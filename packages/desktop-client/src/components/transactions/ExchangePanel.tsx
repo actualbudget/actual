@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -38,6 +38,10 @@ type ExchangePanelProps = {
   /** An existing exchange being edited. */
   initial?: ExchangeEntryInitial;
   submitLabel?: string;
+  /** Reports the request Save would send, whenever it changes. */
+  onRequestChange?: (request: ExchangeRequest | null) => void;
+  /** Holds Save, for example while a budget notice loads. */
+  submitDisabled?: boolean;
 };
 
 // A label and its inputs stay on one line when the panel wraps.
@@ -71,6 +75,8 @@ function ExchangePanelInner({
   feeNeedsOtherAmount,
   initial,
   submitLabel,
+  onRequestChange,
+  submitDisabled = false,
 }: ExchangePanelProps) {
   const { t } = useTranslation();
   const firstInput = useRef<HTMLInputElement>(null);
@@ -113,6 +119,7 @@ function ExchangePanelInner({
     estimateMessage,
     busy,
     post: postEntry,
+    request,
   } = useExchangeEntry({
     transaction,
     register,
@@ -120,7 +127,15 @@ function ExchangePanelInner({
     feeNeedsOtherAmount,
     initial,
   });
-  const post = () => postEntry(onPost);
+  const post = () => (submitDisabled ? undefined : postEntry(onPost));
+  const requestKey = JSON.stringify(request);
+  // Reports only when the request itself changes.
+  const reportRequest = useEffectEvent((key: string) => {
+    onRequestChange?.(JSON.parse(key) as ExchangeRequest | null);
+  });
+  useEffect(() => {
+    reportRequest(requestKey);
+  }, [requestKey]);
 
   return (
     <View
@@ -245,7 +260,7 @@ function ExchangePanelInner({
       <Button
         variant="primary"
         style={{ padding: '4px 10px' }}
-        isDisabled={busy}
+        isDisabled={busy || submitDisabled}
         onPress={() => void post()}
         data-testid="exchange-add-button"
       >

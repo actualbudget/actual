@@ -51,6 +51,7 @@ function setup() {
     destinationId: 'b',
   }));
   initServer({
+    'budget/edit-effects': async () => [],
     'exchange-rates/resolve': async () => ({ status: 'unavailable' as const }),
     'transactions/post-exchange-transfer': post,
   });
@@ -147,6 +148,17 @@ describe('editing an exchange', () => {
     notes: 'trip',
     category: 'savings',
     feeCategory: null,
+    postings: [
+      {
+        id: 'a',
+        account: 'usd',
+        category: 'savings',
+        date: '2026-03-10',
+        amount: -10000,
+        isParent: false,
+        transferAccount: 'jpy',
+      },
+    ],
   };
 
   function setupEdit(
@@ -155,6 +167,7 @@ describe('editing an exchange', () => {
     accountList = accounts,
   ) {
     initServer({
+      'budget/edit-effects': async () => [],
       'exchange-rates/resolve': async () => ({
         status: 'unavailable' as const,
       }),
@@ -263,6 +276,92 @@ describe('editing an exchange', () => {
       await screen.findByText(/changed since you opened it/),
     ).toBeInTheDocument();
     expect(screen.getByTestId('exchange-add-button')).toBeDisabled();
+  });
+
+  it('previews the save for the budget notice and holds Save until it loads', async () => {
+    const update = vi.fn(async (args: { preview?: boolean }) =>
+      args.preview
+        ? {
+            status: 'preview',
+            postings: [{ ...family.postings[0], amount: -9333 }],
+          }
+        : { status: 'ok' },
+    );
+    let resolve: ((value: unknown) => void) | undefined;
+    const effects = vi.fn(
+      (_args: { rows: unknown[] }) =>
+        new Promise(r => {
+          resolve = r;
+        }),
+    );
+    initServer({
+      'exchange-rates/resolve': async () => ({
+        status: 'unavailable' as const,
+      }),
+      'transactions/get-exchange-family': async () => family as never,
+      'transactions/update-exchange-transfer': update as never,
+      'budget/edit-effects': effects as never,
+    });
+    const store = createTestAppStore();
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(accountQueries.list().queryKey, accounts);
+    render(
+      <TestProviders store={store} queryClient={queryClient}>
+        <MemoryRouter>
+          <HotkeysProvider>
+            <ExchangeTransferModal edit={{ id: 'b' }} />
+          </HotkeysProvider>
+        </MemoryRouter>
+      </TestProviders>,
+    );
+    await waitFor(() => expect(effects).toHaveBeenCalled());
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ preview: true }),
+    );
+    expect(effects.mock.lastCall![0]).toEqual({
+      rows: [
+        {
+          before: expect.objectContaining({ amount: -10000 }),
+          after: expect.objectContaining({ amount: -9333 }),
+        },
+      ],
+    });
+    expect(screen.getByTestId('exchange-add-button')).toBeDisabled();
+    resolve?.([
+      {
+        month: '2026-03',
+        effects: [
+          {
+            category: 'savings',
+            name: 'Savings',
+            kind: 'spending',
+            amount: 667,
+          },
+        ],
+      },
+    ]);
+    expect(
+      await screen.findByText(/This changes the budget for March 2026/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('exchange-add-button')).toBeEnabled();
+  });
+
+  it.each([
+    [
+      'failed',
+      { status: 'rate-unavailable', currencies: ['JPY'], date: '' },
+      'Budget effects could not be checked.',
+    ],
+    ['stale', { status: 'stale' }, /changed since you opened it/],
+  ] as const)('reports a %s preview', async (_kind, previewResult, text) => {
+    const update = vi.fn(async (args: { preview?: boolean }) =>
+      args.preview ? previewResult : { status: 'ok' },
+    );
+    setupEdit(family, update);
+    expect(await screen.findByText(text)).toBeInTheDocument();
+    if (previewResult.status === 'stale') {
+      expect(screen.getByTestId('exchange-add-button')).toBeDisabled();
+    }
   });
 
   it('explains a family that can no longer be edited', async () => {

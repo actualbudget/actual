@@ -9,15 +9,8 @@ import {
   getDefaultCurrencyCode,
   getRecordedAmountPrecision,
 } from '#server/util/currency';
-import {
-  isValidDate,
-  nativeToBaseFraction,
-  parseRate,
-} from '#shared/exchange-rate';
-import {
-  allocateByFraction,
-  allocateProportionally,
-} from '#shared/foreign-split';
+import { isValidDate, parseRate } from '#shared/exchange-rate';
+import { foreignSplitBases } from '#shared/foreign-split';
 import type { TransactionEntity } from '#types/models';
 
 import { exchangeValues } from './exchange-transfer';
@@ -28,6 +21,7 @@ import {
   isExchangeFamily,
   preflightTransactionWrites,
   sameEncoding,
+  SNAPSHOT_METADATA_COLUMNS,
   transferTarget,
 } from './foreign-guard';
 import type {
@@ -108,7 +102,8 @@ async function writeFamily({
 async function familyRows(parentId: string) {
   return db.all<FamilyRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
-       transferred_id, schedule, tombstone, cleared, reconciled, category
+       transferred_id, schedule, tombstone, cleared, category,
+       ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE parent_id = ? AND tombstone = 0
        ORDER BY sort_order DESC, id`,
     [parentId],
@@ -118,7 +113,8 @@ async function familyRows(parentId: string) {
 async function storedFamilyRow(id: string) {
   const row = await db.first<FamilyRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
-       transferred_id, schedule, tombstone, cleared, reconciled, category
+       transferred_id, schedule, tombstone, cleared, category,
+       ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE id = ?`,
     [id],
   );
@@ -207,9 +203,6 @@ export async function saveForeignSplit({
     throw new Error('foreign-transfer-edit-unavailable');
   }
   for (const child of children) {
-    if (child.id !== undefined && !storedById.has(child.id)) {
-      throw new Error('transaction-not-found');
-    }
     if (child.payee && (await transferTarget(child.payee))) {
       throw new Error('foreign-transfer-edit-unavailable');
     }
@@ -238,17 +231,11 @@ export async function saveForeignSplit({
     pendingRates = pair.pendingRates;
   }
 
+  // A new child may bring the id its dialog previewed with; the guard's
+  // create check rejects an id any row already has.
   const ids = children.map(child => child.id ?? uuidv4());
-  let bases: Array<{ id: string; amount: number }>;
-  if (transaction_amount !== 0) {
-    bases = allocateProportionally(
-      parentBase,
-      children.map((child, index) => ({
-        id: ids[index],
-        weight: child.transaction_amount,
-      })),
-    );
-  } else {
+  let zeroTotal;
+  if (transaction_amount === 0) {
     // Zero-total families value each child at the rate, keeping the sum.
     const typed = rate !== undefined ? parseRate(rate) : null;
     const resolved = typed
@@ -261,38 +248,20 @@ export async function saveForeignSplit({
     const childRate =
       typed ?? (resolved?.status === 'resolved' ? resolved.rate : null);
     if (!childRate) return { status: 'rate-unavailable', date };
-    const account = await getAccountCurrency(parent.acct);
-    const fractions = children.map((child, index) => ({
-      id: ids[index],
-      ...nativeToBaseFraction(
-        child.transaction_amount,
-        account.precision,
-        getRecordedAmountPrecision(),
-        childRate,
-      ),
-    }));
-    // The exact values sum to zero; a confirmed nonzero parent base is
-    // shared in proportion to the children's sizes (equally when all zero).
-    const atRate = allocateByFraction(
-      0,
-      fractions.map(part => ({ id: part.id, numerator: part.numerator })),
-      fractions[0].denominator,
-    );
-    const sizes = children.map(child => Math.abs(child.transaction_amount));
-    const allZero = sizes.every(size => size === 0);
-    const residual = allocateProportionally(
-      parentBase,
-      ids.map((childId, index) => ({
-        id: childId,
-        weight: allZero ? 1 : sizes[index],
-      })),
-    );
-    bases = atRate.map((part, index) => {
-      const amount = part.amount + residual[index].amount;
-      if (!Number.isSafeInteger(amount)) throw new Error('amount-out-of-range');
-      return { id: part.id, amount };
-    });
+    zeroTotal = {
+      rate: childRate,
+      nativePrecision: (await getAccountCurrency(parent.acct)).precision,
+      basePrecision: getRecordedAmountPrecision(),
+    };
   }
+  const bases = foreignSplitBases(
+    parentBase,
+    children.map((child, index) => ({
+      id: ids[index],
+      native: child.transaction_amount,
+    })),
+    zeroTotal,
+  );
 
   const offbudget = await isOffBudget(parent.acct);
   const edits = new Map<string, ForeignEdit>();
@@ -567,8 +536,9 @@ type ExchangeRow = FamilyRow & {
 async function exchangeRow(id: string) {
   return db.first<ExchangeRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
-       parent_id, transferred_id, schedule, tombstone, cleared, reconciled,
-       category, notes, financial_id, imported_description
+       parent_id, transferred_id, schedule, tombstone, cleared,
+       category, notes, financial_id, imported_description,
+       ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE id = ? AND tombstone = 0`,
     [id],
   );
@@ -577,12 +547,24 @@ async function exchangeRow(id: string) {
 async function exchangeChildren(parentId: string) {
   return db.all<ExchangeRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
-       parent_id, transferred_id, schedule, tombstone, cleared, reconciled,
-       category, notes, financial_id, imported_description
+       parent_id, transferred_id, schedule, tombstone, cleared,
+       category, notes, financial_id, imported_description,
+       ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE parent_id = ? AND tombstone = 0`,
     [parentId],
   );
 }
+
+/** An exchange family row as a budget posting, for edit notices. */
+export type ExchangePosting = {
+  id: string;
+  account: string;
+  category: string | null;
+  date: string;
+  amount: number;
+  isParent: boolean;
+  transferAccount: string | null;
+};
 
 type ExchangeSideRows = {
   leg: ExchangeRow;
@@ -668,6 +650,8 @@ export async function getExchangeFamily({ id }: { id: string }): Promise<
       notes: string | null;
       category: string | null;
       feeCategory: string | null;
+      /** Each row as a budget posting, for the dialog's notice. */
+      postings: ExchangePosting[];
     }
 > {
   const { family } = await exchangeFamily(id);
@@ -700,9 +684,26 @@ export async function getExchangeFamily({ id }: { id: string }): Promise<
           amount: row.amount,
           transaction_amount: row.transaction_amount,
           date: db.fromDateRepr(row.date),
+          // The notice and the reconciled confirmation depend on these.
+          category: row.mapped_category,
+          reconciled: !!row.reconciled,
         },
       ]),
     ),
+    postings: rows.map(row => ({
+      id: row.id,
+      account: row.acct,
+      category: row.mapped_category,
+      date: db.fromDateRepr(row.date),
+      amount: row.amount,
+      isParent: !!row.isParent,
+      transferAccount:
+        row.id === source.leg.id
+          ? destination.leg.acct
+          : row.id === destination.leg.id
+            ? source.leg.acct
+            : null,
+    })),
     reconciled: rows.some(row => row.reconciled),
     selectedSide: selected === source ? 'source' : 'destination',
     sourceAccount: source.leg.acct,
@@ -714,8 +715,8 @@ export async function getExchangeFamily({ id }: { id: string }): Promise<
     destinationFee: destination.fee ? -native(destination.fee) : 0,
     baseAmount: destination.leg.amount,
     notes: top(selected).notes,
-    category: onBudget.length === 1 ? onBudget[0].leg.category : null,
-    feeCategory: fee?.category ?? null,
+    category: onBudget.length === 1 ? onBudget[0].leg.mapped_category : null,
+    feeCategory: fee?.mapped_category ?? null,
   };
 }
 
@@ -738,6 +739,7 @@ export async function updateExchangeTransfer({
   feeCategory,
   notes,
   date: newDate,
+  preview = false,
 }: {
   id: string;
   /** Every row of the family as the editor saw it, by id. */
@@ -752,8 +754,11 @@ export async function updateExchangeTransfer({
   feeCategory?: string | null;
   notes?: string | null;
   date?: string;
+  /** Compute the family's rows without writing, for a budget notice. */
+  preview?: boolean;
 }): Promise<
   | { status: 'ok' }
+  | { status: 'preview'; postings: ExchangePosting[] }
   | { status: 'stale' }
   | { status: 'rate-unavailable'; currencies: string[]; date: string }
 > {
@@ -983,6 +988,49 @@ export async function updateExchangeTransfer({
     feeNative: legs.destinationFee,
   });
 
+  if (preview) {
+    const legAccount = new Map([
+      [source.leg.id, destination.leg.acct],
+      [destination.leg.id, source.leg.acct],
+    ]);
+    const after = new Map(
+      familyRowsOf(source, destination).map(row => [
+        row.id,
+        {
+          id: row.id,
+          account: row.acct,
+          category: row.mapped_category,
+          date: db.fromDateRepr(row.date),
+          amount: row.amount,
+          isParent: !!row.isParent,
+          transferAccount: legAccount.get(row.id) ?? null,
+        },
+      ]),
+    );
+    for (const row of updated) {
+      const current = after.get(row.id)!;
+      after.set(row.id, {
+        ...current,
+        ...(row.amount !== undefined && { amount: row.amount }),
+        ...(row.date !== undefined && { date: row.date }),
+        ...(row.category !== undefined && { category: row.category }),
+        ...(row.is_parent !== undefined && { isParent: !!row.is_parent }),
+      });
+    }
+    for (const row of added) {
+      after.set(row.id, {
+        id: row.id,
+        account: row.account ?? source.leg.acct,
+        category: row.category ?? null,
+        date: row.date ?? date,
+        amount: row.amount ?? 0,
+        isParent: !!row.is_parent,
+        transferAccount: null,
+      });
+    }
+    for (const rowId of deleted) after.delete(rowId);
+    return { status: 'preview', postings: [...after.values()] };
+  }
   await writeFamily({ added, updated, deleted, edits });
   return { status: 'ok' };
 }

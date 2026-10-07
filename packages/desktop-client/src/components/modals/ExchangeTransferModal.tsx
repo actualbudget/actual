@@ -11,6 +11,7 @@ import { format as monthUtilFormat } from '@actual-app/core/shared/months';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { BudgetNotice } from '#components/transactions/BudgetNotice';
 import { ExchangePanel } from '#components/transactions/ExchangePanel';
 import type { ExchangePostResult } from '#components/transactions/ExchangePanel';
 import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
@@ -18,6 +19,8 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useEditEffects } from '#hooks/useEditEffects';
+import type { EditEffectsState } from '#hooks/useEditEffects';
 import { useFormat } from '#hooks/useFormat';
 import { removeModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -252,12 +255,8 @@ function ExchangeEditForm({
         ? 'destination'
         : null;
 
-  const onPost = async (
-    request: ExchangeRequest,
-  ): Promise<ExchangePostResult> => {
-    if (!(await confirmReconciledEdit(dispatch, family.reconciled))) {
-      return { status: 'cancelled' };
-    }
+  /** The handler request for what the panel shows. */
+  const updateFor = (request: ExchangeRequest) => {
     const feeSideNow = request.sourceFee
       ? 'source'
       : request.destinationFee
@@ -268,30 +267,118 @@ function ExchangeEditForm({
     const createsFeeChild = feeSideNow !== null && feeSideNow !== feeSideBefore;
     const feeCategory = request.feeCategory ?? null;
     const category = request.category ?? null;
-    try {
-      const result = await send('transactions/update-exchange-transfer', {
-        id,
-        expected: family.expected,
-        sourceAmount: request.sourceAmount,
-        destinationAmount: request.destinationAmount,
-        sourceFee: request.sourceFee ?? 0,
-        destinationFee: request.destinationFee ?? 0,
-        ...(request.baseAmount !== undefined && {
-          baseAmount: request.baseAmount,
+    return {
+      id,
+      expected: family.expected,
+      sourceAmount: request.sourceAmount,
+      destinationAmount: request.destinationAmount,
+      sourceFee: request.sourceFee ?? 0,
+      destinationFee: request.destinationFee ?? 0,
+      ...(request.baseAmount !== undefined && {
+        baseAmount: request.baseAmount,
+      }),
+      ...(categoryEditable && category !== family.category && { category }),
+      ...(feeSideNow !== null &&
+        (createsFeeChild || feeCategory !== family.feeCategory) && {
+          feeCategory,
         }),
-        ...(categoryEditable && category !== family.category && { category }),
-        ...(feeSideNow !== null &&
-          (createsFeeChild || feeCategory !== family.feeCategory) && {
-            feeCategory,
-          }),
-        ...(notes !== (family.notes ?? '') && { notes: notes || null }),
-        ...(date !== family.date && { date }),
-      });
+      ...(notes !== (family.notes ?? '') && { notes: notes || null }),
+      ...(date !== family.date && { date }),
+    };
+  };
+
+  // The rows the save would write, previewed by the handler, feed the
+  // budget notice; Save waits for the current draft's notice.
+  const [request, setRequest] = useState<ExchangeRequest | null>(null);
+  const previewKey = request ? JSON.stringify(updateFor(request)) : null;
+  // A failed preview cannot describe the save: the notice reports that the
+  // check failed; a stale family locks the dialog.
+  const [preview, setPreview] = useState<{
+    key: string;
+    postings: Family['postings'] | null;
+    outcome: 'ok' | 'failed' | 'stale';
+  } | null>(null);
+  useEffect(() => {
+    if (previewKey === null) return;
+    let cancelled = false;
+    void send('transactions/update-exchange-transfer', {
+      ...JSON.parse(previewKey),
+      preview: true,
+    }).then(
+      result => {
+        if (!cancelled) {
+          setPreview({
+            key: previewKey,
+            postings: result.status === 'preview' ? result.postings : null,
+            outcome:
+              result.status === 'preview'
+                ? 'ok'
+                : result.status === 'stale'
+                  ? 'stale'
+                  : 'failed',
+          });
+        }
+      },
+      () => {
+        if (!cancelled) {
+          setPreview({ key: previewKey, postings: null, outcome: 'failed' });
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [previewKey]);
+  const previewed = preview?.key === previewKey ? preview.postings : null;
+  const ids = previewed
+    ? [
+        ...new Set([
+          ...family.postings.map(row => row.id),
+          ...previewed.map(row => row.id),
+        ]),
+      ]
+    : [];
+  const effects = useEditEffects(
+    previewed
+      ? ids.map(rowId => {
+          const side = (row: Family['postings'][number] | undefined) => {
+            if (!row) return null;
+            const { id: _id, ...posting } = row;
+            return posting;
+          };
+          return {
+            before: side(family.postings.find(row => row.id === rowId)),
+            after: side(previewed.find(row => row.id === rowId)),
+          };
+        })
+      : null,
+  );
+  const current = preview?.key === previewKey ? preview : null;
+  const previewStale = current?.outcome === 'stale';
+  const shownEffects: EditEffectsState =
+    current?.outcome === 'failed' ? { status: 'error' } : effects;
+  const noticeLoading =
+    (previewKey !== null && !current) || effects.status === 'loading';
+
+  const onPost = async (
+    request: ExchangeRequest,
+  ): Promise<ExchangePostResult> => {
+    if (!(await confirmReconciledEdit(dispatch, family.reconciled))) {
+      return { status: 'cancelled' };
+    }
+    try {
+      const result = await send(
+        'transactions/update-exchange-transfer',
+        updateFor(request),
+      );
       if (result.status === 'stale') {
         return { status: 'stale', message: staleEditMessage(t) };
       }
       if (result.status === 'rate-unavailable') {
         return { status: 'rate-unavailable', currencies: result.currencies };
+      }
+      if (result.status !== 'ok') {
+        return { status: 'message', message: foreignEditErrorMessage(t, '') };
       }
       dispatch(removeModal({ name: 'exchange-transfer' }));
       onSaved?.();
@@ -355,6 +442,8 @@ function ExchangeEditForm({
         register={register}
         other={other}
         onPost={onPost}
+        onRequestChange={setRequest}
+        submitDisabled={noticeLoading || previewStale}
         submitLabel={t('Save')}
         initial={{
           otherInput: otherFormat.forEdit(otherTotal),
@@ -374,6 +463,10 @@ function ExchangeEditForm({
           categoryEditable,
         }}
       />
+      <BudgetNotice effects={shownEffects} />
+      {previewStale && (
+        <Text style={{ color: theme.errorText }}>{staleEditMessage(t)}</Text>
+      )}
     </View>
   );
 }

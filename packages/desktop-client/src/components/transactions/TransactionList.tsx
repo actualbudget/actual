@@ -36,6 +36,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import { encodingKey } from '#util/account-encoding';
 import type { ExchangeRequest } from '#util/exchange-entry';
 import { openForeignEditDialog, pushEditModal } from '#util/foreign-edit';
 
@@ -268,7 +269,24 @@ export function TransactionList({
    */
   const openForeignEdit = async (transaction: TransactionEntity) => {
     const rows = transactionsLatest.current;
+    // A dialog saves the edit; the row leaves editing so it shows its
+    // stored values until then (and after Cancel).
+    const leaveEditing = () => tableRef.current?.edit(null);
     const stored = rows.find(row => row.id === transaction.id);
+    // An account in another currency is a move with confirmed amounts.
+    if (stored && transaction.account !== stored.account) {
+      const from = accounts.find(a => a.id === stored.account);
+      const to = accounts.find(a => a.id === transaction.account);
+      if (to && encodingKey(from) !== encodingKey(to)) {
+        leaveEditing();
+        pushEditModal(dispatch, {
+          name: 'foreign-move',
+          options: { id: stored.id, account: to.id, onSaved: onRefetch },
+        });
+        onRefetch();
+        return true;
+      }
+    }
     if (!stored || transaction.amount === stored.amount) return false;
     // A native register edits the native amount; a base register edits the
     // base value and keeps the native amount.
@@ -283,7 +301,10 @@ export function TransactionList({
         : { baseAmount: transaction.amount }),
       onSaved: onRefetch,
     });
-    if (opened) onRefetch();
+    if (opened) {
+      leaveEditing();
+      onRefetch();
+    }
     return opened;
   };
 

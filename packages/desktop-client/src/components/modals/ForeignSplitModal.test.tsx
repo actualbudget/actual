@@ -48,6 +48,8 @@ const snapshot = (row: TransactionEntity) => ({
   amount: row.amount,
   transaction_amount: row.transaction_amount,
   date: row.date,
+  category: row.is_parent ? null : (row.category ?? null),
+  reconciled: !!row.reconciled,
 });
 
 function setup(
@@ -60,6 +62,7 @@ function setup(
   const save = vi.fn().mockResolvedValue({ status: 'ok', ids: [] });
   const collapse = vi.fn().mockResolvedValue({ status: 'ok' });
   initServer({
+    'budget/edit-effects': async () => [],
     'exchange-rates/resolve': async () =>
       rate
         ? {
@@ -119,8 +122,19 @@ describe('ForeignSplitModal', () => {
         expected: { t: snapshot(parent) },
         transaction_amount: -1500,
         children: [
-          { transaction_amount: -1000, category: 'food', notes: null },
-          { transaction_amount: -500, category: null, notes: null },
+          // New children send the ids their notice was computed with.
+          {
+            id: expect.any(String),
+            transaction_amount: -1000,
+            category: 'food',
+            notes: null,
+          },
+          {
+            id: expect.any(String),
+            transaction_amount: -500,
+            category: null,
+            notes: null,
+          },
         ],
       }),
     );
@@ -251,6 +265,67 @@ describe('ForeignSplitModal', () => {
     const request = save.mock.calls[0][0];
     expect(request).toMatchObject({ transaction_amount: 0, rate: '150' });
     expect(request).not.toHaveProperty('baseAmount');
+  });
+
+  it('previews the save and the removal for the budget notice', async () => {
+    const effects = vi.fn().mockResolvedValue([
+      {
+        month: '2026-03',
+        effects: [
+          { category: 'food', name: 'Food', kind: 'spending', amount: 400 },
+        ],
+      },
+    ]);
+    const children = [
+      {
+        ...parent,
+        id: 'c1',
+        parent_id: 't',
+        is_child: true,
+        transaction_amount: -700,
+        amount: -467,
+      },
+      {
+        ...parent,
+        id: 'c2',
+        parent_id: 't',
+        is_child: true,
+        transaction_amount: -800,
+        amount: -533,
+      },
+    ] as TransactionEntity[];
+    const stored = { ...parent, is_parent: true } as TransactionEntity;
+    setup([stored, ...children], { 'budget/edit-effects': effects });
+    expect(
+      await screen.findByText(/This changes the budget for March 2026/),
+    ).toBeInTheDocument();
+    const saveRows = effects.mock.lastCall![0].rows;
+    expect(saveRows[0]).toMatchObject({
+      before: { isParent: true, category: null, amount: -1000 },
+      after: { isParent: true, category: null, amount: -1000 },
+    });
+    expect(
+      saveRows
+        .slice(1)
+        .reduce(
+          (sum: number, row: { after: { amount: number } }) =>
+            sum + row.after.amount,
+          0,
+        ),
+    ).toBe(-1000);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove split' }));
+    // Removal is exclusive: Save leaves until the split is kept.
+    expect(screen.queryByRole('button', { name: 'Save' })).toBeNull();
+    await waitFor(() =>
+      expect(effects.mock.lastCall![0].rows).toEqual([
+        expect.objectContaining({
+          after: expect.objectContaining({ isParent: false, amount: -1000 }),
+        }),
+        expect.objectContaining({ after: null }),
+        expect.objectContaining({ after: null }),
+      ]),
+    );
   });
 
   it('hides categories in an off-budget account', async () => {

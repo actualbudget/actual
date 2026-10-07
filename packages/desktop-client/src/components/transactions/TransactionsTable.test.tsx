@@ -2135,7 +2135,7 @@ describe('foreign-currency rows', () => {
     });
   });
 
-  it('offers only accounts with the same recorded encoding', async () => {
+  it('lists accounts in other currencies last for a saved single row', async () => {
     const otherYen: AccountEntity = {
       ...generateAccount('Second yen'),
       currency: 'JPY',
@@ -2156,8 +2156,13 @@ describe('foreign-currency rows', () => {
     const options = [
       ...document.querySelectorAll('[data-testid$="-account-item"]'),
     ].map(item => item.textContent);
-    expect(options.join(' ')).toContain('Second yen');
-    expect(options.join(' ')).not.toContain('Bank of America');
+    // Same-encoding accounts first; a saved single row may also move to an
+    // account in another currency, listed last under its own heading.
+    expect(options.indexOf('Second yen')).toBeGreaterThanOrEqual(0);
+    expect(options.indexOf('Bank of America')).toBeGreaterThan(
+      options.indexOf('Second yen'),
+    );
+    expect(screen.getByText('Other currencies')).toBeInTheDocument();
   });
 });
 

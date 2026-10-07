@@ -7,8 +7,10 @@ import type { TransactionEntity } from '#types/models';
 
 import {
   accountEncoding,
+  metadataMatches,
   preflightTransactionWrites,
   sameEncoding,
+  SNAPSHOT_METADATA_COLUMNS,
   transferTarget,
 } from './foreign-guard';
 import type {
@@ -38,6 +40,8 @@ export type StoredRow = {
   transferred_id: string | null;
   schedule: string | null;
   tombstone: number;
+  reconciled: number;
+  mapped_category: string | null;
 };
 
 export type PairInput = {
@@ -62,7 +66,7 @@ export type PairFailure =
 export async function liveRow(id: string): Promise<StoredRow> {
   const row = await db.first<StoredRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
-       transferred_id, schedule, tombstone
+       transferred_id, schedule, tombstone, ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE id = ?`,
     [id],
   );
@@ -105,7 +109,8 @@ export function matches(row: StoredRow, expected: Expected) {
     row.acct === expected.account &&
     row.amount === expected.amount &&
     (row.transaction_amount ?? null) === expected.transaction_amount &&
-    String(row.date) === expected.date.replaceAll('-', '')
+    String(row.date) === expected.date.replaceAll('-', '') &&
+    metadataMatches(row, expected)
   );
 }
 
@@ -259,12 +264,18 @@ export async function moveForeignEntry({
   replaceRate,
   saveStanding,
   expectedBaseAmount,
+  destinationEncoding,
 }: {
   id: string;
   account: string;
   expected: Expected;
   /** The confirmed amount in the destination's encoding. */
   transaction_amount: number;
+  /**
+   * The destination encoding the amounts were confirmed in; an empty
+   * destination whose currency changed since returns stale.
+   */
+  destinationEncoding?: { currency: string | null; precision: number | null };
 } & PairInput): Promise<
   | {
       status: 'ok';
@@ -283,6 +294,9 @@ export async function moveForeignEntry({
   );
   if (!destination) throw new Error('account-not-found');
   const target = await accountEncoding(account);
+  if (destinationEncoding && !sameEncoding(destinationEncoding, target)) {
+    return { status: 'stale' };
+  }
   if (sameEncoding(await accountEncoding(row.acct), target)) {
     throw new Error('move-not-cross-encoding');
   }

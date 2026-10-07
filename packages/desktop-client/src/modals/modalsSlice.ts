@@ -312,6 +312,8 @@ export type Modal =
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
         hiddenAccounts?: AccountEntity['id'][];
+        /** Accounts in another currency, listed last for a move. */
+        otherCurrencyAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
@@ -641,6 +643,15 @@ export type Modal =
         /** Saves an existing row instead of posting a new one. */
         edit?: ForeignAmountEdit;
         onPosted: () => void;
+      };
+    }
+  | {
+      name: 'foreign-move';
+      options: {
+        /** A single row moving to an account in another currency. */
+        id: string;
+        account: string;
+        onSaved?: () => void;
       };
     }
   | {

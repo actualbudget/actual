@@ -298,6 +298,79 @@ describe('foreign split families', () => {
     ).toBeNull();
   });
 
+  it('creates new children with the ids the dialog previewed', async () => {
+    await foreignRow('t', 'jpy', -1, -2);
+    await saveSplit({
+      id: 't',
+      expected: familyOf('t'),
+      transaction_amount: -2,
+      children: [
+        { id: 'new-b', transaction_amount: -1, category: 'food' },
+        { id: 'new-a', transaction_amount: -1, category: 'fun' },
+      ],
+    });
+    // The shared allocator's tie order, which the dialog previews with.
+    expect(row('new-b')).toMatchObject({ amount: -1, category: 'food' });
+    expect(row('new-a')).toMatchObject({ amount: 0, category: 'fun' });
+    await foreignRow('u', 'jpy', -1000, -1500);
+    await expect(
+      saveSplit({
+        id: 'u',
+        expected: familyOf('u'),
+        transaction_amount: -1500,
+        children: [{ id: 't', transaction_amount: -1500 }],
+      }),
+    ).rejects.toThrow('foreign-edit-unavailable');
+    expect(row('t')).toMatchObject({ isParent: 1 });
+  });
+
+  it('returns stale when the category or reconciliation changed since reading', async () => {
+    await foreignRow('t', 'jpy', -1000, -1500, { category: 'food' });
+    const seen = {
+      t: { ...expectedOf('t'), category: 'food', reconciled: false },
+    };
+    await db.updateTransaction({ id: 't', category: 'fun' });
+    const split = {
+      id: 't',
+      transaction_amount: -1500,
+      children: [{ transaction_amount: -1500 }],
+    };
+    expect(await saveSplit({ ...split, expected: seen })).toEqual({
+      status: 'stale',
+    });
+    await db.updateTransaction({ id: 't', category: 'food', reconciled: true });
+    expect(await saveSplit({ ...split, expected: seen })).toEqual({
+      status: 'stale',
+    });
+  });
+
+  it('reads categories through mappings, as the app shows them', async () => {
+    await foreignRow('t', 'jpy', -1000, -1500, { category: 'food' });
+    // Deleting a category maps it to another without rewriting rows.
+    await db.deleteCategory({ id: 'food' }, 'fun');
+    expect(
+      await saveSplit({
+        id: 't',
+        expected: { t: { ...expectedOf('t'), category: 'fun' } },
+        transaction_amount: -1500,
+        children: [{ transaction_amount: -1500 }],
+      }),
+    ).toMatchObject({ status: 'ok' });
+  });
+
+  it('reads a deleted category without a transfer as none', async () => {
+    await foreignRow('t', 'jpy', -1000, -1500, { category: 'food' });
+    await db.deleteCategory({ id: 'food' });
+    expect(
+      await saveSplit({
+        id: 't',
+        expected: { t: { ...expectedOf('t'), category: null } },
+        transaction_amount: -1500,
+        children: [{ transaction_amount: -1500 }],
+      }),
+    ).toMatchObject({ status: 'ok' });
+  });
+
   it('collapses a split back into one transaction with its pair', async () => {
     await foreignRow('t', 'jpy', -1000, -1500);
     await saveSplit({

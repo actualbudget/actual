@@ -1470,6 +1470,14 @@ const Transaction = memo(function Transaction({
   const amountFrozen = isForeignAmountFrozen(id, rowAccount, isNativeRegister);
   const frozenAmountTitle = t('Edit this amount in its account');
   const hiddenAccountIds = incompatibleAccountIds(accounts, [rowAccount]);
+  // A saved single row may move to another currency through the move
+  // dialog; splits, transfers and drafts keep their encoding.
+  const canMoveAcrossCurrencies =
+    !isTemporaryId(id) &&
+    !isPreview &&
+    !transaction.is_parent &&
+    !transaction.is_child &&
+    !transaction.transfer_id;
   const transferAcct =
     isTemporaryId(id) && payee?.transfer_acct
       ? getAccountsById(accounts)[payee.transfer_acct]
@@ -1824,7 +1832,10 @@ const Transaction = memo(function Transaction({
             }) => (
               <AccountAutocomplete
                 includeClosedAccounts={false}
-                hiddenAccounts={hiddenAccountIds}
+                hiddenAccounts={canMoveAcrossCurrencies ? [] : hiddenAccountIds}
+                otherCurrencyAccounts={
+                  canMoveAcrossCurrencies ? hiddenAccountIds : undefined
+                }
                 value={accountId}
                 shouldSaveFromKey={shouldSaveFromKey}
                 clearOnBlur={false}

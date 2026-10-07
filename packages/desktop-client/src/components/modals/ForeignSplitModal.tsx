@@ -14,11 +14,13 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { nativeToBase } from '@actual-app/core/shared/exchange-rate';
+import { foreignSplitBases } from '@actual-app/core/shared/foreign-split';
 import { q } from '@actual-app/core/shared/query';
 import type {
   AccountEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   Modal,
@@ -26,6 +28,7 @@ import {
   ModalCloseButton,
   ModalHeader,
 } from '#components/common/Modal';
+import { BudgetNotice } from '#components/transactions/BudgetNotice';
 import {
   RateField,
   rateInDirection,
@@ -35,6 +38,7 @@ import type { RateDirection } from '#components/transactions/RateField';
 import { useAccounts } from '#hooks/useAccounts';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
+import { useEditEffects } from '#hooks/useEditEffects';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { removeModal } from '#modals/modalsSlice';
@@ -152,12 +156,12 @@ function SplitForm({
         }))
       : [
           {
-            key: 'new-0',
+            key: uuidv4(),
             amountInput: format.forEdit(storedTotal),
             category: parent.category ?? '',
             notes: '',
           },
-          { key: 'new-1', amountInput: '', category: '', notes: '' },
+          { key: uuidv4(), amountInput: '', category: '', notes: '' },
         ],
   );
   const [baseInput, setBaseInput] = useState('');
@@ -281,6 +285,92 @@ function SplitForm({
   );
   const reconciled = [parent, ...storedChildren].some(row => row.reconciled);
 
+  // Budget notices: the save's postings, with child bases from the shared
+  // allocator and the ids the save sends, or the removal's.
+  const posting = (
+    amount: number,
+    category: string | null,
+    isParent = false,
+  ) => ({
+    account: parent.account,
+    category,
+    date: parent.date,
+    amount,
+    isParent,
+  });
+  const before = [
+    {
+      id: parent.id,
+      side: posting(
+        parent.amount,
+        parent.is_parent ? null : (parent.category ?? null),
+        !!parent.is_parent,
+      ),
+    },
+    ...storedChildren.map(child => ({
+      id: child.id,
+      side: posting(child.amount, child.category ?? null),
+    })),
+  ];
+  let saveRows = null;
+  if (
+    !invalid &&
+    !conversionInvalid &&
+    total != null &&
+    remaining === 0 &&
+    conversion != null
+  ) {
+    const afterBase = zeroTotal
+      ? totalChanged
+        ? 0
+        : parent.amount
+      : totalChanged
+        ? (parentBase ?? parent.amount)
+        : parent.amount;
+    try {
+      const bases = foreignSplitBases(
+        afterBase,
+        children.map((child, index) => ({
+          id: child.key,
+          native: amounts[index] ?? 0,
+        })),
+        zeroTotal && effectiveRate
+          ? { rate: effectiveRate, nativePrecision: precision, basePrecision }
+          : undefined,
+      );
+      const after = new Map([
+        [parent.id, posting(afterBase, null, true)],
+        ...children.map(
+          (child, index) =>
+            [
+              child.key,
+              posting(
+                bases[index].amount,
+                offbudget ? null : child.category || null,
+              ),
+            ] as const,
+        ),
+      ]);
+      saveRows = [
+        ...before.map(row => ({
+          before: row.side,
+          after: after.get(row.id) ?? null,
+        })),
+        ...children
+          .filter(child => !child.original)
+          .map(child => ({ before: null, after: after.get(child.key)! })),
+      ];
+    } catch {
+      saveRows = null;
+    }
+  }
+  const removalRows = before.map(row => ({
+    before: row.side,
+    after: row.id === parent.id ? posting(parent.amount, null) : null,
+  }));
+  const effects = useEditEffects(confirmRemove ? removalRows : saveRows);
+  const noticeLoading = effects.status === 'loading';
+
   async function save() {
     if (invalid || conversionInvalid || total == null || remaining !== 0) {
       return;
@@ -312,7 +402,8 @@ function SplitForm({
             }),
           };
           return {
-            ...(child.id && { id: child.id }),
+            // New children keep the ids their notice was computed with.
+            id: child.key,
             transaction_amount: amounts[index] ?? 0,
             ...metadata,
           };
@@ -364,6 +455,7 @@ function SplitForm({
   }
 
   async function removeSplit() {
+    if (noticeLoading) return;
     if (!(await confirmReconciledEdit(dispatch, reconciled))) return;
     setBusy(true);
     try {
@@ -389,7 +481,8 @@ function SplitForm({
     <Form
       onSubmit={event => {
         event.preventDefault();
-        void save();
+        // Removal is its own mode: only its confirmation saves.
+        if (!confirmRemove) void save();
       }}
     >
       <View style={{ gap: 10 }}>
@@ -453,7 +546,7 @@ function SplitForm({
               setChildren(current => [
                 ...current,
                 {
-                  key: `new-${current.length}-${Date.now()}`,
+                  key: uuidv4(),
                   amountInput: remaining !== 0 ? format.forEdit(remaining) : '',
                   category: '',
                   notes: '',
@@ -532,18 +625,28 @@ function SplitForm({
             </>
           )
         )}
+        <BudgetNotice effects={effects} />
         {message && <FormError>{message}</FormError>}
       </View>
       <ModalButtons>
         {storedChildren.length > 0 &&
           (confirmRemove ? (
-            <Button
-              variant="primary"
-              isDisabled={busy || stale}
-              onPress={() => void removeSplit()}
-            >
-              <Trans>Confirm removing the split</Trans>
-            </Button>
+            <>
+              <Button
+                variant="primary"
+                isDisabled={busy || stale || noticeLoading}
+                onPress={() => void removeSplit()}
+              >
+                <Trans>Confirm removing the split</Trans>
+              </Button>
+              <Button
+                isDisabled={busy}
+                style={{ marginLeft: 10 }}
+                onPress={() => setConfirmRemove(false)}
+              >
+                <Trans>Keep split</Trans>
+              </Button>
+            </>
           ) : (
             <Button
               isDisabled={busy || stale}
@@ -556,16 +659,23 @@ function SplitForm({
         <Button isDisabled={busy} onPress={onClose}>
           <Trans>Cancel</Trans>
         </Button>
-        <Button
-          type="submit"
-          variant="primary"
-          isDisabled={
-            busy || stale || invalid || conversionInvalid || remaining !== 0
-          }
-          style={{ marginLeft: 10 }}
-        >
-          <Trans>Save</Trans>
-        </Button>
+        {!confirmRemove && (
+          <Button
+            type="submit"
+            variant="primary"
+            isDisabled={
+              busy ||
+              stale ||
+              invalid ||
+              conversionInvalid ||
+              remaining !== 0 ||
+              noticeLoading
+            }
+            style={{ marginLeft: 10 }}
+          >
+            <Trans>Save</Trans>
+          </Button>
+        )}
       </ModalButtons>
     </Form>
   );

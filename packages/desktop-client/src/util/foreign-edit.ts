@@ -32,6 +32,13 @@ export type RowSnapshot = {
   amount: number;
   transaction_amount: number | null;
   date: string;
+  /**
+   * The category (as the app shows it) and reconciled state, which the
+   * budget notice and the reconciled confirmation depend on; a later change
+   * makes the save stale.
+   */
+  category: string | null;
+  reconciled: boolean;
 };
 
 /** An existing row the foreign amount dialog saves instead of posting. */
@@ -54,12 +61,17 @@ export function snapshotOf(row: {
   amount: number;
   transaction_amount?: number | null;
   date: string;
+  category?: string | null;
+  reconciled?: boolean;
+  is_parent?: boolean;
 }): RowSnapshot {
   return {
     account: row.account,
     amount: row.amount,
     transaction_amount: row.transaction_amount ?? null,
     date: row.date,
+    category: row.is_parent ? null : (row.category ?? null),
+    reconciled: !!row.reconciled,
   };
 }
 
@@ -70,6 +82,10 @@ export function snapshotOf(row: {
 export function confirmReconciledEdit(
   dispatch: AppDispatch,
   reconciled: boolean,
+  /** A linked transfer's reconciled counterpart has its own wording. */
+  reason:
+    | 'editReconciled'
+    | 'batchEditWithReconciledTransfer' = 'editReconciled',
 ): Promise<boolean> {
   if (!reconciled) return Promise.resolve(true);
   return new Promise(resolve => {
@@ -78,7 +94,7 @@ export function confirmReconciledEdit(
         modal: {
           name: 'confirm-transaction-edit',
           options: {
-            confirmReason: 'editReconciled',
+            confirmReason: reason,
             onConfirm: () => resolve(true),
             onCancel: () => resolve(false),
           },
@@ -215,6 +231,7 @@ export async function openForeignEditDialog(
           'transaction_amount',
           'date',
           'reconciled',
+          'category',
         ])
         .options({ splits: 'all' }),
     );
