@@ -4,6 +4,7 @@ export default defineConfig({
   timeout: 60000, // 60 seconds
   retries: 1,
   testDir: 'e2e/',
+  globalSetup: './e2e/global-setup.ts',
   reporter: process.env.CI
     ? [['list'], ['junit', { outputFile: 'e2e/test-results/junit.xml' }]]
     : undefined,

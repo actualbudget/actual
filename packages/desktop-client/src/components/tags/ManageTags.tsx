@@ -12,6 +12,7 @@ import { listen } from '@actual-app/core/platform/client/connection';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
 import { Search } from '#components/common/Search';
+import { useTableNavigator } from '#components/table';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useTags } from '#hooks/useTags';
 
@@ -39,6 +40,12 @@ export function ManageTags() {
   }, [filter, tags]);
 
   const selectedInst = useSelected('manage-tags', filteredTags, []);
+  const tableNavigator = useTableNavigator(filteredTags, [
+    'select',
+    'tag',
+    'color',
+    'description',
+  ]);
 
   return (
     <SelectedProvider instance={selectedInst}>
@@ -73,7 +80,9 @@ export function ManageTags() {
             value={filter}
             onChange={setFilter}
           />
-          <SelectedTagsButton />
+          <SelectedTagsButton
+            onRename={id => tableNavigator.onEdit(id, 'tag')}
+          />
           <TagsMenuButton />
         </SpaceBetween>
         <View style={{ marginTop: 12, ...styles.tableContainer }}>
@@ -83,6 +92,7 @@ export function ManageTags() {
           )}
           {tags.length ? (
             <TagsList
+              navigator={tableNavigator}
               tags={filteredTags}
               hoveredTag={hoveredTag}
               onHover={id => setHoveredTag(id ?? undefined)}

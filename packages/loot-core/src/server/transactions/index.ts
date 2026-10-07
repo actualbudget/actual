@@ -57,9 +57,15 @@ export async function batchUpdateTransactions({
     : [];
 
   const oldPayees = new Set<PayeeEntity['id']>();
-  const accounts = await db.all<db.DbAccount>(
-    'SELECT * FROM accounts WHERE tombstone = 0',
-  );
+
+  // Accounts are only needed to clear the category of off-budget
+  // transactions, so skip the read for edits that don't set an account
+  const needsAccounts =
+    (added?.length ?? 0) > 0 ||
+    (updated?.some(transaction => transaction.account) ?? false);
+  const accounts = needsAccounts
+    ? await db.all<db.DbAccount>('SELECT * FROM accounts WHERE tombstone = 0')
+    : [];
 
   // We need to get all the payees of updated transactions _before_
   // making changes
@@ -125,9 +131,24 @@ export async function batchUpdateTransactions({
   // needed to run any cascading logic that depends on the full
   // transaction. Things like transfers, analyzing rule updates, and
   // more
-  const allAdded = await getTransactionsByIds(addedIds);
-  const allUpdated = await getTransactionsByIds(updatedIds);
-  const allDeleted = await getTransactionsByIds(deletedIds);
+  //
+  // One read for all of them: on the web backend every query is a
+  // separate lock/commit cycle against IndexedDB
+  const changedTransactions = await getTransactionsByIds([
+    ...new Set([...addedIds, ...updatedIds, ...deletedIds]),
+  ]);
+  const changedById = new Map(
+    changedTransactions.map(transaction => [transaction.id, transaction]),
+  );
+  const pickTransactions = (ids: string[]) =>
+    [...new Set(ids)]
+      .map(id => changedById.get(id))
+      .filter((transaction): transaction is TransactionEntity =>
+        Boolean(transaction),
+      );
+  const allAdded = pickTransactions(addedIds);
+  const allUpdated = pickTransactions(updatedIds);
+  const allDeleted = pickTransactions(deletedIds);
 
   // Post-processing phase: first do any updates to transfers.
   // Transfers update the transactions and we need to return updates

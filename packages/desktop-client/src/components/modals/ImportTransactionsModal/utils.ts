@@ -45,7 +45,7 @@ export function parseDate(
       .replace(/\bjun(\.|e)?\b/i, '06')
       .replace(/\bjul(\.|y)?\b/i, '07')
       .replace(/\baug(\.|ust)?\b/i, '08')
-      .replace(/\bsep(\.|tember)?\b/i, '09')
+      .replace(/\bsep(\.|t\.?|tember)?\b/i, '09')
       .replace(/\boct(\.|ober)?\b/i, '10')
       .replace(/\bnov(\.|ember)?\b/i, '11')
       .replace(/\bdec(\.|ember)?\b/i, '12')

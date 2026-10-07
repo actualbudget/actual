@@ -6,6 +6,7 @@ import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { theme } from '@actual-app/components/theme';
+import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
 import {
@@ -14,9 +15,12 @@ import {
 } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
+import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
+import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { InputField } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
 import { useDateFormat } from '#hooks/useDateFormat';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -83,7 +87,8 @@ export function EditFieldModal({
   const { isNarrowWidth } = useResponsive();
   let label: string;
   let editor: (props: { close: () => void }) => ReactNode;
-  let minWidth: number | undefined;
+  let width: string | undefined;
+  let height: number | 'auto' = 275;
 
   const inputStyle: CSSProperties = {
     ...(isNarrowWidth && itemStyle),
@@ -102,7 +107,10 @@ export function EditFieldModal({
     case 'date': {
       const today = currentDay();
       label = t('Date');
-      minWidth = 350;
+      // Definite width — the embedded calendar's 100%-wide grid must not
+      // size the modal (see DateSelect)
+      width = tokens.breakpoint_small;
+      height = 'auto'; // fit the calendar; 275 clips six-row months
       editor = ({ close }) => (
         <DateSelect
           value={formatDate(parseISO(today), dateFormat)}
@@ -119,6 +127,7 @@ export function EditFieldModal({
 
     case 'notes':
       label = t('Notes');
+      width = tokens.breakpoint_small;
       editor = ({ close }) => (
         <>
           <View
@@ -226,15 +235,31 @@ export function EditFieldModal({
               />
             </View>
           ) : (
-            <Input
-              ref={noteInputRef}
-              autoFocus
-              onEnter={value => {
-                onSelectNote(value, noteAmend);
-                close();
-              }}
-              style={inputStyle}
-            />
+            <>
+              {isNarrowWidth ? (
+                <InputField
+                  ref={noteInputRef}
+                  autoFocus
+                  iconEnd={<NoteInsertHashButton inputRef={noteInputRef} />}
+                  onEnter={value => {
+                    onSelectNote(value, noteAmend);
+                    close();
+                  }}
+                  style={inputStyle}
+                />
+              ) : (
+                <Input
+                  ref={noteInputRef}
+                  autoFocus
+                  onEnter={value => {
+                    onSelectNote(value, noteAmend);
+                    close();
+                  }}
+                  style={inputStyle}
+                />
+              )}
+              <NoteTagAutocomplete inputRef={noteInputRef} />
+            </>
           )}
         </>
       );
@@ -266,9 +291,9 @@ export function EditFieldModal({
         style: {
           height: isNarrowWidth
             ? 'calc(var(--visual-viewport-height) * 0.85)'
-            : 275,
+            : height,
           padding: '15px 10px',
-          ...(minWidth && { minWidth }),
+          ...(width && { width }),
           backgroundColor: theme.menuAutoCompleteBackground,
         },
       }}

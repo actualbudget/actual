@@ -34,7 +34,16 @@ export type DbAccount = {
     | 'rate-limit-exceeded'
     | 'timed-out'
     | 'account-missing'
+    | 'not-configured'
     | null;
+  account_group_id?: DbAccountGroup['id'] | null;
+};
+
+export type DbAccountGroup = {
+  id: string;
+  name: string;
+  sort_order: number;
+  tombstone: 1 | 0;
 };
 
 export type DbBank = {
@@ -99,6 +108,14 @@ export type DbCrdtMessage = {
   row: string;
   column: string;
   value: Uint8Array;
+};
+
+export type DbPendingMessage = {
+  timestamp: string;
+  dataset: string;
+  row: string;
+  column: string;
+  value: string;
 };
 
 export type DbNote = {

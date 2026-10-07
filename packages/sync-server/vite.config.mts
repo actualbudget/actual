@@ -55,7 +55,7 @@ export default defineConfig({
         ),
         'scripts/health-check': path.resolve(
           __dirname,
-          'src/scripts/health-check.js',
+          'src/scripts/health-check.ts',
         ),
       },
       output: {

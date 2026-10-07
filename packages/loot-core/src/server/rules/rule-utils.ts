@@ -138,13 +138,12 @@ export function migrateIds(rule: Rule, mappings: Map<string, string>): void {
           cond.unparsedValue = cond.value;
           break;
         case 'oneOf':
-          cond.value = cond.rawValue.map(v => mappings.get(v) || v);
+        case 'notOneOf': {
+          const mappedValues = cond.rawValue.map(v => mappings.get(v) || v);
+          cond.value = [...new Set(mappedValues)];
           cond.unparsedValue = [...cond.value];
           break;
-        case 'notOneOf':
-          cond.value = cond.rawValue.map(v => mappings.get(v) || v);
-          cond.unparsedValue = [...cond.value];
-          break;
+        }
         default:
       }
     }

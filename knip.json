@@ -95,7 +95,7 @@
         "app.ts",
         "src/app.ts",
         "bin/**/*.js",
-        "src/scripts/**/*.js",
+        "src/scripts/**/*.{js,ts}",
         "src/app-*/app-*.{ts,js}"
       ]
     }

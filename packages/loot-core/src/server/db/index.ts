@@ -21,6 +21,7 @@ import {
   schemaConfig,
 } from '#server/aql';
 import {
+  accountGroupModel,
   accountModel,
   categoryGroupModel,
   categoryModel,
@@ -41,6 +42,7 @@ import {
 } from './sort';
 import type {
   DbAccount,
+  DbAccountGroup,
   DbBank,
   DbCategory,
   DbCategoryGroup,
@@ -160,8 +162,11 @@ function resetQueryCache() {
   _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
-export function transaction(fn: () => void) {
-  return sqlite.transaction(db, fn);
+export function transaction(
+  fn: () => void,
+  options?: sqlite.TransactionOptions,
+) {
+  return sqlite.transaction(db, fn, options);
 }
 
 export function asyncTransaction(fn: () => Promise<void>) {
@@ -756,6 +761,7 @@ export function deleteAccount(account) {
 export async function moveAccount(
   id: DbAccount['id'],
   targetId: DbAccount['id'] | null,
+  accountGroupId?: DbAccountGroup['id'] | null,
 ) {
   const account = await first<DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
@@ -778,7 +784,95 @@ export async function moveAccount(
     for (const info of updates) {
       void update('accounts', info);
     }
-    void update('accounts', { id, sort_order });
+    void update('accounts', {
+      id,
+      sort_order,
+      ...(accountGroupId !== undefined && {
+        account_group_id: accountGroupId,
+      }),
+    });
+  });
+}
+
+export function getAccountGroups() {
+  return all<DbAccountGroup>(
+    `SELECT * FROM account_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
+  );
+}
+
+export async function insertAccountGroup(
+  group: WithRequired<Partial<DbAccountGroup>, 'name'>,
+): Promise<DbAccountGroup['id']> {
+  // Don't allow duplicate group
+  const existingGroup = await first<Pick<DbAccountGroup, 'id' | 'name'>>(
+    `SELECT id, name FROM account_groups WHERE UPPER(name) = ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase()],
+  );
+  if (existingGroup) {
+    throw new Error(`An '${existingGroup.name}' account group already exists.`);
+  }
+
+  const lastGroup = await first<Pick<DbAccountGroup, 'sort_order'>>(`
+    SELECT sort_order FROM account_groups WHERE tombstone = 0 ORDER BY sort_order DESC, id DESC LIMIT 1
+  `);
+  const sort_order = (lastGroup ? lastGroup.sort_order : 0) + SORT_INCREMENT;
+
+  group = {
+    ...accountGroupModel.validate(group),
+    sort_order,
+  };
+  const id: DbAccountGroup['id'] = await insertWithUUID(
+    'account_groups',
+    group,
+  );
+  return id;
+}
+
+export async function updateAccountGroup(
+  group: WithRequired<Partial<DbAccountGroup>, 'id' | 'name'>,
+) {
+  const existingGroup = await first<Pick<DbAccountGroup, 'id' | 'name'>>(
+    `SELECT id, name FROM account_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+    [group.name.toUpperCase(), group.id],
+  );
+  if (existingGroup) {
+    throw new Error(`An '${existingGroup.name}' account group already exists.`);
+  }
+  group = accountGroupModel.validate(group, { update: true });
+  return update('account_groups', group);
+}
+
+export async function moveAccountGroup(
+  id: DbAccountGroup['id'],
+  targetId?: DbAccountGroup['id'] | null,
+) {
+  const groups = await all<Pick<DbAccountGroup, 'id' | 'sort_order'>>(
+    `SELECT id, sort_order FROM account_groups WHERE tombstone = 0 ORDER BY sort_order, id`,
+  );
+
+  const { updates, sort_order } = shoveSortOrders(groups, targetId);
+  await batchMessages(async () => {
+    for (const info of updates) {
+      await update('account_groups', info);
+    }
+    await update('account_groups', { id, sort_order });
+  });
+}
+
+export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
+  const accounts = await all<Pick<DbAccount, 'id'>>(
+    `SELECT id FROM accounts WHERE account_group_id = ? AND tombstone = 0`,
+    [group.id],
+  );
+
+  // Clearing member refs is best-effort under CRDT sync: a concurrent
+  // assignment on another device can win against these nulls, so consumers
+  // must always treat a ref to a missing/tombstoned group as ungrouped.
+  await batchMessages(async () => {
+    for (const account of accounts) {
+      await update('accounts', { id: account.id, account_group_id: null });
+    }
+    await delete_('account_groups', group.id);
   });
 }
 
@@ -1026,9 +1120,9 @@ export function updateTag(tag: Partial<DbTag> & Pick<DbTag, 'id'>) {
 }
 
 export function findTags() {
-  return all<{ notes: string }>(
+  return all<{ id: DbTransaction['id']; notes: string }>(
     `
-      SELECT notes
+      SELECT id, notes
       FROM transactions
       WHERE tombstone = 0 AND notes LIKE ?
     `,
