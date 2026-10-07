@@ -17,12 +17,14 @@ import * as budget from './base';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
+import { editEffects } from './edit-effects';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
 
 export type BudgetHandlers = {
   'budget/budget-amount': typeof actions.setBudget;
+  'budget/edit-effects': typeof editEffects;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
   'budget/set-zero': typeof actions.setZero;
@@ -72,6 +74,7 @@ export type BudgetHandlers = {
 export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
+app.method('budget/edit-effects', editEffects);
 app.method(
   'budget/copy-previous-month',
   mutator(undoable(actions.copyPreviousMonth)),

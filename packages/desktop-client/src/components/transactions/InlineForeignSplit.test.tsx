@@ -34,6 +34,7 @@ function setup(total: number, amounts: number[], stale = false) {
     stale ? { status: 'stale' as const } : { status: 'ok' as const, ids: [] },
   );
   initServer({
+    'budget/edit-effects': async () => [],
     'exchange-rates/resolve': async () => ({ status: 'unavailable' }),
     'transactions/save-foreign-split': save,
   });

@@ -69,6 +69,7 @@ function setup(nativeView = true) {
   initServer({
     'transactions/save-foreign-split': save,
     'rules-run': async ({ transaction }) => transaction,
+    'budget/edit-effects': async () => [],
     'exchange-rates/resolve': async () => ({ status: 'unavailable' }),
   });
   const store = createTestAppStore();

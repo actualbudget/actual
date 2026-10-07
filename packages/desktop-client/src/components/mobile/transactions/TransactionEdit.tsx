@@ -123,10 +123,18 @@ import { locationService } from '#payees/location';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch, useSelector } from '#redux';
 import { setLastTransaction } from '#transactions/transactionsSlice';
-import { incompatibleAccountIds, reencodeAmount } from '#util/account-encoding';
+import {
+  encodingKey,
+  incompatibleAccountIds,
+  reencodeAmount,
+} from '#util/account-encoding';
 import { exchangeOtherAccount } from '#util/exchange-entry';
 import type { ExchangeRequest } from '#util/exchange-entry';
-import { isExchangeRow, openForeignEditDialog } from '#util/foreign-edit';
+import {
+  isExchangeRow,
+  openForeignEditDialog,
+  pushEditModal,
+} from '#util/foreign-edit';
 import { postForeignEntry } from '#util/post-foreign-entry';
 import { getStatusLabel } from '#util/schedule';
 import {
@@ -873,10 +881,19 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             'reconciled',
             'account',
             'schedule',
+            'amount',
+            'transaction_amount',
           ] as const
         ).some(field => (row[field] ?? null) !== (stored[field] ?? null))
       );
     });
+    const canMoveAcrossCurrencies =
+      !isAdding &&
+      !hasPendingEdits &&
+      !isExchange &&
+      !storedParent?.is_parent &&
+      !storedParent?.transfer_id &&
+      childTransactions.length === 0;
     const onEditForeign = () => {
       const stored = storedTransactions.find(s => s.id === storedParent.id);
       if (!stored || hasPendingEdits) return;
@@ -1217,13 +1234,44 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       // A saved transaction keeps its recorded encoding, and a
                       // split draft cannot become foreign (splits arrive with
                       // foreign edits).
-                      hiddenAccounts: editorHiddenAccounts({
-                        isAdding,
-                        accounts,
-                        account: getAccount(unserializedTransaction),
-                        hasSplits: childTransactions.length > 0,
-                      }),
+                      // A saved single row without other unsaved edits may
+                      // move to another currency through the move dialog.
+                      ...(canMoveAcrossCurrencies
+                        ? {
+                            hiddenAccounts: [],
+                            otherCurrencyAccounts: editorHiddenAccounts({
+                              isAdding,
+                              accounts,
+                              account: getAccount(unserializedTransaction),
+                              hasSplits: false,
+                            }),
+                          }
+                        : {
+                            hiddenAccounts: editorHiddenAccounts({
+                              isAdding,
+                              accounts,
+                              account: getAccount(unserializedTransaction),
+                              hasSplits: childTransactions.length > 0,
+                            }),
+                          }),
                       onSelect: accountId => {
+                        const from = getAccount(unserializedTransaction);
+                        const to = accounts.find(a => a.id === accountId);
+                        if (
+                          canMoveAcrossCurrencies &&
+                          to &&
+                          encodingKey(from) !== encodingKey(to)
+                        ) {
+                          pushEditModal(dispatch, {
+                            name: 'foreign-move',
+                            options: {
+                              id: storedParent.id,
+                              account: accountId,
+                              onSaved: () => navigate(-1),
+                            },
+                          });
+                          return;
+                        }
                         void onUpdateInner(transactionToEdit, name, accountId);
                       },
                       onClose: () => {
@@ -1310,7 +1358,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         isAdding,
         getAccount,
         childTransactions.length,
+        canMoveAcrossCurrencies,
         accounts,
+        navigate,
+        storedParent.id,
         isForeignTransaction,
       ],
     );

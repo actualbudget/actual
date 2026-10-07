@@ -28,6 +28,9 @@ type ExistingRow = {
   date: number;
   tombstone: number;
   amount_pair: string | null;
+  reconciled: number;
+  /** The category through category mappings. */
+  mapped_category: string | null;
 };
 
 /** A row as an edit handler read it. */
@@ -36,7 +39,56 @@ export type ForeignEditExpected = {
   amount: number;
   transaction_amount: number | null;
   date: string;
+  /**
+   * The category the editor read, through category mappings, when its
+   * budget notice depends on it.
+   */
+  category?: string | null;
+  /** The reconciled state the editor's confirmation depended on. */
+  reconciled?: boolean;
 };
+
+/**
+ * A category as the app shows it: through category mappings, and null
+ * when the target is deleted (AQL's reference validation).
+ */
+export async function liveMappedCategory(category: string | null) {
+  if (!category) return null;
+  const live = await db.first<{ id: string }>(
+    `SELECT c.id FROM category_mapping cm
+       JOIN categories c ON c.id = cm.transferId AND c.tombstone = 0
+       WHERE cm.id = ?`,
+    [category],
+  );
+  return live?.id ?? null;
+}
+
+/** Columns a stored-row read needs to check a snapshot's metadata. */
+export const SNAPSHOT_METADATA_COLUMNS = `reconciled,
+       CASE WHEN isParent = 1 THEN NULL
+         ELSE (SELECT c.id FROM category_mapping cm
+           JOIN categories c ON c.id = cm.transferId AND c.tombstone = 0
+           WHERE cm.id = transactions.category) END
+         AS mapped_category`;
+
+/**
+ * Whether a row still has the category and reconciled state a snapshot
+ * recorded (each checked only when the snapshot has it).
+ */
+export function metadataMatches(
+  row: {
+    reconciled?: number | boolean | null;
+    mapped_category?: string | null;
+  },
+  expected: ForeignEditExpected,
+) {
+  return (
+    (expected.category === undefined ||
+      (row.mapped_category ?? null) === expected.category) &&
+    (expected.reconciled === undefined ||
+      !!row.reconciled === expected.reconciled)
+  );
+}
 
 /** The exact values an edit handler computed for a row. */
 export type ForeignEditFinal = {
@@ -229,7 +281,7 @@ function storedRow(id: string) {
   return db.first<ExistingRow>(
     `SELECT id, acct, description, transferred_id, amount, transaction_amount,
        isParent, isChild, parent_id, schedule, category, date, tombstone,
-       amount_pair
+       amount_pair, ${SNAPSHOT_METADATA_COLUMNS}
        FROM transactions WHERE id = ?`,
     [id],
   );
@@ -237,6 +289,7 @@ function storedRow(id: string) {
 
 const ROW_COLUMNS = [
   'acct',
+  'reconciled',
   'description',
   'transferred_id',
   'amount',
@@ -277,10 +330,16 @@ async function effectiveRow(id: string): Promise<ExistingRow | null> {
     date: 0,
     tombstone: 0,
     amount_pair: null,
+    reconciled: 0,
+    mapped_category: null,
     ...stored,
   };
   for (const [column, value] of queued) {
     row[column] = value;
+  }
+  if (queued.some(([column]) => column === 'category')) {
+    const category = typeof row.category === 'string' ? row.category : null;
+    row.mapped_category = await liveMappedCategory(category);
   }
   return row as ExistingRow;
 }
@@ -708,14 +767,23 @@ export async function validateTransactionWrite(
 }
 
 function matchesExpected(
-  stored: Pick<ExistingRow, 'acct' | 'amount' | 'transaction_amount' | 'date'>,
+  stored: Pick<
+    ExistingRow,
+    | 'acct'
+    | 'amount'
+    | 'transaction_amount'
+    | 'date'
+    | 'reconciled'
+    | 'mapped_category'
+  >,
   expected: ForeignEditExpected,
 ) {
   return (
     stored.acct === expected.account &&
     stored.amount === expected.amount &&
     (stored.transaction_amount ?? null) === expected.transaction_amount &&
-    String(stored.date) === expected.date.replaceAll('-', '')
+    String(stored.date) === expected.date.replaceAll('-', '') &&
+    metadataMatches(stored, expected)
   );
 }
 
@@ -809,10 +877,16 @@ export async function preflightTransactionWrites(
           ? await db.first<
               Pick<
                 ExistingRow,
-                'acct' | 'amount' | 'transaction_amount' | 'date'
+                | 'acct'
+                | 'amount'
+                | 'transaction_amount'
+                | 'date'
+                | 'reconciled'
+                | 'mapped_category'
               >
             >(
-              `SELECT acct, amount, transaction_amount, date
+              `SELECT acct, amount, transaction_amount, date,
+                 ${SNAPSHOT_METADATA_COLUMNS}
                  FROM transactions WHERE id = ? AND tombstone = 0`,
               [id],
             )
