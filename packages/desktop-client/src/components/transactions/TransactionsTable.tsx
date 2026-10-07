@@ -1415,8 +1415,23 @@ const Transaction = memo(function Transaction({
   // Row-level drag must not compete with inline editors (notes, amounts,
   // payee, etc.): otherwise clicks/drags inside inputs start a reorder drag
   // instead of moving the caret or selecting text (see GH #7567).
+  // The running balance is read-only, so pause the drag while the mouse is
+  // pressed on it to let the user select and copy the value (see GH #7833).
+  const [isSelectingBalance, setIsSelectingBalance] = useState(false);
+  useEffect(() => {
+    if (!isSelectingBalance) return;
+    const stopSelecting = () => setIsSelectingBalance(false);
+    // `blur` covers a mouseup the window never gets (e.g. alt-tab while pressed)
+    window.addEventListener('mouseup', stopSelecting);
+    window.addEventListener('blur', stopSelecting);
+    return () => {
+      window.removeEventListener('mouseup', stopSelecting);
+      window.removeEventListener('blur', stopSelecting);
+    };
+  }, [isSelectingBalance]);
   const allowRowDrag =
     canDrag &&
+    !isSelectingBalance &&
     !isOnlyTransactionOnDate &&
     (!editing || focusedField === 'select' || focusedField === 'cleared');
   const { dragRef, dragProps } = useDrag<TransactionEntity>({
@@ -2055,6 +2070,11 @@ const Transaction = memo(function Transaction({
             width={amountColumnWidths.balance}
             textAlign="right"
             privacyFilter
+            onMouseDown={e => {
+              // Only the primary button selects text; a right-click opens the
+              // context menu, which can swallow the mouseup
+              if (e.button === 0) setIsSelectingBalance(true);
+            }}
           />
         );
       case 'cleared':
