@@ -14,6 +14,7 @@ vi.mock('#server/main', () => ({ getDefaultDocumentDir: vi.fn() }));
 
 const post = app.handlers['transactions/post-exchange-transfer'];
 const editExchange = app.handlers['transactions/update-exchange-transfer'];
+const getFamily = app.handlers['transactions/get-exchange-family'];
 const date = '2026-03-10';
 
 type Row = {
@@ -325,6 +326,52 @@ describe('editing exchange transfers', () => {
     ).toBe('Bank');
   });
 
+  it("moves the removed fee parent's notes to the promoted leg", async () => {
+    const { destinationId } = await exchange({
+      sourceAmount: 10300,
+      sourceFee: 300,
+      notes: 'trip',
+    });
+    const parent = rows('usd').find(r => r.isParent)!;
+    const leg = rows('usd').find(r => r.transferred_id)!;
+    await db.updateTransaction({ id: parent.id, notes: 'holiday' });
+    await editExchange({
+      id: destinationId,
+      expected: familyExpected(),
+      sourceAmount: 10000,
+      destinationAmount: 15000,
+    });
+    expect(
+      db.firstSync<{ notes: string }>(
+        'SELECT notes FROM transactions WHERE id = ?',
+        [leg.id],
+      )!.notes,
+    ).toBe('holiday');
+  });
+
+  it('keeps a cleared fee parent note cleared when the fee is removed', async () => {
+    const { destinationId } = await exchange({
+      sourceAmount: 10300,
+      sourceFee: 300,
+      notes: 'trip',
+    });
+    const parent = rows('usd').find(r => r.isParent)!;
+    const leg = rows('usd').find(r => r.transferred_id)!;
+    await db.updateTransaction({ id: parent.id, notes: null });
+    await editExchange({
+      id: destinationId,
+      expected: familyExpected(),
+      sourceAmount: 10000,
+      destinationAmount: 15000,
+    });
+    expect(
+      db.firstSync<{ notes: string | null }>(
+        'SELECT notes FROM transactions WHERE id = ?',
+        [leg.id],
+      )!.notes,
+    ).toBeNull();
+  });
+
   it('rejects removing a fee whose child holds an imported fee', async () => {
     const { destinationId } = await exchange({
       sourceAmount: 10300,
@@ -431,6 +478,85 @@ describe('editing exchange transfers', () => {
     expect([row(sourceId).date, row(destinationId).date]).toEqual([
       20260312, 20260312,
     ]);
+  });
+});
+
+describe('reading an exchange family for editing', () => {
+  it('returns the stored values from either side, round-tripping unchanged', async () => {
+    const { sourceId, destinationId } = await exchange({
+      sourceAmount: 10300,
+      sourceFee: 300,
+      notes: 'trip',
+    });
+    const parent = rows('usd').find(r => r.isParent)!;
+    for (const id of [sourceId, destinationId, parent.id]) {
+      const family = await getFamily({ id });
+      expect(family).toMatchObject({
+        status: 'ok',
+        sourceAccount: 'usd',
+        destinationAccount: 'jpy',
+        date,
+        sourceAmount: 10300,
+        destinationAmount: 15000,
+        sourceFee: 300,
+        destinationFee: 0,
+        baseAmount: 10000,
+        reconciled: false,
+      });
+      expect(
+        family.status === 'ok' && Object.keys(family.expected),
+      ).toHaveLength(4);
+    }
+    const fromYen = await getFamily({ id: destinationId });
+    expect(fromYen).toMatchObject({ selectedSide: 'destination' });
+    const before = rows();
+    if (fromYen.status !== 'ok') throw new Error('unavailable');
+    await editExchange({
+      id: destinationId,
+      expected: fromYen.expected,
+      sourceAmount: fromYen.sourceAmount,
+      destinationAmount: fromYen.destinationAmount,
+      sourceFee: fromYen.sourceFee,
+      destinationFee: fromYen.destinationFee,
+    });
+    expect(rows()).toEqual(before);
+  });
+
+  it('reads a destination fee, a two-foreign valuation and reconciled rows', async () => {
+    const result = await post({
+      date,
+      sourceAccount: 'jpy',
+      destinationAccount: 'kwd',
+      sourceAmount: 15000,
+      destinationAmount: 30000,
+      destinationFee: 750,
+      baseAmount: 10000,
+    });
+    if (result.status !== 'ok') throw new Error('post failed');
+    const fee = rows('kwd').find(r => r.isChild && !r.transferred_id)!;
+    await db.updateTransaction({ id: fee.id, reconciled: true });
+    expect(await getFamily({ id: fee.id })).toMatchObject({
+      status: 'ok',
+      selectedSide: 'destination',
+      sourceAmount: 15000,
+      destinationAmount: 30000,
+      destinationFee: 750,
+      baseAmount: 10000,
+      reconciled: true,
+    });
+  });
+
+  it('reports broken families and other rows as unavailable', async () => {
+    const { destinationId } = await exchange();
+    db.runQuery('UPDATE transactions SET transferred_id = NULL WHERE id = ?', [
+      destinationId,
+    ]);
+    expect(await getFamily({ id: destinationId })).toEqual({
+      status: 'unavailable',
+    });
+    expect(await getFamily({ id: 'missing' })).toEqual({
+      status: 'unavailable',
+    });
   });
 });
 

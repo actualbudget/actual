@@ -21,3 +21,27 @@ describe('FixedSizeList', () => {
     expect(centeredOffset(27, 718, 26)).toBe(92);
   });
 });
+
+describe('expanded editing row', () => {
+  const list = new FixedSizeList({
+    renderRow: () => null,
+    itemCount: 20,
+    itemSize: 30,
+    height: 120,
+    expandedItem: { index: 4, height: 100 },
+  });
+  it('reserves space below the selected row', () => {
+    expect(list.getItemOffset(4)).toBe(120);
+    expect(list.getItemSize(4)).toBe(130);
+    expect(list.getItemOffset(5)).toBe(250);
+    expect(list.getEstimatedTotalSize()).toBe(700);
+  });
+  it('keeps the expanded row rendered throughout its controls', () => {
+    expect(list.getStartIndexForOffset(249)).toBe(4);
+    expect(list.getStartIndexForOffset(250)).toBe(5);
+    expect(list.getStopIndexForStartIndex(3, 90)).toBe(4);
+    expect(list.getStopIndexForStartIndex(4, 180)).toBe(6);
+    expect(list.getOffsetForIndexAndAlignment(5, 'start')).toBe(250);
+    expect(list.getOffsetForIndexAndAlignment(19, 'end')).toBe(580);
+  });
+});
