@@ -1,4 +1,8 @@
-import { allocateByFraction, allocateProportionally } from './foreign-split';
+import {
+  allocateByFraction,
+  allocateProportionally,
+  foreignSplitBases,
+} from './foreign-split';
 
 describe('allocateProportionally', () => {
   it.each([
@@ -47,5 +51,34 @@ describe('allocateByFraction', () => {
       { id: 'b', amount: -33 },
       { id: 'c', amount: -17 },
     ]);
+  });
+});
+
+describe('foreignSplitBases', () => {
+  it('gives a one-unit remainder by row id, as a preview with the same ids', () => {
+    const children = [
+      { id: 'b', native: -1 },
+      { id: 'a', native: -1 },
+    ];
+    expect(foreignSplitBases(-1, children)).toEqual([
+      { id: 'b', amount: -1 },
+      { id: 'a', amount: 0 },
+    ]);
+  });
+
+  it('values zero-total children at the rate, sharing a confirmed base', () => {
+    const children = [
+      { id: 'a', native: 300 },
+      { id: 'b', native: -300 },
+    ];
+    const zeroTotal = { rate: '150', nativePrecision: 0, basePrecision: 2 };
+    expect(foreignSplitBases(0, children, zeroTotal)).toEqual([
+      { id: 'a', amount: 200 },
+      { id: 'b', amount: -200 },
+    ]);
+    expect(
+      foreignSplitBases(100, children, zeroTotal).map(part => part.amount),
+    ).toEqual([250, -150]);
+    expect(() => foreignSplitBases(0, children)).toThrow('rate-unavailable');
   });
 });

@@ -432,6 +432,12 @@ export function useExchangeEntry({
     message,
     busy: busy || stale,
     post,
+    /** The request Save would send, or null while the entry is invalid. */
+    request: (() => {
+      if (inputError) return null;
+      const built = buildExchangeRequest(entry);
+      return 'error' in built ? null : built.request;
+    })(),
   };
 }
 

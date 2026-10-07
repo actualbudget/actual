@@ -361,6 +361,27 @@ describe('editing a foreign transaction', () => {
 });
 
 describe('moving a transaction across currencies', () => {
+  it.each([
+    ['foreign to base', 'empty', { currency: 'KWD', precision: 3 }],
+    ['foreign to foreign', 'kwd', { currency: 'USD', precision: 2 }],
+  ])(
+    'rejects a destination whose encoding changed (%s)',
+    async (_case, account, destinationEncoding) => {
+      await foreignRow('t', 'jpy', -1000, -1500);
+      expect(
+        await move({
+          id: 't',
+          account,
+          expected: expectedOf('t'),
+          transaction_amount: -15000,
+          baseAmount: -1000,
+          destinationEncoding,
+        }),
+      ).toEqual({ status: 'stale' });
+      expect(row('t')).toMatchObject({ acct: 'jpy', amount: -1000 });
+    },
+  );
+
   it('moves a budget-currency row into a foreign account', async () => {
     await saveRate('JPY', '150');
     await db.insertTransaction({
