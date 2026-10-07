@@ -131,7 +131,6 @@ export function TransactionListItem({
     is_parent: isParent,
     is_child: isChild,
     notes,
-    tracking_number: trackingNumber,
     forceUpcoming,
     schedule: scheduleId,
   } = transaction;
