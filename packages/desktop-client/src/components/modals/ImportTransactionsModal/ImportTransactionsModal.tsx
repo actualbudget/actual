@@ -441,10 +441,13 @@ export function ImportTransactionsModal({
 
         if (filetype === 'csv') {
           if (!preserveImportSettings) {
-            let mappings = prefs[`csv-mappings-${accountId}`];
-            mappings = mappings
-              ? JSON.parse(mappings)
-              : getInitialMappings(transactions);
+            const initialMappings = getInitialMappings(transactions);
+
+            let csvMappings = prefs[`csv-mappings-${accountId}`];
+            csvMappings = csvMappings ? JSON.parse(csvMappings) : {};
+
+            // Merge mappings together with csvMappings overwriting
+            let mappings = Object.assign({}, initialMappings, csvMappings);
 
             // @ts-expect-error - mappings might not have outflow/inflow properties
             setFieldMappings(mappings);
