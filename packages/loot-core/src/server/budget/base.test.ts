@@ -3,7 +3,7 @@ import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
-import { setBudget, setBuffer } from './actions';
+import { setBudget, setBuffer, setCategoryCarryover } from './actions';
 import { createAllBudgets, createBudget, getBudgetRange } from './base';
 
 beforeEach(() => {
@@ -729,5 +729,169 @@ describe('Base budget', () => {
 
     const jan = monthUtils.sheetForMonth('2017-01');
     expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1000);
+  });
+
+  describe('current-month overspending in future-aware To Budget', () => {
+    let expenseCategory: string;
+    let incomeCategory: string;
+    let currentMonth: string;
+    let nextMonth: string;
+
+    beforeEach(async () => {
+      await sheet.loadSpreadsheet(db);
+      await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+      await db.insertCategoryGroup({
+        id: 'income',
+        name: 'Income',
+        is_income: 1,
+      });
+      expenseCategory = await db.insertCategory({
+        name: 'Clothing',
+        cat_group: 'expenses',
+      });
+      incomeCategory = await db.insertCategory({
+        name: 'Paycheck',
+        cat_group: 'income',
+        is_income: 1,
+      });
+      await db.insertAccount({ id: 'account', name: 'Checking' });
+      currentMonth = monthUtils.currentMonth();
+      nextMonth = monthUtils.nextMonth(currentMonth);
+      await createAllBudgets();
+      await db.insertTransaction({
+        date: `${currentMonth}-01`,
+        amount: 10000,
+        account: 'account',
+        category: incomeCategory,
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-02`,
+        amount: -7850,
+        account: 'account',
+        category: expenseCategory,
+      });
+      await setBudget({
+        month: currentMonth,
+        category: expenseCategory,
+        amount: 3000,
+      });
+      await setBudget({
+        month: nextMonth,
+        category: expenseCategory,
+        amount: 1000,
+      });
+      await sheet.waitOnSpreadsheet();
+    });
+
+    it('deducts negative balances only in future months without changing monthly To Budget', async () => {
+      const positiveCategory = await db.insertCategory({
+        name: 'Savings',
+        cat_group: 'expenses',
+      });
+      await setBudget({
+        month: currentMonth,
+        category: positiveCategory,
+        amount: 500,
+      });
+      await setBuffer(currentMonth, 1000);
+      await sheet.waitOnSpreadsheet();
+      const currentSheet = monthUtils.sheetForMonth(currentMonth);
+      expect(sheet.getCellValue(currentSheet, 'total-overspent')).toBe(-4850);
+      expect(sheet.getCellValue(currentSheet, 'to-budget')).toBe(5500);
+      expect(sheet.getCellValue(currentSheet, 'ready-to-assign')).toBe(5500);
+      for (const month of [nextMonth, monthUtils.nextMonth(nextMonth)]) {
+        expect(
+          sheet.getCellValue(
+            monthUtils.sheetForMonth(month),
+            'ready-to-assign',
+          ),
+        ).toBe(650);
+      }
+
+      // Covering overspending reduces current To Budget and releases the
+      // deduction in future months, leaving their available amount unchanged.
+      await setBudget({
+        month: currentMonth,
+        category: expenseCategory,
+        amount: 7850,
+      });
+      await sheet.waitOnSpreadsheet();
+      expect(sheet.getCellValue(currentSheet, 'total-overspent')).toBe(0);
+      for (const month of [currentMonth, nextMonth]) {
+        expect(
+          sheet.getCellValue(
+            monthUtils.sheetForMonth(month),
+            'ready-to-assign',
+          ),
+        ).toBe(650);
+      }
+    });
+
+    it.each([false, true])(
+      'preserves the rollover choice and deducts overspending once (carryover: %s)',
+      async carryover => {
+        await setCategoryCarryover({
+          startMonth: currentMonth,
+          category: expenseCategory,
+          flag: carryover,
+        });
+        await sheet.waitOnSpreadsheet();
+        expect(
+          sheet.getCellValue(
+            monthUtils.sheetForMonth(currentMonth),
+            'ready-to-assign',
+          ),
+        ).toBe(6000);
+        expect(
+          sheet.getCellValue(
+            monthUtils.sheetForMonth(nextMonth),
+            'ready-to-assign',
+          ),
+        ).toBe(carryover ? 6000 : 1150);
+        const originalCurrentMonth = global.currentMonth;
+        try {
+          global.currentMonth = nextMonth;
+          await createAllBudgets();
+          await sheet.waitOnSpreadsheet();
+          expect(
+            sheet.getCellValue(
+              monthUtils.sheetForMonth(nextMonth),
+              'ready-to-assign',
+            ),
+          ).toBe(carryover ? 6000 : 1150);
+        } finally {
+          global.currentMonth = originalCurrentMonth;
+        }
+      },
+    );
+
+    it('updates the future available amount when overspent categories are deleted or restored', async () => {
+      const currentSheet = monthUtils.sheetForMonth(currentMonth);
+      const category = {
+        id: expenseCategory,
+        name: 'Clothing',
+        cat_group: 'expenses',
+        is_income: 0,
+      } satisfies Partial<db.DbCategory>;
+      await db.updateCategory({ ...category, tombstone: 1 });
+      await sheet.waitOnSpreadsheet();
+      expect(sheet.getCellValue(currentSheet, 'total-overspent')).toBe(0);
+      expect(
+        sheet.getCellValue(
+          monthUtils.sheetForMonth(nextMonth),
+          'ready-to-assign',
+        ),
+      ).toBe(10000);
+      await db.updateCategory({ ...category, tombstone: 0 });
+      await sheet.waitOnSpreadsheet();
+      expect(sheet.getCellValue(currentSheet, 'total-overspent')).toBe(-4850);
+      expect(sheet.getCellValue(currentSheet, 'ready-to-assign')).toBe(6000);
+      expect(
+        sheet.getCellValue(
+          monthUtils.sheetForMonth(nextMonth),
+          'ready-to-assign',
+        ),
+      ).toBe(1150);
+    });
   });
 });

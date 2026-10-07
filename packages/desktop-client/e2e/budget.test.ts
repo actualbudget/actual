@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import type { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
+import { Navigation } from './page-models/navigation';
 
 test.describe('Budget', () => {
   let page: Page;
@@ -87,6 +88,70 @@ test.describe('Budget', () => {
     await expect(
       menu.getByRole('button', { name: 'Switch file' }),
     ).toBeVisible();
+  });
+
+  test('shows current overspending only in future summaries when future assignments are included', async () => {
+    await page.getByTitle('Today', { exact: true }).click();
+    const month = await budgetPage.getSelectedMonth();
+    const summary = page.locator(
+      `[data-testid="budget-summary"][data-month="${month}"]`,
+    );
+    const monthlyBreakdown = await summary
+      .locator('[data-cellname]')
+      .allTextContents();
+    const navigation = new Navigation(page);
+    await navigation.goToSettingsPage();
+    await page
+      .getByRole('button', { name: 'Include future assignments', exact: true })
+      .click();
+    budgetPage = await navigation.goToBudgetPage();
+
+    await expect(summary.getByText('For next month')).toHaveCount(0);
+    await expect(
+      summary.locator('[data-cellname$="!total-overspent"]'),
+    ).toHaveCount(0);
+    await expect(summary.getByText('Budgeted in future months')).toBeVisible();
+    await expect(summary.locator('[data-cellname]').last()).toHaveText('11.00');
+    await page.mouse.move(0, 0);
+    await expect(summary).toMatchThemeScreenshots();
+
+    const currentBreakdown = await summary
+      .locator('[data-cellname*="!"]')
+      .allTextContents();
+    await budgetPage.nextMonthButton.click();
+    const nextMonth = await budgetPage.getSelectedMonth();
+    const futureSummary = page.locator(
+      `[data-testid="budget-summary"][data-month="${nextMonth}"]`,
+    );
+    await expect(
+      futureSummary.locator('[data-cellname$="!total-overspent"]'),
+    ).toBeVisible();
+    await expect(futureSummary.getByText('For next month')).toHaveCount(0);
+    await expect(
+      futureSummary.locator(
+        '[data-cellname*="!"]:not([data-cellname$="!total-overspent"])',
+      ),
+    ).toHaveText(currentBreakdown);
+    await expect(futureSummary.locator('[data-cellname]').last()).toHaveText(
+      '-49.00',
+    );
+    await page.mouse.move(0, 0);
+    await expect(futureSummary).toMatchThemeScreenshots();
+    await page.getByTitle('Today', { exact: true }).click();
+
+    await navigation.goToSettingsPage();
+    await page
+      .getByRole('button', {
+        name: 'Use default monthly calculation',
+        exact: true,
+      })
+      .click();
+    await navigation.goToBudgetPage();
+    await expect(summary.getByText('For next month')).toBeVisible();
+    await expect(summary.getByText('Budgeted in future months')).toHaveCount(0);
+    await expect(summary.locator('[data-cellname]')).toHaveText(
+      monthlyBreakdown,
+    );
   });
 });
 

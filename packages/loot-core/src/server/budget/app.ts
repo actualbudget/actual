@@ -218,6 +218,7 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
   let values = [
     value('available-funds'),
     value('last-month-overspent'),
+    value('total-overspent'),
     value('buffered'),
     value('total-budgeted'),
     value('to-budget'),

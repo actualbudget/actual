@@ -287,6 +287,44 @@ describe('available-balance actions', () => {
         ),
       ).toBe(toBudgetMode === 'include-future' ? 3000 : 6000);
     });
+
+    it('covers current overspending without changing the future available amount', async () => {
+      const { currentMonth, nextMonth } = await setupDatabase(toBudgetMode);
+      await db.insertCategory({
+        id: 'spending',
+        name: 'Spending',
+        cat_group: 'expenses',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: 'paycheck',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-16`,
+        amount: -3000,
+        account: 'account',
+        category: 'spending',
+      });
+      await setBudget({ month: nextMonth, category: 'bills', amount: 7000 });
+      await sheet.waitOnSpreadsheet();
+      const currentSheet = monthUtils.sheetForMonth(currentMonth);
+      const nextSheet = monthUtils.sheetForMonth(nextMonth);
+      expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(3000);
+      expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(0);
+
+      await coverOverspending({
+        month: currentMonth,
+        to: 'spending',
+        from: 'to-budget',
+        currencyCode: 'USD',
+      });
+      await sheet.waitOnSpreadsheet();
+      expect(await getSheetValue(currentSheet, 'budget-spending')).toBe(3000);
+      expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(0);
+      expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(0);
+    });
   });
 });
 

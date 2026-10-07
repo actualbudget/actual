@@ -223,6 +223,24 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       .map(group => `group-leftover-${group.id}`),
     run: sumAmounts,
   });
+
+  sheet.get().createDynamic(sheetName, 'total-overspent', {
+    initialValue: 0,
+    dependencies: flatten2(
+      expenseCategories.map(cat => [
+        `leftover-${cat.id}`,
+        `carryover-${cat.id}`,
+      ]),
+    ),
+    run: (...data) =>
+      safeNumber(
+        unflatten2(data).reduce(
+          (total, [balance, carryover]) =>
+            total + (carryover ? 0 : Math.min(0, number(balance))),
+          0,
+        ),
+      ),
+  });
 }
 
 export function createFutureAwareToBudget(
@@ -258,11 +276,15 @@ export function createFutureAwareToBudget(
       dependencies: [
         resolveName(currentSheetName, 'to-budget'),
         resolveName(currentSheetName, 'buffered-selected'),
+        resolveName(currentSheetName, 'total-overspent'),
         'assigned-in-future',
       ],
-      run: (toBudget, buffered, budgetedInFuture) =>
+      run: (toBudget, buffered, overspent, budgetedInFuture) =>
         safeNumber(
-          number(toBudget) + number(buffered) - number(budgetedInFuture),
+          number(toBudget) +
+            number(buffered) +
+            (month > currentMonth ? number(overspent) : 0) -
+            number(budgetedInFuture),
         ),
     });
   });
@@ -298,6 +320,10 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ],
       ]);
     } else {
+      deps.push([
+        'total-overspent',
+        [`leftover-${cat.id}`, `carryover-${cat.id}`],
+      ]);
       deps.push([
         'last-month-overspent',
         [
