@@ -57,8 +57,11 @@ export function Budget() {
     useCategories();
 
   const prewarm = useEffectEvent(async (monthBounds: MonthBounds) => {
-    await prewarmAllMonths(budgetType, spreadsheet, monthBounds, startMonth);
-    setInitialized(true);
+    try {
+      await prewarmAllMonths(budgetType, spreadsheet, monthBounds, startMonth);
+    } finally {
+      setInitialized(true);
+    }
   });
   useEffect(() => {
     if (bounds) {
