@@ -152,18 +152,22 @@ export async function resolveAccountCurrencyInput(
   }
 
   if (accountId) {
-    const account = await db.first<{ currency: string | null }>(
-      'SELECT currency FROM accounts WHERE id = ?',
-      [accountId],
-    );
+    const account = await db.first<{
+      currency: string | null;
+      currency_locked: number | null;
+    }>('SELECT currency, currency_locked FROM accounts WHERE id = ?', [
+      accountId,
+    ]);
     if (!account) {
       throw new Error('account-not-found');
     }
     // Tombstoned rows count: undo can restore them under the old currency.
-    const hasTransactions = await db.first(
-      'SELECT 1 FROM transactions WHERE acct = ? LIMIT 1',
-      [accountId],
-    );
+    // The lock remembers rows that have since moved away (MC-5.1).
+    const hasTransactions =
+      account.currency_locked === 1 ||
+      (await db.first('SELECT 1 FROM transactions WHERE acct = ? LIMIT 1', [
+        accountId,
+      ]));
     if ((account.currency ?? null) !== value) {
       if (hasTransactions) {
         throw new Error('account-currency-immutable');

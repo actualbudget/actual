@@ -5,9 +5,11 @@ import * as connection from '#platform/server/connection';
 import { getIn } from '#shared/util';
 import type { HandlerFunctions } from '#types/handlers';
 
+import * as db from './db';
 import { getMutatorContext, withMutatorContext } from './mutators';
 import { sendMessages } from './sync';
 import type { Message } from './sync';
+import { amountPair } from './sync/coupled-cells';
 
 // A marker always sits as the first entry to simplify logic
 type MarkerMessage = { type: 'marker'; meta?: unknown };
@@ -183,13 +185,65 @@ export async function undo() {
       }, [])
       .reverse();
 
+    if (changesLockedEncoding(toApply)) {
+      CURSOR = end;
+      throw new Error('account-currency-immutable');
+    }
     await applyUndoAction(toApply, meta, entries[0].undoTag);
   }
 }
 
+/**
+ * Undo and redo restore captured cells without the currency check, so an
+ * account whose currency is locked (it has held a transaction) must not get
+ * another currency or precision back that way.
+ */
+function changesLockedEncoding(messages: Message[]) {
+  return messages.some(message => {
+    if (
+      message.dataset !== 'accounts' ||
+      (message.column !== 'currency' && message.column !== 'currency_precision')
+    ) {
+      return false;
+    }
+    const account = db.firstSync<{
+      currency: string | null;
+      currency_precision: number | null;
+      currency_locked: number | null;
+    }>(
+      'SELECT currency, currency_precision, currency_locked FROM accounts WHERE id = ?',
+      [message.row],
+    );
+    return (
+      account?.currency_locked === 1 &&
+      (account[message.column] ?? null) !== (message.value ?? null)
+    );
+  });
+}
+
 function undoMessage(message, oldData) {
+  // The encoding lock is never cleared, by undo either (MC-5.1).
+  if (message.dataset === 'accounts' && message.column === 'currency_locked') {
+    return null;
+  }
   const oldItem = getIn(oldData, [message.dataset, message.row]);
   if (oldItem) {
+    // A transaction's authority is restored whole, bound to its old account,
+    // even when the captured cell used the MC-3.1 form.
+    if (
+      message.dataset === 'transactions' &&
+      message.column === 'amount_pair' &&
+      oldItem.amount_pair != null
+    ) {
+      return {
+        ...message,
+        value: amountPair(
+          oldItem.amount,
+          oldItem.transaction_amount ?? null,
+          oldItem.acct,
+        ),
+      };
+    }
     let column = message.column;
     if (message.dataset === 'spreadsheet_cells') {
       // The spreadsheet messages use the `expr` column, but only as a
@@ -264,6 +318,10 @@ export async function redo() {
         .concat(redoResurrections(entry.messages, entry.oldData));
     }, []);
 
+    if (changesLockedEncoding(toApply)) {
+      CURSOR = start;
+      throw new Error('account-currency-immutable');
+    }
     await applyUndoAction(toApply, meta, entries[entries.length - 1].undoTag);
   }
 }

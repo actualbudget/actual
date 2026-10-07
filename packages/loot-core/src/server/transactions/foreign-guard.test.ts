@@ -156,7 +156,7 @@ describe('write guard', () => {
     expect(tx('ok')).toMatchObject({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500',
+      amount_pair: '-1000:-1500@jpy',
     });
   });
 
@@ -191,7 +191,7 @@ describe('write guard', () => {
     expect(tx('t')).toMatchObject({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500',
+      amount_pair: '-1000:-1500@jpy',
       notes: 'lunch',
     });
   });
