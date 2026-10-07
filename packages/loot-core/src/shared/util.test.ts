@@ -83,6 +83,21 @@ describe('utility functions', () => {
     expect(looselyParseAmount(' 3.45 ')).toBe(3.45);
   });
 
+  test('looseParseAmount does not count a currency suffix as decimal places', () => {
+    expect(looselyParseAmount('3.4 €')).toBe(3.4);
+    expect(looselyParseAmount('3.45€')).toBe(3.45);
+    expect(looselyParseAmount('3.45 €')).toBe(3.45);
+    expect(looselyParseAmount('3,45 €')).toBe(3.45);
+    expect(looselyParseAmount('3.45 USD')).toBe(3.45);
+    expect(looselyParseAmount('3.45000000 €')).toBe(3.45);
+    expect(looselyParseAmount(' -110.7 €')).toBe(-110.7);
+    expect(looselyParseAmount('1.234,5 kr')).toBe(1234.5);
+    expect(looselyParseAmount('(3.4 €)')).toBe(-3.4);
+    // three places are still ambiguous, same as without a suffix
+    expect(looselyParseAmount('3.456 €')).toBe(3456);
+    expect(looselyParseAmount('1.500 €')).toBe(1500);
+  });
+
   test('number formatting works with comma-dot format', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
     let formatter = getNumberFormat().formatter;
