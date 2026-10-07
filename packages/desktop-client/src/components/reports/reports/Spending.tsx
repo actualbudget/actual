@@ -246,6 +246,28 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     }
   };
 
+  // Picking a month pins the report, as it does in the other reports. The "to"
+  // select stays live: its offset from `compare` is what slides.
+  const onCompareChange = (value: string) => {
+    setCompare(value);
+    setIsLive(false);
+  };
+
+  const onToggleIsLive = () => {
+    const nextIsLive = !isLive;
+    if (nextIsLive) {
+      const [liveCompare, liveCompareTo] = calculateSpendingReportTimeRange({
+        compare,
+        compareTo,
+        isLive: true,
+        mode: reportMode,
+      });
+      setCompare(liveCompare);
+      setCompareTo(liveCompareTo);
+    }
+    setIsLive(nextIsLive);
+  };
+
   const title = widget?.meta?.name || t('Monthly Spending');
   const onSaveWidgetName = async (newName: string) => {
     if (!widget) {
@@ -304,7 +326,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
           <SpaceBetween gap={0}>
             <Button
               variant={isLive ? 'primary' : 'normal'}
-              onPress={() => setIsLive(state => !state)}
+              onPress={onToggleIsLive}
             >
               {isLive ? t('Live') : t('Static')}
             </Button>
@@ -325,7 +347,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
               </Text>
               <Select
                 value={compare}
-                onChange={setCompare}
+                onChange={onCompareChange}
                 options={allIntervals.map(
                   ({ name, pretty }) => [name, pretty] as const,
                 )}
