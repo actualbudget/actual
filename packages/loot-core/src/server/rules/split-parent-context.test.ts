@@ -43,10 +43,8 @@ const parent = {
 };
 
 describe('split parent formula context', () => {
-  test('keeps parent_amount in cents', () => {
-    expect(
-      splitRule('=INTEGER_TO_AMOUNT(parent_amount) / 2').exec(parent),
-    ).toMatchObject({
+  test('reads parent_amount as an amount', () => {
+    expect(splitRule('=parent_amount / 2').exec(parent)).toMatchObject({
       subtransactions: [{ amount: -1500 }, { amount: -1500 }],
     });
   });
