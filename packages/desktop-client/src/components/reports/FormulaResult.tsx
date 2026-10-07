@@ -53,7 +53,7 @@ export function FormulaResult({
   const fontSize =
     fontSizeMode === 'static'
       ? `${staticFontSize}px`
-      : `min(${(FONT_SIZE_SCALE_FACTOR * 100) / longestLineLength}cqi, calc(${100 / lineCount}cqb - ${CONTAINER_MARGIN * 2}px))`;
+      : `min(${(FONT_SIZE_SCALE_FACTOR * 100) / longestLineLength}cqi, calc((100cqb - ${CONTAINER_MARGIN * 2}px) / ${lineCount}))`;
 
   // Determine color
   const color = customColor
