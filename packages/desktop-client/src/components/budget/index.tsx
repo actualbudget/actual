@@ -64,14 +64,16 @@ export function Budget() {
           return;
         }
 
-        await prewarmAllMonths(
-          type,
-          spreadsheet,
-          monthBounds,
-          clampMonth(startMonth, monthBounds),
-        );
-
-        setInitialized(true);
+        try {
+          await prewarmAllMonths(
+            type,
+            spreadsheet,
+            monthBounds,
+            clampMonth(startMonth, monthBounds),
+          );
+        } finally {
+          setInitialized(true);
+        }
       }
 
       void run();

@@ -29,13 +29,14 @@ export function useResizeObserver<T extends Element>(
 ): (el: T) => void {
   const observer = useRef<ResizeObserver | undefined>(undefined);
   const measure = useRef<((el: T) => void) | undefined>(undefined);
+  measure.current = measureOnAttach
+    ? el => func(getContentRect(el))
+    : undefined;
+
   if (!observer.current) {
     observer.current = new ResizeObserver(entries => {
       func(entries[0].contentRect);
     });
-    if (measureOnAttach) {
-      measure.current = el => func(getContentRect(el));
-    }
   }
 
   const elementRef = useCallback((el: T) => {

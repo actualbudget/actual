@@ -44,6 +44,7 @@ function LoadComponentInner<K extends string>({
   useEffect(() => {
     const loadedComponent = loadedModules.get(importer)?.[name];
     if (loadedComponent) {
+      setError(null);
       setComponent(() => loadedComponent);
       return;
     }
