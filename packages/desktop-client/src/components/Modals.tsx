@@ -52,6 +52,7 @@ import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMe
 import { ExchangeTransferModal } from './modals/ExchangeTransferModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { ForeignAmountModal } from './modals/ForeignAmountModal';
+import { ForeignSplitModal } from './modals/ForeignSplitModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -163,6 +164,9 @@ export function Modals() {
 
         case 'foreign-amount':
           return <ForeignAmountModal key={key} {...modal.options} />;
+
+        case 'foreign-split':
+          return <ForeignSplitModal key={key} {...modal.options} />;
 
         case 'exchange-transfer':
           return <ExchangeTransferModal key={key} {...modal.options} />;

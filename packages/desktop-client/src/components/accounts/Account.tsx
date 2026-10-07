@@ -1143,8 +1143,8 @@ class AccountInternal extends PureComponent<
   }
 
   /**
-   * Split changes recompute base amounts but not native ones, so they are
-   * unavailable for foreign rows until foreign splits are supported.
+   * Batch split changes recompute base amounts but not native ones, so
+   * foreign rows are split one at a time, in the split dialog.
    */
   rejectForeignSplitChange(transactions: TransactionEntity[]) {
     const isForeign = transactions.some(
@@ -1157,7 +1157,9 @@ class AccountInternal extends PureComponent<
         addNotification({
           notification: {
             type: 'error',
-            message: t('Splitting foreign transactions is not available yet.'),
+            message: t(
+              'Split transactions in accounts with other currencies one at a time.',
+            ),
           },
         }),
       );

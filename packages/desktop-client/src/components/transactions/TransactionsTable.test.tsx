@@ -166,6 +166,7 @@ function generateTransactions(
 type LiveTransactionTableProps = {
   /** Wraps the table, e.g. in a foreign account's currency format. */
   wrap?: (table: ReactNode) => ReactNode;
+  rowDetails?: { id: string; content: ReactNode };
   transactions: TransactionEntity[];
   payees: PayeeEntity[];
   accounts: AccountEntity[];
@@ -2055,14 +2056,6 @@ describe('Transactions', () => {
   });
 });
 
-function titleOf(field: Element) {
-  return (
-    field.getAttribute('title') ??
-    field.querySelector('[title]')?.getAttribute('title') ??
-    ''
-  );
-}
-
 describe('foreign-currency rows', () => {
   const yen: AccountEntity = {
     ...generateAccount('Yen wallet'),
@@ -2083,19 +2076,19 @@ describe('foreign-currency rows', () => {
     initBasicServer();
   });
 
-  it('keeps foreign amounts read-only in mixed views', async () => {
+  // Saving an edited foreign amount routes to its dialog in TransactionList
+  // (openForeignEditDialog, tested in util/foreign-edit.test.ts).
+  it('lets existing foreign amounts be edited in mixed views', async () => {
     const { container } = renderTransactions({
       accounts: [...accounts, yen],
       transactions: [foreignTransaction()],
       currentAccountId: null,
     });
-    const debit = queryField(container, 'debit', '', 0);
-    expect(titleOf(debit)).toBe('Edit this amount in its account');
-    await userEvent.click(debit.querySelector('div')!);
-    expect(debit.querySelector('input')).toBeNull();
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
   });
 
-  it('freezes existing amounts and hides split in the native register', async () => {
+  it('edits existing amounts and offers split in the native register', async () => {
     const { container } = renderTransactions({
       accounts: [...accounts, yen],
       transactions: [foreignTransaction()],
@@ -2106,34 +2099,12 @@ describe('foreign-currency rows', () => {
         </CurrencyFormatProvider>
       ),
     });
-    const debit = queryField(container, 'debit', '', 0);
-    expect(titleOf(debit)).toBe('Editing foreign amounts is not available yet');
-    await userEvent.click(debit.querySelector('div')!);
-    expect(debit.querySelector('input')).toBeNull();
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
 
     await editField(container, 'category', 0);
     await waitForAutocomplete();
-    expect(screen.queryByTestId('split-transaction-button')).toBeNull();
-  });
-
-  it('skips frozen amounts during keyboard navigation', async () => {
-    const { container } = renderTransactions({
-      accounts: [...accounts, yen],
-      transactions: [foreignTransaction()],
-      currentAccountId: yen.id,
-      wrap: table => (
-        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
-          {table}
-        </CurrencyFormatProvider>
-      ),
-    });
-    const input = await editField(container, 'category', 0);
-    await userEvent.type(input, '{Tab}');
-    for (const name of ['debit', 'credit']) {
-      expect(
-        queryField(container, name, '', 0).querySelector('input'),
-      ).toBeNull();
-    }
+    expect(screen.getByTestId('split-transaction-button')).toBeInTheDocument();
   });
 
   it('keeps a new payee typed last in the foreign draft without creating it', async () => {
@@ -2223,4 +2194,28 @@ describe('useAmountColumnWidths', () => {
       DEFAULT_AMOUNT_COLUMN_WIDTHS.amount,
     );
   });
+});
+
+it('keeps expanded editing controls after their transaction inside the table', async () => {
+  const rows = generateTransactions(3);
+  const { container, updateProps } = renderTransactions({
+    transactions: rows,
+    rowDetails: {
+      id: rows[1].id,
+      content: <input aria-label="Row detail input" />,
+    },
+  });
+  const details = await screen.findByTestId('transaction-row-details');
+  expect(details.closest('[data-focus-key]')).toHaveAttribute(
+    'data-focus-key',
+    rows[1].id,
+  );
+  const controls = screen.getByRole('textbox', { name: 'Row detail input' });
+  await userEvent.type(controls, '123{Tab}');
+  expect(controls).toHaveValue('123');
+  expect(
+    container.querySelector('[data-testid="transaction-table"]'),
+  ).toContainElement(details);
+  updateProps({ rowDetails: undefined });
+  expect(screen.queryByTestId('transaction-row-details')).toBeNull();
 });

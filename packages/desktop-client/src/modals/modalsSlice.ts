@@ -28,6 +28,7 @@ import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLi
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
+import type { ForeignAmountEdit } from '#util/foreign-edit';
 
 const sliceName = 'modals';
 
@@ -598,25 +599,35 @@ export type Modal =
     }
   | {
       name: 'exchange-transfer';
-      options: {
-        /** A scheduled exchange occurrence that has no estimate. */
-        occurrence: {
-          schedule: string;
-          account: string;
-          other: string;
-          date: string;
-          /** In the schedule account's encoding, signed. */
-          amount: number;
-          notes: string | null;
-          cleared: boolean;
-          category: string | null;
-        };
-      };
+      options:
+        | {
+            /** A scheduled exchange occurrence that has no estimate. */
+            occurrence: {
+              schedule: string;
+              account: string;
+              other: string;
+              date: string;
+              /** In the schedule account's encoding, signed. */
+              amount: number;
+              notes: string | null;
+              cleared: boolean;
+              category: string | null;
+            };
+            edit?: undefined;
+          }
+        | {
+            occurrence?: undefined;
+            /** Edits the exchange family holding this row. */
+            edit: { id: string; onSaved?: () => void };
+          };
     }
   | {
       name: 'foreign-amount';
       options: {
-        /** New foreign draft with its native amount in transaction_amount. */
+        /**
+         * A new foreign draft, or an edited row, with its native amount in
+         * transaction_amount.
+         */
         transaction: Omit<
           TransactionEntity,
           'amount' | 'transaction_amount'
@@ -627,7 +638,17 @@ export type Modal =
         nativePrecision: number;
         /** A schedule draft that already ran its rules. */
         rulesApplied?: boolean;
+        /** Saves an existing row instead of posting a new one. */
+        edit?: ForeignAmountEdit;
         onPosted: () => void;
+      };
+    }
+  | {
+      name: 'foreign-split';
+      options: {
+        /** The foreign transaction or split parent being split. */
+        id: string;
+        onSaved?: () => void;
       };
     }
   | {

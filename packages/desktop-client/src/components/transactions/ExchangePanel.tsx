@@ -18,7 +18,10 @@ import type {
 import { RateField } from '#components/transactions/RateField';
 import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useExchangeEntry } from '#hooks/useExchangeEntry';
-import type { ExchangePostResult } from '#hooks/useExchangeEntry';
+import type {
+  ExchangeEntryInitial,
+  ExchangePostResult,
+} from '#hooks/useExchangeEntry';
 import type { ExchangeRequest } from '#util/exchange-entry';
 
 export type { ExchangePostResult };
@@ -37,6 +40,8 @@ type ExchangePanelProps = {
   focusToken?: number;
   onCancel?: () => void;
   cancelButtonRef?: Ref<HTMLButtonElement>;
+  initial?: ExchangeEntryInitial;
+  submitLabel?: string;
 };
 
 // A label and its inputs stay on one line when the panel wraps.
@@ -70,6 +75,8 @@ function ExchangePanelInner({
   onCancel,
   cancelButtonRef,
   feeNeedsOtherAmount,
+  initial,
+  submitLabel,
 }: ExchangePanelProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
@@ -113,6 +120,7 @@ function ExchangePanelInner({
     register,
     other,
     feeNeedsOtherAmount,
+    initial,
   });
   const post = () => postEntry(onPost);
 
@@ -246,7 +254,7 @@ function ExchangePanelInner({
         onPress={() => void post()}
         data-testid="exchange-add-button"
       >
-        <Trans>Add transfer</Trans>
+        {submitLabel ?? <Trans>Add transfer</Trans>}
       </Button>
       {message && (
         <Text

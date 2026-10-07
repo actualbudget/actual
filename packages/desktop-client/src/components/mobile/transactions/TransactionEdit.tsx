@@ -84,6 +84,7 @@ import {
   ToggleField,
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
+import { ForeignSplitEditor } from '#components/modals/ForeignSplitModal';
 import { MobilePageHeader, Page } from '#components/Page';
 import {
   propagateRuleChangeToSubtransactions,
@@ -125,6 +126,7 @@ import { setLastTransaction } from '#transactions/transactionsSlice';
 import { incompatibleAccountIds, reencodeAmount } from '#util/account-encoding';
 import { exchangeOtherAccount } from '#util/exchange-entry';
 import type { ExchangeRequest } from '#util/exchange-entry';
+import { isExchangeRow, openForeignEditDialog } from '#util/foreign-edit';
 import { postForeignEntry } from '#util/post-foreign-entry';
 import { getStatusLabel } from '#util/schedule';
 import {
@@ -464,6 +466,10 @@ type ChildTransactionEditProps = {
     value: TransactionEntity[Field],
   ) => void;
   onDelete: (id: TransactionEntity['id']) => void;
+  /** A foreign split's amounts and structure change in the split dialog. */
+  amountFrozen?: boolean;
+  /** A frozen foreign child's native amount, shown instead of its base. */
+  nativeAmount?: number | null;
 };
 
 const ChildTransactionEdit = forwardRef<
@@ -484,6 +490,8 @@ const ChildTransactionEdit = forwardRef<
       onUpdate,
       onDelete,
       keyboardHeader,
+      amountFrozen = false,
+      nativeAmount,
     },
     ref,
   ) => {
@@ -539,26 +547,31 @@ const ChildTransactionEdit = forwardRef<
             }}
           >
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
-            <SplitAmountInput
-              keyboardHeader={keyboardHeader}
-              disabled={
-                !!editingField &&
-                editingField !== getFieldName(transaction.id, 'amount')
-              }
-              value={transaction.amount}
-              negate={negate}
-              autoFocus={amountFocused}
-              onFocus={event => {
-                onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
+            {amountFrozen && nativeAmount != null ? (
+              <NativeChildAmount amount={nativeAmount} />
+            ) : (
+              <SplitAmountInput
+                keyboardHeader={keyboardHeader}
+                disabled={
+                  amountFrozen ||
+                  (!!editingField &&
+                    editingField !== getFieldName(transaction.id, 'amount'))
+                }
+                value={transaction.amount}
+                negate={negate}
+                autoFocus={amountFocused}
+                onFocus={event => {
+                  onRequestActiveEdit(getFieldName(transaction.id, 'amount'));
 
-                const input = event.currentTarget as HTMLInputElement;
-                input.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              onBlur={() => onClearActiveEdit()}
-              onChange={amount => {
-                onUpdate(transaction, 'amount', amount);
-              }}
-            />
+                  const input = event.currentTarget as HTMLInputElement;
+                  input.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                onBlur={() => onClearActiveEdit()}
+                onChange={amount => {
+                  onUpdate(transaction, 'amount', amount);
+                }}
+              />
+            )}
           </View>
         </View>
 
@@ -610,6 +623,7 @@ const ChildTransactionEdit = forwardRef<
         <View style={{ alignItems: 'center' }}>
           <Button
             variant="bare"
+            isDisabled={amountFrozen}
             onPress={() => onDelete(transaction.id)}
             style={{
               height: 40,
@@ -643,24 +657,52 @@ const ChildTransactionEdit = forwardRef<
 
 ChildTransactionEdit.displayName = 'ChildTransactionEdit';
 
-/** An existing foreign amount: native in its currency, base beneath. */
+/** A frozen foreign child's native amount, in its account's format. */
+function NativeChildAmount({ amount }: { amount: number }) {
+  const format = useFormat();
+  return (
+    <Text style={{ ...styles.tnum, padding: '5px 0' }}>
+      {format(amount, 'financial')}
+    </Text>
+  );
+}
+
+/**
+ * An existing foreign amount: native in its currency, base beneath. Its
+ * edits open a dialog that saves final amounts.
+ */
 function FrozenForeignAmount({
   transaction,
+  pendingEdits,
+  onEdit,
 }: {
   transaction: TransactionEntity;
+  /** Unsaved form edits must be saved before the amount dialog opens. */
+  pendingEdits: boolean;
+  onEdit: () => void;
 }) {
   const format = useFormat();
   return (
     <View style={{ alignItems: 'center', gap: 4, paddingTop: 8 }}>
       <Text style={{ fontSize: 30, ...styles.tnum }}>
-        {format(transaction.transaction_amount ?? 0, 'financial')}
+        {format(
+          transaction.transaction_amount ?? transaction.amount,
+          'financial',
+        )}
       </Text>
-      <BudgetCurrencyFormat>
-        <BaseAmountText amount={transaction.amount} />
-      </BudgetCurrencyFormat>
-      <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
-        <Trans>Editing foreign amounts is not available yet</Trans>
-      </Text>
+      {transaction.transaction_amount != null && (
+        <BudgetCurrencyFormat>
+          <BaseAmountText amount={transaction.amount} />
+        </BudgetCurrencyFormat>
+      )}
+      <Button variant="bare" isDisabled={pendingEdits} onPress={onEdit}>
+        <Trans>Edit amount</Trans>
+      </Button>
+      {pendingEdits && (
+        <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+          <Trans>Save your other changes before editing the amount.</Trans>
+        </Text>
+      )}
     </View>
   );
 }
@@ -681,6 +723,8 @@ type TransactionEditInnerProps = {
   payees: PayeeEntity[];
   dateFormat: string;
   transactions: TransactionEntity[];
+  /** The rows as stored, for the snapshots foreign edit dialogs send. */
+  storedTransactions: TransactionEntity[];
   /** A save is in flight; saving again is refused. */
   isSaving: boolean;
   /** Resolves true when the editor may close. */
@@ -709,6 +753,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     payees,
     dateFormat,
     transactions: unserializedTransactions,
+    storedTransactions,
     onSave,
     onUpdate,
     onDelete,
@@ -738,6 +783,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+    const [editingForeignSplit, setEditingForeignSplit] = useState(false);
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -804,8 +850,48 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         };
       }
     };
-    // Existing foreign amounts are frozen until foreign edits are supported.
-    const isAmountFrozen = isForeignTransaction && !isAdding;
+    // Existing foreign amounts and exchanges are edited in their dialogs,
+    // which save final amounts; the form returns to the list afterwards.
+    const isExchange =
+      !isAdding &&
+      isExchangeRow(storedParent, unserializedTransactions, payees, accounts);
+    const isAmountFrozen = !isAdding && (isForeignTransaction || isExchange);
+    // Dialogs snapshot the stored rows. Unsaved form edits would be lost
+    // when a dialog saves (or make its snapshot stale), so they are saved
+    // first.
+    const hasPendingEdits = unserializedTransactions.some(row => {
+      const stored = storedTransactions.find(s => s.id === row.id);
+      return (
+        !stored ||
+        (
+          [
+            'date',
+            'payee',
+            'notes',
+            'category',
+            'cleared',
+            'reconciled',
+            'account',
+            'schedule',
+          ] as const
+        ).some(field => (row[field] ?? null) !== (stored[field] ?? null))
+      );
+    });
+    const onEditForeign = () => {
+      const stored = storedTransactions.find(s => s.id === storedParent.id);
+      if (!stored || hasPendingEdits) return;
+      if (stored.is_parent) {
+        setEditingForeignSplit(true);
+        return;
+      }
+      void openForeignEditDialog(dispatch, {
+        row: stored,
+        rows: storedTransactions,
+        payees,
+        accounts,
+        onSaved: () => navigate(-1),
+      });
+    };
 
     const getTransferAccount = useCallback(
       (trans: TransactionEntity) => {
@@ -1351,6 +1437,35 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const remaining = transaction.error?.difference ?? 0;
 
+    if (editingForeignSplit) {
+      return (
+        <Page
+          header={
+            <MobilePageHeader
+              title={t('Split transaction')}
+              leftContent={
+                <Button
+                  variant="bare"
+                  onPress={() => setEditingForeignSplit(false)}
+                >
+                  <Trans>Back</Trans>
+                </Button>
+              }
+            />
+          }
+          padding={10}
+        >
+          <BudgetCurrencyFormat>
+            <ForeignSplitEditor
+              id={storedParent.id}
+              onClose={() => setEditingForeignSplit(false)}
+              onSaved={() => navigate(-1)}
+            />
+          </BudgetCurrencyFormat>
+        </Page>
+      );
+    }
+
     return (
       <Page
         header={
@@ -1394,7 +1509,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           >
             <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
             {isAmountFrozen ? (
-              <FrozenForeignAmount transaction={storedParent} />
+              <FrozenForeignAmount
+                transaction={storedParent}
+                pendingEdits={hasPendingEdits}
+                onEdit={onEditForeign}
+              />
             ) : (
               <AmountInput
                 value={transaction.amount}
@@ -1567,6 +1686,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 };
               }}
               isOffBudget={isOffBudget}
+              amountFrozen={isAmountFrozen}
+              nativeAmount={
+                unserializedTransactions.find(u => u.id === childTrans.id)
+                  ?.transaction_amount
+              }
               getCategory={getCategory}
               getPayee={getPayee}
               getTransferAccount={getTransferAccount}
@@ -1591,11 +1715,16 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
           {transaction.amount !== 0 &&
             childTransactions.length === 0 &&
-            !isForeignTransaction && (
+            !isExchange &&
+            !(isAdding && isForeignTransaction) && (
               <View style={{ alignItems: 'center' }}>
                 <Button
                   variant="bare"
-                  isDisabled={!!editingField}
+                  // A foreign split saves in its dialog, which would drop
+                  // unsaved form edits.
+                  isDisabled={
+                    !!editingField || (isAmountFrozen && hasPendingEdits)
+                  }
                   style={{
                     height: 40,
                     borderWidth: 0,
@@ -1604,7 +1733,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                     marginTop: 10,
                     backgroundColor: 'transparent',
                   }}
-                  onPress={() => onSplit(transaction.id)}
+                  onPress={() =>
+                    isAmountFrozen
+                      ? !hasPendingEdits && setEditingForeignSplit(true)
+                      : onSplit(transaction.id)
+                  }
                 >
                   <SvgSplit
                     width={17}
@@ -2614,6 +2747,7 @@ function TransactionEditUnconnected({
       >
         <TransactionEditInner
           transactions={transactions}
+          storedTransactions={fetchedTransactions ?? []}
           isSaving={isSaving}
           isAdding={isAdding.current}
           categories={categories}
