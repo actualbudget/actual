@@ -11,11 +11,15 @@ import {
   sameEncoding,
   transferTarget,
 } from './foreign-guard';
-import type { ForeignEdit } from './foreign-guard';
+import type {
+  ForeignEdit,
+  ForeignEditExpected,
+  ForeignEditFinal,
+} from './foreign-guard';
 
 import { clearDisallowedCategory } from './index';
 
-type Expected = ForeignEdit['expected'];
+type Expected = ForeignEditExpected;
 
 /** A row update that may also clear the schedule link. */
 type RowUpdate = Omit<Partial<TransactionEntity>, 'schedule'> & {
@@ -23,7 +27,7 @@ type RowUpdate = Omit<Partial<TransactionEntity>, 'schedule'> & {
   schedule?: string | null;
 };
 
-type StoredRow = {
+export type StoredRow = {
   id: string;
   acct: string;
   amount: number;
@@ -36,19 +40,19 @@ type StoredRow = {
   tombstone: number;
 };
 
-type PairInput = {
+export type PairInput = {
   baseAmount?: number;
   rate?: string | number;
   /** Base shown to the user for a supplied rate; a mismatch asks again. */
   expectedBaseAmount?: number;
 };
 
-type PairFailure =
+export type PairFailure =
   | { status: 'stale' }
   | { status: 'rate-unavailable'; date: string }
   | { status: 'base-changed'; baseAmount: number };
 
-async function liveRow(id: string): Promise<StoredRow> {
+export async function liveRow(id: string): Promise<StoredRow> {
   const row = await db.first<StoredRow>(
     `SELECT id, acct, amount, transaction_amount, date, isParent, isChild,
        transferred_id, schedule, tombstone
@@ -75,7 +79,7 @@ const EDITABLE_FIELDS = ['date', 'payee', 'notes', 'category', 'cleared'];
  * payloads are not type-checked at runtime, and the row id never comes
  * from them. A transfer payee would need a counterpart (MC-5.2).
  */
-async function editableFields(fields: Record<string, unknown>) {
+export async function editableFields(fields: Record<string, unknown>) {
   const picked = Object.fromEntries(
     Object.entries(fields).filter(([key]) => EDITABLE_FIELDS.includes(key)),
   );
@@ -89,7 +93,7 @@ async function editableFields(fields: Record<string, unknown>) {
   return picked;
 }
 
-function matches(row: StoredRow, expected: Expected) {
+export function matches(row: StoredRow, expected: Expected) {
   return (
     row.acct === expected.account &&
     row.amount === expected.amount &&
@@ -103,7 +107,7 @@ function matches(row: StoredRow, expected: Expected) {
  * else a typed rate for this edit only, else the daily rate for the date. A zero native amount takes base
  * 0 unless a base is supplied.
  */
-async function pairFor(
+export async function pairFor(
   accountId: string,
   native: number,
   date: string,
@@ -131,8 +135,14 @@ async function pairFor(
   return { status: 'ok', amount: pair.baseAmount };
 }
 
-async function write(update: RowUpdate, edit: ForeignEdit) {
-  const foreignEdits = new Map([[update.id, edit]]);
+async function write(
+  update: RowUpdate,
+  expected: Expected,
+  final: ForeignEditFinal,
+) {
+  const foreignEdits = new Map<string, ForeignEdit>([
+    [update.id, { action: 'update', expected, final }],
+  ]);
   await preflightTransactionWrites({ updated: [update] }, { foreignEdits });
   await withUndo(() =>
     batchMessages(async () => {
@@ -185,10 +195,12 @@ export async function updateForeignEntry({
     if (pair.status !== 'ok') return pair;
     amount = pair.amount;
   }
-  await write(
-    { ...picked, id, amount, transaction_amount: native },
-    { expected, account: row.acct, amount, transaction_amount: native },
-  );
+  await write({ ...picked, id, amount, transaction_amount: native }, expected, {
+    account: row.acct,
+    amount,
+    transaction_amount: native,
+    ...(typeof picked.date === 'string' && { date: picked.date }),
+  });
   return { status: 'ok' };
 }
 
@@ -276,8 +288,7 @@ export async function moveForeignEntry({
     ...(scheduleUnlinked && { schedule: null }),
   };
   clearDisallowedCategory(update, destination);
-  await write(update, {
-    expected,
+  await write(update, expected, {
     account,
     amount,
     transaction_amount: native,

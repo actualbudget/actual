@@ -84,7 +84,7 @@ async function transferPayee(accountId: string) {
 
 /** The principal's base value V: one valuation for both transfer legs. */
 async function valuation(
-  input: ExchangeTransferInput,
+  input: Pick<ExchangeTransferInput, 'date' | 'baseAmount'>,
   source: { foreign: boolean; currencyCode: string; precision: number },
   destination: { foreign: boolean; currencyCode: string; precision: number },
   principal: number,
@@ -119,6 +119,87 @@ async function valuation(
     }
   }
   return null;
+}
+
+type ExchangeSide = {
+  foreign: boolean;
+  currencyCode: string;
+  precision: number;
+};
+
+/**
+ * An exchange's stored integers: the legs from S and N or a rate, one
+ * valuation V, and each fee's base at the transfer's implied rate. Posting
+ * and editing share it, so both store the same arithmetic.
+ */
+export async function exchangeValues(
+  input: Pick<
+    ExchangeTransferInput,
+    | 'date'
+    | 'sourceAmount'
+    | 'destinationAmount'
+    | 'rate'
+    | 'sourceFee'
+    | 'destinationFee'
+    | 'baseAmount'
+  >,
+  source: ExchangeSide,
+  destination: ExchangeSide,
+): Promise<
+  | {
+      status: 'ok';
+      legs: ReturnType<typeof exchangeLegs>;
+      value: number;
+      sourceFeeBase: number;
+      destinationFeeBase: number;
+    }
+  | { status: 'rate-unavailable'; currencies: string[]; date: string }
+> {
+  const common = {
+    sourceAmount: input.sourceAmount,
+    sourcePrecision: source.precision,
+    destinationPrecision: destination.precision,
+    sourceFee: input.sourceFee,
+    destinationFee: input.destinationFee,
+  };
+  let legs;
+  if (input.rate !== undefined && input.destinationAmount === undefined) {
+    legs = exchangeLegs({ ...common, rate: input.rate });
+  } else if (
+    input.destinationAmount !== undefined &&
+    input.rate === undefined
+  ) {
+    legs = exchangeLegs({
+      ...common,
+      destinationAmount: input.destinationAmount,
+    });
+  } else {
+    throw new Error('exchange-amount-invalid');
+  }
+
+  const value = await valuation(
+    input,
+    source,
+    destination,
+    legs.principal,
+    legs.gross,
+  );
+  if (value === null) {
+    return {
+      status: 'rate-unavailable',
+      currencies: [source.currencyCode, destination.currencyCode],
+      date: input.date,
+    };
+  }
+  checked(value, 1);
+  const sourceFeeBase = source.foreign
+    ? feeBase(legs.sourceFee, value, legs.principal)
+    : legs.sourceFee;
+  const destinationFeeBase = destination.foreign
+    ? feeBase(legs.destinationFee, value, legs.gross)
+    : legs.destinationFee;
+
+  return { status: 'ok', legs, value, sourceFeeBase, destinationFeeBase };
 }
 
 /**
@@ -167,49 +248,9 @@ export async function postExchangeTransfer(
     foreign: destinationEncoding.currency !== null,
   };
 
-  const common = {
-    sourceAmount: input.sourceAmount,
-    sourcePrecision: source.precision,
-    destinationPrecision: destination.precision,
-    sourceFee: input.sourceFee,
-    destinationFee: input.destinationFee,
-  };
-  let legs;
-  if (input.rate !== undefined && input.destinationAmount === undefined) {
-    legs = exchangeLegs({ ...common, rate: input.rate });
-  } else if (
-    input.destinationAmount !== undefined &&
-    input.rate === undefined
-  ) {
-    legs = exchangeLegs({
-      ...common,
-      destinationAmount: input.destinationAmount,
-    });
-  } else {
-    throw new Error('exchange-amount-invalid');
-  }
-
-  const value = await valuation(
-    input,
-    source,
-    destination,
-    legs.principal,
-    legs.gross,
-  );
-  if (value === null) {
-    return {
-      status: 'rate-unavailable',
-      currencies: [source.currencyCode, destination.currencyCode],
-      date: input.date,
-    };
-  }
-  checked(value, 1);
-  const sourceFeeBase = source.foreign
-    ? feeBase(legs.sourceFee, value, legs.principal)
-    : legs.sourceFee;
-  const destinationFeeBase = destination.foreign
-    ? feeBase(legs.destinationFee, value, legs.gross)
-    : legs.destinationFee;
+  const values = await exchangeValues(input, source, destination);
+  if (values.status !== 'ok') return values;
+  const { legs, value, sourceFeeBase, destinationFeeBase } = values;
 
   const pairOn =
     (foreign: boolean) => (amount: number, native: number, sign: 1 | -1) => ({
