@@ -31,6 +31,11 @@ import { removeModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import {
+  confirmReconciledEdit,
+  foreignEditErrorMessage,
+  staleEditMessage,
+} from '#util/foreign-edit';
 
 type ForeignAmountModalProps = Extract<
   ModalType,
@@ -46,7 +51,8 @@ type Resolution =
       timestamp: string | null;
       fallback: boolean;
     }
-  | { status: 'unavailable' };
+  | { status: 'unavailable' }
+  | { status: 'error' };
 
 function NativeAmount({
   amount,
@@ -78,21 +84,29 @@ function payeeName(
 }
 
 /**
- * Previews a new foreign transaction's conversion and posts it atomically.
- * The preview only reads; confirming sends exactly what was shown.
+ * Previews a foreign transaction's conversion and saves it atomically: a new
+ * entry, or an edit of an existing row (and its transfer counterpart). The
+ * preview only reads; confirming sends exactly what was shown.
  */
 export function ForeignAmountModal({
   transaction,
   currencyCode,
   nativePrecision,
   rulesApplied,
+  edit,
   onPosted,
 }: ForeignAmountModalProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const basePrecision = useAmountPrecision();
   const baseFormat = useFormat(basePrecision);
+  const nativeFormat = useFormat(nativePrecision);
   const [draft, setDraft] = useState(transaction);
+  // An edit may change the native amount in the dialog (the mobile form has
+  // no amount cell of its own).
+  const [nativeInput, setNativeInput] = useState(() =>
+    nativeFormat.forEdit(transaction.transaction_amount),
+  );
   // Keyed by date so a stale lookup never serves a newer draft date.
   const [resolved, setResolved] = useState<{
     date: string;
@@ -104,7 +118,13 @@ export function ForeignAmountModal({
     rate: string;
     baseAmount: number;
   } | null>(null);
-  const [baseInput, setBaseInput] = useState('');
+  const [baseInput, setBaseInput] = useState(() =>
+    edit?.baseAmount != null
+      ? baseFormat.forEdit(Math.abs(edit.baseAmount))
+      : '',
+  );
+  // A stale edit cannot be saved; the dialog must be reopened.
+  const [stale, setStale] = useState(false);
   const [rateInput, setRateInput] = useState('');
   const [rateEdited, setRateEdited] = useState(false);
   const [rateDirection, setRateDirection] =
@@ -123,28 +143,26 @@ export function ForeignAmountModal({
     void send('exchange-rates/resolve', {
       quoteCurrency: currencyCode,
       date: draft.date,
-    }).then(result => {
-      if (!cancelled) setResolved({ date: draft.date, result });
-    });
+    }).then(
+      result => {
+        if (!cancelled) setResolved({ date: draft.date, result });
+      },
+      () => {
+        // The explicit base amount and rate inputs still work.
+        if (!cancelled) {
+          setResolved({ date: draft.date, result: { status: 'error' } });
+        }
+      },
+    );
     return () => {
       cancelled = true;
     };
   }, [currencyCode, draft.date]);
 
+  // A typed rate belongs to the date it was typed for.
   useEffect(() => {
     setRateEdited(false);
   }, [draft.date]);
-
-  useEffect(() => {
-    if (rateEdited || resolved?.date !== draft.date) return;
-    const result = resolved.result;
-    if (result.status === 'resolved' && result.kind === 'dated') {
-      setRateInput(result.rate);
-      setRateDirection('foreign-per-base');
-      return;
-    }
-    setRateInput('');
-  }, [draft.date, rateEdited, resolved]);
 
   useEffect(() => {
     if (standingTouched || !transaction.payee) return;
@@ -161,35 +179,72 @@ export function ForeignAmountModal({
     };
   }, [standingTouched, transaction.payee]);
 
-  const native = draft.transaction_amount;
+  const typedNative = edit ? nativeFormat.fromEdit(nativeInput) : null;
+  const native = edit ? (typedNative ?? 0) : draft.transaction_amount;
   const resolution = resolved?.date === draft.date ? resolved.result : null;
+  // Until the user types a rate, the field shows the draft date's one-day
+  // rate. It is derived from that date's lookup, so it is empty while a new
+  // date resolves. Left alone, it is that date's resolved default, not a
+  // typed rate: the dialog posts its reviewed base and sends no rate.
+  const typedRate = rateEdited ? rateInput : '';
+  const rateText = rateEdited
+    ? rateInput
+    : resolution?.status === 'resolved' && resolution.kind === 'dated'
+      ? resolution.rate
+      : '';
+  const direction: RateDirection = rateEdited
+    ? rateDirection
+    : 'foreign-per-base';
 
   type Preview =
-    | { kind: 'base'; baseAmount: number }
+    | { kind: 'base'; baseAmount: number; rate?: string }
     | { kind: 'rate'; rate: string; baseAmount: number }
     | { kind: 'default'; baseAmount: number }
+    | { kind: 'kept'; baseAmount: number }
     | { kind: 'invalid' }
     | { kind: 'loading' }
     | { kind: 'unavailable' };
 
   /** The conversion shown to the user, which is exactly what Save posts. */
   function preview(): Preview {
+    if (edit && typedNative == null) return { kind: 'invalid' };
+    // An edit that changes nothing keeps the stored pair; a prefilled rate
+    // the user left alone is not a change.
+    const stored =
+      edit?.kind === 'transfer' ? edit.expected.leg : edit?.expected;
+    if (
+      stored &&
+      native === stored.transaction_amount &&
+      baseInput.trim() === '' &&
+      typedRate.trim() === ''
+    ) {
+      return { kind: 'kept', baseAmount: stored.amount };
+    }
     if (baseInput.trim() !== '') {
       const parsed = baseFormat.fromEdit(baseInput);
+      if (parsed == null) return { kind: 'invalid' };
       // The base amount is entered as a magnitude and follows the native
-      // amount's direction (outflow or inflow).
-      return parsed == null
-        ? { kind: 'invalid' }
-        : {
-            kind: 'base',
-            baseAmount: native < 0 ? -Math.abs(parsed) : Math.abs(parsed),
-          };
+      // amount's direction (outflow or inflow). A rate beside it is still
+      // saved, so it must be valid too.
+      let rate: string | undefined;
+      if (typedRate.trim() !== '') {
+        try {
+          rate = storedRate(typedRate, direction);
+        } catch {
+          return { kind: 'invalid' };
+        }
+      }
+      return {
+        kind: 'base',
+        baseAmount: native < 0 ? -Math.abs(parsed) : Math.abs(parsed),
+        rate,
+      };
     }
-    if (rateInput.trim() !== '') {
+    if (typedRate.trim() !== '') {
       // A malformed rate, or one whose conversion is out of range, is
       // reported as invalid input rather than breaking the dialog.
       try {
-        const rate = storedRate(rateInput, rateDirection);
+        const rate = storedRate(typedRate, direction);
         const reviewed =
           serverBase?.date === draft.date && serverBase.rate === rate
             ? serverBase.baseAmount
@@ -225,32 +280,91 @@ export function ForeignAmountModal({
 
   const shown = preview();
 
+  // The rate "Use this rate from this date" saves: a typed rate, else the
+  // resolved rate shown in the conversion or the rate field. Without one
+  // there is nothing to save.
+  const standingRate =
+    shown.kind === 'rate' || shown.kind === 'base'
+      ? (shown.rate ??
+        (shown.kind === 'base' &&
+        resolution?.status === 'resolved' &&
+        rateText !== ''
+          ? resolution.rate
+          : undefined))
+      : shown.kind === 'default' && resolution?.status === 'resolved'
+        ? resolution.rate
+        : undefined;
+  const persistStanding = saveStanding && standingRate !== undefined;
+
   async function confirm() {
+    if (shown.kind === 'kept') {
+      dispatch(removeModal({ name: 'foreign-amount' }));
+      return;
+    }
+    // A base or default posts its reviewed base. A rate goes with it only
+    // when typed or when it is to be saved as standing.
+    const baseRate =
+      shown.kind === 'base' && shown.rate !== undefined
+        ? shown.rate
+        : persistStanding
+          ? standingRate
+          : undefined;
     const payload =
       shown.kind === 'base' || shown.kind === 'default'
-        ? { baseAmount: shown.baseAmount }
+        ? baseRate !== undefined
+          ? {
+              baseAmount: shown.baseAmount,
+              rate: baseRate,
+              expectedBaseAmount: shown.baseAmount,
+            }
+          : { baseAmount: shown.baseAmount }
         : shown.kind === 'rate'
           ? { rate: shown.rate, expectedBaseAmount: shown.baseAmount }
           : null;
     if (shown.kind === 'loading') return;
     if (payload == null) {
       setMessage(
-        baseInput.trim() !== '' || rateInput.trim() !== ''
+        baseInput.trim() !== '' || typedRate.trim() !== ''
           ? t('Enter a valid base amount or rate.')
           : t('Rate unavailable. Enter a base amount or rate.'),
       );
       return;
     }
+    if (edit && !(await confirmReconciledEdit(dispatch, edit.reconciled))) {
+      return;
+    }
     setBusy(true);
     try {
-      const result = await send('transactions/post-foreign-entry', {
-        transaction: draft,
-        ...payload,
-        replaceRate,
-        saveStanding,
-        rulesApplied,
-      });
+      const result = !edit
+        ? await send('transactions/post-foreign-entry', {
+            transaction: draft,
+            ...payload,
+            replaceRate,
+            saveStanding: persistStanding,
+            rulesApplied,
+          })
+        : edit.kind === 'entry'
+          ? await send('transactions/update-foreign-entry', {
+              id: edit.id,
+              expected: edit.expected,
+              transaction_amount: native,
+              ...payload,
+              replaceRate,
+              saveStanding: persistStanding,
+            })
+          : await send('transactions/update-foreign-transfer', {
+              id: edit.id,
+              expected: edit.expected,
+              transaction_amount: native,
+              ...payload,
+              replaceRate,
+              saveStanding: persistStanding,
+            });
       switch (result.status) {
+        case 'stale':
+          setStale(true);
+          setMessage(staleEditMessage(t));
+          return;
         case 'ok':
           // Close only this dialog: another modal may have opened above it.
           dispatch(removeModal({ name: 'foreign-amount' }));
@@ -265,7 +379,7 @@ export function ForeignAmountModal({
                 base: budgetCurrency,
                 currency: currencyCode,
                 existing: result.existing.rate,
-                rate: shown.kind === 'rate' ? shown.rate : rateInput.trim(),
+                rate: standingRate ?? '',
               },
             ),
           );
@@ -306,10 +420,10 @@ export function ForeignAmountModal({
         default:
           setMessage(t('Rate unavailable. Enter a base amount or rate.'));
       }
-    } catch {
+    } catch (error) {
       // The server refused the entry; nothing was written and the draft
       // stays open for correction.
-      setMessage(t('This transaction could not be saved.'));
+      setMessage(foreignEditErrorMessage(t, error));
     } finally {
       setBusy(false);
     }
@@ -326,7 +440,9 @@ export function ForeignAmountModal({
       {({ state }) => (
         <>
           <ModalHeader
-            title={t('Convert to budget currency')}
+            title={
+              edit ? t('Edit foreign amount') : t('Convert to budget currency')
+            }
             rightContent={
               busy ? null : <ModalCloseButton onPress={() => state.close()} />
             }
@@ -338,12 +454,35 @@ export function ForeignAmountModal({
             }}
           >
             <View style={{ gap: 10 }}>
+              {edit?.kind === 'transfer' && (
+                <Text style={{ color: theme.pageTextSubdued }}>
+                  <Trans>
+                    The other account of this transfer changes to match.
+                  </Trans>
+                </Text>
+              )}
               <InlineField label={t('Amount')} width="100%">
-                <NativeAmount
-                  amount={native}
-                  currencyCode={currencyCode}
-                  precision={nativePrecision}
-                />
+                {edit ? (
+                  <Input
+                    name="nativeAmount"
+                    aria-label={t('Amount in {{currency}}', {
+                      currency: currencyCode,
+                    })}
+                    inputMode="decimal"
+                    value={nativeInput}
+                    onChangeValue={value => {
+                      setNativeInput(value);
+                      setServerBase(null);
+                    }}
+                    style={{ flex: 1 }}
+                  />
+                ) : (
+                  <NativeAmount
+                    amount={native}
+                    currencyCode={currencyCode}
+                    precision={nativePrecision}
+                  />
+                )}
               </InlineField>
               {shown.kind === 'base' ? (
                 <Text style={{ color: theme.pageTextSubdued }}>
@@ -376,9 +515,24 @@ export function ForeignAmountModal({
                     </Text>
                   )}
                 </Text>
+              ) : shown.kind === 'kept' ? (
+                <Text style={{ color: theme.pageTextSubdued }}>
+                  <Trans>
+                    {{ amount: baseFormat(shown.baseAmount, 'financial') }}{' '}
+                    unchanged
+                  </Trans>
+                </Text>
               ) : shown.kind === 'unavailable' ? (
                 <Text style={{ color: theme.warningText }}>
-                  <Trans>Rate unavailable. Enter a base amount or rate.</Trans>
+                  {resolution?.status === 'error' ? (
+                    <Trans>
+                      The rate could not be loaded. Enter a base amount or rate.
+                    </Trans>
+                  ) : (
+                    <Trans>
+                      Rate unavailable. Enter a base amount or rate.
+                    </Trans>
+                  )}
                 </Text>
               ) : null}
               <InlineField label={t('Base amount')} width="100%">
@@ -398,8 +552,8 @@ export function ForeignAmountModal({
               <RateField
                 name="rate"
                 currencyCode={currencyCode}
-                value={rateInput}
-                direction={rateDirection}
+                value={rateText}
+                direction={direction}
                 onChange={(value, direction) => {
                   setRateEdited(true);
                   setRateInput(value);
@@ -410,7 +564,8 @@ export function ForeignAmountModal({
               <label style={{ display: 'flex', alignItems: 'center' }}>
                 <Checkbox
                   aria-label={t('Use this rate from this date')}
-                  checked={saveStanding}
+                  disabled={standingRate === undefined}
+                  checked={persistStanding}
                   onChange={event => {
                     setStandingTouched(true);
                     setSaveStanding(event.currentTarget.checked);
@@ -436,7 +591,7 @@ export function ForeignAmountModal({
               <Button
                 type="submit"
                 variant="primary"
-                isDisabled={busy || shown.kind === 'loading'}
+                isDisabled={busy || stale || shown.kind === 'loading'}
                 style={{ marginLeft: 10 }}
               >
                 <Trans>Save</Trans>

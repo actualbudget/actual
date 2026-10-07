@@ -276,6 +276,28 @@ describe('foreign split families', () => {
     ).rejects.toThrow('foreign-split-unbalanced');
   });
 
+  it('values children of a total changed to zero at the rate, saving no rate', async () => {
+    await foreignRow('t', 'jpy', -1000, -1500);
+    await saveSplit({
+      id: 't',
+      expected: familyOf('t'),
+      transaction_amount: 0,
+      children: [{ transaction_amount: 300 }, { transaction_amount: -300 }],
+      rate: '150',
+    });
+    expect(row('t')).toMatchObject({ amount: 0, transaction_amount: 0 });
+    expect(
+      children('t')
+        .map(child => child.amount)
+        .sort((a, b) => a - b),
+    ).toEqual([-200, 200]);
+    expect(
+      db.firstSync('SELECT 1 FROM exchange_rates WHERE quote_currency = ?', [
+        'JPY',
+      ]),
+    ).toBeNull();
+  });
+
   it('collapses a split back into one transaction with its pair', async () => {
     await foreignRow('t', 'jpy', -1000, -1500);
     await saveSplit({

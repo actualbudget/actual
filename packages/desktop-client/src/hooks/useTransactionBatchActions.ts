@@ -98,12 +98,12 @@ export function useTransactionBatchActions() {
       name === 'amount' &&
       transactions.some(trans => accountsById.get(trans.account)?.currency)
     ) {
-      // Foreign amounts are frozen until foreign edits are supported.
+      // Foreign amounts are edited one row at a time, through their dialogs.
       dispatch(
         addNotification({
           notification: {
             type: 'error',
-            message: t('Editing foreign amounts is not available yet.'),
+            message: t('Edit foreign amounts one transaction at a time.'),
           },
         }),
       );

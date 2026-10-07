@@ -23,6 +23,18 @@ export function storedRate(input: string, direction: RateDirection): string {
   return direction === 'foreign-per-base' ? typed : invertRate(typed);
 }
 
+/** A stored rate as typed in `direction`, if it can be shown that way. */
+export function rateInDirection(
+  rate: string,
+  direction: RateDirection,
+): string | undefined {
+  try {
+    return direction === 'foreign-per-base' ? rate : invertRate(rate);
+  } catch {
+    return undefined;
+  }
+}
+
 type RateFieldProps = {
   name: string;
   currencyCode: string;

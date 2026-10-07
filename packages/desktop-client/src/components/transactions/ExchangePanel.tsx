@@ -15,7 +15,10 @@ import type {
 
 import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useExchangeEntry } from '#hooks/useExchangeEntry';
-import type { ExchangePostResult } from '#hooks/useExchangeEntry';
+import type {
+  ExchangeEntryInitial,
+  ExchangePostResult,
+} from '#hooks/useExchangeEntry';
 import type { ExchangeRequest } from '#util/exchange-entry';
 
 export type { ExchangePostResult };
@@ -32,6 +35,9 @@ type ExchangePanelProps = {
   feeNeedsOtherAmount?: boolean;
   /** Increments to focus the first input. */
   focusToken?: number;
+  /** An existing exchange being edited. */
+  initial?: ExchangeEntryInitial;
+  submitLabel?: string;
 };
 
 // A label and its inputs stay on one line when the panel wraps.
@@ -63,6 +69,8 @@ function ExchangePanelInner({
   onPost,
   focusToken = 0,
   feeNeedsOtherAmount,
+  initial,
+  submitLabel,
 }: ExchangePanelProps) {
   const { t } = useTranslation();
   const firstInput = useRef<HTMLInputElement>(null);
@@ -110,6 +118,7 @@ function ExchangePanelInner({
     register,
     other,
     feeNeedsOtherAmount,
+    initial,
   });
   const post = () => postEntry(onPost);
 
@@ -240,7 +249,7 @@ function ExchangePanelInner({
         onPress={() => void post()}
         data-testid="exchange-add-button"
       >
-        <Trans>Add transfer</Trans>
+        {submitLabel ?? <Trans>Add transfer</Trans>}
       </Button>
       {(message || estimateMessage) && (
         <Text

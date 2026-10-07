@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React from 'react';
+import React, { useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -23,6 +23,9 @@ export function ConfirmTransactionEditModal({
   confirmReason,
 }: ConfirmTransactionEditModalProps) {
   const { t } = useTranslation();
+  // Any close other than Confirm (Cancel, the close button, Escape, the
+  // overlay) cancels, exactly once.
+  const confirmed = useRef(false);
 
   const { isNarrowWidth } = useResponsive();
   const narrowButtonStyle = isNarrowWidth
@@ -35,6 +38,9 @@ export function ConfirmTransactionEditModal({
     <Modal
       name="confirm-transaction-edit"
       containerProps={{ style: { width: '30vw' } }}
+      onClose={() => {
+        if (!confirmed.current) onCancel?.();
+      }}
     >
       {({ state }) => (
         <>
@@ -113,10 +119,7 @@ export function ConfirmTransactionEditModal({
                   marginRight: 10,
                   ...narrowButtonStyle,
                 }}
-                onPress={() => {
-                  state.close();
-                  onCancel?.();
-                }}
+                onPress={() => state.close()}
               >
                 <Trans>Cancel</Trans>
               </Button>
@@ -129,6 +132,7 @@ export function ConfirmTransactionEditModal({
                     ...narrowButtonStyle,
                   }}
                   onPress={() => {
+                    confirmed.current = true;
                     state.close();
                     onConfirm();
                   }}

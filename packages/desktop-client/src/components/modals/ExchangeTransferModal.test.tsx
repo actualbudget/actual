@@ -121,3 +121,154 @@ it('requires the other amount when a fee is entered', async () => {
   await userEvent.click(screen.getByTestId('exchange-add-button'));
   await waitFor(() => expect(post).toHaveBeenCalled());
 });
+
+describe('editing an exchange', () => {
+  const expected = {
+    a: {
+      account: 'usd',
+      amount: -10300,
+      transaction_amount: null,
+      date: '2026-03-10',
+    },
+  };
+  const family = {
+    status: 'ok' as const,
+    expected,
+    reconciled: false,
+    selectedSide: 'destination' as const,
+    sourceAccount: 'usd',
+    destinationAccount: 'jpy',
+    date: '2026-03-10',
+    sourceAmount: 10000,
+    destinationAmount: 15000,
+    sourceFee: 0,
+    destinationFee: 0,
+    baseAmount: 10000,
+    notes: 'trip',
+    category: 'savings',
+    feeCategory: null,
+  };
+
+  function setupEdit(
+    stored: typeof family | Record<string, unknown>,
+    update = vi.fn().mockResolvedValue({ status: 'ok' }),
+    accountList = accounts,
+  ) {
+    initServer({
+      'exchange-rates/resolve': async () => ({
+        status: 'unavailable' as const,
+      }),
+      'transactions/get-exchange-family': async () => stored as never,
+      'transactions/update-exchange-transfer': update,
+    });
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        defaultCurrencyCode: 'USD',
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'USD',
+          precision: 2,
+        }),
+      }),
+    );
+    const onSaved = vi.fn();
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(accountQueries.list().queryKey, accountList);
+    render(
+      <TestProviders store={store} queryClient={queryClient}>
+        <MemoryRouter>
+          <HotkeysProvider>
+            <ExchangeTransferModal edit={{ id: 'b', onSaved }} />
+          </HotkeysProvider>
+        </MemoryRouter>
+      </TestProviders>,
+    );
+    return { update, onSaved };
+  }
+
+  it('saves the shown amounts with only changed metadata', async () => {
+    const { update, onSaved } = setupEdit(family);
+    const amount = await screen.findByLabelText('Amount');
+    expect(amount).toHaveValue('15,000');
+    expect(screen.getByLabelText('Amount sent')).toHaveValue('100.00');
+    await userEvent.clear(amount);
+    await userEvent.type(amount, '14000');
+    await userEvent.click(screen.getByTestId('exchange-add-button'));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        id: 'b',
+        expected,
+        sourceAmount: 10000,
+        destinationAmount: 14000,
+        sourceFee: 0,
+        destinationFee: 0,
+      }),
+    );
+    expect(onSaved).toHaveBeenCalled();
+  });
+
+  it('shows the principal category read-only from the off-budget side', async () => {
+    setupEdit(family);
+    expect(
+      await screen.findByText(/Edit it from Checking/),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Category', { selector: 'button *' })).toBeNull();
+  });
+
+  it('sends changed notes and date', async () => {
+    const { update } = setupEdit(family);
+    const notes = await screen.findByLabelText('Notes');
+    await userEvent.clear(notes);
+    await userEvent.type(notes, 'holiday');
+    await userEvent.click(screen.getByTestId('exchange-add-button'));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ notes: 'holiday' }),
+      ),
+    );
+    expect(update.mock.calls[0][0]).not.toHaveProperty('date');
+  });
+
+  it('sends the fee category for a fee child the save creates', async () => {
+    const { update } = setupEdit({
+      ...family,
+      selectedSide: 'source',
+      sourceAmount: 10300,
+      sourceFee: 300,
+      feeCategory: 'bank',
+    });
+    expect(await screen.findByLabelText('Fee')).toHaveValue('3.00');
+    // Moving the fee to the yen side creates a new fee child there.
+    await userEvent.click(screen.getByRole('button', { name: 'USD' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'JPY' }));
+    await userEvent.clear(screen.getByLabelText('Fee'));
+    await userEvent.type(screen.getByLabelText('Fee'), '450');
+    await userEvent.click(screen.getByTestId('exchange-add-button'));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sourceFee: 0,
+          destinationFee: 450,
+          feeCategory: 'bank',
+        }),
+      ),
+    );
+  });
+
+  it('keeps a stale edit open with a message', async () => {
+    setupEdit(family, vi.fn().mockResolvedValue({ status: 'stale' }));
+    await userEvent.click(await screen.findByTestId('exchange-add-button'));
+    expect(
+      await screen.findByText(/changed since you opened it/),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('exchange-add-button')).toBeDisabled();
+  });
+
+  it('explains a family that can no longer be edited', async () => {
+    setupEdit({ status: 'unavailable' });
+    expect(
+      await screen.findByText('This transfer can no longer be edited here.'),
+    ).toBeInTheDocument();
+  });
+});

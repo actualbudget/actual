@@ -223,12 +223,15 @@ export async function saveForeignSplit({
     transaction_amount !== parent.transaction_amount ||
     baseAmount !== undefined
   ) {
+    // A zero total's own base needs no rate (zero unless a base is given);
+    // a rate then only values its children and is not saved.
+    const zero = transaction_amount === 0;
     const pair = await pairFor(parent.acct, transaction_amount, date, {
       baseAmount,
-      rate,
-      replaceRate,
-      saveStanding,
-      expectedBaseAmount,
+      rate: zero ? undefined : rate,
+      replaceRate: zero ? undefined : replaceRate,
+      saveStanding: zero ? undefined : saveStanding,
+      expectedBaseAmount: zero ? undefined : expectedBaseAmount,
     });
     if (pair.status !== 'ok') return pair;
     parentBase = pair.amount;
@@ -643,6 +646,80 @@ function familyRowsOf(...sides: ExchangeSideRows[]) {
 }
 
 /**
+ * An exchange family as its edit dialog needs it: the snapshot to send back,
+ * the accounts and direction, and the values `updateExchangeTransfer` takes,
+ * so the dialog starts from what is stored.
+ */
+export async function getExchangeFamily({ id }: { id: string }): Promise<
+  | { status: 'unavailable' }
+  | {
+      status: 'ok';
+      expected: Record<string, ForeignEditExpected>;
+      reconciled: boolean;
+      selectedSide: 'source' | 'destination';
+      sourceAccount: string;
+      destinationAccount: string;
+      date: string;
+      sourceAmount: number;
+      destinationAmount: number;
+      sourceFee: number;
+      destinationFee: number;
+      baseAmount: number;
+      notes: string | null;
+      category: string | null;
+      feeCategory: string | null;
+    }
+> {
+  const { family } = await exchangeFamily(id);
+  if (!family) return { status: 'unavailable' };
+  const { source, destination, selected } = family;
+  if (
+    sameEncoding(
+      await accountEncoding(source.leg.acct),
+      await accountEncoding(destination.leg.acct),
+    )
+  ) {
+    return { status: 'unavailable' };
+  }
+  const rows = familyRowsOf(source, destination);
+  const native = (row: ExchangeRow) => row.transaction_amount ?? row.amount;
+  const top = (side: ExchangeSideRows) => side.parent ?? side.leg;
+  // The principal category is the on-budget leg's.
+  const onBudget = [];
+  for (const side of [source, destination]) {
+    if (!(await isOffBudget(side.leg.acct))) onBudget.push(side);
+  }
+  const fee = source.fee ?? destination.fee;
+  return {
+    status: 'ok',
+    expected: Object.fromEntries(
+      rows.map(row => [
+        row.id,
+        {
+          account: row.acct,
+          amount: row.amount,
+          transaction_amount: row.transaction_amount,
+          date: db.fromDateRepr(row.date),
+        },
+      ]),
+    ),
+    reconciled: rows.some(row => row.reconciled),
+    selectedSide: selected === source ? 'source' : 'destination',
+    sourceAccount: source.leg.acct,
+    destinationAccount: destination.leg.acct,
+    date: db.fromDateRepr(source.leg.date),
+    sourceAmount: -native(top(source)),
+    destinationAmount: native(top(destination)),
+    sourceFee: source.fee ? -native(source.fee) : 0,
+    destinationFee: destination.fee ? -native(destination.fee) : 0,
+    baseAmount: destination.leg.amount,
+    notes: top(selected).notes,
+    category: onBudget.length === 1 ? onBudget[0].leg.category : null,
+    feeCategory: fee?.category ?? null,
+  };
+}
+
+/**
  * Edits an exchange transfer's amounts, fees, valuation and date as one
  * family update, with posting's arithmetic: rows keep their ids where the
  * structure stays, a side gaining a fee gets a new parent and fee child, and
@@ -875,6 +952,9 @@ export async function updateExchangeTransfer({
       }
       update(side.leg, amounts.leg, TOP, {
         ...legCategory,
+        // The side's notes live on its top row: the stored parent's move to
+        // the promoted leg unless the request names new ones.
+        notes: side.parent.notes,
         ...topNotes,
         cleared: !!(side.leg.cleared || side.parent.cleared),
         reconciled: !!(side.leg.reconciled || side.parent.reconciled),

@@ -26,7 +26,7 @@ import type {
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
 
-import { toForeignDraft } from '#accounts/registerView';
+import { fromRegisterView, toForeignDraft } from '#accounts/registerView';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
@@ -37,6 +37,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import type { ExchangeRequest } from '#util/exchange-entry';
+import { openForeignEditDialog, pushEditModal } from '#util/foreign-edit';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
 import type { ExchangePostResult } from './ExchangePanel';
@@ -260,71 +261,107 @@ export function TransactionList({
     }
   };
 
-  const onSave = useCallback(
-    async (transaction: TransactionEntity) => {
-      const saveTransaction = async () => {
-        const changes = updateTransaction(
-          transactionsLatest.current,
-          transaction,
-        );
-        transactionsLatest.current = changes.data;
+  /**
+   * Opens the edit dialog for a changed amount that only a foreign or
+   * exchange handler may save, returning true when it did. The register
+   * reloads the stored rows; the dialog saves the edit.
+   */
+  const openForeignEdit = async (transaction: TransactionEntity) => {
+    const rows = transactionsLatest.current;
+    const stored = rows.find(row => row.id === transaction.id);
+    if (!stored || transaction.amount === stored.amount) return false;
+    // A native register edits the native amount; a base register edits the
+    // base value and keeps the native amount.
+    const nativeView = stored._baseAmount !== undefined;
+    const opened = await openForeignEditDialog(dispatch, {
+      row: fromRegisterView([stored])[0],
+      rows: fromRegisterView([...rows]),
+      payees,
+      accounts,
+      ...(nativeView
+        ? { native: transaction.amount }
+        : { baseAmount: transaction.amount }),
+      onSaved: onRefetch,
+    });
+    if (opened) onRefetch();
+    return opened;
+  };
 
-        if (changes.diff.updated.length > 0) {
-          const dateChanged = !!changes.diff.updated[0].date;
-          if (dateChanged) {
-            changes.diff.updated[0].sort_order = Date.now();
-            await saveDiff(changes.diff, isLearnCategoriesEnabled);
-            onRefetch();
-          } else {
-            onChange(changes.newTransaction, changes.data);
-            void saveDiffAndApply(
-              changes.diff,
-              changes,
-              onChange,
-              isLearnCategoriesEnabled,
-            );
-          }
-        }
-      };
-
-      await saveTransaction();
-    },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
-  );
-
-  const onAddSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = addSplitTransaction(transactionsLatest.current, id);
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
-
-  const onSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(
+  const onSave = async (transaction: TransactionEntity) => {
+    if (await openForeignEdit(transaction)) return;
+    const saveTransaction = async () => {
+      const changes = updateTransaction(
         transactionsLatest.current,
-        id,
-        makeEmptySplitSubtransactions,
+        transaction,
       );
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
+      transactionsLatest.current = changes.data;
+
+      if (changes.diff.updated.length > 0) {
+        const dateChanged = !!changes.diff.updated[0].date;
+        if (dateChanged) {
+          changes.diff.updated[0].sort_order = Date.now();
+          await saveDiff(changes.diff, isLearnCategoriesEnabled);
+          onRefetch();
+        } else {
+          onChange(changes.newTransaction, changes.data);
+          void saveDiffAndApply(
+            changes.diff,
+            changes,
+            onChange,
+            isLearnCategoriesEnabled,
+          );
+        }
+      }
+    };
+
+    await saveTransaction();
+  };
+
+  /** Foreign splits are edited in their dialog; returns true when opened. */
+  const openForeignSplit = (id: TransactionEntity['id']) => {
+    const row = transactionsLatest.current.find(t => t.id === id);
+    if (!row || !accounts.find(a => a.id === row.account)?.currency) {
+      return false;
+    }
+    pushEditModal(dispatch, {
+      name: 'foreign-split',
+      options: {
+        id: row.is_child && row.parent_id ? row.parent_id : row.id,
+        onSaved: onRefetch,
+      },
+    });
+    return true;
+  };
+
+  const onAddSplit = (id: TransactionEntity['id']) => {
+    if (openForeignSplit(id)) return null;
+    const changes = addSplitTransaction(transactionsLatest.current, id);
+    onChange(changes.newTransaction, changes.data);
+    void saveDiffAndApply(
+      changes.diff,
+      changes,
+      onChange,
+      isLearnCategoriesEnabled,
+    );
+    return changes.diff.added[0].id;
+  };
+
+  const onSplit = (id: TransactionEntity['id']) => {
+    if (openForeignSplit(id)) return null;
+    const changes = splitTransaction(
+      transactionsLatest.current,
+      id,
+      makeEmptySplitSubtransactions,
+    );
+    onChange(changes.newTransaction, changes.data);
+    void saveDiffAndApply(
+      changes.diff,
+      changes,
+      onChange,
+      isLearnCategoriesEnabled,
+    );
+    return changes.diff.added[0].id;
+  };
 
   const onApplyRules = useCallback(
     async (

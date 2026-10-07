@@ -2055,14 +2055,6 @@ describe('Transactions', () => {
   });
 });
 
-function titleOf(field: Element) {
-  return (
-    field.getAttribute('title') ??
-    field.querySelector('[title]')?.getAttribute('title') ??
-    ''
-  );
-}
-
 describe('foreign-currency rows', () => {
   const yen: AccountEntity = {
     ...generateAccount('Yen wallet'),
@@ -2083,19 +2075,19 @@ describe('foreign-currency rows', () => {
     initBasicServer();
   });
 
-  it('keeps foreign amounts read-only in mixed views', async () => {
+  // Saving an edited foreign amount routes to its dialog in TransactionList
+  // (openForeignEditDialog, tested in util/foreign-edit.test.ts).
+  it('lets existing foreign amounts be edited in mixed views', async () => {
     const { container } = renderTransactions({
       accounts: [...accounts, yen],
       transactions: [foreignTransaction()],
       currentAccountId: null,
     });
-    const debit = queryField(container, 'debit', '', 0);
-    expect(titleOf(debit)).toBe('Edit this amount in its account');
-    await userEvent.click(debit.querySelector('div')!);
-    expect(debit.querySelector('input')).toBeNull();
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
   });
 
-  it('freezes existing amounts and hides split in the native register', async () => {
+  it('edits existing amounts and offers split in the native register', async () => {
     const { container } = renderTransactions({
       accounts: [...accounts, yen],
       transactions: [foreignTransaction()],
@@ -2106,34 +2098,12 @@ describe('foreign-currency rows', () => {
         </CurrencyFormatProvider>
       ),
     });
-    const debit = queryField(container, 'debit', '', 0);
-    expect(titleOf(debit)).toBe('Editing foreign amounts is not available yet');
-    await userEvent.click(debit.querySelector('div')!);
-    expect(debit.querySelector('input')).toBeNull();
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
 
     await editField(container, 'category', 0);
     await waitForAutocomplete();
-    expect(screen.queryByTestId('split-transaction-button')).toBeNull();
-  });
-
-  it('skips frozen amounts during keyboard navigation', async () => {
-    const { container } = renderTransactions({
-      accounts: [...accounts, yen],
-      transactions: [foreignTransaction()],
-      currentAccountId: yen.id,
-      wrap: table => (
-        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
-          {table}
-        </CurrencyFormatProvider>
-      ),
-    });
-    const input = await editField(container, 'category', 0);
-    await userEvent.type(input, '{Tab}');
-    for (const name of ['debit', 'credit']) {
-      expect(
-        queryField(container, name, '', 0).querySelector('input'),
-      ).toBeNull();
-    }
+    expect(screen.getByTestId('split-transaction-button')).toBeInTheDocument();
   });
 
   it('keeps a new payee typed last in the foreign draft without creating it', async () => {

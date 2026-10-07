@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { createTestAppStore, TestProviders } from '#mocks';
 import { pushModal } from '#modals/modalsSlice';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
+import type { ForeignAmountEdit } from '#util/foreign-edit';
 
 import { ForeignAmountModal } from './ForeignAmountModal';
 
@@ -34,9 +35,14 @@ type Resolution =
     }
   | { status: 'unavailable' };
 
-function setup(resolution: Resolution, post = vi.fn()) {
+function setup(
+  resolution: Resolution | (() => Promise<Resolution>),
+  post = vi.fn(),
+  transaction: typeof draft & { payee_name?: string } = draft,
+) {
   initServer({
-    'exchange-rates/resolve': async () => resolution,
+    'exchange-rates/resolve':
+      typeof resolution === 'function' ? resolution : async () => resolution,
     'transactions/post-foreign-entry': post,
   });
   const store = createTestAppStore();
@@ -56,7 +62,7 @@ function setup(resolution: Resolution, post = vi.fn()) {
       <MemoryRouter>
         <HotkeysProvider>
           <ForeignAmountModal
-            transaction={draft}
+            transaction={transaction}
             currencyCode="JPY"
             nativePrecision={0}
             onPosted={onPosted}
@@ -432,26 +438,113 @@ describe('ForeignAmountModal', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
-  it('prefills a one-day rate and posts that rate', async () => {
+  it('prefills a one-day rate and posts its reviewed base as the default', async () => {
+    const dated = {
+      ...standing,
+      kind: 'dated',
+      timestamp: '2026-03-10T00:00:00.000Z',
+    } as const;
+    // The one-day rate is deleted elsewhere after the dialog resolved it.
+    let current: Resolution = dated;
     const { post } = setup(
-      {
-        ...standing,
-        kind: 'dated',
-        timestamp: '2026-03-10T00:00:00.000Z',
-      },
+      async () => current,
       vi.fn(async () => ({ status: 'ok', id: 'draft' })),
     );
     await waitFor(async () => {
       expect(await field('rate')).toHaveValue('150');
     });
+    expect(screen.getByText(/at 1 USD = 150 JPY/)).toHaveTextContent(
+      /\(dated, manual, 2026-03-10\)/,
+    );
+    expect(screen.queryByText(/at the entered rate/)).toBeNull();
+    current = { status: 'unavailable' };
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(post).toHaveBeenCalled());
+    // No rate is sent, so the deleted one-day rate is not recreated.
+    expect(post.mock.calls[0][0]).toMatchObject({
+      baseAmount: -1000,
+      saveStanding: false,
+      replaceRate: false,
+    });
+    expect(post.mock.calls[0][0]).not.toHaveProperty('rate');
+  });
+
+  it('saves a resolved default rate as standing when asked', async () => {
+    const { post } = setup(
+      standing,
+      vi.fn(async () => ({ status: 'ok', id: 'draft' })),
+    );
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Use this rate from this date' }),
+    );
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() =>
       expect(post).toHaveBeenCalledWith(
         expect.objectContaining({
+          baseAmount: -1000,
           rate: '150',
-          saveStanding: false,
-          replaceRate: false,
+          expectedBaseAmount: -1000,
+          saveStanding: true,
         }),
+      ),
+    );
+  });
+
+  it('saves the fetched default as standing for a starting balance', async () => {
+    const { post } = setup(
+      { ...standing, kind: 'fetched', source: 'provider' },
+      vi.fn(async () => ({ status: 'ok', id: 'draft' })),
+      { ...draft, payee_name: 'Starting Balance' },
+    );
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    expect(
+      screen.getByRole('checkbox', { name: 'Use this rate from this date' }),
+    ).toBeChecked();
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseAmount: -1000,
+          rate: '150',
+          saveStanding: true,
+        }),
+      ),
+    );
+  });
+
+  it('offers no standing rate when there is no rate to save', async () => {
+    setup({ status: 'unavailable' });
+    await screen.findAllByText(
+      'Rate unavailable. Enter a base amount or rate.',
+    );
+    const checkbox = screen.getByRole('checkbox', {
+      name: 'Use this rate from this date',
+    });
+    expect(checkbox).toBeDisabled();
+    await userEvent.type(await field('baseAmount'), '12.34');
+    expect(checkbox).toBeDisabled();
+    await userEvent.type(await field('rate'), '125');
+    expect(checkbox).toBeEnabled();
+  });
+
+  it('recovers when the rate lookup fails', async () => {
+    const { post } = setup(
+      async () => {
+        throw new Error('rate-lookup-failed');
+      },
+      vi.fn(async () => ({ status: 'ok', id: 'draft' })),
+    );
+    expect(
+      await screen.findByText(
+        'The rate could not be loaded. Enter a base amount or rate.',
+      ),
+    ).toBeInTheDocument();
+    await userEvent.type(await field('baseAmount'), '12.34');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        expect.objectContaining({ baseAmount: -1234 }),
       ),
     );
   });
@@ -476,5 +569,267 @@ describe('ForeignAmountModal', () => {
         expect.objectContaining({ rate: '125', saveStanding: true }),
       ),
     );
+  });
+  it('saves a rate typed beside a base amount', async () => {
+    const { post } = setup(
+      { status: 'unavailable' },
+      vi.fn(async () => ({ status: 'ok', id: 'draft' })),
+    );
+    await userEvent.type(await field('baseAmount'), '12.34');
+    await userEvent.type(await field('rate'), '125');
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: 'Use this rate from this date' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(post).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseAmount: -1234,
+          rate: '125',
+          expectedBaseAmount: -1234,
+          saveStanding: true,
+        }),
+      ),
+    );
+  });
+
+  it('drops a prefilled rate as soon as a rule changes the date', async () => {
+    const dated = {
+      ...standing,
+      kind: 'dated',
+      timestamp: '2026-03-10T00:00:00.000Z',
+    } as const;
+    // The new date's lookup never answers.
+    const resolve = vi.fn(({ date }: { date: string }) =>
+      date === '2026-03-10'
+        ? Promise.resolve(dated)
+        : new Promise<typeof dated>(() => undefined),
+    );
+    const post = vi
+      .fn()
+      .mockResolvedValue({ status: 'rule-date-changed', date: '2026-03-11' });
+    initServer({
+      'exchange-rates/resolve': resolve,
+      'transactions/post-foreign-entry': post,
+    });
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        defaultCurrencyCode: 'USD',
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'USD',
+          precision: 2,
+        }),
+      }),
+    );
+    render(
+      <TestProviders store={store}>
+        <MemoryRouter>
+          <HotkeysProvider>
+            <ForeignAmountModal
+              transaction={draft}
+              currencyCode="JPY"
+              nativePrecision={0}
+              onPosted={vi.fn()}
+            />
+          </HotkeysProvider>
+        </MemoryRouter>
+      </TestProviders>,
+    );
+    await waitFor(async () => expect(await field('rate')).toHaveValue('150'));
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await screen.findByText(/A rule changed the date to 2026-03-11/);
+    expect(await field('rate')).toHaveValue('');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ForeignAmountModal editing an existing row', () => {
+  const snapshot = {
+    account: 'jpy',
+    amount: -1000,
+    transaction_amount: -1500,
+    date: '2026-03-10',
+  };
+
+  function setupEdit(
+    edit: ForeignAmountEdit,
+    handlers: Record<string, ReturnType<typeof vi.fn>> = {},
+    native = -2000,
+  ) {
+    const update = vi.fn().mockResolvedValue({ status: 'ok' });
+    initServer({
+      'exchange-rates/resolve': async () => standing,
+      'transactions/update-foreign-entry': update,
+      'transactions/update-foreign-transfer': update,
+      ...handlers,
+    });
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        defaultCurrencyCode: 'USD',
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'USD',
+          precision: 2,
+        }),
+      }),
+    );
+    const onPosted = vi.fn();
+    render(
+      <TestProviders store={store}>
+        <MemoryRouter>
+          <HotkeysProvider>
+            <ForeignAmountModal
+              transaction={{ ...draft, id: 't', transaction_amount: native }}
+              currencyCode="JPY"
+              nativePrecision={0}
+              edit={edit}
+              onPosted={onPosted}
+            />
+          </HotkeysProvider>
+        </MemoryRouter>
+      </TestProviders>,
+    );
+    return { update, onPosted, store };
+  }
+
+  it('saves a changed native amount at the saved rate with the snapshot', async () => {
+    const { update, onPosted } = setupEdit({
+      kind: 'entry',
+      id: 't',
+      expected: snapshot,
+      reconciled: false,
+    });
+    expect(await field('nativeAmount')).toHaveValue('-2,000');
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith({
+        id: 't',
+        expected: snapshot,
+        transaction_amount: -2000,
+        baseAmount: -1333,
+        replaceRate: false,
+        saveStanding: false,
+      }),
+    );
+    expect(onPosted).toHaveBeenCalled();
+  });
+
+  it('starts a valuation edit from the typed base and keeps the native amount', async () => {
+    const { update } = setupEdit(
+      {
+        kind: 'entry',
+        id: 't',
+        expected: snapshot,
+        reconciled: false,
+        baseAmount: -1234,
+      },
+      {},
+      -1500,
+    );
+    expect(await field('baseAmount')).toHaveValue('12.34');
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          transaction_amount: -1500,
+          baseAmount: -1234,
+        }),
+      ),
+    );
+  });
+
+  it('saves nothing when nothing changed', async () => {
+    const { update } = setupEdit(
+      { kind: 'entry', id: 't', expected: snapshot, reconciled: false },
+      {},
+      -1500,
+    );
+    expect(await screen.findByText(/unchanged/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('keeps the stored pair when a prefilled one-day rate is left alone', async () => {
+    const { update } = setupEdit(
+      { kind: 'entry', id: 't', expected: snapshot, reconciled: false },
+      {
+        'exchange-rates/resolve': vi.fn(async () => ({
+          ...standing,
+          kind: 'dated',
+          timestamp: '2026-03-10T00:00:00.000Z',
+        })),
+      },
+      -1500,
+    );
+    await waitFor(async () => expect(await field('rate')).toHaveValue('150'));
+    expect(screen.getByText(/unchanged/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('edits both legs of a same-currency transfer', async () => {
+    const counterpart = { ...snapshot, account: 'jpy2', amount: 1000 };
+    const { update } = setupEdit({
+      kind: 'transfer',
+      id: 't',
+      expected: { leg: snapshot, counterpart },
+      reconciled: false,
+    });
+    expect(
+      await screen.findByText(
+        'The other account of this transfer changes to match.',
+      ),
+    ).toBeInTheDocument();
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          expected: { leg: snapshot, counterpart },
+          transaction_amount: -2000,
+        }),
+      ),
+    );
+  });
+
+  it('keeps a stale edit open and unsaveable', async () => {
+    const stale = vi.fn().mockResolvedValue({ status: 'stale' });
+    setupEdit(
+      { kind: 'entry', id: 't', expected: snapshot, reconciled: false },
+      { 'transactions/update-foreign-entry': stale },
+    );
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(
+      await screen.findByText(/changed since you opened it/),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('asks before changing a reconciled row and saves nothing when cancelled', async () => {
+    const { update, store } = setupEdit({
+      kind: 'entry',
+      id: 't',
+      expected: snapshot,
+      reconciled: true,
+    });
+    await screen.findByText(/at 1 USD = 150 JPY/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const confirm = await waitFor(() => {
+      const modal = store
+        .getState()
+        .modals.modalStack.find(m => m.name === 'confirm-transaction-edit');
+      assert(modal);
+      return modal;
+    });
+    assert(confirm.name === 'confirm-transaction-edit');
+    confirm.options.onCancel?.();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(update).not.toHaveBeenCalled();
   });
 });

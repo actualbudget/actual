@@ -653,15 +653,16 @@ type NavigateToTransferAccount = (
 ) => void;
 
 /**
- * Existing foreign amounts are frozen until foreign edits are supported; new
- * rows can only be entered in the account's own native register.
+ * New foreign rows can only be entered in the account's own native register.
+ * Existing foreign amounts stay editable: their edits open a dialog that
+ * saves final amounts.
  */
 function isForeignAmountFrozen(
   id: TransactionEntity['id'],
   account: AccountEntity | undefined,
   isNativeRegister: boolean,
 ) {
-  return !!account?.currency && (!isTemporaryId(id) || !isNativeRegister);
+  return !!account?.currency && isTemporaryId(id) && !isNativeRegister;
 }
 
 type PayeeCellProps = {
@@ -1467,9 +1468,7 @@ const Transaction = memo(function Transaction({
   const isForeignRow = !!rowAccount?.currency;
   const isNativeRegister = useCurrencyFormatOverride() != null;
   const amountFrozen = isForeignAmountFrozen(id, rowAccount, isNativeRegister);
-  const frozenAmountTitle = isNativeRegister
-    ? t('Editing foreign amounts is not available yet')
-    : t('Edit this amount in its account');
+  const frozenAmountTitle = t('Edit this amount in its account');
   const hiddenAccountIds = incompatibleAccountIds(accounts, [rowAccount]);
   const transferAcct =
     isTemporaryId(id) && payee?.transfer_acct
@@ -2083,7 +2082,9 @@ const Transaction = memo(function Transaction({
                       !isChild &&
                       !isParent &&
                       allowSplitTransaction &&
-                      !isForeignRow
+                      // An existing foreign row splits in the split dialog;
+                      // drafts and transfers do not split.
+                      (!isForeignRow || (!isTemporaryId(id) && !transferAcct))
                     }
                     shouldSaveFromKey={shouldSaveFromKey}
                     inputProps={{ onBlur, onKeyDown, style: inputStyle }}
@@ -3236,8 +3237,9 @@ export type TransactionTableProps = {
     field: string | null,
     clearedFields?: ClearedFieldsByTransaction,
   ) => Promise<TransactionEntity>;
-  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
-  onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
+  /** Null when the split opened in a dialog instead. */
+  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'] | null;
+  onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'] | null;
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
   /** Posts an exchange transfer; given only in single-account registers. */
@@ -4106,7 +4108,7 @@ export const TransactionTable = forwardRef(
         } else {
           const trans = latestState.current.transactions.find(t => t.id === id);
           const newId = onSplitProp(id);
-          if (!trans) {
+          if (!trans || newId === null) {
             return;
           }
 
@@ -4141,10 +4143,12 @@ export const TransactionTable = forwardRef(
           );
         } else {
           const newId = onAddSplitProp(id);
-          tableNavigator.onEdit(
-            newId,
-            latestState.current.tableNavigator.focusedField,
-          );
+          if (newId !== null) {
+            tableNavigator.onEdit(
+              newId,
+              latestState.current.tableNavigator.focusedField,
+            );
+          }
         }
       },
       [latestState, onAddSplitProp],

@@ -31,7 +31,13 @@ import type {
 export type ExchangePostResult =
   | { status: 'ok' }
   | { status: 'rate-unavailable'; currencies: string[] }
-  | { status: 'error'; error: string };
+  | { status: 'error'; error: string }
+  /** A translated message the caller already chose. */
+  | { status: 'message'; message: string }
+  /** The user cancelled before anything was sent. */
+  | { status: 'cancelled' }
+  /** The edited exchange changed elsewhere; nothing more can be saved. */
+  | { status: 'stale'; message: string };
 
 /** A rate per base unit for an account's currency; '1' for base accounts. */
 function useRatePerBase(
@@ -66,15 +72,32 @@ function useRatePerBase(
   return rate?.key === key ? rate.rate : undefined;
 }
 
+/** Stored values an exchange edit starts from, as typed text. */
+export type ExchangeEntryInitial = {
+  otherInput: string;
+  feeInput: string;
+  feeSide: 'register' | 'other';
+  baseInput: string;
+  category: string;
+  feeCategory: string;
+  /**
+   * Whether the dialog may change the principal category: only from the
+   * on-budget leg's side (MC-5.2 applies it to that side only).
+   */
+  categoryEditable: boolean;
+};
+
 /**
  * State and derived values for entering the other side of an exchange
- * transfer, shared by the desktop register panel and the mobile form.
+ * transfer, shared by the desktop register panel, the mobile form and the
+ * exchange edit dialog.
  */
 export function useExchangeEntry({
   transaction,
   register,
   other,
   feeNeedsOtherAmount = false,
+  initial,
 }: {
   transaction: Pick<
     TransactionEntity,
@@ -88,6 +111,8 @@ export function useExchangeEntry({
    * which imports never replace (MC-4.4).
    */
   feeNeedsOtherAmount?: boolean;
+  /** An existing exchange being edited. */
+  initial?: ExchangeEntryInitial;
 }) {
   const { t } = useTranslation();
   const budgetPrecision = useAmountPrecision();
@@ -99,25 +124,31 @@ export function useExchangeEntry({
   const baseFormat = useFormat(budgetPrecision);
   const { data: categories } = useCategories();
 
-  const [otherInput, setOtherInput] = useState('');
+  const [otherInput, setOtherInput] = useState(initial?.otherInput ?? '');
   const [rateInput, setRateInput] = useState('');
-  const [feeInput, setFeeInput] = useState('');
-  const [feeSide, setFeeSide] = useState<'register' | 'other'>('register');
-  const [baseInput, setBaseInput] = useState('');
+  const [feeInput, setFeeInput] = useState(initial?.feeInput ?? '');
+  const [feeSide, setFeeSide] = useState<'register' | 'other'>(
+    initial?.feeSide ?? 'register',
+  );
+  const [baseInput, setBaseInput] = useState(initial?.baseInput ?? '');
   // The principal's category belongs to its on-budget leg. In an on-budget
   // register that is the draft row, whose own category control is the only
   // one; an off-budget register has none, so the panel asks for it. Until
   // the user picks one, it follows the draft's category, which rules may
   // set after the panel opens.
-  const draftOwnsCategory = !register.offbudget;
-  const [chosenCategory, setCategory] = useState<string | null>(null);
+  // An edit dialog has no draft row, so the panel holds the category.
+  const draftOwnsCategory = !initial && !register.offbudget;
+  const [chosenCategory, setCategory] = useState<string | null>(
+    initial?.category ?? null,
+  );
   const category = draftOwnsCategory
     ? (transaction.category ?? '')
     : (chosenCategory ?? transaction.category ?? '');
   const inFlight = useRef(false);
-  const [feeCategory, setFeeCategory] = useState('');
+  const [feeCategory, setFeeCategory] = useState(initial?.feeCategory ?? '');
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [stale, setStale] = useState(false);
 
   const registerAmount = transaction.amount ?? 0;
   const payment = isPayment({ registerAmount });
@@ -257,7 +288,7 @@ export function useExchangeEntry({
     onPost: (request: ExchangeRequest) => Promise<ExchangePostResult>,
   ): Promise<boolean> {
     // One submission at a time, whichever button or key started it.
-    if (inFlight.current) return false;
+    if (inFlight.current || stale) return false;
     if (inputError) {
       setMessage(inputError);
       return false;
@@ -283,6 +314,11 @@ export function useExchangeEntry({
             },
           ),
         );
+      } else if (result.status === 'stale') {
+        setStale(true);
+        setMessage(result.message);
+      } else if (result.status === 'message') {
+        setMessage(result.message);
       } else if (result.status === 'error') {
         setMessage(
           result.error === 'exchange-fee-invalid'
@@ -362,13 +398,14 @@ export function useExchangeEntry({
     shownRate,
     bothForeign,
     needsCategory:
-      !draftOwnsCategory && needsPrincipalCategory({ register, other }),
+      (initial ? initial.categoryEditable : !draftOwnsCategory) &&
+      needsPrincipalCategory({ register, other }),
     categoryOptions,
     feeCategoryOptions,
     defaultCurrency: defaultCurrency || '',
     message,
     estimateMessage,
-    busy,
+    busy: busy || stale,
     post,
   };
 }
