@@ -246,9 +246,8 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
     }
   };
 
-  // Pinning the compare month makes the report static, the same way picking a
-  // date in the other reports does. The "to" select deliberately keeps the
-  // report live: its offset from the compare month is what slides.
+  // Picking a month pins the report, as it does in the other reports. The "to"
+  // select stays live: its offset from `compare` is what slides.
   const onCompareChange = (value: string) => {
     setCompare(value);
     setIsLive(false);
