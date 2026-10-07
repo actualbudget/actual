@@ -18,7 +18,7 @@ import {
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
 import { app } from '#server/main-app';
-import { runMutator } from '#server/mutators';
+import { runHandler, runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
@@ -799,7 +799,10 @@ export async function initialFullSync(): Promise<{
   return {};
 }
 
-export const fullSync = once(async function (): Promise<
+// Track background syncs so budget shutdown drains their resulting mutators.
+export const fullSync = once(() => runHandler(runFullSync));
+
+async function runFullSync(): Promise<
   | { messages: Message[] }
   | { error: { message: string; reason: string; meta: unknown } }
 > {
@@ -873,7 +876,7 @@ export const fullSync = once(async function (): Promise<
     syncDisabled: checkSyncingMode('disabled'),
   });
   return { messages };
-});
+}
 
 async function _fullSync(
   sinceTimestamp: string,

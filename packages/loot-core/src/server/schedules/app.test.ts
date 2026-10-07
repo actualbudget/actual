@@ -6,7 +6,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { handlers } from '#server/main';
-import { runHandler } from '#server/mutators';
+import { runHandler, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
@@ -1258,6 +1258,32 @@ describe('schedule sync listener', () => {
       .spyOn(aql, 'aqlQuery')
       .mockImplementation(async () => ({ data: [], dependencies: [] }));
   }
+
+  it.each([undefined, '2023-12-31'])(
+    'restores the previous run marker (%s) after a metadata write fails',
+    async previousRunDay => {
+      const runDay = '2024-01-01';
+      vi.spyOn(monthUtils, 'currentDay').mockReturnValue(runDay);
+      const querySpy = mockScheduleQueries();
+      await prefs.savePrefs({ lastScheduleRun: previousRunDay });
+      const savePrefs = prefs.savePrefs;
+      vi.spyOn(prefs, 'savePrefs').mockImplementationOnce(async prefsToSet => {
+        await savePrefs(prefsToSet);
+        throw new Error('metadata write failed');
+      });
+
+      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+      await runMutator(async () => {
+        expect(prefs.getPrefs().lastScheduleRun).toBe(previousRunDay);
+      });
+
+      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+      await runMutator(async () => {
+        expect(prefs.getPrefs().lastScheduleRun).toBe(runDay);
+      });
+      expect(querySpy).toHaveBeenCalledTimes(6);
+    },
+  );
 
   it('does not run schedules twice for duplicate syncs on the same day', async () => {
     const runDay = '2024-01-01';

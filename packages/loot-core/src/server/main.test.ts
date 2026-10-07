@@ -7,6 +7,7 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import * as monthUtils from '#shared/months';
 
+import * as aql from './aql';
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import * as db from './db';
@@ -17,8 +18,10 @@ import {
   runHandler,
   runMutator,
 } from './mutators';
+import * as post from './post';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
+import { setSyncingMode } from './sync';
 
 vi.mock('./post');
 
@@ -462,6 +465,64 @@ describe('Mutator shutdown', () => {
       name: 'close-budget',
     });
   }
+
+  test('waits for background sync and the schedule mutator it starts', async () => {
+    vi.useFakeTimers();
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+    setSyncingMode('enabled');
+    const syncGate = deferred();
+    const syncStarted = deferred();
+    const scheduleGate = deferred();
+    const scheduleStarted = deferred();
+    const postBinary = post.postBinary;
+    const postSpy = vi
+      .spyOn(post, 'postBinary')
+      .mockImplementationOnce(async (...args) => {
+        syncStarted.resolve();
+        await syncGate.promise;
+        return postBinary(...args);
+      });
+    const aqlQuery = aql.aqlQuery;
+    const querySpy = vi
+      .spyOn(aql, 'aqlQuery')
+      .mockImplementationOnce(async (...args) => {
+        scheduleStarted.resolve();
+        await scheduleGate.promise;
+        return aqlQuery(...args);
+      });
+    await runHandler(handlers['app-focused']);
+    await syncStarted.promise;
+    let closed = false;
+    const closePromise = startCloseBudget().then(result => {
+      closed = true;
+      return result;
+    });
+
+    try {
+      await vi.advanceTimersByTimeAsync(200);
+      expect(closed).toBe(false);
+      expect(db.getDatabase()).not.toBeNull();
+
+      syncGate.resolve();
+      await scheduleStarted.promise;
+      expect(closed).toBe(false);
+      expect(db.getDatabase()).not.toBeNull();
+
+      scheduleGate.resolve();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+      expect(db.getDatabase()).toBeNull();
+    } finally {
+      syncGate.resolve();
+      scheduleGate.resolve();
+      await vi.runAllTimersAsync();
+      await closePromise;
+      postSpy.mockRestore();
+      querySpy.mockRestore();
+      setSyncingMode('disabled');
+    }
+  });
 
   test('waits for a running mutator before closing the database', async () => {
     vi.useFakeTimers();
