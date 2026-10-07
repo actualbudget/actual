@@ -447,7 +447,7 @@ export function ImportTransactionsModal({
             csvMappings = csvMappings ? JSON.parse(csvMappings) : {};
 
             // Merge mappings together with csvMappings overwriting
-            let mappings = Object.assign({}, initialMappings, csvMappings);
+            const mappings = Object.assign({}, initialMappings, csvMappings);
 
             // @ts-expect-error - mappings might not have outflow/inflow properties
             setFieldMappings(mappings);
