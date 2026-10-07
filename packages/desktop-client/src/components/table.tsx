@@ -940,6 +940,7 @@ export type TableProps<T extends TableItem = TableItem> = {
   count?: number;
   headers?: ReactNode | TableHeaderProps['headers'];
   contentHeader?: ReactNode;
+  rowDetails?: { id: T['id']; content: ReactNode };
   loading?: boolean;
   rowHeight?: number;
   backgroundColor?: string;
@@ -970,6 +971,7 @@ export const Table = forwardRef(
       count,
       headers,
       contentHeader,
+      rowDetails,
       loading,
       rowHeight = ROW_HEIGHT,
       backgroundColor = theme.tableBackground,
@@ -997,6 +999,37 @@ export const Table = forwardRef(
     }
 
     const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
+    const [detailsElement, setDetailsElement] = useState<HTMLDivElement | null>(
+      null,
+    );
+    const [detailsMeasurement, setDetailsMeasurement] = useState<{
+      id: string | number;
+      height: number;
+    } | null>(null);
+    const detailsId = rowDetails?.id;
+    const detailsHeight =
+      detailsMeasurement?.id === detailsId
+        ? (detailsMeasurement?.height ?? 0)
+        : 0;
+    const detailsIndex = rowDetails
+      ? items.findIndex(item => item.id === rowDetails.id)
+      : -1;
+    useLayoutEffect(() => {
+      const element = detailsElement;
+      if (!element || detailsId === undefined) return;
+      const measure = () => {
+        const height = element.getBoundingClientRect().height;
+        setDetailsMeasurement(previous =>
+          previous?.id === detailsId && previous.height === height
+            ? previous
+            : { id: detailsId, height },
+        );
+      };
+      measure();
+      const observer = new ResizeObserver(measure);
+      observer.observe(element);
+      return () => observer.disconnect();
+    }, [detailsElement, detailsId]);
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
@@ -1113,6 +1146,15 @@ export const Table = forwardRef(
           data-focus-key={item.id}
         >
           {row}
+          {rowDetails && rowDetails.id === item.id && (
+            <View
+              innerRef={setDetailsElement}
+              data-testid="transaction-row-details"
+              onKeyDown={e => e.stopPropagation()}
+            >
+              {rowDetails.content}
+            </View>
+          )}
         </View>
       );
     }
@@ -1216,6 +1258,11 @@ export const Table = forwardRef(
                       renderRow={renderRow}
                       itemCount={count || items.length}
                       itemSize={rowHeight - 1}
+                      expandedItem={
+                        detailsIndex < 0
+                          ? undefined
+                          : { index: detailsIndex, height: detailsHeight }
+                      }
                       itemKey={
                         getItemKey || ((index: number) => items[index].id)
                       }

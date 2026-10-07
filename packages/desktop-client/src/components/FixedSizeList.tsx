@@ -27,6 +27,7 @@ type FixedSizeListProps = {
   itemCount?: number;
   outerRef?: RefObject<HTMLDivElement>;
   itemSize?: number;
+  expandedItem?: { index: number; height: number };
   onItemsRendered?: (config: {
     overscanStartIndex: number;
     overscanStopIndex: number;
@@ -301,9 +302,19 @@ export class FixedSizeList extends PureComponent<
     return this.anchored != null;
   }
 
-  getItemOffset = (index: number) => index * this.props.itemSize;
-  getItemSize = () => this.props.itemSize;
-  getEstimatedTotalSize = () => this.props.itemSize * this.props.itemCount;
+  getItemOffset = (index: number) =>
+    index * this.props.itemSize +
+    (this.props.expandedItem && index > this.props.expandedItem.index
+      ? this.props.expandedItem.height
+      : 0);
+  getItemSize = (index: number) =>
+    this.props.itemSize +
+    (index === this.props.expandedItem?.index
+      ? this.props.expandedItem.height
+      : 0);
+  getEstimatedTotalSize = () =>
+    this.props.itemSize * this.props.itemCount +
+    (this.props.expandedItem?.height ?? 0);
 
   getOffsetForIndexAndAlignment = (
     index: number,
@@ -311,14 +322,11 @@ export class FixedSizeList extends PureComponent<
     scrollOffset?: number,
   ) => {
     const size = this.props.height;
-    const lastItemOffset = Math.max(
-      0,
-      this.props.itemCount * this.props.itemSize - size,
-    );
-    const maxOffset = Math.min(lastItemOffset, index * this.props.itemSize);
+    const lastItemOffset = Math.max(0, this.getEstimatedTotalSize() - size);
+    const maxOffset = Math.min(lastItemOffset, this.getItemOffset(index));
     const minOffset = Math.max(
       0,
-      index * this.props.itemSize - size + this.props.itemSize,
+      this.getItemOffset(index) - size + this.getItemSize(index),
     );
 
     if (align === 'smart') {
@@ -340,7 +348,7 @@ export class FixedSizeList extends PureComponent<
       case 'center': {
         // Items near either end can't be centered, so clamp to the list
         const centeredOffset = Math.round(
-          index * this.props.itemSize - (size - this.props.itemSize) / 2,
+          this.getItemOffset(index) - (size - this.getItemSize(index)) / 2,
         );
         return Math.min(lastItemOffset, Math.max(0, centeredOffset));
       }
@@ -356,29 +364,32 @@ export class FixedSizeList extends PureComponent<
     }
   };
 
-  getStartIndexForOffset = (offset: number) =>
-    Math.max(
-      0,
-      Math.min(
-        this.props.itemCount - 1,
-        Math.floor(offset / this.props.itemSize),
-      ),
-    );
-
-  getStopIndexForStartIndex = (startIndex: number, scrollOffset: number) => {
-    const offset = startIndex * this.props.itemSize;
-    const size = this.props.height;
-    const numVisibleItems = Math.ceil(
-      (size + scrollOffset - offset) / this.props.itemSize,
-    );
+  getStartIndexForOffset = (offset: number) => {
+    const expanded = this.props.expandedItem;
+    let adjusted = offset;
+    if (expanded) {
+      const start = expanded.index * this.props.itemSize;
+      if (offset >= start) {
+        adjusted =
+          offset < start + this.props.itemSize + expanded.height
+            ? start
+            : offset - expanded.height;
+      }
+    }
     return Math.max(
       0,
       Math.min(
         this.props.itemCount - 1,
-        startIndex + numVisibleItems - 1, // -1 is because stop index is inclusive
+        Math.floor(adjusted / this.props.itemSize),
       ),
     );
   };
+
+  getStopIndexForStartIndex = (startIndex: number, scrollOffset: number) =>
+    Math.max(
+      startIndex,
+      this.getStartIndexForOffset(scrollOffset + this.props.height - 1),
+    );
 
   _callOnItemsRendered = memoizeOne(
     (
@@ -439,16 +450,21 @@ export class FixedSizeList extends PureComponent<
   // We maintain this cache, and pass a style prop rather than index,
   // So that List can clear cached styles and force item re-render if necessary.
   _getItemStyle = (index: number) => {
-    const { direction, itemSize, layout } = this.props;
+    const { direction, itemSize, layout, expandedItem } = this.props;
 
-    const itemStyleCache = this._getItemStyleCache(itemSize, layout, direction);
+    const itemStyleCache = this._getItemStyleCache(
+      itemSize,
+      layout,
+      direction,
+      expandedItem,
+    );
 
     let style: CSSProperties;
     if (itemStyleCache.hasOwnProperty(index)) {
       style = itemStyleCache[index];
     } else {
       const offset = this.getItemOffset(index);
-      const size = this.getItemSize();
+      const size = this.getItemSize(index);
 
       itemStyleCache[index] = style = {
         position: 'absolute',
@@ -463,7 +479,12 @@ export class FixedSizeList extends PureComponent<
   };
 
   _getItemStyleCache = memoizeOne<
-    [itemSize: number, layout?: unknown, direction?: unknown],
+    [
+      itemSize: number,
+      layout?: unknown,
+      direction?: unknown,
+      expandedItem?: { index: number; height: number },
+    ],
     Record<number, CSSProperties>
   >(() => ({}));
 
