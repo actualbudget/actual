@@ -418,10 +418,10 @@ test.describe('Transactions', () => {
         'A1',
       );
       await expect(accountPage.getNthTransaction(1).trackingNumber).toHaveText(
-        '10',
+        '9',
       );
       await expect(accountPage.getNthTransaction(2).trackingNumber).toHaveText(
-        '9',
+        '10',
       );
 
       await accountPage.filterByTrackingNumber('10');
