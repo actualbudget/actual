@@ -8,6 +8,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { nativeToBase } from '@actual-app/core/shared/exchange-rate';
+import { foreignSplitBases } from '@actual-app/core/shared/foreign-split';
 import type {
   AccountEntity,
   TransactionEntity,
@@ -16,6 +17,7 @@ import type {
 import { fromRegisterView } from '#accounts/registerView';
 import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAmountPrecision } from '#hooks/useAmountPrecision';
+import { useEditEffects } from '#hooks/useEditEffects';
 import { useFormat } from '#hooks/useFormat';
 import { useDispatch } from '#redux';
 import {
@@ -25,6 +27,7 @@ import {
   staleEditMessage,
 } from '#util/foreign-edit';
 
+import { BudgetNotice } from './BudgetNotice';
 import { RateField, rateInDirection, storedRate } from './RateField';
 import type { RateDirection } from './RateField';
 
@@ -142,6 +145,48 @@ function InlineForeignSplitInner({
   } catch {
     valid = false;
   }
+
+  let valued: Array<{ id: string; amount: number }> = [];
+  if (valid && !collapsing) {
+    try {
+      valued = foreignSplitBases(
+        base,
+        children.map(r => ({ id: r.id, native: native(r) })),
+        total === 0 && rate
+          ? {
+              rate,
+              nativePrecision: account.currency_precision ?? basePrecision,
+              basePrecision,
+            }
+          : undefined,
+      );
+    } catch {
+      valid = false;
+    }
+  }
+  const posting = (r: TransactionEntity, amount: number) => ({
+    account: r.account,
+    date: r.date,
+    category: r.is_parent ? null : (r.category ?? null),
+    amount,
+    isParent: !!r.is_parent,
+  });
+  const after = parent
+    ? [
+        posting(parent, base),
+        ...children.map((r, i) => posting(r, valued[i]?.amount ?? 0)),
+      ]
+    : [];
+  const effects = useEditEffects(
+    !valid
+      ? null
+      : [
+          ...original
+            .filter(r => r.id === draft.id || r.parent_id === draft.id)
+            .map(r => ({ before: posting(r, r.amount), after: null })),
+          ...after.map(r => ({ before: null, after: r })),
+        ],
+  );
 
   async function save() {
     if (!valid || !before || !parent || saving.current || stale) return;
@@ -279,13 +324,14 @@ function InlineForeignSplitInner({
           </Button>
           <Button
             variant="primary"
-            isDisabled={busy || stale || !valid}
+            isDisabled={busy || stale || !valid || effects.status === 'loading'}
             onPress={() => void save()}
           >
             <Trans>Save splits</Trans>
           </Button>
         </View>
       </View>
+      <BudgetNotice effects={effects} />
       {message && <Text style={{ color: theme.errorText }}>{message}</Text>}
     </View>
   );

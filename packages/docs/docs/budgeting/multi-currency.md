@@ -94,6 +94,22 @@ On the rent row, open the category menu and choose **Split Transaction**. On des
 
 <img width="560" alt="Split transaction for a 1,000.00 euro total, with -800 for rent and -200 for fees" src="/img/budgeting/multi-currency-split@2x.png" />
 
+## Move a payment to another account
+
+Open **All accounts**. On the rent row, change the account to **Checking**. Accounts in another currency are listed under **Other currencies**.
+
+**Move to Checking** says: "Now -950.00 EUR in BNP Paribas (-$1,045.00)." **Amount (USD)** is empty, and its placeholder is 1,045.00. Leave it empty to keep the dollar amount. The line under the field is: "Base amount after the move: -$1,045.00."
+
+Type 1000 to record the amount Checking shows. The line changes to -$1,000.00. October already has money budgeted, so the dialog says: "This changes the budget for October 2026: uncategorized $45.00." Click **Move**.
+
+<img width="512" alt="Move to Checking for the 950.00 euro rent, recorded as 1000 dollars, with a budget warning for October 2026" src="/img/budgeting/multi-currency-move@2x.png" />
+
+The rent is then a 1,000.00 payment in Checking. Checking is $1,500.00. BNP Paribas is €2,000.00 again. **All accounts** is $3,950.00.
+
+A payment that came from a schedule is unlinked when the new account uses another currency. The dialog says: "This transaction will no longer be linked to its schedule."
+
+**Edit foreign amount**, **Split transaction**, and **Edit transfer** show the same budget warning when a dollar amount changes a month that already has money budgeted. On a phone, changing the account opens **Move to Checking**.
+
 ## Schedule a payment
 
 Open **Schedules** and click **Add new schedule**. Name it **Paris rent**. Choose the payee **Résidences Saint-Martin SARL** and the account **BNP Paribas**. The amount is then in euros. Enter 950.00. The field shows -€950.00. Set the date to repeat every month.

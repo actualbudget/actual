@@ -41,6 +41,7 @@ function setup(
   transaction: typeof draft & { payee_name?: string } = draft,
 ) {
   initServer({
+    'budget/edit-effects': async () => [],
     'exchange-rates/resolve':
       typeof resolution === 'function' ? resolution : async () => resolution,
     'transactions/post-foreign-entry': post,
@@ -232,6 +233,7 @@ describe('ForeignAmountModal', () => {
       date: '2026-03-11',
     });
     initServer({
+      'budget/edit-effects': async () => [],
       'exchange-rates/resolve': resolve,
       'transactions/post-foreign-entry': post,
     });
@@ -361,6 +363,7 @@ describe('ForeignAmountModal', () => {
       date: '2026-03-11',
     });
     initServer({
+      'budget/edit-effects': async () => [],
       'exchange-rates/resolve': resolve,
       'transactions/post-foreign-entry': post,
     });
@@ -723,6 +726,7 @@ describe('ForeignAmountModal editing an existing row', () => {
   ) {
     const update = vi.fn().mockResolvedValue({ status: 'ok' });
     initServer({
+      'budget/edit-effects': async () => [],
       'exchange-rates/resolve': async () => standing,
       'transactions/update-foreign-entry': update,
       'transactions/update-foreign-transfer': update,
@@ -859,6 +863,36 @@ describe('ForeignAmountModal editing an existing row', () => {
         }),
       ),
     );
+  });
+
+  it('uses the linked-transfer warning when only the other leg is reconciled', async () => {
+    const counterpart = {
+      ...snapshot,
+      account: 'jpy2',
+      amount: 1000,
+      reconciled: true,
+    };
+    const { update, store } = setupEdit({
+      kind: 'transfer',
+      id: 't',
+      expected: { leg: snapshot, counterpart },
+      reconciled: true,
+    });
+    await screen.findByText(/at 1 JPY = 0.006666666666667 USD/);
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    const confirm = await waitFor(() => {
+      const modal = store
+        .getState()
+        .modals.modalStack.find(m => m.name === 'confirm-transaction-edit');
+      assert(modal);
+      return modal;
+    });
+    assert(confirm.name === 'confirm-transaction-edit');
+    expect(confirm.options.confirmReason).toBe(
+      'batchEditWithReconciledTransfer',
+    );
+    confirm.options.onConfirm();
+    await waitFor(() => expect(update).toHaveBeenCalled());
   });
 
   it('keeps a stale edit open and unsaveable', async () => {
