@@ -43,35 +43,54 @@ function deriveExchangeRate(value: unknown) {
   }
 }
 
-export function amountPair(amount: number, transactionAmount: number): string {
+/**
+ * A transaction's amount authority: `amount:native@account`, binding the
+ * account with both amounts so a move and an edit made on different devices
+ * resolve as one unit. Native is empty for a budget-currency account. The
+ * MC-3.1 form `amount:native` (no account) stays readable.
+ */
+export function amountPair(
+  amount: number,
+  transactionAmount: number | null,
+  account: string,
+): string {
   if (
     !Number.isSafeInteger(amount) ||
-    !Number.isSafeInteger(transactionAmount)
+    (transactionAmount !== null && !Number.isSafeInteger(transactionAmount))
   ) {
     throw new Error('foreign-pair-required');
   }
-  return `${amount}:${transactionAmount}`;
+  return `${amount}:${transactionAmount ?? ''}@${account}`;
 }
 
-export function parseAmountPair(
-  value: unknown,
-): { amount: number; transaction_amount: number } | null {
+export function parseAmountPair(value: unknown): {
+  amount: number;
+  transaction_amount: number | null;
+  acct?: string;
+} | null {
   return deriveTransactionAmounts(value);
 }
 
 function deriveTransactionAmounts(value: unknown) {
   if (typeof value !== 'string') return null;
-  const match = /^(-?\d+):(-?\d+)$/.exec(value);
+  const match = /^(-?\d+):(-?\d*)(?:@(.+))?$/.exec(value);
   if (!match) return null;
-  const amount = Number(match[1]);
-  const transactionAmount = Number(match[2]);
+  const [, base, native, account] = match;
+  // Only the account-bound form may leave native empty.
+  if (native === '' && account === undefined) return null;
+  const amount = Number(base);
+  const transactionAmount = native === '' ? null : Number(native);
   if (
     !Number.isSafeInteger(amount) ||
-    !Number.isSafeInteger(transactionAmount)
+    (transactionAmount !== null && !Number.isSafeInteger(transactionAmount))
   ) {
     return null;
   }
-  return { amount, transaction_amount: transactionAmount };
+  return {
+    amount,
+    transaction_amount: transactionAmount,
+    ...(account !== undefined && { acct: account }),
+  };
 }
 
 const COUPLED_TABLES: Record<string, CoupledTable> = {

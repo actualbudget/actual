@@ -27,6 +27,20 @@ type ExistingRow = {
   category: string | null;
   date: number;
   tombstone: number;
+  amount_pair: string | null;
+};
+
+/** The stored row and exact final values an edit or move handler validated. */
+export type ForeignEdit = {
+  expected: {
+    account: string;
+    amount: number;
+    transaction_amount: number | null;
+    date: string;
+  };
+  account: string;
+  amount: number;
+  transaction_amount: number | null;
 };
 
 /**
@@ -49,6 +63,11 @@ export type TransactionWriteOptions = {
    * (`replaceExchangeTotal`); only their amounts may change.
    */
   exchangeReplacements?: ReadonlySet<string>;
+  /**
+   * Rows an edit or move handler rewrites (`foreign-edit.ts`); a changed
+   * pair or cross-encoding account is allowed only for these exact values.
+   */
+  foreignEdits?: ReadonlyMap<string, ForeignEdit>;
 };
 
 type TransactionWrite = {
@@ -173,7 +192,7 @@ export async function scheduleAccountId(
 }
 
 /** Transactions store raw payee ids; merges redirect them through mappings. */
-async function transferTarget(payeeId: string): Promise<string | null> {
+export async function transferTarget(payeeId: string): Promise<string | null> {
   const payee = await db.first<Pick<db.DbPayee, 'transfer_acct'>>(
     `SELECT p.transfer_acct FROM payees p
        WHERE p.id = COALESCE(
@@ -189,7 +208,8 @@ async function transferTarget(payeeId: string): Promise<string | null> {
 function storedRow(id: string) {
   return db.first<ExistingRow>(
     `SELECT id, acct, description, transferred_id, amount, transaction_amount,
-       isParent, isChild, parent_id, schedule, category, date, tombstone
+       isParent, isChild, parent_id, schedule, category, date, tombstone,
+       amount_pair
        FROM transactions WHERE id = ?`,
     [id],
   );
@@ -208,6 +228,7 @@ const ROW_COLUMNS = [
   'category',
   'date',
   'tombstone',
+  'amount_pair',
 ] as const;
 
 /**
@@ -235,6 +256,7 @@ async function effectiveRow(id: string): Promise<ExistingRow | null> {
     category: null,
     date: 0,
     tombstone: 0,
+    amount_pair: null,
     ...stored,
   };
   for (const [column, value] of queued) {
@@ -508,12 +530,17 @@ export async function validateTransactionWrite(
   // cannot be foreign; the schema layer owns referential checks.
   if (!account) return {};
 
+  const editAllowed = existing
+    ? allowedForeignEdit(row, existing, options)
+    : false;
   if (existing && row.account !== undefined && row.account !== existing.acct) {
     const previous = await accountContext(existing.acct);
-    // Native integers only keep their value under the same recorded encoding.
+    // Native integers only keep their value under the same recorded encoding;
+    // a move handler supplies the destination's amounts instead.
     if (
-      (previous?.currency ?? null) !== account.currency ||
-      (previous?.precision ?? null) !== account.precision
+      !editAllowed &&
+      ((previous?.currency ?? null) !== account.currency ||
+        (previous?.precision ?? null) !== account.precision)
     ) {
       throw new Error('account-move-currency-mismatch');
     }
@@ -566,9 +593,26 @@ export async function validateTransactionWrite(
     throw new Error('foreign-split-unavailable');
   }
 
+  const movesAccount =
+    existing !== null &&
+    row.account !== undefined &&
+    row.account !== existing.acct;
   if (!account.foreign) {
     if (row.transaction_amount != null) {
       throw new Error('native-amount-unexpected');
+    }
+    // A budget-currency row with an authority (moved out of a foreign
+    // account) keeps it in step, so the old pair can never be re-derived;
+    // a move handler writes one even when the source pair has not arrived.
+    if (
+      (existing?.amount_pair || editAllowed) &&
+      (row.amount !== undefined || movesAccount)
+    ) {
+      const amount = row.amount !== undefined ? row.amount : existing?.amount;
+      if (!Number.isSafeInteger(amount)) {
+        throw new Error('foreign-pair-required');
+      }
+      return { pair: amountPair(amount as number, null, accountId) };
     }
     return {};
   }
@@ -589,16 +633,32 @@ export async function validateTransactionWrite(
     existing.transaction_amount !== null
   ) {
     return {
-      pair: amountPair(existing.amount, existing.transaction_amount),
+      pair: amountPair(
+        existing.amount,
+        existing.transaction_amount,
+        existing.acct,
+      ),
     };
   }
   const setsAmount =
     row.amount !== undefined || row.transaction_amount !== undefined;
-  if (isUpdate && !setsAmount) return {};
+  if (isUpdate && !setsAmount && !movesAccount) return {};
 
+  // A pair is always written whole; a move alone keeps the stored pair.
   if (
-    !Number.isSafeInteger(row.amount) ||
-    !Number.isSafeInteger(row.transaction_amount)
+    (setsAmount || !isUpdate) &&
+    (!Number.isSafeInteger(row.amount) ||
+      !Number.isSafeInteger(row.transaction_amount))
+  ) {
+    throw new Error('foreign-pair-required');
+  }
+  const finalAmount = setsAmount ? row.amount : existing?.amount;
+  const finalNative = setsAmount
+    ? row.transaction_amount
+    : existing?.transaction_amount;
+  if (
+    !Number.isSafeInteger(finalAmount) ||
+    !Number.isSafeInteger(finalNative)
   ) {
     throw new Error('foreign-pair-required');
   }
@@ -606,6 +666,7 @@ export async function validateTransactionWrite(
   // a leg an import replaces.
   if (
     existing &&
+    !editAllowed &&
     !(await allowedReplacement(row, existing, options)) &&
     ((row.amount !== undefined && row.amount !== existing.amount) ||
       (row.transaction_amount !== undefined &&
@@ -614,8 +675,42 @@ export async function validateTransactionWrite(
     throw new Error('foreign-edit-unavailable');
   }
   return {
-    pair: amountPair(row.amount as number, row.transaction_amount as number),
+    pair: amountPair(finalAmount as number, finalNative as number, accountId),
   };
+}
+
+/**
+ * Whether a write is exactly what an edit or move handler validated: the
+ * stored row still equals what the handler read, and the write leaves the
+ * account and amounts it computed.
+ */
+function allowedForeignEdit(
+  row: TransactionWrite,
+  existing: ExistingRow,
+  options: TransactionWriteOptions,
+) {
+  const edit = options.foreignEdits?.get(existing.id);
+  if (!edit) return false;
+  const { expected } = edit;
+  const stored =
+    existing.acct === expected.account &&
+    existing.amount === expected.amount &&
+    (existing.transaction_amount ?? null) === expected.transaction_amount &&
+    String(existing.date) === expected.date.replaceAll('-', '');
+  const final = {
+    account: row.account !== undefined ? row.account : existing.acct,
+    amount: row.amount !== undefined ? row.amount : existing.amount,
+    transaction_amount:
+      row.transaction_amount !== undefined
+        ? row.transaction_amount
+        : existing.transaction_amount,
+  };
+  return (
+    stored &&
+    final.account === edit.account &&
+    final.amount === edit.amount &&
+    (final.transaction_amount ?? null) === edit.transaction_amount
+  );
 }
 
 /** Validates a whole request before any of its writes or side effects. */

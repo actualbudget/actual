@@ -150,7 +150,7 @@ export function rescaleBudget(
           'transactions',
           row.id,
           'amount_pair',
-          `${amount}:${pair.transaction_amount}`,
+          `${amount}:${pair.transaction_amount ?? ''}${pair.acct !== undefined ? `@${pair.acct}` : ''}`,
         );
       }
     }

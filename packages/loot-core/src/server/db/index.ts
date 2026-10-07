@@ -28,7 +28,7 @@ import {
   payeeModel,
   toDateRepr,
 } from '#server/models';
-import { batchMessages, sendMessages } from '#server/sync';
+import { batchMessages, getBatchedValue, sendMessages } from '#server/sync';
 import { validateTransactionWrite } from '#server/transactions/foreign-guard';
 import type { TransactionWriteOptions } from '#server/transactions/foreign-guard';
 import { accountCurrencyFields } from '#server/util/currency';
@@ -946,8 +946,27 @@ export async function insertTransaction(
       // amount_pair is internal and not in the AQL schema.
       await update('transactions', { id, amount_pair: pair });
     }
+    await lockAccountCurrency(transaction.account);
   });
   return id;
+}
+
+/**
+ * Marks an account as having held a transaction, in the same batch: its
+ * currency then names the encoding of integers that can return to it, so it
+ * may not change until MC-7's corrections. Never cleared.
+ */
+async function lockAccountCurrency(accountId: string | undefined) {
+  if (!accountId) return;
+  const account = await first<{ currency_locked: number | null }>(
+    'SELECT currency_locked FROM accounts WHERE id = ?',
+    [accountId],
+  );
+  if (account?.currency_locked === 1) return;
+  // An account queued in this batch is locked with it; a missing one is not
+  // created by the lock.
+  if (!account && !getBatchedValue('accounts', accountId, 'name')) return;
+  await update('accounts', { id: accountId, currency_locked: 1 });
 }
 
 export async function updateTransaction(
@@ -964,6 +983,7 @@ export async function updateTransaction(
     if (pair) {
       await update('transactions', { id: transaction.id, amount_pair: pair });
     }
+    await lockAccountCurrency(transaction.account);
   });
 }
 
