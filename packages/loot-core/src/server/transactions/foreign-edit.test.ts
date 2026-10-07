@@ -328,10 +328,13 @@ describe('editing a foreign transaction', () => {
             [
               't',
               {
+                action: 'update',
                 expected: expectedOf('t'),
-                account: 'jpy',
-                amount: -2000,
-                transaction_amount: -3000,
+                final: {
+                  account: 'jpy',
+                  amount: -2000,
+                  transaction_amount: -3000,
+                },
               },
             ],
           ]),

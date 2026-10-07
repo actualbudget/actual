@@ -1067,8 +1067,11 @@ export async function matchTransactions(
       const table = reimportDeleted
         ? 'v_transactions'
         : 'v_transactions_internal';
+      // A live row wins over a deleted one sharing its id, such as a
+      // removed exchange fee parent whose id moved to its leg.
       match = await db.first<db.DbTransaction>(
-        `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?`,
+        `SELECT * FROM ${table} WHERE imported_id = ? AND account = ?
+           ${reimportDeleted ? '' : 'ORDER BY tombstone'}`,
         [trans.imported_id, matchAccount],
       );
 

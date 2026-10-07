@@ -80,6 +80,20 @@ export function nativeToBase(
   );
 }
 
+/** The exact base value of a native integer, before rounding. */
+export function nativeToBaseFraction(
+  nativeInteger: number,
+  nativePrecision: number,
+  basePrecision: number,
+  rate: string,
+): { numerator: bigint; denominator: bigint } {
+  const { numerator, denominator } = rateFraction(rate);
+  return {
+    numerator: integer(nativeInteger) * scale(basePrecision) * denominator,
+    denominator: numerator * scale(nativePrecision),
+  };
+}
+
 /** nativeInteger = bankersRound(base / 10^bp * rate * 10^np) */
 export function baseToNative(
   baseInteger: number,

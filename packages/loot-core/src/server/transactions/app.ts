@@ -22,6 +22,12 @@ import { moveForeignEntry, updateForeignEntry } from './foreign-edit';
 import { postForeignEntry } from './foreign-entry';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
+import {
+  collapseForeignSplit,
+  saveForeignSplit,
+  updateExchangeTransfer,
+  updateForeignTransfer,
+} from './linked-edit';
 import { mergeTransactions } from './merge';
 
 import { batchUpdateTransactions } from '.';
@@ -42,6 +48,10 @@ export type TransactionHandlers = {
   'transactions/post-exchange-transfer': typeof postExchangeTransfer;
   'transactions/update-foreign-entry': typeof updateForeignEntry;
   'transactions/move-foreign-entry': typeof moveForeignEntry;
+  'transactions/save-foreign-split': typeof saveForeignSplit;
+  'transactions/collapse-foreign-split': typeof collapseForeignSplit;
+  'transactions/update-foreign-transfer': typeof updateForeignTransfer;
+  'transactions/update-exchange-transfer': typeof updateExchangeTransfer;
 };
 
 async function handleBatchUpdateTransactions({
@@ -183,6 +193,19 @@ app.method(
 );
 app.method('transactions/update-foreign-entry', mutator(updateForeignEntry));
 app.method('transactions/move-foreign-entry', mutator(moveForeignEntry));
+app.method('transactions/save-foreign-split', mutator(saveForeignSplit));
+app.method(
+  'transactions/collapse-foreign-split',
+  mutator(collapseForeignSplit),
+);
+app.method(
+  'transactions/update-foreign-transfer',
+  mutator(updateForeignTransfer),
+);
+app.method(
+  'transactions/update-exchange-transfer',
+  mutator(updateExchangeTransfer),
+);
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));
