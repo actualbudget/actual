@@ -30,18 +30,38 @@ type ExistingRow = {
   amount_pair: string | null;
 };
 
-/** The stored row and exact final values an edit or move handler validated. */
-export type ForeignEdit = {
-  expected: {
-    account: string;
-    amount: number;
-    transaction_amount: number | null;
-    date: string;
-  };
+/** A row as an edit handler read it. */
+export type ForeignEditExpected = {
   account: string;
   amount: number;
   transaction_amount: number | null;
+  date: string;
 };
+
+/** The exact values an edit handler computed for a row. */
+export type ForeignEditFinal = {
+  account: string;
+  amount: number;
+  transaction_amount: number | null;
+  /** Set when the edit changes the date. */
+  date?: string;
+  /** Set when the edit creates the row or changes its family. */
+  structure?: {
+    is_parent: boolean;
+    is_child: boolean;
+    parent_id: string | null;
+    transfer_id: string | null;
+  };
+};
+
+/**
+ * What an edit handler may do to one row: update it from the state it read
+ * to exact final values, create it with exact values, or delete it as read.
+ */
+export type ForeignEdit =
+  | { action: 'update'; expected: ForeignEditExpected; final: ForeignEditFinal }
+  | { action: 'create'; final: ForeignEditFinal }
+  | { action: 'delete'; expected: ForeignEditExpected };
 
 /**
  * Writes trusted to skip transfer relationship rules: `validatedTransfer`
@@ -341,13 +361,16 @@ async function validateForeignTransfer(
   if (existing && (await isExchangeRow(existing.id))) {
     const changes = (value: unknown, stored: unknown) =>
       value !== undefined && value !== stored;
-    const replacing = await allowedReplacement(row, existing, options);
+    const replacing =
+      allowedForeignEdit(row, existing, options) ||
+      (await allowedReplacement(row, existing, options));
     if (
       changes(row.account, existing.acct) ||
       (!replacing && changes(row.amount, existing.amount)) ||
       (!replacing &&
         changes(row.transaction_amount, existing.transaction_amount)) ||
-      (row.date !== undefined &&
+      (!replacing &&
+        row.date !== undefined &&
         row.date.replaceAll('-', '') !== String(existing.date)) ||
       // A leg is never relinked to another transfer payee.
       (payeeChanged && targetAccount !== null)
@@ -523,16 +546,20 @@ export async function validateTransactionWrite(
   // An insert reusing an existing id updates that row through sync, and an
   // update of a missing id inserts it, so the stored row decides.
   const isUpdate = existing !== null;
+  // A row an edit handler scoped is written exactly as authorized or not
+  // at all, whatever account it names; generic rules apply only to
+  // unscoped rows.
+  const editAllowed = allowedForeignEdit(row, existing, options);
+  const scopedId = existing?.id ?? row.id;
+  if (scopedId && options.foreignEdits?.has(scopedId) && !editAllowed) {
+    throw new Error('foreign-edit-unavailable');
+  }
   const accountId = row.account ?? existing?.acct;
   if (!accountId) return {};
   const account = await accountContext(accountId);
   // An account that exists neither in the database nor in the current batch
   // cannot be foreign; the schema layer owns referential checks.
   if (!account) return {};
-
-  const editAllowed = existing
-    ? allowedForeignEdit(row, existing, options)
-    : false;
   if (existing && row.account !== undefined && row.account !== existing.acct) {
     const previous = await accountContext(existing.acct);
     // Native integers only keep their value under the same recorded encoding;
@@ -584,6 +611,7 @@ export async function validateTransactionWrite(
   if (
     changesFamily &&
     !options.validatedTransfer &&
+    !editAllowed &&
     ((existing &&
       (await isExchangeFamily(
         existing.isParent ? existing.id : existing.parent_id,
@@ -620,7 +648,7 @@ export async function validateTransactionWrite(
   // Foreign splits arrive with foreign edits (MC-5): no family may be
   // created or restructured, while metadata edits of a family stay allowed.
   // The exchange handler writes its validated fee families.
-  if (changesFamily && !options.validatedTransfer) {
+  if (changesFamily && !options.validatedTransfer && !editAllowed) {
     throw new Error('foreign-split-unavailable');
   }
   // A foreign leg's base may be derived from its exchange (coupled-cells),
@@ -679,37 +707,71 @@ export async function validateTransactionWrite(
   };
 }
 
+function matchesExpected(
+  stored: Pick<ExistingRow, 'acct' | 'amount' | 'transaction_amount' | 'date'>,
+  expected: ForeignEditExpected,
+) {
+  return (
+    stored.acct === expected.account &&
+    stored.amount === expected.amount &&
+    (stored.transaction_amount ?? null) === expected.transaction_amount &&
+    String(stored.date) === expected.date.replaceAll('-', '')
+  );
+}
+
 /**
- * Whether a write is exactly what an edit or move handler validated: the
- * stored row still equals what the handler read, and the write leaves the
- * account and amounts it computed.
+ * Whether a write is exactly what an edit or move handler validated: an
+ * update of the row it read to the values it computed, or the creation of a
+ * row that does not exist yet with those values.
  */
 function allowedForeignEdit(
   row: TransactionWrite,
-  existing: ExistingRow,
+  existing: ExistingRow | null,
   options: TransactionWriteOptions,
 ) {
-  const edit = options.foreignEdits?.get(existing.id);
-  if (!edit) return false;
-  const { expected } = edit;
-  const stored =
-    existing.acct === expected.account &&
-    existing.amount === expected.amount &&
-    (existing.transaction_amount ?? null) === expected.transaction_amount &&
-    String(existing.date) === expected.date.replaceAll('-', '');
-  const final = {
-    account: row.account !== undefined ? row.account : existing.acct,
-    amount: row.amount !== undefined ? row.amount : existing.amount,
-    transaction_amount:
-      row.transaction_amount !== undefined
-        ? row.transaction_amount
-        : existing.transaction_amount,
+  const id = existing?.id ?? row.id;
+  const edit = id ? options.foreignEdits?.get(id) : undefined;
+  if (!edit || edit.action === 'delete') return false;
+  // Deleting takes a deletion entry, checked in preflight.
+  if (row.tombstone === true || row.tombstone === 1) return false;
+  if (edit.action === 'update' && !existing) return false;
+  if (edit.action === 'create' && existing) return false;
+  if (existing && edit.action === 'update') {
+    if (!matchesExpected(existing, edit.expected)) return false;
+  }
+  const { final } = edit;
+  const value = <T>(written: T | undefined, stored: T) =>
+    written !== undefined ? written : stored;
+  const date = value(
+    row.date?.replaceAll('-', ''),
+    existing ? String(existing.date) : undefined,
+  );
+  const structure = {
+    is_parent: !!value(row.is_parent, !!existing?.isParent),
+    is_child: !!value(row.is_child, !!existing?.isChild),
+    parent_id: value(row.parent_id, existing?.parent_id ?? null) ?? null,
+    transfer_id:
+      value(row.transfer_id, existing?.transferred_id ?? null) ?? null,
   };
+  const sameStructure = final.structure
+    ? structure.is_parent === final.structure.is_parent &&
+      structure.is_child === final.structure.is_child &&
+      structure.parent_id === final.structure.parent_id &&
+      structure.transfer_id === final.structure.transfer_id
+    : !!existing &&
+      structure.is_parent === !!existing.isParent &&
+      structure.is_child === !!existing.isChild &&
+      structure.parent_id === (existing.parent_id ?? null) &&
+      structure.transfer_id === (existing.transferred_id ?? null);
   return (
-    stored &&
-    final.account === edit.account &&
-    final.amount === edit.amount &&
-    (final.transaction_amount ?? null) === edit.transaction_amount
+    value(row.account, existing?.acct) === final.account &&
+    value(row.amount, existing?.amount) === final.amount &&
+    (value(row.transaction_amount, existing?.transaction_amount) ?? null) ===
+      final.transaction_amount &&
+    (final.date === undefined
+      ? !existing || date === String(existing.date)
+      : date === final.date.replaceAll('-', '')) &&
+    sameStructure
   );
 }
 
@@ -738,6 +800,32 @@ export async function preflightTransactionWrites(
   ];
   const deletedIds = new Set(removed.map(row => row.id));
   for (const { id } of removed) {
+    // An edit handler deletes exactly the rows it read, and only under a
+    // deletion entry.
+    const edit = options.foreignEdits?.get(id);
+    if (edit) {
+      const stored =
+        edit.action === 'delete'
+          ? await db.first<
+              Pick<
+                ExistingRow,
+                'acct' | 'amount' | 'transaction_amount' | 'date'
+              >
+            >(
+              `SELECT acct, amount, transaction_amount, date
+                 FROM transactions WHERE id = ? AND tombstone = 0`,
+              [id],
+            )
+          : null;
+      if (
+        edit.action !== 'delete' ||
+        !stored ||
+        !matchesExpected(stored, edit.expected)
+      ) {
+        throw new Error('foreign-split-unavailable');
+      }
+      continue;
+    }
     const child = await db.first<{ acct: string; parent_id: string | null }>(
       'SELECT acct, parent_id FROM transactions WHERE id = ? AND isChild = 1',
       [id],
