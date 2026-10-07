@@ -78,7 +78,21 @@ The account balance is then €1,050.00: the 2,000.00 starting balance minus the
 
 <img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
 
-A saved amount in the euro or peso account cannot be changed or split.
+## Change a saved amount
+
+Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount** opens with -1,000.00. The line under it is -$1,100.00 at the saved standing rate from 2026-10-31, with EUR first. Leave **Base amount** and the rate empty. Click **Save**. The payment is 1,000.00. BNP Paribas is €1,000.00. **All accounts** is $3,850.00.
+
+<img width="512" alt="Edit foreign amount for a 1,000.00 euro rent payment, shown as -$1,100.00 at 1 USD = 0.909091 EUR" src="/img/budgeting/multi-currency-edit@2x.png" />
+
+A transfer between two euro accounts uses this dialog too. It adds: "The other account of this transfer changes to match."
+
+Changing the amount of a transfer to Checking or BBVA México opens **Edit transfer**. That dialog shows the amount in this account, the date, the notes, and the other account's amount, rate, and fee.
+
+## Split a payment
+
+On the rent row, open the category menu and choose **Split Transaction**. On desktop, the existing transaction table opens two split rows under the -1,000.00 euro total. Enter payments of 800 for rent and 200 for fees. Incomplete edits stay local until the parts add up to the total and you choose **Save splits**. **Cancel split edits** restores the stored family. Conversion and save controls appear directly below the edited total. An unchanged total keeps its recorded dollar valuation; a changed or zero total needs a budget amount or rate. On a phone, Split opens the split page. Its total, base amount and rate stay above the child allocations. Transfers cannot be split.
+
+<img width="560" alt="Split transaction for a 1,000.00 euro total, with -800 for rent and -200 for fees" src="/img/budgeting/multi-currency-split@2x.png" />
 
 ## Schedule a payment
 
@@ -148,9 +162,9 @@ A narrow window uses the phone layout. The BBVA México account below uses the s
 
 <img width="390" alt="Phone view of BBVA México with a 250 peso balance and remittances and gifts grouped by month from June through October" src="/img/budgeting/family-bbva-mobile-history.png" />
 
-The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. The screen says: "Editing foreign amounts is not available yet."
+The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. **Edit amount** opens **Edit foreign amount**. **Split** opens the **Split transaction** page. If the screen has other unsaved changes, save them first. Actual says: "Save your other changes before editing the amount."
 
-<img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00 and -$1,045.00, with editing unavailable" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
+<img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00, -$1,045.00, and Edit amount" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
 
 ## Import a file
 

@@ -24,6 +24,7 @@ import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import {
   collapseForeignSplit,
+  getExchangeFamily,
   saveForeignSplit,
   updateExchangeTransfer,
   updateForeignTransfer,
@@ -52,6 +53,7 @@ export type TransactionHandlers = {
   'transactions/collapse-foreign-split': typeof collapseForeignSplit;
   'transactions/update-foreign-transfer': typeof updateForeignTransfer;
   'transactions/update-exchange-transfer': typeof updateExchangeTransfer;
+  'transactions/get-exchange-family': typeof getExchangeFamily;
 };
 
 async function handleBatchUpdateTransactions({
@@ -206,6 +208,7 @@ app.method(
   'transactions/update-exchange-transfer',
   mutator(updateExchangeTransfer),
 );
+app.method('transactions/get-exchange-family', getExchangeFamily);
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));
