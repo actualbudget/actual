@@ -336,18 +336,56 @@ export async function buildMonthlyOutflow(
   const currentMonthStart = monthUtils.firstDayOfMonth(today);
   const isBudgetingAhead = windowStart > currentMonthStart;
 
+  // A completed schedule's rule still yields dates, but nothing after the
+  // next date it had when it was completed ever happened. Its occurrences
+  // count up to a cutoff: that stored next date, or the last payment
+  // linked to it in this category if that is later (a payment entered
+  // ahead of time). Up to the cutoff it is treated exactly like an active
+  // schedule, so completing it changes nothing about what already
+  // happened. With neither a next date nor a payment, nothing counts.
+  const occurrenceCutoff = new Map<string, string>();
+  const completedEntries = smoothEntries.filter(entry => entry.completed);
+  if (completedEntries.length > 0) {
+    const { data: completedPayments } = await aqlQuery(
+      q('transactions')
+        .filter({
+          category: category.id,
+          schedule: { $oneof: completedEntries.map(entry => entry.scheduleId) },
+          'account.offbudget': false,
+        })
+        .select(['date', 'schedule']),
+    );
+    const lastPayment = new Map<string, string>();
+    for (const transaction of completedPayments) {
+      const previous = lastPayment.get(transaction.schedule) ?? '';
+      if (transaction.date > previous) {
+        lastPayment.set(transaction.schedule, transaction.date);
+      }
+    }
+    for (const entry of completedEntries) {
+      const nextDate = entry.storedNextDate ?? '';
+      const paid = lastPayment.get(entry.scheduleId) ?? '';
+      occurrenceCutoff.set(entry.scheduleId, paid > nextDate ? paid : nextDate);
+    }
+  }
+  const occurrencesOf = (
+    entry: ScheduleTemplateTarget,
+    startDay: string,
+    endDay: string,
+  ) => {
+    const dates = getOccurrencesBetween(entry.dateConditions, startDay, endDay);
+    const cutoff = occurrenceCutoff.get(entry.scheduleId);
+    return cutoff === undefined ? dates : dates.filter(d => d <= cutoff);
+  };
+
   // When budgeting ahead (current_month after the real current month), the
   // carried-over balance still holds money for occurrences due between now
   // and the window that haven't posted yet. Count those against month 0 so
   // that money isn't treated as free. Occurrences missed before the real
-  // current month are ignored, so a long-stale next_date can't pile up. A
-  // completed schedule has nothing left to post.
+  // current month are ignored, so a long-stale next_date can't pile up.
   const pendingEntries = isBudgetingAhead
     ? smoothEntries.filter(
-        entry =>
-          !entry.completed &&
-          entry.storedNextDate &&
-          entry.storedNextDate < windowStart,
+        entry => entry.storedNextDate && entry.storedNextDate < windowStart,
       )
     : [];
   // next_date only advances once its date has passed, so a payment made
@@ -377,11 +415,7 @@ export async function buildMonthlyOutflow(
       entry.storedNextDate > currentMonthStart
         ? entry.storedNextDate
         : currentMonthStart;
-    const pending = getOccurrencesBetween(
-      entry.dateConditions,
-      pendingFrom,
-      windowStart,
-    );
+    const pending = occurrencesOf(entry, pendingFrom, windowStart);
     const settled = countLinkedPayments(
       entry,
       linkedBeforeWindow,
@@ -424,14 +458,7 @@ export async function buildMonthlyOutflow(
 
   let dueByToday = 0;
   for (const entry of smoothEntries) {
-    // A completed schedule posts nothing further. What it already posted
-    // is counted from its payments below instead of from occurrences.
-    if (entry.completed) continue;
-    const occurrences = getOccurrencesBetween(
-      entry.dateConditions,
-      windowStart,
-      windowEnd,
-    );
+    const occurrences = occurrencesOf(entry, windowStart, windowEnd);
     const paidThisMonth = isBudgetingAhead
       ? 0
       : countLinkedPayments(
@@ -465,35 +492,6 @@ export async function buildMonthlyOutflow(
       0,
     );
     monthlyOutflow[0] += Math.max(dueByToday, spentByToday);
-  }
-
-  // A completed schedule's payments stand in for the occurrences it no
-  // longer generates, so completing it changes nothing about the forecast.
-  // Those dated in the elapsed part of the budget month are already in
-  // spentByToday; later ones count at their own month, where the
-  // occurrence would have been.
-  const completedEntries = smoothEntries.filter(entry => entry.completed);
-  if (completedEntries.length > 0) {
-    const completedStart = isBudgetingAhead ? windowStart : postedEnd;
-    const { data: completedPayments } = await aqlQuery(
-      q('transactions')
-        .filter({
-          category: category.id,
-          schedule: { $oneof: completedEntries.map(entry => entry.scheduleId) },
-          'account.offbudget': false,
-          date: [{ $gte: completedStart }, { $lt: windowEnd }],
-        })
-        .select(['amount', 'date']),
-    );
-    for (const transaction of completedPayments) {
-      const monthIndex = monthUtils.differenceInCalendarMonths(
-        transaction.date,
-        current_month,
-      );
-      if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
-        monthlyOutflow[monthIndex] += sign * transaction.amount;
-      }
-    }
   }
 
   // Unlinked transactions not covered above count at their own month.

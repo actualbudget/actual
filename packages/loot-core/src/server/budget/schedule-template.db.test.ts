@@ -127,7 +127,7 @@ async function setUpOneTimeBills() {
     name: string,
     date: string,
     amount: number,
-    fromCategory: string = categoryId,
+    fromCategory: string | null = categoryId,
   ) =>
     db.insertTransaction({
       account,
@@ -355,6 +355,83 @@ describe('runScheduleForecast against a real database', () => {
     );
 
     expect(result.to_budget).toBe(2500);
+  });
+
+  it('reserves a completed bill whose payment is not in this category when budgeting ahead', async () => {
+    // Oct 7, budgeting November. Bill A posted Oct 1 and completed, but
+    // the payment was uncategorized, so the $153.34 carried in still has
+    // to pay it. Reported on #8862 as a way to budget next month before
+    // this month's bill comes out.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-07');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000, null);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill A'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      templates,
+      '2026-11',
+      15334,
+      15334,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(3666);
+  });
+
+  it('counts a completed bill whose payment is dated after today', async () => {
+    // Oct 7, budgeting November. Bill B was entered for Nov 1 and marked
+    // completed by hand. The payment is still ahead, so November owes it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-07');
+    const { category, payBill, templates, scheduleIds } =
+      await setUpOneTimeBills();
+    await payBill('Bill B', '2026-11-01', -9000);
+    await updateSchedule({
+      schedule: { id: scheduleIds['Bill B'], completed: true },
+    });
+
+    const result = await runScheduleForecast(
+      [templates[1]],
+      '2026-11',
+      5334,
+      5334,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(3666);
+  });
+
+  it('ignores a schedule completed long ago whose template line was never removed', async () => {
+    // Rent was completed in 2024 with its next date in June 2024. Two
+    // years on, the rule would still yield a date every month (Oct 25 has
+    // already passed), but nothing after that next date ever happened.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-06-01');
+    const { category, template } = await setUpRent();
+    await updateSchedule({
+      schedule: { id: template.scheduleId, completed: true },
+    });
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-27');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-10',
+      0,
+      0,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(0);
   });
 
   it('reserves nothing for a completed schedule when budgeting ahead', async () => {
