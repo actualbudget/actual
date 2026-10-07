@@ -1053,7 +1053,10 @@ export type TransactionForRules = TransactionEntity & {
   parent_imported_payee?: string;
   parent_payee?: string;
   parent_account?: string;
-  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  /**
+   * Prefetched integer balances for BALANCE_OF("…") in rule formulas; converted
+   * to amounts at the formula boundary in executeFormulaSync, cleared in finalize
+   */
   _balanceOfPrefetched?: Map<string, number>;
 };
 
