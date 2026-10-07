@@ -677,7 +677,7 @@ describe('scheduled exchange replacements under sync', () => {
     deriveAllCoupledCells();
     expect(row(destinationId)).toMatchObject({
       amount: 10100,
-      amount_pair: '10100:15000',
+      amount_pair: '10100:15000@jpy',
     });
   });
 
