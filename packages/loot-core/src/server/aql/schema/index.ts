@@ -78,6 +78,13 @@ export const schema = {
     last_reconciled: f('string'),
     last_sync: f('string'),
     bank_sync_status: f('string'),
+    account_group_id: f('id', { ref: 'account_groups' }),
+  },
+  account_groups: {
+    id: f('id'),
+    name: f('string'),
+    sort_order: f('float'),
+    tombstone: f('boolean'),
   },
   categories: {
     id: f('id'),
@@ -287,6 +294,8 @@ export const schemaConfig: SchemaConfig = {
           ];
         case 'accounts':
           return ['sort_order', 'name'];
+        case 'account_groups':
+          return ['sort_order', 'id'];
         case 'schedules':
           return [{ $condition: { completed: true } }, 'next_date'];
         default:

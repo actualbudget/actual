@@ -290,6 +290,46 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test.describe('notes tooltip', () => {
+    test('shows the full note and its tags only when the note is truncated', async () => {
+      const longNote =
+        'This is a deliberately long note about a grocery run that should overflow the notes column and get truncated with an ellipsis #groceries at the very end of the note text.';
+
+      await accountPage.createSingleTransaction({
+        payee: 'Home Depot',
+        notes: longNote,
+      });
+      await accountPage.createSingleTransaction({
+        payee: 'Kroger',
+        notes: 'short note',
+      });
+
+      const truncatedTransaction = accountPage.getNthTransaction(1);
+      const shortTransaction = accountPage.getNthTransaction(0);
+      await expect(truncatedTransaction.payee).toHaveText('Home Depot');
+      await expect(shortTransaction.payee).toHaveText('Kroger');
+
+      const truncatedNotes = truncatedTransaction.notes;
+      const shortNotes = shortTransaction.notes;
+
+      // A short note that fits in the column never shows a tooltip, even
+      // after waiting past the tooltip's hover delay.
+      await shortNotes.hover();
+      await page.waitForTimeout(700);
+      await expect(page.getByRole('tooltip')).not.toBeVisible();
+
+      // A truncated note shows the full text, with tags rendered as pills,
+      // in a tooltip.
+      await truncatedNotes.hover();
+      const tooltip = page.getByRole('tooltip');
+      await expect(tooltip).toBeVisible();
+      await expect(tooltip).toContainText(longNote);
+      await expect(
+        tooltip.getByRole('button', { name: '#groceries' }),
+      ).toBeVisible();
+    });
+  });
+
   test.describe('column manager', () => {
     test('hides and reorders columns', async () => {
       const header = page.getByTestId('transaction-table-header');

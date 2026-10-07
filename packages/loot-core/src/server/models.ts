@@ -11,7 +11,13 @@ import {
   schema,
   schemaConfig,
 } from './aql';
-import type { DbAccount, DbCategory, DbCategoryGroup, DbPayee } from './db';
+import type {
+  DbAccount,
+  DbAccountGroup,
+  DbCategory,
+  DbCategoryGroup,
+  DbPayee,
+} from './db';
 import { ValidationError } from './errors';
 
 export function requiredFields<T extends object, K extends keyof T>(
@@ -66,6 +72,23 @@ export const accountModel = {
     );
 
     return account as DbAccount;
+  },
+};
+
+export const accountGroupModel = {
+  validate<T extends Partial<DbAccountGroup>>(
+    accountGroup: T,
+    { update }: { update?: boolean } = {},
+  ): Omit<T, 'sort_order'> {
+    requiredFields<Partial<DbAccountGroup>, 'name'>(
+      'accountGroup',
+      accountGroup,
+      ['name'],
+      update,
+    );
+
+    const { sort_order: _sort_order, ...rest } = accountGroup;
+    return rest;
   },
 };
 

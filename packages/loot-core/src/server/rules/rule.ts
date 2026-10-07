@@ -43,7 +43,16 @@ function execSplitActions(actions: Action[], transaction) {
       const { data } = addSplitTransaction(newTransactions, transaction.id);
       newTransactions = data;
     }
+    // Keep parent data separate from the child fields changed by split actions.
     newTransactions[splitTransactionIndex].parent_amount = transaction.amount;
+    newTransactions[splitTransactionIndex].parent_notes =
+      transaction.notes ?? '';
+    newTransactions[splitTransactionIndex].parent_imported_payee =
+      transaction.imported_payee ?? '';
+    newTransactions[splitTransactionIndex].parent_payee =
+      transaction.payee ?? '';
+    newTransactions[splitTransactionIndex].parent_account =
+      transaction.account ?? '';
     newTransactions[splitTransactionIndex].balance = transaction.balance;
     newTransactions[splitTransactionIndex]._balanceOfPrefetched =
       transaction._balanceOfPrefetched;

@@ -270,7 +270,7 @@ export function CloseAccountModal({
 
               {!canDelete && (
                 <View style={{ marginBottom: 15 }}>
-                  <Text style={{ fontSize: 12 }}>
+                  <Text size="small">
                     <Trans>
                       You can also{' '}
                       <Link

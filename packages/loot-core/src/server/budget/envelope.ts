@@ -238,49 +238,59 @@ export function createBudget(meta, categories, months) {
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {
-  function addDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
+  // Build list of cells and dependencies that need updated
+  function getDeps(sheetName, prevSheetName, groupId, cat) {
+    const deps: Array<[string, string[]]> = [
+      [`group-sum-amount-${groupId}`, [`sum-amount-${cat.id}`]],
+      [`group-budget-${groupId}`, [`budget-${cat.id}`]],
+      [`group-leftover-${groupId}`, [`leftover-${cat.id}`]],
+    ];
+
+    if (cat.is_income) {
+      deps.push([
+        'buffered-auto',
+        [
+          `${sheetName}!sum-amount-${cat.id}`,
+          `${sheetName}!carryover-${cat.id}`,
+        ],
       ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
+    } else {
+      deps.push([
+        'last-month-overspent',
+        [
+          `${prevSheetName}!leftover-${cat.id}`,
+          `${prevSheetName}!carryover-${cat.id}`,
+        ],
       ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
+    }
+
+    return deps;
   }
 
-  function removeDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
+  function addDeps(sheetName, prevSheetName, groupId, cat) {
+    getDeps(sheetName, prevSheetName, groupId, cat).forEach(
+      ([cellName, deps]) => {
+        sheet.get().addDependencies(sheetName, cellName, deps);
+      },
+    );
+  }
+
+  function removeDeps(sheetName, prevSheetName, groupId, cat) {
+    getDeps(sheetName, prevSheetName, groupId, cat).forEach(
+      ([cellName, deps]) => {
+        sheet.get().removeDependencies(sheetName, cellName, deps);
+      },
+    );
   }
 
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
-    const id = newValue.id;
-    const groupId = newValue.cat_group;
-
     months.forEach(month => {
+      const prevSheetName = monthUtils.sheetForMonth(
+        monthUtils.prevMonth(month),
+      );
       const sheetName = monthUtils.sheetForMonth(month);
-      removeDeps(sheetName, groupId, id);
+
+      removeDeps(sheetName, prevSheetName, newValue.cat_group, newValue);
     });
   } else if (
     newValue.tombstone === 0 &&
@@ -296,38 +306,18 @@ export function handleCategoryChange(months, oldValue, newValue) {
 
       createCategoryFromBase(newValue, sheetName, prevSheetName, start, end);
 
-      const id = newValue.id;
-      const groupId = newValue.cat_group;
-
-      sheet
-        .get()
-        .addDependencies(sheetName, 'last-month-overspent', [
-          `${prevSheetName}!leftover-${id}`,
-          `${prevSheetName}!carryover-${id}`,
-        ]);
-
-      addDeps(sheetName, groupId, id);
-      if (newValue.is_income) {
-        sheet
-          .get()
-          .addDependencies(
-            sheetName,
-            'buffered-auto',
-            flatten2([
-              `${sheetName}!sum-amount-${id}`,
-              `${sheetName}!carryover-${id}`,
-            ]),
-          );
-      }
+      addDeps(sheetName, prevSheetName, newValue.cat_group, newValue);
     });
   } else if (oldValue && oldValue.cat_group !== newValue.cat_group) {
     // The category moved so we need to update the dependencies
-    const id = newValue.id;
-
     months.forEach(month => {
+      const prevSheetName = monthUtils.sheetForMonth(
+        monthUtils.prevMonth(month),
+      );
       const sheetName = monthUtils.sheetForMonth(month);
-      removeDeps(sheetName, oldValue.cat_group, id);
-      addDeps(sheetName, newValue.cat_group, id);
+
+      removeDeps(sheetName, prevSheetName, oldValue.cat_group, newValue);
+      addDeps(sheetName, prevSheetName, newValue.cat_group, newValue);
     });
   }
 }

@@ -8,11 +8,13 @@ import { setSyncingMode } from '#server/sync';
 import { handlers } from '#server/tests/mockSyncServer';
 import { insertRule, loadRules } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
+import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type { SyncedPrefs } from '#types/prefs';
 
 import { app as accountsApp } from './app';
 import {
   addTransactions,
+  compareFuzzyMatchCandidates,
   reconcileTransactions,
   simpleFinBatchSync,
 } from './sync';
@@ -103,6 +105,123 @@ describe('Account sync', () => {
     );
   });
 
+  test('reconcile title-cases the payee name by default', async () => {
+    const { id } = await prepareDatabase();
+
+    await reconcileTransactions(id, [
+      {
+        date: '2020-01-02',
+        payee_name: 'Nintendo Store New York NY',
+        amount: 4133,
+      },
+    ]);
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York Ny');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
+  });
+
+  test('transactions-import title-cases the payee name by default', async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'Nintendo Store New York NY',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York Ny');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
+  });
+
+  test("transactions-import keeps the payee name with payeeNameNormalization 'original'", async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'Nintendo Store New York NY',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+      opts: { payeeNameNormalization: 'original' },
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York NY');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York NY');
+  });
+
+  test("transactions-import trims the payee name with payeeNameNormalization 'original'", async () => {
+    const { id } = await prepareDatabase();
+
+    await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: '  Nintendo Store New York NY  ',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+      opts: { payeeNameNormalization: 'original' },
+    });
+
+    const payees = await getAllPayees();
+    expect(payees.length).toBe(1);
+    expect(payees[0].name).toBe('Nintendo Store New York NY');
+
+    const transactions = await getAllTransactions();
+    expect(transactions[0].imported_payee).toBe('Nintendo Store New York NY');
+  });
+
+  test('transactions-import rejects an unknown payeeNameNormalization', async () => {
+    const { id } = await prepareDatabase();
+
+    await expect(
+      accountsApp.handlers['transactions-import']({
+        accountId: id,
+        transactions: [
+          {
+            account: id,
+            date: '2020-01-02',
+            payee_name: 'Nintendo Store New York NY',
+            amount: 4133,
+          },
+        ],
+        isPreview: false,
+        opts: {
+          payeeNameNormalization: 'titlecase',
+        } as unknown as ImportTransactionsOpts,
+      }),
+    ).rejects.toThrow(/payeeNameNormalization/);
+
+    expect(await getAllPayees()).toEqual([]);
+  });
+
   test('reconcile handles transactions with undefined fields', async () => {
     const { id: acctId } = await prepareDatabase();
 
@@ -190,12 +309,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-override' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      false,
+      { reimportDeleted: false },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(1);
@@ -216,12 +330,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-override2' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      true,
+      { reimportDeleted: true },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(2);
@@ -246,12 +355,7 @@ describe('Account sync', () => {
     await reconcileTransactions(
       acctId,
       [{ date: '2020-01-01', imported_id: 'finid-precedence' }],
-      false,
-      true,
-      false,
-      true,
-      false,
-      false,
+      { reimportDeleted: false },
     );
     const transactions2 = await getAllTransactions();
     expect(transactions2.length).toBe(1);
@@ -535,6 +639,222 @@ describe('Account sync', () => {
     ).toBe(-1239);
   });
 
+  describe('compareFuzzyMatchCandidates', () => {
+    const transDate = '2024-04-05';
+    const alreadyImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: 'existing-import-id',
+    };
+    const notYetImported = {
+      date: db.toDateRepr('2024-04-05'),
+      imported_id: null,
+    };
+
+    test(
+      'breaks a same-distance tie by preferring the unlinked candidate, ' +
+        'regardless of which candidate is passed in first',
+      () => {
+        // Feed the comparator the already-imported candidate first -- the
+        // pre-fix comparator (`aDistance - bDistance`, which never returns 0
+        // for equal distances) would have kept it first. The sort must
+        // still put the unlinked candidate ahead of it either way.
+        expect(
+          [alreadyImported, notYetImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+
+        expect(
+          [notYetImported, alreadyImported].sort((a, b) =>
+            compareFuzzyMatchCandidates(transDate, a, b),
+          ),
+        ).toEqual([notYetImported, alreadyImported]);
+      },
+    );
+
+    test('prefers the closer date over imported_id status', () => {
+      const fartherButUnlinked = {
+        date: db.toDateRepr('2024-04-08'),
+        imported_id: null,
+      };
+
+      expect(
+        [fartherButUnlinked, alreadyImported].sort((a, b) =>
+          compareFuzzyMatchCandidates(transDate, a, b),
+        ),
+      ).toEqual([alreadyImported, fartherButUnlinked]);
+    });
+  });
+
+  test(
+    'given two equally-dated candidates, an unlinked one is preferred over ' +
+      'one that already has its own imported_id',
+    async () => {
+      const { id } = await prepareDatabase();
+
+      // Both candidates are tied on date-distance to the incoming
+      // transaction, so which one wins depends on the comparator's
+      // imported_id tie-break, verified directly (independent of DB read
+      // order) in the compareFuzzyMatchCandidates tests above. This test
+      // covers the same scenario end-to-end through reconcileTransactions.
+      await db.insertTransaction({
+        id: 'already-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+        imported_id: 'existing-import-id',
+      });
+      await db.insertTransaction({
+        id: 'not-yet-imported',
+        account: id,
+        amount: -1239,
+        date: '2024-04-05',
+      });
+
+      // Neither candidate's date matches the incoming transaction's date
+      // any more closely than the other, so the two are tied on distance --
+      // the tie should be broken in favor of the row that isn't already
+      // linked to some other bank transaction.
+      await reconcileTransactions(
+        id,
+        [
+          {
+            date: '2024-04-05',
+            amount: -1239,
+            payee_name: 'Acme Inc.',
+            imported_id: 'new-import-id',
+          },
+        ],
+        { strictIdChecking: false },
+      );
+
+      const transactions = await getAllTransactions();
+      expect(transactions.length).toBe(2);
+
+      const alreadyImported = transactions.find(
+        t => t.id === 'already-imported',
+      );
+      expect(alreadyImported.imported_id).toBe('existing-import-id');
+
+      const notYetImported = transactions.find(
+        t => t.id === 'not-yet-imported',
+      );
+      expect(notYetImported.imported_id).toBe('new-import-id');
+    },
+  );
+  test('bank sync does not fuzzy-match children of an exactly matched split', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: id,
+      amount: -1000,
+      date: '2024-04-05',
+      imported_id: 'parent-provider-id',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: id,
+      amount: -299,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: id,
+      amount: -701,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+
+    const result = await reconcileTransactions(
+      id,
+      [
+        {
+          transactionId: 'new-provider-id',
+          transactionAmount: { amount: '-2.99' },
+          date: '2024-04-07',
+          payeeName: 'New merchant',
+          booked: true,
+        },
+        {
+          transactionId: 'parent-provider-id',
+          transactionAmount: { amount: '-10.00' },
+          date: '2024-04-05',
+          payeeName: 'Split merchant',
+          booked: true,
+        },
+      ],
+      { isBankSyncAccount: true, strictIdChecking: false },
+    );
+
+    expect(result.added).toHaveLength(1);
+
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(transaction => transaction.id === 'split-child-1')
+        .imported_id,
+    ).toBeNull();
+    expect(
+      transactions.find(
+        transaction => transaction.imported_id === 'new-provider-id',
+      ),
+    ).toMatchObject({ amount: -299, parent_id: null });
+  });
+
+  test('bank sync can fuzzy-match children of an unmatched split', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: id,
+      amount: -1000,
+      date: '2024-04-05',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child-1',
+      account: id,
+      amount: -299,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    await db.insertTransaction({
+      id: 'split-child-2',
+      account: id,
+      amount: -701,
+      date: '2024-04-05',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+
+    const result = await reconcileTransactions(
+      id,
+      [
+        {
+          transactionId: 'child-provider-id',
+          transactionAmount: { amount: '-2.99' },
+          date: '2024-04-07',
+          payeeName: 'Child merchant',
+          booked: true,
+        },
+      ],
+      { isBankSyncAccount: true, strictIdChecking: false },
+    );
+
+    expect(result.added).toHaveLength(0);
+
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(transaction => transaction.id === 'split-child-1')
+        .imported_id,
+    ).toBe('child-provider-id');
+  });
+
   test(
     'given an imported tx with no imported_id, ' +
       'when using fuzzy search V2, existing transaction has an imported_id, matches amount, and is within 7 days of imported tx, ' +
@@ -622,8 +942,7 @@ describe('Account sync', () => {
             imported_id: 'something-else-entirely',
           },
         ],
-        false,
-        false,
+        { strictIdChecking: false },
       );
 
       payees = await getAllPayees();
@@ -638,6 +957,8 @@ describe('Account sync', () => {
 });
 
 describe('SimpleFin batch sync', () => {
+  let previousGoCardlessTransactionsHandler;
+
   function mockSimpleFinTransactions(response) {
     vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
     handlers['/simplefin/transactions'] = () => response;
@@ -645,6 +966,12 @@ describe('SimpleFin batch sync', () => {
 
   afterEach(() => {
     delete handlers['/simplefin/transactions'];
+    if (previousGoCardlessTransactionsHandler) {
+      handlers['/gocardless/transactions'] =
+        previousGoCardlessTransactionsHandler;
+    } else {
+      delete handlers['/gocardless/transactions'];
+    }
   });
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
@@ -844,5 +1171,57 @@ describe('SimpleFin batch sync', () => {
     expect(missingResult).toBeDefined();
     expect(missingResult.res.error_code).toBe('ACCOUNT_MISSING');
     expect(missingResult.res.error_type).toBe('ACCOUNT_MISSING');
+  });
+
+  test('preserves GOCARDLESS_NOT_CONFIGURED error through bank sync pipeline', async () => {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+    vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+      'user-id': 'user-1',
+      'user-key': 'key-1',
+    });
+
+    db.runQuery(
+      'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+      ['bank-1', 'gc-bank', 'GoCardless Bank'],
+    );
+
+    const acctId = await db.insertAccount({
+      id: 'acct-gc-1',
+      account_id: 'ext-gc-1',
+      name: 'GoCardless Checking',
+      bank: 'bank-1',
+      account_sync_source: 'goCardless',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + acctId,
+      name: '',
+      transfer_acct: acctId,
+    });
+
+    previousGoCardlessTransactionsHandler =
+      handlers['/gocardless/transactions'];
+    handlers['/gocardless/transactions'] = () => ({
+      error_type: 'GOCARDLESS_NOT_CONFIGURED',
+      error_code: 'GOCARDLESS_NOT_CONFIGURED',
+      reason: 'GoCardless credentials are missing',
+    });
+
+    const result = await accountsApp.handlers['accounts-bank-sync']({
+      ids: [acctId],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toMatchObject({
+      type: 'SyncError',
+      accountId: acctId,
+      category: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+    });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [acctId],
+    );
+    expect(account!.bank_sync_status).toBe('not-configured');
   });
 });

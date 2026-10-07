@@ -148,6 +148,7 @@ type DatePickerProps = {
   onUpdate: (selectedDate: Date) => void;
   onSelect: (selectedDate: Date) => void;
   attached?: boolean;
+  embedded?: boolean;
 };
 
 type DatePickerForwardedRef = {
@@ -155,7 +156,16 @@ type DatePickerForwardedRef = {
 };
 const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
   (
-    { value, dateFormat, locale, firstDayOfWeek, onUpdate, onSelect, attached },
+    {
+      value,
+      dateFormat,
+      locale,
+      firstDayOfWeek,
+      onUpdate,
+      onSelect,
+      attached,
+      embedded,
+    },
     ref,
   ) => {
     const { t } = useTranslation();
@@ -220,6 +230,17 @@ const DatePicker = forwardRef<DatePickerForwardedRef, DatePickerProps>(
               borderBottomRightRadius: 0,
               boxShadow: 'none',
             },
+          },
+          // Embedded: stretch the grid to the container with equal columns
+          // (same technique as DayRangeCalendar). The container must have a
+          // definite width — a 100%-wide table blows up shrink-to-fit boxes.
+          embedded && {
+            '& .react-aria-Calendar': { width: '100%' },
+            '& .react-aria-CalendarGrid': {
+              width: '100%',
+              tableLayout: 'fixed',
+            },
+            '& .react-aria-CalendarCell': { width: 'auto' },
           },
           { flex: 1 },
         ])}
@@ -514,6 +535,7 @@ function DateSelectDesktop({
             locale={locale}
             firstDayOfWeek={firstDayOfWeek}
             attached={!!onTransferDateSyncChange}
+            embedded={embedded}
             onUpdate={date => {
               setSelectedValue(format(date, dateFormat));
               onUpdate?.(format(date, 'yyyy-MM-dd'));
