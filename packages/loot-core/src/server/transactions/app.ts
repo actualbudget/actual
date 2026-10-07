@@ -18,6 +18,7 @@ import type {
 
 import { postExchangeTransfer } from './exchange-transfer';
 import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
+import { moveForeignEntry, updateForeignEntry } from './foreign-edit';
 import { postForeignEntry } from './foreign-entry';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
@@ -39,6 +40,8 @@ export type TransactionHandlers = {
   'get-latest-transaction': typeof getLatestTransaction;
   'transactions/post-foreign-entry': typeof postForeignEntry;
   'transactions/post-exchange-transfer': typeof postExchangeTransfer;
+  'transactions/update-foreign-entry': typeof updateForeignEntry;
+  'transactions/move-foreign-entry': typeof moveForeignEntry;
 };
 
 async function handleBatchUpdateTransactions({
@@ -178,6 +181,8 @@ app.method(
   'transactions/post-exchange-transfer',
   mutator(postExchangeTransfer),
 );
+app.method('transactions/update-foreign-entry', mutator(updateForeignEntry));
+app.method('transactions/move-foreign-entry', mutator(moveForeignEntry));
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
 
 app.method('transaction-add', mutator(addTransaction));

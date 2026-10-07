@@ -41,6 +41,29 @@ describe('rescaleBudget', () => {
     },
   );
 
+  it('keeps the account in a rescaled amount authority', () => {
+    db.execQuery(`
+      INSERT INTO transactions (id, amount, transaction_amount, amount_pair, acct)
+        VALUES ('bound', 1250, 1500, '1250:1500@jpy', 'jpy'),
+               ('base', 1250, NULL, '1250:@usd', 'usd'),
+               ('legacy', 1250, 1500, '1250:1500', 'jpy');
+    `);
+    const database = db.getDatabase();
+    if (!database) throw new Error('missing test database');
+    rescaleBudget(database, 2, 0);
+    expect(
+      db.runQuery(
+        'SELECT id, amount, amount_pair FROM transactions ORDER BY id',
+        [],
+        true,
+      ),
+    ).toEqual([
+      { id: 'base', amount: 12, amount_pair: '12:@usd' },
+      { id: 'bound', amount: 12, amount_pair: '12:1500@jpy' },
+      { id: 'legacy', amount: 12, amount_pair: '12:1500' },
+    ]);
+  });
+
   it('rescales orphan children and one-sided transfers without validating their unrelated structure', () => {
     db.execQuery(`
       INSERT INTO transactions (id, amount, isChild, parent_id) VALUES ('orphan', 150, 1, 'missing');
