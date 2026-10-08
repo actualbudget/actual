@@ -109,28 +109,31 @@ export function runQuery<T>(
 
   const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
 
-  if (fetchAll) {
-    try {
-      stmt.bind(params);
-      const rows = [];
+  try {
+    if (fetchAll) {
+      try {
+        stmt.bind(params);
+        const rows = [];
 
-      while (stmt.step()) {
-        rows.push(stmt.getAsObject());
+        while (stmt.step()) {
+          rows.push(stmt.getAsObject());
+        }
+        return rows;
+      } catch (e) {
+        logger.log(sql);
+        throw e;
       }
-
-      if (typeof sql === 'string') {
-        stmt.free();
-      } else {
-        stmt.reset();
-      }
-      return rows;
-    } catch (e) {
-      logger.log(sql);
-      throw e;
     }
-  } else {
+
     stmt.run(params);
     return { changes: db.getRowsModified() };
+  } finally {
+    // sql.js keeps statements alive in the WASM heap until they are freed.
+    if (typeof sql === 'string') {
+      stmt.free();
+    } else {
+      stmt.reset();
+    }
   }
 }
 
