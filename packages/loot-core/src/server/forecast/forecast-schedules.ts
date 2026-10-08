@@ -61,6 +61,8 @@ type TransferPayee = {
 };
 
 export type ForecastScheduleOccurrence = {
+  occurrenceId: string;
+  originalDueDate: string;
   transaction: TransactionEntity;
   filterObject: ForecastFilterObject;
   amount: number;
@@ -192,6 +194,7 @@ export async function buildFutureScheduleOccurrences(
   const payeesById = new Map<string, Awaited<ReturnType<typeof db.getPayee>>>();
   const simulatedTransactions: TransactionEntity[] = [];
   const occurrences: Array<{
+    originalDueDate: string;
     accountId: string;
     transactionId: string;
     amount: number;
@@ -229,6 +232,7 @@ export async function buildFutureScheduleOccurrences(
       );
       simulatedTransactions.push(sourceTransaction);
       occurrences.push({
+        originalDueDate: date,
         accountId: sourceTransaction.account,
         transactionId: sourceTransaction.id,
         amount: sourceTransaction.amount,
@@ -291,6 +295,7 @@ export async function buildFutureScheduleOccurrences(
       sourceTransaction.transfer_id = transferTransaction.id;
       simulatedTransactions.push(transferTransaction);
       occurrences.push({
+        originalDueDate: date,
         accountId: transferTransaction.account,
         transactionId: transferTransaction.id,
         amount: transferTransaction.amount,
@@ -319,6 +324,8 @@ export async function buildFutureScheduleOccurrences(
     }
 
     return {
+      occurrenceId: `forecast-${occurrence.scheduleId}-${occurrence.originalDueDate}`,
+      originalDueDate: occurrence.originalDueDate,
       transaction,
       filterObject,
       amount: occurrence.amount,

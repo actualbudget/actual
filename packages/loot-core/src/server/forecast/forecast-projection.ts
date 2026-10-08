@@ -2,19 +2,18 @@ import { addMonths, format } from 'date-fns';
 
 import * as monthUtils from '#shared/months';
 import type { TransactionEntity } from '#types/models';
-import type { ForecastDataPoint, ForecastResult } from '#types/models/forecast';
+import type {
+  ForecastDataPoint,
+  ForecastResult,
+  ForecastTransaction,
+} from '#types/models/forecast';
 
 import type { AccountWithComputedBalance } from './forecast-accounts';
 import { matchesForecastFilters } from './forecast-filters';
 import type { ForecastFilterInfo } from './forecast-filters';
 import type { ForecastScheduleOccurrence } from './forecast-schedules';
 
-type ScheduleOccurrenceSummary = {
-  amount: number;
-  payee: string;
-  scheduleId: string;
-  scheduleName: string;
-};
+type ScheduleOccurrenceSummary = ForecastTransaction;
 
 type ScheduleOccurrencesByAccount = Record<
   string,
@@ -130,6 +129,8 @@ export function indexScheduleOccurrences(
       occurrence.transaction.account,
       occurrence.transaction.date,
       {
+        occurrenceId: occurrence.occurrenceId,
+        originalDueDate: occurrence.originalDueDate,
         amount: occurrence.amount,
         payee: occurrence.payee,
         scheduleId: occurrence.scheduleId,
@@ -202,6 +203,8 @@ function buildAccountForecastDataPoints(
       accountId: account.id,
       accountName: account.name,
       transactions: scheduleTxns.map(scheduleTxn => ({
+        occurrenceId: scheduleTxn.occurrenceId,
+        originalDueDate: scheduleTxn.originalDueDate,
         amount: scheduleTxn.amount,
         payee: scheduleTxn.payee,
         scheduleId: scheduleTxn.scheduleId,
