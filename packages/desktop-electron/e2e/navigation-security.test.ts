@@ -86,19 +86,22 @@ test('redirects cannot replace the app with an external page', async ({
   }
 });
 
-test('forwards queued startup logs to the app DevTools console', async ({
-  electronPage,
-}) => {
-  await expect(electronPage).toHaveURL('app://actual/config-server');
-  const messages: string[] = [];
-  const session = await electronPage.context().newCDPSession(electronPage);
-  session.on('Runtime.consoleAPICalled', event => {
-    messages.push(event.args.map(arg => arg.value).join(' '));
-  });
-  // Runtime.enable also reports console messages emitted before attachment.
-  await session.send('Runtime.enable');
-  await expect
-    .poll(() => messages.join('\n'))
-    .toContain('Could not load global state');
-  await session.detach();
-});
+const startupLogTest = test.extend({ corruptGlobalPrefs: true });
+
+startupLogTest(
+  'forwards queued startup logs to the app DevTools console',
+  async ({ electronPage }) => {
+    await expect(electronPage).toHaveURL('app://actual/config-server');
+    const messages: string[] = [];
+    const session = await electronPage.context().newCDPSession(electronPage);
+    session.on('Runtime.consoleAPICalled', event => {
+      messages.push(event.args.map(arg => arg.value).join(' '));
+    });
+    // Runtime.enable also reports console messages emitted before attachment.
+    await session.send('Runtime.enable');
+    await expect
+      .poll(() => messages.join('\n'))
+      .toContain('Could not parse global state');
+    await session.detach();
+  },
+);
