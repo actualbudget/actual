@@ -460,6 +460,7 @@ export type BalanceForecastWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
+    yAxisBase?: 'Zero Based' | 'Auto';
     source?: ForecastSource;
   } | null
 >;
