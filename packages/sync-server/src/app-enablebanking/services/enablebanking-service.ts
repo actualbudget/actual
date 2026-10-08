@@ -7,6 +7,8 @@ import {
 import { getJWT } from '#app-enablebanking/utils/jwt';
 import { SecretName, secretsService } from '#services/secrets-service';
 
+const debugSensitive = createDebug('actual-sensitive:enable-banking');
+
 const debug = createDebug('actual:enable-banking:service');
 
 const BASE_URL = 'https://api.enablebanking.com';
@@ -128,7 +130,8 @@ async function request<T>(
   psuHeaders?: PsuHeaders,
 ): Promise<T> {
   const url = `${BASE_URL}${path}`;
-  debug('%s %s', method, url);
+  debug('%s request', method);
+  debugSensitive('%s %s', method, url);
 
   const headers: Record<string, string> = {
     Authorization: authHeaderOverride ?? getAuthorizationHeader(),

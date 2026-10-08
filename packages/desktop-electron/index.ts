@@ -33,9 +33,11 @@ import type {
   UtilityProcess,
 } from 'electron';
 
+import { openExternalUrl, revealLocalFile } from './external-links';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
+import { isInternalUrl } from './trusted-url';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -93,7 +95,7 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   const trimmedMessage = JSON.stringify(message.trim()); // ensure line endings are removed
   console[loglevel](trimmedMessage);
 
-  if (!clientWin) {
+  if (!clientWin || !isInternalUrl(clientWin.webContents.getURL(), isDev)) {
     // queue up the logs until the client window is ready
     queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
@@ -493,7 +495,7 @@ async function createWindow() {
   win.on('focus', async () => {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
-      if (url.includes('app://') || url.includes('localhost:')) {
+      if (isInternalUrl(url, isDev)) {
         void clientWin.webContents.executeJavaScript(
           'window.__actionsForMenu.appFocused()',
         );
@@ -504,8 +506,8 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
 
     return { action: 'deny' };
@@ -514,9 +516,8 @@ async function createWindow() {
   // hit when clicking <a href/> with no target
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
-      event.preventDefault();
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
   });
 
@@ -524,18 +525,17 @@ async function createWindow() {
 
   clientWin = win;
 
-  // Execute queued logs - displaying them in the client window
-  void Promise.all(
-    queuedClientWinLogs.map((log: string) =>
-      win.webContents.executeJavaScript(log),
-    ),
-  );
-
-  queuedClientWinLogs = [];
-}
-
-function isExternalUrl(url: string) {
-  return !url.includes('localhost:') && !url.includes('app://');
+  // Wait for an internal page before forwarding queued logs to DevTools.
+  win.webContents.on('did-finish-load', () => {
+    if (!isInternalUrl(win.webContents.getURL(), isDev)) {
+      return;
+    }
+    const logs = queuedClientWinLogs;
+    queuedClientWinLogs = [];
+    for (const log of logs) {
+      void win.webContents.executeJavaScript(log);
+    }
+  });
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -754,11 +754,11 @@ ipcMain.handle(
 );
 
 ipcMain.handle('open-external-url', (event, url) => {
-  void shell.openExternal(url);
+  void openExternalUrl(url, target => shell.openExternal(target));
 });
 
 ipcMain.handle('open-in-file-manager', (event, filepath) => {
-  shell.showItemInFolder(filepath);
+  revealLocalFile(filepath, target => shell.showItemInFolder(target));
 });
 
 ipcMain.on('message', (_event, msg) => {

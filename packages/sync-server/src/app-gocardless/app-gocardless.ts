@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import express from 'express';
 import type { Request } from 'express';
 
@@ -26,6 +27,8 @@ import { handleError } from './util/handle-error';
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const ELECTRON_APP_ORIGIN = 'app://actual';
 
@@ -330,14 +333,16 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',

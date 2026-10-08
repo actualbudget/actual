@@ -1,3 +1,5 @@
+import createDebug from 'debug';
+
 import type {
   GoCardlessAccountDetails,
   GoCardlessAccountId,
@@ -12,6 +14,8 @@ import type {
   GetBalances,
   GetTransactionsResponse,
 } from '#app-gocardless/gocardless.types';
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
@@ -134,7 +138,8 @@ export class GoCardlessApi {
       try {
         error.response.data = await response.json();
       } catch {}
-      console.log(
+      console.log(`GoCardless request failed: ${response.status}`);
+      debugSensitive(
         `GoCardless ${method} ${endpoint} ${response.status}`,
         error.response.data ? JSON.stringify(error.response.data) : '(no body)',
       );

@@ -856,7 +856,9 @@ Returns a list of all budget files either locally cached or on the remote server
 
 <Method name="loadBudget" args={[{ properties: [{ name: 'syncId', type: 'string' }] }]} returns="Promise<void>" />
 
-Load a locally cached budget file.
+Load a locally cached budget file using its local `id` from `getBudgets()`. Downloaded budgets receive a local ID that can differ between devices; do not use the Budget ID from another device.
+
+To download and open a budget using its Sync ID, use `downloadBudget()`.
 
 #### `downloadBudget`
 
