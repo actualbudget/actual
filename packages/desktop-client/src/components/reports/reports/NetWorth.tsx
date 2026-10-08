@@ -360,19 +360,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       >
         <View
           style={{
+            alignItems: 'flex-end',
             textAlign: 'right',
             paddingTop: 20,
           }}
         >
-          <View
+          <FinancialText
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>
-              <FinancialText>
-                {format(data.netWorth, 'financial')}
-              </FinancialText>
-            </PrivacyFilter>
-          </View>
+            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
+          </FinancialText>
           <PrivacyFilter>
             <Change amount={data.totalChange} />
           </PrivacyFilter>
