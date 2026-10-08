@@ -1131,11 +1131,13 @@ class AccountInternal extends PureComponent<
   }
 
   getBalanceQuery(id?: string) {
-    // A foreign account's header shows its native balance.
+    // A foreign account's header shows its native balance, counting each
+    // split once through its parent like the sidebar and the estimate.
     const foreign = this.getForeignAccount();
+    const root = this.makeRootTransactionsQuery();
     return {
       name: `balance-query-${id}${foreign ? '-native' : ''}`,
-      query: this.makeRootTransactionsQuery().calculate({
+      query: (foreign ? root.options({ splits: 'none' }) : root).calculate({
         $sum: foreign ? '$transaction_amount' : '$amount',
       }),
     } as const;

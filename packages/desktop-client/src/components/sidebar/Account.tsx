@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef, useState } from 'react';
+import React, { useId, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +22,10 @@ import { css, cx } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
+import {
+  EstimateDescription,
+  useCurrentEstimateLines,
+} from '#components/accounts/CurrentEstimateLines';
 import { Link } from '#components/common/Link';
 import { Notes } from '#components/Notes';
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
@@ -125,10 +129,21 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
 
+  // Current-rate estimates describe the balance on hover and to screen
+  // readers; the account header and mobile list show them as text.
+  const estimateLines = useCurrentEstimateLines({
+    account,
+    accountId: account
+      ? undefined
+      : to.replace(/^\/accounts\/?/, '') || undefined,
+  });
+  const estimateId = useId();
   const balanceCell = (
-    <AccountCurrencyFormat account={account}>
-      <CellValue binding={query} type="financial" />
-    </AccountCurrencyFormat>
+    <View title={estimateLines.join('\n') || undefined}>
+      <AccountCurrencyFormat account={account}>
+        <CellValue binding={query} type="financial" />
+      </AccountCurrencyFormat>
+    </View>
   );
 
   const isContextMenuOpen = useSelector(state =>
@@ -169,6 +184,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
           <Link
             variant="internal"
             to={to}
+            aria-describedby={estimateLines.length ? estimateId : undefined}
             isDisabled={isEditing}
             isExactPathMatch={isExactPathMatch}
             style={{
@@ -271,6 +287,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               }
             />
           </Link>
+          <EstimateDescription id={estimateId} lines={estimateLines} />
         </View>
       </View>
     </View>

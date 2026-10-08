@@ -15,7 +15,7 @@ import { pushModal } from './modals/modalsSlice';
 import { addNotification } from './notifications/notificationsSlice';
 import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
-import { loadPrefs } from './prefs/prefsSlice';
+import { loadPrefs, mergeSyncedPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { signOut } from './users/usersSlice';
@@ -125,6 +125,14 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         void queryClient.invalidateQueries({
           queryKey: budgetBoundsQueries.all(),
         });
+      }
+
+      // Synced preferences (feature flags, currency settings) changed on
+      // another device; displays gated on them read the store.
+      if (tables.includes('preferences')) {
+        void send('preferences/get').then(prefs =>
+          store.dispatch(mergeSyncedPrefs(prefs)),
+        );
       }
 
       if (
