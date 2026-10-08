@@ -163,7 +163,10 @@ export function countForecastScheduledOccurrences({
       continue;
     }
     for (const transaction of dataPoint.transactions) {
-      occurrenceKeys.add(`${dataPoint.date}:${transaction.scheduleId}`);
+      occurrenceKeys.add(
+        transaction.occurrenceId ??
+          `${transaction.originalDueDate ?? dataPoint.date}:${transaction.scheduleId}`,
+      );
     }
   }
 
