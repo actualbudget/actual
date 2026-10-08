@@ -13,6 +13,6 @@ export class TrackingBudgetSummaryModal {
   }
 
   async close() {
-    await this.heading.getByRole('button', { name: 'Close' }).click();
+    await this.locator.getByRole('button', { name: 'Close' }).click();
   }
 }
