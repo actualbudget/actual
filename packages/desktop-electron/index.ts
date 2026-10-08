@@ -306,9 +306,13 @@ async function createBackgroundProcess() {
   };
 
   if (globalPrefs['server-self-signed-cert']) {
+    // The backend process trusts this certificate via tls.setDefaultCACertificates
+    // (see certificates.ts). NODE_EXTRA_CA_CERTS can't be used for this: the
+    // packaged app disables the Electron `nodeOptions` fuse, which makes
+    // Electron ignore both NODE_OPTIONS and NODE_EXTRA_CA_CERTS.
     envVariables = {
       ...envVariables,
-      NODE_EXTRA_CA_CERTS: globalPrefs['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
+      ACTUAL_SERVER_SELF_SIGNED_CERT: globalPrefs['server-self-signed-cert'],
     };
   }
 
