@@ -19,6 +19,8 @@ export type ForecastDataPoint = {
 };
 
 export type ForecastTransaction = {
+  occurrenceId?: string;
+  originalDueDate?: string;
   amount: number;
   payee: string | null;
   scheduleId: string;
