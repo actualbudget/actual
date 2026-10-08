@@ -643,11 +643,11 @@ export function ImportTransactionsModal({
     for (let trans of transactions) {
       if (
         trans.isMatchedTransaction ||
-        (reconcile && !trans.selected && !trans.ignored)
+        (reconcile && !trans.selected && !trans.ignored && !trans.existing)
       ) {
         // skip transactions that are
         // - matched transaction (existing transaction added to show update changes)
-        // - unselected transactions that are not ignored by the reconcilation algorithm (only when reconcilation is enabled)
+        // - unselected transactions that are not ignored or merged by the reconcilation algorithm (only when reconcilation is enabled)
         continue;
       }
 
@@ -703,6 +703,12 @@ export function ImportTransactionsModal({
         // - ignored transactions (aleardy existing) that are checked
         // - transactions with existing (merged transactions) that are not selected_merge
         finalTransaction.forceAddTransaction = true;
+      }
+
+      if (reconcile && trans.existing && !trans.selected) {
+        // unselected transactions with existing are still sent, so they keep
+        // their match and the other transactions match as in the preview
+        finalTransaction.skipTransaction = true;
       }
 
       finalTransactions.push({
