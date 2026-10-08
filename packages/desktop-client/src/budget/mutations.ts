@@ -248,6 +248,7 @@ export function useSaveCategoryMutation() {
 
 type DeleteCategoryPayload = {
   id: CategoryEntity['id'];
+  transferId?: CategoryEntity['id'];
 };
 
 export function useDeleteCategoryMutation() {
@@ -266,7 +267,13 @@ export function useDeleteCategoryMutation() {
   };
 
   return useMutation({
-    mutationFn: async ({ id }: DeleteCategoryPayload) => {
+    mutationFn: async ({ id, transferId }: DeleteCategoryPayload) => {
+      if (transferId) {
+        if (id !== transferId) {
+          await deleteCategory({ id, transferId });
+        }
+        return;
+      }
       const mustTransfer = await send('must-category-transfer', { id });
 
       if (mustTransfer) {
@@ -462,6 +469,7 @@ export function useSaveCategoryGroupMutation() {
 
 type DeleteCategoryGroupPayload = {
   id: CategoryGroupEntity['id'];
+  transferId?: CategoryEntity['id'];
 };
 
 export function useDeleteCategoryGroupMutation() {
@@ -470,7 +478,11 @@ export function useDeleteCategoryGroupMutation() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ id }: DeleteCategoryGroupPayload) => {
+    mutationFn: async ({ id, transferId }: DeleteCategoryGroupPayload) => {
+      if (transferId) {
+        await send('category-group-delete', { id, transferId });
+        return;
+      }
       const { grouped: categoryGroups } = await queryClient.ensureQueryData(
         categoryQueries.list(),
       );
