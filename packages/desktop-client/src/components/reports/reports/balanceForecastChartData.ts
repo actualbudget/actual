@@ -134,11 +134,13 @@ export function countForecastScheduledOccurrences({
   start,
   end,
   granularity,
+  missedOnly = false,
 }: {
   forecastData: ForecastResult | null | undefined;
   start: string;
   end: string;
   granularity: Granularity;
+  missedOnly?: boolean;
 }): number {
   if (!forecastData?.dataPoints.length) {
     return 0;
@@ -163,6 +165,9 @@ export function countForecastScheduledOccurrences({
       continue;
     }
     for (const transaction of dataPoint.transactions) {
+      if (missedOnly && !transaction.isMissed) {
+        continue;
+      }
       occurrenceKeys.add(
         transaction.occurrenceId ??
           `${transaction.originalDueDate ?? dataPoint.date}:${transaction.scheduleId}`,

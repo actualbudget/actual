@@ -99,6 +99,12 @@ export function BalanceForecastCard({
       ? undefined
       : meta?.accounts === undefined,
     source,
+    missedSchedules: isTrackingBudgetForecast
+      ? undefined
+      : meta?.missedSchedules,
+    missedOccurrences: isTrackingBudgetForecast
+      ? undefined
+      : meta?.missedOccurrences,
   });
   const errorMessage =
     error instanceof Error
@@ -147,6 +153,13 @@ export function BalanceForecastCard({
   });
   const hasFilters =
     !isTrackingBudgetForecast && (meta?.conditions?.length ?? 0) > 0;
+  const missedOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity,
+    missedOnly: true,
+  });
 
   return (
     <ReportCard
@@ -360,6 +373,12 @@ export function BalanceForecastCard({
                       <Trans>(filtered running total)</Trans>
                     </>
                   ) : null}
+                </>
+              )}
+              {missedOccurrenceCount > 0 && (
+                <>
+                  {' '}
+                  <Trans>({{ count: missedOccurrenceCount }} missed)</Trans>
                 </>
               )}
               {isUpdatingForecast ? (
