@@ -16,7 +16,11 @@ import type {
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import type { ForecastSource } from '@actual-app/core/types/models/forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastSource,
+} from '@actual-app/core/types/models/forecast';
 import * as d from 'date-fns';
 import {
   CartesianGrid,
@@ -54,6 +58,7 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import { BalanceForecastMissedSchedules } from './BalanceForecastMissedSchedules';
 
 export function BalanceForecast() {
   const params = useParams();
@@ -126,6 +131,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
       : 'schedules',
   );
   const isTrackingBudgetForecast = source === 'tracking-budget';
+  const [missedSchedules, setMissedSchedules] =
+    useState<ForecastMissedSchedules>(
+      widget?.meta?.missedSchedules ?? 'exclude',
+    );
+  const [missedOccurrences, setMissedOccurrences] =
+    useState<ForecastMissedOccurrences>(
+      widget?.meta?.missedOccurrences ?? 'one',
+    );
 
   useEffect(() => {
     if (budgetType !== 'tracking' && source === 'tracking-budget') {
@@ -161,6 +174,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
       ? undefined
       : widget?.meta?.accounts === undefined,
     source,
+    missedSchedules: isTrackingBudgetForecast ? undefined : missedSchedules,
+    missedOccurrences: isTrackingBudgetForecast ? undefined : missedOccurrences,
     enabled: hasMonthOptions,
   });
   const errorMessage =
@@ -189,6 +204,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
         yAxisBase,
         source,
+        missedSchedules,
+        missedOccurrences,
         timeFrame: {
           start,
           end,
@@ -320,6 +337,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     end: chartRange.end,
     granularity,
   });
+  const missedOccurrenceCount = countForecastScheduledOccurrences({
+    forecastData: normalizedForecastData,
+    start: chartRange.start,
+    end: chartRange.end,
+    granularity,
+    missedOnly: true,
+  });
 
   if (!allMonths) {
     return <LoadingIndicator />;
@@ -439,6 +463,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           overflowY: 'auto',
         }}
       >
+        {!isTrackingBudgetForecast && (
+          <BalanceForecastMissedSchedules
+            missedSchedules={missedSchedules}
+            missedOccurrences={missedOccurrences}
+            onSchedulesChange={setMissedSchedules}
+            onOccurrencesChange={setMissedOccurrences}
+          />
+        )}
         {errorMessage ? (
           <div style={{ color: theme.errorText, marginBottom: 20 }}>
             {errorMessage}
@@ -652,6 +684,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                     {{ count: scheduledOccurrenceCount }} scheduled transactions
                     included in this date range
                   </Trans>
+                )}
+                {missedOccurrenceCount > 0 && (
+                  <>
+                    {' '}
+                    <Trans>({{ count: missedOccurrenceCount }} missed)</Trans>
+                  </>
                 )}
                 {isUpdatingForecast ? (
                   <>

@@ -286,6 +286,7 @@ describe('countForecastScheduledOccurrences', () => {
         transactions: ['2024-01-20', '2024-02-20'].map(originalDueDate => ({
           occurrenceId: `transfer:${originalDueDate}`,
           originalDueDate,
+          isMissed: originalDueDate === '2024-01-20',
           amount: accountId === 'checking' ? -250 : 250,
           payee: 'Transfer',
           scheduleId: 'transfer',
@@ -302,6 +303,15 @@ describe('countForecastScheduledOccurrences', () => {
       forecastEndDate: '2024-03-31',
     };
 
+    expect(
+      countForecastScheduledOccurrences({
+        forecastData,
+        start: '2024-03',
+        end: '2024-03',
+        granularity: 'Monthly',
+        missedOnly: true,
+      }),
+    ).toBe(1);
     expect(
       countForecastScheduledOccurrences({
         forecastData,
