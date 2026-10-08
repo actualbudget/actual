@@ -716,6 +716,20 @@ describe('schedule app', () => {
         },
       );
 
+      it('completes a recurring schedule when its last occurrence is posted early', async () => {
+        const lastOnly: RecurConfig = {
+          ...monthly('2017-01-10'),
+          endMode: 'on_date',
+          endDate: '2017-01-31',
+        };
+
+        expect(await postSchedule(lastOnly, true)).toEqual({
+          dates: ['2017-01-01'],
+          nextDate: '2017-01-10',
+          completed: true,
+        });
+      });
+
       it('keeps a one-time schedule open when it is due', async () => {
         expect(await postSchedule('2017-01-01')).toEqual({
           dates: ['2017-01-01'],

@@ -599,10 +599,12 @@ export async function postTransactionForSchedule({
   }
 
   // Posting before the due date pays the upcoming occurrence. Move on to the
-  // next one (or complete a one-time schedule), or the occurrence shows as
-  // unpaid again whenever the transaction is dated before `next_date`.
-  if (schedule.next_date > currentDay()) {
-    if (isRecurringSchedule(schedule)) {
+  // next one (or complete the schedule if there is none), or the occurrence
+  // shows as unpaid again whenever the transaction is dated before
+  // `next_date`.
+  const { date: dateCond } = extractScheduleConds(schedule._conditions);
+  if (dateCond && schedule.next_date > currentDay()) {
+    if (getNextDateAfter(dateCond, schedule.next_date) != null) {
       await advanceRecurringScheduleFromNextDate(schedule);
     } else {
       await updateSchedule({ schedule: { id, completed: true } });
