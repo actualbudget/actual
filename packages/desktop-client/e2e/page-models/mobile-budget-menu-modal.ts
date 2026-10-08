@@ -35,10 +35,15 @@ export class BudgetMenuModal {
   }
 
   async close() {
-    await this.locator.getByRole('button', { name: 'Close' }).click();
+    await this.page.keyboard.press('Escape');
   }
 
   async setBudgetAmount(newAmount: string) {
+    if (!(await this.budgetAmountInput.isVisible())) {
+      await this.locator
+        .getByRole('button', { name: /^-?[\d,]+\.\d{2}$/ })
+        .click();
+    }
     await this.budgetAmountInput.fill(newAmount);
     await this.budgetAmountInput.blur();
     await this.close();
