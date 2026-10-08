@@ -4,21 +4,28 @@ export class CategoryGroupMenuModal {
   readonly page: Page;
   readonly locator: Locator;
   readonly heading: Locator;
-  readonly menuButton: Locator;
+  readonly addCategoryButton: Locator;
+  readonly deleteButton: Locator;
 
   constructor(locator: Locator) {
     this.locator = locator;
     this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
-    this.menuButton = this.heading.getByRole('button', { name: 'Menu' });
+    this.addCategoryButton = locator.getByRole('button', {
+      name: 'Add category',
+    });
+    this.deleteButton = locator.getByRole('button', {
+      name: 'Delete',
+      exact: true,
+    });
+  }
+
+  async close() {
+    await this.locator.getByRole('button', { name: 'Close' }).click();
   }
 
   async delete() {
-    await this.menuButton.click();
-    await this.page
-      .locator('[data-popover]')
-      .getByRole('button', { name: 'Delete' })
-      .click();
+    await this.deleteButton.click();
   }
 }

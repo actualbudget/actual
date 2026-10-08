@@ -16,7 +16,6 @@ const copyLastMonthBudget = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.copyLastMonthBudget();
-  await budgetMenuModal.close();
 };
 
 const setTo3MonthAverage = async (
@@ -25,7 +24,6 @@ const setTo3MonthAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo3MonthAverage();
-  await budgetMenuModal.close();
 };
 
 const setTo6MonthAverage = async (
@@ -34,7 +32,6 @@ const setTo6MonthAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setTo6MonthAverage();
-  await budgetMenuModal.close();
 };
 
 const setToYearlyAverage = async (
@@ -43,7 +40,6 @@ const setToYearlyAverage = async (
 ) => {
   const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
   await budgetMenuModal.setToYearlyAverage();
-  await budgetMenuModal.close();
 };
 
 function getAverageStartMonth(month: string) {
@@ -455,7 +451,6 @@ budgetTypes.forEach(budgetType => {
 
       const budgetMenuModal = await budgetPage.openBudgetMenu(categoryName);
       await budgetMenuModal.applyBudgetTemplate();
-      await budgetMenuModal.close();
 
       await expect(budgetedButton).toHaveText(
         amountToCurrency(amountToTemplate),
