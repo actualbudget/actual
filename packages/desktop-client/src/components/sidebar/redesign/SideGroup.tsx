@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,6 +8,10 @@ import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import {
+  EstimateDescription,
+  useCurrentEstimateLines,
+} from '#components/accounts/CurrentEstimateLines';
 import { Link } from '#components/common/Link';
 import type { Binding } from '#spreadsheet';
 
@@ -49,6 +54,10 @@ export function SideGroup({
   onToggleBucket,
 }: SideGroupProps) {
   const { t } = useTranslation();
+  const estimateLines = useCurrentEstimateLines({
+    accountId: side === 'on' ? 'onbudget' : 'offbudget',
+  });
+  const estimateId = useId();
 
   return (
     <View style={{ marginTop: spacing.xxs }}>
@@ -87,6 +96,7 @@ export function SideGroup({
         <Link
           variant="internal"
           to={side === 'on' ? '/accounts/onbudget' : '/accounts/offbudget'}
+          aria-describedby={estimateLines.length ? estimateId : undefined}
           isExactPathMatch
           style={{
             display: 'flex',
@@ -107,9 +117,11 @@ export function SideGroup({
           <SidebarBalance
             binding={totalBinding}
             testId={balanceTestId}
+            title={estimateLines.join('\n')}
             style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}
           />
         </Link>
+        <EstimateDescription id={estimateId} lines={estimateLines} />
       </View>
       {isOpen && (
         <AccountTree

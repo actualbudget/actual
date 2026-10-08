@@ -27,10 +27,12 @@ import { css } from '@emotion/css';
 
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { useCurrentEstimateLines } from '#components/accounts/CurrentEstimateLines';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
@@ -66,6 +68,10 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
 }: AccountHeaderProps<SheetFieldName>) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // On and off budget sections show their converted total at current rates.
+  const [estimate] = useCurrentEstimateLines({
+    accountId: id === 'onbudget' || id === 'offbudget' ? id : 'none',
+  });
 
   const Cheveron = showCheveronDown ? SvgCheveronDown : SvgCheveronRight;
 
@@ -75,9 +81,11 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       aria-label={t('View {{name}} transactions', { name })}
       onPress={onPress ? onPress : () => navigate(`/accounts/${id}`)}
       style={{
-        height: ROW_HEIGHT,
+        // A section with a converted total grows to fit its estimate line.
+        ...(estimate
+          ? { minHeight: ROW_HEIGHT, paddingBlock: 8, paddingInline: 18 }
+          : { height: ROW_HEIGHT, padding: '0 18px' }),
         width: '100%',
-        padding: '0 18px',
         color: theme.pageTextLight,
         ...style,
       }}
@@ -105,14 +113,17 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
           height={styles.text.fontSize}
         />
       </View>
-      <CellValue binding={amount} type="financial">
-        {props => (
-          <CellValueText<'account', SheetFieldName>
-            {...props}
-            style={{ ...styles.text }}
-          />
-        )}
-      </CellValue>
+      <View style={{ alignItems: 'flex-end' }}>
+        <CellValue binding={amount} type="financial">
+          {props => (
+            <CellValueText<'account', SheetFieldName>
+              {...props}
+              style={{ ...styles.text }}
+            />
+          )}
+        </CellValue>
+        {estimate && <EstimateText>{estimate}</EstimateText>}
+      </View>
     </Button>
   );
 }
@@ -140,6 +151,7 @@ function AccountListItem({
   ...props
 }: AccountListItemProps) {
   const { value: account } = props;
+  const [estimate] = useCurrentEstimateLines({ account });
 
   if (!account) {
     return null;
@@ -160,7 +172,10 @@ function AccountListItem({
         <Button
           {...itemProps}
           style={{
-            height: ROW_HEIGHT,
+            // A row with an estimate line grows to fit it.
+            ...(estimate
+              ? { minHeight: ROW_HEIGHT, paddingBlock: 8 }
+              : { height: ROW_HEIGHT }),
             width: '100%',
             backgroundColor: theme.tableBackground,
             border: 'none',
@@ -204,35 +219,54 @@ function AccountListItem({
               {account.name}
             </TextOneLine>
           </View>
-          {/* A foreign account shows its native balance in its currency. */}
-          <AccountCurrencyFormat account={account}>
-            <CellValue<'account', 'balance' | 'nativeBalance'>
-              binding={
-                account.currency
-                  ? bindings.accountNativeBalance(account.id)
-                  : getBalanceQuery(account.id)
-              }
-              type="financial"
-            >
-              {props => (
-                <CellValueText<'account', 'balance' | 'nativeBalance'>
-                  {...props}
-                  style={{
-                    fontSize: 16,
-                    ...makeAmountFullStyle(props.value, {
-                      positiveColor: theme.numberPositive,
-                      negativeColor: theme.numberNegative,
-                      zeroColor: theme.numberNeutral,
-                    }),
-                  }}
-                  data-testid="account-balance"
-                />
-              )}
-            </CellValue>
-          </AccountCurrencyFormat>
+          {/* A foreign account shows its native balance in its currency,
+              with its current-rate estimate beneath. */}
+          <View style={{ alignItems: 'flex-end' }}>
+            <AccountCurrencyFormat account={account}>
+              <CellValue<'account', 'balance' | 'nativeBalance'>
+                binding={
+                  account.currency
+                    ? bindings.accountNativeBalance(account.id)
+                    : getBalanceQuery(account.id)
+                }
+                type="financial"
+              >
+                {props => (
+                  <CellValueText<'account', 'balance' | 'nativeBalance'>
+                    {...props}
+                    style={{
+                      fontSize: 16,
+                      ...makeAmountFullStyle(props.value, {
+                        positiveColor: theme.numberPositive,
+                        negativeColor: theme.numberNegative,
+                        zeroColor: theme.numberNeutral,
+                      }),
+                    }}
+                    data-testid="account-balance"
+                  />
+                )}
+              </CellValue>
+            </AccountCurrencyFormat>
+            {estimate && <EstimateText>{estimate}</EstimateText>}
+          </View>
         </Button>
       )}
     </ListBoxItem>
+  );
+}
+
+function EstimateText({ children }: { children: string }) {
+  return (
+    <Text
+      style={{
+        fontSize: 12,
+        color: theme.pageTextSubdued,
+        maxWidth: '50vw',
+        textAlign: 'right',
+      }}
+    >
+      <PrivacyFilter>{children}</PrivacyFilter>
+    </Text>
   );
 }
 

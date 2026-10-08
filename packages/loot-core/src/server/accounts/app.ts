@@ -57,6 +57,7 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import { getCurrentEstimates } from './current-estimates';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -82,6 +83,7 @@ export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
+  'accounts/current-estimates': typeof getCurrentEstimates;
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
@@ -1908,6 +1910,7 @@ export const app = createApp<AccountHandlers>();
 app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
+app.method('accounts/current-estimates', getCurrentEstimates);
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
