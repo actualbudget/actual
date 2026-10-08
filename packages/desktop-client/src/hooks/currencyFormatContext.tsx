@@ -53,3 +53,27 @@ export function AccountCurrencyFormat({
 export function useCurrencyFormatOverride() {
   return useContext(CurrencyFormatContext);
 }
+
+const BaseAmountLabelsContext = createContext(false);
+
+/**
+ * Marks controls that compare stored base amounts inside a foreign register,
+ * so their amount labels say "base amount".
+ */
+export function BaseAmountLabels({
+  enabled,
+  children,
+}: {
+  enabled: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <BaseAmountLabelsContext.Provider value={enabled}>
+      {children}
+    </BaseAmountLabelsContext.Provider>
+  );
+}
+
+export function useBaseAmountLabels() {
+  return useContext(BaseAmountLabelsContext);
+}

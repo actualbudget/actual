@@ -78,6 +78,12 @@ The account balance is then €1,050.00: the 2,000.00 starting balance minus the
 
 <img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
 
+Hold the pointer over the 950.00 payment. It says: "Base: -1,045.00 USD. Effective rate: 1 EUR = 1.1 USD."
+
+On **All accounts** the same payment is shown in dollars. Hold the pointer over 1,045.00 and it says: "-950.00 EUR in BNP Paribas. Effective rate: 1 EUR = 1.1 USD."
+
+The row menu includes **Amount details**. For this rent, that opens **Edit foreign amount**.
+
 ## Change a saved amount
 
 Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount** opens with -1,000.00. The line under it is -$1,100.00 at the saved standing rate from 2026-10-31, with EUR first. Leave **Base amount** and the rate empty. Click **Save**. The payment is 1,000.00. BNP Paribas is €1,000.00. **All accounts** is $3,850.00.
@@ -185,6 +191,12 @@ A narrow window uses the phone layout. The BBVA México account below uses the s
 The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. **Edit amount** opens **Edit foreign amount**. **Split** opens the **Split transaction** page. If the screen has other unsaved changes, save them first. Actual says: "Save your other changes before editing the amount."
 
 <img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00, -$1,045.00, and Edit amount" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
+
+## Export the euro amount
+
+Export the transactions to CSV. The file adds **Currency** and **Native amount**. The rent row has Currency EUR, Native amount -950, and Amount -1045. Rows in Checking leave Currency and Native amount empty. A split writes 0 as the parent's Native amount and puts the euro total in **Split_Native_Amount**. Each part keeps its own Native amount.
+
+To import that file into BNP Paribas, set the amount column to **Native amount**. Actual reads those values as euros and converts them at the saved rate.
 
 ## Import a file
 

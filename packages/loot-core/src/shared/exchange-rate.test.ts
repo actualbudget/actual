@@ -1,6 +1,7 @@
 import {
   addUtcDays,
   baseToNative,
+  effectiveRate,
   invertRate,
   isCanonicalTimestamp,
   isValidDate,
@@ -146,5 +147,23 @@ describe('canonical timestamps', () => {
     expect(isCanonicalTimestamp('not a date')).toBe(false);
     expect(isCanonicalTimestamp(null)).toBe(false);
     expect(utcEndOfDay('9999-12-31')).toBe('9999-12-31T23:59:59.999Z');
+  });
+});
+
+describe('effective rates', () => {
+  it('derives native units per base unit from the stored pair', () => {
+    // ¥1,500 for $10.00
+    expect(effectiveRate(-1500, 0, -1000, 2)).toBe('150');
+    // 3.100 KWD for $10.33
+    expect(effectiveRate(3100, 3, 1033, 2)).toBe('0.300097');
+    // ¥1 for $0.01 rounds half-even at six significant digits
+    expect(effectiveRate(1, 0, 3, 2)).toBe('33.3333');
+    expect(effectiveRate(2000000005, 0, 10000, 2)).toBe('20000000');
+    expect(effectiveRate(1, 3, 100000000, 2)).toBe('0.000000001');
+  });
+
+  it('has no rate when either amount is zero', () => {
+    expect(effectiveRate(0, 0, -1000, 2)).toBeNull();
+    expect(effectiveRate(-1500, 0, 0, 2)).toBeNull();
   });
 });
