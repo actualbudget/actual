@@ -1,21 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import type { Ref, RefObject } from 'react';
+import React, { useMemo } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { amountToInteger } from '@actual-app/core/shared/util';
-import { debounce } from 'es-toolkit/compat';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
-import { useMergedRefs } from '#hooks/useMergedRefs';
-import { useResizeObserver } from '#hooks/useResizeObserver';
 
 import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
@@ -24,33 +14,21 @@ const CONTAINER_MARGIN = 8;
 
 type FormulaResultProps = {
   value: number | string | null;
-  animate?: boolean;
   loading?: boolean;
   error?: string | null;
-  initialFontSize?: number;
-  fontSizeChanged?: (fontSize: number) => void;
   fontSizeMode?: 'dynamic' | 'static';
   staticFontSize?: number;
   customColor?: string | null;
-  containerRef?: RefObject<HTMLDivElement | null>;
 };
 
 export function FormulaResult({
   value,
-  animate = false,
   loading = true,
   error = null,
-  initialFontSize = 14,
-  fontSizeChanged,
   fontSizeMode = 'dynamic',
   staticFontSize = 32,
   customColor = null,
-  containerRef,
 }: FormulaResultProps) {
-  const [fontSize, setFontSize] = useState<number>(initialFontSize);
-  const [hasSized, setHasSized] = useState(false);
-  const refDiv = useRef<HTMLDivElement>(null);
-  const previousFontSizeRef = useRef<number>(initialFontSize);
   const format = useFormat();
 
   // Format the display value - just show what we got
@@ -69,89 +47,13 @@ export function FormulaResult({
     }
   }, [error, value, format]);
 
-  const calculateFontSize = useCallback(() => {
-    if (!refDiv.current) return;
-
-    const elementToMeasure =
-      containerRef?.current || refDiv.current.parentElement || refDiv.current;
-    const { clientWidth, clientHeight } = elementToMeasure;
-
-    const width = clientWidth;
-    const height = clientHeight - CONTAINER_MARGIN * 2;
-
-    if (width <= 0 || height <= 0) return;
-
-    // Check if the display value contains line breaks and calculate font size accordingly.
-    const lines = displayValue.split(/\r?\n/);
-    const lineCount = lines.length;
-    const longestLineLength = Math.max(...lines.map(line => line.length), 1);
-
-    // Calculate font size based on the longest line and number of lines
-    const calculatedFontSize = Math.min(
-      (width * FONT_SIZE_SCALE_FACTOR) / longestLineLength,
-      height / lineCount, // Divide height by number of lines to fit all lines
-    );
-
-    if (calculatedFontSize > 0) {
-      setFontSize(calculatedFontSize);
-      setHasSized(true);
-    }
-
-    // Only call fontSizeChanged if the font size actually changed
-    if (
-      fontSizeChanged &&
-      Math.abs(calculatedFontSize - previousFontSizeRef.current) > 0.5
-    ) {
-      previousFontSizeRef.current = calculatedFontSize;
-      fontSizeChanged(calculatedFontSize);
-    }
-  }, [displayValue, fontSizeChanged, containerRef]);
-
-  // Debounce the calculation to avoid too many recalculations
-  const debouncedCalculateFontSize = useRef(
-    debounce(() => {
-      if (fontSizeMode === 'dynamic') {
-        calculateFontSize();
-      }
-    }, 100),
-  );
-
-  // Update the debounced function when calculateFontSize changes
-  useEffect(() => {
-    debouncedCalculateFontSize.current.cancel?.();
-    debouncedCalculateFontSize.current = debounce(() => {
-      if (fontSizeMode === 'dynamic') {
-        calculateFontSize();
-      }
-    }, 100);
-
-    return () => {
-      debouncedCalculateFontSize.current.cancel?.();
-    };
-  }, [calculateFontSize, fontSizeMode]);
-
-  const ref = useResizeObserver(() => {
-    if (fontSizeMode === 'dynamic') {
-      debouncedCalculateFontSize.current();
-    }
-  });
-  const mergedRef = useMergedRefs(ref, refDiv);
-
-  // Recalculate font size when displayValue changes (non-debounced for immediate update)
-  // Only for dynamic mode
-  useEffect(() => {
-    if (fontSizeMode === 'dynamic') {
-      calculateFontSize();
-    }
-  }, [displayValue, calculateFontSize, fontSizeMode]);
-
-  // Use static font size when in static mode
-  useEffect(() => {
-    if (fontSizeMode === 'static') {
-      setFontSize(staticFontSize);
-      setHasSized(true);
-    }
-  }, [fontSizeMode, staticFontSize]);
+  const lines = displayValue.split(/\r?\n/);
+  const lineCount = lines.length;
+  const longestLineLength = Math.max(...lines.map(line => line.length), 1);
+  const fontSize =
+    fontSizeMode === 'static'
+      ? `${staticFontSize}px`
+      : `min(${(FONT_SIZE_SCALE_FACTOR * 100) / longestLineLength}cqi, calc((100cqb - ${CONTAINER_MARGIN * 2}px) / ${lineCount}))`;
 
   // Determine color
   const color = customColor
@@ -160,14 +62,11 @@ export function FormulaResult({
       ? theme.errorText
       : theme.pageText;
 
-  const showContent = hasSized || fontSizeMode === 'static';
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, width: '100%', containerType: 'size' }}>
       {loading && <ReportCardValueSkeleton />}
       {!loading && (
         <View
-          ref={mergedRef as Ref<HTMLDivElement>}
           aria-label={displayValue}
           style={{
             alignItems: 'center',
@@ -180,24 +79,19 @@ export function FormulaResult({
             lineHeight: 1,
             margin: `${CONTAINER_MARGIN}px 0`,
             justifyContent: 'center',
-            transition: animate ? 'font-size 0.3s ease' : '',
             color,
           }}
         >
-          {!showContent ? (
-            <ReportCardValueSkeleton />
-          ) : (
-            <span
-              aria-hidden="true"
-              style={{
-                whiteSpace: 'pre-wrap',
-                textAlign: 'center',
-                wordBreak: 'break-word',
-              }}
-            >
-              <PrivacyFilter>{displayValue}</PrivacyFilter>
-            </span>
-          )}
+          <span
+            aria-hidden="true"
+            style={{
+              whiteSpace: 'pre-wrap',
+              textAlign: 'center',
+              wordBreak: 'break-word',
+            }}
+          >
+            <PrivacyFilter>{displayValue}</PrivacyFilter>
+          </span>
         </View>
       )}
     </View>

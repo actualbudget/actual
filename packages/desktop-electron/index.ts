@@ -33,9 +33,11 @@ import type {
   UtilityProcess,
 } from 'electron';
 
+import { openExternalUrl, revealLocalFile } from './external-links';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
+import { isInternalUrl } from './trusted-url';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -93,7 +95,7 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   const trimmedMessage = JSON.stringify(message.trim()); // ensure line endings are removed
   console[loglevel](trimmedMessage);
 
-  if (!clientWin) {
+  if (!clientWin || !isInternalUrl(clientWin.webContents.getURL(), isDev)) {
     // queue up the logs until the client window is ready
     queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
@@ -160,16 +162,58 @@ if (isDev) {
 const getGlobalPrefsPath = () =>
   path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json');
 
-async function loadGlobalPrefs() {
-  let state: GlobalPrefsJson = {};
+// Complete copy of the store, written ahead of an in-place overwrite by the
+// EXDEV fallback in saveGlobalPrefs (and by loot-core's asyncStorage), so an
+// interrupted overwrite can be recovered from.
+const getGlobalPrefsRecoveryPath = () => `${getGlobalPrefsPath()}.bak`;
+
+function parseGlobalPrefs(contents: string): GlobalPrefsJson {
+  const parsed: unknown = JSON.parse(contents);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Global preferences file is not a JSON object');
+  }
+  // The shape was checked above; the field values are trusted as written by
+  // the app itself, the same way loot-core's asyncStorage treats them.
+  return parsed as GlobalPrefsJson;
+}
+
+function loadGlobalPrefsRecovery(): GlobalPrefsJson | null {
   try {
-    state = JSON.parse(fs.readFileSync(getGlobalPrefsPath(), 'utf8'));
+    return parseGlobalPrefs(
+      fs.readFileSync(getGlobalPrefsRecoveryPath(), 'utf8'),
+    );
   } catch {
-    logMessage('info', 'Could not load global state - using defaults');
-    state = {};
+    return null;
+  }
+}
+
+async function loadGlobalPrefs() {
+  let contents: string;
+  try {
+    contents = fs.readFileSync(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    // A missing file is a fresh install: start from defaults, the same as
+    // loot-core does, without consulting any leftover recovery copy.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logMessage(
+        'error',
+        `Could not read global state - using defaults: ${String(error)}`,
+      );
+    }
+    return {};
   }
 
-  return state;
+  try {
+    return parseGlobalPrefs(contents);
+  } catch {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    logMessage('info', 'Could not parse global state - using defaults');
+    return {};
+  }
 }
 
 // Like loadGlobalPrefs, but only a missing file falls back to defaults; a
@@ -186,11 +230,16 @@ async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
     throw error;
   }
 
-  const parsed: unknown = JSON.parse(contents);
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Global preferences file is not a JSON object');
+  try {
+    return parseGlobalPrefs(contents);
+  } catch (error) {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    throw error;
   }
-  return parsed as GlobalPrefsJson;
 }
 
 // Writes the global preferences file atomically (temp file + rename), the same
@@ -200,11 +249,43 @@ async function saveGlobalPrefs(state: GlobalPrefsJson) {
   const globalPrefsPath = getGlobalPrefsPath();
   const temporaryPath = `${globalPrefsPath}.${process.pid}.main.tmp`;
 
+  const contents = JSON.stringify(state);
+
   try {
-    await writeFile(temporaryPath, JSON.stringify(state), 'utf8');
+    await writeFile(temporaryPath, contents, 'utf8');
     await rename(temporaryPath, globalPrefsPath);
+    // The atomic path never leaves a torn file, so any recovery copy from an
+    // earlier in-place write is stale now; drop it.
+    await rm(getGlobalPrefsRecoveryPath(), { force: true }).catch(
+      () => undefined,
+    );
   } catch (error) {
     await rm(temporaryPath, { force: true }).catch(() => undefined);
+
+    if ((error as NodeJS.ErrnoException).code === 'EXDEV') {
+      // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+      // app data folder, so renaming into it fails as a cross-device move.
+      // Write in place instead; losing atomicity beats failing outright.
+      logMessage(
+        'info',
+        `Could not atomically replace ${globalPrefsPath} (EXDEV); writing it in place instead`,
+      );
+      // Write-ahead copy: land the complete new contents in the recovery file
+      // first, then overwrite in place. If the copy can't be written, refuse
+      // to save rather than risk leaving a torn store as the only copy.
+      try {
+        await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
+      } catch (recoveryError) {
+        logMessage(
+          'error',
+          `Could not write the global preferences recovery copy; not overwriting the store: ${String(recoveryError)}`,
+        );
+        throw recoveryError;
+      }
+      await writeFile(globalPrefsPath, contents, 'utf8');
+      return;
+    }
+
     throw error;
   }
 }
@@ -493,7 +574,7 @@ async function createWindow() {
   win.on('focus', async () => {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
-      if (url.includes('app://') || url.includes('localhost:')) {
+      if (isInternalUrl(url, isDev)) {
         void clientWin.webContents.executeJavaScript(
           'window.__actionsForMenu.appFocused()',
         );
@@ -504,8 +585,8 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
 
     return { action: 'deny' };
@@ -514,9 +595,8 @@ async function createWindow() {
   // hit when clicking <a href/> with no target
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
-      event.preventDefault();
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
   });
 
@@ -524,18 +604,17 @@ async function createWindow() {
 
   clientWin = win;
 
-  // Execute queued logs - displaying them in the client window
-  void Promise.all(
-    queuedClientWinLogs.map((log: string) =>
-      win.webContents.executeJavaScript(log),
-    ),
-  );
-
-  queuedClientWinLogs = [];
-}
-
-function isExternalUrl(url: string) {
-  return !url.includes('localhost:') && !url.includes('app://');
+  // Wait for an internal page before forwarding queued logs to DevTools.
+  win.webContents.on('did-finish-load', () => {
+    if (!isInternalUrl(win.webContents.getURL(), isDev)) {
+      return;
+    }
+    const logs = queuedClientWinLogs;
+    queuedClientWinLogs = [];
+    for (const log of logs) {
+      void win.webContents.executeJavaScript(log);
+    }
+  });
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -754,11 +833,11 @@ ipcMain.handle(
 );
 
 ipcMain.handle('open-external-url', (event, url) => {
-  void shell.openExternal(url);
+  void openExternalUrl(url, target => shell.openExternal(target));
 });
 
 ipcMain.handle('open-in-file-manager', (event, filepath) => {
-  shell.showItemInFolder(filepath);
+  revealLocalFile(filepath, target => shell.showItemInFolder(target));
 });
 
 ipcMain.on('message', (_event, msg) => {

@@ -72,7 +72,9 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Google Cloud Run (serverless)](https://github.com/daniefdz/actual-run)
 - [Home Assistant](https://github.com/sztupy/hassio-actualbudget/blob/main/README.md)
 - [Hostim](https://hostim.dev/docs/templates/actual) - one-click managed Docker hosting with a persistent volume and free SSL.
+- [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/docs/services/actual.md) - Ansible playbook that deploys Actual (and 250+ other self-hosted services) as Docker containers.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
+- [Syncloud](https://syncloud.org/en/actual-budget)
 - Synology NAS
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
   - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)

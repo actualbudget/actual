@@ -211,7 +211,13 @@ async function getUser() {
   }
 }
 
-async function changePassword({ password }: { password: string }) {
+async function changePassword({
+  password,
+  currentPassword,
+}: {
+  password: string;
+  currentPassword: string;
+}) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     return { error: 'not-logged-in' };
@@ -225,6 +231,7 @@ async function changePassword({ password }: { password: string }) {
     await post(serverConfig.SIGNUP_SERVER + '/change-password', {
       token: userToken,
       password,
+      currentPassword,
     });
   } catch (err) {
     if (err instanceof PostError) {
@@ -290,6 +297,17 @@ async function signIn(
 }
 
 async function signOut() {
+  const token = await asyncStorage.getItem('user-token');
+  const server = getServer();
+  if (token && server) {
+    try {
+      await post(server.SIGNUP_SERVER + '/logout', { token }, {}, 5000);
+    } catch {
+      // Local sign-out must still work offline or with an older server.
+      logger.log('Could not revoke the server session; signing out locally.');
+    }
+  }
+
   encryption.unloadAllKeys();
   await asyncStorage.multiRemove([
     'user-token',

@@ -337,15 +337,19 @@ app.post('/upload-user-file', async (req, res) => {
     return;
   }
 
-  let groupId = req.headers['x-actual-group-id'] || null;
+  const groupIdHeader = req.headers['x-actual-group-id'];
   const encryptMeta = extractSingleHeader(req, res, 'x-actual-encrypt-meta');
   if (res.headersSent) return;
   const syncFormatVersion = extractSingleHeader(req, res, 'x-actual-format');
   if (res.headersSent) return;
 
-  if (!!groupId && (typeof groupId !== 'string' || !isValidGroupId(groupId))) {
-    res.status(400).send('invalid groupId');
-    return;
+  let groupId: GroupId | null = null;
+  if (groupIdHeader !== undefined) {
+    if (typeof groupIdHeader !== 'string' || !isValidGroupId(groupIdHeader)) {
+      res.status(400).send('invalid groupId');
+      return;
+    }
+    groupId = groupIdHeader;
   }
 
   const keyId =

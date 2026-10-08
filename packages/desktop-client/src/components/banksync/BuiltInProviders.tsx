@@ -149,17 +149,17 @@ export function BuiltInProviders({
                       flexWrap: 'wrap',
                     }}
                   >
-                    <Text style={{ fontSize: 17, fontWeight: 600 }}>
+                    <Text size="extra-large" style={{ fontWeight: 600 }}>
                       {provider.displayName}
                     </Text>
                     {provider.isConfigured && provider.credentialSource && (
                       <Text
+                        size="small"
                         style={{
                           alignSelf: 'flex-start',
                           borderRadius: 999,
                           backgroundColor: theme.buttonPrimaryBackground,
                           color: theme.buttonPrimaryText,
-                          fontSize: 12,
                           fontWeight: 500,
                           padding: '2px 8px',
                         }}
@@ -173,11 +173,11 @@ export function BuiltInProviders({
                     )}
                   </View>
                   <Text
+                    size="medium"
                     style={{
                       color: provider.isConfigured
                         ? theme.noticeTextDark
                         : theme.pageTextSubdued,
-                      fontSize: 13,
                       fontWeight: 500,
                     }}
                   >
@@ -259,7 +259,7 @@ export function BuiltInProviders({
               {provider.supportsPerBudgetFile &&
                 provider.credentialSource === 'global' &&
                 !provider.canConfigure && (
-                  <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+                  <Text size="medium" style={{ color: theme.pageTextSubdued }}>
                     <Trans>
                       Reset credentials before setting credentials for this
                       budget file.

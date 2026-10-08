@@ -228,8 +228,8 @@ function OpenIdLogin({ setError }) {
       {reviewOpenIdConfiguration && (
         <View style={{ marginTop: 20 }}>
           <Text
+            size="small"
             style={{
-              ...styles.verySmallText,
               color: theme.pageTextLight,
               fontWeight: 'bold ',
               width: '100%',
@@ -433,11 +433,11 @@ export function Login() {
 
       {error && (
         <Text
+          size="large"
           style={{
             marginTop: 20,
             color: theme.errorText,
             borderRadius: 4,
-            fontSize: 15,
           }}
         >
           {getErrorMessage(error)}

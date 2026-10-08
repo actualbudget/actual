@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 
 import {
   bootstrap,
+  getAccountDb,
   getActiveLoginMethod,
   getLoginMethod,
   getServerPrefs,
@@ -13,7 +14,11 @@ import {
   setServerPrefs,
 } from './account-db';
 import { isValidRedirectUrl, loginWithOpenIdSetup } from './accounts/openid';
-import { changePassword, loginWithPassword } from './accounts/password';
+import {
+  changePassword,
+  isValidPassword,
+  loginWithPassword,
+} from './accounts/password';
 import {
   errorMiddleware,
   rejectApiTokenMiddleware,
@@ -133,8 +138,19 @@ app.post('/login', authRateLimiter, async (req, res) => {
   res.send({ status: 'ok', data: { token } });
 });
 
+app.post('/logout', (req, res) => {
+  const token = req.body?.token;
+  if (typeof token !== 'string' || !token) {
+    res.status(400).send({ status: 'error', reason: 'invalid-token' });
+    return;
+  }
+  getAccountDb().mutate('DELETE FROM sessions WHERE token = ?', [token]);
+  res.send({ status: 'ok', data: {} });
+});
+
 app.post(
   '/change-password',
+  authRateLimiter,
   validateSessionMiddleware,
   rejectApiTokenMiddleware,
   async (req, res) => {
@@ -158,7 +174,17 @@ app.post(
       return;
     }
 
-    const { error } = await changePassword(req.body.password);
+    if (!isValidPassword(req.body.currentPassword)) {
+      res
+        .status(400)
+        .send({ status: 'error', reason: 'invalid-current-password' });
+      return;
+    }
+
+    const { error } = await changePassword(
+      req.body.password,
+      req.body.currentPassword,
+    );
 
     if (error) {
       res.status(400).send({ status: 'error', reason: error });

@@ -107,12 +107,7 @@ export function EnvelopeBudgetMenuModal({
               alignItems: 'center',
             }}
           >
-            <Text
-              style={{
-                fontSize: 17,
-                fontWeight: 400,
-              }}
-            >
+            <Text size="extra-large" style={{ fontWeight: 400 }}>
               <Trans>Budgeted</Trans>
             </Text>
             <AmountInput

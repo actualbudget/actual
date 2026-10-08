@@ -21,8 +21,14 @@ vi.mock('../utils/jwt', () => ({
 vi.mock('../../util/middlewares', () => ({
   requestLoggerMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),
-  validateSessionMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
-    next(),
+  validateSessionMiddleware: (
+    _req: unknown,
+    res: { locals: { user_id?: string } },
+    next: () => void,
+  ) => {
+    res.locals.user_id = 'genericAdmin';
+    next();
+  },
   rejectApiTokenMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),
 }));
