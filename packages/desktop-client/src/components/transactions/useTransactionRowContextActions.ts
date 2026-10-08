@@ -13,10 +13,12 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 import type { ContextMenuItem } from '#contextmenu/types';
 import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useOpenAmountDetails } from '#hooks/useOpenAmountDetails';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { amountDetailsTarget } from '#util/foreign-details';
 
 type TransactionRowContextMenuProps = {
   rowRef: RefObject<HTMLElement | null>;
@@ -48,6 +50,7 @@ export function useTransactionRowContextActions({
 }: TransactionRowContextMenuProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const openAmountDetails = useOpenAmountDetails();
   const { data: accounts = [] } = useAccounts();
   const selectedItems = useSelectedItems();
 
@@ -195,7 +198,17 @@ export function useTransactionRowContextActions({
     },
   ];
 
+  const detailsId = amountDetailsTarget(selectedIds, getTransaction, accounts);
+
   const transactionActions: ContextMenuItem[] = [
+    {
+      name: 'amount-details',
+      text: t('Amount details'),
+      onClick: () => {
+        if (detailsId) void openAmountDetails(detailsId);
+      },
+      hidden: !detailsId,
+    },
     {
       name: 'duplicate',
       text: t('Duplicate'),

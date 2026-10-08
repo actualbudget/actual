@@ -113,7 +113,10 @@ import {
   useCurrencyFormatOverride,
 } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
-import { useAmountPrecision } from '#hooks/useAmountPrecision';
+import {
+  useAmountPrecision,
+  useBudgetPrecision,
+} from '#hooks/useAmountPrecision';
 import {
   SchedulesProvider,
   useCachedSchedules,
@@ -153,6 +156,7 @@ import { useDispatch } from '#redux';
 import { encodingKey, incompatibleAccountIds } from '#util/account-encoding';
 import { exchangeOtherAccount } from '#util/exchange-entry';
 import type { ExchangeRequest } from '#util/exchange-entry';
+import { amountDetailsText, storedPair } from '#util/foreign-details';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -1468,6 +1472,25 @@ const Transaction = memo(function Transaction({
   const isNativeRegister = useCurrencyFormatOverride() != null;
   const amountFrozen = isForeignAmountFrozen(id, rowAccount, isNativeRegister);
   const frozenAmountTitle = t('Edit this amount in its account');
+  const budgetPrecision = useBudgetPrecision();
+  const [budgetCurrency] = useSyncedPref('defaultCurrencyCode');
+  // A saved foreign row's cells describe the half this view does not show.
+  const pair =
+    isForeignRow && rowAccount && !isTemporaryId(id) && !isPreview
+      ? storedPair(transaction)
+      : null;
+  const amountDetails = pair
+    ? amountDetailsText(
+        t,
+        {
+          ...pair,
+          account: rowAccount!,
+          basePrecision: budgetPrecision,
+          baseCurrency: budgetCurrency ?? '',
+        },
+        pair.nativeView,
+      )
+    : null;
   const hiddenAccountIds = incompatibleAccountIds(accounts, [rowAccount]);
   // A saved single row may move to another currency through the move
   // dialog; splits, transfers and drafts keep their encoding.
@@ -2134,7 +2157,7 @@ const Transaction = memo(function Transaction({
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={amountFrozen ? frozenAmountTitle : debit}
+            title={amountFrozen ? frozenAmountTitle : (amountDetails ?? debit)}
             onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
@@ -2147,6 +2170,7 @@ const Transaction = memo(function Transaction({
                   ? amountFormatter.format(0)
                   : debit,
               onUpdate: onUpdate.bind(null, 'debit'),
+              'aria-description': amountDetails ?? undefined,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
@@ -2178,7 +2202,7 @@ const Transaction = memo(function Transaction({
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={amountFrozen ? frozenAmountTitle : credit}
+            title={amountFrozen ? frozenAmountTitle : (amountDetails ?? credit)}
             onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
@@ -2188,6 +2212,7 @@ const Transaction = memo(function Transaction({
             inputProps={{
               value: credit,
               onUpdate: onUpdate.bind(null, 'credit'),
+              'aria-description': amountDetails ?? undefined,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
