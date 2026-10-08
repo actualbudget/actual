@@ -4,30 +4,21 @@ import { promisify } from 'util';
 import ipaddr from 'ipaddr.js';
 
 const dnsLookup = promisify(dns.lookup);
+const NAT64_PREFIX = ipaddr.IPv6.parseCIDR('64:ff9b::/96');
 
-// IP ranges (as classified by ipaddr.js) that are never a legitimate
-// destination and are the highest-risk SSRF targets, so they are blocked
-// unconditionally. linkLocal covers the cloud metadata endpoint
-// (169.254.169.254) — the credential-theft vector this protection primarily
-// guards against — and no real service is hosted on the reserved, broadcast or
-// unspecified ranges.
-const ALWAYS_BLOCKED_IP_RANGES = [
-  'linkLocal',
-  'unspecified',
-  'reserved',
-  'broadcast',
+// Only public unicast is allowed by default. Private-network mode additionally
+// permits these classes. Except for public IPv4 via the well-known NAT64 prefix,
+// neither mode permits transition, multicast, link-local,
+// or reserved addresses.
+const PRIVATE_IP_RANGES = [
+  'private',
+  'loopback',
+  'uniqueLocal',
+  'carrierGradeNat',
 ];
 
-// Private-network ranges (LAN, loopback, IPv6 unique-local). These are blocked
-// by default, but self-hosters legitimately run services such as their own
-// SimpleFIN bridge on them, so callers that expect to reach private
-// infrastructure can opt in with { allowPrivateNetwork: true }. Trusting the
-// local network by default keeps self-hosting working out of the box; the
-// always-blocked ranges above still close the worst-case (metadata) attack.
-const PRIVATE_IP_RANGES = ['private', 'loopback', 'uniqueLocal'];
-
 type SsrfOptions = {
-  // Allow requests to private/loopback/unique-local addresses. Defaults to
+  // Allow requests to private/loopback/unique-local/CGNAT addresses. Defaults to
   // false (strict). Set by callers like the SimpleFIN integration whose
   // upstream may be a self-hosted server on the local network.
   allowPrivateNetwork?: boolean;
@@ -49,13 +40,19 @@ export function isBlockedIp(
 
   // process() normalizes IPv4-mapped IPv6 addresses (e.g. ::ffff:127.0.0.1)
   // back to their IPv4 form so their range is classified correctly.
-  const range = ipaddr.process(address).range();
-
-  if (ALWAYS_BLOCKED_IP_RANGES.includes(range)) {
-    return true;
+  const parsed = ipaddr.process(address);
+  if (parsed instanceof ipaddr.IPv6 && parsed.match(NAT64_PREFIX)) {
+    // The well-known NAT64 prefix is only for globally routable IPv4.
+    return (
+      ipaddr.fromByteArray(parsed.toByteArray().slice(12)).range() !== 'unicast'
+    );
   }
+  const range = parsed.range();
 
-  return !allowPrivateNetwork && PRIVATE_IP_RANGES.includes(range);
+  return (
+    range !== 'unicast' &&
+    !(allowPrivateNetwork && PRIVATE_IP_RANGES.includes(range))
+  );
 }
 
 /**
@@ -66,7 +63,7 @@ export function isBlockedIp(
  *
  * Pass { allowPrivateNetwork: true } for callers (e.g. SimpleFIN) whose
  * upstream may legitimately be a self-hosted server on the local network; the
- * always-blocked ranges (cloud metadata, reserved, broadcast) remain blocked
+ * other address classes (including transition, multicast and link-local) remain blocked
  * regardless.
  */
 export async function assertUrlAllowed(

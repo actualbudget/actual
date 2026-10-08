@@ -28,8 +28,11 @@ import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-car
 import {
   createMonteCarloPot,
   createMonteCarloSurplusPot,
+  DEFAULT_HISTORICAL_BLOCK_LENGTH,
   getMonteCarloPotLabel,
+  MAX_HISTORICAL_BLOCK_LENGTH,
   MAX_SIMULATION_COUNT,
+  MIN_HISTORICAL_BLOCK_LENGTH,
   MIN_SIMULATION_COUNT,
   MONTE_CARLO_DEFAULTS,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
@@ -346,6 +349,12 @@ export function MonteCarloConfiguration({
                       (1928 onwards) in random order.
                       <br />
                       <br />
+                      Historical, in blocks: strings together runs of
+                      consecutive real years, so a crash keeps the years that
+                      followed it, while every scenario is still a different mix
+                      of history.
+                      <br />
+                      <br />
                       Historical sequences: replays real market history, one
                       scenario per starting year. Pots with a Custom allocation
                       always use their own return and volatility.
@@ -362,6 +371,10 @@ export function MonteCarloConfiguration({
                   options={[
                     ['normal', t('Random (normal distribution)')],
                     ['historical-bootstrap', t('Historical returns, shuffled')],
+                    [
+                      'historical-block-bootstrap',
+                      t('Historical returns, in blocks'),
+                    ],
                     ['historical-sequence', t('Historical sequences (replay)')],
                   ]}
                 />
@@ -395,6 +408,43 @@ export function MonteCarloConfiguration({
                   }
                 />
               </View>
+
+              {config.returnModel === 'historical-block-bootstrap' && (
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Block length (years)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        How many consecutive real years are replayed, on
+                        average, before the scenario jumps to a different point
+                        in history. Longer blocks keep more of history&apos;s
+                        multi-year patterns, such as a crash and its recovery;
+                        shorter blocks mix history up more.
+                        <br />
+                        <br />
+                        Around 10 years is a common choice. 1 behaves like the
+                        shuffled model.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.historicalBlockLength}
+                    aria-label={t('Block length (years)')}
+                    roundToInteger
+                    min={MIN_HISTORICAL_BLOCK_LENGTH}
+                    max={MAX_HISTORICAL_BLOCK_LENGTH}
+                    step={1}
+                    onCommit={newValue =>
+                      onConfigChange({
+                        historicalBlockLength:
+                          newValue ?? DEFAULT_HISTORICAL_BLOCK_LENGTH,
+                      })
+                    }
+                  />
+                </View>
+              )}
             </View>
           </View>
 

@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -42,8 +43,9 @@ export function useDraggable<T>({
   onDragChange,
 }: UseDraggableArgs<T>) {
   const _onDragChange = useRef(onDragChange);
+  const node = useRef<HTMLElement | null>(null);
 
-  const [, dragRef] = useDrag({
+  const [, connectDragSource] = useDrag({
     type,
     item: () => {
       void _onDragChange.current({ state: 'start-preview', type, item });
@@ -68,6 +70,21 @@ export function useDraggable<T>({
   useLayoutEffect(() => {
     _onDragChange.current = onDragChange;
   }, [onDragChange]);
+
+  const dragRef = useCallback(
+    (el: HTMLElement | null) => {
+      node.current = el;
+      connectDragSource(el);
+    },
+    [connectDragSource],
+  );
+
+  // react-dnd sets draggable="true" when it connects and only consults
+  // canDrag on dragstart. Firefox refuses to place the caret in an input under
+  // a draggable ancestor, so mirror canDrag onto the attribute (#5620).
+  useLayoutEffect(() => {
+    node.current?.setAttribute('draggable', String(canDrag));
+  }, [canDrag, dragRef]);
 
   return { dragRef };
 }

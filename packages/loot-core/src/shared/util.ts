@@ -588,8 +588,10 @@ export function looselyParseAmount(amount: string) {
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
-  // This avoids matching against 3 places which may not actually be decimal
-  const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
+  // This avoids matching against 3 places which may not actually be decimal.
+  // Only digits count as places, so a currency symbol or code after the
+  // number does not change how many there are.
+  const m = amount.match(/[.,](\d{4,9}|\d{1,2})[^\d.,]*$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }

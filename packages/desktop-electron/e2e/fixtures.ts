@@ -16,18 +16,29 @@ type ElectronOptions = {
    * exercise the startup error screen.
    */
   blockDocumentDir: boolean;
+  corruptGlobalPrefs: boolean;
 };
 
 // Create the extended test with fixtures
 export const test = base.extend<ElectronFixtures & ElectronOptions>({
   blockDocumentDir: [false, { option: true }],
+  corruptGlobalPrefs: [false, { option: true }],
 
-  electronApp: async ({ blockDocumentDir }, use, testInfo: TestInfo) => {
+  electronApp: async (
+    { blockDocumentDir, corruptGlobalPrefs },
+    use,
+    testInfo: TestInfo,
+  ) => {
     const uniqueTestId = testInfo.testId.replace(/[^\w-]/g, '-');
     const testDataDir = path.join('e2e/data/', uniqueTestId);
 
     await rm(testDataDir, { recursive: true, force: true }); // ensure any leftover test data is removed
     await mkdir(testDataDir, { recursive: true });
+
+    if (corruptGlobalPrefs) {
+      // Trigger a startup diagnostic before the renderer exists.
+      await writeFile(path.join(testDataDir, 'global-store.json'), '{');
+    }
 
     let documentDir = testDataDir;
     if (blockDocumentDir) {

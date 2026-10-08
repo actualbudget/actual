@@ -2,15 +2,19 @@ import fs, { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import createDebug from 'debug';
 import express from 'express';
 
 import { createApp, setupOpenIdFromConfig } from './create-app';
 import { config } from './load-config';
 
+const debugSensitive = createDebug('actual-sensitive:server');
+
 const app = createApp();
 
 process.on('unhandledRejection', reason => {
-  console.log('Rejection:', reason);
+  console.log('Unhandled rejection');
+  debugSensitive('Unhandled rejection: %O', reason);
 });
 
 app.get('/info', (_req, res) => {

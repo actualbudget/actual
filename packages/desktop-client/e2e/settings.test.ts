@@ -50,7 +50,14 @@ test.describe('Settings', () => {
     await page.route('**/test/theme/refs/heads/main/actual.css*', route =>
       route.fulfill({ body: ':root { --color-pageBackground: #eeeeee; }' }),
     );
-    await page.evaluate(() => window.Actual.setTheme('light'));
+    await expect(async () => {
+      await page.evaluate(() => window.Actual.setTheme('light'));
+      await expect(page.locator('[data-theme]')).toHaveAttribute(
+        'data-theme',
+        'light',
+        { timeout: 1000 },
+      );
+    }).toPass({ timeout: 15000 });
     await page.getByRole('button', { name: 'Light', exact: true }).click();
     await page
       .getByRole('button', { name: 'Custom theme', exact: true })
