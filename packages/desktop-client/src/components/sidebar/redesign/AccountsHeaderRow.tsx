@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import {
@@ -10,6 +11,10 @@ import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
+import {
+  EstimateDescription,
+  useCurrentEstimateLines,
+} from '#components/accounts/CurrentEstimateLines';
 import { Link } from '#components/common/Link';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -34,6 +39,8 @@ export function AccountsHeaderRow({
   onToggleSearch,
 }: AccountsHeaderRowProps) {
   const { t } = useTranslation();
+  const estimateLines = useCurrentEstimateLines({});
+  const estimateId = useId();
   const dispatch = useDispatch();
 
   const onAddAccount = () => {
@@ -53,6 +60,7 @@ export function AccountsHeaderRow({
       <Link
         variant="internal"
         to="/accounts"
+        aria-describedby={estimateLines.length ? estimateId : undefined}
         isExactPathMatch
         style={{
           fontSize: 13,
@@ -92,9 +100,11 @@ export function AccountsHeaderRow({
         <SidebarBalance
           binding={bindings.allAccountBalance()}
           testId="sidebar-all-accounts-balance"
+          title={estimateLines.join('\n')}
           style={{ fontSize: 12, fontWeight: 600 }}
         />
       </Link>
+      <EstimateDescription id={estimateId} lines={estimateLines} />
     </View>
   );
 }
