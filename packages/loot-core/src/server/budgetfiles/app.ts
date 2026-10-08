@@ -183,12 +183,17 @@ async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{
 
 async function downloadBudget({
   cloudFileId,
+  localId,
 }: {
   cloudFileId: Budget['cloudFileId'];
+  localId?: Budget['id'];
 }): Promise<{ id?: Budget['id']; error?: { reason: string; meta?: unknown } }> {
   let result;
   try {
-    result = await cloudStorage.download(cloudFileId);
+    if (localId) {
+      await closeBudget();
+    }
+    result = await cloudStorage.download(cloudFileId, localId);
   } catch (e) {
     if (e.type === 'FileDownloadError') {
       if (e.reason === 'file-exists' && e.meta.id) {
