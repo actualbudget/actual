@@ -20,6 +20,10 @@ export type AuthHandlers = {
   'enable-openid': typeof enableOpenId;
   'get-openid-config': typeof getOpenIdConfig;
   'enable-password': typeof enablePassword;
+  'totp-status': typeof totpStatus;
+  'totp-enroll': typeof totpEnroll;
+  'totp-confirm': typeof totpConfirm;
+  'totp-disable': typeof totpDisable;
 };
 
 export const app = createApp<AuthHandlers>();
@@ -35,6 +39,10 @@ app.method('subscribe-set-token', setToken);
 app.method('enable-openid', enableOpenId);
 app.method('get-openid-config', getOpenIdConfig);
 app.method('enable-password', enablePassword);
+app.method('totp-status', totpStatus);
+app.method('totp-enroll', totpEnroll);
+app.method('totp-confirm', totpConfirm);
+app.method('totp-disable', totpDisable);
 
 async function didBootstrap() {
   return Boolean(await asyncStorage.getItem('did-bootstrap'));
@@ -74,6 +82,7 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
         active: boolean;
       }>;
       multiuser: boolean;
+      supportsTotp?: boolean;
     };
   };
 
@@ -89,6 +98,8 @@ async function needsBootstrap({ url }: { url?: string } = {}) {
       { method: 'password', active: true, displayName: 'Password' },
     ],
     multiuser: res.data.multiuser || false,
+    // Absent on servers that predate two-factor support.
+    supportsTotp: res.data.supportsTotp || false,
     hasServer: true,
   };
 }
@@ -241,6 +252,12 @@ async function signIn(
     | {
         returnUrl: string;
         loginMethod?: 'openid';
+      }
+    | {
+        // Second step of password login when a TOTP factor is configured.
+        mfaToken: string;
+        code: string;
+        loginMethod?: string;
       },
 ) {
   if (
@@ -252,6 +269,8 @@ async function signIn(
   let res: {
     token?: string;
     returnUrl?: string;
+    mfaRequired?: boolean;
+    mfaToken?: string;
   };
 
   try {
@@ -259,7 +278,12 @@ async function signIn(
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
-    res = await post(serverConfig.SIGNUP_SERVER + '/login', loginInfo);
+    // Declares that this client understands the two-step MFA response. The
+    // server refuses (never bypasses) MFA for clients that omit it.
+    res = await post(serverConfig.SIGNUP_SERVER + '/login', {
+      ...loginInfo,
+      clientSupportsMfa: true,
+    });
   } catch (err) {
     if (err instanceof PostError) {
       return {
@@ -272,6 +296,12 @@ async function signIn(
 
   if (res.returnUrl) {
     return { redirectUrl: res.returnUrl };
+  }
+
+  // The password was accepted but no session exists yet; the caller has to come
+  // back with a code from the user's authenticator app.
+  if (res.mfaRequired && res.mfaToken) {
+    return { mfaRequired: true as const, mfaToken: res.mfaToken };
   }
 
   if (!res.token) {
@@ -356,6 +386,135 @@ async function getOpenIdConfig({ password }: { password: string }) {
 
     throw err;
   }
+}
+
+async function totpStatus(): Promise<
+  { error: string } | { enabled: boolean; pending: boolean }
+> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const res = await get(serverConfig.SIGNUP_SERVER + '/totp/status', {
+      headers: {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    });
+
+    const { data } = JSON.parse(res) || {};
+
+    return {
+      enabled: Boolean(data?.enabled),
+      pending: Boolean(data?.pending),
+    };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+
+    throw err;
+  }
+}
+
+async function totpEnroll({
+  password,
+}: {
+  password: string;
+}): Promise<{ error: string } | { secret: string; otpauthUrl: string }> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    const res = await post(
+      serverConfig.SIGNUP_SERVER + '/totp/enroll',
+      { token: userToken, password, clientSupportsMfa: true },
+      { 'X-ACTUAL-TOKEN': userToken },
+    );
+
+    return res as { secret: string; otpauthUrl: string };
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+
+    throw err;
+  }
+}
+
+async function totpConfirm({ code }: { code: string }) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    await post(
+      serverConfig.SIGNUP_SERVER + '/totp/confirm',
+      { token: userToken, code },
+      { 'X-ACTUAL-TOKEN': userToken },
+    );
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+
+    throw err;
+  }
+
+  return {};
+}
+
+async function totpDisable({
+  password,
+  code,
+}: {
+  password: string;
+  code: string;
+}) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) {
+    return { error: 'not-logged-in' };
+  }
+
+  try {
+    const serverConfig = getServer();
+    if (!serverConfig) {
+      throw new Error('No sync server configured.');
+    }
+
+    await post(
+      serverConfig.SIGNUP_SERVER + '/totp/disable',
+      { token: userToken, password, code },
+      { 'X-ACTUAL-TOKEN': userToken },
+    );
+  } catch (err) {
+    if (err instanceof PostError) {
+      return { error: err.reason || 'network-failure' };
+    }
+
+    throw err;
+  }
+
+  return {};
 }
 
 async function enablePassword(passwordConfig: { password: string }) {

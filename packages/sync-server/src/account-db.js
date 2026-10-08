@@ -9,6 +9,7 @@ import {
   setPasswordHash,
   verifyPassword,
 } from './accounts/password';
+import { disableTotp } from './accounts/totp';
 import { openDatabase } from './db';
 import { config } from './load-config';
 
@@ -163,6 +164,10 @@ export async function enableOpenID(loginSettings) {
   if (error) {
     return { error };
   }
+
+  // TOTP is a second factor for the server password only; with OpenID active
+  // MFA is the provider's job, so drop the secret rather than leave it orphaned.
+  disableTotp();
 
   getAccountDb().mutate('DELETE FROM sessions');
 }

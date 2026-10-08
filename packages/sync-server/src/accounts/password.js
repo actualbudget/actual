@@ -67,7 +67,11 @@ export async function bootstrapPassword(password) {
   return {};
 }
 
-export async function loginWithPassword(password) {
+/**
+ * Verify the server password without creating a session. Callers that need a
+ * second factor use this, then only mint a session once that factor passes.
+ */
+export async function verifyPasswordForLogin(password) {
   if (!isValidPassword(password)) {
     return { error: 'invalid-password' };
   }
@@ -96,35 +100,48 @@ export async function loginWithPassword(password) {
     );
   }
 
+  return {};
+}
+
+/**
+ * Resolve the single user backing password auth, creating it on first login.
+ * Password auth has no per-user identity: the user row has an empty user_name.
+ */
+export function resolvePasswordUserId() {
+  const accountDb = getAccountDb();
+
+  const { totalOfUsers } = accountDb.first(
+    'SELECT count(*) as totalOfUsers FROM users',
+  );
+
+  if (totalOfUsers === 0) {
+    const userId = uuidv4();
+    accountDb.mutate(
+      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
+      [userId, '', '', 'ADMIN'],
+    );
+    return { userId };
+  }
+
+  const { id: userId } =
+    accountDb.first('SELECT id FROM users WHERE user_name = ?', ['']) || {};
+
+  if (!userId) {
+    return { error: 'user-not-found' };
+  }
+
+  return { userId };
+}
+
+export function createPasswordSession(userId) {
+  const accountDb = getAccountDb();
+
   const sessionRow = accountDb.first(
     'SELECT * FROM sessions WHERE auth_method = ?',
     ['password'],
   );
 
   const token = sessionRow ? sessionRow.token : uuidv4();
-
-  const { totalOfUsers } = accountDb.first(
-    'SELECT count(*) as totalOfUsers FROM users',
-  );
-  let userId = null;
-  if (totalOfUsers === 0) {
-    userId = uuidv4();
-    accountDb.mutate(
-      'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, 1, ?)',
-      [userId, '', '', 'ADMIN'],
-    );
-  } else {
-    const { id: userIdFromDb } = accountDb.first(
-      'SELECT id FROM users WHERE user_name = ?',
-      [''],
-    );
-
-    userId = userIdFromDb;
-
-    if (!userId) {
-      return { error: 'user-not-found' };
-    }
-  }
 
   let expiration = TOKEN_EXPIRATION_NEVER;
   if (
@@ -151,6 +168,20 @@ export async function loginWithPassword(password) {
   clearExpiredSessions();
 
   return { token };
+}
+
+export async function loginWithPassword(password) {
+  const { error } = await verifyPasswordForLogin(password);
+  if (error) {
+    return { error };
+  }
+
+  const { error: userError, userId } = resolvePasswordUserId();
+  if (userError) {
+    return { error: userError };
+  }
+
+  return createPasswordSession(userId);
 }
 
 export async function changePassword(newPassword) {
