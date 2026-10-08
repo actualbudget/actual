@@ -114,7 +114,17 @@ test.describe('Reports', () => {
 
     test('switches to daily granularity', async () => {
       await reportsPage.selectForecastGranularity('Daily');
+      await expect(page).toMatchThemeScreenshots();
+    });
 
+    test('switches to Auto Y-Axis', async () => {
+      await reportsPage.selectYAxisBase('Auto');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('switches to daily granularity and auto Y-Axis', async () => {
+      await reportsPage.selectForecastGranularity('Daily');
+      await reportsPage.selectYAxisBase('Auto');
       await expect(page).toMatchThemeScreenshots();
     });
 
