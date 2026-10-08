@@ -365,11 +365,15 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             paddingTop: 20,
           }}
         >
-          <FinancialText
+          <View
             style={{ ...styles.largeText, fontWeight: 400, marginBottom: 5 }}
           >
-            <PrivacyFilter>{format(data.netWorth, 'financial')}</PrivacyFilter>
-          </FinancialText>
+            <PrivacyFilter>
+              <FinancialText>
+                {format(data.netWorth, 'financial')}
+              </FinancialText>
+            </PrivacyFilter>
+          </View>
           <PrivacyFilter>
             <Change amount={data.totalChange} />
           </PrivacyFilter>
