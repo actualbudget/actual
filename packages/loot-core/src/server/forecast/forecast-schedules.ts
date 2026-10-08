@@ -21,6 +21,7 @@ import type {
 } from './forecast-accounts';
 import { enrichForecastFilterObjects } from './forecast-filters';
 import type { ForecastFilterObject } from './forecast-filters';
+import { matchForecastOccurrences } from './forecast-occurrence-matching';
 
 /** Synthetic account for schedules with no account; combined forecast only when explicitly included. */
 export const FORECAST_UNASSIGNED_ACCOUNT_ID = '__unassigned_schedule__';
@@ -61,6 +62,9 @@ type TransferPayee = {
 };
 
 export type ForecastScheduleOccurrence = {
+  occurrenceId: string;
+  originalDueDate: string;
+  isMissed?: boolean;
   transaction: TransactionEntity;
   filterObject: ForecastFilterObject;
   amount: number;
@@ -117,6 +121,20 @@ export async function getNormalizedSchedules() {
   });
 }
 
+export async function getPostedScheduleTransactions(scheduleIds: string[]) {
+  if (scheduleIds.length === 0) {
+    return [];
+  }
+  // Fulfillment is independent of the report's account and transaction filters.
+  const { data } = await aqlQuery(
+    q('transactions')
+      .filter({ tombstone: false, schedule: { $oneof: scheduleIds } })
+      .options({ splits: 'all' })
+      .select('*'),
+  );
+  return data;
+}
+
 async function getTransferPayeesByAccountIds(accountIds: string[]) {
   if (accountIds.length === 0) {
     return new Map<string, TransferPayee>();
@@ -141,6 +159,7 @@ async function getTransferPayeesByAccountIds(accountIds: string[]) {
 export function getFutureOccurrenceDates(
   schedule: ScheduleData,
   endDate: Date,
+  failOnLimit = false,
 ) {
   if (typeof schedule._date === 'string') {
     const singleDate = monthUtils.parseDate(schedule._date);
@@ -154,8 +173,16 @@ export function getFutureOccurrenceDates(
   let day = monthUtils.parseDate(schedule.next_date);
   let iterations = 0;
 
-  while (day <= endDate && iterations < maxIterations) {
+  while (day <= endDate) {
     iterations++;
+    if (iterations > maxIterations) {
+      if (failOnLimit) {
+        throw new Error(
+          'Too many schedule occurrences to forecast missed schedules.',
+        );
+      }
+      break;
+    }
     const nextDate = getNextDate(dateCondition, day);
     const parsedNextDate =
       nextDate != null ? monthUtils.parseDate(nextDate) : null;
@@ -183,6 +210,7 @@ export async function buildFutureScheduleOccurrences(
   accountsById: Map<string, AccountWithComputedBalance>,
   ruleAccountsById: Map<string, DbAccountForRules>,
   postedTransactions: TransactionEntity[],
+  reconcileMissedAsOf?: string,
 ) {
   const postedByScheduleId =
     indexPostedScheduleTransactions(postedTransactions);
@@ -192,6 +220,7 @@ export async function buildFutureScheduleOccurrences(
   const payeesById = new Map<string, Awaited<ReturnType<typeof db.getPayee>>>();
   const simulatedTransactions: TransactionEntity[] = [];
   const occurrences: Array<{
+    originalDueDate: string;
     accountId: string;
     transactionId: string;
     amount: number;
@@ -201,15 +230,32 @@ export async function buildFutureScheduleOccurrences(
 
   for (const schedule of schedules) {
     const scheduleName = schedule.name ?? 'Unknown';
-
-    for (const date of getFutureOccurrenceDates(schedule, endDateObj)) {
-      if (
-        isScheduleOccurrencePosted({
+    const dates = getFutureOccurrenceDates(
+      schedule,
+      endDateObj,
+      reconcileMissedAsOf != null,
+    );
+    const posted = postedByScheduleId.get(schedule.id) ?? [];
+    const matchedDates = reconcileMissedAsOf
+      ? matchForecastOccurrences({
           schedule,
           scheduleId: schedule.id,
-          occurrenceDate: date,
-          postedTransactions: postedByScheduleId.get(schedule.id) ?? [],
+          occurrenceDates: dates,
+          postedTransactions,
+          today: reconcileMissedAsOf,
         })
+      : null;
+
+    for (const date of dates) {
+      if (
+        matchedDates
+          ? matchedDates.has(date)
+          : isScheduleOccurrencePosted({
+              schedule,
+              scheduleId: schedule.id,
+              occurrenceDate: date,
+              postedTransactions: posted,
+            })
       ) {
         continue;
       }
@@ -229,6 +275,7 @@ export async function buildFutureScheduleOccurrences(
       );
       simulatedTransactions.push(sourceTransaction);
       occurrences.push({
+        originalDueDate: date,
         accountId: sourceTransaction.account,
         transactionId: sourceTransaction.id,
         amount: sourceTransaction.amount,
@@ -291,6 +338,7 @@ export async function buildFutureScheduleOccurrences(
       sourceTransaction.transfer_id = transferTransaction.id;
       simulatedTransactions.push(transferTransaction);
       occurrences.push({
+        originalDueDate: date,
         accountId: transferTransaction.account,
         transactionId: transferTransaction.id,
         amount: transferTransaction.amount,
@@ -319,6 +367,8 @@ export async function buildFutureScheduleOccurrences(
     }
 
     return {
+      occurrenceId: `forecast-${occurrence.scheduleId}-${occurrence.originalDueDate}`,
+      originalDueDate: occurrence.originalDueDate,
       transaction,
       filterObject,
       amount: occurrence.amount,

@@ -1,4 +1,8 @@
-import type { ForecastSource } from './forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastSource,
+} from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -461,5 +465,7 @@ export type BalanceForecastWidget = AbstractWidget<
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
     source?: ForecastSource;
+    missedSchedules?: ForecastMissedSchedules;
+    missedOccurrences?: ForecastMissedOccurrences;
   } | null
 >;

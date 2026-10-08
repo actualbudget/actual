@@ -35,6 +35,8 @@ describe('forecast projection', () => {
     ];
     const futureOccurrences: ForecastScheduleOccurrence[] = [
       {
+        occurrenceId: 'sched-1:2024-03-02',
+        originalDueDate: '2024-03-02',
         transaction: {
           id: 'occurrence-1',
           account: 'acct-1',
@@ -67,6 +69,7 @@ describe('forecast projection', () => {
       canRestrictAccounts: false,
     };
     const dateContext: ForecastDateContext = {
+      today: '2024-03-02',
       forecastStartDate: '2024-03-02',
       forecastEndDate: '2024-03-04',
       forecastDays: ['2024-03-02', '2024-03-03', '2024-03-04'],
@@ -86,7 +89,12 @@ describe('forecast projection', () => {
       110, 70, 70,
     ]);
     expect(result.dataPoints[0].transactions).toMatchObject([
-      { amount: 10, scheduleId: 'sched-1' },
+      {
+        amount: 10,
+        scheduleId: 'sched-1',
+        occurrenceId: 'sched-1:2024-03-02',
+        originalDueDate: '2024-03-02',
+      },
     ]);
     expect(result.lowestBalance).toEqual({
       date: '2024-03-03',
