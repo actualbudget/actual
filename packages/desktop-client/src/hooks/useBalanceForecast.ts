@@ -1,9 +1,14 @@
-import { send } from '@actual-app/core/platform/client/connection';
+import { useEffect, useEffectEvent } from 'react';
+
+import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
   ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
+import type { ServerEvents } from '@actual-app/core/types/server-events';
 import { useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
@@ -14,6 +19,8 @@ type UseBalanceForecastParams = {
   endDate: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  missedSchedules?: ForecastMissedSchedules;
+  missedOccurrences?: ForecastMissedOccurrences;
   enabled?: boolean;
 };
 
@@ -25,6 +32,8 @@ export function buildBalanceForecastRequest({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  missedSchedules,
+  missedOccurrences,
 }: UseBalanceForecastParams) {
   return Object.fromEntries(
     Object.entries({
@@ -35,6 +44,8 @@ export function buildBalanceForecastRequest({
       endDate,
       includeAccountlessSchedules,
       source,
+      missedSchedules,
+      missedOccurrences,
     }).filter(([, value]) => value !== undefined),
   );
 }
@@ -46,7 +57,7 @@ export function useBalanceForecastSeries({
 }: UseBalanceForecastParams & { series?: ForecastSeries[] }) {
   const requests = buildBalanceForecastSeriesRequests(series, params);
 
-  return useQuery({
+  const result = useQuery({
     queryKey: ['balance-forecast-series', requests],
     queryFn: () =>
       Promise.all(
@@ -69,6 +80,31 @@ export function useBalanceForecastSeries({
     },
     enabled,
   });
+
+  const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
+    if (
+      enabled &&
+      (event.type === 'applied' || event.type === 'success') &&
+      event.tables.some(table =>
+        [
+          'transactions',
+          'schedules',
+          'schedules_next_date',
+          'rules',
+          'accounts',
+          'payees',
+          'payee_mapping',
+          'categories',
+          'category_mapping',
+        ].includes(table),
+      )
+    ) {
+      void result.refetch();
+    }
+  });
+  useEffect(() => listen('sync-event', onSyncEvent), []);
+
+  return result;
 }
 
 export function buildBalanceForecastSeriesRequests(
