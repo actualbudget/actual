@@ -69,6 +69,7 @@ describe('forecast projection', () => {
       canRestrictAccounts: false,
     };
     const dateContext: ForecastDateContext = {
+      today: '2024-03-02',
       forecastStartDate: '2024-03-02',
       forecastEndDate: '2024-03-04',
       forecastDays: ['2024-03-02', '2024-03-03', '2024-03-04'],

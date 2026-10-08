@@ -26,6 +26,7 @@ type PostedTransactionSummary = {
 };
 
 export type ForecastDateContext = {
+  today: string;
   forecastStartDate: string;
   forecastEndDate: string;
   forecastDays: string[];
@@ -57,6 +58,7 @@ export function buildForecastDateContext(
   const todayString = format(today, 'yyyy-MM-dd');
 
   return {
+    today: todayString,
     forecastStartDate,
     forecastEndDate,
     forecastDays: monthUtils.dayRangeInclusive(
@@ -115,9 +117,13 @@ export function indexScheduleOccurrences(
   const scheduleOccurrencesByAccount: ScheduleOccurrencesByAccount = {};
 
   for (const occurrence of futureOccurrences) {
+    // An adjustment assumed today must also be carried into a future-only view.
+    const projectionDate = occurrence.isMissed
+      ? maxDate(occurrence.transaction.date, firstForecastDate)
+      : occurrence.transaction.date;
     if (
-      occurrence.transaction.date < firstForecastDate ||
-      occurrence.transaction.date > forecastEndDate ||
+      projectionDate < firstForecastDate ||
+      projectionDate > forecastEndDate ||
       !accountIdSet.has(occurrence.transaction.account) ||
       !matchesForecastFilters(occurrence.filterObject, filterInfo)
     ) {
@@ -127,10 +133,11 @@ export function indexScheduleOccurrences(
     addScheduleOccurrence(
       scheduleOccurrencesByAccount,
       occurrence.transaction.account,
-      occurrence.transaction.date,
+      projectionDate,
       {
         occurrenceId: occurrence.occurrenceId,
         originalDueDate: occurrence.originalDueDate,
+        isMissed: occurrence.isMissed,
         amount: occurrence.amount,
         payee: occurrence.payee,
         scheduleId: occurrence.scheduleId,
@@ -205,6 +212,7 @@ function buildAccountForecastDataPoints(
       transactions: scheduleTxns.map(scheduleTxn => ({
         occurrenceId: scheduleTxn.occurrenceId,
         originalDueDate: scheduleTxn.originalDueDate,
+        isMissed: scheduleTxn.isMissed,
         amount: scheduleTxn.amount,
         payee: scheduleTxn.payee,
         scheduleId: scheduleTxn.scheduleId,
