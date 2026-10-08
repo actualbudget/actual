@@ -64,6 +64,7 @@ type TransferPayee = {
 export type ForecastScheduleOccurrence = {
   occurrenceId: string;
   originalDueDate: string;
+  isMissed?: boolean;
   transaction: TransactionEntity;
   filterObject: ForecastFilterObject;
   amount: number;
@@ -120,6 +121,20 @@ export async function getNormalizedSchedules() {
   });
 }
 
+export async function getPostedScheduleTransactions(scheduleIds: string[]) {
+  if (scheduleIds.length === 0) {
+    return [];
+  }
+  // Fulfillment is independent of the report's account and transaction filters.
+  const { data } = await aqlQuery(
+    q('transactions')
+      .filter({ tombstone: false, schedule: { $oneof: scheduleIds } })
+      .options({ splits: 'all' })
+      .select('*'),
+  );
+  return data;
+}
+
 async function getTransferPayeesByAccountIds(accountIds: string[]) {
   if (accountIds.length === 0) {
     return new Map<string, TransferPayee>();
@@ -144,6 +159,7 @@ async function getTransferPayeesByAccountIds(accountIds: string[]) {
 export function getFutureOccurrenceDates(
   schedule: ScheduleData,
   endDate: Date,
+  failOnLimit = false,
 ) {
   if (typeof schedule._date === 'string') {
     const singleDate = monthUtils.parseDate(schedule._date);
@@ -157,8 +173,16 @@ export function getFutureOccurrenceDates(
   let day = monthUtils.parseDate(schedule.next_date);
   let iterations = 0;
 
-  while (day <= endDate && iterations < maxIterations) {
+  while (day <= endDate) {
     iterations++;
+    if (iterations > maxIterations) {
+      if (failOnLimit) {
+        throw new Error(
+          'Too many schedule occurrences to forecast missed schedules.',
+        );
+      }
+      break;
+    }
     const nextDate = getNextDate(dateCondition, day);
     const parsedNextDate =
       nextDate != null ? monthUtils.parseDate(nextDate) : null;
@@ -206,7 +230,11 @@ export async function buildFutureScheduleOccurrences(
 
   for (const schedule of schedules) {
     const scheduleName = schedule.name ?? 'Unknown';
-    const dates = getFutureOccurrenceDates(schedule, endDateObj);
+    const dates = getFutureOccurrenceDates(
+      schedule,
+      endDateObj,
+      reconcileMissedAsOf != null,
+    );
     const posted = postedByScheduleId.get(schedule.id) ?? [];
     const matchedDates = reconcileMissedAsOf
       ? matchForecastOccurrences({
