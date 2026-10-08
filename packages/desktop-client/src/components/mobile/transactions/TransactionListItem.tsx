@@ -41,6 +41,7 @@ import { useFormat } from '#hooks/useFormat';
 import { usePayee } from '#hooks/usePayee';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { useSelector } from '#redux';
+import { nativeLine } from '#util/foreign-details';
 
 import { lookupName, Status } from './TransactionEdit';
 
@@ -124,6 +125,9 @@ export function TransactionListItem({
   if (!transaction) {
     return null;
   }
+
+  // Lists in the budget currency show a foreign row's native amount too.
+  const native = nativeLine(transaction, account);
 
   const {
     id,
@@ -325,6 +329,17 @@ export function TransactionListItem({
               >
                 {format(amount, 'financial')}
               </Text>
+              {native && (
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: theme.pageTextSubdued,
+                    ...styles.tnum,
+                  }}
+                >
+                  {native}
+                </Text>
+              )}
               {showRunningBalance && runningBalance !== undefined && (
                 <Text
                   style={{
