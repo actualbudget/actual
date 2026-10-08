@@ -22,7 +22,7 @@ export class CategoryGroupMenuModal {
   }
 
   async close() {
-    await this.locator.getByRole('button', { name: 'Close' }).click();
+    await this.page.keyboard.press('Escape');
   }
 
   async delete() {

@@ -302,13 +302,14 @@ budgetTypes.forEach(budgetType => {
 
       await categoryGroupMenuModal.delete();
 
-      const confirmDeleteModal = page.getByTestId(
-        'confirm-category-delete-modal',
+      await expect(categoryGroupMenuModal.locator).toContainText(
+        'Are you sure you want to delete it?',
       );
-      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
-        'Confirm Delete',
-      );
-      await expect(confirmDeleteModal).toContainText('Transfer to:');
+      await expect(
+        categoryGroupMenuModal.locator.getByRole('button', {
+          name: 'Category',
+        }),
+      ).toBeVisible();
     });
 
     test('opens the transfer confirmation when deleting a category with transactions', async () => {
@@ -319,13 +320,12 @@ budgetTypes.forEach(budgetType => {
 
       await categoryMenuModal.delete();
 
-      const confirmDeleteModal = page.getByTestId(
-        'confirm-category-delete-modal',
+      await expect(categoryMenuModal.locator).toContainText(
+        'Are you sure you want to delete it?',
       );
-      await expect(confirmDeleteModal.getByRole('heading')).toHaveText(
-        'Confirm Delete',
-      );
-      await expect(confirmDeleteModal).toContainText('Transfer to:');
+      await expect(
+        categoryMenuModal.locator.getByRole('button', { name: 'Category' }),
+      ).toBeVisible();
     });
 
     // Budgeted Cell Tests
