@@ -166,7 +166,9 @@ type LiveTransactionTableProps = {
   showCategory: boolean;
   showGroup?: boolean;
   showCleared: boolean;
-  columnOrder?: TransactionTableColumnId[];
+  showBalances?: boolean;
+  balances?: Record<TransactionEntity['id'], number>;
+  onReorder?: () => void;
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
@@ -691,9 +693,7 @@ describe('Transactions', () => {
     });
 
     test('number column can be edited and is navigable when enabled', async () => {
-      const { container, getTransactions } = renderTransactions({
-        columnOrder: [...TRANSACTION_TABLE_COLUMN_IDS],
-      });
+      const { container, getTransactions } = renderTransactions();
 
       const input = await editField(container, 'tracking_number', 2);
       await userEvent.type(input, ' 1001 ');
@@ -1617,6 +1617,37 @@ describe('Transactions', () => {
     expect(container.querySelectorAll('[data-testid=select] svg').length).toBe(
       2,
     );
+  });
+
+  test('pressing the mouse on the running balance pauses row drag so the text can be selected', () => {
+    // Two transactions on the same date, so the rows can be reordered
+    const transactions = generateTransactions(2).map(t => ({
+      ...t,
+      date: '2017-01-01',
+    }));
+    const { container } = renderTransactions({
+      transactions,
+      showBalances: true,
+      balances: Object.fromEntries(transactions.map(t => [t.id, 1000])),
+      onReorder: vi.fn(),
+    });
+
+    const balance = queryField(container, 'balance', '', 0);
+    const row = balance.closest('[data-testid=row]');
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance, { button: 2 });
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    expect(row).toHaveAttribute('draggable', 'false');
+
+    fireEvent.mouseUp(window);
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    fireEvent.blur(window);
+    expect(row).toHaveAttribute('draggable', 'true');
   });
 
   test('transaction can be split, updated, and deleted', async () => {
