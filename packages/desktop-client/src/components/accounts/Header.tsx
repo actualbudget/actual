@@ -58,6 +58,7 @@ import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
+import { CurrentEstimateLines } from './CurrentEstimateLines';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 type AccountHeaderProps = {
@@ -323,6 +324,7 @@ export function AccountHeader({
               isFiltered={isFiltered}
               filteredAmount={filteredAmount}
             />
+            <CurrentEstimateLines account={account} accountId={accountId} />
           </View>
 
           {/* The history graph charts stored base amounts. */}

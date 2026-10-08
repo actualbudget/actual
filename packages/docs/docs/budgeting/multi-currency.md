@@ -82,6 +82,14 @@ On **All accounts** the same payment is shown in dollars. Hold the pointer over 
 
 The row menu includes **Amount details**. For this rent, that opens **Edit foreign amount**.
 
+## Current worth
+
+Under the €1,050.00 balance, Actual shows what that balance is worth at the current rate, and the base amount it has recorded: "≈ $1,155.00 at the current rate (1 EUR = 1.1 USD, manual standing rate from 2026-10-31)." The next line is "Recorded base: $1,155.00."
+
+<img width="860" alt="BNP Paribas at €1,050.00, with a current-rate estimate of $1,155.00 and a recorded base of $1,155.00" src="/img/budgeting/multi-currency-estimate@2x.png" />
+
+**All accounts** adds a line under the total: "≈ $3,905.00 at current rates." Hold the pointer over the BNP Paribas balance in the sidebar and it shows the same two lines. On a phone, the account list shows only the first line. **On budget** says "≈ $3,905.00 at current rates." Under BNP Paribas the line is the euro estimate above. Under BBVA México it says "≈ $250.00 at the current rate (1 MXN = 0.05 USD, manual standing rate from 2026-10-31)."
+
 ## Change a saved amount
 
 Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount** opens with -1,000.00. The line under it is -$1,100.00 at the saved standing rate from 2026-10-31, with EUR first. Leave **Base amount** and the rate empty. Click **Save**. The payment is 1,000.00. BNP Paribas is €1,000.00. **All accounts** is $3,850.00.
