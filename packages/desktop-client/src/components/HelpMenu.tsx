@@ -24,11 +24,19 @@ const getPageDocs = (page: string) => {
       return 'https://actualbudget.org/docs/reports/';
     case '/schedules':
       return 'https://actualbudget.org/docs/schedules';
-    case '/payees':
+    case '/settings/payees':
       return 'https://actualbudget.org/docs/transactions/payees';
-    case '/rules':
+    case '/settings/rules':
       return 'https://actualbudget.org/docs/budgeting/rules';
+    case '/settings/tags':
+      return 'https://actualbudget.org/docs/transactions/tags';
+    case '/settings/bank-sync':
+      return 'https://actualbudget.org/docs/advanced/bank-sync';
+    case '/settings/experimental':
+      return 'https://actualbudget.org/docs/experimental';
     case '/settings':
+    case '/settings/general':
+    case '/settings/advanced':
       return 'https://actualbudget.org/docs/settings';
     case '/notifications':
       return 'https://actualbudget.org/docs/notifications';

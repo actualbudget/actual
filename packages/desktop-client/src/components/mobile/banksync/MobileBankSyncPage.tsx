@@ -18,6 +18,7 @@ import { BuiltInProviders } from '#components/banksync/BuiltInProviders';
 import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBankSyncProviders';
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
+import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -101,7 +102,15 @@ export function MobileBankSyncPage() {
   }, []);
 
   return (
-    <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
+    <Page
+      header={
+        <MobilePageHeader
+          title={t('Bank Sync')}
+          leftContent={<SettingsBackButton />}
+        />
+      }
+      padding={0}
+    >
       <View style={{ padding: 15, flexShrink: 0 }}>
         <BuiltInProviders
           providers={providers}
