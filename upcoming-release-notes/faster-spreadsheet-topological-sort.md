@@ -3,4 +3,4 @@ category: Enhancements
 authors: [mbrevda]
 ---
 
-Improve cache generation performance (when loading, restoring, or updating a budget)
+Speed up opening a budget after downloading, importing, or resetting the cache
