@@ -76,9 +76,9 @@ export function Graph() {
     return graph;
   }
 
-  function topologicalSort(sourceNodes) {
-    const visited = new Set();
-    const sorted = [];
+  function topologicalSort(sourceNodes: string[]) {
+    const visited = new Set<string>();
+    const sorted: string[] = [];
 
     sourceNodes.forEach(name => {
       if (!visited.has(name)) {
@@ -86,57 +86,47 @@ export function Graph() {
       }
     });
 
+    // Nodes are collected in post-order; reversed, that is a topological order.
+    sorted.reverse();
+
     return sorted;
   }
 
-  function topologicalSortIterable(name, visited, sorted) {
-    const stackTrace: StackItem[] = [];
+  // Uses an explicit stack so long dependency chains can't overflow the call
+  // stack. Nodes are marked visited on entry so a cycle can't loop forever.
+  function topologicalSortIterable(
+    name: string,
+    visited: Set<string>,
+    sorted: string[],
+  ) {
+    visited.add(name);
+    const stack = [createStackFrame(name)];
 
-    stackTrace.push({
-      count: -1,
-      value: name,
-      parent: '',
-      level: 0,
-    });
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
 
-    while (stackTrace.length > 0) {
-      const current = stackTrace.slice(-1)[0];
-
-      const adjacents = adjacent(current.value);
-      if (current.count === -1) {
-        current.count = adjacents.size;
+      let next: string | undefined;
+      while (frame.index < frame.neighbors.length) {
+        const neighbor = frame.neighbors[frame.index++];
+        if (!visited.has(neighbor)) {
+          next = neighbor;
+          break;
+        }
       }
 
-      if (current.count > 0) {
-        const iter = adjacents.values();
-        let cur = iter.next();
-        while (!cur.done) {
-          if (!visited.has(cur.value)) {
-            stackTrace.push({
-              count: -1,
-              parent: current.value,
-              value: cur.value,
-              level: current.level + 1,
-            });
-          } else {
-            current.count--;
-          }
-          cur = iter.next();
-        }
+      if (next !== undefined) {
+        visited.add(next);
+        stack.push(createStackFrame(next));
       } else {
-        if (!visited.has(current.value)) {
-          visited.add(current.value);
-          sorted.unshift(current.value);
-        }
-
-        const removed = stackTrace.pop();
-        for (let i = 0; i < stackTrace.length; i++) {
-          if (stackTrace[i].value === removed.parent) {
-            stackTrace[i].count--;
-          }
-        }
+        stack.pop();
+        sorted.push(frame.value);
       }
     }
+  }
+
+  function createStackFrame(value: string): StackFrame {
+    const neighbors = [...adjacent(value)].reverse();
+    return { value, neighbors, index: 0 };
   }
 
   function generateDOT() {
@@ -157,9 +147,8 @@ export function Graph() {
   return graph;
 }
 
-type StackItem = {
-  count: number;
+type StackFrame = {
   value: string;
-  parent: string;
-  level: number;
+  neighbors: string[];
+  index: number;
 };

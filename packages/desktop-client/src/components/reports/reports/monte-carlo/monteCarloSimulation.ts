@@ -156,6 +156,12 @@ export const MAX_FORMATTABLE_AMOUNT = MAX_SAFE_NUMBER;
 
 export const MIN_SIMULATION_COUNT = 1000;
 export const MAX_SIMULATION_COUNT = 10000;
+// The block bootstrap model's average run of consecutive historical years.
+// 10 gives each year a 90% chance of continuing to the next, a common
+// choice for annual market data; 1 never continues (the shuffled model)
+export const MIN_HISTORICAL_BLOCK_LENGTH = 1;
+export const MAX_HISTORICAL_BLOCK_LENGTH = 30;
+export const DEFAULT_HISTORICAL_BLOCK_LENGTH = 10;
 export const MIN_HORIZON_YEARS = 1;
 export const MAX_HORIZON_YEARS = 100;
 
@@ -488,9 +494,15 @@ export type MonteCarloConfig = {
   withdrawalStrategy: MonteCarloWithdrawalStrategy;
   /**
    * How yearly returns are generated: random normal draws, random samples
-   * of historical years, or replays of actual historical sequences
+   * of historical years, random blocks of consecutive historical years,
+   * or replays of actual historical sequences
    */
   returnModel: MonteCarloReturnModel;
+  /**
+   * Block bootstrap model only: the average number of consecutive
+   * historical years in a block before jumping to a new random year
+   */
+  historicalBlockLength: number;
   /** Dynamic withdrawal adjustment rule applied at the start of each year */
   withdrawalRule: MonteCarloWithdrawalRuleConfig;
   /** Minimum yearly spending in minor units (today's money); 0 = no floor */
@@ -534,6 +546,7 @@ export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
   currentAge: 60,
   targetAge: 90,
   simulationCount: 5000,
+  historicalBlockLength: DEFAULT_HISTORICAL_BLOCK_LENGTH,
 };
 
 /** Simulated years, derived from the configured ages */
@@ -677,6 +690,8 @@ export function monteCarloConfigFromMeta(
     targetAge: meta?.targetAge ?? MONTE_CARLO_DEFAULTS.targetAge,
     simulationCount:
       meta?.simulationCount ?? MONTE_CARLO_DEFAULTS.simulationCount,
+    historicalBlockLength:
+      meta?.historicalBlockLength ?? MONTE_CARLO_DEFAULTS.historicalBlockLength,
   };
 }
 
@@ -1620,6 +1635,17 @@ export function runMonteCarloSimulation(
           MAX_SIMULATION_COUNT,
         );
 
+  // Block bootstrap: with an average block of L years, each year carries
+  // on to the next historical year with probability 1 - 1/L
+  const blockContinueProbability =
+    1 -
+    1 /
+      clamp(
+        params.historicalBlockLength,
+        MIN_HISTORICAL_BLOCK_LENGTH,
+        MAX_HISTORICAL_BLOCK_LENGTH,
+      );
+
   const random = mulberry32(params.seed ?? DEFAULT_SIMULATION_SEED);
   const nextNormal = makeNormalSampler(random);
 
@@ -1694,6 +1720,9 @@ export function runMonteCarloSimulation(
     // This replay's realized inflation path: each year draws its own rate
     // when inflation volatility is set
     let cumulativeInflation = 1;
+    // Block bootstrap: the historical year the previous simulated year
+    // used, so this year can carry on from it; -1 before the first year
+    let previousHistoryIndex = -1;
     let ratchetStreak = 0;
     let withdrawnSum = 0;
     let depleted = false;
@@ -1771,6 +1800,18 @@ export function runMonteCarloSimulation(
         let historyIndex = -1;
         if (returnModel === 'historical-bootstrap') {
           historyIndex = Math.floor(random() * historyCount);
+        } else if (returnModel === 'historical-block-bootstrap') {
+          // Stationary block bootstrap: carry on to the next historical
+          // year with the continue probability (wrapping past the end of
+          // the data, as the replay model does), otherwise start a new
+          // block at a random year. The first year always starts a block.
+          // Crashes keep their aftermath within a block, yet every
+          // scenario is a different chain of blocks
+          historyIndex =
+            previousHistoryIndex >= 0 && random() < blockContinueProbability
+              ? (previousHistoryIndex + 1) % historyCount
+              : Math.floor(random() * historyCount);
+          previousHistoryIndex = historyIndex;
         } else if (returnModel === 'historical-sequence') {
           historyIndex = (simulationIndex + year - 1) % historyCount;
         }
