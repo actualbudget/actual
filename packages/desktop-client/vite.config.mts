@@ -256,9 +256,11 @@ export default defineConfig(async ({ mode, command }) => {
 
   // Netlify sets COMMIT_REF; GitHub Actions sets GITHUB_SHA (e.g. the
   // Docker/npm nightly builds). Forward whichever is present so edge/nightly
-  // builds can show which commit they were built from.
+  // builds can show which commit they were built from. Release builds run in
+  // GitHub Actions on a version tag and keep their plain version.
+  const isTagBuild = process.env.GITHUB_REF_TYPE === 'tag';
   const commitRef = process.env.COMMIT_REF || process.env.GITHUB_SHA;
-  if (commitRef) {
+  if (commitRef && !isTagBuild) {
     process.env.REACT_APP_COMMIT_REF = commitRef;
   }
 
