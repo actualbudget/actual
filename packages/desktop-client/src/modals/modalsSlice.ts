@@ -746,7 +746,7 @@ type ReplaceModalPayload = {
 };
 
 type CollapseModalPayload = {
-  rootModalName: Modal['name'];
+  rootModalName: string;
 };
 
 const modalsSlice = createSlice({

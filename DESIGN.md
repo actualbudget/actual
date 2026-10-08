@@ -42,6 +42,7 @@ typography:
 rounded:
   sm: '4px'
   md: '6px'
+  sheet: '18px'
 spacing:
   xs: '5px'
   sm: '10px'
@@ -132,6 +133,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Display** (600, 30px): Page-level headings and large balances. Rare.
 - **Headline** (700, 20px, 0.5px letter-spacing): Section titles.
 - **Title** (500, 15px): Emphasized in-table and card text.
+- **Sheet title** (600, 18px): Centred title of a mobile bottom sheet. Mobile only.
 - **Body** (400, 16px): Default text.
 - **Label** (400, 13px): Table meta, menus, dense secondary text; 12px and 10px steps exist for the tightest spots.
 
@@ -196,7 +198,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 ### Cards / Containers
 
-- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere
+- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere; mobile bottom sheets use 18px top corners and a flat bottom edge
 - **Background:** Surface White on Navy Mist page background
 - **Shadow Strategy:** Card shadow at most; structure via 1px Navy Mist border
 - **Internal Padding:** 16-20px
@@ -205,6 +207,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 - **Sidebar:** Navy Ink background, light navy text; hover darkens the row, selection marked with a purple accent and purple text. Status states (pending/positive/failed) tint the item background gold/green/red
 - **Mobile:** Purple header, white nav bar, purple selected item
+- **Mobile sheets:** Menus open as bottom sheets on the modal surface (`modalBackground`) with a grab handle in `pageTextSubdued` and hairline row dividers in `tooltipBorder`. Rows are full-width bare buttons, destructive rows in `errorText`, section labels in sentence case only when a sheet has two or more groups. Dismiss by swipe down, tap outside or Escape; no close button
 
 ### Pills / Chips
 
