@@ -21,6 +21,7 @@ import type {
 } from './forecast-accounts';
 import { enrichForecastFilterObjects } from './forecast-filters';
 import type { ForecastFilterObject } from './forecast-filters';
+import { matchForecastOccurrences } from './forecast-occurrence-matching';
 
 /** Synthetic account for schedules with no account; combined forecast only when explicitly included. */
 export const FORECAST_UNASSIGNED_ACCOUNT_ID = '__unassigned_schedule__';
@@ -185,6 +186,7 @@ export async function buildFutureScheduleOccurrences(
   accountsById: Map<string, AccountWithComputedBalance>,
   ruleAccountsById: Map<string, DbAccountForRules>,
   postedTransactions: TransactionEntity[],
+  reconcileMissedAsOf?: string,
 ) {
   const postedByScheduleId =
     indexPostedScheduleTransactions(postedTransactions);
@@ -204,15 +206,28 @@ export async function buildFutureScheduleOccurrences(
 
   for (const schedule of schedules) {
     const scheduleName = schedule.name ?? 'Unknown';
-
-    for (const date of getFutureOccurrenceDates(schedule, endDateObj)) {
-      if (
-        isScheduleOccurrencePosted({
+    const dates = getFutureOccurrenceDates(schedule, endDateObj);
+    const posted = postedByScheduleId.get(schedule.id) ?? [];
+    const matchedDates = reconcileMissedAsOf
+      ? matchForecastOccurrences({
           schedule,
           scheduleId: schedule.id,
-          occurrenceDate: date,
-          postedTransactions: postedByScheduleId.get(schedule.id) ?? [],
+          occurrenceDates: dates,
+          postedTransactions,
+          today: reconcileMissedAsOf,
         })
+      : null;
+
+    for (const date of dates) {
+      if (
+        matchedDates
+          ? matchedDates.has(date)
+          : isScheduleOccurrencePosted({
+              schedule,
+              scheduleId: schedule.id,
+              occurrenceDate: date,
+              postedTransactions: posted,
+            })
       ) {
         continue;
       }
