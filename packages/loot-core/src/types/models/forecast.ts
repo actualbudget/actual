@@ -1,6 +1,8 @@
 import type { RuleConditionEntity } from './rule';
 
 export type ForecastSource = 'schedules' | 'tracking-budget';
+export type ForecastMissedSchedules = 'exclude' | 'payments' | 'all';
+export type ForecastMissedOccurrences = 'one' | 'all';
 
 export type ForecastSeries = {
   id: string;
@@ -21,6 +23,7 @@ export type ForecastDataPoint = {
 export type ForecastTransaction = {
   occurrenceId?: string;
   originalDueDate?: string;
+  isMissed?: boolean;
   amount: number;
   payee: string | null;
   scheduleId: string;
