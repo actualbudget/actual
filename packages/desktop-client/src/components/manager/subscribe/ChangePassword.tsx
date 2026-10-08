@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { BigInput } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -19,9 +20,18 @@ export function ChangePassword() {
   const navigate = useNavigate();
   const [error, setError] = useState(null);
   const [msg, setMessage] = useState(null);
+  const [currentPassword, setCurrentPassword] = useState('');
 
   function getErrorMessage(error) {
     switch (error) {
+      case 'invalid-current-password':
+        return t('The current password is incorrect');
+      case 'too-many-requests':
+        return t('Too many attempts. Please try again later.');
+      case 'sign-in-failed':
+        return t(
+          'Your password was changed, but signing in failed. Please sign in again.',
+        );
       case 'invalid-password':
         return t('Password cannot be empty');
       case 'password-match':
@@ -35,13 +45,22 @@ export function ChangePassword() {
 
   async function onSetPassword(password) {
     setError(null);
-    const { error } = await send('subscribe-change-password', { password });
+    const { error } = await send('subscribe-change-password', {
+      password,
+      currentPassword,
+    });
 
     if (error) {
       setError(error);
     } else {
       setMessage(t('Password successfully changed'));
-      await send('subscribe-sign-in', { password });
+      setCurrentPassword('');
+      const result = await send('subscribe-sign-in', { password });
+      if (result.error) {
+        setMessage(null);
+        setError('sign-in-failed');
+        return;
+      }
       void navigate('/');
     }
   }
@@ -58,7 +77,7 @@ export function ChangePassword() {
       >
         <Trans>
           This will change the password for this server instance. All existing
-          sessions will stay logged in.
+          sessions will be signed out.
         </Trans>
       </Text>
 
@@ -87,6 +106,16 @@ export function ChangePassword() {
           {msg}
         </Text>
       )}
+
+      <BigInput
+        aria-label={t('Current password')}
+        placeholder={t('Current password')}
+        type="password"
+        autoComplete="current-password"
+        value={currentPassword}
+        onChangeValue={setCurrentPassword}
+        style={{ marginTop: 20 }}
+      />
 
       <ConfirmPasswordForm
         buttons={
