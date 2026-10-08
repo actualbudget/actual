@@ -46,7 +46,6 @@ import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
-import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
@@ -335,16 +334,6 @@ export function Modals() {
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeIncomeBalanceMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
-
-        case 'envelope-summary-to-budget-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <EnvelopeToBudgetMenuModal {...modal.options} />
             </SheetNameProvider>
           );
 

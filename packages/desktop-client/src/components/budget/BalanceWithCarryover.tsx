@@ -145,8 +145,8 @@ export function BalanceWithCarryover({
         textAlign: 'right',
         ...(!isDisabled && {
           cursor: 'pointer',
+          ':hover': { textDecoration: 'underline' },
         }),
-        ':hover': { textDecoration: 'underline' },
       }),
     [getBalanceAmountStyle, isDisabled],
   );

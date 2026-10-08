@@ -1,26 +1,10 @@
-// @ts-strict-ignore
-import React, { useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import {
-  SvgCheveronDown,
-  SvgCheveronUp,
-} from '@actual-app/components/icons/v1';
-import { SvgNotesPaper } from '@actual-app/components/icons/v2';
-import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { css } from '@emotion/css';
 
-import { BudgetMonthMenu } from '#components/budget/tracking/budgetsummary/BudgetMonthMenu';
-import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
-import { Notes } from '#components/Notes';
+import { useBudgetMonthMenu } from '#components/budget/tracking/budgetsummary/BudgetMonthMenu';
+import { BudgetMonthMenuSheet } from '#components/mobile/budget/BudgetMonthMenuSheet';
 import { useLocale } from '#hooks/useLocale';
-import { useNotes } from '#hooks/useNotes';
-import { useUndo } from '#hooks/useUndo';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type TrackingBudgetMonthMenuModalProps = Extract<
@@ -33,190 +17,59 @@ export function TrackingBudgetMonthMenuModal({
   onBudgetAction,
   onEditNotes,
 }: TrackingBudgetMonthMenuModalProps) {
-  const locale = useLocale();
   const { t } = useTranslation();
-  const originalNotes = useNotes(`budget-${month}`);
-  const { showUndoNotification } = useUndo();
-
-  const _onEditNotes = () => {
-    onEditNotes?.(month);
-  };
-
-  const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mobileMenuItem,
-    color: theme.menuItemText,
-    borderRadius: 0,
-    borderTop: `1px solid ${theme.pillBorder}`,
-  };
-
-  const buttonStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-    color: theme.formLabelText,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '100%',
-  };
-
-  const [showMore, setShowMore] = useState(false);
-
-  const onShowMore = () => {
-    setShowMore(!showMore);
-  };
-
+  const locale = useLocale();
   const displayMonth = monthUtils.format(month, "MMMM ''yy", locale);
 
+  const { items, onMenuSelect } = useBudgetMonthMenu({
+    onCopyLastMonthBudget: () => onBudgetAction(month, 'copy-last'),
+    onSetBudgetsToZero: () => onBudgetAction(month, 'set-zero'),
+    onSetMonthsAverage: numberOfMonths =>
+      onBudgetAction(month, `set-${numberOfMonths}-avg`),
+    onCheckTemplates: () => onBudgetAction(month, 'check-templates'),
+    onApplyBudgetTemplates: () => onBudgetAction(month, 'apply-goal-template'),
+    onOverwriteWithBudgetTemplates: () =>
+      onBudgetAction(month, 'overwrite-goal-template'),
+  });
+
+  const undoMessages = {
+    'copy-last': t(
+      "{{displayMonth}} budgets have all been set to last month's budgeted amounts.",
+      { displayMonth },
+    ),
+    'set-zero': t('{{displayMonth}} budgets have all been set to zero.', {
+      displayMonth,
+    }),
+    'set-3-avg': t(
+      '{{displayMonth}} budgets have all been set to {{months}} month average.',
+      { displayMonth, months: 3 },
+    ),
+    'set-6-avg': t(
+      '{{displayMonth}} budgets have all been set to {{months}} month average.',
+      { displayMonth, months: 6 },
+    ),
+    'set-12-avg': t(
+      '{{displayMonth}} budgets have all been set to yearly average.',
+      { displayMonth },
+    ),
+    'apply-goal-template': t(
+      '{{displayMonth}} budget templates have been applied.',
+      { displayMonth },
+    ),
+    'overwrite-goal-template': t(
+      '{{displayMonth}} budget templates have been overwritten.',
+      { displayMonth },
+    ),
+  };
+
   return (
-    <Modal
+    <BudgetMonthMenuSheet
       name="tracking-budget-month-menu"
-      containerProps={{
-        style: { height: '50vh' },
-      }}
-    >
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={displayMonth}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'column',
-            }}
-          >
-            <View
-              style={{
-                display: showMore ? 'none' : undefined,
-                overflowY: 'auto',
-                flex: 1,
-              }}
-            >
-              <Notes
-                notes={
-                  originalNotes?.length > 0 ? originalNotes : t('No notes')
-                }
-                editable={false}
-                focused={false}
-                getStyle={() => ({
-                  borderRadius: 6,
-                  ...((!originalNotes || originalNotes.length === 0) && {
-                    justifySelf: 'center',
-                    alignSelf: 'center',
-                    color: theme.pageTextSubdued,
-                  }),
-                })}
-              />
-            </View>
-            <View style={{ paddingTop: 10, gap: 5 }}>
-              <View
-                style={{
-                  display: showMore ? 'none' : undefined,
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  justifyContent: 'space-between',
-                  alignContent: 'space-between',
-                }}
-              >
-                <Button style={buttonStyle} onPress={_onEditNotes}>
-                  <SvgNotesPaper
-                    width={20}
-                    height={20}
-                    style={{ paddingRight: 5 }}
-                  />
-                  <Trans>Edit notes</Trans>
-                </Button>
-              </View>
-              <View>
-                <Button
-                  variant="bare"
-                  className={css([
-                    buttonStyle,
-                    {
-                      '&[data-pressed], &[data-hovered]': {
-                        backgroundColor: 'transparent',
-                        color: buttonStyle.color,
-                      },
-                    },
-                  ])}
-                  onPress={onShowMore}
-                >
-                  {!showMore ? (
-                    <SvgCheveronUp
-                      width={30}
-                      height={30}
-                      style={{ paddingRight: 5 }}
-                    />
-                  ) : (
-                    <SvgCheveronDown
-                      width={30}
-                      height={30}
-                      style={{ paddingRight: 5 }}
-                    />
-                  )}
-                  <Trans>Actions</Trans>
-                </Button>
-              </View>
-            </View>
-            {showMore && (
-              <BudgetMonthMenu
-                style={{ overflowY: 'auto', paddingTop: 10 }}
-                getItemStyle={() => defaultMenuItemStyle}
-                onCopyLastMonthBudget={() => {
-                  onBudgetAction(month, 'copy-last');
-                  state.close();
-                  showUndoNotification({
-                    message: t(
-                      "{{displayMonth}} budgets have all been set to last month's budgeted amounts.",
-                      { displayMonth },
-                    ),
-                  });
-                }}
-                onSetBudgetsToZero={() => {
-                  onBudgetAction(month, 'set-zero');
-                  state.close();
-                  showUndoNotification({
-                    message: t(
-                      '{{displayMonth}} budgets have all been set to zero.',
-                      { displayMonth },
-                    ),
-                  });
-                }}
-                onSetMonthsAverage={numberOfMonths => {
-                  onBudgetAction(month, `set-${numberOfMonths}-avg`);
-                  state.close();
-                  showUndoNotification({
-                    message: `${displayMonth} budgets have all been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
-                  });
-                }}
-                onCheckTemplates={() => {
-                  onBudgetAction(month, 'check-templates');
-                  state.close();
-                }}
-                onApplyBudgetTemplates={() => {
-                  onBudgetAction(month, 'apply-goal-template');
-                  state.close();
-                  showUndoNotification({
-                    message: t(
-                      '{{displayMonth}} budget templates have been applied.',
-                      { displayMonth },
-                    ),
-                  });
-                }}
-                onOverwriteWithBudgetTemplates={() => {
-                  onBudgetAction(month, 'overwrite-goal-template');
-                  state.close();
-                  showUndoNotification({
-                    message: t(
-                      '{{displayMonth}} budget templates have been overwritten.',
-                      { displayMonth },
-                    ),
-                  });
-                }}
-              />
-            )}
-          </View>
-        </>
-      )}
-    </Modal>
+      month={month}
+      items={items}
+      onMenuSelect={onMenuSelect}
+      undoMessages={undoMessages}
+      onEditNotes={onEditNotes}
+    />
   );
 }
