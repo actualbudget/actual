@@ -2,7 +2,7 @@ import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
-import { bootstrapPassword } from './accounts/password';
+import { bootstrapPassword, checkPassword } from './accounts/password';
 import { handlers as app, authRateLimiter } from './app-account';
 
 const ADMIN_ROLE = 'ADMIN';
@@ -132,7 +132,7 @@ describe('/change-password', () => {
     const res = await request(app)
       .post('/change-password')
       .set('x-actual-token', basicPasswordToken)
-      .send({ password: 'newpassword' });
+      .send({ password: 'newpassword', currentPassword: 'oldpassword' });
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({
@@ -148,7 +148,7 @@ describe('/change-password', () => {
     const res = await request(app)
       .post('/change-password')
       .set('x-actual-token', adminOpenidToken)
-      .send({ password: 'newpassword' });
+      .send({ password: 'newpassword', currentPassword: 'oldpassword' });
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toEqual({
@@ -164,7 +164,7 @@ describe('/change-password', () => {
     const res = await request(app)
       .post('/change-password')
       .set('x-actual-token', adminPasswordToken)
-      .send({ password: '' });
+      .send({ password: '', currentPassword: 'oldpassword' });
 
     expect(res.statusCode).toEqual(400);
     expect(res.body).toEqual({ status: 'error', reason: 'invalid-password' });
@@ -176,10 +176,44 @@ describe('/change-password', () => {
     const res = await request(app)
       .post('/change-password')
       .set('x-actual-token', adminPasswordToken)
-      .send({ password: 'newpassword' });
+      .send({ password: 'newpassword', currentPassword: 'oldpassword' });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toEqual({ status: 'ok', data: {} });
+  });
+  it.each([undefined, '', 'wrong', null, {}])(
+    'rejects a stolen token without the current password: %j',
+    async currentPassword => {
+      await bootstrapPassword('oldpassword');
+      const res = await request(app)
+        .post('/change-password')
+        .set('x-actual-token', adminPasswordToken)
+        .send({ password: 'attacker password', currentPassword });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.reason).toBe('invalid-current-password');
+      expect(await checkPassword('oldpassword')).toBe(true);
+      expect(
+        getAccountDb().first('SELECT token FROM sessions WHERE token = ?', [
+          adminPasswordToken,
+        ]),
+      ).not.toBeNull();
+    },
+  );
+
+  it('rate limits incorrect current passwords', async () => {
+    await bootstrapPassword('oldpassword');
+    for (let i = 0; i < 5; i++) {
+      await request(app)
+        .post('/change-password')
+        .set('x-actual-token', adminPasswordToken)
+        .send({ password: 'newpassword', currentPassword: 'wrong' });
+    }
+    const res = await request(app)
+      .post('/change-password')
+      .set('x-actual-token', adminPasswordToken)
+      .send({ password: 'newpassword', currentPassword: 'oldpassword' });
+    expect(res.statusCode).toBe(429);
+    expect(await checkPassword('oldpassword')).toBe(true);
   });
 });
 
@@ -414,5 +448,45 @@ describe('/server-prefs', () => {
       const savedPrefs = getServerPrefs();
       expect(savedPrefs).toEqual(prefs);
     });
+  });
+});
+
+describe('logout', () => {
+  it('revokes only the supplied token and allows repeated logout', async () => {
+    const userId = uuidv4();
+    const token = generateSessionToken();
+    const otherToken = generateSessionToken();
+    createUser(userId, userId, BASIC_ROLE);
+    createSession(userId, token, 'password');
+    createSession(userId, otherToken, 'password');
+    try {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const res = await request(app).post('/logout').send({ token });
+        expect(res.status).toBe(200);
+      }
+      expect(
+        getAccountDb().first('SELECT token FROM sessions WHERE token = ?', [
+          token,
+        ]),
+      ).toBeNull();
+      expect(
+        getAccountDb().first('SELECT token FROM sessions WHERE token = ?', [
+          otherToken,
+        ]),
+      ).toEqual({ token: otherToken });
+      for (const token of [undefined, '', null, [], {}]) {
+        expect(
+          (await request(app).post('/logout').send({ token })).status,
+        ).toBe(400);
+      }
+      expect(
+        getAccountDb().first('SELECT token FROM sessions WHERE token = ?', [
+          otherToken,
+        ]),
+      ).toEqual({ token: otherToken });
+    } finally {
+      getAccountDb().mutate('DELETE FROM sessions WHERE user_id = ?', [userId]);
+      deleteUser(userId);
+    }
   });
 });
