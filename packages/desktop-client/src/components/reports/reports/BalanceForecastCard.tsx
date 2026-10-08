@@ -17,6 +17,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
+  YAxis,
 } from 'recharts';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -82,6 +83,8 @@ export function BalanceForecastCard({
   // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
   const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
+
+  const yAxisBase = meta?.yAxisBase ?? 'Zero Based';
 
   const {
     data: forecastData,
@@ -240,8 +243,13 @@ export function BalanceForecastCard({
                     width={width}
                     height={height}
                     data={chartData}
+
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   >
+                    <YAxis
+                      hide // do not show the axis labels (balance)
+                      domain={[yAxisBase === 'Zero Based' ? 0 : 'auto', 'auto']}
+                    />
                     <defs>
                       <linearGradient
                         id={gradientId}
