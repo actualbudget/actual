@@ -167,6 +167,7 @@ type LiveTransactionTableProps = {
   showGroup?: boolean;
   showCleared: boolean;
   showBalances?: boolean;
+  columnOrder?: TransactionTableColumnId[];
   balances?: Record<TransactionEntity['id'], number>;
   onReorder?: () => void;
   isAdding: boolean;
@@ -693,7 +694,9 @@ describe('Transactions', () => {
     });
 
     test('number column can be edited and is navigable when enabled', async () => {
-      const { container, getTransactions } = renderTransactions();
+      const { container, getTransactions } = renderTransactions({
+        columnOrder: [...TRANSACTION_TABLE_COLUMN_IDS],
+      });
 
       const input = await editField(container, 'tracking_number', 2);
       await userEvent.type(input, ' 1001 ');
