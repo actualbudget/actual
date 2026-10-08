@@ -15,6 +15,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -320,11 +321,12 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       >
         <View
           style={{
+            alignItems: 'flex-end',
             textAlign: 'right',
             paddingTop: 20,
           }}
         >
-          <View
+          <Text
             style={{
               ...styles.largeText,
               fontWeight: 400,
@@ -337,7 +339,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
                 ? t('{{days}} days', { days: data.currentAge })
                 : t('N/A')}
             </PrivacyFilter>
-          </View>
+          </Text>
           <View style={{ color: theme.pageTextSubdued }}>
             {data.trend === 'up'
               ? t('↑ Improving')
