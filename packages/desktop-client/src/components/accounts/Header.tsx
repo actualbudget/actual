@@ -43,7 +43,10 @@ import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
-import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
+import {
+  BaseAmountLabels,
+  BudgetCurrencyFormat,
+} from '#hooks/currencyFormatContext';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
@@ -184,6 +187,7 @@ export function AccountHeader({
   onMergeTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
+  const [budgetCurrency] = useSyncedPref('defaultCurrencyCode');
 
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -326,6 +330,13 @@ export function AccountHeader({
             <BalanceHistoryGraph
               ref={graphRef}
               accountId={accountId}
+              aria-label={
+                account?.currency
+                  ? t('Balance history in {{currency}} (base)', {
+                      currency: budgetCurrency,
+                    })
+                  : undefined
+              }
               style={{
                 height: 'calc(5vh + 5vw)',
                 margin: 0,
@@ -374,8 +385,10 @@ export function AccountHeader({
           <View style={{ flexShrink: 0 }}>
             {/* Filters match stored base amounts, so they use budget format. */}
             <BudgetCurrencyFormat>
-              {/* @ts-expect-error fix me */}
-              <FilterButton onApply={onApplyFilter} />
+              <BaseAmountLabels enabled={!!account?.currency}>
+                {/* @ts-expect-error fix me */}
+                <FilterButton onApply={onApplyFilter} />
+              </BaseAmountLabels>
             </BudgetCurrencyFormat>
           </View>
           <View style={{ flex: 1 }} />
@@ -571,17 +584,19 @@ export function AccountHeader({
         </SpaceBetween>
         {filterConditions?.length > 0 && (
           <BudgetCurrencyFormat>
-            <FiltersStack
-              conditions={filterConditions}
-              conditionsOp={filterConditionsOp}
-              onUpdateFilter={onUpdateFilter}
-              onDeleteFilter={onDeleteFilter}
-              onClearFilters={onClearFilters}
-              onReloadSavedFilter={onReloadSavedFilter}
-              filterId={filterId}
-              savedFilters={savedFilters}
-              onConditionsOpChange={onConditionsOpChange}
-            />
+            <BaseAmountLabels enabled={!!account?.currency}>
+              <FiltersStack
+                conditions={filterConditions}
+                conditionsOp={filterConditionsOp}
+                onUpdateFilter={onUpdateFilter}
+                onDeleteFilter={onDeleteFilter}
+                onClearFilters={onClearFilters}
+                onReloadSavedFilter={onReloadSavedFilter}
+                filterId={filterId}
+                savedFilters={savedFilters}
+                onConditionsOpChange={onConditionsOpChange}
+              />
+            </BaseAmountLabels>
           </BudgetCurrencyFormat>
         )}
       </View>

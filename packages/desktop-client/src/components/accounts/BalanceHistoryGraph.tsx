@@ -26,12 +26,14 @@ type BalanceHistoryGraphProps = {
   accountId?: string;
   style?: CSSProperties;
   ref?: Ref<HTMLDivElement>;
+  'aria-label'?: string;
 };
 
 export function BalanceHistoryGraph({
   accountId,
   style,
   ref,
+  'aria-label': ariaLabel,
 }: BalanceHistoryGraphProps) {
   const locale = useLocale();
   const formatAmount = useFormat(useAmountPrecision());
@@ -203,7 +205,13 @@ export function BalanceHistoryGraph({
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <View ref={ref} style={{ margin: 10, ...style }}>
+    <View
+      ref={ref}
+      // A labeled graph names its amounts for screen readers.
+      role={ariaLabel ? 'group' : undefined}
+      aria-label={ariaLabel}
+      style={{ margin: 10, ...style }}
+    >
       <AutoSizer
         renderProp={({ width = 0, height = 0 }) => {
           if (width === 0 || height === 0) {

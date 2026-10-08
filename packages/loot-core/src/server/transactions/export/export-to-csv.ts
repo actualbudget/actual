@@ -26,6 +26,7 @@ export async function exportToCSV(
     reduced[id] = name;
     return reduced;
   }, {});
+  const accountsById = new Map(accounts.map(account => [account.id, account]));
 
   const categoryNamesById = categoryGroups.reduce(
     (reduced, { name, categories: subCategories }) => {
@@ -51,6 +52,7 @@ export async function exportToCSV(
       notes,
       category,
       amount,
+      transaction_amount,
       cleared,
       reconciled,
     }) => ({
@@ -60,12 +62,33 @@ export async function exportToCSV(
       Notes: notes,
       Category: categoryNamesById[category],
       Amount: amount == null ? 0 : integerToAmount(amount, precision),
+      ...nativeColumns(accountsById.get(account), transaction_amount),
       Cleared: cleared,
       Reconciled: reconciled,
     }),
   );
 
   return csvStringify(transactionsForExport, csvStringifyOptions);
+}
+
+/**
+ * A foreign row's native amount in its account's recorded encoding; empty
+ * for budget-currency rows.
+ */
+function nativeColumns(
+  account: { currency?: string | null; currency_precision?: number | null },
+  nativeAmount: number | null | undefined,
+) {
+  const isForeign =
+    nativeAmount != null &&
+    account?.currency != null &&
+    account.currency_precision != null;
+  return {
+    Currency: isForeign ? account.currency : '',
+    'Native amount': isForeign
+      ? integerToAmount(nativeAmount, account.currency_precision)
+      : '',
+  };
 }
 
 export async function exportQueryToCSV(query) {
@@ -85,6 +108,9 @@ export async function exportQueryToCSV(query) {
         { CategoryGroup: 'category.group.name' },
         { Category: 'category.name' },
         { Amount: 'amount' },
+        { NativeAmount: 'transaction_amount' },
+        { Currency: 'account.currency' },
+        { NativePrecision: 'account.currency_precision' },
         { Cleared: 'cleared' },
         { Reconciled: 'reconciled' },
       ])
@@ -134,6 +160,9 @@ export async function exportQueryToCSV(query) {
       Split_Amount: trans.IsParent
         ? integerToAmount(trans.Amount, precision)
         : 0,
+      // Native columns follow Amount: a split parent's total moves to its
+      // own column so each column sums like the base ones.
+      ...splitNativeColumns(trans),
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
@@ -144,4 +173,18 @@ export async function exportQueryToCSV(query) {
   });
 
   return csvStringify(transactionsForExport, csvStringifyOptions);
+}
+
+function splitNativeColumns(trans) {
+  const account = {
+    currency: trans.Currency,
+    currency_precision: trans.NativePrecision,
+  };
+  const columns = nativeColumns(account, trans.NativeAmount);
+  const isForeignParent = trans.IsParent && columns.Currency !== '';
+  return {
+    ...columns,
+    ...(isForeignParent && { 'Native amount': 0 }),
+    Split_Native_Amount: isForeignParent ? columns['Native amount'] : '',
+  };
 }

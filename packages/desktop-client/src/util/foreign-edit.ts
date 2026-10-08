@@ -202,6 +202,7 @@ export async function openForeignEditDialog(
     native,
     baseAmount,
     onSaved,
+    isCurrent = () => true,
   }: {
     /** The stored row: `amount` is its base, `transaction_amount` native. */
     row: TransactionEntity;
@@ -212,8 +213,10 @@ export async function openForeignEditDialog(
     native?: number;
     baseAmount?: number;
     onSaved: () => void;
+    isCurrent?: () => boolean;
   },
 ): Promise<boolean> {
+  if (!isCurrent()) return false;
   if (isExchangeRow(row, rows, payees, accounts)) {
     if (inlineExchangeEdit) {
       inlineExchangeEdit(row.id, onSaved);
@@ -256,6 +259,7 @@ export async function openForeignEditDialog(
         .options({ splits: 'all' }),
     );
     const counterpart = (data as TransactionEntity[])[0];
+    if (!isCurrent()) return false;
     if (!counterpart) return false;
     edit = {
       kind: 'transfer',

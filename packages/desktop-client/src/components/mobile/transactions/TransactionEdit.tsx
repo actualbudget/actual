@@ -100,7 +100,10 @@ import {
   BudgetCurrencyFormat,
 } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
-import { useAmountPrecision } from '#hooks/useAmountPrecision';
+import {
+  useAmountPrecision,
+  useBudgetPrecision,
+} from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import type { ExchangePostResult } from '#hooks/useExchangeEntry';
@@ -129,6 +132,7 @@ import {
 } from '#util/account-encoding';
 import { exchangeOtherAccount } from '#util/exchange-entry';
 import type { ExchangeRequest } from '#util/exchange-entry';
+import { effectiveRateText } from '#util/foreign-details';
 import {
   isExchangeRow,
   openForeignEditDialog,
@@ -701,6 +705,9 @@ function FrozenForeignAmount({
           <BaseAmountText amount={transaction.amount} />
         </BudgetCurrencyFormat>
       )}
+      {transaction.transaction_amount != null && (
+        <EffectiveRateText transaction={transaction} />
+      )}
       <Button variant="bare" isDisabled={pendingEdits} onPress={onEdit}>
         <Trans>Edit amount</Trans>
       </Button>
@@ -710,6 +717,33 @@ function FrozenForeignAmount({
         </Text>
       )}
     </View>
+  );
+}
+
+/** The rate a stored foreign pair implies. */
+function EffectiveRateText({
+  transaction,
+}: {
+  transaction: TransactionEntity;
+}) {
+  const { t } = useTranslation();
+  const { data: accounts = [] } = useAccounts();
+  const basePrecision = useBudgetPrecision();
+  const [baseCurrency = ''] = useSyncedPref('defaultCurrencyCode');
+  const account = accounts.find(a => a.id === transaction.account);
+  if (!account?.currency || transaction.transaction_amount == null) {
+    return null;
+  }
+  return (
+    <Text style={{ color: theme.pageTextSubdued, fontSize: 13 }}>
+      {effectiveRateText(t, {
+        native: transaction.transaction_amount,
+        base: transaction.amount,
+        account,
+        basePrecision,
+        baseCurrency,
+      })}
+    </Text>
   );
 }
 

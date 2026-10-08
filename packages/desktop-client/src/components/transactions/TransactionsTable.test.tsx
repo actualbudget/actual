@@ -45,6 +45,7 @@ import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '#hooks/useSelected';
 import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { createTestQueryClient, TestProviders } from '#mocks';
 import * as modalsSlice from '#modals/modalsSlice';
 import { payeeQueries } from '#payees';
@@ -2132,6 +2133,85 @@ describe('foreign-currency rows', () => {
     expect(getTransactions()[0]).toMatchObject({
       account: yen.id,
       payee: 'new:Ramen Shop',
+    });
+  });
+
+  describe('amount details', () => {
+    beforeEach(() => {
+      vi.mocked(useSyncedPref).mockImplementation(((name: string) => [
+        name === 'defaultCurrencyCode' ? 'USD' : undefined,
+        vi.fn(),
+      ]) as never);
+      onTestFinished(() => {
+        vi.mocked(useSyncedPref).mockImplementation(((name: string) => [
+          name === 'amountEncoding' ? testEncoding : undefined,
+          vi.fn(),
+        ]) as never);
+      });
+    });
+
+    const pair = (overrides: Partial<TransactionEntity> = {}) => ({
+      ...foreignTransaction(),
+      amount: -1000,
+      transaction_amount: -1500,
+      ...overrides,
+    });
+
+    it('describes the native half in a mixed view', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [pair()],
+        currentAccountId: null,
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        '-1,500 JPY in Yen wallet. Effective rate: 1 JPY = 0.00666667 USD.',
+      );
+    });
+
+    it('describes the base half in the native register', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [
+          { ...pair(), amount: -1500, _baseAmount: -1000 } as TransactionEntity,
+        ],
+        currentAccountId: yen.id,
+        wrap: table => (
+          <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+            {table}
+          </CurrencyFormatProvider>
+        ),
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        'Base: -10.00 USD. Effective rate: 1 JPY = 0.00666667 USD.',
+      );
+    });
+
+    it('has no rate when the base is zero', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [pair({ amount: 0, transaction_amount: -1 })],
+        currentAccountId: null,
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        '-1 JPY in Yen wallet. No effective rate (one amount is zero).',
+      );
+    });
+
+    it('keeps base rows untouched', () => {
+      const { container } = renderTransactions({
+        accounts,
+        transactions: generateTransaction({
+          account: accounts[0].id,
+          amount: -2500,
+        }),
+        currentAccountId: null,
+      });
+      expect(
+        queryField(container, 'debit', '', 0).getAttribute('title'),
+      ).not.toMatch(/Effective rate/);
     });
   });
 

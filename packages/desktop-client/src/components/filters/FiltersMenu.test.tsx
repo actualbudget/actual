@@ -1,11 +1,12 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactElement } from 'react';
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { BaseAmountLabels } from '#hooks/currencyFormatContext';
 import { TestProviders } from '#mocks';
 
-import { FilterEditor } from './FiltersMenu';
+import { FilterButton, FilterEditor } from './FiltersMenu';
 
 describe('FilterEditor amount sign', () => {
   const renderEditor = (
@@ -53,5 +54,28 @@ describe('FilterEditor amount sign', () => {
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({ field: 'amount', op: 'gt', value: -15000 }),
     );
+  });
+});
+
+describe('FilterButton amount label', () => {
+  const renderButton = (wrap: (node: ReactElement) => ReactElement) =>
+    render(
+      wrap(<FilterButton onApply={vi.fn()} compact={false} hover={false} />),
+      {
+        wrapper: TestProviders,
+      },
+    );
+
+  it('names base amounts in a foreign register', async () => {
+    renderButton(node => <BaseAmountLabels enabled>{node}</BaseAmountLabels>);
+    await userEvent.click(screen.getByRole('button', { name: /Filter/ }));
+    expect(await screen.findByText('Base amount')).toBeInTheDocument();
+    expect(screen.queryByText('Amount')).not.toBeInTheDocument();
+  });
+
+  it('keeps Amount elsewhere', async () => {
+    renderButton(node => node);
+    await userEvent.click(screen.getByRole('button', { name: /Filter/ }));
+    expect(await screen.findByText('Amount')).toBeInTheDocument();
   });
 });

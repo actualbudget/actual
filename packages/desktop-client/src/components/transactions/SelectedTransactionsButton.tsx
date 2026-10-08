@@ -15,10 +15,12 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
+import { useOpenAmountDetails } from '#hooks/useOpenAmountDetails';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { amountDetailsTarget } from '#util/foreign-details';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -70,6 +72,7 @@ export function SelectedTransactionsButton({
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const openAmountDetails = useOpenAmountDetails();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
   const { data: accounts = [] } = useAccounts();
@@ -80,6 +83,8 @@ export function SelectedTransactionsButton({
       trans && accounts.find(account => account.id === trans.account)?.currency
     );
   });
+
+  const detailsId = amountDetailsTarget(selectedIds, getTransaction, accounts);
 
   const scheduleIds = useMemo(() => {
     return selectedIds
@@ -337,6 +342,14 @@ export function SelectedTransactionsButton({
             ]
           : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
+              ...(detailsId
+                ? [
+                    {
+                      name: 'amount-details',
+                      text: t('Amount details'),
+                    } as const,
+                  ]
+                : []),
               {
                 name: 'duplicate',
                 text: t('Duplicate'),
@@ -427,6 +440,9 @@ export function SelectedTransactionsButton({
         switch (name) {
           case 'show':
             onShow(selectedIds);
+            break;
+          case 'amount-details':
+            if (detailsId) void openAmountDetails(detailsId);
             break;
           case 'duplicate':
             onDuplicate(selectedIds);

@@ -123,6 +123,42 @@ export function invertRate(rate: string): string {
   return parseRate(`${digits.slice(0, -15)}.${digits.slice(-15)}`);
 }
 
+const EFFECTIVE_RATE_DIGITS = 6;
+
+/**
+ * The rate a stored pair implies, native units per base unit, rounded
+ * half-even to six significant digits; null when either amount is zero.
+ */
+export function effectiveRate(
+  nativeInteger: number,
+  nativePrecision: number,
+  baseInteger: number,
+  basePrecision: number,
+): string | null {
+  const native = integer(nativeInteger);
+  const base = integer(baseInteger);
+  if (native === 0n || base === 0n) return null;
+  const numerator = (native < 0n ? -native : native) * scale(basePrecision);
+  const denominator = (base < 0n ? -base : base) * scale(nativePrecision);
+  // Shift by 10^shift so the rounded quotient has exactly six digits.
+  const max = 10n ** BigInt(EFFECTIVE_RATE_DIGITS);
+  let shift =
+    EFFECTIVE_RATE_DIGITS -
+    (String(numerator).length - String(denominator).length);
+  const quotientAt = (k: number) =>
+    k >= 0
+      ? roundEven(numerator * 10n ** BigInt(k), denominator)
+      : roundEven(numerator, denominator * 10n ** BigInt(-k));
+  let quotient = quotientAt(shift);
+  while (quotient >= max) quotient = quotientAt(--shift);
+  while (quotient < max / 10n) quotient = quotientAt(++shift);
+  if (shift <= 0) return String(quotient * 10n ** BigInt(-shift));
+  const digits = String(quotient).padStart(shift + 1, '0');
+  const whole = digits.slice(0, -shift);
+  const fraction = digits.slice(-shift).replace(/0+$/, '');
+  return fraction ? `${whole}.${fraction}` : whole;
+}
+
 export function isValidDate(date: unknown): date is string {
   if (typeof date !== 'string' || !DATE_PATTERN.test(date)) {
     return false;
