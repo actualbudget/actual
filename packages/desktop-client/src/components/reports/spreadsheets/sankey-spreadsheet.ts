@@ -47,11 +47,30 @@ type AggregatedBudget = {
   endMonth: string;
 };
 
+export type SankeyNodeDrilldownField =
+  | 'account'
+  | 'category'
+  | 'group'
+  | 'payee';
+export type SankeyNodeDrilldown = {
+  field: SankeyNodeDrilldownField;
+  id: string;
+  // Which side of the ledger this node's value is drawn from - unset for
+  // Account nodes, which can be both (see SankeyNode.inflow/outflow below).
+  direction?: 'inflow' | 'outflow';
+};
+
 type SankeyNode = {
   name: string;
   percentageLabel?: string;
   key: string;
   color?: string;
+  drilldown?: SankeyNodeDrilldown;
+  // Account nodes can sit between income and expense layers and carry both
+  // directions at once, so their displayed total alone can be misleading;
+  // these let the UI show the two sides (and their net) instead.
+  inflow?: number;
+  outflow?: number;
 };
 
 type SankeyLink = {
@@ -1931,6 +1950,87 @@ export function cleanUpNodes(graph: Graph) {
   }
 }
 
+// Node keys that are synthetic placeholders (budget totals, income summary
+// buckets, etc.) rather than real entity ids, so they can't be turned into a
+// transaction filter.
+const NON_DRILLDOWN_NODE_KEYS: ReadonlySet<string> = new Set([
+  SpecialNodeKeys.ToBudget,
+  SpecialNodeKeys.Budgeted,
+  SpecialNodeKeys.LastMonthOverspent,
+  SpecialNodeKeys.ForNextMonth,
+  SpecialNodeKeys.FromPrevMonth,
+  SpecialNodeKeys.AvailableIncome,
+  SpecialNodeKeys.AllAccounts,
+]);
+
+// Category/CategoryGroup nodes are always the expense side and
+// IncomeCategory/IncomePayee nodes always the income side (see
+// createTransactionsGraph - the "isNegative" entries that would blur this
+// land on a separate, suffixed node that's excluded below). Account nodes
+// have no fixed direction: they can be a target for income links and a
+// source for expense links at once.
+const DRILLDOWN_BY_LAYER: Partial<
+  Record<
+    GraphLayers,
+    { field: SankeyNodeDrilldownField; direction?: 'inflow' | 'outflow' }
+  >
+> = {
+  [GraphLayers.Account]: { field: 'account' },
+  [GraphLayers.Category]: { field: 'category', direction: 'outflow' },
+  [GraphLayers.IncomeCategory]: { field: 'category', direction: 'inflow' },
+  [GraphLayers.CategoryGroup]: { field: 'group', direction: 'outflow' },
+  [GraphLayers.IncomePayee]: { field: 'payee', direction: 'inflow' },
+};
+
+function getNodeDrilldown(
+  key: NodeKey,
+  type: GraphLayers,
+): SankeyNodeDrilldown | undefined {
+  if (
+    NON_DRILLDOWN_NODE_KEYS.has(key) ||
+    key.endsWith(SpecialNodeKeys.OtherSuffix) ||
+    key.endsWith(SpecialNodeKeys.HiddenSuffix) ||
+    key.endsWith(SpecialNodeKeys.NegativeSuffix)
+  ) {
+    return undefined;
+  }
+
+  const mapping = DRILLDOWN_BY_LAYER[type];
+  return mapping
+    ? { field: mapping.field, id: key, direction: mapping.direction }
+    : undefined;
+}
+
+// Sum of a node's outgoing link values, ignoring links into layout-only
+// hidden nodes (which don't represent real money movement).
+function getOutgoingValue(graph: Graph, key: NodeKey): number {
+  const node = graph.get(key);
+  if (!node) {
+    return 0;
+  }
+
+  let total = 0;
+  node.to.forEach((value, targetKey) => {
+    if (!isHiddenNodeKey(targetKey)) {
+      total += value;
+    }
+  });
+  return total;
+}
+
+// Sum of a node's incoming link values, ignoring links from layout-only
+// hidden nodes. Unlike getNodeValue, this isn't root-position-dependent -
+// it's the node's actual incoming total regardless of where it sits.
+function getIncomingValue(graph: Graph, key: NodeKey): number {
+  let total = 0;
+  graph.forEach((data, sourceKey) => {
+    if (!isHiddenNodeKey(sourceKey)) {
+      total += data.to.get(key) ?? 0;
+    }
+  });
+  return total;
+}
+
 export function convertToSankeyData(
   graph: Graph,
   toolTipInfoMap: TooltipInfoMap,
@@ -1942,6 +2042,15 @@ export function convertToSankeyData(
       : (data.name ?? key),
     percentageLabel: data.percentageLabel ?? '',
     color: data.color ?? undefined,
+    drilldown: getNodeDrilldown(key, data.type),
+    inflow:
+      data.type === GraphLayers.Account
+        ? getIncomingValue(graph, key)
+        : undefined,
+    outflow:
+      data.type === GraphLayers.Account
+        ? getOutgoingValue(graph, key)
+        : undefined,
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
