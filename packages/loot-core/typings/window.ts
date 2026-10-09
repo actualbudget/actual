@@ -13,6 +13,14 @@ type FileDialogOptions = {
   }[];
 };
 
+export type McpServerStatus = {
+  running: boolean;
+  port: number | null;
+  url: string | null;
+  /** 'port-in-use', 'missing-token' or an error message */
+  error: string | null;
+};
+
 type Actual = {
   IS_DEV: boolean;
   ACTUAL_VERSION: string;
@@ -53,6 +61,14 @@ type Actual = {
   stopSyncServer: () => Promise<void>;
   isSyncServerRunning: () => Promise<boolean>;
   startOAuthServer: () => Promise<string>;
+  /**
+   * (Re)starts the local read-only MCP server using the saved
+   * `mcpServerConfig` global preference (stops it when disabled).
+   * Electron only.
+   */
+  startMcpServer: () => Promise<McpServerStatus>;
+  stopMcpServer: () => Promise<McpServerStatus>;
+  getMcpServerStatus: () => Promise<McpServerStatus>;
 };
 
 declare global {

@@ -39,6 +39,12 @@ contextBridge.exposeInMainWorld('Actual', {
 
   startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
+  startMcpServer: () => ipcRenderer.invoke('start-mcp-server'),
+
+  stopMcpServer: () => ipcRenderer.invoke('stop-mcp-server'),
+
+  getMcpServerStatus: () => ipcRenderer.invoke('get-mcp-server-status'),
+
   relaunch: () => {
     void ipcRenderer.invoke('relaunch');
   },

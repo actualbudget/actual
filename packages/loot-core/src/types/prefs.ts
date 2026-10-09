@@ -152,6 +152,12 @@ export type GlobalPrefs = Partial<{
     autoStart?: boolean;
     port?: number;
   };
+  mcpServerConfig?: {
+    // Electron only: the local, read-only MCP server for AI assistants
+    enabled?: boolean;
+    port?: number;
+    token?: string;
+  };
   notifyWhenUpdateIsAvailable: boolean;
   lastSeenNewsDate: string; // YYYY-MM-DD of the newest news entry the user has seen on this device
   showNewsFeed: boolean; // Whether in-app notifications (bell, Notifications page, release toast) are shown.
@@ -182,6 +188,7 @@ export type GlobalPrefsJson = Partial<{
   'plugin-theme'?: string; // JSON string of complete plugin theme (current selected plugin theme)
   'server-self-signed-cert'?: GlobalPrefs['serverSelfSignedCert'];
   syncServerConfig?: GlobalPrefs['syncServerConfig'];
+  mcpServerConfig?: GlobalPrefs['mcpServerConfig'];
   notifyWhenUpdateIsAvailable?: GlobalPrefs['notifyWhenUpdateIsAvailable'];
   lastSeenNewsDate?: GlobalPrefs['lastSeenNewsDate'];
   showNewsFeed?: GlobalPrefs['showNewsFeed'];

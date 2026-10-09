@@ -278,6 +278,7 @@ const sidebars = {
           items: [
             'api/reference',
             'api/cli',
+            'api/mcp-server',
             {
               type: 'category',
               label: 'ActualQL',

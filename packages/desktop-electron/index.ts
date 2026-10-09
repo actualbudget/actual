@@ -34,6 +34,12 @@ import type {
 } from 'electron';
 
 import { openExternalUrl, revealLocalFile } from './external-links';
+import {
+  DEFAULT_MCP_PORT,
+  MCP_PATH,
+  startMcpHttpServer,
+  stopMcpHttpServer,
+} from './mcp-server';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
@@ -87,6 +93,23 @@ let syncServerProcess: UtilityProcess | null;
 let lastAppInitFailure: AppInitFailurePayload | null = null;
 
 let oAuthServer: ReturnType<typeof createServer> | null;
+
+let mcpServer: Server | null = null;
+let mcpServerPort: number | null = null;
+let mcpServerError: string | null = null;
+
+// MCP requests forwarded to the backend process, keyed by message id, so their
+// replies can be routed back to the HTTP request instead of the renderer.
+const MCP_REQUEST_TIMEOUT = 60000;
+let mcpRequestCounter = 0;
+const pendingMcpRequests = new Map<
+  string,
+  {
+    resolve: (value: unknown) => void;
+    reject: (error: Error) => void;
+    timer: ReturnType<typeof setTimeout>;
+  }
+>();
 
 let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
 
@@ -346,6 +369,14 @@ async function createBackgroundProcess() {
   const startedProcess = serverProcess;
 
   startedProcess.on('message', msg => {
+    if (
+      (msg.type === 'reply' || msg.type === 'error') &&
+      pendingMcpRequests.has(msg.id)
+    ) {
+      settleMcpRequest(msg);
+      return;
+    }
+
     switch (msg.type) {
       case 'captureEvent':
       case 'captureBreadcrumb':
@@ -372,6 +403,7 @@ async function createBackgroundProcess() {
       return;
     }
     serverProcess = null;
+    rejectPendingMcpRequests('The Actual backend stopped');
 
     // A failure that was already reported is more specific than "it exited".
     if (lastAppInitFailure) {
@@ -384,6 +416,126 @@ async function createBackgroundProcess() {
       message: `The backend process exited unexpectedly (exit code ${code})`,
     });
   });
+}
+
+function settleMcpRequest(msg: {
+  type: string;
+  id: string;
+  result?: { data: unknown; error: unknown };
+  error?: { message?: string };
+}) {
+  const pending = pendingMcpRequests.get(msg.id);
+  if (!pending) {
+    return;
+  }
+  pendingMcpRequests.delete(msg.id);
+  clearTimeout(pending.timer);
+
+  // Requests are sent with `catchErrors`, so failures arrive as `result.error`
+  const error = msg.type === 'error' ? msg.error : msg.result?.error;
+  if (error) {
+    const message =
+      typeof error === 'object' && 'message' in error && error.message
+        ? String(error.message)
+        : 'The Actual backend failed to handle the request';
+    pending.reject(new Error(message));
+    return;
+  }
+  pending.resolve(msg.result?.data ?? null);
+}
+
+function rejectPendingMcpRequests(reason: string) {
+  for (const [id, pending] of pendingMcpRequests) {
+    clearTimeout(pending.timer);
+    pending.reject(new Error(reason));
+    pendingMcpRequests.delete(id);
+  }
+}
+
+function sendMcpMessageToBackend(message: unknown) {
+  return new Promise<unknown>((resolve, reject) => {
+    if (!serverProcess || lastAppInitFailure) {
+      reject(new Error('The Actual backend is not running'));
+      return;
+    }
+
+    const id = `mcp-${++mcpRequestCounter}`;
+    const timer = setTimeout(() => {
+      pendingMcpRequests.delete(id);
+      reject(new Error('The Actual backend did not answer in time'));
+    }, MCP_REQUEST_TIMEOUT);
+    pendingMcpRequests.set(id, { resolve, reject, timer });
+
+    serverProcess.postMessage({
+      id,
+      name: 'mcp-handle-message',
+      args: { message, version: app.getVersion() },
+      catchErrors: true,
+    });
+  });
+}
+
+export type McpServerStatus = {
+  running: boolean;
+  port: number | null;
+  url: string | null;
+  error: string | null;
+};
+
+function getMcpServerStatus(): McpServerStatus {
+  return {
+    running: mcpServer !== null,
+    port: mcpServerPort,
+    url: mcpServerPort ? `http://127.0.0.1:${mcpServerPort}${MCP_PATH}` : null,
+    error: mcpServerError,
+  };
+}
+
+async function stopMcpServer() {
+  const server = mcpServer;
+  mcpServer = null;
+  mcpServerPort = null;
+  if (server) {
+    await stopMcpHttpServer(server);
+    logMessage('info', 'MCP server: Stopped');
+  }
+}
+
+// (Re)starts the read-only MCP server with the settings saved in the global
+// preferences, or stops it when it is disabled there.
+async function startMcpServer(): Promise<McpServerStatus> {
+  await stopMcpServer();
+  mcpServerError = null;
+
+  const { mcpServerConfig } = await loadGlobalPrefs();
+  if (!mcpServerConfig?.enabled) {
+    return getMcpServerStatus();
+  }
+
+  const port = mcpServerConfig.port || DEFAULT_MCP_PORT;
+  const token = mcpServerConfig.token;
+  if (!token) {
+    mcpServerError = 'missing-token';
+    return getMcpServerStatus();
+  }
+
+  try {
+    mcpServer = await startMcpHttpServer({
+      port,
+      token,
+      handleMessage: sendMcpMessageToBackend,
+    });
+    mcpServerPort = port;
+    logMessage('info', `MCP server: Listening on http://127.0.0.1:${port}`);
+  } catch (error) {
+    mcpServerError =
+      (error as NodeJS.ErrnoException).code === 'EADDRINUSE'
+        ? 'port-in-use'
+        : String(error);
+    logMessage('error', `MCP server: Failed to start: ${String(error)}`);
+  }
+
+  return getMcpServerStatus();
 }
 
 async function startSyncServer() {
@@ -635,6 +787,11 @@ app.on('ready', async () => {
     await startSyncServer();
   }
 
+  if (globalPrefs.mcpServerConfig?.enabled) {
+    // Runs quietly alongside the app; answers once a budget is open
+    void startMcpServer();
+  }
+
   protocol.handle('app', request => {
     if (request.method !== 'GET') {
       return new Response(null, {
@@ -701,6 +858,10 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  if (mcpServer) {
+    void stopMcpServer();
+  }
+
   if (serverProcess) {
     const processToKill = serverProcess;
     serverProcess = null;
@@ -736,6 +897,15 @@ ipcMain.handle('is-sync-server-running', async () =>
   syncServerProcess ? true : false,
 );
 
+ipcMain.handle('start-mcp-server', async () => startMcpServer());
+
+ipcMain.handle('stop-mcp-server', async () => {
+  await stopMcpServer();
+  return getMcpServerStatus();
+});
+
+ipcMain.handle('get-mcp-server-status', async () => getMcpServerStatus());
+
 ipcMain.handle('start-oauth-server', async () => {
   const { url, server: newServer } = await createOAuthServer();
   oAuthServer = newServer;
@@ -746,6 +916,7 @@ ipcMain.handle('restart-server', () => {
   if (serverProcess) {
     const processToKill = serverProcess;
     serverProcess = null;
+    rejectPendingMcpRequests('The Actual backend is restarting');
     processToKill.kill();
   }
 
