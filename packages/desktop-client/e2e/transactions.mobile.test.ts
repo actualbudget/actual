@@ -205,4 +205,36 @@ test.describe('Mobile Transactions', () => {
     );
     await expect(page).toMatchThemeScreenshots();
   });
+
+  test('learns a category rule from new transactions', async () => {
+    for (const amount of ['1.00', '2.00', '3.00']) {
+      const transactionEntryPage = await navigation.goToTransactionEntryPage();
+      await transactionEntryPage.fillAmount(amount);
+      // Click anywhere to cancel active edit.
+      await transactionEntryPage.header.click();
+      await transactionEntryPage.fillField(
+        page.getByTestId('payee-field'),
+        'Learned Payee',
+      );
+      await transactionEntryPage.fillField(
+        page.getByTestId('category-field'),
+        'Clothing',
+      );
+      await transactionEntryPage.fillField(
+        page.getByTestId('account-field'),
+        'Ally Savings',
+      );
+      await transactionEntryPage.createTransaction();
+    }
+
+    // The last save is not awaited and the rules page loads rules only on
+    // mount, so reload the page until the learned rule shows.
+    const rulesPage = await navigation.goToRulesPage();
+    await expect(async () => {
+      await page.reload();
+      await rulesPage.searchFor('Learned Payee');
+      await expect(rulesPage.getAllRules()).toHaveCount(1, { timeout: 1000 });
+    }).toPass();
+    await expect(rulesPage.getNthRule(0)).toContainText('Clothing');
+  });
 });
