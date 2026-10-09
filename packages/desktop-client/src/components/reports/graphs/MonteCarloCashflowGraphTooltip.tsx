@@ -22,6 +22,11 @@ type MonteCarloCashflowGraphTooltipProps = {
   groups: MonteCarloCashflowTooltipGroup[];
   /** Shown on years after the plan ran out; defaults to the cashflow wording */
   afterDepletionNote?: string;
+  /**
+   * Keep rows whose value is zero (and their group). Balances read better
+   * with every pot listed each year; cashflows hide what didn't move
+   */
+  showZeroMembers?: boolean;
 };
 
 const VALUE_ROW_STYLE = css({
@@ -44,6 +49,7 @@ export function MonteCarloCashflowGraphTooltip({
   payload,
   groups,
   afterDepletionNote,
+  showZeroMembers = false,
 }: MonteCarloCashflowGraphTooltipProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -52,12 +58,13 @@ export function MonteCarloCashflowGraphTooltip({
     return null;
   }
   const point = payload[0].payload;
-  // Only series with money moving this year, and only groups with any
+  // Only series with money moving this year, and only groups with any -
+  // unless the chart wants every row shown regardless
   const sections = groups
     .map(group => {
       const members = group.series
         .map(series => ({ ...series, value: point.amounts[series.key] ?? 0 }))
-        .filter(series => series.value !== 0);
+        .filter(series => showZeroMembers || series.value !== 0);
       return {
         ...group,
         members,

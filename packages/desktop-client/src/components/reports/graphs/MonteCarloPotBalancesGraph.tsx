@@ -90,6 +90,7 @@ export function MonteCarloPotBalancesGraph({
                 <MonteCarloCashflowGraphTooltip
                   groups={tooltipGroups}
                   afterDepletionNote={t('The pots had run out by this year.')}
+                  showZeroMembers
                 />
               }
               isAnimationActive={false}

@@ -228,7 +228,7 @@ Use the dropdown above the chart to pick which run to look at: the worst run, a 
 
 Switch the results view to **Pots** to see what each of your pots was worth at the end of every year, for one simulated run at a time. The pots are stacked on top of each other, one color per pot (the same colors as the cashflow chart), so the top of the stack is the plan's total balance and the bands inside it show how that total is split. Locked pots and the surplus pot are included, so you can watch a pension sit untouched until its access age, or the surplus pot fill up with income the plan didn't need.
 
-Hover over a year to see every pot's balance and the total. On a run that fails, the stack drops to zero from the failure year onward.
+Hover over a year to see every pot's balance and the total. On a run that fails, the accessible pots are emptied in the failure year - so the stack may not reach zero that year if money is still locked in a pot that hasn't reached its access age - and every year after it is drawn as zero.
 
 The dropdown above the chart picks the run, exactly as it does for the cashflow chart, and the chart also appears above the year-by-year table when you click into a run from the **Runs** view, where **Cashflow** and **Pots** buttons switch between the two charts. Like every other figure in the results, the balances follow the **Show values in today's money** checkbox.
 
