@@ -1,0 +1,58 @@
+name: Fork Windows Build
+
+# Builds an unsigned Windows x64 installer of this fork (with the read-only
+# MCP server) on a GitHub-hosted runner and publishes it as a pre-release.
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI: true
+
+on:
+  push:
+    branches:
+      - fork-windows-build
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - run: pip.exe install setuptools
+      - name: Set up environment
+        uses: ./.github/actions/setup
+      - name: Build app bundles
+        run: ./bin/package-electron --skip-translations --skip-exe-build
+      - name: Build Windows x64 installer
+        working-directory: packages/desktop-electron
+        run: yarn electron-builder --win nsis --x64 --publish never
+      - name: Upload installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Actual-windows-x64.exe
+          path: packages/desktop-electron/dist/Actual-windows-x64.exe
+      - name: Publish pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: mcp-preview-${{ github.run_number }}
+          SHA: ${{ github.sha }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          gh release create "$TAG" \
+            --target "$SHA" \
+            --prerelease \
+            --title "Actual with MCP server (preview $RUN_NUMBER)" \
+            --notes "Unsigned Windows x64 build of the read-only MCP server branch (commit $SHA). Windows SmartScreen may warn because the installer is not code-signed." \
+            packages/desktop-electron/dist/Actual-windows-x64.exe
