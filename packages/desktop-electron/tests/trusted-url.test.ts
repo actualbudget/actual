@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 import { test } from 'vitest';
 
-import { isInternalUrl } from '../trusted-url';
+import { isInternalUrl, isPermissionAllowed } from '../trusted-url';
 
 test('rejects misleading URLs in production and development', () => {
   for (const url of [
@@ -27,4 +27,36 @@ test('accepts only the app origin and the exact development origin', () => {
   assert.equal(isInternalUrl('app://actual/budget?tab=one', false), true);
   assert.equal(isInternalUrl('http://localhost:3001/budget', false), false);
   assert.equal(isInternalUrl('http://localhost:3001/budget', true), true);
+});
+
+test('lets only the app pages write to the clipboard', () => {
+  const permission = 'clipboard-sanitized-write';
+  assert.equal(
+    isPermissionAllowed(permission, 'app://actual/settings', false),
+    true,
+  );
+  assert.equal(
+    isPermissionAllowed(permission, 'http://localhost:3001/settings', true),
+    true,
+  );
+  assert.equal(
+    isPermissionAllowed(permission, 'http://localhost:3001/settings', false),
+    false,
+  );
+  assert.equal(
+    isPermissionAllowed(permission, 'https://evil.example/', false),
+    false,
+  );
+  assert.equal(
+    isPermissionAllowed('media', 'app://actual/settings', false),
+    false,
+  );
+  assert.equal(
+    isPermissionAllowed('notifications', 'app://actual/', true),
+    false,
+  );
+  assert.equal(
+    isPermissionAllowed('media', 'file:///tmp/loading.html', false),
+    true,
+  );
 });

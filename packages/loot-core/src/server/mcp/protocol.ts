@@ -73,6 +73,15 @@ function toolResult(value: unknown, isError = false) {
   return { content: [{ type: 'text', text }], isError };
 }
 
+// Some server errors (e.g. APIError) are plain objects with a message rather
+// than Error instances.
+function errorMessage(error: unknown) {
+  if (isObject(error) && typeof error.message === 'string' && error.message) {
+    return error.message;
+  }
+  return String(error);
+}
+
 async function callTool(
   options: McpServerOptions,
   params: Record<string, unknown>,
@@ -88,8 +97,7 @@ async function callTool(
   } catch (error) {
     // Tool failures are reported to the model (not as protocol errors) so it
     // can correct its arguments and retry.
-    const message = error instanceof Error ? error.message : String(error);
-    return toolResult(`Error: ${message}`, true);
+    return toolResult(`Error: ${errorMessage(error)}`, true);
   }
 }
 
