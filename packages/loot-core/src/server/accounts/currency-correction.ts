@@ -7,10 +7,13 @@ import {
   preflightTransactionWrites,
 } from '#server/transactions/foreign-guard';
 import type { ForeignEdit } from '#server/transactions/foreign-guard';
+import {
+  updateRule,
+  validateScheduleRule,
+} from '#server/transactions/transaction-rules';
 import { clearUndo } from '#server/undo';
 import {
   accountCurrencyFields,
-  assertNoCurrencyDependents,
   getDefaultCurrencyCode,
   getRecordedAmountPrecision,
   isMulticurrencyAvailable,
@@ -28,7 +31,19 @@ import {
   baseToNativeFraction,
   nativeToBaseFraction,
 } from '#shared/exchange-rate';
+import { exchangeLegs, feeBase } from '#shared/exchange-transfer';
 import { foreignSplitBases } from '#shared/foreign-split';
+import { getScheduledAmount } from '#shared/schedules';
+
+import {
+  correctionPreflight,
+  incompatibleLinks,
+  loadTransferLegs,
+} from './currency-correction-dependents';
+import type {
+  ExternalRow,
+  ScheduleOfAccount,
+} from './currency-correction-dependents';
 
 export type CorrectionMode = 'convert' | 'keep';
 
@@ -45,6 +60,8 @@ type StoredRow = {
   tombstone: number;
   reconciled: number;
   category: string | null;
+  transferred_id: string | null;
+  schedule: string | null;
 };
 
 type Amounts = { amount: number; transaction_amount: number | null };
@@ -62,16 +79,54 @@ export type CorrectionRow = {
   /** A split child valued at its parent's date, which differs from its own. */
   dateDiffers?: true;
   error?: 'amount-out-of-range' | 'split-family-inconsistent';
+  /** A same-encoding leg given its counterpart's shared amount. */
+  matchedToCounterpart?: true;
+  /** The transfer counterpart of a leg, as it is and as it will be. */
+  counterpart?: {
+    account: string;
+    id: string;
+    before: Amounts;
+    /** After every transfer and fee adjustment; null while unresolved. */
+    after: Amounts | null;
+  };
+  /** A link to a schedule in another encoding, cleared by the correction. */
+  scheduleUnlinked?: true;
+  /** A row in another account the correction edits (counterpart or link). */
+  external?: true;
+  account?: string;
+};
+
+export type ScheduleCorrection = {
+  id: string;
+  rule: string;
+  date: string;
+  before: { conditions: unknown[]; actions: unknown[] };
+  /** Null while the schedule needs a rate or explicit amount it lacks. */
+  after: { conditions: unknown[]; actions: unknown[] } | null;
+  roundingLoss: boolean;
 };
 
 type Rate = Awaited<ReturnType<typeof resolveRate>>;
+
+type ScheduleAmount = number | { num1: number; num2: number };
 
 type CorrectionInput = {
   account: string;
   currency: string | null;
   mode: CorrectionMode;
   amounts?: Record<string, number>;
+  scheduleAmounts?: Record<string, ScheduleAmount>;
 };
+
+/** `validateScheduleRule` refusals a correction reports as a dependency. */
+const SCHEDULE_RULE_ERRORS = new Set([
+  'schedule-account-encoding-change',
+  'schedule-currency-mismatch',
+  'schedule-amount-invalid',
+  'multicurrency-transfer-unavailable',
+  'foreign-split-unavailable',
+  'rule-account-incompatible',
+]);
 
 const RANGE_ERRORS = new Set([
   'amount-out-of-range',
@@ -128,6 +183,7 @@ export async function previewCurrencyCorrection({
   currency,
   mode,
   amounts = {},
+  scheduleAmounts = {},
 }: CorrectionInput) {
   if (mode !== 'convert' && mode !== 'keep') {
     throw new Error('correction-mode-invalid');
@@ -167,32 +223,37 @@ export async function previewCurrencyCorrection({
   ) {
     throw new Error('multicurrency-unavailable');
   }
-  await assertNoCurrencyDependents(accountId);
+  const { schedules: schedulesOfAccount, checkedRules } =
+    await correctionPreflight(accountId);
 
   const stored = await db.all<StoredRow>(
     `SELECT id, date, amount, transaction_amount, isParent, isChild,
-       parent_id, tombstone, reconciled, category
+       parent_id, tombstone, reconciled, category, transferred_id, schedule
        FROM transactions WHERE acct = ? ORDER BY id`,
     [accountId],
   );
+  const legs = await loadTransferLegs(accountId, target, stored);
 
-  // Rates are only ever needed in the target currency.
+  // Rows only ever need the target currency's rate; schedules in Convert
+  // also value their source amount.
   const rates = new Map<string, Rate>();
-  const rateAt = async (date: string) => {
-    if (target.currency === null) return null;
-    if (!rates.has(date)) {
+  const rateFor = async (quote: string | null, date: string) => {
+    if (quote === null) return null;
+    const key = `${quote}|${date}`;
+    if (!rates.has(key)) {
       rates.set(
-        date,
+        key,
         await resolveRate({
           baseCurrency: budgetCurrency,
-          quoteCurrency: target.currency,
+          quoteCurrency: quote,
           date,
         }),
       );
     }
-    const rate = rates.get(date)!;
+    const rate = rates.get(key)!;
     return rate.status === 'resolved' ? rate.rate : null;
   };
+  const rateAt = (date: string) => rateFor(target.currency, date);
 
   const sourceNative = (row: StoredRow) =>
     source.currency === null ? row.amount : (row.transaction_amount ?? 0);
@@ -221,11 +282,46 @@ export async function previewCurrencyCorrection({
     roundingLoss: false,
   });
 
+  // Convert gives a leg that becomes same-encoding its counterpart's
+  // amount, so its native needs no rate.
+  const matchedNative = new Map(
+    mode === 'convert'
+      ? legs
+          .filter(leg => leg.relationship === 'same')
+          .map(leg => [leg.id, -(leg.counterpart.transaction_amount ?? 0)])
+      : [],
+  );
+
   async function single(row: StoredRow) {
     const result = base(row);
     const rate = await rateAt(result.date);
     result.rate = rate;
-    if (mode === 'convert') {
+    const matched = matchedNative.get(row.id);
+    if (matched !== undefined && target.currency !== null) {
+      result.after = { amount: row.amount, transaction_amount: matched };
+      result.matchedToCounterpart = true;
+      // With a rate, the loss is the difference from the converted native;
+      // one too large to store is lost entirely.
+      if (rate) {
+        try {
+          const exact = baseToNativeFraction(
+            row.amount,
+            bp,
+            target.precision,
+            rate,
+          );
+          result.roundingLoss =
+            !isExact(exact) ||
+            toInteger(roundEven(exact.numerator, exact.denominator)) !==
+              matched;
+        } catch (error) {
+          if (!(error instanceof Error) || !RANGE_ERRORS.has(error.message)) {
+            throw error;
+          }
+          result.roundingLoss = true;
+        }
+      }
+    } else if (mode === 'convert') {
       if (target.currency === null) {
         result.after = { amount: row.amount, transaction_amount: null };
       } else if (rate) {
@@ -540,8 +636,418 @@ export async function previewCurrencyCorrection({
     }
   }
 
-  const rows = stored.map(row => results.get(row.id)!);
-  // Only unresolved rows and families without errors were added.
+  // Transfer legs: Convert keeps bases (a same-encoding leg takes its
+  // counterpart's amount); Keep edits each counterpart to stay equal and
+  // opposite.
+  const external = new Map<
+    string,
+    { row: ExternalRow; result: CorrectionRow }
+  >();
+  const externalResult = (row: ExternalRow): CorrectionRow => {
+    const existing = external.get(row.id);
+    if (existing) return existing.result;
+    const result: CorrectionRow = {
+      id: row.id,
+      date: db.fromDateRepr(row.date),
+      isParent: !!row.isParent,
+      tombstone: !!row.tombstone,
+      before: {
+        amount: row.amount,
+        transaction_amount: row.transaction_amount,
+      },
+      after: { amount: row.amount, transaction_amount: row.transaction_amount },
+      rate: null,
+      roundingLoss: false,
+      external: true,
+      account: row.acct,
+    };
+    external.set(row.id, { row, result });
+    return result;
+  };
+  const resum = (parent: CorrectionRow, children: CorrectionRow[]) => {
+    if (!parent.after || children.some(c => !c.after)) return;
+    parent.after = {
+      amount: sumBig(children.map(c => c.after!.amount)),
+      transaction_amount:
+        parent.after.transaction_amount === null
+          ? null
+          : sumBig(children.map(c => c.after!.transaction_amount ?? 0)),
+    };
+  };
+  for (const leg of legs) {
+    const result = results.get(leg.id)!;
+    if (!result.after || result.error) continue;
+    const cp = leg.counterpart;
+    if (mode === 'convert') {
+      if (leg.relationship === 'same') {
+        const matched = -(cp.transaction_amount ?? 0);
+        result.roundingLoss ||= result.after.transaction_amount !== matched;
+        result.after = { ...result.after, transaction_amount: matched };
+        result.matchedToCounterpart = true;
+      }
+    } else {
+      const cpResult = externalResult(cp);
+      cpResult.after = {
+        amount: -result.after.amount,
+        transaction_amount:
+          leg.relationship === 'exchange'
+            ? cp.transaction_amount
+            : leg.relationship === 'same'
+              ? -(result.after.transaction_amount ?? 0)
+              : null,
+      };
+      if (leg.counterpartFamily) {
+        const { parent, children } = leg.counterpartFamily;
+        resum(
+          externalResult(parent),
+          children.map(child => externalResult(child)),
+        );
+      }
+    }
+    // A leg inside a family in A: its parent holds the children's sums.
+    const own = stored.find(r => r.id === leg.id)!;
+    if (own.isChild && own.parent_id && liveParents.has(own.parent_id)) {
+      resum(
+        results.get(own.parent_id)!,
+        (childrenOf.get(own.parent_id) ?? []).map(c => results.get(c.id)!),
+      );
+    }
+  }
+
+  // A transfer that is an exchange after correction must be a complete MC-4
+  // exchange, its fee bases valued by MC-4.1's rule at the transfer's value.
+  type SideRow = { after: Amounts | null };
+  type Side = {
+    leg: SideRow;
+    parent: SideRow | null;
+    fee: SideRow | null;
+    precision: number;
+    /** Whether its rows may be revalued (Convert keeps counterparts). */
+    editable: boolean;
+  };
+  const nativeOf = (a: Amounts) => a.transaction_amount ?? a.amount;
+  const counterpartRow = (row: ExternalRow): SideRow =>
+    mode === 'keep'
+      ? externalResult(row)
+      : {
+          after: external.get(row.id)?.result.after ?? {
+            amount: row.amount,
+            transaction_amount: row.transaction_amount,
+          },
+        };
+  for (const leg of legs) {
+    if (leg.relationship !== 'exchange') continue;
+    const legResult = results.get(leg.id)!;
+    // Rows still waiting for a rate or value are validated once supplied.
+    if (!legResult.after || legResult.error) continue;
+    const own = stored.find(r => r.id === leg.id)!;
+    const ownParent =
+      own.isChild && own.parent_id && liveParents.has(own.parent_id)
+        ? own.parent_id
+        : null;
+    const ownFee = ownParent
+      ? (childrenOf.get(ownParent) ?? []).find(c => c.id !== own.id)
+      : undefined;
+    const cpFamily = leg.counterpartFamily;
+    const cpFee = cpFamily?.children.find(c => c.id !== leg.counterpart.id);
+    const sides: Side[] = [
+      {
+        leg: legResult,
+        parent: ownParent ? results.get(ownParent)! : null,
+        fee: ownFee ? results.get(ownFee.id)! : null,
+        precision: target.precision,
+        editable: true,
+      },
+      {
+        leg: counterpartRow(leg.counterpart),
+        parent: cpFamily ? counterpartRow(cpFamily.parent) : null,
+        fee: cpFee ? counterpartRow(cpFee) : null,
+        precision: leg.counterpartEncoding.precision ?? bp,
+        editable: mode === 'keep',
+      },
+    ];
+    if (sides.some(s => [s.leg, s.parent, s.fee].some(r => r && !r.after))) {
+      continue;
+    }
+    for (const side of sides) {
+      if (!side.fee || !side.parent || !side.editable) continue;
+      const legAfter = side.leg.after!;
+      const feeAfter = side.fee.after!;
+      const value = Math.abs(legAfter.amount);
+      const legNative = Math.abs(nativeOf(legAfter));
+      const feeNative = nativeOf(feeAfter);
+      if (legNative === 0) continue;
+      // A fee keeps its direction even when a converted native rounds to
+      // zero: Convert reads it from the kept base, Keep from the native.
+      const sign =
+        (mode === 'convert'
+          ? feeAfter.amount || feeNative
+          : feeNative || feeAfter.amount) < 0
+          ? -1
+          : 1;
+      if (mode === 'keep') {
+        // The fee's base follows the transfer's (MC-4.1).
+        const feeAmount = sign * feeBase(Math.abs(feeNative), value, legNative);
+        side.fee.after = { ...feeAfter, amount: feeAmount };
+        side.parent.after = {
+          ...side.parent.after!,
+          amount: legAfter.amount + feeAmount,
+        };
+      } else if (feeAfter.transaction_amount !== null) {
+        // Convert keeps bases: take the fee native nearest the converted one
+        // whose valuation reproduces the stored fee base.
+        const storedFee = Math.abs(feeAfter.amount);
+        const start = Math.abs(feeNative);
+        // A destination fee must leave a positive net credit.
+        const candidate = nearestFeeNative(
+          storedFee,
+          value,
+          legNative,
+          start,
+          nativeOf(legAfter) > 0 ? legNative - 1 : undefined,
+        );
+        if (candidate === undefined) {
+          throw new Error('correction-exchange-invalid');
+        }
+        if (candidate !== start) {
+          (side.fee as CorrectionRow).roundingLoss = true;
+          side.fee.after = {
+            ...feeAfter,
+            transaction_amount: sign * candidate,
+          };
+          side.parent.after = {
+            ...side.parent.after!,
+            transaction_amount:
+              (legAfter.transaction_amount ?? 0) + sign * candidate,
+          };
+        }
+      }
+    }
+    // A transfer that posts nothing (zero natives and bases, no fees).
+    if (
+      sides.every(
+        s =>
+          nativeOf(s.leg.after!) === 0 && s.leg.after!.amount === 0 && !s.fee,
+      )
+    ) {
+      continue;
+    }
+    const [src, dst] =
+      nativeOf(sides[0].leg.after!) < 0 ? sides : [sides[1], sides[0]];
+    const top = (s: Side) => (s.parent ?? s.leg).after!;
+    const feeOf = (s: Side) => (s.fee ? -nativeOf(s.fee.after!) : 0);
+    let valid = false;
+    try {
+      const exchange = exchangeLegs({
+        sourceAmount: -nativeOf(top(src)),
+        destinationAmount: nativeOf(top(dst)),
+        sourceFee: feeOf(src),
+        destinationFee: feeOf(dst),
+        sourcePrecision: src.precision,
+        destinationPrecision: dst.precision,
+      });
+      valid =
+        exchange.principal === -nativeOf(src.leg.after!) &&
+        exchange.gross === nativeOf(dst.leg.after!) &&
+        // One nonnegative value V: the source leg -V, the destination +V.
+        src.leg.after!.amount <= 0 &&
+        src.leg.after!.amount === -dst.leg.after!.amount &&
+        sides.every(
+          s =>
+            !s.fee ||
+            Math.abs(s.fee.after!.amount) ===
+              feeBase(
+                Math.abs(nativeOf(s.fee.after!)),
+                Math.abs(s.leg.after!.amount),
+                Math.abs(nativeOf(s.leg.after!)),
+              ),
+        );
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.startsWith('exchange-')) {
+        throw error;
+      }
+    }
+    if (!valid) throw new Error('correction-exchange-invalid');
+  }
+
+  // Each leg names its counterpart's amounts as finally proposed.
+  for (const leg of legs) {
+    const cp = leg.counterpart;
+    const before = {
+      amount: cp.amount,
+      transaction_amount: cp.transaction_amount,
+    };
+    const result = results.get(leg.id)!;
+    result.counterpart = {
+      account: cp.acct,
+      id: cp.id,
+      before,
+      after:
+        !result.after || result.error
+          ? null
+          : (external.get(cp.id)?.result.after ?? before),
+    };
+  }
+
+  // Schedule links that the target encoding makes incompatible.
+  const scheduleIds = new Set(schedulesOfAccount.map(s => s.id));
+  const unlinked = await incompatibleLinks(accountId, target, scheduleIds);
+  for (const row of unlinked) {
+    const result =
+      row.acct === accountId ? results.get(row.id)! : externalResult(row);
+    result.scheduleUnlinked = true;
+  }
+
+  // Schedules of A carry their amount in A's encoding.
+  const schedules: ScheduleCorrection[] = [];
+  for (const schedule of schedulesOfAccount) {
+    try {
+      schedules.push(await correctSchedule(schedule));
+    } catch (error) {
+      if (error instanceof Error && RANGE_ERRORS.has(error.message)) {
+        throw new Error('amount-out-of-range');
+      }
+      throw error;
+    }
+  }
+
+  // Every schedule rule posting from or to A must still be valid with A in
+  // the target encoding: a transfer becoming an exchange keeps only the
+  // shapes exchange schedules support (MC-4.3).
+  const ruleCheck = {
+    currencyCorrection: {
+      unlinked: new Set(unlinked.map(r => r.id)),
+      account: accountId,
+      encoding: target,
+    },
+  };
+  for (const rule of [
+    ...schedules.map(s => ({
+      id: s.rule,
+      conditions: (s.after ?? s.before).conditions,
+      actions: (s.after ?? s.before).actions,
+    })),
+    ...checkedRules,
+  ]) {
+    try {
+      await validateScheduleRule(
+        rule as Parameters<typeof validateScheduleRule>[0],
+        ruleCheck,
+      );
+    } catch (error) {
+      if (error instanceof Error && SCHEDULE_RULE_ERRORS.has(error.message)) {
+        throw new Error('account-currency-has-schedules');
+      }
+      throw error;
+    }
+  }
+
+  async function correctSchedule(
+    schedule: ScheduleOfAccount,
+  ): Promise<ScheduleCorrection> {
+    const before = {
+      conditions: schedule.conditions,
+      actions: schedule.actions,
+    };
+    for (const action of schedule.actions) {
+      if (
+        action.op === 'set-split-amount' &&
+        action.options?.method === 'fixed-amount'
+      ) {
+        throw new Error('correction-schedule-action-unsupported');
+      }
+    }
+    const index = schedule.conditions.findIndex(
+      c =>
+        c.field === 'amount' &&
+        (c.op === 'is' || c.op === 'isapprox' || c.op === 'isbetween'),
+    );
+    // Only that one amount condition is re-encoded; any other amount
+    // predicate would keep comparing in the old encoding.
+    if (
+      schedule.conditions.some((c, i) => c.field === 'amount' && i !== index)
+    ) {
+      throw new Error('account-currency-has-schedules');
+    }
+    const result: ScheduleCorrection = {
+      id: schedule.id,
+      rule: schedule.rule,
+      date: schedule.date,
+      before,
+      after: before,
+      roundingLoss: false,
+    };
+    if (index < 0) return result;
+    const condition = schedule.conditions[index];
+    const value = condition.value as ScheduleAmount;
+    const convert = async (amount: number): Promise<number | null> => {
+      if (mode === 'keep') {
+        const exact = rescaleExact(amount);
+        result.roundingLoss ||= !isExact(exact);
+        return toInteger(roundEven(exact.numerator, exact.denominator));
+      }
+      let baseValue = { numerator: BigInt(amount), denominator: 1n };
+      if (source.currency !== null) {
+        const sourceRate = await rateFor(source.currency, schedule.date);
+        if (!sourceRate) return null;
+        baseValue = nativeToBaseFraction(
+          amount,
+          source.precision,
+          bp,
+          sourceRate,
+        );
+      }
+      if (target.currency === null) {
+        result.roundingLoss ||= !isExact(baseValue);
+        return toInteger(roundEven(baseValue.numerator, baseValue.denominator));
+      }
+      const targetRate = await rateAt(schedule.date);
+      if (!targetRate) return null;
+      // Target native = base × rate, from the exact base value.
+      const unit = baseToNativeFraction(1, bp, target.precision, targetRate);
+      const numerator = baseValue.numerator * unit.numerator;
+      const denominator = baseValue.denominator * unit.denominator;
+      result.roundingLoss ||= numerator % denominator !== 0n;
+      return toInteger(roundEven(numerator, denominator));
+    };
+    let next: ScheduleAmount | null;
+    if (typeof value === 'object' && value !== null) {
+      const num1 = await convert(value.num1);
+      const num2 = await convert(value.num2);
+      next = num1 === null || num2 === null ? null : { num1, num2 };
+    } else {
+      next = await convert(value as number);
+    }
+    if (next === null) {
+      const given = scheduleAmounts[schedule.id];
+      if (given === undefined) {
+        result.after = null;
+        missing.add(schedule.date);
+        return result;
+      }
+      next = given;
+    }
+    const conditions = schedule.conditions.map((c, i) =>
+      i === index ? { ...c, value: next } : c,
+    );
+    const scheduled = getScheduledAmount(next);
+    const actions = schedule.actions.map(action =>
+      action.op === 'set' &&
+      action.field === 'amount' &&
+      !action.options?.template &&
+      !action.options?.formula
+        ? { ...action, value: scheduled }
+        : action,
+    );
+    result.after = { conditions, actions };
+    return result;
+  }
+
+  const rows = [
+    ...stored.map(row => results.get(row.id)!),
+    ...[...external.values()].map(e => e.result),
+  ];
+  // Only unresolved rows, families and schedules without errors were added.
   const missingRates = [...missing].sort();
 
   // Bases change only in Keep mode; deleted rows and orphans post nothing.
@@ -564,13 +1070,33 @@ export async function previewCurrencyCorrection({
                 date: result.date,
                 amount,
                 isParent: !!row.isParent,
-                transferAccount: null,
+                transferAccount: result.counterpart?.account ?? null,
               });
               return {
                 before: side(result.before.amount),
                 after: side(result.after!.amount),
               };
-            }),
+            })
+            .concat(
+              [...external.values()]
+                .filter(
+                  ({ result }) => result.after!.amount !== result.before.amount,
+                )
+                .map(({ row, result }) => {
+                  const side = (amount: number) => ({
+                    account: row.acct,
+                    category: row.category,
+                    date: result.date,
+                    amount,
+                    isParent: !!row.isParent,
+                    transferAccount: row.transferred_id ? accountId : null,
+                  });
+                  return {
+                    before: side(result.before.amount),
+                    after: side(result.after!.amount),
+                  };
+                }),
+            ),
         })
       : [];
 
@@ -578,9 +1104,12 @@ export async function previewCurrencyCorrection({
     !!r.after &&
     (r.after.amount !== r.before.amount ||
       r.after.transaction_amount !== r.before.transaction_amount);
-  const reconciled = stored.filter(
-    row => row.reconciled && changes(results.get(row.id)!),
-  ).length;
+  const reconciled =
+    stored.filter(row => row.reconciled && changes(results.get(row.id)!))
+      .length +
+    [...external.values()].filter(
+      ({ row, result }) => row.reconciled && changes(result),
+    ).length;
 
   const mapped = await Promise.all(
     stored.map(row => liveMappedCategory(row.category)),
@@ -602,6 +1131,8 @@ export async function previewCurrencyCorrection({
         row.isChild,
         row.parent_id,
         row.reconciled,
+        row.schedule,
+        row.transferred_id,
         mapped[i],
       ]),
       rates: [...rates.entries()]
@@ -612,12 +1143,34 @@ export async function previewCurrencyCorrection({
             : [date, null],
         ),
       amounts: Object.entries(amounts).sort(([a], [b]) => a.localeCompare(b)),
+      scheduleAmounts: Object.entries(scheduleAmounts).sort(([a], [b]) =>
+        a.localeCompare(b),
+      ),
+      legs: legs.map(leg => [
+        leg.id,
+        leg.relationship,
+        leg.counterpartEncoding,
+        snapshot(leg.counterpart),
+        leg.counterpartFamily
+          ? [
+              snapshot(leg.counterpartFamily.parent),
+              leg.counterpartFamily.children.map(snapshot),
+            ]
+          : null,
+      ]),
+      links: unlinked.map(snapshot),
+      schedules: schedules.map(s => [s.id, s.rule, s.date, s.before, s.after]),
+      checkedRules,
+      externalCategories: await Promise.all(
+        [...external.values()].map(e => liveMappedCategory(e.row.category)),
+      ),
       effects,
     }),
   );
 
   return {
     rows,
+    schedules,
     missingRates,
     effects,
     reconciled,
@@ -625,6 +1178,56 @@ export async function previewCurrencyCorrection({
     target,
     changed: rows.filter(changes).length,
   };
+}
+
+/**
+ * The fee native nearest `start` whose MC-4.1 valuation
+ * (`feeBase(n, value, legNative)`) is `storedFee`, if any: the admissible
+ * natives form the interval around `storedFee × legNative / value`, capped
+ * at `max` when given.
+ */
+export function nearestFeeNative(
+  storedFee: number,
+  value: number,
+  legNative: number,
+  start: number,
+  max?: number,
+): number | undefined {
+  const v = BigInt(value);
+  const l = BigInt(legNative);
+  const f = BigInt(storedFee);
+  // n × value / legNative within half a unit of storedFee; the boundaries
+  // are settled by feeBase's half-even rounding below.
+  const low = ((2n * f - 1n) * l) / (2n * v);
+  const ceiling = ((2n * f + 1n) * l + 2n * v - 1n) / (2n * v);
+  const high =
+    max !== undefined && BigInt(max) < ceiling ? BigInt(max) : ceiling;
+  const clamp = (n: bigint) => (n < low ? low : n > high ? high : n);
+  const near = clamp(BigInt(start));
+  return [near, near - 1n, near + 1n, low, low + 1n, high - 1n, high]
+    .filter(n => n >= 0n && n >= low && n <= high)
+    .map(Number)
+    .filter(n => feeBase(n, value, legNative) === storedFee)
+    .sort((a, b) => Math.abs(a - start) - Math.abs(b - start) || a - b)[0];
+}
+
+/** Every stored field a correction reads from a row in another account. */
+function snapshot(row: ExternalRow) {
+  return [
+    row.id,
+    row.acct,
+    row.date,
+    row.amount,
+    row.transaction_amount,
+    row.isParent,
+    row.isChild,
+    row.parent_id,
+    row.transferred_id,
+    row.schedule,
+    row.tombstone,
+    row.reconciled,
+    row.category,
+  ];
 }
 
 /**
@@ -641,14 +1244,11 @@ export async function correctAccountCurrency({
   try {
     proposal = await previewCurrencyCorrection(input);
   } catch (error) {
-    // The account already has the target encoding: the preview predates
-    // another correction (or this one, applied twice).
-    if (
-      error instanceof Error &&
-      error.message === 'account-currency-unchanged'
-    ) {
-      return { status: 'stale' as const };
-    }
+    // The caller holds a fingerprint, so this input previewed without a
+    // refusal: one now (the account already has the target encoding, or a
+    // schedule, rule or transfer changed) means the preview is out of date.
+    // A fresh preview reports the refusal itself.
+    if (error instanceof Error) return { status: 'stale' as const };
     throw error;
   }
   if (proposal.fingerprint !== fingerprint) return { status: 'stale' as const };
@@ -657,35 +1257,47 @@ export async function correctAccountCurrency({
   if (proposal.missingRates.length > 0) {
     return { status: 'rates-missing' as const, dates: proposal.missingRates };
   }
+  const amountChanged = (r: CorrectionRow) =>
+    r.after!.amount !== r.before.amount ||
+    r.after!.transaction_amount !== r.before.transaction_amount;
   const changed = proposal.rows.filter(
-    r =>
-      r.after!.amount !== r.before.amount ||
-      r.after!.transaction_amount !== r.before.transaction_amount,
+    r => amountChanged(r) || r.scheduleUnlinked,
   );
   const foreignEdits = new Map<string, ForeignEdit>(
-    changed.map(r => [
-      r.id,
-      {
-        action: 'update',
-        expected: {
-          account: input.account,
-          amount: r.before.amount,
-          transaction_amount: r.before.transaction_amount,
-          date: r.date,
+    changed.filter(amountChanged).map(r => {
+      const account = r.account ?? input.account;
+      return [
+        r.id,
+        {
+          action: 'update',
+          expected: {
+            account,
+            amount: r.before.amount,
+            transaction_amount: r.before.transaction_amount,
+            date: r.date,
+          },
+          final: {
+            account,
+            amount: r.after!.amount,
+            transaction_amount: r.after!.transaction_amount,
+          },
         },
-        final: {
-          account: input.account,
-          amount: r.after!.amount,
-          transaction_amount: r.after!.transaction_amount,
-        },
-      },
-    ]),
+      ];
+    }),
   );
   const updates = changed.map(r => ({
     id: r.id,
-    amount: r.after!.amount,
-    transaction_amount: r.after!.transaction_amount,
+    ...(amountChanged(r) && {
+      amount: r.after!.amount,
+      transaction_amount: r.after!.transaction_amount,
+    }),
+    ...(r.scheduleUnlinked && { schedule: null }),
   }));
+  const unlinked = new Set<string>(
+    proposal.rows.filter(r => r.scheduleUnlinked).map(r => r.id),
+  );
+  // Transfer legs and counterparts were validated as a whole above.
+  const writeOptions = { foreignEdits, validatedTransfer: true };
 
   await batchMessages(async () => {
     // The account's new encoding is queued first, so the guard validates
@@ -697,9 +1309,27 @@ export async function correctAccountCurrency({
       balance_available: null,
       balance_limit: null,
     });
-    await preflightTransactionWrites({ updated: updates }, { foreignEdits });
+    await preflightTransactionWrites({ updated: updates }, writeOptions);
     for (const update of updates) {
-      await db.updateTransaction(update, { foreignEdits });
+      await db.updateTransaction(update, writeOptions);
+    }
+    // Schedules follow their account into the target encoding.
+    for (const schedule of proposal.schedules) {
+      if (schedule.after === schedule.before) continue;
+      await updateRule(
+        {
+          id: schedule.rule,
+          conditions: schedule.after!.conditions,
+          actions: schedule.after!.actions,
+        },
+        {
+          currencyCorrection: {
+            unlinked,
+            account: input.account,
+            encoding: proposal.target,
+          },
+        },
+      );
     }
   });
   clearUndo();
