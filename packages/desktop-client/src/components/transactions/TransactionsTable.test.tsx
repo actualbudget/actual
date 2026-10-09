@@ -164,6 +164,9 @@ type LiveTransactionTableProps = {
   showCategory: boolean;
   showGroup?: boolean;
   showCleared: boolean;
+  showBalances?: boolean;
+  balances?: Record<TransactionEntity['id'], number>;
+  onReorder?: () => void;
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
@@ -1139,6 +1142,109 @@ describe('Transactions', () => {
     expect(getTransactions()[2].amount).toBe(-1000);
   });
 
+  test('selecting split with the keyboard keeps focus on the parent payment field', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'category');
+    expect(screen.getByTestId('autocomplete')).toBeTruthy();
+    expect(screen.getByTestId('split-transaction-button')).toBeTruthy();
+
+    // Nothing is highlighted on open; ArrowDown highlights Split (index 0).
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
+  test('selecting split after visiting payment keeps focus on the parent payment field', async () => {
+    const appliedTransactions: TransactionEntity[] = [];
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: async transaction => {
+        appliedTransactions.push(transaction);
+        return transaction;
+      },
+    });
+    updateProps({ isAdding: true });
+
+    // Tabbing through payment saves debit 0 as -0 (negated), so amount is no longer null.
+    const debitInput = await editNewField(container, 'debit');
+    await userEvent.type(debitInput, '[Tab]');
+    await waitFor(() => {
+      const appliedAmount = appliedTransactions.at(-1)?.amount;
+      expect(appliedAmount == null).toBe(false);
+      expect(appliedAmount === 0).toBe(true);
+    });
+
+    const input = await editNewField(container, 'category');
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
+  test('tab from the parent cleared field focuses the first split child', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'category');
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    // Enabling split still leaves the parent payment field focused.
+    let field = expectToBeEditingField(container, 'debit', 0, true);
+    await userEvent.type(field, '[Tab]');
+    field = expectToBeEditingField(container, 'credit', 0, true);
+    await userEvent.type(field, '[Tab]');
+    field = expectToBeEditingField(container, 'cleared', 0, true);
+    await userEvent.type(field, '[Tab]');
+
+    expectToBeEditingField(container, 'payee', 1, true);
+    const cancelButton = container.querySelector(
+      '[data-testid="new-transaction"] [data-testid="cancel-button"]',
+    )!;
+    expect(cancelButton.contains(container.ownerDocument.activeElement)).toBe(
+      false,
+    );
+
+    // Cancel follows the last split line.
+    const lastCleared = await editNewField(container, 'cleared', 2);
+    await userEvent.type(lastCleared, '[Tab]');
+    expect(cancelButton.contains(container.ownerDocument.activeElement)).toBe(
+      true,
+    );
+  });
+
   test('escape closes the new transaction rows', async () => {
     const { container, updateProps } = renderTransactions({
       onCloseAddTransaction: () => {
@@ -1493,6 +1599,37 @@ describe('Transactions', () => {
     expect(container.querySelectorAll('[data-testid=select] svg').length).toBe(
       2,
     );
+  });
+
+  test('pressing the mouse on the running balance pauses row drag so the text can be selected', () => {
+    // Two transactions on the same date, so the rows can be reordered
+    const transactions = generateTransactions(2).map(t => ({
+      ...t,
+      date: '2017-01-01',
+    }));
+    const { container } = renderTransactions({
+      transactions,
+      showBalances: true,
+      balances: Object.fromEntries(transactions.map(t => [t.id, 1000])),
+      onReorder: vi.fn(),
+    });
+
+    const balance = queryField(container, 'balance', '', 0);
+    const row = balance.closest('[data-testid=row]');
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance, { button: 2 });
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    expect(row).toHaveAttribute('draggable', 'false');
+
+    fireEvent.mouseUp(window);
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    fireEvent.blur(window);
+    expect(row).toHaveAttribute('draggable', 'true');
   });
 
   test('transaction can be split, updated, and deleted', async () => {

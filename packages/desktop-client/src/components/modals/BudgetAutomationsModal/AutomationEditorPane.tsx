@@ -7,7 +7,7 @@ import { Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { spacing, tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { dayFromDate, firstDayOfMonth } from '@actual-app/core/shared/months';
 import type {
@@ -230,9 +230,9 @@ export function AutomationEditorPane({
                 <AutomationErrorTitle error={activeError} />
               </Text>
               <Text
+                size="small"
                 style={{
-                  fontSize: 12,
-                  marginTop: 2,
+                  marginTop: spacing.xxs,
                   color: 'inherit',
                   display: 'block',
                 }}
@@ -288,11 +288,11 @@ export function AutomationEditorPane({
             >
               {NON_CONTRIBUTION_TYPES.has(state.displayType) && (
                 <Text
+                  size="small"
                   style={{
-                    fontSize: 12,
                     color: theme.pageTextLight,
                     display: 'block',
-                    marginBottom: 4,
+                    marginBottom: spacing.xs,
                   }}
                 >
                   {getDisplayTemplateMeta(state.displayType).description}

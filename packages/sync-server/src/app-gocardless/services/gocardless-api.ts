@@ -1,3 +1,5 @@
+import createDebug from 'debug';
+
 import type {
   GoCardlessAccountDetails,
   GoCardlessAccountId,
@@ -12,6 +14,8 @@ import type {
   GetBalances,
   GetTransactionsResponse,
 } from '#app-gocardless/gocardless.types';
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
@@ -54,6 +58,15 @@ export class GoCardlessApiError extends Error {
   }
 }
 
+function isInvalidTokenResponse(data: unknown): boolean {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'summary' in data &&
+    data.summary === 'Invalid token'
+  );
+}
+
 export class GoCardlessApi {
   #secretId: string | null;
   #secretKey: string | null;
@@ -91,9 +104,11 @@ export class GoCardlessApi {
     {
       method = 'GET',
       body,
+      isRetry = false,
     }: {
       method?: 'GET' | 'POST' | 'DELETE';
       body?: Record<string, unknown>;
+      isRetry?: boolean;
     } = {},
   ): Promise<T> {
     const headers: Record<string, string> = {
@@ -134,10 +149,23 @@ export class GoCardlessApi {
       try {
         error.response.data = await response.json();
       } catch {}
-      console.log(
+      console.log(`GoCardless request failed: ${response.status}`);
+      debugSensitive(
         `GoCardless ${method} ${endpoint} ${response.status}`,
         error.response.data ? JSON.stringify(error.response.data) : '(no body)',
       );
+
+      if (
+        !isRetry &&
+        this.#token &&
+        response.status === 401 &&
+        isInvalidTokenResponse(error.response.data)
+      ) {
+        this.#token = null;
+        await this.generateToken();
+        return this.#request<T>(endpoint, { method, body, isRetry: true });
+      }
+
       throw error;
     }
 
