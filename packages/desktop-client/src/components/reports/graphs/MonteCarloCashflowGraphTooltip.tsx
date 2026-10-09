@@ -20,6 +20,8 @@ type MonteCarloCashflowGraphTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   groups: MonteCarloCashflowTooltipGroup[];
+  /** Shown on years after the plan ran out; defaults to the cashflow wording */
+  afterDepletionNote?: string;
 };
 
 const VALUE_ROW_STYLE = css({
@@ -41,6 +43,7 @@ export function MonteCarloCashflowGraphTooltip({
   active,
   payload,
   groups,
+  afterDepletionNote,
 }: MonteCarloCashflowGraphTooltipProps) {
   const { t } = useTranslation();
   const format = useFormat();
@@ -82,7 +85,8 @@ export function MonteCarloCashflowGraphTooltip({
         <div
           style={{ marginBottom: 10, maxWidth: 220, color: theme.errorText }}
         >
-          {t('The pots had already run out - this spending went unfunded.')}
+          {afterDepletionNote ??
+            t('The pots had already run out - this spending went unfunded.')}
         </div>
       )}
       {point.unspentIncome > 0 && (

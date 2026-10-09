@@ -220,7 +220,17 @@ On a run that fails, the chart doesn't stop at the failure year: the remaining y
 
 The spending bars show the _plan_ - the phase amount, adjusted for inflation, any withdrawal rule and the minimum spending floor - rather than the money actually delivered. That's what makes trouble visible: in a shortfall year the withdrawal bars fall visibly short of the spending bar.
 
-Use the dropdown above the chart to pick which run to look at: the worst run, a typically-bad or typically-good outcome (the 25th and 75th percentiles), the median, or the best run. These are the same runs the **Jump to** dropdown in the runs view lands on. The chart also appears above the year-by-year table when you click into any individual run, so you can see that specific run's flows at a glance.
+Use the dropdown above the chart to pick which run to look at: the worst run, a typically-bad or typically-good outcome (the 25th and 75th percentiles), the median, or the best run. These are the same runs the **Jump to** dropdown in the runs view lands on. The chart also appears above the year-by-year table when you click into any individual run, where **Cashflow** and **Pots** buttons switch between this chart and the pot balances chart.
+
+### The Pot Balances Chart
+
+![The pots chart](/img/experimental/monte-carlo-analysis/monte-carlo-pots-chart.png)
+
+Switch the results view to **Pots** to see what each of your pots was worth at the end of every year, for one simulated run at a time. The pots are stacked on top of each other, one color per pot (the same colors as the cashflow chart), so the top of the stack is the plan's total balance and the bands inside it show how that total is split. Locked pots and the surplus pot are included, so you can watch a pension sit untouched until its access age, or the surplus pot fill up with income the plan didn't need.
+
+Hover over a year to see every pot's balance and the total. On a run that fails, the stack drops to zero from the failure year onward.
+
+The dropdown above the chart picks the run, exactly as it does for the cashflow chart, and the chart also appears above the year-by-year table when you click into a run from the **Runs** view, where **Cashflow** and **Pots** buttons switch between the two charts. Like every other figure in the results, the balances follow the **Show values in today's money** checkbox.
 
 ### When Did the Pot Run Out?
 

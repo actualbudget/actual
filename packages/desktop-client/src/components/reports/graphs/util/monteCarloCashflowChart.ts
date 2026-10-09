@@ -16,6 +16,16 @@ import type {
   MonteCarloSpendingPhase,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 
+/**
+ * The colour a pot is drawn in across the single-run charts: the
+ * qualitative scale from its start, in pot order, so a pot looks the
+ * same in the cashflow and pot balances charts
+ */
+export function getMonteCarloPotColor(potIndex: number): string {
+  const colorScale = getColorScale('qualitative');
+  return colorScale[potIndex % colorScale.length];
+}
+
 export type MonteCarloCashflowSeriesKind =
   | 'pot'
   | 'income'
@@ -122,7 +132,7 @@ export function buildMonteCarloCashflowChart({
     key: seriesKey('pot', potIndex),
     kind: 'pot',
     label: getMonteCarloPotLabel(pots, potIndex, translate),
-    color: inflowColor(potIndex),
+    color: getMonteCarloPotColor(potIndex),
   }));
   // Only streams that pay something in this run get a series
   const incomeSeries: MonteCarloCashflowSeries[] = incomeStreams.flatMap(
