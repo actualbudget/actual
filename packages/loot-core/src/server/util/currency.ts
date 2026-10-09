@@ -172,55 +172,7 @@ export async function resolveAccountCurrencyInput(
       if (hasTransactions) {
         throw new Error('account-currency-immutable');
       }
-      // Schedule amounts and incoming transfers are recorded in the
-      // account's encoding; correcting them waits for MC-7.
-      // Account references may be a single id or a oneOf list, in
-      // conditions or in account-setting actions.
-      const accountReference = `(
-        (json_type(x.value, '$.value') = 'array' AND EXISTS (
-          SELECT 1 FROM json_each(x.value, '$.value') v WHERE v.value = ?))
-        OR json_extract(x.value, '$.value') = ?
-      )`;
-      const hasSchedules = await db.first(
-        `SELECT 1 FROM schedules s
-           JOIN rules r ON r.id = s.rule, json_each(r.conditions) x
-           WHERE s.tombstone = 0
-             AND json_extract(x.value, '$.field') = 'acct'
-             AND ${accountReference}
-           LIMIT 1`,
-        [accountId, accountId],
-      );
-      // Ordinary rules can link schedules too.
-      const hasScheduleRules = await db.first(
-        `SELECT 1 FROM rules r, json_each(r.actions) a
-           WHERE r.tombstone = 0
-             AND json_extract(a.value, '$.op') = 'link-schedule'
-             AND EXISTS (
-               SELECT 1 FROM (
-                 SELECT value FROM json_each(r.conditions)
-                 UNION ALL SELECT value FROM json_each(r.actions)
-               ) x
-               WHERE json_extract(x.value, '$.field') IN ('acct', 'account')
-                 AND ${accountReference})
-           LIMIT 1`,
-        [accountId, accountId],
-      );
-      if (hasSchedules || hasScheduleRules) {
-        throw new Error('account-currency-has-schedules');
-      }
-      // Tombstoned and merged (mapped) payee references count too.
-      const hasTransfers = await db.first(
-        `SELECT 1 FROM transactions t
-           JOIN payees p ON p.id = COALESCE(
-             (SELECT targetId FROM payee_mapping WHERE id = t.description),
-             t.description)
-           WHERE p.transfer_acct = ?
-           LIMIT 1`,
-        [accountId],
-      );
-      if (hasTransfers) {
-        throw new Error('account-currency-has-transfers');
-      }
+      await assertNoCurrencyDependents(accountId);
     }
   }
 
@@ -228,4 +180,80 @@ export async function resolveAccountCurrencyInput(
     throw new Error('multicurrency-unavailable');
   }
   return value;
+}
+
+/**
+ * Schedule amounts and incoming transfers are recorded in an account's
+ * encoding; changing it with them present waits for MC-7.2.
+ */
+export async function assertNoCurrencyDependents(accountId: string) {
+  // Account references may be a single id or a oneOf list, in
+  // conditions or in account-setting actions.
+  const accountReference = `(
+    (json_type(x.value, '$.value') = 'array' AND EXISTS (
+      SELECT 1 FROM json_each(x.value, '$.value') v WHERE v.value = ?))
+    OR json_extract(x.value, '$.value') = ?
+  )`;
+  const hasSchedules = await db.first(
+    `SELECT 1 FROM schedules s
+       JOIN rules r ON r.id = s.rule, json_each(r.conditions) x
+       WHERE s.tombstone = 0
+         AND json_extract(x.value, '$.field') = 'acct'
+         AND ${accountReference}
+       LIMIT 1`,
+    [accountId, accountId],
+  );
+  // Ordinary rules can link schedules too.
+  const hasScheduleRules = await db.first(
+    `SELECT 1 FROM rules r, json_each(r.actions) a
+       WHERE r.tombstone = 0
+         AND json_extract(a.value, '$.op') = 'link-schedule'
+         AND EXISTS (
+           SELECT 1 FROM (
+             SELECT value FROM json_each(r.conditions)
+             UNION ALL SELECT value FROM json_each(r.actions)
+           ) x
+           WHERE json_extract(x.value, '$.field') IN ('acct', 'account')
+             AND ${accountReference})
+       LIMIT 1`,
+    [accountId, accountId],
+  );
+  if (hasSchedules || hasScheduleRules) {
+    throw new Error('account-currency-has-schedules');
+  }
+  // Tombstoned and merged (mapped) payee references count too.
+  const hasTransfers = await db.first(
+    `SELECT 1 FROM transactions t
+       JOIN payees p ON p.id = COALESCE(
+         (SELECT targetId FROM payee_mapping WHERE id = t.description),
+         t.description)
+       WHERE p.transfer_acct = ?
+       LIMIT 1`,
+    [accountId],
+  );
+  if (hasTransfers) {
+    throw new Error('account-currency-has-transfers');
+  }
+  // The account's own rows, tombstones included, linked to a schedule or
+  // naming a transfer (directly or through a merged payee).
+  const ownSchedule = await db.first(
+    'SELECT 1 FROM transactions WHERE acct = ? AND schedule IS NOT NULL LIMIT 1',
+    [accountId],
+  );
+  if (ownSchedule) {
+    throw new Error('account-currency-has-schedules');
+  }
+  const ownTransfer = await db.first(
+    `SELECT 1 FROM transactions t
+       LEFT JOIN payees p ON p.id = COALESCE(
+         (SELECT targetId FROM payee_mapping WHERE id = t.description),
+         t.description)
+       WHERE t.acct = ?
+         AND (t.transferred_id IS NOT NULL OR p.transfer_acct IS NOT NULL)
+       LIMIT 1`,
+    [accountId],
+  );
+  if (ownTransfer) {
+    throw new Error('account-currency-has-transfers');
+  }
 }
