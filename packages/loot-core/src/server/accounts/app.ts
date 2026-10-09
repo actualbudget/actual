@@ -53,6 +53,10 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import {
+  correctAccountCurrency,
+  previewCurrencyCorrection,
+} from './currency-correction';
 import { getCurrentEstimates } from './current-estimates';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
@@ -71,6 +75,8 @@ export type AccountHandlers = {
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'accounts/current-estimates': typeof getCurrentEstimates;
+  'accounts/currency-correction-preview': typeof previewCurrencyCorrection;
+  'accounts/correct-currency': typeof correctAccountCurrency;
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
@@ -1874,6 +1880,8 @@ app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('accounts/current-estimates', getCurrentEstimates);
+app.method('accounts/currency-correction-preview', previewCurrencyCorrection);
+app.method('accounts/correct-currency', mutator(correctAccountCurrency));
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
