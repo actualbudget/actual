@@ -1,3 +1,5 @@
+import { APIError } from '#server/errors';
+
 import { handleMcpMessage, MCP_PROTOCOL_VERSIONS } from './protocol';
 import type { McpServerOptions } from './protocol';
 
@@ -19,6 +21,10 @@ const options: McpServerOptions = {
       run: async args => {
         if (args.fail) {
           throw new Error('It failed');
+        }
+        if (args.failWithObject) {
+          // APIError is a plain object, not an Error instance
+          throw APIError('Bad month');
         }
         return args;
       },
@@ -133,6 +139,22 @@ describe('handleMcpMessage', () => {
       id: 3,
       result: {
         content: [{ type: 'text', text: 'Error: It failed' }],
+        isError: true,
+      },
+    });
+  });
+
+  it('reports the message of non-Error failures', async () => {
+    const response = await handleMcpMessage(options, {
+      jsonrpc: '2.0',
+      id: 3,
+      method: 'tools/call',
+      params: { name: 'echo', arguments: { failWithObject: true } },
+    });
+
+    expect(response).toMatchObject({
+      result: {
+        content: [{ type: 'text', text: 'Error: Bad month' }],
         isError: true,
       },
     });
