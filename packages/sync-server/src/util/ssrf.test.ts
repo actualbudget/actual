@@ -160,3 +160,80 @@ describe('assertUrlAllowed', () => {
     await expect(assertUrlAllowed('not a url')).rejects.toThrow(/Invalid URL/);
   });
 });
+
+const unsafeAddresses = [
+  '64:ff9b::c0a8:101', // NAT64 private IPv4
+  '64:ff9b::7f00:1', // NAT64 loopback
+  '64:ff9b::a9fe:a9fe', // NAT64 well-known prefix
+  '64:ff9b:1::a9fe:a9fe', // NAT64 local-use prefix
+  '2002:a9fe:a9fe::', // 6to4
+  '2001:0:4136:e378:8000:63bf:3fff:fdd2', // Teredo
+  '::ffff:0:169.254.169.254', // RFC 6145 translation
+  'ff02::1', // multicast
+  'fe80::1', // link-local
+  '2001:db8::1', // documentation/reserved
+  '224.0.0.1', // IPv4 multicast
+];
+
+it.each(unsafeAddresses)(
+  'blocks %s as a literal and DNS answer in both modes',
+  async address => {
+    for (const allowPrivateNetwork of [false, true]) {
+      const host = address.includes(':') ? `[${address}]` : address;
+      await expect(
+        assertUrlAllowed(`https://${host}/`, { allowPrivateNetwork }),
+      ).rejects.toThrow();
+      mockDnsLookup(['8.8.8.8', address]);
+      await expect(
+        assertUrlAllowed('https://bridge.example/', { allowPrivateNetwork }),
+      ).rejects.toThrow();
+    }
+  },
+);
+
+it.each(['2606:4700:4700::1111', '::ffff:8.8.8.8'])(
+  'allows public unicast %s',
+  async address => {
+    await expect(
+      assertUrlAllowed(`https://[${address}]/`),
+    ).resolves.toBeUndefined();
+  },
+);
+
+it.each(['::1', 'fd00::1', '::ffff:192.168.1.1'])(
+  'permits private %s only when explicitly enabled',
+  async address => {
+    await expect(assertUrlAllowed(`http://[${address}]/`)).rejects.toThrow();
+    await expect(
+      assertUrlAllowed(`http://[${address}]/`, { allowPrivateNetwork: true }),
+    ).resolves.toBeUndefined();
+  },
+);
+
+it.each(['100.64.0.1', '100.127.255.254', '::ffff:100.64.0.1'])(
+  'permits CGNAT %s as a literal and DNS answer only when explicitly enabled',
+  async address => {
+    const host = address.includes(':') ? `[${address}]` : address;
+    mockDnsLookup(['8.8.8.8', address]);
+
+    for (const url of [`https://${host}/`, 'https://bridge.example/']) {
+      await expect(assertUrlAllowed(url)).rejects.toThrow();
+      await expect(
+        assertUrlAllowed(url, { allowPrivateNetwork: true }),
+      ).resolves.toBeUndefined();
+    }
+  },
+);
+
+it.each([false, true])(
+  'allows public NAT64 literals and DNS answers (private mode: %s)',
+  async allowPrivateNetwork => {
+    await expect(
+      assertUrlAllowed('https://[64:ff9b::808:808]/', { allowPrivateNetwork }),
+    ).resolves.toBeUndefined();
+    mockDnsLookup(['64:ff9b::808:808']);
+    await expect(
+      assertUrlAllowed('https://bridge.example/', { allowPrivateNetwork }),
+    ).resolves.toBeUndefined();
+  },
+);

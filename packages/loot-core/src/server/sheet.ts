@@ -218,32 +218,39 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
 
   sheet.startTransaction();
 
-  // Load all the budget amounts and carryover values
-  for (const budget of budgets) {
-    if (budget.month && budget.category) {
-      const sheetName = `budget${budget.month}`;
-      sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
-      sheet.set(
-        `${sheetName}!carryover-${budget.category}`,
-        budget.carryover === 1 ? true : false,
+  try {
+    // Load all the budget amounts and carryover values
+    for (const budget of budgets) {
+      if (budget.month && budget.category) {
+        const sheetName = `budget${budget.month}`;
+        sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
+        sheet.set(
+          `${sheetName}!carryover-${budget.category}`,
+          budget.carryover === 1 ? true : false,
+        );
+        sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
+        sheet.set(
+          `${sheetName}!long-goal-${budget.category}`,
+          budget.long_goal,
+        );
+      }
+    }
+
+    // For zero-based budgets, load the buffered amounts
+    if (budgetType !== 'tracking') {
+      const budgetMonths = await db.all<DbZeroBudgetMonth>(
+        'SELECT * FROM zero_budget_months',
       );
-      sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
-      sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
+      for (const budgetMonth of budgetMonths) {
+        const sheetName = sheetForMonth(budgetMonth.id);
+        sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
+      }
     }
+  } finally {
+    // The query above runs inside the transaction, so a failure would
+    // otherwise leave it open and wedge the spreadsheet for the session.
+    sheet.endTransaction();
   }
-
-  // For zero-based budgets, load the buffered amounts
-  if (budgetType !== 'tracking') {
-    const budgetMonths = await db.all<DbZeroBudgetMonth>(
-      'SELECT * FROM zero_budget_months',
-    );
-    for (const budgetMonth of budgetMonths) {
-      const sheetName = sheetForMonth(budgetMonth.id);
-      sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
-    }
-  }
-
-  sheet.endTransaction();
 }
 
 export function getCell(sheet: string, name: string) {

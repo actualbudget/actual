@@ -38,6 +38,27 @@ export function getBudgetRange(start: string, end: string) {
   return { start, end, range: monthUtils.rangeInclusive(start, end) };
 }
 
+// The day range spanning the given months. They aren't guaranteed to be
+// sorted, so find the first and last explicitly ('YYYY-MM' strings compare
+// chronologically).
+function getMonthSpanBounds(months: string[]) {
+  let firstMonth = months[0];
+  let lastMonth = months[0];
+  for (const month of months) {
+    if (month < firstMonth) {
+      firstMonth = month;
+    }
+    if (month > lastMonth) {
+      lastMonth = month;
+    }
+  }
+
+  return {
+    rangeStart: monthUtils.bounds(firstMonth).start,
+    rangeEnd: monthUtils.bounds(lastMonth).end,
+  };
+}
+
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
 // `sum-amount` cells on a cold build so we avoid running one
@@ -68,6 +89,45 @@ function getSumAmountsByMonth(
     sums.set(`${row.month}-${row.category}`, row.amount || 0);
   }
   return sums;
+}
+
+// Reseeds the `sum-amount` cells for the given months from the same single
+// grouped query a cold build uses, and returns the names of the cells that
+// were seeded. Resetting the budget cache recomputes every cell, which would
+// otherwise run one `SELECT SUM(amount)` per category per month; the caller
+// skips recomputing these and caches them directly instead.
+export async function reseedSumAmounts(months: string[]): Promise<string[]> {
+  if (months.length === 0) {
+    return [];
+  }
+
+  const { rangeStart, rangeEnd } = getMonthSpanBounds(months);
+  const sums = getSumAmountsByMonth(rangeStart, rangeEnd);
+
+  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+    q('category_groups').select('*'),
+  );
+  const categories = groups.flatMap(group => group.categories);
+
+  const seededCells: string[] = [];
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    const dbMonth = parseInt(month.replace('-', ''));
+
+    for (const cat of categories) {
+      const name = resolveName(sheetName, `sum-amount-${cat.id}`);
+      // A cell the spreadsheet doesn't have stays out of the seed set and is
+      // left to be recomputed normally.
+      if (!sheet.get().hasCell(name)) {
+        continue;
+      }
+
+      sheet.get().load(name, sums.get(`${dbMonth}-${cat.id}`) || 0);
+      seededCells.push(name);
+    }
+  }
+
+  return seededCells;
 }
 
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
@@ -292,22 +352,8 @@ export async function createBudget(months) {
   let sumAmounts: Map<string, number> | null = null;
   const getSumAmounts = () => {
     if (!sumAmounts) {
-      // `monthsToCreate` isn't guaranteed to be sorted, so find the span
-      // explicitly ('YYYY-MM' strings compare chronologically).
-      let firstMonth = monthsToCreate[0];
-      let lastMonth = monthsToCreate[0];
-      for (const month of monthsToCreate) {
-        if (month < firstMonth) {
-          firstMonth = month;
-        }
-        if (month > lastMonth) {
-          lastMonth = month;
-        }
-      }
-      sumAmounts = getSumAmountsByMonth(
-        monthUtils.bounds(firstMonth).start,
-        monthUtils.bounds(lastMonth).end,
-      );
+      const { rangeStart, rangeEnd } = getMonthSpanBounds(monthsToCreate);
+      sumAmounts = getSumAmountsByMonth(rangeStart, rangeEnd);
     }
     return sumAmounts;
   };
