@@ -355,19 +355,20 @@ export function calculateSpendingReportTimeRange({
   isLive?: boolean;
   mode?: 'budget' | 'average' | 'single-month';
 }): [string, string] {
+  // Budget and average chart a single month, so a live report is always the
+  // current month.
   if (['budget', 'average'].includes(mode) && isLive) {
-    const month = compare ?? monthUtils.currentMonth();
+    const month = monthUtils.currentMonth();
     return [month, month];
   }
 
-  if (mode === 'single-month' && isLive && compare) {
-    return [compare, compareTo ?? monthUtils.subMonths(compare, 1)];
-  }
-
+  // Default a missing end to the month before `compare`; the shared default is
+  // the month before now, which would widen the comparison.
   const [start, end] = calculateTimeRange(
     {
       start: compare,
-      end: compareTo,
+      end:
+        compareTo ?? (compare ? monthUtils.subMonths(compare, 1) : undefined),
       mode: (isLive ?? true) ? 'sliding-window' : 'static',
     },
     {

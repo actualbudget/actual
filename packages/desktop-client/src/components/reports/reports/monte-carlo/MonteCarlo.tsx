@@ -752,6 +752,19 @@ export function MonteCarlo() {
                 unusually good, so results may be optimistic for globally
                 diversified portfolios.
               </Trans>
+            ) : config.returnModel === 'historical-block-bootstrap' ? (
+              <Trans>
+                Each scenario chains together blocks of consecutive actual US
+                market years ({{ firstYear }}&ndash;{{ lastYear }}, S&amp;P 500
+                / 10-year Treasuries / T-bills, Damodaran data): each year
+                usually carries on to the next real year, and now and then jumps
+                to a different point in history, wrapping around the end of the
+                data. Each year brings its own actual US inflation with it.
+                Crashes keep the years that followed them within a block, but
+                patterns are broken where blocks join, fees and taxes are only
+                as accurate as the rates you enter, and US history may be
+                optimistic for globally diversified portfolios.
+              </Trans>
             ) : (
               <Trans>
                 Each scenario replays actual US market history ({{ firstYear }}

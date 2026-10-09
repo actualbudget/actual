@@ -1,3 +1,6 @@
+import { format } from 'node:util';
+
+import createDebug from 'debug';
 import request from 'supertest';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -280,8 +283,7 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(403);
       expect(res.body.error).toBe('URL not allowed');
       expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://api.github.com/repos/user/repo1-private/contents/.env',
+        'Blocked request to unauthorized URL',
       );
     });
 
@@ -301,18 +303,37 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(200);
     });
 
-    it('should block non-allowlisted URLs', async () => {
-      const res = await request(app)
-        .get('/')
-        .query({ url: 'https://malicious.com/evil' });
-
-      expect(res.statusCode).toBe(403);
-      expect(res.body.error).toBe('URL not allowed');
-      expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://malicious.com/evil',
-      );
-    });
+    it.each(['', 'actual:*', 'actual-sensitive:cors-proxy'])(
+      'keeps rejected URL details behind sensitive debugging (%s)',
+      async namespaces => {
+        const previous = createDebug.disable();
+        createDebug.enable(namespaces);
+        const log = vi
+          .spyOn(createDebug, 'log')
+          .mockImplementation(() => undefined);
+        const secret = 'private-download-token';
+        try {
+          const res = await request(app)
+            .get('/')
+            .query({
+              url: `https://malicious.com/evil?token=${secret}`,
+            });
+          expect(res.statusCode).toBe(403);
+          expect(res.body.error).toBe('URL not allowed');
+          expect(console.warn).toHaveBeenCalledWith(
+            'Blocked request to unauthorized URL',
+          );
+          expect(JSON.stringify(console.warn.mock.calls)).not.toContain(secret);
+          const output = log.mock.calls.map(args => format(...args)).join('\n');
+          expect(output.includes(secret)).toBe(
+            namespaces === 'actual-sensitive:cors-proxy',
+          );
+        } finally {
+          log.mockRestore();
+          createDebug.enable(previous);
+        }
+      },
+    );
   });
 
   describe('Allowlist fetching and caching', () => {
@@ -617,8 +638,7 @@ describe('app-cors-proxy', () => {
 
       expect(res.statusCode).toBe(403);
       expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://example.com/',
+        'Blocked request to unauthorized URL',
       );
     });
   });
