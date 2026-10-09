@@ -275,15 +275,21 @@ export async function importBuffer(fileData, buffer, localId?: string) {
   };
   const budgetDir = fs.getBudgetDir(id);
   if (await fs.exists(budgetDir)) {
-    // Don't remove the directory so that backups are retained
     const dbFile = fs.join(budgetDir, 'db.sqlite');
     const metaFile = fs.join(budgetDir, 'metadata.json');
-
-    if (await fs.exists(dbFile)) {
-      await fs.removeFile(dbFile);
-    }
-    if (await fs.exists(metaFile)) {
-      await fs.removeFile(metaFile);
+    if ((await fs.exists(dbFile)) && (await fs.exists(metaFile))) {
+      const backupDir = fs.join(budgetDir, 'backups');
+      if (!(await fs.exists(backupDir))) {
+        await fs.mkdir(backupDir);
+      }
+      // Keep a restorable copy before any write can truncate the local budget.
+      await fs.writeFile(
+        fs.join(backupDir, `before-download-${Date.now()}.zip`),
+        safeZip({
+          'db.sqlite': await fs.readFile(dbFile, 'binary'),
+          'metadata.json': await fs.readFile(metaFile, 'binary'),
+        }),
+      );
     }
   } else {
     await fs.mkdir(budgetDir);

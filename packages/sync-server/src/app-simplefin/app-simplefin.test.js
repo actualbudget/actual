@@ -275,6 +275,35 @@ describe('app-simplefin', () => {
   });
 
   describe('/transactions', () => {
+    it.each([
+      ['12.3', 1230],
+      ['10', 1000],
+      ['-0.01', -1],
+    ])('converts balance %s to cents', async (balance, expected) => {
+      secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+      mockFetch({
+        accounts: okResponse(
+          JSON.stringify({
+            errors: [],
+            accounts: [
+              {
+                id: 'account-1',
+                org: { name: 'Bank' },
+                balance,
+                'balance-date': 1751328000,
+                currency: 'EUR',
+                transactions: [],
+              },
+            ],
+          }),
+        ),
+      });
+      const res = await post('/transactions').send({
+        accountId: 'account-1',
+        startDate: '2025-07-01',
+      });
+      expect(res.body.data.startingBalance).toBe(expected);
+    });
     it('reports an invalid token when the cached access key is not an access URL', async () => {
       secretsService.set(
         SecretName.simplefin_accessKey,

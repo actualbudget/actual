@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -30,7 +31,15 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
         <Row
           key={backup.id}
           collapsed={idx !== 0}
+          role="button"
+          tabIndex={0}
           onClick={() => onSelect(backup.id)}
+          onKeyDown={event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              onSelect(backup.id);
+            }
+          }}
           style={{ cursor: 'pointer' }}
         >
           <Cell
@@ -54,6 +63,7 @@ export function LoadBackupModal({
   watchUpdates,
   backupDisabled,
 }: LoadBackupModalProps) {
+  const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
   const [backups, setBackups] = useState<Backup[]>([]);
   const [prefsBudgetId] = useMetadataPref('id');
@@ -80,7 +90,10 @@ export function LoadBackupModal({
   const { t } = useTranslation();
 
   return (
-    <Modal name="load-backup" containerProps={{ style: { maxWidth: '30vw' } }}>
+    <Modal
+      name="load-backup"
+      containerProps={{ style: { maxWidth: isNarrowWidth ? '90vw' : 480 } }}
+    >
       {({ state }) => (
         <>
           <ModalHeader
@@ -133,8 +146,8 @@ export function LoadBackupModal({
                     </Trans>{' '}
                     <Text style={{ fontWeight: 600 }}>
                       <Trans>
-                        If you use a backup, you will have to set up all your
-                        devices to sync from the new budget.
+                        Restored backups are local budgets. Upload the restored
+                        budget to sync it with your other devices.
                       </Trans>
                     </Text>
                   </Block>

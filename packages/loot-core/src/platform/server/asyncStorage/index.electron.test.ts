@@ -147,6 +147,7 @@ describe('electron asyncStorage', () => {
     expect(await asyncStorage.getItem('language')).toBe('en');
     // The damaged file is still preserved for inspection.
     expect(fs.existsSync(`${storePath()}.corrupt`)).toBe(true);
+    await asyncStorage.setItem('language', 'en');
   });
 
   it('repairs the damaged store file after recovering', async () => {

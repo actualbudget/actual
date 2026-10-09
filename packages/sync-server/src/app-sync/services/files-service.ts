@@ -12,7 +12,7 @@ class FileBase {
   encryptKeyId: string | null | undefined;
   encryptMeta: string | null | undefined;
   syncVersion: string | null | undefined;
-  deleted: boolean;
+  deleted: boolean | undefined;
   owner: string | null | undefined;
 
   constructor(
@@ -33,7 +33,7 @@ class FileBase {
     this.encryptKeyId = encryptKeyId;
     this.encryptMeta = encryptMeta;
     this.syncVersion = syncVersion;
-    this.deleted = typeof deleted === 'boolean' ? deleted : Boolean(deleted);
+    this.deleted = deleted === undefined ? undefined : Boolean(deleted);
     this.owner = owner;
   }
 }
@@ -53,6 +53,7 @@ type FileConstructorArgs = {
 
 class File extends FileBase {
   id: FileId;
+  declare deleted: boolean;
 
   constructor({
     id,
@@ -78,6 +79,7 @@ class File extends FileBase {
       owner,
     );
     this.id = id;
+    this.deleted = Boolean(deleted);
   }
 }
 

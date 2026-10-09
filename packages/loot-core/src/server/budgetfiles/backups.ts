@@ -6,8 +6,6 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
-import * as cloudStorage from '#server/cloud-storage';
-import * as prefs from '#server/prefs';
 import { safeUnzip, safeZip } from '#server/util/zip';
 import * as monthUtils from '#shared/months';
 
@@ -184,8 +182,6 @@ export async function loadBackup(id: string, backupId: string) {
     // amount of time to figure out which one they want
     stopBackupService();
     startBackupService(id);
-
-    await prefs.loadPrefs(id);
   }
 
   if (backupId === LATEST_BACKUP_FILENAME) {
@@ -203,32 +199,8 @@ export async function loadBackup(id: string, backupId: string) {
     );
     await fs.removeFile(fs.join(budgetDir, LATEST_BACKUP_FILENAME));
     await fs.removeFile(fs.join(budgetDir, 'metadata.latest.json'));
-
-    // Re-upload the new file
-    try {
-      await cloudStorage.upload();
-    } catch {}
-    prefs.unloadPrefs();
   } else {
     logger.log('Loading backup', backupId);
-
-    // This function is only ever called when a budget isn't loaded,
-    // so it's safe to load our prefs in. We need to forget about any
-    // syncing data if we are loading a backup (the current sync data
-    // will be restored if the user reverts to the original version)
-    await prefs.loadPrefs(id);
-    await prefs.savePrefs({
-      groupId: null,
-      lastSyncedTimestamp: null,
-      lastUploaded: null,
-    });
-
-    // Re-upload the new file
-    try {
-      await cloudStorage.upload();
-    } catch {}
-
-    prefs.unloadPrefs();
 
     const zipContent = await fs.readFile(
       fs.join(budgetDir, 'backups', backupId),
@@ -246,10 +218,30 @@ export async function loadBackup(id: string, backupId: string) {
       throw new Error('Backup zip file is missing db.sqlite or metadata.json');
     }
 
+    const metadata = JSON.parse(
+      new TextDecoder().decode(entries['metadata.json']),
+    );
+    if (
+      metadata === null ||
+      typeof metadata !== 'object' ||
+      Array.isArray(metadata)
+    ) {
+      throw new Error('Backup metadata must be an object');
+    }
+    // A restored snapshot is a local budget; the original remote file stays intact.
+    Object.assign(metadata, {
+      id,
+      cloudFileId: null,
+      groupId: null,
+      encryptKeyId: null,
+      lastSyncedTimestamp: null,
+      lastUploaded: null,
+    });
+
     await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), entries['db.sqlite']);
     await fs.writeFile(
       fs.join(budgetDir, 'metadata.json'),
-      entries['metadata.json'],
+      JSON.stringify(metadata),
     );
   }
 }

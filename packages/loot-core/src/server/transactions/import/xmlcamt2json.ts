@@ -82,7 +82,7 @@ function getNotesFromTxDtls(TxDtls: TxDtls): string | null {
 
 function convertToNumberOrNull(value: string): number | null {
   const number = Number(value);
-  return isNaN(number) ? null : number;
+  return value?.trim() && Number.isFinite(number) ? number : null;
 }
 
 function getDtOrDtTm(Date: DateRef | null): string | null {
@@ -149,7 +149,7 @@ export async function xmlCAMT2json(
         const Amt = findKeys(TxDtls, 'Amt') as Amt[];
         const amount = Amt.length > 0 ? convertToNumberOrNull(Amt[0]._) : null;
         transactions.push({
-          amount: isDebit ? -amount : amount,
+          amount: amount === null ? null : isDebit ? -amount : amount,
           date,
           payee_name: subPayee,
           imported_payee: subPayee,
@@ -175,7 +175,7 @@ export async function xmlCAMT2json(
       }
 
       const transaction: TransactionCAMT = {
-        amount: isDebit ? -amount : amount,
+        amount: amount === null ? null : isDebit ? -amount : amount,
         date,
         payee_name,
         imported_payee: payee_name,

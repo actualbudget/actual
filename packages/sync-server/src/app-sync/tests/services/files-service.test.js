@@ -190,6 +190,16 @@ describe('FilesService', () => {
     );
   });
 
+  test('a partial update preserves a deleted file', () => {
+    filesService.update('1', new FileUpdate({ deleted: true }));
+    const updated = filesService.update(
+      '1',
+      new FileUpdate({ name: 'Renamed' }),
+    );
+    expect(updated.deleted).toBe(true);
+    expect(updated.name).toBe('Renamed');
+  });
+
   test('find should return only files accessible to the user', () => {
     filesService.set(
       new File({

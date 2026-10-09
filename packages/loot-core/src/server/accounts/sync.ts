@@ -1134,9 +1134,7 @@ async function processBankSyncDownload(
       balanceToUse = customStartingBalance;
     } else if (acctRow.account_sync_source === 'simpleFin') {
       const previousBalance = transactions.reduce((total, trans) => {
-        return (
-          total - parseInt(trans.transactionAmount.amount.replace('.', ''))
-        );
+        return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {

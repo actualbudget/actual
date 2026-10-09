@@ -5,7 +5,11 @@ import type * as OpenIdClient from 'openid-client';
 
 import { getAccountDb } from '#account-db';
 
-import { loginWithOpenIdFinalize, loginWithOpenIdSetup } from './openid';
+import {
+  isValidRedirectUrl,
+  loginWithOpenIdFinalize,
+  loginWithOpenIdSetup,
+} from './openid';
 
 const provider = vi.hoisted(() => ({
   callback: vi.fn(),
@@ -54,6 +58,20 @@ afterEach(() => {
   db.mutate("DELETE FROM auth WHERE method = 'openid'");
   db.mutate('DELETE FROM pending_openid_requests');
   db.mutate("DELETE FROM sessions WHERE auth_method = 'openid'");
+});
+
+it.each([
+  ['https://actual.example', true],
+  ['https://actual.example/path', true],
+  ['http://actual.example', false],
+  ['https://actual.example:9999', false],
+  ['https://other.example', false],
+  ['https://user:password@actual.example', false],
+  ['http://localhost:12345', true],
+  // eslint-disable-next-line no-script-url -- Reject executable redirect schemes.
+  ['javascript://localhost/anything', false],
+])('validates the OpenID redirect origin %s', (url, valid) => {
+  expect(isValidRedirectUrl(url)).toBe(valid);
 });
 
 it.each(['', 'actual:*', 'actual-sensitive:openid'])(

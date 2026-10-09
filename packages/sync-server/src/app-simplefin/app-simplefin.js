@@ -199,7 +199,7 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  const startingBalance = Math.round(Number(account.balance) * 100);
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [

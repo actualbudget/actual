@@ -974,6 +974,43 @@ describe('SimpleFin batch sync', () => {
     }
   });
 
+  test('calculates the starting balance with variable decimal precision', async () => {
+    const acctId = await db.insertAccount({
+      id: 'decimal-account',
+      account_id: 'decimal-provider',
+      name: 'Decimals',
+      account_sync_source: 'simpleFin',
+    });
+    mockSimpleFinTransactions({
+      'decimal-provider': {
+        transactions: {
+          all: [
+            {
+              booked: true,
+              date: '2017-10-02',
+              payeeName: 'Shop',
+              transactionAmount: { amount: '-12.3' },
+              transactionId: 'decimal-tx',
+            },
+          ],
+          booked: [],
+          pending: [],
+        },
+        balances: [],
+        startingBalance: 10000,
+      },
+      errors: {},
+    });
+    const result = await accountsApp.handlers['simplefin-batch-sync']({
+      ids: [acctId],
+    });
+    expect(result[0].res.errors).toHaveLength(0);
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.map(transaction => transaction.amount).sort((a, b) => a - b),
+    ).toEqual([-1230, 11230]);
+  });
+
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
     const providerAccountId = 'sf-account-1';
     const acctId = await db.insertAccount({

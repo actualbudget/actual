@@ -379,8 +379,11 @@ export function isValidRedirectUrl(url: string | undefined): url is string {
     const serverUrl = new URL(serverHostname);
 
     if (
-      redirectUrl.hostname === serverUrl.hostname ||
-      redirectUrl.hostname === 'localhost'
+      !redirectUrl.username &&
+      !redirectUrl.password &&
+      (redirectUrl.origin === serverUrl.origin ||
+        (redirectUrl.protocol === 'http:' &&
+          redirectUrl.hostname === 'localhost'))
     ) {
       return true;
     } else {

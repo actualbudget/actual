@@ -8,9 +8,10 @@ import type { ServerHandlers } from '#types/server-handlers';
 
 import { installAPI } from './api';
 import { app as budgetFilesApp } from './budgetfiles/app';
+import { loadBackup, stopBackupService } from './budgetfiles/backups';
 import { download, importBuffer } from './cloud-storage';
 import * as prefs from './prefs';
-import { safeZip } from './util/zip';
+import { safeUnzip, safeZip } from './util/zip';
 
 // Install only the handlers used here rather than bootstrapping the whole app.
 vi.mock('#server/main', () => ({ handlers: {} }));
@@ -33,9 +34,53 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
+  stopBackupService();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   rmSync(directory, { recursive: true, force: true });
+});
+
+it('keeps a restorable copy when replacing a budget fails', async () => {
+  const dir = await createLocal('selected', 'incoming-cloud');
+  const originalDb = readFileSync(join(dir, 'db.sqlite'));
+  const originalMeta = readFileSync(join(dir, 'metadata.json'));
+  const writeFile = fs.writeFile;
+  vi.spyOn(fs, 'writeFile').mockImplementation(async (path, contents) => {
+    if (path === join(dir, 'db.sqlite')) throw new Error('ENOSPC');
+    return writeFile(path, contents);
+  });
+  await expect(
+    importBuffer({ fileId: 'incoming-cloud' }, archive('selected'), 'selected'),
+  ).rejects.toThrow('ENOSPC');
+  expect(readFileSync(join(dir, 'db.sqlite'))).toEqual(originalDb);
+  expect(readFileSync(join(dir, 'metadata.json'))).toEqual(originalMeta);
+  const backups = await fs.listDir(join(dir, 'backups'));
+  const entries = safeUnzip(readFileSync(join(dir, 'backups', backups[0])));
+  expect(Buffer.from(entries['db.sqlite'])).toEqual(originalDb);
+  expect(Buffer.from(entries['metadata.json'])).toEqual(originalMeta);
+});
+
+it('restores a backup as a local budget and can revert to the original', async () => {
+  const dir = await createLocal();
+  const originalDb = readFileSync(join(dir, 'db.sqlite'));
+  const originalMeta = readFileSync(join(dir, 'metadata.json'));
+  await fs.mkdir(join(dir, 'backups'));
+  await fs.writeFile(join(dir, 'backups', 'saved.zip'), archive('old-id'));
+  await loadBackup('victim', 'saved.zip');
+  expect(readFileSync(join(dir, 'db.sqlite'))).toEqual(databaseBytes);
+  expect(
+    JSON.parse(readFileSync(join(dir, 'metadata.json'), 'utf8')),
+  ).toMatchObject({
+    id: 'victim',
+    cloudFileId: null,
+    groupId: null,
+    encryptKeyId: null,
+    lastUploaded: null,
+    lastSyncedTimestamp: null,
+  });
+  await loadBackup('victim', 'db.latest.sqlite');
+  expect(readFileSync(join(dir, 'db.sqlite'))).toEqual(originalDb);
+  expect(readFileSync(join(dir, 'metadata.json'))).toEqual(originalMeta);
 });
 
 function archive(id: string, prefix = '') {
