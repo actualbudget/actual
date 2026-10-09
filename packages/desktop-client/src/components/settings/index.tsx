@@ -35,6 +35,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { McpServerSettings } from './McpServer';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { ThemeSettings } from './Themes';
@@ -265,6 +266,7 @@ export function Settings() {
         <EncryptionSettings />
         <BudgetTypeSettings />
         {isElectron() && <Backups />}
+        {isElectron() && <McpServerSettings />}
         <ExportBudget />
         <AdvancedToggle>
           <AdvancedAbout />

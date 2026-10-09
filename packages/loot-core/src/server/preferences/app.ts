@@ -133,6 +133,9 @@ async function saveGlobalPrefs(prefs: GlobalPrefs) {
   if (prefs.syncServerConfig !== undefined) {
     await asyncStorage.setItem('syncServerConfig', prefs.syncServerConfig);
   }
+  if (prefs.mcpServerConfig !== undefined) {
+    await asyncStorage.setItem('mcpServerConfig', prefs.mcpServerConfig);
+  }
   if (prefs.notifyWhenUpdateIsAvailable !== undefined) {
     await asyncStorage.setItem(
       'notifyWhenUpdateIsAvailable',
@@ -163,6 +166,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'custom-css-override': customCssOverride,
     'server-self-signed-cert': serverSelfSignedCert,
     syncServerConfig,
+    mcpServerConfig,
     notifyWhenUpdateIsAvailable,
     lastSeenNewsDate,
     showNewsFeed,
@@ -180,6 +184,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     'custom-css-override',
     'server-self-signed-cert',
     'syncServerConfig',
+    'mcpServerConfig',
     'notifyWhenUpdateIsAvailable',
     'lastSeenNewsDate',
     'showNewsFeed',
@@ -207,6 +212,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
     customCssOverride: customCssOverride || undefined,
     serverSelfSignedCert: serverSelfSignedCert || undefined,
     syncServerConfig: syncServerConfig || undefined,
+    mcpServerConfig: mcpServerConfig || undefined,
     notifyWhenUpdateIsAvailable:
       notifyWhenUpdateIsAvailable === undefined
         ? true

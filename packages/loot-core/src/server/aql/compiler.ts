@@ -350,7 +350,9 @@ function val(state, expr, type?: string) {
 
   if (castedExpr.literal) {
     if (castedExpr.type === 'id') {
-      return `'${castedExpr.value}'`;
+      // Escape quotes: ids can come from untrusted input (e.g. MCP queries)
+      const value = String(castedExpr.value).replace(/'/g, "''");
+      return `'${value}'`;
     } else if (castedExpr.type === 'string') {
       // Escape quotes
       const value = castedExpr.value.replace(/'/g, "''");

@@ -139,6 +139,21 @@ global.Actual = {
     return '';
   },
 
+  startMcpServer: async () => {
+    // Only for electron app
+    return { running: false, port: null, url: null, error: null };
+  },
+
+  stopMcpServer: async () => {
+    // Only for electron app
+    return { running: false, port: null, url: null, error: null };
+  },
+
+  getMcpServerStatus: async () => {
+    // Only for electron app
+    return { running: false, port: null, url: null, error: null };
+  },
+
   restartElectronServer: () => {
     // Only for electron app
   },

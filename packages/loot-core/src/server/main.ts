@@ -25,6 +25,7 @@ import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
 import { app as formulasApp } from './formulas/app';
 import { app } from './main-app';
+import { app as mcpApp } from './mcp/app';
 import { mutator, runHandler } from './mutators';
 import { app as notesApp } from './notes/app';
 import { app as payeesApp } from './payees/app';
@@ -152,6 +153,7 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
+  mcpApp,
 );
 
 export function getDefaultDocumentDir() {
