@@ -135,6 +135,12 @@ global.Actual = {
 
   isSyncServerRunning: () => false,
 
+  completeOAuthServer: async () => {
+    // Only for the Electron app.
+  },
+  cancelOAuthServer: async () => {
+    // Only for the Electron app.
+  },
   startOAuthServer: () => {
     return '';
   },
