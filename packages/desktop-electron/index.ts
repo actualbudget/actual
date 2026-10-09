@@ -120,14 +120,17 @@ const createOAuthServer = async () => {
       const query = new URL(req.url || '', `http://localhost:${port}`)
         .searchParams;
 
-      const code = query.get('token');
-      if (code && clientWin) {
+      const code = query.get('code');
+      const state = query.get('state');
+      const callback = new URLSearchParams({
+        code: code || '',
+        state: state || '',
+      });
+      if (code && state && clientWin) {
         if (isDev) {
-          void clientWin.loadURL(
-            `http://localhost:3001/openid-cb?token=${code}`,
-          );
+          void clientWin.loadURL(`http://localhost:3001/openid-cb?${callback}`);
         } else {
-          void clientWin.loadURL(`app://actual/openid-cb?token=${code}`);
+          void clientWin.loadURL(`app://actual/openid-cb?${callback}`);
         }
 
         // Respond to the browser
@@ -144,7 +147,7 @@ const createOAuthServer = async () => {
         oAuthServer = null;
       } else {
         res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('No token received.');
+        res.end('No login code received.');
       }
     });
 

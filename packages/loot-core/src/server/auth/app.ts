@@ -7,6 +7,8 @@ import { get, post } from '#server/post';
 import { getServer, isValidBaseURL } from '#server/server-config';
 import type { OpenIdConfig } from '#types/models';
 
+import { completeOpenIdLogin, prepareOpenIdLogin } from './openid-handoff';
+
 export type AuthHandlers = {
   'get-did-bootstrap': typeof didBootstrap;
   'subscribe-needs-bootstrap': typeof needsBootstrap;
@@ -16,7 +18,7 @@ export type AuthHandlers = {
   'subscribe-change-password': typeof changePassword;
   'subscribe-sign-in': typeof signIn;
   'subscribe-sign-out': typeof signOut;
-  'subscribe-set-token': typeof setToken;
+  'subscribe-complete-openid': typeof completeOpenIdLogin;
   'enable-openid': typeof enableOpenId;
   'get-openid-config': typeof getOpenIdConfig;
   'enable-password': typeof enablePassword;
@@ -31,7 +33,7 @@ app.method('subscribe-get-user', getUser);
 app.method('subscribe-change-password', changePassword);
 app.method('subscribe-sign-in', signIn);
 app.method('subscribe-sign-out', signOut);
-app.method('subscribe-set-token', setToken);
+app.method('subscribe-complete-openid', completeOpenIdLogin);
 app.method('enable-openid', enableOpenId);
 app.method('get-openid-config', getOpenIdConfig);
 app.method('enable-password', enablePassword);
@@ -266,7 +268,14 @@ async function signIn(
     if (!serverConfig) {
       throw new Error('No sync server configured.');
     }
-    res = await post(serverConfig.SIGNUP_SERVER + '/login', loginInfo);
+    const clientProof =
+      loginInfo.loginMethod === 'openid'
+        ? await prepareOpenIdLogin(serverConfig.BASE_SERVER)
+        : {};
+    res = await post(serverConfig.SIGNUP_SERVER + '/login', {
+      ...loginInfo,
+      ...clientProof,
+    });
   } catch (err) {
     if (err instanceof PostError) {
       return {
@@ -304,15 +313,12 @@ async function signOut() {
   encryption.unloadAllKeys();
   await asyncStorage.multiRemove([
     'user-token',
+    'openid-login',
     'encrypt-keys',
     'lastBudget',
     'readOnly',
   ]);
   return 'ok';
-}
-
-async function setToken({ token }: { token: string }) {
-  await asyncStorage.setItem('user-token', token);
 }
 
 async function enableOpenId(openIdConfig: { openId: OpenIdConfig }) {
