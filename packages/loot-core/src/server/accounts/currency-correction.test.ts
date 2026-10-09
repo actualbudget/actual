@@ -542,7 +542,7 @@ describe('stale and rejected corrections', () => {
     expect(accountRow('jpy')?.currency).toBe('JPY');
   });
 
-  it('keeps transfers for MC-7.2 and generic currency edits immutable', async () => {
+  it('rejects transfer payees without links and keeps generic currency edits immutable', async () => {
     const payee = await db.first<{ id: string }>(
       'SELECT id FROM payees WHERE transfer_acct = ?',
       ['usd'],
@@ -563,7 +563,7 @@ describe('stale and rejected corrections', () => {
         currency: 'JPY',
         mode: 'convert',
       }),
-    ).rejects.toThrow('account-currency-has-transfers');
+    ).rejects.toThrow('correction-transfer-broken');
     row('y', 'jpy', -1000, -1500);
     await updateAccount({
       id: 'jpy',
@@ -727,20 +727,19 @@ describe('inspection round 1 cases', () => {
     expect(q.q1.roundingLoss).toBe(true);
   });
 
-  it('rejects own schedule links and outgoing transfers until MC-7.2', async () => {
+  it('unlinks own rows from other-encoding schedules and rejects unlinked transfer payees', async () => {
+    await saveRate('JPY', '150');
     row('a', 'usd', -1000, null);
     db.runQuery('UPDATE transactions SET schedule = ? WHERE id = ?', [
       'sched',
       'a',
     ]);
-    await expect(
-      previewCurrencyCorrection({
-        account: 'usd',
-        currency: 'JPY',
-        mode: 'convert',
-      }),
-    ).rejects.toThrow('account-currency-has-schedules');
-    db.runQuery('UPDATE transactions SET schedule = NULL WHERE id = ?', ['a']);
+    const preview = await previewCurrencyCorrection({
+      account: 'usd',
+      currency: 'JPY',
+      mode: 'convert',
+    });
+    expect(preview.rows[0].scheduleUnlinked).toBe(true);
     const kwdPayee = await db.first<{ id: string }>(
       'SELECT id FROM payees WHERE transfer_acct = ?',
       ['kwd'],
@@ -755,7 +754,7 @@ describe('inspection round 1 cases', () => {
         currency: 'JPY',
         mode: 'convert',
       }),
-    ).rejects.toThrow('account-currency-has-transfers');
+    ).rejects.toThrow('correction-transfer-broken');
   });
 
   it("reports a family's valuation date once as missing", async () => {

@@ -239,16 +239,32 @@ export function getRules() {
  * from a new one: a schedule's encoding never changes. Foreign schedules
  * cannot create splits until foreign splits exist.
  */
-async function validateScheduleRule(rule: {
-  id?: string;
-  conditions?: Array<{ op?: string; field?: string; value?: unknown }>;
-  actions?: Array<{
-    op?: string;
-    field?: string;
-    value?: unknown;
-    options?: { splitIndex?: number };
-  }>;
-}) {
+type RuleWriteOptions = {
+  /**
+   * A currency correction re-encoding this schedule in the same batch as its
+   * account: rows whose links the batch clears are not yet cleared in SQL,
+   * and the corrected account already has its target encoding.
+   */
+  currencyCorrection?: {
+    unlinked: ReadonlySet<string>;
+    account: string;
+    encoding: { currency: string | null; precision: number };
+  };
+};
+
+export async function validateScheduleRule(
+  rule: {
+    id?: string;
+    conditions?: Array<{ op?: string; field?: string; value?: unknown }>;
+    actions?: Array<{
+      op?: string;
+      field?: string;
+      value?: unknown;
+      options?: { splitIndex?: number };
+    }>;
+  },
+  options: RuleWriteOptions = {},
+) {
   const stored = rule.id
     ? await db.first<{ conditions: string | null; actions: string | null }>(
         'SELECT conditions, actions FROM rules WHERE id = ?',
@@ -267,10 +283,19 @@ async function validateScheduleRule(rule: {
   const conditions =
     rule.conditions ??
     (stored?.conditions ? JSON.parse(stored.conditions) : []);
-  const encoding = await accountEncoding(scheduleConditionAccount(conditions));
+  const correction = options.currencyCorrection;
+  // The override in accountEncoding's form: the budget currency has no
+  // recorded precision.
+  const encodingOf = async (account: string | null) =>
+    correction && account === correction.account
+      ? correction.encoding.currency === null
+        ? { currency: null, precision: null }
+        : correction.encoding
+      : accountEncoding(account);
+  const encoding = await encodingOf(scheduleConditionAccount(conditions));
 
   if (ownsSchedule && rule.conditions && stored?.conditions) {
-    const previous = await accountEncoding(
+    const previous = await encodingOf(
       scheduleConditionAccount(JSON.parse(stored.conditions)),
     );
     if (!sameEncoding(previous, encoding)) {
@@ -280,14 +305,16 @@ async function validateScheduleRule(rule: {
     // another encoding (an accountless schedule may link any).
     const accountId = scheduleConditionAccount(conditions);
     if (accountId) {
-      const linked = await db.all<{ acct: string }>(
-        `SELECT DISTINCT t.acct FROM transactions t
+      const linked = await db.all<{ id: string; acct: string }>(
+        `SELECT t.id, t.acct FROM transactions t
            JOIN schedules s ON s.id = t.schedule
            WHERE s.rule = ? AND t.tombstone = 0`,
         [rule.id],
       );
-      for (const { acct } of linked) {
-        if (!sameEncoding(await accountEncoding(acct), encoding)) {
+      const unlinked = options.currencyCorrection?.unlinked;
+      for (const { id, acct } of linked) {
+        if (unlinked?.has(id)) continue;
+        if (!sameEncoding(await encodingOf(acct), encoding)) {
           throw new Error('schedule-currency-mismatch');
         }
       }
@@ -324,9 +351,7 @@ async function validateScheduleRule(rule: {
       'SELECT transfer_acct FROM payees WHERE id = ?',
       [id],
     );
-    return payee?.transfer_acct
-      ? await accountEncoding(payee.transfer_acct)
-      : null;
+    return payee?.transfer_acct ? await encodingOf(payee.transfer_acct) : null;
   };
   const crossesEncoding = async (id: unknown) => {
     const target = await transferEncoding(id);
@@ -350,6 +375,40 @@ async function validateScheduleRule(rule: {
   const splits = actions.some(
     action => action.op === 'set-split-amount' || !!action.options?.splitIndex,
   );
+  // A payee list, or a further payee condition (reachable in an "or" rule),
+  // that can reach a cross-encoding transfer has no fixed endpoint, so it
+  // may neither split nor change the payee.
+  for (const cond of conditions) {
+    if (
+      cond !== payeeCondition &&
+      (cond.op === 'oneOf' || cond.op === 'is') &&
+      (cond.field === 'payee' || cond.field === 'description')
+    ) {
+      const ids = cond.op === 'is' ? [cond.value] : cond.value;
+      if (!Array.isArray(ids)) continue;
+      for (const id of ids) {
+        if (!(await crossesEncoding(id))) continue;
+        if (payeeActions.length > 0) {
+          throw new Error('multicurrency-transfer-unavailable');
+        }
+        if (splits) {
+          throw new Error('foreign-split-unavailable');
+        }
+      }
+    }
+  }
+  // An account an action moves the posting to must share the schedule's
+  // encoding, or posting refuses it.
+  for (const action of actions) {
+    if (
+      action.op === 'set' &&
+      (action.field === 'account' || action.field === 'acct') &&
+      typeof action.value === 'string' &&
+      !sameEncoding(await encodingOf(action.value), encoding)
+    ) {
+      throw new Error('rule-account-incompatible');
+    }
+  }
   if (payeeCondition && (await crossesEncoding(payeeCondition.value))) {
     if (payeeActions.length > 0) {
       throw new Error('multicurrency-transfer-unavailable');
@@ -399,9 +458,9 @@ export async function insertRule(
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
 
-export async function updateRule(rule) {
+export async function updateRule(rule, options: RuleWriteOptions = {}) {
   rule = ruleModel.validate(rule, { update: true });
-  await validateScheduleRule(rule);
+  await validateScheduleRule(rule, options);
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
