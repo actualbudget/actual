@@ -106,17 +106,36 @@ export function resolveIdentityUser(
       profile.preferred_username,
       profile.login,
       profile.email,
+      typeof profile.id === 'number' ? String(profile.id) : profile.id,
+      profile.sub,
       identity.subject,
     ].find(nonEmptyString);
+    const legacyUser = db.first(
+      'SELECT id, enabled FROM users WHERE user_name = ?',
+      [username],
+    );
+    if (legacyUser) {
+      if (!legacyUser.enabled) {
+        throw new Error('openid-grant-failed');
+      }
+      // Use legacy matching only until this account has a stable identity.
+      // A different subject or provider must never claim an already linked user.
+      if (
+        db.first('SELECT 1 FROM openid_identities WHERE user_id = ?', [
+          legacyUser.id,
+        ])
+      ) {
+        throw new Error('identity-not-linked');
+      }
+      linkIdentity(legacyUser.id, identity);
+      userId = legacyUser.id;
+      return;
+    }
+
     const { count } = db.first(
       "SELECT count(*) AS count FROM users WHERE user_name <> ''",
     );
-    // Never link an existing account using a mutable profile field, even in
-    // automatic account-creation mode. An operator must map that account.
-    if (
-      db.first('SELECT id FROM users WHERE user_name = ?', [username]) ||
-      (count !== 0 && config.get('userCreationMode') !== 'login')
-    ) {
+    if (count !== 0 && config.get('userCreationMode') !== 'login') {
       throw new Error('identity-not-linked');
     }
     userId = uuidv4();

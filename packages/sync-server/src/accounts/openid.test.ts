@@ -53,6 +53,9 @@ afterEach(() => {
   const db = getAccountDb();
   db.mutate("DELETE FROM auth WHERE method = 'openid'");
   db.mutate('DELETE FROM pending_openid_requests');
+  db.mutate(
+    "DELETE FROM openid_identities WHERE provider = 'oidc:https://identity.example'",
+  );
   db.mutate("DELETE FROM sessions WHERE auth_method = 'openid'");
 });
 
@@ -91,3 +94,46 @@ it.each(['', 'actual:*', 'actual-sensitive:openid'])(
     }
   },
 );
+
+it('links an existing account on provider login and keeps it linked after a rename', async () => {
+  const db = getAccountDb();
+  const before = db.first('SELECT * FROM users WHERE id = ?', ['genericAdmin']);
+  provider.userinfo.mockResolvedValue({
+    sub: 'fixed-id',
+    preferred_username: before.user_name,
+  });
+
+  async function login() {
+    const start = await loginWithOpenIdSetup('https://actual.example');
+    const state = new URL(start.url ?? '').searchParams.get('state');
+    return loginWithOpenIdFinalize({ code: 'provider-code', state });
+  }
+
+  const first = await login();
+  const token = new URL(first.url ?? '').searchParams.get('token');
+  expect(
+    db.first('SELECT user_id FROM sessions WHERE token = ?', [token]),
+  ).toEqual({ user_id: 'genericAdmin' });
+  expect(
+    db.first('SELECT * FROM openid_identities WHERE user_id = ?', [
+      'genericAdmin',
+    ]),
+  ).toEqual({
+    provider: 'oidc:https://identity.example',
+    subject: 'fixed-id',
+    user_id: 'genericAdmin',
+  });
+  expect(
+    db.first('SELECT * FROM users WHERE id = ?', ['genericAdmin']),
+  ).toEqual(before);
+
+  provider.userinfo.mockResolvedValue({
+    sub: 'fixed-id',
+    preferred_username: 'renamed-admin',
+  });
+  const renamed = await login();
+  const nextToken = new URL(renamed.url ?? '').searchParams.get('token');
+  expect(
+    db.first('SELECT user_id FROM sessions WHERE token = ?', [nextToken]),
+  ).toEqual({ user_id: 'genericAdmin' });
+});

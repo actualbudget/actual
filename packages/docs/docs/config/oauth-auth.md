@@ -198,11 +198,17 @@ Configuring the OpenID provider from options supports discovery; otherwise, use 
 
 Actual identifies OpenID users by the provider's issuer and subject, rather than their username or email address. With OAuth2, Actual uses the configured user-info endpoint and the provider's immutable `id`. Changing a provider username does not change the associated Actual account.
 
-When upgrading from username-based authentication, all existing OpenID sessions and pending logins expire. Existing accounts need an operator-provided identity mapping before they can sign in again. Account IDs, budget ownership, roles, and sharing permissions remain unchanged.
+When upgrading from username-based authentication, all existing OpenID sessions and pending logins expire once. Password-authenticated sessions remain valid. Users sign in again through their provider; no server command is required, including on hosted installations.
 
-Before upgrading, stop the server and back up its data directory. Obtain each user's immutable identity from your provider's administration tools. For OpenID, verify the exact issuer (`iss`) and subject (`sub`) for the configured client. For OAuth2, verify the immutable `id` and the exact configured user-info endpoint. Do not infer these values from a username or email address supplied by someone requesting access.
+On the next successful provider login, Actual matches an unlinked account using the previous username-matching rules and saves its stable provider identity. Account IDs, budget ownership, roles, and sharing permissions remain unchanged. After linking, Actual uses only the saved provider identity, even if the username changes. Newly created accounts are linked immediately.
 
-After installing the updated server, run the following commands from the server's installation directory, using the same configuration and `ACTUAL_DATA_DIR` as the server. The first command runs any pending database migrations and lists the existing Actual user IDs and mappings:
+Accounts that have not signed in yet remain subject to the previous matching risk: someone who acquires a reassigned provider username could claim an unlinked Actual account. There is no migration deadline. Administrators can disable unused accounts in user management or, with server command-line access, link them manually before their next login.
+
+### Optional Manual Linking
+
+To link accounts manually, stop the server and back up its data directory. Obtain each user's immutable identity from your provider's administration tools. For OpenID, verify the exact issuer (`iss`) and subject (`sub`) for the configured client. For OAuth2, verify the immutable `id` and the exact configured user-info endpoint. Do not infer these values from a username or email address supplied by someone requesting access.
+
+Run the following commands from the server's installation directory, using the same configuration and `ACTUAL_DATA_DIR` as the server. The first command runs any pending database migrations and lists the existing Actual user IDs and mappings:
 
 ```bash
 node build/scripts/link-openid-identity.js --list
@@ -219,6 +225,6 @@ node build/scripts/link-openid-identity.js \
 
 For a source checkout, run `yarn workspace @actual-app/sync-server link-openid-identity` from the repository root with the same arguments. For Docker, run the built script inside the updated container with its existing data volume mounted.
 
-Repeating an identical mapping is safe. The command rejects a subject already linked to another user, or a user already linked to another subject within the same provider. Creating the first mapping does not promote that user to administrator or change budget ownership. Users added manually also need a mapping before their first login.
+Repeating an identical mapping is safe. The command rejects a subject already linked to another user, or a user already linked to another subject within the same provider. Creating the first mapping does not promote that user to administrator or change budget ownership. Users added manually are linked on their first successful provider login unless an administrator links them beforehand.
 
 Restart the server and verify that each user can access their existing budgets. If you made an incorrect mapping, stop the server and restore the pre-upgrade backup before retrying the migration with corrected values. Keep the backup until access has been verified; restoring it later would also discard subsequent budget changes. Do not switch back to username-based authentication to resolve a mapping problem.
