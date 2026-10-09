@@ -72,25 +72,45 @@ export function rescaleAmountGroup(
 ): Array<{ id: string; amount: number }> {
   const sourceScale = scaleForPrecision(sourcePrecision);
   const targetScale = scaleForPrecision(targetPrecision);
+  return allocateFractions(
+    rows.map(row => ({
+      id: row.id,
+      numerator: integerAmount(row.amount) * targetScale,
+    })),
+    sourceScale,
+    parentAmount === undefined
+      ? undefined
+      : integerAmount(parentAmount) * targetScale,
+  );
+}
+
+/**
+ * Rounds exact values `numerator / denominator` to integers that sum to the
+ * rounded total (by default the rounded sum of the values), giving the
+ * remaining units to the largest discarded fractions with stable id ties
+ * (plan/01-reference.md).
+ */
+export function allocateFractions(
+  rows: ReadonlyArray<{ id: string; numerator: bigint }>,
+  denominator: bigint,
+  totalNumerator?: bigint,
+): Array<{ id: string; amount: number }> {
   if (new Set(rows.map(row => row.id)).size !== rows.length) {
     throw new Error('Amount group must have unique row IDs');
   }
   const scaled = rows.map(row => {
-    const numerator = integerAmount(row.amount) * targetScale;
     // Floor division gives nonnegative discarded fractions for signed rows.
-    const remainder = ((numerator % sourceScale) + sourceScale) % sourceScale;
+    const remainder =
+      ((row.numerator % denominator) + denominator) % denominator;
     return {
       id: row.id,
-      numerator,
       remainder,
-      amount: (numerator - remainder) / sourceScale,
+      amount: (row.numerator - remainder) / denominator,
     };
   });
   const total = roundEven(
-    parentAmount === undefined
-      ? scaled.reduce((sum, row) => sum + row.numerator, 0n)
-      : integerAmount(parentAmount) * targetScale,
-    sourceScale,
+    totalNumerator ?? rows.reduce((sum, row) => sum + row.numerator, 0n),
+    denominator,
   );
   safeAmount(total);
   const remaining = total - scaled.reduce((sum, row) => sum + row.amount, 0n);

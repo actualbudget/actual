@@ -171,14 +171,14 @@ async function accountContext(id: string): Promise<AccountContext | null> {
   if (!account && !queuedCurrency && !getBatchedValue('accounts', id, 'name')) {
     return null;
   }
-  const currency =
-    (queuedCurrency ? (queuedCurrency.value as string | null) : null) ??
-    account?.currency ??
-    null;
-  const precision =
-    (queuedPrecision ? (queuedPrecision.value as number | null) : null) ??
-    account?.currency_precision ??
-    null;
+  // A queued value is authoritative even when it is null: a currency
+  // correction to the budget currency queues nulls before rewriting rows.
+  const currency = queuedCurrency
+    ? (queuedCurrency.value as string | null)
+    : (account?.currency ?? null);
+  const precision = queuedPrecision
+    ? (queuedPrecision.value as number | null)
+    : (account?.currency_precision ?? null);
   return { currency, precision, foreign: currency !== null };
 }
 
