@@ -491,7 +491,27 @@ function getMcpServerStatus(): McpServerStatus {
   };
 }
 
-async function stopMcpServer() {
+// Starts and stops run one at a time, so overlapping requests (app start-up,
+// settings changes, quitting) can't leave two listeners or a stale status.
+let mcpLifecycle: Promise<unknown> = Promise.resolve();
+
+function enqueueMcpLifecycle<T>(operation: () => Promise<T>): Promise<T> {
+  const result = mcpLifecycle.then(operation, operation);
+  mcpLifecycle = result.catch(() => undefined);
+  return result;
+}
+
+function stopMcpServer() {
+  return enqueueMcpLifecycle(stopMcpServerNow);
+}
+
+// (Re)starts the read-only MCP server with the settings saved in the global
+// preferences, or stops it when it is disabled there.
+function startMcpServer() {
+  return enqueueMcpLifecycle(startMcpServerNow);
+}
+
+async function stopMcpServerNow() {
   const server = mcpServer;
   mcpServer = null;
   mcpServerPort = null;
@@ -501,10 +521,8 @@ async function stopMcpServer() {
   }
 }
 
-// (Re)starts the read-only MCP server with the settings saved in the global
-// preferences, or stops it when it is disabled there.
-async function startMcpServer(): Promise<McpServerStatus> {
-  await stopMcpServer();
+async function startMcpServerNow(): Promise<McpServerStatus> {
+  await stopMcpServerNow();
   mcpServerError = null;
 
   const { mcpServerConfig } = await loadGlobalPrefs();
@@ -858,9 +876,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-  if (mcpServer) {
-    void stopMcpServer();
-  }
+  // Queued, so a start that is still in progress is stopped once it finishes
+  void stopMcpServer();
 
   if (serverProcess) {
     const processToKill = serverProcess;
