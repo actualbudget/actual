@@ -43,6 +43,10 @@ import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
+import {
+  isForecastSupported,
+  useAccountBalanceForecast,
+} from '#hooks/useAccountBalanceForecast';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
@@ -52,8 +56,10 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
+import { AccountBalanceForecastGraph } from './AccountBalanceForecastGraph';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
+import { getBalanceOnDate } from './balanceHistoryGraphData';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 type AccountHeaderProps = {
@@ -75,6 +81,8 @@ type AccountHeaderProps = {
   reconcileAmount?: number | null;
   isFiltered: boolean;
   filteredAmount?: number | null;
+  balanceDate: string | null;
+  onSelectBalanceDate: (date: string | null) => void;
   isSorted: boolean;
   search: string;
   filterConditions: RuleConditionEntity[];
@@ -147,6 +155,8 @@ export function AccountHeader({
   reconcileAmount,
   isFiltered,
   filteredAmount,
+  balanceDate,
+  onSelectBalanceDate,
   isSorted,
   search,
   filterConditions,
@@ -196,6 +206,18 @@ export function AccountHeader({
     `show-account-${accountId}-net-worth-chart`,
   );
   const showNetWorthChart = showNetWorthChartPref === 'true';
+  const graphStyle = {
+    height: 'calc(5vh + 5vw)',
+    margin: 0,
+    display: showNetWorthChart ? 'flex' : 'none',
+  };
+  const isForecastEnabled =
+    useFeatureFlag('accountBalanceForecast') && isForecastSupported(accountId);
+  const forecast = useAccountBalanceForecast({
+    accountId,
+    minEndDate: balanceDate,
+    isEnabled: isForecastEnabled && (showNetWorthChart || !!balanceDate),
+  });
 
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
@@ -317,18 +339,33 @@ export function AccountHeader({
               account={account}
               isFiltered={isFiltered}
               filteredAmount={filteredAmount}
+              balanceDate={balanceDate}
+              balanceOnDate={
+                balanceDate && !forecast.isLoading
+                  ? getBalanceOnDate(forecast.points, balanceDate)
+                  : null
+              }
+              onClearBalanceDate={() => onSelectBalanceDate(null)}
             />
           </View>
 
-          <BalanceHistoryGraph
-            ref={graphRef}
-            accountId={accountId}
-            style={{
-              height: 'calc(5vh + 5vw)',
-              margin: 0,
-              display: showNetWorthChart ? 'flex' : 'none',
-            }}
-          />
+          {isForecastEnabled ? (
+            <AccountBalanceForecastGraph
+              ref={graphRef}
+              points={forecast.points}
+              today={forecast.today}
+              isLoading={forecast.isLoading}
+              selectedDate={balanceDate}
+              onSelectDate={onSelectBalanceDate}
+              style={graphStyle}
+            />
+          ) : (
+            <BalanceHistoryGraph
+              ref={graphRef}
+              accountId={accountId}
+              style={graphStyle}
+            />
+          )}
         </View>
         <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (

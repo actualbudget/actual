@@ -227,6 +227,12 @@ export function ExperimentalFeatures() {
               <Trans>Balance Forecast Report</Trans>
             </FeatureToggle>
             <FeatureToggle
+              flag="accountBalanceForecast"
+              feedbackLink="https://github.com/actualbudget/actual/issues/7669"
+            >
+              <Trans>Balance forecast in account graph</Trans>
+            </FeatureToggle>
+            <FeatureToggle
               flag="budgetAnalysisReport"
               feedbackLink="https://github.com/actualbudget/actual/pull/6742"
             >
