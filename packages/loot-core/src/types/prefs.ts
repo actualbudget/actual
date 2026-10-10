@@ -55,6 +55,7 @@ export type SyncedPrefs = Partial<
     | `parse-date-${string}-${'csv' | 'qif'}`
     | `import-reimport-deleted-${string}`
     | `csv-mappings-${string}`
+    | `csv-currency-column-${string}`
     | `csv-delimiter-${string}`
     | `csv-skip-start-lines-${string}`
     | `csv-skip-end-lines-${string}`
