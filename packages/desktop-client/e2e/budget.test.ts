@@ -59,6 +59,79 @@ test.describe('Budget', () => {
     });
   });
 
+  test('enter skips hidden categories when moving to the next budget cell', async () => {
+    await page.evaluate(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const $send = (window as any).$send as (
+        type: string,
+        args?: unknown,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ) => Promise<any>;
+      const { grouped } = await $send('get-categories');
+      const medicalCategory = grouped
+        .flatMap(
+          (group: { categories?: Array<{ name: string }> }) =>
+            group.categories || [],
+        )
+        .find((category: { name: string }) => category.name === 'Medical');
+
+      if (!medicalCategory) {
+        throw new Error('Medical category not found');
+      }
+
+      await $send('category-update', {
+        ...medicalCategory,
+        hidden: true,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (window as any).__TANSTACK_QUERY_CLIENT__.invalidateQueries({
+        queryKey: ['categories', 'lists'],
+      });
+    });
+
+    await expect(page.getByText('Medical', { exact: true })).toBeHidden();
+
+    const giftBudget = budgetPage.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: 'Gift' })
+      .first()
+      .getByTestId('budget')
+      .first();
+    await giftBudget.click();
+    const giftInput = giftBudget.locator('input');
+    await giftInput.fill('10');
+    await giftInput.press('Enter');
+
+    const savingsInput = budgetPage.budgetTable
+      .getByTestId('row')
+      .filter({ hasText: 'Savings' })
+      .first()
+      .getByTestId('budget')
+      .first()
+      .locator('input');
+    await expect(savingsInput).toBeVisible();
+    await expect(savingsInput).toBeFocused();
+  });
+
+  test('tab from a category group name moves to its first visible category', async () => {
+    const rows = budgetPage.budgetTable.getByTestId('row');
+    const groupRowIndex = await rows.evaluateAll(allRows =>
+      allRows.findIndex(row => row.textContent?.includes('Usual Expenses')),
+    );
+    expect(groupRowIndex).toBeGreaterThanOrEqual(0);
+    const firstCategoryRow = rows.nth(groupRowIndex + 1);
+
+    await budgetPage.rightClickCategoryGroup('Usual Expenses');
+    await page.getByRole('button', { name: 'Rename' }).click();
+
+    const groupNameInput = page.locator('input').filter({
+      hasValue: 'Usual Expenses',
+    });
+    await groupNameInput.press('Tab');
+
+    await expect(firstCategoryRow.locator('input')).toBeFocused();
+  });
+
   test('clicking on spent amounts opens a transaction page', async () => {
     const accountPage = await budgetPage.clickOnSpentAmountForRow(1);
     expect(page.url()).toContain('/accounts');
