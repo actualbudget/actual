@@ -167,6 +167,13 @@ export type GlobalPrefsJson = Partial<{
   'server-url'?: string;
   'did-bootstrap'?: boolean;
   'user-token'?: string;
+  'openid-login'?: {
+    server: string;
+    state: string;
+    verifier?: string;
+    token?: string;
+    expires: number;
+  };
   'floating-sidebar'?: string; // "true" or "false"
   'max-months'?: string; // e.g. "2" or "3"
   'category-expanded-state'?: string; // "0" or "1" or "2"

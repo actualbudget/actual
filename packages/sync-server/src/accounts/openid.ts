@@ -3,11 +3,7 @@ import createDebug from 'debug';
 import { custom, generators, Issuer } from 'openid-client';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  clearExpiredSessions,
-  getAccountDb,
-  listLoginMethods,
-} from '#account-db';
+import { getAccountDb, listLoginMethods } from '#account-db';
 import { config } from '#load-config';
 import {
   getUserByUsername,
@@ -15,6 +11,7 @@ import {
 } from '#services/user-service';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
+import { createHandoff, validClientChallenge } from './handoff';
 import { checkPassword } from './password';
 
 export type ConfigParameter = {
@@ -106,7 +103,15 @@ async function setupOpenIdClient(configParameter) {
 export async function loginWithOpenIdSetup(
   returnUrl,
   firstTimeLoginPassword = '',
+  clientState?: string,
+  clientChallenge?: string,
 ) {
+  if (
+    !validClientChallenge(clientState) ||
+    !validClientChallenge(clientChallenge)
+  ) {
+    return { error: 'invalid-client-challenge' };
+  }
   if (!returnUrl) {
     return { error: 'return-url-missing' };
   }
@@ -167,8 +172,15 @@ export async function loginWithOpenIdSetup(
     [now_time],
   );
   accountDb.mutate(
-    'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time) VALUES (?, ?, ?, ?)',
-    [state, code_verifier, returnUrl, expiry_time],
+    'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time, client_state, client_challenge) VALUES (?, ?, ?, ?, ?, ?)',
+    [
+      state,
+      code_verifier,
+      returnUrl,
+      expiry_time,
+      clientState,
+      clientChallenge,
+    ],
   );
 
   const url = client.authorizationUrl({
@@ -214,7 +226,7 @@ export async function loginWithOpenIdFinalize(body) {
   }
 
   const pendingRequest = accountDb.first(
-    'SELECT code_verifier, return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
+    'DELETE FROM pending_openid_requests WHERE state = ? AND expiry_time > ? RETURNING code_verifier, return_url, client_state, client_challenge',
     [body.state, Date.now()],
   );
 
@@ -222,7 +234,8 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'invalid-or-expired-state' };
   }
 
-  const { code_verifier, return_url } = pendingRequest;
+  const { code_verifier, return_url, client_state, client_challenge } =
+    pendingRequest;
 
   try {
     let tokenSet = null;
@@ -321,8 +334,6 @@ export async function loginWithOpenIdFinalize(body) {
       }
     }
 
-    const token = uuidv4();
-
     let expiration;
     if (config.get('token_expiration') === 'openid-provider') {
       expiration = tokenSet.expires_at ?? TOKEN_EXPIRATION_NEVER;
@@ -335,14 +346,12 @@ export async function loginWithOpenIdFinalize(body) {
       expiration = Math.floor(Date.now() / 1000) + 10 * 60; // Default to 10 minutes
     }
 
-    accountDb.mutate(
-      'INSERT INTO sessions (token, expires_at, user_id, auth_method) VALUES (?, ?, ?, ?)',
-      [token, expiration, userId, 'openid'],
-    );
-
-    clearExpiredSessions();
-
-    return { url: `${return_url}/openid-cb?token=${token}` };
+    const code = createHandoff(userId, client_challenge, expiration);
+    const callback = new URL(return_url);
+    callback.pathname = '/openid-cb';
+    callback.searchParams.set('code', code);
+    callback.searchParams.set('state', client_state);
+    return { url: callback.href };
   } catch (error) {
     console.error('OpenID grant failed');
     debugSensitive('OpenID grant failed: %O', error);
@@ -378,14 +387,12 @@ export function isValidRedirectUrl(url: string | undefined): url is string {
     const redirectUrl = new URL(url);
     const serverUrl = new URL(serverHostname);
 
-    if (
-      redirectUrl.hostname === serverUrl.hostname ||
-      redirectUrl.hostname === 'localhost'
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    return (
+      !redirectUrl.username &&
+      !redirectUrl.password &&
+      (redirectUrl.origin === serverUrl.origin ||
+        redirectUrl.origin === 'http://localhost:3010')
+    );
   } catch {
     return false;
   }

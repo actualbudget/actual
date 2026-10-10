@@ -110,6 +110,8 @@ app.post('/login', authRateLimiter, async (req, res) => {
       const { error, url } = await loginWithOpenIdSetup(
         req.body.returnUrl,
         req.body.password,
+        req.body.clientState,
+        req.body.clientChallenge,
       );
       if (error) {
         res.status(400).send({ status: 'error', reason: error });
