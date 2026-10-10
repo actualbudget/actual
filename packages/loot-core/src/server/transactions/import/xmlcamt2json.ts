@@ -31,6 +31,9 @@ type TxDtls = {
   RmtInf?: {
     Ustrd: string | string[];
   };
+  Refs?: {
+    ChqNb?: string;
+  };
 };
 
 type TransactionCAMT = {
@@ -39,6 +42,7 @@ type TransactionCAMT = {
   payee_name: string | null;
   imported_payee: string | null;
   notes: string | null;
+  tracking_number: string | null;
   imported_id?: string;
 };
 
@@ -78,6 +82,10 @@ function getNotesFromTxDtls(TxDtls: TxDtls): string | null {
     return Array.isArray(Ustrd) ? Ustrd.join(' ') : Ustrd;
   }
   return null;
+}
+
+function getTrackingNumberFromTxDtls(TxDtls: TxDtls): string | null {
+  return TxDtls?.Refs?.ChqNb?.trim() || null;
 }
 
 function convertToNumberOrNull(value: string): number | null {
@@ -154,6 +162,7 @@ export async function xmlCAMT2json(
           payee_name: subPayee,
           imported_payee: subPayee,
           notes: subNotes,
+          tracking_number: getTrackingNumberFromTxDtls(TxDtls),
         });
       });
     } else {
@@ -180,6 +189,7 @@ export async function xmlCAMT2json(
         payee_name,
         imported_payee: payee_name,
         notes,
+        tracking_number: getTrackingNumberFromTxDtls(entry.NtryDtls?.TxDtls),
       };
       if (id) {
         transaction.imported_id = id;

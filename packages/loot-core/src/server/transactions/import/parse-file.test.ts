@@ -98,6 +98,55 @@ describe('File import', () => {
     ]);
   });
 
+  test('qif import reads the number field', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/tracking-number.qif',
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toMatchObject([
+      { payee_name: 'City Water', tracking_number: '1001' },
+      { payee_name: 'GroceriesYou', tracking_number: null },
+    ]);
+  });
+
+  test('ofx import reads the check number field', async () => {
+    await prefs.loadPrefs();
+    await db.insertAccount({ id: 'one', name: 'one' });
+
+    const { errors } = await importFileWithRealTime(
+      'one',
+      __dirname + '/../../../mocks/files/tracking-number.ofx',
+      null,
+    );
+    expect(errors.length).toBe(0);
+    const transactions = await getTransactions('one');
+    expect(transactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          financial_id: 'tracking-number-1',
+          tracking_number: '2002',
+        }),
+        expect.objectContaining({
+          financial_id: 'tracking-number-2',
+          tracking_number: null,
+        }),
+      ]),
+    );
+  });
+
+  test('CAMT import reads the cheque number field', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/camt/camt.053.tracking-number.xml',
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toMatchObject([
+      { payee_name: 'Cheque Payee', tracking_number: '3003' },
+      { payee_name: 'Other Payee', tracking_number: null },
+    ]);
+  });
+
   test('ofx import works', async () => {
     await prefs.loadPrefs();
     await db.insertAccount({ id: 'one', name: 'one' });

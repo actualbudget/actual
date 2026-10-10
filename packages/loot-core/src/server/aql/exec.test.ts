@@ -286,4 +286,42 @@ describe('compileAndRunQuery', () => {
         .sort((a, b) => String(a).localeCompare(String(b))),
     ).toEqual(ids);
   });
+
+  it('stores tracking numbers on split transactions independently', async () => {
+    const parent = {
+      id: uuidv4(),
+      account: 'acct',
+      date: '2020-01-01',
+      amount: -100,
+      is_parent: true,
+      tracking_number: '1001',
+    };
+    const child1 = makeChild(parent, { amount: -60, tracking_number: 'A-1' });
+    const child2 = makeChild(parent, { amount: -40 });
+    for (const trans of [parent, child1, child2]) {
+      await db.insertTransaction(trans);
+    }
+
+    const { data } = await compileAndRunAqlQuery(
+      q('transactions')
+        .filter({ parent_id: parent.id })
+        .select(['id', 'tracking_number'])
+        .serialize(),
+    );
+    expect(data).toEqual(
+      expect.arrayContaining([
+        { id: child1.id, tracking_number: 'A-1' },
+        { id: child2.id, tracking_number: null },
+      ]),
+    );
+
+    const { data: parentData } = await compileAndRunAqlQuery(
+      q('transactions')
+        .filter({ id: parent.id })
+        .select(['tracking_number'])
+        .options({ splits: 'all' })
+        .serialize(),
+    );
+    expect(parentData[0].tracking_number).toBe('1001');
+  });
 });

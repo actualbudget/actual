@@ -141,6 +141,19 @@ A new column should appear which shows the balance of the account after each tra
 
 ![Show running balance](/img/tips-tricks/running-balance.webp)
 
+## Track Check or Reference Numbers
+
+Each transaction, including each part of a split transaction, can store a "Number", such as a check number or a reference number from your bank. The column is hidden by default.
+
+To show it:
+
+1. Click on an account.
+2. Click on the 3 dots to show the actions menu.
+3. Select "Manage table columns".
+4. Check "Number".
+
+The "Number" column appears just before the "Payee" column. Click its heading to sort by number, or use **Filter** and choose "Number" to find a specific transaction.
+
 ## Using Emojis in Actual
 
 Actual supports emojis in many places, including payees, categories, and notes. You can use emojis to add visual

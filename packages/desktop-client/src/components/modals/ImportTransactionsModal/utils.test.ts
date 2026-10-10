@@ -1,4 +1,10 @@
-import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
+import {
+  applyFieldMappings,
+  filterByStartDate,
+  findTrackingNumberField,
+  parseCategoryFields,
+  parseDate,
+} from './utils';
 import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
@@ -274,6 +280,7 @@ describe('Import transactions', () => {
         category: null,
         outflow: null,
         inflow: null,
+        tracking_number: null,
       };
       const result = filterByStartDate(
         transactions,
@@ -303,6 +310,47 @@ describe('Import transactions', () => {
       expect(
         parseCategoryFields({ category: 'Missing category' }, categories),
       ).toBeNull();
+    });
+  });
+
+  describe('tracking number mapping', () => {
+    it.each(['Num', 'Number', 'Check'])('detects the %s header', header => {
+      expect(findTrackingNumberField(['Date', header, 'Payee'])).toBe(header);
+    });
+
+    it('only matches exact, case-sensitive headers', () => {
+      expect(
+        findTrackingNumberField(['num', 'NUMBER', 'Check Number', 'Checks']),
+      ).toBeNull();
+    });
+
+    it('maps the selected column to tracking_number', () => {
+      const result = applyFieldMappings(
+        {
+          trx_id: '0',
+          existing: false,
+          ignored: false,
+          selected: true,
+          selected_merge: false,
+          amount: 0,
+          inflow: 0,
+          outflow: 0,
+          inOut: '',
+          Check: '1001',
+        },
+        {
+          date: null,
+          amount: null,
+          payee: null,
+          notes: null,
+          tracking_number: 'Check',
+          inOut: null,
+          category: null,
+          outflow: null,
+          inflow: null,
+        },
+      );
+      expect(result.tracking_number).toBe('1001');
     });
   });
 });

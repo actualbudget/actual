@@ -27,6 +27,7 @@ export function FieldMappings({
     amount: null,
     payee: null,
     notes: null,
+    tracking_number: null,
     inOut: null,
     category: null,
     outflow: null,
@@ -55,6 +56,16 @@ export function FieldMappings({
             options={options}
             value={mappings.date}
             onChange={name => onChange('date', name)}
+            hasHeaderRow={hasHeaderRow}
+            firstTransaction={transactions[0]}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <SubLabel title={t('Number')} />
+          <SelectField
+            options={options}
+            value={mappings.tracking_number}
+            onChange={name => onChange('tracking_number', name)}
             hasHeaderRow={hasHeaderRow}
             firstTransaction={transactions[0]}
           />

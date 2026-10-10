@@ -24,6 +24,7 @@ exports[`Account sync > reconcile does rematch deleted transactions by default 1
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 1,
+    "tracking_number": null,
     "transfer_id": null,
   },
   {
@@ -48,6 +49,7 @@ exports[`Account sync > reconcile does rematch deleted transactions by default 1
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
+    "tracking_number": null,
     "transfer_id": null,
   },
 ]
@@ -77,6 +79,7 @@ exports[`Account sync > reconcile doesnt rematch deleted transactions if reimpor
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 1,
+    "tracking_number": null,
     "transfer_id": null,
   },
 ]
@@ -106,6 +109,7 @@ exports[`Account sync > reconcile handles transactions with undefined fields 1`]
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
+    "tracking_number": null,
     "transfer_id": null,
   },
   {
@@ -130,6 +134,7 @@ exports[`Account sync > reconcile handles transactions with undefined fields 1`]
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
+    "tracking_number": null,
     "transfer_id": null,
   },
 ]

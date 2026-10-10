@@ -639,6 +639,52 @@ describe('Account sync', () => {
     ).toBe(-1239);
   });
 
+  test('reconcile keeps an existing tracking number and fills in a missing one', async () => {
+    const { id } = await prepareDatabase();
+
+    await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -1239,
+        payee_name: 'Acme Inc.',
+        imported_id: 'tracking-1',
+        tracking_number: '1001',
+      },
+      {
+        date: '2024-04-06',
+        amount: -500,
+        payee_name: 'Acme Inc.',
+        imported_id: 'tracking-2',
+      },
+    ]);
+
+    await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -1239,
+        payee_name: 'Acme Inc.',
+        imported_id: 'tracking-1',
+        tracking_number: '9999',
+      },
+      {
+        date: '2024-04-06',
+        amount: -500,
+        payee_name: 'Acme Inc.',
+        imported_id: 'tracking-2',
+        tracking_number: '1002',
+      },
+    ]);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(2);
+    expect(
+      transactions.find(t => t.imported_id === 'tracking-1').tracking_number,
+    ).toBe('1001');
+    expect(
+      transactions.find(t => t.imported_id === 'tracking-2').tracking_number,
+    ).toBe('1002');
+  });
+
   describe('compareFuzzyMatchCandidates', () => {
     const transDate = '2024-04-05';
     const alreadyImported = {
@@ -1057,6 +1103,63 @@ describe('SimpleFin batch sync', () => {
     } finally {
       setSyncingMode('disabled');
     }
+  });
+
+  test('maps a bank field to the tracking number when configured', async () => {
+    const providerAccountId = 'sf-account-1';
+    const acctId = await db.insertAccount({
+      id: 'acct-1',
+      account_id: providerAccountId,
+      name: 'Account 1',
+      account_sync_source: 'simpleFin',
+    });
+    const mappingFields = {
+      date: 'date',
+      payee: 'payeeName',
+      notes: 'notes',
+      tracking_number: 'checkNumber',
+    };
+    await db.insertWithSchema('preferences', {
+      id: `custom-sync-mappings-${acctId}`,
+      value: JSON.stringify({
+        payment: mappingFields,
+        deposit: mappingFields,
+      }),
+    });
+
+    mockSimpleFinTransactions({
+      [providerAccountId]: {
+        transactions: {
+          all: [
+            {
+              booked: true,
+              checkNumber: ' 1234 ',
+              date: '2017-10-02',
+              payeeName: 'Coffee Shop',
+              transactionAmount: {
+                amount: '-12.34',
+              },
+              transactionId: 'provider-tx-1',
+            },
+          ],
+          booked: [],
+          pending: [],
+        },
+        balances: [],
+        startingBalance: 0,
+      },
+      errors: {},
+    });
+
+    const result = await accountsApp.handlers['simplefin-batch-sync']({
+      ids: [acctId],
+    });
+    expect(result[0].res.errors).toHaveLength(0);
+
+    const transactions = await getAllTransactions();
+    expect(
+      transactions.find(t => t.imported_id === 'provider-tx-1').tracking_number,
+    ).toBe('1234');
   });
 
   test('returns ACCOUNT_MISSING error when an account is not in the response', async () => {

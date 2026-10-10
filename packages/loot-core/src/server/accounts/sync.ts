@@ -550,6 +550,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     const date = trans[mapping.get('date')] ?? trans.date;
     const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
     const notes = trans[mapping.get('notes')];
+    const trackingNumber = trans[mapping.get('tracking_number')];
 
     // Validate the date because we do some stuff with it. The db
     // layer does better validation, but this will give nicer errors
@@ -585,6 +586,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         account: trans.account,
         date,
         notes: importNotes && notes ? notes.trim().replace(/#/g, '##') : null,
+        tracking_number: trackingNumber ? String(trackingNumber).trim() : null,
         category: categoryIds.has(trans.category) ? trans.category : null,
         imported_id,
         imported_payee: trans.imported_payee,
@@ -689,6 +691,8 @@ export async function reconcileTransactions(
         category: existing.category || trans.category || null,
         imported_payee: trans.imported_payee || null,
         notes: existing.notes || trans.notes || null,
+        tracking_number:
+          existing.tracking_number || trans.tracking_number || null,
         cleared: existing.cleared || trans.cleared || false,
         raw_synced_data:
           existing.raw_synced_data ?? trans.raw_synced_data ?? null,
@@ -913,12 +917,13 @@ export async function matchTransactions(
             | 'imported_payee'
             | 'category'
             | 'notes'
+            | 'tracking_number'
             | 'reconciled'
             | 'cleared'
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, tracking_number, reconciled, cleared, amount
           FROM v_transactions
           WHERE
             -- If both ids are set, and we didn't match earlier then skip dedup
@@ -946,12 +951,13 @@ export async function matchTransactions(
             | 'imported_payee'
             | 'category'
             | 'notes'
+            | 'tracking_number'
             | 'reconciled'
             | 'cleared'
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, tracking_number, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
           [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],

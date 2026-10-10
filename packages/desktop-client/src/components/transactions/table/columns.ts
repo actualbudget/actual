@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 export const TRANSACTION_TABLE_COLUMN_IDS = [
   'date',
   'account',
+  'tracking_number',
   'payee',
   'notes',
   'group',
@@ -58,6 +59,7 @@ export function useTransactionTableColumnLabels(): Record<
   return {
     date: t('Date'),
     account: t('Account'),
+    tracking_number: t('Number'),
     payee: t('Payee'),
     notes: t('Notes'),
     group: t('Category group'),
@@ -71,8 +73,9 @@ export function useTransactionTableColumnLabels(): Record<
 
 function isColumnHiddenByDefault(id: TransactionTableColumnId): boolean {
   // The running balance and category group columns are opt-in, matching the
-  // app's historical default of not showing them
-  return id === 'balance' || id === 'group';
+  // app's historical default of not showing them. The number column is opt-in
+  // as most users don't track one.
+  return id === 'balance' || id === 'group' || id === 'tracking_number';
 }
 
 export function getDefaultTransactionTableColumns(): TransactionTableColumn[] {

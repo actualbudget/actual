@@ -68,6 +68,10 @@ const FIELD_INFO = {
   payee_name: { type: 'string' },
   date: { type: 'date' },
   notes: { type: 'string', disallowedOps: new Set(['oneOf', 'notOneOf']) },
+  tracking_number: {
+    type: 'string',
+    disallowedOps: new Set(['oneOf', 'notOneOf', 'hasTags', 'hasAnyTag']),
+  },
   amount: { type: 'number' },
   category: {
     type: 'id',

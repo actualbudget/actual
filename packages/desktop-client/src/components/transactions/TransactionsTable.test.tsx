@@ -45,6 +45,8 @@ import * as modalsSlice from '#modals/modalsSlice';
 import { payeeQueries } from '#payees';
 import { tagQueries } from '#tags/queries';
 
+import { TRANSACTION_TABLE_COLUMN_IDS } from './table/columns';
+import type { TransactionTableColumnId } from './table/columns';
 import {
   DEFAULT_AMOUNT_COLUMN_WIDTHS,
   TransactionTable,
@@ -165,6 +167,7 @@ type LiveTransactionTableProps = {
   showGroup?: boolean;
   showCleared: boolean;
   showBalances?: boolean;
+  columnOrder?: TransactionTableColumnId[];
   balances?: Record<TransactionEntity['id'], number>;
   onReorder?: () => void;
   isAdding: boolean;
@@ -679,6 +682,31 @@ describe('Transactions', () => {
         '[data-testid="transaction-table"] [data-testid="group"]',
       );
       expect(children.length).toBe(5);
+    });
+  });
+
+  describe('Number column', () => {
+    test('number column is hidden without a column configuration', () => {
+      const { container } = renderTransactions();
+      expect(
+        container.querySelector('[data-testid="tracking_number"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    test('number column can be edited and is navigable when enabled', async () => {
+      const { container, getTransactions } = renderTransactions({
+        columnOrder: [...TRANSACTION_TABLE_COLUMN_IDS],
+      });
+
+      const input = await editField(container, 'tracking_number', 2);
+      await userEvent.type(input, ' 1001 ');
+      await userEvent.type(input, '[Tab]');
+      expect(getTransactions()[2].tracking_number).toBe('1001');
+      expectToBeEditingField(container, 'payee', 2);
+
+      const payeeInput = await editField(container, 'payee', 2);
+      await userEvent.type(payeeInput, '{Shift>}[Tab]{/Shift}');
+      expectToBeEditingField(container, 'tracking_number', 2);
     });
   });
 

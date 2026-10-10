@@ -6,6 +6,7 @@ type TransactionEntry = {
   debit?: string;
   credit?: string;
   account?: string;
+  trackingNumber?: string;
   payee?: string;
   notes?: string;
   category?: string;
@@ -154,6 +155,7 @@ export class AccountPage {
   _getTransactionDetails(row: Locator) {
     return {
       account: row.getByTestId('account'),
+      trackingNumber: row.getByTestId('tracking_number'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
@@ -221,6 +223,28 @@ export class AccountPage {
   }
 
   /**
+   * Filter to a specific transaction number
+   */
+  async filterByTrackingNumber(trackingNumber: string) {
+    const filterTooltip = await this.filterBy('Number');
+    await this.page.keyboard.type(trackingNumber);
+    await filterTooltip.applyButton.click();
+  }
+
+  /**
+   * Set the transaction number of the nth transaction in the table
+   */
+  async setNthTrackingNumber(index: number, trackingNumber: string) {
+    const cell = this.getNthTransaction(index).trackingNumber;
+    await cell.click();
+    const input = cell.getByRole('textbox');
+    await this.selectInputText(input);
+    await input.fill(trackingNumber);
+    await this.page.keyboard.press('Enter');
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
    * Remove the nth filter
    */
   async removeFilter(idx: number) {
@@ -258,6 +282,15 @@ export class AccountPage {
       const accountInput = accountCell.getByRole('textbox');
       await this.selectInputText(accountInput);
       await accountInput.pressSequentially(transaction.account);
+      await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.trackingNumber) {
+      const trackingNumberCell = transactionRow.getByTestId('tracking_number');
+      await trackingNumberCell.click();
+      const trackingNumberInput = trackingNumberCell.getByRole('textbox');
+      await this.selectInputText(trackingNumberInput);
+      await trackingNumberInput.fill(transaction.trackingNumber);
       await this.page.keyboard.press('Tab');
     }
 
