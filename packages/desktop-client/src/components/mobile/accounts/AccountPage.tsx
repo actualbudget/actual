@@ -13,6 +13,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { StaleEncodingWarning } from '#components/accounts/StaleEncodingWarning';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { AddTransactionButton } from '#components/mobile/transactions/AddTransactionButton';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -80,7 +81,12 @@ export function AccountPage() {
       {/* This key forces the whole table rerender when the number format changes */}
       <Fragment key={numberFormat + hideFraction}>
         {account ? (
-          <AccountTransactions account={account} />
+          <>
+            <View style={{ padding: '0 10px' }}>
+              <StaleEncodingWarning accountId={account.id} />
+            </View>
+            <AccountTransactions account={account} />
+          </>
         ) : accountIdParam === 'onbudget' ? (
           <OnBudgetAccountTransactions />
         ) : accountIdParam === 'offbudget' ? (

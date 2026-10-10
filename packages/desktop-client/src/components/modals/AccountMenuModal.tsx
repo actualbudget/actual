@@ -7,9 +7,13 @@ import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccount } from '#hooks/useAccount';
 import { useAccounts } from '#hooks/useAccounts';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useNotes } from '#hooks/useNotes';
+import { useStaleEncoding } from '#hooks/useStaleEncoding';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type AccountMenuModalProps = Extract<
   ModalType,
@@ -26,7 +30,11 @@ export function AccountMenuModal({
   onReconcile,
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const account = useAccount(accountId);
+  const multicurrencyAvailable = useMulticurrencyAvailable();
+  // Rows from another device in an earlier currency are repaired first.
+  const stale = useStaleEncoding(accountId);
   const { data: accounts = [] } = useAccounts();
   const notes = useNotes(`account-${accountId}`);
   const [showBalances, setShowBalances] = useSyncedPref(
@@ -93,6 +101,21 @@ export function AccountMenuModal({
                 setHideReconciled(hideReconciled === 'true' ? 'false' : 'true');
               }}
             />
+            {multicurrencyAvailable && !account.closed && stale.count === 0 && (
+              <MobileSheetRow
+                label={t('Change currency…')}
+                onPress={() =>
+                  dispatch(
+                    pushModal({
+                      modal: {
+                        name: 'currency-correction',
+                        options: { accountId: account.id },
+                      },
+                    }),
+                  )
+                }
+              />
+            )}
             {account.closed ? (
               <MobileSheetRow
                 label={t('Reopen account')}
