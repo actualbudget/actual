@@ -9,12 +9,9 @@ import {
   listLoginMethods,
 } from '#account-db';
 import { config } from '#load-config';
-import {
-  getUserByUsername,
-  transferAllFilesFromUser,
-} from '#services/user-service';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
+import { oauthIdentity, openIdIdentity, resolveIdentityUser } from './identity';
 import { checkPassword } from './password';
 
 export type ConfigParameter = {
@@ -243,83 +240,10 @@ export async function loginWithOpenIdFinalize(body) {
     }
     const userInfo = await client.userinfo(tokenSet.access_token);
     const identity =
-      userInfo.preferred_username ??
-      userInfo.login ??
-      userInfo.email ??
-      userInfo.id ??
-      userInfo.sub;
-
-    if (identity == null) {
-      return { error: 'openid-grant-failed: no identification was found' };
-    }
-
-    let userId = null;
-    try {
-      accountDb.transaction(() => {
-        const { countUsersWithUserName } = accountDb.first(
-          'SELECT count(*) as countUsersWithUserName FROM users WHERE user_name <> ?',
-          [''],
-        );
-
-        // Check if user was created by another transaction
-        const existingUser = accountDb.first(
-          'SELECT id FROM users WHERE user_name = ?',
-          [identity],
-        );
-
-        if (
-          !existingUser &&
-          (countUsersWithUserName === 0 ||
-            config.get('userCreationMode') === 'login')
-        ) {
-          userId = uuidv4();
-          accountDb.mutate(
-            'INSERT INTO users (id, user_name, display_name, enabled, owner, role) VALUES (?, ?, ?, 1, ?, ?)',
-            [
-              userId,
-              identity,
-              userInfo.name ?? userInfo.email ?? identity,
-              countUsersWithUserName === 0 ? '1' : '0',
-              countUsersWithUserName === 0 ? 'ADMIN' : 'BASIC',
-            ],
-          );
-
-          if (countUsersWithUserName === 0) {
-            const userFromPasswordMethod = getUserByUsername('');
-            if (userFromPasswordMethod) {
-              transferAllFilesFromUser(userId, userFromPasswordMethod.user_id);
-            }
-          }
-        } else {
-          const { id: userIdFromDb, display_name: displayName } =
-            accountDb.first(
-              'SELECT id, display_name FROM users WHERE user_name = ? and enabled = 1',
-              [identity],
-            ) || {};
-
-          if (userIdFromDb == null) {
-            throw new Error('openid-grant-failed');
-          }
-
-          if (!displayName && userInfo.name) {
-            accountDb.mutate('UPDATE users set display_name = ? WHERE id = ?', [
-              userInfo.name,
-              userIdFromDb,
-            ]);
-          }
-
-          userId = userIdFromDb;
-        }
-      });
-    } catch (error) {
-      if (error.message === 'user-already-exists') {
-        return { error: 'user-already-exists' };
-      } else if (error.message === 'openid-grant-failed') {
-        return { error: 'openid-grant-failed' };
-      } else {
-        throw error; // Re-throw other unexpected errors
-      }
-    }
+      !configFromDb.authMethod || configFromDb.authMethod === 'openid'
+        ? openIdIdentity(tokenSet.claims(), userInfo)
+        : oauthIdentity(client.issuer.metadata.userinfo_endpoint, userInfo);
+    const userId = resolveIdentityUser(identity, userInfo);
 
     const token = uuidv4();
 
