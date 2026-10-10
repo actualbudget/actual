@@ -1,7 +1,9 @@
 import * as sqlite from '#platform/server/sqlite';
 import { createAllBudgets } from '#server/budget/base';
+import { stopFxDayWatch } from '#server/budget/fx-valuation';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
+import { loadMappings } from '#server/db/mappings';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as monthUtils from '#shared/months';
@@ -77,6 +79,49 @@ async function changePrecision(currencyCode: string) {
 }
 
 describe('in-place precision changes', () => {
+  it('preserves tracking calculations when a precision change reloads the sheet', async () => {
+    await loadMappings();
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'salary',
+      name: 'Salary',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    db.runQuery(
+      "INSERT INTO preferences (id, value) VALUES ('budgetType', 'tracking'), ('defaultCurrencyCode', 'JPY')",
+    );
+    db.runQuery(
+      "INSERT INTO reflect_budgets (id, month, category, amount) VALUES ('plan', 201701, 'salary', 20000)",
+    );
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+    await createAllBudgets();
+    onTestFinished(stopFxDayWatch);
+    expect(
+      sheet.getCellValue(
+        monthUtils.sheetForMonth('2017-01'),
+        'total-budget-income',
+      ),
+    ).toBe(20000);
+    expect(await changePrecision('JPY')).toEqual({});
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.get().meta().budgetType).toBe('tracking');
+    expect(
+      sheet.getCellValue(
+        monthUtils.sheetForMonth('2017-01'),
+        'total-budget-income',
+      ),
+    ).toBe(200);
+    expect(
+      sheet.getCellValue(monthUtils.sheetForMonth('2017-01'), 'fx-changes'),
+    ).toBeNull();
+  });
+
   it('keeps a budget without a currency at two decimal places', async () => {
     const result = await app.handlers['amount-encoding/preflight']({
       currencyCode: '',
