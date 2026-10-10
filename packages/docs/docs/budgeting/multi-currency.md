@@ -2,7 +2,7 @@
 
 This example budget is for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. BNP Paribas is their euro bank, and BBVA México is their peso bank. Résidences Saint-Martin SARL, the landlord, and the family members in this example are fictional.
 
-A budget has one currency. This page uses US dollars, with a euro account for rent on an apartment in Paris and a peso account for gifts and remittances to parents. Actual stores every balance in dollars. The account name and a note say which currency you typed, and a rule converts that number into dollars.
+A budget has one currency. This page uses US dollars, with a euro account for rent on an apartment in Paris and a peso account for gifts and remittances to parents. Actual stores every balance in dollars. The account name and a note say which currency you typed. General settings stores the exchange rate in foreign units per dollar, and a rule converts the amount you typed into dollars.
 
 <ExperimentalFeatureWarning issueId="5191" />
 
@@ -30,6 +30,20 @@ That setting also updates the number format. You can change the symbol position 
 Back in **Settings**, **Experimental**, turn on **Multiple currencies**. It stays off until the budget has a default currency. Its note says: "Experimental preview. Requires a budget currency. Accounts in other currencies are not available yet."
 
 <img width="643" alt="Experimental settings with Excel formula mode, Currency support, and Multiple currencies turned on" src="/img/budgeting/multi-currency-experimental@2x.png" />
+
+## Save exchange rates
+
+With Multiple currencies on, **Settings**, then **General**, shows **Exchange rates** under the currency block.
+
+The BNP Paribas rule below treats 1 euro as 1.10 dollars, and the BBVA México rule treats 1 peso as 0.05 dollars. The rate field takes dollars per 1 unit of the chosen currency, so enter 1.10 for euros and 0.05 for pesos. The swap button turns the field around.
+
+Choose the currency, set the date, enter the rate, and click **Save fallback**. A fallback applies to its own day only. The examples on this page treat 2026-10-31 as today, and both fallbacks are saved for that day. Saving a second rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
+
+**Rate in use today** names the rate that applies today. For pesos it reads "New transactions and valuations today use: manual fallback 0.05 for 2026-10-31." **Saved rates** lists each fallback as stored, in units per 1 dollar: 0.909090909090909 euros and 20 pesos. **Edit** loads a saved row back into the form. **Remove** deletes it.
+
+<img width="672" alt="Exchange rates with fallbacks of 1.10 dollars per euro and 0.05 dollars per peso for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+
+Saving a rate does not change a payment in the register. Accounts still store dollars. The rule below converts the euro or peso amount you type at the same rates.
 
 ## Name the accounts
 
@@ -74,12 +88,12 @@ Then add two actions. On each one, click the **ƒ** button so the field becomes 
 
 Write the note first, while `amount` is still the foreign number. Convert the amount second. If you swap them, the note records the dollar amount instead of the rent or the remittance.
 
-For the BNP Paribas account, 1 euro is 1.10 dollars:
+For the BNP Paribas account, 1 euro is 1.10 dollars. That is the fallback saved above:
 
 - set **notes** to `=CONCATENATE(FIXED(ABS(amount),2)," EUR (FX rate: 1.10)")`
 - set **amount** to `=amount*1.10`
 
-For the BBVA México account, 1 peso is 0.05 dollars:
+For the BBVA México account, 1 peso is 0.05 dollars. That is the fallback saved above:
 
 - set **notes** to `=CONCATENATE(FIXED(ABS(amount),2)," MXN (FX rate: 0.05)")`
 - set **amount** to `=amount*0.05`

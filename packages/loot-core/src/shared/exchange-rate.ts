@@ -96,6 +96,19 @@ export function baseToNative(
   );
 }
 
+/**
+ * The reciprocal of a rate (1 / rate), rounded half-even to the 15 decimal
+ * places a rate can hold. Throws `rate-invalid` when the reciprocal rounds to
+ * zero or exceeds the largest storable rate.
+ */
+export function invertRate(rate: string): string {
+  const { numerator, denominator } = rateFraction(rate);
+  const digits = roundEven(denominator * 10n ** 15n, numerator)
+    .toString()
+    .padStart(16, '0');
+  return parseRate(`${digits.slice(0, -15)}.${digits.slice(-15)}`);
+}
+
 export function isValidDate(date: unknown): date is string {
   if (typeof date !== 'string' || !DATE_PATTERN.test(date)) {
     return false;
