@@ -46,7 +46,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          TAG: mcp-preview-${{ github.run_number }}
+          TAG: mcp-preview-${{ github.run_number }}-${{ github.run_attempt }}
           SHA: ${{ github.sha }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
