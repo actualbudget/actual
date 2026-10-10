@@ -328,6 +328,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         firstDayOfWeekIdx={firstDayOfWeekIdx}
         granularities={['month', 'day']}
         mode={mode}
+        showUntilTodayMode
         onChangeDates={onChangeDates}
         filters={conditions}
         onApply={onApplyFilter}

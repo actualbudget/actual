@@ -62,6 +62,41 @@ describe('calculateTimeRange', () => {
     expect(mode).toBe('sliding-window');
   });
 
+  it('keeps the saved start and ends an "until today" range at the current month', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-08',
+      end: '2016-10',
+      mode: 'until-today',
+    });
+
+    expect(start).toBe('2016-08');
+    expect(end).toBe('2017-01');
+    expect(mode).toBe('until-today');
+  });
+
+  it('ends a day-shaped "until today" range on today', () => {
+    const [start, end, mode] = calculateTimeRange({
+      start: '2016-12-15',
+      end: '2016-12-29',
+      mode: 'until-today',
+    });
+
+    expect(start).toBe('2016-12-15');
+    expect(end).toBe('2017-01-01'); // currentDay() in test mode
+    expect(mode).toBe('until-today');
+  });
+
+  it('does not invert an "until today" range that starts in the future', () => {
+    const [start, end] = calculateTimeRange({
+      start: '2017-05',
+      end: '2017-06',
+      mode: 'until-today',
+    });
+
+    expect(start).toBe('2017-05');
+    expect(end).toBe('2017-05');
+  });
+
   it('keeps current quarter as a live time range when restoring a saved widget', () => {
     const [start, end, mode] = calculateTimeRange({
       start: '2016-10',
