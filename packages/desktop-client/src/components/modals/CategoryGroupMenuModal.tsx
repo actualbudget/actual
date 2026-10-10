@@ -1,38 +1,13 @@
-// @ts-strict-ignore
-import React, { useRef, useState } from 'react';
-import type { ComponentProps } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import {
-  SvgAdd,
-  SvgCheveronDown,
-  SvgCheveronUp,
-  SvgDotsHorizontalTriple,
-  SvgTrash,
-} from '@actual-app/components/icons/v1';
-import {
-  SvgNotesPaper,
-  SvgViewHide,
-  SvgViewShow,
-} from '@actual-app/components/icons/v2';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
-import { CategoryGroupActionMenu } from '#components/mobile/budget/CategoryGroupActionMenu';
-import { Notes } from '#components/Notes';
+import { MobileSheet } from '#components/mobile/MobileSheet';
+import { MobileSheetDeleteConfirm } from '#components/mobile/MobileSheetDeleteConfirm';
+import { MobileSheetNotes } from '#components/mobile/MobileSheetNotes';
+import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
+import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryGroup } from '#hooks/useCategoryGroup';
+import { useDeleteCategoryFlow } from '#hooks/useDeleteCategoryFlow';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNotes } from '#hooks/useNotes';
 import { useUndo } from '#hooks/useUndo';
@@ -49,310 +24,131 @@ export function CategoryGroupMenuModal({
   onAddCategory,
   onEditNotes,
   onDelete,
-  onToggleVisibility,
   onClose,
   onApplyBudgetTemplatesInGroup,
   onSortCategories,
 }: CategoryGroupMenuModalProps) {
-  const [showMore, setShowMore] = useState(false);
-  const { data: { grouped: categoryGroups } = { grouped: [] } } =
-    useCategories();
-  const group = categoryGroups.find(g => g.id === groupId);
-  const notes = useNotes(group.id);
+  const { t } = useTranslation();
+  const { data: group } = useCategoryGroup(groupId);
+  const {
+    data: { grouped: categoryGroups, list: allCategories } = {
+      grouped: [],
+      list: [],
+    },
+  } = useCategories();
+  const notes = useNotes(groupId);
   const { showUndoNotification } = useUndo();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const { t } = useTranslation();
-
-  const onRename = newName => {
-    if (newName && newName !== group.name) {
-      onSave?.({
-        ...group,
-        name: newName,
-      });
-    }
-  };
-
-  const onShowMore = () => {
-    setShowMore(!showMore);
-  };
-
-  const _onAddCategory = () => {
-    onAddCategory?.(group.id, group.is_income);
-  };
-
-  const _onEditNotes = () => {
-    onEditNotes?.(group.id);
-  };
-
-  const _onDelete = () => {
-    onDelete?.(group.id);
-  };
-
-  const _onToggleVisibility = () => {
-    onToggleVisibility?.(group.id);
-  };
-
-  const _onApplyBudgetTemplatesInGroup = () => {
-    onApplyBudgetTemplatesInGroup?.(
-      group.categories.filter(c => !c.hidden).map(c => c.id),
-    );
-  };
-
-  const hasMultipleCategories = (group.categories?.length ?? 0) > 1;
-
-  const _onSortAsc = () => onSortCategories?.(group.id, 'asc');
-  const _onSortDesc = () => onSortCategories?.(group.id, 'desc');
-
-  const buttonStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-    color: theme.formLabelText,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '48%',
-    marginLeft: '1%',
-    marginRight: '1%',
-  };
-
-  const actionButtonStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-    color: theme.formLabelText,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '100%',
-  };
-
-  const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mobileMenuItem,
-    height: styles.mobileMinHeight,
-    color: theme.menuItemText,
-    borderRadius: 0,
-    borderTop: `1px solid ${theme.pillBorder}`,
-  };
-
-  return (
-    <Modal
-      name="category-group-menu"
-      onClose={onClose}
-      containerProps={{
-        style: {
-          height: '45vh',
-        },
-      }}
-    >
-      {({ state }) => (
-        <>
-          <ModalHeader
-            leftContent={
-              <AdditionalCategoryGroupMenu
-                group={group}
-                onDelete={_onDelete}
-                onToggleVisibility={_onToggleVisibility}
-                onSortAsc={hasMultipleCategories ? _onSortAsc : undefined}
-                onSortDesc={hasMultipleCategories ? _onSortDesc : undefined}
-                onClose={() => state.close()}
-              />
-            }
-            title={
-              <ModalTitle
-                isEditable
-                title={group.name}
-                onTitleUpdate={onRename}
-              />
-            }
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'column',
-            }}
-          >
-            <View
-              style={{
-                overflowY: 'auto',
-                flex: 1,
-              }}
-            >
-              <Notes
-                notes={notes?.length > 0 ? notes : t('No notes')}
-                editable={false}
-                focused={false}
-                getStyle={() => ({
-                  ...styles.mediumText,
-                  borderRadius: 6,
-                  ...((!notes || notes.length === 0) && {
-                    justifySelf: 'center',
-                    alignSelf: 'center',
-                    color: theme.pageTextSubdued,
-                  }),
-                })}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                justifyContent: 'space-between',
-                alignContent: 'space-between',
-                paddingTop: 10,
-              }}
-            >
-              <Button style={buttonStyle} onPress={_onAddCategory}>
-                <SvgAdd width={17} height={17} style={{ paddingRight: 5 }} />
-                <Trans>Add category</Trans>
-              </Button>
-              <Button style={buttonStyle} onPress={_onEditNotes}>
-                <SvgNotesPaper
-                  width={20}
-                  height={20}
-                  style={{ paddingRight: 5 }}
-                />
-                <Trans>Edit notes</Trans>
-              </Button>
-              {isGoalTemplatesEnabled && (
-                <Button
-                  variant="bare"
-                  className={css([
-                    actionButtonStyle,
-                    {
-                      '&[data-pressed], &[data-hovered]': {
-                        backgroundColor: 'transparent',
-                        color: buttonStyle.color,
-                      },
-                    },
-                  ])}
-                  onPress={onShowMore}
-                >
-                  {!showMore ? (
-                    <SvgCheveronUp
-                      width={30}
-                      height={30}
-                      style={{ paddingRight: 5 }}
-                    />
-                  ) : (
-                    <SvgCheveronDown
-                      width={30}
-                      height={30}
-                      style={{ paddingRight: 5 }}
-                    />
-                  )}
-                  <Trans>Actions</Trans>
-                </Button>
-              )}
-            </View>
-            {showMore && (
-              <CategoryGroupActionMenu
-                style={{ overflowY: 'auto', paddingTop: 10 }}
-                getItemStyle={() => defaultMenuItemStyle}
-                onApplyBudgetTemplatesInGroup={() => {
-                  _onApplyBudgetTemplatesInGroup();
-                  state.close();
-                  showUndoNotification({
-                    message: t('budget templates have been applied.'),
-                  });
-                }}
-              />
-            )}
-          </View>
-        </>
-      )}
-    </Modal>
-  );
-}
-
-function AdditionalCategoryGroupMenu({
-  group,
-  onDelete,
-  onToggleVisibility,
-  onSortAsc,
-  onSortDesc,
-  onClose,
-}) {
-  const { t } = useTranslation();
-  const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const itemStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-  };
-
-  const getItemStyle = item => ({
-    ...itemStyle,
-    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  const categories = group?.categories ?? [];
+  const deleteFlow = useDeleteCategoryFlow({
+    categoryIds: categories.map(c => c.id),
+    onDelete: transferCategoryId => onDelete(groupId, transferCategoryId),
   });
 
+  if (!group) {
+    return null;
+  }
+
+  const hasMultipleCategories = categories.length > 1;
+  const hasBudgetSection = isGoalTemplatesEnabled || hasMultipleCategories;
+  const isIncome = Boolean(group.is_income);
+  const transferGroups = categoryGroups.filter(
+    g => g.id !== group.id && Boolean(g.is_income) === isIncome,
+  );
+  const transferName = allCategories.find(
+    c => c.id === deleteFlow.transferId,
+  )?.name;
+
   return (
-    <View>
-      {!group.is_income && (
-        <Button
-          ref={triggerRef}
-          variant="bare"
-          aria-label={t('Menu')}
-          onPress={() => {
-            setMenuOpen(true);
-          }}
-        >
-          <SvgDotsHorizontalTriple
-            width={17}
-            height={17}
-            style={{ color: 'currentColor' }}
+    <MobileSheet
+      name="category-group-menu"
+      title={group.name}
+      onTitleUpdate={newName => {
+        onSave({ ...group, name: newName });
+        return undefined;
+      }}
+      onClose={onClose}
+    >
+      {({ close, editTitle, isEditingTitle }) =>
+        deleteFlow.step ? (
+          <MobileSheetDeleteConfirm
+            flow={deleteFlow}
+            group={group}
+            transferGroups={transferGroups}
+            transferName={transferName}
           />
-          <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            placement="bottom start"
-            onOpenChange={() => setMenuOpen(false)}
-          >
-            <Menu
-              style={{
-                ...styles.mediumText,
-                color: theme.formLabelText,
-              }}
-              getItemStyle={getItemStyle}
-              items={
-                [
-                  {
-                    name: 'toggleVisibility',
-                    text: group.hidden ? t('Show') : t('Hide'),
-                    icon: group.hidden ? SvgViewShow : SvgViewHide,
-                    iconSize: 16,
-                  },
-                  ...(!group.is_income && [
-                    Menu.line,
-                    {
-                      name: 'delete',
-                      text: t('Delete'),
-                      icon: SvgTrash,
-                      iconSize: 15,
-                    },
-                  ]),
-                  ...(onSortAsc && onSortDesc
-                    ? [
-                        Menu.line,
-                        { name: 'sort-asc', text: t('Sort A to Z') },
-                        { name: 'sort-desc', text: t('Sort Z to A') },
-                      ]
-                    : []),
-                ].filter(i => i != null) as ComponentProps<typeof Menu>['items']
-              }
-              onMenuSelect={itemName => {
-                setMenuOpen(false);
-                if (itemName === 'delete') {
-                  onDelete();
-                } else if (itemName === 'toggleVisibility') {
-                  onToggleVisibility();
-                } else if (itemName === 'sort-asc') {
-                  onSortAsc?.();
-                  onClose?.();
-                } else if (itemName === 'sort-desc') {
-                  onSortDesc?.();
-                  onClose?.();
-                }
-              }}
-            />
-          </Popover>
-        </Button>
-      )}
-    </View>
+        ) : (
+          <>
+            {notes && <MobileSheetNotes notes={notes} />}
+
+            {hasBudgetSection && (
+              <MobileSheetSection title={t('Budget')}>
+                {isGoalTemplatesEnabled && (
+                  <MobileSheetRow
+                    label={t('Overwrite with templates')}
+                    onPress={() => {
+                      onApplyBudgetTemplatesInGroup?.(
+                        categories.filter(c => !c.hidden).map(c => c.id),
+                      );
+                      close();
+                      showUndoNotification({
+                        message: t('budget templates have been applied.'),
+                      });
+                    }}
+                  />
+                )}
+                {hasMultipleCategories && (
+                  <MobileSheetRow
+                    label={t('Sort A to Z')}
+                    onPress={() => {
+                      onSortCategories?.(group.id, 'asc');
+                      close();
+                    }}
+                  />
+                )}
+                {hasMultipleCategories && (
+                  <MobileSheetRow
+                    label={t('Sort Z to A')}
+                    onPress={() => {
+                      onSortCategories?.(group.id, 'desc');
+                      close();
+                    }}
+                  />
+                )}
+              </MobileSheetSection>
+            )}
+
+            <MobileSheetSection
+              title={hasBudgetSection ? t('Group') : undefined}
+            >
+              {!isEditingTitle && (
+                <MobileSheetRow label={t('Rename')} onPress={editTitle} />
+              )}
+              <MobileSheetRow
+                label={t('Add category')}
+                onPress={() => onAddCategory(group.id, group.is_income)}
+              />
+              <MobileSheetRow
+                label={t('Edit notes')}
+                onPress={() => onEditNotes(group.id)}
+              />
+              {!group.is_income && (
+                <MobileSheetRow
+                  label={group.hidden ? t('Show') : t('Hide')}
+                  onPress={() => onSave({ ...group, hidden: !group.hidden })}
+                />
+              )}
+              {!group.is_income && (
+                <MobileSheetRow
+                  label={t('Delete')}
+                  isDestructive
+                  onPress={() => void deleteFlow.start()}
+                />
+              )}
+            </MobileSheetSection>
+          </>
+        )
+      }
+    </MobileSheet>
   );
 }

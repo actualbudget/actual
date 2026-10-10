@@ -1,7 +1,8 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
+import { spacing } from '@actual-app/components/tokens';
+import { View } from '@actual-app/components/view';
 import {
   format as formatMonth,
   prevMonth,
@@ -12,7 +13,8 @@ import type { CategoryEntity } from '@actual-app/core/types/models/category';
 import { ToBudgetAmount } from '#components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '#components/budget/envelope/budgetsummary/TotalsList';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
-import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { ToBudgetSheetActions } from '#components/mobile/budget/ToBudgetSheetActions';
+import { MobileSheet } from '#components/mobile/MobileSheet';
 import { useCategoriesById } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -34,7 +36,6 @@ export function EnvelopeBudgetSummaryModal({
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
   const format = useFormat();
-
   const locale = useLocale();
   const dispatch = useDispatch();
   const prevMonthName = formatMonth(prevMonth(month), 'MMM', locale);
@@ -126,61 +127,38 @@ export function EnvelopeBudgetSummaryModal({
     );
   };
 
-  const onResetHoldBuffer = () => {
-    void onBudgetAction(month, 'reset-hold');
-  };
-
-  const onClick = ({ close }: { close: () => void }) => {
-    dispatch(
-      pushModal({
-        modal: {
-          name: 'envelope-summary-to-budget-menu',
-          options: {
-            month,
-            onTransfer: openTransferAvailableModal,
-            onCover: openCoverOverbudgetedModal,
-            onResetHoldBuffer: () => {
-              onResetHoldBuffer();
-              close();
-            },
-            onHoldBuffer,
-            onBudgetAction,
-          },
-        },
-      }),
-    );
-  };
-
   return (
-    <Modal name="envelope-budget-summary">
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={t('Budget Summary')}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <SheetNameProvider name={sheetForMonth(month)}>
+    <MobileSheet name="envelope-budget-summary" title={t('Budget Summary')}>
+      {({ close }) => (
+        <SheetNameProvider name={sheetForMonth(month)}>
+          <View
+            style={{
+              padding: `${spacing.xs}px ${spacing.lg}px ${spacing.lg}px`,
+            }}
+          >
             <TotalsList
               prevMonthName={prevMonthName}
-              style={{
-                ...styles.mediumText,
-              }}
+              style={styles.mediumText}
             />
             <ToBudgetAmount
               prevMonthName={prevMonthName}
-              style={{
-                ...styles.mediumText,
-                marginTop: 15,
-              }}
-              amountStyle={{
-                ...styles.underlinedText,
-              }}
-              onClick={() => onClick({ close: () => state.close() })}
+              style={{ ...styles.mediumText, marginTop: spacing.lg }}
               isTotalsListTooltipDisabled
             />
-          </SheetNameProvider>
-        </>
+          </View>
+          <ToBudgetSheetActions
+            month={month}
+            onTransfer={openTransferAvailableModal}
+            onCover={openCoverOverbudgetedModal}
+            onHoldBuffer={onHoldBuffer}
+            onResetHoldBuffer={() => {
+              void onBudgetAction(month, 'reset-hold');
+              close();
+            }}
+            onBudgetAction={onBudgetAction}
+          />
+        </SheetNameProvider>
       )}
-    </Modal>
+    </MobileSheet>
   );
 }
