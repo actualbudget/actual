@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Block } from '@actual-app/components/block';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -10,11 +10,21 @@ import { LazyLoadFailedError } from '@actual-app/core/shared/errors';
 import { retry as promiseRetry } from '@actual-app/core/shared/retry';
 
 type ProplessComponent = ComponentType<Record<string, never>>;
+type Importer<K extends string> = () => Promise<{
+  [key in K]: ProplessComponent;
+}>;
 type LoadComponentProps<K extends string> = {
   name: K;
   message?: string;
-  importer: () => Promise<{ [key in K]: ProplessComponent }>;
+  importer: Importer<K>;
 };
+
+// Lets later mounts render already-imported modules synchronously
+const loadedModules = new WeakMap<
+  Importer<string>,
+  Record<string, ProplessComponent>
+>();
+
 export function LoadComponent<K extends string>(props: LoadComponentProps<K>) {
   // need to set `key` so the component is reloaded when the name changes
   // otherwise the old component will be rendered while the new one is being loaded
@@ -26,10 +36,19 @@ function LoadComponentInner<K extends string>({
   message,
   importer,
 }: LoadComponentProps<K>) {
-  const [Component, setComponent] = useState<ProplessComponent | null>(null);
+  const [Component, setComponent] = useState<ProplessComponent | null>(
+    () => loadedModules.get(importer)?.[name] ?? null,
+  );
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    const loadedComponent = loadedModules.get(importer)?.[name];
+    if (loadedComponent) {
+      setError(null);
+      setComponent(() => loadedComponent);
+      return;
+    }
+
     let isUnmounted = false;
     setError(null);
     setComponent(null);
@@ -39,6 +58,7 @@ function LoadComponentInner<K extends string>({
       retry =>
         importer()
           .then(module => {
+            loadedModules.set(importer, module);
             // Handle possibly being unmounted while retrying.
             if (!isUnmounted) {
               setComponent(() => module[name]);
