@@ -31,6 +31,7 @@ import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
+import { ExchangeRateSettings } from './ExchangeRates';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
@@ -286,6 +287,7 @@ export function GeneralSettings() {
       {!isNarrowWidth && <SidebarSettings />}
       <FormatSettings />
       <CurrencySettings />
+      <ExchangeRateSettings />
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
