@@ -51,7 +51,9 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import { useStaleEncoding } from '#hooks/useStaleEncoding';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
@@ -60,6 +62,7 @@ import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
 import { CurrentEstimateLines } from './CurrentEstimateLines';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+import { StaleEncodingWarning } from './StaleEncodingWarning';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -325,6 +328,7 @@ export function AccountHeader({
               filteredAmount={filteredAmount}
             />
             <CurrentEstimateLines account={account} accountId={accountId} />
+            <StaleEncodingWarning accountId={accountId} />
           </View>
 
           {/* The history graph charts stored base amounts, and a foreign
@@ -776,7 +780,8 @@ type AccountMenuProps = {
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'change-currency',
   ) => void;
 };
 
@@ -791,6 +796,9 @@ function AccountMenu({
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
+  const multicurrencyAvailable = useMulticurrencyAvailable();
+  // Rows from another device in an earlier currency are repaired first.
+  const stale = useStaleEncoding(account?.id);
 
   return (
     <Menu
@@ -850,6 +858,9 @@ function AccountMenu({
               : []
           : []),
 
+        ...(multicurrencyAvailable && !account.closed && stale.count === 0
+          ? [{ name: 'change-currency', text: t('Change currency…') } as const]
+          : []),
         ...(account.closed
           ? [{ name: 'reopen', text: t('Reopen account') } as const]
           : [{ name: 'close', text: t('Close account') } as const]),

@@ -62,6 +62,18 @@ If no rate is saved for today, the dialog adds **Base amount** and says: "No exc
 
 The BNP Paribas account then shows €2,000.00. Its register lists the starting balance as a 2,000.00 deposit. **All accounts** in the sidebar counts the $2,200.00 dollar amount. The peso account uses $, so its 5,000.00 peso balance looks like $5,000.00. That row is pesos. **All accounts** is dollars.
 
+## Change the account's currency
+
+Open the account menu and choose **Change currency…**. The dialog says: "BNP Paribas uses EUR. Every transaction in its history changes with it." Choose **USD - US Dollar ($)**.
+
+**Keep the numbers** is selected. It says: "Each amount keeps its number in the new currency; budget amounts are recalculated at each date's rate." The preview says: "Transactions that change: 1." That row is the starting balance. Under it: "This change cannot be undone."
+
+**Convert existing amounts** says: "Each budget amount stays the same; amounts in the new currency are calculated at each date's rate." The preview still counts 1 transaction. **Cancel** leaves the account in euros.
+
+<img width="520" alt="Change currency for BNP Paribas, keeping the numbers and moving the account to US dollars" src="/img/budgeting/multi-currency-correction@2x.png" />
+
+If another device added transactions in an earlier currency, the account shows how many use its previous currency, and **Repair…**. **Repair transactions** says another device added or edited transactions in the account using an earlier currency, and repair makes them use the current currency. **Convert existing amounts** is selected there. **Change currency…** is left out of the menu until those transactions are repaired. On a phone, the account menu has **Change currency…** as well.
+
 ## Enter a payment
 
 Open the BNP Paribas account and click **Add New**. Enter the payee **Résidences Saint-Martin SARL** and a payment of 950.00. That amount is euros. **Add** opens **Convert to budget currency**.
@@ -89,6 +101,12 @@ Under the €1,050.00 balance, Actual shows what that balance is worth at the cu
 <img width="860" alt="BNP Paribas at €1,050.00, with a current-rate estimate of $1,155.00 and a recorded base of $1,155.00" src="/img/budgeting/multi-currency-estimate@2x.png" />
 
 **All accounts** adds a line under the total: "≈ $3,905.00 at current rates." Hold the pointer over the BNP Paribas balance in the sidebar and it shows the same two lines. On a phone, the account list shows only the first line. **On budget** says "≈ $3,905.00 at current rates." Under BNP Paribas the line is the euro estimate above. Under BBVA México it says "≈ $250.00 at the current rate (1 MXN = 0.05 USD, manual standing rate from 2026-10-31)."
+
+## Balance chart
+
+Open the BBVA México account menu and choose **Show balance chart**. This uses the five-month family history. The filled area charts the recorded dollar balance, and the blue line charts the native peso balance. Hold the pointer over a month to read both amounts. October 2026 shows $20.25 recorded in dollars and MX$250.00 held in pesos, after five monthly remittances and gifts. The dollar amount is the stored booked balance, rather than the current market estimate shown above the chart. The curves use different scales, so compare their direction and hover values. The menu item then says **Hide balance chart**. An account in dollars charts only its dollar balance.
+
+<img width="1040" alt="BBVA México balance history with five months of remittances and gifts, showing October booked balance $20.25 and native balance 250 pesos" src="/img/budgeting/family-bbva-balance-history.png" />
 
 ## Change a saved amount
 
