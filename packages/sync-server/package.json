@@ -101,6 +101,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.0",
     "express-winston": "^4.2.0",
+    "fflate": "^0.8.3",
     "ipaddr.js": "^2.4.0",
     "jws": "^4.0.1",
     "migrate": "^2.1.0",
