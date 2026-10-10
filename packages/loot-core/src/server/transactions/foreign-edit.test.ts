@@ -132,7 +132,7 @@ describe('editing a foreign transaction', () => {
     expect(row('t')).toMatchObject({
       amount: -2100,
       transaction_amount: -3000,
-      amount_pair: '-2100:-3000@jpy',
+      amount_pair: '-2100:-3000@jpy~JPY.0',
     });
   });
 
@@ -407,7 +407,7 @@ describe('moving a transaction across currencies', () => {
       acct: 'jpy',
       amount: -1200,
       transaction_amount: -1800,
-      amount_pair: '-1200:-1800@jpy',
+      amount_pair: '-1200:-1800@jpy~JPY.0',
     });
   });
 
@@ -423,7 +423,7 @@ describe('moving a transaction across currencies', () => {
       acct: 'usd',
       amount: -1250,
       transaction_amount: null,
-      amount_pair: '-1250:@usd',
+      amount_pair: '-1250:@usd~',
     });
     // Later base edits keep the authority, so the foreign pair never returns.
     await batchUpdateTransactions({ updated: [{ id: 't', amount: -1300 }] });
@@ -432,7 +432,7 @@ describe('moving a transaction across currencies', () => {
       acct: 'usd',
       amount: -1300,
       transaction_amount: null,
-      amount_pair: '-1300:@usd',
+      amount_pair: '-1300:@usd~',
     });
     await undo();
     await undo();
@@ -456,7 +456,7 @@ describe('moving a transaction across currencies', () => {
       acct: 'kwd',
       amount: -1000,
       transaction_amount: -3075,
-      amount_pair: '-1000:-3075@kwd',
+      amount_pair: '-1000:-3075@kwd~KWD.3',
     });
   });
 
@@ -782,7 +782,7 @@ describe('foreign edit guards (inspection round 1)', () => {
       acct: 'usd',
       amount: -1250,
       transaction_amount: null,
-      amount_pair: '-1250:@usd',
+      amount_pair: '-1250:@usd~',
     });
   });
 

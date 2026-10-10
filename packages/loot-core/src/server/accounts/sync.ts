@@ -13,6 +13,7 @@ import { runMutator } from '#server/mutators';
 import { post } from '#server/post';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
+import { effectiveEncoding } from '#server/sync/coupled-cells';
 import { batchUpdateTransactions } from '#server/transactions';
 import {
   exchangeFamilyReconciled,
@@ -81,11 +82,37 @@ function getAccountBalance(account) {
   }
 }
 
+/** The encoding an account's integers are read in, as stored now. */
+async function storedEncoding(id: AccountEntity['id']) {
+  const row = await db.first<
+    Pick<db.DbAccount, 'encoding' | 'currency' | 'currency_precision'>
+  >(
+    'SELECT encoding, currency, currency_precision FROM accounts WHERE id = ?',
+    [id],
+  );
+  return effectiveEncoding(
+    row?.encoding,
+    row?.currency ?? null,
+    row?.currency_precision ?? null,
+  );
+}
+
+/**
+ * Caches a provider balance, stamped with the encoding it was decoded in:
+ * if a correction changed the account since, it derives to null instead of
+ * being read in the new encoding.
+ */
 async function updateAccountBalance(
   id: AccountEntity['id'],
   balance: number | null,
+  decodedIn: string,
 ) {
-  await db.update('accounts', { id, balance_current: balance });
+  const changes = { balance_current: balance };
+  await db.update('accounts', {
+    id,
+    ...changes,
+    ...(await db.balanceSpecFields(id, { ...changes, encoding: decodedIn })),
+  });
 }
 
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
@@ -1380,6 +1407,8 @@ export async function processBankSyncDownload(
   /** Set when the caller already holds the mutator and an open batch. */
   { inMutator = false }: { inMutator?: boolean } = {},
 ) {
+  // Read before any wait: the balance is decoded in this encoding.
+  const decodedIn = await storedEncoding(id);
   const foreign = await foreignAccountCurrency(id);
   if (foreign) {
     return processForeignBankSyncDownload(
@@ -1387,6 +1416,7 @@ export async function processBankSyncDownload(
       id,
       acctRow,
       foreign,
+      decodedIn,
       customStartingBalance,
       customStartingDate,
       inMutator,
@@ -1519,6 +1549,7 @@ export async function processBankSyncDownload(
       await updateAccountBalance(
         id,
         encodeBankAmount(currentBalance, amountPrecision),
+        decodedIn,
       );
     }
 
@@ -1549,6 +1580,7 @@ async function processForeignBankSyncDownload(
   id: AccountEntity['id'],
   acctRow,
   foreign: { currencyCode: string; precision: number },
+  decodedIn: string,
   customStartingBalance?: number,
   customStartingDate?: string,
   inMutator = false,
@@ -1621,6 +1653,7 @@ async function processForeignBankSyncDownload(
             currentBalance !== null
               ? encodeBankAmount(currentBalance, precision)
               : null,
+            decodedIn,
           );
         }
         return;
