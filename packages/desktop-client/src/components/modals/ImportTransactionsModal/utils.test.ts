@@ -1,8 +1,10 @@
 import {
+  currencyColumnOf,
   filterByStartDate,
   parseCategoryFields,
   parseDate,
   parseImportAmount,
+  splitByCurrency,
 } from './utils';
 import type { ImportTransaction } from './utils';
 
@@ -377,5 +379,50 @@ describe('Import transactions', () => {
         parseCategoryFields({ category: 'Missing category' }, categories),
       ).toBeNull();
     });
+  });
+});
+
+describe('splitByCurrency', () => {
+  const rows = [
+    { id: 'a', Currency: 'JPY' },
+    { id: 'b', Currency: ' jpy ' },
+    { id: 'c', Currency: '' },
+    { id: 'd', Currency: '   ' },
+    { id: 'e' },
+    { id: 'f', Currency: 'EUR' },
+    { id: 'g', Currency: '€' },
+    { id: 'h', Currency: 'yen' },
+  ];
+
+  it('keeps every row without a currency column', () => {
+    expect(splitByCurrency(rows, null, 'JPY').rejected).toEqual([]);
+  });
+
+  it('keeps blank, missing and matching cells and leaves out the rest', () => {
+    const { kept, rejected } = splitByCurrency(rows, 'Currency', 'JPY');
+    expect(kept.map(row => row.id)).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(rejected.map(({ row, value }) => [row.id, value])).toEqual([
+      ['f', 'EUR'],
+      ['g', '€'],
+      ['h', 'yen'],
+    ]);
+  });
+
+  it("compares an inheriting account's rows with the budget currency", () => {
+    const budget = [
+      { id: 'a', Currency: '' },
+      { id: 'b', Currency: 'usd' },
+      { id: 'c', Currency: 'EUR' },
+    ];
+    const { kept, rejected } = splitByCurrency(budget, 'Currency', 'USD');
+    expect(kept.map(row => row.id)).toEqual(['a', 'b']);
+    expect(rejected.map(({ row }) => row.id)).toEqual(['c']);
+  });
+
+  it('treats the placeholder and an empty choice as no column', () => {
+    expect(currencyColumnOf('choose-field')).toBeNull();
+    expect(currencyColumnOf('')).toBeNull();
+    expect(currencyColumnOf(undefined)).toBeNull();
+    expect(currencyColumnOf('Currency')).toBe('Currency');
   });
 });

@@ -369,3 +369,38 @@ export function stripCsvImportTransaction(transaction: ImportTransaction) {
 
   return trans;
 }
+
+/** The select's placeholder value: no column chosen. */
+const NO_FIELD = 'choose-field';
+
+/** A saved or chosen currency column: null when none is chosen. */
+export function currencyColumnOf(value: unknown): string | null {
+  return typeof value === 'string' && value !== '' && value !== NO_FIELD
+    ? value
+    : null;
+}
+
+/**
+ * Splits CSV rows by their currency cell (MC-7.5): rows whose cell names
+ * another currency than the account's are left out, never converted. A
+ * missing, empty or blank cell means the account's currency.
+ */
+export function splitByCurrency<T extends object>(
+  rows: T[],
+  column: string | null,
+  accountCode: string,
+): { kept: T[]; rejected: Array<{ row: T; value: string }> } {
+  if (column === null) return { kept: rows, rejected: [] };
+  const kept: T[] = [];
+  const rejected: Array<{ row: T; value: string }> = [];
+  for (const row of rows) {
+    const cell = (row as Record<string, unknown>)[column];
+    const value = cell == null ? '' : String(cell).trim();
+    if (value === '' || value.toUpperCase() === accountCode.toUpperCase()) {
+      kept.push(row);
+    } else {
+      rejected.push({ row, value });
+    }
+  }
+  return { kept, rejected };
+}
