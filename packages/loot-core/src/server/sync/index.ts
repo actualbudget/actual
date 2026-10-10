@@ -635,33 +635,61 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 export const applyMessages = sequential(_applyMessages);
 
 export function receiveMessages(messages: Message[]): Promise<Message[]> {
-  try {
-    // Receiving the latest timestamp preserves the clock and drift check while
-    // advancing the counter once per batch.
-    let latest = null;
-    for (const { timestamp } of messages) {
+  return runMutator(async () => {
+    // Timestamp.recv() mutates the shared clock immediately, but the
+    // messages might not be applied if the transaction fails.
+    // Restore the clock in that case so a failed batch can't bump it.
+    const timestamp = getClock().timestamp;
+    const savedMillis = timestamp.millis();
+    const savedCounter = timestamp.counter();
+    let recvMillis = savedMillis;
+    let recvCounter = savedCounter;
+
+    function restoreClock() {
+      // Non-mutator handlers (e.g. `save-prefs`) can call Timestamp.send()
+      // while we wait on applyMessages; only roll back if nothing advanced
+      // the clock past the post-recv state.
       if (
-        latest === null ||
-        timestamp.millis() > latest.millis() ||
-        (timestamp.millis() === latest.millis() &&
-          timestamp.counter() > latest.counter())
+        timestamp.millis() === recvMillis &&
+        timestamp.counter() === recvCounter
       ) {
-        latest = timestamp;
+        timestamp.setMillis(savedMillis);
+        timestamp.setCounter(savedCounter);
       }
     }
-    if (latest !== null) {
-      Timestamp.recv(latest);
-    }
-  } catch (e) {
-    if (e instanceof Timestamp.ClockDriftError) {
-      throw new SyncError('clock-drift');
-    }
-    throw e;
-  }
 
-  // Inbound messages may come from a newer version of the app, so
-  // unknown-schema errors defer instead of failing the batch
-  return runMutator(() => applyMessages(messages, true));
+    try {
+      // Receiving the latest timestamp preserves the clock and drift check while
+      // advancing the counter once per batch.
+      let latest = null;
+      for (const { timestamp } of messages) {
+        if (
+          latest === null ||
+          timestamp.millis() > latest.millis() ||
+          (timestamp.millis() === latest.millis() &&
+            timestamp.counter() > latest.counter())
+        ) {
+          latest = timestamp;
+        }
+      }
+      if (latest !== null) {
+        Timestamp.recv(latest);
+      }
+      recvMillis = timestamp.millis();
+      recvCounter = timestamp.counter();
+
+      // Inbound messages may come from a newer version of the app, so
+      // unknown-schema errors defer instead of failing the batch
+      return await applyMessages(messages, true);
+    } catch (error) {
+      restoreClock();
+
+      if (error instanceof Timestamp.ClockDriftError) {
+        throw new SyncError('clock-drift');
+      }
+      throw error;
+    }
+  });
 }
 
 async function errorHandler(e: Error) {
