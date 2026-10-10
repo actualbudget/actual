@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import { recoverLocalEncoding } from '#server/amount-encoding/files';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
+import { stopFxDayWatch } from '#server/budget/fx-valuation';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
@@ -315,6 +316,7 @@ async function unloadBudget() {
   captureBreadcrumb({ message: 'Closing budget' });
   resetFormulaPreferencesCache();
 
+  stopFxDayWatch();
   // The spreadsheet may be running, wait for it to complete
   await sheet.waitOnSpreadsheet();
   sheet.unloadSpreadsheet();

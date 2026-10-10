@@ -26,6 +26,7 @@ function createBlankMonth(categories, sheetName, months) {
   sheet.get().createStatic(sheetName, 'is-blank', true);
   sheet.get().createStatic(sheetName, 'to-budget', 0);
   sheet.get().createStatic(sheetName, 'buffered', 0);
+  sheet.get().createStatic(sheetName, 'fx-changes', 0);
 
   categories.forEach(cat => createBlankCategory(cat, months));
 }
@@ -119,11 +120,16 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     run: amount => amount,
   });
 
+  // The month's change in the market value of on-budget holdings in other
+  // currencies (MC-8.1), written by the valuation bridge. Through
+  // available-funds it reaches To Budget once and rolls forward with it.
+  sheet.get().createStatic(sheetName, 'fx-changes', 0);
+
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: ['total-income', 'from-last-month'],
-    run: (income, fromLastMonth) =>
-      safeNumber(number(income) + number(fromLastMonth)),
+    dependencies: ['total-income', 'from-last-month', 'fx-changes'],
+    run: (income, fromLastMonth, fxChanges) =>
+      safeNumber(number(income) + number(fromLastMonth) + number(fxChanges)),
   });
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {

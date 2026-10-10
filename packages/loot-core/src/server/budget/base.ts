@@ -10,6 +10,11 @@ import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
+import {
+  refreshFxChanges,
+  scheduleFxRefresh,
+  startFxDayWatch,
+} from './fx-valuation';
 import * as trackingBudget from './tracking';
 
 // How far ahead budget months are available. Planning past the minimum
@@ -277,9 +282,44 @@ function handleBudgetChange(budget) {
   }
 }
 
+/** Whether a change can move the valuation of holdings in other currencies. */
+function affectsFxValuation(oldValues, newValues) {
+  if (newValues.has('exchange_rates')) return true;
+  for (const [id, account] of newValues.get('accounts') ?? new Map()) {
+    const old = oldValues.get('accounts')?.get(id);
+    if (
+      ['currency', 'encoding', 'offbudget', 'closed', 'tombstone'].some(
+        field => !old || old[field] !== account[field],
+      )
+    ) {
+      return true;
+    }
+  }
+  const transactions = newValues.get('transactions');
+  if (!transactions) return false;
+  const accounts = new Set<string>();
+  for (const [id, row] of transactions) {
+    if (row.acct) accounts.add(row.acct);
+    // A row moved off an account in another currency changes its holdings.
+    const old = oldValues.get('transactions')?.get(id);
+    if (old?.acct) accounts.add(old.acct);
+  }
+  return accounts.size > 0
+    ? db.runQuery(
+        `SELECT 1 FROM accounts WHERE offbudget = 0 AND currency IS NOT NULL
+           AND id IN (${[...accounts].map(() => '?').join(', ')}) LIMIT 1`,
+        [...accounts],
+        true,
+      ).length > 0
+    : false;
+}
+
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+  if (budgetType === 'envelope' && affectsFxValuation(oldValues, newValues)) {
+    scheduleFxRefresh();
+  }
   sheet.startTransaction();
 
   try {
@@ -483,6 +523,9 @@ export async function createAllBudgets() {
   if (newMonths.length > 0) {
     await createBudget(range);
   }
+  // Holdings in other currencies are valued for the months now created.
+  await refreshFxChanges();
+  startFxDayWatch();
 
   // The range only grows while the budget is open, so every created month
   // stays reachable. Clearing allocations shrinks it on the next load.

@@ -68,7 +68,17 @@ for (const viewport of [
       await expectLastMonth('2018-01');
 
       await setBudgetAmount(page, '2018-01', 200);
-      for (let index = 0; index < 3; index++) {
+      // The new range reaches the page after the budget change syncs, and a
+      // click before that is ignored, so retry the first step until it lands.
+      await expect(async () => {
+        if ((await selected.getAttribute('data-month')) === '2018-01') {
+          await budgetPage.nextMonthButton.click();
+        }
+        await expect(selected).toHaveAttribute('data-month', '2018-02', {
+          timeout: 1000,
+        });
+      }).toPass();
+      for (let index = 0; index < 2; index++) {
         await budgetPage.goToNextMonth();
       }
       await expectLastMonth('2018-04');

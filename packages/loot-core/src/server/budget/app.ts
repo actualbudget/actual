@@ -18,6 +18,7 @@ import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import { editEffects } from './edit-effects';
+import { fxValuation } from './fx-valuation';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -25,6 +26,7 @@ import * as goalNoteActions from './template-notes';
 export type BudgetHandlers = {
   'budget/budget-amount': typeof actions.setBudget;
   'budget/edit-effects': typeof editEffects;
+  'budget/fx-valuation': typeof monthFxValuation;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
   'budget/set-zero': typeof actions.setZero;
@@ -75,6 +77,7 @@ export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
 app.method('budget/edit-effects', editEffects);
+app.method('budget/fx-valuation', monthFxValuation);
 app.method(
   'budget/copy-previous-month',
   mutator(undoable(actions.copyPreviousMonth)),
@@ -521,4 +524,26 @@ async function isCategoryTransferRequired({
 
     return value != null && value !== 0;
   });
+}
+
+/** One month's valuation bridge for its display (MC-8.2). */
+async function monthFxValuation({ month }: { month: string }) {
+  // The bridge needs the months before it for its latest resolved close.
+  const months = sheet.get().meta().createdMonths as Set<string> | undefined;
+  const range = [...(months ?? [])].filter(m => m <= month);
+  return (
+    (await fxValuation(range.length > 0 ? range : [month])).find(
+      entry => entry.month === month,
+    ) ?? {
+      month,
+      opening: 0,
+      closing: 0,
+      flows: 0,
+      posted: 0,
+      broughtForward: 0,
+      incomplete: false,
+      unavailableReason: null,
+      accounts: [],
+    }
+  );
 }
