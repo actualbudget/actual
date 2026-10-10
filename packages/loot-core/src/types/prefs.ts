@@ -117,6 +117,8 @@ export type LocalPrefs = Partial<{
    * back-to-back sync attempts.
    */
   'bankSync.lastAutomaticRun': number;
+  // Pixel widths only fit the screen they were set on, so they are not synced
+  [key: `column-widths-${string}`]: Record<string, number>;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

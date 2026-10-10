@@ -391,4 +391,102 @@ test.describe('Transactions', () => {
       await expect(header).not.toContainText('Notes');
     });
   });
+
+  test.describe('column resizing', () => {
+    test('resizes a column by dragging its handle', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+
+      const newWidth = await accountPage.getColumnWidth('date');
+      expect(newWidth).toBeGreaterThan(initialWidth + 90);
+
+      // Body cells follow the header width via the shared CSS variable
+      const bodyBox = await accountPage.transactionTableRow
+        .first()
+        .locator('[data-column="date"]')
+        .boundingBox();
+      expect(bodyBox?.width).toBeGreaterThan(initialWidth + 90);
+
+      // The new width is persisted and survives a reload
+      await page.reload();
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+    });
+
+    test('resizes a column with the keyboard', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+      const handle = accountPage.getColumnResizeHandle('date');
+
+      await handle.focus();
+      await page.keyboard.press('ArrowRight');
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth);
+    });
+
+    test('leaves every column in place when a handle is clicked without dragging', async () => {
+      const header = page.getByTestId('transaction-table-header');
+      const handle = accountPage.getColumnResizeHandle('date');
+      await expect(handle).toBeAttached();
+      const before = await header
+        .locator('[data-column]')
+        .evaluateAll(columns =>
+          columns.map(column => column.getBoundingClientRect().x),
+        );
+      const selectBefore = await header.getByTestId('select').boundingBox();
+
+      await handle.click();
+
+      await expect
+        .poll(() =>
+          header
+            .locator('[data-column]')
+            .evaluateAll(columns =>
+              columns.map(column => column.getBoundingClientRect().x),
+            ),
+        )
+        .toEqual(before);
+      expect(await header.getByTestId('select').boundingBox()).toEqual(
+        selectBefore,
+      );
+    });
+
+    test('resets a column width on double click', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+
+      await accountPage.getColumnResizeHandle('date').dblclick();
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeLessThan(initialWidth + 20);
+    });
+
+    test('resets every column width from the columns modal', async () => {
+      const initialWidth = await accountPage.getColumnWidth('date');
+
+      await accountPage.resizeColumn('date', 100);
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeGreaterThan(initialWidth + 90);
+
+      const modal = await accountPage.openTransactionColumnsModal();
+      await modal
+        .getByRole('button', { name: 'Reset to default', exact: true })
+        .click();
+      await modal.getByRole('button', { name: 'Save', exact: true }).click();
+      await expect(modal).not.toBeVisible();
+
+      await expect
+        .poll(() => accountPage.getColumnWidth('date'))
+        .toBeLessThan(initialWidth + 20);
+    });
+  });
 });

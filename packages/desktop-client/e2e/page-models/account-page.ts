@@ -138,6 +138,44 @@ export class AccountPage {
   }
 
   /**
+   * Retrieve the resize handle for a header column.
+   */
+  getColumnResizeHandle(columnName: string) {
+    return this.page
+      .getByTestId('transaction-table-header')
+      .getByTestId(`resize-handle-${columnName}`);
+  }
+
+  /**
+   * Measure the rendered width of a column in the table header.
+   */
+  async getColumnWidth(columnName: string) {
+    const box = await this.page
+      .getByTestId('transaction-table-header')
+      .locator(`[data-column="${columnName}"]`)
+      .boundingBox();
+    return box?.width ?? 0;
+  }
+
+  /**
+   * Drag a column's resize handle by `delta` pixels.
+   */
+  async resizeColumn(columnName: string, delta: number) {
+    const handle = this.getColumnResizeHandle(columnName);
+    const box = await handle.boundingBox();
+    if (!box) {
+      throw new Error(`Resize handle for "${columnName}" is not visible`);
+    }
+    const y = box.y + box.height / 2;
+    await this.page.mouse.move(box.x + box.width / 2, y);
+    await this.page.mouse.down();
+    await this.page.mouse.move(box.x + box.width / 2 + delta, y, {
+      steps: 8,
+    });
+    await this.page.mouse.up();
+  }
+
+  /**
    * Retrieve the data for the nth-transaction.
    * 0-based index
    */

@@ -20,12 +20,14 @@ import { Checkbox } from '#components/forms';
 import { TransactionTableColumnListItem } from '#components/modals/TransactionTableColumnListItem';
 import {
   getDefaultTransactionTableColumns,
+  TRANSACTION_TABLE_WIDTHS_ID,
   useTransactionTableColumnLabels,
 } from '#components/transactions/table/columns';
 import type {
   TransactionTableColumn,
   TransactionTableColumnId,
 } from '#components/transactions/table/columns';
+import { useColumnWidthsPref } from '#hooks/useColumnWidths';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type TransactionTableColumnsModalProps = Extract<
@@ -43,6 +45,12 @@ export function TransactionTableColumnsModal({
   const [columns, setColumns] =
     useState<TransactionTableColumn[]>(initialColumns);
   const [applyToAll, setApplyToAll] = useState(false);
+  // Resetting also restores the default column widths, but like the rest of
+  // the modal it only takes effect on save
+  const [resetWidths, setResetWidths] = useState(false);
+  const [, , removeSavedWidths] = useColumnWidthsPref(
+    TRANSACTION_TABLE_WIDTHS_ID,
+  );
 
   const onToggleColumn = (id: TransactionTableColumnId, isVisible: boolean) => {
     setColumns(prev => {
@@ -67,6 +75,7 @@ export function TransactionTableColumnsModal({
         initialColumns.some(c => c.id === column.id),
       ),
     );
+    setResetWidths(true);
   };
 
   const { dragAndDropHooks } = useDragAndDrop({
@@ -199,6 +208,7 @@ export function TransactionTableColumnsModal({
               <Button
                 variant="primary"
                 onPress={() => {
+                  if (resetWidths) removeSavedWidths();
                   onSave(columns, applyToAll);
                   state.close();
                 }}
