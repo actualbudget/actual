@@ -35,6 +35,7 @@ export function FinancialInput({
   onChangeValue,
   onBlur,
   onFocus,
+  onMouseDown,
   onMouseUp,
   onEnter,
   className,
@@ -45,9 +46,11 @@ export function FinancialInput({
   // Like PrivacyFilter, redaction is desktop-only for now
   const { isNarrowWidth } = useResponsive();
   const inputRef = useRef<HTMLInputElement>(null);
-  // Set on focus and cleared by the first mouse-up, so a click that
-  // focuses the field keeps the whole value selected (see handleMouseUp)
-  const didJustFocus = useRef(false);
+  // A mouse-down is in progress; when that is what focuses the field,
+  // the first mouse-up is cancelled so the click keeps the whole value
+  // selected (see handleMouseUp). Keyboard focus leaves clicks alone
+  const isPointerDown = useRef(false);
+  const shouldKeepSelection = useRef(false);
   const [internalValue, setInternalValue] = useState(() =>
     format(integerValue, 'financial'),
   );
@@ -75,18 +78,24 @@ export function FinancialInput({
     setIsFocused(true);
     setInternalValue(format.forEdit(integerValue));
     // The selection itself is made in the layout effect above
-    didJustFocus.current = true;
+    shouldKeepSelection.current = isPointerDown.current;
     onFocus?.(e);
+  };
+
+  const handleMouseDown = (e: MouseEvent<HTMLInputElement>) => {
+    isPointerDown.current = true;
+    onMouseDown?.(e);
   };
 
   const handleMouseUp = (e: MouseEvent<HTMLInputElement>) => {
     // The browser's mouse-up would otherwise replace the selection made
     // on focus with a caret at the click point; later clicks in an
     // already-focused field place the caret as normal
-    if (didJustFocus.current) {
+    if (shouldKeepSelection.current) {
       e.preventDefault();
-      didJustFocus.current = false;
     }
+    shouldKeepSelection.current = false;
+    isPointerDown.current = false;
     onMouseUp?.(e);
   };
 
@@ -150,6 +159,7 @@ export function FinancialInput({
       style={{ ...restProps.style, ...styles.tnum }}
       onChangeValue={handleChange}
       onFocus={handleFocus}
+      onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onBlur={handleBlur}
       onEnter={handleEnter}
