@@ -31,3 +31,7 @@ dist
 .idea
 /coverage
 /coverage-e2e
+
+# Cloudflare Workers build
+cloudflare/dist
+cloudflare/.wrangler

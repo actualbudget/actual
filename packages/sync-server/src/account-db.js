@@ -1,6 +1,12 @@
 import { join, resolve } from 'node:path';
 
-import { bootstrapOpenId } from './accounts/openid';
+import { openDatabase } from '#db';
+
+import {
+  bootstrapOpenId,
+  prepareOpenId,
+  saveOpenIdConfig,
+} from './accounts/openid';
 import {
   bootstrapPassword,
   hashPassword,
@@ -9,7 +15,6 @@ import {
   setPasswordHash,
   verifyPassword,
 } from './accounts/password';
-import { openDatabase } from './db';
 import { config } from './load-config';
 
 let _accountDb;
@@ -100,8 +105,7 @@ export async function bootstrap(loginSettings, forced = false) {
     passwordHash = await hashPassword(loginSettings.password);
   }
 
-  accountDb.mutate('BEGIN TRANSACTION');
-  try {
+  function checkCanBootstrap() {
     const { countOfOwner } =
       accountDb.first(
         `SELECT count(*) as countOfOwner
@@ -111,39 +115,68 @@ export async function bootstrap(loginSettings, forced = false) {
 
     if (!forced && (!openIdEnabled || countOfOwner > 0)) {
       if (!needsBootstrap()) {
-        accountDb.mutate('ROLLBACK');
-        return { error: 'already-bootstrapped' };
+        return 'already-bootstrapped';
       }
     }
 
     if (!passEnabled && !openIdEnabled) {
-      accountDb.mutate('ROLLBACK');
-      return { error: 'no-auth-method-selected' };
+      return 'no-auth-method-selected';
     }
 
     if (passEnabled && openIdEnabled && !forced) {
-      accountDb.mutate('ROLLBACK');
-      return { error: 'max-one-method-allowed' };
+      return 'max-one-method-allowed';
     }
 
-    if (passEnabled) {
-      setPasswordHash(passwordHash);
-    }
-
-    if (openIdEnabled && forced) {
-      const { error } = await bootstrapOpenId(loginSettings.openId);
-      if (error) {
-        accountDb.mutate('ROLLBACK');
-        return { error };
-      }
-    }
-
-    accountDb.mutate('COMMIT');
-    return passEnabled ? await loginWithPassword(loginSettings.password) : {};
-  } catch (error) {
-    accountDb.mutate('ROLLBACK');
-    throw error;
+    return null;
   }
+
+  const precheckError = checkCanBootstrap();
+  if (precheckError) {
+    return { error: precheckError };
+  }
+
+  // Talk to the OpenID provider before writing anything, so the writes below
+  // can happen in a single synchronous transaction (Durable Object SQLite
+  // can't hold a transaction open across an await).
+  let openIdConfig = null;
+  if (openIdEnabled && forced) {
+    const prepared = await prepareOpenId(loginSettings.openId);
+    if ('error' in prepared) {
+      return { error: prepared.error };
+    }
+    openIdConfig = prepared.config;
+  }
+
+  let error = null;
+  try {
+    accountDb.transaction(() => {
+      // Re-check: another request may have bootstrapped while we awaited.
+      error = checkCanBootstrap();
+      if (error) {
+        return;
+      }
+
+      if (passEnabled) {
+        setPasswordHash(passwordHash);
+      }
+
+      if (openIdConfig) {
+        saveOpenIdConfig(openIdConfig);
+      }
+    });
+  } catch (err) {
+    if (openIdConfig) {
+      console.error('Error updating auth table:', err);
+      return { error: 'database-error' };
+    }
+    throw err;
+  }
+
+  if (error) {
+    return { error };
+  }
+
+  return passEnabled ? await loginWithPassword(loginSettings.password) : {};
 }
 
 export function isAdmin(userId) {
