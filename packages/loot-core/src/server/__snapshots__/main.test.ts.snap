@@ -5,7 +5,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
   {
     "acct": "one",
     "amount": 5000,
-    "amount_pair": null,
+    "amount_pair": "5000:@one~",
     "category": null,
     "cleared": 1,
     "date": 20170101,
@@ -33,7 +33,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
   {
     "acct": "two",
     "amount": -5000,
-    "amount_pair": null,
+    "amount_pair": "-5000:@two~",
     "category": null,
     "cleared": 0,
     "date": 20170101,
@@ -68,7 +68,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 @@ -3,12 +3,12 @@
       "acct": "one",
       "amount": 5000,
-      "amount_pair": null,
+      "amount_pair": "5000:@one~",
       "category": null,
       "cleared": 1,
 -     "date": 20170101,
@@ -80,7 +80,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "id": "test-transfer",
       "imported_description": null,
       "isChild": 0,
-@@ -26,11 +26,11 @@
+@@ -26,13 +26,13 @@
       "transaction_amount": null,
       "transferred_id": "id2",
       "type": null,
@@ -89,10 +89,13 @@ exports[`Accounts > Transfers are properly updated 2`] = `
 -     "acct": "two",
 +     "acct": "three",
       "amount": -5000,
-      "amount_pair": null,
+-     "amount_pair": "-5000:@two~",
++     "amount_pair": "-5000:@three~",
       "category": null,
       "cleared": 0,
-      "date": 20170101,"
+      "date": 20170101,
+      "description": "transfer-one",
+      "error": null,"
 `;
 
 exports[`Accounts > Transfers are properly updated 3`] = `

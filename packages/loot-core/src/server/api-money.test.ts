@@ -431,7 +431,7 @@ describe('API foreign pairs', () => {
     ).toEqual({
       amount: -2000,
       transaction_amount: -3000,
-      amount_pair: '-2000:-3000@jpy',
+      amount_pair: '-2000:-3000@jpy~JPY.0',
     });
     await expect(
       handlers['api/transactions-add']({
@@ -503,7 +503,7 @@ describe('API foreign pairs', () => {
     ).toEqual({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500@jpy',
+      amount_pair: '-1000:-1500@jpy~JPY.0',
       notes: 'lunch',
     });
   });

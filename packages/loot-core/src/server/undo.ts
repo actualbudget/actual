@@ -9,7 +9,6 @@ import * as db from './db';
 import { getMutatorContext, withMutatorContext } from './mutators';
 import { sendMessages } from './sync';
 import type { Message } from './sync';
-import { amountPair } from './sync/coupled-cells';
 
 // A marker always sits as the first entry to simplify logic
 type MarkerMessage = { type: 'marker'; meta?: unknown };
@@ -202,16 +201,19 @@ function changesLockedEncoding(messages: Message[]) {
   return messages.some(message => {
     if (
       message.dataset !== 'accounts' ||
-      (message.column !== 'currency' && message.column !== 'currency_precision')
+      (message.column !== 'currency' &&
+        message.column !== 'currency_precision' &&
+        message.column !== 'encoding')
     ) {
       return false;
     }
     const account = db.firstSync<{
       currency: string | null;
       currency_precision: number | null;
+      encoding: string | null;
       currency_locked: number | null;
     }>(
-      'SELECT currency, currency_precision, currency_locked FROM accounts WHERE id = ?',
+      'SELECT currency, currency_precision, encoding, currency_locked FROM accounts WHERE id = ?',
       [message.row],
     );
     return (
@@ -228,8 +230,9 @@ function undoMessage(message, oldData) {
   }
   const oldItem = getIn(oldData, [message.dataset, message.row]);
   if (oldItem) {
-    // A transaction's authority is restored whole, bound to its old account,
-    // even when the captured cell used the MC-3.1 form.
+    // A transaction's authority is restored whole: an account-bound cell
+    // exactly as captured (its encoding stamp included); the MC-3.1 form
+    // bound to its old account, unstamped.
     if (
       message.dataset === 'transactions' &&
       message.column === 'amount_pair' &&
@@ -237,11 +240,9 @@ function undoMessage(message, oldData) {
     ) {
       return {
         ...message,
-        value: amountPair(
-          oldItem.amount,
-          oldItem.transaction_amount ?? null,
-          oldItem.acct,
-        ),
+        value: String(oldItem.amount_pair).includes('@')
+          ? oldItem.amount_pair
+          : `${oldItem.amount}:${oldItem.transaction_amount ?? ''}@${oldItem.acct}`,
       };
     }
     let column = message.column;

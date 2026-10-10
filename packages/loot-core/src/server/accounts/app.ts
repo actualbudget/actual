@@ -60,6 +60,9 @@ import type {
 import {
   correctAccountCurrency,
   previewCurrencyCorrection,
+  previewStaleEncodingRepair,
+  repairStaleEncoding,
+  staleEncodingRows,
 } from './currency-correction';
 import { getCurrentEstimates } from './current-estimates';
 import * as link from './link';
@@ -90,6 +93,9 @@ export type AccountHandlers = {
   'accounts/current-estimates': typeof getCurrentEstimates;
   'accounts/currency-correction-preview': typeof previewCurrencyCorrection;
   'accounts/correct-currency': typeof correctAccountCurrency;
+  'accounts/stale-encoding': typeof staleEncodingRows;
+  'accounts/stale-encoding-preview': typeof previewStaleEncodingRepair;
+  'accounts/repair-stale-encoding': typeof repairStaleEncoding;
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
@@ -334,7 +340,7 @@ async function linkBankAccount({
         bank: bank.id,
         offbudget: offBudget ? 1 : 0,
         account_sync_source: syncSource,
-        ...(currency !== null && (await accountCurrencyFields(currency))),
+        ...(await accountCurrencyFields(currency)),
       });
       await db.insertPayee({
         name: '',
@@ -1919,6 +1925,9 @@ app.method('account-balance', getAccountBalance);
 app.method('accounts/current-estimates', getCurrentEstimates);
 app.method('accounts/currency-correction-preview', previewCurrencyCorrection);
 app.method('accounts/correct-currency', mutator(correctAccountCurrency));
+app.method('accounts/stale-encoding', staleEncodingRows);
+app.method('accounts/stale-encoding-preview', previewStaleEncodingRepair);
+app.method('accounts/repair-stale-encoding', mutator(repairStaleEncoding));
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);
