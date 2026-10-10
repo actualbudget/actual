@@ -20,9 +20,17 @@ const debugSensitive = createDebug('actual-sensitive:gocardless');
 const BASE_URL = 'https://bankaccountdata.gocardless.com/api/v2';
 const ALLOWED_ORIGIN = new URL(BASE_URL).origin;
 
+// Refresh the access token this many seconds before it actually expires, so
+// requests never race a token that expires mid-flight.
+const TOKEN_REFRESH_BUFFER_SECONDS = 60;
+
+function nowInSeconds(): number {
+  return Math.floor(Date.now() / 1000);
+}
+
 export type TokenResponse = {
   access: string;
-  refresh: string;
+  refresh?: string;
   access_expires: number;
   refresh_expires: number;
 };
@@ -71,6 +79,9 @@ export class GoCardlessApi {
   #secretId: string | null;
   #secretKey: string | null;
   #token: string | null = null;
+  #refreshToken: string | null = null;
+  #accessExpiresAt: number | null = null;
+  #refreshPromise: Promise<void> | null = null;
 
   constructor({
     secretId,
@@ -95,8 +106,46 @@ export class GoCardlessApi {
     return this.#token;
   }
 
-  set token(value: string | null) {
-    this.#token = value;
+  #storeTokenResponse(data: TokenResponse): void {
+    this.#token = data.access;
+    this.#accessExpiresAt = nowInSeconds() + data.access_expires;
+    if (data.refresh) {
+      this.#refreshToken = data.refresh;
+    }
+  }
+
+  async #refreshIfNeeded(): Promise<void> {
+    if (
+      this.#accessExpiresAt !== null &&
+      nowInSeconds() + TOKEN_REFRESH_BUFFER_SECONDS < this.#accessExpiresAt
+    ) {
+      return;
+    }
+
+    if (this.#refreshPromise) {
+      return this.#refreshPromise;
+    }
+
+    this.#refreshPromise = (async () => {
+      try {
+        if (this.#refreshToken) {
+          try {
+            await this.exchangeToken({ refreshToken: this.#refreshToken });
+            return;
+          } catch (err) {
+            console.log(
+              'GoCardless token refresh failed, falling back to generateToken()',
+              err,
+            );
+          }
+        }
+        await this.generateToken();
+      } finally {
+        this.#refreshPromise = null;
+      }
+    })();
+
+    return this.#refreshPromise;
   }
 
   async #request<T>(
@@ -111,6 +160,10 @@ export class GoCardlessApi {
       isRetry?: boolean;
     } = {},
   ): Promise<T> {
+    if (!endpoint.startsWith('/token/')) {
+      await this.#refreshIfNeeded();
+    }
+
     const headers: Record<string, string> = {
       accept: 'application/json',
       'Content-Type': 'application/json',
@@ -180,7 +233,7 @@ export class GoCardlessApi {
         secret_key: this.#secretKey,
       },
     });
-    this.#token = data.access;
+    this.#storeTokenResponse(data);
     return data;
   }
 
@@ -193,7 +246,7 @@ export class GoCardlessApi {
       method: 'POST',
       body: { refresh: refreshToken },
     });
-    this.#token = data.access;
+    this.#storeTokenResponse(data);
     return data;
   }
 
