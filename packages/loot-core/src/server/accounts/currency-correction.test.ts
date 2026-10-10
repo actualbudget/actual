@@ -159,7 +159,7 @@ describe('converting existing amounts', () => {
     expect(stored('a')).toMatchObject({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500@usd',
+      amount_pair: '-1000:-1500@usd~JPY.0',
     });
     expect(stored('b')).toMatchObject({
       amount: 2500,

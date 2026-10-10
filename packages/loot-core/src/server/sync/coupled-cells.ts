@@ -7,9 +7,13 @@ import { parseRate } from '#shared/exchange-rate';
 // transaction (and after deferred replay or budget load) the dependent
 // columns are recomputed from that cell as plain SQL, without new messages.
 // Every device derives the same values from the same winning cell.
-type CoupledTable = {
+type Coupled = {
+  table: string;
   authority: string;
-  derive: (value: unknown) => Record<string, string | number | null> | null;
+  derive: (
+    value: unknown,
+    row: Record<string, unknown>,
+  ) => Record<string, string | number | null> | null;
 };
 
 const RATE_KINDS = new Set(['dated', 'standing', 'fetched']);
@@ -44,15 +48,102 @@ function deriveExchangeRate(value: unknown) {
 }
 
 /**
- * A transaction's amount authority: `amount:native@account`, binding the
- * account with both amounts so a move and an edit made on different devices
- * resolve as one unit. Native is empty for a budget-currency account. The
- * MC-3.1 form `amount:native` (no account) stays readable.
+ * An account's encoding as one value: `''` for the budget currency (its
+ * recorded precision), `CUR.P` for a foreign account.
+ */
+export function encodingOf(
+  currency: string | null,
+  precision: number | null,
+): string {
+  return currency === null ? '' : `${currency}.${precision}`;
+}
+
+/**
+ * The account encoding every reader uses: the authority when well formed,
+ * else the one the currency columns name (a malformed cell is ignored, as
+ * derivation ignores it).
+ */
+export function effectiveEncoding(
+  encoding: unknown,
+  currency: string | null,
+  precision: number | null,
+): string {
+  return parseEncoding(encoding) !== null
+    ? (encoding as string)
+    : encodingOf(currency, precision);
+}
+
+function parseEncoding(
+  value: unknown,
+): { currency: string | null; currency_precision: number | null } | null {
+  if (value === '') return { currency: null, currency_precision: null };
+  if (typeof value !== 'string') return null;
+  const match = /^([A-Z]{3})\.(\d{1,2})$/.exec(value);
+  if (!match) return null;
+  const precision = Number(match[2]);
+  return precision > 15
+    ? null
+    : { currency: match[1], currency_precision: precision };
+}
+
+/**
+ * Cached bank balances as one value, stamped with the encoding they were
+ * written in: `current:available:limit~ENC`, each integer possibly empty.
+ */
+export function balanceSpec(
+  balances: {
+    balance_current: number | null;
+    balance_available: number | null;
+    balance_limit: number | null;
+  },
+  encoding: string,
+): string {
+  const part = (value: number | null) => {
+    if (value !== null && !Number.isSafeInteger(value)) {
+      throw new Error('amount-invalid');
+    }
+    return value ?? '';
+  };
+  return `${part(balances.balance_current)}:${part(balances.balance_available)}:${part(balances.balance_limit)}~${encoding}`;
+}
+
+function deriveBalances(value: unknown, row: Record<string, unknown>) {
+  if (typeof value !== 'string') return null;
+  const match = /^(-?\d*):(-?\d*):(-?\d*)~(.*)$/.exec(value);
+  if (!match) return null;
+  const [, current, available, limit, stamp] = match;
+  const integer = (text: string) => (text === '' ? null : Number(text));
+  const values = [current, available, limit].map(integer);
+  if (values.some(v => v !== null && !Number.isSafeInteger(v))) return null;
+  // Balances written in another encoding than the account's are absent.
+  const matches =
+    stamp ===
+    effectiveEncoding(
+      row.encoding,
+      (row.currency as string | null) ?? null,
+      (row.currency_precision as number | null) ?? null,
+    );
+  return {
+    balance_current: matches ? values[0] : null,
+    balance_available: matches ? values[1] : null,
+    balance_limit: matches ? values[2] : null,
+  };
+}
+
+/**
+ * A transaction's amount authority: `amount:native@account~ENC`, binding the
+ * account and the encoding its integers were written in with both amounts,
+ * so a move and an edit made on different devices resolve as one unit, and
+ * a row written under an account's previous encoding is detectable. Native
+ * is empty for a budget-currency account, whose stamp is empty. The MC-3.1
+ * form `amount:native` and the MC-5.1 form `amount:native@account` stay
+ * readable and carry no stamp.
  */
 export function amountPair(
   amount: number,
   transactionAmount: number | null,
   account: string,
+  encoding: string,
 ): string {
   if (
     !Number.isSafeInteger(amount) ||
@@ -60,7 +151,17 @@ export function amountPair(
   ) {
     throw new Error('foreign-pair-required');
   }
-  return `${amount}:${transactionAmount ?? ''}@${account}`;
+  return `${amount}:${transactionAmount ?? ''}@${account}~${encoding}`;
+}
+
+/** The encoding a pair is stamped with, or undefined for unstamped forms. */
+export function pairEncoding(value: unknown): string | undefined {
+  if (typeof value !== 'string' || !deriveTransactionAmounts(value)) {
+    return undefined;
+  }
+  const match = /@[^~]+~(.*)$/.exec(value);
+  // A malformed stamp names no encoding: the pair counts as unstamped.
+  return match && parseEncoding(match[1]) !== null ? match[1] : undefined;
 }
 
 export function parseAmountPair(value: unknown): {
@@ -73,7 +174,7 @@ export function parseAmountPair(value: unknown): {
 
 function deriveTransactionAmounts(value: unknown) {
   if (typeof value !== 'string') return null;
-  const match = /^(-?\d+):(-?\d*)(?:@(.+))?$/.exec(value);
+  const match = /^(-?\d+):(-?\d*)(?:@([^~]+)(?:~[^~]*)?)?$/.exec(value);
   if (!match) return null;
   const [, base, native, account] = match;
   // Only the account-bound form may leave native empty.
@@ -93,25 +194,35 @@ function deriveTransactionAmounts(value: unknown) {
   };
 }
 
-const COUPLED_TABLES: Record<string, CoupledTable> = {
-  exchange_rates: { authority: 'spec', derive: deriveExchangeRate },
-  transactions: { authority: 'amount_pair', derive: deriveTransactionAmounts },
-};
+// In order: account encodings before the balances stamped with them and the
+// transaction pairs and exchange bases that read them.
+const COUPLED: Coupled[] = [
+  { table: 'exchange_rates', authority: 'spec', derive: deriveExchangeRate },
+  { table: 'accounts', authority: 'encoding', derive: parseEncoding },
+  { table: 'accounts', authority: 'balance_spec', derive: deriveBalances },
+  {
+    table: 'transactions',
+    authority: 'amount_pair',
+    derive: deriveTransactionAmounts,
+  },
+];
 
 function deriveRows(
   table: string,
-  { authority, derive }: CoupledTable,
+  { authority, derive }: Coupled,
   rows: Array<Record<string, unknown>>,
 ): boolean {
   let changedAny = false;
   for (const row of rows) {
-    const derived = derive(row[authority]);
+    const derived = derive(row[authority], row);
     if (!derived) continue;
     const changed = Object.entries(derived).filter(
       ([column, value]) => row[column] !== value,
     );
     if (changed.length === 0) continue;
     changedAny = true;
+    // Later authorities of the same row read the derived values.
+    Object.assign(row, derived);
     db.runQuery(
       `UPDATE ${table} SET ${changed.map(([column]) => `${column} = ?`).join(', ')} WHERE id = ?`,
       [...changed.map(([, value]) => value), row.id as string],
@@ -183,9 +294,10 @@ export function withTransferCounterparts(
 
 /** Recompute dependent columns for the rows touched by an apply batch. */
 export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
-  for (const [table, ids] of Object.entries(idsPerTable)) {
-    const coupled = COUPLED_TABLES[table];
-    if (!coupled || ids.length === 0) continue;
+  for (const coupled of COUPLED) {
+    const { table } = coupled;
+    const ids = idsPerTable[table] ?? [];
+    if (ids.length === 0) continue;
     const unique = [...new Set(ids)];
     // Chunk to stay well inside SQLite's bound-parameter limit.
     for (let i = 0; i < unique.length; i += 500) {
@@ -193,7 +305,8 @@ export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
       let rows;
       try {
         rows = db.runQuery<Record<string, unknown>>(
-          `SELECT * FROM ${table} WHERE id IN (${chunk.map(() => '?').join(', ')})`,
+          `SELECT * FROM ${table} WHERE id IN (${chunk.map(() => '?').join(', ')})
+             AND ${coupled.authority} IS NOT NULL`,
           chunk,
           true,
         );
@@ -229,7 +342,8 @@ export function deriveCoupledCellsForLoad() {
  */
 export function deriveAllCoupledCells(): Set<string> {
   const changedTables = new Set<string>();
-  for (const [table, coupled] of Object.entries(COUPLED_TABLES)) {
+  for (const coupled of COUPLED) {
+    const { table } = coupled;
     try {
       const changed = deriveRows(
         table,

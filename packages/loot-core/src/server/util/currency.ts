@@ -1,5 +1,6 @@
 import * as db from '#server/db';
 import * as prefs from '#server/prefs';
+import { encodingOf } from '#server/sync/coupled-cells';
 import {
   isReviewedCurrency,
   parseAmountEncoding,
@@ -41,11 +42,17 @@ export async function assertBaseCurrencyChangeAllowed(
  * and, for the first explicit currency, the permanent base-currency lock in
  * the same message batch.
  */
-export async function accountCurrencyFields(
-  currency: string | null,
-): Promise<{ currency: string | null; currency_precision: number | null }> {
+/**
+ * The stored fields of an account's currency, its encoding authority
+ * included (MC-7.3), written together in one batch.
+ */
+export async function accountCurrencyFields(currency: string | null): Promise<{
+  currency: string | null;
+  currency_precision: number | null;
+  encoding: string;
+}> {
   if (currency === null) {
-    return { currency: null, currency_precision: null };
+    return { currency: null, currency_precision: null, encoding: '' };
   }
   if ((await getBaseCurrencyLock()) === null) {
     await db.update('preferences', {
@@ -53,9 +60,11 @@ export async function accountCurrencyFields(
       value: await getDefaultCurrencyCode(),
     });
   }
+  const precision = reviewedAmountEncoding(currency).precision;
   return {
     currency,
-    currency_precision: reviewedAmountEncoding(currency).precision,
+    currency_precision: precision,
+    encoding: encodingOf(currency, precision),
   };
 }
 
