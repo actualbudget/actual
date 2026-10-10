@@ -65,6 +65,7 @@
     "#components/reports/graphs/showActivity": "./src/components/reports/graphs/showActivity.ts",
     "#components/reports/graphs/util/computePadding": "./src/components/reports/graphs/util/computePadding.ts",
     "#components/reports/graphs/util/monteCarloCashflowChart": "./src/components/reports/graphs/util/monteCarloCashflowChart.ts",
+    "#components/reports/graphs/util/monteCarloPotBalancesChart": "./src/components/reports/graphs/util/monteCarloPotBalancesChart.ts",
     "#components/reports/graphs/util/useMonteCarloTickFormatter": "./src/components/reports/graphs/util/useMonteCarloTickFormatter.ts",
     "#components/reports/numberFormatter": "./src/components/reports/numberFormatter.ts",
     "#components/reports/ReportOptions": "./src/components/reports/ReportOptions.ts",
