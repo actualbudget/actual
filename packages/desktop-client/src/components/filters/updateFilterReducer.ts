@@ -1,6 +1,23 @@
 import { FIELD_TYPES, makeValue } from '@actual-app/core/shared/rules';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
+import {
+  normalizeAmountRange,
+  normalizeDateRange,
+} from '#components/util/betweenRange';
+
+// Deliberately looser than a complete range: a half-formed `{ num1 }` still
+// has to be unwrapped when the op moves away from `isbetween`
+function isRangeLike(
+  value: unknown,
+): value is { num1?: unknown; num2?: unknown } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('num1' in value || 'num2' in value)
+  );
+}
+
 export function updateFilterReducer<T extends RuleConditionEntity>(
   state: Pick<T, 'op' | 'field'> & { value: T['value'] | null },
   action:
@@ -11,6 +28,31 @@ export function updateFilterReducer<T extends RuleConditionEntity>(
     case 'set-op': {
       const type = FIELD_TYPES.get(state.field);
       let value = state.value;
+
+      // `isbetween` holds a pair of bounds instead of a single value, so the
+      // value has to be converted whenever the op moves in or out of it
+      if (type === 'date' || type === 'number') {
+        if (action.op === 'isbetween') {
+          // New filters start out with an empty value, and a stored one can
+          // arrive with only a single bound
+          value = (
+            type === 'date'
+              ? normalizeDateRange(value)
+              : normalizeAmountRange(value)
+          ) as T['value'];
+        } else if (isRangeLike(value)) {
+          // Normalizing first keeps the bound a half-formed range does have,
+          // rather than dropping straight to the empty default
+          value = (
+            type === 'date'
+              ? normalizeDateRange(value)
+              : normalizeAmountRange(value)
+          ).num1 as T['value'];
+        }
+
+        return { ...state, op: action.op, value };
+      }
+
       if (
         (type === 'id' || type === 'string') &&
         state.field !== 'notes' &&
