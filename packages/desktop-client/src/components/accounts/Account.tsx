@@ -918,7 +918,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'change-currency',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -971,6 +972,13 @@ class AccountInternal extends PureComponent<
         break;
       case 'reopen':
         this.props.onReopenAccount(accountId);
+        break;
+      case 'change-currency':
+        this.props.dispatch(
+          pushModal({
+            modal: { name: 'currency-correction', options: { accountId } },
+          }),
+        );
         break;
       case 'export':
         const accountName = this.getAccountTitle(account, accountId);

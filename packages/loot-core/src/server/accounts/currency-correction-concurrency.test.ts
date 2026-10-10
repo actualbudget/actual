@@ -503,6 +503,21 @@ describe('repair', () => {
     expect(pairEncoding(stored('leg').amount_pair)).toBe('');
   });
 
+  it("lists the account's own currency when a repair lacks its rate", async () => {
+    // Rates move to a later standing date, so the stale row's date has none.
+    db.runQuery(
+      "UPDATE exchange_rates SET timestamp = '2018-01-01T00:00:00.000Z'",
+    );
+    await applyMessages(remoteRow('r', 'usd', '-600:@usd~'));
+    const preview = await previewStaleEncodingRepair({
+      account: 'usd',
+      mode: 'convert',
+    });
+    expect(preview.missingRateQuotes).toEqual([
+      { date: '2017-01-10', currency: 'JPY' },
+    ]);
+  });
+
   it('goes stale on a stamp change or a mode switch after the preview', async () => {
     await applyMessages(remoteRow('r', 'usd', '-600:@usd~'));
     const preview = await previewStaleEncodingRepair({

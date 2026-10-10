@@ -646,6 +646,18 @@ export type Modal =
       };
     }
   | {
+      name: 'currency-correction';
+      options: { accountId: string };
+    }
+  | {
+      name: 'stale-encoding-repair';
+      options: {
+        accountId: string;
+        /** Called after a repair that wrote rows. */
+        onRepaired?: () => void;
+      };
+    }
+  | {
       name: 'foreign-move';
       options: {
         /** A single row moving to an account in another currency. */

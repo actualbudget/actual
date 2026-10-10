@@ -303,6 +303,14 @@ export async function previewCurrencyCorrection({
   // Valuation dates without a rate or explicit value: a row's own date, or
   // its family's (the parent's) date.
   const missing = new Set<string>();
+  // Which quote each missing date lacks, for the dialog's rate forms.
+  const missingQuotes = new Set<string>();
+  const missingRow = (date: string) => {
+    missing.add(date);
+    if (target.currency !== null) {
+      missingQuotes.add(`${date}|${target.currency}`);
+    }
+  };
   const explicit = (id: string) => {
     const value = amounts[id];
     if (value === undefined) return undefined;
@@ -414,7 +422,7 @@ export async function previewCurrencyCorrection({
       }
     }
     results.set(row.id, result);
-    if (!result.after) missing.add(valuationDate);
+    if (!result.after) missingRow(valuationDate);
   }
 
   async function family(parent: StoredRow, children: StoredRow[]) {
@@ -433,7 +441,7 @@ export async function previewCurrencyCorrection({
     const record = () => {
       for (const result of members) results.set(result.id, result);
       if (!parentResult.after && !parentResult.error) {
-        missing.add(parentResult.date);
+        missingRow(parentResult.date);
       }
     };
     // Allocation needs a family whose children add up to its parent.
@@ -1151,6 +1159,17 @@ export async function previewCurrencyCorrection({
       if (given === undefined) {
         result.after = null;
         missing.add(schedule.date);
+        // Both quotes are checked, so every failing one is listed.
+        if (
+          mode === 'convert' &&
+          source.currency !== null &&
+          !(await rateFor(source.currency, schedule.date))
+        ) {
+          missingQuotes.add(`${schedule.date}|${source.currency}`);
+        }
+        if (target.currency !== null && !(await rateAt(schedule.date))) {
+          missingQuotes.add(`${schedule.date}|${target.currency}`);
+        }
         return result;
       }
       next = given;
@@ -1177,6 +1196,10 @@ export async function previewCurrencyCorrection({
   ];
   // Only unresolved rows, families and schedules without errors were added.
   const missingRates = [...missing].sort();
+  const missingRateQuotes = [...missingQuotes].sort().map(key => {
+    const [date, currency] = key.split('|');
+    return { date, currency };
+  });
 
   // Bases change only in Keep mode; deleted rows and orphans post nothing.
   const effects =
@@ -1303,6 +1326,7 @@ export async function previewCurrencyCorrection({
     rows,
     schedules,
     missingRates,
+    missingRateQuotes,
     effects,
     reconciled,
     fingerprint,
