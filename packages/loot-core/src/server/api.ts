@@ -21,6 +21,7 @@ import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
   CategoryGroupEntity,
+  RecurConfig,
   ScheduleEntity,
 } from '#types/models';
 import type { ServerHandlers } from '#types/server-handlers';
@@ -47,6 +48,7 @@ import * as db from './db';
 import { APIError, withErrorCode } from './errors';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
+import { getScheduleDates } from './schedules/occurrences';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
 
@@ -117,6 +119,41 @@ async function validateExpenseCategory(debug, id) {
 
   if (row.is_income !== 0) {
     throw APIError(`${debug}: category "${id}" is not an expense category`);
+  }
+}
+
+function validateDay(name: string, value: string) {
+  if (typeof value !== 'string' || !monthUtils.isValidYearMonthDay(value)) {
+    throw APIError(`Invalid ${name}, use YYYY-MM-DD: ${value}`);
+  }
+}
+
+function validateScheduleDate(date: RecurConfig | string) {
+  if (typeof date === 'string') {
+    validateDay('schedule date', date);
+    return;
+  }
+  if (date == null || typeof date !== 'object') {
+    throw APIError('date must be a YYYY-MM-DD string or a RecurConfig');
+  }
+
+  validateDay('recurrence start date', date.start);
+  if (
+    date.interval != null &&
+    !(Number.isInteger(date.interval) && date.interval > 0)
+  ) {
+    throw APIError(`interval must be a positive integer: ${date.interval}`);
+  }
+  if (date.endMode === 'on_date') {
+    validateDay('recurrence end date', date.endDate);
+  }
+  if (
+    date.endMode === 'after_n_occurrences' &&
+    !(Number.isInteger(date.endOccurrences) && date.endOccurrences > 0)
+  ) {
+    throw APIError(
+      `endOccurrences must be a positive integer: ${date.endOccurrences}`,
+    );
   }
 }
 
@@ -930,6 +967,31 @@ handlers['api/schedules-get'] = async function () {
   const { data } = await aqlQuery(q('schedules').select('*'));
   const schedules = data as ScheduleEntity[];
   return schedules.map(schedule => scheduleModel.toExternal(schedule));
+};
+
+handlers['api/schedule-dates-get'] = async function ({
+  date,
+  start = monthUtils.currentDay(),
+  end,
+  count,
+}) {
+  validateScheduleDate(date);
+  validateDay('start date', start);
+  if (end != null) {
+    validateDay('end date', end);
+    if (end < start) {
+      throw APIError(`end (${end}) is before start (${start})`);
+    }
+  }
+  if (count != null && !(Number.isInteger(count) && count >= 0)) {
+    throw APIError(`count must be a non-negative integer: ${count}`);
+  }
+
+  try {
+    return getScheduleDates(date, { start, end, count });
+  } catch (error) {
+    throw APIError(`Cannot expand schedule date: ${error.message}`);
+  }
 };
 
 handlers['api/schedule-create'] = withMutation(async function (
