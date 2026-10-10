@@ -232,6 +232,9 @@ export function ExperimentalFeatures() {
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
+            <FeatureToggle flag="apiTokens">
+              <Trans>API tokens</Trans>
+            </FeatureToggle>
             <FeatureToggle
               flag="monteCarloReport"
               feedbackLink="https://github.com/actualbudget/actual/issues/8571"
