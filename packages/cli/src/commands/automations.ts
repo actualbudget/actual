@@ -164,6 +164,12 @@ async function storeTemplates(
   } as never);
 }
 
+/** api.getNote resolves to a { id, note } row (or null), not a bare string. */
+async function readNote(categoryId: string): Promise<string> {
+  const row = await api.getNote(categoryId);
+  return isRecord(row) && typeof row.note === 'string' ? row.note : '';
+}
+
 function templateErrors(templates: Template[]): string[] {
   return templates
     .filter(t => t.type === 'error')
@@ -345,14 +351,8 @@ export function registerAutomationsCommand(program: Command) {
         opts,
         async () => {
           const id = await resolveId('categories', category);
-          const currentNote = (await api.getNote(id)) as
-            | string
-            | null
-            | undefined;
-          const note = appendTemplateLines(
-            typeof currentNote === 'string' ? currentNote : '',
-            lines,
-          );
+          const currentNote = await readNote(id);
+          const note = appendTemplateLines(currentNote, lines);
           // Switch the category back to note-driven templates, write the
           // note, then let loot-core parse it into goal_def.
           await storeTemplates(id, [], 'notes');
@@ -388,14 +388,8 @@ export function registerAutomationsCommand(program: Command) {
         opts,
         async () => {
           const id = await resolveId('categories', category);
-          const currentNote = (await api.getNote(id)) as
-            | string
-            | null
-            | undefined;
-          if (
-            typeof currentNote === 'string' &&
-            currentNote.split('\n').some(l => TEMPLATE_LINE.test(l))
-          ) {
+          const currentNote = await readNote(id);
+          if (currentNote.split('\n').some(l => TEMPLATE_LINE.test(l))) {
             await api.updateNote(id, stripTemplateLines(currentNote));
           }
           await storeTemplates(id, [], 'notes');
