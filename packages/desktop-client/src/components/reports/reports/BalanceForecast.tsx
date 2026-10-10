@@ -117,6 +117,9 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
+  const [yAxisBase, setYaxisbase] = useState<'Zero Based' | 'Auto'>(
+    widget?.meta?.yAxisBase ?? 'Zero Based',
+  );
   const [source, setSource] = useState<ForecastSource>(
     widget?.meta?.source === 'tracking-budget' && budgetType === 'tracking'
       ? 'tracking-budget'
@@ -184,6 +187,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         startDate: start,
         endDate: end,
         granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
+        yAxisBase,
         source,
         timeFrame: {
           start,
@@ -355,6 +359,15 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         options={[
           ['Monthly', t('Monthly')],
           ['Daily', t('Daily')],
+        ]}
+      />
+      <Select
+        value={yAxisBase}
+        onChange={setYaxisbase}
+        disabled={isTrackingBudgetForecast}
+        options={[
+          ['Zero Based', t('Zero Based')],
+          ['Auto', t('Auto')],
         ]}
       />
     </>
@@ -544,7 +557,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         }}
                       />
                       <YAxis
-                        domain={['auto', 'auto']}
+                        // if hasNegativeBalance, the builtin behavior of recharts (allowDataOverflow = false), prevents data from being hidden "under" the axis
+                        domain={[
+                          yAxisBase === 'Zero Based' ? 0 : 'auto',
+                          'auto',
+                        ]} //
                         tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}
