@@ -110,8 +110,17 @@ export function MonteCarloNumberInput({
       onFocus={() => {
         setIsFocused(true);
         // Highlight the whole value so typing replaces it, matching the
-        // currency inputs
-        setTimeout(() => inputRef.current?.select(), 0);
+        // currency inputs. Deferred so a mouse click's own selection
+        // doesn't undo it - but only if focus is still here when the timer
+        // fires: select() also focuses, so selecting a field the user has
+        // already tabbed away from would pull focus back and set the two
+        // fields bouncing focus between each other
+        setTimeout(() => {
+          const input = inputRef.current;
+          if (input != null && document.activeElement === input) {
+            input.select();
+          }
+        }, 0);
       }}
       onBlur={event => {
         setIsFocused(false);

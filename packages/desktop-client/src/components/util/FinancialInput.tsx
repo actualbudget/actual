@@ -58,8 +58,15 @@ export function FinancialInput({
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
     setInternalValue(format.forEdit(integerValue));
+    // Deferred so a mouse click's own selection doesn't undo it, but only
+    // while the field still has focus: select() also focuses, so a field
+    // the user has already tabbed away from would pull focus back and the
+    // two fields would bounce focus between each other
     setTimeout(() => {
-      inputRef.current?.select();
+      const input = inputRef.current;
+      if (input != null && document.activeElement === input) {
+        input.select();
+      }
     }, 0);
     onFocus?.(e);
   };
