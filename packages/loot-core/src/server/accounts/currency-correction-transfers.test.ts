@@ -1187,3 +1187,85 @@ describe('schedules', () => {
     ).toEqual({ status: 'stale' });
   });
 });
+
+describe('missing rate quotes', () => {
+  const monthly = {
+    start: '2017-01-10',
+    frequency: 'monthly' as const,
+    patterns: [],
+    skipWeekend: false,
+    weekendSolveMode: 'after' as const,
+    endMode: 'never' as const,
+  };
+  const scheduleOf = (account: string, amount: number) =>
+    createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'isapprox', field: 'date', value: monthly },
+        { op: 'is', field: 'amount', value: amount },
+      ],
+    });
+  const setDate = (id: string, date: number) =>
+    db.runQuery('UPDATE transactions SET date = ? WHERE id = ?', [date, id]);
+
+  it("lists a schedule's missing source rate for a correction to the budget currency", async () => {
+    row('a', 'jpy', -1000, -1500);
+    await scheduleOf('jpy', -1500);
+    const preview = await previewCurrencyCorrection({
+      account: 'jpy',
+      currency: null,
+      mode: 'convert',
+    });
+    expect(preview.missingRateQuotes).toEqual([
+      { date: '2017-01-10', currency: 'JPY' },
+    ]);
+  });
+
+  it('lists only the quote that fails', async () => {
+    row('a', 'jpy', -1000, -1500);
+    await scheduleOf('jpy', -1500);
+    await saveRate('EUR', '0.9');
+    const one = await previewCurrencyCorrection({
+      account: 'jpy',
+      currency: 'EUR',
+      mode: 'convert',
+    });
+    expect(one.missingRateQuotes).toEqual([
+      { date: '2017-01-10', currency: 'JPY' },
+    ]);
+  });
+
+  it('lists both quotes of a schedule when neither rate exists', async () => {
+    await scheduleOf('jpy', -1500);
+    const preview = await previewCurrencyCorrection({
+      account: 'jpy',
+      currency: 'EUR',
+      mode: 'convert',
+    });
+    expect(preview.missingRateQuotes).toEqual([
+      { date: '2017-01-10', currency: 'EUR' },
+      { date: '2017-01-10', currency: 'JPY' },
+    ]);
+  });
+
+  it('sorts dates and uses a family parent date', async () => {
+    row('a', 'usd', -1000, null);
+    row('b', 'usd', -2000, null);
+    setDate('a', 20170301);
+    setDate('b', 20170105);
+    row('p', 'usd', -900, null, { isParent: true });
+    row('c1', 'usd', -400, null, { parent: 'p' });
+    row('c2', 'usd', -500, null, { parent: 'p' });
+    setDate('c2', 20170220);
+    const preview = await previewCurrencyCorrection({
+      account: 'usd',
+      currency: 'JPY',
+      mode: 'convert',
+    });
+    expect(preview.missingRateQuotes).toEqual([
+      { date: '2017-01-05', currency: 'JPY' },
+      { date: '2017-01-10', currency: 'JPY' },
+      { date: '2017-03-01', currency: 'JPY' },
+    ]);
+  });
+});

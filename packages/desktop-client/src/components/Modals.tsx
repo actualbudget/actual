@@ -38,6 +38,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { CurrencyCorrectionModal } from './modals/CurrencyCorrectionModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
@@ -82,6 +83,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StaleEncodingRepairModal } from './modals/StaleEncodingRepairModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -168,6 +170,12 @@ export function Modals() {
 
         case 'foreign-move':
           return <ForeignMoveModal key={key} {...modal.options} />;
+
+        case 'currency-correction':
+          return <CurrencyCorrectionModal key={key} {...modal.options} />;
+
+        case 'stale-encoding-repair':
+          return <StaleEncodingRepairModal key={key} {...modal.options} />;
 
         case 'foreign-split':
           return <ForeignSplitModal key={key} {...modal.options} />;
