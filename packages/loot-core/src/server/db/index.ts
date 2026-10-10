@@ -29,6 +29,7 @@ import {
   toDateRepr,
 } from '#server/models';
 import { batchMessages, getBatchedValue, sendMessages } from '#server/sync';
+import { balanceSpec, effectiveEncoding } from '#server/sync/coupled-cells';
 import { validateTransactionWrite } from '#server/transactions/foreign-guard';
 import type { TransactionWriteOptions } from '#server/transactions/foreign-guard';
 import { accountCurrencyFields } from '#server/util/currency';
@@ -754,7 +755,8 @@ export async function insertAccount(account) {
     });
     return id;
   }
-  return insertAccountRow(account);
+  // An account inheriting the budget currency still records its encoding.
+  return insertAccountRow({ ...account, encoding: '' });
 }
 
 async function insertAccountRow(account) {
@@ -770,17 +772,80 @@ async function insertAccountRow(account) {
   return insertWithUUID('accounts', account);
 }
 
+const BALANCE_COLUMNS = [
+  'balance_current',
+  'balance_available',
+  'balance_limit',
+] as const;
+
+/**
+ * The bank balance authority for an account update that writes any cached
+ * balance (MC-7.3): all three integers, the unchanged ones read from the
+ * row, stamped with the account's encoding (the update's own, when it also
+ * changes the currency).
+ */
+export async function balanceSpecFields(
+  id: string,
+  changes: Record<string, unknown>,
+): Promise<{ balance_spec?: string }> {
+  if (!BALANCE_COLUMNS.some(column => column in changes)) return {};
+  const row = await first<
+    Pick<
+      DbAccount,
+      | 'balance_current'
+      | 'balance_available'
+      | 'balance_limit'
+      | 'encoding'
+      | 'currency'
+      | 'currency_precision'
+    >
+  >(
+    `SELECT balance_current, balance_available, balance_limit, encoding,
+       currency, currency_precision FROM accounts WHERE id = ?`,
+    [id],
+  );
+  const value = (column: (typeof BALANCE_COLUMNS)[number]) =>
+    ((column in changes ? changes[column] : row?.[column]) ?? null) as
+      | number
+      | null;
+  const encoding =
+    typeof changes.encoding === 'string'
+      ? changes.encoding
+      : effectiveEncoding(
+          row?.encoding,
+          row?.currency ?? null,
+          row?.currency_precision ?? null,
+        );
+  return {
+    balance_spec: balanceSpec(
+      {
+        balance_current: value('balance_current'),
+        balance_available: value('balance_available'),
+        balance_limit: value('balance_limit'),
+      },
+      encoding,
+    ),
+  };
+}
+
 export async function updateAccount(account) {
   if (account.currency !== undefined) {
     return batchMessages(async () => {
       const fields = await accountCurrencyFields(account.currency);
+      const merged = { ...account, ...fields };
       await update(
         'accounts',
-        accountModel.validate({ ...account, ...fields }, { update: true }),
+        accountModel.validate(
+          { ...merged, ...(await balanceSpecFields(account.id, merged)) },
+          { update: true },
+        ),
       );
     });
   }
-  account = accountModel.validate(account, { update: true });
+  account = accountModel.validate(
+    { ...account, ...(await balanceSpecFields(account.id, account)) },
+    { update: true },
+  );
   return update('accounts', account);
 }
 

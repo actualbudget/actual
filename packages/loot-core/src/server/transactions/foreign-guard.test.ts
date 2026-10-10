@@ -129,6 +129,21 @@ describe('write guard', () => {
     expect(tx('t2')).toMatchObject({ amount: 100, transaction_amount: null });
   });
 
+  it('stores a null amount on a base insert as the schema default 0', async () => {
+    // The register sends null when no amount was entered.
+    await batchUpdateTransactions({
+      added: [
+        {
+          id: 't1',
+          account: 'base',
+          date: '2026-03-01',
+          amount: null as never,
+        },
+      ],
+    });
+    expect(tx('t1')).toMatchObject({ amount: 0, transaction_amount: null });
+  });
+
   it('requires complete safe pairs for foreign inserts', async () => {
     for (const row of [
       { amount: -1000 },
@@ -156,7 +171,7 @@ describe('write guard', () => {
     expect(tx('ok')).toMatchObject({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500@jpy',
+      amount_pair: '-1000:-1500@jpy~JPY.0',
     });
   });
 
@@ -191,7 +206,7 @@ describe('write guard', () => {
     expect(tx('t')).toMatchObject({
       amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1000:-1500@jpy',
+      amount_pair: '-1000:-1500@jpy~JPY.0',
       notes: 'lunch',
     });
   });

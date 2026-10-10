@@ -1,6 +1,11 @@
 import * as db from '#server/db';
 import { getBatchedValue } from '#server/sync';
-import { amountPair } from '#server/sync/coupled-cells';
+import {
+  amountPair,
+  effectiveEncoding,
+  pairEncoding,
+} from '#server/sync/coupled-cells';
+import { isMulticurrencyAvailable } from '#server/util/currency';
 
 // Every transaction write reaches db.insertTransaction/updateTransaction,
 // which run this guard so a foreign-currency account can never store a
@@ -11,6 +16,8 @@ type AccountContext = {
   currency: string | null;
   precision: number | null;
   foreign: boolean;
+  /** The encoding authority, as queued or stored (MC-7.3). */
+  encoding: string;
 };
 
 type ExistingRow = {
@@ -140,6 +147,11 @@ export type TransactionWriteOptions = {
    * pair or cross-encoding account is allowed only for these exact values.
    */
   foreignEdits?: ReadonlyMap<string, ForeignEdit>;
+  /**
+   * A correction or repair (MC-7) rewriting rows in a previous encoding:
+   * only then may a foreign edit change a stale row's amounts or account.
+   */
+  staleRewrite?: boolean;
 };
 
 type TransactionWrite = {
@@ -163,8 +175,11 @@ type TransactionWrite = {
 // measurably slow down.
 async function accountContext(id: string): Promise<AccountContext | null> {
   const account = await db.first<
-    Pick<db.DbAccount, 'currency' | 'currency_precision'>
-  >('SELECT currency, currency_precision FROM accounts WHERE id = ?', [id]);
+    Pick<db.DbAccount, 'currency' | 'currency_precision' | 'encoding'>
+  >(
+    'SELECT currency, currency_precision, encoding FROM accounts WHERE id = ?',
+    [id],
+  );
   // An account created earlier in the same batch is still queued.
   const queuedCurrency = getBatchedValue('accounts', id, 'currency');
   const queuedPrecision = getBatchedValue('accounts', id, 'currency_precision');
@@ -179,7 +194,29 @@ async function accountContext(id: string): Promise<AccountContext | null> {
   const precision = queuedPrecision
     ? (queuedPrecision.value as number | null)
     : (account?.currency_precision ?? null);
-  return { currency, precision, foreign: currency !== null };
+  // The encoding cell is the authority; a queued one wins, '' included.
+  const queuedEncoding = getBatchedValue('accounts', id, 'encoding');
+  const encoding = effectiveEncoding(
+    queuedEncoding ? queuedEncoding.value : account?.encoding,
+    currency,
+    precision,
+  );
+  return { currency, precision, foreign: currency !== null, encoding };
+}
+
+/**
+ * Whether a stored row holds integers written under an encoding its
+ * account no longer has (MC-7.3): its pair's stamp differs from the
+ * account's encoding. Unstamped pairs are not stale.
+ */
+export async function isStaleRow(row: {
+  acct: string;
+  amount_pair: string | null;
+}): Promise<boolean> {
+  const stamp = pairEncoding(row.amount_pair);
+  if (stamp === undefined) return false;
+  const account = await accountContext(row.acct);
+  return account !== null && account.encoding !== stamp;
 }
 
 export async function isForeignAccount(id: string): Promise<boolean> {
@@ -619,6 +656,23 @@ export async function validateTransactionWrite(
   // An account that exists neither in the database nor in the current batch
   // cannot be foreign; the schema layer owns referential checks.
   if (!account) return {};
+  // Old-encoding integers must not be restamped as current. A write that
+  // leaves the amounts and account as stored is a metadata edit (editors
+  // and transfer hooks resend unchanged amounts): it is validated without
+  // them, so the stored pair stays. Only a correction or repair rewrites a
+  // stale row.
+  if (existing && (await isStaleRow(existing))) {
+    const changesStored =
+      (row.amount !== undefined && row.amount !== existing.amount) ||
+      (row.transaction_amount !== undefined &&
+        (row.transaction_amount ?? null) !==
+          (existing.transaction_amount ?? null)) ||
+      (row.account !== undefined && row.account !== existing.acct);
+    if (!(editAllowed && options.staleRewrite)) {
+      if (changesStored) throw new Error('transaction-encoding-stale');
+      row = { ...row, amount: undefined, transaction_amount: undefined };
+    }
+  }
   if (existing && row.account !== undefined && row.account !== existing.acct) {
     const previous = await accountContext(existing.acct);
     // Native integers only keep their value under the same recorded encoding;
@@ -691,15 +745,27 @@ export async function validateTransactionWrite(
     // A budget-currency row with an authority (moved out of a foreign
     // account) keeps it in step, so the old pair can never be re-derived;
     // a move handler writes one even when the source pair has not arrived.
+    // Every new row is stamped, whether or not multicurrency is available
+    // yet, so a row added offline under an account's previous currency is
+    // detectable (MC-7.3); with it available, amount writes are too.
     if (
-      (existing?.amount_pair || editAllowed) &&
-      (row.amount !== undefined || movesAccount)
+      !isUpdate ||
+      ((row.amount !== undefined || movesAccount) &&
+        (existing?.amount_pair ||
+          editAllowed ||
+          (await isMulticurrencyAvailable())))
     ) {
-      const amount = row.amount !== undefined ? row.amount : existing?.amount;
+      // An insert leaving its amount unset or null gets the schema default 0.
+      const amount =
+        row.amount != null || (isUpdate && row.amount === null)
+          ? row.amount
+          : (existing?.amount ?? 0);
       if (!Number.isSafeInteger(amount)) {
         throw new Error('foreign-pair-required');
       }
-      return { pair: amountPair(amount as number, null, accountId) };
+      return {
+        pair: amountPair(amount as number, null, accountId, account.encoding),
+      };
     }
     return {};
   }
@@ -724,6 +790,8 @@ export async function validateTransactionWrite(
         existing.amount,
         existing.transaction_amount,
         existing.acct,
+        // A stale leg keeps its stamp: unlinking must not make it current.
+        pairEncoding(existing.amount_pair) ?? account.encoding,
       ),
     };
   }
@@ -762,7 +830,12 @@ export async function validateTransactionWrite(
     throw new Error('foreign-edit-unavailable');
   }
   return {
-    pair: amountPair(finalAmount as number, finalNative as number, accountId),
+    pair: amountPair(
+      finalAmount as number,
+      finalNative as number,
+      accountId,
+      account.encoding,
+    ),
   };
 }
 

@@ -40,6 +40,10 @@ export type DbAccount = {
   account_group_id?: DbAccountGroup['id'] | null;
   currency?: string | null;
   currency_precision?: number | null;
+  /** The encoding authority (MC-7.3): '' or CUR.P; internal, not in AQL. */
+  encoding?: string | null;
+  /** The bank balance authority (MC-7.3); internal, not in AQL. */
+  balance_spec?: string | null;
 };
 
 export type DbAccountGroup = {

@@ -2,7 +2,7 @@ import type * as SQL from '@jlongster/sql.js';
 
 import * as sqlite from '#platform/server/sqlite';
 import type { SqlParam } from '#platform/server/sqlite';
-import { parseAmountPair } from '#server/sync/coupled-cells';
+import { pairEncoding, parseAmountPair } from '#server/sync/coupled-cells';
 import { rescaleAmount, rescaleAmountGroup } from '#shared/amount-rescale';
 
 type JsonValue = string | number | boolean | null | JsonValue[] | JsonObject;
@@ -146,11 +146,13 @@ export function rescaleBudget(
       // Malformed authority cells stay ignored rather than rewritten.
       const pair = parseAmountPair(row.amount_pair);
       if (pair && amount !== null) {
+        // The account and encoding stamp are kept as they were (MC-7.3).
+        const stamp = pairEncoding(row.amount_pair);
         update(
           'transactions',
           row.id,
           'amount_pair',
-          `${amount}:${pair.transaction_amount ?? ''}${pair.acct !== undefined ? `@${pair.acct}` : ''}`,
+          `${amount}:${pair.transaction_amount ?? ''}${pair.acct !== undefined ? `@${pair.acct}` : ''}${stamp !== undefined ? `~${stamp}` : ''}`,
         );
       }
     }
@@ -168,6 +170,37 @@ export function rescaleBudget(
           update(table, row.id, column, rescale(row[column]));
         }
       }
+    }
+    // The bank balance authority takes the rescaled integers and keeps its
+    // encoding stamp (MC-7.3).
+    // Its own integers are rescaled, never the derived columns, which are
+    // null while the stamp differs from the account's encoding.
+    const specs: Array<{ id: string; balance_spec: string }> = sqlite.runQuery(
+      database,
+      'SELECT id, balance_spec FROM accounts WHERE balance_spec IS NOT NULL',
+      [],
+      true,
+    );
+    for (const row of specs) {
+      const match = /^(-?\d*):(-?\d*):(-?\d*)~(.*)$/.exec(row.balance_spec);
+      // A malformed authority stays ignored rather than rewritten, as
+      // derivation ignores it.
+      if (
+        !match ||
+        match
+          .slice(1, 4)
+          .some(text => text !== '' && !Number.isSafeInteger(Number(text)))
+      ) {
+        continue;
+      }
+      const part = (text: string) =>
+        text === '' ? '' : (rescale(Number(text)) ?? '');
+      update(
+        'accounts',
+        row.id,
+        'balance_spec',
+        `${part(match[1])}:${part(match[2])}:${part(match[3])}~${match[4]}`,
+      );
     }
 
     function money(value: JsonValue | undefined): JsonValue {

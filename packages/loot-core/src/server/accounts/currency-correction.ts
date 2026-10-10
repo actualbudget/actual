@@ -3,6 +3,11 @@ import * as db from '#server/db';
 import { resolveRate } from '#server/exchange-rates/app';
 import { batchMessages } from '#server/sync';
 import {
+  balanceSpec,
+  effectiveEncoding,
+  pairEncoding,
+} from '#server/sync/coupled-cells';
+import {
   liveMappedCategory,
   preflightTransactionWrites,
 } from '#server/transactions/foreign-guard';
@@ -62,6 +67,7 @@ type StoredRow = {
   category: string | null;
   transferred_id: string | null;
   schedule: string | null;
+  amount_pair: string | null;
 };
 
 type Amounts = { amount: number; transaction_amount: number | null };
@@ -116,7 +122,19 @@ type CorrectionInput = {
   mode: CorrectionMode;
   amounts?: Record<string, number>;
   scheduleAmounts?: Record<string, ScheduleAmount>;
+  /**
+   * Repair the account's stale rows (MC-7.3): each converts from its own
+   * stamp to the account's current encoding, `currency` being ignored.
+   */
+  repair?: boolean;
 };
+
+/** A pair stamp as an encoding, budget precision for the budget currency. */
+function stampEncoding(stamp: string, bp: number): Encoding {
+  if (stamp === '') return { currency: null, precision: bp };
+  const [currency, precision] = stamp.split('.');
+  return { currency, precision: Number(precision) };
+}
 
 /** `validateScheduleRule` refusals a correction reports as a dependency. */
 const SCHEDULE_RULE_ERRORS = new Set([
@@ -184,6 +202,7 @@ export async function previewCurrencyCorrection({
   mode,
   amounts = {},
   scheduleAmounts = {},
+  repair = false,
 }: CorrectionInput) {
   if (mode !== 'convert' && mode !== 'keep') {
     throw new Error('correction-mode-invalid');
@@ -194,27 +213,31 @@ export async function previewCurrencyCorrection({
     id: string;
     currency: string | null;
     currency_precision: number | null;
+    encoding: string | null;
   }>(
-    'SELECT id, currency, currency_precision FROM accounts WHERE id = ? AND tombstone = 0',
+    'SELECT id, currency, currency_precision, encoding FROM accounts WHERE id = ? AND tombstone = 0',
     [accountId],
   );
   if (!account) throw new Error('account-not-found');
 
+  const requested = repair ? account.currency : currency;
   const targetCurrency =
-    currency === null || currency === budgetCurrency ? null : currency;
+    requested === null || requested === budgetCurrency ? null : requested;
   if (targetCurrency !== null && !isReviewedCurrency(targetCurrency)) {
     throw new Error('account-currency-invalid');
   }
-  const source: Encoding = account.currency
+  const current: Encoding = account.currency
     ? { currency: account.currency, precision: account.currency_precision! }
     : { currency: null, precision: bp };
+  // A repair converts each stale row from its own stamp.
+  let source = current;
   const target: Encoding = targetCurrency
     ? {
         currency: targetCurrency,
         precision: reviewedAmountEncoding(targetCurrency).precision,
       }
     : { currency: null, precision: bp };
-  if (source.currency === target.currency) {
+  if (!repair && source.currency === target.currency) {
     throw new Error('account-currency-unchanged');
   }
   if (
@@ -223,16 +246,31 @@ export async function previewCurrencyCorrection({
   ) {
     throw new Error('multicurrency-unavailable');
   }
-  const { schedules: schedulesOfAccount, checkedRules } =
-    await correctionPreflight(accountId);
-
   const stored = await db.all<StoredRow>(
     `SELECT id, date, amount, transaction_amount, isParent, isChild,
-       parent_id, tombstone, reconciled, category, transferred_id, schedule
+       parent_id, tombstone, reconciled, category, transferred_id, schedule,
+       amount_pair
        FROM transactions WHERE acct = ? ORDER BY id`,
     [accountId],
   );
-  const legs = await loadTransferLegs(accountId, target, stored);
+  // Rows written under an encoding the account no longer has (MC-7.3).
+  const currentStamp = effectiveEncoding(
+    account.encoding,
+    account.currency,
+    account.currency_precision,
+  );
+  const stampOf = (row: StoredRow) => pairEncoding(row.amount_pair);
+  const isStale = (row: StoredRow) => {
+    const stamp = stampOf(row);
+    return stamp !== undefined && stamp !== currentStamp;
+  };
+  if (!repair && stored.some(isStale)) {
+    throw new Error('correction-stale-rows-pending');
+  }
+  const { schedules: schedulesOfAccount, checkedRules } = repair
+    ? { schedules: [], checkedRules: [] }
+    : await correctionPreflight(accountId);
+  const legs = repair ? [] : await loadTransferLegs(accountId, target, stored);
 
   // Rows only ever need the target currency's rate; schedules in Convert
   // also value their source amount.
@@ -292,9 +330,11 @@ export async function previewCurrencyCorrection({
       : [],
   );
 
-  async function single(row: StoredRow) {
+  /** A row valued on its own, at its date or its family's (`valuedOn`). */
+  async function single(row: StoredRow, valuedOn?: string) {
     const result = base(row);
-    const rate = await rateAt(result.date);
+    const valuationDate = valuedOn ?? result.date;
+    const rate = await rateAt(valuationDate);
     result.rate = rate;
     const matched = matchedNative.get(row.id);
     if (matched !== undefined && target.currency !== null) {
@@ -374,7 +414,7 @@ export async function previewCurrencyCorrection({
       }
     }
     results.set(row.id, result);
-    if (!result.after) missing.add(result.date);
+    if (!result.after) missing.add(valuationDate);
   }
 
   async function family(parent: StoredRow, children: StoredRow[]) {
@@ -612,8 +652,65 @@ export async function previewCurrencyCorrection({
       !!row.parent_id &&
       liveParents.has(row.parent_id));
 
+  // A repair converts stale rows only; transfer legs and families holding a
+  // transfer are listed for the user to delete instead.
+  const unsupported = new Set<string>();
+  const mixedParents: StoredRow[] = [];
+  const unchanged = (row: StoredRow) =>
+    results.set(row.id, {
+      ...base(row),
+      after: { amount: row.amount, transaction_amount: row.transaction_amount },
+    });
   for (const row of stored) {
     try {
+      if (repair) {
+        const members = liveParents.has(row.id)
+          ? [row, ...(childrenOf.get(row.id) ?? [])]
+          : [row];
+        if (inLiveFamily(row) && !liveParents.has(row.id)) {
+          // Children are handled with their parent.
+          continue;
+        }
+        const staleMembers = members.filter(isStale);
+        if (staleMembers.length === 0) {
+          members.forEach(unchanged);
+          continue;
+        }
+        if (members.some(m => m.transferred_id)) {
+          for (const member of members) {
+            if (isStale(member)) unsupported.add(member.id);
+            unchanged(member);
+          }
+          continue;
+        }
+        const stamps = new Set(staleMembers.map(m => stampOf(m)));
+        if (
+          liveParents.has(row.id) &&
+          !(staleMembers.length === members.length && stamps.size === 1)
+        ) {
+          // A mixed family: stale children convert alone, valued at the
+          // family's (the parent's) date; the parent becomes the sum of its
+          // children below.
+          for (const child of childrenOf.get(row.id) ?? []) {
+            if (isStale(child)) {
+              source = stampEncoding(stampOf(child)!, bp);
+              await single(child, db.fromDateRepr(row.date));
+            } else {
+              unchanged(child);
+            }
+          }
+          unchanged(row);
+          mixedParents.push(row);
+          continue;
+        }
+        source = stampEncoding(stampOf(row)!, bp);
+        if (liveParents.has(row.id)) {
+          await family(row, childrenOf.get(row.id) ?? []);
+        } else {
+          await single(row);
+        }
+        continue;
+      }
       if (liveParents.has(row.id)) {
         await family(row, childrenOf.get(row.id) ?? []);
       } else if (!inLiveFamily(row)) {
@@ -635,6 +732,35 @@ export async function previewCurrencyCorrection({
       }
     }
   }
+
+  // A mixed family's parent is the sum of its children in the target
+  // encoding; a budget-currency parent holds no native.
+  for (const parent of mixedParents) {
+    const children = (childrenOf.get(parent.id) ?? []).map(c =>
+      results.get(c.id)!,
+    );
+    const result = results.get(parent.id)!;
+    if (children.some(c => !c.after || c.error)) {
+      result.after = null;
+      continue;
+    }
+    result.after = {
+      amount: sumBig(children.map(c => c.after!.amount)),
+      transaction_amount:
+        target.currency === null
+          ? null
+          : sumBig(children.map(c => c.after!.transaction_amount ?? 0)),
+    };
+  }
+  // Every repaired row, and every row of a corrected account (deleted ones
+  // too), is rewritten so it takes the current stamp even when its integers
+  // do not change; otherwise it would be left stale.
+  const restamp = repair
+    ? stored
+        .filter(row => isStale(row) && !unsupported.has(row.id))
+        .map(row => row.id)
+        .concat(mixedParents.map(p => p.id))
+    : stored.map(row => row.id).filter(id => results.has(id));
 
   // Transfer legs: Convert keeps bases (a same-encoding leg takes its
   // counterpart's amount); Keep edits each counterpart to stay equal and
@@ -891,7 +1017,9 @@ export async function previewCurrencyCorrection({
 
   // Schedule links that the target encoding makes incompatible.
   const scheduleIds = new Set(schedulesOfAccount.map(s => s.id));
-  const unlinked = await incompatibleLinks(accountId, target, scheduleIds);
+  const unlinked = repair
+    ? []
+    : await incompatibleLinks(accountId, target, scheduleIds);
   for (const row of unlinked) {
     const result =
       row.acct === accountId ? results.get(row.id)! : externalResult(row);
@@ -1119,7 +1247,7 @@ export async function previewCurrencyCorrection({
       account: accountId,
       mode,
       target,
-      source,
+      source: current,
       budget: { currency: budgetCurrency, precision: bp },
       rows: stored.map((row, i) => [
         row.id,
@@ -1133,8 +1261,11 @@ export async function previewCurrencyCorrection({
         row.reconciled,
         row.schedule,
         row.transferred_id,
+        row.amount_pair,
         mapped[i],
       ]),
+      repair,
+      unsupported: [...unsupported].sort(),
       rates: [...rates.entries()]
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([date, rate]) =>
@@ -1177,6 +1308,10 @@ export async function previewCurrencyCorrection({
     fingerprint,
     target,
     changed: rows.filter(changes).length,
+    /** Stale rows a repair leaves for the user to delete (transfers). */
+    unsupported: [...unsupported].sort(),
+    /** Rows a repair rewrites with the current stamp. */
+    restamp,
   };
 }
 
@@ -1209,6 +1344,16 @@ export function nearestFeeNative(
     .map(Number)
     .filter(n => feeBase(n, value, legNative) === storedFee)
     .sort((a, b) => Math.abs(a - start) - Math.abs(b - start) || a - b)[0];
+}
+
+/** Bank balances nulled under a new encoding (MC-7.3's balance authority). */
+function clearedBalances(encoding: string) {
+  const balances = {
+    balance_current: null,
+    balance_available: null,
+    balance_limit: null,
+  };
+  return { ...balances, balance_spec: balanceSpec(balances, encoding) };
 }
 
 /** Every stored field a correction reads from a row in another account. */
@@ -1245,9 +1390,10 @@ export async function correctAccountCurrency({
     proposal = await previewCurrencyCorrection(input);
   } catch (error) {
     // The caller holds a fingerprint, so this input previewed without a
-    // refusal: one now (the account already has the target encoding, or a
-    // schedule, rule or transfer changed) means the preview is out of date.
-    // A fresh preview reports the refusal itself.
+    // refusal: one now (the account already has the target encoding, rows
+    // from another device arrived in a previous encoding, or a schedule,
+    // rule or transfer changed) means the preview is out of date. A fresh
+    // preview reports the refusal itself.
     if (error instanceof Error) return { status: 'stale' as const };
     throw error;
   }
@@ -1260,11 +1406,12 @@ export async function correctAccountCurrency({
   const amountChanged = (r: CorrectionRow) =>
     r.after!.amount !== r.before.amount ||
     r.after!.transaction_amount !== r.before.transaction_amount;
-  const changed = proposal.rows.filter(
-    r => amountChanged(r) || r.scheduleUnlinked,
-  );
+  // A repair rewrites every repaired row so it takes the current stamp.
+  const restamp = new Set(proposal.restamp);
+  const rewrites = (r: CorrectionRow) => amountChanged(r) || restamp.has(r.id);
+  const changed = proposal.rows.filter(r => rewrites(r) || r.scheduleUnlinked);
   const foreignEdits = new Map<string, ForeignEdit>(
-    changed.filter(amountChanged).map(r => {
+    changed.filter(rewrites).map(r => {
       const account = r.account ?? input.account;
       return [
         r.id,
@@ -1287,7 +1434,7 @@ export async function correctAccountCurrency({
   );
   const updates = changed.map(r => ({
     id: r.id,
-    ...(amountChanged(r) && {
+    ...(rewrites(r) && {
       amount: r.after!.amount,
       transaction_amount: r.after!.transaction_amount,
     }),
@@ -1297,18 +1444,23 @@ export async function correctAccountCurrency({
     proposal.rows.filter(r => r.scheduleUnlinked).map(r => r.id),
   );
   // Transfer legs and counterparts were validated as a whole above.
-  const writeOptions = { foreignEdits, validatedTransfer: true };
+  const writeOptions = {
+    foreignEdits,
+    validatedTransfer: true,
+    staleRewrite: true,
+  };
 
   await batchMessages(async () => {
     // The account's new encoding is queued first, so the guard validates
-    // every row write against it.
-    await db.update('accounts', {
-      id: input.account,
-      ...(await accountCurrencyFields(proposal.target.currency)),
-      balance_current: null,
-      balance_available: null,
-      balance_limit: null,
-    });
+    // every row write against it; a repair keeps the account as it is.
+    if (!input.repair) {
+      const fields = await accountCurrencyFields(proposal.target.currency);
+      await db.update('accounts', {
+        id: input.account,
+        ...fields,
+        ...clearedBalances(fields.encoding),
+      });
+    }
     await preflightTransactionWrites({ updated: updates }, writeOptions);
     for (const update of updates) {
       await db.updateTransaction(update, writeOptions);
@@ -1332,6 +1484,73 @@ export async function correctAccountCurrency({
       );
     }
   });
-  clearUndo();
+  // A repair that wrote nothing leaves undo history alone.
+  if (!input.repair || updates.length > 0) clearUndo();
   return { status: 'ok' as const, changed: changed.length };
+}
+
+/**
+ * Per account, the stale rows (MC-7.3) grouped by the encoding they were
+ * written in: rows from another device under a previous currency.
+ */
+export async function staleEncodingRows(): Promise<
+  Array<{ account: string; stamp: string; count: number }>
+> {
+  const rows = await db.all<{
+    acct: string;
+    amount_pair: string | null;
+    encoding: string | null;
+    currency: string | null;
+    currency_precision: number | null;
+  }>(
+    `SELECT t.acct, t.amount_pair, a.encoding, a.currency, a.currency_precision
+       FROM transactions t JOIN accounts a ON a.id = t.acct
+       WHERE t.amount_pair LIKE '%~%' AND a.tombstone = 0`,
+  );
+  const counts = new Map<
+    string,
+    { account: string; stamp: string; count: number }
+  >();
+  for (const row of rows) {
+    const stamp = pairEncoding(row.amount_pair);
+    const current = effectiveEncoding(
+      row.encoding,
+      row.currency,
+      row.currency_precision,
+    );
+    if (stamp === undefined || stamp === current) continue;
+    const key = `${row.acct}|${stamp}`;
+    const entry = counts.get(key) ?? { account: row.acct, stamp, count: 0 };
+    entry.count++;
+    counts.set(key, entry);
+  }
+  return [...counts.values()];
+}
+
+/** A repair's mode defaults to Convert, which keeps the stale rows' bases. */
+type RepairInput = Omit<
+  CorrectionInput,
+  'currency' | 'repair' | 'scheduleAmounts' | 'mode'
+> & { mode?: CorrectionInput['mode'] };
+
+/** Previews converting an account's stale rows to its current encoding. */
+export function previewStaleEncodingRepair(input: RepairInput) {
+  return previewCurrencyCorrection({
+    ...input,
+    mode: input.mode ?? 'convert',
+    currency: null,
+    repair: true,
+  });
+}
+
+/** Applies a previewed repair, or returns `stale` if anything changed. */
+export function repairStaleEncoding(
+  input: RepairInput & { fingerprint: string },
+) {
+  return correctAccountCurrency({
+    ...input,
+    mode: input.mode ?? 'convert',
+    currency: null,
+    repair: true,
+  });
 }
