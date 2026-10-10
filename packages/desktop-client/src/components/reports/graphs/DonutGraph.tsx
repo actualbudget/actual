@@ -31,7 +31,7 @@ import { showActivity } from './showActivity';
 const RADIAN = Math.PI / 180;
 
 type ClickablePieItem = PieSectorDataItem &
-  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
+  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId' | 'bucketTagNames'>>;
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
@@ -693,6 +693,8 @@ export function DonutGraph({
                         field: groupBy.toLowerCase(),
                         id: item.id,
                         uncategorizedId: item.uncategorizedId,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames: data.scopeTagNames,
                       });
                     }
                   }}

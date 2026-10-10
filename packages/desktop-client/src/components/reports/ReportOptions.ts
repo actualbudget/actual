@@ -62,6 +62,7 @@ const groupByOptions = [
   { description: t('Category+Group'), key: 'CategoryGroup' }, // new: two-ring donut support
   { description: t('Payee'), key: 'Payee' },
   { description: t('Account'), key: 'Account' },
+  { description: t('Tag'), key: 'Tag' },
   { description: t('Interval'), key: 'Interval' },
 ];
 
