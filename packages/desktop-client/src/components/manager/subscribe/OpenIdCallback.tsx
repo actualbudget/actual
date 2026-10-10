@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 import { Link } from 'react-router';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import { isElectron } from '@actual-app/core/shared/environment';
 
 import { useDispatch } from '#redux';
 import { loggedIn } from '#users/usersSlice';
@@ -17,6 +18,7 @@ export function OpenIdCallback() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const state = params.get('state');
+    const nonce = params.get('nonce');
     if (!code || !state || params.has('token')) {
       setFailed(true);
       return;
@@ -28,6 +30,9 @@ export function OpenIdCallback() {
         const result = await send('subscribe-complete-openid', completion);
         if (cancelled) {
           return;
+        }
+        if (isElectron() && nonce) {
+          await window.Actual.completeOAuthServer(nonce, !result.error);
         }
         if (result.error) {
           setFailed(true);
