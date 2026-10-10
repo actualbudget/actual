@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 type ToBudgetMenuProps = Omit<
@@ -29,8 +30,9 @@ export function ToBudgetMenu({
   ...props
 }: ToBudgetMenuProps) {
   const { t } = useTranslation();
+  const { toBudgetBinding, includesFutureAssignments } = useToBudgetMode(month);
 
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(toBudgetBinding) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const manualBuffered =
     useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
@@ -44,7 +46,7 @@ export function ToBudgetMenu({
           },
         ]
       : []),
-    ...(autoBuffered === 0 && toBudget > 0
+    ...(!includesFutureAssignments && autoBuffered === 0 && toBudget > 0
       ? [
           {
             name: 'buffer',

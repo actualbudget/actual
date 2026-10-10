@@ -236,6 +236,12 @@ budgetTypes.forEach(budgetType => {
     test('checks that clicking the month in the page header opens the month menu modal', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
+      if (budgetType === 'Tracking') {
+        await expect(
+          page.getByText('Projected savings', { exact: true }),
+        ).toBeVisible();
+      }
+
       const selectedMonth = await budgetPage.getSelectedMonth();
 
       await budgetPage.openMonthMenu();
