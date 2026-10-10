@@ -53,6 +53,9 @@ export function MonteCarloNumberInput({
   style,
 }: MonteCarloNumberInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  // Set on focus and cleared by the first mouse-up, so a click that
+  // focuses the field keeps the whole value selected (see onMouseUp)
+  const didJustFocus = useRef(false);
   const [text, setText] = useState(() => toDisplayText(value, scale));
   const [isFocused, setIsFocused] = useState(false);
 
@@ -107,20 +110,22 @@ export function MonteCarloNumberInput({
       aria-label={ariaLabel}
       style={style}
       onChangeValue={setText}
-      onFocus={() => {
+      onFocus={event => {
         setIsFocused(true);
         // Highlight the whole value so typing replaces it, matching the
-        // currency inputs. Deferred so a mouse click's own selection
-        // doesn't undo it - but only if focus is still here when the timer
-        // fires: select() also focuses, so selecting a field the user has
-        // already tabbed away from would pull focus back and set the two
-        // fields bouncing focus between each other
-        setTimeout(() => {
-          const input = inputRef.current;
-          if (input != null && document.activeElement === input) {
-            input.select();
-          }
-        }, 0);
+        // currency inputs. Synchronous, so nothing runs after the user
+        // has moved on (a deferred select() would steal focus back)
+        event.currentTarget.select();
+        didJustFocus.current = true;
+      }}
+      onMouseUp={event => {
+        // The browser's mouse-up would otherwise replace the selection
+        // made on focus with a caret at the click point; later clicks in
+        // an already-focused field place the caret as normal
+        if (didJustFocus.current) {
+          event.preventDefault();
+          didJustFocus.current = false;
+        }
       }}
       onBlur={event => {
         setIsFocused(false);
