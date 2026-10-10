@@ -668,6 +668,13 @@ export async function reconcileTransactions(
 
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
+    // A skipped transaction still takes part in the matching above, so the
+    // other transactions match the same way as in the import preview. It is
+    // not imported or merged.
+    if (trans.skipTransaction) {
+      continue;
+    }
+
     if (match && !trans.forceAddTransaction) {
       // Skip updating already reconciled (locked) transactions
       if (match.reconciled) {
