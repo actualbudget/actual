@@ -1,6 +1,16 @@
+export type TagSegment = Extract<ParsedSegment, { type: 'tag' }>;
+
 export type ParsedSegment =
   | { type: 'text'; content: string }
-  | { type: 'tag'; content: string; tag: string }
+  | {
+      type: 'tag';
+      content: string;
+      tag: string;
+      /** Offset of the tag's `#` in the original notes string. */
+      start: number;
+      /** Offset just past the tag's last character in the original notes. */
+      end: number;
+    }
   | {
       type: 'link';
       content: string;
@@ -52,7 +62,7 @@ export function normalizeUrl(rawUrl: string): string {
  * Parses a single word for hashtags (existing logic from NotesTagFormatter)
  * Returns segments for tags found in the word
  */
-function parseTagsInWord(word: string): ParsedSegment[] {
+function parseTagsInWord(word: string, baseOffset: number): ParsedSegment[] {
   const segments: ParsedSegment[] = [];
 
   if (!word.includes('#') || word.length <= 1) {
@@ -61,8 +71,14 @@ function parseTagsInWord(word: string): ParsedSegment[] {
 
   let lastEmptyTag = -1;
   const parts = word.split('#');
+  // Offset (in the original notes) of the current part, i.e. just past the
+  // `#` that precedes it.
+  let partOffset = baseOffset;
 
   parts.forEach((tag, ti) => {
+    const tagOffset = partOffset;
+    partOffset += tag.length + 1;
+
     if (ti === 0) {
       if (tag) {
         segments.push({ type: 'text', content: tag });
@@ -83,7 +99,13 @@ function parseTagsInWord(word: string): ParsedSegment[] {
     lastEmptyTag = -1;
 
     const validTag = `#${tag}`;
-    segments.push({ type: 'tag', content: validTag, tag });
+    segments.push({
+      type: 'tag',
+      content: validTag,
+      tag,
+      start: tagOffset - 1,
+      end: tagOffset + tag.length,
+    });
   });
 
   return segments;
@@ -99,6 +121,9 @@ export function parseNotes(notes: string): ParsedSegment[] {
 
   const segments: ParsedSegment[] = [];
   let remaining = notes;
+  // Offset of `remaining` within `notes`, so tags can report where they sit
+  // in the original string.
+  let offset = 0;
 
   while (remaining.length > 0) {
     // Check for markdown link first (highest priority)
@@ -107,7 +132,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
       // Add text before the link
       if (markdownMatch.index > 0) {
         const textBefore = remaining.slice(0, markdownMatch.index);
-        segments.push(...parseTextWithTags(textBefore));
+        segments.push(...parseTextWithTags(textBefore, offset));
       }
 
       // Add the link segment
@@ -124,7 +149,9 @@ export function parseNotes(notes: string): ParsedSegment[] {
         isFilePath,
       });
 
-      remaining = remaining.slice(markdownMatch.index + fullMatch.length);
+      const consumed = markdownMatch.index + fullMatch.length;
+      remaining = remaining.slice(consumed);
+      offset += consumed;
       continue;
     }
 
@@ -134,7 +161,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
       // Add text before the URL
       if (urlMatch.index > 0) {
         const textBefore = remaining.slice(0, urlMatch.index);
-        segments.push(...parseTextWithTags(textBefore));
+        segments.push(...parseTextWithTags(textBefore, offset));
       }
 
       // Strip trailing punctuation from the URL
@@ -150,7 +177,9 @@ export function parseNotes(notes: string): ParsedSegment[] {
         isFilePath: false,
       });
 
-      remaining = remaining.slice(urlMatch.index + url.length);
+      const consumed = urlMatch.index + url.length;
+      remaining = remaining.slice(consumed);
+      offset += consumed;
       continue;
     }
 
@@ -160,7 +189,7 @@ export function parseNotes(notes: string): ParsedSegment[] {
       // Add text before the URL
       if (wwwMatch.index > 0) {
         const textBefore = remaining.slice(0, wwwMatch.index);
-        segments.push(...parseTextWithTags(textBefore));
+        segments.push(...parseTextWithTags(textBefore, offset));
       }
 
       // Strip trailing punctuation from the URL
@@ -176,12 +205,14 @@ export function parseNotes(notes: string): ParsedSegment[] {
         isFilePath: false,
       });
 
-      remaining = remaining.slice(wwwMatch.index + url.length);
+      const consumed = wwwMatch.index + url.length;
+      remaining = remaining.slice(consumed);
+      offset += consumed;
       continue;
     }
 
     // No more links found, parse remaining text with tags
-    segments.push(...parseTextWithTags(remaining));
+    segments.push(...parseTextWithTags(remaining, offset));
     break;
   }
 
@@ -191,11 +222,15 @@ export function parseNotes(notes: string): ParsedSegment[] {
 /**
  * Parses text that may contain hashtags and file paths
  */
-function parseTextWithTags(text: string): ParsedSegment[] {
+function parseTextWithTags(text: string, baseOffset: number): ParsedSegment[] {
   const segments: ParsedSegment[] = [];
   const words = text.split(/(\s+)/); // Split but keep whitespace
+  let nextOffset = baseOffset;
 
   for (const word of words) {
+    const wordOffset = nextOffset;
+    nextOffset += word.length;
+
     // Check if it's whitespace
     if (/^\s+$/.test(word)) {
       segments.push({ type: 'text', content: word });
@@ -216,7 +251,7 @@ function parseTextWithTags(text: string): ParsedSegment[] {
 
     // Check for hashtags
     if (word.includes('#') && word.length > 1) {
-      segments.push(...parseTagsInWord(word));
+      segments.push(...parseTagsInWord(word, wordOffset));
       continue;
     }
 
@@ -227,4 +262,36 @@ function parseTextWithTags(text: string): ParsedSegment[] {
   }
 
   return segments;
+}
+
+/**
+ * Removes a single tag occurrence from notes.
+ *
+ * Works on the tag's offsets in the original string rather than re-joining
+ * parsed segments, because segments don't round-trip (e.g. `##foo` loses a
+ * `#`). The whitespace left behind is tidied so removing a tag doesn't leave a
+ * double space or leading/trailing whitespace. Line breaks are kept, so the
+ * text on either side of the tag stays on its own line.
+ */
+export function removeTagFromNotes(
+  notes: string,
+  segment: Pick<TagSegment, 'content' | 'start' | 'end'>,
+): string {
+  // Guard against a segment parsed from a different (stale) notes string.
+  if (notes.slice(segment.start, segment.end) !== segment.content) {
+    return notes;
+  }
+
+  let before = notes.slice(0, segment.start);
+  let after = notes.slice(segment.end);
+
+  if (before === '' || /\s$/.test(before)) {
+    // Spaces and tabs only: a line break after the tag still separates lines.
+    after = after.replace(/^[^\S\r\n]+/, '');
+    if (/^[\r\n]/.test(after)) {
+      before = before.replace(/[^\S\r\n]+$/, '');
+    }
+  }
+
+  return (before + after).trim();
 }

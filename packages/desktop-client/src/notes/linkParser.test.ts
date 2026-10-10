@@ -1,4 +1,9 @@
-import { parseNotes } from './linkParser';
+import { parseNotes, removeTagFromNotes } from './linkParser';
+import type { TagSegment } from './linkParser';
+
+function getTags(notes: string): TagSegment[] {
+  return parseNotes(notes).filter(segment => segment.type === 'tag');
+}
 
 describe('linkParser', () => {
   describe('parseNotes', () => {
@@ -195,6 +200,107 @@ describe('linkParser', () => {
           });
         });
       });
+    });
+  });
+  describe('tag offsets', () => {
+    it.each([
+      ['#tag', ['#tag']],
+      ['buy milk #food today', ['#food']],
+      ['#a #b  #c', ['#a', '#b', '#c']],
+      ['#a#b', ['#a', '#b']],
+      ['word#tag', ['#tag']],
+      ['#dup and #dup', ['#dup', '#dup']],
+      ['see https://example.com/x #after', ['#after']],
+      ['#before [docs](https://example.com) #after', ['#before', '#after']],
+      ['www.example.com, #after', ['#after']],
+      ['##escaped #real', ['#real']],
+      ['/usr/bin/x #path', ['#path']],
+    ])('should point at each tag in %j', (notes, expected) => {
+      const tags = getTags(notes);
+      expect(tags.map(tag => tag.content)).toEqual(expected);
+      for (const tag of tags) {
+        expect(notes.slice(tag.start, tag.end)).toBe(tag.content);
+      }
+    });
+
+    it('should report distinct offsets for duplicate tags', () => {
+      const [first, second] = getTags('#dup and #dup');
+      expect([first.start, first.end]).toEqual([0, 4]);
+      expect([second.start, second.end]).toEqual([9, 13]);
+    });
+  });
+
+  describe('removeTagFromNotes', () => {
+    function removeNthTag(notes: string, n: number) {
+      return removeTagFromNotes(notes, getTags(notes)[n]);
+    }
+
+    it('should remove a tag in the middle without leaving a double space', () => {
+      expect(removeNthTag('buy milk #food today', 0)).toBe('buy milk today');
+    });
+
+    it('should remove a tag at the start', () => {
+      expect(removeNthTag('#food buy milk', 0)).toBe('buy milk');
+    });
+
+    it('should remove a tag at the end', () => {
+      expect(removeNthTag('buy milk #food', 0)).toBe('buy milk');
+    });
+
+    it('should leave empty notes when removing the only tag', () => {
+      expect(removeNthTag('#food', 0)).toBe('');
+      expect(removeNthTag('  #food ', 0)).toBe('');
+    });
+
+    it('should keep line breaks around the removed tag', () => {
+      expect(removeNthTag('line one #food\nline two', 0)).toBe(
+        'line one\nline two',
+      );
+      expect(removeNthTag('line one\n#food line two', 0)).toBe(
+        'line one\nline two',
+      );
+    });
+
+    it('should remove only the clicked tag of adjacent tags', () => {
+      expect(removeNthTag('#a#b', 0)).toBe('#b');
+      expect(removeNthTag('#a#b', 1)).toBe('#a');
+      expect(removeNthTag('x #a#b#c y', 1)).toBe('x #a#c y');
+    });
+
+    it('should keep text that the tag was attached to', () => {
+      expect(removeNthTag('word#tag more', 0)).toBe('word more');
+    });
+
+    it('should remove only the clicked occurrence of a duplicate tag', () => {
+      expect(removeNthTag('#dup and #dup again', 0)).toBe('and #dup again');
+      expect(removeNthTag('#dup and #dup again', 1)).toBe('#dup and again');
+    });
+
+    it('should leave neighbouring links intact', () => {
+      expect(removeNthTag('see https://example.com/x #tag', 0)).toBe(
+        'see https://example.com/x',
+      );
+      expect(removeNthTag('#tag https://example.com/x', 0)).toBe(
+        'https://example.com/x',
+      );
+      expect(removeNthTag('a [docs](https://example.com) #tag b', 0)).toBe(
+        'a [docs](https://example.com) b',
+      );
+      expect(removeNthTag('#one [docs](https://example.com) #two', 1)).toBe(
+        '#one [docs](https://example.com)',
+      );
+    });
+
+    it('should preserve escaped hashes', () => {
+      expect(removeNthTag('##escaped #real', 0)).toBe('##escaped');
+      expect(removeNthTag('#real ##escaped', 0)).toBe('##escaped');
+    });
+
+    it('should leave notes untouched for a segment from other notes', () => {
+      const [stale] = getTags('some #tag');
+      expect(removeTagFromNotes('different text', stale)).toBe(
+        'different text',
+      );
     });
   });
 });

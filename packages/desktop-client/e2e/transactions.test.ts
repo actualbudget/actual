@@ -1,9 +1,36 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import type { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
+
+// Whether any part of the element is cut off by an ancestor inside the notes
+// cell that clips its overflow.
+function isClippedByNotesCell(locator: Locator) {
+  return locator.evaluate(el => {
+    const box = el.getBoundingClientRect();
+    for (
+      let parent = el.parentElement;
+      parent && parent.getAttribute('data-testid') !== 'notes';
+      parent = parent.parentElement
+    ) {
+      if (getComputedStyle(parent).overflow === 'visible') {
+        continue;
+      }
+      const clip = parent.getBoundingClientRect();
+      if (
+        box.top < clip.top ||
+        box.left < clip.left ||
+        box.right > clip.right ||
+        box.bottom > clip.bottom
+      ) {
+        return true;
+      }
+    }
+    return false;
+  });
+}
 
 test.describe('Transactions', () => {
   let page: Page;
@@ -327,6 +354,99 @@ test.describe('Transactions', () => {
       await expect(
         tooltip.getByRole('button', { name: '#groceries' }),
       ).toBeVisible();
+    });
+  });
+
+  test.describe('notes tags', () => {
+    test('removes a single tag from the notes without shifting the layout', async () => {
+      await accountPage.createSingleTransaction({
+        payee: 'Kroger',
+        notes: '#work coffee with #friends',
+      });
+
+      const transaction = accountPage.getNthTransaction(0);
+      await expect(transaction.payee).toHaveText('Kroger');
+
+      const notes = transaction.notes;
+      const workTag = notes.getByRole('button', { name: '#work', exact: true });
+      const friendsTag = notes.getByRole('button', {
+        name: '#friends',
+        exact: true,
+      });
+      const removeWorkTag = notes.getByRole('button', {
+        name: 'Remove tag #work',
+      });
+
+      await expect(workTag).toBeVisible();
+      await expect(removeWorkTag).toBeHidden();
+      const workTagBox = await workTag.boundingBox();
+      const friendsTagBox = await friendsTag.boundingBox();
+
+      // Hovering reveals the remove button as an overlay: nothing moves.
+      await workTag.hover();
+      await expect(removeWorkTag).toBeVisible();
+      expect(await workTag.boundingBox()).toEqual(workTagBox);
+      expect(await friendsTag.boundingBox()).toEqual(friendsTagBox);
+
+      // The remove button is fully visible rather than clipped by the cell,
+      // for a tag at the very start of the notes and one at the very end.
+      expect(await isClippedByNotesCell(removeWorkTag)).toBe(false);
+
+      const removeFriendsTag = notes.getByRole('button', {
+        name: 'Remove tag #friends',
+      });
+      await friendsTag.hover();
+      await expect(removeFriendsTag).toBeVisible();
+      expect(await isClippedByNotesCell(removeFriendsTag)).toBe(false);
+      expect(await workTag.boundingBox()).toEqual(workTagBox);
+      expect(await friendsTag.boundingBox()).toEqual(friendsTagBox);
+
+      await workTag.hover();
+      await removeWorkTag.click();
+
+      // Only that tag is removed; the cell isn't opened for editing and the
+      // table isn't filtered by the tag.
+      await expect(notes).toHaveText('coffee with #friends');
+      await expect(workTag).toHaveCount(0);
+      await expect(friendsTag).toBeVisible();
+      await expect(notes.getByRole('combobox')).toHaveCount(0);
+      await expect(
+        page.getByRole('button', { name: 'Delete filter' }),
+      ).toHaveCount(0);
+    });
+
+    test('removes a tag from the truncated notes tooltip', async () => {
+      const longNote =
+        'This is a deliberately long note about a grocery run that should overflow the notes column and get truncated with an ellipsis #groceries at the very end of the note text.';
+
+      await accountPage.createSingleTransaction({
+        payee: 'Home Depot',
+        notes: longNote,
+      });
+
+      const transaction = accountPage.getNthTransaction(0);
+      await expect(transaction.payee).toHaveText('Home Depot');
+
+      await transaction.notes.hover();
+      const tooltip = page.getByRole('tooltip');
+      await expect(tooltip).toBeVisible();
+
+      const tag = tooltip.getByRole('button', {
+        name: '#groceries',
+        exact: true,
+      });
+      const tagBox = await tag.boundingBox();
+      await tag.hover();
+      const removeTag = tooltip.getByRole('button', {
+        name: 'Remove tag #groceries',
+      });
+      await expect(removeTag).toBeVisible();
+      expect(await tag.boundingBox()).toEqual(tagBox);
+      await removeTag.click();
+
+      await expect(transaction.notes).toHaveText(
+        longNote.replace(' #groceries', ''),
+      );
     });
   });
 
