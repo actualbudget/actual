@@ -46,7 +46,9 @@ describe('rescaleBudget', () => {
       INSERT INTO transactions (id, amount, transaction_amount, amount_pair, acct)
         VALUES ('bound', 1250, 1500, '1250:1500@jpy', 'jpy'),
                ('base', 1250, NULL, '1250:@usd', 'usd'),
-               ('legacy', 1250, 1500, '1250:1500', 'jpy');
+               ('legacy', 1250, 1500, '1250:1500', 'jpy'),
+               ('stamped', 1250, 1500, '1250:1500@jpy~JPY.0', 'jpy'),
+               ('stamped-base', 1250, NULL, '1250:@usd~', 'usd');
     `);
     const database = db.getDatabase();
     if (!database) throw new Error('missing test database');
@@ -61,6 +63,35 @@ describe('rescaleBudget', () => {
       { id: 'base', amount: 12, amount_pair: '12:@usd' },
       { id: 'bound', amount: 12, amount_pair: '12:1500@jpy' },
       { id: 'legacy', amount: 12, amount_pair: '12:1500' },
+      { id: 'stamped', amount: 12, amount_pair: '12:1500@jpy~JPY.0' },
+      { id: 'stamped-base', amount: 12, amount_pair: '12:@usd~' },
+    ]);
+  });
+
+  it('rescales stamped bank balances keeping the stamp', () => {
+    db.execQuery(`
+      INSERT INTO accounts (id, name, balance_current, balance_available, balance_spec)
+        VALUES ('bank', 'Bank', 1250, NULL, '1250::~'),
+               ('stale', 'Stale', NULL, NULL, '1250::~JPY.0'),
+               ('unsafe', 'Unsafe', NULL, NULL, '9007199254740993::~'),
+               ('dash', 'Dash', NULL, NULL, '-::~');
+    `);
+    const database = db.getDatabase();
+    if (!database) throw new Error('missing test database');
+    rescaleBudget(database, 2, 0);
+    expect(
+      db.runQuery(
+        "SELECT balance_current, balance_spec FROM accounts WHERE id IN ('bank', 'stale', 'unsafe', 'dash') ORDER BY name",
+        [],
+        true,
+      ),
+    ).toEqual([
+      { balance_current: 12, balance_spec: '12::~' },
+      // Malformed authorities are left as they are.
+      { balance_current: null, balance_spec: '-::~' },
+      // A balance derived to null under another stamp keeps its integers.
+      { balance_current: null, balance_spec: '12::~JPY.0' },
+      { balance_current: null, balance_spec: '9007199254740993::~' },
     ]);
   });
 

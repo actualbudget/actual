@@ -1246,14 +1246,17 @@ describe('SimpleFin batch sync', () => {
         [crdtMessageCount],
       );
 
-      expect(secondSyncMessages).toHaveLength(3);
+      // The balance travels with its encoding-stamped authority (MC-7.3).
+      expect(secondSyncMessages).toHaveLength(4);
       expect(secondSyncMessages.map(message => message.dataset)).toEqual([
+        'accounts',
         'accounts',
         'accounts',
         'accounts',
       ]);
       expect(secondSyncMessages.map(message => message.column).sort()).toEqual([
         'balance_current',
+        'balance_spec',
         'bank_sync_status',
         'last_sync',
       ]);
