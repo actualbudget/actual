@@ -62,6 +62,7 @@ function TransactionSearchInput({
 
 type TransactionListWithBalancesProps = {
   isLoading: boolean;
+  balanceLabel?: string;
   transactions: readonly TransactionEntity[];
   balance:
     | Binding<'account', 'onbudget-accounts-balance'>
@@ -96,6 +97,7 @@ export function TransactionListWithBalances({
   transactions,
   balance,
   balanceCleared,
+  balanceLabel,
   balanceUncleared,
   showRunningBalances,
   runningBalances,
@@ -130,6 +132,7 @@ export function TransactionListWithBalances({
             {balanceCleared && balanceUncleared ? (
               <BalanceWithCleared
                 balance={balance}
+                balanceLabel={balanceLabel}
                 balanceCleared={balanceCleared}
                 balanceUncleared={balanceUncleared}
                 alwaysShowCleared={isReconciling}
@@ -137,7 +140,7 @@ export function TransactionListWithBalances({
             ) : (
               <>
                 <View style={{ flexBasis: '33%' }} />
-                <Balance balance={balance} />
+                <Balance balance={balance} balanceLabel={balanceLabel} />
                 <View
                   style={{
                     flexBasis: '33%',
@@ -217,6 +220,7 @@ const TransactionListBalanceCellValue = <
 };
 
 type BalanceWithClearedProps = {
+  balanceLabel?: string;
   balanceUncleared: NonNullable<
     TransactionListWithBalancesProps['balanceUncleared']
   >;
@@ -228,6 +232,7 @@ type BalanceWithClearedProps = {
 };
 
 function BalanceWithCleared({
+  balanceLabel,
   balanceUncleared,
   balanceCleared,
   balance,
@@ -269,7 +274,7 @@ function BalanceWithCleared({
           )}
         </TransactionListBalanceCellValue>
       </View>
-      <Balance balance={balance} />
+      <Balance balance={balance} balanceLabel={balanceLabel} />
       <View
         style={{
           display: !showCleared ? 'none' : undefined,
@@ -302,14 +307,18 @@ function BalanceWithCleared({
 }
 
 type BalanceProps = {
+  balanceLabel?: string;
   balance: TransactionListWithBalancesProps['balance'];
 };
 
-function Balance({ balance }: BalanceProps) {
+function Balance({ balance, balanceLabel }: BalanceProps) {
   const { t } = useTranslation();
   return (
     <View style={{ flexBasis: '33%' }}>
-      <Label title={t('Balance')} style={{ textAlign: 'center' }} />
+      <Label
+        title={balanceLabel ?? t('Balance')}
+        style={{ textAlign: 'center' }}
+      />
       <TransactionListBalanceCellValue binding={balance} type="financial">
         {props => (
           <CellValueText
