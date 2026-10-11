@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -52,6 +58,27 @@ function TransactionListWithPreviews() {
     currentQuery,
   );
 
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { isSearching, search } = useTransactionsSearch({
+    updateQuery: updateFn =>
+      setTransactionsQuery(query => (query ? updateFn(query) : query)),
+    resetQuery: () => setTransactionsQuery(currentQuery),
+    dateFormat,
+  });
+
+  const searchTextRef = useRef('');
+
+  const onSearch = useCallback(
+    (searchText: string) => {
+      searchTextRef.current = searchText;
+      search(searchText);
+    },
+    [search],
+  );
+
   useEffect(() => {
     let isStale = false;
 
@@ -65,6 +92,10 @@ function TransactionListWithPreviews() {
       if (!isStale) {
         setCurrentQuery(query);
         setTransactionsQuery(query);
+        // A search restored before the filters loaded was dropped, re-apply it
+        if (searchTextRef.current !== '') {
+          search(searchTextRef.current);
+        }
       }
     };
 
@@ -76,7 +107,7 @@ function TransactionListWithPreviews() {
     return () => {
       isStale = true;
     };
-  }, [location.state, makeRootTransactionsQuery]);
+  }, [location.state, makeRootTransactionsQuery, search]);
 
   const {
     transactions,
@@ -88,17 +119,6 @@ function TransactionListWithPreviews() {
   });
   const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     usePreviewTransactions();
-
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: updateFn =>
-      setTransactionsQuery(query => (query ? updateFn(query) : query)),
-    resetQuery: () => setTransactionsQuery(currentQuery),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {

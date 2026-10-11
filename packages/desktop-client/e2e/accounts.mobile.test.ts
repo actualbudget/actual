@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
+import { MobileTransactionEntryPage } from './page-models/mobile-transaction-entry-page';
 
 test.describe('Mobile Accounts', () => {
   let page: Page;
@@ -61,6 +62,36 @@ test.describe('Mobile Accounts', () => {
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactions).not.toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('keeps the search after editing a transaction', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.searchByText('Kroger');
+    // Wait for the debounced search to replace the unfiltered list
+    await expect(
+      accountPage.transactions.filter({ hasNotText: 'Kroger' }),
+    ).toHaveCount(0);
+    await expect(accountPage.transactions).not.toHaveCount(0);
+    const searchedCount = await accountPage.transactions.count();
+
+    await accountPage.transactions.first().click();
+    const transactionPage = new MobileTransactionEntryPage(page);
+    await transactionPage.waitFor();
+    await transactionPage.footer
+      .getByRole('button', { name: 'Save changes' })
+      .click();
+
+    await accountPage.waitFor();
+    await expect(accountPage.searchBox).toHaveValue('Kroger');
+    await expect(
+      accountPage.transactions.filter({ hasNotText: 'Kroger' }),
+    ).toHaveCount(0);
+    await expect(accountPage.transactions).toHaveCount(searchedCount);
   });
 
   test('reconciles an account', async () => {
