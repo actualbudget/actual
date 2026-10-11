@@ -152,6 +152,74 @@ describe('useRefEventListener', () => {
     expect(el.addEventListener).toHaveBeenCalledTimes(1);
   });
 
+  // Every transaction row uses this hook. An extra render on mount queues
+  // work for each row the virtualized list mounts while scrolling, which
+  // kept React's nested-update counter climbing until it crashed (#9170).
+  it('does not schedule an extra render when it binds on mount', () => {
+    const el = makeMockElement();
+    const ref = { current: el } as unknown as RefObject<HTMLElement | null>;
+    let renders = 0;
+
+    renderHook(() => {
+      renders++;
+      useRefEventListener(ref, 'click', vi.fn());
+    });
+
+    expect(el.addEventListener).toHaveBeenCalledTimes(1);
+    expect(renders).toBe(1);
+  });
+
+  it('does not schedule an extra render when the ref is empty on mount', () => {
+    const ref = { current: null } as unknown as RefObject<HTMLElement | null>;
+    let renders = 0;
+
+    renderHook(() => {
+      renders++;
+      useRefEventListener(ref, 'click', vi.fn());
+    });
+
+    expect(renders).toBe(1);
+  });
+
+  it('does not schedule an extra render when it rebinds to a new element', () => {
+    const first = makeMockElement();
+    const second = makeMockElement();
+    const ref = { current: first } as unknown as RefObject<HTMLElement | null>;
+    let renders = 0;
+
+    const { rerender } = renderHook(() => {
+      renders++;
+      useRefEventListener(ref, 'click', vi.fn());
+    });
+
+    renders = 0;
+    ref.current = second as unknown as HTMLElement;
+    rerender();
+
+    expect(second.addEventListener).toHaveBeenCalledTimes(1);
+    expect(renders).toBe(1);
+  });
+
+  it('binds document and window targets without an extra render', () => {
+    let renders = 0;
+    const addDoc = vi.spyOn(document, 'addEventListener');
+    const removeDoc = vi.spyOn(document, 'removeEventListener');
+
+    const { unmount } = renderHook(() => {
+      renders++;
+      useRefEventListener(document, 'keyup', vi.fn());
+    });
+
+    expect(addDoc).toHaveBeenCalledWith('keyup', expect.any(Function));
+    expect(renders).toBe(1);
+
+    unmount();
+
+    expect(removeDoc).toHaveBeenCalledWith('keyup', expect.any(Function));
+    addDoc.mockRestore();
+    removeDoc.mockRestore();
+  });
+
   it('keeps delivering events to a conditionally rendered target that remounts', () => {
     const callback = vi.fn();
 
