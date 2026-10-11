@@ -20,8 +20,6 @@ import { resolveName } from './spreadsheet/util';
 let globalSheet: Spreadsheet;
 let globalOnChange;
 let globalCacheDb;
-// The database holding the cache: `globalCacheDb` on desktop, otherwise the
-// main database. Unset when caching is disabled.
 let globalCacheTarget;
 
 export function get(): Spreadsheet {

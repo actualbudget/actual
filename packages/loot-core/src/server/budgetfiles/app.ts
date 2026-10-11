@@ -153,8 +153,6 @@ async function resetBudgetCache() {
   spreadsheet.startCacheBarrier();
 
   try {
-    // Start from an empty cache: it drops entries for cells that no longer
-    // exist, and rewriting into an empty table is faster than replacing rows.
     sheet.clearCache();
 
     let seededCells: string[] = [];
