@@ -64,8 +64,7 @@
   "dependencies": {
     "@emotion/css": "^11.13.5",
     "@internationalized/date": "^3.12.2",
-    "react-aria-components": "^1.19.0",
-    "usehooks-ts": "^3.1.1"
+    "react-aria-components": "^1.19.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
