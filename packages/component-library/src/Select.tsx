@@ -40,6 +40,7 @@ type SelectProps<Value> = {
   style?: CSSProperties;
   popoverStyle?: CSSProperties;
   className?: string;
+  isNonModal?: boolean;
 };
 
 /**
@@ -51,6 +52,11 @@ type SelectProps<Value> = {
  * @param {function} [onChange] - A callback function invoked when the selected value changes.
  * @param {CSSProperties} [style] - Custom styles to apply to the selected button.
  * @param {string[]} [disabledKeys] - An array of option values to disable.
+ * @param {boolean} [isNonModal] - Set this when the `Select` lives inside another
+ *   popover. A modal popover also renders a full-viewport underlay, which
+ *   swallows the click meant to dismiss the popover behind it. Leave it off
+ *   inside a modal dialog: a non-modal popover is dismissed by `Popover`'s
+ *   `focusout` listener, and a dialog pulls focus back into itself.
  *
  * @example
  * // Usage:
@@ -69,6 +75,7 @@ export function Select<const Value = string>({
   style = {},
   popoverStyle = {},
   className,
+  isNonModal = false,
 }: SelectProps<Value>) {
   const targetOption = options
     .filter(isValueOption)
@@ -125,11 +132,7 @@ export function Select<const Value = string>({
         placement="bottom start"
         isOpen={isOpen}
         onOpenChange={() => setIsOpen(false)}
-        // A modal popover renders a full-viewport underlay that swallows the
-        // next click, so a `Select` opened inside another popover would eat
-        // the click meant to dismiss its parent. Menu-like overlays
-        // (autocomplete, date select, context menu) are all non-modal.
-        isNonModal
+        isNonModal={isNonModal}
         style={popoverStyle}
       >
         <Menu<Value>

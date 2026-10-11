@@ -368,6 +368,10 @@ function ConfigureField<T extends RuleConditionEntity>({
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
+              // `ConfigureField` is rendered inside the filter popover. A modal
+              // select would cover it with an underlay that swallows the click
+              // meant to dismiss the filter (#3051).
+              isNonModal
             />
           ) : (
             <View

@@ -26,6 +26,9 @@ export function ConditionsOpMenu({
         ]}
         value={conditionsOp}
         onChange={onChange}
+        // This menu is rendered inside the filter popover, so the select must
+        // not lay an underlay over it.
+        isNonModal
       />
       of:
     </Text>

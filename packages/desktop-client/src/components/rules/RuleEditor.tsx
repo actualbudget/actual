@@ -101,6 +101,8 @@ type FieldSelectProps<T extends string> = {
   style?: CSSProperties;
   value: T;
   onChange: (value: T) => void;
+  /** Set this when the select is rendered inside a popover, not a modal. */
+  isNonModal?: boolean;
 };
 
 export function FieldSelect<T extends string>({
@@ -108,6 +110,7 @@ export function FieldSelect<T extends string>({
   style,
   value,
   onChange,
+  isNonModal,
 }: FieldSelectProps<T>) {
   return (
     <View style={style} data-testid="field-select">
@@ -116,6 +119,7 @@ export function FieldSelect<T extends string>({
         options={fields}
         value={value}
         onChange={onChange}
+        isNonModal={isNonModal}
         className={css({
           color: theme.pageTextPositive,
           '&[data-hovered]': { color: theme.pageTextPositive },
