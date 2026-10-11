@@ -283,7 +283,7 @@ __metadata:
     plugins-service: "workspace:*"
     re-resizable: "npm:^6.11.2"
     react: "npm:19.2.7"
-    react-aria: "npm:^3.50.0"
+    react-aria: "patch:react-aria@npm%3A3.50.0#~/.yarn/patches/react-aria-npm-3.50.0-c04a1eee28.patch"
     react-aria-components: "npm:^1.19.0"
     react-dnd: "npm:^16.0.1"
     react-dnd-html5-backend: "npm:^16.0.1"
@@ -23176,7 +23176,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-aria@npm:3.50.0, react-aria@npm:^3.48.0, react-aria@npm:^3.50.0":
+"react-aria@npm:3.50.0":
   version: 3.50.0
   resolution: "react-aria@npm:3.50.0"
   dependencies:
@@ -23193,6 +23193,26 @@ __metadata:
     react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
     react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
   checksum: 10/6209fee37a1b92f5866f4ce90f34a7e6d793d7aab5195a6897d5f28d39fb4bdb7d6f67214c249666b4f67b4361a7319205a36e542994ea03b61da1ff04a020aa
+  languageName: node
+  linkType: hard
+
+"react-aria@patch:react-aria@npm%3A3.50.0#~/.yarn/patches/react-aria-npm-3.50.0-c04a1eee28.patch":
+  version: 3.50.0
+  resolution: "react-aria@patch:react-aria@npm%3A3.50.0#~/.yarn/patches/react-aria-npm-3.50.0-c04a1eee28.patch::version=3.50.0&hash=899559"
+  dependencies:
+    "@internationalized/date": "npm:^3.12.2"
+    "@internationalized/number": "npm:^3.6.7"
+    "@internationalized/string": "npm:^3.2.9"
+    "@react-types/shared": "npm:^3.36.0"
+    "@swc/helpers": "npm:^0.5.0"
+    aria-hidden: "npm:^1.2.3"
+    clsx: "npm:^2.0.0"
+    react-stately: "npm:3.48.0"
+    use-sync-external-store: "npm:^1.6.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+    react-dom: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+  checksum: 10/6ae1cfe58d13516d55e67adba4b3aadaacab0b85266ac5a9f18971ee8203f9356106d87385823b23e5124b2374c5b0a8432cb91e65f9b7cfb6c276a41110475d
   languageName: node
   linkType: hard
 
