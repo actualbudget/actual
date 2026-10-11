@@ -196,11 +196,9 @@ type ScheduleRuleOptions = IRuleOptions & {
   frequency: string;
   interval?: number;
   byHourOfDay?: number[];
-  byDayOfMonth?: number[];
-  byDayOfWeek?: [string, number][];
 };
 
-export function recurConfigToRSchedule(config): ScheduleRuleOptions[] {
+export function recurConfigToRSchedule(config) {
   const base: ScheduleRuleOptions = {
     start: monthUtils.parseDate(config.start),
     frequency: config.frequency.toUpperCase(),
@@ -236,17 +234,13 @@ export function recurConfigToRSchedule(config): ScheduleRuleOptions[] {
         const days = config.patterns.filter(p => p.type === 'day');
         const dayNames = config.patterns.filter(p => p.type !== 'day');
 
-        const rules: ScheduleRuleOptions[] = [];
-        if (days.length > 0) {
-          rules.push({ ...base, byDayOfMonth: days.map(p => p.value) });
-        }
-        if (dayNames.length > 0) {
-          rules.push({
+        return [
+          days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },
+          dayNames.length > 0 && {
             ...base,
             byDayOfWeek: dayNames.map(p => [abbrevDay(p.type), p.value]),
-          });
-        }
-        return rules;
+          },
+        ].filter(Boolean);
       } else {
         // Nothing to do
         return [base];

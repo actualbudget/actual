@@ -801,7 +801,7 @@ Every recurrence setting is taken into account: `frequency`, `interval`, `patter
 - `end`: last date to include.
 - `count`: maximum number of dates to return.
 
-The window applies to the dates after the weekend move, so the result matches the dates Actual shows for the schedule. A recurrence that never ends needs an `end` or a `count`.
+The window applies to the dates after the weekend move, so the result matches the dates Actual shows for the schedule. A date that several occurrences move onto (a daily schedule's Saturday and Sunday both landing on Monday) is listed once, and `count` counts distinct dates. A recurrence that never ends needs an `end` or a `count`.
 
 ```js
 const [rent] = await api.getSchedules();

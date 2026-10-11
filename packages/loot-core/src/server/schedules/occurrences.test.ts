@@ -240,6 +240,28 @@ describe('getScheduleDates', () => {
       ).toEqual(['2024-07-01']);
     });
 
+    it('lists a date once when several occurrences move onto it', () => {
+      // Saturday 1 and Sunday 2 June both move to Monday 3 June.
+      const daily = {
+        frequency: 'daily',
+        start: '2024-06-01',
+        skipWeekend: true,
+      } satisfies RecurConfig;
+
+      expect(
+        getScheduleDates(
+          { ...daily, weekendSolveMode: 'after' },
+          { start: '2024-06-01', count: 3 },
+        ),
+      ).toEqual(['2024-06-03', '2024-06-04', '2024-06-05']);
+      expect(
+        getScheduleDates(
+          { ...daily, weekendSolveMode: 'before', start: '2024-05-31' },
+          { start: '2024-05-31', end: '2024-06-04' },
+        ),
+      ).toEqual(['2024-05-31', '2024-06-03', '2024-06-04']);
+    });
+
     it('keeps weekend dates when skipWeekend is off', () => {
       expect(
         getScheduleDates(

@@ -1254,6 +1254,31 @@ describe('API schedules: getScheduleDates', () => {
     ).toEqual(['2024-06-03', '2024-07-01', '2024-08-01', '2024-09-02']);
   });
 
+  // apis: createSchedule, getSchedules, getScheduleDates
+  test('starts at the next date the app shows and never repeats a date', async () => {
+    // Tests run with today pinned to Sunday 2017-01-01. The occurrences on
+    // Saturday 31 December and Sunday 1 January both move to Monday 2
+    // January, which must be listed once and match the stored next_date.
+    const id = await api.createSchedule({
+      name: 'daily weekdays',
+      amount: -500,
+      amountOp: 'is',
+      posts_transaction: false,
+      date: {
+        frequency: 'daily',
+        start: '2016-12-31',
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+        endMode: 'never',
+      },
+    });
+    const [schedule] = (await api.getSchedules()).filter(s => s.id === id);
+
+    const dates = await api.getScheduleDates(schedule.date, { count: 3 });
+    expect(dates[0]).toEqual(schedule.next_date);
+    expect(dates).toEqual(['2017-01-02', '2017-01-03', '2017-01-04']);
+  });
+
   // apis: getScheduleDates
   test('expands a single date', async () => {
     expect(
