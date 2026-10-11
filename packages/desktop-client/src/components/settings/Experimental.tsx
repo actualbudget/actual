@@ -228,7 +228,7 @@ export function ExperimentalFeatures() {
             </FeatureToggle>
             <FeatureToggle
               flag="budgetAnalysisReport"
-              feedbackLink="https://github.com/actualbudget/actual/pull/6742"
+              feedbackLink="https://github.com/actualbudget/actual/issues/6742"
             >
               <Trans>Budget Analysis Report</Trans>
             </FeatureToggle>
