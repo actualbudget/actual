@@ -169,10 +169,11 @@ class FilesService {
 
     return (
       canSeeAll
-        ? this.accountDb.all('SELECT * FROM files WHERE deleted = 0 LIMIT ?', [
-            limit,
-          ])
-        : this.accountDb.all(
+        ? this.accountDb.all<RawFile>(
+            'SELECT * FROM files WHERE deleted = 0 LIMIT ?',
+            [limit],
+          )
+        : this.accountDb.all<RawFile>(
             `SELECT files.*
         FROM files
         WHERE files.owner = ? and deleted = 0
