@@ -305,13 +305,15 @@ export function useDrop<T extends { id: string }>({
   // Track if react-aria thinks we're a drop target (needed to attach dragover listener)
   const [isDropActive, setIsDropActive] = useState(false);
 
-  // Reset state when cursor leaves
-  useEffect(() => {
-    if (!isCursorOver) {
-      setDropPos(null);
-      lastClientY.current = null;
-    }
-  }, [isCursorOver]);
+  // Reset from the drag events themselves rather than an effect: an effect
+  // runs (and schedules a state update) every time a row mounts, which
+  // piles up while scrolling a virtualized list and can trip React's
+  // "Maximum update depth exceeded" guard (#9170).
+  const resetCursor = () => {
+    setIsCursorOver(false);
+    setDropPos(null);
+    lastClientY.current = null;
+  };
 
   const acceptedTypes = Array.isArray(types) ? types : [types];
 
@@ -333,11 +335,27 @@ export function useDrop<T extends { id: string }>({
     },
     onDropExit() {
       setIsDropActive(false);
-      setIsCursorOver(false);
+      resetCursor();
     },
     async onDrop(e) {
       if (!onDrop) return;
       if (!dropRef.current) return;
+
+      // MIGRATION: With useDragAndDrop, the drop position is provided
+      // in the event object (e.target.dropPosition) - no manual
+      // calculation needed.
+      //
+      // Compute the position before awaiting anything: react-aria fires
+      // onDropExit (which resets the cursor tracking) right after this
+      // handler returns its promise.
+      const rect = dropRef.current.getBoundingClientRect();
+      const hoverMiddleY = (rect.bottom - rect.top) / 2;
+      const hoverClientY =
+        lastClientY.current != null
+          ? lastClientY.current - rect.top
+          : hoverMiddleY + 1;
+      const pos: DropPosition =
+        hoverClientY < hoverMiddleY ? 'before' : 'after';
 
       // Find the first matching type
       const matchingType = acceptedTypes.find(t =>
@@ -377,18 +395,6 @@ export function useDrop<T extends { id: string }>({
         return;
       }
 
-      // MIGRATION: With useDragAndDrop, the drop position is provided
-      // in the event object (e.target.dropPosition) - no manual
-      // calculation needed.
-      const rect = dropRef.current.getBoundingClientRect();
-      const hoverMiddleY = (rect.bottom - rect.top) / 2;
-      const hoverClientY =
-        lastClientY.current != null
-          ? lastClientY.current - rect.top
-          : hoverMiddleY + 1;
-      const pos: DropPosition =
-        hoverClientY < hoverMiddleY ? 'before' : 'after';
-
       void onDrop(parsed.id, pos, id);
     },
   });
@@ -412,7 +418,7 @@ export function useDrop<T extends { id: string }>({
         clientY <= rect.bottom;
 
       if (!cursorInBounds) {
-        setIsCursorOver(false);
+        resetCursor();
         return;
       }
 
