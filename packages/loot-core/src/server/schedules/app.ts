@@ -444,11 +444,13 @@ export async function updateSchedule({
       // or date changed. We check account because we don't update
       // schedules automatically for closed account, and the user
       // might switch accounts from a closed one
+      const oldAccountCond = extractScheduleConds(oldConditions).account;
+      const newAccountCond = extractScheduleConds(newConditions).account;
       if (
         resetNextDate ||
         !areScheduleConditionsEqual(
-          oldConditions.find(c => c.field === 'account'),
-          newConditions.find(c => c.field === 'account'),
+          oldAccountCond && { ...oldAccountCond, field: 'account' },
+          newAccountCond && { ...newAccountCond, field: 'account' },
         ) ||
         !areConditionValuesEqual(
           stripType(oldConditions.find(c => c.field === 'date') || {}),
