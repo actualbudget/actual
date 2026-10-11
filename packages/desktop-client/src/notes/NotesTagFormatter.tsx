@@ -4,18 +4,24 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
 import { DesktopLinkedNotes } from './DesktopLinkedNotes';
 import { DesktopTaggedNotes } from './DesktopTaggedNotes';
-import { parseNotes } from './linkParser';
+import { parseNotes, removeTagFromNotes } from './linkParser';
 import { MobileLinkedNotes } from './MobileLinkedNotes';
 import { MobileTaggedNotes } from './MobileTaggedNotes';
 
 type NotesTagFormatterProps = {
   notes: string;
   onNotesTagClick?: (tag: string) => void;
+  /**
+   * Called with the updated notes when a tag is removed. When omitted, tags
+   * can't be removed.
+   */
+  onNotesChange?: (notes: string) => void;
 };
 
 export function NotesTagFormatter({
   notes,
   onNotesTagClick,
+  onNotesChange,
 }: NotesTagFormatterProps) {
   const { isNarrowWidth } = useResponsive();
 
@@ -52,6 +58,10 @@ export function NotesTagFormatter({
               <DesktopTaggedNotes
                 key={index}
                 onPress={onNotesTagClick}
+                onRemove={
+                  onNotesChange &&
+                  (() => onNotesChange(removeTagFromNotes(notes, segment)))
+                }
                 content={segment.content}
                 tag={segment.tag}
                 separator={separator}
