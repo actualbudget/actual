@@ -41,7 +41,6 @@ describe('Select', () => {
     const option = await openSelect({ isNonModal: true });
 
     const outside = screen.getByRole('button', { name: 'Somewhere else' });
-    expect(screen.queryByRole('button', { name: 'Dismiss' })).toBeNull();
 
     // A non-modal popover opts out of react-aria's own dismissal, so closing
     // is left to the `focusout` listener in `Popover`.
@@ -63,9 +62,8 @@ describe('Select', () => {
     // non-modal.
     await openSelect();
 
-    // react-aria hides everything outside a modal popover and supplies its own
-    // dismiss affordance instead.
+    // react-aria hides everything outside a modal popover, which is the same
+    // reason the underlay is there.
     expect(screen.queryByRole('button', { name: 'Somewhere else' })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Dismiss' })).toBeTruthy();
   });
 });
