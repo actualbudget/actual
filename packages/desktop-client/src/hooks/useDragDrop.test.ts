@@ -45,9 +45,9 @@ describe('useDrop', () => {
   it('does not update state when many drop targets mount at once', () => {
     const ids = Array.from({ length: 100 }, (_, i) => `t${i}`);
 
-    renderHook(() =>
-      ids.map(id => useDrop({ types: ['transaction', 'other'], id })),
-    );
+    for (const id of ids) {
+      renderHook(() => useDrop({ types: ['transaction', 'other'], id }));
+    }
 
     expect(setStateCalls.count).toBe(0);
   });

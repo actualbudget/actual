@@ -68,7 +68,8 @@ async function drop(items: DropEvent['items']) {
   await act(async () => {
     const pending = captured.options?.onDrop?.(dropEvent(items));
     captured.options?.onDropExit?.({ type: 'dropexit', x: 0, y: 0 });
-    await pending;
+    // react-aria types onDrop as void, but our implementation is async.
+    await Promise.resolve(pending);
   });
 }
 
