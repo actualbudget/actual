@@ -193,7 +193,7 @@
     "plugins-service": "workspace:*",
     "re-resizable": "^6.11.2",
     "react": "19.2.7",
-    "react-aria": "^3.50.0",
+    "react-aria": "patch:react-aria@npm%3A3.50.0#~/.yarn/patches/react-aria-npm-3.50.0-c04a1eee28.patch",
     "react-aria-components": "^1.19.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
