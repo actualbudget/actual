@@ -214,6 +214,7 @@ const sidebars = {
             'experimental/rule-templating',
             'experimental/formulas',
             'experimental/balance-forecast-report',
+            'experimental/account-balance-forecast',
             'experimental/budget-analysis-report',
             'experimental/monte-carlo-analysis',
             'experimental/sankey-report',

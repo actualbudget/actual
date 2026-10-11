@@ -110,6 +110,7 @@ type AllTransactionsProps = {
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   showBalances?: boolean | undefined;
   filtered?: boolean | undefined;
+  balanceDate?: string | null;
   children: (
     transactions: TransactionEntity[],
     balances: Record<TransactionEntity['id'], IntegerAmount> | null,
@@ -122,12 +123,16 @@ function AllTransactions({
   balances,
   showBalances,
   filtered,
+  balanceDate,
   children,
 }: AllTransactionsProps) {
   const accountId = account?.id;
   const { dispatch: splitsExpandedDispatch } = useSplitsExpanded();
   const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
-    useAccountPreviewTransactions({ accountId });
+    useAccountPreviewTransactions({
+      accountId,
+      endDate: balanceDate ?? undefined,
+    });
 
   useEffect(() => {
     if (!isPreviewTransactionsLoading) {
@@ -290,6 +295,7 @@ type AccountInternalState = {
     prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
+  balanceDate: string | null;
 };
 
 export type TableRef = RefObject<{
@@ -334,6 +340,7 @@ class AccountInternal extends PureComponent<
       isAdding: false,
       sort: null,
       filteredAmount: null,
+      balanceDate: null,
     };
   }
 
@@ -487,6 +494,12 @@ class AccountInternal extends PureComponent<
       query = query.filter({ reconciled: { $eq: false } });
     }
 
+    // Hide transactions after the date picked on the balance graph. This is
+    // not a user filter, so running balances and schedule previews still work.
+    if (this.state.balanceDate) {
+      query = query.filter({ date: { $lte: this.state.balanceDate } });
+    }
+
     this.paged = pagedQuery(query.select('*'), {
       onData: async (groupedData, prevData) => {
         const data = ungroupTransactions([...groupedData]);
@@ -577,6 +590,7 @@ class AccountInternal extends PureComponent<
           showCleared: nextProps.showCleared,
           showReconciled: nextProps.showReconciled,
           reconcileAmount: null,
+          balanceDate: null,
         },
         () => {
           this.fetchTransactions();
@@ -807,6 +821,12 @@ class AccountInternal extends PureComponent<
 
   onToggleExtraBalances = () => {
     this.props.setShowExtraBalances(!this.props.showExtraBalances);
+  };
+
+  onSelectBalanceDate = (balanceDate: string | null) => {
+    this.setState({ balanceDate }, () =>
+      this.fetchTransactions(this.state.filterConditions),
+    );
   };
 
   onMenuSelect = async (
@@ -1835,6 +1855,7 @@ class AccountInternal extends PureComponent<
         balances={balances}
         showBalances={showBalances}
         filtered={transactionsFiltered}
+        balanceDate={this.state.balanceDate}
       >
         {(allTransactions, allBalances) => (
           <SelectedProviderWithItems
@@ -1871,6 +1892,8 @@ class AccountInternal extends PureComponent<
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 filteredAmount={filteredAmount}
+                balanceDate={this.state.balanceDate}
+                onSelectBalanceDate={this.onSelectBalanceDate}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
                 reconcileAmount={reconcileAmount}

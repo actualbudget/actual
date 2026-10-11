@@ -6,6 +6,7 @@ export type FeatureFlag =
   | 'formulaMode'
   | 'currency'
   | 'balanceForecastReport'
+  | 'accountBalanceForecast'
   | 'customThemes'
   | 'budgetAnalysisReport'
   | 'enableBanking'

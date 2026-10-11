@@ -20,6 +20,7 @@ import { calculateRunningBalancesBottomUp } from './useTransactions';
 
 type UseAccountPreviewTransactionsProps = {
   accountId?: AccountEntity['id'] | undefined;
+  endDate?: string | undefined;
 };
 
 type UseAccountPreviewTransactionsResult = ReturnType<
@@ -33,6 +34,7 @@ type UseAccountPreviewTransactionsResult = ReturnType<
  */
 export function useAccountPreviewTransactions({
   accountId,
+  endDate,
 }: UseAccountPreviewTransactionsProps): UseAccountPreviewTransactionsResult {
   const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
@@ -91,6 +93,7 @@ export function useAccountPreviewTransactions({
     options: {
       calculateRunningBalances: showBalances === 'true',
       startingBalance: accountBalanceValue ?? 0,
+      endDate,
     },
   });
 

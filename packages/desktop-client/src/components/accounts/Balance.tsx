@@ -3,10 +3,12 @@ import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgDelete } from '@actual-app/components/icons/v0';
 import { SvgArrowButtonRight1 } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
 import { getScheduledAmount } from '@actual-app/core/shared/schedules';
@@ -18,6 +20,7 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
@@ -147,30 +150,82 @@ function FilteredBalance({ filteredAmount }: FilteredBalanceProps) {
   );
 }
 
-type MoreBalancesProps = {
-  balanceQuery: { name: `balance-query-${string}`; query: Query };
+type BalanceOnDateProps = {
+  date: string;
+  balance: number | null;
+  onClear: () => void;
 };
 
-function MoreBalances({ balanceQuery }: MoreBalancesProps) {
+function BalanceOnDate({ date, balance, onClear }: BalanceOnDateProps) {
+  const { t } = useTranslation();
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <DetailedBalance
+        name={t('Balance on {{date}}:', {
+          date: monthUtils.format(date, dateFormat),
+        })}
+        balance={balance ?? 0}
+        isExactBalance={balance !== null}
+      />
+      <Button
+        variant="bare"
+        onPress={onClear}
+        aria-label={t('Clear balance date')}
+      >
+        <SvgDelete style={{ width: 8, height: 8, margin: 4 }} />
+      </Button>
+    </View>
+  );
+}
+
+type MoreBalancesProps = {
+  balanceQuery: { name: `balance-query-${string}`; query: Query };
+  balanceDate: string | null;
+  balanceOnDate: number | null;
+};
+
+function MoreBalances({
+  balanceQuery,
+  balanceDate,
+  balanceOnDate,
+}: MoreBalancesProps) {
   const { t } = useTranslation();
 
+  const query = balanceDate
+    ? balanceQuery.query.filter({ date: { $lte: balanceDate } })
+    : balanceQuery.query;
+  const name = balanceDate
+    ? `${balanceQuery.name}-${balanceDate}`
+    : balanceQuery.name;
+
   const cleared = useSheetValue<'balance', `balance-query-${string}-cleared`>({
-    name: (balanceQuery.name + '-cleared') as `balance-query-${string}-cleared`,
-    query: balanceQuery.query.filter({ cleared: true }),
+    name: (name + '-cleared') as `balance-query-${string}-cleared`,
+    query: query.filter({ cleared: true }),
   });
   const uncleared = useSheetValue<
     'balance',
     `balance-query-${string}-uncleared`
   >({
-    name: (balanceQuery.name +
-      '-uncleared') as `balance-query-${string}-uncleared`,
-    query: balanceQuery.query.filter({ cleared: false }),
+    name: (name + '-uncleared') as `balance-query-${string}-uncleared`,
+    query: query.filter({ cleared: false }),
   });
+
+  // Scheduled transactions are never cleared, so on a chosen date they are
+  // part of the uncleared total.
+  const unclearedOnDate =
+    balanceDate && balanceOnDate !== null
+      ? balanceOnDate - (cleared ?? 0)
+      : uncleared;
 
   return (
     <>
       <DetailedBalance name={t('Cleared total:')} balance={cleared ?? 0} />
-      <DetailedBalance name={t('Uncleared total:')} balance={uncleared ?? 0} />
+      <DetailedBalance
+        name={t('Uncleared total:')}
+        balance={unclearedOnDate ?? 0}
+      />
     </>
   );
 }
@@ -182,6 +237,9 @@ type BalancesProps = {
   account?: AccountEntity;
   isFiltered: boolean;
   filteredAmount?: number | null;
+  balanceDate?: string | null;
+  balanceOnDate?: number | null;
+  onClearBalanceDate?: () => void;
 };
 
 export function Balances({
@@ -191,6 +249,9 @@ export function Balances({
   account,
   isFiltered,
   filteredAmount,
+  balanceDate = null,
+  balanceOnDate = null,
+  onClearBalanceDate,
 }: BalancesProps) {
   const selectedItems = useSelectedItems();
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -258,7 +319,20 @@ export function Balances({
         />
       </Button>
 
-      {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
+      {balanceDate && onClearBalanceDate && (
+        <BalanceOnDate
+          date={balanceDate}
+          balance={balanceOnDate}
+          onClear={onClearBalanceDate}
+        />
+      )}
+      {showExtraBalances && (
+        <MoreBalances
+          balanceQuery={balanceQuery}
+          balanceDate={balanceDate}
+          balanceOnDate={balanceOnDate}
+        />
+      )}
 
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />

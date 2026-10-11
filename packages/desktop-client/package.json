@@ -34,6 +34,7 @@
     "#mocks": "./src/mocks.tsx",
     "#mocks/*": "./src/mocks/*.ts",
     "#components/forms": "./src/components/forms/index.tsx",
+    "#components/accounts/balanceHistoryGraphData": "./src/components/accounts/balanceHistoryGraphData.ts",
     "#components/banksync": "./src/components/banksync/index.tsx",
     "#components/banksync/bankSyncUtils": "./src/components/banksync/bankSyncUtils.ts",
     "#components/banksync/BuiltInProviders": "./src/components/banksync/BuiltInProviders.tsx",
