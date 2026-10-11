@@ -362,6 +362,11 @@ describe('schedule app', () => {
           offbudget: 0,
           closed: 0,
         });
+        const otherAccountId = await db.insertAccount({
+          name: 'Savings',
+          offbudget: 0,
+          closed: 0,
+        });
         const date: RecurConfig = {
           start: '2021-05-17',
           frequency: 'monthly',
@@ -400,6 +405,21 @@ describe('schedule app', () => {
           q('schedules').filter({ id }).select(['next_date']),
         );
         expect(updatedRows[0].next_date).toBe('2021-06-17');
+
+        await updateSchedule({
+          schedule: { id },
+          conditions: [
+            { op: 'is', field: 'description', value: 'internet' },
+            { op: 'is', field: 'acct', value: otherAccountId },
+            { op: 'is', field: 'amount', value: -5000 },
+            { op: 'is', field: 'date', value: date },
+          ] as unknown as RuleConditionEntity[],
+        });
+
+        const { data: changedAccountRows } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(changedAccountRows[0].next_date).toBe('2021-05-17');
       } finally {
         MockDate.reset();
       }
