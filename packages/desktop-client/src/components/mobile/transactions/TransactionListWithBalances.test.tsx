@@ -68,6 +68,13 @@ function TransactionEditPage() {
   return <button onClick={() => void navigate(-1)}>Save changes</button>;
 }
 
+// Navigates to a URL on the same page, like a link or the browser's
+// back/forward between two searches would, without remounting the list.
+function NavigateButton({ to }: { to: string }) {
+  const navigate = useNavigate();
+  return <button onClick={() => void navigate(to)}>Go to {to}</button>;
+}
+
 function LocationDisplay() {
   const location = useLocation();
   return (
@@ -91,6 +98,8 @@ describe('TransactionListWithBalances', () => {
             <Route path="/transactions/:id" element={<TransactionEditPage />} />
           </Routes>
           <LocationDisplay />
+          <NavigateButton to="/accounts?search=Fuel" />
+          <NavigateButton to="/accounts" />
         </MemoryRouter>
       </TestProviders>,
     );
@@ -132,6 +141,23 @@ describe('TransactionListWithBalances', () => {
     const location = screen.getByTestId('location');
     expect(location).toHaveTextContent('/accounts?reconcile=100');
     expect(location).not.toHaveTextContent('search=');
+    expect(screen.getByText('Groceries #food')).toBeInTheDocument();
+  });
+
+  it('follows the search param when the URL changes after the first render', async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const searchBox = screen.getByPlaceholderText('Search All Accounts');
+    expect(searchBox).toHaveValue('');
+
+    await user.click(screen.getByText('Go to /accounts?search=Fuel'));
+    expect(searchBox).toHaveValue('Fuel');
+    expect(screen.getByText('Fuel')).toBeInTheDocument();
+    expect(screen.queryByText('Groceries #food')).not.toBeInTheDocument();
+
+    await user.click(screen.getByText('Go to /accounts'));
+    expect(searchBox).toHaveValue('');
     expect(screen.getByText('Groceries #food')).toBeInTheDocument();
   });
 
