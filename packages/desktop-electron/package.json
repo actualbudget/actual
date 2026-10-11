@@ -1,6 +1,6 @@
 {
   "name": "desktop-electron",
-  "version": "26.9.0",
+  "version": "26.10.0",
   "description": "A simple and powerful personal finance system",
   "author": "Actual",
   "main": "build/desktop-electron/index.js",
@@ -9,6 +9,7 @@
     "update-client": "bin/update-client",
     "build": "yarn build:dist && electron-builder",
     "build:dist": "tsgo && yarn copy-static-assets",
+    "test": "vitest --run",
     "typecheck": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
@@ -27,14 +28,16 @@
     "@typescript/native-preview": "beta",
     "copyfiles": "^2.4.1",
     "cross-env": "^10.1.0",
-    "electron": "43.4.0",
+    "electron": "43.5.0",
     "electron-builder": "26.8.1",
-    "typescript-strict-plugin": "^2.4.4"
+    "typescript-strict-plugin": "^2.4.4",
+    "vitest": "^5.0.0"
   },
   "build": {
     "appId": "com.actualbudget.actual",
     "files": [
       "build",
+      "!build/desktop-electron/{tests,vitest.config.*}",
       "!node_modules/@actual-app/web",
       "node_modules/@actual-app/web/build",
       "node_modules/@actual-app/web/package.json",
@@ -48,7 +51,7 @@
     "afterSign": "./build/desktop-electron/afterSignHook.js",
     "electronFuses": {
       "runAsNode": false,
-      "enableNodeOptionsEnvironmentVariable": true,
+      "enableNodeOptionsEnvironmentVariable": false,
       "enableNodeCliInspectArguments": false
     },
     "mac": {

@@ -12,10 +12,12 @@ The bell sits in the top bar, next to the Help menu. When there are notification
 
 Each notification is shown as a card:
 
-- **Release** cards summarize what changed in a version of Actual. The card shows the highlights, and you can click **Show all changes** to expand the full list of changes in that release. A link on the card takes you to the same release announcement on the website.
+- **Release** cards summarize what changed in a version of Actual. The card shows the highlights, followed by **All changes**: the full list of changes grouped into Features, Enhancements, Bugfixes, and Maintenance. Click a group to expand it. A link on the card takes you to the same release announcement on the website.
 - **Post** cards are announcements from the team, such as community news or project updates, with a link to the full post on the blog.
 
-At the top of the page you will also find links to the full [release notes](./releases.md), the blog, and the community Discord.
+At the bottom of the page you will also find links to the full [release notes](./releases.md), the blog, and the community Discord.
+
+If Actual cannot load the notifications, for example because you are offline, the page tells you so and offers a **Try again** button. Everything else in Actual keeps working.
 
 ## Release Messages
 

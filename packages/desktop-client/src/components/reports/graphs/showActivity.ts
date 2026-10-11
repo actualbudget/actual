@@ -1,6 +1,7 @@
 import type { NavigateFunction } from 'react-router';
 
 import * as monthUtils from '@actual-app/core/shared/months';
+import { makeExactTagSetQueryFilter } from '@actual-app/core/shared/tags';
 import type {
   AccountEntity,
   balanceTypeOpType,
@@ -8,6 +9,7 @@ import type {
   CategoryGroupEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
+import { t } from 'i18next';
 
 import { ReportOptions } from '#components/reports/ReportOptions';
 
@@ -26,6 +28,8 @@ type showActivityProps = {
   id?: string | string[]; // changed: supports array for oneOf
   uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
   interval?: string;
+  bucketTagNames?: string[];
+  scopeTagNames?: string[];
 };
 
 export function showActivity({
@@ -43,6 +47,8 @@ export function showActivity({
   id,
   uncategorizedId,
   interval = 'Day',
+  bucketTagNames,
+  scopeTagNames = [],
 }: showActivityProps) {
   const isOutFlow =
     balanceTypeOp === 'totalDebts' || type === 'debts' ? true : false;
@@ -55,28 +61,45 @@ export function showActivity({
           'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
   const isDateOp = interval === 'Weekly' || type !== 'time';
   const drilldownFilter =
-    field === 'category' && uncategorizedId === 'transfer'
+    field === 'tag' && bucketTagNames
       ? {
-          field: 'transfer',
-          op: 'is',
-          value: true,
-          type: 'boolean',
+          field: 'notes',
+          op: 'hasTags',
+          value: bucketTagNames.map(tag => `#${tag}`).join(' '),
+          type: 'string',
+          customName:
+            bucketTagNames.length === 0
+              ? t('Tag: Untagged')
+              : t('Tag: {{tags}}', {
+                  tags: bucketTagNames.map(tag => `#${tag}`).join(' + '),
+                }),
+          queryFilter: makeExactTagSetQueryFilter(
+            bucketTagNames,
+            scopeTagNames,
+          ),
         }
-      : field === 'group'
-        ? !uncategorizedId &&
-          id && {
-            field: 'category_group',
+      : field === 'category' && uncategorizedId === 'transfer'
+        ? {
+            field: 'transfer',
             op: 'is',
-            value: id,
-            type: 'id',
+            value: true,
+            type: 'boolean',
           }
-        : id && {
-            // changed: use oneOf when id is an array, is when it's a string
-            field,
-            op: Array.isArray(id) ? 'oneOf' : 'is',
-            value: id,
-            type: 'id',
-          };
+        : field === 'group'
+          ? !uncategorizedId &&
+            id && {
+              field: 'category_group',
+              op: 'is',
+              value: id,
+              type: 'id',
+            }
+          : id && {
+              // changed: use oneOf when id is an array, is when it's a string
+              field,
+              op: Array.isArray(id) ? 'oneOf' : 'is',
+              value: id,
+              type: 'id',
+            };
 
   const filterConditions = [
     ...filters,

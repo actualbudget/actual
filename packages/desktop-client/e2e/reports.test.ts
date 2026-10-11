@@ -47,6 +47,27 @@ test.describe('Reports', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('resizes number cards with the viewport', async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    const number = page.locator('[aria-label*="amount:"]').first();
+    await expect(number).toBeVisible();
+    const numberText = number.locator('span').first();
+    const initialFontSize = await numberText.evaluate(
+      element => getComputedStyle(element).fontSize,
+    );
+    await expect(number).toMatchThemeScreenshots();
+
+    await page.setViewportSize({ width: 900, height: 900 });
+    await expect(number).toMatchThemeScreenshots();
+
+    await expect
+      .poll(() =>
+        numberText.evaluate(element => getComputedStyle(element).fontSize),
+      )
+      .not.toBe(initialFontSize);
+  });
+
   test('right clicking a report card opens context menu', async () => {
     await reportsPage.rightClickReportCard('Net Worth');
     const menu = page.getByRole('menu');

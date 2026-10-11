@@ -79,6 +79,36 @@ test.describe('Mobile Transactions', () => {
 - textbox [disabled]: just a note`);
   });
 
+  test('removes the payee from a new transaction', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    const accountPage = await accountsPage.openNthAccount(2);
+    const transactionEntryPage = await accountPage.clickCreateTransaction();
+
+    await transactionEntryPage.fillAmount('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
+    await transactionEntryPage.fillField(
+      page.getByTestId('payee-field'),
+      'Kroger',
+    );
+    await expect(page.getByTestId('payee-field')).toContainText('Kroger');
+
+    // Reopen the payee selector and clear it with the "No payee" option.
+    await page.getByTestId('payee-field').click();
+    await page.getByRole('button', { name: 'No payee' }).click();
+    await expect(page.getByTestId('payee-field')).not.toContainText('Kroger');
+
+    await transactionEntryPage.fillField(
+      page.getByTestId('category-field'),
+      'Clothing',
+    );
+    await transactionEntryPage.createTransaction();
+
+    await expect(accountPage.transactions.nth(0)).toHaveText(
+      '(No payee)Clothing-12.34',
+    );
+  });
+
   test('creates a transaction from `/accounts/:id` page', async () => {
     const accountsPage = await navigation.goToAccountsPage();
     const accountPage = await accountsPage.openNthAccount(2);

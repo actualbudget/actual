@@ -146,10 +146,44 @@ async function getRemoteFiles() {
 }
 
 async function resetBudgetCache() {
-  // Recomputing everything will update the cache
-  await sheet.loadUserBudgets(db);
-  sheet.get().recomputeAll();
-  await sheet.waitOnSpreadsheet();
+  const spreadsheet = sheet.get();
+
+  // Hold the cache dirty for the whole reset so an interrupted one doesn't
+  // leave a half-written cache looking clean.
+  spreadsheet.startCacheBarrier();
+
+  try {
+    let seededCells: string[] = [];
+
+    // One transaction around the whole reset. `loadUserBudgets` would
+    // otherwise close its own, queueing a computation pass over everything
+    // downstream of the budget inputs that `recomputeAll` then repeats.
+    spreadsheet.startTransaction();
+    try {
+      await sheet.loadUserBudgets(db);
+
+      // Seeding the spend totals from a single grouped query keeps the
+      // recompute from running a `SELECT SUM(amount)` per category per month.
+      seededCells = await budget.reseedSumAmounts([
+        ...spreadsheet.meta().createdMonths,
+      ]);
+
+      // Recomputing everything will update the cache
+      spreadsheet.recomputeAll(new Set(seededCells));
+    } finally {
+      // A transaction left open would stop the spreadsheet from queueing any
+      // further computations, and make every later `waitOnSpreadsheet` throw.
+      spreadsheet.endTransaction();
+    }
+
+    // The seeded cells were loaded rather than computed, so they aren't part
+    // of the computation queue that normally gets cached.
+    spreadsheet.saveCachedCells(seededCells);
+
+    await sheet.waitOnSpreadsheet();
+  } finally {
+    spreadsheet.endCacheBarrier();
+  }
 }
 
 async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{
@@ -183,12 +217,17 @@ async function uploadBudget({ id }: { id?: Budget['id'] } = {}): Promise<{
 
 async function downloadBudget({
   cloudFileId,
+  localId,
 }: {
   cloudFileId: Budget['cloudFileId'];
+  localId?: Budget['id'];
 }): Promise<{ id?: Budget['id']; error?: { reason: string; meta?: unknown } }> {
   let result;
   try {
-    result = await cloudStorage.download(cloudFileId);
+    if (localId) {
+      await closeBudget();
+    }
+    result = await cloudStorage.download(cloudFileId, localId);
   } catch (e) {
     if (e.type === 'FileDownloadError') {
       if (e.reason === 'file-exists' && e.meta.id) {
