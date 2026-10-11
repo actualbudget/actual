@@ -205,6 +205,20 @@ function hasIntervalDates(value: unknown): value is IntervalDrilldownPayload {
   );
 }
 
+// Keeps angled category labels from taking over the small card preview
+const COMPACT_LABEL_MAX_LENGTH = 12;
+// Rough horizontal space an angled tick label takes per character
+const ANGLED_LABEL_WIDTH_PER_CHAR = 5;
+
+const graphemeSegmenter = new Intl.Segmenter(undefined, {
+  granularity: 'grapheme',
+});
+
+// Splits by visible character so emoji like flags and families stay whole
+function splitGraphemes(value: string) {
+  return Array.from(graphemeSegmenter.segment(value), s => s.segment);
+}
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -251,15 +265,43 @@ export function BarGraph({
     return obj[balanceTypeOp];
   };
 
+  const formatXTick = (value: string) => {
+    // Split by grapheme so emoji like flags and families stay whole
+    const chars = splitGraphemes(value);
+    return compact && chars.length > COMPACT_LABEL_MAX_LENGTH
+      ? `${chars.slice(0, COMPACT_LABEL_MAX_LENGTH - 1).join('')}…`
+      : value;
+  };
+
+  const getLabelLength = (value: string) =>
+    splitGraphemes(formatXTick(value)).length;
+
   const longestLabelLength = data[splitData]
-    .map(c => c[yAxis])
-    .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
+    .map(c => getLabelLength(c[yAxis]))
+    .reduce((acc, cur) => (cur > acc ? cur : acc), 0);
 
   const largestValue = data[splitData]
     .map(c => c[balanceTypeOp])
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
-  const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
+  // Dates fit flat like the stacked bar card; only category names need angling
+  const isAngled = !compact || groupBy !== 'Interval';
+
+  const getLeftMargin = () => {
+    // Without a Y axis the card has no room for the first angled label to overhang
+    const firstLabel = data[splitData][0]?.[yAxis];
+    if (compact && isAngled && firstLabel) {
+      return getLabelLength(firstLabel) * ANGLED_LABEL_WIDTH_PER_CHAR;
+    }
+
+    if (Math.abs(largestValue) > 1000000) {
+      return 20;
+    }
+
+    return 0;
+  };
+
+  const leftMargin = getLeftMargin();
 
   return (
     <Container
@@ -301,15 +343,17 @@ export function BarGraph({
                 />
               )}
               {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <XAxis
-                  dataKey={yAxis}
-                  angle={-35}
-                  height={Math.sqrt(longestLabelLength) * 25}
-                  tick={{ fill: theme.pageText, textAnchor: 'end' }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              <XAxis
+                dataKey={yAxis}
+                angle={isAngled ? -35 : 0}
+                height={isAngled ? Math.sqrt(longestLabelLength) * 25 : 30}
+                tickFormatter={formatXTick}
+                tick={{
+                  fill: theme.pageText,
+                  textAnchor: isAngled ? 'end' : 'middle',
+                }}
+                tickLine={{ stroke: theme.pageText }}
+              />
               {!compact && (
                 <YAxis
                   tickFormatter={value =>
