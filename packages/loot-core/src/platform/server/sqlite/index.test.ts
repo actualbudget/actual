@@ -193,4 +193,21 @@ describe('Web sqlite', () => {
     // @ts-expect-error Property 'id' does not exist on type 'unknown'
     expect(rows[0].id).toBe('id1');
   });
+
+  it('should free statements it prepares', async () => {
+    const db = await openDatabase();
+    execQuery(db, initSQL);
+    const prepare = vi.spyOn(db, 'prepare');
+
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
+    runQuery(db, 'SELECT * FROM numbers', [], true);
+    expect(() =>
+      runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 5)"),
+    ).toThrow(/constraint failed/);
+
+    expect(prepare).toHaveBeenCalledTimes(3);
+    for (const { value: statement } of prepare.mock.results) {
+      expect(() => statement.run()).toThrow(/Statement closed/);
+    }
+  });
 });
