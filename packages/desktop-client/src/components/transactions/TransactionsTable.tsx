@@ -5,7 +5,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -128,7 +127,6 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
-import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
@@ -2259,25 +2257,25 @@ function NotesCell({
   onClickTag,
   onExpose,
 }: NotesCellProps) {
+  // Sync the editable value with the note during render rather than in an
+  // effect, so mounting a row doesn't queue a state update (#9170).
   const [inputValue, setInputValue] = useState(note);
-  useEffect(() => {
+  const [prevNote, setPrevNote] = useState(note);
+  if (note !== prevNote) {
+    setPrevNote(note);
     setInputValue(note);
-  }, [note, setInputValue]);
+  }
 
+  // Only measure truncation when the pointer enters the note: the tooltip is
+  // only needed on hover, and measuring on mount set state in a layout effect
+  // for every row the virtualized list mounted while scrolling, which kept
+  // React's nested-update counter climbing until it crashed (#9170).
   const textRef = useRef<HTMLSpanElement | null>(null);
   const [isTruncated, setIsTruncated] = useState(false);
-  const checkTruncated = useCallback(() => {
+  function checkTruncated() {
     const el = textRef.current;
     setIsTruncated(el != null && el.scrollWidth > el.clientWidth);
-  }, []);
-  const resizeRef = useResizeObserver<HTMLSpanElement>(checkTruncated);
-  const setTextRef = useCallback(
-    (el: HTMLSpanElement | null) => {
-      textRef.current = el;
-      resizeRef(el as HTMLSpanElement);
-    },
-    [resizeRef],
-  );
+  }
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === 'Tab') {
@@ -2288,10 +2286,6 @@ function NotesCell({
   }
 
   const displayedNote = note || scheduleNote || '';
-
-  useLayoutEffect(() => {
-    checkTruncated();
-  }, [displayedNote, checkTruncated]);
 
   return (
     <CustomCell
@@ -2324,7 +2318,11 @@ function NotesCell({
           placement="bottom start"
           triggerProps={{ delay: 500, isDisabled: !isTruncated }}
         >
-          <UnexposedCellContent {...props} ref={setTextRef} />
+          <UnexposedCellContent
+            {...props}
+            ref={textRef}
+            onMouseEnter={checkTruncated}
+          />
         </Tooltip>
       )}
     >

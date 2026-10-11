@@ -1963,6 +1963,42 @@ describe('Transactions', () => {
       });
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
+
+    // Truncation is measured when the pointer enters the note rather than on
+    // mount: measuring on mount set state in a layout effect for every row
+    // the virtualized list mounted while scrolling, which fed the update
+    // loop that crashed the transaction list (#9170).
+    test('shows the tooltip when a note becomes truncated after it rendered', async () => {
+      isOverflowing = false;
+      const transactions = generateTransactions(1);
+      transactions[0].notes = 'a note that the narrowed column now cuts off';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      isOverflowing = true;
+      await userEvent.hover(notesText);
+
+      const tooltip = await screen.findByRole('tooltip', {}, { timeout: 1000 });
+      expect(tooltip.textContent).toContain('the narrowed column now cuts off');
+    });
+
+    test('does not show the tooltip when a note stops being truncated after it rendered', async () => {
+      isOverflowing = true;
+      const transactions = generateTransactions(1);
+      transactions[0].notes = 'a note that fits once the column widens';
+
+      const { container } = renderTransactions({ transactions });
+      const notesText = queryField(container, 'notes', 'span', 0);
+
+      isOverflowing = false;
+      await userEvent.hover(notesText);
+
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 700));
+      });
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
   });
 });
 
