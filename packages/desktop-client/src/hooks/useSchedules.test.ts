@@ -1,4 +1,7 @@
+import type * as React from 'react';
+
 import { q } from '@actual-app/core/shared/query';
+import type { Query } from '@actual-app/core/shared/query';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,6 +13,28 @@ import { getSchedulesQuery, useSchedules } from './useSchedules';
 vi.mock('#queries/liveQuery', () => ({
   liveQuery: vi.fn(),
 }));
+
+// Count state updates the hook schedules. Every transaction row calls this
+// hook, so a state update on mount is queued for each row the virtualized
+// list mounts while scrolling (#9170).
+const setStateCalls = vi.hoisted(() => ({ count: 0 }));
+
+vi.mock('react', async importOriginal => {
+  const actual = await importOriginal<typeof React>();
+  return {
+    ...actual,
+    useState: ((initial: unknown) => {
+      const [value, setValue] = actual.useState(initial);
+      return [
+        value,
+        (next: unknown) => {
+          setStateCalls.count++;
+          setValue(next);
+        },
+      ];
+    }) as typeof actual.useState,
+  };
+});
 
 vi.mock('./useSyncedPref', () => ({
   useSyncedPref: () => ['7', vi.fn()],
@@ -26,6 +51,7 @@ describe('useSchedules', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     calls = [];
+    setStateCalls.count = 0;
 
     // `vi.mocked` keeps the mock bound to the real `liveQuery` signature, so a
     // change to how the hook calls it still fails typecheck.
@@ -39,6 +65,54 @@ describe('useSchedules', () => {
       // surface used by the hook is faked here.
       return handle as unknown as LiveQuery<unknown>;
     });
+  });
+
+  it('does not update state when mounted without a query', () => {
+    const { result } = renderHook(() => useSchedules({}));
+
+    expect(result.current.error).toBeUndefined();
+    expect(setStateCalls.count).toBe(0);
+  });
+
+  it('does not update state when re-rendered without a query', () => {
+    const { rerender } = renderHook(() => useSchedules({}));
+
+    rerender();
+    rerender();
+
+    expect(setStateCalls.count).toBe(0);
+  });
+
+  it('reports an error for a query on the wrong table', () => {
+    // Build the query once: a new query object every render would re-run
+    // the effect forever.
+    const query = q('transactions').select('*');
+    const { result } = renderHook(() => useSchedules({ query }));
+
+    expect(result.current.error?.message).toBe(
+      'Query must be a schedules query.',
+    );
+    expect(result.current.isLoading).toBe(false);
+    expect(liveQuery).not.toHaveBeenCalled();
+  });
+
+  it('clears a previous error when the query changes', () => {
+    const { result, rerender } = renderHook<
+      ReturnType<typeof useSchedules>,
+      { query: Query | undefined }
+    >(({ query }) => useSchedules({ query }), {
+      initialProps: { query: q('transactions').select('*') },
+    });
+    expect(result.current.error).toBeDefined();
+
+    rerender({ query: q('schedules').select('*') });
+    expect(result.current.error).toBeUndefined();
+
+    rerender({ query: q('transactions').select('*') });
+    expect(result.current.error).toBeDefined();
+
+    rerender({ query: undefined });
+    expect(result.current.error).toBeUndefined();
   });
 
   it('does not open any live query when no query is given', () => {
