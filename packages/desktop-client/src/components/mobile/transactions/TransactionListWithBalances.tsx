@@ -1,83 +1,24 @@
-import React, { useEffect, useEffectEvent, useState } from 'react';
+import React from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router';
 
 import { SvgFilter } from '@actual-app/components/icons/v1';
 import { Label } from '@actual-app/components/label';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { Search } from '#components/common/Search';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
-import { useUrlParam } from '#hooks/useUrlParam';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 import { TransactionList } from './TransactionList';
-
-type TransactionSearchInputProps = {
-  placeholder: string;
-  onSearch: TransactionListWithBalancesProps['onSearch'];
-};
-
-function TransactionSearchInput({
-  placeholder,
-  onSearch,
-}: TransactionSearchInputProps) {
-  const location = useLocation();
-  // Keep the search in the URL so it survives opening a transaction and
-  // navigating back. Local state drives the input so typing stays responsive.
-  const [searchParam, setSearchParam] = useUrlParam('search');
-  const [text, setText] = useState(searchParam ?? '');
-
-  // Re-apply a search restored from the URL. Mount-only on purpose: later
-  // changes come from typing, which already calls onSearch.
-  const restoreSearch = useEffectEvent(() => {
-    if (text) {
-      onSearch(text);
-    }
-  });
-  useEffect(() => {
-    restoreSearch();
-  }, []);
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.mobilePageBackground,
-        padding: 10,
-        width: '100%',
-      }}
-    >
-      <Search
-        value={text}
-        onChange={text => {
-          setText(text);
-          onSearch(text);
-          // Preserve navigation state (e.g. report drill-down filters).
-          setSearchParam(text, { replace: true, state: location.state });
-        }}
-        placeholder={placeholder}
-        width="100%"
-        height={styles.mobileMinHeight}
-        style={{
-          backgroundColor: theme.tableBackground,
-          borderColor: theme.formInputBorder,
-        }}
-      />
-    </View>
-  );
-}
+import { TransactionSearchInput } from './TransactionSearchInput';
 
 type TransactionListWithBalancesProps = {
   isLoading: boolean;
