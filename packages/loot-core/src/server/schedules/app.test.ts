@@ -387,6 +387,7 @@ describe('schedule app', () => {
 
         await updateSchedule({
           schedule: { id, name: 'Broadband' },
+          // The editor sends these serialized aliases, which aren't in the core union.
           conditions: [
             { op: 'is', field: 'description', value: 'internet' },
             { op: 'is', field: 'acct', value: accountId },
