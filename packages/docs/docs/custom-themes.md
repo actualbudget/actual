@@ -15,16 +15,20 @@ The easiest way to install a custom theme is to choose one from the catalog:
 
 Themes in the catalog are hosted on GitHub and are automatically fetched when you select them. Each theme shows a color palette preview (6 colors in a 3x2 grid) and includes a link to its source repository.
 
-### Installing a Theme by Pasting CSS
+### Applying Custom CSS Overrides
 
-You can also install a custom theme by pasting CSS directly:
+You can also customize your colors by pasting CSS directly:
 
 1. Go to **Settings** → **Themes** → **Custom theme**
-2. Scroll down to the "or paste CSS directly" section
+2. Scroll down to the **Additional CSS overrides** section
 3. Paste your theme CSS into the text area
 4. Click **Apply**
 
-The CSS will be validated before installation. If there are any errors, they will be displayed below the text area.
+The CSS will be validated before it is applied. If there are any errors, they will be displayed below the text area.
+
+These overrides apply on top of every theme, including **Light**, **Dark**, **Midnight**, and both modes of **System default**. Switching themes does not clear your overrides.
+
+The **Custom CSS is active** button below the theme selectors opens the editor with your saved CSS. To remove the overrides, clear the text area and click **Apply**.
 
 ## Publishing Custom Themes
 

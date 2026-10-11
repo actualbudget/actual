@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -22,8 +23,14 @@ const DISCORD_URL = 'https://discord.gg/pRYNYr4W5A';
 
 export function NotificationsPage() {
   const { t } = useTranslation();
-  const { entries, isLoading, error, lastSeenNewsDate, markAllSeen } =
-    useNewsFeed();
+  const {
+    entries,
+    isLoading,
+    errorKind,
+    retry,
+    lastSeenNewsDate,
+    markAllSeen,
+  } = useNewsFeed();
 
   // Everything is marked as seen once the page shows it, but the unread
   // markers should reflect what was new when the page opened, so remember the
@@ -47,10 +54,71 @@ export function NotificationsPage() {
           marginTop: 10,
           flexShrink: 0,
           gap: 30,
+          // Keeps lines of text to a comfortable reading length.
           maxWidth: 800,
           paddingBottom: MOBILE_NAV_HEIGHT,
         }}
       >
+        {isLoading && (
+          <View style={{ alignItems: 'center', padding: 30 }}>
+            <AnimatedLoading
+              style={{
+                width: 20,
+                height: 20,
+                color: theme.pageTextDark,
+                ...styles.delayedFadeIn,
+              }}
+            />
+          </View>
+        )}
+
+        {/* The settings card is reused on purpose so this page matches Settings. */}
+        {errorKind === 'unavailable' && (
+          <Setting
+            primaryAction={
+              <Button onPress={retry}>
+                <Trans>Try again</Trans>
+              </Button>
+            }
+          >
+            <Text>
+              <Trans>
+                <strong>Notifications aren't available right now.</strong>{' '}
+                Actual couldn't load them, which usually means you're offline.
+                Everything else keeps working, and they'll load next time you're
+                connected.
+              </Trans>
+            </Text>
+          </Setting>
+        )}
+
+        {errorKind === 'unsupported' && (
+          <Setting>
+            <Text>
+              <Trans>
+                <strong>Update Actual to see the latest notifications.</strong>{' '}
+                This version can't read the newest notifications format.
+              </Trans>
+            </Text>
+          </Setting>
+        )}
+
+        {!isLoading && !errorKind && entries.length === 0 && (
+          <Setting>
+            <Text>
+              <Trans>Nothing new to show yet.</Trans>
+            </Text>
+          </Setting>
+        )}
+
+        {entries.map(entry => (
+          <NewsEntryCard
+            key={entry.id}
+            entry={entry}
+            isUnread={unseenOnOpen.has(entry.id)}
+          />
+        ))}
+
         <View
           style={{
             flexDirection: 'row',
@@ -69,49 +137,6 @@ export function NotificationsPage() {
             <Trans>Community (Discord)</Trans>
           </Link>
         </View>
-
-        {isLoading && (
-          <View style={{ alignItems: 'center', padding: 30 }}>
-            <AnimatedLoading
-              style={{
-                width: 20,
-                height: 20,
-                color: theme.pageTextDark,
-                ...styles.delayedFadeIn,
-              }}
-            />
-          </View>
-        )}
-
-        {/* The settings card is reused on purpose so this page matches Settings. */}
-        {error && (
-          <Setting>
-            <Text data-testid="notifications-offline">
-              <Trans>
-                <strong>The latest news isn't available right now.</strong>{' '}
-                Actual couldn't reach actualbudget.org, which usually means
-                you're offline. That's fine - everything else in Actual keeps
-                working, and the news will load next time you're connected.
-              </Trans>
-            </Text>
-          </Setting>
-        )}
-
-        {!isLoading && !error && entries.length === 0 && (
-          <Setting>
-            <Text>
-              <Trans>Nothing new to show yet.</Trans>
-            </Text>
-          </Setting>
-        )}
-
-        {entries.map(entry => (
-          <NewsEntryCard
-            key={entry.id}
-            entry={entry}
-            isUnread={unseenOnOpen.has(entry.id)}
-          />
-        ))}
       </View>
     </Page>
   );

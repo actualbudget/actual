@@ -304,8 +304,13 @@ test.describe('Transactions', () => {
         notes: 'short note',
       });
 
-      const truncatedNotes = accountPage.getNthTransaction(1).notes;
-      const shortNotes = accountPage.getNthTransaction(0).notes;
+      const truncatedTransaction = accountPage.getNthTransaction(1);
+      const shortTransaction = accountPage.getNthTransaction(0);
+      await expect(truncatedTransaction.payee).toHaveText('Home Depot');
+      await expect(shortTransaction.payee).toHaveText('Kroger');
+
+      const truncatedNotes = truncatedTransaction.notes;
+      const shortNotes = shortTransaction.notes;
 
       // A short note that fits in the column never shows a tooltip, even
       // after waiting past the tooltip's hover delay.

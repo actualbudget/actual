@@ -162,8 +162,11 @@ function resetQueryCache() {
   _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
-export function transaction(fn: () => void) {
-  return sqlite.transaction(db, fn);
+export function transaction(
+  fn: () => void,
+  options?: sqlite.TransactionOptions,
+) {
+  return sqlite.transaction(db, fn, options);
 }
 
 export function asyncTransaction(fn: () => Promise<void>) {

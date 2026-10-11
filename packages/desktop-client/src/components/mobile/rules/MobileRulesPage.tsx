@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -12,6 +13,7 @@ import type { RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { ruleToString } from '#components/ManageRules';
+import { withFilterParam } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -29,12 +31,23 @@ import { RulesList } from './RulesList';
 export function MobileRulesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const [visibleRulesParam] = useUrlParam('visible-rules');
   const [allRules, setAllRules] = useState<RuleEntity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState('');
+  // Keep the filter in the URL so it is restored when navigating back from a
+  // rule. Local state drives rendering because URL updates are applied in a
+  // React transition, which would let the list lag behind what was typed.
+  const [filterParam, setFilterParam] = useUrlParam('filter');
+  const [filter, setFilter] = useState(filterParam ?? '');
+
+  // A query-only navigation can change the filter param while this page stays
+  // mounted, which would leave the local state (and the list) stale.
+  useEffect(() => {
+    setFilter(filterParam ?? '');
+  }, [filterParam]);
 
   const { schedules = [] } = useSchedules({
     query: useMemo(() => q('schedules').select('*'), []),
@@ -112,16 +125,19 @@ export function MobileRulesPage() {
 
   const handleRulePress = useCallback(
     (rule: RuleEntity) => {
-      void navigate(`/rules/${rule.id}`);
+      void navigate(
+        `/rules/${rule.id}${withFilterParam(location.search, filter)}`,
+      );
     },
-    [navigate],
+    [navigate, location.search, filter],
   );
 
   const onSearchChange = useCallback(
     (value: string) => {
       setFilter(value);
+      setFilterParam(value, { replace: true });
     },
-    [setFilter],
+    [setFilterParam],
   );
 
   const handleRuleDelete = useCallback(

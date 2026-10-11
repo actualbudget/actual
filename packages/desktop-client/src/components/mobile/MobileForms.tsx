@@ -56,6 +56,24 @@ export const hideNativeDateIconClassName = css({
   },
 });
 
+const nativePickerInputTypes = new Set([
+  'date',
+  'month',
+  'time',
+  'week',
+  'datetime-local',
+]);
+
+// browsers don't reliably open the native picker when the field itself is
+// tapped (chromium only opens it from the indicator, which can be hidden)
+function showNativePicker(input: HTMLInputElement) {
+  try {
+    input.showPicker();
+  } catch {
+    // unsupported or blocked; the browser's default tap behavior still applies
+  }
+}
+
 const iconFieldWrapperClassName = css({
   ...valueStyle,
   flexDirection: 'row',
@@ -89,9 +107,18 @@ export function InputField({
   iconStart,
   iconEnd,
   className,
+  type,
+  onClick,
   ref,
   ...props
 }: InputFieldProps) {
+  const onClickInner: InputFieldProps['onClick'] = event => {
+    onClick?.(event);
+    if (type && nativePickerInputTypes.has(type) && !event.defaultPrevented) {
+      showNativePicker(event.currentTarget);
+    }
+  };
+
   if (iconStart || iconEnd) {
     return (
       <View
@@ -105,10 +132,12 @@ export function InputField({
         {iconStart && <View style={iconStyle}>{iconStart}</View>}
         <Input
           ref={ref}
+          type={type}
           autoCorrect="false"
           autoCapitalize="none"
           disabled={disabled}
           onUpdate={onUpdate}
+          onClick={onClickInner}
           style={{
             flex: 1,
             border: 'none',
@@ -139,10 +168,12 @@ export function InputField({
   return (
     <Input
       ref={ref}
+      type={type}
       autoCorrect="false"
       autoCapitalize="none"
       disabled={disabled}
       onUpdate={onUpdate}
+      onClick={onClickInner}
       className={className}
       style={{
         ...valueStyle,
