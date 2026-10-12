@@ -190,10 +190,10 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       title: <Trans>Getting Around</Trans>,
       content: (
         <Trans>
-          The sidebar takes you to your budget, reports, and scheduled
-          transactions. Payees, rules, and tags live under{' '}
-          <strong>Settings</strong>, where you can also choose which pages
-          appear in the sidebar.
+          Commonly used pages live in the sidebar, like your budget, reports,
+          and scheduled transactions. Other less common ones are in{' '}
+          <strong>Settings</strong>, such as the payees, rules and tags pages.
+          You can also change these defaults in <strong>Settings</strong>.
         </Trans>
       ),
     },

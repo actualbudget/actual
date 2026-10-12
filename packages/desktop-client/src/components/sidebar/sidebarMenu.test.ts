@@ -100,13 +100,13 @@ describe('parseSidebarStartPage', () => {
     ]),
   );
 
-  it('returns the saved page when it is in the sidebar', () => {
+  it('returns the saved page whether or not it is in the sidebar', () => {
     expect(parseSidebarStartPage('budget', items)).toBe('budget');
+    expect(parseSidebarStartPage('schedules', items)).toBe('schedules');
   });
 
-  it('falls back to the first sidebar page', () => {
+  it('falls back to the first page', () => {
     expect(parseSidebarStartPage(undefined, items)).toBe('reports');
-    expect(parseSidebarStartPage('schedules', items)).toBe('reports');
     expect(parseSidebarStartPage('unknown', items)).toBe('reports');
   });
 });

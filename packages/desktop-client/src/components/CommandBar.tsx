@@ -98,19 +98,17 @@ export function CommandBar() {
   const { modalStack } = useModalState();
   const { startTour } = useTour();
 
-  const { items: menuItems, isItemAvailable, isInSidebar } = useSidebarMenu();
+  const { availableItems: menuItems } = useSidebarMenu();
   const menuItemDetails = useSidebarMenuItemDetails();
 
   const navigationItems = useMemo(
     () => [
-      ...menuItems
-        .filter(item => isItemAvailable(item.id))
-        .map(item => ({
-          id: item.id === 'reports' ? 'reports-nav' : item.id,
-          name: menuItemDetails[item.id].title,
-          path: getSidebarMenuItemPath(item.id, isInSidebar(item.id)),
-          Icon: menuItemDetails[item.id].Icon,
-        })),
+      ...menuItems.map(item => ({
+        id: item.id === 'reports' ? 'reports-nav' : item.id,
+        name: menuItemDetails[item.id].title,
+        path: getSidebarMenuItemPath(item.id, !item.hidden),
+        Icon: menuItemDetails[item.id].Icon,
+      })),
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
       {
         id: 'accounts',
@@ -125,7 +123,7 @@ export function CommandBar() {
         Icon: SvgLibrary,
       },
     ],
-    [t, menuItems, isItemAvailable, isInSidebar, menuItemDetails],
+    [t, menuItems, menuItemDetails],
   );
 
   useEffect(() => {

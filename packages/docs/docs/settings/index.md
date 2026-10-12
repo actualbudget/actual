@@ -4,11 +4,11 @@ The Settings screen in Actual provides you with a number of options for managing
 
 You can access the Settings screen by clicking the down arrow by your budget name or by clicking **Settings** at the bottom of the sidebar. Settings are split into pages that you switch between using the navigation on the left of the Settings screen.
 
-There is an option to "Display a notification when updates are available" here.
-
 ![The Settings page with the General section open](/img/settings/settings-general@2x.webp)
 
 ### Notifications
+
+The option **Display a notification when updates are available** shows a notice in the app when a new version of Actual is released.
 
 The option **Show in-app notifications (release notes and announcements)** controls whether Actual shows you news from the project inside the app: the notification bell in the top bar, the Notifications page, and the message that appears after an update. It is on by default and applies to the device you change it on. See [Notifications](../notifications.md) for the full guide.
 
@@ -18,14 +18,7 @@ Themes change the user interface colors. Pick from the built-in **Light**, **Dar
 
 ### Sidebar
 
-By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there:
-
-- Switch a page on to show it in the sidebar, or off to move it into Settings. Pages that are switched off, such as Payees, Rules, Tags and Bank Sync, are listed in the Settings navigation instead.
-- Budget and Reports are always shown in the sidebar.
-- Drag the handle next to a page to change the order.
-- Choose the **Start page**. This is the page Actual opens when you load your budget.
-
-Changes apply straight away. Click **Reset to default** to go back to the original menu. These settings are stored in your budget file, so they apply on every device that opens it. The sidebar menu is only available on larger screens. The mobile layout is not affected.
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page** that Actual opens on. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout is not affected.
 
 ### Formatting
 

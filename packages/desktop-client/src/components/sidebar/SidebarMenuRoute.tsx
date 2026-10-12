@@ -25,12 +25,14 @@ export function SidebarMenuRoute({
   children,
 }: SidebarMenuRouteProps) {
   const { isNarrowWidth } = useResponsive();
-  const { isInSidebar } = useSidebarMenu();
+  const { sidebarItems } = useSidebarMenu();
   const itemDetails = useSidebarMenuItemDetails();
   const location = useLocation();
 
   const isMobilePage = isNarrowWidth && !isSettingsSectionOnMobile(id);
-  const isSettingsPage = isNarrowWidth ? !isMobilePage : !isInSidebar(id);
+  const isSettingsPage = isNarrowWidth
+    ? !isMobilePage
+    : !sidebarItems.some(item => item.id === id);
 
   if (isSettingsPage !== isInSettings) {
     return (

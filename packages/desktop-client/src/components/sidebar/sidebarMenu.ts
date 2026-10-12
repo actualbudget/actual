@@ -118,10 +118,7 @@ export function parseSidebarStartPage(
   raw: string | undefined,
   items: SidebarMenuItem[],
 ): SidebarMenuItemId {
-  const visibleItems = items.filter(item => !item.hidden);
-  const saved = visibleItems.find(item => item.id === raw);
-
-  return (saved ?? visibleItems[0] ?? items[0]).id;
+  return (items.find(item => item.id === raw) ?? items[0]).id;
 }
 
 export function moveSidebarMenuItem(

@@ -23,11 +23,8 @@ import { SidebarMenuListItem } from './SidebarMenuListItem';
 export function SidebarSettings() {
   const { t } = useTranslation();
   const itemDetails = useSidebarMenuItemDetails();
-  const { items, startPage, isItemAvailable, saveItems, saveStartPage } =
+  const { items, availableItems, startPage, saveItems, saveStartPage } =
     useSidebarMenu();
-
-  const availableItems = items.filter(item => isItemAvailable(item.id));
-  const visibleItems = availableItems.filter(item => !item.hidden);
 
   const onToggleItem = (id: SidebarMenuItemId, isVisible: boolean) => {
     saveItems(
@@ -112,7 +109,7 @@ export function SidebarSettings() {
             aria-label={t('Start page')}
             value={startPage}
             onChange={saveStartPage}
-            options={visibleItems.map(item => [
+            options={availableItems.map(item => [
               item.id,
               itemDetails[item.id].title,
             ])}

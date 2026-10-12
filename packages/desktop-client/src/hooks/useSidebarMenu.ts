@@ -23,26 +23,19 @@ export function useSidebarMenu() {
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
 
-  const items = parseSidebarMenuItems(itemsPref);
-  const startPage = parseSidebarStartPage(startPagePref, items);
-
   const isItemAvailable = (id: SidebarMenuItemId) =>
     id !== 'bank-sync' || isUsingServer;
-  const isInSidebar = (id: SidebarMenuItemId) =>
-    isItemAvailable(id) && !items.find(item => item.id === id)?.hidden;
 
-  const sidebarItems = items.filter(
-    item => !item.hidden && isItemAvailable(item.id),
-  );
-  const settingsItems = items.filter(
-    item => item.hidden && isItemAvailable(item.id),
-  );
+  const items = parseSidebarMenuItems(itemsPref);
+  const availableItems = items.filter(item => isItemAvailable(item.id));
+  const sidebarItems = availableItems.filter(item => !item.hidden);
+  const settingsItems = availableItems.filter(item => item.hidden);
 
-  const startItem =
-    sidebarItems.find(item => item.id === startPage) ?? sidebarItems[0];
-  const startPath = startItem
-    ? getSidebarMenuItemPath(startItem.id, true)
-    : '/budget';
+  const startPage = parseSidebarStartPage(startPagePref, availableItems);
+  const startPath = getSidebarMenuItemPath(
+    startPage,
+    sidebarItems.some(item => item.id === startPage),
+  );
 
   const savePrefs = (prefs: Partial<SyncedPrefs>) => {
     dispatch(mergeSyncedPrefs(prefs));
@@ -59,12 +52,12 @@ export function useSidebarMenu() {
 
   return {
     items,
-    startPage,
+    availableItems,
     sidebarItems,
     settingsItems,
+    startPage,
     startPath,
     isItemAvailable,
-    isInSidebar,
     saveItems,
     saveStartPage,
   };
