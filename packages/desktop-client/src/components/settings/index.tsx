@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { Navigate, Outlet } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { spacing, tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
@@ -18,7 +19,7 @@ import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { Page } from '#components/Page';
+import { MobilePageHeader, Page } from '#components/Page';
 import { useServerVersion } from '#components/ServerContext';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
@@ -37,8 +38,10 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
+import { SettingsBackButton } from './SettingsBackButton';
+import { SettingsNav } from './SettingsNav';
 import { ThemeSettings } from './Themes';
-import { AdvancedToggle, Setting } from './UI';
+import { Setting } from './UI';
 
 function About() {
   const version = useServerVersion();
@@ -187,16 +190,144 @@ function AdvancedAbout() {
   );
 }
 
-export function Settings() {
+type SettingsSectionsProps = {
+  title: string;
+  children: ReactNode;
+};
+
+function SettingsSections({ title, children }: SettingsSectionsProps) {
+  const { isNarrowWidth } = useResponsive();
+
+  const sections = (
+    <View
+      data-testid="settings"
+      style={{
+        marginTop: isNarrowWidth ? 10 : 0,
+        flexShrink: 0,
+        maxWidth: 530,
+        width: '100%',
+        gap: 30,
+        paddingBottom: MOBILE_NAV_HEIGHT,
+      }}
+    >
+      {children}
+    </View>
+  );
+
+  if (!isNarrowWidth) {
+    return sections;
+  }
+
+  return (
+    <Page
+      header={
+        <MobilePageHeader title={title} leftContent={<SettingsBackButton />} />
+      }
+    >
+      {sections}
+    </Page>
+  );
+}
+
+export function SettingsIndex() {
   const { t } = useTranslation();
-  const [floatingSidebar] = useGlobalPref('floatingSidebar');
+  const { isNarrowWidth } = useResponsive();
   const [budgetName] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
+
+  if (!isNarrowWidth) {
+    return <Navigate to="/settings/general" replace />;
+  }
+
+  return (
+    <Page header={t('Settings')}>
+      <View
+        data-testid="settings"
+        style={{
+          marginTop: 10,
+          flexShrink: 0,
+          gap: 30,
+          paddingBottom: MOBILE_NAV_HEIGHT,
+        }}
+      >
+        <View
+          style={{
+            gap: 10,
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            width: '100%',
+          }}
+        >
+          {/* The only spot to close a budget on mobile */}
+          <FormField style={{ flex: 1 }}>
+            <FormLabel title={t('Budget name')} />
+            <Input
+              value={budgetName}
+              disabled
+              style={{ color: theme.buttonNormalDisabledText }}
+            />
+          </FormField>
+          <Button
+            onPress={() => void dispatch(closeBudget())}
+            style={{ flexShrink: 0 }}
+          >
+            <Trans>Switch file</Trans>
+          </Button>
+        </View>
+        <SettingsNav />
+      </View>
+    </Page>
+  );
+}
+
+export function GeneralSettings() {
+  const { t } = useTranslation();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
 
-  const onCloseBudget = () => {
-    void dispatch(closeBudget());
-  };
+  return (
+    <SettingsSections title={t('General')}>
+      <About />
+      <ThemeSettings />
+      <FormatSettings />
+      {isCurrencyExperimentalEnabled && <CurrencySettings />}
+      <LanguageSettings />
+      <AuthSettings />
+      <EncryptionSettings />
+      <BudgetTypeSettings />
+      {isElectron() && <Backups />}
+      <ExportBudget />
+    </SettingsSections>
+  );
+}
+
+export function AdvancedSettings() {
+  const { t } = useTranslation();
+
+  return (
+    <SettingsSections title={t('Advanced')}>
+      <AdvancedAbout />
+      <ResetCache />
+      <ResetSync />
+      <RepairTransactions />
+    </SettingsSections>
+  );
+}
+
+export function ExperimentalSettings() {
+  const { t } = useTranslation();
+
+  return (
+    <SettingsSections title={t('Experimental')}>
+      <ExperimentalFeatures />
+    </SettingsSections>
+  );
+}
+
+export function Settings() {
+  const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
+  const dispatch = useDispatch();
+  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
@@ -213,66 +344,24 @@ export function Settings() {
     }
   }, [dispatch, isCurrencyExperimentalEnabled]);
 
-  const { isNarrowWidth } = useResponsive();
+  if (isNarrowWidth) {
+    return <Outlet />;
+  }
 
   return (
-    <Page
-      header={t('Settings')}
-      style={{
-        marginInline: floatingSidebar && !isNarrowWidth ? 'auto' : 0,
-      }}
-    >
+    <Page header={t('Settings')}>
       <View
-        data-testid="settings"
         style={{
-          marginTop: 10,
-          flexShrink: 0,
-          maxWidth: 530,
-          width: '100%',
-          gap: 30,
-          paddingBottom: MOBILE_NAV_HEIGHT,
+          flexDirection: 'row',
+          flex: 1,
+          gap: spacing.xl,
+          paddingTop: 10,
         }}
       >
-        {isNarrowWidth && (
-          <View
-            style={{
-              gap: 10,
-              flexDirection: 'row',
-              alignItems: 'flex-end',
-              width: '100%',
-            }}
-          >
-            {/* The only spot to close a budget on mobile */}
-            <FormField style={{ flex: 1 }}>
-              <FormLabel title={t('Budget name')} />
-              <Input
-                value={budgetName}
-                disabled
-                style={{ color: theme.buttonNormalDisabledText }}
-              />
-            </FormField>
-            <Button onPress={onCloseBudget} style={{ flexShrink: 0 }}>
-              <Trans>Switch file</Trans>
-            </Button>
-          </View>
-        )}
-        <About />
-        <ThemeSettings />
-        <FormatSettings />
-        {isCurrencyExperimentalEnabled && <CurrencySettings />}
-        <LanguageSettings />
-        <AuthSettings />
-        <EncryptionSettings />
-        <BudgetTypeSettings />
-        {isElectron() && <Backups />}
-        <ExportBudget />
-        <AdvancedToggle>
-          <AdvancedAbout />
-          <ResetCache />
-          <ResetSync />
-          <RepairTransactions />
-          <ExperimentalFeatures />
-        </AdvancedToggle>
+        <SettingsNav />
+        <View style={{ flex: 1, overflowY: 'auto' }}>
+          <Outlet />
+        </View>
       </View>
     </Page>
   );

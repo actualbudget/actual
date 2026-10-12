@@ -81,6 +81,24 @@
   --color-sidebarControlBackground: var(--color-sidebarItemBackgroundHover);
   --color-sidebarBrand: var(--color-sidebarItemAccentSelected);
 
+  --color-settingsCardBackground: var(--color-tableBackground);
+  --color-settingsCardBorder: var(--color-tableBorder);
+  --color-settingsNavItemText: var(--color-pageText);
+  --color-settingsNavItemBackgroundHover: color-mix(
+    in srgb,
+    var(--color-settingsNavItemText) 8%,
+    transparent
+  );
+  --color-settingsNavItemAccentSelected: var(--palette-purple200);
+  --color-settingsNavItemTextSelected: var(
+    --color-settingsNavItemAccentSelected
+  );
+  --color-settingsNavItemBackgroundSelected: color-mix(
+    in srgb,
+    var(--color-settingsNavItemAccentSelected) 22%,
+    transparent
+  );
+
   --color-menuBackground: var(--palette-gray700);
   --color-menuItemBackground: var(--palette-gray200);
   --color-menuItemBackgroundHover: var(--palette-gray500);
