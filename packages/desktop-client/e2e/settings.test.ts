@@ -42,13 +42,11 @@ test.describe('Settings', () => {
 
   test('moves pages between the sidebar and settings', async () => {
     await settingsPage.settings
-      .getByRole('button', { name: 'Customize' })
+      .locator('label[for="toggle-sidebar-item-payees"]')
       .click();
-
-    const dialog = page.getByRole('dialog');
-    await dialog.locator('label[for="toggle-sidebar-item-payees"]').click();
-    await dialog.locator('label[for="toggle-sidebar-item-schedules"]').click();
-    await dialog.getByRole('button', { name: 'Save' }).click();
+    await settingsPage.settings
+      .locator('label[for="toggle-sidebar-item-schedules"]')
+      .click();
 
     const sidebar = page.getByTestId('sidebar-primary-buttons');
     await expect(sidebar.getByRole('link', { name: 'Payees' })).toBeVisible();

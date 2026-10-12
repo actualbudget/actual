@@ -1,3 +1,5 @@
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+
 import {
   getSidebarMenuItemPath,
   parseSidebarMenuItems,
@@ -10,7 +12,7 @@ import type {
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
-import { saveSyncedPrefs } from '#prefs/prefsSlice';
+import { mergeSyncedPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch } from '#redux';
 
 export function useSidebarMenu() {
@@ -42,18 +44,17 @@ export function useSidebarMenu() {
     ? getSidebarMenuItemPath(startItem.id, true)
     : '/budget';
 
-  const saveMenu = (
-    newItems: SidebarMenuItem[],
-    newStartPage: SidebarMenuItemId,
-  ) => {
-    void dispatch(
-      saveSyncedPrefs({
-        prefs: {
-          'sidebar-menu-items': JSON.stringify(newItems),
-          'sidebar-start-page': newStartPage,
-        },
-      }),
-    );
+  const savePrefs = (prefs: Partial<SyncedPrefs>) => {
+    dispatch(mergeSyncedPrefs(prefs));
+    void dispatch(saveSyncedPrefs({ prefs }));
+  };
+
+  const saveItems = (newItems: SidebarMenuItem[]) => {
+    savePrefs({ 'sidebar-menu-items': JSON.stringify(newItems) });
+  };
+
+  const saveStartPage = (newStartPage: SidebarMenuItemId) => {
+    savePrefs({ 'sidebar-start-page': newStartPage });
   };
 
   return {
@@ -64,6 +65,7 @@ export function useSidebarMenu() {
     startPath,
     isItemAvailable,
     isInSidebar,
-    saveMenu,
+    saveItems,
+    saveStartPage,
   };
 }

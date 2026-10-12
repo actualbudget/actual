@@ -18,14 +18,14 @@ Themes change the user interface colors. Pick from the built-in **Light**, **Dar
 
 ### Sidebar
 
-By default the sidebar shows **Budget**, **Reports** and **Schedules**. Click **Customize** to choose which pages appear there:
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there:
 
 - Switch a page on to show it in the sidebar, or off to move it into Settings. Pages that are switched off, such as Payees, Rules, Tags and Bank Sync, are listed in the Settings navigation instead.
 - Budget and Reports are always shown in the sidebar.
 - Drag the handle next to a page to change the order.
 - Choose the **Start page**. This is the page Actual opens when you load your budget.
 
-Click **Save** to apply your changes, or **Reset to default** to go back to the original menu. These settings are stored in your budget file, so they apply on every device that opens it. The sidebar menu is only available on larger screens. The mobile layout is not affected.
+Changes apply straight away. Click **Reset to default** to go back to the original menu. These settings are stored in your budget file, so they apply on every device that opens it. The sidebar menu is only available on larger screens. The mobile layout is not affected.
 
 ### Formatting
 
