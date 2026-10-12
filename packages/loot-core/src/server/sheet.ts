@@ -26,18 +26,27 @@ export function get(): Spreadsheet {
   return globalSheet;
 }
 
+// Prepared once per database: a cold build writes hundreds of thousands of
+// rows, and preparing the statement for each one dominated the write.
+const cacheInsertStatements = new WeakMap();
+
 async function updateSpreadsheetCache(rawDb, names: string[]) {
+  let insert = cacheInsertStatements.get(rawDb);
+  if (!insert) {
+    insert = sqlite.prepare(
+      rawDb,
+      'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
+    );
+    cacheInsertStatements.set(rawDb, insert);
+  }
+
   sqlite.transaction(rawDb, () => {
     names.forEach(name => {
       const node = globalSheet._getNode(name);
 
       // Don't cache query nodes yet
       if (node.sql == null) {
-        sqlite.runQuery(
-          rawDb,
-          'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
-          [name, JSON.stringify(node.value)],
-        );
+        sqlite.runQuery(rawDb, insert, [name, JSON.stringify(node.value)]);
       }
     });
   });
