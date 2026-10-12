@@ -13,15 +13,13 @@ import { IncomeCategoryListItem } from './IncomeCategoryListItem';
 type IncomeCategoryListProps = {
   categories: CategoryEntity[];
   month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategory: (id: string) => void;
 };
 
 export function IncomeCategoryList({
   categories,
   month,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategory,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
   const moveCategory = useMoveCategoryMutation();
@@ -106,15 +104,14 @@ export function IncomeCategoryList({
       aria-label={t('Income categories')}
       items={categories}
       dragAndDropHooks={dragAndDropHooks}
-      dependencies={[month, onEditCategory, onBudgetAction]}
+      dependencies={[month, onShowCategory]}
     >
       {category => (
         <IncomeCategoryListItem
           key={category.id}
           value={category}
           month={month}
-          onEdit={onEditCategory}
-          onBudgetAction={onBudgetAction}
+          onShowCategory={onShowCategory}
         />
       )}
     </GridList>

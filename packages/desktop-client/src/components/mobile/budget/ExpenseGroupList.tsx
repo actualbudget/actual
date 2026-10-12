@@ -11,19 +11,16 @@ import { css } from '@emotion/css';
 
 import { useMoveCategoryGroupMutation } from '#budget';
 
-import {
-  ExpenseGroupHeader,
-  ExpenseGroupListItem,
-} from './ExpenseGroupListItem';
+import { ExpenseGroupHeader } from './ExpenseGroupHeader';
+import { ExpenseGroupListItem } from './ExpenseGroupListItem';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   month: string;
-  onEditCategoryGroup: (id: CategoryGroupEntity['id']) => void;
-  onEditCategory: (id: CategoryEntity['id']) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategoryGroup: (id: CategoryGroupEntity['id']) => void;
+  onShowCategory: (id: CategoryEntity['id']) => void;
   showHiddenCategories: boolean;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
@@ -34,9 +31,8 @@ export function ExpenseGroupList({
   show3Columns,
   showBudgetedColumn,
   month,
-  onEditCategoryGroup,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategoryGroup,
+  onShowCategory,
   showHiddenCategories,
   isCollapsed,
   onToggleCollapse,
@@ -81,7 +77,7 @@ export function ExpenseGroupList({
           month={month}
           showBudgetedColumn={showBudgetedColumn}
           show3Columns={show3Columns}
-          onEditCategoryGroup={() => {}}
+          onShowCategoryGroup={() => {}}
           isCollapsed={() => true}
           onToggleCollapse={() => {}}
           isHidden={false}
@@ -138,9 +134,8 @@ export function ExpenseGroupList({
       items={categoryGroups}
       dependencies={[
         month,
-        onEditCategoryGroup,
-        onEditCategory,
-        onBudgetAction,
+        onShowCategoryGroup,
+        onShowCategory,
         show3Columns,
         showBudgetedColumn,
         showHiddenCategories,
@@ -154,9 +149,8 @@ export function ExpenseGroupList({
           key={categoryGroup.id}
           value={categoryGroup}
           month={month}
-          onEditCategoryGroup={onEditCategoryGroup}
-          onEditCategory={onEditCategory}
-          onBudgetAction={onBudgetAction}
+          onShowCategoryGroup={onShowCategoryGroup}
+          onShowCategory={onShowCategory}
           showBudgetedColumn={showBudgetedColumn}
           show3Columns={show3Columns}
           showHiddenCategories={showHiddenCategories}
