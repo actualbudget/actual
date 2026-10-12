@@ -664,6 +664,9 @@ export type Modal =
       name: 'keyboard-shortcuts';
     }
   | {
+      name: 'sidebar-menu';
+    }
+  | {
       name: 'goal-templates';
     }
   | {

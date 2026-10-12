@@ -75,6 +75,7 @@ import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
+import { SidebarMenuModal } from './modals/SidebarMenuModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
@@ -161,6 +162,9 @@ export function Modals() {
 
         case 'transaction-table-columns':
           return <TransactionTableColumnsModal key={key} {...modal.options} />;
+
+        case 'sidebar-menu':
+          return <SidebarMenuModal key={key} />;
 
         case 'convert-to-schedule':
           return <ConvertToScheduleModal key={key} {...modal.options} />;
