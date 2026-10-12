@@ -60,7 +60,6 @@ test.describe('Mobile Transactions', () => {
       transactionEntryPage.page.url() +
         '?category=Food&amount=23.42&account=HSBC&date=2025-10-31&cleared=true&payee=Kroger&notes=just+a+note',
     );
-    // Note: no easy way to test cleared checkbox
     await expect(page.getByTestId('transaction-form'))
       .toMatchAriaSnapshot(`- text: Amount
 - textbox
@@ -75,7 +74,9 @@ test.describe('Mobile Transactions', () => {
 - button "HSBC" [disabled]
 - text: Date
 - textbox [disabled]: 2025-10-31
-- text: Cleared Notes
+- text: Cleared
+- checkbox [checked]
+- text: Notes
 - textbox [disabled]: just a note`);
   });
 
