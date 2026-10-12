@@ -2,7 +2,7 @@
 
 The Settings screen in Actual provides you with a number of options for managing the look and feel of your budget along with some more system specific settings. Most settings are self-explanatory.
 
-You can access the Settings screen by clicking the down arrow by your budget name or going to the sidebar and clicking **Settings**.
+You can access the Settings screen by clicking the down arrow by your budget name or by clicking **Settings** at the bottom of the sidebar. Settings are split into pages that you switch between using the navigation on the left of the Settings screen.
 
 There is an option to "Display a notification when updates are available" here.
 
@@ -15,6 +15,17 @@ The option **Show in-app notifications (release notes and announcements)** contr
 ### Themes
 
 Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](../custom-themes.md) for the full guide.
+
+### Sidebar
+
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. Click **Customize** to choose which pages appear there:
+
+- Switch a page on to show it in the sidebar, or off to move it into Settings. Pages that are switched off, such as Payees, Rules, Tags and Bank Sync, are listed in the Settings navigation instead.
+- Budget and Reports are always shown in the sidebar.
+- Drag the handle next to a page to change the order.
+- Choose the **Start page**. This is the page Actual opens when you load your budget.
+
+Click **Save** to apply your changes, or **Reset to default** to go back to the original menu. These settings are stored in your budget file, so they apply on every device that opens it. The sidebar menu is only available on larger screens. The mobile layout is not affected.
 
 ### Formatting
 

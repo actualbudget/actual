@@ -26,8 +26,8 @@ From the sidebar, you have easy access to all Actual functions.
 
 <img width="261" alt="The sidebar with the navigation links, Settings and the accounts list labeled" src="/img/a-tour-of-actual/tour-user-interface-sidebar@2x.webp" />
 
-- **A. Navigation.** Access to your Budget, Reports and Schedules.
-- **B. Settings.** Less used functions, like managing Payees and Rules, are found under _Settings_. This is also where you find the software settings.
+- **A. Navigation.** Access to your Budget, Reports and Schedules. Less used pages, like Payees and Rules, live in Settings. You can add them to the sidebar from the [Sidebar](../settings/index.md#sidebar) section of the settings.
+- **B. Settings.** Settings is at the bottom of the menu. This is also where you find the software settings.
 - **C. Accounts.** The sidebar also holds all of your accounts, both on budget and off budget; these will display in a list under their respective heading.
 
 Most of these will we cover later in the tour.
