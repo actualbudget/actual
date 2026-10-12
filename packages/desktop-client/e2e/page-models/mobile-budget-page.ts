@@ -1,13 +1,13 @@
 import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
-import { MobileAccountPage } from './mobile-account-page';
-import { BalanceMenuModal } from './mobile-balance-menu-modal';
-import { BudgetMenuModal } from './mobile-budget-menu-modal';
-import { CategoryGroupMenuModal } from './mobile-category-group-menu-modal';
-import { CategoryMenuModal } from './mobile-category-menu-modal';
+import { CategoryActionsSheet } from './mobile-category-actions-sheet';
+import { CategoryGroupActionsSheet } from './mobile-category-group-actions-sheet';
+import { MobileCategoryPage } from './mobile-category-page';
 import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
 import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
+
+const LONG_PRESS_DELAY_MS = 700;
 
 export class MobileBudgetPage {
   readonly MONTH_HEADER_DATE_FORMAT = "MMMM ''yy";
@@ -157,12 +157,12 @@ export class MobileBudgetPage {
     });
   }
 
-  async openCategoryGroupMenu(categoryGroupName: string | RegExp) {
+  async openCategoryGroupActions(categoryGroupName: string | RegExp) {
     const categoryGroupButton =
       await this.#getButtonForCategoryGroup(categoryGroupName);
     await categoryGroupButton.click();
 
-    return new CategoryGroupMenuModal(this.page.getByRole('dialog'));
+    return new CategoryGroupActionsSheet(this.page.getByRole('dialog'));
   }
 
   async getCategoryNameForRow(idx: number) {
@@ -173,18 +173,30 @@ export class MobileBudgetPage {
     return categoryNameText;
   }
 
-  async #getButtonForCategory(categoryName: string | RegExp) {
-    return this.categoryRows.getByRole('button', {
-      name: categoryName,
+  async #getRowForCategory(categoryName: string | RegExp) {
+    return this.budgetTable.getByTestId('budget-groups').getByRole('row', {
+      name:
+        typeof categoryName === 'string'
+          ? `Open ${categoryName} category`
+          : categoryName,
       exact: true,
     });
   }
 
-  async openCategoryMenu(categoryName: string | RegExp) {
-    const categoryButton = await this.#getButtonForCategory(categoryName);
-    await categoryButton.click();
+  async openCategory(categoryName: string | RegExp) {
+    const categoryRow = await this.#getRowForCategory(categoryName);
+    await categoryRow.click();
 
-    return new CategoryMenuModal(this.page.getByRole('dialog'));
+    const categoryPage = new MobileCategoryPage(this.page);
+    await categoryPage.waitFor();
+    return categoryPage;
+  }
+
+  async openCategoryActionsWithLongPress(categoryName: string | RegExp) {
+    const categoryRow = await this.#getRowForCategory(categoryName);
+    await categoryRow.click({ delay: LONG_PRESS_DELAY_MS });
+
+    return new CategoryActionsSheet(this.page.getByRole('dialog'));
   }
 
   async #getButtonForCell(
@@ -193,17 +205,17 @@ export class MobileBudgetPage {
   ) {
     const buttonSelector =
       buttonType === 'Budgeted'
-        ? `Open budget menu for ${categoryName} category`
-        : `Show transactions for ${categoryName} category`;
+        ? `Budgeted amount for ${categoryName} category`
+        : `Spent amount for ${categoryName} category`;
 
-    let button = this.budgetTable.getByRole('button', { name: buttonSelector });
+    let button = this.budgetTable.getByLabel(buttonSelector, { exact: true });
 
     if (await button.isVisible()) {
       return button;
     }
 
     await this.toggleVisibleColumns();
-    button = this.budgetTable.getByRole('button', { name: buttonSelector });
+    button = this.budgetTable.getByLabel(buttonSelector, { exact: true });
 
     if (await button.isVisible()) {
       return button;
@@ -222,31 +234,38 @@ export class MobileBudgetPage {
     return await this.#getButtonForCell('Spent', categoryName);
   }
 
-  async openBudgetMenu(categoryName: string) {
+  async openCategoryFromBudgeted(categoryName: string) {
     const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
 
-    return new BudgetMenuModal(this.page.getByRole('dialog'));
+    const categoryPage = new MobileCategoryPage(this.page);
+    await categoryPage.waitFor();
+    return categoryPage;
   }
 
-  async openSpentPage(categoryName: string) {
+  async openCategoryFromSpent(categoryName: string) {
     const spentButton = await this.getButtonForSpent(categoryName);
     await spentButton.click();
 
-    return new MobileAccountPage(this.page);
+    const categoryPage = new MobileCategoryPage(this.page);
+    await categoryPage.waitFor();
+    return categoryPage;
   }
 
-  async openBalanceMenu(categoryName: string) {
-    const balanceButton = this.budgetTable.getByRole('button', {
-      name: `Open balance menu for ${categoryName} category`,
-    });
+  async openCategoryFromBalance(categoryName: string) {
+    const balanceCell = this.budgetTable.getByLabel(
+      `Balance for ${categoryName} category`,
+      { exact: true },
+    );
 
-    if (await balanceButton.isVisible()) {
-      await balanceButton.click();
-      return new BalanceMenuModal(this.page.getByRole('dialog'));
+    if (await balanceCell.isVisible()) {
+      await balanceCell.click();
+      const categoryPage = new MobileCategoryPage(this.page);
+      await categoryPage.waitFor();
+      return categoryPage;
     } else {
       throw new Error(
-        `Balance button for category ${categoryName} not found or not visible.`,
+        `Balance cell for category ${categoryName} not found or not visible.`,
       );
     }
   }
