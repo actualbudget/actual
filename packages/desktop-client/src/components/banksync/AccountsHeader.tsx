@@ -1,6 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { spacing } from '@actual-app/components/tokens';
+
 import { Cell, TableHeader } from '#components/table';
 
 type AccountsHeaderProps = {
@@ -15,21 +17,21 @@ export function AccountsHeader({ unlinked }: AccountsHeaderProps) {
       <Cell
         value={t('Account')}
         width={!unlinked ? 250 : 'flex'}
-        style={{ paddingLeft: '10px' }}
+        style={{ paddingLeft: spacing.sm }}
       />
       {!unlinked && (
         <>
           <Cell
             value={t('Bank')}
             width="flex"
-            style={{ paddingLeft: '10px' }}
+            style={{ paddingLeft: spacing.sm }}
           />
           <Cell
             value={t('Last sync')}
-            width={160}
-            style={{ paddingLeft: '10px' }}
+            width={200}
+            style={{ paddingLeft: spacing.sm }}
           />
-          <Cell value="" width={100} style={{ paddingLeft: '10px' }} />
+          <Cell value="" width={100} style={{ paddingLeft: spacing.sm }} />
         </>
       )}
     </TableHeader>

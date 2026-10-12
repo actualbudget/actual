@@ -92,7 +92,7 @@ If Actual is doing something that you simply don't like, create a `post` rule to
 
 ### Creating a Rule
 
-To create a rule, go to More > Rules… to view all the rules and click "Create new rule" in the bottom-right. You will now be editing a new rule.
+To create a rule, go to Settings > Rules to view all the rules and click "Add new rule" above the list. You will now be editing a new rule.
 
 ### Editing a Rule
 
@@ -104,21 +104,21 @@ You can even manually apply all the actions to the transactions. You need to sel
 
 ### Deleting a Rule
 
-To delete a rule (or rules), select the ones you want to delete. Then go down to the bottom right of the window and click the "Delete # rules" button.
+To delete a rule (or rules), select the ones you want to delete. Then click the "# rules" button above the list and choose "Delete".
 
 ### Viewing Rules for a Payee
 
-To view the list of rules that apply to a specific payee, go to More > Payees… to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
+To view the list of rules that apply to a specific payee, go to Settings > Payees to view the list of payees. This table shows you which payees have rules associated with them, and you can click "# associated rules" to view the rules just for that payee.
 
 ### Disabling Payee(s) Automatic Rule Creation
 
-To disable automatic rule creation for a payee, go to More > Payees… right-click on the payee you would like to disable automatic rule creation for and click "Disable learning". You will see a red icon indicating learning is disabled for the payee.
+To disable automatic rule creation for a payee, go to Settings > Payees, right-click on the payee you would like to disable automatic rule creation for and click "Disable learning". You will see a red icon indicating learning is disabled for the payee.
 
-To disable automatic rule creation for multiple payees, go to More > Payees… and select the payees by placing a checkmark on the left of each payee. At the top of the screen click the "N payee" button indicating the total payees selected and click "Category learning".
+To disable automatic rule creation for multiple payees, go to Settings > Payees and select the payees by placing a checkmark on the left of each payee. At the top of the screen click the "N payee" button indicating the total payees selected and click "Category learning".
 
 ### Disabling All Automatic Rule Creation
 
-To disable automatic rule creation for all payees, disable category learning by going to More > Payees > "Category learning settings"… at the bottom of the screen. Disabling category learning will not delete any existing rules but will prevent new rules from being created automatically on a global level.
+To disable automatic rule creation for all payees, disable category learning by going to Settings > Payees and choosing "Category learning settings" from the menu at the top right. Disabling category learning will not delete any existing rules but will prevent new rules from being created automatically on a global level.
 
 ## Using the Rule Editor for Sophisticated Batch Editing
 
@@ -126,4 +126,4 @@ This deserves its own section because this turned out to be a surprising use cas
 
 That means if you need to do a lot of work across many transactions at once, you should try the rule editor. While you can select individual transactions in the account screen and quickly change any one field, that is more targeted to changing one field across a small number of transactions. In the rule editor, you can apply any number of actions at once and get a clear view of what transactions are changing.
 
-To do this go to More > Rules… and click "Create new rule". You won't be actually creating a new rule, but you'll have the rule editor at your disposal for quick bulk editing.
+To do this go to Settings > Rules and click "Add new rule". You won't be actually creating a new rule, but you'll have the rule editor at your disposal for quick bulk editing.
