@@ -178,18 +178,19 @@ export async function disableOpenID(loginSettings) {
       'password',
     ]) || {};
 
-  if (!passwordHash) {
-    return { error: 'invalid-password' };
-  }
+  // A server bootstrapped straight into OpenID (e.g. from ACTUAL_OPENID_*
+  // config) has no password to confirm; the admin's password becomes the
+  // new server password, so switching doesn't require shell access to run
+  // the disable-openid script.
+  if (passwordHash) {
+    const confirmed = await verifyPassword(
+      loginSettings.password,
+      passwordHash,
+    );
 
-  if (!loginSettings?.password) {
-    return { error: 'invalid-password' };
-  }
-
-  const confirmed = await verifyPassword(loginSettings.password, passwordHash);
-
-  if (!confirmed) {
-    return { error: 'invalid-password' };
+    if (!confirmed) {
+      return { error: 'invalid-password' };
+    }
   }
 
   const { error } = await bootstrapPassword(loginSettings.password);
