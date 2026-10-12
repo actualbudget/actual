@@ -581,6 +581,38 @@ test.describe('Reports', () => {
       await customReportPage.showLabelsButton.click();
     });
   });
+
+  test('keeps uncategorized transactions in a custom report when a category is unchecked', async () => {
+    const accountPage = await navigation.goToAccountPage('Bank of America');
+    await accountPage.createSingleTransaction({ payee: '', debit: '12.34' });
+
+    reportsPage = await navigation.goToReportsPage();
+    const customReportPage = await reportsPage.goToCustomReportPage();
+    await customReportPage.selectViz('Data Table');
+    const report = customReportPage.pageContent;
+    // "Food" shows once in the category selector and once as a table row.
+    await expect(report.getByText('Food', { exact: true })).toHaveCount(2);
+    await expect(
+      report.getByText('Uncategorized', { exact: true }),
+    ).toBeVisible();
+
+    await report.getByLabel('Food', { exact: true }).uncheck();
+
+    await expect(report.getByText('Food', { exact: true })).toHaveCount(1);
+    await expect(
+      report.getByText('Uncategorized', { exact: true }),
+    ).toBeVisible();
+    const uncategorizedAmount = report
+      .getByText('-12.34', { exact: true })
+      .first();
+    await expect(uncategorizedAmount).toBeVisible();
+
+    // The drill-down list also keeps the uncategorized transaction.
+    await uncategorizedAmount.click();
+    await expect(
+      page.getByTestId('transaction-table').getByText('12.34', { exact: true }),
+    ).toBeVisible();
+  });
 });
 
 test.describe('Reports without transactions', () => {

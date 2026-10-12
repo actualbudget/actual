@@ -3,6 +3,7 @@ import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
+  RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -300,4 +301,81 @@ describe('showActivity', () => {
       ).toEqual(['date', 'date']);
     },
   );
+
+  describe('category "one of" filter from the report checkboxes', () => {
+    const categoryList: CategoryEntity[] = ['food', 'rent', 'fun'].map(id => ({
+      id,
+      name: id,
+      group: 'group',
+    }));
+
+    function drillDownFilters(
+      list: CategoryEntity[],
+      filters: RuleConditionEntity[],
+    ) {
+      const navigate = vi.fn();
+      showActivity({
+        navigate,
+        categories: { grouped: [], list },
+        accounts,
+        balanceTypeOp: 'totalTotals',
+        filters,
+        showHiddenCategories: true,
+        showOffBudget: true,
+        type: 'totals',
+        startDate: '2026-05-24',
+        endDate: '2026-05-30',
+      });
+      return navigate.mock.calls[0][1].state.filterConditions;
+    }
+
+    it('becomes "not one of" the unchecked categories', () => {
+      const filterConditions = drillDownFilters(categoryList, [
+        { field: 'category', op: 'oneOf', value: ['food', 'fun'], type: 'id' },
+        { field: 'account', op: 'is', value: 'acct-1', type: 'id' },
+      ]);
+
+      expect(filterConditions).toContainEqual({
+        field: 'category',
+        op: 'notOneOf',
+        value: ['rent'],
+        type: 'id',
+      });
+      expect(filterConditions).toContainEqual({
+        field: 'account',
+        op: 'is',
+        value: 'acct-1',
+        type: 'id',
+      });
+      expect(filterConditions).not.toContainEqual(
+        expect.objectContaining({ field: 'category', op: 'oneOf' }),
+      );
+    });
+
+    it('is dropped when every category is checked', () => {
+      const filterConditions = drillDownFilters(categoryList, [
+        {
+          field: 'category',
+          op: 'oneOf',
+          value: ['food', 'rent', 'fun'],
+          type: 'id',
+        },
+      ]);
+
+      expect(filterConditions).not.toContainEqual(
+        expect.objectContaining({ field: 'category' }),
+      );
+    });
+
+    it('is kept when the category list is not loaded', () => {
+      const filter: RuleConditionEntity = {
+        field: 'category',
+        op: 'oneOf',
+        value: ['food'],
+        type: 'id',
+      };
+
+      expect(drillDownFilters([], [filter])).toContainEqual(filter);
+    });
+  });
 });
