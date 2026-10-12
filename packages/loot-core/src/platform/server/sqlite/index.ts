@@ -113,10 +113,16 @@ export function runQuery<T>(
     if (fetchAll) {
       try {
         stmt.bind(params);
+        const columns = stmt.getColumnNames();
         const rows = [];
 
         while (stmt.step()) {
-          rows.push(stmt.getAsObject());
+          const values = stmt.get();
+          const row = {};
+          for (let i = 0; i < columns.length; i++) {
+            row[columns[i]] = values[i];
+          }
+          rows.push(row);
         }
         return rows;
       } catch (e) {
