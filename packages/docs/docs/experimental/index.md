@@ -9,12 +9,12 @@ These features are still in active development and therefore it is highly recomm
 
 ## View and enable experimental features
 
-In order to view the currently available experimental features go to `Settings -> Show advanced settings -> Experimental features`.
+In order to view the currently available experimental features go to **Settings** and click **Experimental** in the settings navigation.
 
-![Experimental features](/img/experimental/setting.webp)
+![The Settings page with the Experimental section open](/img/experimental/experimental-settings@2x.webp)
 
-You will need to agree to the disclaimer, and then you will be able to see the available experimental features.
+The available features are listed below a warning.
 
-![available features](/img/experimental/available.webp)
+<img width="664" alt="The list of experimental features with their checkboxes" src="/img/settings/settings-experimental@2x.webp" />
 
 _The features listed in image above are just some examples of experimental features. The actual experimental features available will differ._
