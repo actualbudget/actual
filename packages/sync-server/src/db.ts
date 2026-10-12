@@ -1,12 +1,6 @@
 import Database from 'better-sqlite3';
 
-type SqlParam =
-  | string
-  | number
-  | bigint
-  | Buffer
-  | Uint8Array
-  | null;
+type SqlParam = string | number | bigint | Buffer | Uint8Array | null;
 
 type MutationResult = {
   changes: number;
