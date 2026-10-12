@@ -22,7 +22,7 @@ export function MobileSheetMenuRows({
           <Text
             key={item.name}
             style={{
-              ...styles.smallText,
+              ...styles.mediumText,
               color: theme.pageTextLight,
               padding: `${spacing.sm}px ${spacing.lg}px ${spacing.lg}px`,
             }}

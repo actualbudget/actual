@@ -22,7 +22,7 @@ export function MobileSheetRow({
       variant="bare"
       onPress={onPress}
       style={{
-        ...styles.smallText,
+        ...styles.mediumText,
         width: '100%',
         minHeight: styles.mobileMinHeight,
         justifyContent: 'flex-start',
