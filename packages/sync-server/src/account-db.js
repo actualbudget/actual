@@ -211,18 +211,16 @@ export async function disableOpenID(loginSettings) {
       'password',
     ]) || {};
 
-  if (!passwordHash) {
-    return { error: 'invalid-password' };
-  }
 
-  if (!loginSettings?.password) {
-    return { error: 'invalid-password' };
-  }
+  if (passwordHash) {
+    const confirmed = await verifyPassword(
+      loginSettings.password,
+      passwordHash,
+    );
 
-  const confirmed = await verifyPassword(loginSettings.password, passwordHash);
-
-  if (!confirmed) {
-    return { error: 'invalid-password' };
+    if (!confirmed) {
+      return { error: 'invalid-password' };
+    }
   }
 
   const { error } = await bootstrapPassword(loginSettings.password);
