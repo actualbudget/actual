@@ -26,6 +26,7 @@ type BuiltInProvidersProps = {
   permissionWarning: 'general' | 'file-owner' | null;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  hasHeading?: boolean;
 };
 
 export function BuiltInProviders({
@@ -34,6 +35,7 @@ export function BuiltInProviders({
   permissionWarning,
   isCollapsed = false,
   onToggleCollapse,
+  hasHeading = true,
 }: BuiltInProvidersProps) {
   const { t } = useTranslation();
 
@@ -60,31 +62,33 @@ export function BuiltInProviders({
 
   return (
     <View style={{ gap: spacing.md }}>
-      <View style={{ gap: spacing.xs }}>
-        {onToggleCollapse ? (
-          <Button
-            variant="bare"
-            aria-expanded
-            onPress={onToggleCollapse}
-            style={{ alignSelf: 'flex-start' }}
-          >
-            {title}
-            <Cheveron
-              width={20}
-              height={20}
-              style={{ marginLeft: spacing.xs }}
-            />
-          </Button>
-        ) : (
-          title
-        )}
-        <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
-          <Trans>
-            Set up a bank sync provider, then link new accounts or connect an
-            existing Actual account.
-          </Trans>
-        </Paragraph>
-      </View>
+      {hasHeading && (
+        <View style={{ gap: spacing.xs }}>
+          {onToggleCollapse ? (
+            <Button
+              variant="bare"
+              aria-expanded
+              onPress={onToggleCollapse}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              {title}
+              <Cheveron
+                width={20}
+                height={20}
+                style={{ marginLeft: spacing.xs }}
+              />
+            </Button>
+          ) : (
+            title
+          )}
+          <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
+            <Trans>
+              Set up a bank sync provider, then link new accounts or connect an
+              existing Actual account.
+            </Trans>
+          </Paragraph>
+        </View>
+      )}
 
       {syncServerStatus !== 'online' ? (
         <View

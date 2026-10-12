@@ -87,6 +87,7 @@ export function BankSync() {
         providers={providers}
         syncServerStatus={syncServerStatus}
         permissionWarning={permissionWarning}
+        hasHeading={false}
       />
 
       {hasLinkedAccounts && <AutomaticSyncSettings />}
