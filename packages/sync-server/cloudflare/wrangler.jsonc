@@ -4,6 +4,12 @@
   "main": "./src/index.ts",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Routes and custom domains are managed in the dashboard (Worker > Settings
+  // > Domains & Routes); with no `routes` key, wrangler deploy leaves them
+  // alone. workers.dev and preview URLs stay off so nothing bypasses
+  // Cloudflare Access on the custom domain.
+  "workers_dev": false,
+  "preview_urls": false,
 
   // The web app (yarn build:browser). Everything not listed in
   // run_worker_first is served straight from here, with the COOP/COEP
@@ -59,10 +65,11 @@
     "ACTUAL_TRUSTED_PROXIES": "0.0.0.0/1,128.0.0.0/1,::/1,8000::/1",
   },
 
-  "limits": {
-    // argon2id password hashing takes ~120ms of CPU.
-    "cpu_ms": 30000,
-  },
+  // Workers Paid only (the Free plan rejects `limits`): a login is ~20 ms of
+  // CPU, over the Free plan's 10 ms per request.
+  //"limits": {
+  //  "cpu_ms": 30000,
+  //},
 
   "observability": { "enabled": true },
 }

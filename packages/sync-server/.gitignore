@@ -35,3 +35,4 @@ dist
 # Cloudflare Workers build
 cloudflare/dist
 cloudflare/.wrangler
+cloudflare/.dev.vars*

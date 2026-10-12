@@ -5,6 +5,9 @@
   "compilerOptions": {
     "noEmit": true,
     "composite": false,
+    // The entry points import sync-server's sources from ../src; TypeScript 6
+    // would otherwise default rootDir to this directory (TS6059).
+    "rootDir": "..",
     // Matches sync-server, whose sources the entry points import.
     "strict": false,
     "strictFunctionTypes": true,
