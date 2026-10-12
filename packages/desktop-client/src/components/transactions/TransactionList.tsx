@@ -296,7 +296,7 @@ export function TransactionList({
   const onManagePayees = useCallback(
     (id: PayeeEntity['id']) => {
       void navigate(
-        '/payees',
+        '/settings/payees',
         id ? { state: { selectedPayee: id } } : undefined,
       );
     },

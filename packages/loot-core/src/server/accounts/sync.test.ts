@@ -583,6 +583,36 @@ describe('Account sync', () => {
     ]);
   });
 
+  test('reconcile matches a skipped transaction but does not import it', async () => {
+    const { id } = await prepareDatabase();
+    await reconcileTransactions(id, [
+      { date: '2024-04-05', amount: -899, payee_name: 'Netflix' },
+    ]);
+
+    // The Netflix row matches the existing transaction and is skipped (the
+    // user unchecked it). It must still take the match, so the coffee row
+    // with the same amount is added and not merged into Netflix.
+    const { added, updated } = await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -899,
+        payee_name: 'Netflix',
+        notes: 'Subscription',
+        skipTransaction: true,
+      },
+      { date: '2024-04-03', amount: -899, payee_name: 'Corner Coffee' },
+    ]);
+
+    expect(added).toHaveLength(1);
+    expect(updated).toHaveLength(0);
+    expect(
+      (await getAllTransactions()).map(t => [t.date, t.payee_name, t.notes]),
+    ).toEqual([
+      [20240405, 'Netflix', null],
+      [20240403, 'Corner Coffee', null],
+    ]);
+  });
+
   test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();
 
