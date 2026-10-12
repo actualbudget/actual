@@ -151,15 +151,15 @@ class FilesService {
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_salt, encrypt_test, encrypt_keyid, deleted, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ? ,?, ?)',
       [
         file.id,
-        file.groupId,
-        file.syncVersion?.toString(),
-        file.name,
-        file.encryptMeta,
-        file.encryptSalt,
-        file.encryptTest,
-        file.encryptKeyId,
+        file.groupId ?? null,
+        file.syncVersion?.toString() ?? null,
+        file.name ?? null,
+        file.encryptMeta ?? null,
+        file.encryptSalt ?? null,
+        file.encryptTest ?? null,
+        file.encryptKeyId ?? null,
         deletedInt,
-        file.owner,
+        file.owner ?? null,
       ],
     );
   }
