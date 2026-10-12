@@ -370,6 +370,8 @@ export function BarGraph({
                     showOffBudget,
                     type: 'totals',
                     ...drilldown,
+                    bucketTagNames: item.payload.bucketTagNames,
+                    scopeTagNames: data.scopeTagNames,
                   });
                 }}
                 shape={(props: BarShapeProps) => (
