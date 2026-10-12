@@ -38,6 +38,7 @@ type ReportTableRowProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
   height?: number;
   colorized?: boolean;
+  scopeTagNames?: string[];
 };
 
 const getAmountColor = (amount: number) => {
@@ -66,6 +67,7 @@ export const ReportTableRow = memo(
     height,
     interval,
     colorized,
+    scopeTagNames,
   }: ReportTableRowProps) => {
     const average = Math.round(item[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
@@ -111,6 +113,7 @@ export const ReportTableRow = memo(
     return (
       <Row
         key={item.id}
+        data-testid={`report-row-${item.name}`}
         height={height}
         collapsed
         style={{
@@ -189,6 +192,8 @@ export const ReportTableRow = memo(
                         id: item.id,
                         uncategorizedId: item.uncategorizedId,
                         interval,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                     width="flex"
@@ -240,6 +245,8 @@ export const ReportTableRow = memo(
                         type: 'assets',
                         ...drilldown,
                         uncategorizedId: item.uncategorizedId,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                   />
@@ -285,6 +292,8 @@ export const ReportTableRow = memo(
                         type: 'debts',
                         ...drilldown,
                         uncategorizedId: item.uncategorizedId,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                   />
@@ -329,6 +338,8 @@ export const ReportTableRow = memo(
                 type: 'totals',
                 ...drilldown,
                 uncategorizedId: item.uncategorizedId,
+                bucketTagNames: item.bucketTagNames,
+                scopeTagNames,
               })
             }
             width="flex"
