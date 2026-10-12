@@ -7,7 +7,7 @@ describe('workerd password hashing', () => {
   it('hashes to an argon2id string and verifies the correct password', async () => {
     const hash = await workerdHash.hashPassword('correct horse');
 
-    expect(hash).toMatch(/^\$argon2id\$v=19\$m=47104,t=1,p=1\$/);
+    expect(hash).toMatch(/^\$argon2id\$v=19\$m=19456,t=1,p=1\$/);
     expect(await workerdHash.verifyPassword('correct horse', hash)).toBe(true);
     expect(await workerdHash.verifyPassword('wrong', hash)).toBe(false);
   });

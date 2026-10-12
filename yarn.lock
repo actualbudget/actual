@@ -184,6 +184,7 @@ __metadata:
     "@actual-app/web": "workspace:*"
     "@cloudflare/vite-plugin": "npm:^1"
     "@cloudflare/workers-types": "npm:^5"
+    "@hallaxius/argon2w": "npm:0.0.2"
     "@noble/hashes": "npm:^2.0.0"
     "@types/bcrypt": "npm:^6.0.0"
     "@types/better-sqlite3": "npm:^9.6.0"
@@ -4656,6 +4657,13 @@ __metadata:
   dependencies:
     is-negated-glob: "npm:^1.0.0"
   checksum: 10/30ec7825064422b6f02c1975ab6c779ff73409411c37bec2e984262459935afd196c1dbe960075e914967a047743ccf726fce3d3ebb4417ca2e3c34538fbceb8
+  languageName: node
+  linkType: hard
+
+"@hallaxius/argon2w@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@hallaxius/argon2w@npm:0.0.2"
+  checksum: 10/905921353e7e2a51623c81128656771a3480ed0b57427ec0ad9dadff0233bab1408e609ee88426520de1fc951ec7ba1b604444acef498881c4b9a83bec083d67
   languageName: node
   linkType: hard
 

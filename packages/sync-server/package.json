@@ -112,6 +112,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
+    "@hallaxius/argon2w": "0.0.2",
     "@noble/hashes": "^2.0.0",
     "akahu": "^2.5.1",
     "argon2": "^0.44.0",

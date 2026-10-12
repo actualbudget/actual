@@ -1,12 +1,16 @@
 import { httpServerHandler } from 'cloudflare:node';
 import { DurableObject } from 'cloudflare:workers';
 
+import { configureWasm } from '@hallaxius/argon2w';
+import argon2Wasm from '@hallaxius/argon2w/wasm';
+
 import packageJson from '#package.json';
 import { setWorkerdRuntime } from '#workerd/runtime';
 import type { WorkerdEnv } from '#workerd/runtime';
 
 const EXPRESS_PORT = 8080;
 
+configureWasm(argon2Wasm);
 type FetchHandler = NonNullable<ReturnType<typeof httpServerHandler>['fetch']>;
 
 let handlerPromise: Promise<FetchHandler> | null = null;
