@@ -174,7 +174,12 @@ export function SidebarMenuModal() {
               <Button
                 variant="primary"
                 onPress={() => {
-                  saveMenu(items, startPage);
+                  saveMenu(
+                    items,
+                    isItemAvailable(selectedStartPage)
+                      ? startPage
+                      : selectedStartPage,
+                  );
                   state.close();
                 }}
               >

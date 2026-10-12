@@ -27,7 +27,7 @@ export function useSidebarMenu() {
   const isItemAvailable = (id: SidebarMenuItemId) =>
     id !== 'bank-sync' || isUsingServer;
   const isInSidebar = (id: SidebarMenuItemId) =>
-    !items.find(item => item.id === id)?.hidden;
+    isItemAvailable(id) && !items.find(item => item.id === id)?.hidden;
 
   const sidebarItems = items.filter(
     item => !item.hidden && isItemAvailable(item.id),
