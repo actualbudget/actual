@@ -40,7 +40,6 @@ export function ReportSummary({
 }: ReportSummaryProps) {
   const locale = useLocale();
   const { t } = useTranslation();
-  const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const intervalFormat = getIntervalFormat(interval, dateFormat);
 
@@ -118,86 +117,16 @@ export function ReportSummary({
         </>
       ) : (
         <>
-          <View
-            style={{
-              backgroundColor: theme.pageBackground,
-              padding: 15,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                ...styles.mediumText,
-                alignItems: 'center',
-                marginBottom: 2,
-                fontWeight: 400,
-              }}
-            >
-              {balanceTypeOp === 'totalDebts'
-                ? t('TOTAL SPENDING')
-                : balanceTypeOp === 'totalAssets'
-                  ? t('TOTAL DEPOSITS')
-                  : balanceTypeOp === 'totalBudgeted'
-                    ? t('TOTAL BUDGETED')
-                    : t('NET {{net}}', { net })}
-            </Text>
-            <FinancialText
-              style={{
-                ...styles.veryLargeText,
-                alignItems: 'center',
-                marginBottom: 2,
-                fontWeight: 800,
-              }}
-            >
-              <PrivacyFilter>
-                {format(data[balanceTypeOp], 'financial')}
-              </PrivacyFilter>
-            </FinancialText>
-            <Text style={{ fontWeight: 600 }}>
-              <Trans>For this time period</Trans>
-            </Text>
-          </View>
-          <View
-            style={{
-              backgroundColor: theme.pageBackground,
-              padding: 15,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                ...styles.mediumText,
-                alignItems: 'center',
-                marginBottom: 2,
-                fontWeight: 400,
-              }}
-            >
-              {balanceTypeOp === 'totalDebts'
-                ? t('AVERAGE SPENDING')
-                : balanceTypeOp === 'totalAssets'
-                  ? t('AVERAGE DEPOSIT')
-                  : balanceTypeOp === 'totalBudgeted'
-                    ? t('AVERAGE BUDGETED')
-                    : t('AVERAGE NET')}
-            </Text>
-            <FinancialText
-              style={{
-                ...styles.veryLargeText,
-                alignItems: 'center',
-                marginBottom: 2,
-                fontWeight: 800,
-              }}
-            >
-              <PrivacyFilter>
-                {!isNaN(average) && format(average, 'financial')}
-              </PrivacyFilter>
-            </FinancialText>
-            <Text style={{ fontWeight: 600 }}>{perIntervalCaption}</Text>
-          </View>
+          <SummaryBox
+            label={getTotalLabel(balanceTypeOp, net, t)}
+            value={data[balanceTypeOp]}
+            caption={<Trans>For this time period</Trans>}
+          />
+          <SummaryBox
+            label={getAverageLabel(balanceTypeOp, false, t)}
+            value={average}
+            caption={perIntervalCaption}
+          />
         </>
       )}
     </View>
@@ -248,6 +177,23 @@ function SummaryBox({ label, value, caption }: SummaryBoxProps) {
       <Text style={{ fontWeight: 600 }}>{caption}</Text>
     </View>
   );
+}
+
+function getTotalLabel(
+  balanceTypeOp: balanceTypeOpType,
+  net: string,
+  t: TFunction,
+) {
+  switch (balanceTypeOp) {
+    case 'totalDebts':
+      return t('TOTAL SPENDING');
+    case 'totalAssets':
+      return t('TOTAL DEPOSITS');
+    case 'totalBudgeted':
+      return t('TOTAL BUDGETED');
+    default:
+      return t('NET {{net}}', { net });
+  }
 }
 
 function getAverageLabel(

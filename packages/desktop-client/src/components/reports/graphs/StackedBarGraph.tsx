@@ -35,7 +35,7 @@ import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
-import { BaselineTooltipLines } from './BaselineTooltipLines';
+import { BaselineTooltipLines } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 

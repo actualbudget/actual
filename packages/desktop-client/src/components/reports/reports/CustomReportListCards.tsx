@@ -17,6 +17,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateHasWarning } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { usePayees } from '#hooks/usePayees';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -200,6 +201,7 @@ type DateSelection = Pick<
 function ReportCardDates({ report }: { report: CustomReportEntity }) {
   const { t } = useTranslation();
   const locale = useLocale();
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
 
   const getRangeLabel = (range: DateSelection) => {
     if (!range.isDateStatic) {
@@ -210,7 +212,7 @@ function ReportCardDates({ report }: { report: CustomReportEntity }) {
     return start === end ? start : `${start} - ${end}`;
   };
 
-  if (report.baseline?.enabled) {
+  if (reportBaselineEnabled && report.baseline?.enabled) {
     const current = getRangeLabel(report);
     const baseline = getRangeLabel(report.baseline);
     return (

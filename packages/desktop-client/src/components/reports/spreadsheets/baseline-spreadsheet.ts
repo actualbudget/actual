@@ -21,6 +21,10 @@ import type { createCustomSpreadsheetProps } from './custom-spreadsheet';
 import { filterEmptyRows } from './filterEmptyRows';
 import { createGroupedSpreadsheet } from './grouped-spreadsheet';
 import { sortData } from './sortData';
+import {
+  determineIntervalRange,
+  trimIntervalDataToRange,
+} from './trimIntervals';
 
 type Spreadsheet = ReturnType<typeof useSpreadsheet>;
 
@@ -98,8 +102,13 @@ export function offsetInterval(
   baseline: ReportValues | undefined,
   scale: BaselineScale,
 ): IntervalEntity {
-  const start = interval.intervalStartDate || interval.date;
-  const end = interval.intervalEndDate || start;
+  const start = interval.intervalStartDate;
+  const end = interval.intervalEndDate ?? start;
+  // Report spreadsheets always date their intervals; without dates there's
+  // no length to scale the baseline by
+  if (!start || !end) {
+    return interval;
+  }
 
   // Intervals that haven't started have nothing to compare yet, so they stay
   // empty rather than showing the whole baseline as a change. Budgets are set
@@ -140,14 +149,12 @@ function isFuture(date: string) {
 
 // The whole range a row's intervals cover, for projecting its total
 function getProjection(intervals: IntervalEntity[], scale: BaselineScale) {
-  const first = intervals[0];
-  const last = intervals[intervals.length - 1];
-  if (!scale.projectToFullPeriod || scale.perInterval || !first || !last) {
+  const start = intervals[0]?.intervalStartDate;
+  const end = intervals[intervals.length - 1]?.intervalEndDate;
+  if (!scale.projectToFullPeriod || scale.perInterval || !start || !end) {
     return null;
   }
 
-  const start = first.intervalStartDate || first.date;
-  const end = last.intervalEndDate || last.intervalStartDate || last.date;
   const days = countDays(start, end);
   const elapsedDays = countElapsedDays(start, end);
   return days > elapsedDays ? { days, scale: days / elapsedDays } : null;
@@ -356,6 +363,53 @@ function colorLegend(
   return legend;
 }
 
+// Trimming looks at what actually happened, so an interval doesn't count as
+// active just because it differs from the baseline. Intervals that haven't
+// started are empty, so trailing ones are trimmed too.
+function toActual(intervals: IntervalEntity[]): IntervalEntity[] {
+  return intervals.map(interval =>
+    interval.baseline ? { ...interval, ...interval.baseline.actual } : interval,
+  );
+}
+
+export function getTrimRange(
+  rows: GroupedEntity[],
+  intervals: IntervalEntity[],
+  balanceTypeOp: balanceTypeOpType,
+) {
+  const actualRows = rows.flatMap(row => [row, ...(row.categories ?? [])]);
+  return determineIntervalRange(
+    actualRows.map(row => ({
+      ...row,
+      intervalData: toActual(row.intervalData),
+    })),
+    toActual(intervals),
+    true,
+    balanceTypeOp,
+  );
+}
+
+// Totals keep covering the whole range; only the drawn intervals are trimmed
+function trimRows(
+  rows: GroupedEntity[],
+  { startIndex, endIndex }: { startIndex: number; endIndex: number },
+): GroupedEntity[] {
+  return rows.map(row => ({
+    ...row,
+    intervalData: trimIntervalDataToRange(
+      row.intervalData,
+      startIndex,
+      endIndex,
+    ),
+    categories:
+      row.categories &&
+      trimRows(row.categories, {
+        startIndex,
+        endIndex,
+      }),
+  }));
+}
+
 async function collect<T>(
   getData: SpreadsheetFn<T>,
   spreadsheet: Spreadsheet,
@@ -383,19 +437,15 @@ function countIntervals(
 }
 
 export function getAverageDays(intervals: IntervalEntity[]) {
-  if (intervals.length === 0) {
+  const lengths = intervals.flatMap(({ intervalStartDate, intervalEndDate }) =>
+    intervalStartDate && intervalEndDate
+      ? [countDays(intervalStartDate, intervalEndDate)]
+      : [],
+  );
+  if (lengths.length === 0) {
     return 1;
   }
-  const total = intervals.reduce(
-    (sum, interval) =>
-      sum +
-      countDays(
-        interval.intervalStartDate || interval.date,
-        interval.intervalEndDate || interval.intervalStartDate || interval.date,
-      ),
-    0,
-  );
-  return total / intervals.length;
+  return lengths.reduce((sum, days) => sum + days, 0) / lengths.length;
 }
 
 function getScale(
@@ -420,19 +470,20 @@ function getScale(
   };
 }
 
-// Empty rows are filtered after offsetting, once both ranges are known
+// Empty rows are filtered and intervals trimmed after offsetting, since
+// projecting and comparing a range needs all of its intervals, including ones
+// that haven't started yet
 function getSpreadsheetProps(
   props: createCustomSpreadsheetProps,
   baselineDates: BaselineDates,
 ) {
-  const actual = { ...props, showEmpty: true };
+  const actual = { ...props, showEmpty: true, trimIntervals: false };
   return {
     actual,
     baseline: {
       ...actual,
       startDate: baselineDates.startDate,
       endDate: baselineDates.endDate,
-      trimIntervals: false,
     },
   };
 }
@@ -443,6 +494,7 @@ export function createBaselineSpreadsheet(
 ) {
   const {
     showEmpty,
+    trimIntervals,
     balanceTypeOp = 'totalDebts',
     sortByOp = 'desc',
     groupBy = '',
@@ -465,7 +517,7 @@ export function createBaselineSpreadsheet(
     }
 
     const scale = getScale(props, baselineDates, actual.intervalData);
-    const rows = offsetRows(actual.data ?? [], baseline?.data ?? [], {
+    const untrimmedRows = offsetRows(actual.data ?? [], baseline?.data ?? [], {
       scale,
       template: actual.intervalData,
       showEmpty,
@@ -473,8 +525,18 @@ export function createBaselineSpreadsheet(
       sortByOp,
     });
     const totals = offsetItem(actual, baseline, scale);
+    const trimRange = trimIntervals
+      ? getTrimRange(untrimmedRows, totals.intervalData, balanceTypeOp)
+      : null;
+    const rows = trimRange ? trimRows(untrimmedRows, trimRange) : untrimmedRows;
     const intervalData = stackIntervals(
-      totals.intervalData,
+      trimRange
+        ? trimIntervalDataToRange(
+            totals.intervalData,
+            trimRange.startIndex,
+            trimRange.endIndex,
+          )
+        : totals.intervalData,
       rows,
       balanceTypeOp,
     );
@@ -508,7 +570,12 @@ export function createBaselineGroupedSpreadsheet(
   props: createCustomSpreadsheetProps,
   baselineDates: BaselineDates,
 ) {
-  const { showEmpty, balanceTypeOp = 'totalDebts', sortByOp = 'desc' } = props;
+  const {
+    showEmpty,
+    trimIntervals,
+    balanceTypeOp = 'totalDebts',
+    sortByOp = 'desc',
+  } = props;
   const spreadsheetProps = getSpreadsheetProps(props, baselineDates);
   const getActual = createGroupedSpreadsheet(spreadsheetProps.actual);
   const getBaseline = createGroupedSpreadsheet(spreadsheetProps.baseline);
@@ -523,14 +590,20 @@ export function createBaselineGroupedSpreadsheet(
     ]);
 
     const template = actual[0]?.intervalData ?? [];
+    const rows = offsetRows(actual, baseline, {
+      scale: getScale(props, baselineDates, template),
+      template,
+      showEmpty,
+      balanceTypeOp,
+      sortByOp,
+    });
     setData(
-      offsetRows(actual, baseline, {
-        scale: getScale(props, baselineDates, template),
-        template,
-        showEmpty,
-        balanceTypeOp,
-        sortByOp,
-      }),
+      trimIntervals
+        ? trimRows(
+            rows,
+            getTrimRange(rows, rows[0]?.intervalData ?? [], balanceTypeOp),
+          )
+        : rows,
     );
   };
 }

@@ -78,4 +78,41 @@ describe('ReportTableList', () => {
       }),
     );
   });
+
+  it('keeps each interval baseline on its row when split by interval', () => {
+    const renderRow = vi.fn(() => null);
+    const values = makeInterval('', '', '');
+    const baseline = { expected: values, actual: values };
+    const data: DataEntity = {
+      intervalData: [
+        {
+          ...makeInterval('May 2026', '2026-05-01', '2026-05-31'),
+          baseline,
+        },
+      ],
+      totalAssets: 0,
+      totalDebts: 0,
+      netAssets: 0,
+      netDebts: 0,
+      totalTotals: 0,
+      totalBudgeted: 0,
+    };
+
+    render(
+      <TestProviders>
+        <ReportTableList
+          data={data}
+          mode="total"
+          groupBy="Interval"
+          renderRow={renderRow}
+        />
+      </TestProviders>,
+    );
+
+    expect(renderRow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        item: expect.objectContaining({ baseline }),
+      }),
+    );
+  });
 });

@@ -133,8 +133,21 @@ export function ReportSidebar({
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
-  const baselineEnabled = useFeatureFlag('reportBaseline');
-  const baseline = customReportItems.baseline ?? defaultBaseline;
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
+  const savedBaseline = customReportItems.baseline ?? defaultBaseline;
+  // Live baselines are resolved against today, since saved dates go stale
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    savedBaseline,
+    earliestTransaction,
+    latestTransaction,
+    firstDayOfWeekIdx,
+  );
+  const baseline = {
+    ...savedBaseline,
+    startDate: baselineStartDate,
+    endDate: baselineEndDate,
+  };
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -191,7 +204,7 @@ export function ReportSidebar({
   // Like the report's own range, a baseline range the new interval doesn't
   // offer falls back to that interval's default
   const keepBaselineRangeAvailable = (interval: string) => {
-    if (baseline.enabled && isRangeUnavailable(baseline.dateRange, interval)) {
+    if (isBaselineEnabled && isRangeUnavailable(baseline.dateRange, interval)) {
       updateBaseline({
         ...baseline,
         dateRange: defaultsList.intervalRange.get(interval) || '',
@@ -332,7 +345,8 @@ export function ReportSidebar({
             <Trans>Time</Trans>
           </ModeButton>
         </SpaceBetween>
-        {(baselineEnabled || baseline.enabled) && (
+        {reportBaselineEnabled && (
+          // Lines up with the controls beside the 50px row labels
           <View style={{ padding: '0 5px 0 60px' }}>
             <LabeledCheckbox
               id="baseline-enabled"
@@ -635,15 +649,15 @@ export function ReportSidebar({
             }
           }}
         >
-          {baseline.enabled && (
+          {isBaselineEnabled && (
             <View style={{ padding: '5px 5px 0 10px' }}>
               <Tooltip
                 placement="bottom start"
                 content={
                   <Text>
                     <Trans>
-                      Scale an unfinished interval up to its full length, based
-                      on how many days have passed.
+                      Project the amounts so far over the whole date range,
+                      based on how many days have passed.
                     </Trans>
                   </Text>
                 }
@@ -666,7 +680,7 @@ export function ReportSidebar({
             </View>
           )}
         </ReportDateFilter>
-        {baseline.enabled && (
+        {isBaselineEnabled && (
           <>
             <View
               style={{

@@ -5,6 +5,7 @@ import type {
 
 import {
   getAverageDays,
+  getTrimRange,
   offsetInterval,
   offsetItem,
   offsetRows,
@@ -60,6 +61,12 @@ const scale: BaselineScale = {
 const baselineTotals = row('baseline', [interval('2016-07-01', '', -18400)]);
 
 describe('offsetInterval', () => {
+  it('leaves intervals without dates unchanged', () => {
+    const undated = { ...november(-4000), intervalStartDate: undefined };
+
+    expect(offsetInterval(undated, baselineTotals, scale)).toBe(undated);
+  });
+
   it('leaves intervals that have not started empty', () => {
     const offset = offsetInterval(
       interval('2017-02-01', '2017-02-28', 0),
@@ -242,5 +249,52 @@ describe('offsetRows', () => {
 describe('getAverageDays', () => {
   it('averages the full length of each interval', () => {
     expect(getAverageDays([november(0), december(0)])).toBe(30.5);
+  });
+});
+
+describe('getTrimRange', () => {
+  // A quiet October, spending in November and December, and nothing yet in
+  // January or the months after it
+  const months = [
+    interval('2016-10-01', '2016-10-31', 0),
+    november(-4000),
+    december(-3100),
+    january(0),
+    interval('2017-02-01', '2017-02-28', 0),
+  ];
+
+  it('trims by what actually happened, not by the change', () => {
+    const item = offsetItem(row('groceries', months), baselineTotals, scale);
+
+    // Quiet months still differ from the baseline, but count as empty
+    expect(getTrimRange([item], item.intervalData, 'totalDebts')).toEqual({
+      startIndex: 1,
+      endIndex: 2,
+    });
+  });
+
+  it('trims intervals that have not started, even with future transactions', () => {
+    const item = offsetItem(
+      row('groceries', [
+        ...months.slice(0, 4),
+        interval('2017-02-01', '2017-02-28', -500),
+      ]),
+      baselineTotals,
+      scale,
+    );
+
+    expect(getTrimRange([item], item.intervalData, 'totalDebts').endIndex).toBe(
+      2,
+    );
+  });
+
+  it('keeps totals covering the whole range', () => {
+    const item = offsetItem(row('groceries', months), baselineTotals, {
+      ...scale,
+      projectToFullPeriod: false,
+    });
+
+    // Totals include the baseline for the quiet months either side
+    expect(item.baseline.expected.totalDebts).toBe(-12300);
   });
 });
