@@ -23,6 +23,8 @@ type ReportTableHeaderProps = {
   style?: CSSProperties;
   compactStyle?: CSSProperties;
   mode: string;
+  showBaseline?: boolean;
+  showProjected?: boolean;
 };
 
 export function ReportTableHeader({
@@ -36,7 +38,11 @@ export function ReportTableHeader({
   style,
   compactStyle,
   mode,
+  showBaseline = false,
+  showProjected = false,
 }: ReportTableHeaderProps) {
+  // Total tables show real amounts and add the change beside them
+  const showsChange = showBaseline && mode !== 'time';
   const { t } = useTranslation();
   return (
     <Row
@@ -76,6 +82,22 @@ export function ReportTableHeader({
               : groupBy
           }
         />
+        {showBaseline && (
+          <Cell
+            style={{
+              minWidth: compact ? 50 : 85,
+            }}
+            valueStyle={compactStyle}
+            value={t('Baseline')}
+            title={
+              mode === 'time'
+                ? t('The baseline average over one interval')
+                : t('The baseline average over the same number of days')
+            }
+            textAlign="right"
+            width="flex"
+          />
+        )}
         {mode === 'time'
           ? data.map((header, index) => {
               return (
@@ -113,6 +135,18 @@ export function ReportTableHeader({
                 />
               </>
             )}
+        {showBaseline && mode === 'time' && showProjected && (
+          <Cell
+            style={{
+              minWidth: compact ? 50 : 85,
+            }}
+            valueStyle={compactStyle}
+            value={t('Projected')}
+            title={t('The amount so far, scaled up to the whole range')}
+            textAlign="right"
+            width="flex"
+          />
+        )}
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
@@ -122,6 +156,28 @@ export function ReportTableHeader({
           textAlign="right"
           width="flex"
         />
+        {showsChange && showProjected && (
+          <Cell
+            style={{
+              minWidth: compact ? 50 : 85,
+            }}
+            valueStyle={compactStyle}
+            value={t('Projected')}
+            textAlign="right"
+            width="flex"
+          />
+        )}
+        {showsChange && (
+          <Cell
+            style={{
+              minWidth: compact ? 50 : 85,
+            }}
+            valueStyle={compactStyle}
+            value={t('Change')}
+            textAlign="right"
+            width="flex"
+          />
+        )}
         <Cell
           style={{
             minWidth: compact ? 50 : 85,

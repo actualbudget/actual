@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -10,6 +11,7 @@ import type {
   balanceTypeOpType,
   DataEntity,
 } from '@actual-app/core/types/models';
+import type { TFunction } from 'i18next';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -51,6 +53,15 @@ export function ReportSummary({
           ? t('PAYMENT')
           : t('DEPOSIT');
   const average = Math.round(data[balanceTypeOp] / intervalsCount);
+  const perIntervalCaption = (
+    <Trans>
+      Per{' '}
+      {{
+        interval: (ReportOptions.intervalMap.get(interval) || '').toLowerCase(),
+      }}
+    </Trans>
+  );
+
   return (
     <View
       style={{
@@ -80,95 +91,182 @@ export function ReportSummary({
             ` ${t('to')} ` + monthUtils.format(endDate, intervalFormat, locale)}
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
-        <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
-        >
-          {balanceTypeOp === 'totalDebts'
-            ? t('TOTAL SPENDING')
-            : balanceTypeOp === 'totalAssets'
-              ? t('TOTAL DEPOSITS')
-              : balanceTypeOp === 'totalBudgeted'
-                ? t('TOTAL BUDGETED')
-                : t('NET {{net}}', { net })}
-        </Text>
-        <FinancialText
-          style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
-          }}
-        >
-          <PrivacyFilter>
-            {format(data[balanceTypeOp], 'financial')}
-          </PrivacyFilter>
-        </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
-          <Trans>For this time period</Trans>
-        </Text>
-      </View>
-      <View
-        style={{
-          backgroundColor: theme.pageBackground,
-          padding: 15,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginTop: 10,
-        }}
-      >
-        <Text
-          style={{
-            ...styles.mediumText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 400,
-          }}
-        >
-          {balanceTypeOp === 'totalDebts'
-            ? t('AVERAGE SPENDING')
-            : balanceTypeOp === 'totalAssets'
-              ? t('AVERAGE DEPOSIT')
-              : balanceTypeOp === 'totalBudgeted'
-                ? t('AVERAGE BUDGETED')
-                : t('AVERAGE NET')}
-        </Text>
-        <FinancialText
-          style={{
-            ...styles.veryLargeText,
-            alignItems: 'center',
-            marginBottom: 2,
-            fontWeight: 800,
-          }}
-        >
-          <PrivacyFilter>
-            {!isNaN(average) && format(average, 'financial')}
-          </PrivacyFilter>
-        </FinancialText>
-        <Text style={{ fontWeight: 600 }}>
-          <Trans>
-            Per{' '}
-            {{
-              interval: (
-                ReportOptions.intervalMap.get(interval) || ''
-              ).toLowerCase(),
+      {data.baseline ? (
+        <>
+          <SummaryBox
+            label={t('BASELINE AVERAGE')}
+            value={data.baseline.perInterval?.[balanceTypeOp] ?? 0}
+            caption={perIntervalCaption}
+          />
+          <SummaryBox
+            label={getAverageLabel(balanceTypeOp, !!data.baseline.projected, t)}
+            value={Math.round(
+              (data.baseline.projected ?? data.baseline.actual)[balanceTypeOp] /
+                intervalsCount,
+            )}
+            caption={perIntervalCaption}
+          />
+          <SummaryBox
+            label={
+              data.baseline.projected
+                ? t('AVERAGE PROJECTED CHANGE')
+                : t('AVERAGE CHANGE')
+            }
+            value={average}
+            caption={perIntervalCaption}
+          />
+        </>
+      ) : (
+        <>
+          <View
+            style={{
+              backgroundColor: theme.pageBackground,
+              padding: 15,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 10,
             }}
-          </Trans>
-        </Text>
-      </View>
+          >
+            <Text
+              style={{
+                ...styles.mediumText,
+                alignItems: 'center',
+                marginBottom: 2,
+                fontWeight: 400,
+              }}
+            >
+              {balanceTypeOp === 'totalDebts'
+                ? t('TOTAL SPENDING')
+                : balanceTypeOp === 'totalAssets'
+                  ? t('TOTAL DEPOSITS')
+                  : balanceTypeOp === 'totalBudgeted'
+                    ? t('TOTAL BUDGETED')
+                    : t('NET {{net}}', { net })}
+            </Text>
+            <FinancialText
+              style={{
+                ...styles.veryLargeText,
+                alignItems: 'center',
+                marginBottom: 2,
+                fontWeight: 800,
+              }}
+            >
+              <PrivacyFilter>
+                {format(data[balanceTypeOp], 'financial')}
+              </PrivacyFilter>
+            </FinancialText>
+            <Text style={{ fontWeight: 600 }}>
+              <Trans>For this time period</Trans>
+            </Text>
+          </View>
+          <View
+            style={{
+              backgroundColor: theme.pageBackground,
+              padding: 15,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginTop: 10,
+            }}
+          >
+            <Text
+              style={{
+                ...styles.mediumText,
+                alignItems: 'center',
+                marginBottom: 2,
+                fontWeight: 400,
+              }}
+            >
+              {balanceTypeOp === 'totalDebts'
+                ? t('AVERAGE SPENDING')
+                : balanceTypeOp === 'totalAssets'
+                  ? t('AVERAGE DEPOSIT')
+                  : balanceTypeOp === 'totalBudgeted'
+                    ? t('AVERAGE BUDGETED')
+                    : t('AVERAGE NET')}
+            </Text>
+            <FinancialText
+              style={{
+                ...styles.veryLargeText,
+                alignItems: 'center',
+                marginBottom: 2,
+                fontWeight: 800,
+              }}
+            >
+              <PrivacyFilter>
+                {!isNaN(average) && format(average, 'financial')}
+              </PrivacyFilter>
+            </FinancialText>
+            <Text style={{ fontWeight: 600 }}>{perIntervalCaption}</Text>
+          </View>
+        </>
+      )}
     </View>
   );
+}
+
+type SummaryBoxProps = {
+  label: string;
+  value: number;
+  caption: ReactNode;
+};
+
+function SummaryBox({ label, value, caption }: SummaryBoxProps) {
+  const format = useFormat();
+
+  return (
+    <View
+      style={{
+        backgroundColor: theme.pageBackground,
+        padding: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+      }}
+    >
+      <Text
+        style={{
+          ...styles.mediumText,
+          alignItems: 'center',
+          marginBottom: 2,
+          fontWeight: 400,
+        }}
+      >
+        {label}
+      </Text>
+      <FinancialText
+        style={{
+          ...styles.veryLargeText,
+          alignItems: 'center',
+          marginBottom: 2,
+          fontWeight: 800,
+        }}
+      >
+        <PrivacyFilter>
+          {!isNaN(value) && format(value, 'financial')}
+        </PrivacyFilter>
+      </FinancialText>
+      <Text style={{ fontWeight: 600 }}>{caption}</Text>
+    </View>
+  );
+}
+
+function getAverageLabel(
+  balanceTypeOp: balanceTypeOpType,
+  isProjected: boolean,
+  t: TFunction,
+) {
+  switch (balanceTypeOp) {
+    case 'totalDebts':
+      return isProjected
+        ? t('AVERAGE PROJECTED SPENDING')
+        : t('AVERAGE SPENDING');
+    case 'totalAssets':
+      return isProjected
+        ? t('AVERAGE PROJECTED DEPOSIT')
+        : t('AVERAGE DEPOSIT');
+    case 'totalBudgeted':
+      return t('AVERAGE BUDGETED');
+    default:
+      return isProjected ? t('AVERAGE PROJECTED NET') : t('AVERAGE NET');
+  }
 }

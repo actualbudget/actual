@@ -29,6 +29,10 @@ import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  defaultBaseline,
+  getBaselineRange,
+} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
   defaultsGraphList,
@@ -51,6 +55,10 @@ import { ReportSummary } from '#components/reports/ReportSummary';
 import { ReportTopbar } from '#components/reports/ReportTopbar';
 import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
+import {
+  createBaselineGroupedSpreadsheet,
+  createBaselineSpreadsheet,
+} from '#components/reports/spreadsheets/baseline-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { normalizeTagScope } from '#components/reports/tagScope';
@@ -297,6 +305,9 @@ function CustomReportInner({
     loadReport.showTrendLines,
   );
   const [graphType, setGraphType] = useState(loadReport.graphType);
+  const [baseline, setBaseline] = useState(
+    loadReport.baseline ?? defaultBaseline,
+  );
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const dateRangeLine =
@@ -526,8 +537,18 @@ function CustomReportInner({
     });
   }, [balanceTypeOp, conditions, onApplyFilter]);
 
+  // Live baselines are resolved again so saved dates don't go stale
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    baseline,
+    earliestTransactionDate,
+    latestTransactionDate,
+    firstDayOfWeekIdx,
+  );
+  const isBaselineEnabled = baseline.enabled;
+  const projectToFullPeriod = baseline.projectToFullPeriod;
+
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -543,8 +564,19 @@ function CustomReportInner({
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineGroupedSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+        })
+      : createGroupedSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
     startDate,
     endDate,
     interval,
@@ -563,7 +595,7 @@ function CustomReportInner({
   ]);
 
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -586,8 +618,19 @@ function CustomReportInner({
       graphType,
       firstDayOfWeekIdx,
       dateFormat,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
     startDate,
     endDate,
     interval,
@@ -639,6 +682,7 @@ function CustomReportInner({
     showUncategorized,
     trimIntervals,
     showTrendLines,
+    baseline,
     graphType,
     conditions,
     conditionsOp,
@@ -738,8 +782,14 @@ function CustomReportInner({
 
   const disabledItems = (type: string) => {
     switch (type) {
-      case 'split':
-        return disabledGraphList(mode, graphType, 'disabledSplit') || [];
+      case 'split': {
+        const disabledSplits =
+          disabledGraphList(mode, graphType, 'disabledSplit') || [];
+        // Signed changes can't fill matching inner and outer donut rings
+        return baseline.enabled
+          ? [...new Set([...disabledSplits, 'CategoryGroup'])]
+          : disabledSplits;
+      }
       case 'type':
         return graphType === 'BarGraph' && groupBy === 'Interval'
           ? []
@@ -788,6 +838,7 @@ function CustomReportInner({
     setShowUncategorized(input.showUncategorized);
     setTrimIntervals(input.trimIntervals);
     setShowTrendLines(input.showTrendLines);
+    setBaseline(input.baseline ?? defaultBaseline);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => {
@@ -935,6 +986,7 @@ function CustomReportInner({
             setShowUncategorized={setShowUncategorized}
             setTrimIntervals={setTrimIntervals}
             setShowTrendLines={setShowTrendLines}
+            setBaseline={setBaseline}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -1052,7 +1104,13 @@ function CustomReportInner({
                     }}
                   >
                     <AlignedText
-                      left={<Block>{balanceType}:</Block>}
+                      left={
+                        <Block>
+                          {baseline.enabled
+                            ? t('{{balanceType}} vs baseline:', { balanceType })
+                            : `${balanceType}:`}
+                        </Block>
+                      }
                       right={
                         <FinancialText>
                           <PrivacyFilter>

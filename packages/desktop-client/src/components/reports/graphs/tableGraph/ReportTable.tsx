@@ -70,6 +70,8 @@ export function ReportTable({
   showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const showBaseline = !!data.baseline;
+  const showProjected = !!data.baseline?.projected;
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {
@@ -87,6 +89,10 @@ export function ReportTable({
         filters={filters}
         startDate={data.startDate}
         endDate={data.endDate}
+        showBaseline={showBaseline}
+        showProjected={showProjected}
+        baselineStartDate={data.baselineStartDate}
+        baselineEndDate={data.baselineEndDate}
         intervalsCount={intervalsCount}
         compact={compact}
         style={style}
@@ -115,6 +121,10 @@ export function ReportTable({
         filters={filters}
         startDate={data.startDate}
         endDate={data.endDate}
+        showBaseline={showBaseline}
+        showProjected={showProjected}
+        baselineStartDate={data.baselineStartDate}
+        baselineEndDate={data.baselineEndDate}
         intervalsCount={intervalsCount}
         compact={compact}
         style={totalsStyle}
@@ -145,6 +155,8 @@ export function ReportTable({
         style={style}
         compactStyle={compactStyle}
         mode={mode}
+        showBaseline={showBaseline}
+        showProjected={showProjected}
       />
       <View
         style={{

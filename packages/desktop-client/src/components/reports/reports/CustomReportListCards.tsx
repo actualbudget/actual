@@ -17,6 +17,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateHasWarning } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useLocale } from '#hooks/useLocale';
 import { usePayees } from '#hooks/usePayees';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTags } from '#hooks/useTags';
@@ -155,13 +156,7 @@ function CustomReportListCardsInner({
               onChange={onSaveName}
               onClose={() => setNameMenuOpen(false)}
             />
-            {report.isDateStatic ? (
-              <DateRange start={report.startDate} end={report.endDate} />
-            ) : (
-              <Text style={{ color: theme.pageTextSubdued }}>
-                {t(report.dateRange)}
-              </Text>
-            )}
+            <ReportCardDates report={report} />
           </View>
         </View>
         <GetCardData
@@ -194,5 +189,44 @@ function CustomReportListCardsInner({
         </View>
       )}
     </ReportCard>
+  );
+}
+
+type DateSelection = Pick<
+  CustomReportEntity,
+  'isDateStatic' | 'dateRange' | 'startDate' | 'endDate'
+>;
+
+function ReportCardDates({ report }: { report: CustomReportEntity }) {
+  const { t } = useTranslation();
+  const locale = useLocale();
+
+  const getRangeLabel = (range: DateSelection) => {
+    if (!range.isDateStatic) {
+      return t(range.dateRange);
+    }
+    const start = monthUtils.format(range.startDate, 'MMM yyyy', locale);
+    const end = monthUtils.format(range.endDate, 'MMM yyyy', locale);
+    return start === end ? start : `${start} - ${end}`;
+  };
+
+  if (report.baseline?.enabled) {
+    const current = getRangeLabel(report);
+    const baseline = getRangeLabel(report.baseline);
+    return (
+      <Text style={{ color: theme.pageTextSubdued }}>
+        <Trans>
+          Compare {{ current }} to {{ baseline }}
+        </Trans>
+      </Text>
+    );
+  }
+
+  if (report.isDateStatic) {
+    return <DateRange start={report.startDate} end={report.endDate} />;
+  }
+
+  return (
+    <Text style={{ color: theme.pageTextSubdued }}>{t(report.dateRange)}</Text>
   );
 }

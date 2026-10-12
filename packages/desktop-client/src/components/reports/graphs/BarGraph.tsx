@@ -7,6 +7,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
@@ -39,6 +40,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { BaselineTooltip } from './BaselineTooltipLines';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
@@ -52,6 +54,7 @@ type PayloadChild = {
 type PayloadItem = {
   payload: {
     name: string;
+    baseline?: BaselineBreakdown;
     totalAssets: number;
     totalDebts: number;
     netAssets: number;
@@ -80,6 +83,18 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const row = payload?.[0]?.payload;
+  if (active && row?.baseline) {
+    return (
+      <BaselineTooltip
+        title={row[yAxis]}
+        breakdown={row.baseline}
+        balanceTypeOp={balanceTypeOp}
+        format={format}
+      />
+    );
+  }
 
   if (active && payload && payload.length) {
     return (
@@ -244,7 +259,9 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+    // Spending is flipped so it points up, but baseline changes are already
+    // signed and point the same way as their numbers
+    if (!data.baseline && ['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     }
 
