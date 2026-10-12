@@ -1,8 +1,7 @@
-import { httpServerHandler } from 'cloudflare:node';
-import { DurableObject } from 'cloudflare:workers';
-
 import { configureWasm } from '@hallaxius/argon2w';
 import argon2Wasm from '@hallaxius/argon2w/wasm';
+import { httpServerHandler } from 'cloudflare:node';
+import { DurableObject } from 'cloudflare:workers';
 
 import packageJson from '#package.json';
 import { setWorkerdRuntime } from '#workerd/runtime';

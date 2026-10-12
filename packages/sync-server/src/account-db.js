@@ -211,7 +211,6 @@ export async function disableOpenID(loginSettings) {
       'password',
     ]) || {};
 
-
   if (passwordHash) {
     const confirmed = await verifyPassword(
       loginSettings.password,
