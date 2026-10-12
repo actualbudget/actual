@@ -54,7 +54,6 @@ Until multi-currency is supported natively by Actual Budget, you can use the met
    - Click the Template toggle button for this line.
    - _set amount_ to: **`{{ fixed (mul amount FX_RATE) 0 }}`**.
      - FX_RATE is the same as above.
-
    - Click on the _Save_ button.
 
    **Rule 2:**
