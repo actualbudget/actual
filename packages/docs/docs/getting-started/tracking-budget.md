@@ -13,13 +13,13 @@ We, the Actual team, suggest that you try to use the **Envelope Budget** if you 
 
 The **Tracking Budget** feature can be enabled from the Settings page by clicking on "Switch to tracking budgeting".
 
-![](/img/tracking-budget-7.webp)
+<img width="638" alt="The Budget type setting with the Switch to tracking budgeting button highlighted" src="/img/getting-started/tracking-budget-settings@2x.webp" />
 
 ## Creating a Budget
 
 Below is a view of what the budget page of a **Tracking Budget** looks like.
 
-![](/img/tracking-budget-1.webp)
+![The budget page of a tracking budget showing September and October](/img/getting-started/tracking-budget-page@2x.webp)
 
 If you are creating a budget for the first time, here's how it works:
 
@@ -36,25 +36,28 @@ When one of your categories is overdrawn, increase the budgeted amount for that 
 
 As you can see in the following example, your total budgeted items show in the right hand side of the summary for both your **Income** and **Expenses** and your actual expenses and income are totaled in the left hand side of the summary. The **Projected Savings** field is calculated from your budgeted income minus budgeted expenses, so expect the **Projected Savings** to decrease when covering overspending.
 
-![](/img/tracking-budget-2.webp)
+<img width="321" alt="The October summary with the actual amounts and the budgeted amounts labeled" src="/img/getting-started/tracking-budget-summary@2x.webp" />
+
+- **A. Actual.** The income received and the amount spent so far this month.
+- **B. Budgeted.** The income and expenses you budgeted for the month.
 
 There are useful pie charts next to **Income** and **Expenses** to track your progress visually.
 
-![](/img/tracking-budget-5.webp)
+<img width="238" alt="The pie charts next to Income and Expenses" src="/img/getting-started/tracking-budget-pies@2x.webp" />
 
 - An incomplete green pie means your total expenses or income are less than your total amount budgeted for expenses or income, respectively.
 
-![](/img/tracking-budget-4.webp)
+  <img width="208" alt="An incomplete green pie next to Expenses" src="/img/getting-started/tracking-budget-pie-incomplete@2x.webp" />
 
 - A complete green pie chart means your spending and budget are exactly the same.
 
-![](/img/tracking-budget-6.webp)
+  <img width="208" alt="A complete green pie next to Expenses, with the amount spent equal to the amount budgeted" src="/img/getting-started/tracking-budget-pie-complete@2x.webp" />
 
 - A pie chart that has turned red means you have overspent your total budget.
 
 When a new month begins, your **Projected Savings** changes to **Saved** or **Overspent**, depending on your final transactions. The final savings amount calculated for this field is your actual income minus your actual expenses. If you hover your mouse over the **Saved** or **Overspent** text, you can view the breakdown of projected and actual savings for the month.
 
-![](/img/tracking-budget-3.webp)
+<img width="321" alt="Hovering over the Saved amount for September shows the projected savings and the difference, next to a red Expenses pie" src="/img/getting-started/tracking-budget-saved-hover@2x.webp" />
 
 ## How Money Rolls Over
 
