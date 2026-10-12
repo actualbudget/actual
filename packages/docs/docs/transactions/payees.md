@@ -6,7 +6,7 @@ When importing transactions, by default Actual will create new payees based on t
 
 :::info[Payee Management]
 
-To manage payees, either select the **More > Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
+To manage payees, either select **Settings > Payees** from the sidebar or click the **Manage Payees** button when editing a transaction's payee.
 
 :::
 
@@ -41,19 +41,19 @@ A powerful feature is merging payees. You may already have months worth of data 
 
 2. Type "Morrisons" into the filter to only show those payees.
 
-![Image searching for a Payee](/img/payees/MergePayeesSearch.webp)
+   <img width="638" alt="The Payees page filtered to Morrisons, showing three variations" src="/img/transactions/payees-search@2x.webp" />
 
 3. Click the checkbox in the table header next to the **Name** column to select all of the different variations of "Morrisons"
 
-![Image selecting Payees](/img/payees/PayeesSelected.webp)
+   <img width="638" alt="All three Morrisons payees selected with the checkbox in the table header" src="/img/transactions/payees-selected@2x.webp" />
 
 4. Click the button in the top-left to open the menu, and select **Merge**
 
-![Image merging payees](/img/payees/MergePayeesOption.webp)
+   <img width="638" alt="The 3 payees menu open with Merge highlighted" src="/img/transactions/payees-merge-option@2x.webp" />
 
 5. All of the payees will merge into one. Actual will choose one of the payee names to retain but you can edit the payee name by clicking it and typing in the desired name for the final payee.
 
-![Image of merged Payee](/img/payees/PayeesMerged.webp)
+   <img width="638" alt="A single Morrisons payee left after merging" src="/img/transactions/payees-merged@2x.webp" />
 
 You can individually select payees and merge them if you like, but filtering & merging is a powerful way to quickly clean up your payees.
 
@@ -61,4 +61,4 @@ You can individually select payees and merge them if you like, but filtering & m
 
 [Transfers](./transfers.md) are just special payees that indicate which account to transfer to/from. Since they are payees, you can create rules like normal which will automatically create transfers. You will find them at the bottom of the **Payees** page if you want to create custom rules.
 
-![Image of Payee Page with transfers](/img/payees/payee-transfers.webp)
+![The bottom of the Payees page with the transfer payees highlighted](/img/transactions/payees-transfers@2x.webp)
