@@ -3,12 +3,19 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { SvgAdd } from '@actual-app/components/icons/v1';
+import {
+  SvgCalendar,
+  SvgSearchAlternate,
+} from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import { spacing } from '@actual-app/components/tokens';
 import { send } from '@actual-app/core/platform/client/connection';
 import { q } from '@actual-app/core/shared/query';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
+import { ManagePage } from '#components/common/ManagePage';
+import { PageMenuButton } from '#components/common/PageMenuButton';
 import { Search } from '#components/common/Search';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useSchedules } from '#hooks/useSchedules';
@@ -87,29 +94,48 @@ export function Schedules() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: '0 0 15px',
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <Search
-              placeholder={t('Filter schedules…')}
-              value={filter}
-              onChange={setFilter}
+      <ManagePage
+        actions={
+          <Button variant="bare" onPress={onAdd}>
+            <SvgAdd
+              width={10}
+              height={10}
+              style={{ marginRight: spacing.xs }}
             />
-          </View>
-        </View>
-
+            <Trans>Add new schedule</Trans>
+          </Button>
+        }
+        search={
+          <Search
+            placeholder={t('Filter schedules…')}
+            value={filter}
+            onChange={setFilter}
+          />
+        }
+        menu={
+          <PageMenuButton<'discover' | 'upcoming-length'>
+            items={[
+              {
+                name: 'discover',
+                text: t('Find schedules'),
+                icon: SvgSearchAlternate,
+              },
+              {
+                name: 'upcoming-length',
+                text: t('Change upcoming length'),
+                icon: SvgCalendar,
+              },
+            ]}
+            onMenuSelect={name => {
+              if (name === 'discover') {
+                onDiscover();
+              } else {
+                onChangeUpcomingLength();
+              }
+            }}
+          />
+        }
+      >
         <SchedulesTable
           isLoading={isSchedulesLoading}
           schedules={schedules}
@@ -120,34 +146,7 @@ export function Schedules() {
           onAction={onAction}
           style={{ backgroundColor: theme.tableBackground }}
         />
-
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            margin: '20px 0',
-            flexShrink: 0,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: '1em',
-            }}
-          >
-            <Button onPress={onDiscover}>
-              <Trans>Find schedules</Trans>
-            </Button>
-            <Button onPress={onChangeUpcomingLength}>
-              <Trans>Change upcoming length</Trans>
-            </Button>
-          </View>
-          <Button variant="primary" onPress={onAdd}>
-            <Trans>Add new schedule</Trans>
-          </Button>
-        </View>
-      </>
+      </ManagePage>
     </ErrorBoundary>
   );
 }

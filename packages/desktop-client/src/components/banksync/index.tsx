@@ -3,10 +3,10 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { useAccounts } from '#hooks/useAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -82,7 +82,7 @@ export function BankSync() {
   }, []);
 
   return (
-    <View style={{ flexShrink: 0, gap: 24, paddingBottom: MOBILE_NAV_HEIGHT }}>
+    <View style={{ flexShrink: 0, gap: spacing.xl, paddingBottom: spacing.xl }}>
       <BuiltInProviders
         providers={providers}
         syncServerStatus={syncServerStatus}
