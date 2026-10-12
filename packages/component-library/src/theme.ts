@@ -63,6 +63,8 @@ export const theme = {
   sidebarBrand: 'var(--color-sidebarBrand)',
   settingsCardBackground: 'var(--color-settingsCardBackground)',
   settingsCardBorder: 'var(--color-settingsCardBorder)',
+  settingsCardText: 'var(--color-settingsCardText)',
+  settingsCardTextSubdued: 'var(--color-settingsCardTextSubdued)',
   settingsNavItemText: 'var(--color-settingsNavItemText)',
   settingsNavItemBackgroundHover: 'var(--color-settingsNavItemBackgroundHover)',
   settingsNavItemAccentSelected: 'var(--color-settingsNavItemAccentSelected)',
