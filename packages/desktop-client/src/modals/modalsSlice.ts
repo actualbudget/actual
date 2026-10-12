@@ -24,6 +24,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';
+import type { ApplyBudgetActionPayload } from '#budget';
 import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
@@ -434,6 +435,40 @@ export type Modal =
           groupId: CategoryGroupEntity['id'],
           direction: 'asc' | 'desc',
         ) => void;
+      };
+    }
+  | {
+      name: 'category-actions';
+      options: {
+        categoryId: CategoryEntity['id'];
+        month: string;
+      };
+    }
+  | {
+      name: 'budget-amount';
+      options: {
+        categoryId: CategoryEntity['id'];
+        month: string;
+      };
+    }
+  | {
+      name: 'category-group-actions';
+      options: {
+        groupId: CategoryGroupEntity['id'];
+        month: string;
+      };
+    }
+  | {
+      name: 'budget-month-picker';
+      options: {
+        month: string;
+        monthBounds: { start: string; end: string };
+        onSelectMonth: (month: string) => void;
+        onBudgetAction: (
+          month: string,
+          type: ApplyBudgetActionPayload['type'],
+        ) => void;
+        onEditNotes: (month: string) => void;
       };
     }
   | {

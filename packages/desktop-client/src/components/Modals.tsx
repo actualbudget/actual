@@ -17,9 +17,13 @@ import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
+import { BudgetAmountSheet } from './modals/BudgetAmountSheet';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
+import { BudgetMonthPickerSheet } from './modals/BudgetMonthPickerSheet';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
+import { CategoryActionsSheet } from './modals/CategoryActionsSheet';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
+import { CategoryGroupActionsSheet } from './modals/CategoryGroupActionsSheet';
 import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
@@ -313,6 +317,32 @@ export function Modals() {
 
         case 'category-group-menu':
           return <CategoryGroupMenuModal key={key} {...modal.options} />;
+
+        case 'category-actions':
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <CategoryActionsSheet {...modal.options} />
+            </SheetNameProvider>
+          );
+
+        case 'budget-amount':
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(modal.options.month)}
+            >
+              <BudgetAmountSheet {...modal.options} />
+            </SheetNameProvider>
+          );
+
+        case 'category-group-actions':
+          return <CategoryGroupActionsSheet key={key} {...modal.options} />;
+
+        case 'budget-month-picker':
+          return <BudgetMonthPickerSheet key={key} {...modal.options} />;
 
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;
