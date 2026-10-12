@@ -193,6 +193,18 @@ function hasUncategorizedId(value: unknown): value is ReportDrilldownPayload {
   );
 }
 
+// Recharts types the bar's payload as `any`, so check it holds interval dates
+type IntervalDrilldownPayload = Pick<
+  IntervalEntity,
+  'intervalStartDate' | 'intervalEndDate'
+>;
+
+function hasIntervalDates(value: unknown): value is IntervalDrilldownPayload {
+  return (
+    value !== null && typeof value === 'object' && 'intervalStartDate' in value
+  );
+}
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -317,33 +329,48 @@ export function BarGraph({
                 stackId="a"
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
-                onMouseEnter={() =>
-                  groupBy !== 'Interval' && setPointer('pointer')
-                }
+                onMouseEnter={() => setPointer('pointer')}
                 onClick={item => {
+                  if (compact && !showTooltip) {
+                    return;
+                  }
+
+                  const intervalPayload = hasIntervalDates(item.payload)
+                    ? item.payload
+                    : undefined;
                   const itemPayload = hasUncategorizedId(item.payload)
                     ? item.payload
                     : undefined;
 
-                  return (
-                    ((compact && showTooltip) || !compact) &&
-                    groupBy !== 'Interval' &&
-                    showActivity({
-                      navigate,
-                      categories,
-                      accounts,
-                      balanceTypeOp,
-                      filters,
-                      showHiddenCategories,
-                      showOffBudget,
-                      type: 'totals',
-                      startDate: data.startDate,
-                      endDate: data.endDate,
-                      field: groupBy.toLowerCase(),
-                      id: item.id,
-                      uncategorizedId: itemPayload?.uncategorizedId,
-                    })
-                  );
+                  // Interval bars drill down by their own date range instead of a field
+                  const drilldown =
+                    groupBy === 'Interval'
+                      ? {
+                          startDate:
+                            intervalPayload?.intervalStartDate ??
+                            data.startDate,
+                          endDate:
+                            intervalPayload?.intervalEndDate ?? data.endDate,
+                        }
+                      : {
+                          startDate: data.startDate,
+                          endDate: data.endDate,
+                          field: groupBy.toLowerCase(),
+                          id: item.id,
+                          uncategorizedId: itemPayload?.uncategorizedId,
+                        };
+
+                  showActivity({
+                    navigate,
+                    categories,
+                    accounts,
+                    balanceTypeOp,
+                    filters,
+                    showHiddenCategories,
+                    showOffBudget,
+                    type: 'totals',
+                    ...drilldown,
+                  });
                 }}
                 shape={(props: BarShapeProps) => (
                   <Rectangle

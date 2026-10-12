@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -28,6 +29,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '#components/FinancialText';
 import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
@@ -431,12 +433,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         ) : endingPoint ? (
           <View
             style={{
+              alignItems: 'flex-end',
               textAlign: 'right',
               paddingTop: 20,
               marginBottom: 20,
             }}
           >
-            <View
+            <FinancialText
               style={{
                 ...styles.largeText,
                 fontWeight: 400,
@@ -448,12 +451,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               <PrivacyFilter>
                 {format(endingPoint.balance, 'financial')}
               </PrivacyFilter>
-            </View>
+            </FinancialText>
             <View style={{ color: theme.pageTextLight }}>
               <Trans>Ending Balance</Trans>: {endingPoint.date}
             </View>
             {lowestPoint && lowestPoint.date !== endingPoint.date ? (
-              <View
+              <Text
                 style={{
                   color: theme.pageTextLight,
                   fontSize: 12,
@@ -461,11 +464,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                 }}
               >
                 <Trans>Lowest visible point</Trans>:{' '}
-                <PrivacyFilter>
-                  {format(lowestPoint.balance, 'financial')}
-                </PrivacyFilter>{' '}
+                <FinancialText>
+                  <PrivacyFilter>
+                    {format(lowestPoint.balance, 'financial')}
+                  </PrivacyFilter>
+                </FinancialText>{' '}
                 ({lowestPoint.date})
-              </View>
+              </Text>
             ) : null}
           </View>
         ) : null}
