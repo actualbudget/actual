@@ -61,7 +61,7 @@ The tab is organized into four small groups - **A. Your plan**, **B. Simulation*
 
 ### Investment Pots
 
-<img width="1184" alt="The Investment pots tab with three pots and the Vanguard 401k pot expanded" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-pots@2x.webp" />
+<img width="1344" alt="The Investment pots tab with three pots and the Vanguard 401k pot expanded" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-pots@2x.webp" />
 
 A _pot_ is a chunk of invested money - a pension or retirement account, an investment account, a savings account. You can model one pot or several, each with its own settings:
 
@@ -107,7 +107,7 @@ A plan whose income covers its spending doesn't need the pots at all, and empty 
 
 ### Contributions
 
-<img width="1184" alt="The Contributions tab with yearly contributions into the Vanguard 401k pot" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-contributions@2x.webp" />
+<img width="1344" alt="The Contributions tab with yearly contributions into the Vanguard 401k pot" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-contributions@2x.webp" />
 
 If you're still earning, you can model the money you add to your pots each year - pension deposits or brokerage savings, anything that tops up a pot on a regular basis. Each contribution has:
 
@@ -224,7 +224,7 @@ Use the dropdown above the chart to pick which run to look at: the worst run, a 
 
 ### The Pot Balances Chart
 
-![The pots chart](/img/experimental/monte-carlo-analysis/monte-carlo-pots-chart.png)
+<img width="1184" alt="The pot balances chart for the median run, with each pot stacked to the plan's total" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-pots-chart@2x.webp" />
 
 Switch the results view to **Pots** to see what each of your pots was worth at the end of every year, for one simulated run at a time. The pots are stacked on top of each other, one color per pot (the same colors as the cashflow chart), so the top of the stack is the plan's total balance and the bands inside it show how that total is split. Locked pots and the surplus pot are included, so you can watch a pension sit untouched until its access age, or the surplus pot fill up with income the plan didn't need.
 
