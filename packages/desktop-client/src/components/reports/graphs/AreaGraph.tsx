@@ -6,6 +6,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   DataEntity,
   IntervalEntity,
   RuleConditionEntity,
@@ -33,6 +34,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { BaselineTooltip } from './BaselineTooltipLines';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
@@ -45,6 +47,7 @@ type PayloadItem = {
     netDebts: number;
     totalTotals: number;
     totalBudgeted: number;
+    baseline?: BaselineBreakdown;
   };
 };
 
@@ -62,6 +65,18 @@ const CustomTooltip = ({
   format,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+
+  const interval = payload?.[0]?.payload;
+  if (active && interval?.baseline) {
+    return (
+      <BaselineTooltip
+        title={interval.date}
+        breakdown={interval.baseline}
+        balanceTypeOp={balanceTypeOp}
+        format={format}
+      />
+    );
+  }
 
   if (active && payload && payload.length) {
     return (

@@ -5,7 +5,11 @@ import { app as dashboardApp } from '#server/dashboard/app';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { runMutator } from '#server/mutators';
-import type { CustomReportEntity, CustomReportTagScope } from '#types/models';
+import type {
+  CustomReportBaseline,
+  CustomReportEntity,
+  CustomReportTagScope,
+} from '#types/models';
 
 import { app as reportApp, reportModel } from './app';
 
@@ -170,4 +174,47 @@ describe('custom report tag scope mapping', () => {
       expect(importedReport.tagScope).toEqual(tagScope);
     },
   );
+});
+
+describe('custom report baseline', () => {
+  const baseline = {
+    enabled: true,
+    dateRange: 'Last 6 months',
+    isDateStatic: false,
+    startDate: '2026-04-01',
+    endDate: '2026-09-30',
+    includeCurrentInterval: false,
+    projectToFullPeriod: true,
+  } satisfies CustomReportBaseline;
+
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+  });
+
+  it('stores the baseline alongside other metadata', async () => {
+    await db.insertWithSchema(
+      'custom_reports',
+      reportModel.fromJS({
+        ...report,
+        baseline,
+        metadata: { presentation: 'compact' },
+      }),
+    );
+
+    const [loadedReport] = await reportApp.handlers['report/get']();
+    expect(loadedReport.baseline).toEqual(baseline);
+    expect(loadedReport.metadata).toEqual({ presentation: 'compact' });
+  });
+
+  it.each([
+    null,
+    { ...baseline, dateRange: 3 },
+    { ...baseline, enabled: 'yes' },
+  ])('rejects an invalid baseline: %j', invalid => {
+    expect(() =>
+      // @ts-expect-error deliberately malformed input
+      reportModel.validate({ ...report, baseline: invalid }),
+    ).toThrow('Invalid report baseline.');
+  });
 });

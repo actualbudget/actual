@@ -273,6 +273,9 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
+      <FeatureToggle flag="reportBaseline">
+        <Trans>Baseline comparison for custom reports</Trans>
+      </FeatureToggle>
       {isUsingServer && (
         <FeatureToggle
           flag="enableBanking"

@@ -7,6 +7,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   DataEntity,
   LegendEntity,
   RuleConditionEntity,
@@ -34,6 +35,7 @@ import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
+import { BaselineTooltipLines } from './BaselineTooltipLines';
 import { showActivity } from './showActivity';
 import { computeTrendLines } from './util/computeTrendLines';
 
@@ -43,6 +45,7 @@ type PayloadItem = {
   date: string;
   color: string;
   payload: {
+    baseline?: BaselineBreakdown;
     date: string;
   };
 };
@@ -54,6 +57,7 @@ type CustomTooltipProps = {
   active?: boolean;
   payload?: PayloadItem[];
   format: (value: unknown, type: FormatType) => string;
+  balanceTypeOp: balanceTypeOpType;
 };
 
 const CustomTooltip = ({
@@ -63,8 +67,11 @@ const CustomTooltip = ({
   active,
   payload,
   format,
+  balanceTypeOp,
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
+  // Offset intervals carry what their whole-interval change was built from
+  const interval = payload?.[0]?.payload;
 
   const dataKeyToName = useMemo(() => {
     return new Map(legend.map(entry => [entry.dataKey, entry.name]));
@@ -126,15 +133,35 @@ const CustomTooltip = ({
               );
             })}
             {payload.length > 5 && compact && '...'}
-            <AlignedText
-              left={t('Total')}
-              right={
-                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
-              }
-              style={{
-                fontWeight: 600,
-              }}
-            />
+            {/* The baseline's change line replaces the total */}
+            {!interval?.baseline && (
+              <AlignedText
+                left={t('Total')}
+                right={
+                  <FinancialText>
+                    {format(sumTotals, 'financial')}
+                  </FinancialText>
+                }
+                style={{
+                  fontWeight: 600,
+                }}
+              />
+            )}
+            {interval?.baseline && (
+              <div
+                style={{
+                  marginTop: 5,
+                  paddingTop: 5,
+                  borderTop: `1px solid ${theme.menuBorder}`,
+                }}
+              >
+                <BaselineTooltipLines
+                  breakdown={interval.baseline}
+                  balanceTypeOp={balanceTypeOp}
+                  format={format}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -237,6 +264,7 @@ export function LineGraph({
                       tooltip={tooltip}
                       legend={data.legend}
                       format={format}
+                      balanceTypeOp={balanceTypeOp}
                     />
                   }
                   formatter={numberFormatterTooltip}

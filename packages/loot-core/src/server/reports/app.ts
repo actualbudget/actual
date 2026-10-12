@@ -41,11 +41,26 @@ export const reportModel = {
       throw new ValidationError('Invalid report tag scope.');
     }
 
+    const baseline = report.baseline;
+    if (
+      baseline !== undefined &&
+      (baseline === null ||
+        typeof baseline.enabled !== 'boolean' ||
+        typeof baseline.dateRange !== 'string' ||
+        typeof baseline.startDate !== 'string' ||
+        typeof baseline.endDate !== 'string' ||
+        typeof baseline.isDateStatic !== 'boolean' ||
+        typeof baseline.includeCurrentInterval !== 'boolean' ||
+        typeof baseline.projectToFullPeriod !== 'boolean')
+    ) {
+      throw new ValidationError('Invalid report baseline.');
+    }
+
     return report;
   },
 
   toJS(row: CustomReportData): CustomReportEntity {
-    const { tagScope, ...metadata } = row.metadata ?? {};
+    const { tagScope, baseline, ...metadata } = row.metadata ?? {};
 
     return {
       id: row.id,
@@ -57,6 +72,7 @@ export const reportModel = {
       mode: row.mode,
       groupBy: row.group_by,
       tagScope,
+      baseline,
       sortBy: row.sort_by,
       interval: row.interval,
       balanceType: row.balance_type,
@@ -97,7 +113,11 @@ export const reportModel = {
       graph_type: report.graphType,
       conditions: report.conditions,
       conditions_op: report.conditionsOp,
-      metadata: { ...report.metadata, tagScope: report.tagScope },
+      metadata: {
+        ...report.metadata,
+        tagScope: report.tagScope,
+        baseline: report.baseline,
+      },
     };
   },
 };

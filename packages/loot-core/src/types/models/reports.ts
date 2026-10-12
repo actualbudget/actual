@@ -6,8 +6,21 @@ export type CustomReportTagScope =
 
 export type CustomReportMetadata = Record<string, unknown>;
 
+// A date range the report's data is offset against, by its daily average
+export type CustomReportBaseline = {
+  enabled: boolean;
+  dateRange: string;
+  isDateStatic: boolean;
+  startDate: string;
+  endDate: string;
+  includeCurrentInterval: boolean;
+  // Scale the report's unfinished interval up to its full length by days
+  projectToFullPeriod: boolean;
+};
+
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
+  baseline?: CustomReportBaseline;
 };
 
 export type CustomReportEntity = {
@@ -30,6 +43,7 @@ export type CustomReportEntity = {
   showUncategorized: boolean;
   trimIntervals: boolean;
   showTrendLines: boolean;
+  baseline?: CustomReportBaseline;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -46,6 +60,19 @@ export type balanceTypeOpType =
   | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
+
+export type ReportValues = Record<balanceTypeOpType, number>;
+
+// What an amount offset against a baseline was built from
+export type BaselineBreakdown = {
+  // The baseline's daily average over the same number of days
+  expected: ReportValues;
+  actual: ReportValues;
+  // The actual amount scaled up to the full length of unfinished intervals
+  projected?: ReportValues;
+  // The baseline over an average-length interval, for tables and summaries
+  perInterval?: ReportValues;
+};
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -100,6 +127,9 @@ export type DataEntity = {
   totalTotals: number;
   totalBudgeted: number;
   scopeTagNames?: string[];
+  baseline?: BaselineBreakdown;
+  baselineStartDate?: string;
+  baselineEndDate?: string;
 };
 
 export type LegendEntity = {
@@ -122,6 +152,7 @@ export type IntervalEntity = {
   netDebts: number;
   totalTotals: number;
   totalBudgeted: number;
+  baseline?: BaselineBreakdown;
 };
 
 export type GroupedEntity = {
@@ -138,6 +169,7 @@ export type GroupedEntity = {
   totalBudgeted: number;
   categories?: GroupedEntity[];
   bucketTagNames?: string[];
+  baseline?: BaselineBreakdown;
 };
 
 export type Interval = {

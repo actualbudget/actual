@@ -17,10 +17,18 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
+import {
+  defaultBaseline,
+  getBaselineRange,
+} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportOptions } from '#components/reports/ReportOptions';
+import {
+  createBaselineGroupedSpreadsheet,
+  createBaselineSpreadsheet,
+} from '#components/reports/spreadsheets/baseline-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -106,6 +114,16 @@ export function GetCardData({
     endDate = dateEnd || report.endDate;
   }
 
+  const baseline = report.baseline ?? defaultBaseline;
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    baseline,
+    earliestTransaction,
+    latestTransaction,
+    firstDayOfWeekIdx,
+  );
+  const isBaselineEnabled = baseline.enabled;
+  const projectToFullPeriod = baseline.projectToFullPeriod;
+
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
 
@@ -127,7 +145,7 @@ export function GetCardData({
   }
 
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -143,10 +161,28 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-    });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx, budgetType]);
+    };
+    return isBaselineEnabled
+      ? createBaselineGroupedSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+        })
+      : createGroupedSpreadsheet(props);
+  }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
+    report,
+    categories,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+    budgetType,
+  ]);
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -169,8 +205,19 @@ export function GetCardData({
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
       dateFormat,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
     report,
     categories,
     payees,

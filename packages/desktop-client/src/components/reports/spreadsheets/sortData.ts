@@ -17,13 +17,17 @@ const shouldReverse = (balanceTypeOp: balanceTypeOpType) =>
 export function sortData({
   balanceTypeOp,
   sortByOp,
+  isSigned = false,
 }: {
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
+  // Signed values, like changes from a baseline, are shown as they are, so
+  // spending isn't flipped to sort largest first
+  isSigned?: boolean;
 }): (a: GroupedEntity, b: GroupedEntity) => number {
   if (!balanceTypeOp || !sortByOp) return () => 0;
 
-  if (shouldReverse(balanceTypeOp)) {
+  if (!isSigned && shouldReverse(balanceTypeOp)) {
     sortByOp = reverseSort[sortByOp] ?? sortByOp;
   }
 

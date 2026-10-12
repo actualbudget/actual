@@ -26,6 +26,10 @@ type ReportTableRowProps = {
   filters?: RuleConditionEntity[];
   startDate?: string;
   endDate?: string;
+  showBaseline?: boolean;
+  showProjected?: boolean;
+  baselineStartDate?: string;
+  baselineEndDate?: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
@@ -55,6 +59,10 @@ export const ReportTableRow = memo(
     filters = [],
     startDate = '',
     endDate,
+    showBaseline = false,
+    showProjected = false,
+    baselineStartDate = '',
+    baselineEndDate = '',
     intervalsCount,
     compact,
     style,
@@ -69,7 +77,14 @@ export const ReportTableRow = memo(
     colorized,
     scopeTagNames,
   }: ReportTableRowProps) => {
-    const average = Math.round(item[balanceTypeOp] / intervalsCount);
+    const breakdown = showBaseline ? item.baseline : undefined;
+    // Total tables keep real amounts beside the change, so they match the
+    // transactions a click-through shows
+    const showsActual = !!breakdown && mode !== 'time';
+    const amounts = showsActual ? breakdown.actual : item;
+    const baselineAmount =
+      mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
+    const average = Math.round(amounts[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
 
@@ -144,6 +159,48 @@ export const ReportTableRow = memo(
             }}
             valueStyle={compactStyle}
           />
+          {showBaseline && (
+            <Cell
+              value={format(baselineAmount?.[balanceTypeOp] ?? 0, 'financial')}
+              textAlign="right"
+              style={{
+                minWidth: compact ? 50 : 85,
+                backgroundColor: style?.backgroundColor,
+              }}
+              unexposedContent={({ value }) => (
+                <FinancialText
+                  style={{
+                    ...hoverUnderline,
+                    textAlign: 'right',
+                    flexGrow: 1,
+                  }}
+                >
+                  {value}
+                </FinancialText>
+              )}
+              valueStyle={compactStyle}
+              onClick={() =>
+                canShowActivity &&
+                showActivity({
+                  navigate,
+                  categories,
+                  accounts,
+                  balanceTypeOp,
+                  filters,
+                  showHiddenCategories,
+                  showOffBudget,
+                  type: 'totals',
+                  startDate: baselineStartDate,
+                  endDate: baselineEndDate,
+                  field: drilldownField,
+                  id: item.id,
+                  uncategorizedId: item.uncategorizedId,
+                })
+              }
+              width="flex"
+              privacyFilter
+            />
+          )}
           {item.intervalData && mode === 'time'
             ? item.intervalData.map((intervalItem, index) => {
                 return (
@@ -204,10 +261,10 @@ export const ReportTableRow = memo(
             : ['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
                 <>
                   <Cell
-                    value={format(item.totalAssets, 'financial')}
+                    value={format(amounts.totalAssets, 'financial')}
                     title={
-                      Math.abs(item.totalAssets) > 100000
-                        ? format(item.totalAssets, 'financial')
+                      Math.abs(amounts.totalAssets) > 100000
+                        ? format(amounts.totalAssets, 'financial')
                         : undefined
                     }
                     textAlign="right"
@@ -217,7 +274,7 @@ export const ReportTableRow = memo(
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
                       ...(colorized && {
-                        color: getAmountColor(item.totalAssets),
+                        color: getAmountColor(amounts.totalAssets),
                       }),
                     }}
                     unexposedContent={({ value }) => (
@@ -251,10 +308,10 @@ export const ReportTableRow = memo(
                     }
                   />
                   <Cell
-                    value={format(item.totalDebts, 'financial')}
+                    value={format(amounts.totalDebts, 'financial')}
                     title={
-                      Math.abs(item.totalDebts) > 100000
-                        ? format(item.totalDebts, 'financial')
+                      Math.abs(amounts.totalDebts) > 100000
+                        ? format(amounts.totalDebts, 'financial')
                         : undefined
                     }
                     textAlign="right"
@@ -264,7 +321,7 @@ export const ReportTableRow = memo(
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
                       ...(colorized && {
-                        color: getAmountColor(item.totalDebts),
+                        color: getAmountColor(amounts.totalDebts),
                       }),
                     }}
                     unexposedContent={({ value }) => (
@@ -299,11 +356,19 @@ export const ReportTableRow = memo(
                   />
                 </>
               )}
+          {mode === 'time' && breakdown && showProjected && (
+            <AmountCell
+              value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
+              compact={compact}
+              backgroundColor={style?.backgroundColor}
+              compactStyle={compactStyle}
+            />
+          )}
           <Cell
-            value={format(item[balanceTypeOp], 'financial')}
+            value={format(amounts[balanceTypeOp], 'financial')}
             title={
-              Math.abs(item[balanceTypeOp]) > 100000
-                ? format(item[balanceTypeOp], 'financial')
+              Math.abs(amounts[balanceTypeOp]) > 100000
+                ? format(amounts[balanceTypeOp], 'financial')
                 : undefined
             }
             textAlign="right"
@@ -311,7 +376,9 @@ export const ReportTableRow = memo(
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
-              ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
+              ...(colorized && {
+                color: getAmountColor(amounts[balanceTypeOp]),
+              }),
             }}
             unexposedContent={({ value }) => (
               <FinancialText
@@ -345,6 +412,23 @@ export const ReportTableRow = memo(
             width="flex"
             privacyFilter
           />
+          {showsActual && showProjected && (
+            <AmountCell
+              value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
+              compact={compact}
+              backgroundColor={style?.backgroundColor}
+              compactStyle={compactStyle}
+            />
+          )}
+          {showsActual && (
+            <AmountCell
+              value={item[balanceTypeOp]}
+              compact={compact}
+              backgroundColor={style?.backgroundColor}
+              compactStyle={compactStyle}
+              colorized
+            />
+          )}
           <Cell
             value={format(average, 'financial')}
             title={
@@ -375,3 +459,43 @@ export const ReportTableRow = memo(
 );
 
 ReportTableRow.displayName = 'ReportTableRow';
+
+type AmountCellProps = {
+  value: number;
+  compact: boolean;
+  backgroundColor?: CSSProperties['backgroundColor'];
+  compactStyle?: CSSProperties;
+  colorized?: boolean;
+};
+
+function AmountCell({
+  value,
+  compact,
+  backgroundColor,
+  compactStyle,
+  colorized,
+}: AmountCellProps) {
+  const format = useFormat();
+
+  return (
+    <Cell
+      value={format(value, 'financial')}
+      title={Math.abs(value) > 100000 ? format(value, 'financial') : undefined}
+      textAlign="right"
+      style={{
+        fontWeight: 600,
+        minWidth: compact ? 50 : 85,
+        backgroundColor,
+        ...(colorized && { color: getAmountColor(value) }),
+      }}
+      unexposedContent={({ value }) => (
+        <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>
+          {value}
+        </FinancialText>
+      )}
+      valueStyle={compactStyle}
+      width="flex"
+      privacyFilter
+    />
+  );
+}

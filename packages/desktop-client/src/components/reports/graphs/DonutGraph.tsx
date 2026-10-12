@@ -368,6 +368,11 @@ export function DonutGraph({
   const [pointer, setPointer] = useState('');
 
   const getVal = (obj: GroupedEntity | IntervalEntity) => {
+    // Slices can't be negative, so baseline changes are sized by how much
+    // changed and coloured by direction
+    if (data.baseline) {
+      return Math.abs(obj[balanceTypeOp]);
+    }
     if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     }
