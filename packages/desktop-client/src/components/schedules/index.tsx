@@ -11,7 +11,6 @@ import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
-import { Page } from '#components/Page';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -88,7 +87,7 @@ export function Schedules() {
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-      <Page header={t('Schedules')}>
+      <>
         <View
           style={{
             flexDirection: 'row',
@@ -148,7 +147,7 @@ export function Schedules() {
             <Trans>Add new schedule</Trans>
           </Button>
         </View>
-      </Page>
+      </>
     </ErrorBoundary>
   );
 }

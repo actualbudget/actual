@@ -133,15 +133,15 @@ This will now open Actual so we can start configuring it.
 
 1. Set a password - remember this, you will need it in the future.
 
-   ![](/img/fly/actual-config-1@2x.webp)
+   <img width="498" alt="The Welcome to Actual screen asking you to set a server password" src="/img/install/server-set-password@2x.webp" />
 
-2. You'll see a welcome screen. Either click "Import my budget" to [import your budget from YNAB or the subscription version of Actual](../migration/index.md), or click "Start fresh" to create a blank budget file.
+2. You'll see a welcome screen. Either click "Import my budget" to [import your budget from YNAB or the subscription version of Actual](../migration/index.md), or click "Start budgeting" to create a blank budget file.
 
-   ![](/img/fly/actual-config-2@2x.webp)
+   ![The welcome screen with the Start budgeting button and the Import my budget link](/img/fly/fly-welcome@2x.webp)
 
 3. If everything went well you should then be taken to your very first budget.
 
-   ![](/img/fly/actual-register.webp)
+   ![A new, empty budget](/img/fly/fly-first-budget@2x.webp)
 
 Actual is now up and running. Congratulations! Consider checking out [our tour](../tour/index.md) next.
 
