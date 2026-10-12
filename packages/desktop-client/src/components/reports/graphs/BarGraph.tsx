@@ -219,6 +219,14 @@ function splitGraphemes(value: string) {
   return Array.from(graphemeSegmenter.segment(value), s => s.segment);
 }
 
+// Emoji and CJK characters render about twice as wide as Latin letters
+const WIDE_GRAPHEME =
+  /\p{Extended_Pictographic}|\p{Regional_Indicator}|\p{Script=Han}|\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Hangul}/u;
+
+function getGraphemeWidth(grapheme: string) {
+  return WIDE_GRAPHEME.test(grapheme) ? 2 : 1;
+}
+
 type BarGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
@@ -291,7 +299,11 @@ export function BarGraph({
     // Without a Y axis the card has no room for the first angled label to overhang
     const firstLabel = data[splitData][0]?.[yAxis];
     if (compact && isAngled && firstLabel) {
-      return getLabelLength(firstLabel) * ANGLED_LABEL_WIDTH_PER_CHAR;
+      const labelWidth = splitGraphemes(formatXTick(firstLabel)).reduce(
+        (sum, grapheme) => sum + getGraphemeWidth(grapheme),
+        0,
+      );
+      return labelWidth * ANGLED_LABEL_WIDTH_PER_CHAR;
     }
 
     if (Math.abs(largestValue) > 1000000) {
