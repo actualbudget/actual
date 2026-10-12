@@ -96,16 +96,16 @@ export function BudgetMenuSheet({
           {notes && <MobileSheetNotes notes={notes} />}
 
           <MobileSheetSection>
+            <MobileSheetRow
+              label={t('Edit notes')}
+              onPress={() => onEditNotes(notesId, month)}
+            />
             <MobileSheetMenuRows
               items={items}
               onSelect={itemName => {
                 onMenuSelect(itemName);
                 close();
               }}
-            />
-            <MobileSheetRow
-              label={t('Edit notes')}
-              onPress={() => onEditNotes(notesId, month)}
             />
           </MobileSheetSection>
         </>

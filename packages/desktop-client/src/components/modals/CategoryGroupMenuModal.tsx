@@ -125,12 +125,12 @@ export function CategoryGroupMenuModal({
                 <MobileSheetRow label={t('Rename')} onPress={editTitle} />
               )}
               <MobileSheetRow
-                label={t('Add category')}
-                onPress={() => onAddCategory(group.id, group.is_income)}
-              />
-              <MobileSheetRow
                 label={t('Edit notes')}
                 onPress={() => onEditNotes(group.id)}
+              />
+              <MobileSheetRow
+                label={t('Add category')}
+                onPress={() => onAddCategory(group.id, group.is_income)}
               />
               {!group.is_income && (
                 <MobileSheetRow
