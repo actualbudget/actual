@@ -1,4 +1,3 @@
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
@@ -34,6 +33,7 @@ import {
   filterHiddenItems,
   filterReportTransactions,
 } from './filterHiddenItems';
+import { makeCustomReportFilters } from './makeCustomReportFilters';
 import { recalculate } from './recalculate';
 import { reportCategoryLists } from './reportCategoryLists';
 import { sortData } from './sortData';
@@ -131,12 +131,10 @@ export function createCustomSpreadsheet({
         : monthUtils[
             ReportOptions.intervalRange.get(interval) || 'rangeInclusive'
           ](startDate, endDate);
-    const { filters } =
+    const filters =
       hasGroups || hasDateFilter
-        ? await send('make-filters-from-conditions', {
-            conditions: transactionConditions,
-          })
-        : { filters: [] };
+        ? await makeCustomReportFilters(conditions)
+        : [];
     const filteredIntervalCount = hasDateFilter
       ? countFilteredIntervals(
           startDate,
