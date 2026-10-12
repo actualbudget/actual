@@ -18,7 +18,7 @@ Themes change the user interface colors. Pick from the built-in **Light**, **Dar
 
 ### Sidebar
 
-By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page** that Actual opens on. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout is not affected.
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page**, the page Actual shows when it opens or when you go to its home page. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout does not use these settings yet, but support for it is planned.
 
 ### Formatting
 
