@@ -40,7 +40,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
-import { BaselineTooltip } from './BaselineTooltipLines';
+import { BaselineTooltip } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 

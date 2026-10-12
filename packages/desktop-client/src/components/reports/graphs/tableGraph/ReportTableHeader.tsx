@@ -41,9 +41,9 @@ export function ReportTableHeader({
   showBaseline = false,
   showProjected = false,
 }: ReportTableHeaderProps) {
-  // Total tables show real amounts and add the change beside them
-  const showsChange = showBaseline && mode !== 'time';
   const { t } = useTranslation();
+  // Total tables keep real amounts and add a change column beside them
+  const hasChangeColumn = showBaseline && mode !== 'time';
   return (
     <Row
       collapsed
@@ -156,18 +156,19 @@ export function ReportTableHeader({
           textAlign="right"
           width="flex"
         />
-        {showsChange && showProjected && (
+        {hasChangeColumn && showProjected && (
           <Cell
             style={{
               minWidth: compact ? 50 : 85,
             }}
             valueStyle={compactStyle}
             value={t('Projected')}
+            title={t('The amount so far, scaled up to the whole range')}
             textAlign="right"
             width="flex"
           />
         )}
-        {showsChange && (
+        {hasChangeColumn && (
           <Cell
             style={{
               minWidth: compact ? 50 : 85,

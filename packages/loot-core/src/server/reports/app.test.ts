@@ -192,6 +192,12 @@ describe('custom report baseline', () => {
     await loadMappings();
   });
 
+  afterEach(async () => {
+    if (await fs.exists(dashboardImportPath)) {
+      await fs.removeFile(dashboardImportPath);
+    }
+  });
+
   it('stores the baseline alongside other metadata', async () => {
     await db.insertWithSchema(
       'custom_reports',
@@ -208,13 +214,20 @@ describe('custom report baseline', () => {
   });
 
   it.each([
-    null,
-    { ...baseline, dateRange: 3 },
-    { ...baseline, enabled: 'yes' },
-  ])('rejects an invalid baseline: %j', invalid => {
-    expect(() =>
-      // @ts-expect-error deliberately malformed input
-      reportModel.validate({ ...report, baseline: invalid }),
-    ).toThrow('Invalid report baseline.');
+    { baseline: null },
+    { baseline: { ...baseline, dateRange: 3 } },
+    { baseline: { ...baseline, enabled: 'yes' } },
+  ])('rejects invalid imported baselines: %j', async invalid => {
+    await writeDashboardReport({ ...report, ...invalid });
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-import']({
+          filePath: dashboardImportPath,
+          dashboardPageId: 'dashboard-page-id',
+        }),
+      ),
+    ).rejects.toMatchObject({ cause: 'validation-error' });
+    expect(await reportApp.handlers['report/get']()).toEqual([]);
   });
 });

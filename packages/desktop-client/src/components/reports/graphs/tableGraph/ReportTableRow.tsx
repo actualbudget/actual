@@ -78,10 +78,10 @@ export const ReportTableRow = memo(
     scopeTagNames,
   }: ReportTableRowProps) => {
     const breakdown = showBaseline ? item.baseline : undefined;
-    // Total tables keep real amounts beside the change, so they match the
-    // transactions a click-through shows
-    const showsActual = !!breakdown && mode !== 'time';
-    const amounts = showsActual ? breakdown.actual : item;
+    // Total tables keep real amounts and add a change column beside them, so
+    // the amounts match the transactions a click-through shows
+    const hasChangeColumn = !!breakdown && mode !== 'time';
+    const amounts = hasChangeColumn ? breakdown.actual : item;
     const baselineAmount =
       mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
     const average = Math.round(amounts[balanceTypeOp] / intervalsCount);
@@ -114,6 +114,44 @@ export const ReportTableRow = memo(
             id: item.id,
           };
     const canShowActivity = !isNarrowWidth && !compact;
+
+    const onShowTotals = () =>
+      canShowActivity &&
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters,
+        showHiddenCategories,
+        showOffBudget,
+        type: 'totals',
+        ...drilldown,
+        uncategorizedId: item.uncategorizedId,
+        bucketTagNames: item.bucketTagNames,
+        scopeTagNames,
+      });
+
+    // A single interval has no matching slice of the baseline, so interval
+    // rows open the whole baseline range
+    const onShowBaseline = () =>
+      canShowActivity &&
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters,
+        showHiddenCategories,
+        showOffBudget,
+        type: 'totals',
+        ...drilldown,
+        startDate: baselineStartDate,
+        endDate: baselineEndDate,
+        uncategorizedId: item.uncategorizedId,
+        bucketTagNames: item.bucketTagNames,
+        scopeTagNames,
+      });
 
     const pointer = canShowActivity ? 'pointer' : 'inherit';
 
@@ -179,24 +217,7 @@ export const ReportTableRow = memo(
                 </FinancialText>
               )}
               valueStyle={compactStyle}
-              onClick={() =>
-                canShowActivity &&
-                showActivity({
-                  navigate,
-                  categories,
-                  accounts,
-                  balanceTypeOp,
-                  filters,
-                  showHiddenCategories,
-                  showOffBudget,
-                  type: 'totals',
-                  startDate: baselineStartDate,
-                  endDate: baselineEndDate,
-                  field: drilldownField,
-                  id: item.id,
-                  uncategorizedId: item.uncategorizedId,
-                })
-              }
+              onClick={onShowBaseline}
               width="flex"
               privacyFilter
             />
@@ -362,6 +383,8 @@ export const ReportTableRow = memo(
               compact={compact}
               backgroundColor={style?.backgroundColor}
               compactStyle={compactStyle}
+              hoverStyle={hoverUnderline}
+              onClick={onShowTotals}
             />
           )}
           <Cell
@@ -392,40 +415,28 @@ export const ReportTableRow = memo(
               </FinancialText>
             )}
             valueStyle={compactStyle}
-            onClick={() =>
-              canShowActivity &&
-              showActivity({
-                navigate,
-                categories,
-                accounts,
-                balanceTypeOp,
-                filters,
-                showHiddenCategories,
-                showOffBudget,
-                type: 'totals',
-                ...drilldown,
-                uncategorizedId: item.uncategorizedId,
-                bucketTagNames: item.bucketTagNames,
-                scopeTagNames,
-              })
-            }
+            onClick={onShowTotals}
             width="flex"
             privacyFilter
           />
-          {showsActual && showProjected && (
+          {hasChangeColumn && showProjected && (
             <AmountCell
               value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
               compact={compact}
               backgroundColor={style?.backgroundColor}
               compactStyle={compactStyle}
+              hoverStyle={hoverUnderline}
+              onClick={onShowTotals}
             />
           )}
-          {showsActual && (
+          {hasChangeColumn && (
             <AmountCell
               value={item[balanceTypeOp]}
               compact={compact}
               backgroundColor={style?.backgroundColor}
               compactStyle={compactStyle}
+              hoverStyle={hoverUnderline}
+              onClick={onShowTotals}
               colorized
             />
           )}
@@ -465,6 +476,8 @@ type AmountCellProps = {
   compact: boolean;
   backgroundColor?: CSSProperties['backgroundColor'];
   compactStyle?: CSSProperties;
+  hoverStyle?: CSSProperties;
+  onClick?: () => void;
   colorized?: boolean;
 };
 
@@ -473,6 +486,8 @@ function AmountCell({
   compact,
   backgroundColor,
   compactStyle,
+  hoverStyle,
+  onClick,
   colorized,
 }: AmountCellProps) {
   const format = useFormat();
@@ -489,11 +504,14 @@ function AmountCell({
         ...(colorized && { color: getAmountColor(value) }),
       }}
       unexposedContent={({ value }) => (
-        <FinancialText style={{ textAlign: 'right', flexGrow: 1 }}>
+        <FinancialText
+          style={{ ...hoverStyle, textAlign: 'right', flexGrow: 1 }}
+        >
           {value}
         </FinancialText>
       )}
       valueStyle={compactStyle}
+      onClick={onClick}
       width="flex"
       privacyFilter
     />

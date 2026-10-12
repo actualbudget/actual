@@ -14,7 +14,7 @@ export type CustomReportBaseline = {
   startDate: string;
   endDate: string;
   includeCurrentInterval: boolean;
-  // Scale the report's unfinished interval up to its full length by days
+  // Project amounts so far over the report's whole range, by days elapsed
   projectToFullPeriod: boolean;
 };
 
@@ -68,7 +68,7 @@ export type BaselineBreakdown = {
   // The baseline's daily average over the same number of days
   expected: ReportValues;
   actual: ReportValues;
-  // The actual amount scaled up to the full length of unfinished intervals
+  // The actual amount projected over its full length from its pace so far
   projected?: ReportValues;
   // The baseline over an average-length interval, for tables and summaries
   perInterval?: ReportValues;

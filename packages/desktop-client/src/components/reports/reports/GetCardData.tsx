@@ -33,6 +33,7 @@ import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 function ErrorFallback() {
@@ -114,6 +115,7 @@ export function GetCardData({
     endDate = dateEnd || report.endDate;
   }
 
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
   const baseline = report.baseline ?? defaultBaseline;
   const [baselineStartDate, baselineEndDate] = getBaselineRange(
     baseline,
@@ -121,7 +123,7 @@ export function GetCardData({
     latestTransaction,
     firstDayOfWeekIdx,
   );
-  const isBaselineEnabled = baseline.enabled;
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
 
   const fromDate = convertFromDate(report.interval);

@@ -67,6 +67,7 @@ import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -308,6 +309,7 @@ function CustomReportInner({
   const [baseline, setBaseline] = useState(
     loadReport.baseline ?? defaultBaseline,
   );
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const dateRangeLine =
@@ -538,7 +540,7 @@ function CustomReportInner({
     latestTransactionDate,
     firstDayOfWeekIdx,
   );
-  const isBaselineEnabled = baseline.enabled;
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
 
   const getGroupData = useMemo(() => {
@@ -780,7 +782,7 @@ function CustomReportInner({
         const disabledSplits =
           disabledGraphList(mode, graphType, 'disabledSplit') || [];
         // Signed changes can't fill matching inner and outer donut rings
-        return baseline.enabled
+        return isBaselineEnabled
           ? [...new Set([...disabledSplits, 'CategoryGroup'])]
           : disabledSplits;
       }
@@ -1100,7 +1102,7 @@ function CustomReportInner({
                     <AlignedText
                       left={
                         <Block>
-                          {baseline.enabled
+                          {isBaselineEnabled
                             ? t('{{balanceType}} vs baseline:', { balanceType })
                             : `${balanceType}:`}
                         </Block>
