@@ -375,69 +375,6 @@ export type Modal =
       };
     }
   | {
-      name: 'category-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        onSave: (category: CategoryEntity) => void;
-        onEditNotes: (id: NoteEntity['id']) => void;
-        onDelete: (
-          categoryId: CategoryEntity['id'],
-          transferCategoryId?: CategoryEntity['id'],
-        ) => void;
-        onEditAutomations?: (categoryId: CategoryEntity['id']) => void;
-        onClose?: () => void;
-      };
-    }
-  | {
-      name: 'envelope-budget-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        month: string;
-        onUpdateBudget: (amount: number) => void;
-        onCopyLastMonthAverage: () => void;
-        onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
-        onEditNotes: (id: NoteEntity['id'], month: string) => void;
-      };
-    }
-  | {
-      name: 'tracking-budget-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        month: string;
-        onUpdateBudget: (amount: number) => void;
-        onCopyLastMonthAverage: () => void;
-        onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
-        onCopyUntilYearEnd: () => void;
-        onEditNotes: (id: NoteEntity['id'], month: string) => void;
-      };
-    }
-  | {
-      name: 'category-group-menu';
-      options: {
-        groupId: CategoryGroupEntity['id'];
-        onSave: (group: CategoryGroupEntity) => void;
-        onAddCategory: (
-          groupId: CategoryGroupEntity['id'],
-          isIncome: CategoryGroupEntity['is_income'],
-        ) => void;
-        onEditNotes: (id: NoteEntity['id']) => void;
-        onDelete: (
-          groupId: CategoryGroupEntity['id'],
-          transferCategoryId?: CategoryEntity['id'],
-        ) => void;
-        onClose?: () => void;
-        onApplyBudgetTemplatesInGroup?: (
-          categories: Array<CategoryEntity['id']>,
-        ) => void;
-        onSortCategories?: (
-          groupId: CategoryGroupEntity['id'],
-          direction: 'asc' | 'desc',
-        ) => void;
-      };
-    }
-  | {
       name: 'category-actions';
       options: {
         categoryId: CategoryEntity['id'];
@@ -509,33 +446,6 @@ export type Modal =
       };
     }
   | {
-      name: 'envelope-balance-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        month: string;
-        onCarryover?: (carryover: boolean) => void;
-        onTransfer?: () => void;
-        onCover?: () => void;
-      };
-    }
-  | {
-      name: 'envelope-income-balance-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        month: string;
-        onCarryover: (carryover: boolean) => void;
-        onShowActivity: () => void;
-      };
-    }
-  | {
-      name: 'tracking-balance-menu';
-      options: {
-        categoryId: CategoryEntity['id'];
-        month: string;
-        onCarryover: (carryover: boolean) => void;
-      };
-    }
-  | {
       name: 'transfer';
       options: {
         title: string;
@@ -588,22 +498,6 @@ export type Modal =
         onAddCategoryGroup: () => void;
         onToggleHiddenCategories: () => void;
         onSwitchBudgetFile: () => void;
-      };
-    }
-  | {
-      name: 'envelope-budget-month-menu';
-      options: {
-        month: string;
-        onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-        onEditNotes: (id: NoteEntity['id']) => void;
-      };
-    }
-  | {
-      name: 'tracking-budget-month-menu';
-      options: {
-        month: string;
-        onBudgetAction: (month: string, action: string, arg?: unknown) => void;
-        onEditNotes: (id: NoteEntity['id']) => void;
       };
     }
   | {
