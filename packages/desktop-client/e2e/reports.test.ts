@@ -152,8 +152,8 @@ test.describe('Reports', () => {
 
     test('splits transactions into exact tag buckets and scopes them', async () => {
       test.setTimeout(90_000);
-      await page.getByRole('button', { name: 'More', exact: true }).click();
-      await page.getByRole('link', { name: 'Tags', exact: true }).click();
+      const settingsPage = await navigation.goToSettingsPage();
+      await settingsPage.goToSection('Tags');
       await page.getByRole('button', { name: 'Add New', exact: true }).click();
       for (const tag of ['red', 'circle']) {
         await page.getByPlaceholder('New tag', { exact: true }).fill(tag);
