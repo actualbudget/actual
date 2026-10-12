@@ -14,7 +14,7 @@ export class SyncGroup extends DurableObject<Env> {
 
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
-    this.#db = new WrappedDatabase(ctx.storage);
+    this.#db = new WrappedDatabase(() => ctx.storage);
   }
 
   #ensureSchema() {

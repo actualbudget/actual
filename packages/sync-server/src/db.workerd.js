@@ -31,9 +31,19 @@ function fromRow(row) {
 }
 
 export class WrappedDatabase {
-  /** @param {import('#workerd/runtime').DurableObjectStorageLike} storage */
-  constructor(storage) {
-    this.storage = storage;
+  /**
+   * Storage is resolved on every call: it belongs to one Durable Object
+   * instance, and a recreated instance in the same isolate can't use the old
+   * one's.
+   *
+   * @param {() => import('#workerd/runtime').DurableObjectStorageLike} getStorage
+   */
+  constructor(getStorage) {
+    this.getStorage = getStorage;
+  }
+
+  get storage() {
+    return this.getStorage();
   }
 
   /**
@@ -106,5 +116,5 @@ export class WrappedDatabase {
  * @param {string} _filename
  */
 export function openDatabase(_filename) {
-  return new WrappedDatabase(getWorkerdRuntime().storage);
+  return new WrappedDatabase(() => getWorkerdRuntime().storage);
 }
