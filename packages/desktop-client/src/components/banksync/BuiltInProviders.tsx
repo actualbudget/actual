@@ -12,6 +12,7 @@ import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Warning } from '#components/alerts';
@@ -52,14 +53,14 @@ export function BuiltInProviders({
         style={{ alignSelf: 'flex-start' }}
       >
         {title}
-        <Cheveron width={20} height={20} style={{ marginLeft: 5 }} />
+        <Cheveron width={20} height={20} style={{ marginLeft: spacing.xs }} />
       </Button>
     );
   }
 
   return (
-    <View style={{ gap: 12 }}>
-      <View style={{ gap: 4 }}>
+    <View style={{ gap: spacing.md }}>
+      <View style={{ gap: spacing.xs }}>
         {onToggleCollapse ? (
           <Button
             variant="bare"
@@ -68,7 +69,11 @@ export function BuiltInProviders({
             style={{ alignSelf: 'flex-start' }}
           >
             {title}
-            <Cheveron width={20} height={20} style={{ marginLeft: 5 }} />
+            <Cheveron
+              width={20}
+              height={20}
+              style={{ marginLeft: spacing.xs }}
+            />
           </Button>
         ) : (
           title
@@ -86,14 +91,14 @@ export function BuiltInProviders({
           style={{
             border: `1px solid ${theme.tableBorder}`,
             borderRadius: 8,
-            padding: 16,
+            padding: spacing.lg,
             backgroundColor: theme.tableBackground,
           }}
         >
-          <Button isDisabled style={{ padding: '10px 0', fontSize: 15 }}>
+          <Button isDisabled style={{ paddingBlock: spacing.sm, fontSize: 15 }}>
             <Trans>Set up bank sync</Trans>
           </Button>
-          <Paragraph style={{ fontSize: 15, marginTop: 10 }}>
+          <Paragraph style={{ fontSize: 15, marginTop: spacing.sm }}>
             <Trans>
               Connect to an Actual server to set up{' '}
               <Link
@@ -112,7 +117,7 @@ export function BuiltInProviders({
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 12,
+            gap: spacing.md,
           }}
         >
           {providers.map(provider => (
@@ -122,9 +127,9 @@ export function BuiltInProviders({
               style={{
                 border: `1px solid ${theme.tableBorder}`,
                 borderRadius: 8,
-                padding: 16,
+                padding: spacing.lg,
                 backgroundColor: theme.tableBackground,
-                gap: 16,
+                gap: spacing.lg,
               }}
             >
               <View
@@ -132,12 +137,12 @@ export function BuiltInProviders({
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'flex-start',
-                  gap: 12,
+                  gap: spacing.md,
                 }}
               >
                 <View
                   style={{
-                    gap: 6,
+                    gap: spacing.sm,
                     flex: 1,
                   }}
                 >
@@ -145,7 +150,7 @@ export function BuiltInProviders({
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
-                      gap: 8,
+                      gap: spacing.sm,
                       flexWrap: 'wrap',
                     }}
                   >
@@ -161,7 +166,8 @@ export function BuiltInProviders({
                           backgroundColor: theme.buttonPrimaryBackground,
                           color: theme.buttonPrimaryText,
                           fontWeight: 500,
-                          padding: '2px 8px',
+                          paddingBlock: spacing.xxs,
+                          paddingInline: spacing.sm,
                         }}
                       >
                         {provider.credentialSource === 'global' ? (
@@ -232,7 +238,7 @@ export function BuiltInProviders({
                   flexDirection: 'row',
                   justifyContent: 'flex-end',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: spacing.sm,
                   flexWrap: 'wrap',
                 }}
               >

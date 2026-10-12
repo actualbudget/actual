@@ -4,8 +4,10 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { MIN_CUSTOM_INTERVAL_MINUTES } from '#hooks/useAutomaticBankSync';
@@ -94,13 +96,13 @@ export function AutomaticSyncSettings() {
       style={{
         border: `1px solid ${theme.tableBorder}`,
         borderRadius: 8,
-        padding: 16,
+        padding: spacing.lg,
         backgroundColor: theme.tableBackground,
-        gap: 12,
+        gap: spacing.md,
       }}
     >
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 17, fontWeight: 600 }}>
+      <View style={{ gap: spacing.xs }}>
+        <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
           <Trans>Automatic syncing</Trans>
         </Text>
         <Paragraph
@@ -119,7 +121,7 @@ export function AutomaticSyncSettings() {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: spacing.sm,
           flexWrap: 'wrap',
         }}
       >

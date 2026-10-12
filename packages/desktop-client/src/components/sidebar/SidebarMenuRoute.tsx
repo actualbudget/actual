@@ -2,8 +2,11 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { spacing } from '@actual-app/components/tokens';
+import { View } from '@actual-app/components/view';
 
 import { Page } from '#components/Page';
+import { SettingsPageTitle } from '#components/settings/SettingsPageTitle';
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 import {
@@ -48,8 +51,17 @@ export function SidebarMenuRoute({
     );
   }
 
-  if (isInSettings || isMobilePage) {
+  if (isMobilePage || (isInSettings && isNarrowWidth)) {
     return children;
+  }
+
+  if (isInSettings) {
+    return (
+      <View style={{ flex: 1, minHeight: 0, gap: spacing.lg }}>
+        <SettingsPageTitle>{itemDetails[id].title}</SettingsPageTitle>
+        {children}
+      </View>
+    );
   }
 
   return <Page header={itemDetails[id].title}>{children}</Page>;
