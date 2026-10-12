@@ -171,6 +171,7 @@ export type GlobalPrefsJson = Partial<{
   'max-months'?: string; // e.g. "2" or "3"
   'category-expanded-state'?: string; // "0" or "1" or "2"
   'document-dir'?: GlobalPrefs['documentDir'];
+  'last-file-dialog-dir'?: string;
   'encrypt-key'?: string;
   language?: GlobalPrefs['language'];
   theme?: GlobalPrefs['theme'];

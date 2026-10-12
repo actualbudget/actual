@@ -34,6 +34,7 @@ import type {
 } from 'electron';
 
 import { openExternalUrl, revealLocalFile } from './external-links';
+import { dialogDefaultPath, directoryToRemember } from './file-dialog-dir';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
@@ -799,11 +800,39 @@ export type OpenFileDialogPayload = {
 
 ipcMain.handle(
   'open-file-dialog',
-  (_event, { filters, properties }: OpenFileDialogPayload) => {
-    return dialog.showOpenDialogSync({
-      properties: properties || ['openFile'],
+  async (_event, { filters, properties }: OpenFileDialogPayload) => {
+    const dialogProperties = properties || ['openFile'];
+
+    // Reading and writing the remembered folder is deliberately best-effort: a
+    // prefs file that cannot be read or written must never stop the user from
+    // picking a file.
+    let globalPrefs: GlobalPrefsJson | null = null;
+    try {
+      globalPrefs = await loadGlobalPrefsStrict();
+    } catch (error) {
+      logMessage('error', `Could not read the last used folder: ${error}`);
+    }
+
+    const lastDirectory = globalPrefs?.['last-file-dialog-dir'];
+    const selection = dialog.showOpenDialogSync({
+      properties: dialogProperties,
       filters,
+      defaultPath: dialogDefaultPath(lastDirectory),
     });
+
+    const directory = directoryToRemember(selection, dialogProperties);
+    if (globalPrefs && directory && directory !== lastDirectory) {
+      try {
+        await saveGlobalPrefs({
+          ...globalPrefs,
+          'last-file-dialog-dir': directory,
+        });
+      } catch (error) {
+        logMessage('error', `Could not remember the last used folder: ${error}`);
+      }
+    }
+
+    return selection;
   },
 );
 
