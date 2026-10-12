@@ -191,8 +191,9 @@ function getBudgetTourSteps({ navigate, budgetType }: TourStepDeps): Step[] {
       content: (
         <Trans>
           The sidebar takes you to your budget, reports, and scheduled
-          transactions. You can find payees, rules, and tags under{' '}
-          <strong>Settings</strong>.
+          transactions. Payees, rules, and tags live under{' '}
+          <strong>Settings</strong>, where you can also choose which pages
+          appear in the sidebar.
         </Trans>
       ),
     },
