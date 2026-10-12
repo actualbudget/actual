@@ -20,6 +20,7 @@ import { resolveName } from './spreadsheet/util';
 let globalSheet: Spreadsheet;
 let globalOnChange;
 let globalCacheDb;
+let globalCacheTarget;
 
 export function get(): Spreadsheet {
   return globalSheet;
@@ -130,6 +131,7 @@ export async function loadSpreadsheet(
   }
 
   let sheet;
+  globalCacheTarget = cacheEnabled ? cacheDb : null;
   if (cacheEnabled) {
     sheet = new Spreadsheet(
       updateSpreadsheetCache.bind(null, cacheDb),
@@ -187,6 +189,13 @@ export function unloadSpreadsheet(): void {
   if (globalCacheDb) {
     sqlite.closeDatabase(globalCacheDb);
     globalCacheDb = null;
+  }
+  globalCacheTarget = null;
+}
+
+export function clearCache(): void {
+  if (globalCacheTarget) {
+    sqlite.runQuery(globalCacheTarget, 'DELETE FROM kvcache');
   }
 }
 
