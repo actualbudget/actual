@@ -12,6 +12,8 @@ import { css } from '@emotion/css';
 
 import { LABEL_STYLE } from './budgetTableStyles';
 import { HiddenDragButton } from './HiddenDragButton';
+import { ReorderHandle } from './ReorderHandle';
+import { useReorderMode } from './ReorderModeContext';
 
 type CategoryGroupRowNameProps = {
   group: CategoryGroupEntity;
@@ -29,6 +31,7 @@ export function CategoryGroupRowName({
   onToggleCollapse,
 }: CategoryGroupRowNameProps) {
   const { t } = useTranslation();
+  const isReordering = useReorderMode();
 
   return (
     <View
@@ -41,6 +44,7 @@ export function CategoryGroupRowName({
       }}
     >
       {isDraggable && <HiddenDragButton />}
+      {isReordering && isDraggable && <ReorderHandle scope="group" />}
       <Button
         variant="bare"
         aria-label={

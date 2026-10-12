@@ -11,6 +11,7 @@ import { useDispatch } from '#redux';
 import { getRowGridStyle, ROW_PRESSABLE_STYLE } from './budgetTableStyles';
 import { CategoryGroupRowName } from './CategoryGroupRowName';
 import { ExpenseGroupCells } from './ExpenseGroupCells';
+import { useReorderMode } from './ReorderModeContext';
 
 type ExpenseGroupHeaderProps = {
   categoryGroup: CategoryGroupEntity;
@@ -21,6 +22,7 @@ type ExpenseGroupHeaderProps = {
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   isHidden: boolean;
+  isDragging?: boolean;
 };
 
 export function ExpenseGroupHeader({
@@ -32,8 +34,10 @@ export function ExpenseGroupHeader({
   isCollapsed,
   onToggleCollapse,
   isHidden,
+  isDragging = false,
 }: ExpenseGroupHeaderProps) {
   const dispatch = useDispatch();
+  const isReordering = useReorderMode();
   const { handlers: longPressHandlers, wasRecentLongPress } = useLongPress(
     () => {
       dispatch(
@@ -50,12 +54,17 @@ export function ExpenseGroupHeader({
   return (
     <View
       data-testid="category-group-row"
-      onClick={() => {
-        if (!wasRecentLongPress()) {
+      data-reorder-item="group"
+      data-reorder-id={categoryGroup.id}
+      onClick={event => {
+        const isHandleClick =
+          event.target instanceof Element &&
+          event.target.closest('[data-reorder-handle]') != null;
+        if (!isHandleClick && !wasRecentLongPress()) {
           onToggleCollapse(categoryGroup.id);
         }
       }}
-      {...longPressHandlers}
+      {...(isReordering ? {} : longPressHandlers)}
       style={{
         ...ROW_PRESSABLE_STYLE,
         ...getRowGridStyle(show3Columns ? 2 : 1),
@@ -66,7 +75,7 @@ export function ExpenseGroupHeader({
         paddingBottom: spacing.xs,
         borderBottomWidth: 1,
         borderColor: theme.tableBorder,
-        opacity: isHidden ? 0.5 : undefined,
+        opacity: isDragging ? 0.4 : isHidden ? 0.5 : undefined,
         backgroundColor: monthUtils.isCurrentMonth(month)
           ? theme.budgetHeaderCurrentMonth
           : theme.budgetHeaderOtherMonth,

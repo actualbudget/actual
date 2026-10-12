@@ -21,22 +21,26 @@ import {
 import { CategoryRowName } from './CategoryRowName';
 import { HiddenDragButton } from './HiddenDragButton';
 import { IncomeCategoryCells } from './IncomeCategoryCells';
+import { useReorderMode } from './ReorderModeContext';
 
 type IncomeCategoryListItemProps = ComponentPropsWithoutRef<
   typeof GridListItem<CategoryEntity>
 > & {
   month: string;
+  isDragging: boolean;
   onShowCategory: (id: CategoryEntity['id']) => void;
 };
 
 export function IncomeCategoryListItem({
   month,
+  isDragging,
   onShowCategory,
   ...props
 }: IncomeCategoryListItemProps) {
   const { t } = useTranslation();
   const { value: category } = props;
   const dispatch = useDispatch();
+  const isReordering = useReorderMode();
   const { handlers: longPressHandlers, wasRecentLongPress } = useLongPress(
     () => {
       if (category) {
@@ -64,16 +68,22 @@ export function IncomeCategoryListItem({
         categoryName: category.name,
       })}
       data-testid="category-row"
-      onAction={() => {
-        if (!wasRecentLongPress()) {
-          onShowCategory(category.id);
-        }
-      }}
+      onAction={
+        isReordering
+          ? undefined
+          : () => {
+              if (!wasRecentLongPress()) {
+                onShowCategory(category.id);
+              }
+            }
+      }
       {...props}
     >
       <HiddenDragButton />
       <View
-        {...longPressHandlers}
+        {...(isReordering ? {} : longPressHandlers)}
+        data-reorder-item="category"
+        data-reorder-id={category.id}
         className={css({
           '[data-pressed] &': {
             backgroundColor: theme.tableRowBackgroundHover,
@@ -85,7 +95,7 @@ export function IncomeCategoryListItem({
           height: ROW_HEIGHT,
           borderBottomWidth: 1,
           borderColor: theme.tableBorder,
-          opacity: category.hidden ? 0.5 : undefined,
+          opacity: isDragging ? 0.4 : category.hidden ? 0.5 : undefined,
           backgroundColor: monthUtils.isCurrentMonth(month)
             ? theme.budgetCurrentMonth
             : theme.budgetOtherMonth,

@@ -142,6 +142,48 @@ export class MobileBudgetPage {
     await this.budgetPageMenuButton.click();
   }
 
+  async enterReorderMode() {
+    await this.openBudgetPageMenu();
+    await this.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Reorder categories' })
+      .click();
+    await expect(
+      this.categoryRows.first().getByTestId('reorder-handle'),
+    ).toBeVisible();
+  }
+
+  async exitReorderMode() {
+    await this.page.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(
+      this.categoryRows.first().getByTestId('reorder-handle'),
+    ).toHaveCount(0);
+  }
+
+  async dragCategoryToRow(fromIndex: number, toIndex: number) {
+    const handle = this.categoryRows
+      .nth(fromIndex)
+      .getByTestId('reorder-handle');
+    const handleBox = await handle.boundingBox();
+    const targetBox = await this.categoryRows.nth(toIndex).boundingBox();
+    if (!handleBox || !targetBox) {
+      throw new Error('Could not locate the reorder handle or target row.');
+    }
+    await this.page.mouse.move(
+      handleBox.x + handleBox.width / 2,
+      handleBox.y + handleBox.height / 2,
+    );
+    await this.page.mouse.down();
+    await this.page.mouse.move(
+      handleBox.x + handleBox.width / 2,
+      targetBox.y + 2,
+      {
+        steps: 8,
+      },
+    );
+    await this.page.mouse.up();
+  }
+
   async getCategoryGroupNameForRow(idx: number) {
     const groupNameText = await this.categoryGroupNames.nth(idx).textContent();
     if (!groupNameText) {

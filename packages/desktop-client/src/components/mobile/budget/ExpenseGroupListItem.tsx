@@ -24,6 +24,7 @@ type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   showBudgetedColumn: boolean;
   show3Columns: boolean;
   isHidden: boolean;
+  draggingId: string | null;
 };
 
 export function ExpenseGroupListItem({
@@ -36,6 +37,7 @@ export function ExpenseGroupListItem({
   isCollapsed,
   onToggleCollapse,
   isHidden,
+  draggingId,
   ...props
 }: ExpenseGroupListItemProps) {
   const { value: categoryGroup } = props;
@@ -73,6 +75,7 @@ export function ExpenseGroupListItem({
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
           isHidden={isHidden}
+          isDragging={categoryGroup.id === draggingId}
         />
 
         <ExpenseCategoryList
@@ -83,6 +86,7 @@ export function ExpenseGroupListItem({
           shouldHideCategory={shouldHideCategory}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
+          draggingId={draggingId}
         />
       </View>
     </GridListItem>

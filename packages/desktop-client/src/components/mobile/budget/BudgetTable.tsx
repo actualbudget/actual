@@ -40,6 +40,7 @@ import {
 } from './budgetTableStyles';
 import { ExpenseGroupList } from './ExpenseGroupList';
 import { IncomeGroup } from './IncomeGroup';
+import { useReorderMode } from './ReorderModeContext';
 
 type ToBudgetProps = {
   toBudget: Binding<'envelope-budget', 'to-budget'>;
@@ -290,6 +291,7 @@ export function BudgetTable({
 }: BudgetTableProps) {
   const { width } = useResponsive();
   const show3Columns = width >= 300;
+  const isReordering = useReorderMode();
 
   const [showSpentColumn = false, setShowSpentColumnPref] = useLocalPref(
     'mobile.showSpentColumn',
@@ -314,7 +316,7 @@ export function BudgetTable({
         toggleSpentColumn={toggleSpentColumn}
         onShowBudgetSummary={onShowBudgetSummary}
       />
-      <PullToRefresh onRefresh={onRefresh}>
+      <PullToRefresh onRefresh={onRefresh} isPullable={!isReordering}>
         <View
           data-testid="budget-table"
           style={{

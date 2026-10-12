@@ -6,6 +6,8 @@ import { View } from '@actual-app/components/view';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { CategoryScheduleIndicator } from './CategoryScheduleIndicator';
+import { ReorderHandle } from './ReorderHandle';
+import { useReorderMode } from './ReorderModeContext';
 
 type CategoryRowNameProps = {
   category: CategoryEntity;
@@ -13,6 +15,8 @@ type CategoryRowNameProps = {
 };
 
 export function CategoryRowName({ category, month }: CategoryRowNameProps) {
+  const isReordering = useReorderMode();
+
   return (
     <View
       style={{
@@ -20,9 +24,11 @@ export function CategoryRowName({ category, month }: CategoryRowNameProps) {
         alignItems: 'center',
         gap: spacing.xs,
         minWidth: 0,
+        height: '100%',
         overflow: 'hidden',
       }}
     >
+      {isReordering && <ReorderHandle scope="category" />}
       <Text
         style={{
           ...styles.smallText,

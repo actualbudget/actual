@@ -59,6 +59,7 @@ import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { BudgetTable } from './BudgetTable';
+import { ReorderModeContext } from './ReorderModeContext';
 
 const PILL_STYLE = {
   borderRadius: 16,
@@ -91,6 +92,7 @@ export function BudgetPage() {
     end: startMonth,
   });
   const [initialized, setInitialized] = useState(false);
+  const [isReorderMode, setIsReorderMode] = useState(false);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -152,7 +154,7 @@ export function BudgetPage() {
         modal: {
           name: 'new-category-group',
           options: {
-            onValidate: name => (!name ? 'Name is required.' : null),
+            onValidate: name => (!name ? t('Name is required.') : null),
             onSubmit: async name => {
               createCategoryGroup.mutate(
                 { name },
@@ -169,7 +171,7 @@ export function BudgetPage() {
         },
       }),
     );
-  }, [dispatch, createCategoryGroup]);
+  }, [dispatch, createCategoryGroup, t]);
 
   const onPrevMonth = useCallback(async () => {
     const month = monthUtils.subMonths(startMonth, 1);
@@ -285,8 +287,10 @@ export function BudgetPage() {
         modal: {
           name: 'budget-page-menu',
           options: {
+            isReorderMode,
             onAddCategoryGroup: onOpenNewCategoryGroupModal,
             onToggleHiddenCategories,
+            onToggleReorderMode: () => setIsReorderMode(mode => !mode),
             onSwitchBudgetFile,
           },
         },
@@ -294,6 +298,7 @@ export function BudgetPage() {
     );
   }, [
     dispatch,
+    isReorderMode,
     onOpenNewCategoryGroupModal,
     onSwitchBudgetFile,
     onToggleHiddenCategories,
@@ -349,15 +354,30 @@ export function BudgetPage() {
             </Button>
           }
           rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
+            isReorderMode ? (
               <Button
                 variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
-                style={{ margin: 10 }}
+                onPress={() => setIsReorderMode(false)}
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 600,
+                  margin: 10,
+                  color: theme.mobileHeaderText,
+                }}
               >
-                <SvgCalendar width={20} height={20} />
+                <Trans>Done</Trans>
               </Button>
+            ) : (
+              !monthUtils.isCurrentMonth(startMonth) && (
+                <Button
+                  variant="bare"
+                  onPress={onCurrentMonth}
+                  aria-label={t('Today')}
+                  style={{ margin: 10 }}
+                >
+                  <SvgCalendar width={20} height={20} />
+                </Button>
+              )
             )
           }
         />
@@ -372,17 +392,19 @@ export function BudgetPage() {
           {({ onRefresh }) => (
             <>
               <Banners month={startMonth} onBudgetAction={onBudgetAction} />
-              <BudgetTable
-                // This key forces the whole table rerender when the number
-                // format changes
-                key={`${numberFormat}${hideFraction}`}
-                categoryGroups={categoryGroups}
-                month={startMonth}
-                onShowBudgetSummary={onShowBudgetSummary}
-                onRefresh={onRefresh}
-                onShowCategoryGroup={onShowCategoryGroup}
-                onShowCategory={onShowCategory}
-              />
+              <ReorderModeContext.Provider value={isReorderMode}>
+                <BudgetTable
+                  // This key forces the whole table rerender when the number
+                  // format changes
+                  key={`${numberFormat}${hideFraction}`}
+                  categoryGroups={categoryGroups}
+                  month={startMonth}
+                  onShowBudgetSummary={onShowBudgetSummary}
+                  onRefresh={onRefresh}
+                  onShowCategoryGroup={onShowCategoryGroup}
+                  onShowCategory={onShowCategory}
+                />
+              </ReorderModeContext.Provider>
             </>
           )}
         </SyncRefresh>

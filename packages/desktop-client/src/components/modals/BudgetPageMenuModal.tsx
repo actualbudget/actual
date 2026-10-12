@@ -11,8 +11,10 @@ type BudgetPageMenuModalProps = Extract<
 >['options'];
 
 export function BudgetPageMenuModal({
+  isReorderMode,
   onAddCategoryGroup,
   onToggleHiddenCategories,
+  onToggleReorderMode,
   onSwitchBudgetFile,
 }: BudgetPageMenuModalProps) {
   const { t } = useTranslation();
@@ -25,6 +27,15 @@ export function BudgetPageMenuModal({
           <MobileSheetRow
             label={t('Add category group')}
             onPress={onAddCategoryGroup}
+          />
+          <MobileSheetRow
+            label={
+              isReorderMode ? t('Finish reordering') : t('Reorder categories')
+            }
+            onPress={() => {
+              close();
+              onToggleReorderMode();
+            }}
           />
           <MobileSheetRow
             label={

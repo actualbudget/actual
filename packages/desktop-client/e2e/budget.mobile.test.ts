@@ -409,6 +409,21 @@ budgetTypes.forEach(budgetType => {
       expect(nameBox!.x + nameBox!.width).toBeLessThanOrEqual(budgetedBox!.x);
     });
 
+    test('reorders categories with the handle in reorder mode', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const firstName = await budgetPage.getCategoryNameForRow(0);
+      const secondName = await budgetPage.getCategoryNameForRow(1);
+
+      await budgetPage.enterReorderMode();
+      await budgetPage.dragCategoryToRow(1, 0);
+
+      await expect(budgetPage.categoryNames.nth(0)).toHaveText(secondName);
+      await expect(budgetPage.categoryNames.nth(1)).toHaveText(firstName);
+
+      await budgetPage.exitReorderMode();
+    });
+
     test('checks that the category menu opens from the category page', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 

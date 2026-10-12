@@ -31,6 +31,7 @@ type ExpenseCategoryListProps = {
   onShowCategory: (id: string) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  draggingId: string | null;
 };
 
 export function ExpenseCategoryList({
@@ -41,6 +42,7 @@ export function ExpenseCategoryList({
   show3Columns,
   showBudgetedColumn,
   shouldHideCategory,
+  draggingId,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
   const reorderCategory = useReorderCategoryMutation();
@@ -108,6 +110,7 @@ export function ExpenseCategoryList({
         shouldHideCategory,
         show3Columns,
         showBudgetedColumn,
+        draggingId,
       ]}
     >
       {category => (
@@ -117,6 +120,7 @@ export function ExpenseCategoryList({
           month={month}
           onShowCategory={onShowCategory}
           isHidden={shouldHideCategory(category)}
+          isDragging={category.id === draggingId}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
         />

@@ -54,6 +54,7 @@ export function IncomeGroup({
         onToggleCollapse={onToggleCollapse}
       />
       <IncomeCategoryList
+        categoryGroup={categoryGroup}
         categories={categories}
         month={month}
         onShowCategory={onShowCategory}

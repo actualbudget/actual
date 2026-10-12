@@ -1,18 +1,28 @@
+import { useState } from 'react';
 import type { DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import { View } from '@actual-app/components/view';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { useMoveCategoryGroupMutation } from '#budget';
+import {
+  useMoveCategoryGroupMutation,
+  useReorderCategoryMutation,
+} from '#budget';
+import { useTouchReorder } from '#hooks/useTouchReorder';
+import { useUndo } from '#hooks/useUndo';
 
 import { ExpenseGroupHeader } from './ExpenseGroupHeader';
 import { ExpenseGroupListItem } from './ExpenseGroupListItem';
+import { ReorderDropIndicator } from './ReorderDropIndicator';
+import { useReorderMode } from './ReorderModeContext';
 
 type ExpenseGroupListProps = {
   categoryGroups: CategoryGroupEntity[];
@@ -39,6 +49,82 @@ export function ExpenseGroupList({
 }: ExpenseGroupListProps) {
   const { t } = useTranslation();
   const moveCategoryGroup = useMoveCategoryGroupMutation();
+  const reorderCategory = useReorderCategoryMutation();
+  const { showUndoNotification } = useUndo();
+  const isReordering = useReorderMode();
+  const [announcement, setAnnouncement] = useState('');
+
+  const touchReorder = useTouchReorder({
+    isEnabled: isReordering,
+    onMoveCategory: (id, { groupId, targetId }) => {
+      const category = categoryGroups
+        .flatMap(group => group.categories ?? [])
+        .find(c => c.id === id);
+      const group = categoryGroups.find(g => g.id === groupId);
+      if (!category || !group) {
+        return;
+      }
+      const hasNameConflict = (group.categories ?? []).some(
+        c =>
+          c.id !== id && c.name.toUpperCase() === category.name.toUpperCase(),
+      );
+      if (hasNameConflict) {
+        reorderCategory.mutate({ id, groupId, targetId });
+        return;
+      }
+      const others = (group.categories ?? []).filter(
+        c => c.id !== id && (!c.hidden || showHiddenCategories),
+      );
+      const targetIndex = targetId
+        ? others.findIndex(c => c.id === targetId)
+        : -1;
+      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+      reorderCategory.mutate(
+        { id, groupId, targetId },
+        {
+          onSuccess: () => {
+            setAnnouncement(
+              t('{{name}} moved to position {{position}} in {{groupName}}', {
+                name: category.name,
+                position,
+                groupName: group.name,
+              }),
+            );
+            showUndoNotification({
+              message: t('Moved {{name}}', { name: category.name }),
+            });
+          },
+        },
+      );
+    },
+    onMoveGroup: (id, targetId) => {
+      const group = categoryGroups.find(g => g.id === id);
+      if (!group) {
+        return;
+      }
+      const others = categoryGroups.filter(g => g.id !== id);
+      const targetIndex = targetId
+        ? others.findIndex(g => g.id === targetId)
+        : -1;
+      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+      moveCategoryGroup.mutate(
+        { id, targetId },
+        {
+          onSuccess: () => {
+            setAnnouncement(
+              t('{{name}} moved to position {{position}}', {
+                name: group.name,
+                position,
+              }),
+            );
+            showUndoNotification({
+              message: t('Moved {{name}}', { name: group.name }),
+            });
+          },
+        },
+      );
+    },
+  });
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
@@ -129,36 +215,46 @@ export function ExpenseGroupList({
   });
 
   return (
-    <GridList
-      aria-label={t('Expense category groups')}
-      items={categoryGroups}
-      dependencies={[
-        month,
-        onShowCategoryGroup,
-        onShowCategory,
-        show3Columns,
-        showBudgetedColumn,
-        showHiddenCategories,
-        isCollapsed,
-        onToggleCollapse,
-      ]}
-      dragAndDropHooks={dragAndDropHooks}
-    >
-      {categoryGroup => (
-        <ExpenseGroupListItem
-          key={categoryGroup.id}
-          value={categoryGroup}
-          month={month}
-          onShowCategoryGroup={onShowCategoryGroup}
-          onShowCategory={onShowCategory}
-          showBudgetedColumn={showBudgetedColumn}
-          show3Columns={show3Columns}
-          showHiddenCategories={showHiddenCategories}
-          isCollapsed={isCollapsed}
-          onToggleCollapse={onToggleCollapse}
-          isHidden={!!categoryGroup.hidden}
-        />
+    <View {...touchReorder.containerProps} style={{ position: 'relative' }}>
+      <GridList
+        aria-label={t('Expense category groups')}
+        items={categoryGroups}
+        dependencies={[
+          month,
+          onShowCategoryGroup,
+          onShowCategory,
+          show3Columns,
+          showBudgetedColumn,
+          showHiddenCategories,
+          isCollapsed,
+          onToggleCollapse,
+          touchReorder.draggingId,
+        ]}
+        dragAndDropHooks={dragAndDropHooks}
+      >
+        {categoryGroup => (
+          <ExpenseGroupListItem
+            key={categoryGroup.id}
+            value={categoryGroup}
+            month={month}
+            onShowCategoryGroup={onShowCategoryGroup}
+            onShowCategory={onShowCategory}
+            showBudgetedColumn={showBudgetedColumn}
+            show3Columns={show3Columns}
+            showHiddenCategories={showHiddenCategories}
+            isCollapsed={isCollapsed}
+            onToggleCollapse={onToggleCollapse}
+            isHidden={!!categoryGroup.hidden}
+            draggingId={touchReorder.draggingId}
+          />
+        )}
+      </GridList>
+      {touchReorder.indicatorTop != null && (
+        <ReorderDropIndicator top={touchReorder.indicatorTop} />
       )}
-    </GridList>
+      <View aria-live="polite" aria-atomic style={styles.visuallyHidden}>
+        {announcement}
+      </View>
+    </View>
   );
 }

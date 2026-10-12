@@ -495,8 +495,10 @@ export type Modal =
   | {
       name: 'budget-page-menu';
       options: {
+        isReorderMode: boolean;
         onAddCategoryGroup: () => void;
         onToggleHiddenCategories: () => void;
+        onToggleReorderMode: () => void;
         onSwitchBudgetFile: () => void;
       };
     }
