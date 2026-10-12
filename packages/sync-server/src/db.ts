@@ -4,11 +4,9 @@ type SqlParam =
   | string
   | number
   | bigint
-  | boolean
   | Buffer
   | Uint8Array
-  | null
-  | undefined;
+  | null;
 
 type MutationResult = {
   changes: number;
