@@ -828,7 +828,10 @@ ipcMain.handle(
           'last-file-dialog-dir': directory,
         });
       } catch (error) {
-        logMessage('error', `Could not remember the last used folder: ${error}`);
+        logMessage(
+          'error',
+          `Could not remember the last used folder: ${error}`,
+        );
       }
     }
 

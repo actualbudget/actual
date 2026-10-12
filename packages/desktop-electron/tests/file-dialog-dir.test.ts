@@ -6,8 +6,14 @@ import { test } from 'vitest';
 import { dialogDefaultPath, directoryToRemember } from '../file-dialog-dir';
 
 test('only offers a remembered folder that still exists', () => {
-  assert.equal(dialogDefaultPath(undefined, () => true), undefined);
-  assert.equal(dialogDefaultPath('', () => true), undefined);
+  assert.equal(
+    dialogDefaultPath(undefined, () => true),
+    undefined,
+  );
+  assert.equal(
+    dialogDefaultPath('', () => true),
+    undefined,
+  );
   assert.equal(
     dialogDefaultPath(path.join('/budgets', 'imports'), () => true),
     path.join('/budgets', 'imports'),
