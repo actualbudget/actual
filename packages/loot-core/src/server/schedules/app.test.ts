@@ -638,6 +638,96 @@ describe('schedule app', () => {
       expect(row.next_date).toBe('2020-12-07');
     });
 
+    it('createSchedule keeps an occurrence moved `after` the weekend onto a later day', async () => {
+      // Tests run on Sunday 1 January 2017. Saturday 31 December moves to
+      // Monday 2 January, which is still ahead, so it is the next date.
+      for (const frequency of ['weekly', 'monthly'] as const) {
+        const id = await createSchedule({
+          schedule: { name: frequency },
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-31',
+                frequency,
+                patterns: [],
+                skipWeekend: true,
+                weekendSolveMode: 'after',
+              },
+            },
+          ],
+        });
+
+        const {
+          data: [row],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(row.next_date).toBe('2017-01-02');
+      }
+    });
+
+    it('updateSchedule keeps an occurrence moved `after` the weekend onto a later day', async () => {
+      const id = await createSchedule({
+        conditions: [{ op: 'is', field: 'date', value: '2020-12-20' }],
+      });
+
+      // Edited on Sunday 23 May: Saturday 22 May moves to Monday 24 May,
+      // which is still ahead, so it is the next date.
+      MockDate.set(new Date(2021, 4, 23, 12));
+
+      try {
+        await updateSchedule({
+          schedule: { id },
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2021-05-22',
+                frequency: 'weekly',
+                patterns: [],
+                skipWeekend: true,
+                weekendSolveMode: 'after',
+              },
+            },
+          ],
+        });
+
+        const {
+          data: [row],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(row.next_date).toBe('2021-05-24');
+      } finally {
+        MockDate.reset();
+      }
+    });
+
+    it('createSchedule keeps the last date of a schedule that has ended', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2016-11-07',
+              frequency: 'weekly',
+              patterns: [],
+              endMode: 'after_n_occurrences',
+              endOccurrences: 2,
+            },
+          },
+        ],
+      });
+
+      const {
+        data: [row],
+      } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+      expect(row.next_date).toBe('2016-11-14');
+    });
+
     it('auto-posts every missed recurring occurrence while catching up', async () => {
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
