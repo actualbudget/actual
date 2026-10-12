@@ -31,7 +31,7 @@ import { showActivity } from './showActivity';
 const RADIAN = Math.PI / 180;
 
 type ClickablePieItem = PieSectorDataItem &
-  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>> &
+  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId' | 'bucketTagNames'>> &
   Partial<Pick<IntervalEntity, 'intervalStartDate' | 'intervalEndDate'>>;
 
 // ---------------------------------------------------------------------------
@@ -703,6 +703,8 @@ export function DonutGraph({
                         showOffBudget,
                         type: 'totals',
                         ...drilldown,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames: data.scopeTagNames,
                       });
                     }
                   }}
