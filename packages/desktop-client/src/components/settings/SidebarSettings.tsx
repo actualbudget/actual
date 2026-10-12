@@ -104,9 +104,10 @@ export function SidebarSettings() {
       <SettingsRow
         title={t('Start page')}
         description={t('The page Actual shows when it opens.')}
+        htmlFor="settings-sidebarStartPage"
         control={
           <Select
-            aria-label={t('Start page')}
+            id="settings-sidebarStartPage"
             value={startPage}
             onChange={saveStartPage}
             options={availableItems.map(item => [
