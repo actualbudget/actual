@@ -64,5 +64,11 @@ export function SidebarMenuRoute({
     );
   }
 
-  return <Page header={itemDetails[id].title}>{children}</Page>;
+  return (
+    <Page header={itemDetails[id].title}>
+      <View style={{ flex: 1, minHeight: 0, paddingTop: spacing.md }}>
+        {children}
+      </View>
+    </Page>
+  );
 }
