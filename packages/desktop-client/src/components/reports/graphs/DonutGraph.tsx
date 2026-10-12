@@ -31,7 +31,8 @@ import { showActivity } from './showActivity';
 const RADIAN = Math.PI / 180;
 
 type ClickablePieItem = PieSectorDataItem &
-  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
+  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>> &
+  Partial<Pick<IntervalEntity, 'intervalStartDate' | 'intervalEndDate'>>;
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
@@ -665,9 +666,7 @@ export function DonutGraph({
                   onMouseEnter={(_, index) => {
                     if (!isTouchDevice()) {
                       setActiveIndex(index);
-                      if (groupBy !== 'Interval') {
-                        setPointer('pointer');
-                      }
+                      setPointer('pointer');
                     }
                   }}
                   onClick={(item: ClickablePieItem, index) => {
@@ -675,10 +674,25 @@ export function DonutGraph({
                       setActiveIndex(index);
                     }
                     if (
-                      groupBy !== 'Interval' &&
                       (!isTouchDevice() || activeIndex === index) &&
                       ((compact && showTooltip) || !compact)
                     ) {
+                      // Interval slices drill down by their own date range instead of a field
+                      const drilldown =
+                        groupBy === 'Interval'
+                          ? {
+                              startDate:
+                                item.intervalStartDate ?? data.startDate,
+                              endDate: item.intervalEndDate ?? data.endDate,
+                            }
+                          : {
+                              startDate: data.startDate,
+                              endDate: data.endDate,
+                              field: groupBy.toLowerCase(),
+                              id: item.id,
+                              uncategorizedId: item.uncategorizedId,
+                            };
+
                       showActivity({
                         navigate,
                         categories,
@@ -688,11 +702,7 @@ export function DonutGraph({
                         showHiddenCategories,
                         showOffBudget,
                         type: 'totals',
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
-                        uncategorizedId: item.uncategorizedId,
+                        ...drilldown,
                       });
                     }
                   }}

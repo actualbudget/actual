@@ -80,8 +80,23 @@ export const ReportTableRow = memo(
       item.uncategorizedId === 'all' ||
       categories.grouped.some(g => g.id === item.id);
     const drilldownField = isGroupRow ? 'group' : groupBy.toLowerCase();
-    const canShowActivity =
-      !isNarrowWidth && groupBy !== 'Interval' && !compact;
+    // Interval rows drill down by the date range of their intervals (a single
+    // interval, or all of them for the totals row) instead of a field
+    const firstInterval = item.intervalData[0];
+    const lastInterval = item.intervalData[item.intervalData.length - 1];
+    const drilldown =
+      groupBy === 'Interval'
+        ? {
+            startDate: firstInterval?.intervalStartDate ?? startDate,
+            endDate: lastInterval?.intervalEndDate ?? endDate,
+          }
+        : {
+            startDate,
+            endDate,
+            field: drilldownField,
+            id: item.id,
+          };
+    const canShowActivity = !isNarrowWidth && !compact;
 
     const pointer = canShowActivity ? 'pointer' : 'inherit';
 
@@ -223,10 +238,7 @@ export const ReportTableRow = memo(
                         showHiddenCategories,
                         showOffBudget,
                         type: 'assets',
-                        startDate,
-                        endDate,
-                        field: drilldownField,
-                        id: item.id,
+                        ...drilldown,
                         uncategorizedId: item.uncategorizedId,
                       })
                     }
@@ -271,10 +283,7 @@ export const ReportTableRow = memo(
                         showHiddenCategories,
                         showOffBudget,
                         type: 'debts',
-                        startDate,
-                        endDate,
-                        field: drilldownField,
-                        id: item.id,
+                        ...drilldown,
                         uncategorizedId: item.uncategorizedId,
                       })
                     }
@@ -318,10 +327,7 @@ export const ReportTableRow = memo(
                 showHiddenCategories,
                 showOffBudget,
                 type: 'totals',
-                startDate,
-                endDate,
-                field: drilldownField,
-                id: item.id,
+                ...drilldown,
                 uncategorizedId: item.uncategorizedId,
               })
             }
