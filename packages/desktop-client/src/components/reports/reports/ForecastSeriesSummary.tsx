@@ -20,6 +20,9 @@ export function ForecastSeriesSummary({
   isHovered?: boolean;
 }) {
   const format = useFormat();
+  const hasAssumptions = lines.some(
+    line => line.endingPoint?.baselineBalance != null,
+  );
   return (
     <View style={{ overflow: 'auto', marginBottom: compact ? 4 : 16 }}>
       <table
@@ -45,8 +48,36 @@ export function ForecastSeriesSummary({
                 paddingBottom: compact ? 4 : 8,
               }}
             >
-              <Trans>Ending Balance</Trans>
+              {hasAssumptions ? (
+                <Trans>Ending purchasing power</Trans>
+              ) : (
+                <Trans>Ending Balance</Trans>
+              )}
             </th>
+            {hasAssumptions && !compact && (
+              <>
+                <th
+                  scope="col"
+                  style={{
+                    textAlign: 'right',
+                    fontWeight: 400,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <Trans>Baseline (nominal)</Trans>
+                </th>
+                <th
+                  scope="col"
+                  style={{
+                    textAlign: 'right',
+                    fontWeight: 400,
+                    paddingBottom: 8,
+                  }}
+                >
+                  <Trans>With salary growth (nominal)</Trans>
+                </th>
+              </>
+            )}
             {!compact && (
               <th
                 scope="col"
@@ -93,6 +124,31 @@ export function ForecastSeriesSummary({
                   <Trans>No data</Trans>
                 )}
               </td>
+              {hasAssumptions &&
+                !compact &&
+                [
+                  line.endingPoint?.baselineBalance,
+                  line.endingPoint?.nominalBalance,
+                ].map((balance, index) => (
+                  <td
+                    key={index}
+                    style={{
+                      textAlign: 'right',
+                      whiteSpace: 'nowrap',
+                      padding: '4px 0 4px 16px',
+                    }}
+                  >
+                    {balance != null ? (
+                      <FinancialText>
+                        <PrivacyFilter>
+                          {format(balance, 'financial')}
+                        </PrivacyFilter>
+                      </FinancialText>
+                    ) : (
+                      <Trans>No data</Trans>
+                    )}
+                  </td>
+                ))}
               {!compact && (
                 <td
                   style={{

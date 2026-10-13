@@ -104,6 +104,52 @@ describe('buildForecastSeriesChart', () => {
     ]);
   });
 
+  it('keeps baseline and salary-growth amounts alongside each line’s purchasing power', () => {
+    const assumptions = {
+      anchorDate: '2026-10-01',
+      inflationRate: 0.1,
+      salaryGrowthRate: 0.1,
+      incomeScheduleIds: ['salary'],
+    };
+    const forecasts = [
+      { id: 'checking', baseline: 10000, nominal: 12100 },
+      { id: 'card', baseline: -5000, nominal: -5000 },
+    ].map(({ id, baseline, nominal }) => ({
+      id,
+      forecast: {
+        ...forecast([['2027-10-01', baseline, id]]),
+        scenario: {
+          assumptions,
+          dataPoints: forecast([['2027-10-01', nominal, id]]).dataPoints,
+        },
+      },
+    }));
+    const result = buildForecastSeriesChart({
+      forecasts,
+      series,
+      start: '2027-10-01',
+      end: '2027-10-01',
+      granularity: 'Daily',
+    });
+    expect(result.chartData).toEqual([
+      { date: '2027-10-01', balance: 11000, series1: -4545 },
+    ]);
+    expect(result.lines.map(line => line.endingPoint)).toEqual([
+      {
+        date: '2027-10-01',
+        balance: 11000,
+        baselineBalance: 10000,
+        nominalBalance: 12100,
+      },
+      {
+        date: '2027-10-01',
+        balance: -4545,
+        baselineBalance: -5000,
+        nominalBalance: -5000,
+      },
+    ]);
+  });
+
   it('retains empty lines as no data and identifies names by id, including duplicate names', () => {
     const result = buildForecastSeriesChart({
       series: series.map(line => ({ ...line, name: 'Same name' })),

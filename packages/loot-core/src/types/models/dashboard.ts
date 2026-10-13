@@ -1,4 +1,8 @@
-import type { ForecastSeries, ForecastSource } from './forecast';
+import type {
+  ForecastAssumptions,
+  ForecastSeries,
+  ForecastSource,
+} from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -495,5 +499,6 @@ export type BalanceForecastWidget = AbstractWidget<
     yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
     series?: ForecastSeries[];
+    assumptions?: ForecastAssumptions;
   } | null
 >;
