@@ -831,11 +831,14 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       return;
     }
 
+    // Even with zero or one report condition, the drilldown's own id/amount/
+    // date conditions are always multiple and must be "and"'d together, so
+    // "or" can never be passed through as the top-level op here.
     void navigate('/accounts', {
       state: {
         goBack: true,
         filterConditions: [...conditions, ...drilldownConditions],
-        filterConditionsOp: conditionsOp,
+        filterConditionsOp: conditionsOp === 'or' ? 'and' : conditionsOp,
       },
     });
   }
