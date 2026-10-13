@@ -19,7 +19,7 @@ Go to `Settings -> Show advanced settings -> Experimental features` and enable:
 
 - **Excel formula mode (Formula cards & Rule formulas)**
 
-![Placeholder: enable Excel formula mode toggle](/img/experimental/formulas/enable-formula-mode.png)
+<img width="609" alt="The Excel formula mode row in the experimental features, with its checkbox ticked" src="/img/experimental/formulas/formulas-enable@2x.webp" />
 
 ## Formula cards
 
@@ -27,12 +27,12 @@ Go to `Settings -> Show advanced settings -> Experimental features` and enable:
 
 1. Go to **Reports**
 2. Click **Edit dashboard**
-3. Click **Add widget**
+3. Click **Add new widget**
 4. Choose **Formula card**
 
 Click the card to open the editor (where you can save the widget).
 
-![Placeholder: add Formula card from Reports dashboard](/img/experimental/formulas/add-formula-card.png)
+<img width="189" alt="The Add new widget menu on the Reports dashboard with Formula card highlighted" src="/img/experimental/formulas/formulas-add-card@2x.webp" />
 
 ### Write a formula
 
@@ -243,7 +243,7 @@ In the Formula editor page, use **Query Definitions**:
    - **Static**: fixed start/end dates
 3. Add **Filters** (same style as report filters)
 
-![Placeholder: formula editor and Query Definitions panel](/img/experimental/formulas/formula-editor-and-queries.png)
+<img width="1196" alt="The formula editor with two named queries in the Query Definitions panel, numbered by step" src="/img/experimental/formulas/formulas-editor-and-queries@2x.webp" />
 
 ### Budget queries with `BUDGET_QUERY`
 
@@ -315,7 +315,7 @@ In **More -> Rules -> edit a rule**, on a **Set** action:
 - Formula mode is not available for actions that set **payee**, **category**, or **account** (those values are IDs).
 - Rule action templating (the `</>` icon) and formulas are mutually exclusive: enabling one disables the other.
 
-![Placeholder: Rule action formula toggle (ƒ)](/img/experimental/formulas/rule-formula-toggle.png)
+<img width="884" alt="A rule's notes action in formula mode, with the ƒ button boxed" src="/img/experimental/formulas/formulas-rule-toggle@2x.webp" />
 
 ### Available variables
 

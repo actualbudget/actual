@@ -6,7 +6,7 @@
 
 The Balance Forecast report projects future balances from posted transaction history, upcoming scheduled transactions, or Tracking Budget plans. Use it to spot possible shortfalls, compare date ranges, and see how planned income and expenses may affect your balances over time.
 
-![Balance Forecast report showing projected balances over time](/img/experimental/balance-forecast-report/balance-forecast-report-overview.png)
+![The Balance Forecast report projecting the Bank of America balance day by day over the next six months](/img/experimental/balance-forecast-report/balance-forecast-report-overview@2x.webp)
 
 ## How balances are predicted
 
