@@ -461,5 +461,7 @@ export type BalanceForecastWidget = AbstractWidget<
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
     source?: ForecastSource;
+    // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
+    monthsFromToday?: number;
   } | null
 >;
