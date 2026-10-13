@@ -1,10 +1,10 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
-  ForecastResult,
+  ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
   accountIds?: string[];
@@ -39,43 +39,64 @@ export function buildBalanceForecastRequest({
   );
 }
 
-export function useBalanceForecast({
-  accountIds,
-  conditions,
-  conditionsOp,
-  startDate,
-  endDate,
-  includeAccountlessSchedules,
-  source = 'schedules',
+export function useBalanceForecastSeries({
+  series,
   enabled = true,
-}: UseBalanceForecastParams) {
+  ...params
+}: UseBalanceForecastParams & { series?: ForecastSeries[] }) {
+  const requests = buildBalanceForecastSeriesRequests(series, params);
+
   return useQuery({
-    queryKey: [
-      'balance-forecast',
-      {
-        accountIds: accountIds ?? null,
-        conditions: conditions ?? null,
-        conditionsOp: conditionsOp ?? 'and',
-        startDate,
-        endDate,
-        includeAccountlessSchedules: includeAccountlessSchedules ?? false,
-        source,
-      },
-    ],
-    queryFn: async (): Promise<ForecastResult> =>
-      send(
-        'forecast/generate',
-        buildBalanceForecastRequest({
-          accountIds,
-          conditions,
-          conditionsOp,
-          startDate,
-          endDate,
-          includeAccountlessSchedules,
-          source,
-        }),
+    queryKey: ['balance-forecast-series', requests],
+    queryFn: () =>
+      Promise.all(
+        requests.map(async ({ id, request }) => ({
+          id,
+          forecast: await send('forecast/generate', request),
+        })),
       ),
-    placeholderData: keepPreviousData,
+    // Keep the whole comparison together while its range changes. Adding,
+    // removing, or filtering a line must not relabel an earlier result.
+    placeholderData: (previous, previousQuery) => {
+      const previousRequests = previousQuery?.queryKey[1];
+      if (!Array.isArray(previousRequests)) {
+        return undefined;
+      }
+      const withoutDates = (items: typeof requests) =>
+        items.map(
+          ({
+            id,
+            request: { startDate: _startDate, endDate: _endDate, ...request },
+          }) => ({
+            id,
+            request,
+          }),
+        );
+      return JSON.stringify(withoutDates(requests)) ===
+        JSON.stringify(withoutDates(previousRequests))
+        ? previous
+        : undefined;
+    },
     enabled,
   });
+}
+
+export function buildBalanceForecastSeriesRequests(
+  series: ForecastSeries[] | undefined,
+  params: UseBalanceForecastParams,
+) {
+  if (!series?.length || params.source === 'tracking-budget') {
+    return [{ id: 'balance', request: buildBalanceForecastRequest(params) }];
+  }
+
+  return series.map(line => ({
+    id: line.id,
+    request: buildBalanceForecastRequest({
+      ...params,
+      accountIds: line.accounts,
+      conditions: line.conditions,
+      conditionsOp: line.conditionsOp,
+      includeAccountlessSchedules: line.accounts === undefined,
+    }),
+  }));
 }
