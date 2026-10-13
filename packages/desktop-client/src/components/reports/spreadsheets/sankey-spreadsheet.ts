@@ -268,9 +268,14 @@ export function buildSankeyData(
   addHiddenNodes(sortedGraph);
   addPercentageLabels(sortedGraph);
   addColors(sortedGraph);
+  // filterGraphByLayers deletes nodes (and the links stored on them) outside
+  // the selected layer range. Account inflow/outflow totals need the full
+  // picture regardless of which layers are currently shown, so snapshot the
+  // graph before filtering and use it just for those totals.
+  const totalsGraph = cloneGraph(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
 
-  return convertToSankeyData(sortedGraph, toolTipInfoMap);
+  return convertToSankeyData(sortedGraph, toolTipInfoMap, totalsGraph);
 }
 
 export function createBudgetSpreadsheet(
@@ -2012,6 +2017,7 @@ function getNodeDrilldown(
 export function convertToSankeyData(
   graph: Graph,
   toolTipInfoMap: TooltipInfoMap,
+  totalsGraph: Graph = graph,
 ): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => ({
     key,
@@ -2023,11 +2029,11 @@ export function convertToSankeyData(
     drilldown: getNodeDrilldown(key, data.type, data.isNegative),
     inflow:
       data.type === GraphLayers.Account
-        ? getIncomingValue(graph, key)
+        ? getIncomingValue(totalsGraph, key)
         : undefined,
     outflow:
       data.type === GraphLayers.Account
-        ? getOutgoingValue(graph, key)
+        ? getOutgoingValue(totalsGraph, key)
         : undefined,
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
