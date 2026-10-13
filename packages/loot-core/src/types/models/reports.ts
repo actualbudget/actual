@@ -16,9 +16,11 @@ export type CustomReportBaseline = {
   includeCurrentInterval: boolean;
   // Project amounts so far over the report's whole range, by days elapsed
   projectToFullPeriod: boolean;
-  // Draw bar graph bars from the baseline to the actual amount, rather than
-  // from zero to the change. Optional since older reports don't store it.
-  barsFromBaseline?: boolean;
+  // Draw bar graphs as amounts in front of faint baseline bars, rather than as
+  // changes. Optional since older reports don't store it.
+  showAmounts?: boolean;
+  // With baseline bars, draw only the change, from the baseline's end
+  changeFromBaseline?: boolean;
 };
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
@@ -71,10 +73,14 @@ export type BaselineBreakdown = {
   // The baseline's daily average over the same number of days
   expected: ReportValues;
   actual: ReportValues;
-  // The actual amount projected over its full length from its pace so far
+  // A row's or total's actual amount projected over the whole range from its
+  // pace so far. Single intervals aren't projected.
   projected?: ReportValues;
   // The baseline over an average-length interval, for tables and summaries
   perInterval?: ReportValues;
+  // The baseline over an interval that hasn't started, which compares
+  // nothing yet but lets charts draw the baseline ahead
+  upcoming?: ReportValues;
   // The actual amount at its pace so far over an average-length interval, to
   // compare against perInterval
   pacePerInterval?: ReportValues;
@@ -159,6 +165,10 @@ export type IntervalEntity = {
   totalTotals: number;
   totalBudgeted: number;
   baseline?: BaselineBreakdown;
+  // When graphs draw amounts against a baseline: the interval's amount, which
+  // is null before it starts, and its baseline
+  amount?: number | null;
+  baselineAmount?: number | null;
 };
 
 export type GroupedEntity = {

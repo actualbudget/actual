@@ -52,8 +52,10 @@ export const reportModel = {
         typeof baseline.isDateStatic !== 'boolean' ||
         typeof baseline.includeCurrentInterval !== 'boolean' ||
         typeof baseline.projectToFullPeriod !== 'boolean' ||
-        (baseline.barsFromBaseline !== undefined &&
-          typeof baseline.barsFromBaseline !== 'boolean'))
+        (baseline.showAmounts !== undefined &&
+          typeof baseline.showAmounts !== 'boolean') ||
+        (baseline.changeFromBaseline !== undefined &&
+          typeof baseline.changeFromBaseline !== 'boolean'))
     ) {
       throw new ValidationError('Invalid report baseline.');
     }

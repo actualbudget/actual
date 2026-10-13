@@ -28,6 +28,7 @@ import {
 import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
+import { isIntervalInProgress } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -40,7 +41,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
-import { BaselineArrow } from './BaselineArrow';
+import { BaselineBar } from './BaselineBar';
 import { BaselineTooltip } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
@@ -183,9 +184,10 @@ const CustomTooltip = ({
   }
 };
 
-const customLabel = (props, typeOp, format) => {
+// Baseline bars label their change above the bar, whichever way it goes
+const customLabel = (props, typeOp, format, isAbove = false) => {
   const calcX = props.x + props.width / 2;
-  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const calcY = props.y - (isAbove || props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
   const display =
     props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
@@ -232,7 +234,8 @@ type BarGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
-  barsFromBaseline?: boolean;
+  showAmounts?: boolean;
+  changeFromBaseline?: boolean;
 };
 
 export function BarGraph({
@@ -246,7 +249,8 @@ export function BarGraph({
   showHiddenCategories,
   showOffBudget,
   showTooltip = true,
-  barsFromBaseline = false,
+  showAmounts = false,
+  changeFromBaseline = false,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -271,20 +275,26 @@ export function BarGraph({
     return obj[balanceTypeOp];
   };
 
-  // Floating bars run from the baseline to the amount it's compared against,
-  // so their length is still the change
-  const isFromBaseline = barsFromBaseline && !!data.baseline;
-  const getBarValue = (obj: GroupedEntity | IntervalEntity) => {
-    const breakdown = obj.baseline;
-    if (!isFromBaseline || !breakdown) {
-      return getVal(obj);
-    }
+  // Baseline bars show amounts rather than changes, so spending is flipped to
+  // point up like other spending charts
+  const isBaselineBars = showAmounts && !!data.baseline;
+  const sign = ['totalDebts', 'netDebts'].includes(balanceTypeOp) ? -1 : 1;
+  const getBaselineValues = (breakdown: BaselineBreakdown) => ({
+    baseline: sign * breakdown.expected[balanceTypeOp],
+    amount: sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
+  });
 
-    return [
-      breakdown.expected[balanceTypeOp],
-      (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
-    ];
+  // Baseline bars span everything drawn in them, so their shape can place
+  // each part along the same scale
+  const getBaselineRange = (breakdown: BaselineBreakdown): [number, number] => {
+    const { baseline, amount } = getBaselineValues(breakdown);
+    return [Math.min(0, baseline, amount), Math.max(0, baseline, amount)];
   };
+
+  const getBarValue = (obj: GroupedEntity | IntervalEntity) =>
+    isBaselineBars && obj.baseline
+      ? getBaselineRange(obj.baseline)
+      : getVal(obj);
 
   const longestLabelLength = data[splitData]
     .map(c => c[yAxis])
@@ -361,8 +371,8 @@ export function BarGraph({
               {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />}
               <Bar
                 dataKey={getBarValue}
-                // Recharts can't stack floating bars
-                stackId={isFromBaseline ? undefined : 'a'}
+                // Recharts can't stack range bars
+                stackId={isBaselineBars ? undefined : 'a'}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
@@ -414,30 +424,37 @@ export function BarGraph({
                   const fill =
                     data.legend[props.index]?.color ?? props.fill ?? undefined;
                   const breakdown = props.payload?.baseline;
-                  if (isFromBaseline && breakdown) {
+                  // An interval in progress is faded, since its amount is
+                  // only part of what it will be
+                  const opacity =
+                    breakdown && isIntervalInProgress(props.payload) ? 0.5 : 1;
+                  if (isBaselineBars && breakdown) {
                     return (
-                      <BaselineArrow
+                      <BaselineBar
+                        opacity={opacity}
                         x={props.x}
                         y={props.y}
                         width={props.width}
                         height={props.height}
+                        range={getBaselineRange(breakdown)}
+                        {...getBaselineValues(breakdown)}
+                        changeFromBaseline={changeFromBaseline}
                         fill={fill}
-                        isUp={
-                          (breakdown.projected ?? breakdown.actual)[
-                            balanceTypeOp
-                          ] >= breakdown.expected[balanceTypeOp]
-                        }
                       />
                     );
                   }
 
-                  return <Rectangle {...props} fill={fill} />;
+                  return (
+                    <Rectangle {...props} fill={fill} fillOpacity={opacity} />
+                  );
                 }}
               >
                 {viewLabels && !compact && (
                   <LabelList
                     dataKey={val => getVal(val)}
-                    content={e => customLabel(e, balanceTypeOp, format)}
+                    content={e =>
+                      customLabel(e, balanceTypeOp, format, isBaselineBars)
+                    }
                   />
                 )}
               </Bar>

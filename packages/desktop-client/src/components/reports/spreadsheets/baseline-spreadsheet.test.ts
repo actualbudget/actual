@@ -76,6 +76,18 @@ describe('offsetInterval', () => {
 
     expect(offset.totalDebts).toBe(0);
     expect(offset.baseline?.expected.totalDebts).toBe(0);
+    // Its baseline is still kept for charts to draw ahead: 28 days at 100
+    expect(offset.baseline?.upcoming?.totalDebts).toBe(-2800);
+  });
+
+  it('only keeps the baseline ahead when projecting', () => {
+    const offset = offsetInterval(
+      interval('2017-02-01', '2017-02-28', 0),
+      baselineTotals,
+      { ...scale, projectToFullPeriod: false },
+    );
+
+    expect(offset.baseline?.upcoming).toBeUndefined();
   });
 
   it('still compares budgets for intervals that have not started', () => {
@@ -97,20 +109,9 @@ describe('offsetInterval', () => {
     expect(offset.baseline?.projected).toBeUndefined();
   });
 
-  it('projects an unfinished interval to its full length', () => {
+  it('compares an unfinished interval against the days so far', () => {
+    // Even when projecting, which only covers the whole range
     const offset = offsetInterval(january(-100), baselineTotals, scale);
-
-    // One day of 31 has passed
-    expect(offset.baseline?.actual.totalDebts).toBe(-100);
-    expect(offset.baseline?.projected?.totalDebts).toBe(-3100);
-    expect(offset.totalDebts).toBe(0);
-  });
-
-  it('compares unprojected amounts against the days so far', () => {
-    const offset = offsetInterval(january(-100), baselineTotals, {
-      ...scale,
-      projectToFullPeriod: false,
-    });
 
     // One day has passed, so 100 is expected rather than the whole month
     expect(offset.baseline?.projected).toBeUndefined();
@@ -203,6 +204,7 @@ describe('offsetRows', () => {
     showEmpty: false,
     balanceTypeOp: 'totalDebts' as const,
     sortByOp: 'desc' as const,
+    showAmounts: false,
   };
 
   it('keeps rows with activity in only one of the ranges', () => {
@@ -236,6 +238,19 @@ describe('offsetRows', () => {
     expect(
       offsetRows(actual, baseline, { ...context, showEmpty: true }),
     ).toHaveLength(1);
+  });
+
+  it('sorts by amount, largest spending first, when showing amounts', () => {
+    const rows = offsetRows(
+      [row('less', [november(-1000)]), row('more', [november(-4000)])],
+      [
+        row('less', [interval('2016-07-01', '', -18400)]),
+        row('more', [interval('2016-07-01', '', -1840)]),
+      ],
+      { ...context, showAmounts: true },
+    );
+
+    expect(rows.map(r => r.id)).toEqual(['more', 'less']);
   });
 
   it('sorts spending changes by their signed value', () => {

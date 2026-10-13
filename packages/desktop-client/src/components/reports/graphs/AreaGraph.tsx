@@ -213,6 +213,7 @@ type AreaGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
+  showAmounts?: boolean;
 };
 
 export function AreaGraph({
@@ -225,6 +226,7 @@ export function AreaGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTooltip = true,
+  showAmounts = false,
 }: AreaGraphProps) {
   const format = useFormat();
   const navigate = useNavigate();
@@ -234,8 +236,26 @@ export function AreaGraph({
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const privacyMode = usePrivacyMode();
-  const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
-  const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
+  // Amounts against a baseline draw the amount with a faint baseline line.
+  // The spreadsheet flips spending to point up, but area graphs draw it below
+  // zero, so it's flipped back.
+  const isAmounts = showAmounts && !!data.baseline;
+  const amountSign =
+    balanceTypeOp === 'totalDebts' || balanceTypeOp === 'netDebts' ? -1 : 1;
+  const toAreaValue = (value: number | null | undefined) =>
+    value == null ? null : amountSign * value;
+  const getValue = (interval: IntervalEntity) =>
+    isAmounts ? toAreaValue(interval.amount) : interval[balanceTypeOp];
+  const getBaselineValue = (interval: IntervalEntity) =>
+    toAreaValue(interval.baselineAmount);
+
+  const values = data.intervalData.flatMap(i =>
+    isAmounts
+      ? [getValue(i), getBaselineValue(i)].filter(value => value != null)
+      : [i[balanceTypeOp]],
+  );
+  const dataMax = Math.max(...values);
+  const dataMin = Math.min(...values);
 
   const labelsMargin = viewLabels ? 30 : 0;
   const dataDiff = dataMax - dataMin;
@@ -310,10 +330,11 @@ export function AreaGraph({
               )}
               {compact ? null : (
                 <YAxis
-                  dataKey={balanceTypeOp}
+                  // Amounts span both their own and the baseline's values
+                  dataKey={isAmounts ? undefined : balanceTypeOp}
                   domain={[
-                    viewLabels ? labelsMin : 'auto',
-                    viewLabels ? labelsMax : 'auto',
+                    viewLabels || isAmounts ? labelsMin : 'auto',
+                    viewLabels || isAmounts ? labelsMax : 'auto',
                   ]}
                   tickFormatter={tickFormatter}
                   tick={{ fill: theme.pageText }}
@@ -371,6 +392,21 @@ export function AreaGraph({
                 </linearGradient>
               </defs>
 
+              {isAmounts && (
+                <Area
+                  type="linear"
+                  dataKey={getBaselineValue}
+                  stroke={theme.pageTextLight}
+                  strokeOpacity={0.5}
+                  strokeWidth={2}
+                  fill="none"
+                  dot={false}
+                  activeDot={false}
+                  tooltipType="none"
+                  legendType="none"
+                  {...animationProps}
+                />
+              )}
               <Area
                 type="linear"
                 dot={false}
@@ -402,14 +438,14 @@ export function AreaGraph({
                   },
                 }}
                 {...animationProps}
-                dataKey={balanceTypeOp}
+                dataKey={getValue}
                 stroke={`url(#stroke${balanceTypeOp})`}
                 fill={`url(#fill${balanceTypeOp})`}
                 fillOpacity={1}
               >
                 {viewLabels && !compact && (
                   <LabelList
-                    dataKey={balanceTypeOp}
+                    dataKey={getValue}
                     content={props =>
                       customLabel({
                         props,

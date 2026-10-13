@@ -31,6 +31,7 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import {
+  canShowBaselineAmounts,
   defaultBaseline,
   getBaselineRange,
   rangesOverlap,
@@ -360,32 +361,52 @@ export function ReportSidebar({
               <Trans>Compare to baseline</Trans>
             </LabeledCheckbox>
             {isBaselineEnabled && (
-              <Tooltip
-                placement="bottom start"
-                content={
-                  <Text>
-                    <Trans>
-                      Draw each bar from its baseline to its actual amount,
-                      instead of from zero to the change.
-                    </Trans>
-                  </Text>
-                }
-                style={{ ...styles.tooltip, lineHeight: 1.5 }}
-              >
+              <>
+                <Tooltip
+                  placement="bottom start"
+                  content={
+                    <Text>
+                      <Trans>
+                        Draw amounts in front of a faint baseline, instead of
+                        the change.
+                      </Trans>
+                    </Text>
+                  }
+                  style={{ ...styles.tooltip, lineHeight: 1.5 }}
+                >
+                  <LabeledCheckbox
+                    id="baseline-show-amounts"
+                    checked={!!baseline.showAmounts}
+                    disabled={
+                      !canShowBaselineAmounts(customReportItems.graphType)
+                    }
+                    onChange={() =>
+                      updateBaseline({
+                        ...baseline,
+                        showAmounts: !baseline.showAmounts,
+                      })
+                    }
+                  >
+                    <Trans>Show amounts with baseline</Trans>
+                  </LabeledCheckbox>
+                </Tooltip>
                 <LabeledCheckbox
-                  id="baseline-bars-from-baseline"
-                  checked={!!baseline.barsFromBaseline}
-                  disabled={customReportItems.graphType !== 'BarGraph'}
+                  id="baseline-change-from-baseline"
+                  checked={!!baseline.changeFromBaseline}
+                  disabled={
+                    customReportItems.graphType !== 'BarGraph' ||
+                    !baseline.showAmounts
+                  }
                   onChange={() =>
                     updateBaseline({
                       ...baseline,
-                      barsFromBaseline: !baseline.barsFromBaseline,
+                      changeFromBaseline: !baseline.changeFromBaseline,
                     })
                   }
                 >
-                  <Trans>Start bars at baseline</Trans>
+                  <Trans>Start change at baseline</Trans>
                 </LabeledCheckbox>
-              </Tooltip>
+              </>
             )}
           </View>
         )}
