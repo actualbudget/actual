@@ -27,6 +27,22 @@ export function BaselineTooltipLines({
   format,
 }: BaselineTooltipLinesProps) {
   const { t } = useTranslation();
+
+  // Intervals that haven't started only have a baseline to show
+  if (breakdown.upcoming) {
+    return (
+      <AlignedText
+        left={t('Baseline:')}
+        right={
+          <FinancialText>
+            {format(breakdown.upcoming[balanceTypeOp], 'financial')}
+          </FinancialText>
+        }
+        style={{ fontWeight: 600 }}
+      />
+    );
+  }
+
   const compared = breakdown.projected ?? breakdown.actual;
   const change = compared[balanceTypeOp] - breakdown.expected[balanceTypeOp];
 

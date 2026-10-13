@@ -18,6 +18,7 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import {
+  canShowBaselineAmounts,
   defaultBaseline,
   getBaselineRange,
 } from '#components/reports/baselineRange';
@@ -125,6 +126,8 @@ export function GetCardData({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
+  const showAmounts =
+    !!baseline.showAmounts && canShowBaselineAmounts(report.graphType);
 
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
@@ -169,6 +172,7 @@ export function GetCardData({
           startDate: baselineStartDate,
           endDate: baselineEndDate,
           projectToFullPeriod,
+          showAmounts,
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -176,6 +180,7 @@ export function GetCardData({
     baselineStartDate,
     baselineEndDate,
     projectToFullPeriod,
+    showAmounts,
     report,
     categories,
     startDate,
@@ -213,6 +218,7 @@ export function GetCardData({
           startDate: baselineStartDate,
           endDate: baselineEndDate,
           projectToFullPeriod,
+          showAmounts,
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -220,6 +226,7 @@ export function GetCardData({
     baselineStartDate,
     baselineEndDate,
     projectToFullPeriod,
+    showAmounts,
     report,
     categories,
     payees,
@@ -252,7 +259,8 @@ export function GetCardData({
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
-        barsFromBaseline={baseline.barsFromBaseline}
+        showAmounts={showAmounts}
+        changeFromBaseline={baseline.changeFromBaseline}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

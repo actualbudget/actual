@@ -11,7 +11,12 @@ import type {
   sortByOpType,
 } from '@actual-app/core/types/models';
 
-import { countDays, countElapsedDays } from '#components/reports/baselineRange';
+import {
+  countDays,
+  countElapsedDays,
+  getBaselineKey,
+  getFullIntervalDays,
+} from '#components/reports/baselineRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
@@ -41,10 +46,13 @@ type AdditiveField =
 
 type OffsetItem = ReportValues & { intervalData: IntervalEntity[] };
 
-export type BaselineDates = {
+export type BaselineOptions = {
   startDate: string;
   endDate: string;
   projectToFullPeriod: boolean;
+  // Graphs draw amounts against the baseline rather than changes, so rows
+  // sort by amount and intervals carry each series' amount and baseline
+  showAmounts?: boolean;
 };
 
 // How baseline totals map onto the report's intervals
@@ -64,7 +72,15 @@ type BaselineContext = {
   showEmpty: boolean;
   balanceTypeOp: balanceTypeOpType;
   sortByOp: sortByOpType;
+  showAmounts: boolean;
 };
+
+// Amounts are drawn like other report graphs, with spending pointing up
+function getAmountSign(balanceTypeOp: balanceTypeOpType) {
+  return balanceTypeOp === 'totalDebts' || balanceTypeOp === 'netDebts'
+    ? -1
+    : 1;
+}
 
 function mapValues(getValue: (field: balanceTypeOpType) => number) {
   return {
@@ -113,35 +129,38 @@ export function offsetInterval(
   // Intervals that haven't started have nothing to compare yet, so they stay
   // empty rather than showing the whole baseline as a change. Budgets are set
   // ahead of time, so theirs are still compared.
+  const days = countDays(start, end);
   if (!scale.perInterval && isFuture(start)) {
     const zero = mapValues(() => 0);
-    return { ...interval, ...zero, baseline: { expected: zero, actual: zero } };
+    // Charts only draw the baseline ahead when the amount is projected there
+    const upcoming = scale.projectToFullPeriod
+      ? fromTotals(field =>
+          Math.round(((baseline?.[field] ?? 0) * days) / scale.baselineDays),
+        )
+      : undefined;
+    return {
+      ...interval,
+      ...zero,
+      baseline: { expected: zero, actual: zero, upcoming },
+    };
   }
 
-  const days = countDays(start, end);
-  const elapsedDays = countElapsedDays(start, end);
-  // Without a projection, an interval in progress is compared against the
-  // baseline over the days that have passed, not its whole length
-  const comparedDays = scale.projectToFullPeriod ? days : elapsedDays;
+  // An interval in progress is compared against the baseline over the days
+  // that have passed. Projecting from its first few days is too unreliable,
+  // so projections only cover the whole range.
   const share = scale.perInterval
     ? 1 / scale.baselineIntervals
-    : comparedDays / scale.baselineDays;
-  const projection =
-    !scale.perInterval && scale.projectToFullPeriod ? days / elapsedDays : 1;
+    : countElapsedDays(start, end) / scale.baselineDays;
 
   const expected = fromTotals(field =>
     Math.round((baseline?.[field] ?? 0) * share),
   );
   const actual = fromTotals(field => interval[field]);
-  const projected =
-    projection === 1
-      ? undefined
-      : fromTotals(field => Math.round(actual[field] * projection));
 
   return {
     ...interval,
-    ...subtract(projected ?? actual, expected),
-    baseline: { expected, actual, projected },
+    ...subtract(actual, expected),
+    baseline: { expected, actual },
   };
 }
 
@@ -275,7 +294,8 @@ export function offsetRows(
   baselineRows: GroupedEntity[],
   context: BaselineContext,
 ): GroupedEntity[] {
-  const { scale, template, showEmpty, balanceTypeOp, sortByOp } = context;
+  const { scale, template, showEmpty, balanceTypeOp, sortByOp, showAmounts } =
+    context;
   const baselineByKey = new Map(baselineRows.map(row => [rowKey(row), row]));
   const actualKeys = new Set(actualRows.map(rowKey));
   const pairs = [
@@ -308,22 +328,74 @@ export function offsetRows(
           : undefined,
       };
     })
-    .sort(sortData({ balanceTypeOp, sortByOp, isSigned: true }));
+    .sort(
+      sortData(
+        showAmounts
+          ? {
+              balanceTypeOp,
+              sortByOp,
+              getValue: row =>
+                row.baseline
+                  ? (row.baseline.projected ?? row.baseline.actual)[
+                      balanceTypeOp
+                    ]
+                  : 0,
+            }
+          : { balanceTypeOp, sortByOp, isSigned: true },
+      ),
+    );
 }
 
 function stackIntervals(
   intervals: IntervalEntity[],
   rows: GroupedEntity[],
   balanceTypeOp: balanceTypeOpType,
+  showAmounts: boolean,
 ): IntervalEntity[] {
+  const sign = getAmountSign(balanceTypeOp);
+  // Intervals that haven't started have no amount, so lines stop at today.
+  // Their baseline is drawn ahead only when it was kept for a projection.
+  // Budgets are set ahead of time, so theirs are drawn as they are.
+  const isUpcoming = (interval: IntervalEntity) =>
+    balanceTypeOp !== 'totalBudgeted' &&
+    !!interval.intervalStartDate &&
+    isFuture(interval.intervalStartDate);
+  const getAmount = (interval: IntervalEntity) => {
+    const breakdown = interval.baseline;
+    if (!breakdown || isUpcoming(interval)) {
+      return null;
+    }
+    return sign * breakdown.actual[balanceTypeOp];
+  };
+  const getBaseline = (interval: IntervalEntity) => {
+    const breakdown = interval.baseline;
+    if (!breakdown) {
+      return null;
+    }
+    if (isUpcoming(interval)) {
+      return breakdown.upcoming
+        ? sign * breakdown.upcoming[balanceTypeOp]
+        : null;
+    }
+    return sign * breakdown.expected[balanceTypeOp];
+  };
+
   return intervals.map((interval, index) => {
-    const stacked: Record<string, number> = {};
+    const stacked: Record<string, number | null> = {};
     for (const row of rows) {
       const rowInterval = row.intervalData[index];
-      if (rowInterval) {
-        // Changes are stacked as signed values, unlike spending which the report
-        // spreadsheets flip so it points up
-        stacked[row.id || row.name] = rowInterval[balanceTypeOp];
+      if (!rowInterval) {
+        continue;
+      }
+
+      const key = row.id || row.name;
+      if (showAmounts) {
+        stacked[key] = getAmount(rowInterval);
+        stacked[getBaselineKey(key)] = getBaseline(rowInterval);
+      } else {
+        // Changes are stacked as signed values, unlike spending which the
+        // report spreadsheets flip so it points up
+        stacked[key] = rowInterval[balanceTypeOp];
       }
     }
 
@@ -333,9 +405,57 @@ function stackIntervals(
       intervalEndDate: interval.intervalEndDate,
       ...mapValues(field => interval[field]),
       baseline: interval.baseline,
+      ...(showAmounts && {
+        amount: getAmount(interval),
+        baselineAmount: getBaseline(interval),
+      }),
       ...stacked,
     };
   });
+}
+
+// The rows the report would show without a baseline, in its order, then the
+// rows with only baseline activity, which it would hide as empty
+function getAmountOrder(
+  rows: GroupedEntity[],
+  {
+    showEmpty,
+    balanceTypeOp,
+    sortByOp,
+  }: {
+    showEmpty: boolean;
+    balanceTypeOp: balanceTypeOpType;
+    sortByOp: sortByOpType;
+  },
+) {
+  const actualRows = rows.map(row =>
+    row.baseline ? { ...row, ...row.baseline.actual } : row,
+  );
+  const isShown = (row: GroupedEntity) =>
+    filterEmptyRows({ showEmpty, data: row, balanceTypeOp });
+
+  return [
+    ...actualRows.filter(isShown).sort(sortData({ balanceTypeOp, sortByOp })),
+    ...actualRows.filter(row => !isShown(row)),
+  ];
+}
+
+/**
+ * Colours series as the report would without a baseline, where they're
+ * ordered by amount, so turning the baseline on or off or sorting by change
+ * doesn't reshuffle the colours.
+ */
+function keepAmountColors(
+  legend: LegendEntity[],
+  amountOrderLegend: LegendEntity[],
+): LegendEntity[] {
+  const colors = new Map(
+    amountOrderLegend.map(entry => [entry.dataKey, entry.color]),
+  );
+  return legend.map(entry => ({
+    ...entry,
+    color: colors.get(entry.dataKey) ?? entry.color,
+  }));
 }
 
 function colorBySign(
@@ -453,24 +573,6 @@ function countIntervals(
   return Math.max(intervals.length, 1);
 }
 
-// An interval's whole length, even when the report's range cuts it short
-function getFullIntervalDays(intervalStartDate: string, interval: string) {
-  switch (interval) {
-    case 'Daily':
-      return 1;
-    case 'Weekly':
-      return 7;
-    case 'Yearly': {
-      const year = intervalStartDate.slice(0, 4);
-      return countDays(`${year}-01-01`, `${year}-12-31`);
-    }
-    default: {
-      const month = intervalStartDate.slice(0, 7);
-      return countDays(`${month}-01`, monthUtils.lastDayOfMonth(month));
-    }
-  }
-}
-
 /**
  * The average full length of the given intervals, for the Baseline column.
  * Using full lengths keeps the column equal to what every whole interval is
@@ -488,22 +590,22 @@ export function getAverageDays(intervals: IntervalEntity[], interval: string) {
 
 function getScale(
   props: createCustomSpreadsheetProps,
-  baselineDates: BaselineDates,
+  baselineOptions: BaselineOptions,
   template: IntervalEntity[],
 ): BaselineScale {
   return {
     baselineDays: countElapsedDays(
-      baselineDates.startDate,
-      baselineDates.endDate,
+      baselineOptions.startDate,
+      baselineOptions.endDate,
     ),
     baselineIntervals: countIntervals(
-      baselineDates.startDate,
-      baselineDates.endDate,
+      baselineOptions.startDate,
+      baselineOptions.endDate,
       props.interval,
       props.firstDayOfWeekIdx,
     ),
     perInterval: props.balanceTypeOp === 'totalBudgeted',
-    projectToFullPeriod: baselineDates.projectToFullPeriod,
+    projectToFullPeriod: baselineOptions.projectToFullPeriod,
     averageDays: getAverageDays(template, props.interval),
   };
 }
@@ -528,22 +630,22 @@ function getVisibleScale(
 // that haven't started yet
 function getSpreadsheetProps(
   props: createCustomSpreadsheetProps,
-  baselineDates: BaselineDates,
+  baselineOptions: BaselineOptions,
 ) {
   const actual = { ...props, showEmpty: true, trimIntervals: false };
   return {
     actual,
     baseline: {
       ...actual,
-      startDate: baselineDates.startDate,
-      endDate: baselineDates.endDate,
+      startDate: baselineOptions.startDate,
+      endDate: baselineOptions.endDate,
     },
   };
 }
 
 export function createBaselineSpreadsheet(
   props: createCustomSpreadsheetProps,
-  baselineDates: BaselineDates,
+  baselineOptions: BaselineOptions,
 ) {
   const {
     showEmpty,
@@ -553,7 +655,7 @@ export function createBaselineSpreadsheet(
     groupBy = '',
     graphType,
   } = props;
-  const spreadsheetProps = getSpreadsheetProps(props, baselineDates);
+  const spreadsheetProps = getSpreadsheetProps(props, baselineOptions);
   const getActual = createCustomSpreadsheet(spreadsheetProps.actual);
   const getBaseline = createCustomSpreadsheet(spreadsheetProps.baseline);
 
@@ -576,11 +678,12 @@ export function createBaselineSpreadsheet(
         showEmpty,
         balanceTypeOp,
         sortByOp,
+        showAmounts: !!baselineOptions.showAmounts,
       }),
       totals: offsetItem(actual, baseline, scale),
     });
 
-    const scale = getScale(props, baselineDates, actual.intervalData);
+    const scale = getScale(props, baselineOptions, actual.intervalData);
     const untrimmed = offset(scale);
     const trimRange = trimIntervals
       ? getTrimRange(
@@ -611,14 +714,18 @@ export function createBaselineSpreadsheet(
         : totals.intervalData,
       rows,
       balanceTypeOp,
+      !!baselineOptions.showAmounts,
     );
 
-    const legend = calculateLegend(
-      intervalData,
-      rows,
-      groupBy,
-      graphType,
-      balanceTypeOp,
+    const legend = keepAmountColors(
+      calculateLegend(intervalData, rows, groupBy, graphType, balanceTypeOp),
+      calculateLegend(
+        intervalData,
+        getAmountOrder(rows, { showEmpty, balanceTypeOp, sortByOp }),
+        groupBy,
+        graphType,
+        balanceTypeOp,
+      ),
     );
 
     setData({
@@ -632,15 +739,15 @@ export function createBaselineSpreadsheet(
         rows,
         balanceTypeOp,
       }),
-      baselineStartDate: baselineDates.startDate,
-      baselineEndDate: baselineDates.endDate,
+      baselineStartDate: baselineOptions.startDate,
+      baselineEndDate: baselineOptions.endDate,
     });
   };
 }
 
 export function createBaselineGroupedSpreadsheet(
   props: createCustomSpreadsheetProps,
-  baselineDates: BaselineDates,
+  baselineOptions: BaselineOptions,
 ) {
   const {
     showEmpty,
@@ -648,7 +755,7 @@ export function createBaselineGroupedSpreadsheet(
     balanceTypeOp = 'totalDebts',
     sortByOp = 'desc',
   } = props;
-  const spreadsheetProps = getSpreadsheetProps(props, baselineDates);
+  const spreadsheetProps = getSpreadsheetProps(props, baselineOptions);
   const getActual = createGroupedSpreadsheet(spreadsheetProps.actual);
   const getBaseline = createGroupedSpreadsheet(spreadsheetProps.baseline);
 
@@ -669,9 +776,10 @@ export function createBaselineGroupedSpreadsheet(
         showEmpty,
         balanceTypeOp,
         sortByOp,
+        showAmounts: !!baselineOptions.showAmounts,
       });
 
-    const scale = getScale(props, baselineDates, template);
+    const scale = getScale(props, baselineOptions, template);
     const rows = offset(scale);
     if (!trimIntervals) {
       setData(rows);

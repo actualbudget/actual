@@ -24,6 +24,11 @@ import {
 } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
+import {
+  getBaselineKey,
+  getSeriesKey,
+  isBaselineKey,
+} from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -77,8 +82,15 @@ const CustomTooltip = ({
     return new Map(legend.map(entry => [entry.dataKey, entry.name]));
   }, [legend]);
 
+  // Intervals that haven't started list each series' baseline instead
+  const isUpcoming = !!interval?.baseline?.upcoming;
+
   const { sumTotals, items } = useMemo(() => {
     return (payload ?? [])
+      .filter(
+        item =>
+          item.value != null && isBaselineKey(item.dataKey) === isUpcoming,
+      )
       .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
       .reduce(
         (acc, item) => {
@@ -91,7 +103,7 @@ const CustomTooltip = ({
           items: [] as PayloadItem[],
         },
       );
-  }, [payload]);
+  }, [payload, isUpcoming]);
 
   if (active && items.length) {
     return (
@@ -112,7 +124,8 @@ const CustomTooltip = ({
           </div>
           <div style={{ lineHeight: 1.5 }}>
             {items.map((p: PayloadItem, index: number) => {
-              const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
+              const seriesKey = getSeriesKey(p.dataKey);
+              const displayName = dataKeyToName.get(seriesKey) ?? seriesKey;
               return (
                 (compact ? index < 4 : true) && (
                   <AlignedText
@@ -181,6 +194,7 @@ type LineGraphProps = {
   showTrendLines?: boolean;
   showTooltip?: boolean;
   interval?: string;
+  showAmounts?: boolean;
 };
 
 export function LineGraph({
@@ -195,6 +209,7 @@ export function LineGraph({
   showTrendLines = false,
   showTooltip = true,
   interval,
+  showAmounts = false,
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -206,14 +221,24 @@ export function LineGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
+  // Amounts against a baseline draw each series beside a faint baseline line
+  const isAmounts = showAmounts && !!data.baseline;
+
   const largestValue = data.intervalData
-    .map(c => c[balanceTypeOp])
+    .flatMap(c =>
+      isAmounts ? [c.amount ?? 0, c.baselineAmount ?? 0] : [c[balanceTypeOp]],
+    )
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
   const trendLines = showTrendLines
-    ? computeTrendLines(data.intervalData, data.legend)
+    ? computeTrendLines(
+        data.intervalData,
+        data.legend,
+        // Budgets are set per interval rather than accrued per day
+        balanceTypeOp === 'totalBudgeted' ? undefined : interval,
+      )
     : [];
 
   const onShowActivity = (id, payload, uncategorizedId, bucketTagNames) => {
@@ -302,6 +327,22 @@ export function LineGraph({
                   ifOverflow="extendDomain"
                 />
               ))}
+              {isAmounts &&
+                data.legend.map(entry => (
+                  <Line
+                    key={getBaselineKey(entry.dataKey)}
+                    strokeWidth={2}
+                    type="monotone"
+                    dataKey={getBaselineKey(entry.dataKey)}
+                    stroke={entry.color}
+                    strokeOpacity={0.35}
+                    dot={false}
+                    activeDot={false}
+                    tooltipType="none"
+                    legendType="none"
+                    {...animationProps}
+                  />
+                ))}
               {data.legend.map((entry, index) => {
                 return (
                   <Line

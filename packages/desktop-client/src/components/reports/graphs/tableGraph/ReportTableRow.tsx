@@ -14,7 +14,7 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
-import { countDays, countElapsedDays } from '#components/reports/baselineRange';
+import { countElapsedDays } from '#components/reports/baselineRange';
 import { showActivity } from '#components/reports/graphs/showActivity';
 import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
@@ -118,7 +118,7 @@ export const ReportTableRow = memo(
         intervalBreakdown.expected[balanceTypeOp],
         'financial',
       );
-      const lines = [
+      const baselineLine =
         // Budgets are compared per interval, so their length doesn't matter
         balanceTypeOp === 'totalBudgeted' ||
         !intervalItem.intervalStartDate ||
@@ -126,30 +126,18 @@ export const ReportTableRow = memo(
           ? t('Baseline: {{amount}}', { amount: expected })
           : t('Baseline: {{amount}} over {{count}} days', {
               amount: expected,
-              // Unprojected intervals in progress compare the days so far
-              count: (intervalBreakdown.projected
-                ? countDays
-                : countElapsedDays)(
+              // Intervals in progress compare the days so far
+              count: countElapsedDays(
                 intervalItem.intervalStartDate,
                 intervalItem.intervalEndDate,
               ),
-            }),
-      ];
-      if (intervalBreakdown.projected) {
-        lines.push(
-          t('Projected: {{amount}}', {
-            amount: format(
-              intervalBreakdown.projected[balanceTypeOp],
-              'financial',
-            ),
-          }),
-        );
-      }
-      lines.push(
+            });
+      const lines = [
+        baselineLine,
         t('Change: {{amount}}', {
           amount: (change > 0 ? '+' : '') + format(change, 'financial'),
         }),
-      );
+      ];
       return lines.join('\n');
     };
 

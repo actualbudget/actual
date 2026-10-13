@@ -31,7 +31,8 @@ type ChooseGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTrendLines?: boolean;
-  barsFromBaseline?: boolean;
+  showAmounts?: boolean;
+  changeFromBaseline?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
 };
@@ -51,7 +52,8 @@ export function ChooseGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTrendLines = false,
-  barsFromBaseline = false,
+  showAmounts = false,
+  changeFromBaseline = false,
   showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
@@ -113,6 +115,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
+        showAmounts={showAmounts}
       />
     );
   }
@@ -129,7 +132,8 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
-        barsFromBaseline={barsFromBaseline}
+        showAmounts={showAmounts}
+        changeFromBaseline={changeFromBaseline}
       />
     );
   }
@@ -172,6 +176,7 @@ export function ChooseGraph({
         showTrendLines={showTrendLines}
         showTooltip={showTooltip}
         interval={interval}
+        showAmounts={showAmounts}
       />
     );
   }
@@ -189,6 +194,7 @@ export function ChooseGraph({
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
         interval={interval}
+        showAmounts={showAmounts}
       />
     );
   }

@@ -30,6 +30,7 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
+  canShowBaselineAmounts,
   defaultBaseline,
   getBaselineRange,
 } from '#components/reports/baselineRange';
@@ -542,6 +543,8 @@ function CustomReportInner({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
+  const showAmounts =
+    !!baseline.showAmounts && canShowBaselineAmounts(graphType);
 
   const getGroupData = useMemo(() => {
     const props = {
@@ -566,6 +569,7 @@ function CustomReportInner({
           startDate: baselineStartDate,
           endDate: baselineEndDate,
           projectToFullPeriod,
+          showAmounts,
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -573,6 +577,7 @@ function CustomReportInner({
     baselineStartDate,
     baselineEndDate,
     projectToFullPeriod,
+    showAmounts,
     startDate,
     endDate,
     interval,
@@ -620,6 +625,7 @@ function CustomReportInner({
           startDate: baselineStartDate,
           endDate: baselineEndDate,
           projectToFullPeriod,
+          showAmounts,
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -627,6 +633,7 @@ function CustomReportInner({
     baselineStartDate,
     baselineEndDate,
     projectToFullPeriod,
+    showAmounts,
     startDate,
     endDate,
     interval,
@@ -1134,7 +1141,8 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
-                    barsFromBaseline={baseline.barsFromBaseline}
+                    showAmounts={showAmounts}
+                    changeFromBaseline={baseline.changeFromBaseline}
                     intervalsCount={intervals.length}
                   />
                 ) : (

@@ -18,12 +18,18 @@ import {
   BarChart,
   CartesianGrid,
   LabelList,
+  Rectangle,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
+import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
+import {
+  isBaselineKey,
+  isIntervalInProgress,
+} from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -80,8 +86,10 @@ const CustomTooltip = ({
   }, [legend]);
 
   const { sumTotals, items } = useMemo(() => {
+    // Intervals that haven't started have no amount to list, and the
+    // baseline is summed up below
     return (payload ?? [])
-      .slice(0)
+      .filter(item => item.value != null && !isBaselineKey(item.name))
       .reverse()
       .reduce(
         (acc, item) => {
@@ -115,7 +123,8 @@ const CustomTooltip = ({
     return nonZeroItems.slice(0, maxTooltipItems);
   }, [compact, nonZeroItems, tooltip]);
 
-  if (active && items.length) {
+  // Intervals that haven't started still show their baseline
+  if (active && (items.length || interval?.baseline?.upcoming)) {
     return (
       <div
         className={css({
@@ -224,6 +233,7 @@ type StackedBarGraphProps = {
   showOffBudget?: boolean;
   showTooltip?: boolean;
   interval?: string;
+  showAmounts?: boolean;
 };
 
 export function StackedBarGraph({
@@ -238,6 +248,7 @@ export function StackedBarGraph({
   showOffBudget,
   showTooltip = true,
   interval,
+  showAmounts = false,
 }: StackedBarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -251,8 +262,14 @@ export function StackedBarGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
+  // Amounts against a baseline stack in front of a faint bar for the whole
+  // interval's baseline
+  const isAmounts = showAmounts && !!data.baseline;
+
   const largestValue = data.intervalData
-    .map(c => c[balanceTypeOp])
+    .flatMap(c =>
+      isAmounts ? [c.amount ?? 0, c.baselineAmount ?? 0] : [c[balanceTypeOp]],
+    )
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
@@ -264,108 +281,149 @@ export function StackedBarGraph({
         ...(compact && { height: 'auto' }),
       }}
     >
-      {(width, height) =>
-        data.intervalData && (
-          <div>
-            {!compact && <div style={{ marginTop: '15px' }} />}
-            <BarChart
-              width={width}
-              height={height}
-              data={data.intervalData}
-              margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
-              style={{ cursor: pointer }}
-              stackOffset="sign" //stacked by sign
-            >
-              {showTooltip && (
-                <Tooltip
-                  content={
-                    <CustomTooltip
-                      compact={compact}
-                      tooltip={tooltip}
-                      legend={data.legend}
-                      format={format}
-                      balanceTypeOp={balanceTypeOp}
-                    />
-                  }
-                  formatter={numberFormatterTooltip}
-                  isAnimationActive={false}
-                  cursor={{ fill: 'transparent' }}
-                />
-              )}
-              <XAxis
-                dataKey="date"
-                tick={{ fill: theme.pageText }}
-                tickLine={{ stroke: theme.pageText }}
-              />
-              {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <YAxis
-                  tickFormatter={value =>
-                    getCustomTick(
-                      format(value, 'financial-no-decimals'),
-                      privacyMode,
-                    )
-                  }
+      {(width, height) => {
+        // The baseline and the stack share a slot, overlapped by a negative
+        // gap, and the baseline draws itself wider so it shows around the
+        // stack
+        const barSize = isAmounts
+          ? (width / Math.max(data.intervalData.length, 1)) * 0.45
+          : undefined;
+
+        return (
+          data.intervalData && (
+            <div>
+              {!compact && <div style={{ marginTop: '15px' }} />}
+              <BarChart
+                width={width}
+                height={height}
+                data={data.intervalData}
+                margin={{ top: 0, right: 0, left: leftMargin, bottom: 10 }}
+                style={{ cursor: pointer }}
+                stackOffset="sign" //stacked by sign
+                barSize={barSize}
+                barGap={isAmounts ? -barSize : undefined}
+              >
+                {showTooltip && (
+                  <Tooltip
+                    content={
+                      <CustomTooltip
+                        compact={compact}
+                        tooltip={tooltip}
+                        legend={data.legend}
+                        format={format}
+                        balanceTypeOp={balanceTypeOp}
+                      />
+                    }
+                    formatter={numberFormatterTooltip}
+                    isAnimationActive={false}
+                    cursor={{ fill: 'transparent' }}
+                  />
+                )}
+                <XAxis
+                  dataKey="date"
                   tick={{ fill: theme.pageText }}
                   tickLine={{ stroke: theme.pageText }}
-                  tickSize={0}
                 />
-              )}
-              {data.legend
-                .slice(0)
-                .reverse()
-                .map(entry => (
-                  <Bar
-                    key={entry.dataKey}
-                    dataKey={entry.dataKey}
-                    stackId="a"
-                    fill={entry.color}
-                    {...animationProps}
-                    onMouseLeave={() => {
-                      setPointer('');
-                      setTooltip('');
-                    }}
-                    onMouseEnter={() => {
-                      setTooltip(entry.dataKey);
-                      if (groupBy !== 'Interval') {
-                        setPointer('pointer');
-                      }
-                    }}
-                    onClick={e =>
-                      ((compact && showTooltip) || !compact) &&
-                      groupBy !== 'Interval' &&
-                      showActivity({
-                        navigate,
-                        categories,
-                        accounts,
-                        balanceTypeOp,
-                        filters,
-                        showHiddenCategories,
-                        showOffBudget,
-                        type: 'time',
-                        startDate: e.payload?.intervalStartDate,
-                        endDate: e.payload?.intervalEndDate,
-                        field: groupBy.toLowerCase(),
-                        id: entry.id,
-                        uncategorizedId: entry.uncategorizedId,
-                        bucketTagNames: entry.bucketTagNames,
-                        scopeTagNames: data.scopeTagNames,
-                        interval,
-                      })
+                {!compact && <CartesianGrid strokeDasharray="3 3" />}
+                {!compact && (
+                  <YAxis
+                    tickFormatter={value =>
+                      getCustomTick(
+                        format(value, 'financial-no-decimals'),
+                        privacyMode,
+                      )
                     }
-                  >
-                    {viewLabels && !compact && (
-                      <LabelList
-                        dataKey={entry.dataKey}
-                        content={customLabelWithFormat}
+                    tick={{ fill: theme.pageText }}
+                    tickLine={{ stroke: theme.pageText }}
+                    tickSize={0}
+                  />
+                )}
+                {isAmounts && (
+                  <Bar
+                    dataKey="baselineAmount"
+                    tooltipType="none"
+                    legendType="none"
+                    isAnimationActive={false}
+                    shape={(props: BarShapeProps) => (
+                      <Rectangle
+                        x={props.x - props.width * 0.4}
+                        y={props.y}
+                        width={props.width * 1.8}
+                        height={props.height}
+                        fill={theme.pageTextLight}
+                        fillOpacity={0.3}
                       />
                     )}
-                  </Bar>
-                ))}
-            </BarChart>
-          </div>
-        )
-      }
+                  />
+                )}
+                {data.legend
+                  .slice(0)
+                  .reverse()
+                  .map(entry => (
+                    <Bar
+                      key={entry.dataKey}
+                      dataKey={entry.dataKey}
+                      stackId="a"
+                      fill={entry.color}
+                      // An interval in progress is faded, since its amount
+                      // is only part of what it will be
+                      shape={(props: BarShapeProps) => (
+                        <Rectangle
+                          {...props}
+                          fillOpacity={
+                            data.baseline && isIntervalInProgress(props.payload)
+                              ? 0.5
+                              : 1
+                          }
+                        />
+                      )}
+                      {...animationProps}
+                      onMouseLeave={() => {
+                        setPointer('');
+                        setTooltip('');
+                      }}
+                      onMouseEnter={() => {
+                        setTooltip(entry.dataKey);
+                        if (groupBy !== 'Interval') {
+                          setPointer('pointer');
+                        }
+                      }}
+                      onClick={e =>
+                        ((compact && showTooltip) || !compact) &&
+                        groupBy !== 'Interval' &&
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'time',
+                          startDate: e.payload?.intervalStartDate,
+                          endDate: e.payload?.intervalEndDate,
+                          field: groupBy.toLowerCase(),
+                          id: entry.id,
+                          uncategorizedId: entry.uncategorizedId,
+                          bucketTagNames: entry.bucketTagNames,
+                          scopeTagNames: data.scopeTagNames,
+                          interval,
+                        })
+                      }
+                    >
+                      {viewLabels && !compact && (
+                        <LabelList
+                          dataKey={entry.dataKey}
+                          content={customLabelWithFormat}
+                        />
+                      )}
+                    </Bar>
+                  ))}
+              </BarChart>
+            </div>
+          )
+        );
+      }}
     </Container>
   );
 }
