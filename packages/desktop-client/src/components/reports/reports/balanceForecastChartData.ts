@@ -144,7 +144,7 @@ export function countForecastScheduledOccurrences({
     return 0;
   }
 
-  // The forecast query always covers whole months; only count occurrences the
+  // Fixed-range queries can cover whole months; only count occurrences the
   // chart actually shows. Daily keeps day-shaped bounds exact, Monthly widens
   // to full months (mirrors buildBalanceForecastChartData).
   const startDay =

@@ -26,7 +26,6 @@ import { DateRange } from '#components/reports/DateRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { useBalanceForecastSeries } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -41,6 +40,7 @@ import { buildForecastSeriesChart } from './balanceForecastSeries';
 import { getForecastSeriesStyle } from './ForecastSeriesKey';
 import { ForecastSeriesSummary } from './ForecastSeriesSummary';
 import { ForecastSeriesTooltip } from './ForecastSeriesTooltip';
+import { resolveBalanceForecastRange } from './balanceForecastRange';
 
 type BalanceForecastCardProps = {
   widgetId: string;
@@ -73,22 +73,13 @@ export function BalanceForecastCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
 
-  const defaultTimeFrame = {
-    start: monthUtils.currentMonth(),
-    end: monthUtils.addMonths(monthUtils.currentMonth(), 11),
-    mode: 'static' as const,
-  };
-
-  const [start, end] = calculateTimeRange(meta?.timeFrame, defaultTimeFrame);
+  const { start, end, startDate, endDate, monthsFromToday } =
+    resolveBalanceForecastRange(meta, source);
 
   const selectedAccountIds = useMemo(
     () => meta?.accounts ?? accounts.map(a => a.id),
     [accounts, meta?.accounts],
   );
-
-  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
-  const startDate = monthUtils.firstDayOfMonth(start);
-  const endDate = monthUtils.lastDayOfMonth(end);
 
   const yAxisBase = meta?.yAxisBase ?? 'Auto';
 
@@ -199,7 +190,13 @@ export function BalanceForecastCard({
               }}
               onClose={() => setNameMenuOpen(false)}
             />
-            <DateRange start={start} end={end} />
+            {monthsFromToday !== undefined ? (
+              <Block style={{ color: theme.pageTextSubdued }}>
+                <Trans>From today</Trans>: {start} – {end}
+              </Block>
+            ) : (
+              <DateRange start={start} end={end} />
+            )}
           </View>
           {!series && endingPoint && (
             <View style={{ textAlign: 'right' }}>
@@ -220,7 +217,9 @@ export function BalanceForecastCard({
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
                 <Block style={{ fontSize: 12, color: theme.pageTextLight }}>
-                  {endingPoint.date}
+                  {monthsFromToday !== undefined
+                    ? chartRange.end
+                    : endingPoint.date}
                 </Block>
               </PrivacyFilter>
               {lowestPoint && lowestPoint.date !== endingPoint.date ? (

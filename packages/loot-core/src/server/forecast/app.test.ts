@@ -134,6 +134,52 @@ afterEach(() => {
 });
 
 describe('forecast app', () => {
+  it('carries the opening balance into an inclusive range starting today', async () => {
+    const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
+    for (const [id, date, amount] of [
+      ['opening', '2024-03-01', 100_000],
+      ['earlier-spending', '2024-03-09', -20_000],
+      ['today', '2024-03-10', -5_000],
+      ['last-day', '2024-09-09', -7_000],
+      ['outside-range', '2024-09-10', -50_000],
+    ] as const) {
+      await db.insertTransaction({ id, account: accountId, date, amount });
+    }
+    await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: accountId },
+        { op: 'is', field: 'amount', value: -1_000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: '2024-03-10', frequency: 'monthly' },
+        },
+      ],
+    });
+
+    const result = await generateForecast({
+      accountIds: [accountId],
+      startDate: '2024-03-10',
+      endDate: '2024-09-09',
+    });
+    expect(result.dataPoints[0]).toMatchObject({
+      date: '2024-03-10',
+      balance: 74_000,
+    });
+    expect(result.dataPoints.at(-1)).toMatchObject({
+      date: '2024-09-09',
+      balance: 62_000,
+    });
+    expect(result.dataPoints.flatMap(point => point.transactions)).toHaveLength(
+      6,
+    );
+    expect(
+      result.dataPoints.every(
+        point => point.date >= '2024-03-10' && point.date <= '2024-09-09',
+      ),
+    ).toBe(true);
+  });
+
   it('shows the real running balance for historical months', async () => {
     const accountId = await db.insertAccount({ id: 'acct', name: 'Checking' });
 
