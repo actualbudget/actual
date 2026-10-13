@@ -234,6 +234,19 @@ describe('forecast app', () => {
       endDate: '2024-03-31',
     });
 
+    const withAssumptions = await generateForecast({
+      source: 'tracking-budget',
+      startDate: '2024-03-01',
+      endDate: '2024-03-31',
+      assumptions: {
+        anchorDate: '2023-03-01',
+        inflationRate: 0.03,
+        salaryGrowthRate: 0.1,
+        incomeScheduleIds: ['ignored'],
+      },
+    });
+    expect(withAssumptions.dataPoints).toEqual(result.dataPoints);
+    expect(withAssumptions.scenario?.dataPoints).toEqual(result.dataPoints);
     expect(result.dataPoints).toMatchObject([
       {
         date: '2024-03-31',
@@ -769,5 +782,144 @@ describe('forecast app', () => {
         dataPoint => dataPoint.accountId !== FORECAST_UNASSIGNED_ACCOUNT_ID,
       ),
     ).toBe(true);
+  });
+});
+
+describe('forecast assumption scenarios', () => {
+  it('grows only selected recurring income and leaves transfers, one-offs, expenses and posted amounts unchanged', async () => {
+    const account = await db.insertAccount({
+      id: 'checking',
+      name: 'Checking',
+    });
+    const savings = await db.insertAccount({ id: 'savings', name: 'Savings' });
+    const transferPayee = await db.insertPayee({
+      id: 'transfer',
+      name: 'Transfer',
+      transfer_acct: savings,
+    });
+    async function addSchedule(
+      amount: number,
+      extra: RuleConditionEntity[] = [],
+      recurring = true,
+    ) {
+      return createSchedule({
+        conditions: [
+          { op: 'is', field: 'account', value: account },
+          { op: 'is', field: 'amount', value: amount },
+          {
+            op: 'is',
+            field: 'date',
+            value: recurring
+              ? { start: '2024-03-10', frequency: 'monthly' }
+              : '2024-04-10',
+          },
+          ...extra,
+        ],
+      });
+    }
+    const salary = await addSchedule(10000);
+    const otherIncome = await addSchedule(2000);
+    const expense = await addSchedule(-1000);
+    const oneOff = await addSchedule(3000, [], false);
+    const transfer = await addSchedule(4000, [
+      { op: 'is', field: 'payee', value: transferPayee },
+    ]);
+    await db.insertTransaction({
+      id: 'posted-salary',
+      account,
+      amount: 10000,
+      date: '2024-03-10',
+      schedule: salary,
+    });
+    const params = {
+      accountIds: [account],
+      startDate: '2024-03-01',
+      endDate: '2024-04-30',
+    };
+    const baseline = await generateForecast(params);
+    const result = await generateForecast({
+      ...params,
+      assumptions: {
+        anchorDate: '2023-03-10',
+        inflationRate: 0.03,
+        salaryGrowthRate: 0.1,
+        incomeScheduleIds: [
+          salary,
+          expense,
+          oneOff,
+          transfer,
+          'deleted-schedule',
+        ],
+      },
+    });
+    expect(result.dataPoints).toEqual(baseline.dataPoints);
+    expect(baseline.scenario).toBeUndefined();
+    const scenario = result.scenario?.dataPoints;
+    expect(scenario?.find(point => point.date === '2024-03-10')?.balance).toBe(
+      baseline.dataPoints.find(point => point.date === '2024-03-10')?.balance,
+    );
+    expect(scenario?.at(-1)?.balance).toBe(
+      (baseline.dataPoints.at(-1)?.balance ?? 0) + 1000,
+    );
+    const aprilTransactions = scenario?.find(
+      point => point.date === '2024-04-10',
+    )?.transactions;
+    expect(aprilTransactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ scheduleId: salary, amount: 11000 }),
+        expect.objectContaining({ scheduleId: otherIncome, amount: 2000 }),
+        expect.objectContaining({ scheduleId: expense, amount: -1000 }),
+        expect.objectContaining({ scheduleId: oneOff, amount: 3000 }),
+        expect.objectContaining({ scheduleId: transfer, amount: 4000 }),
+      ]),
+    );
+    // The source schedule is never rewritten by a what-if scenario.
+    expect((await generateForecast(params)).dataPoints).toEqual(
+      baseline.dataPoints,
+    );
+
+    // Amount filters select the original income before applying assumptions.
+    const filtered = await generateForecast({
+      ...params,
+      conditions: [{ op: 'is', field: 'amount', value: 10000 }],
+      assumptions: result.scenario?.assumptions,
+    });
+    expect(filtered.scenario?.dataPoints.at(-1)?.balance).toBe(
+      (filtered.dataPoints.at(-1)?.balance ?? 0) + 1000,
+    );
+  });
+
+  it('supports five years of salary anniversaries without changing the baseline', async () => {
+    const account = await db.insertAccount({
+      id: 'checking',
+      name: 'Checking',
+    });
+    const salary = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'is', field: 'amount', value: 10000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: { start: '2024-03-10', frequency: 'yearly' },
+        },
+      ],
+    });
+    const result = await generateForecast({
+      accountIds: [account],
+      startDate: '2024-03-10',
+      endDate: '2029-03-10',
+      assumptions: {
+        anchorDate: '2024-03-10',
+        inflationRate: 0,
+        salaryGrowthRate: 0.1,
+        incomeScheduleIds: [salary],
+      },
+    });
+    expect(result.dataPoints.at(-1)?.balance).toBe(60000);
+    expect(result.scenario?.dataPoints.at(-1)?.transactions[0].amount).toBe(
+      16105,
+    );
+    expect(result.scenario?.dataPoints.at(-1)?.balance).toBe(77156);
   });
 });
