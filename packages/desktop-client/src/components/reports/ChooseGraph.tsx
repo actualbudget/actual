@@ -31,6 +31,7 @@ type ChooseGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTrendLines?: boolean;
+  barsFromBaseline?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
 };
@@ -50,6 +51,7 @@ export function ChooseGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTrendLines = false,
+  barsFromBaseline = false,
   showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
@@ -127,6 +129,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
+        barsFromBaseline={barsFromBaseline}
       />
     );
   }

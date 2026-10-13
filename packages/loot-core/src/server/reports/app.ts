@@ -51,7 +51,9 @@ export const reportModel = {
         typeof baseline.endDate !== 'string' ||
         typeof baseline.isDateStatic !== 'boolean' ||
         typeof baseline.includeCurrentInterval !== 'boolean' ||
-        typeof baseline.projectToFullPeriod !== 'boolean')
+        typeof baseline.projectToFullPeriod !== 'boolean' ||
+        (baseline.barsFromBaseline !== undefined &&
+          typeof baseline.barsFromBaseline !== 'boolean'))
     ) {
       throw new ValidationError('Invalid report baseline.');
     }

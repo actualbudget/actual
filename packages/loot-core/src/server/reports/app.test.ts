@@ -192,6 +192,7 @@ describe('custom report baseline', () => {
     endDate: '2026-09-30',
     includeCurrentInterval: false,
     projectToFullPeriod: true,
+    barsFromBaseline: true,
   } satisfies CustomReportBaseline;
 
   beforeEach(async () => {
@@ -224,6 +225,7 @@ describe('custom report baseline', () => {
     { baseline: null },
     { baseline: { ...baseline, dateRange: 3 } },
     { baseline: { ...baseline, enabled: 'yes' } },
+    { baseline: { ...baseline, barsFromBaseline: 'yes' } },
   ])('rejects invalid imported baselines: %j', async invalid => {
     await writeDashboardReport({ ...report, ...invalid });
 
