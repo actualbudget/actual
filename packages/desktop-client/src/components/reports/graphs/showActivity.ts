@@ -107,7 +107,11 @@ export function showActivity({
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
-      value: isDateOp ? startDate : monthUtils[fromDate](startDate),
+      // Interval start dates may be month or year keys (e.g. '2026-06'),
+      // so normalise them to a full day for range filters
+      value: isDateOp
+        ? monthUtils.dayFromDate(startDate)
+        : monthUtils[fromDate](startDate),
       type: 'date',
     },
     isDateOp && {
