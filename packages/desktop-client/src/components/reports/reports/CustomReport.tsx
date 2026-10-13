@@ -1134,6 +1134,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
+                    barsFromBaseline={baseline.barsFromBaseline}
                     intervalsCount={intervals.length}
                   />
                 ) : (

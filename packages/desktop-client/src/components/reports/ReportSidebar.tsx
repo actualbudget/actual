@@ -359,6 +359,34 @@ export function ReportSidebar({
             >
               <Trans>Compare to baseline</Trans>
             </LabeledCheckbox>
+            {isBaselineEnabled && (
+              <Tooltip
+                placement="bottom start"
+                content={
+                  <Text>
+                    <Trans>
+                      Draw each bar from its baseline to its actual amount,
+                      instead of from zero to the change.
+                    </Trans>
+                  </Text>
+                }
+                style={{ ...styles.tooltip, lineHeight: 1.5 }}
+              >
+                <LabeledCheckbox
+                  id="baseline-bars-from-baseline"
+                  checked={!!baseline.barsFromBaseline}
+                  disabled={customReportItems.graphType !== 'BarGraph'}
+                  onChange={() =>
+                    updateBaseline({
+                      ...baseline,
+                      barsFromBaseline: !baseline.barsFromBaseline,
+                    })
+                  }
+                >
+                  <Trans>Start bars at baseline</Trans>
+                </LabeledCheckbox>
+              </Tooltip>
+            )}
           </View>
         )}
 

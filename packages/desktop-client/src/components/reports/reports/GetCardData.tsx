@@ -252,6 +252,7 @@ export function GetCardData({
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
+        barsFromBaseline={baseline.barsFromBaseline}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

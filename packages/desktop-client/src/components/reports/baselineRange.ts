@@ -15,6 +15,7 @@ export const defaultBaseline: CustomReportBaseline = {
   ),
   includeCurrentInterval: false,
   projectToFullPeriod: true,
+  barsFromBaseline: false,
 };
 
 /**

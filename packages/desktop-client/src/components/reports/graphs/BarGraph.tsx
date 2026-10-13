@@ -40,6 +40,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { BaselineArrow } from './BaselineArrow';
 import { BaselineTooltip } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
@@ -231,6 +232,7 @@ type BarGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
+  barsFromBaseline?: boolean;
 };
 
 export function BarGraph({
@@ -244,6 +246,7 @@ export function BarGraph({
   showHiddenCategories,
   showOffBudget,
   showTooltip = true,
+  barsFromBaseline = false,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -268,12 +271,27 @@ export function BarGraph({
     return obj[balanceTypeOp];
   };
 
+  // Floating bars run from the baseline to the amount it's compared against,
+  // so their length is still the change
+  const isFromBaseline = barsFromBaseline && !!data.baseline;
+  const getBarValue = (obj: GroupedEntity | IntervalEntity) => {
+    const breakdown = obj.baseline;
+    if (!isFromBaseline || !breakdown) {
+      return getVal(obj);
+    }
+
+    return [
+      breakdown.expected[balanceTypeOp],
+      (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
+    ];
+  };
+
   const longestLabelLength = data[splitData]
     .map(c => c[yAxis])
     .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
 
   const largestValue = data[splitData]
-    .map(c => c[balanceTypeOp])
+    .flatMap(c => getBarValue(c))
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
@@ -342,8 +360,9 @@ export function BarGraph({
               )}
               {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />}
               <Bar
-                dataKey={val => getVal(val)}
-                stackId="a"
+                dataKey={getBarValue}
+                // Recharts can't stack floating bars
+                stackId={isFromBaseline ? undefined : 'a'}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
@@ -391,14 +410,29 @@ export function BarGraph({
                     scopeTagNames: data.scopeTagNames,
                   });
                 }}
-                shape={(props: BarShapeProps) => (
-                  <Rectangle
-                    {...props}
-                    fill={
-                      data.legend[props.index]?.color ?? props.fill ?? undefined
-                    }
-                  />
-                )}
+                shape={(props: BarShapeProps) => {
+                  const fill =
+                    data.legend[props.index]?.color ?? props.fill ?? undefined;
+                  const breakdown = props.payload?.baseline;
+                  if (isFromBaseline && breakdown) {
+                    return (
+                      <BaselineArrow
+                        x={props.x}
+                        y={props.y}
+                        width={props.width}
+                        height={props.height}
+                        fill={fill}
+                        isUp={
+                          (breakdown.projected ?? breakdown.actual)[
+                            balanceTypeOp
+                          ] >= breakdown.expected[balanceTypeOp]
+                        }
+                      />
+                    );
+                  }
+
+                  return <Rectangle {...props} fill={fill} />;
+                }}
               >
                 {viewLabels && !compact && (
                   <LabelList

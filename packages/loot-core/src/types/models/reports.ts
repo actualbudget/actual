@@ -16,6 +16,9 @@ export type CustomReportBaseline = {
   includeCurrentInterval: boolean;
   // Project amounts so far over the report's whole range, by days elapsed
   projectToFullPeriod: boolean;
+  // Draw bar graph bars from the baseline to the actual amount, rather than
+  // from zero to the change. Optional since older reports don't store it.
+  barsFromBaseline?: boolean;
 };
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
