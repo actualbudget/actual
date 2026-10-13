@@ -70,6 +70,24 @@ export const SimpleFinInitialiseModal = ({
           fileId,
         })) || {});
     }
+    if (
+      !error &&
+      !perBudgetFile &&
+      credentialSource === 'per-budget-file' &&
+      cloudFileId
+    ) {
+      for (const name of ['simplefin_token', 'simplefin_accessKey']) {
+        ({ error, reason } =
+          (await send('secret-set', {
+            name,
+            value: null,
+            fileId: cloudFileId,
+          })) || {});
+        if (error) {
+          break;
+        }
+      }
+    }
     setIsLoading(false);
     if (error) {
       setIsValid(false);
