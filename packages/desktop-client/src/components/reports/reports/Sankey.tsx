@@ -775,7 +775,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   // Filters the accounts page down to the transactions behind a clicked
   // node or link.
-  function onDrilldownClick(drilldowns: SankeyNodeDrilldown[]) {
+  async function onDrilldownClick(drilldowns: SankeyNodeDrilldown[]) {
     const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
       earliestTransaction,
       latestTransaction,
@@ -783,8 +783,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       end,
     );
 
-    const filterConditions = [
-      ...conditions,
+    const drilldownConditions = [
       ...buildIdConditions(drilldowns),
       ...buildAmountCondition(drilldowns),
       {
@@ -801,10 +800,41 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       } satisfies RuleConditionEntity,
     ];
 
+    // The report's own conditions are "or"'d together as a single group.
+    // Flattening them into one list alongside the drilldown/date
+    // conditions - which always have to hold - and applying a single
+    // top-level "or" to everything would incorrectly let a drilldown match
+    // outside the clicked date range. Fold the report conditions into one
+    // composite condition first so the rest can always be "and"'d.
+    if (conditionsOp === 'or' && conditions.length > 1) {
+      const { filters: reportQueryFilters } = await send(
+        'make-filters-from-conditions',
+        { conditions },
+      );
+
+      const combinedReportCondition = {
+        field: 'date',
+        op: 'gte',
+        value: monthUtils.firstDayOfMonth(boundedStart),
+        type: 'date',
+        customName: t('Report filters'),
+        queryFilter: { $or: reportQueryFilters },
+      } satisfies RuleConditionEntity;
+
+      void navigate('/accounts', {
+        state: {
+          goBack: true,
+          filterConditions: [combinedReportCondition, ...drilldownConditions],
+          filterConditionsOp: 'and',
+        },
+      });
+      return;
+    }
+
     void navigate('/accounts', {
       state: {
         goBack: true,
-        filterConditions,
+        filterConditions: [...conditions, ...drilldownConditions],
         filterConditionsOp: conditionsOp,
       },
     });
