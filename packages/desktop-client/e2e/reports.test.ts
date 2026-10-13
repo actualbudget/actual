@@ -133,6 +133,124 @@ test.describe('Reports', () => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('compares named forecast lines and saves them to the dashboard', async () => {
+      test.setTimeout(90_000);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(1);
+      await page
+        .getByRole('button', { name: 'Compare lines', exact: true })
+        .click();
+      await page
+        .getByRole('textbox', { name: 'Line 1 name', exact: true })
+        .fill('Checking');
+
+      async function selectAccounts(lineNumber: number, names: string[]) {
+        const group = page.getByRole('group', {
+          name: `Forecast line ${lineNumber}`,
+          exact: true,
+        });
+        await group
+          .getByRole('button', { name: 'Filter', exact: true })
+          .click();
+        await page
+          .getByRole('menu')
+          .getByRole('button', { name: 'Account', exact: true })
+          .click();
+        await page
+          .getByRole('textbox', { name: 'Account', exact: true })
+          .press('Escape');
+        await page.getByRole('button', { name: 'one of', exact: true }).click();
+        for (const name of names) {
+          await page
+            .getByRole('textbox', { name: 'Account', exact: true })
+            .click();
+          await page.getByRole('option', { name, exact: true }).click();
+        }
+        await page
+          .getByRole('textbox', { name: 'Account', exact: true })
+          .press('Escape');
+        await page.getByRole('button', { name: 'Apply', exact: true }).click();
+        await expect(
+          group.getByRole('button', { name: /account/ }),
+        ).toBeVisible();
+      }
+
+      await selectAccounts(1, ['Capital One Checking']);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('textbox', { name: 'Line 2 name', exact: true })
+        .fill('Card');
+      await selectAccounts(2, ['HSBC']);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('textbox', { name: 'Line 3 name', exact: true })
+        .fill('Checking + card');
+      await selectAccounts(3, ['Capital One Checking', 'HSBC']);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await expect(
+        page.getByRole('button', { name: 'Add line', exact: true }),
+      ).toBeDisabled();
+      await page
+        .getByRole('button', { name: 'Remove line 4', exact: true })
+        .click();
+      await expect(
+        page.getByRole('button', { name: 'Add line', exact: true }),
+      ).toBeEnabled();
+      await page
+        .getByRole('button', { name: 'Save widget', exact: true })
+        .click();
+      await expect(
+        page.getByText('Dashboard widget successfully saved.', { exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      const summary = page.getByRole('table');
+      const endingBalances = await summary
+        .locator('tbody tr td:first-of-type')
+        .allTextContents();
+      const [checking, cardBalance, combined] = endingBalances.map(value =>
+        Math.round(Number(value.replaceAll(',', '')) * 100),
+      );
+      expect(checking).not.toBe(cardBalance);
+      expect(combined).toBe(checking + cardBalance);
+      const beforeSave = await summary.innerText();
+      await page.reload();
+      await expect
+        .poll(() => page.getByRole('table').innerText())
+        .toBe(beforeSave);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      await expect(page.getByRole('main')).toMatchThemeScreenshots();
+      await page
+        .getByRole('button', { name: 'Edit lines', exact: true })
+        .click();
+      await expect(
+        page.locator('#forecast-series-editor'),
+      ).toMatchThemeScreenshots();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      const widgetUrl = page.url();
+      await navigation.goToReportsPage();
+      const card = page.getByRole('button').filter({
+        has: page.getByRole('heading', { name: /^Balance Forecast/ }),
+      });
+      await page.locator('.react-grid-item').last().scrollIntoViewIfNeeded();
+      await expect(
+        card.getByRole('rowheader', { name: 'Checking + card', exact: true }),
+      ).toBeVisible();
+      await expect(card.locator('.recharts-line-curve')).toHaveCount(3);
+      await expect(card).toMatchThemeScreenshots();
+      await page.goto(widgetUrl);
+      await page
+        .getByRole('button', { name: 'Edit lines', exact: true })
+        .click();
+      await expect(
+        page.getByRole('textbox', { name: 'Line 2 name', exact: true }),
+      ).toHaveValue('Card');
+    });
+
     test('loads tracking budget forecast report', async () => {
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.useBudgetType('Tracking');
