@@ -547,8 +547,12 @@ export function useTransactionBatchActions() {
             .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
             .select(['id', 'offbudget']),
         );
-        const fromAccount = accounts.find(a => a.id === fromTrans.account);
-        const toAccount = accounts.find(a => a.id === toTrans.account);
+        const fromAccount = accounts.find(
+          (a: { id: string; offbudget?: boolean }) => a.id === fromTrans.account,
+        );
+        const toAccount = accounts.find(
+          (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
+        );
         const clearCategory = fromAccount?.offbudget === toAccount?.offbudget;
 
         const changes = {
