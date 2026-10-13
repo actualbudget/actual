@@ -72,6 +72,9 @@ export type BaselineBreakdown = {
   projected?: ReportValues;
   // The baseline over an average-length interval, for tables and summaries
   perInterval?: ReportValues;
+  // The actual amount at its pace so far over an average-length interval, to
+  // compare against perInterval
+  pacePerInterval?: ReportValues;
 };
 
 export type SpendingMonthEntity = Record<

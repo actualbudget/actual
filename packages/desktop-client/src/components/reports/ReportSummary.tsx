@@ -52,6 +52,9 @@ export function ReportSummary({
           ? t('PAYMENT')
           : t('DEPOSIT');
   const average = Math.round(data[balanceTypeOp] / intervalsCount);
+  // Baselines compare an average-length interval at the pace so far
+  const baselineAverage = data.baseline?.perInterval?.[balanceTypeOp] ?? 0;
+  const paceAverage = data.baseline?.pacePerInterval?.[balanceTypeOp] ?? 0;
   const perIntervalCaption = (
     <Trans>
       Per{' '}
@@ -94,24 +97,17 @@ export function ReportSummary({
         <>
           <SummaryBox
             label={t('BASELINE AVERAGE')}
-            value={data.baseline.perInterval?.[balanceTypeOp] ?? 0}
+            value={baselineAverage}
             caption={perIntervalCaption}
           />
           <SummaryBox
-            label={getAverageLabel(balanceTypeOp, !!data.baseline.projected, t)}
-            value={Math.round(
-              (data.baseline.projected ?? data.baseline.actual)[balanceTypeOp] /
-                intervalsCount,
-            )}
+            label={getAverageLabel(balanceTypeOp, t)}
+            value={paceAverage}
             caption={perIntervalCaption}
           />
           <SummaryBox
-            label={
-              data.baseline.projected
-                ? t('AVERAGE PROJECTED CHANGE')
-                : t('AVERAGE CHANGE')
-            }
-            value={average}
+            label={t('AVERAGE CHANGE')}
+            value={paceAverage - baselineAverage}
             caption={perIntervalCaption}
           />
         </>
@@ -123,7 +119,7 @@ export function ReportSummary({
             caption={<Trans>For this time period</Trans>}
           />
           <SummaryBox
-            label={getAverageLabel(balanceTypeOp, false, t)}
+            label={getAverageLabel(balanceTypeOp, t)}
             value={average}
             caption={perIntervalCaption}
           />
@@ -196,23 +192,15 @@ function getTotalLabel(
   }
 }
 
-function getAverageLabel(
-  balanceTypeOp: balanceTypeOpType,
-  isProjected: boolean,
-  t: TFunction,
-) {
+function getAverageLabel(balanceTypeOp: balanceTypeOpType, t: TFunction) {
   switch (balanceTypeOp) {
     case 'totalDebts':
-      return isProjected
-        ? t('AVERAGE PROJECTED SPENDING')
-        : t('AVERAGE SPENDING');
+      return t('AVERAGE SPENDING');
     case 'totalAssets':
-      return isProjected
-        ? t('AVERAGE PROJECTED DEPOSIT')
-        : t('AVERAGE DEPOSIT');
+      return t('AVERAGE DEPOSIT');
     case 'totalBudgeted':
       return t('AVERAGE BUDGETED');
     default:
-      return isProjected ? t('AVERAGE PROJECTED NET') : t('AVERAGE NET');
+      return t('AVERAGE NET');
   }
 }

@@ -49,10 +49,10 @@ describe('ReportTableHeader', () => {
     );
   });
 
-  it('shows changes per interval in time mode', () => {
+  it('ends time mode with the same projection and change columns', () => {
     expect(
       renderHeader({ mode: 'time', showBaseline: true, showProjected: true }),
-    ).toBe('CategoryBaselineMay 2026Jun 2026ProjectedTotalsAverage');
+    ).toBe('CategoryBaselineMay 2026Jun 2026TotalsProjectedChangeAverage');
   });
 
   it('leaves the columns unchanged without a baseline', () => {

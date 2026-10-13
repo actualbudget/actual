@@ -54,7 +54,7 @@ export type BaselineScale = {
   // Budgets are set per interval rather than accrued per day
   perInterval: boolean;
   projectToFullPeriod: boolean;
-  // Average length of the report's intervals, for the single baseline figure
+  // Average full length of the displayed intervals, for the Baseline column
   averageDays: number;
 };
 
@@ -119,13 +119,15 @@ export function offsetInterval(
   }
 
   const days = countDays(start, end);
+  const elapsedDays = countElapsedDays(start, end);
+  // Without a projection, an interval in progress is compared against the
+  // baseline over the days that have passed, not its whole length
+  const comparedDays = scale.projectToFullPeriod ? days : elapsedDays;
   const share = scale.perInterval
     ? 1 / scale.baselineIntervals
-    : days / scale.baselineDays;
+    : comparedDays / scale.baselineDays;
   const projection =
-    !scale.perInterval && scale.projectToFullPeriod
-      ? days / countElapsedDays(start, end)
-      : 1;
+    !scale.perInterval && scale.projectToFullPeriod ? days / elapsedDays : 1;
 
   const expected = fromTotals(field =>
     Math.round((baseline?.[field] ?? 0) * share),
@@ -158,6 +160,17 @@ function getProjection(intervals: IntervalEntity[], scale: BaselineScale) {
   const days = countDays(start, end);
   const elapsedDays = countElapsedDays(start, end);
   return days > elapsedDays ? { days, scale: days / elapsedDays } : null;
+}
+
+// Scales a row's amount so far to an average-length interval, using its daily
+// pace over the days that have passed. Budgets are set per interval instead.
+function getPaceShare(intervals: IntervalEntity[], scale: BaselineScale) {
+  const start = intervals[0]?.intervalStartDate;
+  const end = intervals[intervals.length - 1]?.intervalEndDate;
+  if (scale.perInterval || !start || !end) {
+    return 1 / Math.max(intervals.length, 1);
+  }
+  return scale.averageDays / countElapsedDays(start, end);
 }
 
 /**
@@ -204,6 +217,7 @@ export function offsetItem<T extends OffsetItem>(
   const perIntervalShare = scale.perInterval
     ? 1 / scale.baselineIntervals
     : scale.averageDays / scale.baselineDays;
+  const paceShare = getPaceShare(item.intervalData, scale);
 
   return {
     ...item,
@@ -215,6 +229,9 @@ export function offsetItem<T extends OffsetItem>(
       projected,
       perInterval: fromTotals(field =>
         Math.round((baseline?.[field] ?? 0) * perIntervalShare),
+      ),
+      pacePerInterval: fromTotals(field =>
+        Math.round(actual[field] * paceShare),
       ),
     },
   };
@@ -436,11 +453,32 @@ function countIntervals(
   return Math.max(intervals.length, 1);
 }
 
-export function getAverageDays(intervals: IntervalEntity[]) {
-  const lengths = intervals.flatMap(({ intervalStartDate, intervalEndDate }) =>
-    intervalStartDate && intervalEndDate
-      ? [countDays(intervalStartDate, intervalEndDate)]
-      : [],
+// An interval's whole length, even when the report's range cuts it short
+function getFullIntervalDays(intervalStartDate: string, interval: string) {
+  switch (interval) {
+    case 'Daily':
+      return 1;
+    case 'Weekly':
+      return 7;
+    case 'Yearly': {
+      const year = intervalStartDate.slice(0, 4);
+      return countDays(`${year}-01-01`, `${year}-12-31`);
+    }
+    default: {
+      const month = intervalStartDate.slice(0, 7);
+      return countDays(`${month}-01`, monthUtils.lastDayOfMonth(month));
+    }
+  }
+}
+
+/**
+ * The average full length of the given intervals, for the Baseline column.
+ * Using full lengths keeps the column equal to what every whole interval is
+ * compared against, so only intervals the range cuts short differ from it.
+ */
+export function getAverageDays(intervals: IntervalEntity[], interval: string) {
+  const lengths = intervals.flatMap(({ intervalStartDate }) =>
+    intervalStartDate ? [getFullIntervalDays(intervalStartDate, interval)] : [],
   );
   if (lengths.length === 0) {
     return 1;
@@ -466,7 +504,22 @@ function getScale(
     ),
     perInterval: props.balanceTypeOp === 'totalBudgeted',
     projectToFullPeriod: baselineDates.projectToFullPeriod,
-    averageDays: getAverageDays(template),
+    averageDays: getAverageDays(template, props.interval),
+  };
+}
+
+function getVisibleScale(
+  scale: BaselineScale,
+  template: IntervalEntity[],
+  { startIndex, endIndex }: { startIndex: number; endIndex: number },
+  interval: string,
+): BaselineScale {
+  return {
+    ...scale,
+    averageDays: getAverageDays(
+      trimIntervalDataToRange(template, startIndex, endIndex),
+      interval,
+    ),
   };
 }
 
@@ -516,18 +569,37 @@ export function createBaselineSpreadsheet(
       return;
     }
 
-    const scale = getScale(props, baselineDates, actual.intervalData);
-    const untrimmedRows = offsetRows(actual.data ?? [], baseline?.data ?? [], {
-      scale,
-      template: actual.intervalData,
-      showEmpty,
-      balanceTypeOp,
-      sortByOp,
+    const offset = (scale: BaselineScale) => ({
+      rows: offsetRows(actual.data ?? [], baseline?.data ?? [], {
+        scale,
+        template: actual.intervalData,
+        showEmpty,
+        balanceTypeOp,
+        sortByOp,
+      }),
+      totals: offsetItem(actual, baseline, scale),
     });
-    const totals = offsetItem(actual, baseline, scale);
+
+    const scale = getScale(props, baselineDates, actual.intervalData);
+    const untrimmed = offset(scale);
     const trimRange = trimIntervals
-      ? getTrimRange(untrimmedRows, totals.intervalData, balanceTypeOp)
+      ? getTrimRange(
+          untrimmed.rows,
+          untrimmed.totals.intervalData,
+          balanceTypeOp,
+        )
       : null;
+    // The Baseline column follows the intervals left after trimming
+    const { rows: untrimmedRows, totals } = trimRange
+      ? offset(
+          getVisibleScale(
+            scale,
+            actual.intervalData,
+            trimRange,
+            props.interval,
+          ),
+        )
+      : untrimmed;
     const rows = trimRange ? trimRows(untrimmedRows, trimRange) : untrimmedRows;
     const intervalData = stackIntervals(
       trimRange
@@ -590,20 +662,33 @@ export function createBaselineGroupedSpreadsheet(
     ]);
 
     const template = actual[0]?.intervalData ?? [];
-    const rows = offsetRows(actual, baseline, {
-      scale: getScale(props, baselineDates, template),
-      template,
-      showEmpty,
+    const offset = (scale: BaselineScale) =>
+      offsetRows(actual, baseline, {
+        scale,
+        template,
+        showEmpty,
+        balanceTypeOp,
+        sortByOp,
+      });
+
+    const scale = getScale(props, baselineDates, template);
+    const rows = offset(scale);
+    if (!trimIntervals) {
+      setData(rows);
+      return;
+    }
+
+    // The Baseline column follows the intervals left after trimming
+    const trimRange = getTrimRange(
+      rows,
+      rows[0]?.intervalData ?? [],
       balanceTypeOp,
-      sortByOp,
-    });
+    );
     setData(
-      trimIntervals
-        ? trimRows(
-            rows,
-            getTrimRange(rows, rows[0]?.intervalData ?? [], balanceTypeOp),
-          )
-        : rows,
+      trimRows(
+        offset(getVisibleScale(scale, template, trimRange, props.interval)),
+        trimRange,
+      ),
     );
   };
 }

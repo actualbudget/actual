@@ -106,14 +106,16 @@ describe('offsetInterval', () => {
     expect(offset.totalDebts).toBe(0);
   });
 
-  it('compares unprojected amounts against the full length', () => {
+  it('compares unprojected amounts against the days so far', () => {
     const offset = offsetInterval(january(-100), baselineTotals, {
       ...scale,
       projectToFullPeriod: false,
     });
 
+    // One day has passed, so 100 is expected rather than the whole month
     expect(offset.baseline?.projected).toBeUndefined();
-    expect(offset.totalDebts).toBe(3000);
+    expect(offset.baseline?.expected.totalDebts).toBe(-100);
+    expect(offset.totalDebts).toBe(0);
   });
 
   it('spreads budgets per interval rather than per day', () => {
@@ -137,10 +139,28 @@ describe('offsetItem', () => {
       projectToFullPeriod: false,
     });
 
-    expect(item.intervalData.map(i => i.totalDebts)).toEqual([-1000, 0, 3000]);
-    expect(item.totalDebts).toBe(2000);
-    expect(item.baseline.expected.totalDebts).toBe(-9200);
+    expect(item.intervalData.map(i => i.totalDebts)).toEqual([-1000, 0, 0]);
+    expect(item.totalDebts).toBe(-1000);
+    expect(item.baseline.expected.totalDebts).toBe(-6200);
     expect(item.baseline.projected).toBeUndefined();
+  });
+
+  it('scales the pace so far to an average-length interval', () => {
+    const item = offsetItem(row('groceries', months), baselineTotals, scale);
+
+    // 7200 over the 62 days so far, over a 30.5-day interval
+    expect(item.baseline.pacePerInterval?.totalDebts).toBe(-3542);
+    expect(item.baseline.perInterval?.totalDebts).toBe(-3050);
+  });
+
+  it('averages budgets per interval rather than by pace', () => {
+    const item = offsetItem(
+      row('groceries', months),
+      row('baseline', [interval('2016-05-01', '', -60000)]),
+      { ...scale, perInterval: true },
+    );
+
+    expect(item.baseline.pacePerInterval?.totalBudgeted).toBe(-2400);
   });
 
   it('projects the total over the whole range at its pace so far', () => {
@@ -248,7 +268,19 @@ describe('offsetRows', () => {
 
 describe('getAverageDays', () => {
   it('averages the full length of each interval', () => {
-    expect(getAverageDays([november(0), december(0)])).toBe(30.5);
+    expect(getAverageDays([november(0), december(0)], 'Monthly')).toBe(30.5);
+  });
+
+  it('counts intervals the range cuts short at their full length', () => {
+    const weeks = [
+      interval('2016-12-01', '2016-12-03', 0),
+      interval('2016-12-04', '2016-12-10', 0),
+    ];
+
+    expect(getAverageDays(weeks, 'Weekly')).toBe(7);
+    expect(
+      getAverageDays([interval('2016-11-15', '2016-11-30', 0)], 'Monthly'),
+    ).toBe(30);
   });
 });
 
@@ -294,7 +326,8 @@ describe('getTrimRange', () => {
       projectToFullPeriod: false,
     });
 
-    // Totals include the baseline for the quiet months either side
-    expect(item.baseline.expected.totalDebts).toBe(-12300);
+    // Totals include the baseline for the quiet months either side, and for
+    // the day of January so far
+    expect(item.baseline.expected.totalDebts).toBe(-9300);
   });
 });
