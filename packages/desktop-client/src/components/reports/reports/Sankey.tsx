@@ -802,7 +802,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     ];
 
     void navigate('/accounts', {
-      state: { goBack: true, filterConditions },
+      state: {
+        goBack: true,
+        filterConditions,
+        filterConditionsOp: conditionsOp,
+      },
     });
   }
 

@@ -54,6 +54,12 @@ type SankeyLinkPayload = {
   color?: string;
 };
 
+// A link's two endpoint keys, stable across re-renders even if `data.nodes`/
+// `data.links` get reordered (unlike a raw array index).
+function linkKey(source: { key: string }, target: { key: string }) {
+  return `${source.key}->${target.key}`;
+}
+
 type SankeyLinkProps = {
   sourceX: number;
   sourceY: number;
@@ -241,10 +247,9 @@ export function SankeyGraph({
 }: SankeyGraphProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
-  const [hovered, setHovered] = useState<{
-    type: 'node' | 'link';
-    index: number;
-  } | null>(null);
+  const [hovered, setHovered] = useState<
+    { type: 'node'; key: string } | { type: 'link'; key: string } | null
+  >(null);
 
   // play the load animation once: wait until the card scrolls into view,
   // run the fade-in, then stay in 'done' so later data changes (filters,
@@ -290,26 +295,37 @@ export function SankeyGraph({
                   showPercentages={showPercentages}
                   onDrilldownClick={onDrilldownClick}
                   onMouseEnter={() =>
-                    setHovered({ type: 'node', index: props.index })
+                    setHovered({
+                      type: 'node',
+                      key: (props.payload as SankeyGraphNode).key,
+                    })
                   }
                   onMouseLeave={() => setHovered(null)}
                 />
               )}
-              link={props => (
-                <SankeyLink
-                  {...props}
-                  containerWidth={width}
-                  phase={phase}
-                  isHovered={
-                    hovered?.type === 'link' && hovered.index === props.index
-                  }
-                  onMouseEnter={() =>
-                    setHovered({ type: 'link', index: props.index })
-                  }
-                  onMouseLeave={() => setHovered(null)}
-                  onDrilldownClick={onDrilldownClick}
-                />
-              )}
+              link={props => {
+                const linkPayload = props.payload as SankeyLinkPayload;
+                return (
+                  <SankeyLink
+                    {...props}
+                    containerWidth={width}
+                    phase={phase}
+                    isHovered={
+                      hovered?.type === 'link' &&
+                      hovered.key ===
+                        linkKey(linkPayload.source, linkPayload.target)
+                    }
+                    onMouseEnter={() =>
+                      setHovered({
+                        type: 'link',
+                        key: linkKey(linkPayload.source, linkPayload.target),
+                      })
+                    }
+                    onMouseLeave={() => setHovered(null)}
+                    onDrilldownClick={onDrilldownClick}
+                  />
+                );
+              }}
               sort={false}
               iterations={128}
               nodePadding={23}
@@ -327,15 +343,36 @@ export function SankeyGraph({
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     const { value = 0, name = '' } = payload[0];
+                    // Looked up by stable key (not array index) so a data
+                    // refresh that reorders nodes/links while the pointer
+                    // stays put can't make this resolve to the wrong one.
                     const tooltipInfo =
                       hovered?.type === 'link'
                         ? (
-                            data.links[hovered.index] as {
-                              tooltipInfo?: Array<{
-                                name: string;
-                                value: number;
-                              }>;
-                            }
+                            data.links.find(link => {
+                              const { source, target } = link as {
+                                source: number;
+                                target: number;
+                              };
+                              const sourceNode = data.nodes[source] as
+                                | SankeyGraphNode
+                                | undefined;
+                              const targetNode = data.nodes[target] as
+                                | SankeyGraphNode
+                                | undefined;
+                              return (
+                                sourceNode &&
+                                targetNode &&
+                                linkKey(sourceNode, targetNode) === hovered.key
+                              );
+                            }) as
+                              | {
+                                  tooltipInfo?: Array<{
+                                    name: string;
+                                    value: number;
+                                  }>;
+                                }
+                              | undefined
                           )?.tooltipInfo
                         : undefined;
                     // `data` is typed as the generic recharts SankeyData, so
@@ -343,13 +380,14 @@ export function SankeyGraph({
                     // the links cast above) aren't visible without this cast.
                     const hoveredNode =
                       hovered?.type === 'node'
-                        ? (data.nodes[hovered.index] as SankeyGraphNode)
+                        ? (data.nodes.find(
+                            node =>
+                              (node as SankeyGraphNode).key === hovered.key,
+                          ) as SankeyGraphNode | undefined)
                         : undefined;
                     const showInOutNet =
                       hoveredNode?.inflow !== undefined &&
-                      hoveredNode?.outflow !== undefined &&
-                      hoveredNode.inflow > 0 &&
-                      hoveredNode.outflow > 0;
+                      hoveredNode?.outflow !== undefined;
                     const redactedFont = privacyMode
                       ? t('Redacted Script')
                       : undefined;

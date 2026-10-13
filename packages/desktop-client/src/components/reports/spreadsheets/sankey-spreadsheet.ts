@@ -1559,6 +1559,36 @@ export function moveNodeToStart(
   }
 }
 
+// Sum of a node's outgoing link values, ignoring links into layout-only
+// hidden nodes (which don't represent real money movement).
+function getOutgoingValue(graph: Graph, key: NodeKey): number {
+  const node = graph.get(key);
+  if (!node) {
+    return 0;
+  }
+
+  let total = 0;
+  node.to.forEach((value, targetKey) => {
+    if (!isHiddenNodeKey(targetKey)) {
+      total += value ?? 0;
+    }
+  });
+  return total;
+}
+
+// Sum of a node's incoming link values, ignoring links from layout-only
+// hidden nodes. Unlike getNodeValue, this isn't root-position-dependent -
+// it's the node's actual incoming total regardless of where it sits.
+function getIncomingValue(graph: Graph, key: NodeKey): number {
+  let total = 0;
+  graph.forEach((data, sourceKey) => {
+    if (!isHiddenNodeKey(sourceKey)) {
+      total += data.to.get(key) ?? 0;
+    }
+  });
+  return total;
+}
+
 export function getNodeValue(
   graph: Graph,
   key: NodeKey,
@@ -1566,42 +1596,15 @@ export function getNodeValue(
 ): number {
   const resolvedLayersByNode =
     computedLayersByNode ?? getComputedNodeLayers(graph);
-  let nodeValue: number = 0;
 
   if ((resolvedLayersByNode.get(key) ?? 0) === 0) {
     // Look at outgoing links for root nodes
-    const node = graph.get(key);
-    if (node) {
-      node.to.forEach((value, targetKey) => {
-        if (isHiddenNodeKey(targetKey)) {
-          return;
-        }
-        nodeValue += value ?? 0;
-      });
-    }
-  } else {
-    graph.forEach((data, sourceKey) => {
-      if (isHiddenNodeKey(sourceKey)) {
-        return;
-      }
-      nodeValue += data.to.get(key) ?? 0;
-    });
-
-    // If node is in reality a root node, masked behind hidden nodes
-    if (nodeValue < 0) {
-      nodeValue = 0;
-      const node = graph.get(key);
-      if (node) {
-        node.to.forEach((value, targetKey) => {
-          if (isHiddenNodeKey(targetKey)) {
-            return;
-          }
-          nodeValue += value;
-        });
-      }
-    }
+    return getOutgoingValue(graph, key);
   }
-  return nodeValue;
+
+  const incomingValue = getIncomingValue(graph, key);
+  // If node is in reality a root node, masked behind hidden nodes
+  return incomingValue < 0 ? getOutgoingValue(graph, key) : incomingValue;
 }
 
 export function addPercentageLabels(graph: Graph): void {
@@ -1985,12 +1988,17 @@ const DRILLDOWN_BY_LAYER: Partial<
 function getNodeDrilldown(
   key: NodeKey,
   type: GraphLayers,
+  isNegative?: boolean,
 ): SankeyNodeDrilldown | undefined {
   if (
     NON_DRILLDOWN_NODE_KEYS.has(key) ||
     key.endsWith(SpecialNodeKeys.OtherSuffix) ||
     key.endsWith(SpecialNodeKeys.HiddenSuffix) ||
-    key.endsWith(SpecialNodeKeys.NegativeSuffix)
+    key.endsWith(SpecialNodeKeys.NegativeSuffix) ||
+    // `isNegative` nodes are budget-mode accounting placeholders (e.g. the
+    // "From {{category}}" overspend node, keyed by the category's own id
+    // but typed as an Account) rather than the real entity their key names.
+    isNegative
   ) {
     return undefined;
   }
@@ -1999,36 +2007,6 @@ function getNodeDrilldown(
   return mapping
     ? { field: mapping.field, id: key, direction: mapping.direction }
     : undefined;
-}
-
-// Sum of a node's outgoing link values, ignoring links into layout-only
-// hidden nodes (which don't represent real money movement).
-function getOutgoingValue(graph: Graph, key: NodeKey): number {
-  const node = graph.get(key);
-  if (!node) {
-    return 0;
-  }
-
-  let total = 0;
-  node.to.forEach((value, targetKey) => {
-    if (!isHiddenNodeKey(targetKey)) {
-      total += value;
-    }
-  });
-  return total;
-}
-
-// Sum of a node's incoming link values, ignoring links from layout-only
-// hidden nodes. Unlike getNodeValue, this isn't root-position-dependent -
-// it's the node's actual incoming total regardless of where it sits.
-function getIncomingValue(graph: Graph, key: NodeKey): number {
-  let total = 0;
-  graph.forEach((data, sourceKey) => {
-    if (!isHiddenNodeKey(sourceKey)) {
-      total += data.to.get(key) ?? 0;
-    }
-  });
-  return total;
 }
 
 export function convertToSankeyData(
@@ -2042,7 +2020,7 @@ export function convertToSankeyData(
       : (data.name ?? key),
     percentageLabel: data.percentageLabel ?? '',
     color: data.color ?? undefined,
-    drilldown: getNodeDrilldown(key, data.type),
+    drilldown: getNodeDrilldown(key, data.type, data.isNegative),
     inflow:
       data.type === GraphLayers.Account
         ? getIncomingValue(graph, key)
