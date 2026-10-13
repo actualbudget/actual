@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
+import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
@@ -17,6 +18,7 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FormField, FormLabel } from '#components/forms';
+import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { getSecretsError } from '#util/error';
 
@@ -27,8 +29,13 @@ type SimpleFinInitialiseModalProps = Extract<
 
 export const SimpleFinInitialiseModal = ({
   onSuccess,
+  credentialSource,
 }: SimpleFinInitialiseModalProps) => {
   const { t } = useTranslation();
+  const { cloudFileId, isAdmin } = useCurrentAccess();
+  const [perBudgetFile, setPerBudgetFile] = useState(
+    credentialSource === 'per-budget-file' || !isAdmin,
+  );
   const [token, setToken] = useState('');
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,25 +47,36 @@ export const SimpleFinInitialiseModal = ({
       return;
     }
 
+    const fileId = perBudgetFile ? cloudFileId : null;
+    if (perBudgetFile && !fileId) {
+      setIsValid(false);
+      setError(t('Budget file ID is required.'));
+      return;
+    }
     setIsLoading(true);
 
-    const { error, reason } =
+    let { error, reason } =
       (await send('secret-set', {
         name: 'simplefin_token',
         value: token,
+        fileId,
       })) || {};
 
+    if (!error) {
+      ({ error, reason } =
+        (await send('secret-set', {
+          name: 'simplefin_accessKey',
+          value: null,
+          fileId,
+        })) || {});
+    }
+    setIsLoading(false);
     if (error) {
       setIsValid(false);
       setError(getSecretsError(error, reason));
-    } else {
-      await send('secret-set', {
-        name: 'simplefin_accessKey',
-        value: null,
-      });
-      onSuccess();
+      return;
     }
-    setIsLoading(false);
+    onSuccess(perBudgetFile);
     close();
   };
 
@@ -86,6 +104,26 @@ export const SimpleFinInitialiseModal = ({
                 .
               </Trans>
             </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
+              <Text>
+                <Trans>For this budget only</Trans>
+              </Text>
+              <Toggle
+                id="simplefin-per-budget-file"
+                aria-label={t('For this budget only')}
+                isOn={perBudgetFile}
+                isDisabled={!isAdmin}
+                onToggle={setPerBudgetFile}
+              />
+            </View>
 
             <FormField>
               <FormLabel title={t('Token:')} htmlFor="token-field" />
