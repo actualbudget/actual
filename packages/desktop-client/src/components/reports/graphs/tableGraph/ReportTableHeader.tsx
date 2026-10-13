@@ -43,7 +43,6 @@ export function ReportTableHeader({
 }: ReportTableHeaderProps) {
   const { t } = useTranslation();
   // Total tables keep real amounts and add a change column beside them
-  const hasChangeColumn = showBaseline && mode !== 'time';
   return (
     <Row
       collapsed
@@ -135,18 +134,6 @@ export function ReportTableHeader({
                 />
               </>
             )}
-        {showBaseline && mode === 'time' && showProjected && (
-          <Cell
-            style={{
-              minWidth: compact ? 50 : 85,
-            }}
-            valueStyle={compactStyle}
-            value={t('Projected')}
-            title={t('The amount so far, scaled up to the whole range')}
-            textAlign="right"
-            width="flex"
-          />
-        )}
         <Cell
           style={{
             minWidth: compact ? 50 : 85,
@@ -156,7 +143,7 @@ export function ReportTableHeader({
           textAlign="right"
           width="flex"
         />
-        {hasChangeColumn && showProjected && (
+        {showBaseline && showProjected && (
           <Cell
             style={{
               minWidth: compact ? 50 : 85,
@@ -168,13 +155,18 @@ export function ReportTableHeader({
             width="flex"
           />
         )}
-        {hasChangeColumn && (
+        {showBaseline && (
           <Cell
             style={{
               minWidth: compact ? 50 : 85,
             }}
             valueStyle={compactStyle}
             value={t('Change')}
+            title={
+              mode === 'time'
+                ? t('The average compared with the baseline per interval')
+                : t('The difference from the baseline over the whole range')
+            }
             textAlign="right"
             width="flex"
           />
@@ -185,6 +177,11 @@ export function ReportTableHeader({
           }}
           valueStyle={compactStyle}
           value={t('Average')}
+          title={
+            showBaseline && mode === 'time'
+              ? t('An average-length interval at the pace so far')
+              : undefined
+          }
           textAlign="right"
           width="flex"
         />

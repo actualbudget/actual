@@ -1,16 +1,20 @@
 import React, { memo } from 'react';
 import type { CSSProperties, RefObject, UIEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   GroupedEntity,
+  IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
+import { countDays, countElapsedDays } from '#components/reports/baselineRange';
 import { showActivity } from '#components/reports/graphs/showActivity';
 import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
@@ -78,15 +82,76 @@ export const ReportTableRow = memo(
     scopeTagNames,
   }: ReportTableRowProps) => {
     const breakdown = showBaseline ? item.baseline : undefined;
-    // Total tables keep real amounts and add a change column beside them, so
-    // the amounts match the transactions a click-through shows
-    const hasChangeColumn = !!breakdown && mode !== 'time';
-    const amounts = hasChangeColumn ? breakdown.actual : item;
+    // Baseline tables keep real amounts, so they match the transactions a
+    // click-through shows, and put the change in its own column
+    const amounts = breakdown ? breakdown.actual : item;
     const baselineAmount =
       mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
-    const average = Math.round(amounts[balanceTypeOp] / intervalsCount);
+    // Time tables compare a typical interval at the pace so far against the
+    // Baseline column, while total tables compare the whole range
+    const pace = mode === 'time' ? breakdown?.pacePerInterval : undefined;
+    const average = pace
+      ? pace[balanceTypeOp]
+      : Math.round(amounts[balanceTypeOp] / intervalsCount);
+    const change = pace
+      ? average - (baselineAmount?.[balanceTypeOp] ?? 0)
+      : item[balanceTypeOp];
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
+    const { t } = useTranslation();
+
+    // Spells out what a baseline interval was compared against, since its
+    // length can differ from the average interval in the Baseline column
+    const getIntervalTitle = (
+      intervalItem: IntervalEntity,
+      intervalBreakdown: BaselineBreakdown | undefined,
+    ) => {
+      if (!intervalBreakdown) {
+        const amount = intervalItem[balanceTypeOp];
+        return Math.abs(amount) > 100000
+          ? format(amount, 'financial')
+          : undefined;
+      }
+
+      const change = intervalItem[balanceTypeOp];
+      const expected = format(
+        intervalBreakdown.expected[balanceTypeOp],
+        'financial',
+      );
+      const lines = [
+        // Budgets are compared per interval, so their length doesn't matter
+        balanceTypeOp === 'totalBudgeted' ||
+        !intervalItem.intervalStartDate ||
+        !intervalItem.intervalEndDate
+          ? t('Baseline: {{amount}}', { amount: expected })
+          : t('Baseline: {{amount}} over {{count}} days', {
+              amount: expected,
+              // Unprojected intervals in progress compare the days so far
+              count: (intervalBreakdown.projected
+                ? countDays
+                : countElapsedDays)(
+                intervalItem.intervalStartDate,
+                intervalItem.intervalEndDate,
+              ),
+            }),
+      ];
+      if (intervalBreakdown.projected) {
+        lines.push(
+          t('Projected: {{amount}}', {
+            amount: format(
+              intervalBreakdown.projected[balanceTypeOp],
+              'financial',
+            ),
+          }),
+        );
+      }
+      lines.push(
+        t('Change: {{amount}}', {
+          amount: (change > 0 ? '+' : '') + format(change, 'financial'),
+        }),
+      );
+      return lines.join('\n');
+    };
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -224,6 +289,19 @@ export const ReportTableRow = memo(
           )}
           {item.intervalData && mode === 'time'
             ? item.intervalData.map((intervalItem, index) => {
+                // With a baseline, cells show real amounts coloured by their
+                // change from it
+                const intervalBreakdown = breakdown && intervalItem.baseline;
+                const intervalAmount = intervalBreakdown
+                  ? intervalBreakdown.actual[balanceTypeOp]
+                  : intervalItem[balanceTypeOp];
+                const intervalChange = intervalBreakdown
+                  ? intervalItem[balanceTypeOp]
+                  : undefined;
+                const intervalColor =
+                  intervalChange !== undefined
+                    ? getAmountColor(intervalChange)
+                    : colorized && getAmountColor(intervalAmount);
                 return (
                   <Cell
                     key={index}
@@ -231,9 +309,7 @@ export const ReportTableRow = memo(
                     style={{
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
-                      ...(colorized && {
-                        color: getAmountColor(intervalItem[balanceTypeOp]),
-                      }),
+                      ...(intervalColor && { color: intervalColor }),
                     }}
                     unexposedContent={({ value }) => (
                       <FinancialText
@@ -247,12 +323,8 @@ export const ReportTableRow = memo(
                       </FinancialText>
                     )}
                     valueStyle={compactStyle}
-                    value={format(intervalItem[balanceTypeOp], 'financial')}
-                    title={
-                      Math.abs(intervalItem[balanceTypeOp]) > 100000
-                        ? format(intervalItem[balanceTypeOp], 'financial')
-                        : undefined
-                    }
+                    value={format(intervalAmount, 'financial')}
+                    title={getIntervalTitle(intervalItem, intervalBreakdown)}
                     onClick={() =>
                       canShowActivity &&
                       showActivity({
@@ -377,16 +449,6 @@ export const ReportTableRow = memo(
                   />
                 </>
               )}
-          {mode === 'time' && breakdown && showProjected && (
-            <AmountCell
-              value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
-              compact={compact}
-              backgroundColor={style?.backgroundColor}
-              compactStyle={compactStyle}
-              hoverStyle={hoverUnderline}
-              onClick={onShowTotals}
-            />
-          )}
           <Cell
             value={format(amounts[balanceTypeOp], 'financial')}
             title={
@@ -419,7 +481,7 @@ export const ReportTableRow = memo(
             width="flex"
             privacyFilter
           />
-          {hasChangeColumn && showProjected && (
+          {breakdown && showProjected && (
             <AmountCell
               value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
               compact={compact}
@@ -429,9 +491,9 @@ export const ReportTableRow = memo(
               onClick={onShowTotals}
             />
           )}
-          {hasChangeColumn && (
+          {breakdown && (
             <AmountCell
-              value={item[balanceTypeOp]}
+              value={change}
               compact={compact}
               backgroundColor={style?.backgroundColor}
               compactStyle={compactStyle}
