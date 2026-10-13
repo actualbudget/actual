@@ -2019,23 +2019,26 @@ export function convertToSankeyData(
   toolTipInfoMap: TooltipInfoMap,
   totalsGraph: Graph = graph,
 ): SankeyData {
-  const nodes = Array.from(graph, ([key, data]) => ({
-    key,
-    name: data.labelKey
-      ? t(data.labelKey, data.labelParams)
-      : (data.name ?? key),
-    percentageLabel: data.percentageLabel ?? '',
-    color: data.color ?? undefined,
-    drilldown: getNodeDrilldown(key, data.type, data.isNegative),
-    inflow:
-      data.type === GraphLayers.Account
-        ? getIncomingValue(totalsGraph, key)
-        : undefined,
-    outflow:
-      data.type === GraphLayers.Account
-        ? getOutgoingValue(totalsGraph, key)
-        : undefined,
-  }));
+  const nodes = Array.from(graph, ([key, data]) => {
+    const drilldown = getNodeDrilldown(key, data.type, data.isNegative);
+    // Some synthetic placeholder nodes (e.g. AvailableIncome, AllAccounts,
+    // the budget-mode overspend node) are typed as Account too, but aren't
+    // real accounts - getNodeDrilldown already excludes them from
+    // click-to-filter, so gate the in/out/net tooltip totals the same way.
+    const isRealAccount = data.type === GraphLayers.Account && drilldown;
+
+    return {
+      key,
+      name: data.labelKey
+        ? t(data.labelKey, data.labelParams)
+        : (data.name ?? key),
+      percentageLabel: data.percentageLabel ?? '',
+      color: data.color ?? undefined,
+      drilldown,
+      inflow: isRealAccount ? getIncomingValue(totalsGraph, key) : undefined,
+      outflow: isRealAccount ? getOutgoingValue(totalsGraph, key) : undefined,
+    };
+  });
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
       const tooltipInfo = toolTipInfoMap.get(key)?.get(targetKey) ?? [];
