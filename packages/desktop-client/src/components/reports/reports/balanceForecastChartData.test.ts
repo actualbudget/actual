@@ -1,3 +1,4 @@
+import type { ForecastResult } from '@actual-app/core/types/models/forecast';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -437,5 +438,56 @@ describe('getLowestChartDataPoint', () => {
 
   it('returns undefined for empty chart data', () => {
     expect(getLowestChartDataPoint([])).toBeUndefined();
+  });
+});
+
+describe('forecast purchasing-power comparison', () => {
+  it('discounts combined month-end scenario balances while retaining both nominal series', () => {
+    const point = {
+      date: '2025-03-31',
+      balance: 5500,
+      accountId: 'checking',
+      accountName: 'Checking',
+      transactions: [],
+    };
+    const forecastData: ForecastResult = {
+      dataPoints: [point, { ...point, accountId: 'savings', balance: 4500 }],
+      lowestBalance: point,
+      forecastStartDate: '2025-03-01',
+      forecastEndDate: '2025-03-31',
+      scenario: {
+        assumptions: {
+          anchorDate: '2024-03-31',
+          inflationRate: 0.1,
+          salaryGrowthRate: 0.1,
+          incomeScheduleIds: ['salary'],
+        },
+        dataPoints: [
+          { ...point, balance: 6600 },
+          { ...point, accountId: 'savings', balance: 4500 },
+        ],
+      },
+    };
+    const common = { forecastData, start: '2025-03-31', end: '2025-03-31' };
+    expect(
+      buildBalanceForecastChartData({ ...common, granularity: 'Monthly' }),
+    ).toEqual([
+      {
+        date: '2025-03',
+        balance: 10091,
+        baselineBalance: 10000,
+        nominalBalance: 11100,
+      },
+    ]);
+    expect(
+      buildBalanceForecastChartData({ ...common, granularity: 'Daily' }),
+    ).toEqual([
+      {
+        date: '2025-03-31',
+        balance: 10091,
+        baselineBalance: 10000,
+        nominalBalance: 11100,
+      },
+    ]);
   });
 });
