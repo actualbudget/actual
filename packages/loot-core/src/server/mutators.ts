@@ -4,6 +4,7 @@ import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
+const runningBackgroundMethods = new Set<Promise<unknown>>();
 const runningMutators = new Set<Promise<unknown>>();
 
 let currentContext = null;
@@ -21,14 +22,14 @@ export function isMutating(handler) {
   return mutatingMethods.has(handler);
 }
 
-async function flushRunningMethods() {
+async function flushRunningMethods(methods = runningMethods) {
   // Give the client some time to invoke new requests
   await wait(200);
 
-  while (runningMethods.size > 0 || runningMutators.size > 0) {
+  while (methods.size > 0 || runningMutators.size > 0) {
     // Wait for all of them; rejections already went to their callers.
     await Promise.allSettled([
-      ...runningMethods.values(),
+      ...methods.values(),
       ...runningMutators.values(),
     ]);
 
@@ -38,6 +39,11 @@ async function flushRunningMethods() {
   }
 }
 
+export function flushRunningBackgroundMethods() {
+  // The closing API handler may itself be tracked in runningMethods.
+  return flushRunningMethods(runningBackgroundMethods);
+}
+
 function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
@@ -45,7 +51,7 @@ function wait(time) {
 export async function runHandler<T extends Handlers[keyof Handlers]>(
   handler: T,
   args?: Parameters<T>[0],
-  { undoTag, name }: { undoTag?; name? } = {},
+  { undoTag, name, background }: { undoTag?; name?; background?: boolean } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
@@ -69,8 +75,14 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
 
   const promise = handler(args);
   runningMethods.add(promise);
+  if (background) {
+    runningBackgroundMethods.add(promise);
+  }
   // Remove on rejection too — a stale promise poisons every later flush.
-  const remove = () => runningMethods.delete(promise);
+  const remove = () => {
+    runningMethods.delete(promise);
+    runningBackgroundMethods.delete(promise);
+  };
   void promise.then(remove, remove);
   return promise as Promise<ReturnType<T>>;
 }

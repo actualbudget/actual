@@ -800,7 +800,9 @@ export async function initialFullSync(): Promise<{
 }
 
 // Track background syncs so budget shutdown drains their resulting mutators.
-export const fullSync = once(() => runHandler(runFullSync));
+export const fullSync = once(() =>
+  runHandler(runFullSync, undefined, { background: true }),
+);
 
 async function runFullSync(): Promise<
   | { messages: Message[] }

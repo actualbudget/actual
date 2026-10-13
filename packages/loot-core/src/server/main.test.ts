@@ -447,7 +447,9 @@ describe('Categories', () => {
   });
 });
 
-describe('Mutator shutdown', () => {
+const closeModes = ['named', 'unnamed', 'direct', 'nested'];
+
+describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
   afterEach(() => {
     vi.useRealTimers();
   });
@@ -461,9 +463,21 @@ describe('Mutator shutdown', () => {
   }
 
   function startCloseBudget() {
-    return runHandler(handlers['close-budget'], undefined, {
-      name: 'close-budget',
-    });
+    switch (closeMode) {
+      case 'direct':
+        return handlers['close-budget']();
+      case 'nested':
+        return runHandler(async () => {
+          await Promise.resolve();
+          return handlers['close-budget']();
+        });
+      case 'unnamed':
+        return runHandler(handlers['close-budget']);
+      default:
+        return runHandler(handlers['close-budget'], undefined, {
+          name: 'close-budget',
+        });
+    }
   }
 
   test('waits for background sync and the schedule mutator it starts', async () => {
