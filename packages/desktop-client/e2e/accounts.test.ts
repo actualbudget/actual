@@ -119,6 +119,31 @@ test.describe('Accounts', () => {
     await expect(transaction.balance).toHaveText('25.00');
   });
 
+  test('shows the running balance when sorted by date oldest first', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Running balance',
+      offBudget: false,
+      balance: 100,
+    });
+    await accountPage.waitFor();
+    await accountPage.createSingleTransaction({ debit: '30.00' });
+    await accountPage.createSingleTransaction({ credit: '5.00' });
+    await accountPage.setTransactionColumnVisibility('balance', true);
+
+    // The first click sorts newest first, the second oldest first.
+    const dateHeader = page.getByRole('button', { name: 'Date', exact: true });
+    await dateHeader.click();
+    await expect(accountPage.getNthTransaction(0).credit).toHaveText('5.00');
+    await dateHeader.click();
+
+    await expect(accountPage.getNthTransaction(0).payee).toHaveText(
+      'Starting Balance',
+    );
+    await expect(accountPage.getNthTransaction(0).balance).toHaveText('100.00');
+    await expect(accountPage.getNthTransaction(1).balance).toHaveText('70.00');
+    await expect(accountPage.getNthTransaction(2).balance).toHaveText('75.00');
+  });
+
   test('bulk editing the date shows a properly formatted date picker', async () => {
     async function measure(locator: Locator) {
       const box = await locator.boundingBox();
