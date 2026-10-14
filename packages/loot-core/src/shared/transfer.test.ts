@@ -140,3 +140,45 @@ describe('categoryForLinkedTransfer', () => {
     ).toBeNull();
   });
 });
+
+describe('linkedTransferAccounts', () => {
+  test('turns AQL booleans into the numeric off-budget flag', () => {
+    const accounts = transfer.linkedTransferAccounts([
+      { id: 'checking', offbudget: false },
+      { id: 'brokerage', offbudget: true },
+    ]);
+
+    expect(accounts).toEqual([
+      { id: 'checking', offbudget: 0 },
+      { id: 'brokerage', offbudget: 1 },
+    ]);
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'checking', category: 'income' },
+        { account: 'brokerage' },
+        accounts,
+      ),
+    ).toBe('income');
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'brokerage', category: 'income' },
+        { account: 'checking' },
+        accounts,
+      ),
+    ).toBeNull();
+  });
+
+  test('keeps numeric flags unchanged', () => {
+    expect(
+      transfer.linkedTransferAccounts([
+        { id: 'checking', offbudget: 0 },
+        { id: 'savings', offbudget: 0 },
+        { id: 'brokerage', offbudget: 1 },
+      ]),
+    ).toEqual([
+      { id: 'checking', offbudget: 0 },
+      { id: 'savings', offbudget: 0 },
+      { id: 'brokerage', offbudget: 1 },
+    ]);
+  });
+});

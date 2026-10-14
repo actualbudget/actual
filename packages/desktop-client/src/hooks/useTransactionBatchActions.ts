@@ -12,6 +12,7 @@ import {
 } from '@actual-app/core/shared/transactions';
 import {
   categoryForLinkedTransfer,
+  linkedTransferAccounts,
   validForTransfer,
 } from '@actual-app/core/shared/transfer';
 import { applyChanges, applyFindReplace } from '@actual-app/core/shared/util';
@@ -541,9 +542,7 @@ export function useTransactionBatchActions() {
         const { data: accountRows } = await aqlQuery(
           q('accounts').select(['id', 'offbudget']),
         );
-        const accounts = accountRows as Array<
-          Pick<AccountEntity, 'id' | 'offbudget'>
-        >;
+        const accounts = linkedTransferAccounts(accountRows);
 
         const changes = {
           updated: [

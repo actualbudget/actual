@@ -17,6 +17,20 @@ export function validForTransfer(
 
 type TransferAccount = Pick<AccountEntity, 'id' | 'offbudget'>;
 
+// The accounts query returns offbudget as a boolean. Account records store
+// the same flag as 0 or 1, which is what the category check compares.
+export function linkedTransferAccounts(
+  rows: ReadonlyArray<{
+    id: string;
+    offbudget?: boolean | number | null;
+  }>,
+): TransferAccount[] {
+  return rows.map(account => ({
+    id: account.id,
+    offbudget: account.offbudget ? 1 : 0,
+  }));
+}
+
 // Linking two existing transactions into a transfer. Same-budget links have
 // no category. A link between an on-budget and an off-budget account keeps
 // the category on the on-budget side, which is how money entering or leaving
