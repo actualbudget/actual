@@ -1,4 +1,4 @@
-import type { TransactionEntity } from '#types/models';
+import type { AccountEntity, TransactionEntity } from '#types/models';
 
 export function validForTransfer(
   fromTransaction: TransactionEntity,
@@ -13,4 +13,29 @@ export function validForTransfer(
     return true;
   }
   return false;
+}
+
+type TransferAccount = Pick<AccountEntity, 'id' | 'offbudget'>;
+
+// Linking two existing transactions into a transfer. Same-budget links have
+// no category. A link between an on-budget and an off-budget account keeps
+// the category on the on-budget side, which is how money entering or leaving
+// the budget stays categorized. The off-budget side is always cleared.
+export function categoryForLinkedTransfer(
+  transaction: Pick<TransactionEntity, 'account' | 'category'>,
+  other: Pick<TransactionEntity, 'account'>,
+  accounts: ReadonlyArray<TransferAccount>,
+): string | null {
+  const own = accounts.find(account => account.id === transaction.account);
+  const counterparty = accounts.find(account => account.id === other.account);
+  if (!own || !counterparty) {
+    return null;
+  }
+
+  const crossesBudget = own.offbudget !== counterparty.offbudget;
+  if (crossesBudget && own.offbudget === 0) {
+    return transaction.category ?? null;
+  }
+
+  return null;
 }

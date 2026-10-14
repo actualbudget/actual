@@ -73,3 +73,70 @@ describe('Transfer', () => {
     ).toBeFalsy();
   });
 });
+
+describe('categoryForLinkedTransfer', () => {
+  const checking = { id: 'checking', offbudget: 0 as const };
+  const savings = { id: 'savings', offbudget: 0 as const };
+  const brokerage = { id: 'brokerage', offbudget: 1 as const };
+  const accounts = [checking, savings, brokerage];
+
+  test('clears the category when both accounts are on budget', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'checking', category: 'food' },
+        { account: 'savings' },
+        accounts,
+      ),
+    ).toBeNull();
+  });
+
+  test('clears the category when both accounts are off budget', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'brokerage', category: 'food' },
+        { account: 'brokerage-other' },
+        [brokerage, { id: 'brokerage-other', offbudget: 1 }],
+      ),
+    ).toBeNull();
+  });
+
+  test('keeps the category on the on-budget side of a cross-budget link', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'checking', category: 'income' },
+        { account: 'brokerage' },
+        accounts,
+      ),
+    ).toBe('income');
+  });
+
+  test('clears the category on the off-budget side of a cross-budget link', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'brokerage', category: 'income' },
+        { account: 'checking' },
+        accounts,
+      ),
+    ).toBeNull();
+  });
+
+  test('keeps a missing category as null on the on-budget side', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'checking' },
+        { account: 'brokerage' },
+        accounts,
+      ),
+    ).toBeNull();
+  });
+
+  test('clears the category when an account is unknown', () => {
+    expect(
+      transfer.categoryForLinkedTransfer(
+        { account: 'checking', category: 'food' },
+        { account: 'missing' },
+        accounts,
+      ),
+    ).toBeNull();
+  });
+});

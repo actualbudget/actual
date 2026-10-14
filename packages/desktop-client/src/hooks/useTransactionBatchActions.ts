@@ -10,7 +10,10 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { validForTransfer } from '@actual-app/core/shared/transfer';
+import {
+  categoryForLinkedTransfer,
+  validForTransfer,
+} from '@actual-app/core/shared/transfer';
 import { applyChanges, applyFindReplace } from '@actual-app/core/shared/util';
 import type { Diff } from '@actual-app/core/shared/util';
 import type {
@@ -535,18 +538,24 @@ export function useTransactionBatchActions() {
           p => p.transfer_acct === fromTrans.account,
         );
         const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+        const { data: accountRows } = await aqlQuery(
+          q('accounts').select(['id', 'offbudget']),
+        );
+        const accounts = accountRows as Array<
+          Pick<AccountEntity, 'id' | 'offbudget'>
+        >;
 
         const changes = {
           updated: [
             {
               ...fromTrans,
-              category: null,
+              category: categoryForLinkedTransfer(fromTrans, toTrans, accounts),
               payee: toPayee?.id,
               transfer_id: toTrans.id,
             },
             {
               ...toTrans,
-              category: null,
+              category: categoryForLinkedTransfer(toTrans, fromTrans, accounts),
               payee: fromPayee?.id,
               transfer_id: fromTrans.id,
             },
