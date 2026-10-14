@@ -200,16 +200,16 @@ If you have a lot of cash withdrawals during a month, you will be better off usi
 2. In the Budget view, you enter the same amount in the _Budgeted_ columns as found in the _Spent_ columns
    for all the months you have entered or imported your data.
 
-![](/img/getting-started/actual-intro-with-budget-numbers.webp)
+![Two past months in the budget with the budgeted amounts matching the spent amounts](/img/getting-started/starting-fresh-budget-history@2x.webp)
 
 You have two easy ways to populate the various budget values when this is done.
 You can apply the last three months' average on all budget categories:
 
-![](/img/getting-started/actual-intro-set-budget-to-3-months-average.webp)
+<img width="321" alt="The month menu with Set budgets to 3 month average highlighted" src="/img/getting-started/starting-fresh-set-3-month-average@2x.webp" />
 
 You can also set specific categories to various averages:
 
-![](/img/getting-started/actual-intro-set-budget-category-average.webp)
+<img width="860" alt="The budget menu for the Food category with the 3 month, 6 month and yearly average options highlighted" src="/img/getting-started/starting-fresh-set-category-average@2x.webp" />
 
 ### What to do if you do not want to, or can't, use historical data
 

@@ -1289,6 +1289,56 @@ describe('Learning categories', () => {
     );
   });
 
+  test('does not create a rule if a "one of" rule already sets the category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(1);
+    expect(getRules()[0].conditions[0].op).toBe('oneOf');
+  });
+
+  test('creates a rule if a "one of" rule sets a different category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(2);
+    expectCategoryRule(getRules()[1], 'food', 'foo');
+  });
+
   test('updates rules correctly even if multiple rules exist', async () => {
     await loadData();
 

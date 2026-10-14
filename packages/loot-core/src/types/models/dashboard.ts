@@ -142,6 +142,7 @@ export type MonteCarloWithdrawalStrategy =
 export type MonteCarloReturnModel =
   | 'normal'
   | 'historical-bootstrap'
+  | 'historical-block-bootstrap'
   | 'historical-sequence';
 
 export type MonteCarloWithdrawalRuleType =
@@ -315,6 +316,8 @@ export type MonteCarloWidget = AbstractWidget<
     /** Age the pot must last to; the horizon is targetAge - currentAge */
     targetAge?: number;
     simulationCount?: number;
+    /** Block bootstrap model: average run of consecutive years */
+    historicalBlockLength?: number;
   } | null
 >;
 

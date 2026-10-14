@@ -1026,8 +1026,14 @@ export async function updateCategoryRules(transactions) {
             });
           }
         }
-      } else {
-        // No existing rules, so create one
+      } else if (
+        !getOneOfSetterRules(null, 'payee', 'category', {
+          condValue: payeeId,
+          actionValue: category,
+        }).next().value
+      ) {
+        // No existing rules (and no "one of" rule that already sets this
+        // category for the payee), so create one
         const newRule = new Rule({
           stage: null,
           conditionsOp: 'and',
@@ -1053,7 +1059,10 @@ export type TransactionForRules = TransactionEntity & {
   parent_imported_payee?: string;
   parent_payee?: string;
   parent_account?: string;
-  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  /**
+   * Prefetched integer balances for BALANCE_OF("…") in rule formulas; converted
+   * to amounts at the formula boundary in executeFormulaSync, cleared in finalize
+   */
   _balanceOfPrefetched?: Map<string, number>;
 };
 

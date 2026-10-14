@@ -206,7 +206,7 @@
     "date-fns": "^4.4.0",
     "es-toolkit": "^1.49.0",
     "fflate": "^0.8.3",
-    "handlebars": "^4.7.9",
+    "handlebars": "^4.7.10",
     "hyperformula": "^3.3.0",
     "lru-cache": "^11.5.2",
     "mitt": "^3.0.1",

@@ -50,7 +50,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
         notes: '',
       });
 
-      expect(transaction.notes).toBe('Interest: $5,000.00');
+      expect(transaction.notes).toBe('Interest: $50.00');
     });
 
     it('should use nested IF statements with transaction fields', async () => {
@@ -68,7 +68,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=IF(amount > 0, "Income", IF(ABS(amount) > 10000, "Large Expense", IF(ABS(amount) > 5000, "Medium Expense", "Small Expense")))',
+                '=IF(amount > 0, "Income", IF(ABS(amount) > 100, "Large Expense", IF(ABS(amount) > 50, "Medium Expense", "Small Expense")))',
             },
           },
         ],
@@ -133,7 +133,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE(UPPER(payee_name), " - ", FORMATCURRENCY(amount / 100), " on ", TEXT(date, "MM/DD/YYYY"))',
+                '=CONCATENATE(UPPER(payee_name), " - ", FORMATCURRENCY(amount), " on ", TEXT(date, "MM/DD/YYYY"))',
             },
           },
         ],
@@ -257,7 +257,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Split: ", FORMATCURRENCY(ROUND((amount / 100) * 0.333, 2)))',
+                '=CONCATENATE("Split: ", FORMATCURRENCY(ROUND(amount * 0.333, 2)))',
             },
           },
         ],
@@ -286,7 +286,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Fee: ", FORMATCURRENCY(MAX((ABS(amount) / 100) * 0.01, 5)))',
+                '=CONCATENATE("Fee: ", FORMATCURRENCY(MAX(ABS(amount) * 0.01, 5)))',
             },
           },
         ],
@@ -317,7 +317,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Rounded: ", FORMATCURRENCY(CEILING(amount / 100, -1)))',
+                '=CONCATENATE("Rounded: ", FORMATCURRENCY(CEILING(amount, -1)))',
             },
           },
         ],
@@ -362,7 +362,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
         notes: '',
       });
 
-      expect(transaction.notes).toBe('Square root: 100.00');
+      expect(transaction.notes).toBe('Square root: 10.00');
     });
   });
 
@@ -509,7 +509,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=IF(AND(amount < 0, ABS(amount) > 10000), "Large Expense", IF(OR(amount > 0, ABS(amount) < 1000), "Small Transaction", "Medium Transaction"))',
+                '=IF(AND(amount < 0, ABS(amount) > 100), "Large Expense", IF(OR(amount > 0, ABS(amount) < 10), "Small Transaction", "Medium Transaction"))',
             },
           },
         ],
@@ -630,8 +630,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula:
-                '=CONCATENATE("Amount: ", FORMATNUMBER(amount / 100, 2))',
+              formula: '=CONCATENATE("Amount: ", FORMATNUMBER(amount, 2))',
             },
           },
         ],
@@ -660,7 +659,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula: '=FORMATCURRENCY(amount / 100, "€", 2)',
+              formula: '=FORMATCURRENCY(amount, "€", 2)',
             },
           },
         ],
@@ -688,7 +687,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula: '=FORMATCURRENCY(amount / 100, "€", 2, ".", ",")',
+              formula: '=FORMATCURRENCY(amount, "€", 2, ".", ",")',
             },
           },
         ],
@@ -718,7 +717,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             field: 'notes',
             value: null,
             options: {
-              formula: '=FORMATNUMBER(amount / 100, 0)',
+              formula: '=FORMATNUMBER(amount, 0)',
             },
           },
         ],
@@ -751,7 +750,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Payment: ", FORMATCURRENCY(amount / 100), " | Principal: ", FORMATCURRENCY((amount / 100) * 0.8), " | Interest: ", FORMATCURRENCY((amount / 100) * 0.2), " | Month: ", MONTH(date))',
+                '=CONCATENATE("Payment: ", FORMATCURRENCY(amount), " | Principal: ", FORMATCURRENCY(amount * 0.8), " | Interest: ", FORMATCURRENCY(amount * 0.2), " | Month: ", MONTH(date))',
             },
           },
         ],
@@ -784,7 +783,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE(UPPER(LEFT(imported_payee, 7)), " - ", IF(WEEKDAY(date) = 1, "Weekend", "Weekday"), " - ", FORMATCURRENCY(ABS(amount) / 100), " - ", MONTH(date), "/", DAY(date))',
+                '=CONCATENATE(UPPER(LEFT(imported_payee, 7)), " - ", IF(WEEKDAY(date) = 1, "Weekend", "Weekday"), " - ", FORMATCURRENCY(ABS(amount)), " - ", MONTH(date), "/", DAY(date))',
             },
           },
         ],
@@ -849,7 +848,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Merchant: ", payee_name, CHAR(10), "Amount: ", FORMATCURRENCY(amount / 100), CHAR(10), "Date: ", YEAR(date), "-", MONTH(date), "-", DAY(date))',
+                '=CONCATENATE("Merchant: ", payee_name, CHAR(10), "Amount: ", FORMATCURRENCY(amount), CHAR(10), "Date: ", YEAR(date), "-", MONTH(date), "-", DAY(date))',
             },
           },
         ],
@@ -883,7 +882,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Transaction Summary", CHAR(10), "Amount: ", FORMATCURRENCY(amount / 100), CHAR(10), "Tax (10%): ", FORMATCURRENCY((amount / 100) * 0.1), CHAR(10), "Total: ", FORMATCURRENCY((amount / 100) * 1.1))',
+                '=CONCATENATE("Transaction Summary", CHAR(10), "Amount: ", FORMATCURRENCY(amount), CHAR(10), "Tax (10%): ", FORMATCURRENCY(amount * 0.1), CHAR(10), "Total: ", FORMATCURRENCY(amount * 1.1))',
             },
           },
         ],
@@ -1108,7 +1107,7 @@ describe('Formula Rule Actions - Integration Tests', () => {
             value: null,
             options: {
               formula:
-                '=CONCATENATE("Compound: ", FORMATCURRENCY((amount / 100) * POWER(1.05, 12)))',
+                '=CONCATENATE("Compound: ", FORMATCURRENCY(amount * POWER(1.05, 12)))',
             },
           },
         ],

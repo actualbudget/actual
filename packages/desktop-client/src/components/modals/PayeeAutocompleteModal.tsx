@@ -38,7 +38,7 @@ export function PayeeAutocompleteModal({
     containerProps: { style: { height: isNarrowWidth ? '90vh' : 275 } },
   };
 
-  const onManagePayees = () => navigate('/payees');
+  const onManagePayees = () => navigate('/settings/payees');
 
   return (
     <Modal
