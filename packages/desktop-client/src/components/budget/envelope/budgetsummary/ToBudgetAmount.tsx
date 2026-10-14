@@ -1,5 +1,4 @@
-import React from 'react';
-import type { CSSProperties, MouseEventHandler } from 'react';
+import type { CSSProperties, KeyboardEvent, MouseEventHandler } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -16,11 +15,13 @@ import {
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
+import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { TotalsList } from './TotalsList';
 
 type ToBudgetAmountProps = {
+  month: string;
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
@@ -30,6 +31,7 @@ type ToBudgetAmountProps = {
 };
 
 export function ToBudgetAmount({
+  month,
   prevMonthName,
   style,
   amountStyle,
@@ -44,6 +46,7 @@ export function ToBudgetAmount({
     value: 0,
   });
   const format = useFormat();
+  const isPrivacyEnabled = usePrivacyMode();
   const availableValue = sheetValue;
   if (typeof availableValue !== 'number' && availableValue !== null) {
     throw new Error(
@@ -61,6 +64,8 @@ export function ToBudgetAmount({
         <Tooltip
           content={
             <TotalsList
+              month={month}
+              interactive={false}
               prevMonthName={prevMonthName}
               style={{
                 padding: 7,
@@ -77,6 +82,23 @@ export function ToBudgetAmount({
             }}
           >
             <Block
+              // Only a clickable amount opens the To Budget menu.
+              {...(onClick && {
+                role: 'button',
+                tabIndex: 0,
+                'aria-label': isPrivacyEnabled
+                  ? t('To Budget menu')
+                  : t('To Budget menu: {{amount}}', {
+                      amount: format(num, 'financial'),
+                    }),
+                'aria-haspopup': 'menu',
+                onKeyDown: (event: KeyboardEvent) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onClick();
+                  }
+                },
+              })}
               onClick={onClick}
               onContextMenu={onContextMenu}
               data-cellname={sheetName}

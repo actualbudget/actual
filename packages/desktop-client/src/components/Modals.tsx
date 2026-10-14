@@ -55,6 +55,7 @@ import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { ForeignAmountModal } from './modals/ForeignAmountModal';
 import { ForeignMoveModal } from './modals/ForeignMoveModal';
 import { ForeignSplitModal } from './modals/ForeignSplitModal';
+import { FxValuationModal } from './modals/FxValuationModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -121,6 +122,11 @@ export function Modals() {
       // A stable id keeps a dialog mounted when one below it closes.
       const key = modal.id ?? `${name}-${idx}`;
       switch (name) {
+        case 'fx-valuation':
+          return budgetId ? (
+            <FxValuationModal key={key} {...modal.options} />
+          ) : null;
+
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={key} /> : null;
 
