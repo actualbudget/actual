@@ -186,7 +186,7 @@ export function MobileBankSyncAccountEditPage() {
             <Button onPress={handleCancel}>
               <Trans>Cancel</Trans>
             </Button>
-            <Button variant="primary" size="extra-large" onPress={handleSave}>
+            <Button variant="primary" onPress={handleSave}>
               <Trans>Save</Trans>
             </Button>
           </SpaceBetween>

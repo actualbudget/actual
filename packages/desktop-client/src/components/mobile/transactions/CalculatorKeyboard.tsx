@@ -145,7 +145,6 @@ function NonFocusableButton({
   return (
     <Button
       variant={variant}
-      size="extra-large"
       style={{
         flex: 1,
         height: styles.mobileMinHeight,
