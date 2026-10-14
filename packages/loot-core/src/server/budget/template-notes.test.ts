@@ -547,17 +547,9 @@ describe('periodic template intervals', () => {
       });
     },
   );
-  it('preserves a positive interval with leading zeroes', () => {
-    expect(
-      parse('#template 100 repeat every 002 days starting 2026-09-01'),
-    ).toMatchObject({
-      type: 'periodic',
-      period: { period: 'day', amount: 2 },
-    });
-  });
-  it('rejects a zero interval with leading zeroes', () => {
+  it.each(['002', '000'])('rejects an interval with leading zeroes (%s)', n => {
     expect(() =>
-      parse('#template 100 repeat every 000 days starting 2026-09-01'),
+      parse(`#template 100 repeat every ${n} days starting 2026-09-01`),
     ).toThrow();
   });
 });

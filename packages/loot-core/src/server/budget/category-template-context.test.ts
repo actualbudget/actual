@@ -373,7 +373,9 @@ describe('CategoryTemplateContext', () => {
               },
               instance,
             ),
-          ).toThrow('Periodic template interval must advance the date');
+          ).toThrow(
+            'Infinite loop detected in repeating template, check the repeat interval',
+          );
           expect(shift).toHaveBeenCalledOnce();
         } finally {
           shift.mockRestore();

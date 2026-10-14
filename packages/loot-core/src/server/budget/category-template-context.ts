@@ -747,10 +747,14 @@ export class CategoryTemplateContext {
         throw new Error(`Unrecognized periodic period: ${String(period)}`);
     }
 
+    // Both loops below only end once the date moves past a bound, so stop
+    // instead of hanging if a shift ever fails to advance the date.
     function advanceDate(current: string): string {
       const next = dateShiftFunction(current, numPeriods);
       if (!monthUtils.isAfter(next, current)) {
-        throw new Error('Periodic template interval must advance the date');
+        throw new Error(
+          'Infinite loop detected in repeating template, check the repeat interval',
+        );
       }
       return next;
     }
