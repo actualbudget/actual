@@ -548,7 +548,8 @@ export function useTransactionBatchActions() {
             .select(['id', 'offbudget']),
         );
         const fromAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) => a.id === fromTrans.account,
+          (a: { id: string; offbudget?: boolean }) =>
+            a.id === fromTrans.account,
         );
         const toAccount = accounts.find(
           (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
