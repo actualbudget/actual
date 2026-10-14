@@ -537,6 +537,10 @@ export type Modal =
       };
     }
   | {
+      name: 'fx-valuation';
+      options: { month: string };
+    }
+  | {
       name: 'tracking-balance-menu';
       options: {
         categoryId: CategoryEntity['id'];
@@ -930,6 +934,11 @@ const modalsSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(setAppState, (state, action) => {
       state.isHidden = action.payload.loadingText !== null;
+      if (state.isHidden) {
+        state.modalStack = state.modalStack.filter(
+          modal => modal.name !== 'fx-valuation',
+        );
+      }
     });
     builder.addCase(signOut.fulfilled, () => initialState);
     builder.addCase(resetApp, () => initialState);

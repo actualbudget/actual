@@ -38,6 +38,8 @@ export type Spreadsheets = {
 
     // Envelope budget fields
     'available-funds': number;
+    'fx-changes': number;
+    'fx-incomplete': boolean;
     'last-month-overspent': number;
     buffered: number;
     'buffered-auto': number;

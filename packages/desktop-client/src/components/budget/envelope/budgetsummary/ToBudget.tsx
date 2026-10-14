@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { CSSProperties, MouseEvent } from 'react';
 
 import { Popover } from '@actual-app/components/popover';
@@ -9,6 +9,8 @@ import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudge
 import { HoldMenu } from '#components/budget/envelope/HoldMenu';
 import { TransferMenu } from '#components/budget/envelope/TransferMenu';
 import { useFormat } from '#hooks/useFormat';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { ToBudgetAmount } from './ToBudgetAmount';
@@ -33,15 +35,13 @@ export function ToBudget({
   const [menuStep, _setMenuStep] = useState<string>('actions');
   const triggerRef = useRef(null);
   const format = useFormat();
+  const dispatch = useDispatch();
 
   const ref = useRef<HTMLSpanElement>(null);
-  const setMenuStep = useCallback(
-    (menu: string) => {
-      if (menu) ref.current?.focus();
-      _setMenuStep(menu);
-    },
-    [ref, _setMenuStep],
-  );
+  function setMenuStep(menu: string) {
+    if (menu) ref.current?.focus();
+    _setMenuStep(menu);
+  }
   const availableValue = useEnvelopeSheetValue({
     name: envelopeBudget.toBudget,
     value: 0,
@@ -76,6 +76,7 @@ export function ToBudget({
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
+          month={month}
           onClick={() => {
             resetPosition();
             setMenuOpen(true);
@@ -100,6 +101,14 @@ export function ToBudget({
         <span tabIndex={-1} ref={ref}>
           {menuStep === 'actions' && (
             <ToBudgetMenu
+              onFxDetails={() => {
+                closeMenu();
+                dispatch(
+                  pushModal({
+                    modal: { name: 'fx-valuation', options: { month } },
+                  }),
+                );
+              }}
               onTransfer={() => setMenuStep('transfer')}
               onCover={() => setMenuStep('cover')}
               onHoldBuffer={() => setMenuStep('buffer')}
