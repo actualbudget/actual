@@ -236,6 +236,10 @@ The preview shows -€950.00 for the October 31 rent, with -$1,045.00 under it. 
 
 <img width="860" alt="Import preview of a 950 euro rent payment to Résidences Saint-Martin SARL, with -$1,045.00 under the euro amount" src="/img/budgeting/multi-currency-import@2x.png" />
 
+A CSV can also name the currency of each row. Set **Currency** to that column. Rows marked EUR stay in the preview, and a blank currency is read as euros. A file with the October 31 rent, a €5.00 cafe payment with no currency, and a 1,500.00 peso row keeps the first two. The rent is -€950.00, with -$1,045.00 under it. The cafe payment is -€5.00, with -$5.50 under it. The peso row is listed under "Rows left out because of their currency:" as "10/31/2026 · Elena García · -1500.00 Currency MXN does not match this account's EUR." **Import** offers **Import 2 transactions**.
+
+<img width="860" alt="CSV import into BNP Paribas with the Currency column set, keeping the euro rows and leaving out a peso row" src="/img/budgeting/multi-currency-csv-currency@2x.png" />
+
 If a date in the file has no saved rate, the dialog says: "No exchange rate is saved for 2026-10-30. Enter a rate, used from 2026-10-30 until you save another rate." The rate defaults to dollars per 1 euro, with a swap button for the reciprocal direction. **Save rate** stores a standing rate from that date. The preview can then convert the rows.
 
 <img width="860" alt="Import dialog asking for a euro rate from 2026-10-30, with two 950 euro rent rows" src="/img/budgeting/multi-currency-import-rate@2x.png" />
@@ -257,3 +261,19 @@ If the bank does not report a balance in that currency, the link dialog says: "T
 Downloaded transactions in some other currency are left out. Actual reports the count: "downloaded transactions were in another currency and were skipped."
 
 If a download needs a rate that is not saved, Actual says: "An exchange rate is needed before these transactions can be added." **Add exchange rate** opens the same form as import. The rate defaults to budget units per 1 account-currency unit, saved from the earliest missing date. Saving it downloads again.
+
+## FX changes in To Budget
+
+The figures in this section are for the two starting balances only, before the rent, gifts, remittances, and transfers above. Those payments stay booked at the rate in use when you enter them, and they change the FX total.
+
+Save a new standing euro rate of 0.8 on October 31. The register keeps the booked amounts: BNP Paribas stays $2,200.00, and BBVA México stays $250.00. The account list then estimates BNP Paribas at about $2,500.00, "1 EUR = 1.25 USD, manual standing rate from 2026-10-31", and the recorded base stays $2,200.00. **All accounts** stays $4,950.00 and adds "≈ $5,250.00 at current rates."
+
+On the **Budget** page for October, **FX changes (included)** is $300.00. **To Budget** is $5,250.00. That is the booked $4,950.00 plus the $300.00. November lists FX changes of $0.00, and its To Budget stays $5,250.00.
+
+**FX details** opens **FX valuation details for October 2026**. The monthly FX change is $300.00. The dialog says: "FX changes are already included in To Budget." A separate included total appears only when it differs from the monthly figure.
+
+The calculated valuation is opening valuation $0.00, transaction activity $2,450.00, monthly FX changes $300.00, brought-forward FX $0.00, and closing valuation $2,750.00.
+
+BNP Paribas books $2,200.00 and closes at $2,500.00. Its monthly FX change is $300.00. The closing formula for 10/31/2026 is 1 EUR = 1.25 USD. BBVA México books $250.00 and closes at $250.00, so its FX change is $0.00. Its closing formula is 1 MXN = 0.05 USD.
+
+<img width="620" alt="FX valuation details for October 2026, with $300.00 included in To Budget and BNP Paribas closing at $2,500.00" src="/img/budgeting/multi-currency-fx-details@2x.png" />
