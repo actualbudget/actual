@@ -41,7 +41,8 @@ export function SelectedPayeesButton({
 
   const selectedPayeeNames = [...selectedItems]
     .slice(0, 4)
-    .map(id => payeesById[id].name)
+    .map(id => payeesById[id]?.name)
+    .filter(name => name != null)
     .join(', ');
 
   function handleSelect(name: Actions) {

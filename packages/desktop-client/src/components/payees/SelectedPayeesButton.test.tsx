@@ -128,4 +128,11 @@ describe('SelectedPayeesButton', () => {
 
     expect(within(menu).getByText('Kroger, Publix')).toBeInTheDocument();
   });
+
+  it('skips selected payees that no longer exist', async () => {
+    renderButton(['payee-1', 'payee-gone']);
+    const menu = await openMenu();
+
+    expect(within(menu).getByText('Kroger')).toBeInTheDocument();
+  });
 });
