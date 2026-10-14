@@ -366,7 +366,10 @@ export async function refreshFxChanges() {
   const bridge = new Map(
     (await fxValuation(months, today)).map(entry => [
       entry.month,
-      sumAmounts([entry.posted, entry.broughtForward]).value,
+      {
+        value: sumAmounts([entry.posted, entry.broughtForward]).value,
+        incomplete: entry.incomplete,
+      },
     ]),
   );
   if (pass !== refreshPass || sheet.get() !== spreadsheet) return;
@@ -374,9 +377,14 @@ export async function refreshFxChanges() {
   try {
     for (const month of months) {
       const sheetName = monthUtils.sheetForMonth(month);
-      const value = bridge.has(month) ? bridge.get(month)! : 0;
+      const result = bridge.get(month);
+      const value = result?.value ?? null;
+      const incomplete = result ? result.incomplete || value === null : false;
       // Incomplete aggregates contribute zero on every device and reopen.
       const adjustment = value ?? 0;
+      if (spreadsheet.getCellValue(sheetName, 'fx-incomplete') !== incomplete) {
+        spreadsheet.set(`${sheetName}!fx-incomplete`, incomplete);
+      }
       if (spreadsheet.getCellValue(sheetName, 'fx-changes') !== adjustment) {
         spreadsheet.set(`${sheetName}!fx-changes`, adjustment);
       }
