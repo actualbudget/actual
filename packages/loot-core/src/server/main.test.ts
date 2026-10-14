@@ -21,7 +21,7 @@ import {
 import * as post from './post';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
-import { setSyncingMode } from './sync';
+import { scheduleFullSync, setSyncingMode } from './sync';
 
 vi.mock('./post');
 
@@ -534,6 +534,95 @@ describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
       await closePromise;
       postSpy.mockRestore();
       querySpy.mockRestore();
+      setSyncingMode('disabled');
+    }
+  });
+
+  test('cancels the sync timer before waiting for the spreadsheet', async () => {
+    vi.useFakeTimers();
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+    setSyncingMode('enabled');
+    const sheetGate = deferred();
+    const sheetStarted = deferred();
+    const sheetSpy = vi
+      .spyOn(sheet, 'waitOnSpreadsheet')
+      .mockImplementationOnce(async () => {
+        sheetStarted.resolve();
+        await sheetGate.promise;
+      });
+    const postSpy = vi.spyOn(post, 'postBinary');
+    vi.stubEnv('NODE_ENV', 'production');
+    void scheduleFullSync();
+    vi.unstubAllEnvs();
+    const closePromise = startCloseBudget();
+
+    try {
+      await vi.advanceTimersByTimeAsync(500);
+      await sheetStarted.promise;
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(postSpy).not.toHaveBeenCalled();
+      expect(db.getDatabase()).not.toBeNull();
+
+      sheetGate.resolve();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+    } finally {
+      sheetGate.resolve();
+      await vi.runAllTimersAsync();
+      await closePromise;
+      sheetSpy.mockRestore();
+      postSpy.mockRestore();
+      setSyncingMode('disabled');
+    }
+  });
+
+  test('drains background work started while waiting for the spreadsheet', async () => {
+    vi.useFakeTimers();
+    await prefs.loadPrefs();
+    setSyncingMode('enabled');
+    const backgroundGate = deferred();
+    const backgroundStarted = deferred();
+    let backgroundPromise;
+    const sheetSpy = vi
+      .spyOn(sheet, 'waitOnSpreadsheet')
+      .mockImplementationOnce(async () => {
+        backgroundPromise = runHandler(
+          async () => {
+            backgroundStarted.resolve();
+            await backgroundGate.promise;
+            await db.first('SELECT 1');
+            vi.stubEnv('NODE_ENV', 'production');
+            void scheduleFullSync();
+            vi.unstubAllEnvs();
+          },
+          undefined,
+          { background: true },
+        );
+        void backgroundPromise.catch(() => undefined);
+      });
+    let closed = false;
+    const closePromise = startCloseBudget().then(result => {
+      closed = true;
+      return result;
+    });
+
+    try {
+      await vi.advanceTimersByTimeAsync(1000);
+      await backgroundStarted.promise;
+      expect(closed).toBe(false);
+      expect(db.getDatabase()).not.toBeNull();
+
+      backgroundGate.resolve();
+      await vi.advanceTimersByTimeAsync(300);
+      await expect(backgroundPromise).resolves.toBeUndefined();
+      await expect(closePromise).resolves.toBe('ok');
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      backgroundGate.resolve();
+      await vi.runAllTimersAsync();
+      await Promise.allSettled([backgroundPromise, closePromise]);
+      sheetSpy.mockRestore();
       setSyncingMode('disabled');
     }
   });

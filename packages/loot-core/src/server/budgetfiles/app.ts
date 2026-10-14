@@ -257,6 +257,7 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  clearFullSyncTimeout();
   await flushRunningBackgroundMethods();
   captureBreadcrumb({ message: 'Closing budget' });
   resetFormulaPreferencesCache();
@@ -265,8 +266,9 @@ async function closeBudget() {
   await sheet.waitOnSpreadsheet();
   sheet.unloadSpreadsheet();
 
-  clearFullSyncTimeout();
   await mainApp.stopServices();
+  await flushRunningBackgroundMethods();
+  clearFullSyncTimeout();
 
   db.closeDatabase();
 
