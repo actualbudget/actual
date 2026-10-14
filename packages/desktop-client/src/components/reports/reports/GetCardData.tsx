@@ -18,7 +18,7 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import {
-  canShowBaselineAmounts,
+  canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
 } from '#components/reports/baselineRange';
@@ -126,8 +126,10 @@ export function GetCardData({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
-  const showAmounts =
-    !!baseline.showAmounts && canShowBaselineAmounts(report.graphType);
+  // Amounts are drawn with the baseline unless changes are asked for
+  const showAmounts = !(
+    baseline.showChanges && canShowBaselineChanges(report.graphType)
+  );
 
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);

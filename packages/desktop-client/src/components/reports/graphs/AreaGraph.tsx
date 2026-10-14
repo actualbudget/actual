@@ -11,7 +11,6 @@ import type {
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   Area,
   AreaChart,
@@ -37,6 +36,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { BaselineTooltip } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
+import { TooltipCard } from './TooltipCard';
 
 type PayloadItem = {
   payload: {
@@ -80,86 +80,69 @@ const CustomTooltip = ({
 
   if (active && payload && payload.length) {
     return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.date}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netAssets'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netDebts'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={
-                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
-                }
-                right={
-                  <FinancialText as="strong">
-                    {format(
-                      balanceTypeOp === 'totalBudgeted'
-                        ? payload[0].payload.totalBudgeted
-                        : payload[0].payload.totalTotals,
-                      'financial',
-                    )}
-                  </FinancialText>
-                }
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      <TooltipCard title={payload[0].payload.date}>
+        {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netAssets'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netDebts'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={
+              balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+            }
+            right={
+              <FinancialText as="strong">
+                {format(
+                  balanceTypeOp === 'totalBudgeted'
+                    ? payload[0].payload.totalBudgeted
+                    : payload[0].payload.totalTotals,
+                  'financial',
+                )}
+              </FinancialText>
+            }
+          />
+        )}
+      </TooltipCard>
     );
   }
 

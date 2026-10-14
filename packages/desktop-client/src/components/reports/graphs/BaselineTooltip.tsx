@@ -2,15 +2,15 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   BaselineBreakdown,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 
 import { FinancialText } from '#components/FinancialText';
 import type { FormatType } from '#hooks/useFormat';
+
+import { TooltipCard } from './TooltipCard';
 
 type BaselineTooltipLinesProps = {
   breakdown: BaselineBreakdown;
@@ -92,23 +92,8 @@ type BaselineTooltipProps = BaselineTooltipLinesProps & {
  */
 export function BaselineTooltip({ title, ...props }: BaselineTooltipProps) {
   return (
-    <div
-      className={css({
-        zIndex: 1000,
-        pointerEvents: 'none',
-        borderRadius: 2,
-        boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-        backgroundColor: theme.menuBackground,
-        color: theme.menuItemText,
-        padding: 10,
-      })}
-    >
-      <div style={{ marginBottom: 10 }}>
-        <strong>{title}</strong>
-      </div>
-      <div style={{ lineHeight: 1.5 }}>
-        <BaselineTooltipLines {...props} />
-      </div>
-    </div>
+    <TooltipCard title={title}>
+      <BaselineTooltipLines {...props} />
+    </TooltipCard>
   );
 }

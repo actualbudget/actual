@@ -30,7 +30,7 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
-  canShowBaselineAmounts,
+  canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
 } from '#components/reports/baselineRange';
@@ -543,8 +543,10 @@ function CustomReportInner({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
-  const showAmounts =
-    !!baseline.showAmounts && canShowBaselineAmounts(graphType);
+  // Amounts are drawn with the baseline unless changes are asked for
+  const showAmounts = !(
+    baseline.showChanges && canShowBaselineChanges(graphType)
+  );
 
   const getGroupData = useMemo(() => {
     const props = {
