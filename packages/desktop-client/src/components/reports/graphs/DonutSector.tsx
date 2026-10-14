@@ -9,7 +9,8 @@ type DonutSectorProps = {
   fill: string;
   fillOpacity?: number;
   stroke?: string;
-  // Drawn over the sector while it's hovered
+  // Drawn over the sector while it's hovered. The hovered sector drops its
+  // border, as it did when the highlight replaced it.
   highlight?: ReactNode;
 };
 
@@ -31,7 +32,7 @@ export function DonutSector({
         {...sector}
         fill={fill}
         fillOpacity={fillOpacity}
-        stroke={stroke ?? sector.stroke}
+        stroke={stroke ?? (highlight ? 'none' : sector.stroke)}
       />
       {highlight}
     </g>
