@@ -17,7 +17,6 @@ const RADIAN = Math.PI / 180;
 export function DonutActiveShapeMobile({
   cx,
   cy,
-  innerRadius,
   outerRadius,
   startAngle,
   endAngle,
@@ -28,6 +27,8 @@ export function DonutActiveShapeMobile({
   expandInward,
   chartInnerRadius,
   chartOuterRadius,
+  detail,
+  valueSuffix,
 }: DonutActiveShapeProps) {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name and payload.date
@@ -48,6 +49,17 @@ export function DonutActiveShapeMobile({
         {yAxis}
       </text>
       <PrivacyFilter>
+        {detail && (
+          <FinancialText
+            as="text"
+            x={cx}
+            y={cy + chartOuterRadius * Math.sin(-RADIAN * 270) + 33}
+            textAnchor="middle"
+            fill={detail.color}
+          >
+            {detail.text}
+          </FinancialText>
+        )}
         <FinancialText
           as="text"
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 240) - 30}
@@ -56,6 +68,7 @@ export function DonutActiveShapeMobile({
           fill={fill}
         >
           {format(value, 'financial')}
+          {valueSuffix && ` ${valueSuffix}`}
         </FinancialText>
         <text
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 330) + 10}
@@ -66,15 +79,6 @@ export function DonutActiveShapeMobile({
           {`${(percent * 100).toFixed(2)}%`}
         </text>
       </PrivacyFilter>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
       <Sector
         cx={cx}
         cy={cy}

@@ -1,18 +1,13 @@
 // @ts-strict-ignore
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
   DataEntity,
-  LegendEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   CartesianGrid,
   Line,
@@ -23,12 +18,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { FinancialText } from '#components/FinancialText';
-import {
-  getBaselineKey,
-  getSeriesKey,
-  isBaselineKey,
-} from '#components/reports/baselineRange';
+import { getBaselineKey } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -36,151 +26,12 @@ import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
-import { BaselineTooltipLines } from './BaselineTooltip';
+import { SeriesTooltip } from './SeriesTooltip';
 import { showActivity } from './showActivity';
 import { computeTrendLines } from './util/computeTrendLines';
-
-type PayloadItem = {
-  dataKey: string;
-  value: number;
-  date: string;
-  color: string;
-  payload: {
-    baseline?: BaselineBreakdown;
-    date: string;
-  };
-};
-
-type CustomTooltipProps = {
-  compact: boolean;
-  tooltip: string;
-  legend: LegendEntity[];
-  active?: boolean;
-  payload?: PayloadItem[];
-  format: (value: unknown, type: FormatType) => string;
-  balanceTypeOp: balanceTypeOpType;
-};
-
-const CustomTooltip = ({
-  compact,
-  tooltip,
-  legend,
-  active,
-  payload,
-  format,
-  balanceTypeOp,
-}: CustomTooltipProps) => {
-  const { t } = useTranslation();
-  // Offset intervals carry what their whole-interval change was built from
-  const interval = payload?.[0]?.payload;
-
-  const dataKeyToName = useMemo(() => {
-    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
-  }, [legend]);
-
-  // Intervals that haven't started list each series' baseline instead
-  const isUpcoming = !!interval?.baseline?.upcoming;
-
-  const { sumTotals, items } = useMemo(() => {
-    return (payload ?? [])
-      .filter(
-        item =>
-          item.value != null && isBaselineKey(item.dataKey) === isUpcoming,
-      )
-      .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-      .reduce(
-        (acc, item) => {
-          acc.sumTotals += item.value;
-          acc.items.push(item);
-          return acc;
-        },
-        {
-          sumTotals: 0,
-          items: [] as PayloadItem[],
-        },
-      );
-  }, [payload, isUpcoming]);
-
-  if (active && items.length) {
-    return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.date}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {items.map((p: PayloadItem, index: number) => {
-              const seriesKey = getSeriesKey(p.dataKey);
-              const displayName = dataKeyToName.get(seriesKey) ?? seriesKey;
-              return (
-                (compact ? index < 4 : true) && (
-                  <AlignedText
-                    key={index}
-                    left={displayName}
-                    right={
-                      <FinancialText>
-                        {format(p.value, 'financial')}
-                      </FinancialText>
-                    }
-                    style={{
-                      color: p.color,
-                      textDecoration:
-                        tooltip === p.dataKey ? 'underline' : 'inherit',
-                    }}
-                  />
-                )
-              );
-            })}
-            {payload.length > 5 && compact && '...'}
-            {/* The baseline's change line replaces the total */}
-            {!interval?.baseline && (
-              <AlignedText
-                left={t('Total')}
-                right={
-                  <FinancialText>
-                    {format(sumTotals, 'financial')}
-                  </FinancialText>
-                }
-                style={{
-                  fontWeight: 600,
-                }}
-              />
-            )}
-            {interval?.baseline && (
-              <div
-                style={{
-                  marginTop: 5,
-                  paddingTop: 5,
-                  borderTop: `1px solid ${theme.menuBorder}`,
-                }}
-              >
-                <BaselineTooltipLines
-                  breakdown={interval.baseline}
-                  balanceTypeOp={balanceTypeOp}
-                  format={format}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-};
 
 type LineGraphProps = {
   style?: CSSProperties;
@@ -284,12 +135,12 @@ export function LineGraph({
               {showTooltip && (
                 <Tooltip
                   content={
-                    <CustomTooltip
+                    <SeriesTooltip
                       compact={compact}
-                      tooltip={tooltip}
+                      hoveredKey={tooltip}
                       legend={data.legend}
                       format={format}
-                      balanceTypeOp={balanceTypeOp}
+                      order="value"
                     />
                   }
                   formatter={numberFormatterTooltip}

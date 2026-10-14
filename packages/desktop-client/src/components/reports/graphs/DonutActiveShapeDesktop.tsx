@@ -18,7 +18,6 @@ export function DonutActiveShapeDesktop({
   cx,
   cy,
   midAngle,
-  innerRadius,
   outerRadius,
   startAngle,
   endAngle,
@@ -28,6 +27,8 @@ export function DonutActiveShapeDesktop({
   value,
   expandInward,
   chartInnerRadius,
+  detail,
+  valueSuffix,
 }: DonutActiveShapeProps) {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name  and payload.date
@@ -56,15 +57,6 @@ export function DonutActiveShapeDesktop({
       <Sector
         cx={cx}
         cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
-      <Sector
-        cx={cx}
-        cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
         innerRadius={expansionInner}
@@ -90,10 +82,23 @@ export function DonutActiveShapeDesktop({
           fill={fill}
         >
           {format(value, 'financial')}
+          {valueSuffix && ` ${valueSuffix}`}
         </FinancialText>
         <text x={labelX} y={ey} dy={36} textAnchor={textAnchor} fill="#999">
           {`(${(percent * 100).toFixed(2)}%)`}
         </text>
+        {detail && (
+          <FinancialText
+            as="text"
+            x={labelX}
+            y={ey}
+            dy={54}
+            textAnchor={textAnchor}
+            fill={detail.color}
+          >
+            {detail.text}
+          </FinancialText>
+        )}
       </PrivacyFilter>
     </g>
   );

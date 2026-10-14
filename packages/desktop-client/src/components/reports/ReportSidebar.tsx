@@ -31,7 +31,7 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import {
-  canShowBaselineAmounts,
+  canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
   rangesOverlap,
@@ -367,27 +367,27 @@ export function ReportSidebar({
                   content={
                     <Text>
                       <Trans>
-                        Draw amounts in front of a faint baseline, instead of
-                        the change.
+                        Draw how much each amount changed from the baseline,
+                        instead of the amount with the baseline drawn in.
                       </Trans>
                     </Text>
                   }
                   style={{ ...styles.tooltip, lineHeight: 1.5 }}
                 >
                   <LabeledCheckbox
-                    id="baseline-show-amounts"
-                    checked={!!baseline.showAmounts}
+                    id="baseline-show-changes"
+                    checked={!!baseline.showChanges}
                     disabled={
-                      !canShowBaselineAmounts(customReportItems.graphType)
+                      !canShowBaselineChanges(customReportItems.graphType)
                     }
                     onChange={() =>
                       updateBaseline({
                         ...baseline,
-                        showAmounts: !baseline.showAmounts,
+                        showChanges: !baseline.showChanges,
                       })
                     }
                   >
-                    <Trans>Show amounts with baseline</Trans>
+                    <Trans>Show as change from baseline</Trans>
                   </LabeledCheckbox>
                 </Tooltip>
                 <LabeledCheckbox
@@ -395,7 +395,7 @@ export function ReportSidebar({
                   checked={!!baseline.changeFromBaseline}
                   disabled={
                     customReportItems.graphType !== 'BarGraph' ||
-                    !baseline.showAmounts
+                    !!baseline.showChanges
                   }
                   onChange={() =>
                     updateBaseline({

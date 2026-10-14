@@ -52,8 +52,8 @@ export const reportModel = {
         typeof baseline.isDateStatic !== 'boolean' ||
         typeof baseline.includeCurrentInterval !== 'boolean' ||
         typeof baseline.projectToFullPeriod !== 'boolean' ||
-        (baseline.showAmounts !== undefined &&
-          typeof baseline.showAmounts !== 'boolean') ||
+        (baseline.showChanges !== undefined &&
+          typeof baseline.showChanges !== 'boolean') ||
         (baseline.changeFromBaseline !== undefined &&
           typeof baseline.changeFromBaseline !== 'boolean'))
     ) {

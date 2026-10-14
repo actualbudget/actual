@@ -1,18 +1,13 @@
 // @ts-strict-ignore
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
   DataEntity,
-  LegendEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   Bar,
   BarChart,
@@ -25,11 +20,7 @@ import {
 } from 'recharts';
 import type { BarShapeProps } from 'recharts';
 
-import { FinancialText } from '#components/FinancialText';
-import {
-  isBaselineKey,
-  isIntervalInProgress,
-} from '#components/reports/baselineRange';
+import { isIntervalInProgress } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -37,166 +28,12 @@ import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
-import { BaselineTooltipLines } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
+import { SeriesTooltip } from './SeriesTooltip';
 import { showActivity } from './showActivity';
-
-type PayloadItem = {
-  name: string;
-  value: number;
-  color: string;
-  payload: {
-    baseline?: BaselineBreakdown;
-    name: string;
-    color: number | string;
-  };
-};
-
-type CustomTooltipProps = {
-  compact: boolean;
-  tooltip: string;
-  legend: LegendEntity[];
-  active?: boolean;
-  payload?: PayloadItem[];
-  label?: string;
-  format: (value: unknown, type: FormatType) => string;
-  balanceTypeOp: balanceTypeOpType;
-};
-
-const CustomTooltip = ({
-  compact,
-  tooltip,
-  legend,
-  active,
-  payload,
-  label,
-  format,
-  balanceTypeOp,
-}: CustomTooltipProps) => {
-  const { t } = useTranslation();
-  // Offset intervals carry what their whole-interval change was built from
-  const interval = payload?.[0]?.payload;
-
-  const dataKeyToName = useMemo(() => {
-    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
-  }, [legend]);
-
-  const { sumTotals, items } = useMemo(() => {
-    // Intervals that haven't started have no amount to list, and the
-    // baseline is summed up below
-    return (payload ?? [])
-      .filter(item => item.value != null && !isBaselineKey(item.name))
-      .reverse()
-      .reduce(
-        (acc, item) => {
-          acc.sumTotals += item.value;
-          acc.items.push(item);
-          return acc;
-        },
-        {
-          sumTotals: 0,
-          items: [] as PayloadItem[],
-        },
-      );
-  }, [payload]);
-
-  const maxTooltipItems = 5;
-
-  const nonZeroItems = useMemo(() => {
-    return items.filter(p => p.value !== 0);
-  }, [items]);
-
-  const visibleItems = useMemo(() => {
-    if (!compact || nonZeroItems.length <= maxTooltipItems) return nonZeroItems;
-
-    const hoveredIndex = nonZeroItems.findIndex(p => tooltip === p.name);
-    if (hoveredIndex >= maxTooltipItems) {
-      return [
-        ...nonZeroItems.slice(0, maxTooltipItems - 1),
-        nonZeroItems[hoveredIndex],
-      ];
-    }
-    return nonZeroItems.slice(0, maxTooltipItems);
-  }, [compact, nonZeroItems, tooltip]);
-
-  // Intervals that haven't started still show their baseline
-  if (active && (items.length || interval?.baseline?.upcoming)) {
-    return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{label}</strong>
-          </div>
-          <div style={{ lineHeight: 1.4 }}>
-            {visibleItems.map(pay => {
-              const displayName = dataKeyToName.get(pay.name) ?? pay.name;
-              return (
-                <AlignedText
-                  key={pay.name}
-                  left={displayName}
-                  right={
-                    <FinancialText>
-                      {format(pay.value, 'financial')}
-                    </FinancialText>
-                  }
-                  style={{
-                    color: pay.color,
-                    textDecoration:
-                      tooltip === pay.name ? 'underline' : 'inherit',
-                  }}
-                />
-              );
-            })}
-            {compact && nonZeroItems.length > visibleItems.length && '...'}
-            {/* The baseline's change line replaces the total */}
-            {!interval?.baseline && (
-              <AlignedText
-                left={t('Total')}
-                right={
-                  <FinancialText>
-                    {format(sumTotals, 'financial')}
-                  </FinancialText>
-                }
-                style={{
-                  fontWeight: 600,
-                }}
-              />
-            )}
-            {interval?.baseline && (
-              <div
-                style={{
-                  marginTop: 5,
-                  paddingTop: 5,
-                  borderTop: `1px solid ${theme.menuBorder}`,
-                }}
-              >
-                <BaselineTooltipLines
-                  breakdown={interval.baseline}
-                  balanceTypeOp={balanceTypeOp}
-                  format={format}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-};
 
 const customLabel = props => {
   const calcX = props.x + props.width / 2;
@@ -306,12 +143,13 @@ export function StackedBarGraph({
                 {showTooltip && (
                   <Tooltip
                     content={
-                      <CustomTooltip
+                      <SeriesTooltip
                         compact={compact}
-                        tooltip={tooltip}
+                        hoveredKey={tooltip}
                         legend={data.legend}
                         format={format}
-                        balanceTypeOp={balanceTypeOp}
+                        order="stack"
+                        hideZero
                       />
                     }
                     formatter={numberFormatterTooltip}

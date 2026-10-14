@@ -18,7 +18,7 @@ export const defaultBaseline: CustomReportBaseline = {
   ),
   includeCurrentInterval: false,
   projectToFullPeriod: true,
-  showAmounts: false,
+  showChanges: false,
   changeFromBaseline: false,
 };
 
@@ -96,43 +96,36 @@ export function getFullIntervalDays(
   }
 }
 
-// Graphs that can draw amounts against the baseline instead of changes
-const baselineAmountGraphs = new Set([
+// Graphs that can draw changes from the baseline instead of amounts with the
+// baseline drawn in. Tables always show both, and donuts can't draw negative
+// changes, so they always compare amounts.
+const baselineChangeGraphs = new Set([
   'BarGraph',
   'StackedBarGraph',
   'LineGraph',
   'AreaGraph',
 ]);
 
-export function canShowBaselineAmounts(graphType: string) {
-  return baselineAmountGraphs.has(graphType);
+export function canShowBaselineChanges(graphType: string) {
+  return baselineChangeGraphs.has(graphType);
 }
 
-/**
- * The key of a series' baseline in stacked interval data, when amounts are
- * drawn against the baseline.
- */
+// Each series in baseline interval data also carries its amount, change and
+// baseline under these keys, whichever of them is drawn
+function getSeriesKey(dataKey: string, suffix: string) {
+  return `${dataKey}:${suffix}`;
+}
+
+export function getAmountKey(dataKey: string) {
+  return getSeriesKey(dataKey, 'amount');
+}
+
+export function getChangeKey(dataKey: string) {
+  return getSeriesKey(dataKey, 'change');
+}
+
 export function getBaselineKey(dataKey: string) {
-  return `${dataKey}${baselineKeySuffix}`;
-}
-
-const baselineKeySuffix = ':baseline';
-
-/**
- * Whether a key holds a baseline drawn behind amounts, which tooltips leave
- * out since they list the baseline separately.
- */
-export function isBaselineKey(key: string) {
-  return key === 'baselineAmount' || key.endsWith(baselineKeySuffix);
-}
-
-/**
- * The series a baseline key belongs to.
- */
-export function getSeriesKey(baselineKey: string) {
-  return baselineKey.endsWith(baselineKeySuffix)
-    ? baselineKey.slice(0, -baselineKeySuffix.length)
-    : baselineKey;
+  return getSeriesKey(dataKey, 'baseline');
 }
 
 /**

@@ -17,4 +17,8 @@ export type DonutActiveShapeProps = {
   chartInnerRadius: number;
   chartMidRadius: number;
   chartOuterRadius: number;
+  // An extra line under the amount, like a change from a baseline
+  detail?: { text: string; color: string };
+  // A word after the amount saying what it is, like "baseline"
+  valueSuffix?: string;
 };

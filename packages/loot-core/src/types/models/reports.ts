@@ -16,10 +16,10 @@ export type CustomReportBaseline = {
   includeCurrentInterval: boolean;
   // Project amounts so far over the report's whole range, by days elapsed
   projectToFullPeriod: boolean;
-  // Draw bar graphs as amounts in front of faint baseline bars, rather than as
-  // changes. Optional since older reports don't store it.
-  showAmounts?: boolean;
-  // With baseline bars, draw only the change, from the baseline's end
+  // Draw graphs as changes from the baseline, rather than as amounts with the
+  // baseline drawn in. Optional since older reports don't store it.
+  showChanges?: boolean;
+  // With amounts on bar graphs, draw only the change, from the baseline's end
   changeFromBaseline?: boolean;
 };
 

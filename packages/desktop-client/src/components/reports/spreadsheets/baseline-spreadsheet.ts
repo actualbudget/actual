@@ -14,7 +14,9 @@ import type {
 import {
   countDays,
   countElapsedDays,
+  getAmountKey,
   getBaselineKey,
+  getChangeKey,
   getFullIntervalDays,
 } from '#components/reports/baselineRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
@@ -388,15 +390,18 @@ function stackIntervals(
         continue;
       }
 
+      // Tooltips list each series' amount and change whichever is drawn.
+      // Changes are signed, unlike spending which the report spreadsheets
+      // flip so it points up.
       const key = row.id || row.name;
-      if (showAmounts) {
-        stacked[key] = getAmount(rowInterval);
-        stacked[getBaselineKey(key)] = getBaseline(rowInterval);
-      } else {
-        // Changes are stacked as signed values, unlike spending which the
-        // report spreadsheets flip so it points up
-        stacked[key] = rowInterval[balanceTypeOp];
-      }
+      const amount = getAmount(rowInterval);
+      const change = isUpcoming(rowInterval)
+        ? null
+        : rowInterval[balanceTypeOp];
+      stacked[key] = showAmounts ? amount : change;
+      stacked[getAmountKey(key)] = amount;
+      stacked[getChangeKey(key)] = change;
+      stacked[getBaselineKey(key)] = getBaseline(rowInterval);
     }
 
     return {
@@ -472,32 +477,33 @@ function colorBySign(
   }));
 }
 
-// Changes are coloured by direction wherever a single series is coloured by
-// its amount, and on donuts, whose slices only show the size of a change.
-// Everything else keeps its category colours.
+// A single series is coloured by the sign of what it draws: its change, or
+// its amount like it would be without a baseline. Everything else keeps its
+// category colours.
 function colorLegend(
   legend: LegendEntity[],
   {
     groupBy,
-    graphType,
     intervalData,
-    rows,
     balanceTypeOp,
+    showAmounts,
   }: {
     groupBy: string;
-    graphType?: string;
     intervalData: IntervalEntity[];
-    rows: GroupedEntity[];
     balanceTypeOp: balanceTypeOpType;
+    showAmounts: boolean;
   },
 ): LegendEntity[] {
-  if (groupBy === 'Interval') {
-    return colorBySign(legend, intervalData, balanceTypeOp);
+  if (groupBy !== 'Interval') {
+    return legend;
   }
-  if (graphType === 'DonutGraph') {
-    return colorBySign(legend, rows, balanceTypeOp);
-  }
-  return legend;
+  return colorBySign(
+    legend,
+    showAmounts
+      ? intervalData.map(interval => interval.baseline?.actual ?? interval)
+      : intervalData,
+    balanceTypeOp,
+  );
 }
 
 // Trimming looks at what actually happened, so an interval doesn't count as
@@ -734,10 +740,9 @@ export function createBaselineSpreadsheet(
       intervalData,
       legend: colorLegend(legend, {
         groupBy,
-        graphType,
         intervalData,
-        rows,
         balanceTypeOp,
+        showAmounts: !!baselineOptions.showAmounts,
       }),
       baselineStartDate: baselineOptions.startDate,
       baselineEndDate: baselineOptions.endDate,
