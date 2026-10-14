@@ -42,6 +42,7 @@ import { SettingsBackButton } from './SettingsBackButton';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
 import { SettingsRow } from './SettingsRow';
+import { SidebarSettings } from './SidebarSettings';
 import { ThemeSettings } from './Themes';
 
 function About() {
@@ -267,6 +268,7 @@ export function SettingsIndex() {
 
 export function GeneralSettings() {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
 
@@ -274,6 +276,7 @@ export function GeneralSettings() {
     <SettingsSections title={t('General')}>
       <About />
       <ThemeSettings />
+      {!isNarrowWidth && <SidebarSettings />}
       <FormatSettings />
       {isCurrencyExperimentalEnabled && <CurrencySettings />}
       <LanguageSettings />

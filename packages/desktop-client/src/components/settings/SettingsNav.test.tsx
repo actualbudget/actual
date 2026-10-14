@@ -4,6 +4,8 @@ import { render, screen } from '@testing-library/react';
 
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { createTestAppStore, TestProviders } from '#mocks';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
 import { SettingsNav } from './SettingsNav';
 
@@ -14,11 +16,22 @@ vi.mock('#hooks/useIsTestEnv', () => ({
   useIsTestEnv: vi.fn(),
 }));
 
-function renderNav(initialPath: string) {
+function renderNav(initialPath: string, sidebarMenuItems?: unknown[]) {
+  const store = createTestAppStore();
+  if (sidebarMenuItems) {
+    store.dispatch(
+      mergeSyncedPrefs({
+        'sidebar-menu-items': JSON.stringify(sidebarMenuItems),
+      }),
+    );
+  }
+
   return render(
-    <MemoryRouter initialEntries={[initialPath]}>
-      <SettingsNav />
-    </MemoryRouter>,
+    <TestProviders store={store}>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <SettingsNav />
+      </MemoryRouter>
+    </TestProviders>,
   );
 }
 
@@ -38,6 +51,28 @@ describe('SettingsNav', () => {
     expect(hrefs).toEqual([
       '/settings/general',
       '/settings/payees',
+      '/settings/tags',
+      '/settings/rules',
+      '/settings/bank-sync',
+      '/settings/advanced',
+      '/settings/experimental',
+    ]);
+  });
+
+  it('leaves out pages that are shown in the sidebar', () => {
+    renderNav('/settings', [
+      { id: 'budget', hidden: false },
+      { id: 'payees', hidden: false },
+      { id: 'schedules', hidden: true },
+    ]);
+
+    const hrefs = screen
+      .getAllByRole('link')
+      .map(link => link.getAttribute('href'));
+
+    expect(hrefs).toEqual([
+      '/settings/general',
+      '/settings/schedules',
       '/settings/tags',
       '/settings/rules',
       '/settings/bank-sync',
