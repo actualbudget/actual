@@ -331,6 +331,7 @@ describe('budgets without valuation', () => {
     row('a', 'jpy', '2016-11-10', 10000, 15000);
     await build();
     expect(fxCell('2016-12')).toBeNull();
+    expect(cell('2016-12', 'fx-incomplete')).toBeNull();
   });
 });
 
@@ -528,5 +529,43 @@ describe('Sol review regressions', () => {
       },
       { timeout: 2000 },
     );
+  });
+});
+
+describe('FX incomplete spreadsheet cells', () => {
+  it('marks unavailable holdings and clears the marker after a rate recovers', async () => {
+    row('a', 'jpy', '2016-11-10', 10000, 15000);
+    await db.update('accounts', { id: 'jpy', closed: 1 });
+    await build();
+    expect(cell('2016-11', 'fx-incomplete')).toBe(true);
+    expect(cell('2017-02', 'fx-incomplete')).toBe(false);
+    expect(
+      sheet.getCellValue(
+        monthUtils.sheetForMonth(
+          monthUtils.prevMonth([...sheet.get().meta().createdMonths].sort()[0]),
+        ),
+        'fx-incomplete',
+      ),
+    ).toBe(false);
+    await saveRate('JPY', '100', '2016-10-01');
+    await refreshFxChanges();
+    await sheet.waitOnSpreadsheet();
+    expect(cell('2016-11', 'fx-incomplete')).toBe(false);
+    expect(fxCell('2016-11')).toBe(5000);
+  });
+
+  it('marks an unrepresentable aggregate incomplete while contributing zero', async () => {
+    await db.update('accounts', { id: 'savings', offbudget: 0 });
+    await saveRate('JPY', '50', '2016-11-01');
+    row('a', 'jpy', '2016-11-01', 0, 750000000000000);
+    row('b', 'savings', '2016-11-01', 0, 750000000000000);
+    await build();
+    expect(fxCell('2016-11')).toBe(0);
+    expect(cell('2016-11', 'fx-incomplete')).toBe(true);
+  });
+
+  it('creates complete zero cells for base-only months and no tracking cells', async () => {
+    await build();
+    expect(cell('2016-12', 'fx-incomplete')).toBe(false);
   });
 });

@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -27,7 +27,7 @@ import { TotalsList } from './TotalsList';
 type BudgetSummaryProps = {
   month: string;
 };
-export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
+export function BudgetSummary({ month }: BudgetSummaryProps) {
   const locale = useLocale();
   const {
     currentMonth,
@@ -268,6 +268,7 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
         ) : (
           <>
             <TotalsList
+              month={month}
               prevMonthName={prevMonthName}
               style={{
                 padding: '5px 0',
@@ -290,6 +291,4 @@ export const BudgetSummary = memo(({ month }: BudgetSummaryProps) => {
       </SheetNameProvider>
     </View>
   );
-});
-
-BudgetSummary.displayName = 'EnvelopeBudgetSummary';
+}
