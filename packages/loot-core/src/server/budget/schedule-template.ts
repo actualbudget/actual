@@ -282,46 +282,54 @@ type PostedTransaction = {
 // payment, so it covers schedules that recur as rarely as every two years.
 const LINKED_PAYMENT_SEARCH_MONTHS = 25;
 
-// How many of this schedule's occurrences in [rangeStart, rangeEnd) are
+// Which of this schedule's occurrences in [rangeStart, rangeEnd) are
 // settled by its linked payments. The link says which schedule a payment
 // belongs to; each payment is attributed to that schedule's nearest
 // occurrence, so an early payment settles the upcoming occurrence and a
 // late one settles the previous occurrence, not the next. Several payments
 // nearest the same occurrence (a bill paid in parts) settle it only once.
-function countLinkedPayments(
+function settledOccurrences(
   entry: ScheduleTemplateTarget,
   transactions: PostedTransaction[],
   rangeStart: string,
   rangeEnd: string,
-): number {
+): Set<string> {
+  const settled = new Set<string>();
   const linked = transactions.filter(
     transaction => transaction.schedule === entry.scheduleId,
   );
-  if (linked.length === 0) return 0;
+  if (linked.length === 0) return settled;
 
+  // Ascending, so the nearest occurrence is one of the two either side of
+  // the payment's date; on a tie the later one wins.
   const nearby = getOccurrencesBetween(
     entry.dateConditions,
     `${monthUtils.subMonths(rangeStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
     `${monthUtils.addMonths(rangeEnd, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
   );
-  const settled = new Set<string>();
+  if (nearby.length === 0) return settled;
   for (const transaction of linked) {
-    let nearest: string | null = null;
-    let nearestDistance = Infinity;
-    for (const occurrenceDate of nearby) {
-      const distance = Math.abs(
-        monthUtils.differenceInCalendarDays(transaction.date, occurrenceDate),
-      );
-      if (distance <= nearestDistance) {
-        nearest = occurrenceDate;
-        nearestDistance = distance;
-      }
+    let low = 0;
+    let high = nearby.length;
+    while (low < high) {
+      const mid = (low + high) >> 1;
+      if (nearby[mid] < transaction.date) low = mid + 1;
+      else high = mid;
     }
-    if (nearest !== null && nearest >= rangeStart && nearest < rangeEnd) {
+    const distanceTo = (index: number) =>
+      Math.abs(
+        monthUtils.differenceInCalendarDays(transaction.date, nearby[index]),
+      );
+    const nearest =
+      low === nearby.length ||
+      (low > 0 && distanceTo(low - 1) < distanceTo(low))
+        ? nearby[low - 1]
+        : nearby[low];
+    if (nearest >= rangeStart && nearest < rangeEnd) {
       settled.add(nearest);
     }
   }
-  return settled.size;
+  return settled;
 }
 
 export async function buildMonthlyOutflow(
@@ -390,38 +398,38 @@ export async function buildMonthlyOutflow(
     : [];
   // next_date only advances once its date has passed, so a payment made
   // early leaves it in place. A linked payment already in the carried-over
-  // balance (dated before the budget month) settles its nearest pending
-  // occurrence. Only this category's payments count: one booked elsewhere
-  // didn't come out of this balance, and the same schedule can be linked
-  // from more than one category.
-  let linkedBeforeWindow: PostedTransaction[] = [];
-  if (pendingEntries.length > 0) {
-    ({ data: linkedBeforeWindow } = await aqlQuery(
-      q('transactions')
-        .filter({
-          category: category.id,
-          schedule: { $oneof: pendingEntries.map(entry => entry.scheduleId) },
-          'account.offbudget': false,
-          date: [
-            { $gte: `${monthUtils.subMonths(currentMonthStart, 1)}-01` },
-            { $lt: windowStart },
-          ],
-        })
-        .select(['date', 'schedule']),
-    ));
-  }
+  // balance (dated before the budget month) settles its nearest occurrence,
+  // whether that is a pending one or one in the budget month itself. Only
+  // this category's payments count: one booked elsewhere didn't come out
+  // of this balance, and the same schedule can be linked from more than
+  // one category.
+  const { data: linkedBeforeWindow } = await aqlQuery(
+    q('transactions')
+      .filter({
+        category: category.id,
+        schedule: { $oneof: smoothEntries.map(entry => entry.scheduleId) },
+        'account.offbudget': false,
+        date: [
+          {
+            $gte: `${monthUtils.subMonths(windowStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
+          },
+          { $lt: windowStart },
+        ],
+      })
+      .select(['date', 'schedule']),
+  );
   for (const entry of pendingEntries) {
     const pendingFrom =
       entry.storedNextDate > currentMonthStart
         ? entry.storedNextDate
         : currentMonthStart;
     const pending = occurrencesOf(entry, pendingFrom, windowStart);
-    const settled = countLinkedPayments(
+    const settled = settledOccurrences(
       entry,
       linkedBeforeWindow,
       pendingFrom,
       windowStart,
-    );
+    ).size;
     monthlyOutflow[0] +=
       Math.max(0, pending.length - settled) * entry.perOccurrenceAmount;
   }
@@ -435,7 +443,9 @@ export async function buildMonthlyOutflow(
   // at its real amount; one that came in lower still reserves the
   // scheduled amount, since the rest may yet be due. A linked payment marks
   // one of its schedule's occurrences this month as elapsed even if it is
-  // due after today, so an early payment isn't counted twice either.
+  // due after today, so an early payment isn't counted twice either. An
+  // occurrence a payment before the budget month settled is skipped
+  // outright: that money is already out of the carried-over balance.
   const tomorrow = monthUtils.addDays(today, 1);
   const budgetMonthEnd = monthUtils.firstDayOfMonth(
     monthUtils.addMonths(current_month, 1),
@@ -459,16 +469,25 @@ export async function buildMonthlyOutflow(
   let dueByToday = 0;
   for (const entry of smoothEntries) {
     const occurrences = occurrencesOf(entry, windowStart, windowEnd);
+    const settledEarly = settledOccurrences(
+      entry,
+      linkedBeforeWindow,
+      windowStart,
+      budgetMonthEnd,
+    );
     const paidThisMonth = isBudgetingAhead
       ? 0
-      : countLinkedPayments(
-          entry,
-          postedTransactions,
-          windowStart,
-          budgetMonthEnd,
-        );
+      : [
+          ...settledOccurrences(
+            entry,
+            postedTransactions,
+            windowStart,
+            budgetMonthEnd,
+          ),
+        ].filter(date => !settledEarly.has(date)).length;
     let indexInBudgetMonth = 0;
     for (const occurrenceDate of occurrences) {
+      if (settledEarly.has(occurrenceDate)) continue;
       const monthIndex = monthUtils.differenceInCalendarMonths(
         occurrenceDate,
         current_month,

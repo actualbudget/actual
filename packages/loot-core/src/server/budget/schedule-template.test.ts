@@ -1195,7 +1195,7 @@ describe('buildMonthlyOutflow relative to today', () => {
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
 
     expect(dateFilter('linked')).toEqual({
-      $gte: '2024-09-01',
+      $gte: '2022-10-01',
       $lt: '2024-11-01',
     });
     expect(outflow[0]).toBe(10000);

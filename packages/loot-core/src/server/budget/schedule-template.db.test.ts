@@ -37,7 +37,7 @@ afterEach(() => {
   vi.mocked(monthUtils.currentDay).mockReset();
 });
 
-async function setUpRent() {
+async function setUpRent(start = '2024-01-25') {
   const account = await db.insertAccount({
     name: 'Checking',
     offbudget: 0,
@@ -58,7 +58,7 @@ async function setUpRent() {
         op: 'is',
         field: 'date',
         value: {
-          start: '2024-01-25',
+          start,
           frequency: 'monthly',
           interval: 1,
           patterns: [],
@@ -186,6 +186,52 @@ describe('runScheduleForecast against a real database', () => {
     );
 
     expect(result.to_budget).toBe(10000);
+  });
+
+  it('does not charge a bill paid early in the previous month when budgeting ahead', async () => {
+    // Oct 26, budgeting November. Rent is due on the 1st; November's was
+    // paid and linked on Oct 25, so it already came out of the balance
+    // carried into November. Only December onward is left to fund:
+    // $5,900 over the 60-month window, or $98.34 a month.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-26');
+    const { category, payRent, template } = await setUpRent('2024-01-01');
+    await payRent('2024-10-01');
+    await payRent('2024-10-25');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2024-11',
+      0,
+      0,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(9834);
+  });
+
+  it('does not charge a bill paid early in the previous month when budgeting the current month', async () => {
+    // Oct 15, budgeting October. October's rent, due on the 1st, was paid
+    // and linked on Sep 29, so it already came out of the balance carried
+    // into October.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-15');
+    const { category, payRent, template } = await setUpRent('2024-01-01');
+    await payRent('2024-09-29');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2024-10',
+      0,
+      0,
+      0,
+      [],
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(9834);
   });
 
   it('reserves an unposted one-time bill from an earlier month when budgeting ahead', async () => {
