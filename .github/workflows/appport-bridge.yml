@@ -1,0 +1,32 @@
+name: AppPort bridge
+
+on:
+  pull_request:
+    paths:
+      - 'appport-bridge/**'
+      - '.github/workflows/appport-bridge.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  consumer-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Build the API and sync server from this repository
+        run: |
+          yarn build:api
+          yarn workspace @actual-app/sync-server build
+      - name: Install bridge (published @appport packages, exact pins)
+        working-directory: appport-bridge
+        run: npm ci
+      - name: Independent consumer test against a real Actual sync server
+        working-directory: appport-bridge
+        run: npm test
