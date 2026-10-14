@@ -7,28 +7,23 @@ import {
   SvgLibrary,
   SvgPiggyBank,
   SvgReports,
-  SvgStoreFront,
-  SvgTag,
-  SvgTuning,
-  SvgWallet,
 } from '@actual-app/components/icons/v1';
-import {
-  SvgCalendar3,
-  SvgHelp,
-  SvgNotesPaperText,
-} from '@actual-app/components/icons/v2';
+import { SvgHelp, SvgNotesPaperText } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
+import { getSidebarMenuItemPath } from '#components/sidebar/sidebarMenu';
+import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardPages } from '#hooks/useDashboardPages';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
+import { useSidebarMenu } from '#hooks/useSidebarMenu';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 import {
   accountBalance,
@@ -50,7 +45,9 @@ type SearchableItem = {
    * Meant for complex items that want to display more than just static text.
    */
   content?: ReactNode;
-  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
 };
 
 type SearchSection = {
@@ -101,34 +98,17 @@ export function CommandBar() {
   const { modalStack } = useModalState();
   const { startTour } = useTour();
 
+  const { availableItems: menuItems } = useSidebarMenu();
+  const menuItemDetails = useSidebarMenuItemDetails();
+
   const navigationItems = useMemo(
     () => [
-      { id: 'budget', name: t('Budget'), path: '/budget', Icon: SvgWallet },
-      {
-        id: 'reports-nav',
-        name: t('Reports'),
-        path: '/reports',
-        Icon: SvgReports,
-      },
-      {
-        id: 'schedules',
-        name: t('Schedules'),
-        path: '/schedules',
-        Icon: SvgCalendar3,
-      },
-      {
-        id: 'payees',
-        name: t('Payees'),
-        path: '/settings/payees',
-        Icon: SvgStoreFront,
-      },
-      {
-        id: 'rules',
-        name: t('Rules'),
-        path: '/settings/rules',
-        Icon: SvgTuning,
-      },
-      { id: 'tags', name: t('Tags'), path: '/settings/tags', Icon: SvgTag },
+      ...menuItems.map(item => ({
+        id: item.id === 'reports' ? 'reports-nav' : item.id,
+        name: menuItemDetails[item.id].title,
+        path: getSidebarMenuItemPath(item.id, !item.hidden),
+        Icon: menuItemDetails[item.id].Icon,
+      })),
       { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
       {
         id: 'accounts',
@@ -143,7 +123,7 @@ export function CommandBar() {
         Icon: SvgLibrary,
       },
     ],
-    [t],
+    [t, menuItems, menuItemDetails],
   );
 
   useEffect(() => {

@@ -1,30 +1,37 @@
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import {
-  SvgCog,
-  SvgLibrary,
-  SvgPylon,
-  SvgTag,
-  SvgTuning,
-  SvgUserGroup,
-} from '@actual-app/components/icons/v1';
+import { SvgCog, SvgPylon } from '@actual-app/components/icons/v1';
 import { SvgSettingsSliderAlternate } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { useIsTestEnv } from '#hooks/useIsTestEnv';
-import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import {
+  getDefaultSidebarMenuItems,
+  getSidebarMenuItemPath,
+  isInMobileSettingsNav,
+  isSettingsSection,
+} from '#components/sidebar/sidebarMenu';
+import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
+import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 import { SettingsNavLink } from './SettingsNavLink';
 
 export function SettingsNav() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-  const syncServerStatus = useSyncServerStatus();
-  const isTestEnv = useIsTestEnv();
-  const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
+  const { settingsItems, isItemAvailable } = useSidebarMenu();
+  const itemDetails = useSidebarMenuItemDetails();
+
+  const menuItems = isNarrowWidth
+    ? getDefaultSidebarMenuItems().filter(
+        item =>
+          isSettingsSection(item.id) &&
+          isInMobileSettingsNav(item.id) &&
+          isItemAvailable(item.id),
+      )
+    : settingsItems;
 
   return (
     <View
@@ -46,26 +53,14 @@ export function SettingsNav() {
         Icon={SvgCog}
         to="/settings/general"
       />
-      <SettingsNavLink
-        title={t('Payees')}
-        Icon={SvgUserGroup}
-        to="/settings/payees"
-      />
-      {!isNarrowWidth && (
-        <SettingsNavLink title={t('Tags')} Icon={SvgTag} to="/settings/tags" />
-      )}
-      <SettingsNavLink
-        title={t('Rules')}
-        Icon={SvgTuning}
-        to="/settings/rules"
-      />
-      {isUsingServer && (
+      {menuItems.map(item => (
         <SettingsNavLink
-          title={t('Bank Sync')}
-          Icon={SvgLibrary}
-          to="/settings/bank-sync"
+          key={item.id}
+          title={itemDetails[item.id].title}
+          Icon={itemDetails[item.id].Icon}
+          to={getSidebarMenuItemPath(item.id, false)}
         />
-      )}
+      ))}
       <SettingsNavLink
         title={t('Advanced')}
         Icon={SvgSettingsSliderAlternate}

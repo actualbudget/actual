@@ -2,7 +2,7 @@ import React, { useEffect, useEffectEvent, useRef } from 'react';
 import type { ReactElement } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
-import { Navigate, Route, Routes, useHref, useLocation } from 'react-router';
+import { Route, Routes, useHref, useLocation } from 'react-router';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
@@ -47,6 +47,8 @@ import {
   SettingsIndex,
 } from './settings';
 import { FloatableSidebar } from './sidebar';
+import { SidebarMenuRoute } from './sidebar/SidebarMenuRoute';
+import { StartPageRedirect } from './StartPageRedirect';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 import { Tour } from './tour/Tour';
@@ -260,10 +262,7 @@ export function FinancesApp() {
                   {isNarrowWidth && <MobilePageHeaderSlot />}
 
                   <Routes>
-                    <Route
-                      path="/"
-                      element={<Navigate to="/budget" replace />}
-                    />
+                    <Route path="/" element={<StartPageRedirect />} />
 
                     <Route path="/reports/*" element={<Reports />} />
 
@@ -282,12 +281,14 @@ export function FinancesApp() {
                     <Route
                       path="/schedules"
                       element={
-                        <ErrorBoundary
-                          FallbackComponent={FeatureErrorFallback}
-                          resetKeys={[location.pathname]}
-                        >
-                          <NarrowAlternate name="Schedules" />
-                        </ErrorBoundary>
+                        <SidebarMenuRoute id="schedules">
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Schedules" />
+                          </ErrorBoundary>
+                        </SidebarMenuRoute>
                       }
                     />
                     <Route
@@ -344,6 +345,55 @@ export function FinancesApp() {
                       }
                     />
                     <Route
+                      path="/payees"
+                      element={
+                        <SidebarMenuRoute id="payees">
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Payees" />
+                          </ErrorBoundary>
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
+                      path="/tags"
+                      element={
+                        <SidebarMenuRoute id="tags">
+                          <ManageTagsPage />
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
+                      path="/rules"
+                      element={
+                        <SidebarMenuRoute id="rules">
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Rules" />
+                          </ErrorBoundary>
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
+                      path="/bank-sync"
+                      element={
+                        <SidebarMenuRoute id="bank-sync">
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <View style={{ flexShrink: 0, paddingTop: 10 }}>
+                              <NarrowAlternate name="BankSync" />
+                            </View>
+                          </ErrorBoundary>
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
                       path="/notifications"
                       element={<NotificationsPage />}
                     />
@@ -351,37 +401,63 @@ export function FinancesApp() {
                       <Route index element={<SettingsIndex />} />
                       <Route path="general" element={<GeneralSettings />} />
                       <Route
-                        path="payees"
+                        path="schedules"
                         element={
-                          <ErrorBoundary
-                            FallbackComponent={FeatureErrorFallback}
-                            resetKeys={[location.pathname]}
-                          >
-                            <NarrowAlternate name="Payees" />
-                          </ErrorBoundary>
+                          <SidebarMenuRoute id="schedules" isInSettings>
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="Schedules" />
+                            </ErrorBoundary>
+                          </SidebarMenuRoute>
                         }
                       />
-                      <Route path="tags" element={<ManageTagsPage />} />
+                      <Route
+                        path="payees"
+                        element={
+                          <SidebarMenuRoute id="payees" isInSettings>
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="Payees" />
+                            </ErrorBoundary>
+                          </SidebarMenuRoute>
+                        }
+                      />
+                      <Route
+                        path="tags"
+                        element={
+                          <SidebarMenuRoute id="tags" isInSettings>
+                            <ManageTagsPage />
+                          </SidebarMenuRoute>
+                        }
+                      />
                       <Route
                         path="rules"
                         element={
-                          <ErrorBoundary
-                            FallbackComponent={FeatureErrorFallback}
-                            resetKeys={[location.pathname]}
-                          >
-                            <NarrowAlternate name="Rules" />
-                          </ErrorBoundary>
+                          <SidebarMenuRoute id="rules" isInSettings>
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="Rules" />
+                            </ErrorBoundary>
+                          </SidebarMenuRoute>
                         }
                       />
                       <Route
                         path="bank-sync"
                         element={
-                          <ErrorBoundary
-                            FallbackComponent={FeatureErrorFallback}
-                            resetKeys={[location.pathname]}
-                          >
-                            <NarrowAlternate name="BankSync" />
-                          </ErrorBoundary>
+                          <SidebarMenuRoute id="bank-sync" isInSettings>
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="BankSync" />
+                            </ErrorBoundary>
+                          </SidebarMenuRoute>
                         }
                       />
                       <Route path="advanced" element={<AdvancedSettings />} />
@@ -478,10 +554,7 @@ export function FinancesApp() {
                       />
                     )}
                     {/* redirect all other traffic to the budget page */}
-                    <Route
-                      path="/*"
-                      element={<Navigate to="/budget" replace />}
-                    />
+                    <Route path="/*" element={<StartPageRedirect />} />
                   </Routes>
                 </View>
 

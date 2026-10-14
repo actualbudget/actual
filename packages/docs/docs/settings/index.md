@@ -2,19 +2,23 @@
 
 The Settings screen in Actual provides you with a number of options for managing the look and feel of your budget along with some more system specific settings. Most settings are self-explanatory.
 
-You can access the Settings screen by clicking the down arrow by your budget name or going to the sidebar and clicking **Settings**.
-
-There is an option to "Display a notification when updates are available" here.
+You can access the Settings screen by clicking the down arrow by your budget name or by clicking **Settings** at the bottom of the sidebar. Settings are split into pages that you switch between using the navigation on the left of the Settings screen.
 
 ![The Settings page with the General section open](/img/settings/settings-general@2x.webp)
 
 ### Notifications
+
+The option **Display a notification when updates are available** shows a notice in the app when a new version of Actual is released.
 
 The option **Show in-app notifications (release notes and announcements)** controls whether Actual shows you news from the project inside the app: the notification bell in the top bar, the Notifications page, and the message that appears after an update. It is on by default and applies to the device you change it on. See [Notifications](../notifications.md) for the full guide.
 
 ### Themes
 
 Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](../custom-themes.md) for the full guide.
+
+### Sidebar
+
+By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page**, the page Actual shows when it opens or when you go to its home page. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout does not use these settings yet, but support for it is planned.
 
 ### Formatting
 
