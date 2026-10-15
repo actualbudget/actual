@@ -746,9 +746,7 @@ describe('schedules', () => {
         '2024-01-31',
         '2024-02-29',
       ]);
-      expect(getOccurrences(dateCond, '2024-03-31', 1)).toEqual([
-        '2024-04-30',
-      ]);
+      expect(getOccurrences(dateCond, '2024-03-31', 1)).toEqual(['2024-04-30']);
     });
 
     it('keeps the last-day (-1) pattern unchanged', () => {
@@ -788,9 +786,7 @@ describe('schedules', () => {
 
     it('clamps the first occurrence when the schedule starts mid-month', () => {
       const dateCond = dayConfig('2025-02-15', [{ value: 30, type: 'day' }]);
-      expect(getOccurrences(dateCond, '2025-02-14', 1)).toEqual([
-        '2025-02-28',
-      ]);
+      expect(getOccurrences(dateCond, '2025-02-14', 1)).toEqual(['2025-02-28']);
     });
 
     it('clamps day 31 on an every-other-month interval', () => {
