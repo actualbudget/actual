@@ -380,7 +380,7 @@ function MonthlyPatterns({
                 marginTop: -5,
               }}
             >
-              <Text style={{ color: theme.tableTextSubdued }}>
+              <Text style={{ color: theme.tableText }}>
                 <Trans>
                   Months without this day will use the last day of that month.
                 </Trans>
@@ -547,7 +547,7 @@ function RecurringScheduleTooltip({
             marginTop: 5,
           }}
         >
-          <Text style={{ color: theme.tableTextSubdued }}>
+          <Text style={{ color: theme.tableText }}>
             <Trans>
               Months without this day will use the last day of that month.
             </Trans>
