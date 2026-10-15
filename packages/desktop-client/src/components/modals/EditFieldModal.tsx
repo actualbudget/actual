@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -13,7 +13,7 @@ import {
   amountToInteger,
   currencyToInteger,
 } from '@actual-app/core/shared/util';
-import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
+import { parse as parseDate } from 'date-fns';
 
 import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
 import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
@@ -49,10 +49,10 @@ type EditFieldModalProps = Extract<
 >['options'];
 
 export function EditFieldModal({
-                                 name,
-                                 onSubmit,
-                                 onClose,
-                               }: EditFieldModalProps) {
+  name,
+  onSubmit,
+  onClose,
+}: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
@@ -88,7 +88,7 @@ export function EditFieldModal({
   const { isNarrowWidth } = useResponsive();
   let label: string;
   let editor: (props: { apply: (value: string) => void }) => ReactNode;
-  let apply: (value: string) => boolean = (value) => {
+  let apply: (value: string) => boolean = value => {
     onSelect(value);
     return true;
   };
@@ -116,7 +116,7 @@ export function EditFieldModal({
       // size the modal (see DateSelect)
       width = tokens.breakpoint_small;
       height = 'auto'; // fit the calendar; 275 clips six-row months
-      apply = (date) => {
+      apply = date => {
         onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
         return true;
       };
@@ -153,7 +153,7 @@ export function EditFieldModal({
           return true;
         };
       } else {
-        apply = (value) => {
+        apply = value => {
           onSelectNote(value, noteMode);
           return true;
         };
@@ -170,7 +170,7 @@ export function EditFieldModal({
               gap: 5,
             }}
           >
-            {Object.keys(noteAmendStrings).map((mode, _, arr) => (
+            {Object.keys(noteAmendStrings).map((mode, _) => (
               <Button
                 key={mode}
                 style={{
@@ -330,7 +330,7 @@ export function EditFieldModal({
             )}
             <View style={{ flex: 1 }}>
               {editor({
-                apply: (value) => {
+                apply: value => {
                   setValue(value);
                   const close = apply(value);
                   if (close) state.close();
@@ -344,7 +344,7 @@ export function EditFieldModal({
                   if (close) state.close();
                 }}
               >
-                {t('Apply')}
+                {<Trans>Apply</Trans>}
               </Button>
             </View>
           </View>
