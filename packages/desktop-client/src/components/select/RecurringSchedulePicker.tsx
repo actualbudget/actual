@@ -102,9 +102,8 @@ function unparseConfig(parsed: StateConfig): RecurConfig {
 }
 
 function createMonthlyRecurrence(startDate: string) {
-  const day = parseInt(monthUtils.format(startDate, 'd'));
   return {
-    value: day > 28 ? -1 : day,
+    value: parseInt(monthUtils.format(startDate, 'd')),
     type: 'day' as const,
   };
 }
@@ -381,25 +380,11 @@ function MonthlyPatterns({
                 marginTop: -5,
               }}
             >
-              <Text style={{ color: theme.warningText }}>
+              <Text style={{ color: theme.tableTextSubdued }}>
                 <Trans>
-                  Some months don't have this day, so nothing will be scheduled
-                  in those months.
+                  Months without this day will use the last day of that month.
                 </Trans>
               </Text>
-              <Button
-                variant="bare"
-                onPress={() =>
-                  dispatch({
-                    type: 'update-recurrence',
-                    recurrence,
-                    field: 'value',
-                    value: -1,
-                  })
-                }
-              >
-                <Trans>Use last day of the month</Trans>
-              </Button>
             </View>
           )}
         </Fragment>
