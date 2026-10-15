@@ -80,9 +80,18 @@ export class ScheduleEditModal {
       .locator('[data-popover]')
       .filter({ hasText: 'Repeat every' });
     await expect(popover).toBeVisible();
-    await this.page.keyboard.press('Escape');
+    await popover.getByText('From').click();
 
     return popover;
+  }
+
+  async addSpecificDays(popover: Locator) {
+    const addDaysButton = popover.getByRole('button', {
+      name: 'Add specific days',
+    });
+    await expect(addDaysButton).toBeVisible();
+    await addDaysButton.click();
+    await popover.getByText('Repeat every').click();
   }
 
   async save() {

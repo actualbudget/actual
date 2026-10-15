@@ -95,7 +95,7 @@ test.describe('Schedules', () => {
     });
 
     const popover = await scheduleEditModal.openRecurringPicker();
-    await popover.getByRole('button', { name: 'Add specific days' }).click();
+    await scheduleEditModal.addSpecificDays(popover);
 
     const daySelect = popover.getByRole('button', { name: '1', exact: true });
     await daySelect.click();
