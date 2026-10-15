@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -9,11 +10,14 @@ import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import type { PayeeEntity, RuleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
+import { withFilterParam } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
 import { usePayees } from '#hooks/usePayees';
 import { useUndo } from '#hooks/useUndo';
+import { useUrlParam } from '#hooks/useUrlParam';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 
@@ -23,9 +27,21 @@ export function MobilePayeesPage() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: payees = [], isPending } = usePayees();
   const { showUndoNotification } = useUndo();
-  const [filter, setFilter] = useState('');
+  // Keep the filter in the URL so it is restored when navigating back from a
+  // payee. Local state drives rendering because URL updates are applied in a
+  // React transition, which would let the list lag behind what was typed.
+  const [filterParam, setFilterParam] = useUrlParam('filter');
+  const [filter, setFilter] = useState(filterParam ?? '');
+
+  // A query-only navigation can change the filter param while this page stays
+  // mounted, which would leave the local state (and the list) stale.
+  useEffect(() => {
+    setFilter(filterParam ?? '');
+  }, [filterParam]);
+
   const { data: ruleCounts = new Map(), isPending: isRuleCountsLoading } =
     usePayeeRuleCounts();
 
@@ -35,15 +51,21 @@ export function MobilePayeesPage() {
     return payees.filter(p => getNormalisedString(p.name).includes(norm));
   }, [payees, filter]);
 
-  const onSearchChange = useCallback((value: string) => {
-    setFilter(value);
-  }, []);
+  const onSearchChange = useCallback(
+    (value: string) => {
+      setFilter(value);
+      setFilterParam(value, { replace: true });
+    },
+    [setFilterParam],
+  );
 
   const handlePayeePress = useCallback(
     (payee: PayeeEntity) => {
-      void navigate(`/payees/${payee.id}`);
+      void navigate(
+        `/payees/${payee.id}${withFilterParam(location.search, filter)}`,
+      );
     },
-    [navigate],
+    [navigate, location.search, filter],
   );
 
   const handlePayeeRuleAction = useCallback(
@@ -55,12 +77,12 @@ export function MobilePayeesPage() {
             id: payee.id,
           });
           const ruleIds = associatedRules.map(rule => rule.id).join(',');
-          void navigate(`/rules?visible-rules=${ruleIds}`);
+          void navigate(`/settings/rules?visible-rules=${ruleIds}`);
           return;
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);
           // Fallback to general rules page
-          void navigate('/rules');
+          void navigate('/settings/rules');
           return;
         }
       }
@@ -109,7 +131,15 @@ export function MobilePayeesPage() {
   );
 
   return (
-    <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
+    <Page
+      header={
+        <MobilePageHeader
+          title={t('Payees')}
+          leftContent={<SettingsBackButton />}
+        />
+      }
+      padding={0}
+    >
       <View
         style={{
           flexDirection: 'row',

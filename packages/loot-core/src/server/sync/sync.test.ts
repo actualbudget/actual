@@ -5,6 +5,7 @@ import * as db from '#server/db';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
+import { q } from '#shared/query';
 
 import * as encoder from './encoder';
 import { isError } from './utils';
@@ -403,5 +404,53 @@ describe('Sync projections', () => {
 
     // Apply the messages that deletes it
     await applyMessages(secondMessages);
+  });
+});
+
+describe('Sync account balance cells', () => {
+  test('recomputes account totals and group subtotals when transactions sync', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+    await sheet.loadSpreadsheet(db);
+
+    const spreadsheet = sheet.get();
+    function sumOf(filter: Record<string, unknown>) {
+      return q('transactions')
+        .filter(filter)
+        .calculate({ $sum: '$amount' })
+        .serialize();
+    }
+    spreadsheet.createQuery(
+      '__global',
+      'onbudget-accounts-balance',
+      sumOf({ 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'account-group-balance-g1-on',
+      sumOf({ 'account.account_group_id': 'g1', 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'balance-acct1',
+      sumOf({ account: 'acct1' }),
+    );
+    await sheet.waitOnSpreadsheet();
+
+    const recompute = vi.spyOn(spreadsheet, 'recompute');
+    await applyMessages([
+      global.stepForwardInTime() || {
+        dataset: 'transactions',
+        row: 'foo',
+        column: 'amount',
+        value: 3200,
+        timestamp: Timestamp.send(),
+      },
+    ]);
+
+    const recomputed = recompute.mock.calls.map(([name]) => name);
+    expect(recomputed).toContain('__global!onbudget-accounts-balance');
+    expect(recomputed).toContain('__global!account-group-balance-g1-on');
+    expect(recomputed).not.toContain('__global!balance-acct1');
   });
 });

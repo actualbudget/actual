@@ -495,7 +495,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
             <View ref={triggerRef} style={{ flexShrink: 0 }}>
               {renderInput(
                 (() => {
-                  const { className, style, ...restInputProps } =
+                  const { className, style, size, ...restInputProps } =
                     inputProps || {};
                   const downshiftProps = getInputProps({
                     ref: inputRef,
@@ -616,6 +616,7 @@ function SingleAutocomplete<T extends AutocompleteItem>({
                     ...downshiftProps,
                     ...(className && { className }),
                     ...(style && { style }),
+                    ...(size && { size }),
                   };
                 })(),
               )}

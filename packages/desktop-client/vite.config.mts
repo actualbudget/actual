@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { createReadStream } from 'node:fs';
+import { createReadStream, readFileSync } from 'node:fs';
 import { cp, mkdir, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -98,6 +98,23 @@ const pluginsServiceDistDir = path.resolve(
 );
 const serviceWorkerDir = path.resolve(__dirname, 'service-worker');
 
+const repoRoot = path.resolve(__dirname, '../..');
+
+// The repo pins the Yarn release it expects via `.yarnrc.yml`, so resolve that
+// path and launch it through Node directly. Spawning `yarn` by name does not
+// work on Windows, where it resolves to a `.cmd` shim that `spawn` cannot
+// execute without a shell.
+function resolveYarnCli(): string {
+  const yarnRc = readFileSync(path.resolve(repoRoot, '.yarnrc.yml'), 'utf8');
+  const yarnPath = /^yarnPath:\s*(.+?)\s*$/m.exec(yarnRc)?.[1];
+
+  if (!yarnPath) {
+    throw new Error('Could not resolve "yarnPath" from .yarnrc.yml');
+  }
+
+  return path.resolve(repoRoot, yarnPath);
+}
+
 const WORKER_FILENAME_RE = /^kcab\.worker\.(.+)\.js$/;
 
 async function extractWorkerHash(): Promise<string> {
@@ -125,6 +142,10 @@ async function stagePluginsService(): Promise<void> {
   await cp(pluginsServiceDistDir, serviceWorkerDir, { recursive: true });
 }
 
+// Extensions of data files served to the backend worker. Keep in sync
+// with the workbox `globPatterns` below so every listed file is precached.
+const DATA_FILE_EXTENSIONS = new Set(['.sql', '.js', '.sqlite']);
+
 async function stagePublicData(): Promise<void> {
   const migrationsDest = path.resolve(publicDataDir, 'migrations');
   await mkdir(publicDataDir, { recursive: true });
@@ -146,10 +167,10 @@ async function stagePublicData(): Promise<void> {
         .relative(publicDataDir, path.join(e.parentPath, e.name))
         .replaceAll(path.sep, '/'),
     )
-    // Skip dotfiles (e.g. legacy `.force-copy-windows` marker). They have no
-    // matching extension in the workbox precache globs, so a PWA opened
-    // offline would fail to fetch them and break startup (issue #7886).
+    // Only list files the backend needs and the workbox precache globs
+    // cover; anything else fails to load offline and breaks startup.
     .filter(file => !file.split('/').some(part => part.startsWith('.')))
+    .filter(file => DATA_FILE_EXTENSIONS.has(path.extname(file)))
     .sort();
   await writeFile(
     path.resolve(publicDir, 'data-file-index.txt'),
@@ -161,8 +182,9 @@ const lootCoreBackend = (): Plugin => ({
   name: 'loot-core-backend',
   configureServer(server) {
     const child: ChildProcess = spawn(
-      'yarn',
+      process.execPath,
       [
+        resolveYarnCli(),
         'vite',
         'build',
         '--config',
@@ -248,6 +270,16 @@ export default defineConfig(async ({ mode, command }) => {
   if (process.env.REVIEW_ID) {
     process.env.REACT_APP_REVIEW_ID = process.env.REVIEW_ID;
     process.env.REACT_APP_BRANCH = process.env.BRANCH;
+  }
+
+  // Netlify sets COMMIT_REF; GitHub Actions sets GITHUB_SHA (e.g. the
+  // Docker/npm nightly builds). Forward whichever is present so edge/nightly
+  // builds can show which commit they were built from. Release builds run in
+  // GitHub Actions on a version tag and keep their plain version.
+  const isTagBuild = process.env.GITHUB_REF_TYPE === 'tag';
+  const commitRef = process.env.COMMIT_REF || process.env.GITHUB_SHA;
+  if (commitRef && !isTagBuild) {
+    process.env.REACT_APP_COMMIT_REF = commitRef;
   }
 
   // Electron packaging (--mode=desktop) bundles loot-core directly, so skip

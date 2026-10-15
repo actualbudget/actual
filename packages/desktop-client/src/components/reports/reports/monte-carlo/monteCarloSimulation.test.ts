@@ -102,6 +102,7 @@ function makeParams(
     taxBands: [],
     horizonYears: 30,
     simulationCount: 1000,
+    historicalBlockLength: 10,
     seed: 42,
     ...rest,
   };
@@ -495,6 +496,165 @@ describe('runMonteCarloSimulation', () => {
       ),
     );
     expect(historical.percentileBands).toEqual(deterministic.percentileBands);
+  });
+
+  describe('block bootstrap model', () => {
+    // A 20-year history whose stock return and inflation both encode the
+    // year's position, so a captured run reveals which historical year
+    // each simulated year replayed
+    const encodedHistory = Array.from({ length: 20 }, (_, yearIndex) => ({
+      year: 2000 + yearIndex,
+      stocks: yearIndex * 0.001,
+      bonds: 0,
+      cash: 0,
+      inflation: (yearIndex + 1) * 0.0005,
+    }));
+
+    function captureHistoryIndices(
+      historicalBlockLength: number,
+      captureRunDetail: number,
+    ) {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-block-bootstrap',
+            historicalReturns: encodedHistory,
+            historicalBlockLength,
+            inflationMean: 0.02,
+            annualWithdrawal: 0,
+            horizonYears: 100,
+            captureRunDetail,
+          },
+          { startingBalance: 1_000_000, allocationPreset: 'equity-100' },
+        ),
+      );
+      return result.runDetail!.map(row => ({
+        historyIndex: Math.round((row.potReturns[0] ?? 0) / 0.001),
+        inflation: row.inflation,
+      }));
+    }
+
+    // The share of year-to-year steps that carried on to the next
+    // historical year (wrapping), pooled over a few captured runs
+    function getContinuationShare(historicalBlockLength: number) {
+      let continued = 0;
+      let steps = 0;
+      for (let runIndex = 0; runIndex < 5; runIndex++) {
+        const years = captureHistoryIndices(historicalBlockLength, runIndex);
+        for (let position = 1; position < years.length; position++) {
+          steps++;
+          if (
+            years[position].historyIndex ===
+            (years[position - 1].historyIndex + 1) % encodedHistory.length
+          ) {
+            continued++;
+          }
+        }
+      }
+      return continued / steps;
+    }
+
+    it('continues to the next year about as often as the block length implies', () => {
+      // Length 10 continues 90% of the time (plus the odd random jump that
+      // happens to land on the next year); length 1 never continues on
+      // purpose; length 30 almost always does
+      const typical = getContinuationShare(10);
+      expect(typical).toBeGreaterThan(0.85);
+      expect(typical).toBeLessThan(0.95);
+      expect(getContinuationShare(1)).toBeLessThan(0.12);
+      expect(getContinuationShare(30)).toBeGreaterThan(0.94);
+    });
+
+    it('wraps from the last historical year back to the first', () => {
+      const years = captureHistoryIndices(30, 0);
+      const hasWrapped = years.some(
+        (year, position) =>
+          position > 0 &&
+          years[position - 1].historyIndex === encodedHistory.length - 1 &&
+          year.historyIndex === 0,
+      );
+      expect(hasWrapped).toBe(true);
+    });
+
+    it("pairs each year with its own historical year's inflation", () => {
+      for (const year of captureHistoryIndices(10, 0)) {
+        expect(year.inflation).toBeCloseTo(
+          (year.historyIndex + 1) * 0.0005,
+          10,
+        );
+      }
+    });
+
+    it('runs the requested number of scenarios, not one per start year', () => {
+      const result = runMonteCarloSimulation(
+        makeParams({
+          returnModel: 'historical-block-bootstrap',
+          historicalReturns: encodedHistory,
+          simulationCount: 1_500,
+        }),
+      );
+      expect(result.simulationCount).toBe(1_500);
+    });
+
+    it('matches deterministic growth on a one-year history', () => {
+      // With a single historical year, continuing and jumping both land on
+      // it, so the run must match a zero-volatility 5% projection
+      const blocks = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-block-bootstrap',
+            historicalReturns: [
+              {
+                year: 2000,
+                stocks: 0.05,
+                bonds: 0.02,
+                cash: 0.01,
+                inflation: 0,
+              },
+            ],
+            annualWithdrawal: 3_000,
+            horizonYears: 30,
+          },
+          { startingBalance: 100_000, allocationPreset: 'equity-100' },
+        ),
+      );
+      const deterministic = runMonteCarloSimulation(
+        makeParams(
+          { annualWithdrawal: 3_000, horizonYears: 30 },
+          {
+            startingBalance: 100_000,
+            expectedReturnMean: 0.05,
+            returnStdDev: 0,
+          },
+        ),
+      );
+      expect(blocks.percentileBands).toEqual(deterministic.percentileBands);
+    });
+
+    it('is seeded, and a captured run replays the same scenario', () => {
+      const params = makeParams(
+        {
+          returnModel: 'historical-block-bootstrap',
+          annualWithdrawal: 40_000,
+          horizonYears: 30,
+        },
+        { startingBalance: 1_000_000, allocationPreset: 'equity-60' },
+      );
+      const first = runMonteCarloSimulation(params);
+      const second = runMonteCarloSimulation(params);
+      expect(second.endingBalances).toEqual(first.endingBalances);
+
+      // Variable draws per year must not desynchronise the capture re-run
+      const captured = runMonteCarloSimulation({
+        ...params,
+        captureRunDetail: 7,
+      });
+      expect(captured.endingBalances).toEqual(first.endingBalances);
+      const fundedRows = captured.runDetail!.filter(row => !row.afterDepletion);
+      expect(fundedRows.at(-1)!.endBalance).toBe(
+        Math.round(first.endingBalances[7]),
+      );
+    });
   });
 
   it('runs one scenario per start year in sequence mode', () => {

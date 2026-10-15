@@ -564,7 +564,7 @@ export function KeyboardShortcutModal() {
                     padding: 20,
                   }}
                 >
-                  <Text style={{ fontSize: 15 }}>
+                  <Text size="large">
                     <Trans>
                       {isSearching
                         ? 'No matching shortcuts'

@@ -41,15 +41,25 @@ export default {
     // Clean up remittanceInformation, deduplicate payee (removing slashes ...
     // ... that are added to the remittanceInformation field), and ...
     // ... remove clutter like "End-to-End-Ref.: NOTPROVIDED"
-    const payee = escapeRegExp(
-      transaction.creditorName || transaction.debtorName || '',
+    const payeeTokens = (
+      transaction.creditorName ||
+      transaction.debtorName ||
+      ''
+    )
+      .split(/[\s/]+/)
+      .filter(Boolean)
+      .map(escapeRegExp);
+    let notes = editedTrans.remittanceInformationUnstructured.replace(
+      /\s*(,)?\s+/g,
+      '$1 ',
     );
-    editedTrans.remittanceInformationUnstructured =
-      editedTrans.remittanceInformationUnstructured
-        .replace(/\s*(,)?\s+/g, '$1 ')
-        .replace(RegExp(payee.split(' ').join('(/*| )'), 'gi'), ' ')
-        .replace(', End-to-End-Ref.: NOTPROVIDED', '')
-        .trim();
+    if (payeeTokens.length > 0) {
+      // Separators consume at least one character and cannot overlap tokens.
+      notes = notes.replace(new RegExp(payeeTokens.join('[\\s/]+'), 'gi'), ' ');
+    }
+    editedTrans.remittanceInformationUnstructured = notes
+      .replace(', End-to-End-Ref.: NOTPROVIDED', '')
+      .trim();
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);
   },
