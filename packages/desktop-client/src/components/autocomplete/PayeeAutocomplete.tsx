@@ -30,7 +30,7 @@ import type {
   PayeeEntity,
 } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
-import { Fzf } from 'fzf';
+import { byLengthAsc, byStartAsc, Fzf } from 'fzf';
 
 import { useAccounts } from '#hooks/useAccounts';
 import { useCommonPayees } from '#hooks/useCommonPayees';
@@ -461,6 +461,9 @@ export function PayeeAutocomplete({
       selector: item => item.name ?? '',
       limit: 100,
       casing: 'case-insensitive',
+      // Prefer exact/shorter matches over longer ones that merely contain
+      // the query as a substring when fzf scores them equally.
+      tiebreakers: [byLengthAsc, byStartAsc],
     })
       .find(rawPayee)
       .map(result => result.item);
@@ -515,6 +518,9 @@ export function PayeeAutocomplete({
         selector: item => item.name ?? '',
         limit: 100,
         casing: 'case-insensitive',
+        // Prefer exact/shorter matches over longer ones that merely contain
+        // the query as a substring when fzf scores them equally.
+        tiebreakers: [byLengthAsc, byStartAsc],
       })
         .find(value)
         .map(result => result.item);

@@ -5,6 +5,7 @@ import {
   SvgCheveronDownUp,
   SvgCheveronUpDown,
 } from '@actual-app/components/icons/v1';
+import { SvgSearchAlternate } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -20,11 +21,17 @@ import { SidebarIconButton } from './SidebarIconButton';
 type AccountsHeaderRowProps = {
   allOpen: boolean;
   onToggleAll: () => void;
+  isToggleAllDisabled: boolean;
+  isSearchOpen: boolean;
+  onToggleSearch: () => void;
 };
 
 export function AccountsHeaderRow({
   allOpen,
   onToggleAll,
+  isToggleAllDisabled,
+  isSearchOpen,
+  onToggleSearch,
 }: AccountsHeaderRowProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -60,7 +67,14 @@ export function AccountsHeaderRow({
       <SidebarIconButton
         Icon={allOpen ? SvgCheveronDownUp : SvgCheveronUpDown}
         label={allOpen ? t('Collapse all groups') : t('Expand all groups')}
+        isDisabled={isToggleAllDisabled}
         onPress={onToggleAll}
+      />
+      <SidebarIconButton
+        Icon={SvgSearchAlternate}
+        label={t('Find account')}
+        isToggledOn={isSearchOpen}
+        onPress={onToggleSearch}
       />
       <SidebarIconButton
         Icon={SvgAdd}

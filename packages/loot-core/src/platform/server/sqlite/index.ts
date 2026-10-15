@@ -109,28 +109,37 @@ export function runQuery<T>(
 
   const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
 
-  if (fetchAll) {
-    try {
-      stmt.bind(params);
-      const rows = [];
+  try {
+    if (fetchAll) {
+      try {
+        stmt.bind(params);
+        const columns = stmt.getColumnNames();
+        const rows = [];
 
-      while (stmt.step()) {
-        rows.push(stmt.getAsObject());
+        while (stmt.step()) {
+          const values = stmt.get();
+          const row = {};
+          for (let i = 0; i < columns.length; i++) {
+            row[columns[i]] = values[i];
+          }
+          rows.push(row);
+        }
+        return rows;
+      } catch (e) {
+        logger.log(sql);
+        throw e;
       }
-
-      if (typeof sql === 'string') {
-        stmt.free();
-      } else {
-        stmt.reset();
-      }
-      return rows;
-    } catch (e) {
-      logger.log(sql);
-      throw e;
     }
-  } else {
+
     stmt.run(params);
     return { changes: db.getRowsModified() };
+  } finally {
+    // sql.js keeps statements alive in the WASM heap until they are freed.
+    if (typeof sql === 'string') {
+      stmt.free();
+    } else {
+      stmt.reset();
+    }
   }
 }
 
@@ -140,14 +149,27 @@ export function execQuery(db: Database, sql: string) {
 
 let transactionDepth = 0;
 
-export function transaction(db: Database, fn: () => void) {
+export type TransactionOptions = {
+  // Take the write lock up front (`BEGIN IMMEDIATE`) instead of on the
+  // first write. Use it for transactions that read before they write:
+  // absurd-sql reuses an IndexedDB cursor across the lock upgrade, and
+  // a read that lands just after that cursor then fails with
+  // "TransactionInactiveError" and stalls the backend.
+  immediate?: boolean;
+};
+
+export function transaction(
+  db: Database,
+  fn: () => void,
+  { immediate = false }: TransactionOptions = {},
+) {
   let before, after, undo;
   if (transactionDepth > 0) {
     before = 'SAVEPOINT __actual_sp';
     after = 'RELEASE __actual_sp';
     undo = 'ROLLBACK TO __actual_sp';
   } else {
-    before = 'BEGIN';
+    before = immediate ? 'BEGIN IMMEDIATE' : 'BEGIN';
     after = 'COMMIT';
     undo = 'ROLLBACK';
   }
@@ -218,9 +240,13 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
           // @ts-expect-error 2nd argument missed in sql.js types
           { filename: true },
         );
+        // absurd-sql serves every page cache miss with a synchronous
+        // round trip to IndexedDB, so allow the cache to hold a whole
+        // large budget file. SQLite allocates cache pages lazily, so
+        // small files don't pay for the ceiling. The value is in KiB.
         db.exec(`
           PRAGMA journal_mode=MEMORY;
-          PRAGMA cache_size=-10000;
+          PRAGMA cache_size=-64000;
         `);
       }
     }

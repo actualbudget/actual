@@ -81,6 +81,26 @@ export const WithSeparator: Story = {
   },
 };
 
+export const WithHeadings: Story = {
+  args: {
+    options: [
+      ['none', 'Outside the plan'],
+      [Menu.label, 'Income streams'],
+      ['pension', 'State pension'],
+      ['rental', 'Rental income'],
+    ],
+    value: 'none',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A [Menu.label, text] entry renders a non-selectable heading over the options that follow it.',
+      },
+    },
+  },
+};
+
 export const WithDisabledKeys: Story = {
   args: {
     options: [

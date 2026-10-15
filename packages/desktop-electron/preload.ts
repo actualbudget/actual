@@ -101,6 +101,10 @@ contextBridge.exposeInMainWorld('Actual', {
     );
   },
 
+  setDocumentDir: (directory: string) => {
+    return ipcRenderer.invoke('set-document-dir', directory);
+  },
+
   reload: async () => {
     throw new Error('Reload not implemented in electron app');
   },

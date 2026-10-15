@@ -110,3 +110,24 @@ export const InlineUsage: Story = {
     },
   },
 };
+
+export const Sizes: Story = {
+  render: () => (
+    <View style={{ gap: 8 }}>
+      <Text size="small">Small (12px)</Text>
+      <Text size="medium">Medium (13px)</Text>
+      <Text size="large">Large (15px, 16px on mobile)</Text>
+      <Text size="extra-large">
+        Extra Large (17px on mobile/tablet, 16px on desktop)
+      </Text>
+    </View>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The standard size vocabulary. Values adapt to the viewport: resize the story canvas below 512px, 730px and 1100px to see the responsive steps.',
+      },
+    },
+  },
+};

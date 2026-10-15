@@ -95,10 +95,35 @@ function getDtOrDtTm(Date: DateRef | null): string | null {
   return Date?.Dt;
 }
 
+function decodeXmlContent(content: Uint8Array): string {
+  const utf8Decoder = new TextDecoder('utf-8');
+
+  // The XML declaration (up to the first `>`) is ASCII, so it can be
+  // inspected to find the declared encoding before decoding the rest of
+  // the document. Decoding the header as latin1 keeps the raw byte
+  // values, which is correct for the ASCII-only declaration.
+  const header = new TextDecoder('latin1').decode(content.subarray(0, 500));
+  const match = header.match(/encoding\s*=\s*["']([^"']+)["']/i);
+  const declaredEncoding = match?.[1];
+
+  if (declaredEncoding && !/^utf-?8$/i.test(declaredEncoding)) {
+    try {
+      return new TextDecoder(declaredEncoding).decode(content);
+    } catch {
+      // Unsupported or unknown encoding label; fall back to UTF-8.
+    }
+  }
+
+  return utf8Decoder.decode(content);
+}
+
 export async function xmlCAMT2json(
-  content: string,
+  content: string | Uint8Array,
 ): Promise<TransactionCAMT[]> {
-  const data = await parseStringPromise(content, { explicitArray: false });
+  const data = await parseStringPromise(
+    content instanceof Uint8Array ? decodeXmlContent(content) : content,
+    { explicitArray: false },
+  );
   const entries = findKeys(data, 'Ntry') as Ntry[];
 
   const transactions: TransactionCAMT[] = [];

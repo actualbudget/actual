@@ -74,7 +74,7 @@ export function UpdateNotification() {
                   )
                 }
               >
-                <Trans>notes</Trans>
+                <Trans context="release notes">notes</Trans>
               </Link>
               )
               <Button

@@ -1,4 +1,8 @@
-import { getUnsafeZipMeta, toMB } from '@actual-app/core/shared/errors';
+import {
+  getUnsafeZipMeta,
+  isDatabaseSchemaMismatch,
+  toMB,
+} from '@actual-app/core/shared/errors';
 import type { UnsafeZipMeta } from '@actual-app/core/shared/errors';
 import { t } from 'i18next';
 
@@ -85,21 +89,6 @@ export function getUploadError({ reason, meta }: ErrorWithMeta) {
   }
 }
 
-function isDatabaseSchemaMismatch(meta?: unknown): boolean {
-  if (
-    meta &&
-    typeof meta === 'object' &&
-    'error' in meta &&
-    meta.error &&
-    typeof meta.error === 'object' &&
-    'message' in meta.error &&
-    typeof meta.error.message === 'string'
-  ) {
-    return /no such (column|table)/i.test(meta.error.message);
-  }
-  return false;
-}
-
 function getSchemaMismatchError() {
   return t(
     'This budget could not be loaded because it uses a newer database schema than this version of Actual supports. Make sure you are using the latest version, then try again.',
@@ -128,6 +117,10 @@ export function getDownloadError({
     case 'invalid-meta-file':
       return t(
         'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.',
+      );
+    case 'mismatched-cloud-file':
+      return t(
+        'The selected local budget does not match this cloud file. It has not been replaced.',
       );
     case 'zip-too-large': {
       const zipMeta = getUnsafeZipMeta(meta);

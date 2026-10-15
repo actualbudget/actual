@@ -236,3 +236,34 @@ describe('printOutput', () => {
     expect(writeSpy).toHaveBeenCalledWith('\n');
   });
 });
+
+describe('BOM-prefixed CSV formulas', () => {
+  it.each(['=1+1', '+1+1', '-2+3', '@SUM(1+1)', '\ttext', '\rtext'])(
+    'neutralizes %j after repeated BOMs in values, headers and scalars',
+    formula => {
+      for (const prefix of ['\uFEFF', '\uFEFF\uFEFF']) {
+        const text = prefix + formula;
+        const expected = formula.includes('\r') ? `"'${text}"` : `'${text}`;
+        expect(formatOutput([{ value: text }], 'csv')).toBe(
+          `value\n${expected}`,
+        );
+        expect(formatOutput({ [text]: 'ordinary' }, 'csv')).toBe(
+          `${expected}\nordinary`,
+        );
+        expect(formatOutput([{ [text]: 'ordinary' }], 'csv')).toBe(
+          `${expected}\nordinary`,
+        );
+        expect(formatOutput(text, 'csv')).toBe(expected);
+      }
+    },
+  );
+
+  it('preserves quoting and Unicode text', () => {
+    expect(formatOutput('\uFEFF=CONCAT("é","日")', 'csv')).toBe(
+      '"\'\uFEFF=CONCAT(""é"",""日"")"',
+    );
+    expect(formatOutput('\uFEFFQuébec', 'csv')).toBe('\uFEFFQuébec');
+    expect(formatOutput(-25, 'csv')).toBe('-25');
+    expect(formatOutput([{ amount: -2500 }], 'csv')).toBe('amount\n-25.00');
+  });
+});

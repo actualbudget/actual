@@ -1,7 +1,15 @@
 import fs from 'fs';
 import { createServer } from 'http';
 import type { Server } from 'http';
-import { cp, mkdir, rm } from 'node:fs/promises';
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import path from 'path';
 
 import type { GlobalPrefsJson } from '@actual-app/core/types/prefs';
@@ -25,8 +33,11 @@ import type {
   UtilityProcess,
 } from 'electron';
 
+import { openExternalUrl, revealLocalFile } from './external-links';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
+import type { AppInitFailurePayload } from './server';
+import { isInternalUrl } from './trusted-url';
 import {
   get as getWindowState,
   listen as listenToWindowState,
@@ -70,6 +81,11 @@ let clientWin: BrowserWindow | null;
 let serverProcess: UtilityProcess | null;
 let syncServerProcess: UtilityProcess | null;
 
+// The last startup failure reported by (or observed on) the backend process.
+// Kept so a renderer that connects after the failure was posted still gets
+// told about it instead of waiting forever for a reply.
+let lastAppInitFailure: AppInitFailurePayload | null = null;
+
 let oAuthServer: ReturnType<typeof createServer> | null;
 
 let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
@@ -79,7 +95,7 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   const trimmedMessage = JSON.stringify(message.trim()); // ensure line endings are removed
   console[loglevel](trimmedMessage);
 
-  if (!clientWin) {
+  if (!clientWin || !isInternalUrl(clientWin.webContents.getURL(), isDev)) {
     // queue up the logs until the client window is ready
     queuedClientWinLogs.push(`console.${loglevel}(${trimmedMessage})`);
   } else {
@@ -143,33 +159,162 @@ if (isDev) {
   process.traceProcessWarnings = true;
 }
 
-async function loadGlobalPrefs() {
-  let state: GlobalPrefsJson = {};
+const getGlobalPrefsPath = () =>
+  path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json');
+
+// Complete copy of the store, written ahead of an in-place overwrite by the
+// EXDEV fallback in saveGlobalPrefs (and by loot-core's asyncStorage), so an
+// interrupted overwrite can be recovered from.
+const getGlobalPrefsRecoveryPath = () => `${getGlobalPrefsPath()}.bak`;
+
+function parseGlobalPrefs(contents: string): GlobalPrefsJson {
+  const parsed: unknown = JSON.parse(contents);
+  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Global preferences file is not a JSON object');
+  }
+  // The shape was checked above; the field values are trusted as written by
+  // the app itself, the same way loot-core's asyncStorage treats them.
+  return parsed as GlobalPrefsJson;
+}
+
+function loadGlobalPrefsRecovery(): GlobalPrefsJson | null {
   try {
-    state = JSON.parse(
-      fs.readFileSync(
-        path.join(process.env.ACTUAL_DATA_DIR!, 'global-store.json'),
-        'utf8',
-      ),
+    return parseGlobalPrefs(
+      fs.readFileSync(getGlobalPrefsRecoveryPath(), 'utf8'),
     );
   } catch {
-    logMessage('info', 'Could not load global state - using defaults');
-    state = {};
+    return null;
+  }
+}
+
+async function loadGlobalPrefs() {
+  let contents: string;
+  try {
+    contents = fs.readFileSync(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    // A missing file is a fresh install: start from defaults, the same as
+    // loot-core does, without consulting any leftover recovery copy.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      logMessage(
+        'error',
+        `Could not read global state - using defaults: ${String(error)}`,
+      );
+    }
+    return {};
   }
 
-  return state;
+  try {
+    return parseGlobalPrefs(contents);
+  } catch {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    logMessage('info', 'Could not parse global state - using defaults');
+    return {};
+  }
+}
+
+// Like loadGlobalPrefs, but only a missing file falls back to defaults; a
+// read or parse failure is propagated so callers doing read-modify-write don't
+// overwrite a store they couldn't read.
+async function loadGlobalPrefsStrict(): Promise<GlobalPrefsJson> {
+  let contents: string;
+  try {
+    contents = await readFile(getGlobalPrefsPath(), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return {};
+    }
+    throw error;
+  }
+
+  try {
+    return parseGlobalPrefs(contents);
+  } catch (error) {
+    const recovered = loadGlobalPrefsRecovery();
+    if (recovered) {
+      logMessage('info', 'Loaded global state from its recovery copy');
+      return recovered;
+    }
+    throw error;
+  }
+}
+
+// Writes the global preferences file atomically (temp file + rename), the same
+// way loot-core's asyncStorage does. Only meant to be used while the backend
+// process is not running, otherwise the two would race for the file.
+async function saveGlobalPrefs(state: GlobalPrefsJson) {
+  const globalPrefsPath = getGlobalPrefsPath();
+  const temporaryPath = `${globalPrefsPath}.${process.pid}.main.tmp`;
+
+  const contents = JSON.stringify(state);
+
+  try {
+    await writeFile(temporaryPath, contents, 'utf8');
+    await rename(temporaryPath, globalPrefsPath);
+    // The atomic path never leaves a torn file, so any recovery copy from an
+    // earlier in-place write is stale now; drop it.
+    await rm(getGlobalPrefsRecoveryPath(), { force: true }).catch(
+      () => undefined,
+    );
+  } catch (error) {
+    await rm(temporaryPath, { force: true }).catch(() => undefined);
+
+    if ((error as NodeJS.ErrnoException).code === 'EXDEV') {
+      // Sandboxed installs (e.g. the Microsoft Store package) virtualise the
+      // app data folder, so renaming into it fails as a cross-device move.
+      // Write in place instead; losing atomicity beats failing outright.
+      logMessage(
+        'info',
+        `Could not atomically replace ${globalPrefsPath} (EXDEV); writing it in place instead`,
+      );
+      // Write-ahead copy: land the complete new contents in the recovery file
+      // first, then overwrite in place. If the copy can't be written, refuse
+      // to save rather than risk leaving a torn store as the only copy.
+      try {
+        await writeFile(getGlobalPrefsRecoveryPath(), contents, 'utf8');
+      } catch (recoveryError) {
+        logMessage(
+          'error',
+          `Could not write the global preferences recovery copy; not overwriting the store: ${String(recoveryError)}`,
+        );
+        throw recoveryError;
+      }
+      await writeFile(globalPrefsPath, contents, 'utf8');
+      return;
+    }
+
+    throw error;
+  }
+}
+
+function reportAppInitFailure(payload: AppInitFailurePayload) {
+  lastAppInitFailure = payload;
+  logMessage('error', `Backend failed to start: ${payload.message}`);
+
+  if (clientWin) {
+    clientWin.webContents.send('message', payload);
+  }
 }
 
 async function createBackgroundProcess() {
+  lastAppInitFailure = null;
+
   const globalPrefs = await loadGlobalPrefs(); // ensures we have the latest settings - even when restarting the server
   let envVariables: Env = {
     ...process.env, // required
   };
 
   if (globalPrefs['server-self-signed-cert']) {
+    // The backend process trusts this certificate via tls.setDefaultCACertificates
+    // (see certificates.ts). NODE_EXTRA_CA_CERTS can't be used for this: the
+    // packaged app disables the Electron `nodeOptions` fuse, which makes
+    // Electron ignore both NODE_OPTIONS and NODE_EXTRA_CA_CERTS.
     envVariables = {
       ...envVariables,
-      NODE_EXTRA_CA_CERTS: globalPrefs['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
+      ACTUAL_SERVER_SELF_SIGNED_CERT: globalPrefs['server-self-signed-cert'],
     };
   }
 
@@ -198,7 +343,9 @@ async function createBackgroundProcess() {
     logMessage('error', `Server Log: ${chunk.toString('utf8')}`);
   });
 
-  serverProcess.on('message', msg => {
+  const startedProcess = serverProcess;
+
+  startedProcess.on('message', msg => {
     switch (msg.type) {
       case 'captureEvent':
       case 'captureBreadcrumb':
@@ -210,9 +357,32 @@ async function createBackgroundProcess() {
           clientWin.webContents.send('message', msg);
         }
         break;
+      case 'app-init-failure':
+        reportAppInitFailure(msg as AppInitFailurePayload);
+        break;
       default:
         logMessage('info', 'Unknown server message: ' + msg.type);
     }
+  });
+
+  startedProcess.on('exit', code => {
+    // `serverProcess` is cleared before an intentional kill (restart / quit),
+    // so if it still points at this process the exit was unexpected.
+    if (serverProcess !== startedProcess) {
+      return;
+    }
+    serverProcess = null;
+
+    // A failure that was already reported is more specific than "it exited".
+    if (lastAppInitFailure) {
+      return;
+    }
+
+    reportAppInitFailure({
+      type: 'app-init-failure',
+      BackendInitFailure: true,
+      message: `The backend process exited unexpectedly (exit code ${code})`,
+    });
   });
 }
 
@@ -408,7 +578,7 @@ async function createWindow() {
   win.on('focus', async () => {
     if (clientWin) {
       const url = clientWin.webContents.getURL();
-      if (url.includes('app://') || url.includes('localhost:')) {
+      if (isInternalUrl(url, isDev)) {
         void clientWin.webContents.executeJavaScript(
           'window.__actionsForMenu.appFocused()',
         );
@@ -419,8 +589,8 @@ async function createWindow() {
   // hit when middle-clicking buttons or <a href/> with a target set to _blank
   // always deny, optionally redirect to browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
 
     return { action: 'deny' };
@@ -429,9 +599,8 @@ async function createWindow() {
   // hit when clicking <a href/> with no target
   // optionally redirect to browser
   win.webContents.on('will-navigate', (event, url) => {
-    if (isExternalUrl(url)) {
-      void shell.openExternal(url);
-      event.preventDefault();
+    if (!isInternalUrl(url, isDev)) {
+      void openExternalUrl(url, target => shell.openExternal(target));
     }
   });
 
@@ -439,18 +608,17 @@ async function createWindow() {
 
   clientWin = win;
 
-  // Execute queued logs - displaying them in the client window
-  void Promise.all(
-    queuedClientWinLogs.map((log: string) =>
-      win.webContents.executeJavaScript(log),
-    ),
-  );
-
-  queuedClientWinLogs = [];
-}
-
-function isExternalUrl(url: string) {
-  return !url.includes('localhost:') && !url.includes('app://');
+  // Wait for an internal page before forwarding queued logs to DevTools.
+  win.webContents.on('did-finish-load', () => {
+    if (!isInternalUrl(win.webContents.getURL(), isDev)) {
+      return;
+    }
+    const logs = queuedClientWinLogs;
+    queuedClientWinLogs = [];
+    for (const log of logs) {
+      void win.webContents.executeJavaScript(log);
+    }
+  });
 }
 
 app.setAppUserModelId('com.actualbudget.actual');
@@ -534,8 +702,9 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   if (serverProcess) {
-    serverProcess.kill();
+    const processToKill = serverProcess;
     serverProcess = null;
+    processToKill.kill();
   }
 });
 
@@ -575,11 +744,47 @@ ipcMain.handle('start-oauth-server', async () => {
 
 ipcMain.handle('restart-server', () => {
   if (serverProcess) {
-    serverProcess.kill();
+    const processToKill = serverProcess;
     serverProcess = null;
+    processToKill.kill();
   }
 
   void createBackgroundProcess();
+});
+
+// Lets the user pick a new budget data folder from the startup error screen,
+// when the backend (which normally owns the global preferences) is not
+// running. The app is relaunched by the renderer afterwards.
+ipcMain.handle('set-document-dir', async (_event, directory: string) => {
+  if (!directory) {
+    throw new Error('A directory must be provided');
+  }
+
+  if (!fs.existsSync(directory)) {
+    throw new Error(`The directory does not exist: ${directory}`);
+  }
+
+  // Probe that we can actually create something inside the chosen folder.
+  // Permission checks alone don't catch things like Windows Controlled Folder
+  // Access, which blocks writes without changing the folder's permissions.
+  const probePrefix = path.join(directory, '.actual-write-test-');
+  let probeDirectory: string;
+  try {
+    probeDirectory = await mkdtemp(probePrefix);
+  } catch (error) {
+    throw new Error(
+      `Actual is not allowed to create files in ${directory}: ${String(error)}`,
+    );
+  }
+  await rm(probeDirectory, { recursive: true, force: true }).catch(
+    () => undefined,
+  );
+
+  // Strict read: a corrupt or unreadable store must not be silently replaced
+  // by `{ document-dir }`, which would wipe the user's other preferences.
+  const globalPrefs = await loadGlobalPrefsStrict();
+  await saveGlobalPrefs({ ...globalPrefs, 'document-dir': directory });
+  logMessage('info', `Budget data folder changed to: ${directory}`);
 });
 
 ipcMain.handle('relaunch', () => {
@@ -632,15 +837,20 @@ ipcMain.handle(
 );
 
 ipcMain.handle('open-external-url', (event, url) => {
-  void shell.openExternal(url);
+  void openExternalUrl(url, target => shell.openExternal(target));
 });
 
 ipcMain.handle('open-in-file-manager', (event, filepath) => {
-  shell.showItemInFolder(filepath);
+  revealLocalFile(filepath, target => shell.showItemInFolder(target));
 });
 
 ipcMain.on('message', (_event, msg) => {
-  if (!serverProcess) {
+  if (!serverProcess || lastAppInitFailure) {
+    // The backend isn't there to answer. If we know why, tell the renderer
+    // (again) so its pending requests reject instead of hanging forever.
+    if (lastAppInitFailure && clientWin) {
+      clientWin.webContents.send('message', lastAppInitFailure);
+    }
     return;
   }
 

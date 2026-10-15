@@ -22,6 +22,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { isTouchDevice } from '#util/isTouchDevice';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
@@ -29,10 +30,9 @@ import { showActivity } from './showActivity';
 
 const RADIAN = Math.PI / 180;
 
-const canDeviceHover = () => window.matchMedia('(hover: hover)').matches;
-
 type ClickablePieItem = PieSectorDataItem &
-  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId'>>;
+  Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId' | 'bucketTagNames'>> &
+  Partial<Pick<IntervalEntity, 'intervalStartDate' | 'intervalEndDate'>>;
 
 // ---------------------------------------------------------------------------
 // Dimension helpers
@@ -487,18 +487,18 @@ export function DonutGraph({
                     }}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      if (canDeviceHover()) {
+                      if (!isTouchDevice()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
                       }
                     }}
                     onClick={(item: ClickablePieItem, index) => {
-                      if (!canDeviceHover()) {
+                      if (isTouchDevice()) {
                         setActiveGroupIndex(index);
                         setActiveRing('group');
                       }
                       if (
-                        (canDeviceHover() || activeGroupIndex === index) &&
+                        (!isTouchDevice() || activeGroupIndex === index) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -569,19 +569,19 @@ export function DonutGraph({
                     }}
                     onMouseLeave={() => setPointer('')}
                     onMouseEnter={(_, index) => {
-                      if (canDeviceHover()) {
+                      if (!isTouchDevice()) {
                         setActiveCategoryIndex(index);
                         setActiveRing('category');
                         setPointer('pointer');
                       }
                     }}
                     onClick={(item: ClickablePieItem, index) => {
-                      if (!canDeviceHover()) {
+                      if (isTouchDevice()) {
                         setActiveCategoryIndex(index);
                         setActiveRing('category');
                       }
                       if (
-                        (canDeviceHover() || activeCategoryIndex === index) &&
+                        (!isTouchDevice() || activeCategoryIndex === index) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -664,22 +664,35 @@ export function DonutGraph({
                   }}
                   onMouseLeave={() => setPointer('')}
                   onMouseEnter={(_, index) => {
-                    if (canDeviceHover()) {
+                    if (!isTouchDevice()) {
                       setActiveIndex(index);
-                      if (groupBy !== 'Interval') {
-                        setPointer('pointer');
-                      }
+                      setPointer('pointer');
                     }
                   }}
                   onClick={(item: ClickablePieItem, index) => {
-                    if (!canDeviceHover()) {
+                    if (isTouchDevice()) {
                       setActiveIndex(index);
                     }
                     if (
-                      groupBy !== 'Interval' &&
-                      (canDeviceHover() || activeIndex === index) &&
+                      (!isTouchDevice() || activeIndex === index) &&
                       ((compact && showTooltip) || !compact)
                     ) {
+                      // Interval slices drill down by their own date range instead of a field
+                      const drilldown =
+                        groupBy === 'Interval'
+                          ? {
+                              startDate:
+                                item.intervalStartDate ?? data.startDate,
+                              endDate: item.intervalEndDate ?? data.endDate,
+                            }
+                          : {
+                              startDate: data.startDate,
+                              endDate: data.endDate,
+                              field: groupBy.toLowerCase(),
+                              id: item.id,
+                              uncategorizedId: item.uncategorizedId,
+                            };
+
                       showActivity({
                         navigate,
                         categories,
@@ -689,11 +702,9 @@ export function DonutGraph({
                         showHiddenCategories,
                         showOffBudget,
                         type: 'totals',
-                        startDate: data.startDate,
-                        endDate: data.endDate,
-                        field: groupBy.toLowerCase(),
-                        id: item.id,
-                        uncategorizedId: item.uncategorizedId,
+                        ...drilldown,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames: data.scopeTagNames,
                       });
                     }
                   }}

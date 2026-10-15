@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -43,13 +43,19 @@ export function MonteCarloCard({
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const [isCardHovered, setIsCardHovered] = useState(false);
 
-  const config = monteCarloConfigFromMeta(meta);
+  // Memoised by hand so hovering the card (which toggles state) doesn't
+  // re-run thousands of simulations
+  const config = useMemo(() => monteCarloConfigFromMeta(meta), [meta]);
   const resolvedConfig = useResolvedMonteCarloConfig(config);
-  const result = runMonteCarloSimulation({
-    ...resolvedConfig,
-    horizonYears: getMonteCarloHorizonYears(resolvedConfig),
-    deflateToTodaysMoney: true,
-  });
+  const result = useMemo(
+    () =>
+      runMonteCarloSimulation({
+        ...resolvedConfig,
+        horizonYears: getMonteCarloHorizonYears(resolvedConfig),
+        deflateToTodaysMoney: true,
+      }),
+    [resolvedConfig],
+  );
 
   const endAge = config.currentAge + result.horizonYears;
   const successPercent = Math.round(result.successRate * 1000) / 10;

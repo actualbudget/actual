@@ -7,6 +7,8 @@ import {
 import { getJWT } from '#app-enablebanking/utils/jwt';
 import { SecretName, secretsService } from '#services/secrets-service';
 
+const debugSensitive = createDebug('actual-sensitive:enable-banking');
+
 const debug = createDebug('actual:enable-banking:service');
 
 const BASE_URL = 'https://api.enablebanking.com';
@@ -128,7 +130,8 @@ async function request<T>(
   psuHeaders?: PsuHeaders,
 ): Promise<T> {
   const url = `${BASE_URL}${path}`;
-  debug('%s %s', method, url);
+  debug('%s request', method);
+  debugSensitive('%s %s', method, url);
 
   const headers: Record<string, string> = {
     Authorization: authHeaderOverride ?? getAuthorizationHeader(),
@@ -350,6 +353,7 @@ export const enableBankingService = {
     state: string,
     maxConsentValidity?: number,
     psuType: PsuType = 'personal',
+    psuHeaders?: PsuHeaders,
   ): Promise<EnableBankingAuthResponse> {
     const DEFAULT_CONSENT_DAYS = 90;
     const defaultMs = DEFAULT_CONSENT_DAYS * 24 * 60 * 60 * 1000;
@@ -363,15 +367,23 @@ export const enableBankingService = {
 
     const validUntil = new Date(Date.now() + consentMs);
 
-    return request<EnableBankingAuthResponse>('POST', '/auth', {
-      aspsp: { name: aspsp.name, country: aspsp.country },
-      redirect_url: redirectUrl,
-      state,
-      access: {
-        valid_until: validUntil.toISOString(),
+    return request<EnableBankingAuthResponse>(
+      'POST',
+      '/auth',
+      {
+        aspsp: { name: aspsp.name, country: aspsp.country },
+        redirect_url: redirectUrl,
+        state,
+        access: {
+          valid_until: validUntil.toISOString(),
+          balances: true,
+          transactions: true,
+        },
+        psu_type: psuType,
       },
-      psu_type: psuType,
-    });
+      undefined,
+      psuHeaders,
+    );
   },
 
   async createSession(code: string): Promise<EnableBankingSession> {
@@ -437,7 +449,6 @@ export const enableBankingService = {
         continuationKey,
         psuHeaders,
       );
-      allTransactions.push(...result.transactions);
 
       if (
         result.continuation_key &&
@@ -446,6 +457,7 @@ export const enableBankingService = {
         break;
       }
 
+      allTransactions.push(...result.transactions);
       continuationKey = result.continuation_key;
       iteration++;
     } while (continuationKey && iteration < maxIterations);

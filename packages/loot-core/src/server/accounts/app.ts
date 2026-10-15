@@ -26,6 +26,7 @@ import { amountToInteger } from '#shared/util';
 import type { ImportTransactionsOpts } from '#types/api-handlers';
 import type {
   AccountEntity,
+  AccountGroupEntity,
   BankSyncProviderStatus,
   BankSyncStatus,
   CategoryEntity,
@@ -710,11 +711,13 @@ async function reopenAccount({ id }: { id: AccountEntity['id'] }) {
 async function moveAccount({
   id,
   targetId,
+  accountGroupId,
 }: {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;
+  accountGroupId?: AccountGroupEntity['id'] | null;
 }) {
-  await db.moveAccount(id, targetId);
+  await db.moveAccount(id, targetId, accountGroupId);
 }
 
 async function setSecret({
@@ -1413,6 +1416,15 @@ function getBankSyncStatusFromError(
 
     if (err.category === 'ACCOUNT_MISSING') {
       return 'account-missing';
+    }
+
+    if (
+      err.category === 'GOCARDLESS_NOT_CONFIGURED' ||
+      err.category === 'NOT_CONFIGURED' ||
+      err.code === 'GOCARDLESS_NOT_CONFIGURED' ||
+      err.code === 'NOT_CONFIGURED'
+    ) {
+      return 'not-configured';
     }
   }
 
