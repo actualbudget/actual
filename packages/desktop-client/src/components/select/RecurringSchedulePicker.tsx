@@ -131,6 +131,18 @@ function boundedRecurrence({
   return { [field]: value };
 }
 
+function usesLastDayForShortMonths(config: StateConfig) {
+  const dayValues = (config.patterns ?? [])
+    .filter(recurrence => recurrence.type === 'day')
+    .map(recurrence => recurrence.value);
+
+  return (
+    config.endMode !== 'after_n_occurrences' ||
+    dayValues.includes(-1) ||
+    (dayValues.length === 1 && dayValues[0] === 31)
+  );
+}
+
 type StateConfig = Omit<
   WithRequired<RecurConfig, 'patterns' | 'endDate' | 'weekendSolveMode'>,
   'interval' | 'endOccurrences'
@@ -370,7 +382,9 @@ function MonthlyPatterns({
               <SvgAdd style={{ width: 10, height: 10 }} />
             </Button>
           </View>
-          {recurrence.type === 'day' && recurrence.value >= 29 && (
+          {recurrence.type === 'day' &&
+            recurrence.value >= 29 &&
+            usesLastDayForShortMonths(config) && (
             <View
               style={{
                 display: 'flex',
@@ -537,7 +551,8 @@ function RecurringScheduleTooltip({
       </SpaceBetween>
       {config.frequency === 'monthly' &&
       (config.patterns == null || config.patterns.length === 0) &&
-      startDay >= 29 ? (
+      startDay >= 29 &&
+      (config.endMode !== 'after_n_occurrences' || startDay === 31) ? (
         <View
           style={{
             display: 'flex',
