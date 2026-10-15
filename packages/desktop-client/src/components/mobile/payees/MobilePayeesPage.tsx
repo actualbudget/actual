@@ -12,6 +12,7 @@ import type { PayeeEntity, RuleEntity } from '@actual-app/core/types/models';
 import { Search } from '#components/common/Search';
 import { withFilterParam } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
+import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayeeRuleCounts } from '#hooks/usePayeeRuleCounts';
 import { usePayees } from '#hooks/usePayees';
@@ -76,12 +77,12 @@ export function MobilePayeesPage() {
             id: payee.id,
           });
           const ruleIds = associatedRules.map(rule => rule.id).join(',');
-          void navigate(`/rules?visible-rules=${ruleIds}`);
+          void navigate(`/settings/rules?visible-rules=${ruleIds}`);
           return;
         } catch (error) {
           console.error('Failed to fetch payee rules:', error);
           // Fallback to general rules page
-          void navigate('/rules');
+          void navigate('/settings/rules');
           return;
         }
       }
@@ -130,7 +131,15 @@ export function MobilePayeesPage() {
   );
 
   return (
-    <Page header={<MobilePageHeader title={t('Payees')} />} padding={0}>
+    <Page
+      header={
+        <MobilePageHeader
+          title={t('Payees')}
+          leftContent={<SettingsBackButton />}
+        />
+      }
+      padding={0}
+    >
       <View
         style={{
           flexDirection: 'row',
