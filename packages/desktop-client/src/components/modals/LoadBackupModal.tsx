@@ -31,6 +31,7 @@ function BackupTable({ backups, onSelect }: BackupTableProps) {
         <Row
           key={backup.id}
           collapsed={idx !== 0}
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
           role="button"
           tabIndex={0}
           onClick={() => onSelect(backup.id)}

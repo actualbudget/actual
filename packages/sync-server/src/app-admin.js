@@ -91,6 +91,7 @@ app.post('/users', validateSessionMiddleware, async (req, res) => {
     userName,
     displayName || null,
     enabled ? 1 : 0,
+    role,
   );
 
   res.status(200).send({ status: 'ok', data: { id: userId } });

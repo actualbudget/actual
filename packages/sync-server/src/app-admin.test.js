@@ -193,6 +193,22 @@ describe('/admin', () => {
         createdUserId = res.body.data.id;
       });
 
+      it('should store the requested role on the new user', async () => {
+        const res = await request(app)
+          .post('/users')
+          .send({ userName: 'user1', enabled: 1, role: ADMIN_ROLE })
+          .set('x-actual-token', sessionToken);
+
+        expect(res.statusCode).toEqual(200);
+        createdUserId = res.body.data.id;
+
+        const { role } = getAccountDb().first(
+          'SELECT role FROM users WHERE id = ?',
+          [createdUserId],
+        );
+        expect(role).toBe(ADMIN_ROLE);
+      });
+
       it('should return 400 if the user already exists', async () => {
         const newUser = {
           userName: 'user1',
