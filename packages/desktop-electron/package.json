@@ -73,12 +73,6 @@
     "linux": {
       "target": [
         {
-          "target": "flatpak",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
           "target": "AppImage",
           "arch": [
             "x64",
@@ -97,10 +91,6 @@
         }
       },
       "executableName": "actual"
-    },
-    "flatpak": {
-      "runtimeVersion": "24.08",
-      "baseVersion": "24.08"
     },
     "win": {
       "target": [
