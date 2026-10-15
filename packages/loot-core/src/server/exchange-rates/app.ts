@@ -248,44 +248,38 @@ function newestFirst(a: ExchangeRateEntity, b: ExchangeRateEntity): number {
   return a.id < b.id ? -1 : 1;
 }
 
-/** Resolves a rate for one UTC day. Entry includes the one-day manual rate. Estimates and valuation skip it. */
-export async function resolveRate({
-  baseCurrency,
-  quoteCurrency,
-  date,
-  explicitRate,
-  forEntry = false,
-}: {
-  baseCurrency: string;
-  quoteCurrency: string;
-  date: string;
-  explicitRate?: string | number;
-  forEntry?: boolean;
-}): Promise<RateResolution> {
-  if (quoteCurrency === baseCurrency) {
-    throw new Error('rate-same-currency');
-  }
-  if (explicitRate !== undefined) {
-    return {
-      status: 'resolved',
-      rate: parseRate(explicitRate),
-      kind: 'explicit',
-      source: 'explicit',
-      timestamp: null,
-      fallback: false,
-    };
-  }
-  // Rows starting after the requested UTC day can never apply. Rows that
-  // arrived through sync are re-validated so string order is time order.
-  const rows = (
-    await db.all<ExchangeRateEntity>(
-      `SELECT * FROM exchange_rates
-         WHERE base_currency = ? AND quote_currency = ? AND tombstone = 0
-           AND timestamp <= ?`,
-      [baseCurrency, quoteCurrency, utcEndOfDay(date)],
-    )
-  )
+/**
+ * Selects the rate for one UTC day from stored rows: rows for the pair that
+ * are live, start by the end of the day and pass model validation (synced
+ * rows are re-validated so string order is time order), newest first, then
+ * the hierarchy. Entry includes the one-day manual rate; estimates and
+ * valuation skip it.
+ */
+export function selectRate(
+  rows: ExchangeRateEntity[],
+  {
+    baseCurrency,
+    quoteCurrency,
+    date,
+    forEntry = false,
+  }: {
+    baseCurrency: string;
+    quoteCurrency: string;
+    date: string;
+    forEntry?: boolean;
+  },
+): RateResolution {
+  const cutoff = utcEndOfDay(date);
+  const applicable = rows
     .filter(row => {
+      if (
+        row.base_currency !== baseCurrency ||
+        row.quote_currency !== quoteCurrency ||
+        row.tombstone !== 0 ||
+        row.timestamp > cutoff
+      ) {
+        return false;
+      }
       try {
         exchangeRateModel.validate(row);
         return true;
@@ -316,7 +310,7 @@ export async function resolveRate({
     [row => row.kind === 'standing' && utcDay(row.timestamp) <= date, false],
   ];
   for (const [matches, fallback] of steps) {
-    const row = rows.find(matches);
+    const row = applicable.find(matches);
     if (row) {
       return {
         status: 'resolved',
@@ -329,6 +323,43 @@ export async function resolveRate({
     }
   }
   return { status: 'unavailable' };
+}
+
+/** Resolves a rate for one UTC day. Entry includes the one-day manual rate. Estimates and valuation skip it. */
+export async function resolveRate({
+  baseCurrency,
+  quoteCurrency,
+  date,
+  explicitRate,
+  forEntry = false,
+}: {
+  baseCurrency: string;
+  quoteCurrency: string;
+  date: string;
+  explicitRate?: string | number;
+  forEntry?: boolean;
+}): Promise<RateResolution> {
+  if (quoteCurrency === baseCurrency) {
+    throw new Error('rate-same-currency');
+  }
+  if (explicitRate !== undefined) {
+    return {
+      status: 'resolved',
+      rate: parseRate(explicitRate),
+      kind: 'explicit',
+      source: 'explicit',
+      timestamp: null,
+      fallback: false,
+    };
+  }
+  // Rows starting after the requested UTC day can never apply.
+  const rows = await db.all<ExchangeRateEntity>(
+    `SELECT * FROM exchange_rates
+       WHERE base_currency = ? AND quote_currency = ? AND tombstone = 0
+         AND timestamp <= ?`,
+    [baseCurrency, quoteCurrency, utcEndOfDay(date)],
+  );
+  return selectRate(rows, { baseCurrency, quoteCurrency, date, forEntry });
 }
 
 async function resolveRateHandler({
