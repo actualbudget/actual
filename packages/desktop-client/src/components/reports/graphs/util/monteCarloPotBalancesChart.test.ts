@@ -35,6 +35,7 @@ function makePot(id: string, name = '', isSurplus = false): MonteCarloPot {
     feeAdjustsWithInflation: false,
     annualFeeRate: 0,
     isSurplus,
+    investmentPhases: [],
   };
 }
 
