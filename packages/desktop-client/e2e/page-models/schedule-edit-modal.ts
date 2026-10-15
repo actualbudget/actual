@@ -35,9 +35,9 @@ export class ScheduleEditModal {
     this.addButton = locator.getByRole('button', { name: 'Add' });
     this.saveButton = locator.getByRole('button', { name: 'Save' });
     this.cancelButton = locator.getByRole('button', { name: 'Cancel' });
-    this.recurringPickerButton = locator.getByRole('button', {
-      name: 'No recurring date',
-    });
+    this.recurringPickerButton = locator.getByTestId(
+      'recurring-picker-trigger',
+    );
   }
 
   async fill(data: ScheduleEntry) {
