@@ -9,6 +9,7 @@ export type * from './dashboard';
 export type * from './enablebanking';
 export type * from './exchange-rate';
 export type * from './forecast';
+export type * from './fx-impact';
 export type * from './gocardless';
 export type * from './import-transaction';
 export type * from './nearby-payee';
