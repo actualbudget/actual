@@ -358,6 +358,7 @@ async function downloadAkahuTransactions(
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  aspspName?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -369,6 +370,7 @@ async function downloadEnableBankingTransactions(
     {
       accountId: acctId,
       startDate: since,
+      aspspName,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -666,6 +668,13 @@ export async function reconcileTransactions(
 
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
+    // A skipped transaction still takes part in the matching above, so the
+    // other transactions match the same way as in the import preview. It is
+    // not imported or merged.
+    if (trans.skipTransaction) {
+      continue;
+    }
+
     if (match && !trans.forceAddTransaction) {
       // Skip updating already reconciled (locked) transactions
       if (match.reconciled) {
@@ -794,6 +803,33 @@ export async function reconcileTransactions(
   };
 }
 
+// Ranks fuzzy-match candidates by distance from transaction date, nearest first.
+// On a same-distance tie, a candidate that already carries its own imported_id
+// (from a previous, unrelated sync) ranks after one that doesn't. Without this
+// tie-break, picking the already-imported one would lead the fuzzy match merge
+// to silently overwrite imported_id/payee/notes with this transaction's data.
+export function compareFuzzyMatchCandidates(
+  transactionDate: string,
+  a: Pick<db.DbViewTransaction, 'date' | 'imported_id'>,
+  b: Pick<db.DbViewTransaction, 'date' | 'imported_id'>,
+): number {
+  const aDistance = Math.abs(
+    dateFns.differenceInMilliseconds(
+      dateFns.parseISO(transactionDate),
+      dateFns.parseISO(db.fromDateRepr(a.date)),
+    ),
+  );
+  const bDistance = Math.abs(
+    dateFns.differenceInMilliseconds(
+      dateFns.parseISO(transactionDate),
+      dateFns.parseISO(db.fromDateRepr(b.date)),
+    ),
+  );
+  const aHasImportedId = Number(a.imported_id != null);
+  const bHasImportedId = Number(b.imported_id != null);
+  return aDistance - bDistance || aHasImportedId - bHasImportedId;
+}
+
 export async function matchTransactions(
   acctId,
   transactions,
@@ -816,6 +852,7 @@ export async function matchTransactions(
         ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
   const hasMatched = new Set();
+  const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
 
   const { normalized, payeesToCreate } = isBankSyncAccount
     ? await normalizeBankSyncTransactions(transactions, acctId)
@@ -853,6 +890,10 @@ export async function matchTransactions(
 
       if (match) {
         hasMatched.add(match.id);
+
+        if (isBankSyncAccount && match.is_parent) {
+          exactMatchedParentIds.add(match.id);
+        }
       }
     }
 
@@ -872,6 +913,7 @@ export async function matchTransactions(
             db.DbViewTransaction,
             | 'id'
             | 'is_parent'
+            | 'parent_id'
             | 'date'
             | 'imported_id'
             | 'payee'
@@ -883,7 +925,7 @@ export async function matchTransactions(
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE
             -- If both ids are set, and we didn't match earlier then skip dedup
@@ -904,6 +946,7 @@ export async function matchTransactions(
             db.DbViewTransaction,
             | 'id'
             | 'is_parent'
+            | 'parent_id'
             | 'date'
             | 'imported_id'
             | 'payee'
@@ -915,7 +958,7 @@ export async function matchTransactions(
             | 'amount'
           >
         >(
-          `SELECT id, is_parent, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
+          `SELECT id, is_parent, parent_id, date, imported_id, payee, imported_payee, category, notes, reconciled, cleared, amount
           FROM v_transactions
           WHERE date >= ? AND date <= ? AND amount = ? AND account = ?`,
           [sevenDaysBefore, sevenDaysAfter, trans.amount || 0, acctId],
@@ -926,21 +969,9 @@ export async function matchTransactions(
       // transactions date. i.e. if the original transaction is in 21-02-2024 and
       // the matched transactions are: 20-02-2024, 21-02-2024, 29-02-2024 then
       // the resulting data-set should be: 21-02-2024, 20-02-2024, 29-02-2024.
-      fuzzyDataset = fuzzyDataset.sort((a, b) => {
-        const aDistance = Math.abs(
-          dateFns.differenceInMilliseconds(
-            dateFns.parseISO(trans.date),
-            dateFns.parseISO(db.fromDateRepr(a.date)),
-          ),
-        );
-        const bDistance = Math.abs(
-          dateFns.differenceInMilliseconds(
-            dateFns.parseISO(trans.date),
-            dateFns.parseISO(db.fromDateRepr(b.date)),
-          ),
-        );
-        return aDistance > bDistance ? 1 : -1;
-      });
+      fuzzyDataset = fuzzyDataset.sort((a, b) =>
+        compareFuzzyMatchCandidates(trans.date, a, b),
+      );
     }
 
     transactionsStep1.push({
@@ -961,7 +992,10 @@ export async function matchTransactions(
     if (!data.match && data.fuzzyDataset) {
       // Try to find one where the payees match.
       const match = data.fuzzyDataset.find(
-        row => !hasMatched.has(row.id) && data.trans.payee === row.payee,
+        row =>
+          !hasMatched.has(row.id) &&
+          !exactMatchedParentIds.has(row.parent_id) &&
+          data.trans.payee === row.payee,
       );
 
       if (match) {
@@ -978,7 +1012,10 @@ export async function matchTransactions(
   // around the same date with the same amount.
   const transactionsStep3 = transactionsStep2.map(data => {
     if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(row => !hasMatched.has(row.id));
+      const match = data.fuzzyDataset.find(
+        row =>
+          !hasMatched.has(row.id) && !exactMatchedParentIds.has(row.parent_id),
+      );
       if (match) {
         hasMatched.add(match.id);
         return { ...data, match };
@@ -1238,7 +1275,12 @@ export async function syncAccount(
       newAccount,
     );
   } else if (acctRow.account_sync_source === 'enableBanking') {
-    download = await downloadEnableBankingTransactions(acctId, syncStartDate);
+    const bankRow = await db.select('banks', acctRow.bank);
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankRow?.name,
+    );
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

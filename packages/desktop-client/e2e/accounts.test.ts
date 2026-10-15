@@ -324,6 +324,31 @@ test.describe('Accounts', () => {
       await importCsv(true);
     });
 
+    test('preserves QIF categories in preview and imported transactions', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/qif-categories.qif'));
+
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('Food', { exact: true })).toBeVisible();
+      await expect(dialog.getByText('Income', { exact: true })).toBeVisible();
+
+      await dialog
+        .getByRole('button', { name: 'Import 2 transactions' })
+        .click();
+
+      const expense = accountPage.transactionTableRow.filter({
+        hasText: 'QIF Cafe',
+      });
+      const income = accountPage.transactionTableRow.filter({
+        hasText: 'QIF Salary',
+      });
+      await expect(expense.getByTestId('category')).toHaveText('Food');
+      await expect(income.getByTestId('category')).toHaveText('Income');
+    });
+
     test('import csv file twice', async () => {
       await importCsv(false);
 
@@ -347,6 +372,55 @@ test.describe('Accounts', () => {
       await accountPage.page.getByRole('button', { name: 'Close' }).click();
 
       await expect(importButton).not.toBeVisible();
+    });
+
+    test('imports a new transaction when an unchecked match has the same amount', async () => {
+      async function openCsv(content: string) {
+        const fileChooserPromise = page.waitForEvent('filechooser');
+        await accountPage.page.getByRole('button', { name: 'Import' }).click();
+        const fileChooser = await fileChooserPromise;
+        await fileChooser.setFiles({
+          name: 'same-amount.csv',
+          mimeType: 'text/csv',
+          buffer: Buffer.from(content),
+        });
+        return page.getByRole('dialog');
+      }
+
+      let dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n2024-08-02,Netflix,,-8.99\n',
+      );
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      // Netflix matches the existing transaction; Corner Coffee is new.
+      dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n' +
+          '2024-08-02,Netflix,Subscription,-8.99\n' +
+          '2024-07-31,Corner Coffee,Latte,-8.99\n',
+      );
+      await expect(dialog.getByText('Corner Coffee')).toBeVisible();
+
+      // Uncheck the Netflix row: merge -> import as new -> skip
+      const netflixCheckbox = dialog
+        .getByTestId('row')
+        .filter({ hasText: 'Netflix' })
+        .getByRole('checkbox');
+      await netflixCheckbox.click();
+      await netflixCheckbox.click();
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Corner Coffee' }),
+      ).toBeVisible();
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Subscription' }),
+      ).toHaveCount(0);
     });
 
     test('import notes checkbox is not shown for CSV files', async () => {

@@ -209,7 +209,7 @@ export async function exportBuffer() {
   return { data: Buffer.from(zipped), warnings };
 }
 
-export async function importBuffer(fileData, buffer) {
+export async function importBuffer(fileData, buffer, localId?: string) {
   let entries;
   try {
     entries = safeUnzip(buffer);
@@ -253,18 +253,27 @@ export async function importBuffer(fileData, buffer) {
     throw FileDownloadError('invalid-meta-file');
   }
 
-  // Update the metadata. The stored file on the server might be
-  // out-of-date with a few keys
+  // Only local selection can authorize replacement. Archive IDs are never
+  // used as destinations, including for archives imported from disk.
+  const id = localId || uuidv4();
+  if (localId) {
+    const localMeta = JSON.parse(
+      await fs.readFile(fs.join(fs.getBudgetDir(id), 'metadata.json')),
+    );
+    if (!fileData.fileId || localMeta.cloudFileId !== fileData.fileId) {
+      throw FileDownloadError('mismatched-cloud-file');
+    }
+  }
+
   meta = {
     ...meta,
+    id,
     cloudFileId: fileData.fileId,
     groupId: fileData.groupId,
     lastUploaded: monthUtils.currentDay(),
     encryptKeyId: fileData.encryptMeta ? fileData.encryptMeta.keyId : null,
   };
-
-  const budgetDir = fs.getBudgetDir(meta.id);
-
+  const budgetDir = fs.getBudgetDir(id);
   if (await fs.exists(budgetDir)) {
     // Don't remove the directory so that backups are retained
     const dbFile = fs.join(budgetDir, 'db.sqlite');
@@ -441,7 +450,7 @@ export async function listRemoteFiles(): Promise<RemoteFile[]> {
     .filter(Boolean);
 }
 
-export async function download(cloudFileId) {
+export async function download(cloudFileId, localId?: string) {
   const userToken = await asyncStorage.getItem('user-token');
   const syncServer = getServer().SYNC_SERVER;
 
@@ -487,6 +496,9 @@ export async function download(cloudFileId) {
   }
 
   const fileData = userFileInfoRes.data;
+  if (fileData.fileId !== cloudFileId) {
+    throw FileDownloadError('mismatched-cloud-file');
+  }
   let buffer = userFileRes;
 
   // The download process checks if the server gave us decrypt
@@ -502,5 +514,5 @@ export async function download(cloudFileId) {
     }
   }
 
-  return importBuffer(fileData, buffer);
+  return importBuffer(fileData, buffer, localId);
 }

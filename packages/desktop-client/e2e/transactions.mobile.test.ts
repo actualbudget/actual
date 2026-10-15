@@ -60,7 +60,6 @@ test.describe('Mobile Transactions', () => {
       transactionEntryPage.page.url() +
         '?category=Food&amount=23.42&account=HSBC&date=2025-10-31&cleared=true&payee=Kroger&notes=just+a+note',
     );
-    // Note: no easy way to test cleared checkbox
     await expect(page.getByTestId('transaction-form'))
       .toMatchAriaSnapshot(`- text: Amount
 - textbox
@@ -75,8 +74,40 @@ test.describe('Mobile Transactions', () => {
 - button "HSBC" [disabled]
 - text: Date
 - textbox [disabled]: 2025-10-31
-- text: Cleared Notes
+- text: Cleared
+- checkbox [checked]
+- text: Notes
 - textbox [disabled]: just a note`);
+  });
+
+  test('removes the payee from a new transaction', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    const accountPage = await accountsPage.openNthAccount(2);
+    const transactionEntryPage = await accountPage.clickCreateTransaction();
+
+    await transactionEntryPage.fillAmount('12.34');
+    // Click anywhere to cancel active edit.
+    await transactionEntryPage.header.click();
+    await transactionEntryPage.fillField(
+      page.getByTestId('payee-field'),
+      'Kroger',
+    );
+    await expect(page.getByTestId('payee-field')).toContainText('Kroger');
+
+    // Reopen the payee selector and clear it with the "No payee" option.
+    await page.getByTestId('payee-field').click();
+    await page.getByRole('button', { name: 'No payee' }).click();
+    await expect(page.getByTestId('payee-field')).not.toContainText('Kroger');
+
+    await transactionEntryPage.fillField(
+      page.getByTestId('category-field'),
+      'Clothing',
+    );
+    await transactionEntryPage.createTransaction();
+
+    await expect(accountPage.transactions.nth(0)).toHaveText(
+      '(No payee)Clothing-12.34',
+    );
   });
 
   test('creates a transaction from `/accounts/:id` page', async () => {
@@ -174,5 +205,37 @@ test.describe('Mobile Transactions', () => {
       '(No payee)Uncategorized-12.35',
     );
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('learns a category rule from new transactions', async () => {
+    for (const amount of ['1.00', '2.00', '3.00']) {
+      const transactionEntryPage = await navigation.goToTransactionEntryPage();
+      await transactionEntryPage.fillAmount(amount);
+      // Click anywhere to cancel active edit.
+      await transactionEntryPage.header.click();
+      await transactionEntryPage.fillField(
+        page.getByTestId('payee-field'),
+        'Learned Payee',
+      );
+      await transactionEntryPage.fillField(
+        page.getByTestId('category-field'),
+        'Clothing',
+      );
+      await transactionEntryPage.fillField(
+        page.getByTestId('account-field'),
+        'Ally Savings',
+      );
+      await transactionEntryPage.createTransaction();
+    }
+
+    // The last save is not awaited and the rules page loads rules only on
+    // mount, so reload the page until the learned rule shows.
+    const rulesPage = await navigation.goToRulesPage();
+    await expect(async () => {
+      await page.reload();
+      await rulesPage.searchFor('Learned Payee');
+      await expect(rulesPage.getAllRules()).toHaveCount(1, { timeout: 1000 });
+    }).toPass();
+    await expect(rulesPage.getNthRule(0)).toContainText('Clothing');
   });
 });
