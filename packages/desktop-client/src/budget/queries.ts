@@ -62,3 +62,13 @@ function translateStartingBalancesCategory(
         : category.name,
   };
 }
+
+export const fundingQueries = {
+  all: () => ['budget-funding'],
+  category: (month: string, categoryId: string) =>
+    queryOptions({
+      queryKey: [...fundingQueries.all(), month, categoryId],
+      queryFn: () => send('budget/category-funding', { month, categoryId }),
+      staleTime: Infinity,
+    }),
+};

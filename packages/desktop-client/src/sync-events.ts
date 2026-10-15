@@ -6,7 +6,7 @@ import { t } from 'i18next';
 import { accountGroupQueries } from './account-groups';
 import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
-import { categoryQueries } from './budget';
+import { categoryQueries, fundingQueries } from './budget';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -102,6 +102,10 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       }
 
       const tables = event.tables;
+      // Any data change can affect budget automations; empty syncs change nothing.
+      if (tables.length > 0) {
+        void queryClient.invalidateQueries({ queryKey: fundingQueries.all() });
+      }
 
       if (tables.includes('prefs')) {
         void store.dispatch(loadPrefs());

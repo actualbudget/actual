@@ -19,6 +19,7 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { CategoryFundingStatus } from '#components/budget/goals/CategoryFundingStatus';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -289,6 +290,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             >
               <Button
                 ref={triggerRef}
+                aria-label={t('Budget menu for {{category}}', {
+                  category: category.name,
+                })}
                 variant="bare"
                 onPress={() => setMenuOpen(true)}
                 style={{
@@ -308,6 +312,13 @@ export const CategoryMonth = memo(function CategoryMonth({
                 onOpenChange={() => setMenuOpen(false)}
                 placement="bottom start"
               >
+                {category.is_income && (
+                  <CategoryFundingStatus
+                    category={category}
+                    month={month}
+                    onFunded={() => setMenuOpen(false)}
+                  />
+                )}
                 <BudgetMenu
                   onCopyLastMonthAverage={() => {
                     onMenuAction(month, 'copy-single-last', {
@@ -490,6 +501,11 @@ export const CategoryMonth = memo(function CategoryMonth({
             onOpenChange={() => setBalanceMenuOpen(false)}
             placement="bottom end"
           >
+            <CategoryFundingStatus
+              category={category}
+              month={month}
+              onFunded={() => setBalanceMenuOpen(false)}
+            />
             <BalanceMenu
               categoryId={category.id}
               onCarryover={carryover => {

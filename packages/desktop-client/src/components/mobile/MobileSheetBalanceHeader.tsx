@@ -13,6 +13,7 @@ import { MobileSheetCarryoverIndicator } from './MobileSheetCarryoverIndicator';
 
 type MobileSheetBalanceHeaderProps = {
   label: ReactNode;
+  shouldInlineGoalStatus?: boolean;
 } & Pick<
   ComponentPropsWithoutRef<typeof BalanceWithCarryover>,
   'carryover' | 'balance' | 'goal' | 'budgeted' | 'longGoal'
@@ -20,6 +21,7 @@ type MobileSheetBalanceHeaderProps = {
 
 export function MobileSheetBalanceHeader({
   label,
+  shouldInlineGoalStatus = true,
   ...bindings
 }: MobileSheetBalanceHeaderProps) {
   return (
@@ -41,7 +43,7 @@ export function MobileSheetBalanceHeader({
       </Text>
       <BalanceWithCarryover
         isDisabled
-        shouldInlineGoalStatus
+        shouldInlineGoalStatus={shouldInlineGoalStatus}
         CarryoverIndicator={MobileSheetCarryoverIndicator}
         {...bindings}
       >

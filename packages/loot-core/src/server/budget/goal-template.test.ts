@@ -11,8 +11,14 @@ import {
   applyMultipleCategoryTemplates,
   applyTemplate,
   dryRunCategoryTemplate,
+  fundCategory,
+  getCategoryFunding,
 } from './goal-template';
 import * as statements from './statements';
+import {
+  getCategoriesWithTemplates,
+  storeNoteTemplates,
+} from './template-notes';
 
 vi.mock('./actions', () => ({
   getSheetValue: vi.fn(),
@@ -41,6 +47,7 @@ vi.mock('./statements', () => ({
 
 vi.mock('./template-notes', () => ({
   checkTemplateNotes: vi.fn(),
+  getCategoriesWithTemplates: vi.fn(),
   storeNoteTemplates: vi.fn(),
 }));
 
@@ -688,5 +695,125 @@ describe('applyTemplate (force=false)', () => {
       .mock.calls.map(call => call[0]);
     expect(budgetCalls.map(c => c.category)).toEqual([cat1.id]);
     expect(budgetCalls[0].amount).toBe(10000);
+  });
+});
+
+describe('category funding', () => {
+  const request = { month: '2024-01', categoryId: category.id };
+  const monthly: Template = {
+    type: 'simple',
+    monthly: 650,
+    priority: 1,
+    directive: 'template',
+  };
+
+  function setup(goalDef: string, sheet: Record<string, number> = {}) {
+    setupSheetMock(sheet);
+    setupAqlForCategoryLookup({
+      ...category,
+      goal_def: goalDef,
+      template_settings: { source: 'ui' },
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(statements.getActiveSchedules).mockResolvedValue([]);
+    vi.mocked(db.getCategories).mockResolvedValue([]);
+  });
+
+  it.each([
+    [0, 65000],
+    [40000, 25000],
+    [90000, 0],
+  ])(
+    'reports %i budgeted with %i still needed without writing',
+    async (budgeted, remaining) => {
+      setup(JSON.stringify([monthly]), { 'budget-cat-1': budgeted });
+      expect(await getCategoryFunding(request)).toEqual({
+        budgeted,
+        recommended: 65000,
+        remaining,
+      });
+      expect(actions.setBudget).not.toHaveBeenCalled();
+      expect(actions.setGoal).not.toHaveBeenCalled();
+    },
+  );
+
+  it('funds the full recommendation even when To Budget cannot cover it', async () => {
+    setup(JSON.stringify([monthly]), { 'budget-cat-1': 40000 });
+    expect(await fundCategory(request)).toBe(true);
+    expect(actions.setBudget).toHaveBeenCalledExactlyOnceWith({
+      month: '2024-01',
+      category: category.id,
+      amount: 65000,
+    });
+    expect(actions.setGoal).toHaveBeenCalledExactlyOnceWith({
+      month: '2024-01',
+      category: category.id,
+      goal: 65000,
+      long_goal: null,
+    });
+  });
+
+  it('recomputes before funding, so stale requests never reduce or repeat', async () => {
+    setup(JSON.stringify([monthly]), { 'budget-cat-1': 90000 });
+    expect(await fundCategory(request)).toBe(false);
+    setup('[]', { 'budget-cat-1': 0 });
+    expect(await fundCategory(request)).toBe(false);
+    expect(actions.setBudget).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    '[]',
+    '[{"type":"goal","amount":100,"directive":"goal"}]',
+    '[{"type":"limit","amount":650,"period":"monthly","hold":false,"priority":null,"directive":"template"}]',
+  ])(
+    'has no funding without a template that assigns money: %s',
+    async goalDef => {
+      setup(goalDef);
+      expect(await getCategoryFunding(request)).toBeNull();
+      expect(await fundCategory(request)).toBe(false);
+    },
+  );
+
+  it.each([false, true])(
+    'funds income categories only in tracking budgets (tracking: %s)',
+    async isTracking => {
+      setupSheetMock({});
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(isTracking);
+      setupAqlForCategoryLookup({
+        ...category,
+        is_income: true,
+        goal_def: JSON.stringify([monthly]),
+        template_settings: { source: 'ui' },
+      });
+      expect(await fundCategory(request)).toBe(isTracking);
+    },
+  );
+
+  it('reads note templates without storing them', async () => {
+    setupSheetMock({});
+    setupAqlForCategoryLookup(category);
+    vi.mocked(getCategoriesWithTemplates).mockResolvedValue([
+      { id: category.id, name: category.name, templates: [monthly] },
+    ]);
+    expect(await getCategoryFunding(request)).toMatchObject({
+      remaining: 65000,
+    });
+    expect(getCategoriesWithTemplates).toHaveBeenCalledWith([category.id]);
+    expect(storeNoteTemplates).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    '{broken',
+    '[{"type":"error","directive":"error","line":"#template ?","error":"?"}]',
+    '[{"type":"by","amount":1200,"month":"2023-12","priority":0,"directive":"template"}]',
+    '[{"type":"simple","monthly":"invalid","priority":0,"directive":"template"}]',
+  ])('fails closed for an invalid automation: %s', async goalDef => {
+    setup(goalDef);
+    await expect(getCategoryFunding(request)).rejects.toThrow();
+    await expect(fundCategory(request)).rejects.toThrow();
+    expect(actions.setBudget).not.toHaveBeenCalled();
   });
 });

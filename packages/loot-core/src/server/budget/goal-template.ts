@@ -11,7 +11,11 @@ import type { Template } from '#types/models/templates';
 import { getSheetValue, isTrackingBudget, setBudget, setGoal } from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { tombstoneOrphanCleanupGroups } from './cleanup-groups';
-import { checkTemplateNotes, storeNoteTemplates } from './template-notes';
+import {
+  checkTemplateNotes,
+  getCategoriesWithTemplates,
+  storeNoteTemplates,
+} from './template-notes';
 import type { TemplateNotification } from './template-notification';
 
 export function distributeRemainder(
@@ -390,4 +394,84 @@ export async function dryRunCategoryTemplate({
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
   };
+}
+
+export type CategoryFunding = {
+  budgeted: number;
+  recommended: number;
+  remaining: number;
+};
+
+// The dryRunCategoryTemplate projection for the category's saved automations.
+// Note templates are parsed without being stored, so reading never writes.
+async function computeCategoryFunding(month: string, categoryId: string) {
+  const { data: categories }: { data: CategoryEntity[] } = await aqlQuery(
+    q('categories').filter({ id: categoryId }).select('*'),
+  );
+  const category = categories[0];
+  if (!category || (category.is_income && !isTrackingBudget())) return null;
+  const templates: Template[] =
+    category.template_settings?.source === 'ui'
+      ? JSON.parse(category.goal_def || '[]')
+      : ((await getCategoriesWithTemplates([categoryId]))[0]?.templates ?? []);
+  if (templates.some(t => t.type === 'error')) {
+    throw new Error('Invalid budget automation');
+  }
+  // Goals, limits and cleanups alone never assign a monthly budget.
+  if (!templates.some(t => t.directive === 'template' && t.type !== 'limit')) {
+    return null;
+  }
+  const { contexts, errors } = await computeTemplates(
+    month,
+    true,
+    { [categoryId]: templates },
+    [category],
+    true,
+  );
+  if (errors.length) throw new Error(errors.join('\n'));
+  const values = contexts[0].getValues();
+  if (!Number.isFinite(values.budgeted)) {
+    throw new Error('Invalid budget automation amount');
+  }
+  const budgeted = contexts[0].previouslyBudgeted;
+  const funding: CategoryFunding = {
+    budgeted,
+    recommended: values.budgeted,
+    remaining: Math.max(0, values.budgeted - budgeted),
+  };
+  return { funding, values };
+}
+
+export async function getCategoryFunding({
+  month,
+  categoryId,
+}: {
+  month: string;
+  categoryId: CategoryEntity['id'];
+}): Promise<CategoryFunding | null> {
+  return (await computeCategoryFunding(month, categoryId))?.funding ?? null;
+}
+
+export async function fundCategory({
+  month,
+  categoryId,
+}: {
+  month: string;
+  categoryId: CategoryEntity['id'];
+}): Promise<boolean> {
+  // Recompute so stale or repeated requests never reduce or double-fund.
+  // Unlike Apply, this assigns the full recommendation regardless of funds.
+  const result = await computeCategoryFunding(month, categoryId);
+  if (!result || result.funding.remaining <= 0) return false;
+  const { values } = result;
+  await batchMessages(async () => {
+    await setBudget({ month, category: categoryId, amount: values.budgeted });
+    await setGoal({
+      month,
+      category: categoryId,
+      goal: values.goal,
+      long_goal: values.longGoal ? 1 : null,
+    });
+  });
+  return true;
 }
