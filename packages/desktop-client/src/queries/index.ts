@@ -85,7 +85,9 @@ export function transactionsSearch(
   search: string,
   dateFormat: SyncedPrefs['dateFormat'],
 ) {
-  const amount = currencyToAmount(search);
+  // currencyToAmount drops every non-digit, so "35mm" or "a2b2c7d" would
+  // match amounts 35 and 227. A query with letters is text, not an amount.
+  const amount = /\p{L}/u.test(search) ? null : currencyToAmount(search);
   const escapedSearch = search.replace(/[\\%?]/g, '\\$&');
 
   // Support various date formats
