@@ -80,6 +80,7 @@ export class ScheduleEditModal {
       .locator('[data-popover]')
       .filter({ hasText: 'Repeat every' });
     await expect(popover).toBeVisible();
+    await this.page.keyboard.press('Escape');
 
     return popover;
   }

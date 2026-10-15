@@ -275,7 +275,7 @@ function SchedulePreview({
         </Text>
         <SpaceBetween gap={20} style={{ marginTop: 10 }}>
           {previewDates.map((d, idx) => (
-            <View key={idx} style={{ flex: 1 }}>
+            <View key={idx} style={{ flex: 1 }} data-vrt-mask>
               <Text>{monthUtils.format(d, dateFormat, locale)}</Text>
               <Text>{monthUtils.format(d, 'EEEE', locale)}</Text>
             </View>

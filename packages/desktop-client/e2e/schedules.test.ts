@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { getDaysInMonth, parse } from 'date-fns';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -108,8 +109,14 @@ test.describe('Schedules', () => {
         'Months without this day will use the last day of that month.',
       ),
     ).toBeVisible();
-    await expect(popover).toContainText('1/31/2017');
-    await expect(popover).toContainText('2/28/2017');
+
+    const dates = (await popover.innerText()).match(/\d{1,2}\/\d{1,2}\/\d{4}/g);
+    expect(dates).toHaveLength(4);
+
+    for (const value of dates) {
+      const date = parse(value, 'M/d/yyyy', new Date());
+      expect(date.getDate()).toBe(getDaysInMonth(date));
+    }
 
     await expect(popover).toMatchThemeScreenshots();
   });
