@@ -1,6 +1,11 @@
 import MockDate from 'mockdate';
 
-import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
+import type {
+  RecurConfig,
+  RecurPattern,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from '#types/models';
 
 import * as monthUtils from './months';
 import {
@@ -14,6 +19,7 @@ import {
   indexPostedScheduleTransactions,
   isCustomUpcomingLength,
   isScheduleOccurrencePosted,
+  recurConfigToRSchedule,
   UPCOMING_LENGTH_PRESET_LABELS,
   UPCOMING_LENGTH_PRESET_OPTIONS,
   UPCOMING_LENGTH_PRESET_VALUES,
@@ -611,6 +617,244 @@ describe('schedules', () => {
 
       expect(getNextDateAfter(dateCond, '2020-12-05')).toBe('2020-12-12');
       expect(getNextDateAfter(dateCond, '2020-12-12')).toBeNull();
+    });
+  });
+
+  describe('monthly day-of-month clamping', () => {
+    type MonthlyRule = {
+      byDayOfMonth?: number[];
+      byMonthOfYear?: number[];
+      byDayOfWeek?: [string, number][];
+    };
+
+    function dayConfig(
+      start: string,
+      patterns: RecurPattern[],
+      extra: Partial<RecurConfig> = {},
+    ): { op: 'isapprox'; value: RecurConfig } {
+      return {
+        op: 'isapprox',
+        value: { start, frequency: 'monthly', patterns, ...extra },
+      };
+    }
+
+    function getOccurrences(
+      dateCond: { op: 'isapprox'; value: RecurConfig },
+      afterDate: string,
+      count: number,
+    ): string[] {
+      const dates: string[] = [];
+      let cursor = afterDate;
+      for (let i = 0; i < count; i++) {
+        const next = getNextDateAfter(dateCond, cursor);
+        if (next == null) break;
+        dates.push(next);
+        cursor = next;
+      }
+      return dates;
+    }
+
+    it('clamps day 31 to the last day of shorter months', () => {
+      const dateCond = dayConfig('2024-01-31', [{ value: 31, type: 'day' }]);
+      expect(getOccurrences(dateCond, '2024-01-30', 7)).toEqual([
+        '2024-01-31',
+        '2024-02-29',
+        '2024-03-31',
+        '2024-04-30',
+        '2024-05-31',
+        '2024-06-30',
+        '2024-07-31',
+      ]);
+    });
+
+    it('clamps day 31 to Feb 28 in a non-leap year', () => {
+      const dateCond = dayConfig('2023-01-31', [{ value: 31, type: 'day' }]);
+      expect(getOccurrences(dateCond, '2023-01-30', 2)).toEqual([
+        '2023-01-31',
+        '2023-02-28',
+      ]);
+    });
+
+    it('clamps day 30 without overshooting to day 31', () => {
+      const dateCond = dayConfig('2024-01-30', [{ value: 30, type: 'day' }]);
+      const dates = getOccurrences(dateCond, '2024-01-29', 3);
+      expect(dates).toEqual(['2024-01-30', '2024-02-29', '2024-03-30']);
+      expect(dates).not.toContain('2024-03-31');
+    });
+
+    it('produces a single Feb 29 occurrence for day 29 in a leap year', () => {
+      const dateCond = dayConfig('2024-01-29', [{ value: 29, type: 'day' }]);
+      expect(getOccurrences(dateCond, '2024-01-28', 3)).toEqual([
+        '2024-01-29',
+        '2024-02-29',
+        '2024-03-29',
+      ]);
+    });
+
+    it('clamps day 29 to Feb 28 in a non-leap year', () => {
+      const dateCond = dayConfig('2023-01-29', [{ value: 29, type: 'day' }]);
+      expect(getOccurrences(dateCond, '2023-01-28', 2)).toEqual([
+        '2023-01-29',
+        '2023-02-28',
+      ]);
+    });
+
+    it('keeps the exact occurrence count for day 31 with after_n_occurrences', () => {
+      const dateCond = dayConfig('2024-01-31', [{ value: 31, type: 'day' }], {
+        endMode: 'after_n_occurrences',
+        endOccurrences: 3,
+      });
+      expect(getOccurrences(dateCond, '2024-01-30', 4)).toEqual([
+        '2024-01-31',
+        '2024-02-29',
+        '2024-03-31',
+      ]);
+    });
+
+    it('skips short months and keeps the exact count for day 30 with after_n_occurrences', () => {
+      const dateCond = dayConfig('2024-01-30', [{ value: 30, type: 'day' }], {
+        endMode: 'after_n_occurrences',
+        endOccurrences: 12,
+      });
+      const dates = getOccurrences(dateCond, '2024-01-29', 12);
+      expect(dates).toHaveLength(12);
+      expect(dates.some(d => d.startsWith('2024-02'))).toBe(false);
+      expect(dates[11]).toBe('2025-01-30');
+    });
+
+    it('bounds the clamped schedule by the end date', () => {
+      const dateCond = dayConfig('2024-01-31', [{ value: 31, type: 'day' }], {
+        endMode: 'on_date',
+        endDate: '2024-06-15',
+      });
+      expect(getOccurrences(dateCond, '2024-01-30', 6)).toEqual([
+        '2024-01-31',
+        '2024-02-29',
+        '2024-03-31',
+        '2024-04-30',
+        '2024-05-31',
+      ]);
+    });
+
+    it('combines days 30 and 31 with a single clamped Feb occurrence', () => {
+      const dateCond = dayConfig('2024-01-01', [
+        { value: 30, type: 'day' },
+        { value: 31, type: 'day' },
+      ]);
+      expect(getOccurrences(dateCond, '2023-12-31', 3)).toEqual([
+        '2024-01-30',
+        '2024-01-31',
+        '2024-02-29',
+      ]);
+      expect(getOccurrences(dateCond, '2024-03-31', 1)).toEqual([
+        '2024-04-30',
+      ]);
+    });
+
+    it('keeps the last-day (-1) pattern unchanged', () => {
+      const rules = recurConfigToRSchedule({
+        frequency: 'monthly',
+        start: '2023-01-31',
+        patterns: [{ value: -1, type: 'day' }],
+      }) as MonthlyRule[];
+      expect(rules).toHaveLength(1);
+      expect(rules[0].byDayOfMonth).toEqual([-1]);
+
+      const nonLeap = dayConfig('2023-01-31', [{ value: -1, type: 'day' }]);
+      expect(getOccurrences(nonLeap, '2023-01-30', 2)).toEqual([
+        '2023-01-31',
+        '2023-02-28',
+      ]);
+
+      const leap = dayConfig('2024-01-31', [{ value: -1, type: 'day' }]);
+      expect(getOccurrences(leap, '2024-01-30', 2)).toEqual([
+        '2024-01-31',
+        '2024-02-29',
+      ]);
+    });
+
+    it('unions day and weekday patterns without duplicates', () => {
+      const dateCond = dayConfig('2024-01-29', [
+        { value: 29, type: 'day' },
+        { value: 1, type: 'FR' },
+      ]);
+      expect(getOccurrences(dateCond, '2024-01-28', 4)).toEqual([
+        '2024-01-29',
+        '2024-02-02',
+        '2024-02-29',
+        '2024-03-01',
+      ]);
+    });
+
+    it('clamps the first occurrence when the schedule starts mid-month', () => {
+      const dateCond = dayConfig('2025-02-15', [{ value: 30, type: 'day' }]);
+      expect(getOccurrences(dateCond, '2025-02-14', 1)).toEqual([
+        '2025-02-28',
+      ]);
+    });
+
+    it('clamps day 31 on an every-other-month interval', () => {
+      const dateCond = dayConfig('2023-12-31', [{ value: 31, type: 'day' }], {
+        interval: 2,
+      });
+      expect(getOccurrences(dateCond, '2023-12-30', 3)).toEqual([
+        '2023-12-31',
+        '2024-02-29',
+        '2024-04-30',
+      ]);
+    });
+
+    describe('rule construction', () => {
+      it('uses a single [31, -1] rule for day 31', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-31',
+          patterns: [{ value: 31, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toEqual([31, -1]);
+      });
+
+      it('adds a short-month fallback rule for days >= 29', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-01',
+          patterns: [
+            { value: 30, type: 'day' },
+            { value: 31, type: 'day' },
+          ],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(2);
+        expect(rules[0].byDayOfMonth).toEqual([30, 31]);
+        expect(rules[1].byMonthOfYear).toEqual([2, 4, 6, 9, 11]);
+        expect(rules[1].byDayOfMonth).toEqual([-1]);
+      });
+
+      it('keeps only the primary rule for day 29 with after_n_occurrences', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-29',
+          endMode: 'after_n_occurrences',
+          endOccurrences: 5,
+          patterns: [{ value: 29, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toEqual([29]);
+      });
+
+      it('keeps day rules before weekday rules', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-29',
+          patterns: [
+            { value: 1, type: 'FR' },
+            { value: 15, type: 'day' },
+          ],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(2);
+        expect(rules[0].byDayOfMonth).toEqual([15]);
+        expect(rules[1].byDayOfWeek).toEqual([['FR', 1]]);
+      });
     });
   });
 

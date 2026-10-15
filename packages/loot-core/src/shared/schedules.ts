@@ -196,6 +196,8 @@ type ScheduleRuleOptions = IRuleOptions & {
   frequency: string;
   interval?: number;
   byHourOfDay?: number[];
+  byDayOfMonth?: number[];
+  byMonthOfYear?: number[];
 };
 
 export function recurConfigToRSchedule(config) {
@@ -234,8 +236,48 @@ export function recurConfigToRSchedule(config) {
         const days = config.patterns.filter(p => p.type === 'day');
         const dayNames = config.patterns.filter(p => p.type !== 'day');
 
+        const dayValues: number[] = days.map(p => p.value);
+        let dayRules: ScheduleRuleOptions[] = [];
+
+        if (days.length > 0) {
+          const dayRule: ScheduleRuleOptions = {
+            ...base,
+            byDayOfMonth: dayValues,
+          };
+
+          if (dayValues.includes(-1)) {
+            dayRules = [dayRule];
+          } else if (dayValues.length === 1 && dayValues[0] === 31) {
+            dayRules = [{ ...base, byDayOfMonth: [31, -1] }];
+          } else if (dayValues.some(v => v >= 29)) {
+            if (config.endMode === 'after_n_occurrences') {
+              // count is per-rule in rschedule, so a fallback rule would double the total occurrences beyond the requested end
+              dayRules = [dayRule];
+            } else {
+              const fallbackMonths = [
+                ...new Set(
+                  dayValues
+                    .filter(v => v >= 29)
+                    .flatMap(v => (v === 31 ? [2, 4, 6, 9, 11] : [2])),
+                ),
+              ].sort((a, b) => a - b);
+
+              dayRules = [
+                dayRule,
+                {
+                  ...base,
+                  byMonthOfYear: fallbackMonths,
+                  byDayOfMonth: [-1],
+                },
+              ];
+            }
+          } else {
+            dayRules = [dayRule];
+          }
+        }
+
         return [
-          days.length > 0 && { ...base, byDayOfMonth: days.map(p => p.value) },
+          ...dayRules,
           dayNames.length > 0 && {
             ...base,
             byDayOfWeek: dayNames.map(p => [abbrevDay(p.type), p.value]),
