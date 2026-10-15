@@ -813,8 +813,14 @@ export function getMonteCarloHorizonYears(
   );
 }
 
-function investmentPhaseFromMeta(
+function hasStartAge(
   phaseMeta: MonteCarloInvestmentPhaseMeta,
+): phaseMeta is MonteCarloInvestmentPhaseMeta & { fromAge: number } {
+  return Number.isFinite(phaseMeta.fromAge);
+}
+
+function investmentPhaseFromMeta(
+  phaseMeta: MonteCarloInvestmentPhaseMeta & { fromAge: number },
   pot: MonteCarloInvestmentFields,
   index: number,
 ): MonteCarloInvestmentPhase {
@@ -822,7 +828,7 @@ function investmentPhaseFromMeta(
   // only changes the allocation keeps the pot's fees
   return {
     id: phaseMeta.id || `phase-${index + 1}`,
-    fromAge: phaseMeta.fromAge ?? 0,
+    fromAge: phaseMeta.fromAge,
     transition: phaseMeta.transition ?? 'at-once',
     allocationPreset: phaseMeta.allocationPreset ?? pot.allocationPreset,
     allocationStocks: phaseMeta.allocationStocks ?? pot.allocationStocks,
@@ -862,10 +868,14 @@ function potFromMeta(potMeta: MonteCarloPotMeta, index: number): MonteCarloPot {
   };
   return {
     ...pot,
-    investmentPhases: (potMeta.investmentPhases ?? []).map(
-      (phaseMeta, phaseIndex) =>
+    // A phase without a start age can't be placed, so it is dropped rather
+    // than treated as already reached, which would override the pot's own
+    // settings
+    investmentPhases: (potMeta.investmentPhases ?? [])
+      .filter(hasStartAge)
+      .map((phaseMeta, phaseIndex) =>
         investmentPhaseFromMeta(phaseMeta, pot, phaseIndex),
-    ),
+      ),
   };
 }
 

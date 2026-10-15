@@ -153,6 +153,27 @@ describe('surplus pot defaults', () => {
     });
   });
 
+  it('drops saved investment phases that have no start age', () => {
+    const config = monteCarloConfigFromMeta({
+      pots: [
+        {
+          id: 'saved-pot',
+          allocationPreset: 'equity-100',
+          investmentPhases: [
+            { id: 'no-age', allocationPreset: 'cash' },
+            { id: 'at-70', fromAge: 70, allocationPreset: 'cash' },
+          ],
+        },
+      ],
+    });
+    const [pot] = config.pots;
+    expect(pot.investmentPhases.map(phase => phase.id)).toEqual(['at-70']);
+    // The pot's own allocation still applies before the first phase
+    expect(getPotInvestmentAtAge(pot, 52, 60).weights).toEqual(
+      getPotAssetWeights(pot),
+    );
+  });
+
   it('keeps saved plans without a surplus pot unchanged', () => {
     const config = monteCarloConfigFromMeta({
       pots: [{ id: 'saved-pot', startingBalance: 500_000 }],

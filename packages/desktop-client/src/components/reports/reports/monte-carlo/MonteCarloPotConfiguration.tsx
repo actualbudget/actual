@@ -111,16 +111,24 @@ export function MonteCarloPotConfiguration({
     });
   }
 
+  // Once a phase starts at the plan's end there is nowhere later to put
+  // another one
+  const sortedPhases = resolveInvestmentPhases(pot, currentAge);
+  const latestPhase = sortedPhases[sortedPhases.length - 1];
+  const canAddInvestmentPhase =
+    latestPhase == null || latestPhase.fromAge < targetAge;
+
   function addInvestmentPhase() {
     // Start from the latest phase so only the differences need typing,
     // ten years on (or at the plan's end if that's sooner)
-    const sorted = resolveInvestmentPhases(pot, currentAge);
-    const last = sorted[sorted.length - 1];
-    const fromAge = Math.min(targetAge, (last?.fromAge ?? currentAge) + 10);
+    const fromAge = Math.min(
+      targetAge,
+      (latestPhase?.fromAge ?? currentAge) + 10,
+    );
     onPotChange({
       investmentPhases: [
         ...pot.investmentPhases,
-        createMonteCarloInvestmentPhase(uuidv4(), last ?? pot, fromAge),
+        createMonteCarloInvestmentPhase(uuidv4(), latestPhase ?? pot, fromAge),
       ],
     });
   }
@@ -819,6 +827,7 @@ export function MonteCarloPotConfiguration({
             ))}
             <Button
               variant="bare"
+              isDisabled={!canAddInvestmentPhase}
               onPress={addInvestmentPhase}
               style={{ alignSelf: 'flex-start' }}
             >
