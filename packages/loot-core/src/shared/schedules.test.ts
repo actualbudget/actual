@@ -800,6 +800,56 @@ describe('schedules', () => {
       ]);
     });
 
+    it('clamps a bare monthly schedule starting on day 31', () => {
+      const dateCond = dayConfig('2026-10-31', []);
+      expect(getOccurrences(dateCond, '2026-10-30', 4)).toEqual([
+        '2026-10-31',
+        '2026-11-30',
+        '2026-12-31',
+        '2027-01-31',
+      ]);
+    });
+
+    it('clamps a bare monthly schedule starting on day 30 without overshooting', () => {
+      const dateCond = dayConfig('2024-01-30', []);
+      const dates = getOccurrences(dateCond, '2024-01-29', 3);
+      expect(dates).toEqual(['2024-01-30', '2024-02-29', '2024-03-30']);
+      expect(dates).not.toContain('2024-03-31');
+    });
+
+    it('keeps the legacy path for a bare monthly schedule on day 28', () => {
+      const dateCond = dayConfig('2023-02-28', []);
+      expect(getOccurrences(dateCond, '2023-02-27', 3)).toEqual([
+        '2023-02-28',
+        '2023-03-28',
+        '2023-04-28',
+      ]);
+    });
+
+    it('skips short months and keeps the exact count for a bare monthly schedule on day 30 with after_n_occurrences', () => {
+      const dateCond = dayConfig('2024-01-30', [], {
+        endMode: 'after_n_occurrences',
+        endOccurrences: 3,
+      });
+      expect(getOccurrences(dateCond, '2024-01-29', 4)).toEqual([
+        '2024-01-30',
+        '2024-03-30',
+        '2024-04-30',
+      ]);
+    });
+
+    it('keeps the exact occurrence count for a bare monthly schedule on day 31 with after_n_occurrences', () => {
+      const dateCond = dayConfig('2024-01-31', [], {
+        endMode: 'after_n_occurrences',
+        endOccurrences: 3,
+      });
+      expect(getOccurrences(dateCond, '2024-01-30', 4)).toEqual([
+        '2024-01-31',
+        '2024-02-29',
+        '2024-03-31',
+      ]);
+    });
+
     describe('rule construction', () => {
       it('uses a single [31, -1] rule for day 31', () => {
         const rules = recurConfigToRSchedule({
@@ -850,6 +900,27 @@ describe('schedules', () => {
         expect(rules).toHaveLength(2);
         expect(rules[0].byDayOfMonth).toEqual([15]);
         expect(rules[1].byDayOfWeek).toEqual([['FR', 1]]);
+      });
+
+      it('derives a clamped rule from the start date for a bare monthly schedule', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-31',
+          patterns: [],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toEqual([31, -1]);
+      });
+
+      it('keeps the legacy base rule for a bare monthly schedule on day 28', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2023-02-28',
+          patterns: [],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toBeUndefined();
+        expect(rules[0].byMonthOfYear).toBeUndefined();
       });
     });
   });
