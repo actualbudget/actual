@@ -426,6 +426,7 @@ function RecurringScheduleTooltip({
   }, [currentConfig]);
 
   const { config } = state;
+  const startDay = parseInt(monthUtils.format(config.start, 'd'), 10);
 
   const updateField = <Field extends keyof RecurConfig>(
     field: Field,
@@ -534,6 +535,25 @@ function RecurringScheduleTooltip({
           </Button>
         ) : null}
       </SpaceBetween>
+      {config.frequency === 'monthly' &&
+      (config.patterns == null || config.patterns.length === 0) &&
+      startDay >= 29 ? (
+        <View
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+            marginTop: 5,
+          }}
+        >
+          <Text style={{ color: theme.tableTextSubdued }}>
+            <Trans>
+              Months without this day will use the last day of that month.
+            </Trans>
+          </Text>
+        </View>
+      ) : null}
       {config.frequency === 'monthly' &&
         config.patterns &&
         config.patterns.length > 0 && (
