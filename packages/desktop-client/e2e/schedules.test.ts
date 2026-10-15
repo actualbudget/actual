@@ -110,13 +110,21 @@ test.describe('Schedules', () => {
       ),
     ).toBeVisible();
 
-    const dates = (await popover.innerText()).match(/\d{1,2}\/\d{1,2}\/\d{4}/g);
-    expect(dates).toHaveLength(4);
+    await expect
+      .poll(async () => {
+        const previewDates =
+          (await popover.innerText()).match(/\d{1,2}\/\d{1,2}\/\d{4}/g) ?? [];
 
-    for (const value of dates) {
-      const date = parse(value, 'M/d/yyyy', new Date());
-      expect(date.getDate()).toBe(getDaysInMonth(date));
-    }
+        return (
+          previewDates.length === 4 &&
+          previewDates.every(value => {
+            const date = parse(value, 'M/d/yyyy', new Date());
+
+            return date.getDate() === getDaysInMonth(date);
+          })
+        );
+      })
+      .toBe(true);
 
     await expect(popover).toMatchThemeScreenshots();
   });
