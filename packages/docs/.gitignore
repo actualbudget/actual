@@ -2,4 +2,4 @@
 build
 
 # Auto-generated on every docs build from the repo-root upcoming-release-notes/ directory
-docs/upcoming-release-notes.md
+docs/_upcoming-release-notes.md
