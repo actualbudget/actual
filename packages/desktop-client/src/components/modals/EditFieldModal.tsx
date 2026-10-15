@@ -49,10 +49,10 @@ type EditFieldModalProps = Extract<
 >['options'];
 
 export function EditFieldModal({
-                                 name,
-                                 onSubmit,
-                                 onClose,
-                               }: EditFieldModalProps) {
+  name,
+  onSubmit,
+  onClose,
+}: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
