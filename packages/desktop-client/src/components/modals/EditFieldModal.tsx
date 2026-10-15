@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
-import { useTranslation, Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -344,7 +344,7 @@ export function EditFieldModal({
                   if (close) state.close();
                 }}
               >
-                {<Trans>Apply</Trans>}
+                <Trans>Apply</Trans>
               </Button>
             </View>
           </View>
