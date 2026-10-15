@@ -580,6 +580,7 @@ function DateSelectMobile(props: DateSelectProps) {
         id={props.id}
         type="date"
         value={props.value ?? ''}
+        autoFocus={props.autoFocus}
         onChange={event => {
           props.onSelect(event.target.value);
         }}

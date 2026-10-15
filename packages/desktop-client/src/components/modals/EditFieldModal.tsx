@@ -49,10 +49,10 @@ type EditFieldModalProps = Extract<
 >['options'];
 
 export function EditFieldModal({
-  name,
-  onSubmit,
-  onClose,
-}: EditFieldModalProps) {
+                                 name,
+                                 onSubmit,
+                                 onClose,
+                               }: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
@@ -67,20 +67,6 @@ export function EditFieldModal({
 
   function onSelect(value: string | number) {
     if (value != null) {
-      // Process the value if needed
-      if (name === 'amount') {
-        if (typeof value === 'string') {
-          const parsed = currencyToInteger(value);
-          if (parsed === null) {
-            alert(t('Invalid amount value'));
-            return;
-          }
-          value = parsed;
-        } else if (typeof value === 'number') {
-          value = amountToInteger(value);
-        }
-      }
-
       onSubmit(name, value);
     }
   }
@@ -278,6 +264,27 @@ export function EditFieldModal({
 
     case 'amount':
       label = t('Amount');
+      apply = value => {
+        let num: number | null = null;
+        if (typeof value === 'string') {
+          const parsed = currencyToInteger(value);
+          if (parsed === null) {
+            alert(t('Invalid amount value'));
+            return false;
+          }
+          num = parsed;
+        } else if (typeof value === 'number') {
+          num = amountToInteger(value);
+        }
+
+        if (num === null) {
+          alert(t('Invalid amount value'));
+          return false;
+        }
+
+        onSelect(num);
+        return true;
+      };
       editor = ({ apply }) => (
         <Input
           value={value}
