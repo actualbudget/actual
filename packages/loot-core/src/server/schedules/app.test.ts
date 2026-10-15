@@ -704,6 +704,37 @@ describe('schedule app', () => {
       }
     });
 
+    it('createSchedule uses the local day west of UTC', async () => {
+      // `new Date('2017-01-01')` is UTC midnight, which is still Saturday
+      // 31 December in New York, so that past Saturday became the next date.
+      const tz = process.env.TZ;
+      process.env.TZ = 'America/New_York';
+
+      try {
+        const id = await createSchedule({
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-24',
+                frequency: 'weekly',
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const {
+          data: [row],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(row.next_date).toBe('2017-01-07');
+      } finally {
+        process.env.TZ = tz;
+      }
+    });
+
     it('createSchedule keeps the last date of a schedule that has ended', async () => {
       const id = await createSchedule({
         conditions: [

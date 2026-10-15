@@ -22,7 +22,7 @@ import {
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
-import { currentDay, dayFromDate, subDays } from '#shared/months';
+import { currentDay, dayFromDate, parseDate, subDays } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
@@ -349,7 +349,7 @@ export async function createSchedule({
     throw new Error('Date is required');
   }
 
-  const nextDate = getNextDateFrom(dateCond, new Date(currentDay()));
+  const nextDate = getNextDateFrom(dateCond, parseDate(currentDay()));
   const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
   const scheduleFields = schedule && {
     ...schedule,
