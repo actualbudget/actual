@@ -237,10 +237,72 @@ function newestFirst(a: ExchangeRateEntity, b: ExchangeRateEntity): number {
 }
 
 /**
- * Resolves a rate for one calendar day; an explicit rate wins. Otherwise the
- * order is the exact-date fetched rate, the exact-day manual fallback, then
- * the most recent earlier fetched rate at most seven days old.
+ * Selects the rate for one calendar day from stored rows: rows for the pair
+ * that are live, start by the end of the day and pass model validation (synced
+ * rows are re-validated so string order is time order), newest first. Order:
+ * the exact-date fetched rate, the exact-day manual fallback, then the most
+ * recent earlier fetched rate at most seven days old.
  */
+export function selectRate(
+  rows: ExchangeRateEntity[],
+  {
+    baseCurrency,
+    quoteCurrency,
+    date,
+  }: {
+    baseCurrency: string;
+    quoteCurrency: string;
+    date: string;
+  },
+): RateResolution {
+  const cutoff = utcEndOfDay(date);
+  const applicable = rows
+    .filter(row => {
+      if (
+        row.base_currency !== baseCurrency ||
+        row.quote_currency !== quoteCurrency ||
+        row.tombstone !== 0 ||
+        row.timestamp > cutoff
+      ) {
+        return false;
+      }
+      try {
+        exchangeRateModel.validate(row);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .sort(newestFirst);
+  const earliestFallback = addUtcDays(date, -FETCHED_FALLBACK_DAYS);
+  const steps: Array<[(row: ExchangeRateEntity) => boolean, boolean]> = [
+    [row => row.kind === 'fetched' && utcDay(row.timestamp) === date, false],
+    [row => row.kind === 'dated' && utcDay(row.timestamp) === date, false],
+    [
+      row =>
+        row.kind === 'fetched' &&
+        utcDay(row.timestamp) < date &&
+        utcDay(row.timestamp) >= earliestFallback,
+      true,
+    ],
+  ];
+  for (const [matches, fallback] of steps) {
+    const row = applicable.find(matches);
+    if (row) {
+      return {
+        status: 'resolved',
+        rate: row.rate,
+        kind: row.kind,
+        source: row.source,
+        timestamp: row.timestamp,
+        fallback,
+      };
+    }
+  }
+  return { status: 'unavailable' };
+}
+
+/** Resolves a rate for one calendar day; an explicit rate wins. */
 export async function resolveRate({
   baseCurrency,
   quoteCurrency,
@@ -265,51 +327,14 @@ export async function resolveRate({
       fallback: false,
     };
   }
-  // Rows starting after the requested day can never apply. Rows that
-  // arrived through sync are re-validated so string order is time order.
-  const rows = (
-    await db.all<ExchangeRateEntity>(
-      `SELECT * FROM exchange_rates
-         WHERE base_currency = ? AND quote_currency = ? AND tombstone = 0
-           AND timestamp <= ?`,
-      [baseCurrency, quoteCurrency, utcEndOfDay(date)],
-    )
-  )
-    .filter(row => {
-      try {
-        exchangeRateModel.validate(row);
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .sort(newestFirst);
-  const earliestFallback = addUtcDays(date, -FETCHED_FALLBACK_DAYS);
-  const steps: Array<[(row: ExchangeRateEntity) => boolean, boolean]> = [
-    [row => row.kind === 'fetched' && utcDay(row.timestamp) === date, false],
-    [row => row.kind === 'dated' && utcDay(row.timestamp) === date, false],
-    [
-      row =>
-        row.kind === 'fetched' &&
-        utcDay(row.timestamp) < date &&
-        utcDay(row.timestamp) >= earliestFallback,
-      true,
-    ],
-  ];
-  for (const [matches, fallback] of steps) {
-    const row = rows.find(matches);
-    if (row) {
-      return {
-        status: 'resolved',
-        rate: row.rate,
-        kind: row.kind,
-        source: row.source,
-        timestamp: row.timestamp,
-        fallback,
-      };
-    }
-  }
-  return { status: 'unavailable' };
+  // Rows starting after the requested day can never apply.
+  const rows = await db.all<ExchangeRateEntity>(
+    `SELECT * FROM exchange_rates
+       WHERE base_currency = ? AND quote_currency = ? AND tombstone = 0
+         AND timestamp <= ?`,
+    [baseCurrency, quoteCurrency, utcEndOfDay(date)],
+  );
+  return selectRate(rows, { baseCurrency, quoteCurrency, date });
 }
 
 async function resolveRateHandler({

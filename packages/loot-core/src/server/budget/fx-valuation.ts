@@ -1,5 +1,6 @@
 import { logger } from '#platform/server/log';
 import * as db from '#server/db';
+import type { RateResolution } from '#server/exchange-rates/app';
 import * as sheet from '#server/sheet';
 import {
   getDefaultCurrencyCode,
@@ -8,14 +9,9 @@ import {
 import { nativeToBase } from '#shared/exchange-rate';
 import * as monthUtils from '#shared/months';
 import { MAX_SAFE_NUMBER } from '#shared/util';
+import type { FxRateUsed } from '#types/models';
 
-type RateUsed = {
-  rate: string;
-  kind: string;
-  source: string;
-  timestamp: string | null;
-  fallback: boolean;
-};
+type RateUsed = FxRateUsed;
 
 type UnavailableReason =
   | 'rate-unavailable'
@@ -95,6 +91,32 @@ function closeOf(month: string, today: string) {
     : monthUtils.getMonthEnd(`${month}-01`);
 }
 
+/** The rate metadata a valuation records, or null when unavailable. */
+export function rateUsed(resolution: RateResolution): RateUsed | null {
+  return resolution.status === 'resolved'
+    ? {
+        rate: resolution.rate,
+        kind: resolution.kind,
+        source: resolution.source,
+        timestamp: resolution.timestamp,
+        fallback: resolution.fallback,
+      }
+    : null;
+}
+
+export type FxWalkAccount = {
+  id: string;
+  name: string;
+  currency: string;
+  currency_precision: number | null;
+};
+
+export type FxWalkRow = {
+  date: string;
+  amount: number;
+  transaction_amount: number | null;
+};
+
 /**
  * The monthly valuation bridge (MC-8.1) of on-budget accounts in other
  * currencies, from the first given month through the current one: each
@@ -106,50 +128,98 @@ export async function fxValuation(
   today = monthUtils.currentDay(),
 ): Promise<FxMonth[]> {
   const current = monthUtils.monthFromDate(today);
-  const sorted = [...new Set(months)].filter(m => m <= current).sort();
-  if (sorted.length === 0) return [];
+  if (!months.some(m => m <= current)) return [];
   const budgetCurrency = await getDefaultCurrencyCode();
   const bp = getRecordedAmountPrecision();
-  const accounts = await db.all<{
-    id: string;
-    name: string;
-    currency: string;
-    currency_precision: number | null;
-  }>(
+  const accounts = await db.all<FxWalkAccount>(
     `SELECT id, name, currency, currency_precision FROM accounts
        WHERE tombstone = 0 AND offbudget = 0 AND currency IS NOT NULL
          AND currency != ?
        ORDER BY sort_order, name`,
     [budgetCurrency],
   );
+  const rows = new Map<string, FxWalkRow[]>();
+  for (const account of accounts) {
+    rows.set(
+      account.id,
+      (
+        await db.all<{
+          date: number;
+          amount: number;
+          transaction_amount: number | null;
+        }>(
+          `SELECT date, amount, transaction_amount FROM transactions
+           WHERE acct = ? AND tombstone = 0 AND isChild = 0
+             AND date IS NOT NULL AND date <= ? ORDER BY date, id`,
+          [account.id, db.toDateRepr(today)],
+        )
+      ).map(row => ({ ...row, date: db.fromDateRepr(row.date) })),
+    );
+  }
+  const walk = (rateOn: (currency: string, date: string) => RateUsed | null) =>
+    walkFxValuation({
+      accounts,
+      rowsOf: id => rows.get(id) ?? [],
+      months,
+      today,
+      basePrecision: bp,
+      rateOn,
+    });
+  // Which closes need a rate depends only on the row sums, so a first pass
+  // finds them; each is then resolved once, in walk order.
+  const rates = new Map<string, RateUsed | null>();
+  walk((currency, date) => {
+    rates.set(`${currency}|${date}`, null);
+    return null;
+  });
   // Loaded on use: the rates app registers handlers when imported, and the
   // budget modules that import this one load before the handler registry.
   const { resolveRate } = await import('#server/exchange-rates/app');
+  for (const key of rates.keys()) {
+    const [currency, date] = key.split('|');
+    rates.set(
+      key,
+      rateUsed(
+        await resolveRate({
+          baseCurrency: budgetCurrency,
+          quoteCurrency: currency,
+          date,
+        }),
+      ),
+    );
+  }
+  return walk((currency, date) => rates.get(`${currency}|${date}`) ?? null);
+}
+
+/**
+ * The historical walk of {@link fxValuation} over given accounts, their
+ * top-level rows through today, and a synchronous rate lookup. Pure, so the
+ * FX impact report (MC-9) reproduces the posted amounts on its snapshot.
+ */
+export function walkFxValuation({
+  accounts,
+  rowsOf,
+  months,
+  today,
+  basePrecision: bp,
+  rateOn: lookup,
+}: {
+  accounts: FxWalkAccount[];
+  rowsOf: (account: string) => FxWalkRow[];
+  months: string[];
+  today: string;
+  basePrecision: number;
+  rateOn: (currency: string, date: string) => RateUsed | null;
+}): FxMonth[] {
+  const current = monthUtils.monthFromDate(today);
+  const sorted = [...new Set(months)].filter(m => m <= current).sort();
+  if (sorted.length === 0) return [];
   const rates = new Map<string, RateUsed | null>();
-  const rateOn = async (currency: string, date: string) => {
+  const rateOn = (currency: string, date: string) => {
     const key = `${currency}|${date}`;
-    if (!rates.has(key)) {
-      const resolved = await resolveRate({
-        baseCurrency: budgetCurrency,
-        quoteCurrency: currency,
-        date,
-      });
-      rates.set(
-        key,
-        resolved.status === 'resolved'
-          ? {
-              rate: resolved.rate,
-              kind: resolved.kind,
-              source: resolved.source,
-              timestamp: resolved.timestamp,
-              fallback: resolved.fallback,
-            }
-          : null,
-      );
-    }
+    if (!rates.has(key)) rates.set(key, lookup(currency, date));
     return rates.get(key)!;
   };
-
   const result: FxMonth[] = sorted.map(month => ({
     month,
     opening: 0,
@@ -165,23 +235,13 @@ export async function fxValuation(
   for (const account of accounts) {
     // Sum integer rows exactly, including totals outside the representable
     // range, so a later outflow can bring holdings back into range.
-    const rows = await db.all<{
-      date: number;
-      amount: number;
-      transaction_amount: number | null;
-    }>(
-      `SELECT date, amount, transaction_amount FROM transactions
-       WHERE acct = ? AND tombstone = 0 AND isChild = 0
-         AND date IS NOT NULL AND date <= ? ORDER BY date, id`,
-      [account.id, db.toDateRepr(today)],
-    );
+    const rows = rowsOf(account.id);
     let cursor = 0;
     let native = 0n;
     let base = 0n;
     let invalidAmount = false;
-    const closeAt = async (date: string): Promise<Close> => {
-      const dateRepr = db.toDateRepr(date);
-      while (cursor < rows.length && rows[cursor].date <= dateRepr) {
+    const closeAt = (date: string): Close => {
+      while (cursor < rows.length && rows[cursor].date <= date) {
         const row = rows[cursor++];
         if (
           !Number.isSafeInteger(row.amount) ||
@@ -209,7 +269,7 @@ export async function fxValuation(
         return { ...close, unavailableReason: 'amount-out-of-range' };
       }
       if (native === 0n) return { ...close, value: 0 };
-      const rate = await rateOn(account.currency, date);
+      const rate = rateOn(account.currency, date);
       const precision = account.currency_precision;
       close.rate = rate;
       if (!Number.isInteger(precision) || precision! < 0 || precision! > 15) {
@@ -244,11 +304,9 @@ export async function fxValuation(
 
     // Walk historical closes before slicing the requested range. An
     // unresolved opening must still use the last resolved historical gap.
-    const first = rows[0]
-      ? monthUtils.monthFromDate(db.fromDateRepr(rows[0].date))
-      : sorted[0];
+    const first = rows[0] ? monthUtils.monthFromDate(rows[0].date) : sorted[0];
     const start = first < sorted[0] ? first : sorted[0];
-    let previous = await closeAt(
+    let previous = closeAt(
       monthUtils.getMonthEnd(`${monthUtils.prevMonth(start)}-01`),
     );
     let lastGap = 0n;
@@ -259,7 +317,7 @@ export async function fxValuation(
       sorted[sorted.length - 1],
     )) {
       const entry = byMonth.get(month);
-      let close = await closeAt(closeOf(month, today));
+      let close = closeAt(closeOf(month, today));
       let closeGap = gap(close);
       let posted = 0;
       let broughtForward: number | null = 0;
