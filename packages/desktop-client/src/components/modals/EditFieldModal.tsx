@@ -49,14 +49,15 @@ type EditFieldModalProps = Extract<
 >['options'];
 
 export function EditFieldModal({
-  name,
-  onSubmit,
-  onClose,
-}: EditFieldModalProps) {
+                                 name,
+                                 onSubmit,
+                                 onClose,
+                               }: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
+  const [value, setValue] = useState(name === 'date' ? currentDay() : '');
 
   function onSelectNote(value: NoteAmendValue, mode?: NoteAmendMode) {
     if (value != null) {
@@ -86,7 +87,11 @@ export function EditFieldModal({
 
   const { isNarrowWidth } = useResponsive();
   let label: string;
-  let editor: (props: { close: () => void }) => ReactNode;
+  let editor: (props: { apply: (value: string) => void }) => ReactNode;
+  let apply: (value: string) => boolean = (value) => {
+    onSelect(value);
+    return true;
+  };
   let width: string | undefined;
   let height: number | 'auto' = 275;
 
@@ -94,7 +99,7 @@ export function EditFieldModal({
     ...(isNarrowWidth && itemStyle),
   };
 
-  const [noteAmend, onChangeMode] = useState<NoteAmendMode>('replace');
+  const [noteMode, onChangeMode] = useState<NoteAmendMode>('replace');
   const [noteFindReplace, setNoteFindReplace] = useState<
     Extract<NoteAmendValue, { useRegex: boolean }>
   >({
@@ -111,15 +116,17 @@ export function EditFieldModal({
       // size the modal (see DateSelect)
       width = tokens.breakpoint_small;
       height = 'auto'; // fit the calendar; 275 clips six-row months
-      editor = ({ close }) => (
+      apply = (date) => {
+        onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
+        return true;
+      };
+      editor = ({ apply }) => (
         <DateSelect
-          value={formatDate(parseISO(today), dateFormat)}
+          value={today}
           dateFormat={dateFormat}
           embedded
-          onSelect={date => {
-            onSelect(dayFromDate(parseDate(date, 'yyyy-MM-dd', new Date())));
-            close();
-          }}
+          autoFocus
+          onSelect={apply}
         />
       );
       break;
@@ -128,15 +135,36 @@ export function EditFieldModal({
     case 'notes':
       label = t('Notes');
       width = tokens.breakpoint_small;
-      editor = ({ close }) => (
+      if (noteMode === 'findAndReplace') {
+        apply = () => {
+          if (noteFindReplace.find === '') {
+            alert(t('Find value required'));
+            return false;
+          }
+          if (noteFindReplace.useRegex) {
+            try {
+              new RegExp(noteFindReplace.find, 'g');
+            } catch {
+              alert(t('Invalid regular expression'));
+              return false;
+            }
+          }
+          onSelectNote(noteFindReplace, noteMode);
+          return true;
+        };
+      } else {
+        apply = (value) => {
+          onSelectNote(value, noteMode);
+          return true;
+        };
+      }
+      editor = ({ apply }) => (
         <>
           <View
             style={{
               flexDirection: 'row',
               marginTop: 5,
               marginBottom: 5,
-              marginLeft: 8,
-              marginRight: 4,
               alignItems: 'center',
               justifyContent: 'center',
               gap: 5,
@@ -146,12 +174,12 @@ export function EditFieldModal({
               <Button
                 key={mode}
                 style={{
+                  flex: 1,
                   padding: '5px 10px',
                   height: '100%',
-                  width: `${100 / arr.length}%`,
                   backgroundColor: theme.menuBackground,
                   fontSize: 'inherit',
-                  ...(noteAmend === mode && {
+                  ...(noteMode === mode && {
                     backgroundColor: theme.buttonPrimaryBackground,
                     color: theme.buttonPrimaryText,
                     ':hover': {
@@ -159,7 +187,7 @@ export function EditFieldModal({
                       color: theme.buttonPrimaryTextHover,
                     },
                   }),
-                  ...(noteAmend !== mode && {
+                  ...(noteMode !== mode && {
                     backgroundColor: theme.buttonNormalBackground,
                     color: theme.buttonNormalText,
                     ':hover': {
@@ -177,7 +205,7 @@ export function EditFieldModal({
               </Button>
             ))}
           </View>
-          {noteAmend === 'findAndReplace' ? (
+          {noteMode === 'findAndReplace' ? (
             <View style={{ gap: 10 }}>
               <LabeledCheckbox
                 id="noteRegex"
@@ -215,22 +243,7 @@ export function EditFieldModal({
                     replace: value,
                   }))
                 }
-                onEnter={() => {
-                  if (noteFindReplace.find === '') {
-                    alert(t('Find value required'));
-                    return;
-                  }
-                  if (noteFindReplace.useRegex) {
-                    try {
-                      new RegExp(noteFindReplace.find, 'g');
-                    } catch {
-                      alert(t('Invalid regular expression'));
-                      return;
-                    }
-                  }
-                  onSelectNote(noteFindReplace, noteAmend);
-                  close();
-                }}
+                onEnter={apply}
                 style={inputStyle}
               />
             </View>
@@ -241,20 +254,18 @@ export function EditFieldModal({
                   ref={noteInputRef}
                   autoFocus
                   iconEnd={<NoteInsertHashButton inputRef={noteInputRef} />}
-                  onEnter={value => {
-                    onSelectNote(value, noteAmend);
-                    close();
-                  }}
+                  value={value}
+                  onChange={({ currentTarget: { value } }) => setValue(value)}
+                  onEnter={apply}
                   style={inputStyle}
                 />
               ) : (
                 <Input
                   ref={noteInputRef}
                   autoFocus
-                  onEnter={value => {
-                    onSelectNote(value, noteAmend);
-                    close();
-                  }}
+                  value={value}
+                  onChange={({ currentTarget: { value } }) => setValue(value)}
+                  onEnter={apply}
                   style={inputStyle}
                 />
               )}
@@ -267,12 +278,12 @@ export function EditFieldModal({
 
     case 'amount':
       label = t('Amount');
-      editor = ({ close }) => (
+      editor = ({ apply }) => (
         <Input
-          onEnter={value => {
-            onSelect(value);
-            close();
-          }}
+          value={value}
+          onChange={({ currentTarget: { value } }) => setValue(value)}
+          onEnter={apply}
+          autoFocus
           style={inputStyle}
         />
       );
@@ -306,7 +317,7 @@ export function EditFieldModal({
               rightContent={<ModalCloseButton onPress={() => state.close()} />}
             />
           )}
-          <View>
+          <View style={{ height: '100%' }}>
             {!isNarrowWidth && (
               <SectionLabel
                 title={label}
@@ -318,7 +329,23 @@ export function EditFieldModal({
               />
             )}
             <View style={{ flex: 1 }}>
-              {editor({ close: () => state.close() })}
+              {editor({
+                apply: (value) => {
+                  setValue(value);
+                  const close = apply(value);
+                  if (close) state.close();
+                },
+              })}
+            </View>
+            <View>
+              <Button
+                onPress={() => {
+                  const close = apply(value);
+                  if (close) state.close();
+                }}
+              >
+                {t('Apply')}
+              </Button>
             </View>
           </View>
         </>

@@ -304,6 +304,7 @@ type DateSelectProps = {
   value: string;
   isOpen?: boolean;
   embedded?: boolean;
+  autoFocus?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
   ref?: Ref<HTMLInputElement>;
@@ -322,6 +323,7 @@ function DateSelectDesktop({
   value: defaultValue,
   isOpen,
   embedded,
+  autoFocus,
   dateFormat = 'yyyy-MM-dd',
   openOnFocus = true,
   ref,
@@ -466,6 +468,7 @@ function DateSelectDesktop({
   return (
     <View {...containerProps}>
       <Input
+        autoFocus={autoFocus}
         id={id}
         {...inputProps}
         ref={mergedRef}
