@@ -385,22 +385,22 @@ function MonthlyPatterns({
           {recurrence.type === 'day' &&
             recurrence.value >= 29 &&
             usesLastDayForShortMonths(config) && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 5,
-                marginTop: -5,
-              }}
-            >
-              <Text style={{ color: theme.tableText }}>
-                <Trans>
-                  Months without this day will use the last day of that month.
-                </Trans>
-              </Text>
-            </View>
-          )}
+              <View
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 5,
+                  marginTop: -5,
+                }}
+              >
+                <Text style={{ color: theme.tableText }}>
+                  <Trans>
+                    Months without this day will use the last day of that month.
+                  </Trans>
+                </Text>
+              </View>
+            )}
         </Fragment>
       ))}
     </SpaceBetween>
