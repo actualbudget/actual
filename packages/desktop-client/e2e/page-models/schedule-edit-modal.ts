@@ -91,7 +91,10 @@ export class ScheduleEditModal {
     });
     await expect(addDaysButton).toBeVisible();
     await addDaysButton.click();
-    await popover.getByText('Repeat every').click();
+    await expect(
+      popover.getByRole('button', { name: '1', exact: true }),
+    ).toBeVisible();
+    await this.page.keyboard.press('Escape');
   }
 
   async save() {
