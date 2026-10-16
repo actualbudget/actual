@@ -171,10 +171,10 @@ function getCurrencySymbolPositionFromArg(
 
 function regexExtractMatch(result: RegExpMatchArray | null): string | string[] {
   if (!result || result.length === 0) return '';
-  if (result.length === 1) return result[0];
-  if (result.length === 2) return result[1];
+  if (result.length === 1) return result[0] ?? '';
+  if (result.length === 2) return result[1] ?? '';
 
-  return result.slice(1);
+  return result.slice(1).map(match => match ?? '');
 }
 
 export class CustomFunctionsPlugin extends FunctionPlugin {
