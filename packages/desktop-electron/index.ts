@@ -33,6 +33,7 @@ import type {
   UtilityProcess,
 } from 'electron';
 
+import { bufferToUint8Array } from './buffer-utils';
 import { openExternalUrl, revealLocalFile } from './external-links';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
@@ -826,12 +827,17 @@ ipcMain.handle(
         const contents =
           typeof fileContents === 'string'
             ? fileContents
-            : new Uint8Array(fileContents.buffer);
+            : bufferToUint8Array(fileContents);
         fs.writeFile(fileLocation.filePath, contents, error => {
-          return reject(error);
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
         });
+      } else {
+        resolve();
       }
-      resolve();
     });
   },
 );
