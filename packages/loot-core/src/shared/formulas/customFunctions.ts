@@ -468,7 +468,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
           return SimpleRangeValue.onlyValues(
             match.slice(1).map(value => [value]),
           );
-        } catch (e) {
+        } catch {
           return new CellError(ErrorType.VALUE, 'Invalid regex');
         }
       },
@@ -484,7 +484,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
         try {
           const match = text.match(new RegExp(regex, flags));
           return match !== null;
-        } catch (e) {
+        } catch {
           return new CellError(ErrorType.VALUE, 'Invalid regex');
         }
       },
@@ -504,7 +504,7 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       ) => {
         try {
           return text.replace(new RegExp(regex, flags), replacement);
-        } catch (e) {
+        } catch {
           return new CellError(ErrorType.VALUE, 'Invalid regex');
         }
       },
