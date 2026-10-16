@@ -44,7 +44,7 @@ Most likely, a common workflow will be to "hold" income you make this month for 
 1. Click the **To Budget** amount.
 2. Select **Hold for next month** in the menu.
 
-![hold funds](/img/how-it-works/buffer-1.webp)
+   <img width="321" alt="The To Budget menu with Hold for next month highlighted" src="/img/budgeting/budgeting-hold-for-next-month@2x.webp" />
 
 3. Press <Key k="enter" /> to hold all available money, or enter a custom amount to hold.
 
@@ -108,15 +108,15 @@ Sometimes, you want to be consistently holding funds for future months.
 For example, if you use the "Month Ahead" strategy and reserve all income from the current month for the next month, keeping the held funds up to date and accurate can be a lot of work.
 You can automate holding funds from specific income categories for future months by clicking the income total and enabling the auto hold for that category.
 
-![Auto hold funds menu](/img/how-it-works/auto-hold.webp)
+<img width="724" alt="The Income category menu with Enable auto hold highlighted" src="/img/budgeting/budgeting-auto-hold@2x.webp" />
 
 When the _auto hold_ function has been enabled for an income category, this will be indicated by an arrow.
 The income category will be set for automatic holding starting from the current month and the following 12 months.
 If wanted, the _auto hold_ functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
 
-![Auto hold indicator](/img/how-it-works/auto-hold-carryover.webp)
+<img width="724" alt="The Income category with the auto hold arrow next to its amount" src="/img/budgeting/budgeting-auto-hold-indicator@2x.webp" />
 
 If you need to modify the _held funds_ later in the month, you can disable the auto hold for the current month by clicking the budget value and choosing "Disable current auto hold."
 You may then set the held funds like normal and the _auto hold_ will still be set in the future.
 
-![Auto hold disable current month](/img/how-it-works/auto-hold-disable.webp)
+<img width="502" alt="The To Budget menu with Disable current auto hold highlighted" src="/img/budgeting/budgeting-auto-hold-disable@2x.webp" />

@@ -304,6 +304,14 @@ export type ApiHandlers = {
   'api/schedule-delete': (id: string) => Promise<void>;
 
   'api/schedules-get': () => Promise<APIScheduleEntity[]>;
+
+  'api/schedule-dates-get': (arg: {
+    date: APIScheduleEntity['date'];
+    start?: string;
+    end?: string;
+    count?: number;
+  }) => Promise<string[]>;
+
   'api/get-id-by-name': (arg: {
     type: string;
     name: string;

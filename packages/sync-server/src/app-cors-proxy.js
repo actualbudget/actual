@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
@@ -5,6 +6,8 @@ import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
 import { isBlockedIp } from './util/ssrf';
 import { validateSession } from './util/validate-user';
+
+const debugSensitive = createDebug('actual-sensitive:cors-proxy');
 
 const app = express();
 
@@ -111,7 +114,8 @@ function isUrlAllowed(targetUrl) {
 
     return false;
   } catch (e) {
-    console.warn('Invalid target URL:', targetUrl, e.message);
+    console.warn('Invalid target URL');
+    debugSensitive('Invalid target URL %s: %O', targetUrl, e);
     return false;
   }
 }
@@ -158,7 +162,8 @@ app.use('/', async (req, res) => {
 
   // Check if the URL is allowed
   if (!isUrlAllowed(url.href)) {
-    console.warn('Blocked request to unauthorized URL:', url.href);
+    console.warn('Blocked request to unauthorized URL');
+    debugSensitive('Blocked request to unauthorized URL: %s', url.href);
     return res.status(403).json({
       error: 'URL not allowed',
       message:

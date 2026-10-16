@@ -135,6 +135,30 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 - **Body** (400, 16px): Default text.
 - **Label** (400, 13px): Table meta, menus, dense secondary text; 12px and 10px steps exist for the tightest spots.
 
+### Standard Component Sizes
+
+`Button`, `Text` and `Input` accept a `size` prop: `small` | `medium` | `large` | `extra-large` (the `ComponentSize` vocabulary in `packages/component-library/src/tokens.ts`). Omitting the prop renders exactly as before — fully backward compatible. Sizes are responsive: they step up one notch on mobile/narrow for readability and touch targets, and collapse to the compact desktop scale from 512px/730px up. Breakpoint groups mirror the `useResponsive` view modes: narrow <512, small 512–729, medium 730–1099, wide ≥1100.
+
+Text values (fontSize / lineHeight, px):
+
+| Size        | narrow  | small   | medium  | wide    |
+| ----------- | ------- | ------- | ------- | ------- |
+| small       | 12 / 16 | 12 / 16 | 12 / 16 | 12 / 16 |
+| medium      | 13 / 18 | 13 / 18 | 13 / 18 | 13 / 18 |
+| large       | 16 / 22 | 15 / 20 | 15 / 20 | 15 / 20 |
+| extra-large | 17 / 24 | 17 / 24 | 16 / 22 | 16 / 22 |
+
+Control values for Button/Input (paddingY / paddingX / min-height, px):
+
+| Size        | narrow       | small       | medium      | wide        |
+| ----------- | ------------ | ----------- | ----------- | ----------- |
+| small       | 3 / 8 / 24   | 3 / 8 / 24  | 3 / 8 / 24  | 3 / 8 / 24  |
+| medium      | 5 / 10 / —   | 5 / 10 / —  | 5 / 10 / —  | 5 / 10 / —  |
+| large       | 8 / 12 / 36  | 6 / 12 / 32 | 6 / 12 / 32 | 6 / 12 / 32 |
+| extra-large | 10 / 14 / 40 | 8 / 12 / 36 | 8 / 12 / 36 | 8 / 12 / 36 |
+
+`size="medium"` reproduces today's default control look exactly (5px/10px padding, 13px text, no min-height) and, on controls, inherits line-height like the default; the other sizes apply their scale line-height. `Text` always applies its size's line-height, while the omitted prop forces no line-height at all. `extra-large` narrow hits the 40px mobile touch target. The touch-target guarantee applies to touch-primary controls: at narrow, use `large` or `extra-large` for controls the user taps; `small` stays the compact 24px desktop-density choice at every breakpoint and is not meant for touch-primary controls.
+
 ### Named Rules
 
 **The Tabular Number Rule.** Every standalone financial figure renders with `font-feature-settings: "tnum", "ss01", "ss04"` (via `FinancialText` or `styles.tnum`) so digits align in columns and disambiguate. A proportional-figure money column is a bug.
