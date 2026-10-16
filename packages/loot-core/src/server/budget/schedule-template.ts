@@ -19,7 +19,7 @@ import { amountToInteger } from '#shared/util';
 import type { CategoryEntity, TransactionEntity } from '#types/models';
 import type { ScheduleTemplate, Template } from '#types/models/templates';
 
-import { getSheetValue, isTrackingBudget } from './actions';
+import { isTrackingBudget } from './actions';
 
 type ScheduleTemplateTarget = {
   template: ScheduleTemplate;
@@ -29,7 +29,7 @@ type ScheduleTemplateTarget = {
   // computed before `target` is summed across every occurrence landing
   // in the schedule's monthly-equivalent aggregation window below. Unlike
   // `target` (whose value is a monthly-equivalent aggregate that
-  // `runSchedule`/`getMonthlyBaseContribution` depend on), this is the
+  // the full-flag path and `getMonthlyBaseContribution` depend on), this is the
   // right value to multiply by an occurrence count elsewhere (e.g.
   // `buildMonthlyOutflow`, which buckets one entry per occurrence date).
   perOccurrenceAmount: number;
@@ -47,8 +47,8 @@ type ScheduleTemplateTarget = {
   full: boolean;
   repeat: boolean;
   dateConditions: ReturnType<typeof extractScheduleConds>['date'];
-  // Its last occurrence falls before current_month. Only kept when
-  // createScheduleList is asked to keep past-due schedules.
+  // Its last occurrence falls before current_month. It may still be
+  // unpaid, and money carried into current_month has to cover it.
   isPastDue: boolean;
 };
 
@@ -57,17 +57,8 @@ export async function createScheduleList(
   current_month: string,
   category: CategoryEntity,
   currency: Currency,
-  // Keep a schedule whose last occurrence is before current_month instead
-  // of rejecting it as past. It may still be unpaid, and money carried into
-  // current_month has to cover it.
-  keepPastDue = false,
-  // Keep a completed schedule instead of dropping it. It posts nothing
-  // further, but a payment that completed it this month still has to be
-  // covered by this month's budget.
-  keepCompleted = false,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
-  const errors: string[] = [];
   const accounts = (await db.getAccounts()) ?? [];
   const accountsMap = new Map(accounts.map(a => [a.id, a]));
 
@@ -189,84 +180,73 @@ export async function createScheduleList(
     );
     const displayName = scheduleName ?? template.name ?? '';
     const isPastDue = num_months < 0;
-    if (isPastDue && !keepPastDue) {
-      //non-repeating schedules could be negative
-      errors.push(`Schedule ${displayName} is in the Past.`);
-    } else {
-      t.push({
-        template,
-        target,
-        perOccurrenceAmount: target,
-        next_date_string,
-        storedNextDate,
-        scheduleId: sid,
-        target_interval,
-        target_frequency,
-        num_months,
-        completed,
-        //started,
-        full: template.full === null ? false : template.full,
-        repeat: isRepeating,
-        name: displayName,
+    t.push({
+      template,
+      target,
+      perOccurrenceAmount: target,
+      next_date_string,
+      storedNextDate,
+      scheduleId: sid,
+      target_interval,
+      target_frequency,
+      num_months,
+      completed,
+      //started,
+      full: template.full === null ? false : template.full,
+      repeat: isRepeating,
+      name: displayName,
+      dateConditions,
+      isPastDue,
+    });
+    if (!completed && isRepeating && !isPastDue) {
+      let monthlyTarget = 0;
+      const nextMonth = monthUtils.addMonths(
+        current_month,
+        t[t.length - 1].num_months + 1,
+      );
+      let nextBaseDate = getNextDate(
         dateConditions,
-        isPastDue,
-      });
-      if (!completed) {
-        if (isRepeating && !isPastDue) {
-          let monthlyTarget = 0;
-          const nextMonth = monthUtils.addMonths(
-            current_month,
-            t[t.length - 1].num_months + 1,
-          );
-          let nextBaseDate = getNextDate(
-            dateConditions,
-            monthUtils._parse(current_month),
-            true,
-          );
-          let nextDate = dateConditions.value.skipWeekend
-            ? monthUtils.dayFromDate(
-                getDateWithSkippedWeekend(
-                  monthUtils._parse(nextBaseDate),
-                  dateConditions.value.weekendSolveMode,
-                ),
-              )
-            : nextBaseDate;
-          while (nextDate < nextMonth) {
-            monthlyTarget += -target;
-            const currentDate = nextBaseDate;
-            const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
-            nextBaseDate = getNextDate(
-              dateConditions,
-              monthUtils._parse(oneDayLater),
-              true,
-            );
-            nextDate = dateConditions.value.skipWeekend
-              ? monthUtils.dayFromDate(
-                  getDateWithSkippedWeekend(
-                    monthUtils._parse(nextBaseDate),
-                    dateConditions.value.weekendSolveMode,
-                  ),
-                )
-              : nextBaseDate;
-            const diffDays = monthUtils.differenceInCalendarDays(
-              nextBaseDate,
-              currentDate,
-            );
-            if (!diffDays) {
-              // This can happen if the schedule has an end condition.
-              break;
-            }
-          }
-          t[t.length - 1].target = -monthlyTarget;
-        }
-      } else if (!keepCompleted) {
-        errors.push(
-          `Schedule ${displayName} is not active during the month in question.`,
+        monthUtils._parse(current_month),
+        true,
+      );
+      let nextDate = dateConditions.value.skipWeekend
+        ? monthUtils.dayFromDate(
+            getDateWithSkippedWeekend(
+              monthUtils._parse(nextBaseDate),
+              dateConditions.value.weekendSolveMode,
+            ),
+          )
+        : nextBaseDate;
+      while (nextDate < nextMonth) {
+        monthlyTarget += -target;
+        const currentDate = nextBaseDate;
+        const oneDayLater = monthUtils.addDays(nextBaseDate, 1);
+        nextBaseDate = getNextDate(
+          dateConditions,
+          monthUtils._parse(oneDayLater),
+          true,
         );
+        nextDate = dateConditions.value.skipWeekend
+          ? monthUtils.dayFromDate(
+              getDateWithSkippedWeekend(
+                monthUtils._parse(nextBaseDate),
+                dateConditions.value.weekendSolveMode,
+              ),
+            )
+          : nextBaseDate;
+        const diffDays = monthUtils.differenceInCalendarDays(
+          nextBaseDate,
+          currentDate,
+        );
+        if (!diffDays) {
+          // This can happen if the schedule has an end condition.
+          break;
+        }
       }
+      t[t.length - 1].target = -monthlyTarget;
     }
   }
-  return { t: t.filter(c => c.completed === 0 || keepCompleted), errors };
+  return { t };
 }
 
 const FORECAST_MONTHS = 60;
@@ -543,49 +523,6 @@ export async function buildMonthlyOutflow(
   return monthlyOutflow;
 }
 
-function getPayMonthOfTotal(t: ScheduleTemplateTarget[]) {
-  //return the contribution amounts of full or every month type schedules
-  let total = 0;
-  const schedules = t.filter(c => c.num_months === 0);
-  for (const schedule of schedules) {
-    total += schedule.target;
-  }
-  return total;
-}
-
-function getSinkingContributionBreakdown(
-  t: ScheduleTemplateTarget[],
-  remainder: number,
-  last_month_balance: number,
-) {
-  // Mirrors getSinkingContributionTotal but also records each schedule's
-  // contribution so the caller can attribute the batch back to individual
-  // templates. Total math is unchanged.
-  let total = 0;
-  const perSchedule = new Map<ScheduleTemplate, number>();
-  for (const [index, schedule] of t.entries()) {
-    remainder =
-      index === 0
-        ? schedule.target - last_month_balance
-        : schedule.target - remainder;
-    let tg = 0;
-    if (remainder >= 0) {
-      tg = remainder;
-      remainder = 0;
-    } else {
-      tg = 0;
-      remainder = Math.abs(remainder);
-    }
-    const contribution = tg / (schedule.num_months + 1);
-    total += contribution;
-    perSchedule.set(
-      schedule.template,
-      (perSchedule.get(schedule.template) ?? 0) + contribution,
-    );
-  }
-  return { total, perSchedule };
-}
-
 function getMonthlyBaseContribution(schedule: ScheduleTemplateTarget) {
   let prevDate;
   let intervalMonths;
@@ -622,176 +559,65 @@ function getMonthlyBaseContribution(schedule: ScheduleTemplateTarget) {
   }
 }
 
-function getSinkingBaseContributionTotal(t: ScheduleTemplateTarget[]) {
-  let total = 0;
-  for (const schedule of t) total += getMonthlyBaseContribution(schedule);
-  return total;
-}
-
-function getSinkingTotal(t: ScheduleTemplateTarget[]) {
-  //sum the total of all upcoming schedules
-  let total = 0;
-  for (const schedule of t) {
-    total += schedule.target;
-  }
-  return total;
-}
-
-export async function runSchedule(
-  template_lines: Template[],
-  current_month: string,
-  balance: number,
-  remainder: number,
-  last_month_balance: number,
-  to_budget: number,
-  errors: string[],
-  category: CategoryEntity,
-  currency: Currency,
-) {
-  const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
-
-  const t = await createScheduleList(
-    scheduleTemplates,
-    current_month,
-    category,
-    currency,
-  );
-  errors = errors.concat(t.errors);
-
-  const isPayMonthOf = c =>
-    c.full ||
-    ((c.target_frequency === 'monthly' || !c.target_frequency) &&
-      c.target_interval === 1 &&
-      c.num_months === 0) ||
-    (c.target_frequency === 'weekly' && c.target_interval <= 4) ||
-    (c.target_frequency === 'daily' && c.target_interval <= 31) ||
-    isTrackingBudget();
-
-  // A schedule only behaves "sub-monthly" when it recurs more often than
-  // monthly — the same weekly/daily caps `isPayMonthOf` uses. A "repeat every
-  // 360 days" schedule is daily in shape but yearly in effect: letting it
-  // count here wrongly switches the category to the steady-accrual shortcut,
-  // which ignores both the deadline and what has already been saved (#6644).
-  function isSubMonthly(schedule: ScheduleTemplateTarget) {
-    return (
-      (schedule.target_frequency === 'weekly' &&
-        schedule.target_interval <= 4) ||
-      (schedule.target_frequency === 'daily' && schedule.target_interval <= 31)
-    );
-  }
-
-  const t_payMonthOf = t.t.filter(isPayMonthOf);
-  const t_sinking = t.t
-    .filter(c => !isPayMonthOf(c))
-    .sort((a, b) => a.next_date_string.localeCompare(b.next_date_string));
-  const numSubMonthly = t.t.filter(isSubMonthly).length;
-  const totalPayMonthOf = getPayMonthOfTotal(t_payMonthOf);
-  const totalSinking = getSinkingTotal(t_sinking);
-  const totalSinkingBaseContribution =
-    getSinkingBaseContributionTotal(t_sinking);
-  const lastMonthGoal = await getSheetValue(
-    monthUtils.sheetForMonth(monthUtils.subMonths(current_month, 1)),
-    `goal-${category.id}`,
-  );
-
-  // check and see if we should budget the full amount becaue the previous schedules
-  // haven't been paid yet, or if we can use the leftover balance for this month
-  // First option: check if the previous month doesn't have its monthly schedules paid yet
-  // Second option: check if the previous month needed less than this month and hasn't paid yet
-  // Accumulate per-schedule contributions, keyed by the source template, so
-  // callers can attribute the batched to_budget back to individual schedule
-  // templates for UI projections.
-  const perScheduleMonthly = new Map<ScheduleTemplate, number>();
-  const addContribution = (template: ScheduleTemplate, amount: number) => {
-    perScheduleMonthly.set(
-      template,
-      (perScheduleMonthly.get(template) ?? 0) + amount,
-    );
-  };
-
-  if (
-    balance >= totalSinking + totalPayMonthOf ||
-    (lastMonthGoal < totalSinking + totalPayMonthOf &&
-      lastMonthGoal !== 0 &&
-      balance >= lastMonthGoal &&
-      numSubMonthly > 0)
-  ) {
-    to_budget += Math.round(totalPayMonthOf + totalSinkingBaseContribution);
-    for (const c of t_payMonthOf) {
-      if (c.num_months === 0) {
-        addContribution(c.template, c.target);
-      }
-    }
-    for (const c of t_sinking) {
-      addContribution(c.template, getMonthlyBaseContribution(c));
-    }
-  } else {
-    const { total: totalSinkingContribution, perSchedule: sinkingPerSchedule } =
-      getSinkingContributionBreakdown(t_sinking, remainder, last_month_balance);
-    if (t_sinking.length === 0) {
-      to_budget +=
-        Math.round(totalPayMonthOf + totalSinkingContribution) -
-        last_month_balance;
-    } else {
-      to_budget += Math.round(totalPayMonthOf + totalSinkingContribution);
-    }
-    for (const c of t_payMonthOf) {
-      if (c.num_months === 0) {
-        addContribution(c.template, c.target);
-      }
-    }
-    for (const [template, amount] of sinkingPerSchedule) {
-      addContribution(template, amount);
-    }
-  }
-  return { to_budget, errors, remainder, perScheduleMonthly };
-}
-
-// Pure, synchronous: given a starting balance and a 60-length projected
+// Pure, synchronous: given a starting balance and a projected
 // monthly-outflow array (an entry can be negative — an unlinked inflow
-// transaction offsets that month's need), returns the minimal whole-cent
-// monthly contribution that keeps the projected balance non-negative
-// across the whole window.
+// transaction offsets that month's need), returns this month's whole-cent
+// contribution.
 //
-// Each month i's balance is affine in `candidate`:
+// The steady rate is the window's average monthly outflow. The required
+// balance is the smallest starting balance from which contributing the
+// steady rate every month never lets the projected balance go negative.
+//
+// Short of the required balance, the answer is the minimal constant
+// contribution that keeps the projected balance non-negative across the
+// whole window. Each month i's balance is affine in `candidate`:
 //   balance[i] = startingBalance + (i + 1) * candidate - cumsum[i]
 // so balance[i] >= 0 for all i  <=>  candidate >= threshold_i for all i,
-// where threshold_i = (cumsum[i] - startingBalance) / (i + 1) does not
-// depend on candidate at all. The answer is simply max_i(threshold_i).
-// An earlier guess-and-correct version of this function was wrong: it
-// operated on each month's raw balance, which is the
-// threshold gap scaled by (i + 1) — a late month's small gap can
-// produce a larger raw balance than an early month's large gap, so
-// picking the extremum of raw balance does not reliably find
-// max_i(threshold_i)).
+// where threshold_i = (cumsum[i] - startingBalance) / (i + 1). The answer
+// is max_i(threshold_i), which is at least the steady rate here.
+//
+// Above the required balance, the surplus is used up before anything new
+// is asked for: the contribution is the steady rate less the surplus,
+// never below zero. Nothing is ever taken back out of the category; the
+// user can move a surplus elsewhere by hand. In the month the surplus
+// runs out, the contribution covers only what the surplus doesn't, and the
+// steady rate from then on keeps every month covered.
 export function solveMonthlyContribution(
   startingBalance: number,
   monthlyOutflow: number[],
 ): number {
+  const totalOutflow = monthlyOutflow.reduce((sum, value) => sum + value, 0);
+  const steadyRate = Math.max(
+    0,
+    Math.ceil(totalOutflow / monthlyOutflow.length),
+  );
   let candidate = 0;
+  let requiredBalance = 0;
   let cumsum = 0;
 
   for (let i = 0; i < monthlyOutflow.length; i++) {
     cumsum += monthlyOutflow[i];
     const threshold = Math.ceil((cumsum - startingBalance) / (i + 1));
     candidate = Math.max(candidate, threshold);
+    requiredBalance = Math.max(requiredBalance, cumsum - steadyRate * (i + 1));
   }
 
-  return candidate;
+  const surplus = startingBalance - requiredBalance;
+  if (surplus <= 0) {
+    return candidate;
+  }
+  return Math.max(0, steadyRate - surplus);
 }
 
 export async function runScheduleForecast(
   template_lines: Template[],
   current_month: string,
   balance: number,
-  last_month_balance: number,
   to_budget: number,
-  errors: string[],
   category: CategoryEntity,
   currency: Currency,
 ): Promise<{
   to_budget: number;
-  errors: string[];
   perScheduleMonthly: Map<ScheduleTemplate, number>;
 }> {
   const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
@@ -800,27 +626,29 @@ export async function runScheduleForecast(
     current_month,
     category,
     currency,
-    true,
-    true,
   );
-  errors = errors.concat(t.errors);
 
+  // A tracking budget doesn't carry a category's leftover into the next
+  // month, so nothing can be saved ahead for a bill: every schedule is
+  // budgeted like a full-flag one, in the month it's due.
+  const isTracking = isTrackingBudget();
   // Past-due and completed schedules only matter to the forecast: it
   // reserves the past-due ones still unpaid out of the carried-over
   // balance, and a schedule that completed this month still has its
   // payment in this month's spending.
   const fullEntries = t.t.filter(
-    c => c.template.full && !c.isPastDue && !c.completed,
+    c => (isTracking || c.template.full) && !c.isPastDue && !c.completed,
   );
   // A completed full-flag schedule has nothing left to budget in full, but
   // its payment this month still has to be covered, so it rides the
   // forecast like a completed smooth one.
-  const smoothEntries = t.t.filter(c => !c.template.full || c.completed);
+  const smoothEntries = isTracking
+    ? []
+    : t.t.filter(c => !c.template.full || c.completed);
 
   const perScheduleMonthly = new Map<ScheduleTemplate, number>();
-  // Full-flag schedules keep today's exact runSchedule behavior: they're
-  // budgeted in full only when due this month, never smoothed and never
-  // budgeted ahead of time.
+  // Full-flag schedules are budgeted in full only when due this month,
+  // never smoothed and never budgeted ahead of time.
   const fullContribution = fullEntries.reduce((sum, c) => {
     const contribution = c.num_months === 0 ? c.target : 0;
     perScheduleMonthly.set(
@@ -833,7 +661,6 @@ export async function runScheduleForecast(
   if (smoothEntries.length === 0) {
     return {
       to_budget: to_budget + fullContribution,
-      errors,
       perScheduleMonthly,
     };
   }
@@ -851,8 +678,7 @@ export async function runScheduleForecast(
 
   // Split the single smoothed candidate back out across the smooth
   // schedules that share this category, proportional to each schedule's
-  // own monthly-equivalent contribution — the same normalization
-  // `runSchedule` already uses (getMonthlyBaseContribution divides a
+  // own monthly-equivalent contribution (getMonthlyBaseContribution divides a
   // yearly/weekly/daily target down to a monthly-equivalent amount; using
   // raw `entry.target` instead would treat a yearly schedule's full
   // lump-sum as if it were a monthly amount, and would also understate
@@ -892,7 +718,6 @@ export async function runScheduleForecast(
 
   return {
     to_budget: to_budget + fullContribution + candidate,
-    errors,
     perScheduleMonthly,
   };
 }

@@ -8,11 +8,10 @@ import type { q } from '#shared/query';
 import type { CategoryEntity } from '#types/models';
 import type { ScheduleTemplate } from '#types/models/templates';
 
-import { getSheetValue, isTrackingBudget } from './actions';
+import { isTrackingBudget } from './actions';
 import {
   buildMonthlyOutflow,
   createScheduleList,
-  runSchedule,
   runScheduleForecast,
   solveMonthlyContribution,
 } from './schedule-template';
@@ -116,637 +115,6 @@ function mockSchedulesByName(
   });
   vi.mocked(isTrackingBudget).mockReturnValue(false);
 }
-
-describe('runSchedule', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(db.getAccounts).mockResolvedValue([]);
-  });
-
-  it('should return correct budget when recurring schedule set', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Test Schedule',
-        priority: 0,
-        directive: 'template',
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-08-01',
-      amount: -10000,
-      frequency: 'monthly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.to_budget).toBe(10000);
-    expect(result.errors).toHaveLength(0);
-    expect(result.remainder).toBe(0);
-  });
-
-  it('should return correct budget when yearly recurring schedule set and balance is greater than target', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Test Schedule',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-08-01',
-      amount: -12000,
-      frequency: 'yearly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-09-01',
-      12000,
-      0,
-      12000,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.to_budget).toBe(1000);
-    expect(result.errors).toHaveLength(0);
-    expect(result.remainder).toBe(0);
-  });
-
-  it('returns a per-template monthly attribution map keyed by template', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: '  Test Schedule  ',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-08-01',
-      amount: -10000,
-      frequency: 'monthly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.perScheduleMonthly.get(template_lines[0])).toBe(10000);
-    expect(result.to_budget).toBe(10000);
-  });
-
-  it('handles a pay-month-of monthly schedule alongside a yearly sinking schedule', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Internet',
-        directive: 'template',
-        priority: 0,
-      } as const,
-      {
-        type: 'schedule',
-        name: 'Insurance',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSchedulesByName({
-      Internet: {
-        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
-      },
-      Insurance: {
-        spec: { start: '2024-12-15', amount: -60000, frequency: 'yearly' },
-      },
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.errors).toHaveLength(0);
-    const internet = result.perScheduleMonthly.get(template_lines[0]) ?? 0;
-    const insurance = result.perScheduleMonthly.get(template_lines[1]) ?? 0;
-    expect(internet).toBe(10000); // pay-month-of: full target
-    expect(insurance).toBeGreaterThan(0);
-    expect(insurance).toBeLessThan(internet);
-    expect(internet + insurance).toBeCloseTo(result.to_budget, -1);
-  });
-
-  it('budgets nothing in advance for a yearly schedule with `full: true`', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Insurance',
-        full: true,
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-12-15',
-      amount: -60000,
-      frequency: 'yearly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(0);
-    expect(result.perScheduleMonthly.get(template_lines[0])).toBeUndefined();
-  });
-
-  it('only attributes contribution to schedules occurring this month when full: true is used', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Schedule A',
-        full: true,
-        directive: 'template',
-        priority: 0,
-      } as const,
-      {
-        type: 'schedule',
-        name: 'Schedule B',
-        full: true,
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSchedulesByName({
-      'Schedule A': {
-        spec: { start: '2024-08-01', amount: -10000, frequency: 'monthly' },
-      },
-      'Schedule B': {
-        spec: { start: '2024-09-01', amount: -20000, frequency: 'monthly' },
-      },
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.to_budget).toBe(10000);
-    expect(result.perScheduleMonthly.get(template_lines[0])).toBe(10000);
-    expect(result.perScheduleMonthly.get(template_lines[1])).toBeUndefined();
-  });
-
-  it('applies a percent adjustment to the schedule amount', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Bill',
-        adjustment: 10,
-        adjustmentType: 'percent',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-08-15',
-      amount: -10000,
-      frequency: 'monthly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(11000); // $100 × 1.10
-  });
-
-  it('applies a fixed adjustment to the schedule amount', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Bill',
-        adjustment: 5,
-        adjustmentType: 'fixed',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-08-15',
-      amount: -10000,
-      frequency: 'monthly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(10500); // $100 + $5
-  });
-
-  it('skips completed schedules from the budget total', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Done',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule(
-      { start: '2024-08-15', amount: -10000, frequency: 'monthly' },
-      1,
-    );
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-08-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(0);
-  });
-
-  it('budgets all daily occurrences within the month for a daily schedule', async () => {
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Daily Bill',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-01-01',
-      amount: -100,
-      frequency: 'daily',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(3100); // 31 days × $1
-  });
-
-  it('sorts sinking schedules by next due date so existing balance covers the earliest first', async () => {
-    // Templates given in reverse-date order to verify the engine sorts.
-    // Sorted (May first): ($1200-$200)/5 + $600/11 = $254.55 → 25455
-    // Unsorted (Nov first): ($600-$200)/11 + $1200/5 = $276.36 — the
-    // assertion below only matches if the sort runs.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'November bill',
-        directive: 'template',
-        priority: 0,
-      } as const,
-      {
-        type: 'schedule',
-        name: 'May bill',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSchedulesByName({
-      'November bill': {
-        spec: { start: '2024-11-15', amount: -60000, frequency: 'yearly' },
-      },
-      'May bill': {
-        spec: { start: '2024-05-15', amount: -120000, frequency: 'yearly' },
-      },
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      20000,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-
-    expect(result.errors).toHaveLength(0);
-    expect(result.to_budget).toBe(25455);
-  });
-
-  it('records a Past error for a non-repeating schedule whose date has already passed', async () => {
-    // Non-repeating (no frequency) and dated before current_month → engine
-    // marks it as past rather than rolling forward.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Past',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
-    vi.mocked(getRuleForSchedule).mockResolvedValue(
-      new Rule({
-        id: 'r',
-        stage: 'pre',
-        conditionsOp: 'and',
-        conditions: [
-          { op: 'is', field: 'date', value: '2023-06-01', type: 'date' },
-          { op: 'is', field: 'amount', value: -10000, type: 'number' },
-        ],
-        actions: [],
-      }),
-    );
-    vi.mocked(isTrackingBudget).mockReturnValue(false);
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.errors).toContainEqual(
-      expect.stringMatching(/Schedule Past is in the Past/),
-    );
-    expect(result.to_budget).toBe(0);
-  });
-
-  it('contributes target/interval per month for a fully-funded bi-monthly schedule', async () => {
-    // Every-2-months from 2024-03-15: interval 2 keeps it out of the
-    // pay-month-of fast path. With balance == target the engine takes
-    // the base-contribution branch: target / interval = $200 / 2 = $100.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'BiMonthly',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-03-15',
-      amount: -20000,
-      frequency: 'monthly',
-      interval: 2,
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      20000,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(10000);
-  });
-
-  it('contributes target / months-spanned for a fully-funded six-week schedule', async () => {
-    // Every 6 weeks from 2024-02-12: outside the weekly pay-month-of
-    // cap (≤4), so it sinks. With balance == target the base path runs:
-    // prev = subWeeks(2024-02-12, 6) = 2024-01-01, span = 1 month →
-    // contribution = $60 / 1 = $60.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'EverySixWeeks',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-02-12',
-      amount: -6000,
-      frequency: 'weekly',
-      interval: 6,
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      6000,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(6000);
-  });
-
-  it('contributes target / months-spanned for a fully-funded sixty-day schedule', async () => {
-    // Every 60 days from 2024-03-01: outside the daily pay-month-of
-    // cap (≤31), so it sinks. With balance == target the base path
-    // runs: prev = subDays(2024-03-01, 60) = 2024-01-01, span = 2
-    // months → contribution = $60 / 2 = $30.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'EverySixtyDays',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-03-01',
-      amount: -6000,
-      frequency: 'daily',
-      interval: 60,
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      6000,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(3000);
-  });
-
-  it('keeps meeting the deadline for a schedule repeating every 360 days', async () => {
-    // Every 360 days is daily in shape but yearly in effect, so it sinks:
-    // $500 due 2026-05-15 spread over the five months from January is $100
-    // a month. Once January is funded, February used to drop to $41.67 --
-    // subDays(2026-05-15, 360) lands in May 2025, and that 12-month span
-    // became the divisor. The deadline and the $100 already saved were both
-    // ignored, so the category came up short in May.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'EveryThreeSixtyDays',
-        directive: 'template',
-        priority: 0,
-      } satisfies ScheduleTemplate,
-    ];
-    mockSingleSchedule({
-      start: '2026-05-15',
-      amount: -50000,
-      frequency: 'daily',
-      interval: 360,
-    });
-    // January budgeted $100 and nothing was spent, so it carries forward and
-    // is also last month's goal.
-    vi.mocked(getSheetValue).mockResolvedValue(10000);
-
-    const result = await runSchedule(
-      template_lines,
-      '2026-02-01',
-      10000,
-      0,
-      10000,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(10000);
-  });
-
-  it('absorbs surplus when last-month balance exceeds a sinking schedule target', async () => {
-    // Last-month balance ($150) > yearly target ($120). The sink rolls
-    // the surplus forward and contributes nothing this month.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'Overfunded',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    mockSingleSchedule({
-      start: '2024-12-15',
-      amount: -12000,
-      frequency: 'yearly',
-    });
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      15000,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(0);
-  });
-
-  it('forces sinking schedules into pay-month-of mode when tracking-budget is on', async () => {
-    // In tracking mode every schedule is treated as pay-month-of. A
-    // far-future yearly schedule that would normally contribute ~$100/mo
-    // sinking instead contributes 0 this month, since pay-month-of only
-    // counts schedules whose num_months is 0.
-    const template_lines = [
-      {
-        type: 'schedule',
-        name: 'YearlyFar',
-        directive: 'template',
-        priority: 0,
-      } as const,
-    ];
-    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
-    vi.mocked(getRuleForSchedule).mockResolvedValue(
-      makeRule({ start: '2024-12-15', amount: -12000, frequency: 'yearly' }),
-    );
-    vi.mocked(isTrackingBudget).mockReturnValue(true);
-
-    const result = await runSchedule(
-      template_lines,
-      '2024-01-01',
-      0,
-      0,
-      0,
-      0,
-      [],
-      defaultCategory,
-      defaultCurrency,
-    );
-    expect(result.to_budget).toBe(0);
-  });
-});
 
 describe('createScheduleList', () => {
   beforeEach(() => {
@@ -1030,8 +398,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       '2024-09',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1060,8 +426,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       '2024-09',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1343,9 +707,7 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       10000,
-      10000,
       0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1381,14 +743,11 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
-    expect(result.errors).toHaveLength(0);
   });
 
   it('never projects a negative month-end balance across two schedules sharing a category', async () => {
@@ -1420,14 +779,12 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
 
     // Re-derive the projection with the returned candidate to check the
-    // postcondition directly, rather than asserting against runSchedule.
+    // postcondition directly.
     const { t } = await createScheduleList(
       template_lines as ScheduleTemplate[],
       '2024-01-01',
@@ -1473,8 +830,6 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1512,8 +867,6 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1553,8 +906,6 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1613,8 +964,6 @@ describe('runScheduleForecast', () => {
       '2024-01-01',
       0,
       0,
-      0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1628,10 +977,9 @@ describe('runScheduleForecast', () => {
   it('never underfunds two annual schedules with different due dates, sharing a category (regression: actualbudget/actual#6513)', async () => {
     // #6513: two annual schedules in one category (£100 due Feb, £90 due
     // Mar), with £80 already banked going into January, under-budgeted
-    // every month under runSchedule's independent per-schedule remainder
-    // chaining. Assert runScheduleForecast's own postcondition directly —
-    // every projected month-end balance stays non-negative — rather than
-    // comparing its output against runSchedule's.
+    // every month under the old algorithm's independent per-schedule
+    // remainder chaining. Assert runScheduleForecast's own postcondition
+    // directly: every projected month-end balance stays non-negative.
     const template_lines = [
       {
         type: 'schedule',
@@ -1659,9 +1007,7 @@ describe('runScheduleForecast', () => {
       template_lines,
       '2025-01-01',
       8000,
-      8000,
       0,
-      [],
       defaultCategory,
       defaultCurrency,
     );
@@ -1680,6 +1026,174 @@ describe('runScheduleForecast', () => {
       minBalance = Math.min(minBalance, runningBalance);
     }
     expect(minBalance).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('runScheduleForecast budgeting rules', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+  });
+
+  const billTemplate = {
+    type: 'schedule',
+    name: 'Bill',
+    directive: 'template',
+    priority: 0,
+  } as const;
+
+  it('applies a percent adjustment to the schedule amount', async () => {
+    mockSingleSchedule({
+      start: '2024-08-15',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+
+    const result = await runScheduleForecast(
+      [{ ...billTemplate, adjustment: 10, adjustmentType: 'percent' }],
+      '2024-08-01',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(11000); // $100 × 1.10
+  });
+
+  it('applies a fixed adjustment to the schedule amount', async () => {
+    mockSingleSchedule({
+      start: '2024-08-15',
+      amount: -10000,
+      frequency: 'monthly',
+    });
+
+    const result = await runScheduleForecast(
+      [{ ...billTemplate, adjustment: 5, adjustmentType: 'fixed' }],
+      '2024-08-01',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(10500); // $100 + $5
+  });
+
+  it('budgets nothing for a completed schedule with no payments', async () => {
+    mockSingleSchedule(
+      { start: '2024-08-15', amount: -10000, frequency: 'monthly' },
+      1,
+    );
+
+    const result = await runScheduleForecast(
+      [billTemplate],
+      '2024-08-01',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(0);
+  });
+
+  it('keeps meeting the deadline for a schedule repeating every 360 days', async () => {
+    // Every 360 days is daily in shape but yearly in effect. $500 is due
+    // 2026-05-15 and $100 is already saved, so February through May need
+    // the remaining $400 at $100 a month (#6644).
+    mockSingleSchedule({
+      start: '2026-05-15',
+      amount: -50000,
+      frequency: 'daily',
+      interval: 360,
+    });
+
+    const result = await runScheduleForecast(
+      [billTemplate],
+      '2026-02-01',
+      10000,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('budgets nothing while the category holds more than its bills need', async () => {
+    // $1,200 due every March. The steady rate is $100 a month, and $5,000
+    // banked covers years of it.
+    mockSingleSchedule({
+      start: '2024-03-15',
+      amount: -120000,
+      frequency: 'yearly',
+    });
+
+    const result = await runScheduleForecast(
+      [billTemplate],
+      '2024-01-01',
+      500000,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(0);
+  });
+
+  it('never takes money back out of the category', async () => {
+    mockSingleSchedule({
+      start: '2024-03-15',
+      amount: -120000,
+      frequency: 'yearly',
+    });
+
+    const result = await runScheduleForecast(
+      [billTemplate],
+      '2024-01-01',
+      10000000,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+    expect(result.to_budget).toBe(0);
+  });
+
+  describe('in a tracking budget', () => {
+    it('budgets nothing ahead for a bill due in a later month', async () => {
+      mockSingleSchedule({
+        start: '2024-12-15',
+        amount: -12000,
+        frequency: 'yearly',
+      });
+      vi.mocked(isTrackingBudget).mockReturnValue(true);
+
+      const result = await runScheduleForecast(
+        [billTemplate],
+        '2024-01-01',
+        0,
+        0,
+        defaultCategory,
+        defaultCurrency,
+      );
+      expect(result.to_budget).toBe(0);
+    });
+
+    it('budgets a bill in full in the month it is due', async () => {
+      mockSingleSchedule({
+        start: '2024-12-15',
+        amount: -12000,
+        frequency: 'yearly',
+      });
+      vi.mocked(isTrackingBudget).mockReturnValue(true);
+
+      const result = await runScheduleForecast(
+        [billTemplate],
+        '2024-12-01',
+        0,
+        0,
+        defaultCategory,
+        defaultCurrency,
+      );
+      expect(result.to_budget).toBe(12000);
+    });
   });
 });
 
@@ -1747,13 +1261,9 @@ describe('runScheduleForecast (real AQL query path)', () => {
         '2024-01',
         0,
         0,
-        0,
-        [],
         defaultCategory,
         defaultCurrency,
       );
-
-      expect(result.errors).toHaveLength(0);
       // Re-derive the projection independently to confirm the query result
       // (the unlinked $5 transaction on 2024-01-20) and the weekly
       // schedule's per-occurrence amount were both folded in correctly,
@@ -1827,5 +1337,60 @@ describe('solveMonthlyContribution', () => {
       minBalance = Math.min(minBalance, runningBalance);
     }
     expect(minBalance).toBeGreaterThanOrEqual(0);
+  });
+
+  // $1,200 due each March and $600 each September, starting in January.
+  function yearlyBillsOutflow(startMonth: number) {
+    return Array.from({ length: 60 }, (_, i) => {
+      const monthOfYear = (startMonth + i) % 12;
+      if (monthOfYear === 2) return 120000;
+      if (monthOfYear === 8) return 60000;
+      return 0;
+    });
+  }
+
+  it('budgets the steady rate once a category holds exactly what its bills need', () => {
+    // The lowest balance the steady $150/month covers is $750 in January.
+    expect(solveMonthlyContribution(75000, yearlyBillsOutflow(0))).toBe(15000);
+  });
+
+  it('budgets nothing while the category holds more than its bills need', () => {
+    expect(solveMonthlyContribution(500000, yearlyBillsOutflow(0))).toBe(0);
+  });
+
+  it('covers only what a small surplus does not', () => {
+    // $50 over the $750 needed: $150 less the $50 surplus.
+    expect(solveMonthlyContribution(80000, yearlyBillsOutflow(0))).toBe(10000);
+  });
+
+  it('never asks for less than nothing', () => {
+    expect(solveMonthlyContribution(10000000, yearlyBillsOutflow(0))).toBe(0);
+  });
+
+  it('uses up a surplus, then settles at the steady rate without going negative', () => {
+    let balance = 500000;
+    const contributions: number[] = [];
+    for (let month = 0; month < 72; month++) {
+      const outflow = yearlyBillsOutflow(month);
+      const contribution = solveMonthlyContribution(balance, outflow);
+      contributions.push(contribution);
+      balance += contribution - outflow[0];
+      expect(balance).toBeGreaterThanOrEqual(0);
+    }
+
+    const firstPaid = contributions.findIndex(amount => amount > 0);
+    expect(firstPaid).toBeGreaterThan(24);
+    expect(
+      contributions.slice(0, firstPaid).every(amount => amount === 0),
+    ).toBe(true);
+    // After at most one partial month, every month is the steady rate.
+    expect(
+      contributions.slice(firstPaid + 1).every(amount => amount === 15000),
+    ).toBe(true);
+  });
+
+  it('catches up faster than the steady rate when the category is short', () => {
+    // Empty in January with $1,200 due in March: $400/month until then.
+    expect(solveMonthlyContribution(0, yearlyBillsOutflow(0))).toBe(40000);
   });
 });

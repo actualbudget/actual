@@ -11,12 +11,9 @@ import type { CategoryEntity } from '#types/models';
 import type { ByTemplate, Template } from '#types/models/templates';
 
 import * as actions from './actions';
-import {
-  CategoryTemplateContext,
-  scheduleForecastConfig,
-} from './category-template-context';
+import { CategoryTemplateContext } from './category-template-context';
 import { distributeRemainder } from './goal-template';
-import { runSchedule, runScheduleForecast } from './schedule-template';
+import { runScheduleForecast } from './schedule-template';
 import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
@@ -1223,7 +1220,7 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
-  describe('schedule template gating', () => {
+  describe('schedule templates', () => {
     const category: CategoryEntity = {
       id: 'gate-cat',
       name: 'Gate Category',
@@ -1265,13 +1262,6 @@ describe('CategoryTemplateContext', () => {
             {
               op: 'is',
               field: 'date',
-              // Both schedules are non-monthly with different due dates
-              // (not one pay-month-of + one sinking): a uniform monthly
-              // schedule mixed with a single sinking schedule happens to
-              // make runSchedule and runScheduleForecast agree numerically
-              // for this fixture shape, which would let a broken dispatch
-              // gate pass unnoticed (see the differs-by-construction
-              // assertion below).
               value: isInternet
                 ? {
                     start: '2024-03-15',
@@ -1318,20 +1308,9 @@ describe('CategoryTemplateContext', () => {
       mockTwoSchedules();
     });
 
-    afterEach(() => {
-      scheduleForecastConfig.enabled = false;
-    });
-
-    it('dispatches to runScheduleForecast by default, without setting the gate', async () => {
-      // Must run before any other test in this block sets
-      // scheduleForecastConfig.enabled — it asserts the module's untouched
-      // initial value rather than a value a test set.
-      expect(scheduleForecastConfig.enabled).toBe(true);
+    beforeEach(() => {
       vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
         const queryStr = JSON.stringify(query);
-        if (queryStr.includes('transactions')) {
-          return { data: [], dependencies: [] };
-        }
         if (queryStr.includes('hideFraction')) {
           return { data: [{ value: 'false' }], dependencies: [] };
         }
@@ -1340,7 +1319,9 @@ describe('CategoryTemplateContext', () => {
         }
         return { data: [], dependencies: [] };
       });
+    });
 
+    it('budgets the forecast contribution for an empty category', async () => {
       const instance = await CategoryTemplateContext.init(
         templates,
         category,
@@ -1362,31 +1343,17 @@ describe('CategoryTemplateContext', () => {
         '2024-01',
         0,
         0,
-        0,
-        [],
         category,
         currency,
       );
-      // Guard against this test coincidentally passing if the dispatch gate
-      // is broken: confirm the two algorithms actually produce different
-      // totals for this fixture before asserting which one was dispatched.
-      const otherAlgorithm = await runSchedule(
-        templates,
-        '2024-01',
-        0,
-        0,
-        0,
-        0,
-        [],
-        category,
-        currency,
-      );
-      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
+      expect(expected.to_budget).toBeGreaterThan(0);
       expect(result).toBe(expected.to_budget);
     });
 
-    it('dispatches to runSchedule when the gate is explicitly disabled', async () => {
-      scheduleForecastConfig.enabled = false;
+    it('budgets nothing when last month left more than the bills need', async () => {
+      // $100 due each March and $600 each December: $5,000 left over
+      // covers years of both.
+      vi.mocked(actions.getSheetValue).mockResolvedValue(500000);
 
       const instance = await CategoryTemplateContext.init(
         templates,
@@ -1396,101 +1363,7 @@ describe('CategoryTemplateContext', () => {
       );
       const result = await instance.runTemplatesForPriority(1, 100000, 100000);
 
-      const currency = {
-        code: 'USD',
-        symbol: '$',
-        name: 'US Dollar',
-        decimalPlaces: 2,
-        numberFormat: 'comma-dot',
-        symbolFirst: true,
-      } satisfies Currency;
-      const expected = await runSchedule(
-        templates,
-        '2024-01',
-        0,
-        0,
-        0,
-        0,
-        [],
-        category,
-        currency,
-      );
-      // Guard against this test coincidentally passing if the dispatch gate
-      // is broken: confirm the two algorithms actually produce different
-      // totals for this fixture before asserting which one was dispatched.
-      vi.mocked(aql.aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
-      const otherAlgorithm = await runScheduleForecast(
-        templates,
-        '2024-01',
-        0,
-        0,
-        0,
-        [],
-        category,
-        currency,
-      );
-      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
-      expect(result).toBe(expected.to_budget);
-    });
-
-    it('dispatches to runScheduleForecast when the gate is explicitly enabled', async () => {
-      scheduleForecastConfig.enabled = true;
-      vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
-        const queryStr = JSON.stringify(query);
-        if (queryStr.includes('transactions')) {
-          return { data: [], dependencies: [] };
-        }
-        if (queryStr.includes('hideFraction')) {
-          return { data: [{ value: 'false' }], dependencies: [] };
-        }
-        if (queryStr.includes('defaultCurrencyCode')) {
-          return { data: [{ value: 'USD' }], dependencies: [] };
-        }
-        return { data: [], dependencies: [] };
-      });
-
-      const instance = await CategoryTemplateContext.init(
-        templates,
-        category,
-        '2024-01',
-        0,
-      );
-      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
-
-      const currency = {
-        code: 'USD',
-        symbol: '$',
-        name: 'US Dollar',
-        decimalPlaces: 2,
-        numberFormat: 'comma-dot',
-        symbolFirst: true,
-      } satisfies Currency;
-      const expected = await runScheduleForecast(
-        templates,
-        '2024-01',
-        0,
-        0,
-        0,
-        [],
-        category,
-        currency,
-      );
-      // Guard against this test coincidentally passing if the dispatch gate
-      // is broken: confirm the two algorithms actually produce different
-      // totals for this fixture before asserting which one was dispatched.
-      const otherAlgorithm = await runSchedule(
-        templates,
-        '2024-01',
-        0,
-        0,
-        0,
-        0,
-        [],
-        category,
-        currency,
-      );
-      expect(expected.to_budget).not.toBe(otherAlgorithm.to_budget);
-      expect(result).toBe(expected.to_budget);
+      expect(result).toBe(0);
     });
   });
 

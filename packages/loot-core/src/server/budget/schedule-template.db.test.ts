@@ -159,8 +159,6 @@ describe('runScheduleForecast against a real database', () => {
       '2024-06',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -179,8 +177,6 @@ describe('runScheduleForecast against a real database', () => {
       '2024-09',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -203,8 +199,6 @@ describe('runScheduleForecast against a real database', () => {
       '2024-11',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -225,8 +219,6 @@ describe('runScheduleForecast against a real database', () => {
       '2024-10',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -245,9 +237,7 @@ describe('runScheduleForecast against a real database', () => {
       templates,
       '2026-11',
       15334,
-      15334,
       0,
-      [],
       category,
       currency,
     );
@@ -269,9 +259,7 @@ describe('runScheduleForecast against a real database', () => {
       templates,
       '2026-11',
       5334,
-      5334,
       0,
-      [],
       category,
       currency,
     );
@@ -292,9 +280,7 @@ describe('runScheduleForecast against a real database', () => {
       templates,
       '2026-11',
       15334,
-      15334,
       0,
-      [],
       category,
       currency,
     );
@@ -318,9 +304,7 @@ describe('runScheduleForecast against a real database', () => {
       [templates[0]],
       '2026-10',
       7500,
-      7500,
       0,
-      [],
       category,
       currency,
     );
@@ -342,9 +326,7 @@ describe('runScheduleForecast against a real database', () => {
       [{ ...templates[0], full: true }],
       '2026-10',
       7500,
-      7500,
       0,
-      [],
       category,
       currency,
     );
@@ -369,8 +351,6 @@ describe('runScheduleForecast against a real database', () => {
       '2026-08',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -393,9 +373,7 @@ describe('runScheduleForecast against a real database', () => {
       [templates[0]],
       '2026-10',
       7500,
-      7500,
       0,
-      [],
       category,
       currency,
     );
@@ -420,9 +398,7 @@ describe('runScheduleForecast against a real database', () => {
       templates,
       '2026-11',
       15334,
-      15334,
       0,
-      [],
       category,
       currency,
     );
@@ -445,9 +421,7 @@ describe('runScheduleForecast against a real database', () => {
       [templates[1]],
       '2026-11',
       5334,
-      5334,
       0,
-      [],
       category,
       currency,
     );
@@ -471,8 +445,6 @@ describe('runScheduleForecast against a real database', () => {
       '2026-10',
       0,
       0,
-      0,
-      [],
       category,
       currency,
     );
@@ -495,9 +467,7 @@ describe('runScheduleForecast against a real database', () => {
       templates,
       '2026-11',
       5334,
-      5334,
       0,
-      [],
       category,
       currency,
     );
@@ -513,9 +483,7 @@ describe('runScheduleForecast against a real database', () => {
       [templates[0]],
       '2026-11',
       5000,
-      5000,
       0,
-      [],
       category,
       currency,
     );
