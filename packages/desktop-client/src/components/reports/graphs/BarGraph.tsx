@@ -42,6 +42,7 @@ import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import { adjustTextSize } from './adjustTextSize';
 import { BaselineBar } from './BaselineBar';
 import { BaselineTooltip } from './BaselineTooltip';
+import { getSpendingSign } from './getSpendingSign';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 import { TooltipCard } from './TooltipCard';
@@ -167,13 +168,15 @@ const CustomTooltip = ({
   }
 };
 
-// Baseline bars label their change above the bar, whichever way it goes
+// Baseline bars label their change above the bar, whichever way it goes,
+// with spending's change flipped to match the bar's positive amounts
 const customLabel = (props, typeOp, format, isAbove = false) => {
   const calcX = props.x + props.width / 2;
   const calcY = props.y - (isAbove || props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
+  const shown = isAbove ? getSpendingSign(typeOp) * props.value : props.value;
   const display =
-    props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
+    props.value !== 0 && `${format(shown, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
     type:
@@ -261,7 +264,7 @@ export function BarGraph({
   // Baseline bars show amounts rather than changes, so spending is flipped to
   // point up like other spending charts
   const isBaselineBars = showAmounts && !!data.baseline;
-  const sign = ['totalDebts', 'netDebts'].includes(balanceTypeOp) ? -1 : 1;
+  const sign = getSpendingSign(balanceTypeOp);
   const getBaselineValues = (breakdown: BaselineBreakdown) => ({
     baseline: sign * breakdown.expected[balanceTypeOp],
     amount: sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],

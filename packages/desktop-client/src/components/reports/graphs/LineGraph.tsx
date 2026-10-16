@@ -137,6 +137,7 @@ export function LineGraph({
                   content={
                     <SeriesTooltip
                       compact={compact}
+                      balanceTypeOp={balanceTypeOp}
                       hoveredKey={tooltip}
                       legend={data.legend}
                       format={format}

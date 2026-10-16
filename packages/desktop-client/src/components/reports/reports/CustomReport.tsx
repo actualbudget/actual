@@ -787,14 +787,8 @@ function CustomReportInner({
 
   const disabledItems = (type: string) => {
     switch (type) {
-      case 'split': {
-        const disabledSplits =
-          disabledGraphList(mode, graphType, 'disabledSplit') || [];
-        // Signed changes can't fill matching inner and outer donut rings
-        return isBaselineEnabled
-          ? [...new Set([...disabledSplits, 'CategoryGroup'])]
-          : disabledSplits;
-      }
+      case 'split':
+        return disabledGraphList(mode, graphType, 'disabledSplit') || [];
       case 'type':
         return graphType === 'BarGraph' && groupBy === 'Interval'
           ? []

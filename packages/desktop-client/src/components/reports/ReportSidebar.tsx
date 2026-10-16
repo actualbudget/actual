@@ -149,6 +149,12 @@ export function ReportSidebar({
     endDate: baselineEndDate,
   };
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  // Baseline options only show as ticked where they apply, keeping the saved
+  // choice for when the graph switches back
+  const canShowChanges = canShowBaselineChanges(customReportItems.graphType);
+  const isShowingChanges = canShowChanges && !!baseline.showChanges;
+  const canChangeFromBaseline =
+    customReportItems.graphType === 'BarGraph' && !isShowingChanges;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -352,8 +358,6 @@ export function ReportSidebar({
             <LabeledCheckbox
               id="baseline-enabled"
               checked={baseline.enabled}
-              // Signed changes can't fill matching inner and outer donut rings
-              disabled={customReportItems.groupBy === 'CategoryGroup'}
               onChange={() =>
                 updateBaseline({ ...baseline, enabled: !baseline.enabled })
               }
@@ -376,10 +380,8 @@ export function ReportSidebar({
                 >
                   <LabeledCheckbox
                     id="baseline-show-changes"
-                    checked={!!baseline.showChanges}
-                    disabled={
-                      !canShowBaselineChanges(customReportItems.graphType)
-                    }
+                    checked={isShowingChanges}
+                    disabled={!canShowChanges}
                     onChange={() =>
                       updateBaseline({
                         ...baseline,
@@ -392,11 +394,10 @@ export function ReportSidebar({
                 </Tooltip>
                 <LabeledCheckbox
                   id="baseline-change-from-baseline"
-                  checked={!!baseline.changeFromBaseline}
-                  disabled={
-                    customReportItems.graphType !== 'BarGraph' ||
-                    !!baseline.showChanges
+                  checked={
+                    canChangeFromBaseline && !!baseline.changeFromBaseline
                   }
+                  disabled={!canChangeFromBaseline}
                   onChange={() =>
                     updateBaseline({
                       ...baseline,

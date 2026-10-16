@@ -4,6 +4,7 @@ import { Trans } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
 import type {
+  balanceTypeOpType,
   IntervalEntity,
   LegendEntity,
 } from '@actual-app/core/types/models';
@@ -42,6 +43,7 @@ type SeriesTooltipProps = {
   payload?: ReadonlyArray<{ payload?: IntervalEntity }>;
   legend: LegendEntity[];
   format: (value: unknown, type: FormatType) => string;
+  balanceTypeOp: balanceTypeOpType;
   compact: boolean;
   // The series under the pointer, which is underlined and kept when
   // compact tooltips trim their rows
@@ -61,6 +63,7 @@ export function SeriesTooltip({
   payload,
   legend,
   format,
+  balanceTypeOp,
   compact,
   hoveredKey,
   order,
@@ -146,6 +149,7 @@ export function SeriesTooltip({
             row={row}
             isHovered={row.key === hoveredKey}
             format={format}
+            balanceTypeOp={balanceTypeOp}
           />
         ))}
         {visibleRows.length < rows.length && (
@@ -179,7 +183,7 @@ export function SeriesTooltip({
                   color: getChangeColor(sumOf(getChangeKey)),
                 }}
               >
-                {formatChange(sumOf(getChangeKey), format)}
+                {formatChange(sumOf(getChangeKey), format, balanceTypeOp)}
               </FinancialText>
             )}
           </>

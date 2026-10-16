@@ -8,7 +8,6 @@ import type {
   DataEntity,
   GroupedEntity,
   IntervalEntity,
-  LegendEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
@@ -26,6 +25,7 @@ import { adjustTextSize } from './adjustTextSize';
 import { DonutActiveShapeDesktop } from './DonutActiveShapeDesktop';
 import { DonutActiveShapeMobile } from './DonutActiveShapeMobile';
 import type { DonutActiveShapeProps } from './donutActiveShapeProps';
+import { buildColorMap } from './donutColors';
 import { DonutSector } from './DonutSector';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
@@ -62,67 +62,6 @@ const getDonutDimensions = (
     chartOuterRadius: minDim * (compact ? 0.36 : 0.42),
     compact,
   };
-};
-
-// ---------------------------------------------------------------------------
-// Color helpers
-// ---------------------------------------------------------------------------
-
-const resolveCSSVariable = (color: string): string => {
-  if (!color.startsWith('var(')) return color;
-  const inner = color.slice(4, -1).trim();
-  const varName = inner.split(',')[0].trim();
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
-};
-
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : { r: 0, g: 0, b: 0 };
-};
-
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
-  const adjust = (c: number) =>
-    Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
-  return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
-};
-
-const buildColorMap = (
-  groupedData: GroupedEntity[],
-  legend: LegendEntity[],
-): Map<string, string> => {
-  const legendById = new Map(
-    legend
-      .filter(l => l.id != null)
-      .map(l => [l.id, resolveCSSVariable(l.color)]),
-  );
-
-  return groupedData.reduce((acc, group) => {
-    if (!group.id) return acc;
-
-    const groupColor = legendById.get(group.id);
-    if (!groupColor) return acc;
-
-    acc.set(group.id, groupColor);
-
-    // Fix 1: capture cats once to avoid group.categories.length on undefined
-    const cats = group.categories ?? [];
-    cats.forEach((cat, i) => {
-      if (!cat.id) return;
-      const shade = 0.15 + (i / Math.max(cats.length, 1)) * 0.5;
-      acc.set(cat.id, shadeColor(groupColor, shade));
-    });
-
-    return acc;
-  }, new Map<string, string>());
 };
 
 // ---------------------------------------------------------------------------
@@ -271,6 +210,9 @@ export function DonutGraph({
                   width={width}
                   height={height}
                   className={sectorCursor}
+                  // Recharts' keyboard support marks the same sector active in every
+                  // ring, so all of them would be highlighted at once
+                  accessibilityLayer={false}
                 >
                   {/* Drives each sector's isActive; the label is the tooltip */}
                   <Tooltip content={() => null} active />
@@ -299,7 +241,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           ) : (
@@ -308,7 +249,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           )
@@ -374,7 +314,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward={false}
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           ) : (
@@ -383,7 +322,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward={false}
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           )
@@ -465,7 +403,6 @@ export function DonutGraph({
                             fill={fill}
                             expandInward
                             chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
                             chartOuterRadius={chartOuterRadius}
                           />
                         ) : (
@@ -474,7 +411,6 @@ export function DonutGraph({
                             fill={fill}
                             expandInward={false}
                             chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
                             chartOuterRadius={chartOuterRadius}
                           />
                         )

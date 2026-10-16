@@ -1,5 +1,7 @@
 import React from 'react';
 
+import type { balanceTypeOpType } from '@actual-app/core/types/models';
+
 import { FinancialText } from '#components/FinancialText';
 import type { FormatType } from '#hooks/useFormat';
 
@@ -19,6 +21,7 @@ type SeriesTooltipRowProps = {
   row: SeriesRow;
   isHovered: boolean;
   format: (value: unknown, type: FormatType) => string;
+  balanceTypeOp: balanceTypeOpType;
 };
 
 /**
@@ -28,6 +31,7 @@ export function SeriesTooltipRow({
   row,
   isHovered,
   format,
+  balanceTypeOp,
 }: SeriesTooltipRowProps) {
   const textDecoration = isHovered ? 'underline' : 'inherit';
 
@@ -43,7 +47,7 @@ export function SeriesTooltipRow({
         <FinancialText
           style={{ textAlign: 'right', color: getChangeColor(row.change) }}
         >
-          {formatChange(row.change, format)}
+          {formatChange(row.change, format, balanceTypeOp)}
         </FinancialText>
       )}
     </>

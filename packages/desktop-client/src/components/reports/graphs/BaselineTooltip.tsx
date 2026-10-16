@@ -10,6 +10,7 @@ import type {
 import { FinancialText } from '#components/FinancialText';
 import type { FormatType } from '#hooks/useFormat';
 
+import { getSpendingSign } from './getSpendingSign';
 import { TooltipCard } from './TooltipCard';
 
 type BaselineTooltipLinesProps = {
@@ -27,6 +28,9 @@ export function BaselineTooltipLines({
   format,
 }: BaselineTooltipLinesProps) {
   const { t } = useTranslation();
+  // Spending is shown as positive, like the bars it describes
+  const sign = getSpendingSign(balanceTypeOp);
+  const show = (value: number) => format(sign * value || 0, 'financial');
 
   // Intervals that haven't started only have a baseline to show
   if (breakdown.upcoming) {
@@ -35,7 +39,7 @@ export function BaselineTooltipLines({
         left={t('Baseline:')}
         right={
           <FinancialText>
-            {format(breakdown.upcoming[balanceTypeOp], 'financial')}
+            {show(breakdown.upcoming[balanceTypeOp])}
           </FinancialText>
         }
         style={{ fontWeight: 600 }}
@@ -52,16 +56,14 @@ export function BaselineTooltipLines({
         left={t('Baseline:')}
         right={
           <FinancialText>
-            {format(breakdown.expected[balanceTypeOp], 'financial')}
+            {show(breakdown.expected[balanceTypeOp])}
           </FinancialText>
         }
       />
       <AlignedText
         left={t('Current:')}
         right={
-          <FinancialText>
-            {format(breakdown.actual[balanceTypeOp], 'financial')}
-          </FinancialText>
+          <FinancialText>{show(breakdown.actual[balanceTypeOp])}</FinancialText>
         }
       />
       {breakdown.projected && (
@@ -69,14 +71,14 @@ export function BaselineTooltipLines({
           left={t('Projected:')}
           right={
             <FinancialText>
-              {format(breakdown.projected[balanceTypeOp], 'financial')}
+              {show(breakdown.projected[balanceTypeOp])}
             </FinancialText>
           }
         />
       )}
       <AlignedText
         left={t('Change:')}
-        right={<FinancialText>{format(change, 'financial')}</FinancialText>}
+        right={<FinancialText>{show(change)}</FinancialText>}
         style={{ fontWeight: 600 }}
       />
     </>
