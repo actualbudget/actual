@@ -46,7 +46,10 @@ import {
   GRAPH_LAYER_ORDER,
   GraphLayers,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
-import type { Graph } from '#components/reports/spreadsheets/sankey-spreadsheet';
+import type {
+  Graph,
+  SankeyNodeDrilldown,
+} from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
@@ -701,6 +704,145 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     setTimeFrameMode(mode);
   }
 
+  // Turns one or two drilldowns (a node has one; a link has one per
+  // endpoint) into id filter conditions. Two drilldowns on different
+  // fields (e.g. a category -> account link) go together with "and". Two
+  // on the *same* field (an account -> account transfer link) become a
+  // single "oneOf", since the transaction's account is either leg of the
+  // transfer, not both at once.
+  function buildIdConditions(
+    drilldowns: SankeyNodeDrilldown[],
+  ): RuleConditionEntity[] {
+    if (
+      drilldowns.length === 2 &&
+      drilldowns[0].field === drilldowns[1].field
+    ) {
+      const { field } = drilldowns[0];
+      return [
+        {
+          field: field === 'group' ? 'category_group' : field,
+          op: 'oneOf',
+          value: drilldowns.map(d => d.id),
+          type: 'id',
+        } satisfies RuleConditionEntity,
+      ];
+    }
+
+    return drilldowns.map(
+      ({ field, id }) =>
+        ({
+          field: field === 'group' ? 'category_group' : field,
+          op: 'is',
+          value: id,
+          type: 'id',
+        }) satisfies RuleConditionEntity,
+    );
+  }
+
+  // Adds the matching inflow/outflow filter when every drilldown agrees on
+  // a direction (e.g. a category node/link is always expense-side, so its
+  // filtered total will equal the amount shown on the chart). Account
+  // nodes carry no direction - they can be both at once - so a node/link
+  // touching one adds no amount filter and the accounts page shows
+  // everything for that account in the period, matching the in/out/net
+  // breakdown shown on hover instead of a single number.
+  function buildAmountCondition(
+    drilldowns: SankeyNodeDrilldown[],
+  ): RuleConditionEntity[] {
+    const directions = new Set(
+      drilldowns
+        .map(d => d.direction)
+        .filter((d): d is 'inflow' | 'outflow' => Boolean(d)),
+    );
+    if (directions.size !== 1) {
+      return [];
+    }
+    const [direction] = directions;
+
+    return [
+      {
+        field: 'amount',
+        op: 'gte',
+        value: 0,
+        type: 'number',
+        options: {
+          inflow: direction === 'inflow',
+          outflow: direction === 'outflow',
+        },
+      } satisfies RuleConditionEntity,
+    ];
+  }
+
+  // Filters the accounts page down to the transactions behind a clicked
+  // node or link.
+  async function onDrilldownClick(drilldowns: SankeyNodeDrilldown[]) {
+    const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
+      earliestTransaction,
+      latestTransaction,
+      start,
+      end,
+    );
+
+    const drilldownConditions = [
+      ...buildIdConditions(drilldowns),
+      ...buildAmountCondition(drilldowns),
+      {
+        field: 'date',
+        op: 'gte',
+        value: monthUtils.firstDayOfMonth(boundedStart),
+        type: 'date',
+      } satisfies RuleConditionEntity,
+      {
+        field: 'date',
+        op: 'lte',
+        value: monthUtils.lastDayOfMonth(boundedEnd),
+        type: 'date',
+      } satisfies RuleConditionEntity,
+    ];
+
+    // The report's own conditions are "or"'d together as a single group.
+    // Flattening them into one list alongside the drilldown/date
+    // conditions - which always have to hold - and applying a single
+    // top-level "or" to everything would incorrectly let a drilldown match
+    // outside the clicked date range. Fold the report conditions into one
+    // composite condition first so the rest can always be "and"'d.
+    if (conditionsOp === 'or' && conditions.length > 1) {
+      const { filters: reportQueryFilters } = await send(
+        'make-filters-from-conditions',
+        { conditions },
+      );
+
+      const combinedReportCondition = {
+        field: 'date',
+        op: 'gte',
+        value: monthUtils.firstDayOfMonth(boundedStart),
+        type: 'date',
+        customName: t('Report filters'),
+        queryFilter: { $or: reportQueryFilters },
+      } satisfies RuleConditionEntity;
+
+      void navigate('/accounts', {
+        state: {
+          goBack: true,
+          filterConditions: [combinedReportCondition, ...drilldownConditions],
+          filterConditionsOp: 'and',
+        },
+      });
+      return;
+    }
+
+    // Even with zero or one report condition, the drilldown's own id/amount/
+    // date conditions are always multiple and must be "and"'d together, so
+    // "or" can never be passed through as the top-level op here.
+    void navigate('/accounts', {
+      state: {
+        goBack: true,
+        filterConditions: [...conditions, ...drilldownConditions],
+        filterConditionsOp: conditionsOp === 'or' ? 'and' : conditionsOp,
+      },
+    });
+  }
+
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
   async function onSaveWidget() {
     if (!widget) {
@@ -953,9 +1095,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     }}
                   >
                     <SankeyGraph
-                      style={{ flexGrow: 1 }}
+                      style={{ flexGrow: 1, minHeight: 500 }}
                       data={displayData}
                       showPercentages={showPercentages}
+                      onDrilldownClick={
+                        graphMode === 'spent' ? onDrilldownClick : undefined
+                      }
                     />
                   </View>
                 ) : (
