@@ -176,5 +176,5 @@ export function q(table: QueryState['table']) {
 }
 
 export function escapeAqlLiteral(value: string) {
-  return value.startsWith('$') ? `\\${value}` : value;
+  return value.replace(/\$/g, '\\$');
 }

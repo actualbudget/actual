@@ -76,6 +76,22 @@ describe('sheet language', () => {
     );
   });
 
+  it('preserves backslashes before dollar signs in string literals', () => {
+    const result = generateSQLWithState(
+      q('payees')
+        .filter({ name: escapeAqlLiteral('\\$Rent') })
+        .select(['name'])
+        .serialize(),
+      schemaWithRefs,
+    );
+
+    expect(sqlLines(result.sql)).toEqual(
+      sqlLines(`
+        SELECT payees.name AS name, payees.id AS id FROM payees
+        WHERE (payees.name = '\\$Rent')`),
+    );
+  });
+
   it('`select` should select fields', () => {
     let result = generateSQLWithState(
       q('accounts')
