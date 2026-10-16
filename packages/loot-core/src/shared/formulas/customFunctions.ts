@@ -452,6 +452,64 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       },
     );
   }
+
+  regexExtract(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXEXTRACT'),
+      (text: string, regex: string, flags: string = '') => {
+        try {
+          const match = text.match(new RegExp(regex, flags));
+          if (!match) return '';
+          if (match.length === 1) return match[0];
+          if (match.length === 2) return match[1];
+
+          return SimpleRangeValue.onlyValues(
+            match.slice(1).map(value => [value]),
+          );
+        } catch (e) {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
+
+  regexMatch(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXMATCH'),
+      (text: string, regex: string, flags: string = '') => {
+        try {
+          const match = text.match(new RegExp(regex, flags));
+          return match !== null;
+        } catch (e) {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
+
+  regexReplace(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXREPLACE'),
+      (
+        text: string,
+        regex: string,
+        replacement: string,
+        flags: string = '',
+      ) => {
+        try {
+          return text.replace(new RegExp(regex, flags), replacement);
+        } catch (e) {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
 }
 
 CustomFunctionsPlugin.implementedFunctions = {
@@ -568,6 +626,57 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  REGEXEXTRACT: {
+    method: 'regexExtract',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
+  REGEXMATCH: {
+    method: 'regexMatch',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
+  REGEXREPLACE: {
+    method: 'regexReplace',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Replacement
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
 };
 
 export const customFunctionsTranslations = {
@@ -583,5 +692,8 @@ export const customFunctionsTranslations = {
     BUDGET_QUERY: 'BUDGET_QUERY',
     FORMATNUMBER: 'FORMATNUMBER',
     FORMATCURRENCY: 'FORMATCURRENCY',
+    REGEXEXTRACT: 'REGEXEXTRACT',
+    REGEXMATCH: 'REGEXMATCH',
+    REGEXREPLACE: 'REGEXREPLACE',
   },
 };

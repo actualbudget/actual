@@ -523,4 +523,178 @@ describe('Formula-based rule actions', () => {
 
     expect(transaction.notes).toBe('fallback');
   });
+
+  describe('REGEX functions', () => {
+    describe('REGEXMATCH', () => {
+      it('should support REGEXMATCH', () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXMATCH("hello world", "hello")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('true');
+      });
+
+      it('should return false for non-matching patterns', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXMATCH("hello world", "goodbye")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('false');
+      });
+
+      it('should work with flags', async () => {
+        let action = new Action('set', 'notes', null, {
+          formula: '=REGEXMATCH("hello world", "HELLO", "i")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('true');
+
+        action = new Action('set', 'notes', null, {
+          formula: '=REGEXMATCH("hello world", "HELLO")',
+        });
+
+        action.exec(transaction);
+        expect(transaction.notes).toBe('false');
+      });
+    });
+
+    describe('REGEXEXTRACT', () => {
+      it('should support REGEXEXTRACT', () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXEXTRACT("hello world", "hello")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hello');
+      });
+
+      it('should return empty string for non-matching patterns', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXEXTRACT("hello world", "goodbye")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('');
+      });
+
+      it('should work with flags', async () => {
+        let action = new Action('set', 'notes', null, {
+          formula: '=REGEXEXTRACT("hello world", "HELLO", "i")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hello');
+
+        action = new Action('set', 'notes', null, {
+          formula: '=REGEXEXTRACT("hello world", "HELLO")',
+        });
+
+        action.exec(transaction);
+        expect(transaction.notes).toBe('');
+      });
+
+      it('should work with one capture group', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXEXTRACT("hello world", "h(ello)")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('ello');
+      });
+
+      it('should work with multiple capture groups', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula:
+            '=CONCATENATE(REGEXEXTRACT("hello world", "h(ello) w(orld)"))',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('elloorld');
+      });
+    });
+
+    describe('REGEXREPLACE', () => {
+      it('should support REGEXREPLACE', () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXREPLACE("hello world", "world", "there")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hello there');
+      });
+
+      it('should work with flags', async () => {
+        let action = new Action('set', 'notes', null, {
+          formula: '=REGEXREPLACE("hello world", "HELLO", "hi", "i")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hi world');
+
+        action = new Action('set', 'notes', null, {
+          formula: '=REGEXREPLACE("hello world", "HELLO", "hi")',
+        });
+
+        action.exec(transaction);
+        expect(transaction.notes).toBe('hello world');
+      });
+
+      it('should work with capture groups', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula:
+            '=REGEXREPLACE("hello world", "h(ello) w(orld)", "hi $1 $2")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hi ello orld');
+      });
+
+      it('should replace just one instance', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXREPLACE("hello world hello", "hello", "hi")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hi world hello');
+      });
+
+      it('should replace all with g flag', async () => {
+        const action = new Action('set', 'notes', null, {
+          formula: '=REGEXREPLACE("hello world hello", "hello", "hi", "g")',
+        });
+
+        const transaction = { notes: 'original' };
+        action.exec(transaction);
+
+        expect(transaction.notes).toBe('hi world hi');
+      });
+    });
+  });
 });
