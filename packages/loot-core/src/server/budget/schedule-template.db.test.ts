@@ -452,6 +452,39 @@ describe('runScheduleForecast against a real database', () => {
     expect(result.to_budget).toBe(0);
   });
 
+  it('counts a completed schedule up to a payment entered after its next date', async () => {
+    // Rent was completed on Jun 1 with its next date Jun 25, after July's
+    // and August's payments had been entered ahead of time. Earlier
+    // payments are on file too. Budgeting August on Aug 1, the Aug 25
+    // payment still has to be covered: it extends the schedule past its
+    // next date, so the query for it must not drop it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-06-01');
+    const { category, payRent, template } = await setUpRent();
+    for (const date of [
+      '2024-04-25',
+      '2024-05-25',
+      '2024-07-25',
+      '2024-08-25',
+    ]) {
+      await payRent(date);
+    }
+    await updateSchedule({
+      schedule: { id: template.scheduleId, completed: true },
+    });
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2024-08-01');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2024-08',
+      0,
+      0,
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(10000);
+  });
+
   it('reserves nothing for a completed schedule when budgeting ahead', async () => {
     // Oct 3, budgeting November. Bill A completed, its payment already in
     // the carry-in. Only Bill B is left to cover.

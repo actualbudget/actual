@@ -392,12 +392,22 @@ export async function buildMonthlyOutflow(
   const occurrenceCutoff = new Map<string, string>();
   const completedEntries = smoothEntries.filter(entry => entry.completed);
   if (completedEntries.length > 0) {
+    // A payment only moves a cutoff when it's after that schedule's next
+    // date, so when every schedule has one, older payments needn't be read.
+    // On an old budget file the full payment history is slow to query.
+    const nextDates = completedEntries.map(entry => entry.storedNextDate);
+    const earliestNextDate = nextDates.includes(null)
+      ? null
+      : nextDates.reduce((earliest, date) =>
+          date < earliest ? date : earliest,
+        );
     const { data: completedPayments } = await aqlQuery(
       q('transactions')
         .filter({
           category: category.id,
           schedule: { $oneof: completedEntries.map(entry => entry.scheduleId) },
           'account.offbudget': false,
+          ...(earliestNextDate ? { date: { $gt: earliestNextDate } } : {}),
         })
         .select(['date', 'schedule']),
     );
