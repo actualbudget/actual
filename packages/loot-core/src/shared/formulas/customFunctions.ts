@@ -169,6 +169,14 @@ function getCurrencySymbolPositionFromArg(
   return value === 'before' || value === 'after' ? value : fallback;
 }
 
+function regexExtractMatch(result: RegExpMatchArray | null): string | string[] {
+  if (!result || result.length === 0) return '';
+  if (result.length === 1) return result[0];
+  if (result.length === 2) return result[1];
+
+  return result.slice(1);
+}
+
 export class CustomFunctionsPlugin extends FunctionPlugin {
   private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
     return this.config.context as CustomFunctionsContext | undefined;
@@ -460,14 +468,23 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       this.metadata('REGEXEXTRACT'),
       (text: string, regex: string, flags: string = '') => {
         try {
-          const match = text.match(new RegExp(regex, flags));
-          if (!match) return '';
-          if (match.length === 1) return match[0];
-          if (match.length === 2) return match[1];
+          const regexp = new RegExp(regex, flags);
 
-          return SimpleRangeValue.onlyValues(
-            match.slice(1).map(value => [value]),
-          );
+          if (regexp.global) {
+            const allMatches = [...text.matchAll(regexp)];
+
+            if (allMatches.length === 0) return '';
+            return SimpleRangeValue.onlyValues(
+              allMatches.map(match => {
+                return [regexExtractMatch(match)].flat();
+              }),
+            );
+          } else {
+            const match = text.match(new RegExp(regex, flags));
+            const result = regexExtractMatch(match);
+            if (typeof result === 'string') return result;
+            return SimpleRangeValue.onlyValues([result]);
+          }
         } catch {
           return new CellError(ErrorType.VALUE, 'Invalid regex');
         }
@@ -673,7 +690,7 @@ CustomFunctionsPlugin.implementedFunctions = {
       {
         argumentType: FunctionArgumentType.STRING,
         optionalArg: true,
-        defaultValue: '',
+        defaultValue: 'g',
       },
     ],
   },

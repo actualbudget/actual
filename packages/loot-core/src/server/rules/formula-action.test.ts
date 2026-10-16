@@ -674,9 +674,9 @@ describe('Formula-based rule actions', () => {
         expect(transaction.notes).toBe('hi ello orld');
       });
 
-      it('should replace just one instance', async () => {
+      it('should replace just one instance with no flags', async () => {
         const action = new Action('set', 'notes', null, {
-          formula: '=REGEXREPLACE("hello world hello", "hello", "hi")',
+          formula: '=REGEXREPLACE("hello world hello", "hello", "hi", "")',
         });
 
         const transaction = { notes: 'original' };
@@ -685,9 +685,9 @@ describe('Formula-based rule actions', () => {
         expect(transaction.notes).toBe('hi world hello');
       });
 
-      it('should replace all with g flag', async () => {
+      it('should replace all by default', async () => {
         const action = new Action('set', 'notes', null, {
-          formula: '=REGEXREPLACE("hello world hello", "hello", "hi", "g")',
+          formula: '=REGEXREPLACE("hello world hello", "hello", "hi")',
         });
 
         const transaction = { notes: 'original' };
