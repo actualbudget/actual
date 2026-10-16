@@ -170,9 +170,12 @@ export function uncategorizedCount<SheetName extends SheetNames>() {
 export const envelopeBudget = {
   incomeAvailable: 'available-funds',
   lastMonthOverspent: 'last-month-overspent',
+  totalOverspent: 'total-overspent',
   forNextMonth: 'buffered-selected',
   totalBudgeted: 'total-budgeted',
   toBudget: 'to-budget',
+  toBudgetWithFuture: 'ready-to-assign',
+  budgetedInFuture: 'assigned-in-future',
 
   fromLastMonth: 'from-last-month',
   manualBuffered: 'buffered',

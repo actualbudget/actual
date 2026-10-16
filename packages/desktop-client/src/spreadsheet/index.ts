@@ -39,11 +39,14 @@ export type Spreadsheets = {
     'buffered-auto': number;
     'buffered-selected': number;
     'to-budget': number | null;
+    'ready-to-assign': number | null;
+    'assigned-in-future': number;
     'from-last-month': number;
     'total-budgeted': number;
     'total-income': number;
     'total-spent': number;
     'total-leftover': number;
+    'total-overspent': number;
     'group-sum-amount': number;
     'group-budget': number;
     'group-leftover': number;

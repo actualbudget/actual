@@ -3,17 +3,330 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
+import * as monthUtils from '#shared/months';
 
 import {
   copyUntilYearEnd,
   coverOverbudgeted,
+  coverOverspending,
   getSheetValue,
+  holdForNextMonth,
   set3MonthAvg,
   setBudget,
   setCategoryCarryover,
   setNMonthAvg,
+  transferAvailable,
 } from './actions';
 import * as budget from './base';
+
+describe('available-balance actions', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  async function setupDatabase(toBudgetMode: string | null = 'include-future') {
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'bills',
+      name: 'Bills',
+      cat_group: 'expenses',
+    });
+    await db.insertCategory({
+      id: 'paycheck',
+      name: 'Paycheck',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertAccount({ id: 'account', name: 'Checking' });
+    if (toBudgetMode !== null) {
+      await db.insert('preferences', {
+        id: 'toBudgetMode',
+        value: toBudgetMode,
+      });
+    }
+
+    const currentMonth = monthUtils.currentMonth();
+    const nextMonth = monthUtils.nextMonth(currentMonth);
+    const followingMonth = monthUtils.nextMonth(nextMonth);
+
+    await sheet.loadSpreadsheet(db);
+    await budget.createAllBudgets();
+
+    return { currentMonth, nextMonth, followingMonth };
+  }
+
+  it('limits transfers to the future-aware available amount', async () => {
+    const { currentMonth, nextMonth } = await setupDatabase();
+
+    await db.insertTransaction({
+      date: `${currentMonth}-15`,
+      amount: 10000,
+      account: 'account',
+      category: 'paycheck',
+    });
+    await setBudget({
+      month: nextMonth,
+      category: 'bills',
+      amount: 7000,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const currentSheet = monthUtils.sheetForMonth(currentMonth);
+    expect(await getSheetValue(currentSheet, 'to-budget')).toBe(10000);
+    expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(3000);
+
+    await transferAvailable({
+      month: currentMonth,
+      amount: 8000,
+      category: 'bills',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue(currentSheet, 'budget-bills')).toBe(3000);
+    expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(0);
+  });
+
+  it('limits future-month transfers to the future-aware available amount', async () => {
+    const { currentMonth, nextMonth, followingMonth } = await setupDatabase();
+
+    await db.insertTransaction({
+      date: `${currentMonth}-15`,
+      amount: 10000,
+      account: 'account',
+      category: 'paycheck',
+    });
+    await setBudget({
+      month: nextMonth,
+      category: 'bills',
+      amount: 7000,
+    });
+    await setBudget({
+      month: followingMonth,
+      category: 'bills',
+      amount: 2000,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const nextSheet = monthUtils.sheetForMonth(nextMonth);
+    expect(await getSheetValue(nextSheet, 'to-budget')).toBe(3000);
+    expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(1000);
+
+    await transferAvailable({
+      month: nextMonth,
+      amount: 8000,
+      category: 'bills',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue(nextSheet, 'budget-bills')).toBe(8000);
+    expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(0);
+  });
+
+  it('uses the monthly available amount for historical transfers', async () => {
+    const { currentMonth } = await setupDatabase();
+    const historicalMonth = monthUtils.prevMonth(currentMonth);
+
+    await db.insertTransaction({
+      date: `${historicalMonth}-15`,
+      amount: 4000,
+      account: 'account',
+      category: 'paycheck',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const historicalSheet = monthUtils.sheetForMonth(historicalMonth);
+    expect(await getSheetValue(historicalSheet, 'to-budget')).toBe(4000);
+
+    await transferAvailable({
+      month: historicalMonth,
+      amount: 8000,
+      category: 'bills',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue(historicalSheet, 'budget-bills')).toBe(4000);
+    expect(await getSheetValue(historicalSheet, 'to-budget')).toBe(0);
+  });
+
+  describe.each(['include-future', null])('mode %s', toBudgetMode => {
+    it.each([0, 1])(
+      'covers the omitted amount at month offset %s',
+      async offset => {
+        const { currentMonth, nextMonth, followingMonth } =
+          await setupDatabase(toBudgetMode);
+        await db.insertTransaction({
+          date: `${currentMonth}-15`,
+          amount: 10000,
+          account: 'account',
+          category: 'paycheck',
+        });
+        for (const month of [currentMonth, nextMonth, followingMonth]) {
+          await setBudget({ month, category: 'bills', amount: 4000 });
+        }
+        await sheet.waitOnSpreadsheet();
+
+        const month = offset === 0 ? currentMonth : nextMonth;
+        const sheetName = monthUtils.sheetForMonth(month);
+        expect(await getSheetValue(sheetName, 'ready-to-assign')).toBe(-2000);
+        expect(await getSheetValue(sheetName, 'to-budget')).toBe(
+          offset === 0 ? 6000 : 2000,
+        );
+
+        await coverOverbudgeted({
+          month,
+          category: 'bills',
+          currencyCode: 'USD',
+        });
+        await sheet.waitOnSpreadsheet();
+
+        expect(await getSheetValue(sheetName, 'budget-bills')).toBe(
+          toBudgetMode === 'include-future' ? 2000 : 4000,
+        );
+        expect(await getSheetValue(sheetName, 'ready-to-assign')).toBe(
+          toBudgetMode === 'include-future' ? 0 : -2000,
+        );
+      },
+    );
+
+    it('uses the provided overbudgeted amount', async () => {
+      const { currentMonth, nextMonth } = await setupDatabase(toBudgetMode);
+      await db.insertTransaction({
+        date: `${currentMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: 'paycheck',
+      });
+      await setBudget({ month: currentMonth, category: 'bills', amount: 4000 });
+      await setBudget({ month: nextMonth, category: 'bills', amount: 8000 });
+      await sheet.waitOnSpreadsheet();
+
+      await coverOverbudgeted({
+        month: currentMonth,
+        category: 'bills',
+        amount: 500,
+        currencyCode: 'USD',
+      });
+      await sheet.waitOnSpreadsheet();
+
+      expect(
+        await getSheetValue(
+          monthUtils.sheetForMonth(currentMonth),
+          'budget-bills',
+        ),
+      ).toBe(3500);
+    });
+
+    it('limits holds to the available amount', async () => {
+      const { currentMonth, nextMonth } = await setupDatabase(toBudgetMode);
+      await db.insertTransaction({
+        date: `${currentMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: 'paycheck',
+      });
+      await setBudget({ month: nextMonth, category: 'bills', amount: 7000 });
+      await sheet.waitOnSpreadsheet();
+
+      expect(
+        await holdForNextMonth({ month: currentMonth, amount: 8000 }),
+      ).toBe(true);
+      await sheet.waitOnSpreadsheet();
+
+      const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
+        'SELECT buffered FROM zero_budget_months WHERE id = ?',
+        [currentMonth],
+      );
+      expect(row?.buffered).toBe(
+        toBudgetMode === 'include-future' ? 3000 : 8000,
+      );
+    });
+
+    it('limits overspending coverage from available funds', async () => {
+      const { currentMonth, nextMonth } = await setupDatabase(toBudgetMode);
+      await db.insertCategory({
+        id: 'spending',
+        name: 'Spending',
+        cat_group: 'expenses',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: 'paycheck',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-16`,
+        amount: -6000,
+        account: 'account',
+        category: 'spending',
+      });
+      await setBudget({
+        month: currentMonth,
+        category: 'spending',
+        amount: 1000,
+      });
+      await setBudget({ month: nextMonth, category: 'bills', amount: 7000 });
+      await sheet.waitOnSpreadsheet();
+
+      await coverOverspending({
+        month: currentMonth,
+        to: 'spending',
+        from: 'to-budget',
+        currencyCode: 'USD',
+      });
+      await sheet.waitOnSpreadsheet();
+
+      expect(
+        await getSheetValue(
+          monthUtils.sheetForMonth(currentMonth),
+          'budget-spending',
+        ),
+      ).toBe(toBudgetMode === 'include-future' ? 3000 : 6000);
+    });
+
+    it('covers current overspending without changing the future available amount', async () => {
+      const { currentMonth, nextMonth } = await setupDatabase(toBudgetMode);
+      await db.insertCategory({
+        id: 'spending',
+        name: 'Spending',
+        cat_group: 'expenses',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-15`,
+        amount: 10000,
+        account: 'account',
+        category: 'paycheck',
+      });
+      await db.insertTransaction({
+        date: `${currentMonth}-16`,
+        amount: -3000,
+        account: 'account',
+        category: 'spending',
+      });
+      await setBudget({ month: nextMonth, category: 'bills', amount: 7000 });
+      await sheet.waitOnSpreadsheet();
+      const currentSheet = monthUtils.sheetForMonth(currentMonth);
+      const nextSheet = monthUtils.sheetForMonth(nextMonth);
+      expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(3000);
+      expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(0);
+
+      await coverOverspending({
+        month: currentMonth,
+        to: 'spending',
+        from: 'to-budget',
+        currencyCode: 'USD',
+      });
+      await sheet.waitOnSpreadsheet();
+      expect(await getSheetValue(currentSheet, 'budget-spending')).toBe(3000);
+      expect(await getSheetValue(currentSheet, 'ready-to-assign')).toBe(0);
+      expect(await getSheetValue(nextSheet, 'ready-to-assign')).toBe(0);
+    });
+  });
+});
 
 describe('copyUntilYearEnd', () => {
   beforeEach(global.emptyDatabase());

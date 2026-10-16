@@ -223,6 +223,71 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       .map(group => `group-leftover-${group.id}`),
     run: sumAmounts,
   });
+
+  sheet.get().createDynamic(sheetName, 'total-overspent', {
+    initialValue: 0,
+    dependencies: flatten2(
+      expenseCategories.map(cat => [
+        `leftover-${cat.id}`,
+        `carryover-${cat.id}`,
+      ]),
+    ),
+    run: (...data) =>
+      safeNumber(
+        unflatten2(data).reduce(
+          (total, [balance, carryover]) =>
+            total + (carryover ? 0 : Math.min(0, number(balance))),
+          0,
+        ),
+      ),
+  });
+}
+
+export function createFutureAwareToBudget(
+  months,
+  currentMonth,
+  replace = false,
+) {
+  const activeMonths = months.filter(month => month >= currentMonth);
+  const currentSheetName = monthUtils.sheetForMonth(currentMonth);
+  const futureBudgetDependencies = activeMonths
+    .slice(1)
+    .map(futureMonth =>
+      resolveName(monthUtils.sheetForMonth(futureMonth), 'total-budgeted'),
+    );
+
+  activeMonths.forEach(month => {
+    const sheetName = monthUtils.sheetForMonth(month);
+    if (replace) {
+      sheet.get().deleteCell(sheetName, 'assigned-in-future');
+      sheet.get().deleteCell(sheetName, 'ready-to-assign');
+    }
+
+    sheet.get().createDynamic(sheetName, 'assigned-in-future', {
+      initialValue: 0,
+      dependencies: futureBudgetDependencies,
+      run: (...futureBudgetedAmounts) => {
+        const futureBudgeted = sumAmounts(...futureBudgetedAmounts);
+        return futureBudgeted === 0 ? 0 : -futureBudgeted;
+      },
+    });
+    sheet.get().createDynamic(sheetName, 'ready-to-assign', {
+      initialValue: 0,
+      dependencies: [
+        resolveName(currentSheetName, 'to-budget'),
+        resolveName(currentSheetName, 'buffered-selected'),
+        resolveName(currentSheetName, 'total-overspent'),
+        'assigned-in-future',
+      ],
+      run: (toBudget, buffered, overspent, budgetedInFuture) =>
+        safeNumber(
+          number(toBudget) +
+            number(buffered) +
+            (month > currentMonth ? number(overspent) : 0) -
+            number(budgetedInFuture),
+        ),
+    });
+  });
 }
 
 export function createBudget(meta, categories, months) {
@@ -255,6 +320,10 @@ export function handleCategoryChange(months, oldValue, newValue) {
         ],
       ]);
     } else {
+      deps.push([
+        'total-overspent',
+        [`leftover-${cat.id}`, `carryover-${cat.id}`],
+      ]);
       deps.push([
         'last-month-overspent',
         [
