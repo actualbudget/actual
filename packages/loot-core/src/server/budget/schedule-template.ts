@@ -374,6 +374,9 @@ export async function buildMonthlyOutflow(
   smoothEntries: ScheduleTemplateTarget[],
   current_month: string,
   category: CategoryEntity,
+  // Schedules budgeted in full outside the forecast. Their payments come
+  // out of that separate amount, so they aren't this month's spending.
+  fullScheduleIds: string[] = [],
 ): Promise<number[]> {
   const monthlyOutflow = new Array(FORECAST_MONTHS).fill(0);
   const windowStart = monthUtils.firstDayOfMonth(current_month);
@@ -590,10 +593,9 @@ export async function buildMonthlyOutflow(
   }
 
   if (!isBudgetingAhead) {
-    const spentByToday = postedTransactions.reduce(
-      (sum, transaction) => sum + sign * transaction.amount,
-      0,
-    );
+    const spentByToday = postedTransactions
+      .filter(transaction => !fullScheduleIds.includes(transaction.schedule))
+      .reduce((sum, transaction) => sum + sign * transaction.amount, 0);
     monthlyOutflow[0] += Math.max(dueByToday, spentByToday);
   }
 
@@ -770,12 +772,11 @@ export async function runScheduleForecast(
     smoothEntries,
     current_month,
     category,
+    fullEntries.map(c => c.scheduleId),
   );
-  const forecastStartingBalance = balance - fullContribution;
-  const candidate = solveMonthlyContribution(
-    forecastStartingBalance,
-    monthlyOutflow,
-  );
+  // Full-flag bills are paid from fullContribution, which is added on top,
+  // so they don't draw on the balance the forecast starts from.
+  const candidate = solveMonthlyContribution(balance, monthlyOutflow);
 
   // Split the single smoothed candidate back out across the smooth
   // schedules that share this category, proportional to each schedule's

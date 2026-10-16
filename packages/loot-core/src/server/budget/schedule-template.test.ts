@@ -877,6 +877,45 @@ describe('runScheduleForecast', () => {
     expect(result.perScheduleMonthly.get(template_lines[1])).toBe(10000);
   });
 
+  it('does not fund a full-flag bill due this month twice', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Full',
+        full: true,
+        priority: 0,
+        directive: 'template',
+      } as const,
+      {
+        type: 'schedule',
+        name: 'Smooth',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSchedulesByName({
+      Full: {
+        spec: { start: '2024-01-20', amount: -60000, frequency: 'yearly' },
+      },
+      Smooth: {
+        spec: { start: '2024-01-15', amount: -10000, frequency: 'monthly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-01-01',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // $600 in full for the bill due this month, plus $100 for the monthly
+    // one. The $600 is new money, so it doesn't also come off the balance.
+    expect(result.to_budget).toBe(70000);
+  });
+
   it('splits perScheduleMonthly by monthly-equivalent contribution, not raw target, for a monthly + yearly mix', async () => {
     const template_lines = [
       {

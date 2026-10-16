@@ -452,6 +452,27 @@ describe('runScheduleForecast against a real database', () => {
     expect(result.to_budget).toBe(0);
   });
 
+  it("does not count a posted full-flag payment as this month's spending", async () => {
+    // Oct 10, budgeting October. Bill A is budgeted in full and was paid
+    // Oct 1. Bill B is smoothed and due Nov 1. Bill A's $100 comes from its
+    // own full amount; it isn't spending the forecast has to cover too.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-10');
+    const { category, payBill, templates } = await setUpOneTimeBills();
+    await payBill('Bill A', '2026-10-01', -10000);
+
+    const result = await runScheduleForecast(
+      [{ ...templates[0], full: true }, templates[1]],
+      '2026-10',
+      0,
+      0,
+      category,
+      currency,
+    );
+
+    // $100 for Bill A in full, plus $90 for Bill B spread over Oct and Nov.
+    expect(result.to_budget).toBe(10000 + 4500);
+  });
+
   it('counts a completed schedule up to a payment entered after its next date', async () => {
     // Rent was completed on Jun 1 with its next date Jun 25, after July's
     // and August's payments had been entered ahead of time. Earlier
