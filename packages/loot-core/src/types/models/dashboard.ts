@@ -366,6 +366,16 @@ export type AgeOfMoneyWidget = AbstractWidget<
   } | null
 >;
 
+export type FxImpactWidget = AbstractWidget<
+  'fx-impact-card',
+  {
+    name?: string;
+    timeFrame?: TimeFrame;
+    accounts?: string[];
+    currencies?: string[];
+  } | null
+>;
+
 type SpecializedWidget =
   | NetWorthWidget
   | CashFlowWidget
@@ -379,7 +389,8 @@ type SpecializedWidget =
   | FormulaWidget
   | SankeyWidget
   | AgeOfMoneyWidget
-  | BalanceForecastWidget;
+  | BalanceForecastWidget
+  | FxImpactWidget;
 export type DashboardWidgetEntity = SpecializedWidget | CustomReportWidget;
 export type NewDashboardWidgetEntity = Omit<
   DashboardWidgetEntity,
