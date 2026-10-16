@@ -24,7 +24,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "tracking_number": null,
+    "number": null,
     "transfer_id": "id6",
   },
   {
@@ -49,7 +49,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "tracking_number": null,
+    "number": null,
     "transfer_id": "id5",
   },
 ]
@@ -80,7 +80,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 
 @@ -23,10 +23,60 @@
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
       "transfer_id": "id6",
     },
     Object {
@@ -105,7 +105,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id8",
 +   },
 +   Object {
@@ -130,7 +130,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id7",
 +   },
 +   Object {
@@ -165,7 +165,7 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "tracking_number": null,
+    "number": null,
     "transfer_id": null,
   },
 ]
@@ -192,7 +192,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id7",
 +   },
 +   Object {
@@ -219,7 +219,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id6",
     },
@@ -256,7 +256,7 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
       "sort_order": 123456789,
 @@ -23,11 +23,11 @@
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
       "transfer_id": "id7",
     },
     Object {
@@ -293,7 +293,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "tracking_number": null,
+    "number": null,
     "transfer_id": null,
   },
 ]
@@ -306,7 +306,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 @@ -22,6 +22,56 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
       "transfer_id": null,
     },
 +   Object {
@@ -331,7 +331,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id8",
 +   },
 +   Object {
@@ -356,7 +356,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id7",
 +   },
   ]"
@@ -394,7 +394,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id8",
     },
@@ -423,7 +423,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
 -     "transfer_id": "id8",
 +     "transfer_id": null,
     },
@@ -465,7 +465,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "sort_order": 123456789,
 @@ -48,11 +48,11 @@
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
       "transfer_id": null,
     },
     Object {
@@ -498,7 +498,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
 -     "transfer_id": "id8",
 +     "transfer_id": null,
     },
@@ -510,7 +510,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
       "transfer_id": null,
 -   },
 -   Object {
@@ -535,7 +535,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "tracking_number": null,
+-     "number": null,
 -     "transfer_id": "id7",
     },
   ]"
@@ -561,7 +561,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "tracking_number": null,
++     "number": null,
 +     "transfer_id": "id10",
 +   },
 +   Object {
@@ -586,7 +586,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "tracking_number": null,
+      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id7",
     },
@@ -623,7 +623,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "tracking_number": null,
+-     "number": null,
 -     "transfer_id": "id10",
 -   },
 -   Object {
@@ -648,7 +648,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "tracking_number": null,
+-     "number": null,
 -     "transfer_id": "id7",
 -   },
 -   Object {

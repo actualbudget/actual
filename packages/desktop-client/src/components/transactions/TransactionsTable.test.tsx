@@ -689,7 +689,7 @@ describe('Transactions', () => {
     test('number column is hidden without a column configuration', () => {
       const { container } = renderTransactions();
       expect(
-        container.querySelector('[data-testid="tracking_number"]'),
+        container.querySelector('[data-testid="number"]'),
       ).not.toBeInTheDocument();
     });
 
@@ -698,15 +698,15 @@ describe('Transactions', () => {
         columnOrder: [...TRANSACTION_TABLE_COLUMN_IDS],
       });
 
-      const input = await editField(container, 'tracking_number', 2);
+      const input = await editField(container, 'number', 2);
       await userEvent.type(input, ' 1001 ');
       await userEvent.type(input, '[Tab]');
-      expect(getTransactions()[2].tracking_number).toBe('1001');
+      expect(getTransactions()[2].number).toBe('1001');
       expectToBeEditingField(container, 'payee', 2);
 
       const payeeInput = await editField(container, 'payee', 2);
       await userEvent.type(payeeInput, '{Shift>}[Tab]{/Shift}');
-      expectToBeEditingField(container, 'tracking_number', 2);
+      expectToBeEditingField(container, 'number', 2);
     });
   });
 

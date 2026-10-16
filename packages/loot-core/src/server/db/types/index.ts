@@ -198,7 +198,7 @@ export type DbTransaction = {
   category?: DbCategory['id'] | null;
   description?: string | null;
   notes?: string | null;
-  tracking_number?: string | null;
+  number?: string | null;
   financial_id?: string | null;
   error?: string | null;
   imported_description?: string | null;
@@ -307,7 +307,7 @@ export type DbViewTransactionInternal = {
   category: DbCategory['id'] | null;
   payee: DbPayee['id'] | null;
   notes: DbTransaction['notes'] | null;
-  tracking_number: DbTransaction['tracking_number'] | null;
+  number: DbTransaction['number'] | null;
   imported_id: DbTransaction['financial_id'] | null;
   error: DbTransaction['error'] | null;
   imported_payee: DbTransaction['imported_description'] | null;

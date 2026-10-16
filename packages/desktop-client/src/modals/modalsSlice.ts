@@ -263,12 +263,12 @@ export type Modal =
       options: {
         name: keyof Pick<
           TransactionEntity,
-          'date' | 'amount' | 'notes' | 'tracking_number'
+          'date' | 'amount' | 'notes' | 'number'
         >;
         onSubmit: (
           name: keyof Pick<
             TransactionEntity,
-            'date' | 'amount' | 'notes' | 'tracking_number'
+            'date' | 'amount' | 'notes' | 'number'
           >,
           value:
             | string

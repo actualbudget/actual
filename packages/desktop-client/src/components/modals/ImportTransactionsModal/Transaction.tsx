@@ -21,7 +21,7 @@ import type { FieldMapping, ImportTransaction } from './utils';
 type TransactionProps = {
   transaction: ImportTransaction;
   fieldMappings: FieldMapping;
-  showTrackingNumber: boolean;
+  showNumber: boolean;
   showParsed: boolean;
   parseDateFormat: ComponentProps<typeof ParsedDate>['parseDateFormat'];
   dateFormat: ComponentProps<typeof ParsedDate>['dateFormat'];
@@ -39,7 +39,7 @@ type TransactionProps = {
 export function Transaction({
   transaction: rawTransaction,
   fieldMappings,
-  showTrackingNumber,
+  showNumber,
   showParsed,
   parseDateFormat,
   dateFormat,
@@ -209,9 +209,9 @@ export function Transaction({
           formatDate(transaction.date ?? null, dateFormat)
         )}
       </Field>
-      {showTrackingNumber && (
-        <Field width={100} title={transaction.tracking_number ?? undefined}>
-          {transaction.tracking_number}
+      {showNumber && (
+        <Field width={100} title={transaction.number ?? undefined}>
+          {transaction.number}
         </Field>
       )}
       <Field

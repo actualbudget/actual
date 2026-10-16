@@ -678,7 +678,7 @@ describe('Account sync', () => {
         amount: -1239,
         payee_name: 'Acme Inc.',
         imported_id: 'tracking-1',
-        tracking_number: '1001',
+        number: '1001',
       },
       {
         date: '2024-04-06',
@@ -694,24 +694,24 @@ describe('Account sync', () => {
         amount: -1239,
         payee_name: 'Acme Inc.',
         imported_id: 'tracking-1',
-        tracking_number: '9999',
+        number: '9999',
       },
       {
         date: '2024-04-06',
         amount: -500,
         payee_name: 'Acme Inc.',
         imported_id: 'tracking-2',
-        tracking_number: '1002',
+        number: '1002',
       },
     ]);
 
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
     expect(
-      transactions.find(t => t.imported_id === 'tracking-1').tracking_number,
+      transactions.find(t => t.imported_id === 'tracking-1').number,
     ).toBe('1001');
     expect(
-      transactions.find(t => t.imported_id === 'tracking-2').tracking_number,
+      transactions.find(t => t.imported_id === 'tracking-2').number,
     ).toBe('1002');
   });
 
@@ -1147,7 +1147,7 @@ describe('SimpleFin batch sync', () => {
       date: 'date',
       payee: 'payeeName',
       notes: 'notes',
-      tracking_number: 'checkNumber',
+      number: 'checkNumber',
     };
     await db.insertWithSchema('preferences', {
       id: `custom-sync-mappings-${acctId}`,
@@ -1188,7 +1188,7 @@ describe('SimpleFin batch sync', () => {
 
     const transactions = await getAllTransactions();
     expect(
-      transactions.find(t => t.imported_id === 'provider-tx-1').tracking_number,
+      transactions.find(t => t.imported_id === 'provider-tx-1').number,
     ).toBe('1234');
   });
 

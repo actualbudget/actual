@@ -49,8 +49,8 @@ describe('rules', () => {
       expect(validOps).toContain('hasAnyTag');
     });
 
-    it('should only include text match operations for tracking_number field', () => {
-      expect(getValidOps('tracking_number')).toEqual([
+    it('should only include text match operations for number field', () => {
+      expect(getValidOps('number')).toEqual([
         'is',
         'contains',
         'matches',

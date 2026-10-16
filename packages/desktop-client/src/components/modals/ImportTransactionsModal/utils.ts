@@ -135,7 +135,7 @@ export type ImportTransaction = {
   imported_payee?: string;
   payee_name?: string;
   notes?: string;
-  tracking_number?: string;
+  number?: string;
   category?: string;
   date?: string;
 } & Record<string, string | number | boolean>;
@@ -161,7 +161,7 @@ export type FieldMapping = {
   amount: string | null;
   payee: string | null;
   notes: string | null;
-  tracking_number: string | null;
+  number: string | null;
   inOut: string | null;
   category: string | null;
   outflow: string | null;
@@ -170,7 +170,7 @@ export type FieldMapping = {
 
 const TRACKING_NUMBER_HEADERS = ['Num', 'Number', 'Check'];
 
-export function findTrackingNumberField(fieldNames: string[]) {
+export function findNumberField(fieldNames: string[]) {
   return (
     fieldNames.find(name => TRACKING_NUMBER_HEADERS.includes(name)) ?? null
   );

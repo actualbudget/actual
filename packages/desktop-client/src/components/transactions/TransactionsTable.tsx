@@ -280,8 +280,8 @@ const TransactionHeader = memo(
         marginLeft: -5,
         sortDirection: 'asc',
       },
-      tracking_number: {
-        value: columnLabels.tracking_number,
+      number: {
+        value: columnLabels.number,
         width: 100,
         alignItems: 'flex',
         marginLeft: -5,
@@ -1239,7 +1239,7 @@ const Transaction = memo(function Transaction({
 
     // Don't change the note or number to an empty string if it's null (since they are both rendered the same)
     if (
-      (name === 'notes' || name === 'tracking_number') &&
+      (name === 'notes' || name === 'number') &&
       value === '' &&
       transaction[name] == null
     ) {
@@ -1350,7 +1350,7 @@ const Transaction = memo(function Transaction({
     payee: payeeId,
     imported_payee: importedPayee,
     notes,
-    tracking_number: trackingNumber,
+    number: number,
     date,
     account: accountId,
     category: categoryId,
@@ -1766,23 +1766,23 @@ const Transaction = memo(function Transaction({
             onNavigateToSchedule={onNavigateToSchedule}
           />
         );
-      case 'tracking_number':
+      case 'number':
         return (
           <InputCell
             key={columnId}
             /* Number field for all transactions */
             type="input"
             width={100}
-            name="tracking_number"
-            exposed={focusedField === 'tracking_number'}
-            focused={focusedField === 'tracking_number'}
-            value={trackingNumber ?? ''}
+            name="number"
+            exposed={focusedField === 'number'}
+            focused={focusedField === 'number'}
+            value={number ?? ''}
             valueStyle={valueStyle}
-            title={trackingNumber ?? undefined}
+            title={number ?? undefined}
             onExpose={name => !isPreview && onEdit(id, name)}
             inputProps={{
-              value: trackingNumber ?? '',
-              onUpdate: value => onUpdate('tracking_number', value.trim()),
+              value: number ?? '',
+              onUpdate: value => onUpdate('number', value.trim()),
               'data-1p-ignore': true,
             }}
           />
@@ -3156,7 +3156,7 @@ export const TransactionTable = forwardRef(
               return showBalances;
             case 'cleared':
               return showCleared;
-            case 'tracking_number':
+            case 'number':
               // Opt-in, so only shown when enabled in a column configuration
               return columnOrder != null;
             default:

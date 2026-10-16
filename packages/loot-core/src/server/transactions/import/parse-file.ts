@@ -51,7 +51,7 @@ type StructuredTransaction = {
   payee_name: string;
   imported_payee: string;
   notes: string;
-  tracking_number?: string | null;
+  number?: string | null;
   category?: string | null;
 };
 
@@ -231,7 +231,7 @@ async function parseQIF(
           category: trans.subcategory || trans.category || null,
           notes:
             options.importNotes && !fallbackUsed ? memoSource || null : null,
-          tracking_number: trans.number?.trim() || null,
+          number: trans.number?.trim() || null,
         };
       })
       .filter(trans => trans.date != null && trans.amount != null),
@@ -283,7 +283,7 @@ async function parseOFX(
         payee_name: payeeSource || (fallbackUsed ? memoSource : null),
         imported_payee: payeeSource || (fallbackUsed ? memoSource : null),
         notes: options.importNotes && !fallbackUsed ? memoSource || null : null,
-        tracking_number: trans.checkNum?.trim() || null,
+        number: trans.checkNum?.trim() || null,
       };
     }),
   };

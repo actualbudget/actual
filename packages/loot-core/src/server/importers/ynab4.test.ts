@@ -99,20 +99,20 @@ describe('importTransactions', () => {
 
     expect(parent.payee).toBe('actual-payee-1');
     expect(parent.imported_payee).toBe('Some Payee');
-    expect(parent.tracking_number).toBe('1001');
+    expect(parent.number).toBe('1001');
 
     const [child, transferChild] = parent.subtransactions;
     // No payee key at all, so makeChild falls back to the parent payee
     expect(child).not.toHaveProperty('payee');
     expect(child.transfer_id).toBeNull();
-    expect(child).not.toHaveProperty('tracking_number');
+    expect(child).not.toHaveProperty('number');
     expect(makeChild(parent, child).payee).toBe('actual-payee-1');
 
     expect(transferChild.payee).toBe('transfer-payee-2');
     const transfer = imported.find(
       t => t.id === entityIdMap.get('txn-transfer-in'),
     );
-    expect(transfer.tracking_number).toBeNull();
+    expect(transfer.number).toBeNull();
     expect(transferChild.transfer_id).toBe(entityIdMap.get('txn-transfer-in'));
   });
 });

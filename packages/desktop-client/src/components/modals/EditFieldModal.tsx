@@ -265,7 +265,7 @@ export function EditFieldModal({
       );
       break;
 
-    case 'tracking_number':
+    case 'number':
       label = t('Number');
       editor = ({ close }) => (
         <Input

@@ -438,7 +438,7 @@ test.describe('Accounts', () => {
         .click();
       await expect(dialog).not.toBeVisible();
 
-      await accountPage.setTransactionColumnVisibility('tracking_number', true);
+      await accountPage.setTransactionColumnVisibility('number', true);
 
       const first = accountPage.transactionTableRow.filter({
         hasText: 'Hardware Store',
@@ -446,8 +446,8 @@ test.describe('Accounts', () => {
       const second = accountPage.transactionTableRow.filter({
         hasText: 'Grocery Store',
       });
-      await expect(first.getByTestId('tracking_number')).toHaveText('1001');
-      await expect(second.getByTestId('tracking_number')).toHaveText('1002-A');
+      await expect(first.getByTestId('number')).toHaveText('1001');
+      await expect(second.getByTestId('number')).toHaveText('1002-A');
     });
 
     test('import notes checkbox is not shown for CSV files', async () => {

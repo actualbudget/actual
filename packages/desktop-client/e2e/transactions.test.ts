@@ -394,7 +394,7 @@ test.describe('Transactions', () => {
 
   test.describe('number column', () => {
     test.beforeEach(async () => {
-      await accountPage.setTransactionColumnVisibility('tracking_number', true);
+      await accountPage.setTransactionColumnVisibility('number', true);
     });
 
     test('shows the number column before the payee', async () => {
@@ -404,9 +404,9 @@ test.describe('Transactions', () => {
     });
 
     test('edits, sorts and filters by number', async () => {
-      await accountPage.setNthTrackingNumber(0, '10');
-      await accountPage.setNthTrackingNumber(1, '9');
-      await accountPage.setNthTrackingNumber(2, 'A1');
+      await accountPage.setNthNumber(0, '10');
+      await accountPage.setNthNumber(1, '9');
+      await accountPage.setNthNumber(2, 'A1');
 
       const sortButton = page
         .getByTestId('transaction-table-header')
@@ -414,19 +414,19 @@ test.describe('Transactions', () => {
       await sortButton.click();
       await sortButton.click();
 
-      await expect(accountPage.getNthTransaction(0).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(0).number).toHaveText(
         'A1',
       );
-      await expect(accountPage.getNthTransaction(1).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(1).number).toHaveText(
         '9',
       );
-      await expect(accountPage.getNthTransaction(2).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(2).number).toHaveText(
         '10',
       );
 
-      await accountPage.filterByTrackingNumber('10');
+      await accountPage.filterByNumber('10');
       await expect(accountPage.transactionTableRow).toHaveCount(1);
-      await expect(accountPage.getNthTransaction(0).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(0).number).toHaveText(
         '10',
       );
     });
@@ -434,12 +434,12 @@ test.describe('Transactions', () => {
     test('stores numbers separately on split transactions', async () => {
       await accountPage.createSplitTransaction([
         {
-          trackingNumber: '500',
+          number: '500',
           payee: 'Krogger',
           debit: '333.33',
         },
         {
-          trackingNumber: '500-1',
+          number: '500-1',
           category: 'General',
           debit: '222.22',
         },
@@ -448,13 +448,13 @@ test.describe('Transactions', () => {
         },
       ]);
 
-      await expect(accountPage.getNthTransaction(0).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(0).number).toHaveText(
         '500',
       );
-      await expect(accountPage.getNthTransaction(1).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(1).number).toHaveText(
         '500-1',
       );
-      await expect(accountPage.getNthTransaction(2).trackingNumber).toHaveText(
+      await expect(accountPage.getNthTransaction(2).number).toHaveText(
         '',
       );
     });

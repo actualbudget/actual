@@ -105,8 +105,8 @@ describe('File import', () => {
 
     expect(errors.length).toBe(0);
     expect(transactions).toMatchObject([
-      { payee_name: 'City Water', tracking_number: '1001' },
-      { payee_name: 'GroceriesYou', tracking_number: null },
+      { payee_name: 'City Water', number: '1001' },
+      { payee_name: 'GroceriesYou', number: null },
     ]);
   });
 
@@ -125,11 +125,11 @@ describe('File import', () => {
       expect.arrayContaining([
         expect.objectContaining({
           financial_id: 'tracking-number-1',
-          tracking_number: '2002',
+          number: '2002',
         }),
         expect.objectContaining({
           financial_id: 'tracking-number-2',
-          tracking_number: null,
+          number: null,
         }),
       ]),
     );
@@ -142,8 +142,8 @@ describe('File import', () => {
 
     expect(errors.length).toBe(0);
     expect(transactions).toMatchObject([
-      { payee_name: 'Cheque Payee', tracking_number: '3003' },
-      { payee_name: 'Other Payee', tracking_number: null },
+      { payee_name: 'Cheque Payee', number: '3003' },
+      { payee_name: 'Other Payee', number: null },
     ]);
   });
 

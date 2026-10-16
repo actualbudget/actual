@@ -6,7 +6,7 @@ type TransactionEntry = {
   debit?: string;
   credit?: string;
   account?: string;
-  trackingNumber?: string;
+  number?: string;
   payee?: string;
   notes?: string;
   category?: string;
@@ -155,7 +155,7 @@ export class AccountPage {
   _getTransactionDetails(row: Locator) {
     return {
       account: row.getByTestId('account'),
-      trackingNumber: row.getByTestId('tracking_number'),
+      number: row.getByTestId('number'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
@@ -225,21 +225,21 @@ export class AccountPage {
   /**
    * Filter to a specific transaction number
    */
-  async filterByTrackingNumber(trackingNumber: string) {
+  async filterByNumber(number: string) {
     const filterTooltip = await this.filterBy('Number');
-    await this.page.keyboard.type(trackingNumber);
+    await this.page.keyboard.type(number);
     await filterTooltip.applyButton.click();
   }
 
   /**
    * Set the transaction number of the nth transaction in the table
    */
-  async setNthTrackingNumber(index: number, trackingNumber: string) {
-    const cell = this.getNthTransaction(index).trackingNumber;
+  async setNthNumber(index: number, number: string) {
+    const cell = this.getNthTransaction(index).number;
     await cell.click();
     const input = cell.getByRole('textbox');
     await this.selectInputText(input);
-    await input.fill(trackingNumber);
+    await input.fill(number);
     await this.page.keyboard.press('Enter');
     await this.page.keyboard.press('Escape');
   }
@@ -285,12 +285,12 @@ export class AccountPage {
       await this.page.keyboard.press('Tab');
     }
 
-    if (transaction.trackingNumber) {
-      const trackingNumberCell = transactionRow.getByTestId('tracking_number');
-      await trackingNumberCell.click();
-      const trackingNumberInput = trackingNumberCell.getByRole('textbox');
-      await this.selectInputText(trackingNumberInput);
-      await trackingNumberInput.fill(transaction.trackingNumber);
+    if (transaction.number) {
+      const numberCell = transactionRow.getByTestId('number');
+      await numberCell.click();
+      const numberInput = numberCell.getByRole('textbox');
+      await this.selectInputText(numberInput);
+      await numberInput.fill(transaction.number);
       await this.page.keyboard.press('Tab');
     }
 

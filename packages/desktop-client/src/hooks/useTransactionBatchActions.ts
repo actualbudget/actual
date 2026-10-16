@@ -214,7 +214,7 @@ export function useTransactionBatchActions() {
         name !== 'date' &&
         name !== 'amount' &&
         name !== 'notes' &&
-        name !== 'tracking_number'
+        name !== 'number'
       ) {
         return;
       }

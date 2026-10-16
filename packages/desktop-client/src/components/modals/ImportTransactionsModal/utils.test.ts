@@ -1,7 +1,7 @@
 import {
   applyFieldMappings,
   filterByStartDate,
-  findTrackingNumberField,
+  findNumberField,
   parseCategoryFields,
   parseDate,
 } from './utils';
@@ -280,7 +280,7 @@ describe('Import transactions', () => {
         category: null,
         outflow: null,
         inflow: null,
-        tracking_number: null,
+        number: null,
       };
       const result = filterByStartDate(
         transactions,
@@ -315,16 +315,16 @@ describe('Import transactions', () => {
 
   describe('tracking number mapping', () => {
     it.each(['Num', 'Number', 'Check'])('detects the %s header', header => {
-      expect(findTrackingNumberField(['Date', header, 'Payee'])).toBe(header);
+      expect(findNumberField(['Date', header, 'Payee'])).toBe(header);
     });
 
     it('only matches exact, case-sensitive headers', () => {
       expect(
-        findTrackingNumberField(['num', 'NUMBER', 'Check Number', 'Checks']),
+        findNumberField(['num', 'NUMBER', 'Check Number', 'Checks']),
       ).toBeNull();
     });
 
-    it('maps the selected column to tracking_number', () => {
+    it('maps the selected column to number', () => {
       const result = applyFieldMappings(
         {
           trx_id: '0',
@@ -343,14 +343,14 @@ describe('Import transactions', () => {
           amount: null,
           payee: null,
           notes: null,
-          tracking_number: 'Check',
+          number: 'Check',
           inOut: null,
           category: null,
           outflow: null,
           inflow: null,
         },
       );
-      expect(result.tracking_number).toBe('1001');
+      expect(result.number).toBe('1001');
     });
   });
 });

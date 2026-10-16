@@ -575,15 +575,15 @@ const ChildTransactionEdit = forwardRef<
             placeholder={t('Add a number (optional)')}
             disabled={
               !!editingField &&
-              editingField !== getFieldName(transaction.id, 'tracking_number')
+              editingField !== getFieldName(transaction.id, 'number')
             }
-            defaultValue={transaction.tracking_number ?? ''}
+            defaultValue={transaction.number ?? ''}
             onFocus={() =>
               onRequestActiveEdit(
-                getFieldName(transaction.id, 'tracking_number'),
+                getFieldName(transaction.id, 'number'),
               )
             }
-            onUpdate={value => onUpdate(transaction, 'tracking_number', value)}
+            onUpdate={value => onUpdate(transaction, 'number', value)}
           />
         </View>
 
@@ -1566,19 +1566,19 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               placeholder={t('Add a number (optional)')}
               disabled={
                 !!editingField &&
-                editingField !== getFieldName(transaction.id, 'tracking_number')
+                editingField !== getFieldName(transaction.id, 'number')
               }
-              defaultValue={transaction.tracking_number ?? ''}
+              defaultValue={transaction.number ?? ''}
               onFocus={() => {
                 onRequestActiveEdit(
-                  getFieldName(transaction.id, 'tracking_number'),
+                  getFieldName(transaction.id, 'number'),
                 );
               }}
               onBlur={() => onClearActiveEdit()}
               onChange={event =>
                 onUpdateInner(
                   transaction,
-                  'tracking_number',
+                  'number',
                   event.target.value,
                 )
               }

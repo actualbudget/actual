@@ -1,5 +1,0 @@
-BEGIN TRANSACTION;
-
-ALTER TABLE transactions ADD COLUMN tracking_number TEXT;
-
-COMMIT;
