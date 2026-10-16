@@ -437,6 +437,16 @@ export function scheduleIsRecurring(dateCond: Condition | null) {
 // to a full day) — pad by exactly that much.
 const WEEKEND_SHIFT_PAD_DAYS = 3;
 
+// Same output as monthUtils.dayFromDate for a Date, without date-fns
+// format: over a multi-year window a daily schedule has thousands of
+// occurrences, and formatting them dominated the cost of this function.
+function formatOccurrenceDay(date: Date): string {
+  const year = String(date.getFullYear()).padStart(4, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function getOccurrencesBetween(
   dateCond,
   startDay: string,
@@ -471,7 +481,7 @@ export function getOccurrencesBetween(
   const rawDates = schedule
     .occurrences({ start: queryStart, end: queryEnd })
     .toArray()
-    .map(occurrence => monthUtils.dayFromDate(occurrence.date));
+    .map(occurrence => formatOccurrenceDay(occurrence.date));
 
   if (!schedule.data.skipWeekend) {
     return rawDates.filter(dt => dt >= startDay && dt < endDay);
@@ -479,7 +489,7 @@ export function getOccurrencesBetween(
 
   const dates: string[] = [];
   for (const rawDate of rawDates) {
-    const adjustedDate = monthUtils.dayFromDate(
+    const adjustedDate = formatOccurrenceDay(
       getDateWithSkippedWeekend(
         monthUtils.parseDate(rawDate),
         schedule.data.weekendSolve,

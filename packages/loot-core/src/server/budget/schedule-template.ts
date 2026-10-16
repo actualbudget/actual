@@ -262,6 +262,70 @@ type PostedTransaction = {
 // payment, so it covers schedules that recur as rarely as every two years.
 const LINKED_PAYMENT_SEARCH_MONTHS = 25;
 
+function linkedSearchStart(rangeStart: string) {
+  return `${monthUtils.subMonths(rangeStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`;
+}
+
+function linkedSearchEnd(rangeEnd: string) {
+  return `${monthUtils.addMonths(rangeEnd, LINKED_PAYMENT_SEARCH_MONTHS)}-01`;
+}
+
+// Index of the first date in ascending `dates` that is not before `day`.
+function firstIndexFrom(dates: string[], day: string) {
+  let low = 0;
+  let high = dates.length;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if (dates[mid] < day) low = mid + 1;
+    else high = mid;
+  }
+  return low;
+}
+
+// Months from `month` to the month of `day`; both start "YYYY-MM". Same as
+// monthUtils.differenceInCalendarMonths, without parsing dates, since it
+// runs once per occurrence.
+function monthsBetween(month: string, day: string) {
+  return (
+    (Number(day.slice(0, 4)) - Number(month.slice(0, 4))) * 12 +
+    Number(day.slice(5, 7)) -
+    Number(month.slice(5, 7))
+  );
+}
+
+type OccurrencesBetween = (startDay: string, endDay: string) => string[];
+
+// A schedule's occurrences across every range given, generated in one pass
+// and sliced per request. Generating occurrences is the expensive part of
+// the forecast (thousands for a daily schedule), and the ranges overlap.
+// A slice is the same as generating that range on its own; a range outside
+// the ones given is generated directly.
+function occurrenceLookup(
+  entry: ScheduleTemplateTarget,
+  ranges: Array<[string, string]>,
+): OccurrencesBetween {
+  let coveredStart = ranges[0][0];
+  let coveredEnd = ranges[0][1];
+  for (const [startDay, endDay] of ranges) {
+    if (startDay < coveredStart) coveredStart = startDay;
+    if (endDay > coveredEnd) coveredEnd = endDay;
+  }
+  const dates = getOccurrencesBetween(
+    entry.dateConditions,
+    coveredStart,
+    coveredEnd,
+  );
+  return (startDay, endDay) => {
+    if (startDay < coveredStart || endDay > coveredEnd) {
+      return getOccurrencesBetween(entry.dateConditions, startDay, endDay);
+    }
+    return dates.slice(
+      firstIndexFrom(dates, startDay),
+      firstIndexFrom(dates, endDay),
+    );
+  };
+}
+
 // Which of this schedule's occurrences in [rangeStart, rangeEnd) are
 // settled by its linked payments. The link says which schedule a payment
 // belongs to; each payment is attributed to that schedule's nearest
@@ -273,6 +337,7 @@ function settledOccurrences(
   transactions: PostedTransaction[],
   rangeStart: string,
   rangeEnd: string,
+  occurrencesBetween: OccurrencesBetween,
 ): Set<string> {
   const settled = new Set<string>();
   const linked = transactions.filter(
@@ -282,20 +347,13 @@ function settledOccurrences(
 
   // Ascending, so the nearest occurrence is one of the two either side of
   // the payment's date; on a tie the later one wins.
-  const nearby = getOccurrencesBetween(
-    entry.dateConditions,
-    `${monthUtils.subMonths(rangeStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
-    `${monthUtils.addMonths(rangeEnd, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
+  const nearby = occurrencesBetween(
+    linkedSearchStart(rangeStart),
+    linkedSearchEnd(rangeEnd),
   );
   if (nearby.length === 0) return settled;
   for (const transaction of linked) {
-    let low = 0;
-    let high = nearby.length;
-    while (low < high) {
-      const mid = (low + high) >> 1;
-      if (nearby[mid] < transaction.date) low = mid + 1;
-      else high = mid;
-    }
+    const low = firstIndexFrom(nearby, transaction.date);
     const distanceTo = (index: number) =>
       Math.abs(
         monthUtils.differenceInCalendarDays(transaction.date, nearby[index]),
@@ -356,12 +414,7 @@ export async function buildMonthlyOutflow(
       occurrenceCutoff.set(entry.scheduleId, paid > nextDate ? paid : nextDate);
     }
   }
-  const occurrencesOf = (
-    entry: ScheduleTemplateTarget,
-    startDay: string,
-    endDay: string,
-  ) => {
-    const dates = getOccurrencesBetween(entry.dateConditions, startDay, endDay);
+  const withinCutoff = (entry: ScheduleTemplateTarget, dates: string[]) => {
     const cutoff = occurrenceCutoff.get(entry.scheduleId);
     return cutoff === undefined ? dates : dates.filter(d => d <= cutoff);
   };
@@ -398,22 +451,6 @@ export async function buildMonthlyOutflow(
       })
       .select(['date', 'schedule']),
   );
-  for (const entry of pendingEntries) {
-    const pendingFrom =
-      entry.storedNextDate > currentMonthStart
-        ? entry.storedNextDate
-        : currentMonthStart;
-    const pending = occurrencesOf(entry, pendingFrom, windowStart);
-    const settled = settledOccurrences(
-      entry,
-      linkedBeforeWindow,
-      pendingFrom,
-      windowStart,
-    ).size;
-    monthlyOutflow[0] +=
-      Math.max(0, pending.length - settled) * entry.perOccurrenceAmount;
-  }
-
   // When budgeting the current or a past month, part (or all) of the
   // budget month has already happened. For that part, the category needs
   // whichever is larger: the occurrences due by today, or what was
@@ -446,14 +483,73 @@ export async function buildMonthlyOutflow(
     ));
   }
 
+  // Every range each schedule's occurrences are needed over below: the
+  // forecast window, its pending occurrences, and the search around any
+  // linked payments.
+  const pendingFromOf = (entry: ScheduleTemplateTarget) =>
+    entry.storedNextDate > currentMonthStart
+      ? entry.storedNextDate
+      : currentMonthStart;
+  const linkedSchedules = new Set(
+    [...linkedBeforeWindow, ...postedTransactions].map(
+      transaction => transaction.schedule,
+    ),
+  );
+  const lookups = new Map<ScheduleTemplateTarget, OccurrencesBetween>();
+  for (const entry of smoothEntries) {
+    const ranges: Array<[string, string]> = [[windowStart, windowEnd]];
+    const isPending = pendingEntries.includes(entry);
+    if (isPending) {
+      ranges.push([pendingFromOf(entry), windowStart]);
+    }
+    if (linkedSchedules.has(entry.scheduleId)) {
+      ranges.push([
+        linkedSearchStart(windowStart),
+        linkedSearchEnd(budgetMonthEnd),
+      ]);
+      if (isPending) {
+        ranges.push([
+          linkedSearchStart(pendingFromOf(entry)),
+          linkedSearchEnd(windowStart),
+        ]);
+      }
+    }
+    lookups.set(entry, occurrenceLookup(entry, ranges));
+  }
+
+  // Budgeting ahead: unposted occurrences before the window (see
+  // pendingEntries above) count against month 0.
+  for (const entry of pendingEntries) {
+    const occurrencesBetween = lookups.get(entry);
+    const pendingFrom = pendingFromOf(entry);
+    const pending = withinCutoff(
+      entry,
+      occurrencesBetween(pendingFrom, windowStart),
+    );
+    const settled = settledOccurrences(
+      entry,
+      linkedBeforeWindow,
+      pendingFrom,
+      windowStart,
+      occurrencesBetween,
+    ).size;
+    monthlyOutflow[0] +=
+      Math.max(0, pending.length - settled) * entry.perOccurrenceAmount;
+  }
+
   let dueByToday = 0;
   for (const entry of smoothEntries) {
-    const occurrences = occurrencesOf(entry, windowStart, windowEnd);
+    const occurrencesBetween = lookups.get(entry);
+    const occurrences = withinCutoff(
+      entry,
+      occurrencesBetween(windowStart, windowEnd),
+    );
     const settledEarly = settledOccurrences(
       entry,
       linkedBeforeWindow,
       windowStart,
       budgetMonthEnd,
+      occurrencesBetween,
     );
     const paidThisMonth = isBudgetingAhead
       ? 0
@@ -463,15 +559,13 @@ export async function buildMonthlyOutflow(
             postedTransactions,
             windowStart,
             budgetMonthEnd,
+            occurrencesBetween,
           ),
         ].filter(date => !settledEarly.has(date)).length;
     let indexInBudgetMonth = 0;
     for (const occurrenceDate of occurrences) {
       if (settledEarly.has(occurrenceDate)) continue;
-      const monthIndex = monthUtils.differenceInCalendarMonths(
-        occurrenceDate,
-        current_month,
-      );
+      const monthIndex = monthsBetween(current_month, occurrenceDate);
       const isElapsed =
         !isBudgetingAhead &&
         monthIndex === 0 &&
@@ -511,10 +605,7 @@ export async function buildMonthlyOutflow(
   );
 
   for (const transaction of unlinkedTransactions) {
-    const monthIndex = monthUtils.differenceInCalendarMonths(
-      transaction.date,
-      current_month,
-    );
+    const monthIndex = monthsBetween(current_month, transaction.date);
     if (monthIndex >= 0 && monthIndex < FORECAST_MONTHS) {
       monthlyOutflow[monthIndex] += sign * transaction.amount;
     }
