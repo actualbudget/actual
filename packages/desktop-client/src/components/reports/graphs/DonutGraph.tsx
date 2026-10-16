@@ -210,6 +210,9 @@ export function DonutGraph({
                   width={width}
                   height={height}
                   className={sectorCursor}
+                  // Recharts' keyboard support marks the same sector active in every
+                  // ring, so all of them would be highlighted at once
+                  accessibilityLayer={false}
                 >
                   {/* Drives each sector's isActive; the label is the tooltip */}
                   <Tooltip content={() => null} active />
@@ -238,7 +241,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           ) : (
@@ -247,7 +249,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           )
@@ -313,7 +314,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward={false}
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           ) : (
@@ -322,7 +322,6 @@ export function DonutGraph({
                               fill={fill}
                               expandInward={false}
                               chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
                               chartOuterRadius={chartOuterRadius}
                             />
                           )
@@ -404,7 +403,6 @@ export function DonutGraph({
                             fill={fill}
                             expandInward
                             chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
                             chartOuterRadius={chartOuterRadius}
                           />
                         ) : (
@@ -413,7 +411,6 @@ export function DonutGraph({
                             fill={fill}
                             expandInward={false}
                             chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
                             chartOuterRadius={chartOuterRadius}
                           />
                         )

@@ -15,10 +15,11 @@ export type DonutActiveShapeProps = {
   value: number;
   expandInward: boolean;
   chartInnerRadius: number;
-  chartMidRadius: number;
   chartOuterRadius: number;
-  // An extra line under the amount, like a change from a baseline
-  detail?: { text: string; color: string };
-  // A word after the amount saying what it is, like "baseline"
-  valueSuffix?: string;
+  // Shown instead of the plain amount, like "Baseline: 12.00"
+  valueText?: string;
+  // Shown in brackets after the amount, like a change from a baseline
+  change?: { text: string; color: string };
+  // How solid the highlight is, so a faint ring gets a faint highlight
+  highlightOpacity?: number;
 };

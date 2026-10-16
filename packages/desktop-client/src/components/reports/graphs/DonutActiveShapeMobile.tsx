@@ -27,8 +27,9 @@ export function DonutActiveShapeMobile({
   expandInward,
   chartInnerRadius,
   chartOuterRadius,
-  detail,
-  valueSuffix,
+  valueText,
+  change,
+  highlightOpacity,
 }: DonutActiveShapeProps) {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name and payload.date
@@ -49,17 +50,6 @@ export function DonutActiveShapeMobile({
         {yAxis}
       </text>
       <PrivacyFilter>
-        {detail && (
-          <FinancialText
-            as="text"
-            x={cx}
-            y={cy + chartOuterRadius * Math.sin(-RADIAN * 270) + 33}
-            textAnchor="middle"
-            fill={detail.color}
-          >
-            {detail.text}
-          </FinancialText>
-        )}
         <FinancialText
           as="text"
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 240) - 30}
@@ -67,8 +57,8 @@ export function DonutActiveShapeMobile({
           textAnchor="end"
           fill={fill}
         >
-          {format(value, 'financial')}
-          {valueSuffix && ` ${valueSuffix}`}
+          {valueText ?? format(value, 'financial')}
+          {change && <tspan fill={change.color}> ({change.text})</tspan>}
         </FinancialText>
         <text
           x={cx + chartOuterRadius * Math.cos(-RADIAN * 330) + 10}
@@ -87,6 +77,7 @@ export function DonutActiveShapeMobile({
         innerRadius={expansionInner}
         outerRadius={expansionOuter}
         fill={fill}
+        fillOpacity={highlightOpacity}
       />
     </g>
   );

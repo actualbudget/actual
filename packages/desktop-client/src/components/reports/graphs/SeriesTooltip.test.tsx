@@ -51,6 +51,7 @@ function renderTooltip(
         payload={[{ payload: interval }]}
         legend={legend}
         format={value => String(value)}
+        balanceTypeOp="totalAssets"
         compact={false}
         hoveredKey=""
         order="value"
