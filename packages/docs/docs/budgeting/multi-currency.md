@@ -26,7 +26,7 @@ Back in **Settings**, **Experimental**, turn on **Multiple currencies**. It stay
 
 ## The family example
 
-The registers show five months of the family budget, from June through October 2026, with opening balances on May 31. Each month, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin, the brother-in-law. The entries offset, leaving the opening €2,000 balance. Rent uses Paris rent, and the receipt uses Sublease income.
+The registers show five months of the family budget, from June through October 2026, with opening balances on May 31. Each month, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin, the brother-in-law. The entries offset, leaving the opening €2,000 balance. Rent uses Paris rent, and the receipt uses Sublease income. The same history appears in the [FX impact report](#fx-impact-report).
 
 <img width="860" alt="BNP Paribas with five months of Paris rent and matching sublease income, keeping a 2000 euro balance" src="/img/budgeting/family-bnp-history.png" />
 
@@ -214,7 +214,7 @@ A transfer posted with a fee is left as entered. A reconciled transfer is left a
 
 ## On a phone
 
-A narrow window uses the phone layout. The BBVA México account below uses the same five-month history as the desktop register. Its balance is 250 pesos, with the monthly 800 peso remittances and 150 peso gifts grouped by date. The **+** button adds a payment and opens **Convert to budget currency**.
+A narrow window uses the phone layout. The BBVA México account below uses the same five-month history as the desktop register and FX report. Its balance is 250 pesos, with the monthly 800 peso remittances and 150 peso gifts grouped by date. The **+** button adds a payment and opens **Convert to budget currency**.
 
 <img width="390" alt="Phone view of BBVA México with a 250 peso balance and remittances and gifts grouped by month from June through October" src="/img/budgeting/family-bbva-mobile-history.png" />
 
@@ -277,3 +277,37 @@ The calculated valuation is opening valuation $0.00, transaction activity $2,450
 BNP Paribas books $2,200.00 and closes at $2,500.00. Its monthly FX change is $300.00. The closing formula for 10/31/2026 is 1 EUR = 1.25 USD. BBVA México books $250.00 and closes at $250.00, so its FX change is $0.00. Its closing formula is 1 MXN = 0.05 USD.
 
 <img width="620" alt="FX valuation details for October 2026, with $300.00 included in To Budget and BNP Paribas closing at $2,500.00" src="/img/budgeting/multi-currency-fx-details@2x.png" />
+
+## FX impact report
+
+Hover over or focus a rate formula to see its kind, source, effective timestamp and fallback details.
+
+Open **Reports** and choose **FX impact**. Select June through October 2026. Leave **Accounts** and **Currencies** on all accounts and currencies for this example.
+
+This extends the same example budget for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. It uses Checking, BNP Paribas and BBVA México, with the same landlord and family payees as above. It is a separate checkpoint from the manual-rate examples.
+
+The history starts on May 31 with $2,500 in Checking, €2,000 in BNP Paribas and MX$5,000 in BBVA México. At each month-end from June through October, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin as sublease income. BBVA México pays MX$800 to Elena García as a remittance and MX$150 to José García as a gift. October ends with €2,000 and MX$250 in the foreign accounts.
+
+### Read the report
+
+Positive amounts are gains. **Realized** records FX recognized when foreign holdings are spent. **Unrealized change** records the movement in the value still held. **Closing unrealized** is the remaining unrealized balance at month-end, rather than another amount to add to that month's change. Fee expense is a booked cost. This history has no exchange transfers or fees, so **Transfer carry**, **Internal settlement** and fee columns are zero.
+
+<img width="1040" alt="FX impact report for June through October 2026, showing EUR and MXN gains and losses for the family budget" src="/img/budgeting/multi-currency-fx-impact-history.png" />
+
+The **Selected total** combines the selected accounts and currencies. All figures below are in USD:
+
+| Month     | Realized | Unrealized change | Total change | Closing unrealized |
+| --------- | -------: | ----------------: | -----------: | -----------------: |
+| June      |  -$17.24 |           -$37.29 |      -$54.53 |            -$37.29 |
+| July      |   -$6.30 |           +$30.35 |      +$24.05 |             -$6.94 |
+| August    |   +$5.48 |           +$14.17 |      +$19.65 |             +$7.23 |
+| September |  -$17.28 |           -$41.78 |      -$59.06 |            -$34.55 |
+| October   |  -$35.48 |            -$1.11 |      -$36.59 |            -$35.66 |
+
+For October, euros contribute -$34.06 and pesos -$2.53, making the selected total -$36.59. Expand **Accounts** beneath a month to see BNP Paribas or BBVA México and the closing rate used. The October 31 rates are 1 USD = 0.895897049531496 EUR and 1 USD = 18.78733781 MXN.
+
+### Reconcile with the budget and export
+
+The final table, **FX changes included in To Budget**, shows amounts already included in available funds. Do not add them again. Each month in this example is **Up to date** and matches the selected total above. Brought forward is $0.00.
+
+Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. The CSV retains full rate precision for checking the displayed amounts.
