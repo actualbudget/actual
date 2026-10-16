@@ -174,3 +174,7 @@ export function getPrimaryOrderBy(
 export function q(table: QueryState['table']) {
   return new Query({ table });
 }
+
+export function escapeAqlLiteral(value: string) {
+  return value.startsWith('$') ? `\\${value}` : value;
+}
