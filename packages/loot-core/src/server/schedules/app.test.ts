@@ -8,12 +8,14 @@ import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
+import type { RecurConfig } from '#types/models';
 
 import {
   advanceSchedulesService,
   areConditionValuesEqual,
   createSchedule,
   deleteSchedule,
+  postTransactionForSchedule,
   app as schedulesApp,
   setNextDate,
   skipNextDate,
@@ -636,6 +638,105 @@ describe('schedule app', () => {
       row = res.data[0];
 
       expect(row.next_date).toBe('2020-12-07');
+    });
+
+    describe('postTransactionForSchedule', () => {
+      // Services fill `_account` from the rule; without it nothing posts.
+      beforeEach(() => schedulesApp.startServices());
+      afterEach(() => schedulesApp.stopServices());
+
+      // In tests `currentDay()` is fixed at 2017-01-01.
+      const monthly = (start: string): RecurConfig => ({
+        start,
+        frequency: 'monthly',
+        patterns: [],
+      });
+
+      async function postSchedule(date: string | RecurConfig, today?: boolean) {
+        const accountId = await db.insertAccount({ name: 'Checking' });
+        const id = await createSchedule({
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: -10000 },
+            { op: 'is', field: 'date', value: date },
+          ],
+        });
+
+        await postTransactionForSchedule({ id, today });
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['date']),
+        );
+        const {
+          data: [schedule],
+        } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date', 'completed']),
+        );
+
+        return {
+          dates: transactions.map(t => t.date),
+          nextDate: schedule.next_date,
+          completed: schedule.completed,
+        };
+      }
+
+      it.each([
+        [false, '2017-01-10'],
+        [true, '2017-01-01'],
+      ])(
+        'moves to the next occurrence when posted early (today: %s)',
+        async (today, postedDate) => {
+          expect(await postSchedule(monthly('2017-01-10'), today)).toEqual({
+            dates: [postedDate],
+            nextDate: '2017-02-10',
+            completed: false,
+          });
+        },
+      );
+
+      it('keeps `next_date` when the schedule is due', async () => {
+        expect(await postSchedule(monthly('2017-01-01'))).toEqual({
+          dates: ['2017-01-01'],
+          nextDate: '2017-01-01',
+          completed: false,
+        });
+      });
+
+      it.each([
+        [false, '2017-01-10'],
+        [true, '2017-01-01'],
+      ])(
+        'completes a one-time schedule when posted early (today: %s)',
+        async (today, postedDate) => {
+          expect(await postSchedule('2017-01-10', today)).toEqual({
+            dates: [postedDate],
+            nextDate: '2017-01-10',
+            completed: true,
+          });
+        },
+      );
+
+      it('completes a recurring schedule when its last occurrence is posted early', async () => {
+        const lastOnly: RecurConfig = {
+          ...monthly('2017-01-10'),
+          endMode: 'on_date',
+          endDate: '2017-01-31',
+        };
+
+        expect(await postSchedule(lastOnly, true)).toEqual({
+          dates: ['2017-01-01'],
+          nextDate: '2017-01-10',
+          completed: true,
+        });
+      });
+
+      it('keeps a one-time schedule open when it is due', async () => {
+        expect(await postSchedule('2017-01-01')).toEqual({
+          dates: ['2017-01-01'],
+          nextDate: '2017-01-01',
+          completed: false,
+        });
+      });
     });
 
     it('auto-posts every missed recurring occurrence while catching up', async () => {
