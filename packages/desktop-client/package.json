@@ -202,6 +202,7 @@
     "downshift": "9.4.0",
     "es-toolkit": "^1.52.0",
     "extensionless": "^2.0.6",
+    "fake-indexeddb": "^6.2.5",
     "fzf": "^0.5.2",
     "hyperformula": "^3.5.0",
     "i18next": "^26.4.4",

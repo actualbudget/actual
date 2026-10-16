@@ -86,6 +86,8 @@ export type FxExchangeEnd = {
   realized: number | null;
   feeRealized: number | null;
   referenceRate: FxRateUsed | null;
+  /** Why this endpoint has an unknown figure or reference rate; empty when none. */
+  reasons: FxImpactAccountReason[];
 };
 
 export type FxExchange = {

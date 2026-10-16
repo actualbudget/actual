@@ -276,6 +276,7 @@ __metadata:
     downshift: "npm:9.4.0"
     es-toolkit: "npm:^1.52.0"
     extensionless: "npm:^2.0.6"
+    fake-indexeddb: "npm:^6.2.5"
     fzf: "npm:^0.5.2"
     hyperformula: "npm:^3.5.0"
     i18next: "npm:^26.4.4"
