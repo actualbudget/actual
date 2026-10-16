@@ -15,6 +15,7 @@ type GetDashboardWidgetItemsParams = {
   crossoverReportEnabled: boolean;
   budgetAnalysisReportEnabled: boolean;
   balanceForecastReportEnabled: boolean;
+  fxImpactReportAvailable: boolean;
 };
 
 type DashboardWidgetMenuName =
@@ -25,6 +26,7 @@ type DashboardWidgetMenuName =
   | 'crossover-card'
   | 'custom-report'
   | 'formula-card'
+  | 'fx-impact-card'
   | 'markdown-card'
   | 'net-worth-card'
   | 'spending-card'
@@ -48,6 +50,7 @@ export function getDashboardWidgetItems({
   crossoverReportEnabled,
   budgetAnalysisReportEnabled,
   balanceForecastReportEnabled,
+  fxImpactReportAvailable,
 }: GetDashboardWidgetItemsParams): MenuItem<DashboardWidgetMenuName>[] {
   const items: MenuItem<DashboardWidgetMenuName>[] = [
     {
@@ -98,6 +101,13 @@ export function getDashboardWidgetItems({
     items.splice(findItemIndex(items, 'markdown-card'), 0, {
       name: 'balance-forecast-card',
       text: t('Balance forecast'),
+    });
+  }
+
+  if (fxImpactReportAvailable) {
+    items.splice(findItemIndex(items, 'markdown-card'), 0, {
+      name: 'fx-impact-card',
+      text: t('FX impact'),
     });
   }
 

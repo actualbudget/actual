@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from 'react-router';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 
 import { AgeOfMoney } from './reports/AgeOfMoney';
 import { BalanceForecast } from './reports/BalanceForecast';
@@ -13,6 +14,7 @@ import { CashFlow } from './reports/CashFlow';
 import { Crossover } from './reports/Crossover';
 import { CustomReport } from './reports/CustomReport';
 import { Formula } from './reports/Formula';
+import { FxImpact } from './reports/FxImpact';
 import { MonteCarlo } from './reports/monte-carlo/MonteCarlo';
 import { NetWorth } from './reports/NetWorth';
 import { Sankey } from './reports/Sankey';
@@ -37,6 +39,7 @@ export function ReportRouter() {
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const sankeyReportEnabled = useFeatureFlag('sankeyReport');
   const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
+  const isMulticurrencyAvailable = useMulticurrencyAvailable();
 
   return (
     <Routes>
@@ -241,6 +244,26 @@ export function ReportRouter() {
             element={
               <ReportBoundary>
                 <MonteCarlo />
+              </ReportBoundary>
+            }
+          />
+        </>
+      )}
+      {isMulticurrencyAvailable && (
+        <>
+          <Route
+            path="/fx-impact"
+            element={
+              <ReportBoundary>
+                <FxImpact />
+              </ReportBoundary>
+            }
+          />
+          <Route
+            path="/fx-impact/:id"
+            element={
+              <ReportBoundary>
+                <FxImpact />
               </ReportBoundary>
             }
           />

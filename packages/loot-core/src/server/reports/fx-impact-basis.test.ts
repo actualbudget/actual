@@ -1195,6 +1195,35 @@ describe('exchanges and every fee location', () => {
     checkIdentities(b.s, result);
   });
 
+  it('E1 explains a spread unknown for a missing exchange-date rate', () => {
+    const b = usdToJpy(200, 0);
+    b.s.rates = [];
+    b.rate('JPY', '100', '2026-01-10');
+    for (const accountIds of [null, ['usd'], ['J']]) {
+      const result = b.run({ endMonth: '2026-01', accountIds });
+      expect(monthOf(result, '2026-01').exchanges).toEqual([
+        expect.objectContaining({
+          value: 10000,
+          spread: null,
+          source: expect.objectContaining({ referenceRate: null, reasons: [] }),
+          destination: expect.objectContaining({
+            native: 10000,
+            realized: 0,
+            referenceRate: null,
+            reasons: [{ reason: 'rate-unavailable', since: '2026-01-02' }],
+          }),
+        }),
+      ]);
+    }
+    // The close resolves its rate, so the account itself has no reason.
+    expect(closing(b.run({ endMonth: '2026-01' }), 'J')).toMatchObject({
+      value: 10000,
+    });
+    expect(
+      accountOf(b.run({ endMonth: '2026-01' }), '2026-01', 'J').reasons,
+    ).toEqual([]);
+  });
+
   it('E2 destination fee removes its basis without realizing', () => {
     const b = usdToJpy(0, 100);
     b.s.rates = [];
@@ -2188,7 +2217,12 @@ describe('Sol inspection round 1', () => {
       value: 10000,
       spread: null,
       source: { accountId: 'usd', native: -10000 },
-      destination: { accountId: 'J', native: null, referenceRate: null },
+      destination: {
+        accountId: 'J',
+        native: null,
+        referenceRate: null,
+        reasons: [{ reason: 'precision-unavailable', since: '2026-01-02' }],
+      },
     });
     expect(accountOf(result, '2026-01', 'J').reasons).toContainEqual({
       reason: 'precision-unavailable',
@@ -2209,8 +2243,11 @@ describe('Sol inspection round 1', () => {
         expect.objectContaining({
           value: 10000,
           spread: null,
-          source: expect.objectContaining({ native: -10000 }),
-          destination: expect.objectContaining({ native: null }),
+          source: expect.objectContaining({ native: -10000, reasons: [] }),
+          destination: expect.objectContaining({
+            native: null,
+            reasons: [{ reason, since: '2026-01-02' }],
+          }),
         }),
       ]);
       expect(accountOf(result, '2026-01', 'J').reasons).toContainEqual({
@@ -2616,8 +2653,22 @@ describe('Sol inspection round 2', () => {
       expect(exchangeOf(result)).toMatchObject({
         value: 1000,
         spread: 0,
-        source: { accountId: 'A', native: -1000, fee: null, feeBooked: null },
-        destination: { accountId: 'usd', native: 1000, fee: 0, feeBooked: 0 },
+        source: {
+          accountId: 'A',
+          native: -1000,
+          fee: null,
+          feeBooked: null,
+          reasons: [
+            { reason: 'exchange-family-ambiguous', since: '2026-01-05' },
+          ],
+        },
+        destination: {
+          accountId: 'usd',
+          native: 1000,
+          fee: 0,
+          feeBooked: 0,
+          reasons: [],
+        },
       });
       expect(monthOf(result, '2026-01').diagnostics.fees).toBeNull();
       if (accountIds?.[0] === 'A') {

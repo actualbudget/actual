@@ -16,6 +16,7 @@ import type {
   FxExchangeEnd,
   FxImpactAccountReason,
   FxImpactMonth,
+  FxImpactReason,
   FxImpactRequest,
   FxImpactResult,
   FxRateUsed,
@@ -446,6 +447,30 @@ export function calculateFxImpact(
       failure,
     ]);
   }
+  /** One entry per reason and origin, at its earliest date on or before `through`. */
+  const reasonsOf = (accountId: string, through: string) => {
+    const reasons: FxImpactAccountReason[] = [];
+    for (const failure of (failuresOf.get(accountId) ?? [])
+      .filter(failure => failure.since <= through)
+      .sort((a, b) => (a.since < b.since ? -1 : a.since > b.since ? 1 : 0))) {
+      if (
+        !reasons.some(
+          r =>
+            r.reason === failure.reason &&
+            r.fromAccountId === failure.fromAccountId,
+        )
+      ) {
+        reasons.push({
+          reason: failure.reason,
+          since: failure.since,
+          ...(failure.fromAccountId && {
+            fromAccountId: failure.fromAccountId,
+          }),
+        });
+      }
+    }
+    return reasons;
+  };
   const accountMonth = (
     account: FxSnapshotAccount,
     index: number,
@@ -477,27 +502,7 @@ export function calculateFxImpact(
       settlement: change('settlement'),
       gap: difference(opening.gap, closing.gap),
     };
-    // One entry per reason and origin, at its earliest date.
-    const reasons: FxImpactAccountReason[] = [];
-    for (const failure of (failuresOf.get(account.id) ?? [])
-      .filter(failure => failure.since <= closeDate)
-      .sort((a, b) => (a.since < b.since ? -1 : a.since > b.since ? 1 : 0))) {
-      if (
-        !reasons.some(
-          r =>
-            r.reason === failure.reason &&
-            r.fromAccountId === failure.fromAccountId,
-        )
-      ) {
-        reasons.push({
-          reason: failure.reason,
-          since: failure.since,
-          ...(failure.fromAccountId && {
-            fromAccountId: failure.fromAccountId,
-          }),
-        });
-      }
-    }
+    const reasons = reasonsOf(account.id, closeDate);
     const market: Array<[Stocks['reason'], string]> = [
       [opening.reason, openDate],
       [closing.reason, closeDate],
@@ -639,48 +644,86 @@ export function calculateFxImpact(
   };
 
   /** A reference market value for the spread; a budget-currency leg is its own value. */
-  const marketOf = (
-    leg: FxLeg,
-    date: string,
-  ): Pick<Valued, 'value' | 'rate'> => {
+  const marketOf = (leg: FxLeg, date: string): Valued => {
     const account = accounts.get(leg.account)!;
-    if (leg.native === null) return { value: null, rate: null };
+    if (leg.native === null) return { value: null, rate: null, reason: null };
     const magnitude = leg.native < 0n ? -leg.native : leg.native;
-    if (!foreign(account)) return { value: magnitude, rate: null };
-    const valued = valueOf(account, magnitude, date);
-    return { value: valued.value, rate: valued.rate };
+    if (!foreign(account)) {
+      return { value: magnitude, rate: null, reason: null };
+    }
+    return valueOf(account, magnitude, date);
   };
   const exchangeOf = (record: FxExchangeRecord): FxExchange => {
-    const end = (leg: FxLeg, market: FxRateUsed | null): FxExchangeEnd => {
-      const account = accounts.get(leg.account)!;
-      const fee = record.fees.find(f => f.account === leg.account);
-      const unknownFee = record.feeUnknown.includes(leg.account);
-      const realized = record.realized.get(leg.account);
-      const feeRealized = record.feeRealized.get(leg.account);
-      return {
-        accountId: leg.account,
-        currency: foreign(account) ? account.currency : null,
-        native: bounded(leg.native),
-        // An ambiguous family's fee is unknown, not absent.
-        fee: unknownFee ? null : fee ? bounded(fee.native) : 0,
-        feeBooked: unknownFee ? null : fee ? bounded(fee.base) : 0,
-        realized: realized === undefined ? null : bounded(realized),
-        feeRealized: feeRealized === undefined ? null : bounded(feeRealized),
-        referenceRate: market,
-      };
-    };
     const source = marketOf(record.source, record.date);
     const destination = marketOf(record.destination, record.date);
+    const spread =
+      source.value === null || destination.value === null
+        ? null
+        : destination.value - source.value;
+    const value = bounded(record.destination.base);
+    /**
+     * Reasons travel with the endpoint so an unselected endpoint's unknown
+     * figures stay explained. A budget-currency endpoint's realization and
+     * reference rate are not applicable, not unknown.
+     */
+    const end = (leg: FxLeg, market: Valued): FxExchangeEnd => {
+      const account = accounts.get(leg.account)!;
+      const isForeign = foreign(account);
+      const fee = record.fees.find(f => f.account === leg.account);
+      // An ambiguous family's fee is unknown, not absent.
+      const unknownFee = record.feeUnknown.includes(leg.account);
+      const exact = {
+        native: leg.native,
+        fee: unknownFee ? null : fee ? fee.native : 0n,
+        feeBooked: unknownFee ? null : fee ? fee.base : 0n,
+        realized: record.realized.get(leg.account) ?? null,
+        feeRealized: record.feeRealized.get(leg.account) ?? null,
+      };
+      const known = Object.entries(exact).filter(
+        ([field]) =>
+          isForeign || (field !== 'realized' && field !== 'feeRealized'),
+      );
+      const reasons =
+        value === null || known.some(([, amount]) => amount === null)
+          ? reasonsOf(leg.account, record.date)
+          : [];
+      const add = (reason: FxImpactReason | null) => {
+        if (
+          reason &&
+          !reasons.some(r => r.reason === reason && r.since === record.date)
+        ) {
+          reasons.push({ reason, since: record.date });
+        }
+      };
+      add(market.reason);
+      if (
+        known.some(
+          ([, amount]) => amount !== null && bounded(amount) === null,
+        ) ||
+        (record.destination.base !== null && value === null) ||
+        (spread !== null && bounded(spread) === null)
+      ) {
+        add('amount-out-of-range');
+      }
+      return {
+        accountId: leg.account,
+        currency: isForeign ? account.currency : null,
+        native: bounded(exact.native),
+        fee: bounded(exact.fee),
+        feeBooked: bounded(exact.feeBooked),
+        realized: bounded(exact.realized),
+        feeRealized: bounded(exact.feeRealized),
+        referenceRate: market.rate,
+        reasons,
+      };
+    };
     return {
       id: record.id,
       date: record.date,
-      value: bounded(record.destination.base),
-      source: end(record.source, source.rate),
-      destination: end(record.destination, destination.rate),
-      spread:
-        source.value === null || destination.value === null
-          ? null
-          : bounded(destination.value - source.value),
+      value,
+      source: end(record.source, source),
+      destination: end(record.destination, destination),
+      spread: bounded(spread),
     };
   };
 
