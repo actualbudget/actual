@@ -1350,7 +1350,7 @@ const Transaction = memo(function Transaction({
     payee: payeeId,
     imported_payee: importedPayee,
     notes,
-    number: number,
+    number,
     date,
     account: accountId,
     category: categoryId,
