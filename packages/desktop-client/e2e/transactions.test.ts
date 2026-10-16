@@ -414,21 +414,13 @@ test.describe('Transactions', () => {
       await sortButton.click();
       await sortButton.click();
 
-      await expect(accountPage.getNthTransaction(0).number).toHaveText(
-        'A1',
-      );
-      await expect(accountPage.getNthTransaction(1).number).toHaveText(
-        '9',
-      );
-      await expect(accountPage.getNthTransaction(2).number).toHaveText(
-        '10',
-      );
+      await expect(accountPage.getNthTransaction(0).number).toHaveText('A1');
+      await expect(accountPage.getNthTransaction(1).number).toHaveText('9');
+      await expect(accountPage.getNthTransaction(2).number).toHaveText('10');
 
       await accountPage.filterByNumber('10');
       await expect(accountPage.transactionTableRow).toHaveCount(1);
-      await expect(accountPage.getNthTransaction(0).number).toHaveText(
-        '10',
-      );
+      await expect(accountPage.getNthTransaction(0).number).toHaveText('10');
     });
 
     test('stores numbers separately on split transactions', async () => {
@@ -448,15 +440,9 @@ test.describe('Transactions', () => {
         },
       ]);
 
-      await expect(accountPage.getNthTransaction(0).number).toHaveText(
-        '500',
-      );
-      await expect(accountPage.getNthTransaction(1).number).toHaveText(
-        '500-1',
-      );
-      await expect(accountPage.getNthTransaction(2).number).toHaveText(
-        '',
-      );
+      await expect(accountPage.getNthTransaction(0).number).toHaveText('500');
+      await expect(accountPage.getNthTransaction(1).number).toHaveText('500-1');
+      await expect(accountPage.getNthTransaction(2).number).toHaveText('');
     });
   });
 });

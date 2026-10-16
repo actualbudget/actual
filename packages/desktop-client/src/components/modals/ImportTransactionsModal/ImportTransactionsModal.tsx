@@ -115,9 +115,7 @@ function getInitialMappings(transactions) {
     return entry ? entry[0] : null;
   }
 
-  const numberField = findNumberField(
-    fields.map(([name]) => name),
-  );
+  const numberField = findNumberField(fields.map(([name]) => name));
 
   const dateField = key(
     fields.find(([name]) => name.toLowerCase().includes('date')) ||

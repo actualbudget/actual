@@ -579,9 +579,7 @@ const ChildTransactionEdit = forwardRef<
             }
             defaultValue={transaction.number ?? ''}
             onFocus={() =>
-              onRequestActiveEdit(
-                getFieldName(transaction.id, 'number'),
-              )
+              onRequestActiveEdit(getFieldName(transaction.id, 'number'))
             }
             onUpdate={value => onUpdate(transaction, 'number', value)}
           />
@@ -1570,17 +1568,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               defaultValue={transaction.number ?? ''}
               onFocus={() => {
-                onRequestActiveEdit(
-                  getFieldName(transaction.id, 'number'),
-                );
+                onRequestActiveEdit(getFieldName(transaction.id, 'number'));
               }}
               onBlur={() => onClearActiveEdit()}
               onChange={event =>
-                onUpdateInner(
-                  transaction,
-                  'number',
-                  event.target.value,
-                )
+                onUpdateInner(transaction, 'number', event.target.value)
               }
             />
           </View>

@@ -707,12 +707,12 @@ describe('Account sync', () => {
 
     const transactions = await getAllTransactions();
     expect(transactions.length).toBe(2);
-    expect(
-      transactions.find(t => t.imported_id === 'tracking-1').number,
-    ).toBe('1001');
-    expect(
-      transactions.find(t => t.imported_id === 'tracking-2').number,
-    ).toBe('1002');
+    expect(transactions.find(t => t.imported_id === 'tracking-1').number).toBe(
+      '1001',
+    );
+    expect(transactions.find(t => t.imported_id === 'tracking-2').number).toBe(
+      '1002',
+    );
   });
 
   describe('compareFuzzyMatchCandidates', () => {
