@@ -3,4 +3,4 @@ category: Enhancements
 authors: [MikeBishop]
 ---
 
-Budget schedules using a smarter forecast that avoids holding more money than upcoming bills actually need
+Budget schedules using a smarter forecast that stops adding to a category once it holds what its upcoming bills need
