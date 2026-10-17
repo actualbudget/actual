@@ -192,7 +192,7 @@ __metadata:
     "@types/supertest": "npm:^7.2.1"
     "@typescript/native-preview": "npm:beta"
     akahu: "npm:^2.5.1"
-    argon2: "npm:^0.44.0"
+    argon2: "npm:^0.45.1"
     bcrypt: "npm:^6.0.0"
     better-sqlite3: "npm:^13.0.3"
     convict: "npm:^6.2.5"
@@ -10276,16 +10276,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"argon2@npm:^0.44.0":
-  version: 0.44.0
-  resolution: "argon2@npm:0.44.0"
+"argon2@npm:^0.45.1":
+  version: 0.45.1
+  resolution: "argon2@npm:0.45.1"
   dependencies:
     "@phc/format": "npm:^1.0.0"
-    cross-env: "npm:^10.0.0"
-    node-addon-api: "npm:^8.5.0"
+    cross-env: "npm:^10.1.0"
+    node-addon-api: "npm:^8.9.0"
     node-gyp: "npm:latest"
     node-gyp-build: "npm:^4.8.4"
-  checksum: 10/ddf239634329e6f980c5bec59705c4b9f82505da4f5f5f8da35420647e8b92ee4551e8ac122e4ef492644eb030a523f56ce5e8209c4dc2da39c29418736d8e1d
+  checksum: 10/20e552d413c96222af5e0f16a33e55aa89b658877053eb9cced4ce14060eb456fb38f63cb9c5210a524879515bf337d74bb6968054da5a7da8c48623b14f8d51
   languageName: node
   linkType: hard
 
@@ -12530,7 +12530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-env@npm:^10.0.0, cross-env@npm:^10.1.0":
+"cross-env@npm:^10.1.0":
   version: 10.1.0
   resolution: "cross-env@npm:10.1.0"
   dependencies:
@@ -20454,7 +20454,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^8.0.0, node-addon-api@npm:^8.3.0, node-addon-api@npm:^8.5.0":
+"node-addon-api@npm:^8.0.0, node-addon-api@npm:^8.3.0, node-addon-api@npm:^8.9.0":
   version: 8.9.2
   resolution: "node-addon-api@npm:8.9.2"
   dependencies:
