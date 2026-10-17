@@ -196,6 +196,11 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
 }: FocusableAmountInputProps) {
   const [isNegative, setIsNegative] = useState(true);
   const [liveValue, setLiveValue] = useState(Math.abs(value));
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setLiveValue(Math.abs(value));
+  }
 
   const maybeApplyNegative = (amount: number, negative: boolean) => {
     const absValue = Math.abs(amount);
@@ -210,10 +215,6 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
     setLiveValue(currencyToAmount(text) || 0);
     onChangeValue?.(text);
   };
-
-  useEffect(() => {
-    setLiveValue(Math.abs(value));
-  }, [value]);
 
   useEffect(() => {
     if (sign) {

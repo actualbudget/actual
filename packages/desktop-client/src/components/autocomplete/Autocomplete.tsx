@@ -240,6 +240,19 @@ function SingleAutocomplete<T extends AutocompleteItem>({
   const [selectedItem, setSelectedItem] = useState(() =>
     findItem(strict, suggestions, initialValue),
   );
+  const [prevSelectionInputs, setPrevSelectionInputs] = useState({
+    initialValue,
+    suggestions,
+    strict,
+  });
+  if (
+    prevSelectionInputs.initialValue !== initialValue ||
+    prevSelectionInputs.suggestions !== suggestions ||
+    prevSelectionInputs.strict !== strict
+  ) {
+    setPrevSelectionInputs({ initialValue, suggestions, strict });
+    setSelectedItem(findItem(strict, suggestions, initialValue));
+  }
   const [value, setValue] = useState(
     selectedItem ? getItemName(selectedItem) : '',
   );
@@ -296,12 +309,6 @@ function SingleAutocomplete<T extends AutocompleteItem>({
       ...inputProps.style,
     },
   };
-
-  // Update the selected item if the suggestion list or initial
-  // input value has changed
-  useEffect(() => {
-    setSelectedItem(findItem(strict, suggestions, initialValue));
-  }, [initialValue, suggestions, strict]);
 
   // Sometimes (khem, khem.. on mobile) we want to force update
   // the "value" field (which is also used as a search term) if
