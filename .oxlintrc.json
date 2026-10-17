@@ -371,6 +371,13 @@
   },
   "overrides": [
     {
+      // CommonJS files that cannot use ESM imports.
+      "files": ["**/*.cjs", "packages/eslint-plugin-actual/lib/**/*.js"],
+      "rules": {
+        "typescript/no-var-requires": "off"
+      }
+    },
+    {
       "files": ["packages/desktop-electron/**/*"],
       "rules": {
         "react/rules-of-hooks": "off"
