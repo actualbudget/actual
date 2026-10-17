@@ -59,7 +59,7 @@
     "@actual-app/crdt": "workspace:*",
     "better-sqlite3": "^13.0.3",
     "compare-versions": "^6.1.1",
-    "uuid": "^14.0.2"
+    "uuid": "^14.0.3"
   },
   "devDependencies": {
     "@actual-app/vite-plugin-peggy": "workspace:*",
