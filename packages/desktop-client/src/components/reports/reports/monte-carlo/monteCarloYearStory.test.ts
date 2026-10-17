@@ -206,7 +206,7 @@ describe('buildMonteCarloYearStory', () => {
         },
       })[0],
     ).toBe(
-      "Guardrails raised this year's spending from 14947.00 to 17936.00 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is still below the 60000.00 planned.",
+      "Guardrails raised this year's spending from 14947.00 to 17936.00 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is below the 60000.00 planned.",
     );
 
     const cutStillAbovePlan = makeRow({
@@ -221,7 +221,7 @@ describe('buildMonteCarloYearStory', () => {
       },
     });
     expect(story(cutStillAbovePlan)[0]).toBe(
-      "Boundaries cut this year's spending from 4800.00 to 4320.00 because the withdrawal rate rose above 6%. With earlier changes included, that is still above the 4000.00 planned.",
+      "Boundaries cut this year's spending from 4800.00 to 4320.00 because the withdrawal rate rose above 6%. With earlier changes included, that is above the 4000.00 planned.",
     );
   });
 

@@ -137,13 +137,13 @@ function getEarlierChangesSentence(
   const planned = format(explanation.planned, 'financial');
   if (explanation.adjusted < explanation.planned) {
     return translate(
-      'With earlier changes included, that is still below the {{planned}} planned.',
+      'With earlier changes included, that is below the {{planned}} planned.',
       { planned },
     );
   }
   if (explanation.adjusted > explanation.planned) {
     return translate(
-      'With earlier changes included, that is still above the {{planned}} planned.',
+      'With earlier changes included, that is above the {{planned}} planned.',
       { planned },
     );
   }
