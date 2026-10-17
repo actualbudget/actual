@@ -887,11 +887,11 @@ Resolves with what the sync reconciled, so a caller can tell an idle sync from o
 {
   newTransactions: ['id', ...],     // transactions the sync added
   matchedTransactions: ['id', ...], // existing transactions it updated
-  updatedAccounts: ['id', ...]      // accounts whose balance it refreshed
+  updatedAccounts: ['id', ...]      // accounts the sync added transactions to
 }
 ```
 
-A sync that finds nothing new resolves with empty arrays. Errors still reject, so a resolved promise always means the sync succeeded.
+A sync that finds nothing new resolves with empty arrays. Errors still reject, so a resolved promise always means the sync succeeded. When syncing every account, one failing account rejects the whole call, but transactions already imported for the other accounts stay in the ledger and are not reported. After a rejection, check the ledger instead of assuming nothing was imported.
 
 #### `runImport`
 
