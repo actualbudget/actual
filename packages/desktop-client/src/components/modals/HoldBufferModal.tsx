@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -23,11 +23,12 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
   const { t } = useTranslation(); // Initialize i18next
   const [hideFraction] = useSyncedPref('hideFraction');
   const available = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
-  const [amount, setAmount] = useState<number>(0);
-
-  useEffect(() => {
+  const [amount, setAmount] = useState<number>(available);
+  const [prevAvailable, setPrevAvailable] = useState(available);
+  if (available !== prevAvailable) {
+    setPrevAvailable(available);
     setAmount(available);
-  }, [available]);
+  }
 
   const _onSubmit = (newAmount: number) => {
     if (newAmount) {
