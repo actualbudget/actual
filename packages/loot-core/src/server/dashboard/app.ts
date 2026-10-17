@@ -152,12 +152,14 @@ async function updateDashboard(
     (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
 
-  await Promise.all(
-    widgets
-      // Perform an update query only if the widget actually has changes
-      .filter(widget => !isMatch(dbWidgetMap.get(widget.id) ?? {}, widget))
-      .map(widget => db.update('dashboard', widget)),
-  );
+  await batchMessages(async () => {
+    await Promise.all(
+      widgets
+        // Perform an update query only if the widget actually has changes
+        .filter(widget => !isMatch(dbWidgetMap.get(widget.id) ?? {}, widget))
+        .map(widget => db.update('dashboard', widget)),
+    );
+  });
 }
 
 async function updateDashboardWidget(
