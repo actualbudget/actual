@@ -101,8 +101,26 @@ export function showActivity({
               type: 'id',
             };
 
+  // Like the report query, keep transactions without a category: "is not one
+  // of" the unchecked categories matches them, "is one of" does not.
+  const reportFilters = filters.flatMap(filter => {
+    if (
+      filter.field !== 'category' ||
+      filter.op !== 'oneOf' ||
+      categories.list.length === 0
+    ) {
+      return [filter];
+    }
+    const uncheckedIds = categories.list
+      .map(({ id }) => id)
+      .filter(id => !filter.value.includes(id));
+    return uncheckedIds.length > 0
+      ? [{ ...filter, op: 'notOneOf' as const, value: uncheckedIds }]
+      : [];
+  });
+
   const filterConditions = [
-    ...filters,
+    ...reportFilters,
     drilldownFilter,
     {
       field: 'date',
