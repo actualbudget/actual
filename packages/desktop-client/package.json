@@ -201,7 +201,7 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.3.0",
-    "react-error-boundary": "^6.1.2",
+    "react-error-boundary": "^6.1.6",
     "react-grid-layout": "^2.2.3",
     "react-hotkeys-hook": "^5.3.3",
     "react-i18next": "^17.0.10",
