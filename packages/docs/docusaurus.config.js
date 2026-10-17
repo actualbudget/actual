@@ -3,6 +3,36 @@
 
 const { themes } = require('prism-react-renderer');
 
+const docVersions = require('./doc-versions.json');
+
+const DOCS_DOMAIN = 'https://actualbudget.org';
+const CURRENT_DOCS_URL = `${DOCS_DOMAIN}/docs/`;
+
+const isDeployPreview = process.env.CONTEXT === 'deploy-preview';
+const DOCS_URL =
+  (isDeployPreview && process.env.DEPLOY_PRIME_URL) || DOCS_DOMAIN;
+
+const isDev = process.env.NODE_ENV === 'development';
+// DOCS_NEXT is set by the workflow that deploys master to next--
+const isNext = isDev || isDeployPreview || process.env.DOCS_NEXT === 'true';
+const activeVersion = isNext ? 'next' : docVersions.current;
+// Only the current release on actualbudget.org is indexed. DOCS_PRODUCTION is
+// set by the release workflow; CONTEXT covers Netlify's own production builds.
+const isProduction =
+  process.env.DOCS_PRODUCTION === 'true' ||
+  process.env.CONTEXT === 'production';
+
+const versionDropdownItems = Object.entries(docVersions.versions || {}).map(
+  ([version, url]) => {
+    const isCurrent = version === activeVersion;
+    const label = version === 'next' ? 'Next' : `v${version}`;
+    const key = isCurrent ? 'to' : 'href';
+    const link = isCurrent ? '/docs/' : url;
+
+    return { label, [key]: link };
+  },
+);
+
 const defaultOptions = {
   editUrl: 'https://github.com/actualbudget/actual/tree/master/packages/docs',
   beforeDefaultRemarkPlugins: [
@@ -15,8 +45,9 @@ const defaultOptions = {
 module.exports = {
   title: 'Actual Budget',
   tagline: 'Your finances - made simple',
-  url: 'https://actualbudget.org/',
+  url: `${DOCS_URL}/`,
   baseUrl: '/',
+  noIndex: !isProduction,
   onBrokenLinks: 'throw',
   onBrokenAnchors: 'throw',
   favicon: 'img/favicon.ico',
@@ -31,6 +62,13 @@ module.exports = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
+  },
+
+  customFields: {
+    mainHost: new URL(DOCS_DOMAIN).hostname,
+    currentDocsUrl: CURRENT_DOCS_URL,
+    docVersion: docVersions.current,
+    isNext,
   },
 
   markdown: {
@@ -122,6 +160,17 @@ module.exports = {
             label: 'Donate',
             position: 'left',
           },
+          ...(activeVersion
+            ? [
+                {
+                  type: 'dropdown',
+                  position: 'right',
+                  label:
+                    activeVersion === 'next' ? 'Next' : `v${activeVersion}`,
+                  items: versionDropdownItems,
+                },
+              ]
+            : []),
           {
             href: 'https://discord.gg/8JfAXSgfRf',
             label: 'Discord',
