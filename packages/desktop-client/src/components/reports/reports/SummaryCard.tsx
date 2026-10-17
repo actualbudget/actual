@@ -126,8 +126,6 @@ export function SummaryCard({
               contentType={content.type}
               suffix={content.type === 'percentage' ? '%' : ''}
               loading={!data}
-              initialFontSize={content.fontSize}
-              animate={isEditing ?? false}
             />
           ) : (
             <ReportCardValueSkeleton />

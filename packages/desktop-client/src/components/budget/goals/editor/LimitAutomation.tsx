@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import {
   dayFromDate,
   firstDayOfMonth,
@@ -44,10 +46,10 @@ export const LimitAutomation = ({
     template.amount,
     format.currency.decimalPlaces,
   );
-  const start =
-    template.start ??
-    defaultWeeklyStart ??
-    dayFromDate(firstDayOfMonth(new Date()));
+  const [currentMonthStart] = useState(() =>
+    dayFromDate(firstDayOfMonth(new Date())),
+  );
+  const start = template.start ?? defaultWeeklyStart ?? currentMonthStart;
   const dayOfWeek = getDay(parseDate(start));
   const hold = template.hold;
 
@@ -129,11 +131,11 @@ export const LimitAutomation = ({
       </SpaceBetween>
 
       <Text
+        size="small"
         style={{
-          fontSize: 12,
           color: theme.pageTextLight,
           display: 'block',
-          marginTop: 8,
+          marginTop: spacing.sm,
         }}
       >
         <Trans>

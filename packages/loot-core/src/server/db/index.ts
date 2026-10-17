@@ -162,8 +162,11 @@ function resetQueryCache() {
   _queryCache = new LRUCache<string, Statement>({ max: 100 });
 }
 
-export function transaction(fn: () => void) {
-  return sqlite.transaction(db, fn);
+export function transaction(
+  fn: () => void,
+  options?: sqlite.TransactionOptions,
+) {
+  return sqlite.transaction(db, fn, options);
 }
 
 export function asyncTransaction(fn: () => Promise<void>) {
@@ -758,6 +761,7 @@ export function deleteAccount(account) {
 export async function moveAccount(
   id: DbAccount['id'],
   targetId: DbAccount['id'] | null,
+  accountGroupId?: DbAccountGroup['id'] | null,
 ) {
   const account = await first<DbAccount>(
     'SELECT * FROM accounts WHERE id = ?',
@@ -780,7 +784,13 @@ export async function moveAccount(
     for (const info of updates) {
       void update('accounts', info);
     }
-    void update('accounts', { id, sort_order });
+    void update('accounts', {
+      id,
+      sort_order,
+      ...(accountGroupId !== undefined && {
+        account_group_id: accountGroupId,
+      }),
+    });
   });
 }
 

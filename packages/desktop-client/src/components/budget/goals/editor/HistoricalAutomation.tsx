@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -36,9 +36,11 @@ export const HistoricalAutomation = ({
   const months =
     template.type === 'average' ? template.numMonths : template.lookBack;
   const [rawMonths, setRawMonths] = useState(String(months));
-  useEffect(() => {
+  const [prevMonths, setPrevMonths] = useState(months);
+  if (months !== prevMonths) {
+    setPrevMonths(months);
     setRawMonths(String(months));
-  }, [months]);
+  }
 
   const commitMonths = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawMonths)) || 1);

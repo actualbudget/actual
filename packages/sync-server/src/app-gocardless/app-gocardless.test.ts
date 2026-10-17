@@ -17,6 +17,7 @@ vi.mock('./services/gocardless-service', () => ({
     createRequisition: vi.fn(),
     setToken: vi.fn(),
     getInstitutions: vi.fn(),
+    isConfigured: vi.fn(() => true),
   },
 }));
 
@@ -27,6 +28,7 @@ const { AccessDeniedError, RateLimitError, InvalidInputDataError } =
   await import('./errors');
 
 const app = express();
+app.use(express.json());
 app.use('/', handlers);
 
 describe('/create-web-token', () => {
@@ -225,5 +227,40 @@ describe('/link', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/text\/html/);
     expect(res.text).toContain('window.close()');
+  });
+});
+
+describe('when GoCardless credentials are missing (not configured)', () => {
+  const isConfigured = vi.mocked(goCardlessService.isConfigured);
+
+  beforeEach(() => {
+    isConfigured.mockReturnValue(false);
+  });
+
+  afterEach(() => {
+    isConfigured.mockReturnValue(true);
+  });
+
+  it('reports configured: false from /status', async () => {
+    const res = await request(app).post('/status');
+    expect(res.body).toEqual({
+      status: 'ok',
+      data: { configured: false },
+    });
+  });
+
+  it('returns GOCARDLESS_NOT_CONFIGURED from POST /transactions', async () => {
+    const res = await request(app)
+      .post('/transactions')
+      .send({ requisitionId: 'req-1', accountId: 'acc-1' });
+
+    expect(res.body).toEqual({
+      status: 'ok',
+      data: {
+        error_type: 'GOCARDLESS_NOT_CONFIGURED',
+        error_code: 'GOCARDLESS_NOT_CONFIGURED',
+        reason: 'GoCardless credentials are missing',
+      },
+    });
   });
 });

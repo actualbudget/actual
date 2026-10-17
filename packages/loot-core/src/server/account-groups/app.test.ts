@@ -163,4 +163,78 @@ describe('account groups app', () => {
       expect(accounts[0].account_group_id).toBeNull();
     });
   });
+
+  describe('account-move', () => {
+    it('reorders and reassigns the group in one undoable move', async () => {
+      const groupId = await app.handlers['account-group-create']({
+        name: 'Savings',
+      });
+      await db.insertAccount({ id: 'acct1', name: 'Checking' });
+      await db.insertAccount({ id: 'acct2', name: 'Marcus' });
+      await db.insertAccount({ id: 'acct3', name: 'Premium Saver' });
+      await accountsApp.handlers['account-update']({
+        id: 'acct3',
+        account_group_id: groupId,
+      });
+
+      await accountsApp.handlers['account-move']({
+        id: 'acct1',
+        targetId: 'acct3',
+        accountGroupId: groupId,
+      });
+
+      let accounts = await accountsApp.handlers['accounts-get']();
+      expect(accounts.map(account => account.id)).toEqual([
+        'acct2',
+        'acct1',
+        'acct3',
+      ]);
+      expect(
+        accounts.find(account => account.id === 'acct1')?.account_group_id,
+      ).toBe(groupId);
+
+      await accountsApp.handlers['account-move']({
+        id: 'acct1',
+        targetId: 'acct2',
+        accountGroupId: null,
+      });
+      accounts = await accountsApp.handlers['accounts-get']();
+      expect(accounts.map(account => account.id)).toEqual([
+        'acct1',
+        'acct2',
+        'acct3',
+      ]);
+      expect(
+        accounts.find(account => account.id === 'acct1')?.account_group_id,
+      ).toBeNull();
+
+      await accountsApp.handlers['account-move']({
+        id: 'acct2',
+        targetId: null,
+      });
+      accounts = await accountsApp.handlers['accounts-get']();
+      expect(accounts.map(account => account.id)).toEqual([
+        'acct1',
+        'acct3',
+        'acct2',
+      ]);
+      expect(
+        accounts.find(account => account.id === 'acct2')?.account_group_id,
+      ).toBeNull();
+
+      await accountsApp.handlers['account-move']({
+        id: 'acct3',
+        targetId: 'acct1',
+      });
+      accounts = await accountsApp.handlers['accounts-get']();
+      expect(accounts.map(account => account.id)).toEqual([
+        'acct3',
+        'acct1',
+        'acct2',
+      ]);
+      expect(
+        accounts.find(account => account.id === 'acct3')?.account_group_id,
+      ).toBe(groupId);
+    });
+  });
 });

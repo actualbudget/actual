@@ -228,8 +228,8 @@ function OpenIdLogin({ setError }) {
       {reviewOpenIdConfiguration && (
         <View style={{ marginTop: 20 }}>
           <Text
+            size="small"
             style={{
-              ...styles.verySmallText,
               color: theme.pageTextLight,
               fontWeight: 'bold ',
               width: '100%',
@@ -302,16 +302,18 @@ export function Login() {
   const dispatch = useDispatch();
   const defaultLoginMethod = useLoginMethod();
   const [method, setMethod] = useState(defaultLoginMethod);
+  const [prevDefaultLoginMethod, setPrevDefaultLoginMethod] =
+    useState(defaultLoginMethod);
+  if (defaultLoginMethod !== prevDefaultLoginMethod) {
+    setPrevDefaultLoginMethod(defaultLoginMethod);
+    setMethod(defaultLoginMethod);
+  }
   const [searchParams, _setSearchParams] = useSearchParams();
   const [error, setError] = useState(null);
   const { checked } = useBootstrapped();
   const loginMethods = useAvailableLoginMethods();
   const loginMethodRef = useRef<HTMLButtonElement>(null);
   const [loginMethodMenuOpen, setLoginMethodMenuOpen] = useState(false);
-
-  useEffect(() => {
-    setMethod(defaultLoginMethod);
-  }, [defaultLoginMethod]);
 
   useEffect(() => {
     if (checked && !searchParams.has('error')) {
@@ -433,11 +435,11 @@ export function Login() {
 
       {error && (
         <Text
+          size="large"
           style={{
             marginTop: 20,
             color: theme.errorText,
             borderRadius: 4,
-            fontSize: 15,
           }}
         >
           {getErrorMessage(error)}

@@ -33,43 +33,47 @@ Server Version 24.10.0 or higher are required for this feature.
 
 7. Back in Actual, click on "+ Add account" at the bottom of the sidebar.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
+   <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-8. Click "Link bank account with SimpleFIN".
+8. Click **Set up bank sync**. This opens the **Bank Sync** page in Settings.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-05.webp)
+   <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-9. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
+9. Under **Providers**, click **Set up** on the SimpleFIN card.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-06.webp)
+   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the SimpleFIN card highlighted" src="/img/advanced/bank-sync/simplefin-set-up@2x.webp" />
+
+10. You will be asked to enter your SimpleFIN setup token. The keys from this value will be saved on the server, so you will only need to enter it once.
+
+    <img width="510" alt="The Set-up SimpleFIN dialog with an empty Token field" src="/img/advanced/bank-sync/simplefin-setup-modal@2x.webp" />
 
 ### Link Accounts with SimpleFIN
 
 1. Add the link to your accounts in actual (Existing or New).
-   - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
+   - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link account_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-01.webp)
+     <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom_**
+   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, then click Set up bank sync_**
 
-     ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
+     <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Select the Link bank account with SimpleFIN button.
+2. Click the **Link bank account** button on the SimpleFIN card.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-07.webp)
+   <img width="662" alt="The Link account dialog with Link bank account on the SimpleFIN card highlighted" src="/img/advanced/bank-sync/simplefin-link-bank-account@2x.webp" />
 
-3. A Link Accounts box will pop up. To link a SimpleFIN account to an Actual account, click the "Setup bank-sync" button in the same row.
+3. A Link Accounts box will pop up. To link a SimpleFIN account to an Actual account, click the "Set up bank sync" button in the same row.
    - The "Bank Account To Sync" column contains the names of the accounts found via SimpleFIN
    - The "Account in Actual" column contains the name of the Actual account it is linked to.
-   - You can also click in the "Account in Actual" column, instead of clicking the "Setup bank-sync" button.
+   - You can also click in the "Account in Actual" column, instead of clicking the "Set up bank sync" button.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-08.webp)
+   <img width="988" alt="The Link Accounts dialog listing SimpleFIN accounts, with one Set up bank sync button highlighted" src="/img/advanced/bank-sync/simplefin-link-accounts@2x.webp" />
 
 4. Either select an existing Actual account to link to, or create a new one.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-simplefin-09.webp)
+   <img width="988" alt="The account picker open in the Account in Actual column, listing existing accounts and Create new account" src="/img/advanced/bank-sync/simplefin-account-picker@2x.webp" />
 
-5. When you've mapped all your accounts that you wish to, click the "Link Account" button.
+5. When you've mapped all your accounts that you wish to, click the "Link accounts" button.
 
 ### SimpleFIN Considerations
 

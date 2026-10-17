@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -7,6 +8,8 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { assertUrlAllowed } from '#util/ssrf';
+
+const debugSensitive = createDebug('actual-sensitive:simplefin');
 
 const app = express();
 export { app as handlers };
@@ -59,10 +62,10 @@ app.post(
       }
 
       if (isInvalidAccessKey(accessKey)) {
-        console.log(
-          `SimpleFIN rejected the setup token claim: ${
-            accessKey.slice(0, 200) || '(empty response)'
-          }`,
+        console.log('SimpleFIN rejected the setup token claim');
+        debugSensitive(
+          'SimpleFIN rejected the setup token claim: %s',
+          accessKey.slice(0, 200) || '(empty response)',
         );
         invalidToken(res);
         return;
@@ -296,7 +299,8 @@ function invalidToken(res) {
 }
 
 function serverDown(e, res) {
-  console.log(e);
+  console.log('Error communicating with SimpleFIN');
+  debugSensitive('Error communicating with SimpleFIN: %O', e);
   res.send({
     status: 'ok',
     data: {
@@ -477,7 +481,8 @@ async function getAccounts(
     results.errors = {};
     return results;
   } catch (e) {
-    console.log(`Error parsing JSON response: ${text}`);
+    console.log('Error parsing SimpleFIN response');
+    debugSensitive('Error parsing SimpleFIN response: %s', text);
     throw e;
   }
 }

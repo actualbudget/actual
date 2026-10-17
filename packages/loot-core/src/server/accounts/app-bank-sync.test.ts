@@ -274,6 +274,33 @@ describe('accountsBankSync', () => {
     );
     expect(account!.bank_sync_status).toBe('failed');
   });
+
+  it('persists not-configured status after a missing credentials error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'credentials missing',
+      category: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+      message: 'GoCardless credentials are missing',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('not-configured');
+  });
 });
 
 describe('bank sync handlers must not nest mutators', () => {

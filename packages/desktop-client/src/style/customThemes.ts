@@ -652,6 +652,27 @@ export function generateThemeId(urlOrRepo: string): string {
   return `theme-${Math.abs(hash).toString(36)}`;
 }
 
+export function validateThemeCssSafely(
+  css: string | undefined,
+  onError?: (error: unknown) => void,
+): string {
+  if (!css?.trim()) return '';
+  try {
+    return validateThemeCss(css);
+  } catch (error) {
+    onError?.(error);
+    return '';
+  }
+}
+
+export function usesRedesignSidebarPalette(css: string): boolean {
+  const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  return (
+    /--color-sidebarRedesign[A-Za-z]*\s*:/.test(declarations) ||
+    !/--color-sidebar(?!Redesign)[A-Za-z]*\s*:/.test(declarations)
+  );
+}
+
 /**
  * Parse the installed theme JSON from global prefs.
  * Returns a single InstalledTheme or null if none is installed.

@@ -114,7 +114,7 @@ export function GoCardlessExternalMsgModal({
   const [language] = useGlobalPref('language');
 
   const browserTimezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    new Intl.DateTimeFormat().resolvedOptions().timeZone || '';
   const browserLocale = language || navigator.language || 'en-US';
   const detectedCountry = getCountryFromBrowser(
     browserTimezone,
