@@ -19,7 +19,6 @@ import { AutoTextSize } from 'auto-text-size';
 
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
-import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useFormat } from '#hooks/useFormat';
@@ -131,23 +130,21 @@ function SummaryHeadline({
           {label}
         </Text>
         <View style={{ ...AMOUNT_WRAPPER_STYLE, justifyContent: 'flex-start' }}>
-          <PrivacyFilter>
-            <AutoTextSize
-              key={amount}
-              as={Text}
-              minFontSizePx={12}
-              maxFontSizePx={20}
-              mode="oneline"
-              style={{
-                ...styles.tnum,
-                ...styles.largeText,
-                letterSpacing: -0.4,
-                color,
-              }}
-            >
-              {format(amount, 'financial')}
-            </AutoTextSize>
-          </PrivacyFilter>
+          <AutoTextSize
+            key={amount}
+            as={Text}
+            minFontSizePx={12}
+            maxFontSizePx={20}
+            mode="oneline"
+            style={{
+              ...styles.tnum,
+              ...styles.largeText,
+              letterSpacing: -0.4,
+              color,
+            }}
+          >
+            {format(amount, 'financial')}
+          </AutoTextSize>
         </View>
       </View>
     </Button>
@@ -173,17 +170,15 @@ function SummaryTotal({ label, binding, negate = false }: SummaryTotalProps) {
       </Text>
       <CellValue binding={binding} type="financial">
         {({ type, value }) => (
-          <PrivacyFilter>
-            <Text
-              style={{
-                ...AMOUNT_TEXT_STYLE,
-                fontWeight: 600,
-                color: theme.pageTextDark,
-              }}
-            >
-              {format(negate ? -value : value, type)}
-            </Text>
-          </PrivacyFilter>
+          <Text
+            style={{
+              ...AMOUNT_TEXT_STYLE,
+              fontWeight: 600,
+              color: theme.pageTextDark,
+            }}
+          >
+            {format(negate ? -value : value, type)}
+          </Text>
         )}
       </CellValue>
     </View>

@@ -11,7 +11,6 @@ import { View } from '@actual-app/components/view';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { makeBalanceAmountStyle } from '#components/budget/util';
-import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useBudgetBindings } from '#hooks/useBudgetBindings';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -111,20 +110,18 @@ export function CategorySummary({
             marginTop: spacing.xxs,
           }}
         >
-          <PrivacyFilter>
-            <Text
-              data-testid="category-balance"
-              style={{
-                ...styles.tnum,
-                ...styles.veryLargeText,
-                fontWeight: 800,
-                letterSpacing: -0.8,
-                ...balanceStyle,
-              }}
-            >
-              {format(heroValue, 'financial')}
-            </Text>
-          </PrivacyFilter>
+          <Text
+            data-testid="category-balance"
+            style={{
+              ...styles.tnum,
+              ...styles.veryLargeText,
+              fontWeight: 800,
+              letterSpacing: -0.8,
+              ...balanceStyle,
+            }}
+          >
+            {format(heroValue, 'financial')}
+          </Text>
           {carryover && <MobileCarryoverIndicator style={balanceStyle} />}
         </View>
         {note && (
@@ -174,18 +171,16 @@ export function CategorySummary({
               <Text style={tileLabelStyle}>
                 <Trans>Budgeted</Trans>
               </Text>
-              <PrivacyFilter>
-                <Text
-                  style={{
-                    ...tileValueStyle,
-                    textDecoration: 'underline dotted',
-                    textDecorationColor: theme.buttonPrimaryBackground,
-                    textUnderlineOffset: 4,
-                  }}
-                >
-                  {format(budgeted, 'financial')}
-                </Text>
-              </PrivacyFilter>
+              <Text
+                style={{
+                  ...tileValueStyle,
+                  textDecoration: 'underline dotted',
+                  textDecorationColor: theme.buttonPrimaryBackground,
+                  textUnderlineOffset: 4,
+                }}
+              >
+                {format(budgeted, 'financial')}
+              </Text>
             </Button>
           )}
           {showSpent && (
@@ -193,9 +188,7 @@ export function CategorySummary({
               <Text style={tileLabelStyle}>
                 <Trans>Spent</Trans>
               </Text>
-              <PrivacyFilter>
-                <Text style={tileValueStyle}>{format(spent, 'financial')}</Text>
-              </PrivacyFilter>
+              <Text style={tileValueStyle}>{format(spent, 'financial')}</Text>
             </View>
           )}
         </View>

@@ -5,7 +5,6 @@ import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
 
-import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 
 import { AMOUNT_WRAPPER_STYLE } from './budgetTableStyles';
@@ -32,20 +31,18 @@ export function CategoryAmountText({
   return (
     <View style={AMOUNT_WRAPPER_STYLE}>
       {label != null && <Text style={styles.visuallyHidden}>{label}</Text>}
-      <PrivacyFilter>
-        <AutoTextSize
-          key={value}
-          as={Text}
-          minFontSizePx={10}
-          maxFontSizePx={maxFontSizePx}
-          mode="oneline"
-          style={style}
-          className={className}
-          aria-hidden={label != null ? true : undefined}
-        >
-          {formattedValue}
-        </AutoTextSize>
-      </PrivacyFilter>
+      <AutoTextSize
+        key={value}
+        as={Text}
+        minFontSizePx={10}
+        maxFontSizePx={maxFontSizePx}
+        mode="oneline"
+        style={style}
+        className={className}
+        aria-hidden={label != null ? true : undefined}
+      >
+        {formattedValue}
+      </AutoTextSize>
     </View>
   );
 }

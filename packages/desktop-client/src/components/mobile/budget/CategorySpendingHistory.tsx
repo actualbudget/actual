@@ -14,7 +14,6 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
-import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useQuery } from '#hooks/useQuery';
@@ -108,24 +107,22 @@ export function CategorySpendingHistory({
               })}
         </Text>
         {activeMonth != null && (
-          <PrivacyFilter>
-            <Text
-              style={{
-                ...styles.tnum,
-                ...styles.verySmallText,
-                fontWeight: 600,
-                color: theme.pageTextDark,
-              }}
-            >
-              {t('{{month}} · {{amount}}', {
-                month: monthUtils.format(activeMonth, 'MMM yyyy', locale),
-                amount: format(
-                  spentAmounts[months.indexOf(activeMonth)],
-                  'financial',
-                ),
-              })}
-            </Text>
-          </PrivacyFilter>
+          <Text
+            style={{
+              ...styles.tnum,
+              ...styles.verySmallText,
+              fontWeight: 600,
+              color: theme.pageTextDark,
+            }}
+          >
+            {t('{{month}} · {{amount}}', {
+              month: monthUtils.format(activeMonth, 'MMM yyyy', locale),
+              amount: format(
+                spentAmounts[months.indexOf(activeMonth)],
+                'financial',
+              ),
+            })}
+          </Text>
         )}
       </View>
       {hasSpending ? (
@@ -155,29 +152,27 @@ export function CategorySpendingHistory({
                   borderRadius: radius.sm,
                 }}
               >
-                <PrivacyFilter>
+                <View
+                  style={{
+                    height: BAR_AREA_HEIGHT,
+                    justifyContent: 'flex-end',
+                  }}
+                >
                   <View
                     style={{
-                      height: BAR_AREA_HEIGHT,
-                      justifyContent: 'flex-end',
+                      width: BAR_WIDTH,
+                      height: Math.max(
+                        MIN_BAR_HEIGHT,
+                        (spent / maxSpent) * BAR_AREA_HEIGHT,
+                      ),
+                      borderRadius: `${radius.sm}px ${radius.sm}px 0 0`,
+                      backgroundColor:
+                        isSelected || isActive
+                          ? theme.pageTextPositive
+                          : theme.pageTextSubdued,
                     }}
-                  >
-                    <View
-                      style={{
-                        width: BAR_WIDTH,
-                        height: Math.max(
-                          MIN_BAR_HEIGHT,
-                          (spent / maxSpent) * BAR_AREA_HEIGHT,
-                        ),
-                        borderRadius: `${radius.sm}px ${radius.sm}px 0 0`,
-                        backgroundColor:
-                          isSelected || isActive
-                            ? theme.pageTextPositive
-                            : theme.pageTextSubdued,
-                      }}
-                    />
-                  </View>
-                </PrivacyFilter>
+                  />
+                </View>
                 <Text
                   style={{
                     ...styles.verySmallText,
