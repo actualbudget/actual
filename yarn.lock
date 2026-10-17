@@ -277,7 +277,7 @@ __metadata:
     hyperformula: "npm:^3.5.0"
     i18next: "npm:^26.4.4"
     i18next-parser: "npm:^9.4.0"
-    i18next-resources-to-backend: "npm:^1.2.1"
+    i18next-resources-to-backend: "npm:^1.2.3"
     jsdom: "npm:^29.1.1"
     lru-cache: "npm:^11.5.2"
     mdast-util-newline-to-break: "npm:^2.0.0"
@@ -16968,12 +16968,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next-resources-to-backend@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "i18next-resources-to-backend@npm:1.2.1"
+"i18next-resources-to-backend@npm:^1.2.3":
+  version: 1.2.3
+  resolution: "i18next-resources-to-backend@npm:1.2.3"
   dependencies:
     "@babel/runtime": "npm:^7.23.2"
-  checksum: 10/93e3d5ede02f4f9b1515759fe7c4f0b911aec1deceb1836e4b25926ff5c54d27d24e5e42c62a55ad1d911d9f9a0965d48b03fdf0028183215b5cd4f5d9465e5f
+  checksum: 10/6f7e47a09861cba52eb79e84ffab89ce2e7b8841949442090bc4dd4e3024efb5a8bebb105acefe410abf015245162c52ba61525397f646d67507655387b25d34
   languageName: node
   linkType: hard
 

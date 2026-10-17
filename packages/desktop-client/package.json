@@ -189,7 +189,7 @@
     "hyperformula": "^3.5.0",
     "i18next": "^26.4.4",
     "i18next-parser": "^9.4.0",
-    "i18next-resources-to-backend": "^1.2.1",
+    "i18next-resources-to-backend": "^1.2.3",
     "jsdom": "^29.1.1",
     "lru-cache": "^11.5.2",
     "mdast-util-newline-to-break": "^2.0.0",
