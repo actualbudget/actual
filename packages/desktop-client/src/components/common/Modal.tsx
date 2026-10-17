@@ -197,7 +197,7 @@ const ModalContentContainer = ({
 }: ModalContentContainerProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const mounted = useRef(false);
-  const rotateFactor = useRef(Math.random() * 10 - 5);
+  const [rotateFactor] = useState(() => Math.random() * 10 - 5);
 
   useLayoutEffect(() => {
     if (!contentRef.current) {
@@ -214,7 +214,7 @@ const ModalContentContainer = ({
         contentRef.current.style.willChange = 'auto';
         contentRef.current.style.pointerEvents = 'auto';
       } else {
-        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor.current}deg)`;
+        contentRef.current.style.transform = `translateY(-40px) scale(.95) rotate(${rotateFactor}deg)`;
         contentRef.current.style.pointerEvents = 'none';
       }
     }
@@ -247,7 +247,7 @@ const ModalContentContainer = ({
     } else {
       setProps();
     }
-  }, [noAnimation, isActive]);
+  }, [noAnimation, isActive, rotateFactor]);
 
   return (
     <View
