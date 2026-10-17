@@ -140,7 +140,7 @@ __metadata:
     fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.10"
     hyperformula: "npm:^3.5.0"
-    jest-diff: "npm:^30.4.1"
+    jest-diff: "npm:^30.5.2"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.5.3"
     mitt: "npm:^3.0.1"
@@ -4791,26 +4791,40 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/diff-sequences@npm:30.4.0":
-  version: 30.4.0
-  resolution: "@jest/diff-sequences@npm:30.4.0"
-  checksum: 10/65c27937c10a7157899dad5d176806104286f9d55464f318955a0cee98db8aed6b8f70ad4aee7133468087146422cdd391d49b1e101ec543db3283ee4eb59c06
+"@jest/diff-sequences@npm:30.5.0":
+  version: 30.5.0
+  resolution: "@jest/diff-sequences@npm:30.5.0"
+  checksum: 10/6fdba657e811790850c68beeef9a9d435b77733242c0ff94226cd210bbc11320a39a687bb3037089be7ffc6a2d98f5527d987327a2a18f83ebc87a8fe1e97e2a
   languageName: node
   linkType: hard
 
-"@jest/get-type@npm:30.1.0":
-  version: 30.1.0
-  resolution: "@jest/get-type@npm:30.1.0"
-  checksum: 10/e2a95fbb49ce2d15547db8af5602626caf9b05f62a5e583b4a2de9bd93a2bfe7175f9bbb2b8a5c3909ce261d467b6991d7265bb1d547cb60e7e97f571f361a70
+"@jest/get-type@npm:30.5.0":
+  version: 30.5.0
+  resolution: "@jest/get-type@npm:30.5.0"
+  checksum: 10/6b67e70f6c1cca6da153814542903b4c385447c7c5e029f8911402ca8a75fbd33a14cc0fff4c6ed7c6c629f6425fade605d6f32eb9516b52146a8640fd899773
   languageName: node
   linkType: hard
 
-"@jest/schemas@npm:30.4.1":
-  version: 30.4.1
-  resolution: "@jest/schemas@npm:30.4.1"
+"@jest/react-is-18@npm:react-is@^18.3.1, react-is@npm:^18.2.0":
+  version: 18.3.1
+  resolution: "react-is@npm:18.3.1"
+  checksum: 10/d5f60c87d285af24b1e1e7eaeb123ec256c3c8bdea7061ab3932e3e14685708221bf234ec50b21e10dd07f008f1b966a2730a0ce4ff67905b3872ff2042aec22
+  languageName: node
+  linkType: hard
+
+"@jest/react-is-19@npm:react-is@^19.2.5":
+  version: 19.3.0
+  resolution: "react-is@npm:19.3.0"
+  checksum: 10/69cfafcab48caac03da35fb17e640a2a2de8299a3cd699da720e671a22231fc7179c77c82e379826728857f9cc45cb56ff1e7f5d607acdd48fe151417a2a388f
+  languageName: node
+  linkType: hard
+
+"@jest/schemas@npm:30.5.0":
+  version: 30.5.0
+  resolution: "@jest/schemas@npm:30.5.0"
   dependencies:
     "@sinclair/typebox": "npm:^0.34.0"
-  checksum: 10/86e62c8fd8fc77535085f1ede3a416430a3740f78b8f88ec7d0ee4516b22daf3326ffc1ade9d5f7839bbde923aaf1b5ac430a42ed4bb1a38edc3de5005a58f51
+  checksum: 10/8b882db2f056f96f4ef82cafca6270cbc0ab3a6201cd76f43214bc17cc3e16df3e5a10ffc03e5667c2381c8141f7dd79f49d03cb85354b38c33c228c832408e5
   languageName: node
   linkType: hard
 
@@ -17914,15 +17928,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-diff@npm:^30.4.1":
-  version: 30.4.1
-  resolution: "jest-diff@npm:30.4.1"
+"jest-diff@npm:^30.5.2":
+  version: 30.5.2
+  resolution: "jest-diff@npm:30.5.2"
   dependencies:
-    "@jest/diff-sequences": "npm:30.4.0"
-    "@jest/get-type": "npm:30.1.0"
+    "@jest/diff-sequences": "npm:30.5.0"
+    "@jest/get-type": "npm:30.5.0"
     chalk: "npm:^4.1.2"
-    pretty-format: "npm:30.4.1"
-  checksum: 10/594212df96bf101170afdb7eebd188d6d7d27241cbdd18b61d95f1142a3c94ae3b270377d15e719fb3c5efe4458d32acba8ad13dd6230dd7d6917a9eebb32625
+    pretty-format: "npm:30.5.1"
+  checksum: 10/42c2f228f605438e2f6c128290365fce29914508fbb96a8bfda41000a2437d8de9718b77ad97d40e65d0e36ea05a4b06227137f669869e11f2fa08c92df5a4be
   languageName: node
   linkType: hard
 
@@ -22867,15 +22881,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:30.4.1":
-  version: 30.4.1
-  resolution: "pretty-format@npm:30.4.1"
+"pretty-format@npm:30.5.1":
+  version: 30.5.1
+  resolution: "pretty-format@npm:30.5.1"
   dependencies:
-    "@jest/schemas": "npm:30.4.1"
+    "@jest/react-is-18": "npm:react-is@^18.3.1"
+    "@jest/react-is-19": "npm:react-is@^19.2.5"
+    "@jest/schemas": "npm:30.5.0"
     ansi-styles: "npm:^5.2.0"
-    react-is-18: "npm:react-is@^18.3.1"
-    react-is-19: "npm:react-is@^19.2.5"
-  checksum: 10/60311ef47a646eeaec0432efe66290cb6f0d2eccb123a28ad4ab6d7e53087bc62db91cfd54c3cc00c89d6875aefb2bf6264381b6c9411ce6bff3d6aa8280abad
+  checksum: 10/bf86d7eb192ef2a456ded06fbe5d387c92b09dc4473331dbc7130e79128fd90f66c662717df8a52431060c1ddb8288a0a78858e9c203974de1b8d1107054b6e8
   languageName: node
   linkType: hard
 
@@ -23480,20 +23494,6 @@ __metadata:
     "@types/react": ">=0.0.0 <=99"
     react: ">=0.0.0 <=99"
   checksum: 10/01c9c8a5a471f03965b9d69c8bee02d420fd3a607b678004f0bdee098c9bccb3e2eae8460c90b1d180d2a8d544a3ddb09b8c2a11e5aa8b3a077733e2d9c25c2c
-  languageName: node
-  linkType: hard
-
-"react-is-18@npm:react-is@^18.3.1, react-is@npm:^18.2.0":
-  version: 18.3.1
-  resolution: "react-is@npm:18.3.1"
-  checksum: 10/d5f60c87d285af24b1e1e7eaeb123ec256c3c8bdea7061ab3932e3e14685708221bf234ec50b21e10dd07f008f1b966a2730a0ce4ff67905b3872ff2042aec22
-  languageName: node
-  linkType: hard
-
-"react-is-19@npm:react-is@^19.2.5":
-  version: 19.2.7
-  resolution: "react-is@npm:19.2.7"
-  checksum: 10/ae0d3ae7638aa2fa2a82a78a817daf2806e57fa0aef357d07e1e8d1e9a301902e5967168e9334b5816db0df8fa980a725cd57569ba5a9e6e76a71e117b18be04
   languageName: node
   linkType: hard
 
