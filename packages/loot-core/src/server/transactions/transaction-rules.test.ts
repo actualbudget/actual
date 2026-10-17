@@ -850,6 +850,32 @@ describe('Transaction rules', () => {
     ]);
   });
 
+  test('transactions can be queried by a notes regex that is still being typed', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      notes: 'Invoice #123',
+      amount: 123,
+    });
+
+    // An incomplete pattern matches nothing instead of failing the query
+    for (const value of ['#\\', '#[', '#\\d+(']) {
+      const transactions = await getMatchingTransactions([
+        { field: 'notes', op: 'matches', value },
+      ]);
+      expect(transactions).toEqual([]);
+    }
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '#\\d+' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('transactions can be queried by hasTags if no "#" is included', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });

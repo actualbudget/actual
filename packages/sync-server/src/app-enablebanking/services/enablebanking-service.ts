@@ -19,8 +19,8 @@ export type EnableBankingTransaction = {
   entry_reference?: string;
   transaction_id?: string;
   transaction_amount: { currency: string; amount: string };
-  creditor?: { name?: string };
-  debtor?: { name?: string };
+  creditor?: { name?: string | null } | null;
+  debtor?: { name?: string | null } | null;
   credit_debit_indicator?: 'CRDT' | 'DBIT';
   status?: 'BOOK' | 'PDNG';
   booking_date?: string;
@@ -215,27 +215,21 @@ export function normalizeTransaction(
   const valueDate = tx.value_date;
 
   let payeeName = '';
-  if (tx.credit_debit_indicator === 'CRDT' && tx.debtor?.name) {
-    payeeName = tx.debtor.name;
-  } else if (tx.credit_debit_indicator === 'DBIT' && tx.creditor?.name) {
-    payeeName = tx.creditor.name;
-  } else if (tx.creditor?.name) {
-    payeeName = tx.creditor.name;
-  } else if (tx.debtor?.name) {
-    payeeName = tx.debtor.name;
-  } else if (
-    tx.remittance_information &&
-    tx.remittance_information.length > 0
-  ) {
-    const cleanedFallback = cleanRemittanceArray(tx.remittance_information);
-    if (cleanedFallback.length > 0) {
-      payeeName = cleanedFallback[0];
-    }
+  // With a known direction, the other party is the account holder.
+  if (tx.credit_debit_indicator === 'CRDT') {
+    payeeName = tx.debtor?.name || '';
+  } else if (tx.credit_debit_indicator === 'DBIT') {
+    payeeName = tx.creditor?.name || '';
+  } else {
+    payeeName = tx.creditor?.name || tx.debtor?.name || '';
   }
 
   const cleanedAll = tx.remittance_information
     ? cleanRemittanceArray(tx.remittance_information)
     : [];
+  if (!payeeName) {
+    payeeName = cleanedAll[0] || '';
+  }
   const remittanceInformationUnstructured =
     cleanedAll.length > 0 ? cleanedAll.join(' ') : undefined;
 
