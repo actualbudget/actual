@@ -8,6 +8,7 @@ import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
+import type { RecurConfig, RuleConditionEntity } from '#types/models';
 
 import {
   advanceSchedulesService,
@@ -350,6 +351,78 @@ describe('schedule app', () => {
       } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
 
       expect(row.next_date).toBe('2020-12-30');
+    });
+
+    it('keeps a skipped next date when the account condition uses its editor field name', async () => {
+      MockDate.set(new Date(2021, 4, 17));
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+        const otherAccountId = await db.insertAccount({
+          name: 'Savings',
+          offbudget: 0,
+          closed: 0,
+        });
+        const date: RecurConfig = {
+          start: '2021-05-17',
+          frequency: 'monthly',
+          patterns: [{ type: 'day', value: 17 }],
+        };
+        const id = await createSchedule({
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'payee', value: 'internet' },
+            { op: 'is', field: 'amount', value: -5000 },
+            { op: 'is', field: 'date', value: date },
+          ],
+        });
+
+        await skipNextDate({ id });
+
+        const { data: skippedRows } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(skippedRows[0].next_date).toBe('2021-06-17');
+
+        MockDate.set(new Date(2021, 4, 17, 0, 1));
+
+        await updateSchedule({
+          schedule: { id, name: 'Broadband' },
+          // The editor sends these serialized aliases, which aren't in the core union.
+          conditions: [
+            { op: 'is', field: 'description', value: 'internet' },
+            { op: 'is', field: 'acct', value: accountId },
+            { op: 'is', field: 'amount', value: -5000 },
+            { op: 'is', field: 'date', value: date },
+          ] as unknown as RuleConditionEntity[],
+        });
+
+        const { data: updatedRows } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(updatedRows[0].next_date).toBe('2021-06-17');
+
+        await updateSchedule({
+          schedule: { id },
+          conditions: [
+            { op: 'is', field: 'description', value: 'internet' },
+            { op: 'is', field: 'acct', value: otherAccountId },
+            { op: 'is', field: 'amount', value: -5000 },
+            { op: 'is', field: 'date', value: date },
+          ] as unknown as RuleConditionEntity[],
+        });
+
+        const { data: changedAccountRows } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(changedAccountRows[0].next_date).toBe('2021-05-17');
+      } finally {
+        MockDate.reset();
+      }
     });
 
     it('updateSchedule ignores the condition `type` field when date value is unchanged', async () => {
