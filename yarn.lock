@@ -301,7 +301,7 @@ __metadata:
     react-spring: "npm:^10.0.4"
     react-swipeable: "npm:^7.0.2"
     react-virtualized-auto-sizer: "npm:^2.0.3"
-    recharts: "npm:^3.9.2"
+    recharts: "npm:^3.10.1"
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
     rolldown: "npm:^1.2.0"
@@ -23914,9 +23914,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"recharts@npm:^3.9.2":
-  version: 3.9.2
-  resolution: "recharts@npm:3.9.2"
+"recharts@npm:^3.10.1":
+  version: 3.10.1
+  resolution: "recharts@npm:3.10.1"
   dependencies:
     "@reduxjs/toolkit": "npm:^1.9.0 || 2.x.x"
     clsx: "npm:^2.1.1"
@@ -23933,7 +23933,7 @@ __metadata:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
     react-is: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-  checksum: 10/c34cd9358e6ba71505389b1a06a274a5eb58cab293d0c3f636ef3c07190164e65e48196ea54adafd0b2ec22515cec5a2a146b51237429dc221290771997cf987
+  checksum: 10/866c02fac2afcecdd59d3bafdf486229138b4d0704d989fd51f3e8ae00995161488a75a3c330115fb39724bd93875883138b900abb5937d970057ea5436e00d9
   languageName: node
   linkType: hard
 
