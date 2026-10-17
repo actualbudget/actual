@@ -196,7 +196,12 @@ function getRuleDecisionSentence(
   // changed before
   const previousFactor =
     explanation.factor / (1 + getRuleStep(explanation, withdrawalRule));
-  const from = format(explanation.planned * previousFactor, 'financial');
+  // Rounded because amounts are whole minor units and the formatter
+  // rejects fractions
+  const from = format(
+    Math.round(explanation.planned * previousFactor),
+    'financial',
+  );
   const earlierChanges = getEarlierChangesSentence(
     explanation,
     previousFactor,

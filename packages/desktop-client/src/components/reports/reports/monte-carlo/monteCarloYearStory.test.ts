@@ -12,7 +12,14 @@ const translate = ((key: string, options?: Record<string, unknown>) =>
     String(options?.[name]),
   )) as unknown as TFunction;
 
-const format = (amount: number) => amount.toFixed(2);
+// Rejects fractions like the real formatter, which only takes whole
+// minor units
+const format = (amount: number) => {
+  if (!Number.isInteger(amount)) {
+    throw new Error(`not an integer: ${amount}`);
+  }
+  return amount.toFixed(2);
+};
 
 function makeRow(
   overrides: Partial<MonteCarloRunDetailRow> = {},
