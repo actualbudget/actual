@@ -7,12 +7,12 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   Bar,
   BarChart,
@@ -27,6 +27,7 @@ import {
 import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
+import { isIntervalInProgress } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -39,8 +40,12 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { BaselineBar } from './BaselineBar';
+import { BaselineTooltip } from './BaselineTooltip';
+import { getSpendingSign } from './getSpendingSign';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
+import { TooltipCard } from './TooltipCard';
 
 type PayloadChild = {
   props: {
@@ -52,6 +57,7 @@ type PayloadChild = {
 type PayloadItem = {
   payload: {
     name: string;
+    baseline?: BaselineBreakdown;
     totalAssets: number;
     totalDebts: number;
     netAssets: number;
@@ -81,98 +87,96 @@ const CustomTooltip = ({
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
+  const row = payload?.[0]?.payload;
+  if (active && row?.baseline) {
+    return (
+      <BaselineTooltip
+        title={row[yAxis]}
+        breakdown={row.baseline}
+        balanceTypeOp={balanceTypeOp}
+        format={format}
+      />
+    );
+  }
+
   if (active && payload && payload.length) {
     return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload[yAxis]}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netAssets'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netDebts'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={
-                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
-                }
-                right={
-                  <FinancialText as="strong">
-                    {format(
-                      balanceTypeOp === 'totalBudgeted'
-                        ? payload[0].payload.totalBudgeted
-                        : payload[0].payload.totalTotals,
-                      'financial',
-                    )}
-                  </FinancialText>
-                }
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      <TooltipCard title={payload[0].payload[yAxis]}>
+        {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netAssets'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netDebts'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={
+              balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+            }
+            right={
+              <FinancialText as="strong">
+                {format(
+                  balanceTypeOp === 'totalBudgeted'
+                    ? payload[0].payload.totalBudgeted
+                    : payload[0].payload.totalTotals,
+                  'financial',
+                )}
+              </FinancialText>
+            }
+          />
+        )}
+      </TooltipCard>
     );
   }
 };
 
-const customLabel = (props, typeOp, format) => {
+// Baseline bars label their change above the bar, whichever way it goes,
+// with spending's change flipped to match the bar's positive amounts
+const customLabel = (props, typeOp, format, isAbove = false) => {
   const calcX = props.x + props.width / 2;
-  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const calcY = props.y - (isAbove || props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
+  const shown = isAbove ? getSpendingSign(typeOp) * props.value : props.value;
   const display =
-    props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
+    props.value !== 0 && `${format(shown, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
     type:
@@ -216,6 +220,8 @@ type BarGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
+  showAmounts?: boolean;
+  changeFromBaseline?: boolean;
 };
 
 export function BarGraph({
@@ -229,6 +235,8 @@ export function BarGraph({
   showHiddenCategories,
   showOffBudget,
   showTooltip = true,
+  showAmounts = false,
+  changeFromBaseline = false,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -244,19 +252,42 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+    // Spending is flipped so it points up, but baseline changes are already
+    // signed and point the same way as their numbers
+    if (!data.baseline && ['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
       return -1 * obj[balanceTypeOp];
     }
 
     return obj[balanceTypeOp];
   };
 
+  // Baseline bars show amounts rather than changes, so spending is flipped to
+  // point up like other spending charts
+  const isBaselineBars = showAmounts && !!data.baseline;
+  const sign = getSpendingSign(balanceTypeOp);
+  const getBaselineValues = (breakdown: BaselineBreakdown) => ({
+    baseline: sign * breakdown.expected[balanceTypeOp],
+    amount: sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
+  });
+
+  // Baseline bars span everything drawn in them, so their shape can place
+  // each part along the same scale
+  const getBaselineRange = (breakdown: BaselineBreakdown): [number, number] => {
+    const { baseline, amount } = getBaselineValues(breakdown);
+    return [Math.min(0, baseline, amount), Math.max(0, baseline, amount)];
+  };
+
+  const getBarValue = (obj: GroupedEntity | IntervalEntity) =>
+    isBaselineBars && obj.baseline
+      ? getBaselineRange(obj.baseline)
+      : getVal(obj);
+
   const longestLabelLength = data[splitData]
     .map(c => c[yAxis])
     .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
 
   const largestValue = data[splitData]
-    .map(c => c[balanceTypeOp])
+    .flatMap(c => getBarValue(c))
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
@@ -325,8 +356,9 @@ export function BarGraph({
               )}
               {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />}
               <Bar
-                dataKey={val => getVal(val)}
-                stackId="a"
+                dataKey={getBarValue}
+                // Recharts can't stack range bars
+                stackId={isBaselineBars ? undefined : 'a'}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
@@ -374,19 +406,41 @@ export function BarGraph({
                     scopeTagNames: data.scopeTagNames,
                   });
                 }}
-                shape={(props: BarShapeProps) => (
-                  <Rectangle
-                    {...props}
-                    fill={
-                      data.legend[props.index]?.color ?? props.fill ?? undefined
-                    }
-                  />
-                )}
+                shape={(props: BarShapeProps) => {
+                  const fill =
+                    data.legend[props.index]?.color ?? props.fill ?? undefined;
+                  const breakdown = props.payload?.baseline;
+                  // An interval in progress is faded, since its amount is
+                  // only part of what it will be
+                  const opacity =
+                    breakdown && isIntervalInProgress(props.payload) ? 0.5 : 1;
+                  if (isBaselineBars && breakdown) {
+                    return (
+                      <BaselineBar
+                        opacity={opacity}
+                        x={props.x}
+                        y={props.y}
+                        width={props.width}
+                        height={props.height}
+                        range={getBaselineRange(breakdown)}
+                        {...getBaselineValues(breakdown)}
+                        changeFromBaseline={changeFromBaseline}
+                        fill={fill}
+                      />
+                    );
+                  }
+
+                  return (
+                    <Rectangle {...props} fill={fill} fillOpacity={opacity} />
+                  );
+                }}
               >
                 {viewLabels && !compact && (
                   <LabelList
                     dataKey={val => getVal(val)}
-                    content={e => customLabel(e, balanceTypeOp, format)}
+                    content={e =>
+                      customLabel(e, balanceTypeOp, format, isBaselineBars)
+                    }
                   />
                 )}
               </Bar>

@@ -9,7 +9,7 @@ export function filterEmptyRows({
   balanceTypeOp = 'totalDebts',
 }: {
   showEmpty: boolean;
-  data: GroupedEntity;
+  data: Pick<GroupedEntity, balanceTypeOpType>;
   balanceTypeOp?: balanceTypeOpType;
 }): boolean {
   let showHide: boolean;

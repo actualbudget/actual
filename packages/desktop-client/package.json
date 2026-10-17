@@ -55,6 +55,7 @@
     "#components/formula/queryTimeFrame": "./src/components/formula/queryTimeFrame.ts",
     "#components/mobile/utils": "./src/components/mobile/utils.ts",
     "#components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations": "./src/components/modals/BudgetAutomationsModal/migrateTemplatesToAutomations.ts",
+    "#components/reports/baselineRange": "./src/components/reports/baselineRange.ts",
     "#components/reports/chart-theme": "./src/components/reports/chart-theme.ts",
     "#components/reports/constants": "./src/components/reports/constants.ts",
     "#components/reports/disabledList": "./src/components/reports/disabledList.ts",

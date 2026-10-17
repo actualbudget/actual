@@ -1,16 +1,20 @@
 import React, { memo } from 'react';
 import type { CSSProperties, RefObject, UIEventHandler } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   GroupedEntity,
+  IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
+import { countElapsedDays } from '#components/reports/baselineRange';
 import { showActivity } from '#components/reports/graphs/showActivity';
 import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
@@ -26,6 +30,10 @@ type ReportTableRowProps = {
   filters?: RuleConditionEntity[];
   startDate?: string;
   endDate?: string;
+  showBaseline?: boolean;
+  showProjected?: boolean;
+  baselineStartDate?: string;
+  baselineEndDate?: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
@@ -55,6 +63,10 @@ export const ReportTableRow = memo(
     filters = [],
     startDate = '',
     endDate,
+    showBaseline = false,
+    showProjected = false,
+    baselineStartDate = '',
+    baselineEndDate = '',
     intervalsCount,
     compact,
     style,
@@ -69,9 +81,65 @@ export const ReportTableRow = memo(
     colorized,
     scopeTagNames,
   }: ReportTableRowProps) => {
-    const average = Math.round(item[balanceTypeOp] / intervalsCount);
+    const breakdown = showBaseline ? item.baseline : undefined;
+    // Baseline tables keep real amounts, so they match the transactions a
+    // click-through shows, and put the change in its own column
+    const amounts = breakdown ? breakdown.actual : item;
+    const baselineAmount =
+      mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
+    // Time tables compare a typical interval at the pace so far against the
+    // Baseline column, while total tables compare the whole range
+    const pace = mode === 'time' ? breakdown?.pacePerInterval : undefined;
+    const average = pace
+      ? pace[balanceTypeOp]
+      : Math.round(amounts[balanceTypeOp] / intervalsCount);
+    const change = pace
+      ? average - (baselineAmount?.[balanceTypeOp] ?? 0)
+      : item[balanceTypeOp];
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
+    const { t } = useTranslation();
+
+    // Spells out what a baseline interval was compared against, since its
+    // length can differ from the average interval in the Baseline column
+    const getIntervalTitle = (
+      intervalItem: IntervalEntity,
+      intervalBreakdown: BaselineBreakdown | undefined,
+    ) => {
+      if (!intervalBreakdown) {
+        const amount = intervalItem[balanceTypeOp];
+        return Math.abs(amount) > 100000
+          ? format(amount, 'financial')
+          : undefined;
+      }
+
+      const change = intervalItem[balanceTypeOp];
+      const expected = format(
+        intervalBreakdown.expected[balanceTypeOp],
+        'financial',
+      );
+      const baselineLine =
+        // Budgets are compared per interval, so their length doesn't matter
+        balanceTypeOp === 'totalBudgeted' ||
+        !intervalItem.intervalStartDate ||
+        !intervalItem.intervalEndDate
+          ? t('Baseline: {{amount}}', { amount: expected })
+          : t('Baseline: {{amount}} over {{count}} days', {
+              amount: expected,
+              // Intervals in progress compare the days so far
+              count: countElapsedDays(
+                intervalItem.intervalStartDate,
+                intervalItem.intervalEndDate,
+              ),
+            });
+      const lines = [
+        baselineLine,
+        t('Change: {{amount}}', {
+          amount: (change > 0 ? '+' : '') + format(change, 'financial'),
+        }),
+      ];
+      return lines.join('\n');
+    };
 
     const navigate = useNavigate();
     const { isNarrowWidth } = useResponsive();
@@ -99,6 +167,44 @@ export const ReportTableRow = memo(
             id: item.id,
           };
     const canShowActivity = !isNarrowWidth && !compact;
+
+    const onShowTotals = () =>
+      canShowActivity &&
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters,
+        showHiddenCategories,
+        showOffBudget,
+        type: 'totals',
+        ...drilldown,
+        uncategorizedId: item.uncategorizedId,
+        bucketTagNames: item.bucketTagNames,
+        scopeTagNames,
+      });
+
+    // A single interval has no matching slice of the baseline, so interval
+    // rows open the whole baseline range
+    const onShowBaseline = () =>
+      canShowActivity &&
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters,
+        showHiddenCategories,
+        showOffBudget,
+        type: 'totals',
+        ...drilldown,
+        startDate: baselineStartDate,
+        endDate: baselineEndDate,
+        uncategorizedId: item.uncategorizedId,
+        bucketTagNames: item.bucketTagNames,
+        scopeTagNames,
+      });
 
     const pointer = canShowActivity ? 'pointer' : 'inherit';
 
@@ -144,8 +250,46 @@ export const ReportTableRow = memo(
             }}
             valueStyle={compactStyle}
           />
+          {showBaseline && (
+            <Cell
+              value={format(baselineAmount?.[balanceTypeOp] ?? 0, 'financial')}
+              textAlign="right"
+              style={{
+                minWidth: compact ? 50 : 85,
+                backgroundColor: style?.backgroundColor,
+              }}
+              unexposedContent={({ value }) => (
+                <FinancialText
+                  style={{
+                    ...hoverUnderline,
+                    textAlign: 'right',
+                    flexGrow: 1,
+                  }}
+                >
+                  {value}
+                </FinancialText>
+              )}
+              valueStyle={compactStyle}
+              onClick={onShowBaseline}
+              width="flex"
+              privacyFilter
+            />
+          )}
           {item.intervalData && mode === 'time'
             ? item.intervalData.map((intervalItem, index) => {
+                // With a baseline, cells show real amounts coloured by their
+                // change from it
+                const intervalBreakdown = breakdown && intervalItem.baseline;
+                const intervalAmount = intervalBreakdown
+                  ? intervalBreakdown.actual[balanceTypeOp]
+                  : intervalItem[balanceTypeOp];
+                const intervalChange = intervalBreakdown
+                  ? intervalItem[balanceTypeOp]
+                  : undefined;
+                const intervalColor =
+                  intervalChange !== undefined
+                    ? getAmountColor(intervalChange)
+                    : colorized && getAmountColor(intervalAmount);
                 return (
                   <Cell
                     key={index}
@@ -153,9 +297,7 @@ export const ReportTableRow = memo(
                     style={{
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
-                      ...(colorized && {
-                        color: getAmountColor(intervalItem[balanceTypeOp]),
-                      }),
+                      ...(intervalColor && { color: intervalColor }),
                     }}
                     unexposedContent={({ value }) => (
                       <FinancialText
@@ -169,12 +311,8 @@ export const ReportTableRow = memo(
                       </FinancialText>
                     )}
                     valueStyle={compactStyle}
-                    value={format(intervalItem[balanceTypeOp], 'financial')}
-                    title={
-                      Math.abs(intervalItem[balanceTypeOp]) > 100000
-                        ? format(intervalItem[balanceTypeOp], 'financial')
-                        : undefined
-                    }
+                    value={format(intervalAmount, 'financial')}
+                    title={getIntervalTitle(intervalItem, intervalBreakdown)}
                     onClick={() =>
                       canShowActivity &&
                       showActivity({
@@ -204,10 +342,10 @@ export const ReportTableRow = memo(
             : ['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
                 <>
                   <Cell
-                    value={format(item.totalAssets, 'financial')}
+                    value={format(amounts.totalAssets, 'financial')}
                     title={
-                      Math.abs(item.totalAssets) > 100000
-                        ? format(item.totalAssets, 'financial')
+                      Math.abs(amounts.totalAssets) > 100000
+                        ? format(amounts.totalAssets, 'financial')
                         : undefined
                     }
                     textAlign="right"
@@ -217,7 +355,7 @@ export const ReportTableRow = memo(
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
                       ...(colorized && {
-                        color: getAmountColor(item.totalAssets),
+                        color: getAmountColor(amounts.totalAssets),
                       }),
                     }}
                     unexposedContent={({ value }) => (
@@ -251,10 +389,10 @@ export const ReportTableRow = memo(
                     }
                   />
                   <Cell
-                    value={format(item.totalDebts, 'financial')}
+                    value={format(amounts.totalDebts, 'financial')}
                     title={
-                      Math.abs(item.totalDebts) > 100000
-                        ? format(item.totalDebts, 'financial')
+                      Math.abs(amounts.totalDebts) > 100000
+                        ? format(amounts.totalDebts, 'financial')
                         : undefined
                     }
                     textAlign="right"
@@ -264,7 +402,7 @@ export const ReportTableRow = memo(
                       minWidth: compact ? 50 : 85,
                       backgroundColor: style?.backgroundColor,
                       ...(colorized && {
-                        color: getAmountColor(item.totalDebts),
+                        color: getAmountColor(amounts.totalDebts),
                       }),
                     }}
                     unexposedContent={({ value }) => (
@@ -300,10 +438,10 @@ export const ReportTableRow = memo(
                 </>
               )}
           <Cell
-            value={format(item[balanceTypeOp], 'financial')}
+            value={format(amounts[balanceTypeOp], 'financial')}
             title={
-              Math.abs(item[balanceTypeOp]) > 100000
-                ? format(item[balanceTypeOp], 'financial')
+              Math.abs(amounts[balanceTypeOp]) > 100000
+                ? format(amounts[balanceTypeOp], 'financial')
                 : undefined
             }
             textAlign="right"
@@ -311,7 +449,9 @@ export const ReportTableRow = memo(
               fontWeight: 600,
               minWidth: compact ? 50 : 85,
               backgroundColor: style?.backgroundColor,
-              ...(colorized && { color: getAmountColor(item[balanceTypeOp]) }),
+              ...(colorized && {
+                color: getAmountColor(amounts[balanceTypeOp]),
+              }),
             }}
             unexposedContent={({ value }) => (
               <FinancialText
@@ -325,26 +465,31 @@ export const ReportTableRow = memo(
               </FinancialText>
             )}
             valueStyle={compactStyle}
-            onClick={() =>
-              canShowActivity &&
-              showActivity({
-                navigate,
-                categories,
-                accounts,
-                balanceTypeOp,
-                filters,
-                showHiddenCategories,
-                showOffBudget,
-                type: 'totals',
-                ...drilldown,
-                uncategorizedId: item.uncategorizedId,
-                bucketTagNames: item.bucketTagNames,
-                scopeTagNames,
-              })
-            }
+            onClick={onShowTotals}
             width="flex"
             privacyFilter
           />
+          {breakdown && showProjected && (
+            <AmountCell
+              value={(breakdown.projected ?? breakdown.actual)[balanceTypeOp]}
+              compact={compact}
+              backgroundColor={style?.backgroundColor}
+              compactStyle={compactStyle}
+              hoverStyle={hoverUnderline}
+              onClick={onShowTotals}
+            />
+          )}
+          {breakdown && (
+            <AmountCell
+              value={change}
+              compact={compact}
+              backgroundColor={style?.backgroundColor}
+              compactStyle={compactStyle}
+              hoverStyle={hoverUnderline}
+              onClick={onShowTotals}
+              colorized
+            />
+          )}
           <Cell
             value={format(average, 'financial')}
             title={
@@ -375,3 +520,50 @@ export const ReportTableRow = memo(
 );
 
 ReportTableRow.displayName = 'ReportTableRow';
+
+type AmountCellProps = {
+  value: number;
+  compact: boolean;
+  backgroundColor?: CSSProperties['backgroundColor'];
+  compactStyle?: CSSProperties;
+  hoverStyle?: CSSProperties;
+  onClick?: () => void;
+  colorized?: boolean;
+};
+
+function AmountCell({
+  value,
+  compact,
+  backgroundColor,
+  compactStyle,
+  hoverStyle,
+  onClick,
+  colorized,
+}: AmountCellProps) {
+  const format = useFormat();
+
+  return (
+    <Cell
+      value={format(value, 'financial')}
+      title={Math.abs(value) > 100000 ? format(value, 'financial') : undefined}
+      textAlign="right"
+      style={{
+        fontWeight: 600,
+        minWidth: compact ? 50 : 85,
+        backgroundColor,
+        ...(colorized && { color: getAmountColor(value) }),
+      }}
+      unexposedContent={({ value }) => (
+        <FinancialText
+          style={{ ...hoverStyle, textAlign: 'right', flexGrow: 1 }}
+        >
+          {value}
+        </FinancialText>
+      )}
+      valueStyle={compactStyle}
+      onClick={onClick}
+      width="flex"
+      privacyFilter
+    />
+  );
+}

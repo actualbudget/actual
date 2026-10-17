@@ -6,7 +6,6 @@ import { Menu } from '@actual-app/components/menu';
 import { ModeButton } from '@actual-app/components/mode-button';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
-import type { SelectOption } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -17,6 +16,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
+  CustomReportBaseline,
   CustomReportEntity,
   CustomReportTagScope,
   sortByOpType,
@@ -27,15 +27,21 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { Information } from '#components/alerts';
-import { useDateFormat } from '#hooks/useDateFormat';
-import { useLocale } from '#hooks/useLocale';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
+import {
+  canShowBaselineChanges,
+  defaultBaseline,
+  getBaselineRange,
+  rangesOverlap,
+} from './baselineRange';
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
-import { getIntervalFormat, ReportOptions } from './ReportOptions';
+import { ReportDateFilter } from './ReportDateFilter';
+import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
-import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
 import { TagScopeSelector } from './TagScopeSelector';
 
@@ -65,6 +71,7 @@ type ReportSidebarProps = {
   ) => void;
   setTrimIntervals: (value: CustomReportEntity['trimIntervals']) => void;
   setShowTrendLines: (value: CustomReportEntity['showTrendLines']) => void;
+  setBaseline: (value: CustomReportBaseline) => void;
   setIncludeCurrentInterval: (
     value: CustomReportEntity['includeCurrentInterval'],
   ) => void;
@@ -83,6 +90,13 @@ type ReportSidebarProps = {
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
   isComplexCategoryCondition?: boolean;
 };
+
+function isRangeUnavailable(dateRange: string, interval: string) {
+  return ReportOptions.dateRange
+    .filter(d => !d[interval as keyof dateRangeProps])
+    .map(int => int.key)
+    .includes(dateRange);
+}
 
 export function ReportSidebar({
   customReportItems,
@@ -107,6 +121,7 @@ export function ReportSidebar({
   setShowUncategorized,
   setTrimIntervals,
   setShowTrendLines,
+  setBaseline,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -119,8 +134,27 @@ export function ReportSidebar({
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
-  const locale = useLocale();
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
+  const savedBaseline = customReportItems.baseline ?? defaultBaseline;
+  // Live baselines are resolved against today, since saved dates go stale
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    savedBaseline,
+    earliestTransaction,
+    latestTransaction,
+    firstDayOfWeekIdx,
+  );
+  const baseline = {
+    ...savedBaseline,
+    startDate: baselineStartDate,
+    endDate: baselineEndDate,
+  };
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  // Baseline options only show as ticked where they apply, keeping the saved
+  // choice for when the graph switches back
+  const canShowChanges = canShowBaselineChanges(customReportItems.graphType);
+  const isShowingChanges = canShowChanges && !!baseline.showChanges;
+  const canChangeFromBaseline =
+    customReportItems.graphType === 'BarGraph' && !isShowingChanges;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -159,6 +193,36 @@ export function ReportSidebar({
 
       return [text, tooltip];
     }, [customReportItems.dateRange, t]);
+
+  // Live dates are resolved on every change so a static switch keeps them
+  const updateBaseline = (next: CustomReportBaseline) => {
+    const [startDate, endDate] = getBaselineRange(
+      next,
+      earliestTransaction,
+      latestTransaction,
+      firstDayOfWeekIdx,
+    );
+    const resolved = { ...next, startDate, endDate };
+    setSessionReport('baseline', resolved);
+    onReportChange({ type: 'modify' });
+    setBaseline(resolved);
+  };
+
+  // Like the report's own range, a baseline range the new interval doesn't
+  // offer falls back to that interval's default
+  const keepBaselineRangeAvailable = (interval: string) => {
+    if (isBaselineEnabled && isRangeUnavailable(baseline.dateRange, interval)) {
+      updateBaseline({
+        ...baseline,
+        dateRange: defaultsList.intervalRange.get(interval) || '',
+      });
+    }
+  };
+
+  // Projection only changes anything while the report's range runs past today
+  const canProjectToFullPeriod =
+    customReportItems.balanceType !== 'Budgeted' &&
+    customReportItems.endDate > monthUtils.currentDay();
 
   const onChangeMode = (cond: string) => {
     setSessionReport('mode', cond);
@@ -217,14 +281,10 @@ export function ReportSidebar({
       ) {
         setSessionReport('interval', 'Monthly');
         setInterval('Monthly');
-        if (
-          ReportOptions.dateRange
-            .filter(d => !d['Monthly' as keyof dateRangeProps])
-            .map(int => int.key)
-            .includes(customReportItems.dateRange)
-        ) {
+        if (isRangeUnavailable(customReportItems.dateRange, 'Monthly')) {
           onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
         }
+        keepBaselineRangeAvailable('Monthly');
       }
     }
   };
@@ -235,18 +295,6 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setSortBy(cond);
   };
-
-  const rangeOptions = useMemo(() => {
-    const options: SelectOption[] = ReportOptions.dateRange
-      .filter(f => f[customReportItems.interval as keyof dateRangeProps])
-      .map(option => [option.key, option.description]);
-
-    // Append separator if necessary
-    if (dateRangeLine > 0) {
-      options.splice(dateRangeLine, 0, Menu.line);
-    }
-    return options;
-  }, [customReportItems, dateRangeLine]);
 
   const disableSort =
     customReportItems.graphType !== 'TableGraph' &&
@@ -304,6 +352,65 @@ export function ReportSidebar({
             <Trans>Time</Trans>
           </ModeButton>
         </SpaceBetween>
+        {reportBaselineEnabled && (
+          // Lines up with the controls beside the 50px row labels
+          <View style={{ padding: '0 5px 0 60px' }}>
+            <LabeledCheckbox
+              id="baseline-enabled"
+              checked={baseline.enabled}
+              onChange={() =>
+                updateBaseline({ ...baseline, enabled: !baseline.enabled })
+              }
+            >
+              <Trans>Compare to baseline</Trans>
+            </LabeledCheckbox>
+            {isBaselineEnabled && (
+              <>
+                <Tooltip
+                  placement="bottom start"
+                  content={
+                    <Text>
+                      <Trans>
+                        Draw how much each amount changed from the baseline,
+                        instead of the amount with the baseline drawn in.
+                      </Trans>
+                    </Text>
+                  }
+                  style={{ ...styles.tooltip, lineHeight: 1.5 }}
+                >
+                  <LabeledCheckbox
+                    id="baseline-show-changes"
+                    checked={isShowingChanges}
+                    disabled={!canShowChanges}
+                    onChange={() =>
+                      updateBaseline({
+                        ...baseline,
+                        showChanges: !baseline.showChanges,
+                      })
+                    }
+                  >
+                    <Trans>Show as change from baseline</Trans>
+                  </LabeledCheckbox>
+                </Tooltip>
+                <LabeledCheckbox
+                  id="baseline-change-from-baseline"
+                  checked={
+                    canChangeFromBaseline && !!baseline.changeFromBaseline
+                  }
+                  disabled={!canChangeFromBaseline}
+                  onChange={() =>
+                    updateBaseline({
+                      ...baseline,
+                      changeFromBaseline: !baseline.changeFromBaseline,
+                    })
+                  }
+                >
+                  <Trans>Start change at baseline</Trans>
+                </LabeledCheckbox>
+              </>
+            )}
+          </View>
+        )}
 
         <View
           style={{
@@ -383,14 +490,10 @@ export function ReportSidebar({
               setSessionReport('interval', e);
               setInterval(e);
               onReportChange({ type: 'modify' });
-              if (
-                ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.key)
-                  .includes(customReportItems.dateRange)
-              ) {
+              if (isRangeUnavailable(customReportItems.dateRange, e)) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
+              keepBaselineRangeAvailable(e);
             }}
             options={ReportOptions.interval.map(option => [
               option.key,
@@ -565,146 +668,131 @@ export function ReportSidebar({
             flexShrink: 0,
           }}
         />
-        <SpaceBetween
-          gap={5}
-          style={{
-            marginTop: 10,
-            marginBottom: 5,
-          }}
-        >
-          <Text>
-            <strong>
-              <Trans>Date filters</Trans>
-            </strong>
-          </Text>
-          <View style={{ flex: 1 }} />
-          <ModeButton
-            selected={!customReportItems.isDateStatic}
-            onSelect={() => {
-              setSessionReport('isDateStatic', false);
-              setIsDateStatic(false);
-              onSelectRange(customReportItems.dateRange);
-            }}
-          >
-            <Trans>Live</Trans>
-          </ModeButton>
-          <ModeButton
-            selected={customReportItems.isDateStatic}
-            onSelect={() => {
-              setSessionReport('isDateStatic', true);
-              setIsDateStatic(true);
+        <ReportDateFilter
+          title={<Trans>Date filters</Trans>}
+          interval={customReportItems.interval}
+          dateRange={customReportItems.dateRange}
+          isDateStatic={customReportItems.isDateStatic}
+          startDate={customReportItems.startDate}
+          endDate={customReportItems.endDate}
+          includeCurrentInterval={customReportItems.includeCurrentInterval}
+          dateRangeLine={dateRangeLine}
+          allIntervals={allIntervals}
+          earliestTransaction={earliestTransaction}
+          latestTransaction={latestTransaction}
+          firstDayOfWeekIdx={firstDayOfWeekIdx}
+          onSelectRange={onSelectRange}
+          onChangeDates={(dateStart, dateEnd) =>
+            onChangeDates(dateStart, dateEnd, 'static')
+          }
+          onChangeStatic={isDateStatic => {
+            setSessionReport('isDateStatic', isDateStatic);
+            setIsDateStatic(isDateStatic);
+            if (isDateStatic) {
               onChangeDates(
                 customReportItems.startDate,
                 customReportItems.endDate,
                 'static',
               );
-            }}
-          >
-            <Trans>Static</Trans>
-          </ModeButton>
-        </SpaceBetween>
-        {!customReportItems.isDateStatic ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              padding: 5,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-              <Trans>Range:</Trans>
-            </Text>
-            <Select
-              value={customReportItems.dateRange}
-              onChange={onSelectRange}
-              options={rangeOptions}
-            />
-            {!disabledList.currentInterval.get(customReportItems.dateRange) &&
-              customReportItems.includeCurrentInterval && (
-                <Tooltip
-                  placement="bottom start"
-                  content={
-                    <Text>
-                      <Trans>Current month</Trans>
-                    </Text>
+            } else {
+              onSelectRange(customReportItems.dateRange);
+            }
+          }}
+        >
+          {isBaselineEnabled && (
+            <View style={{ padding: '5px 5px 0 10px' }}>
+              <Tooltip
+                placement="bottom start"
+                content={
+                  <Text>
+                    <Trans>
+                      Project the amounts so far over the whole date range,
+                      based on how many days have passed.
+                    </Trans>
+                  </Text>
+                }
+                style={{ ...styles.tooltip, lineHeight: 1.5 }}
+              >
+                <LabeledCheckbox
+                  id="baseline-project-full-period"
+                  checked={baseline.projectToFullPeriod}
+                  disabled={!canProjectToFullPeriod}
+                  onChange={() =>
+                    updateBaseline({
+                      ...baseline,
+                      projectToFullPeriod: !baseline.projectToFullPeriod,
+                    })
                   }
-                  style={{
-                    ...styles.tooltip,
-                    lineHeight: 1.5,
-                    padding: '6px 10px',
-                    marginTop: 5,
-                  }}
                 >
-                  <Text style={{ marginLeft: 10 }}>+1</Text>
-                </Tooltip>
-              )}
-          </View>
-        ) : (
+                  <Trans>Project to full period</Trans>
+                </LabeledCheckbox>
+              </Tooltip>
+            </View>
+          )}
+        </ReportDateFilter>
+        {isBaselineEnabled && (
           <>
             <View
               style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
+                height: 1,
+                backgroundColor: theme.pillBorderDark,
+                marginTop: 10,
+                flexShrink: 0,
               }}
+            />
+            <ReportDateFilter
+              title={<Trans>Baseline</Trans>}
+              interval={customReportItems.interval}
+              dateRange={baseline.dateRange}
+              isDateStatic={baseline.isDateStatic}
+              startDate={baseline.startDate}
+              endDate={baseline.endDate}
+              includeCurrentInterval={baseline.includeCurrentInterval}
+              dateRangeLine={dateRangeLine}
+              allIntervals={allIntervals}
+              earliestTransaction={earliestTransaction}
+              latestTransaction={latestTransaction}
+              firstDayOfWeekIdx={firstDayOfWeekIdx}
+              onSelectRange={dateRange =>
+                updateBaseline({ ...baseline, dateRange })
+              }
+              onChangeDates={(startDate, endDate) =>
+                updateBaseline({ ...baseline, startDate, endDate })
+              }
+              onChangeStatic={isDateStatic =>
+                updateBaseline({ ...baseline, isDateStatic })
+              }
             >
-              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-                <Trans>From:</Trans>
-              </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateStart(
-                      earliestTransaction,
-                      latestTransaction,
-                      newValue,
-                      customReportItems.endDate,
-                      customReportItems.interval,
-                      firstDayOfWeekIdx,
-                    ),
-                  )
-                }
-                value={customReportItems.startDate}
-                defaultLabel={monthUtils.format(
-                  customReportItems.startDate,
-                  getIntervalFormat(customReportItems.interval, dateFormat),
-                  locale,
-                )}
-                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                padding: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-                <Trans>To:</Trans>
-              </Text>
-              <Select
-                onChange={newValue =>
-                  onChangeDates(
-                    ...validateEnd(
-                      earliestTransaction,
-                      latestTransaction,
-                      customReportItems.startDate,
-                      newValue,
-                      customReportItems.interval,
-                      firstDayOfWeekIdx,
-                    ),
-                  )
-                }
-                value={customReportItems.endDate}
-                defaultLabel={monthUtils.format(
-                  customReportItems.endDate,
-                  getIntervalFormat(customReportItems.interval, dateFormat),
-                  locale,
-                )}
-                options={allIntervals.map(({ name, pretty }) => [name, pretty])}
-              />
-            </View>
+              <View style={{ padding: '5px 5px 0 10px' }}>
+                <LabeledCheckbox
+                  id="baseline-include-current"
+                  checked={baseline.includeCurrentInterval}
+                  disabled={
+                    baseline.isDateStatic ||
+                    disabledList.currentInterval.get(baseline.dateRange)
+                  }
+                  onChange={() =>
+                    updateBaseline({
+                      ...baseline,
+                      includeCurrentInterval: !baseline.includeCurrentInterval,
+                    })
+                  }
+                >
+                  <Trans>Include current period</Trans>
+                </LabeledCheckbox>
+              </View>
+              {rangesOverlap(
+                [customReportItems.startDate, customReportItems.endDate],
+                [baseline.startDate, baseline.endDate],
+              ) && (
+                <Information style={{ marginTop: 5 }}>
+                  <Trans>
+                    The baseline overlaps the report's date range, so some
+                    transactions count towards both.
+                  </Trans>
+                </Information>
+              )}
+            </ReportDateFilter>
           </>
         )}
         <View
