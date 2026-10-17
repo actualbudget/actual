@@ -53,6 +53,10 @@ export default defineConfig({
           __dirname,
           'src/scripts/enable-openid.js',
         ),
+        'scripts/link-openid-identity': path.resolve(
+          __dirname,
+          'src/scripts/link-openid-identity.ts',
+        ),
         'scripts/health-check': path.resolve(
           __dirname,
           'src/scripts/health-check.ts',
