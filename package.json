@@ -87,7 +87,7 @@
     "oxfmt": "^0.59.0",
     "oxlint": "^1.74.0",
     "oxlint-tsgolint": "^0.25.0",
-    "p-limit": "^7.3.0",
+    "p-limit": "^7.3.3",
     "prompts": "^2.4.2",
     "typescript": "^6.0.3",
     "vitest": "^5.0.0"

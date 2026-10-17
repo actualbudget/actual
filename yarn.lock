@@ -10191,7 +10191,7 @@ __metadata:
     oxfmt: "npm:^0.59.0"
     oxlint: "npm:^1.74.0"
     oxlint-tsgolint: "npm:^0.25.0"
-    p-limit: "npm:^7.3.0"
+    p-limit: "npm:^7.3.3"
     prompts: "npm:^2.4.2"
     typescript: "npm:^6.0.3"
     vitest: "npm:^5.0.0"
@@ -21660,12 +21660,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-limit@npm:^7.3.0":
-  version: 7.3.0
-  resolution: "p-limit@npm:7.3.0"
+"p-limit@npm:^7.3.3":
+  version: 7.3.3
+  resolution: "p-limit@npm:7.3.3"
   dependencies:
     yocto-queue: "npm:^1.2.1"
-  checksum: 10/bd3f3487ec84401e2cbf243122eef11813edacb621a27808e60a425646d0e75a79514acc2c01e39c41911550dbae5ef0f0ab01caa61cfc1c541cd17a19e8f01b
+  checksum: 10/79440f0c98c21b8e78ead262bb3eca47b65e497ea945c03b978474c80fa55276695da409506650df1d60b8a1830f656b580c430dc02a74978759efdf8a00532d
   languageName: node
   linkType: hard
 
