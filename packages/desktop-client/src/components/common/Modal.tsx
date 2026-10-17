@@ -24,17 +24,71 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
-import { tokens } from '@actual-app/components/tokens';
+import { radius, spacing, tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { css } from '@emotion/css';
+import { css, keyframes } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useModalState } from '#hooks/useModalState';
+import { useReducedMotion } from '#hooks/useReducedMotion';
+import { useSwipeToDismiss } from '#hooks/useSwipeToDismiss';
+import { collapseModals } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 export const MODAL_Z_INDEX = 3000;
 
+const mobileSheetContainerStyle: CSSProperties = {
+  minWidth: '100%',
+  maxWidth: '100%',
+  borderRadius: `${radius.sheet}px ${radius.sheet}px 0 0`,
+  ...styles.shadowSheet,
+};
+
+const SHEET_EXIT_MS = 180;
+
+const sheetSlideIn = keyframes({
+  from: { transform: 'translateY(100%)' },
+  to: { transform: 'translateY(0)' },
+});
+
+const sheetSlideOut = keyframes({
+  to: { transform: 'translateY(100%)' },
+});
+
+const overlayFadeIn = keyframes({ from: { opacity: 0 }, to: { opacity: 1 } });
+const overlayFadeOut = keyframes({ from: { opacity: 1 }, to: { opacity: 0 } });
+
+const mobileSheetModalClassName = css({
+  '&[data-entering]': {
+    animation: `${sheetSlideIn} 240ms cubic-bezier(0.22, 1, 0.36, 1)`,
+  },
+  '&[data-exiting]': {
+    animation: `${sheetSlideOut} ${SHEET_EXIT_MS}ms ease-in forwards`,
+  },
+});
+
+const mobileSheetOverlayClassName = css({
+  '&[data-entering]': { animation: `${overlayFadeIn} 180ms ease-out` },
+  '&[data-exiting]': {
+    animation: `${overlayFadeOut} ${SHEET_EXIT_MS}ms ease-in forwards`,
+  },
+});
+
+const mobileSheetHandleStyle: CSSProperties = {
+  width: 36,
+  height: 4,
+  borderRadius: radius.pill,
+  backgroundColor: theme.pageTextSubdued,
+  alignSelf: 'center',
+  marginTop: spacing.sm,
+  marginBottom: spacing.sm,
+  flexShrink: 0,
+};
+
 type ModalProps = ComponentPropsWithRef<typeof ReactAriaModal> & {
+  presentation?: 'dialog' | 'sheet';
+  ariaLabelledBy?: string;
   name: string;
   isLoading?: boolean;
   noAnimation?: boolean;
@@ -57,10 +111,13 @@ export const Modal = ({
   onClose,
   wrapperProps,
   containerProps,
+  presentation = 'dialog',
+  ariaLabelledBy,
   ...props
 }: ModalProps) => {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const isSheet = presentation === 'sheet' && isNarrowWidth;
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
@@ -70,19 +127,62 @@ export const Modal = ({
   }, [enableScope, disableScope, name]);
 
   const { isHidden, isActive, onClose: closeModal } = useModalState();
+  const dispatch = useDispatch();
+  const prefersReducedMotion = useReducedMotion();
+  const isAnimatedSheet = isSheet && !prefersReducedMotion;
+  const [isOpen, setIsOpen] = useState(true);
+  const isClosingRef = useRef(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleOnClose = () => {
-    closeModal();
-    onClose?.();
+    if (isClosingRef.current) {
+      return;
+    }
+    isClosingRef.current = true;
+    const finishClose = () => {
+      if (isSheet) {
+        dispatch(collapseModals({ rootModalName: name }));
+      } else {
+        closeModal();
+      }
+      onClose?.();
+    };
+    if (isAnimatedSheet) {
+      closeTimerRef.current = setTimeout(finishClose, SHEET_EXIT_MS);
+      return;
+    }
+    finishClose();
   };
+
+  const sheetRef = useSwipeToDismiss({
+    isEnabled: isSheet,
+    onDismiss: () => {
+      setIsOpen(false);
+      handleOnClose();
+    },
+  });
 
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <ReactAriaModalOverlay
         data-testid={`${name}-modal`}
+        className={isAnimatedSheet ? mobileSheetOverlayClassName : undefined}
         isDismissable
-        defaultOpen
-        onOpenChange={isOpen => !isOpen && handleOnClose?.()}
+        isOpen={isOpen}
+        onOpenChange={nextIsOpen => {
+          setIsOpen(nextIsOpen);
+          if (!nextIsOpen) {
+            handleOnClose();
+          }
+        }}
         style={{
           position: 'fixed',
           inset: 0,
@@ -104,30 +204,35 @@ export const Modal = ({
         <View
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            ...(isSheet
+              ? { alignItems: 'stretch', justifyContent: 'flex-end' }
+              : { alignItems: 'center', justifyContent: 'center' }),
             height: 'var(--visual-viewport-height)',
             overflowY: 'auto',
             ...wrapperProps?.style,
           }}
         >
-          <ReactAriaModal>
+          <ReactAriaModal
+            ref={sheetRef}
+            className={isAnimatedSheet ? mobileSheetModalClassName : undefined}
+          >
             {modalProps => (
               <Dialog
-                aria-label={t('Modal dialog')}
+                aria-label={ariaLabelledBy ? undefined : t('Modal dialog')}
+                aria-labelledby={ariaLabelledBy}
                 className={css(styles.lightScrollbar)}
                 style={{
                   outline: 'none', // remove focus outline
                 }}
               >
                 <ModalContentContainer
-                  noAnimation={noAnimation}
+                  noAnimation={noAnimation || isSheet}
                   isActive={isActive(name)}
                   {...containerProps}
                   style={{
                     flex: 1,
                     padding: 10,
-                    willChange: 'opacity, transform',
+                    willChange: isSheet ? undefined : 'opacity, transform',
                     maxWidth: '90vw',
                     minWidth: '90vw',
                     maxHeight: 'calc(var(--visual-viewport-height) * 0.9)',
@@ -142,9 +247,11 @@ export const Modal = ({
                     },
                     overflowY: 'auto',
                     ...styles.shadowLarge,
+                    ...(isSheet && mobileSheetContainerStyle),
                     ...containerProps?.style,
                   }}
                 >
+                  {isSheet && <View style={mobileSheetHandleStyle} />}
                   <View style={{ paddingTop: 0, flex: 1, flexShrink: 0 }}>
                     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
                       {typeof children === 'function'
@@ -222,7 +329,7 @@ const ModalContentContainer = ({
     if (!mounted.current) {
       if (noAnimation) {
         contentRef.current.style.opacity = '1';
-        contentRef.current.style.transform = 'translateY(0px) scale(1)';
+        contentRef.current.style.transform = 'none';
 
         setTimeout(() => {
           if (contentRef.current) {
