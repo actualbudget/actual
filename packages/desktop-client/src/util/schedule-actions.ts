@@ -63,6 +63,16 @@ export async function createSingleTimeScheduleFromTransaction(
     transaction.subtransactions.forEach((split, index) => {
       const splitIndex = index + 1;
 
+      // Empty payees must be explicit so a split does not inherit another payee.
+      actions.push({
+        op: 'set',
+        field: 'payee',
+        value: split.payee || null,
+        options: {
+          splitIndex,
+        },
+      });
+
       if (split.amount != null) {
         actions.push({
           op: 'set-split-amount',
