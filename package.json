@@ -81,7 +81,7 @@
     "husky": "^9.1.7",
     "knip": "^6.41.0",
     "lage": "^2.17.0",
-    "minimatch": "^10.2.5",
+    "minimatch": "^10.2.6",
     "nano-staged": "^1.0.2",
     "npm-run-all": "^4.1.5",
     "oxfmt": "^0.59.0",
