@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -52,6 +58,28 @@ function TransactionListWithPreviews() {
     currentQuery,
   );
 
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  const { isSearching, search } = useTransactionsSearch({
+    updateQuery: updateFn =>
+      setTransactionsQuery(query => (query ? updateFn(query) : query)),
+    resetQuery: () => setTransactionsQuery(currentQuery),
+    dateFormat,
+  });
+
+  const searchTextRef = useRef('');
+  const onSearch = useCallback(
+    (searchText: string) => {
+      searchTextRef.current = searchText;
+      search(searchText);
+    },
+    [search],
+  );
+
+  // Keyed on the serialized conditions, not location.state: updating the URL
+  // (e.g. the search param) gives location.state a new identity each time.
+  const filterConditionsKey = JSON.stringify(filterConditions);
+
   useEffect(() => {
     let isStale = false;
 
@@ -65,18 +93,23 @@ function TransactionListWithPreviews() {
       if (!isStale) {
         setCurrentQuery(query);
         setTransactionsQuery(query);
+        // A search typed or restored before the filters loaded had no query
+        // to apply to; re-run it on top of the filtered query.
+        if (searchTextRef.current !== '') {
+          search(searchTextRef.current);
+        }
       }
     };
 
-    const conditions = location?.state?.filterConditions;
-    if (conditions?.length) {
+    const conditions: RuleConditionEntity[] = JSON.parse(filterConditionsKey);
+    if (conditions.length) {
       void applyFilters(conditions);
     }
 
     return () => {
       isStale = true;
     };
-  }, [location.state, makeRootTransactionsQuery]);
+  }, [filterConditionsKey, makeRootTransactionsQuery, search]);
 
   const {
     transactions,
@@ -89,16 +122,8 @@ function TransactionListWithPreviews() {
   const { previewTransactions, isLoading: isPreviewTransactionsLoading } =
     usePreviewTransactions();
 
-  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
-  const { isSearching, search: onSearch } = useTransactionsSearch({
-    updateQuery: updateFn =>
-      setTransactionsQuery(query => (query ? updateFn(query) : query)),
-    resetQuery: () => setTransactionsQuery(currentQuery),
-    dateFormat,
-  });
 
   const onOpenTransaction = useCallback(
     (transaction: TransactionEntity) => {
