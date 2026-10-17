@@ -342,13 +342,7 @@ budgetTypes.forEach(budgetType => {
       await page.setViewportSize({ width: 350, height: 1000 });
       const budgetPage = await navigation.goToBudgetPage();
 
-      const giftRow = budgetPage.categoryRows.filter({ hasText: 'Gift' });
-      const internetRow = budgetPage.categoryRows.filter({
-        hasText: 'Internet',
-      });
-
-      // Drop on the top edge of "Internet" to place "Gift" before it.
-      await giftRow.dragTo(internetRow, { targetPosition: { x: 20, y: 5 } });
+      await budgetPage.dragCategoryBefore('Gift', 'Internet');
 
       await expect(
         page

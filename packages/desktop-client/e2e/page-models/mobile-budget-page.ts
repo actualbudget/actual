@@ -160,6 +160,23 @@ export class MobileBudgetPage {
     ).toHaveCount(0);
   }
 
+  async dragCategoryBefore(categoryName: string, targetCategoryName: string) {
+    const sourceRow = await this.#getRowForCategory(categoryName);
+    const targetRow = await this.#getRowForCategory(targetCategoryName);
+    const sourceBox = await sourceRow.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+    if (!sourceBox || !targetBox) {
+      throw new Error('Could not locate the category rows to drag.');
+    }
+    const x = sourceBox.x + sourceBox.width / 2;
+    const y = sourceBox.y + sourceBox.height / 2;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.down();
+    await this.page.mouse.move(x, y - 5, { steps: 2 });
+    await this.page.mouse.move(targetBox.x + 20, targetBox.y + 5, { steps: 5 });
+    await this.page.mouse.up();
+  }
+
   async dragCategoryToRow(fromIndex: number, toIndex: number) {
     const handle = this.categoryRows
       .nth(fromIndex)
