@@ -31,7 +31,7 @@
     "electron": "43.5.0",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.4"
   },
   "build": {
     "appId": "com.actualbudget.actual",
@@ -73,12 +73,6 @@
     "linux": {
       "target": [
         {
-          "target": "flatpak",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
           "target": "AppImage",
           "arch": [
             "x64",
@@ -97,10 +91,6 @@
         }
       },
       "executableName": "actual"
-    },
-    "flatpak": {
-      "runtimeVersion": "24.08",
-      "baseVersion": "24.08"
     },
     "win": {
       "target": [

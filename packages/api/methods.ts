@@ -433,6 +433,13 @@ export function getSchedules() {
   return send('api/schedules-get');
 }
 
+export function getScheduleDates(
+  date: APIScheduleEntity['date'],
+  options: { start?: string; end?: string; count?: number } = {},
+) {
+  return send('api/schedule-dates-get', { date, ...options });
+}
+
 export function getIDByName(
   type: 'accounts' | 'schedules' | 'categories' | 'payees',
   name: string,

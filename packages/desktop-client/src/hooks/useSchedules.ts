@@ -79,19 +79,11 @@ export function useSchedules({
 
   const scheduleQueryRef = useRef<LiveQuery<ScheduleEntity> | null>(null);
   const statusQueryRef = useRef<LiveQuery<TransactionEntity> | null>(null);
-  // Tracks whether `error` is set so the effect only clears it when needed.
-  // Every transaction row calls this hook, and an unconditional
-  // setError(undefined) queues an update for each row the virtualized list
-  // mounts while scrolling (#9170).
-  const hasErrorRef = useRef(false);
 
   useEffect(() => {
     let isUnmounted = false;
 
-    if (hasErrorRef.current) {
-      hasErrorRef.current = false;
-      setError(undefined);
-    }
+    setError(undefined);
 
     if (!query) {
       // This usually means query is not yet set on this render cycle.
@@ -100,7 +92,6 @@ export function useSchedules({
 
     function onError(error: Error) {
       if (!isUnmounted) {
-        hasErrorRef.current = true;
         setError(error);
         setIsLoading(false);
       }

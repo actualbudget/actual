@@ -13,7 +13,6 @@ import type {
   FocusEvent,
   JSX,
   KeyboardEvent,
-  MouseEventHandler,
   ReactElement,
   ReactNode,
   Ref,
@@ -128,17 +127,11 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(function Field(
 
 export const UnexposedCellContent = forwardRef<
   HTMLSpanElement,
-  Pick<CellProps, 'value' | 'formatter' | 'style'> & {
-    onMouseEnter?: MouseEventHandler<HTMLSpanElement>;
-  }
->(function UnexposedCellContent(
-  { value, formatter, style, onMouseEnter, ...props },
-  ref,
-) {
+  Pick<CellProps, 'value' | 'formatter' | 'style'>
+>(function UnexposedCellContent({ value, formatter, style, ...props }, ref) {
   return (
     <Text
       innerRef={ref}
-      onMouseEnter={onMouseEnter}
       style={{
         flexGrow: 1,
         whiteSpace: 'nowrap',
