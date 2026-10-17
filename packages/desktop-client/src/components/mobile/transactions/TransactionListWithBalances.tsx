@@ -89,6 +89,7 @@ type TransactionListWithBalancesProps = {
   isReconciling?: boolean;
   onToggleTransactionCleared?: (transaction: TransactionEntity) => void;
   filtered?: boolean;
+  showBalance?: boolean;
 };
 
 export function TransactionListWithBalances({
@@ -109,6 +110,7 @@ export function TransactionListWithBalances({
   isReconciling = false,
   onToggleTransactionCleared,
   filtered = false,
+  showBalance = true,
 }: TransactionListWithBalancesProps) {
   const selectedInst = useSelected('transactions', [...transactions], []);
 
@@ -121,35 +123,43 @@ export function TransactionListWithBalances({
             marginTop: 10,
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-evenly',
-            }}
-          >
-            {balanceCleared && balanceUncleared ? (
-              <BalanceWithCleared
-                balance={balance}
-                balanceCleared={balanceCleared}
-                balanceUncleared={balanceUncleared}
-                alwaysShowCleared={isReconciling}
-              />
-            ) : (
-              <>
-                <View style={{ flexBasis: '33%' }} />
-                <Balance balance={balance} />
-                <View
-                  style={{
-                    flexBasis: '33%',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  {filtered && <AppliedFiltersChip />}
-                </View>
-              </>
-            )}
-          </View>
+          {showBalance ? (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-evenly',
+              }}
+            >
+              {balanceCleared && balanceUncleared ? (
+                <BalanceWithCleared
+                  balance={balance}
+                  balanceCleared={balanceCleared}
+                  balanceUncleared={balanceUncleared}
+                  alwaysShowCleared={isReconciling}
+                />
+              ) : (
+                <>
+                  <View style={{ flexBasis: '33%' }} />
+                  <Balance balance={balance} />
+                  <View
+                    style={{
+                      flexBasis: '33%',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {filtered && <AppliedFiltersChip />}
+                  </View>
+                </>
+              )}
+            </View>
+          ) : (
+            filtered && (
+              <View style={{ alignItems: 'center' }}>
+                <AppliedFiltersChip />
+              </View>
+            )
+          )}
           <TransactionSearchInput
             placeholder={searchPlaceholder}
             onSearch={onSearch}

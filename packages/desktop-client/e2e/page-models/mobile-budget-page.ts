@@ -1,13 +1,19 @@
 import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
-import { MobileAccountPage } from './mobile-account-page';
-import { BalanceMenuModal } from './mobile-balance-menu-modal';
-import { BudgetMenuModal } from './mobile-budget-menu-modal';
-import { CategoryGroupMenuModal } from './mobile-category-group-menu-modal';
-import { CategoryMenuModal } from './mobile-category-menu-modal';
+import { BudgetAmountSheet } from './mobile-budget-amount-sheet';
+import { CategoryActionsSheet } from './mobile-category-actions-sheet';
+import { CategoryGroupActionsSheet } from './mobile-category-group-actions-sheet';
+import { MobileCategoryPage } from './mobile-category-page';
 import { EnvelopeBudgetSummaryModal } from './mobile-envelope-budget-summary-modal';
 import { TrackingBudgetSummaryModal } from './mobile-tracking-budget-summary-modal';
+
+const LONG_PRESS_DELAY_MS = 700;
+
+function cellLabel(prefix: string, categoryName: string) {
+  const escaped = categoryName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^${prefix} for ${escaped} category`);
+}
 
 export class MobileBudgetPage {
   readonly MONTH_HEADER_DATE_FORMAT = "MMMM ''yy";
@@ -142,6 +148,81 @@ export class MobileBudgetPage {
     await this.budgetPageMenuButton.click();
   }
 
+  async enterReorderMode() {
+    await this.openBudgetPageMenu();
+    await this.page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Reorder categories' })
+      .click();
+    await expect(
+      this.categoryRows.first().getByTestId('reorder-handle'),
+    ).toBeVisible();
+  }
+
+  async exitReorderMode() {
+    await this.page.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(
+      this.categoryRows.first().getByTestId('reorder-handle'),
+    ).toHaveCount(0);
+  }
+
+  async dragCategoryBefore(categoryName: string, targetCategoryName: string) {
+    const sourceRow = await this.#getRowForCategory(categoryName);
+    const targetRow = await this.#getRowForCategory(targetCategoryName);
+    const sourceBox = await sourceRow.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+    if (!sourceBox || !targetBox) {
+      throw new Error('Could not locate the category rows to drag.');
+    }
+    const x = sourceBox.x + sourceBox.width / 2;
+    const y = sourceBox.y + sourceBox.height / 2;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.down();
+    await this.page.mouse.move(x, y - 5, { steps: 2 });
+    await this.page.mouse.move(targetBox.x + 20, targetBox.y + 5, { steps: 5 });
+    await this.page.mouse.up();
+  }
+
+  async dragCategoryToRow(fromIndex: number, toIndex: number) {
+    const targetRow = this.categoryRows.nth(toIndex);
+    const handle = this.categoryRows
+      .nth(fromIndex)
+      .getByTestId('reorder-handle');
+    await targetRow.evaluate(element =>
+      element.scrollIntoView({ block: 'center' }),
+    );
+    const handleBox = await handle.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+    if (!handleBox || !targetBox) {
+      throw new Error('Could not locate the reorder handle or target row.');
+    }
+    await this.page.mouse.move(
+      handleBox.x + handleBox.width / 2,
+      handleBox.y + handleBox.height / 2,
+    );
+    await this.page.mouse.down();
+    await this.page.mouse.move(
+      handleBox.x + handleBox.width / 2,
+      targetBox.y + 2,
+      {
+        steps: 8,
+      },
+    );
+    await this.page.mouse.up();
+  }
+
+  async tapGroupHandle(idx: number) {
+    await this.categoryGroupRows.nth(idx).getByTestId('reorder-handle').click();
+  }
+
+  getGroupCategoryNames(categoryGroupName: string) {
+    return this.page
+      .getByRole('grid', {
+        name: `${categoryGroupName} expense group categories`,
+      })
+      .getByTestId('category-name');
+  }
+
   async getCategoryGroupNameForRow(idx: number) {
     const groupNameText = await this.categoryGroupNames.nth(idx).textContent();
     if (!groupNameText) {
@@ -157,12 +238,12 @@ export class MobileBudgetPage {
     });
   }
 
-  async openCategoryGroupMenu(categoryGroupName: string | RegExp) {
+  async openCategoryGroupActions(categoryGroupName: string | RegExp) {
     const categoryGroupButton =
       await this.#getButtonForCategoryGroup(categoryGroupName);
     await categoryGroupButton.click();
 
-    return new CategoryGroupMenuModal(this.page.getByRole('dialog'));
+    return new CategoryGroupActionsSheet(this.page.getByRole('dialog'));
   }
 
   async getCategoryNameForRow(idx: number) {
@@ -173,37 +254,48 @@ export class MobileBudgetPage {
     return categoryNameText;
   }
 
-  async #getButtonForCategory(categoryName: string | RegExp) {
-    return this.categoryRows.getByRole('button', {
-      name: categoryName,
+  async #getRowForCategory(categoryName: string | RegExp) {
+    return this.budgetTable.getByTestId('budget-groups').getByRole('row', {
+      name:
+        typeof categoryName === 'string'
+          ? `Open ${categoryName} category`
+          : categoryName,
       exact: true,
     });
   }
 
-  async openCategoryMenu(categoryName: string | RegExp) {
-    const categoryButton = await this.#getButtonForCategory(categoryName);
-    await categoryButton.click();
+  async openCategory(categoryName: string | RegExp) {
+    const categoryRow = await this.#getRowForCategory(categoryName);
+    await categoryRow.getByTestId('category-name').click();
 
-    return new CategoryMenuModal(this.page.getByRole('dialog'));
+    const categoryPage = new MobileCategoryPage(this.page);
+    await categoryPage.waitFor();
+    return categoryPage;
+  }
+
+  async openCategoryActionsWithLongPress(categoryName: string | RegExp) {
+    const categoryRow = await this.#getRowForCategory(categoryName);
+    await categoryRow
+      .getByTestId('category-name')
+      .click({ delay: LONG_PRESS_DELAY_MS });
+
+    return new CategoryActionsSheet(this.page.getByRole('dialog'));
   }
 
   async #getButtonForCell(
     buttonType: 'Budgeted' | 'Spent',
     categoryName: string,
   ) {
-    const buttonSelector =
-      buttonType === 'Budgeted'
-        ? `Open budget menu for ${categoryName} category`
-        : `Show transactions for ${categoryName} category`;
+    const buttonSelector = cellLabel(`${buttonType} amount`, categoryName);
 
-    let button = this.budgetTable.getByRole('button', { name: buttonSelector });
+    let button = this.budgetTable.getByLabel(buttonSelector);
 
     if (await button.isVisible()) {
       return button;
     }
 
     await this.toggleVisibleColumns();
-    button = this.budgetTable.getByRole('button', { name: buttonSelector });
+    button = this.budgetTable.getByLabel(buttonSelector);
 
     if (await button.isVisible()) {
       return button;
@@ -222,33 +314,24 @@ export class MobileBudgetPage {
     return await this.#getButtonForCell('Spent', categoryName);
   }
 
-  async openBudgetMenu(categoryName: string) {
+  async openBudgetAmountFromCell(categoryName: string) {
     const budgetedButton = await this.getButtonForBudgeted(categoryName);
     await budgetedButton.click();
 
-    return new BudgetMenuModal(this.page.getByRole('dialog'));
+    return new BudgetAmountSheet(this.page.getByRole('dialog'));
   }
 
-  async openSpentPage(categoryName: string) {
-    const spentButton = await this.getButtonForSpent(categoryName);
-    await spentButton.click();
-
-    return new MobileAccountPage(this.page);
-  }
-
-  async openBalanceMenu(categoryName: string) {
-    const balanceButton = this.budgetTable.getByRole('button', {
-      name: `Open balance menu for ${categoryName} category`,
-    });
-
-    if (await balanceButton.isVisible()) {
-      await balanceButton.click();
-      return new BalanceMenuModal(this.page.getByRole('dialog'));
-    } else {
+  async getReceivedForIncomeCategory(categoryName: string) {
+    const cell = this.budgetTable.getByLabel(
+      cellLabel('Received amount', categoryName),
+    );
+    const received = await cell.textContent();
+    if (!received) {
       throw new Error(
-        `Balance button for category ${categoryName} not found or not visible.`,
+        `Failed to read the received amount for ${categoryName}.`,
       );
     }
+    return received;
   }
 
   async #waitForNewMonthToLoad({

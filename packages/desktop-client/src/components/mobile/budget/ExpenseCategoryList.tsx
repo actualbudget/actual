@@ -28,21 +28,21 @@ type ExpenseCategoryListProps = {
   categories: CategoryEntity[];
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategory: (id: string) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  draggingId: string | null;
 };
 
 export function ExpenseCategoryList({
   categoryGroup,
   categories,
   month,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategory,
   show3Columns,
   showBudgetedColumn,
   shouldHideCategory,
+  draggingId,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
   const reorderCategory = useReorderCategoryMutation();
@@ -106,11 +106,11 @@ export function ExpenseCategoryList({
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[
         month,
-        onEditCategory,
-        onBudgetAction,
+        onShowCategory,
         shouldHideCategory,
         show3Columns,
         showBudgetedColumn,
+        draggingId,
       ]}
     >
       {category => (
@@ -118,9 +118,9 @@ export function ExpenseCategoryList({
           key={category.id}
           value={category}
           month={month}
-          onEditCategory={onEditCategory}
-          onBudgetAction={onBudgetAction}
+          onShowCategory={onShowCategory}
           isHidden={shouldHideCategory(category)}
+          isDragging={category.id === draggingId}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
         />

@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { q } from '@actual-app/core/shared/query';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
@@ -43,6 +44,7 @@ function TransactionListWithPreviews({
   category,
   month,
 }: TransactionListWithPreviewsProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const baseTransactionsQuery = useCallback(
@@ -112,7 +114,10 @@ function TransactionListWithPreviews({
       balance={balance}
       balanceCleared={balanceCleared}
       balanceUncleared={balanceUncleared}
-      searchPlaceholder={`Search ${category.name}`}
+      showBalance={false}
+      searchPlaceholder={t('Search {{categoryName}}', {
+        categoryName: category.name,
+      })}
       onSearch={onSearch}
       isLoadingMore={isLoadingMoreTransactions}
       onLoadMore={fetchMoreTransactions}

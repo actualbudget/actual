@@ -1,31 +1,33 @@
 import type { Locator, Page } from '@playwright/test';
 
-export class CategoryGroupMenuModal {
+export class CategoryGroupActionsSheet {
   readonly page: Page;
   readonly locator: Locator;
   readonly heading: Locator;
-  readonly addCategoryButton: Locator;
-  readonly deleteButton: Locator;
+  readonly addCategoryRow: Locator;
+  readonly renameRow: Locator;
+  readonly deleteGroupRow: Locator;
 
   constructor(locator: Locator) {
     this.locator = locator;
     this.page = locator.page();
 
     this.heading = locator.getByRole('heading');
-    this.addCategoryButton = locator.getByRole('button', {
+    this.addCategoryRow = locator.getByRole('button', {
       name: 'Add category',
     });
-    this.deleteButton = locator.getByRole('button', {
+    this.renameRow = locator.getByRole('button', { name: 'Rename' });
+    this.deleteGroupRow = locator.getByRole('button', {
       name: 'Delete',
       exact: true,
     });
   }
 
   async close() {
-    await this.page.keyboard.press('Escape');
+    await this.locator.press('Escape');
   }
 
   async delete() {
-    await this.deleteButton.click();
+    await this.deleteGroupRow.click();
   }
 }

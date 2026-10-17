@@ -1,30 +1,75 @@
+import { useState } from 'react';
 import type { DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import type { CategoryEntity } from '@actual-app/core/types/models';
+import { View } from '@actual-app/components/view';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useMoveCategoryMutation } from '#budget';
+import { useTouchReorder } from '#hooks/useTouchReorder';
+import { useUndo } from '#hooks/useUndo';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
+import { ReorderDropIndicator } from './ReorderDropIndicator';
+import { useReorderMode } from './ReorderModeContext';
 
 type IncomeCategoryListProps = {
+  categoryGroup: CategoryGroupEntity;
   categories: CategoryEntity[];
   month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategory: (id: string) => void;
 };
 
 export function IncomeCategoryList({
+  categoryGroup,
   categories,
   month,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategory,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
   const moveCategory = useMoveCategoryMutation();
+  const { showUndoNotification } = useUndo();
+  const isReordering = useReorderMode();
+  const [announcement, setAnnouncement] = useState('');
+
+  const touchReorder = useTouchReorder({
+    isEnabled: isReordering,
+    onMoveCategory: (id, { groupId, targetId }) => {
+      const category = categories.find(c => c.id === id);
+      if (!category) {
+        return;
+      }
+      const others = categories.filter(c => c.id !== id);
+      const targetIndex = targetId
+        ? others.findIndex(c => c.id === targetId)
+        : -1;
+      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+      moveCategory.mutate(
+        { id, groupId, targetId },
+        {
+          onSuccess: () => {
+            setAnnouncement(
+              t('{{name}} moved to position {{position}} in {{groupName}}', {
+                name: category.name,
+                position,
+                groupName: categoryGroup.name,
+              }),
+            );
+            showUndoNotification({
+              message: t('Moved {{name}}', { name: category.name }),
+            });
+          },
+        },
+      );
+    },
+  });
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
@@ -102,21 +147,33 @@ export function IncomeCategoryList({
   });
 
   return (
-    <GridList
-      aria-label={t('Income categories')}
-      items={categories}
-      dragAndDropHooks={dragAndDropHooks}
-      dependencies={[month, onEditCategory, onBudgetAction]}
+    <View
+      {...touchReorder.containerProps}
+      data-reorder-group-id={categoryGroup.id}
+      style={{ position: 'relative' }}
     >
-      {category => (
-        <IncomeCategoryListItem
-          key={category.id}
-          value={category}
-          month={month}
-          onEdit={onEditCategory}
-          onBudgetAction={onBudgetAction}
-        />
+      <GridList
+        aria-label={t('Income categories')}
+        items={categories}
+        dragAndDropHooks={dragAndDropHooks}
+        dependencies={[month, onShowCategory, touchReorder.draggingId]}
+      >
+        {category => (
+          <IncomeCategoryListItem
+            key={category.id}
+            value={category}
+            month={month}
+            isDragging={category.id === touchReorder.draggingId}
+            onShowCategory={onShowCategory}
+          />
+        )}
+      </GridList>
+      {touchReorder.indicatorTop != null && (
+        <ReorderDropIndicator top={touchReorder.indicatorTop} />
       )}
-    </GridList>
+      <View aria-live="polite" aria-atomic style={styles.visuallyHidden}>
+        {announcement}
+      </View>
+    </View>
   );
 }
