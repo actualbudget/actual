@@ -297,6 +297,26 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('moves a category to another group with drag and drop', async () => {
+      // Keep both rows on screen so the drag doesn't scroll the page midway.
+      await page.setViewportSize({ width: 350, height: 1000 });
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const giftRow = budgetPage.categoryRows.filter({ hasText: 'Gift' });
+      const internetRow = budgetPage.categoryRows.filter({
+        hasText: 'Internet',
+      });
+
+      // Drop on the top edge of "Internet" to place "Gift" before it.
+      await giftRow.dragTo(internetRow, { targetPosition: { x: 20, y: 5 } });
+
+      await expect(
+        page
+          .getByRole('grid', { name: 'Bills expense group categories' })
+          .getByTestId('category-name'),
+      ).toHaveText(['Cell', 'Gift', 'Internet', 'Mortgage', 'Water', 'Power']);
+    });
+
     test('opens the transfer confirmation when deleting a category group with transactions', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
