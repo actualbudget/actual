@@ -105,6 +105,14 @@ export function createCustomSpreadsheet({
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: DataEntity) => void,
   ) => {
+    // Weekly reports display complete calendar weeks. Query through the end of
+    // the final week too, otherwise transactions after the selected weekday
+    // are excluded from the last interval.
+    const intervalEndDate =
+      interval === 'Weekly'
+        ? monthUtils.getWeekEnd(endDate, firstDayOfWeekIdx)
+        : endDate;
+
     let groupByList = initialGroups;
     let scopeTagNames: string[] | undefined;
     const emptyData: DataEntity = {
@@ -137,7 +145,7 @@ export function createCustomSpreadsheet({
     ({ assets, debts } = await fetchSpreadsheetQueryData({
       balanceTypeOp,
       startDate,
-      endDate,
+      endDate: intervalEndDate,
       interval,
       categories: categories.list,
       categoryGroups: categories.grouped,
@@ -298,7 +306,7 @@ export function createCustomSpreadsheet({
           intervalStartDate: index === 0 ? startDate : intervalItem,
           intervalEndDate:
             index + 1 === intervals.length
-              ? endDate
+              ? intervalEndDate
               : monthUtils.subDays(intervals[index + 1], 1),
           totalAssets: perIntervalAssets,
           totalDebts: perIntervalDebts,

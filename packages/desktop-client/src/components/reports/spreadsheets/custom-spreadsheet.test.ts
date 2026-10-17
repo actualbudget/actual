@@ -77,3 +77,36 @@ it.each([
     ]);
   },
 );
+
+it('includes the complete final week in a weekly report query', async () => {
+  vi.mocked(fetchSpreadsheetQueryData).mockResolvedValue({
+    assets: [],
+    debts: [],
+  });
+  const { result } = renderHook(useSpreadsheet, {
+    wrapper: SpreadsheetProvider,
+  });
+
+  await createCustomSpreadsheet({
+    startDate: '2024-09-30',
+    endDate: '2024-10-28',
+    interval: 'Weekly',
+    categories: { list: [], grouped: [] },
+    conditions: [],
+    conditionsOp: 'and',
+    showEmpty: true,
+    showOffBudget: false,
+    showHiddenCategories: false,
+    showUncategorized: false,
+    trimIntervals: false,
+    groupBy: 'Tag',
+    tags: [{ id: 'red', tag: 'red' }],
+    firstDayOfWeekIdx: '1',
+  })(result.current, vi.fn());
+
+  expect(fetchSpreadsheetQueryData).toHaveBeenCalledWith(
+    expect.objectContaining({
+      endDate: '2024-11-03',
+    }),
+  );
+});
