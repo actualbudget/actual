@@ -252,7 +252,7 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.13.0"
     "@rolldown/plugin-babel": "npm:~0.2.4"
     "@rollup/plugin-inject": "npm:^5.0.5"
-    "@tanstack/react-query": "npm:^5.101.2"
+    "@tanstack/react-query": "npm:^5.104.2"
     "@testing-library/dom": "npm:10.4.2"
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:16.3.3"
@@ -8131,21 +8131,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.101.2":
-  version: 5.101.2
-  resolution: "@tanstack/query-core@npm:5.101.2"
-  checksum: 10/567af5e3c21628745a08c1a5054d838597bc620dcbbeabe20cdd6ccffdcca85a8d38128f6e80829b6e04d10f79ca793a7dd8fddc8a3d6bef10c2d580ae214c7d
+"@tanstack/query-core@npm:5.104.2":
+  version: 5.104.2
+  resolution: "@tanstack/query-core@npm:5.104.2"
+  checksum: 10/52475453c5361d538ee48c64c21dd3d2ce10f1071e705857e8985b83970b7afc4be514a234c4ebebb63e1b7a5f2a86cd4927d19547d730e6b3c26c76166af583
   languageName: node
   linkType: hard
 
-"@tanstack/react-query@npm:^5.101.2":
-  version: 5.101.2
-  resolution: "@tanstack/react-query@npm:5.101.2"
+"@tanstack/react-query@npm:^5.104.2":
+  version: 5.104.2
+  resolution: "@tanstack/react-query@npm:5.104.2"
   dependencies:
-    "@tanstack/query-core": "npm:5.101.2"
+    "@tanstack/query-core": "npm:5.104.2"
   peerDependencies:
     react: ^18 || ^19
-  checksum: 10/0837c176b6afb01e3632010bbd8bdfeee7f46c4a25a50ed2ba9ddddce11c34431161d80dd8e53a2f55190c2313bbfb22a84a77308e6ccf29877b4818de68c4b3
+  checksum: 10/664a72b9047af976cdde495084ed8134c74bdc4e491abd2afd49275c40c160e0d5cc2eb23ccfe1ecadea82e9c7b46e945b701508233a31d6fd149b2282af2f2e
   languageName: node
   linkType: hard
 
