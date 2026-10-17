@@ -22,7 +22,13 @@ import {
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
-import { currentDay, dayFromDate, isValidYearMonthDay, parseDate, subDays } from '#shared/months';
+import {
+  currentDay,
+  dayFromDate,
+  isValidYearMonthDay,
+  parseDate,
+  subDays,
+} from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
@@ -883,10 +889,7 @@ app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));
 app.method('schedule/move', mutator(undoable(moveSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
-app.method(
-  'schedule/set-next-date',
-  mutator(undoable(setScheduleNextDate)),
-);
+app.method('schedule/set-next-date', mutator(undoable(setScheduleNextDate)));
 app.method(
   'schedule/post-transaction',
   mutator(undoable(postTransactionForSchedule)),
