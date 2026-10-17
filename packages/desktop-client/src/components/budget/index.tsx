@@ -51,8 +51,7 @@ export function Budget() {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
-  // Only wait for prewarming on the first visit; after that the cache is warm
-  const [initialized, setInitialized] = useState(bounds != null);
+  const [initialized, setInitialized] = useState(false);
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
 
