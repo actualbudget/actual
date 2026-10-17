@@ -292,6 +292,7 @@ function Footer({
       {isFuture && (
         <Button
           variant="normal"
+          size="large"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onSchedule}
@@ -310,6 +311,7 @@ function Footer({
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
+          size="extra-large"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onClickRemainingSplit}
@@ -350,6 +352,7 @@ function Footer({
       ) : !transaction.account ? (
         <Button
           variant="primary"
+          size="extra-large"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={() => onEditField(transaction.id, 'account')}
@@ -367,6 +370,7 @@ function Footer({
       ) : isAdding ? (
         <Button
           variant="primary"
+          size="extra-large"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onAdd}
@@ -384,6 +388,7 @@ function Footer({
       ) : (
         <Button
           variant="primary"
+          size="extra-large"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onSave}
@@ -1978,6 +1983,7 @@ function TransactionEditUnconnected({
           </Text>
           <Button
             variant="primary"
+            size="extra-large"
             onPress={() => {
               dispatch(
                 pushModal({
@@ -2029,6 +2035,7 @@ function TransactionEditUnconnected({
           </Text>
           <Button
             variant="primary"
+            size="extra-large"
             onPress={() => {
               void navigate('/budget');
             }}
@@ -2115,6 +2122,7 @@ function FillRemainingButton({
   return (
     <Button
       variant="primary"
+      size="extra-large"
       style={{ height: styles.mobileMinHeight }}
       onPress={onPress}
       isDisabled={remaining === 0}
