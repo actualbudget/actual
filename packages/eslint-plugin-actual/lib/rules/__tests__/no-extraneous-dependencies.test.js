@@ -25,6 +25,9 @@ void runClassic(
       // Virtual modules are allowed
       `import { registerSW } from 'virtual:pwa-register'`,
 
+      // Cloudflare Workers runtime modules are allowed
+      `import { DurableObject } from 'cloudflare:workers'`,
+
       // require() with relative path
       `const foo = require('./foo')`,
     ],

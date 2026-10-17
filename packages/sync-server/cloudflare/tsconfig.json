@@ -1,0 +1,19 @@
+{
+  // Standalone project for the Cloudflare Worker entry points. Kept out of the
+  // sync-server project so Workers globals don't leak into the Node code.
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    // The entry points import sync-server's sources from ../src; TypeScript 6
+    // would otherwise default rootDir to this directory (TS6059).
+    "rootDir": "..",
+    // Matches sync-server, whose sources the entry points import.
+    "strict": false,
+    "strictFunctionTypes": true,
+    "lib": ["ES2022"],
+    "types": ["./worker-configuration.d.ts", "vite/client"],
+    "resolveJsonModule": true
+  },
+  "include": ["src/**/*", "worker-configuration.d.ts"]
+}
