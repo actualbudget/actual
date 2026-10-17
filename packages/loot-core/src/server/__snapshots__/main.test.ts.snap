@@ -18,8 +18,10 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "isParent": 0,
     "location": null,
     "notes": null,
+    "pair_encoding": "",
     "parent_id": null,
     "pending": 0,
+    "pocket": null,
     "raw_synced_data": null,
     "reconciled": 0,
     "schedule": null,
@@ -46,8 +48,10 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "isParent": 0,
     "location": null,
     "notes": null,
+    "pair_encoding": "",
     "parent_id": null,
     "pending": 0,
+    "pocket": null,
     "raw_synced_data": null,
     "reconciled": 0,
     "schedule": null,
@@ -80,7 +84,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "id": "test-transfer",
       "imported_description": null,
       "isChild": 0,
-@@ -26,13 +26,13 @@
+@@ -28,13 +28,13 @@
       "transaction_amount": null,
       "transferred_id": "id2",
       "type": null,
@@ -102,7 +106,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
 "- First value
 + Second value
 
-@@ -20,13 +20,13 @@
+@@ -22,13 +22,13 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
@@ -118,7 +122,7 @@ exports[`Accounts > Transfers are properly updated 3`] = `
     Object {
       "acct": "three",
       "amount": -5000,
-@@ -48,11 +48,11 @@
+@@ -52,11 +52,11 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
