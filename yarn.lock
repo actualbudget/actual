@@ -290,7 +290,7 @@ __metadata:
     react-dnd-html5-backend: "npm:^16.0.1"
     react-dom: "npm:19.3.0"
     react-error-boundary: "npm:^6.1.6"
-    react-grid-layout: "npm:^2.2.3"
+    react-grid-layout: "npm:^2.3.0"
     react-hotkeys-hook: "npm:^5.3.3"
     react-i18next: "npm:^17.0.10"
     react-joyride: "npm:^3.2.0"
@@ -23403,20 +23403,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-grid-layout@npm:^2.2.3":
-  version: 2.2.3
-  resolution: "react-grid-layout@npm:2.2.3"
+"react-grid-layout@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "react-grid-layout@npm:2.3.0"
   dependencies:
     clsx: "npm:^2.1.1"
     fast-equals: "npm:^4.0.3"
     prop-types: "npm:^15.8.1"
     react-draggable: "npm:^4.4.6"
-    react-resizable: "npm:^3.1.3"
+    react-resizable: "npm:^3.2.0"
     resize-observer-polyfill: "npm:^1.5.1"
   peerDependencies:
     react: ">= 16.3.0"
     react-dom: ">= 16.3.0"
-  checksum: 10/90b66db889fc5889e038dd1b6198eb94cb093a9669335b0f617cee3999b6d0f37bf4683aba418235c8469967fba113461d6858e8c1f6165cf58af483236cb8d4
+  checksum: 10/3163936e7c91d8f2a78e00a4a91a658f8d68e2f4049349dbfc664b0324538321fa0d7c8aceb9cf3a5fb0ea99e472be2aeeba5f03fbd6101c68b1e5a09e674952
   languageName: node
   linkType: hard
 
@@ -23635,16 +23635,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resizable@npm:^3.1.3":
-  version: 3.1.3
-  resolution: "react-resizable@npm:3.1.3"
+"react-resizable@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "react-resizable@npm:3.2.0"
   dependencies:
     prop-types: "npm:15.x"
     react-draggable: "npm:^4.5.0"
   peerDependencies:
     react: ">= 16.3"
     react-dom: ">= 16.3"
-  checksum: 10/bc7126fabbd2f0ba422fa0da77fcfcebf2b4f28141d3faf02067632d258e345bc5f63891f9d5eca0e9ea31dc461b74ec69073a18f905b25bdd392ca6283577f9
+  checksum: 10/fb0a7de795107f2d0e854c7ceb53a666ff85bf98cc75735a21f931aa52684740aabf55cf30085ac000f816173d076c69d611858e4d4577d001a56796ec0e7e32
   languageName: node
   linkType: hard
 
