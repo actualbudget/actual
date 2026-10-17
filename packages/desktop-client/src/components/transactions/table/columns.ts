@@ -14,6 +14,9 @@ export const TRANSACTION_TABLE_COLUMN_IDS = [
   'cleared',
 ] as const;
 
+// Names the transaction table's saved column widths (see ColumnWidthsProvider)
+export const TRANSACTION_TABLE_WIDTHS_ID = 'transactions';
+
 export type TransactionTableColumnId =
   (typeof TRANSACTION_TABLE_COLUMN_IDS)[number];
 
