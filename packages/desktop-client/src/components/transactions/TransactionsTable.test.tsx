@@ -1055,7 +1055,7 @@ describe('Transactions', () => {
     expect(getTransactions()[3].payee).toBe(null);
   });
 
-  test('dropdown escape resets the value ', async () => {
+  test('dropdown escape resets the value', async () => {
     const { container } = renderTransactions();
 
     const input = await editField(container, 'category', 2);

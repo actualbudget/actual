@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "import", "jsx-a11y"],
+  "plugins": ["react", "typescript", "import", "jsx-a11y", "node", "vitest"],
   // Vendored third-party agent skill scripts; not maintained in this repo
   "ignorePatterns": ["**/skills/impeccable/**"],
   "jsPlugins": [
@@ -80,6 +80,7 @@
 
     // Typescript rules
     "typescript/ban-ts-comment": ["error"],
+    "typescript/no-generated-empty-object-type": "error",
     "typescript/consistent-type-definitions": ["error", "type"],
     "typescript/consistent-type-imports": [
       "error",
@@ -169,6 +170,50 @@
     "react/self-closing-comp": "error",
     "react/style-prop-object": "error",
     "react/jsx-boolean-value": "error",
+
+    "react/capitalized-calls": "error",
+    "react/hooks": "error",
+    "react/immutability": "error",
+    "react/memo-dependencies": "error",
+    "react/no-deriving-state-in-effects": "error",
+    "react/preserve-manual-memoization": "error",
+    "react/purity": "error",
+    "react/rule-suppression": "error",
+    "react/set-state-in-render": "error",
+    "react/exhaustive-effect-dependencies": "warn",
+    "react/refs": "warn",
+    "react/set-state-in-effect": "warn",
+
+    // Node rules
+    "node/no-exports-assign": "error",
+
+    // Vitest rules
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": [
+          "expect",
+          "expectTypeOf",
+          "assert",
+          "assertType",
+          "tracer.expect",
+          "expect*"
+        ]
+      }
+    ],
+    "vitest/hoisted-apis-on-top": "error",
+    "vitest/no-conditional-tests": "error",
+    "vitest/no-disabled-tests": "warn",
+    "vitest/no-focused-tests": "error",
+    "vitest/no-identical-title": "error",
+    "vitest/no-standalone-expect": "error",
+    "vitest/valid-describe-callback": "error",
+    "vitest/valid-expect": ["error", { "maxArgs": 2 }],
+    "vitest/valid-expect-in-promise": "error",
+    "vitest/valid-title": ["error", { "ignoreTypeOfTestName": true }],
+    "vitest/prefer-snapshot-hint": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "vitest/require-to-throw-message": "off",
 
     // ESLint rules
     "eslint/array-callback-return": "error",
@@ -367,11 +412,11 @@
     "eslint/no-undef": "error",
     "eslint/no-unused-expressions": "error",
     "eslint/no-return-assign": "error",
-    "eslint/no-unused-vars": "error"
+    "eslint/no-unused-vars": "error",
+    "eslint/prefer-promise-reject-errors": "error"
   },
   "overrides": [
     {
-      // CommonJS files that cannot use ESM imports.
       "files": ["**/*.cjs", "packages/eslint-plugin-actual/lib/**/*.js"],
       "rules": {
         "typescript/no-var-requires": "off"
