@@ -43,7 +43,7 @@
     "@types/proper-lockfile": "^4",
     "@typescript/native-preview": "beta",
     "rollup-plugin-visualizer": "^7.1.1",
-    "vite": "^8.1.5",
+    "vite": "^8.3.4",
     "vitest": "^5.0.4"
   },
   "engines": {
