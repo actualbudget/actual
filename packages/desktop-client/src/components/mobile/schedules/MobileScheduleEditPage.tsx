@@ -10,7 +10,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send, sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { q } from '@actual-app/core/shared/query';
+import { escapeAqlLiteral, q } from '@actual-app/core/shared/query';
 import type {
   RecurConfig,
   ScheduleEntity,
@@ -74,7 +74,9 @@ export function MobileScheduleEditPage() {
 
     if (state.fields.name) {
       const { data: sameName } = await aqlQuery(
-        q('schedules').filter({ name: state.fields.name }).select('id'),
+        q('schedules')
+          .filter({ name: escapeAqlLiteral(state.fields.name) })
+          .select('id'),
       );
       if (sameName.length > 0 && sameName[0].id !== state.schedule.id) {
         dispatch({

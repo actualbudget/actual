@@ -174,3 +174,9 @@ export function getPrimaryOrderBy(
 export function q(table: QueryState['table']) {
   return new Query({ table });
 }
+
+export function escapeAqlLiteral(value: string) {
+  // Backslashes first: escaping the dollar signs of a value that still holds raw
+  // backslashes would let `\$` end the escape early and shift every later quote.
+  return value.replace(/\\/g, '\\\\').replace(/\$/g, '\\$');
+}
