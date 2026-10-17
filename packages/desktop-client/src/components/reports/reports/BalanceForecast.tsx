@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -54,6 +55,10 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import {
+  buildFromTodayForecastPresets,
+  resolveBalanceForecastRange,
+} from './balanceForecastRange';
 
 export function BalanceForecast() {
   const params = useParams();
@@ -77,6 +82,7 @@ type BalanceForecastInnerProps = {
 
 function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const format = useFormat();
   const privacyMode = usePrivacyMode();
   const locale = useLocale();
@@ -103,10 +109,10 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   }> | null>(null);
 
   const currentMonth = monthUtils.currentMonth();
-  const [start, setStart] = useState(
+  const [selectedStart, setStart] = useState(
     widget?.meta?.timeFrame?.start ?? widget?.meta?.startDate ?? currentMonth,
   );
-  const [end, setEnd] = useState(
+  const [selectedEnd, setEnd] = useState(
     widget?.meta?.timeFrame?.end ??
       widget?.meta?.endDate ??
       monthUtils.addMonths(currentMonth, 11),
@@ -123,6 +129,18 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
       : 'schedules',
   );
   const isTrackingBudgetForecast = source === 'tracking-budget';
+  const [monthsFromToday, setMonthsFromToday] = useState(
+    resolveBalanceForecastRange(widget?.meta, source).monthsFromToday,
+  );
+  const { start, end, startDate, endDate } = resolveBalanceForecastRange(
+    {
+      timeFrame: { start: selectedStart, end: selectedEnd, mode },
+      monthsFromToday,
+    },
+    source,
+  );
+  const startsToday =
+    monthsFromToday !== undefined && !isTrackingBudgetForecast;
 
   useEffect(() => {
     if (budgetType !== 'tracking' && source === 'tracking-budget') {
@@ -135,9 +153,6 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     [accounts, widget?.meta?.accounts],
   );
   const hasMonthOptions = allMonths != null;
-  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
-  const startDate = monthUtils.firstDayOfMonth(start);
-  const endDate = monthUtils.lastDayOfMonth(end);
   const {
     data: forecastData,
     error,
@@ -185,6 +200,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         endDate: end,
         granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
         source,
+        monthsFromToday: startsToday ? monthsFromToday : undefined,
         timeFrame: {
           start,
           end,
@@ -273,6 +289,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     newEnd: string,
     newMode?: TimeFrame['mode'],
   ) => {
+    setMonthsFromToday(undefined);
     setStart(newStart);
     setEnd(newEnd);
     if (newMode) {
@@ -284,6 +301,26 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     setSource(newSource);
     if (newSource === 'tracking-budget') {
       setGranularity('Monthly');
+      if (monthsFromToday !== undefined) {
+        setStart(currentMonth);
+        setEnd(monthUtils.addMonths(currentMonth, monthsFromToday - 1));
+        setMode('static');
+        setMonthsFromToday(undefined);
+      }
+    }
+  }
+
+  function onToggleStartToday() {
+    if (monthsFromToday !== undefined) {
+      onChangeDates(
+        currentMonth,
+        monthUtils.addMonths(currentMonth, monthsFromToday - 1),
+        'static',
+      );
+    } else {
+      setMonthsFromToday(
+        Math.max(1, monthUtils.differenceInCalendarMonths(end, start) + 1),
+      );
     }
   }
 
@@ -338,6 +375,16 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const headerInlineContent = (
     <>
+      {!isTrackingBudgetForecast && (
+        <Button
+          variant={startsToday ? 'primary' : 'normal'}
+          size={isNarrowWidth ? 'extra-large' : undefined}
+          aria-pressed={startsToday}
+          onPress={onToggleStartToday}
+        >
+          <Trans>Start today</Trans>
+        </Button>
+      )}
       {budgetType === 'tracking' && (
         <Select
           value={source}
@@ -401,6 +448,11 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
           granularities={['month', 'day']}
+          dateRangePresets={
+            startsToday
+              ? buildFromTodayForecastPresets(t, setMonthsFromToday)
+              : undefined
+          }
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}
@@ -426,6 +478,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           overflowY: 'auto',
         }}
       >
+        {startsToday && (
+          <Text style={{ color: theme.pageTextLight, paddingTop: 12 }}>
+            <Trans>
+              This range moves forward from today. Monthly points show the
+              balance on the last included day of each month.
+            </Trans>
+          </Text>
+        )}
         {errorMessage ? (
           <div style={{ color: theme.errorText, marginBottom: 20 }}>
             {errorMessage}
@@ -453,7 +513,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               </PrivacyFilter>
             </FinancialText>
             <View style={{ color: theme.pageTextLight }}>
-              <Trans>Ending Balance</Trans>: {endingPoint.date}
+              <Trans>Ending Balance</Trans>:{' '}
+              {startsToday ? chartRange.end : endingPoint.date}
             </View>
             {lowestPoint && lowestPoint.date !== endingPoint.date ? (
               <Text
