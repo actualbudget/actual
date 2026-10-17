@@ -16,6 +16,11 @@ export function MobileSheetCarryoverIndicator({
         height: 15,
         display: 'inline-flex',
         position: 'relative',
+        // Reset the default indicator's absolute offsets so it flows inline
+        // next to the balance instead of being nudged out of the row.
+        top: 'auto',
+        bottom: 'auto',
+        right: 'auto',
         ...style,
       }}
     />
