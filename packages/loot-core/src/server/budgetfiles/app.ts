@@ -11,6 +11,7 @@ import { recoverLocalEncoding } from '#server/amount-encoding/files';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
 import { stopFxDayWatch } from '#server/budget/fx-valuation';
+import { rebuildSlotResolution } from '#server/budget/pockets';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
@@ -678,6 +679,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
   // Rows written by an older client or a crash mid-load are made coherent
   // before the spreadsheet reads them.
   deriveCoupledCellsForLoad();
+  // Lanes resolved differently than the cached spend totals assumed.
+  if (rebuildSlotResolution().size > 0) {
+    db.runQuery('DELETE FROM kvcache_key');
+  }
 
   await db.loadClock();
 

@@ -70,12 +70,15 @@ export async function liveMappedCategory(category: string | null) {
   return live?.id ?? null;
 }
 
-/** Columns a stored-row read needs to check a snapshot's metadata. */
+/**
+ * Columns a stored-row read needs to check a snapshot's metadata. The
+ * category is the one readers show: its budget lane's (MC-10).
+ */
 export const SNAPSHOT_METADATA_COLUMNS = `reconciled,
        CASE WHEN isParent = 1 THEN NULL
-         ELSE (SELECT c.id FROM category_mapping cm
-           JOIN categories c ON c.id = cm.transferId AND c.tombstone = 0
-           WHERE cm.id = transactions.category) END
+         ELSE (SELECT c.id FROM v_transaction_lanes l
+           JOIN categories c ON c.id = l.category AND c.tombstone = 0
+           WHERE l.id = transactions.id) END
          AS mapped_category`;
 
 /**
