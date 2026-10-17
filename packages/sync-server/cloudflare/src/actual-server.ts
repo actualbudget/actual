@@ -78,7 +78,11 @@ export class ActualServer extends DurableObject<Env> {
     });
 
     void ctx.blockConcurrencyWhile(async () => {
-      handlerPromise ??= startServer();
+      // Don't cache a failed start: the next construction should retry.
+      handlerPromise ??= startServer().catch((error: unknown) => {
+        handlerPromise = null;
+        throw error;
+      });
       this.#handler = await handlerPromise;
     });
   }
