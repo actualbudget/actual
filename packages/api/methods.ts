@@ -425,6 +425,13 @@ export function updateSchedule(
   });
 }
 
+export function setScheduleNextDate(
+  scheduleId: APIScheduleEntity['id'],
+  date: string,
+) {
+  return send('api/schedule-set-next-date', { id: scheduleId, date });
+}
+
 export function deleteSchedule(scheduleId: APIScheduleEntity['id']) {
   return send('api/schedule-delete', scheduleId);
 }

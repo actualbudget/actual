@@ -22,7 +22,7 @@ import {
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
-import { currentDay, dayFromDate, parseDate, subDays } from '#shared/months';
+import { currentDay, dayFromDate, isValidYearMonthDay, parseDate, subDays } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
@@ -506,6 +506,44 @@ export async function skipNextDate({ id }) {
   return setNextDate({ id, advance: true });
 }
 
+// Sets the schedule's next occurrence date to an explicit target date without
+// changing the recurrence rule. Only the local next-date override in
+// `schedules_next_date` is written (the same row `skipNextDate` writes), so
+// the recurrence pattern, start anchor, end rule, linked transactions and
+// recorded payment history are all preserved. The requested date becomes the
+// schedule's `next_date` until the recurrence is recomputed (via
+// `resetNextDate`) or the rule itself changes.
+export async function setScheduleNextDate({
+  id,
+  date,
+}: {
+  id: string;
+  date: string;
+}) {
+  if (!isValidYearMonthDay(date)) {
+    throw new Error(`Invalid date, use YYYY-MM-DD: ${date}`);
+  }
+
+  // Our `update` function requires the id of the item and we don't
+  // have it, so we need to query it
+  const nd = await db.first<
+    Pick<db.DbScheduleNextDate, 'id' | 'base_next_date_ts'>
+  >(
+    'SELECT id, base_next_date_ts FROM schedules_next_date WHERE schedule_id = ?',
+    [id],
+  );
+
+  if (nd == null) {
+    throw new Error(`Schedule ${id} not found`);
+  }
+
+  await db.update('schedules_next_date', {
+    id: nd.id,
+    local_next_date: toDateRepr(date),
+    local_next_date_ts: nd.base_next_date_ts,
+  });
+}
+
 function discoverSchedules() {
   return findSchedules();
 }
@@ -830,6 +868,7 @@ export type SchedulesHandlers = {
   'schedule/delete': typeof deleteSchedule;
   'schedule/move': typeof moveSchedule;
   'schedule/skip-next-date': typeof skipNextDate;
+  'schedule/set-next-date': typeof setScheduleNextDate;
   'schedule/post-transaction': typeof postTransactionForSchedule;
   'schedule/force-run-service': typeof advanceSchedulesService;
   'schedule/discover': typeof discoverSchedules;
@@ -844,6 +883,10 @@ app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));
 app.method('schedule/move', mutator(undoable(moveSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
+app.method(
+  'schedule/set-next-date',
+  mutator(undoable(setScheduleNextDate)),
+);
 app.method(
   'schedule/post-transaction',
   mutator(undoable(postTransactionForSchedule)),

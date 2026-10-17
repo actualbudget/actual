@@ -1151,6 +1151,29 @@ handlers['api/schedule-update'] = withMutation(async function ({
   }
 });
 
+handlers['api/schedule-set-next-date'] = withMutation(async function ({
+  id,
+  date,
+}: {
+  id: string;
+  date: string;
+}) {
+  checkFileOpen();
+  validateDay('date', date);
+
+  const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
+  if (!data || data.length === 0) {
+    throw APIError(`Schedule ${id} not found`);
+  }
+
+  await handlers['schedule/set-next-date']({ id, date });
+
+  const { data: updated } = await aqlQuery(
+    q('schedules').filter({ id }).select('*'),
+  );
+  return scheduleModel.toExternal(updated[0] as ScheduleEntity);
+});
+
 handlers['api/schedule-delete'] = withMutation(async function (id: string) {
   checkFileOpen();
   return handlers['schedule/delete']({ id });

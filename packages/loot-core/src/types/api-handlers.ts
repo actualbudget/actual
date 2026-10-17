@@ -301,6 +301,11 @@ export type ApiHandlers = {
     resetNextDate?: boolean;
   }) => Promise<ScheduleEntity['id']>;
 
+  'api/schedule-set-next-date': (arg: {
+    id: ScheduleEntity['id'];
+    date: string;
+  }) => Promise<APIScheduleEntity>;
+
   'api/schedule-delete': (id: string) => Promise<void>;
 
   'api/schedules-get': () => Promise<APIScheduleEntity[]>;

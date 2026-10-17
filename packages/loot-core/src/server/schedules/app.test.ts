@@ -16,6 +16,7 @@ import {
   deleteSchedule,
   app as schedulesApp,
   setNextDate,
+  setScheduleNextDate,
   skipNextDate,
   updateConditions,
   updateSchedule,
@@ -478,6 +479,240 @@ describe('schedule app', () => {
       row = res.data[0];
 
       expect(row.next_date).toBe('2021-05-18');
+    });
+
+    it('setScheduleNextDate sets an explicit next date without changing the rule', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      const { data: before } = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date', '_conditions']),
+      );
+      expect(before[0].next_date).toBe('2020-12-30');
+
+      // Move the next date forward to a date the recurrence would never produce
+      await setScheduleNextDate({ id, date: '2021-01-17' });
+
+      let res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date', '_conditions']),
+      );
+      expect(res.data[0].next_date).toBe('2021-01-17');
+      // The recurrence pattern, start anchor and everything else is untouched
+      expect(res.data[0]._conditions).toEqual(before[0]._conditions);
+
+      // Move it backward too, even to a past date
+      await setScheduleNextDate({ id, date: '2020-12-25' });
+
+      res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date', '_conditions']),
+      );
+      expect(res.data[0].next_date).toBe('2020-12-25');
+      expect(res.data[0]._conditions).toEqual(before[0]._conditions);
+    });
+
+    it('setScheduleNextDate works on overdue schedules', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      try {
+        // Travel past the next occurrence so the schedule is overdue
+        MockDate.set(new Date(2021, 4, 17));
+
+        await setScheduleNextDate({ id, date: '2021-05-20' });
+
+        const { data } = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(data[0].next_date).toBe('2021-05-20');
+      } finally {
+        MockDate.reset();
+      }
+    });
+
+    it('setScheduleNextDate preserves the end rule of finite recurrences', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [{ type: 'day', value: 15 }],
+              endMode: 'on_date',
+              endDate: '2021-03-31',
+            },
+          },
+        ],
+      });
+
+      const { data: before } = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date', '_conditions']),
+      );
+
+      await setScheduleNextDate({ id, date: '2021-02-15' });
+
+      const { data: after } = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date', '_conditions']),
+      );
+      expect(after[0].next_date).toBe('2021-02-15');
+      // The end rule and the rest of the recurrence are untouched
+      expect(after[0]._conditions).toEqual(before[0]._conditions);
+    });
+
+    it('setScheduleNextDate preserves linked transactions and history', async () => {
+      const accountId = await db.insertAccount({
+        name: 'Checking',
+        offbudget: 0,
+        closed: 0,
+      });
+
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [{ type: 'day', value: 15 }],
+            },
+          },
+          { op: 'is', field: 'account', value: accountId },
+        ],
+      });
+
+      await db.insertTransaction({
+        account: accountId,
+        amount: -10000,
+        date: '2016-12-05',
+        schedule: id,
+      });
+
+      const baseNextDateRow = await db.first<{
+        base_next_date: number;
+      }>(
+        'SELECT base_next_date FROM schedules_next_date WHERE schedule_id = ?',
+        [id],
+      );
+
+      await setScheduleNextDate({ id, date: '2021-01-17' });
+
+      // The derived base next date is untouched; only the local override moved
+      const nextDateRow = await db.first<{
+        local_next_date: number;
+        base_next_date: number;
+      }>(
+        'SELECT local_next_date, base_next_date FROM schedules_next_date WHERE schedule_id = ?',
+        [id],
+      );
+      expect(nextDateRow.base_next_date).toBe(baseNextDateRow.base_next_date);
+      expect(nextDateRow.local_next_date).toBe(20210117);
+
+      // The recorded transaction still links to this schedule, unchanged
+      const { data: transactions } = await aqlQuery(
+        q('transactions').filter({ schedule: id }).select(['date', 'amount']),
+      );
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].date).toBe('2016-12-05');
+      expect(transactions[0].amount).toBe(-10000);
+    });
+
+    it('setScheduleNextDate is undone by resetNextDate', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [
+                { type: 'day', value: 15 },
+                { type: 'day', value: 30 },
+              ],
+            },
+          },
+        ],
+      });
+
+      await setScheduleNextDate({ id, date: '2021-01-17' });
+
+      let res = await aqlQuery(
+        q('schedules').filter({ id }).select(['next_date']),
+      );
+      expect(res.data[0].next_date).toBe('2021-01-17');
+
+      try {
+        // Move "today" forward so the recompute produces a fresh timestamp
+        MockDate.set(new Date(2021, 0, 20, 12));
+
+        // Recomputing from the rule clears the explicit override: the next
+        // monthly 15th/30th after 2021-01-20 is 2021-01-30
+        await updateSchedule({ schedule: { id }, resetNextDate: true });
+
+        res = await aqlQuery(
+          q('schedules').filter({ id }).select(['next_date']),
+        );
+        expect(res.data[0].next_date).toBe('2021-01-30');
+      } finally {
+        MockDate.reset();
+      }
+    });
+
+    it('setScheduleNextDate rejects invalid dates and unknown schedules', async () => {
+      const id = await createSchedule({
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2020-12-20',
+              frequency: 'monthly',
+              patterns: [{ type: 'day', value: 15 }],
+            },
+          },
+        ],
+      });
+
+      await expect(
+        setScheduleNextDate({ id, date: 'not-a-date' }),
+      ).rejects.toThrow('Invalid date');
+      await expect(
+        setScheduleNextDate({ id, date: '2021-13-45' }),
+      ).rejects.toThrow('Invalid date');
+
+      await expect(
+        setScheduleNextDate({ id: 'no-such-schedule', date: '2021-01-17' }),
+      ).rejects.toThrow('not found');
     });
 
     it('skipNextDate skips `next_date`', async () => {
