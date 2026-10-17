@@ -30,6 +30,18 @@ export const categoryQueries = {
     }),
 };
 
+export const budgetQueries = {
+  all: () => ['budget'],
+  bounds: () =>
+    queryOptions<{ start: string; end: string }>({
+      queryKey: [...budgetQueries.all(), 'bounds'],
+      queryFn: () => send('get-budget-bounds'),
+      // Fetching also creates missing budget months, so refresh on every mount
+      staleTime: Infinity,
+      refetchOnMount: 'always',
+    }),
+};
+
 function translateStartingBalances(categories: {
   grouped: CategoryGroupEntity[];
   list: CategoryEntity[];

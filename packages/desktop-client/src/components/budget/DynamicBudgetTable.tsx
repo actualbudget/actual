@@ -1,9 +1,8 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
 import type { ComponentProps } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -181,16 +180,42 @@ type AutoSizingBudgetTableProps = Omit<
 };
 
 export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
-  return (
-    <AutoSizer
-      renderProp={({ width = 0, height = 0 }) => {
-        if (width === 0 || height === 0) {
-          return null;
-        }
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
-        return <DynamicBudgetTable width={width} height={height} {...props} />;
-      }}
-    />
+  // Measure before the first paint (AutoSizer measures after it)
+  useLayoutEffect(() => {
+    const parent = ref.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    function measure() {
+      const { width, height } = parent.getBoundingClientRect();
+      setSize(prev =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
+    }
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    // Zero-size wrapper so the table doesn't affect the measured parent
+    <div ref={ref} style={{ width: 0, height: 0, overflow: 'visible' }}>
+      {size.width > 0 && size.height > 0 && (
+        <DynamicBudgetTable
+          width={size.width}
+          height={size.height}
+          {...props}
+        />
+      )}
+    </div>
   );
 };
 
