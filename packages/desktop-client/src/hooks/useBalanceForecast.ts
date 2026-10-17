@@ -1,6 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
+  ForecastAssumptions,
   ForecastResult,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
@@ -14,6 +15,7 @@ type UseBalanceForecastParams = {
   endDate: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  assumptions?: ForecastAssumptions;
   enabled?: boolean;
 };
 
@@ -25,6 +27,7 @@ export function buildBalanceForecastRequest({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  assumptions,
 }: UseBalanceForecastParams) {
   return Object.fromEntries(
     Object.entries({
@@ -35,6 +38,7 @@ export function buildBalanceForecastRequest({
       endDate,
       includeAccountlessSchedules,
       source,
+      assumptions,
     }).filter(([, value]) => value !== undefined),
   );
 }
@@ -47,6 +51,7 @@ export function useBalanceForecast({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  assumptions,
   enabled = true,
 }: UseBalanceForecastParams) {
   return useQuery({
@@ -60,6 +65,7 @@ export function useBalanceForecast({
         endDate,
         includeAccountlessSchedules: includeAccountlessSchedules ?? false,
         source,
+        assumptions: assumptions ?? null,
       },
     ],
     queryFn: async (): Promise<ForecastResult> =>
@@ -73,6 +79,7 @@ export function useBalanceForecast({
           endDate,
           includeAccountlessSchedules,
           source,
+          assumptions,
         }),
       ),
     placeholderData: keepPreviousData,

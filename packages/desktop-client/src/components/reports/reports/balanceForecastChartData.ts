@@ -1,9 +1,15 @@
+import { forecastPurchasingPower } from '@actual-app/core/shared/forecast-assumptions';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { ForecastResult } from '@actual-app/core/types/models/forecast';
 import * as d from 'date-fns';
 
 type Granularity = 'Daily' | 'Monthly';
-type ChartDataPoint = { date: string; balance: number };
+type ChartDataPoint = {
+  date: string;
+  balance: number;
+  baselineBalance?: number;
+  nominalBalance?: number;
+};
 
 function getCombinedBalanceByDate(forecastData: ForecastResult) {
   const balancesByDateAndAccount: Record<string, Record<string, number>> = {};
@@ -56,7 +62,7 @@ function getCombinedBalanceByMonth(forecastData: ForecastResult) {
   return combinedBalanceByMonth;
 }
 
-export function buildBalanceForecastChartData({
+function buildForecastSeries({
   forecastData,
   start,
   end,
@@ -127,6 +133,32 @@ export function buildBalanceForecastChartData({
   }
 
   return result;
+}
+
+export function buildBalanceForecastChartData(
+  params: Parameters<typeof buildForecastSeries>[0],
+): ChartDataPoint[] {
+  const baseline = buildForecastSeries(params);
+  const scenario = params.forecastData?.scenario;
+  if (!scenario || !params.forecastData) {
+    return baseline;
+  }
+  const nominal = buildForecastSeries({
+    ...params,
+    forecastData: { ...params.forecastData, dataPoints: scenario.dataPoints },
+  });
+  return nominal.map((point, index) => ({
+    date: point.date,
+    baselineBalance: baseline[index]?.balance,
+    nominalBalance: point.balance,
+    balance: forecastPurchasingPower(
+      point.balance,
+      params.granularity === 'Monthly'
+        ? monthUtils.lastDayOfMonth(point.date)
+        : point.date,
+      scenario.assumptions,
+    ),
+  }));
 }
 
 export function countForecastScheduledOccurrences({

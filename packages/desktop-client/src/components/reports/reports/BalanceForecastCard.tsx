@@ -19,6 +19,7 @@ import {
   Tooltip,
 } from 'recharts';
 
+import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
 import { DateRange } from '#components/reports/DateRange';
@@ -26,6 +27,7 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
+import { ForecastAssumptionsSummary } from '#components/reports/reports/ForecastAssumptionsSummary';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -99,6 +101,7 @@ export function BalanceForecastCard({
       ? undefined
       : meta?.accounts === undefined,
     source,
+    assumptions: meta?.assumptions,
   });
   const errorMessage =
     error instanceof Error
@@ -128,9 +131,15 @@ export function BalanceForecastCard({
     granularity,
   });
   const endingPoint = chartData.at(-1);
+  const activeAssumptions = normalizedForecastData?.scenario?.assumptions;
   const lowestPoint = getLowestChartDataPoint(chartData);
   const hasNegativeEndingBalance = endingPoint && endingPoint.balance < 0;
-  const hasNegativeBalance = chartData.some(d => d.balance < 0);
+  const hasNegativeBalance = chartData.some(
+    d =>
+      d.balance < 0 ||
+      (d.baselineBalance ?? 0) < 0 ||
+      (d.nominalBalance ?? 0) < 0,
+  );
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
   const isUpdatingForecast = isFetching && isPlaceholderData;
@@ -190,8 +199,12 @@ export function BalanceForecastCard({
                 }}
               >
                 <PrivacyFilter activationFilters={[!isCardHovered]}>
-                  <Trans>Ending</Trans>:{' '}
-                  {format(endingPoint.balance, 'financial')}
+                  {activeAssumptions ? (
+                    <Trans>Purchasing power</Trans>
+                  ) : (
+                    <Trans>Ending</Trans>
+                  )}
+                  : {format(endingPoint.balance, 'financial')}
                 </PrivacyFilter>
               </Block>
               <PrivacyFilter activationFilters={[!isCardHovered]}>
@@ -216,6 +229,15 @@ export function BalanceForecastCard({
             </View>
           )}
         </View>
+
+        {activeAssumptions && (
+          <View style={{ padding: '0 20px 12px' }}>
+            <ForecastAssumptionsSummary
+              assumptions={activeAssumptions}
+              source={source}
+            />
+          </View>
+        )}
 
         {isLoading && !normalizedForecastData ? (
           <LoadingIndicator />
@@ -292,12 +314,16 @@ export function BalanceForecastCard({
                               <div style={{ marginBottom: 5 }}>
                                 <strong>{payload[0].payload.date}</strong>
                               </div>
-                              <div>
-                                {format(
-                                  payload[0].value as number,
-                                  'financial',
-                                )}
-                              </div>
+                              {payload.map(entry => (
+                                <div key={String(entry.dataKey)}>
+                                  {activeAssumptions && <>{entry.name}: </>}
+                                  <FinancialText>
+                                    <PrivacyFilter>
+                                      {format(Number(entry.value), 'financial')}
+                                    </PrivacyFilter>
+                                  </FinancialText>
+                                </div>
+                              ))}
                             </div>
                           );
                         }
@@ -314,7 +340,32 @@ export function BalanceForecastCard({
                     {hasNegativeBalance && (
                       <ReferenceLine y={0} stroke={theme.pageTextSubdued} />
                     )}
+                    {activeAssumptions && (
+                      <>
+                        <Line
+                          type="monotone"
+                          dataKey="baselineBalance"
+                          name={t('Baseline (nominal)')}
+                          stroke={theme.pageTextSubdued}
+                          strokeDasharray="3 3"
+                          dot={false}
+                          opacity={isUpdatingForecast ? 0.45 : 1}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="nominalBalance"
+                          name={t('With salary growth (nominal)')}
+                          stroke={theme.reportsBlue}
+                          strokeDasharray="7 3"
+                          dot={false}
+                          opacity={isUpdatingForecast ? 0.45 : 1}
+                        />
+                      </>
+                    )}
                     <Line
+                      name={
+                        activeAssumptions ? t('Purchasing power') : t('Balance')
+                      }
                       type="monotone"
                       dataKey="balance"
                       stroke={`url(#${gradientId})`}

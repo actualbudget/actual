@@ -3,6 +3,21 @@ import { describe, expect, it } from 'vitest';
 import { buildBalanceForecastRequest } from './useBalanceForecast';
 
 describe('buildBalanceForecastRequest', () => {
+  it('includes the saved assumptions in the forecast request', () => {
+    const assumptions = {
+      anchorDate: '2024-03-01',
+      inflationRate: 0.03,
+      salaryGrowthRate: 0.05,
+      incomeScheduleIds: ['salary'],
+    };
+    expect(
+      buildBalanceForecastRequest({
+        startDate: '2024-03-01',
+        endDate: '2029-03-01',
+        assumptions,
+      }),
+    ).toMatchObject({ assumptions });
+  });
   it('keeps schedule forecast filters and account selection', () => {
     expect(
       buildBalanceForecastRequest({
