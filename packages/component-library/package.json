@@ -63,8 +63,8 @@
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "@internationalized/date": "^3.12.2",
-    "react-aria-components": "^1.19.0",
+    "@internationalized/date": "^3.12.4",
+    "react-aria-components": "^1.22.1",
     "usehooks-ts": "^3.1.1"
   },
   "devDependencies": {
