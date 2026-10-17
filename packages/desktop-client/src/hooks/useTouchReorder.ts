@@ -115,7 +115,7 @@ function resolveGroupSlot(entries: ReorderEntry[], clientY: number): DropSlot {
     targetId: target?.id ?? null,
     edgeTop:
       target?.element.getBoundingClientRect().top ??
-      groups.at(-1)?.element.getBoundingClientRect().bottom ??
+      entries.at(-1)?.element.getBoundingClientRect().bottom ??
       0,
   };
 }
@@ -327,6 +327,7 @@ export function useTouchReorder({
     };
     const onPointerUp = (e: PointerEvent) => {
       if (e.pointerId === pointerId) {
+        update(e.clientY);
         finish(true);
       }
     };

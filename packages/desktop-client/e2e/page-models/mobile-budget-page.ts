@@ -282,11 +282,8 @@ export class MobileBudgetPage {
     return new CategoryActionsSheet(this.page.getByRole('dialog'));
   }
 
-  async #getButtonForCell(
-    buttonType: 'Budgeted' | 'Spent',
-    categoryName: string,
-  ) {
-    const buttonSelector = cellLabel(`${buttonType} amount`, categoryName);
+  async getButtonForBudgeted(categoryName: string) {
+    const buttonSelector = cellLabel('Budgeted amount', categoryName);
 
     let button = this.budgetTable.getByLabel(buttonSelector);
 
@@ -302,16 +299,37 @@ export class MobileBudgetPage {
     }
 
     throw new Error(
-      `${buttonType} button for category ${categoryName} could not be located on the page.`,
+      `Budgeted button for category ${categoryName} could not be located on the page.`,
     );
   }
 
-  async getButtonForBudgeted(categoryName: string) {
-    return await this.#getButtonForCell('Budgeted', categoryName);
+  async #getAmountForCell(
+    cellType: 'Spent amount' | 'Received amount',
+    categoryName: string,
+  ) {
+    const labelSelector = cellLabel(cellType, categoryName);
+
+    let label = this.budgetTable.getByText(labelSelector);
+
+    if ((await label.count()) === 0) {
+      await this.toggleVisibleColumns();
+      label = this.budgetTable.getByText(labelSelector);
+    }
+
+    const labelText = await label.textContent();
+    const amount = labelText?.replace(labelSelector, '').replace(/^, /, '');
+
+    if (!amount) {
+      throw new Error(
+        `Failed to read the ${cellType.toLowerCase()} for ${categoryName}.`,
+      );
+    }
+
+    return amount;
   }
 
-  async getButtonForSpent(categoryName: string) {
-    return await this.#getButtonForCell('Spent', categoryName);
+  async getSpentForCategory(categoryName: string) {
+    return await this.#getAmountForCell('Spent amount', categoryName);
   }
 
   async openBudgetAmountFromCell(categoryName: string) {
@@ -322,16 +340,7 @@ export class MobileBudgetPage {
   }
 
   async getReceivedForIncomeCategory(categoryName: string) {
-    const cell = this.budgetTable.getByLabel(
-      cellLabel('Received amount', categoryName),
-    );
-    const received = await cell.textContent();
-    if (!received) {
-      throw new Error(
-        `Failed to read the received amount for ${categoryName}.`,
-      );
-    }
-    return received;
+    return await this.#getAmountForCell('Received amount', categoryName);
   }
 
   async #waitForNewMonthToLoad({

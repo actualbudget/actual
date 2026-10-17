@@ -38,9 +38,11 @@ export function CategorySpendingHistory({
   const { t } = useTranslation();
   const locale = useLocale();
   const format = useFormat();
-  const [activeMonth, setActiveMonth] = useState<string | null>(null);
+  const [pressedMonth, setPressedMonth] = useState<string | null>(null);
   const startMonth = monthUtils.subMonths(month, HISTORY_MONTHS - 1);
   const months = monthUtils.rangeInclusive(startMonth, month);
+  const activeMonth =
+    pressedMonth != null && months.includes(pressedMonth) ? pressedMonth : null;
 
   const { data: transactions, isLoading } = useQuery<
     Pick<TransactionEntity, 'date' | 'amount'>
@@ -137,7 +139,7 @@ export function CategorySpendingHistory({
                 key={m}
                 variant="bare"
                 onPress={() =>
-                  setActiveMonth(current => (current === m ? null : m))
+                  setPressedMonth(current => (current === m ? null : m))
                 }
                 aria-pressed={isActive}
                 aria-label={t('{{month}}: {{amount}}', {

@@ -88,12 +88,7 @@ async function getAverageMonthAmounts(
   }
 
   for (let i = 0; i < numberOfMonths; i++) {
-    const spentButton = await budgetPage.getButtonForSpent(categoryName);
-    const spent = await spentButton.textContent();
-
-    if (!spent) {
-      throw new Error('Failed to get average month amounts');
-    }
+    const spent = await budgetPage.getSpentForCategory(categoryName);
 
     amounts.push(currencyToAmount(spent) ?? 0);
 

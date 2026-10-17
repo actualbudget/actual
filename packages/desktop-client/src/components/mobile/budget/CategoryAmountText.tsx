@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { View } from '@actual-app/components/view';
 import { AutoTextSize } from 'auto-text-size';
@@ -26,9 +27,11 @@ export function CategoryAmountText({
 }: CategoryAmountTextProps) {
   const format = useFormat();
   const formattedValue = format(value, 'financial');
+  const label = getAriaLabel?.(formattedValue);
 
   return (
     <View style={AMOUNT_WRAPPER_STYLE}>
+      {label != null && <Text style={styles.visuallyHidden}>{label}</Text>}
       <PrivacyFilter>
         <AutoTextSize
           key={value}
@@ -38,7 +41,7 @@ export function CategoryAmountText({
           mode="oneline"
           style={style}
           className={className}
-          aria-label={getAriaLabel?.(formattedValue)}
+          aria-hidden={label != null ? true : undefined}
         >
           {formattedValue}
         </AutoTextSize>

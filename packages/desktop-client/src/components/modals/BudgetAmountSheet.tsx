@@ -79,7 +79,10 @@ export function BudgetAmountSheet({
   };
 
   const onUpdateBudget = (amount: number) => {
-    const integerAmount = amountToInteger(amount);
+    const integerAmount = amountToInteger(
+      amount,
+      format.currency.decimalPlaces,
+    );
     applyBudgetAction.mutate({
       month,
       type: 'budget-amount',
@@ -119,7 +122,10 @@ export function BudgetAmountSheet({
               <Trans>Budgeted</Trans>
             </Text>
             <AmountInput
-              value={integerToAmount(budgeted || 0)}
+              value={integerToAmount(
+                budgeted || 0,
+                format.currency.decimalPlaces,
+              )}
               onEnter={close}
               onChange={onUpdateBudget}
               onFocus={() => setIsCalculatorOpen(isMobileCalculatorEnabled)}
