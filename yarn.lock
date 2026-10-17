@@ -201,7 +201,7 @@ __metadata:
     date-fns: "npm:^4.4.0"
     debug: "npm:^4.4.3"
     express: "npm:^5.3.0"
-    express-rate-limit: "npm:^8.6.0"
+    express-rate-limit: "npm:^8.7.1"
     express-winston: "npm:^4.2.0"
     http-proxy-middleware: "npm:^4.2.0"
     ipaddr.js: "npm:^2.4.0"
@@ -15048,15 +15048,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-rate-limit@npm:^8.6.0":
-  version: 8.6.0
-  resolution: "express-rate-limit@npm:8.6.0"
+"express-rate-limit@npm:^8.7.1":
+  version: 8.7.1
+  resolution: "express-rate-limit@npm:8.7.1"
   dependencies:
     debug: "npm:^4.4.3"
     ip-address: "npm:^10.2.0"
   peerDependencies:
     express: ">= 4.11"
-  checksum: 10/193c346cfae0e2ce43d51d8f0c9d34f96dcd9d8d3675f463583f4440ba585deaab0fddc7a94722516699d9181b593902736b08a7374a6eb9082f7b62dfa8f1c1
+  checksum: 10/64c27b98d5ed0f3dcf6625c319c9118415d6cfd51638d7b847f6166c5ca738379fcc880bc620332624a78b31e90918304cc4f74b050fd06745c06e1a4e9bbcad
   languageName: node
   linkType: hard
 
