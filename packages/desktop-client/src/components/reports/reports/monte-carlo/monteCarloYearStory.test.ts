@@ -84,7 +84,15 @@ describe('buildMonteCarloYearStory', () => {
         referenceRate: 0.0714,
       },
     });
-    expect(story(row, { hasSurplusPot: true })).toEqual([
+    expect(
+      story(row, {
+        hasSurplusPot: true,
+        withdrawalRule: {
+          ...WITHDRAWAL_RULE_DEFAULTS,
+          preservationCutPct: 0.25,
+        },
+      }),
+    ).toEqual([
       "Guardrails cut this year's spending from 40000.00 to 16875.00 because the withdrawal rate had climbed too far above the plan.",
       'The minimum spending floor then lifted it to 20000.00.',
       'Spent 20000.00 as planned, funded from the pots.',
@@ -161,6 +169,52 @@ describe('buildMonteCarloYearStory', () => {
     });
     expect(story(ratchetRaise)[0]).toBe(
       "Ratcheting raised this year's spending from 4000.00 to 4200.00 because the balance had stayed above 1.5× its starting level for 3 years.",
+    );
+  });
+
+  it("measures a change from last year's level when earlier changes still apply", () => {
+    // The screenshot year 57: earlier cuts had the factor at 0.249, a
+    // 20% raise takes it to 0.299 - so spending rose from 14,946.78 to
+    // 17,936.13, nowhere near the 60,000 planned
+    const raiseStillBelowPlan = makeRow({
+      withdrawal: 17_936.13,
+      plannedSpending: 17_936.13,
+      spent: 17_936.13,
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'guardrails',
+        factor: 0.298936,
+        planned: 60_000,
+        adjusted: 17_936.13,
+        action: 'raise',
+        currentRate: 0.01504,
+        referenceRate: 0.053553,
+      },
+    });
+    expect(
+      story(raiseStillBelowPlan, {
+        withdrawalRule: {
+          ...WITHDRAWAL_RULE_DEFAULTS,
+          prosperityIncreasePct: 0.2,
+        },
+      })[0],
+    ).toBe(
+      "Guardrails raised this year's spending from 14946.80 to 17936.13 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is still below the 60000.00 planned.",
+    );
+
+    const cutStillAbovePlan = makeRow({
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'boundaries',
+        factor: 1.2 * 0.9,
+        planned: 4_000,
+        adjusted: 4_320,
+        action: 'cut',
+        currentRate: 0.07,
+      },
+    });
+    expect(story(cutStillAbovePlan)[0]).toBe(
+      "Boundaries cut this year's spending from 4800.00 to 4320.00 because the withdrawal rate rose above 6%. With earlier changes included, that is still above the 4000.00 planned.",
     );
   });
 
