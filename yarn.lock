@@ -139,7 +139,7 @@ __metadata:
     fast-check: "npm:^4.9.0"
     fflate: "npm:^0.8.3"
     handlebars: "npm:^4.7.10"
-    hyperformula: "npm:^3.3.0"
+    hyperformula: "npm:^3.5.0"
     jest-diff: "npm:^30.4.1"
     jsverify: "npm:^0.8.4"
     lru-cache: "npm:^11.5.2"
@@ -274,7 +274,7 @@ __metadata:
     es-toolkit: "npm:^1.52.0"
     fzf: "npm:^0.5.2"
     html-to-image: "npm:^1.11.13"
-    hyperformula: "npm:^3.3.0"
+    hyperformula: "npm:^3.5.0"
     i18next: "npm:^26.3.6"
     i18next-parser: "npm:^9.4.0"
     i18next-resources-to-backend: "npm:^1.2.1"
@@ -16931,13 +16931,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyperformula@npm:^3.3.0":
-  version: 3.3.0
-  resolution: "hyperformula@npm:3.3.0"
+"hyperformula@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "hyperformula@npm:3.5.0"
   dependencies:
     chevrotain: "npm:^6.5.0"
     tiny-emitter: "npm:^2.1.0"
-  checksum: 10/ce972d33955c56467bb673db0ff369a54e97f45c8ac4e5a5061859ca2c9241ade030db9ec7ddd77c57202db01026c433e2cff7269aae30049945e727a06b1f4c
+  checksum: 10/d37eaf0d33e5c80d6083dbd3eab9dfc1ffc581e1e76c6577507d8ccdffc4aad3989184adda755daf35c976a45298f54eab09d11cbe5d4beb80022cb42cfe32e5
   languageName: node
   linkType: hard
 

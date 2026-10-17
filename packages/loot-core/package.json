@@ -207,7 +207,7 @@
     "es-toolkit": "^1.52.0",
     "fflate": "^0.8.3",
     "handlebars": "^4.7.10",
-    "hyperformula": "^3.3.0",
+    "hyperformula": "^3.5.0",
     "lru-cache": "^11.5.2",
     "mitt": "^3.0.1",
     "uuid": "^14.0.3",
