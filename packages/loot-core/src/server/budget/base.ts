@@ -15,6 +15,7 @@ import {
   scheduleFxRefresh,
   startFxDayWatch,
 } from './fx-valuation';
+import { rebuildSlotResolution } from './pockets';
 import * as trackingBudget from './tracking';
 
 // How far ahead budget months are available. Planning past the minimum
@@ -201,16 +202,45 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   }
 }
 
+// Account columns that decide a row's eligibility or the stamp its lane
+// judges (MC-10).
+const ATTRIBUTION_COLUMNS = [
+  'offbudget',
+  'tombstone',
+  'encoding',
+  'currency',
+  'currency_precision',
+];
+
 function handleAccountChange(months, oldValue, newValue) {
-  if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
-    const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
-      `
-        SELECT DISTINCT(category) as category FROM transactions
-        WHERE acct = ?
+  if (
+    !oldValue ||
+    ATTRIBUTION_COLUMNS.some(column => oldValue[column] !== newValue[column])
+  ) {
+    // Every category a row could show before or after: the effective
+    // category of its pointer's lane, its raw category's lane and its mapped
+    // category's lane, and the mapped category itself.
+    const rows = db
+      .runQuery<Pick<db.DbTransaction, 'category'>>(
+        `
+        SELECT r.effective_category AS category FROM transactions t
+          JOIN slot_resolution r ON r.lane = t.pocket
+          WHERE t.acct = ?
+        UNION SELECT r.effective_category FROM transactions t
+          JOIN slot_resolution r ON r.lane = t.category
+          WHERE t.acct = ?
+        UNION SELECT r.effective_category FROM transactions t
+          JOIN category_mapping m ON m.id = t.category
+          JOIN slot_resolution r ON r.lane = m.transferId
+          WHERE t.acct = ?
+        UNION SELECT m.transferId FROM transactions t
+          JOIN category_mapping m ON m.id = t.category
+          WHERE t.acct = ?
       `,
-      [newValue.id],
-      true,
-    );
+        [newValue.id, newValue.id, newValue.id, newValue.id],
+        true,
+      )
+      .filter(row => row.category != null);
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
@@ -314,7 +344,24 @@ function affectsFxValuation(oldValues, newValues) {
     : false;
 }
 
+/**
+ * Spend totals of categories whose lanes now resolve elsewhere, in every
+ * created month: a retirement, owner or deletion message moves every row of
+ * its lanes without touching them.
+ */
+function handleResolutionChange(months, categories: Set<string>) {
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    for (const category of categories) {
+      sheet.get().recompute(resolveName(sheetName, 'sum-amount-' + category));
+    }
+  }
+}
+
 export function triggerBudgetChanges(oldValues, newValues) {
+  // Lane owners and status depend on every synced table and on activity,
+  // so they are rebuilt first, whatever the batch touched.
+  const resolutionChanged = rebuildSlotResolution();
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
   if (budgetType === 'envelope' && affectsFxValuation(oldValues, newValues)) {
@@ -323,6 +370,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
   sheet.startTransaction();
 
   try {
+    handleResolutionChange(createdMonths, resolutionChanged);
     newValues.forEach((items, table) => {
       const old = oldValues.get(table);
 

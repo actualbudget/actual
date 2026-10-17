@@ -32,6 +32,8 @@ import { batchMessages, getBatchedValue, sendMessages } from '#server/sync';
 import { balanceSpec, effectiveEncoding } from '#server/sync/coupled-cells';
 import { validateTransactionWrite } from '#server/transactions/foreign-guard';
 import type { TransactionWriteOptions } from '#server/transactions/foreign-guard';
+import { laneIntent } from '#server/transactions/lane-intent';
+import type { LaneReason } from '#server/transactions/lane-intent';
 import { accountCurrencyFields } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { groupById } from '#shared/util';
@@ -1006,10 +1008,14 @@ export async function insertTransaction(
       undefined,
       options,
     );
-    id = await insertWithSchema('transactions', transaction);
+    const lane = await laneIntent(transaction, pair);
+    id = await insertWithSchema('transactions', lane.row);
     if (pair) {
       // amount_pair is internal and not in the AQL schema.
       await update('transactions', { id, amount_pair: pair });
+    }
+    if (lane.pocket !== undefined) {
+      await update('transactions', { id, pocket: lane.pocket });
     }
     await lockAccountCurrency(transaction.account);
   });
@@ -1037,19 +1043,29 @@ async function lockAccountCurrency(accountId: string | undefined) {
 export async function updateTransaction(
   transaction,
   options?: TransactionWriteOptions,
-) {
+): Promise<{ reason?: LaneReason }> {
+  let reason: LaneReason | undefined;
   await batchMessages(async () => {
     const { pair } = await validateTransactionWrite(
       transaction,
       undefined,
       options,
     );
-    await updateWithSchema('transactions', transaction);
+    const lane = await laneIntent(transaction, pair);
+    reason = lane.reason;
+    await updateWithSchema('transactions', lane.row);
     if (pair) {
       await update('transactions', { id: transaction.id, amount_pair: pair });
     }
+    if (lane.pocket !== undefined) {
+      await update('transactions', {
+        id: transaction.id,
+        pocket: lane.pocket,
+      });
+    }
     await lockAccountCurrency(transaction.account);
   });
+  return reason ? { reason } : {};
 }
 
 export async function deleteTransaction(transaction) {

@@ -190,11 +190,15 @@ function fetchAll(table: string, ids: string[]) {
     // which trigger budget changes based on data changes assumes data has been
     // mapped. The only mapped data that the budget is concerned about is
     // categories. This is kind of annoying, but we manually map it here
+    // Transactions also carry the category of their budget lane, which
+    // every reader shows, and the raw category undo restores.
     if (table === 'transactions') {
       sql = `
-        SELECT t.*, c.transferId AS category
+        SELECT t.*, COALESCE(l.category, c.transferId) AS category,
+          t.category AS raw_category
         FROM transactions t
         LEFT JOIN category_mapping c ON c.id = t.category
+        LEFT JOIN v_transaction_lanes l ON l.id = t.id
       `;
       column = 't.id';
     } else {

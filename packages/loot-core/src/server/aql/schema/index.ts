@@ -242,6 +242,48 @@ export const schema = {
   },
 };
 
+// Transaction attribution to budget lanes (MC-10), over a transactions
+// row aliased `_` with its category mapping `cm`. Rule 1: a pointer to a
+// lane of the row's raw category that admits the row's stamp (a base lane
+// any stamp, a foreign lane its currency at no finer precision). Rule 2: a
+// raw category that is a retired category lane. Rule 3: the raw category
+// through category_mapping.
+const LANE_STAMP = `COALESCE(_.pair_encoding, CASE WHEN _la.currency IS NULL
+  THEN '' ELSE _la.currency || '.' || _la.currency_precision END)`;
+const LANE_JOINS = `
+  LEFT JOIN accounts _la ON _la.id = _.acct
+  LEFT JOIN category_pockets _lp ON _lp.id = _.pocket
+    AND _lp.category = _.category
+    AND (_lp.kind = 'base' OR (_lp.kind = 'foreign'
+      AND length(${LANE_STAMP}) >= 5
+      AND substr(${LANE_STAMP}, 1, 4) = substr(_lp.encoding, 1, 4)
+      AND CAST(substr(${LANE_STAMP}, 5) AS INTEGER)
+        <= CAST(substr(_lp.encoding, 5) AS INTEGER)))
+  LEFT JOIN slot_retirements _lr ON _lr.id = _.category AND _lr.tombstone = 0
+  LEFT JOIN slot_resolution _ls ON _ls.lane = CASE
+    WHEN _lp.id IS NOT NULL THEN _lp.id
+    WHEN _lr.id IS NOT NULL THEN _.category
+    ELSE cm.transferId END
+  LEFT JOIN categories _lk ON _lk.id = COALESCE(_ls.effective_category,
+    CASE WHEN _lp.id IS NOT NULL THEN _lp.category
+      WHEN _lr.id IS NOT NULL THEN _.category
+      ELSE cm.transferId END)`;
+const LANE_CANDIDATE = `CASE WHEN _lp.id IS NOT NULL THEN _lp.id
+  WHEN _lr.id IS NOT NULL THEN _.category ELSE cm.transferId END`;
+// Rule 0, read at query time: live, dated, categorized, in a live
+// on-budget account (closed or not); the kind is the effective category's,
+// else the origin category's even when tombstoned.
+const LANE_LIVE = `(IFNULL(_.tombstone, 0) = 0 AND _.date IS NOT NULL
+  AND _.category IS NOT NULL AND IFNULL(_.isParent, 0) = 0
+  AND _la.tombstone = 0 AND _la.offbudget = 0)`;
+const LANE_ELIGIBLE = `(${LANE_LIVE} AND (${LANE_CANDIDATE}) IS NOT NULL
+  AND _lk.id IS NOT NULL AND IFNULL(_lk.is_income, 0) = 0)`;
+// The transaction-facing category: the effective category of the row's
+// lane, else upstream's mapped category. It ignores the category kind, so a
+// row whose owner became income shows that owner, outside every lane.
+const LANE_CATEGORY = `CASE WHEN ${LANE_LIVE} AND _ls.lane IS NOT NULL
+  THEN _ls.effective_category ELSE cm.transferId END`;
+
 export const schemaConfig: SchemaConfig = {
   // Note: these views *must* represent the underlying table that we
   // are mapping here. The compiler makes optimizations with this
@@ -398,11 +440,31 @@ export const schemaConfig: SchemaConfig = {
         payee: 'description',
       },
 
+      // Every row's lane (null when rule 0 excludes it) and the category
+      // every transaction reader shows. `live` and `candidate` ignore the
+      // category kind, for slot activity.
+      v_transaction_lanes: `
+        SELECT _.id AS id,
+          CASE WHEN ${LANE_ELIGIBLE} AND (_.isChild = 0 OR _lt.tombstone = 0)
+            THEN ${LANE_CANDIDATE} END AS lane,
+          ${LANE_CANDIDATE} AS candidate,
+          CASE WHEN ${LANE_LIVE} AND (_.isChild = 0 OR _lt.tombstone = 0)
+            THEN 1 ELSE 0 END AS live,
+          ${LANE_CATEGORY} AS category,
+          _.category AS raw_category,
+          _.pocket AS pocket,
+          _.acct AS account
+        FROM transactions _
+        LEFT JOIN category_mapping cm ON cm.id = _.category
+        LEFT JOIN transactions _lt ON _.isChild = 1 AND _lt.id = _.parent_id
+        ${LANE_JOINS}
+      `,
+
       v_transactions_internal: internalFields => {
         // Override some fields to make custom stuff
         const fields = internalFields({
           payee: 'pm.targetId',
-          category: `CASE WHEN _.isParent = 1 THEN NULL ELSE cm.transferId END`,
+          category: `CASE WHEN _.isParent = 1 THEN NULL ELSE ${LANE_CATEGORY} END`,
           amount: `IFNULL(_.amount, 0)`,
           parent_id: 'CASE WHEN _.isChild = 0 THEN NULL ELSE _.parent_id END',
         });
@@ -411,6 +473,7 @@ export const schemaConfig: SchemaConfig = {
           SELECT ${fields} FROM transactions _
           LEFT JOIN category_mapping cm ON cm.id = _.category
           LEFT JOIN payee_mapping pm ON pm.id = _.description
+          ${LANE_JOINS}
           WHERE
            _.date IS NOT NULL AND
            _.acct IS NOT NULL AND

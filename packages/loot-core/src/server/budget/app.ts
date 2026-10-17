@@ -20,6 +20,7 @@ import { storeNoteCleanups } from './cleanup-template-notes';
 import { editEffects } from './edit-effects';
 import { fxValuation } from './fx-valuation';
 import * as goalActions from './goal-template';
+import { createPocket, setSlotMeta } from './pockets';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
 
@@ -48,6 +49,8 @@ export type BudgetHandlers = {
   'budget/transfer-category': typeof actions.transferCategory;
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
+  'budget/pocket-create': typeof createPocket;
+  'budget/slot-meta-set': typeof setSlotMeta;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
@@ -76,6 +79,8 @@ export type BudgetHandlers = {
 export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
+app.method('budget/pocket-create', mutator(undoable(createPocket)));
+app.method('budget/slot-meta-set', mutator(undoable(setSlotMeta)));
 app.method('budget/edit-effects', editEffects);
 app.method('budget/fx-valuation', monthFxValuation);
 app.method(
