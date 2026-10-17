@@ -135,6 +135,16 @@ export class ReportsPage {
       .waitFor({ state: 'visible' });
   }
 
+  async selectYAxisBase(yAxisBase: string) {
+    await this.pageContent.getByRole('button', { name: 'Zero Based' }).click();
+    const option = this.page.getByRole('button', { name: yAxisBase });
+    await option.waitFor({ state: 'visible' });
+    await option.click();
+    await this.pageContent
+      .getByRole('button', { name: yAxisBase })
+      .waitFor({ state: 'visible' });
+  }
+
   async selectForecastSource(
     source: 'Scheduled transactions' | 'Tracking budget',
   ) {
