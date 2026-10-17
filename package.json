@@ -79,7 +79,7 @@
     "eslint-plugin-perfectionist": "^5.12.1",
     "eslint-plugin-typescript-paths": "^0.0.33",
     "husky": "^9.1.7",
-    "knip": "^6.27.0",
+    "knip": "^6.41.0",
     "lage": "^2.15.17",
     "minimatch": "^10.2.5",
     "nano-staged": "^1.0.2",
