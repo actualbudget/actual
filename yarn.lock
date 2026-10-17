@@ -2082,18 +2082,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@capacitor/android@npm:^8.5.3":
-  version: 8.5.3
-  resolution: "@capacitor/android@npm:8.5.3"
+"@capacitor/android@npm:^8.4.3":
+  version: 8.4.3
+  resolution: "@capacitor/android@npm:8.4.3"
   peerDependencies:
-    "@capacitor/core": ^8.5.0
-  checksum: 10/48117d266d3d5f427098eb31eb2f422556a3c2adaa9d9d472c5f6c54b01c4557bf3ec14ceb1d93dda23a4c6b5c2f934dabc6f8ebb220c317567a467242932aa6
+    "@capacitor/core": ^8.4.0
+  checksum: 10/931b319de1f33e9d0d9e8dbd8b594059567d8348ca33f3b3fb225165fa8f63e7ed8a346b4f6f5e5f91ccf8d6e633cc82cda271f3fb29796d0f3e470b59d61cc6
   languageName: node
   linkType: hard
 
-"@capacitor/cli@npm:^8.5.3":
-  version: 8.5.3
-  resolution: "@capacitor/cli@npm:8.5.3"
+"@capacitor/cli@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "@capacitor/cli@npm:8.4.2"
   dependencies:
     "@ionic/cli-framework-output": "npm:^2.2.8"
     "@ionic/utils-subprocess": "npm:^3.0.1"
@@ -2111,21 +2111,20 @@ __metadata:
     semver: "npm:^7.6.3"
     tar: "npm:^7.5.3"
     tslib: "npm:^2.8.1"
-    xcode: "npm:^3.0.1"
     xml2js: "npm:^0.6.2"
   bin:
     cap: bin/capacitor
     capacitor: bin/capacitor
-  checksum: 10/e62f922046bba46283a524a4626d0c9096bd89a2dfb28b495bd517c6374ba057126cb75052bfe85cb1523096697d0ef2bed9249e832262754647e907fc87fd2e
+  checksum: 10/f583142b64b700c913956f55ec7dc6aa22d9d661e2ea458b048ca2f0ae17bf210a318e9060a6eb709108a2ae8e38497f33e7bfb2efe0702e941eaa88a1cbaf36
   languageName: node
   linkType: hard
 
-"@capacitor/core@npm:^8.5.3":
-  version: 8.5.3
-  resolution: "@capacitor/core@npm:8.5.3"
+"@capacitor/core@npm:^8.4.2":
+  version: 8.4.2
+  resolution: "@capacitor/core@npm:8.4.2"
   dependencies:
     tslib: "npm:^2.1.0"
-  checksum: 10/f6a87fa55398d6d3fe8eb7addd0c8b372a724bb800e5f494acd8a930b06f1e84117adf72a0cb7f7e56125029f5acb72ecd3731545e49c324fa0f59a2c580be82
+  checksum: 10/dc1f1cf89de2bbdce1fa4b7b8f9eac81886bed6c9956038cd9463c057aba189d1eca938acba798ba039e86ef51e8d7b0eb70db2be08994ddbbd5aa6a35a2deb6
   languageName: node
   linkType: hard
 
@@ -10947,16 +10946,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bplist-creator@npm:0.1.1":
-  version: 0.1.1
-  resolution: "bplist-creator@npm:0.1.1"
-  dependencies:
-    stream-buffers: "npm:2.2.x"
-  checksum: 10/4f185ee84a97f4b7c7caa73436b9c664e410f8640661a4ae97f0fbe1420aa8fc5db39d9a9d8571c87069665f6d3c5a8a8d2be30db7b64681b7cc366695211913
-  languageName: node
-  linkType: hard
-
-"bplist-parser@npm:0.3.2, bplist-parser@npm:^0.3.2":
+"bplist-parser@npm:^0.3.2":
   version: 0.3.2
   resolution: "bplist-parser@npm:0.3.2"
   dependencies:
@@ -20249,9 +20239,9 @@ __metadata:
   resolution: "mobile-client@workspace:packages/mobile-client"
   dependencies:
     "@actual-app/web": "workspace:*"
-    "@capacitor/android": "npm:^8.5.3"
-    "@capacitor/cli": "npm:^8.5.3"
-    "@capacitor/core": "npm:^8.5.3"
+    "@capacitor/android": "npm:^8.4.3"
+    "@capacitor/cli": "npm:^8.4.2"
+    "@capacitor/core": "npm:^8.4.2"
     "@capacitor/ios": "npm:^8.5.3"
     "@capacitor/splash-screen": "npm:^8.0.2"
   languageName: unknown
@@ -25387,17 +25377,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-plist@npm:^1.1.0":
-  version: 1.4.0
-  resolution: "simple-plist@npm:1.4.0"
-  dependencies:
-    bplist-creator: "npm:0.1.1"
-    bplist-parser: "npm:0.3.2"
-    plist: "npm:^3.0.5"
-  checksum: 10/e03f1619370d8d502543f2f9c6448722456dd2594e34d689eb8706c7c9e328c1ed5bef89280cb9e13426942ec1ab0f5655406ab70550be28b84fcccc304d447b
-  languageName: node
-  linkType: hard
-
 "simple-swizzle@npm:^0.2.2":
   version: 0.2.4
   resolution: "simple-swizzle@npm:0.2.4"
@@ -25835,13 +25814,6 @@ __metadata:
     inherits: "npm:~2.0.4"
     readable-stream: "npm:^3.5.0"
   checksum: 10/05a3cd0a0ce2d568dbdeb69914557c26a1b0a9d871839666b692eae42b96189756a3ed685affc90dab64ff588a8524c8aec6d85072c07905a1f0d941ea68f956
-  languageName: node
-  linkType: hard
-
-"stream-buffers@npm:2.2.x":
-  version: 2.2.0
-  resolution: "stream-buffers@npm:2.2.0"
-  checksum: 10/79f897cead810383b4181e4ee56f4855a69b51c9da4c96b91ccca6ee6fe90b908bea9b304225bedd1a5e2c41d72bc88d3ada7f897b51f8ffae3593f7460ecbc8
   languageName: node
   linkType: hard
 
@@ -27509,15 +27481,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^7.0.3":
-  version: 7.0.3
-  resolution: "uuid@npm:7.0.3"
-  bin:
-    uuid: dist/bin/uuid
-  checksum: 10/b2a4d30ecd6581015175487426558aafd7f7b4013a2e30802c128cc28cad9abe46ecd36c02f7fbcde7908fd4672334818d56a441c0871963d6bd89d911bef2ea
-  languageName: node
-  linkType: hard
-
 "uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
@@ -28614,16 +28577,6 @@ __metadata:
     is-wsl: "npm:^3.1.0"
     powershell-utils: "npm:^0.1.0"
   checksum: 10/46800b92fa4974f2a846a93f0b8c409a455c35897d001a7599b5524766b603c8fb0945d2b21ad6ad27d4b0ae7e72ca2e58d832ccfcaabf659399921c6448b1d0
-  languageName: node
-  linkType: hard
-
-"xcode@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "xcode@npm:3.0.1"
-  dependencies:
-    simple-plist: "npm:^1.1.0"
-    uuid: "npm:^7.0.3"
-  checksum: 10/539d7b808ccce648078c5ceb63c4f9c14a7018a7db688fe0ff55c7d59e685c67392f18e9f531ce524f8d71162e836714b8835fa0a8688e976d4a293b147917c3
   languageName: node
   linkType: hard
 
