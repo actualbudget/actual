@@ -183,7 +183,7 @@
     "csv-stringify": "^6.9.0",
     "date-fns": "^4.4.0",
     "downshift": "9.4.0",
-    "es-toolkit": "^1.49.0",
+    "es-toolkit": "^1.52.0",
     "fzf": "^0.5.2",
     "html-to-image": "^1.11.13",
     "hyperformula": "^3.3.0",
