@@ -240,6 +240,6 @@
     "vite": "^8.3.4",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
     "vitest": "^5.0.4",
-    "yargs": "^18.0.0"
+    "yargs": "^18.2.0"
   }
 }
