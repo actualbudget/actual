@@ -23,7 +23,7 @@
     "@docusaurus/theme-mermaid": "^3.10.2",
     "@easyops-cn/docusaurus-search-local": "^0.55.3",
     "@mdx-js/react": "^3.1.1",
-    "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
+    "@r74tech/docusaurus-plugin-panzoom": "^2.5.0",
     "prism-react-renderer": "^2.4.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",

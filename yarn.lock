@@ -3622,7 +3622,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/utils-validation@npm:3.10.2, @docusaurus/utils-validation@npm:^2 || ^3, @docusaurus/utils-validation@npm:^3.9.2":
+"@docusaurus/utils-validation@npm:3.10.2, @docusaurus/utils-validation@npm:^2 || ^3, @docusaurus/utils-validation@npm:^3.10.2":
   version: 3.10.2
   resolution: "@docusaurus/utils-validation@npm:3.10.2"
   dependencies:
@@ -6401,10 +6401,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@panzoom/panzoom@npm:^4.6.1":
-  version: 4.6.1
-  resolution: "@panzoom/panzoom@npm:4.6.1"
-  checksum: 10/e7c47009aa75e5e06863684c24edc63140823c5d26264b0053c0d7e9154e34b7f72bee8595c3bd4fb96946f0350e1c28664eb806b153eef7a33a6a56fa8934e0
+"@panzoom/panzoom@npm:^4.6.2":
+  version: 4.6.2
+  resolution: "@panzoom/panzoom@npm:4.6.2"
+  checksum: 10/169981bb2648012b39fa3f18b35d3cb4b9cb7de805a65dc9a730efbe724dae48b88dbd61661f5a700f606546595e84acf3f0d969685be872cd29d51a095ad48b
   languageName: node
   linkType: hard
 
@@ -6783,13 +6783,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@r74tech/docusaurus-plugin-panzoom@npm:^2.4.2":
-  version: 2.4.2
-  resolution: "@r74tech/docusaurus-plugin-panzoom@npm:2.4.2"
+"@r74tech/docusaurus-plugin-panzoom@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "@r74tech/docusaurus-plugin-panzoom@npm:2.5.0"
   dependencies:
-    "@docusaurus/utils-validation": "npm:^3.9.2"
-    "@panzoom/panzoom": "npm:^4.6.1"
-  checksum: 10/7825504924c4fe59d32486a1ac620b11ac79b188c48e7e8782b079852405611ec546941ba0d9e2e9aa21c1036b74fdd16a65567eb9c4df120b27ea3385c4aa7b
+    "@docusaurus/utils-validation": "npm:^3.10.2"
+    "@panzoom/panzoom": "npm:^4.6.2"
+  checksum: 10/106757f0cd23bcd09104dbbdd662a5d7094a5bb93479f926b527f28edc1a2540c88d71cdd2548619dfab8b4f053633b82f79ecee34c07daeb3310fe6f644f07c
   languageName: node
   linkType: hard
 
@@ -13739,7 +13739,7 @@ __metadata:
     "@docusaurus/types": "npm:^3.10.2"
     "@easyops-cn/docusaurus-search-local": "npm:^0.55.3"
     "@mdx-js/react": "npm:^3.1.1"
-    "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.2"
+    "@r74tech/docusaurus-plugin-panzoom": "npm:^2.5.0"
     "@types/react": "npm:^19.3.0"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.3.0"
