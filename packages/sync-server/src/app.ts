@@ -188,13 +188,15 @@ function parseHTTPSConfig(value: string) {
   return fs.readFileSync(value);
 }
 
-function sendServerStartedMessage() {
+function sendServerStartedMessage(
+  activeHostname: string = config.get('hostname'),
+) {
   // Signify to any parent process that the server has started. Used in electron desktop app
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
   console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
+    'Listening on ' + activeHostname + ':' + config.get('port') + '...',
   );
 }
 
@@ -220,6 +222,8 @@ export async function run() {
     }
   }
 
+  const { listenWithFallback } = await import('./util/server-listen');
+
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
@@ -227,12 +231,15 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
-      sendServerStartedMessage();
+    const server = https.createServer(httpsOptions, app);
+    listenWithFallback(server, port, hostname, actualHost => {
+      sendServerStartedMessage(actualHost);
     });
   } else {
-    app.listen(port, hostname, () => {
-      sendServerStartedMessage();
+    const http = await import('node:http');
+    const server = http.createServer(app);
+    listenWithFallback(server, port, hostname, actualHost => {
+      sendServerStartedMessage(actualHost);
     });
   }
 }
