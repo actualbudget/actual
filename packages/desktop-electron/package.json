@@ -31,7 +31,7 @@
     "electron": "43.5.0",
     "electron-builder": "26.8.1",
     "typescript-strict-plugin": "^2.4.4",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.4"
   },
   "build": {
     "appId": "com.actualbudget.actual",

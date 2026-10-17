@@ -6,6 +6,7 @@ import { getDataDir, readFile, removeFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
+import { regexp } from './regexp';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -119,10 +120,6 @@ export async function asyncTransaction(
       db.exec('COMMIT');
     }
   }
-}
-
-function regexp(regex: string, text: string | null) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
 export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {

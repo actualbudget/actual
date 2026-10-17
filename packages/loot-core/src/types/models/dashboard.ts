@@ -187,6 +187,35 @@ export type MonteCarloSpendingPhaseMeta = {
   annualWithdrawal?: number;
 };
 
+/** How a later investment phase takes over from the previous one */
+export type MonteCarloInvestmentTransition = 'at-once' | 'gradual';
+
+/**
+ * A change to what a pot is invested in from a given age: its allocation
+ * (or hand-typed return and volatility) and its fees. The pot's own
+ * fields are its settings until the first phase begins
+ */
+export type MonteCarloInvestmentPhaseMeta = {
+  id: string;
+  /** Age the phase takes effect (inclusive) */
+  fromAge?: number;
+  /**
+   * 'gradual' glides from the previous phase's settings, starting at that
+   * phase's own start age and arriving at fromAge; 'at-once' switches on
+   * the birthday
+   */
+  transition?: MonteCarloInvestmentTransition;
+  allocationPreset?: MonteCarloAllocationPreset;
+  allocationStocks?: number;
+  allocationBonds?: number;
+  allocationCash?: number;
+  expectedReturnMean?: number;
+  returnStdDev?: number;
+  annualFeeFixed?: number;
+  feeAdjustsWithInflation?: boolean;
+  annualFeeRate?: number;
+};
+
 export type MonteCarloPotMeta = {
   id: string;
   name?: string;
@@ -229,6 +258,8 @@ export type MonteCarloPotMeta = {
    * it is drawn on before any other pot. At most one pot is flagged.
    */
   isSurplus?: boolean;
+  /** Later changes to the pot's investment, by age */
+  investmentPhases?: MonteCarloInvestmentPhaseMeta[];
 };
 
 /** One recurring yearly contribution into a pot over an age window */

@@ -80,7 +80,7 @@ Most of the budget automations will have a priority field that you can use to se
 - Priority 0 automations will budget funds even if they are not available in **To Budget**, this can lead to a negative **To Budget**.
 - Priorities other than 0 will **not** budget more funds than are available.
 - If you have multiple _Cover schedule_ or _Save by date_ automations in a single category, their priorities **must** match.
-  :::
+:::
 
 :::tip
 When you first start using priorities, space them 10 numbers apart so you have room to insert additional priorities later.
@@ -322,7 +322,7 @@ Once you hit your goal, the balance will turn green. Note that if you remove fun
 
 - The long-term goal does not automatically add funds or stop funds from being added after the goal has been hit. To stop automated funds from being added after you reach the goal, add a _Balance cap_ to the category.
 - You can have a long-term goal without any other automations and budget manually toward your goal. You will still need to run the automations on the category to see the indicator and tooltip.
-  :::
+:::
 
 The tooltip will give you information regarding your progress:
 

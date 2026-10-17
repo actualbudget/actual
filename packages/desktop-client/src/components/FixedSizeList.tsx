@@ -469,7 +469,10 @@ export class FixedSizeList extends PureComponent<
     return style;
   };
 
-  _getItemStyleCache = memoizeOne((_, __, ___) => ({}));
+  _getItemStyleCache = memoizeOne<
+    [itemSize: number, layout?: unknown, direction?: unknown],
+    Record<number, CSSProperties>
+  >(() => ({}));
 
   _getRangeToRender() {
     const { itemCount, overscanCount } = this.props;
@@ -565,7 +568,6 @@ export class FixedSizeList extends PureComponent<
     this.setState({ isScrolling: false }, () => {
       // Clear style cache after state update has been committed.
       // This way we don't break pure sCU for items that don't use isScrolling param.
-      // @ts-expect-error fix me
       this._getItemStyleCache(-1, null);
     });
   };
