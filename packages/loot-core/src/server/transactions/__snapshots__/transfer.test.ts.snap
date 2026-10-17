@@ -15,6 +15,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "is_child": 0,
     "is_parent": 0,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "payee": "id3",
     "payee_name": "",
@@ -24,7 +25,6 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transfer_id": "id6",
   },
   {
@@ -40,6 +40,7 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "is_child": 0,
     "is_parent": 0,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "payee": "id2",
     "payee_name": "",
@@ -49,7 +50,6 @@ exports[`Transfer > split transfers are retained on child transactions 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transfer_id": "id5",
   },
 ]
@@ -78,9 +78,8 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 "- First value
 + Second value
 
-@@ -23,10 +23,60 @@
+@@ -23,9 +23,59 @@
       "tombstone": 0,
-      "number": null,
       "transfer_id": "id6",
     },
     Object {
@@ -96,6 +95,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "is_child": 1,
 +     "is_parent": 0,
 +     "notes": null,
++     "number": null,
 +     "parent_id": "id5",
 +     "payee": "id2",
 +     "payee_name": "",
@@ -105,7 +105,6 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id8",
 +   },
 +   Object {
@@ -121,6 +120,7 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": null,
++     "number": null,
 +     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
@@ -130,7 +130,6 @@ exports[`Transfer > split transfers are retained on child transactions 3`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id7",
 +   },
 +   Object {
@@ -156,6 +155,7 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
     "is_child": 0,
     "is_parent": 0,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "payee": "id5",
     "payee_name": "Non-transfer",
@@ -165,7 +165,6 @@ exports[`Transfer > transfers are properly de-categorized 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transfer_id": null,
   },
 ]
@@ -183,6 +182,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
       "is_parent": 0,
 -     "notes": null,
 +     "notes": "hi",
++     "number": null,
 +     "parent_id": null,
 +     "payee": "id4",
 +     "payee_name": "",
@@ -192,7 +192,6 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id7",
 +   },
 +   Object {
@@ -208,6 +207,7 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": "hi",
+      "number": null,
       "parent_id": null,
 -     "payee": "id5",
 -     "payee_name": "Non-transfer",
@@ -219,7 +219,6 @@ exports[`Transfer > transfers are properly de-categorized 2`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id6",
     },
@@ -254,9 +253,8 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
-@@ -23,11 +23,11 @@
+@@ -23,10 +23,10 @@
       "tombstone": 0,
-      "number": null,
       "transfer_id": "id7",
     },
     Object {
@@ -284,6 +282,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
     "is_child": 0,
     "is_parent": 0,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "payee": "id5",
     "payee_name": "Non-transfer",
@@ -293,7 +292,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transfer_id": null,
   },
 ]
@@ -303,10 +301,9 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 "- First value
 + Second value
 
-@@ -22,6 +22,56 @@
+@@ -22,5 +22,55 @@
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
       "transfer_id": null,
     },
 +   Object {
@@ -322,6 +319,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": null,
++     "number": null,
 +     "parent_id": null,
 +     "payee": "id3",
 +     "payee_name": "",
@@ -331,7 +329,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id8",
 +   },
 +   Object {
@@ -347,6 +344,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": null,
++     "number": null,
 +     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
@@ -356,7 +354,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id7",
 +   },
   ]"
@@ -383,6 +380,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "is_parent": 0,
 -     "notes": null,
 +     "notes": "This is a note",
+      "number": null,
       "parent_id": null,
 -     "payee": "id5",
 -     "payee_name": "Non-transfer",
@@ -394,7 +392,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id8",
     },
@@ -412,6 +409,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "is_child": 0,
       "is_parent": 0,
       "notes": null,
+      "number": null,
       "parent_id": null,
 -     "payee": "id3",
 -     "payee_name": "",
@@ -423,7 +421,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
 -     "transfer_id": "id8",
 +     "transfer_id": null,
     },
@@ -463,9 +460,8 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
-@@ -48,11 +48,11 @@
+@@ -48,10 +48,10 @@
       "tombstone": 0,
-      "number": null,
       "transfer_id": null,
     },
     Object {
@@ -487,6 +483,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "is_child": 0,
       "is_parent": 0,
       "notes": "This is a note",
+      "number": null,
       "parent_id": null,
 -     "payee": "id4",
 -     "payee_name": "",
@@ -498,7 +495,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
 -     "transfer_id": "id8",
 +     "transfer_id": null,
     },
@@ -506,11 +502,10 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "account": "one",
       "amount": 5000,
       "category": null,
-@@ -46,32 +46,7 @@
+@@ -46,31 +46,6 @@
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
       "transfer_id": null,
 -   },
 -   Object {
@@ -526,6 +521,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "is_child": 0,
 -     "is_parent": 0,
 -     "notes": "This is a note",
+-     "number": null,
 -     "parent_id": null,
 -     "payee": "id2",
 -     "payee_name": "",
@@ -535,7 +531,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "number": null,
 -     "transfer_id": "id7",
     },
   ]"
@@ -550,6 +545,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
       "is_child": 0,
       "is_parent": 0,
       "notes": "This is a note",
++     "number": null,
       "parent_id": null,
 -     "payee": "id9",
 -     "payee_name": "Not transferred anymore",
@@ -561,7 +557,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "sort_order": 123456789,
 +     "starting_balance_flag": 0,
 +     "tombstone": 0,
-+     "number": null,
 +     "transfer_id": "id10",
 +   },
 +   Object {
@@ -577,6 +572,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": "This is a note",
+      "number": null,
 +     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
@@ -586,7 +582,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
-      "number": null,
 -     "transfer_id": null,
 +     "transfer_id": "id7",
     },
@@ -614,6 +609,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "is_child": 0,
 -     "is_parent": 0,
 -     "notes": "This is a note",
+-     "number": null,
 -     "parent_id": null,
 -     "payee": "id3",
 -     "payee_name": "",
@@ -623,7 +619,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "number": null,
 -     "transfer_id": "id10",
 -   },
 -   Object {
@@ -639,6 +634,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "is_child": 0,
 -     "is_parent": 0,
 -     "notes": "This is a note",
+-     "number": null,
 -     "parent_id": null,
 -     "payee": "id2",
 -     "payee_name": "",
@@ -648,7 +644,6 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 7`] = `
 -     "sort_order": 123456789,
 -     "starting_balance_flag": 0,
 -     "tombstone": 0,
--     "number": null,
 -     "transfer_id": "id7",
 -   },
 -   Object {

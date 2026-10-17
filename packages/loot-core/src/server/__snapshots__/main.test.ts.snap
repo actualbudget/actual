@@ -17,6 +17,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "isParent": 0,
     "location": null,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "pending": 0,
     "raw_synced_data": null,
@@ -25,7 +26,6 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transferred_id": "id2",
     "type": null,
   },
@@ -44,6 +44,7 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "isParent": 0,
     "location": null,
     "notes": null,
+    "number": null,
     "parent_id": null,
     "pending": 0,
     "raw_synced_data": null,
@@ -52,7 +53,6 @@ exports[`Accounts > Transfers are properly updated 1`] = `
     "sort_order": 123456789,
     "starting_balance_flag": 0,
     "tombstone": 0,
-    "number": null,
     "transferred_id": "test-transfer",
     "type": null,
   },
@@ -78,8 +78,7 @@ exports[`Accounts > Transfers are properly updated 2`] = `
       "id": "test-transfer",
       "imported_description": null,
       "isChild": 0,
-@@ -25,11 +25,11 @@
-      "number": null,
+@@ -25,10 +25,10 @@
       "transferred_id": "id2",
       "type": null,
     },
@@ -97,23 +96,22 @@ exports[`Accounts > Transfers are properly updated 3`] = `
 "- First value
 + Second value
 
-@@ -19,13 +19,13 @@
+@@ -19,12 +19,12 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
       "starting_balance_flag": 0,
 -     "tombstone": 0,
-+     "tombstone": 1,
-      "number": null,
 -     "transferred_id": "id2",
++     "tombstone": 1,
 +     "transferred_id": null,
       "type": null,
     },
     Object {
       "acct": "three",
       "amount": -5000,
-@@ -46,11 +46,11 @@
+@@ -46,10 +46,10 @@
       "raw_synced_data": null,
       "reconciled": 0,
       "schedule": null,
@@ -121,7 +119,6 @@ exports[`Accounts > Transfers are properly updated 3`] = `
       "starting_balance_flag": 0,
 -     "tombstone": 0,
 +     "tombstone": 1,
-      "number": null,
       "transferred_id": "test-transfer",
       "type": null,
     },
