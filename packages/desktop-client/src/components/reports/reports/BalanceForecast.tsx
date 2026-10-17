@@ -37,6 +37,7 @@ import { getCustomTick } from '#components/reports/getCustomTick';
 import { computePadding } from '#components/reports/graphs/util/computePadding';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { BalanceForecastContributors } from '#components/reports/reports/BalanceForecastContributors';
 import { useAccounts } from '#hooks/useAccounts';
 import { useBalanceForecast } from '#hooks/useBalanceForecast';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
@@ -641,6 +642,15 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                   </>
                 ) : null}
               </div>
+              {!isTrackingBudgetForecast && normalizedForecastData && (
+                <BalanceForecastContributors
+                  forecast={normalizedForecastData}
+                  start={chartRange.start}
+                  end={chartRange.end}
+                  granularity={granularity}
+                  isUpdating={isUpdatingForecast}
+                />
+              )}
             </>
           ) : (
             <div

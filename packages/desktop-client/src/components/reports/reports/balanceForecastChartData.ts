@@ -1,3 +1,4 @@
+import { getForecastRange } from '@actual-app/core/shared/forecast-contributors';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { ForecastResult } from '@actual-app/core/types/models/forecast';
 import * as d from 'date-fns';
@@ -76,12 +77,11 @@ export function buildBalanceForecastChartData({
     const combinedBalanceByDate = getCombinedBalanceByDate(forecastData);
 
     // Expand month-shaped bounds to full months; keep day-shaped bounds exact.
-    const startDay = monthUtils.isValidYearMonth(start)
-      ? monthUtils.firstDayOfMonth(start)
-      : start;
-    const endDay = monthUtils.isValidYearMonth(end)
-      ? monthUtils.lastDayOfMonth(end)
-      : end;
+    const { startDate: startDay, endDate: endDay } = getForecastRange(
+      start,
+      end,
+      granularity,
+    );
 
     // Carry the balance forward from the latest point before the visible
     // range, so a day-shaped start doesn't begin the chart at zero.
@@ -147,14 +147,11 @@ export function countForecastScheduledOccurrences({
   // The forecast query always covers whole months; only count occurrences the
   // chart actually shows. Daily keeps day-shaped bounds exact, Monthly widens
   // to full months (mirrors buildBalanceForecastChartData).
-  const startDay =
-    granularity === 'Daily' && !monthUtils.isValidYearMonth(start)
-      ? start
-      : monthUtils.firstDayOfMonth(start);
-  const endDay =
-    granularity === 'Daily' && !monthUtils.isValidYearMonth(end)
-      ? end
-      : monthUtils.lastDayOfMonth(end);
+  const { startDate: startDay, endDate: endDay } = getForecastRange(
+    start,
+    end,
+    granularity,
+  );
 
   const occurrenceKeys = new Set<string>();
 
@@ -163,7 +160,9 @@ export function countForecastScheduledOccurrences({
       continue;
     }
     for (const transaction of dataPoint.transactions) {
-      occurrenceKeys.add(`${dataPoint.date}:${transaction.scheduleId}`);
+      occurrenceKeys.add(
+        `${transaction.occurrenceDate ?? dataPoint.date}:${transaction.scheduleId}`,
+      );
     }
   }
 
