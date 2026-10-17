@@ -18,6 +18,7 @@ import type {
   ForeignEditExpected,
   ForeignEditFinal,
 } from './foreign-guard';
+import type { LaneReason } from './lane-intent';
 
 import { clearDisallowedCategory } from './index';
 
@@ -149,11 +150,13 @@ async function write(
     [update.id, { action: 'update', expected, final }],
   ]);
   await preflightTransactionWrites({ updated: [update] }, { foreignEdits });
+  let reason: LaneReason | undefined;
   await withUndo(() =>
     batchMessages(async () => {
-      await db.updateTransaction(update, { foreignEdits });
+      ({ reason } = await db.updateTransaction(update, { foreignEdits }));
     }),
   );
+  return reason;
 }
 
 /**
@@ -241,6 +244,8 @@ export async function moveForeignEntry({
       baseBefore: number;
       baseAfter: number;
       scheduleUnlinked: boolean;
+      /** The row's lane could not be routed (MC-10). */
+      reason?: LaneReason;
     }
   | PairFailure
 > {
@@ -302,7 +307,7 @@ export async function moveForeignEntry({
     ...(scheduleUnlinked && { schedule: null }),
   };
   clearDisallowedCategory(update, destination);
-  await write(update, expected, {
+  const reason = await write(update, expected, {
     account,
     amount,
     transaction_amount: native,
@@ -312,5 +317,6 @@ export async function moveForeignEntry({
     baseBefore: row.amount,
     baseAfter: amount,
     scheduleUnlinked,
+    ...(reason && { reason }),
   };
 }

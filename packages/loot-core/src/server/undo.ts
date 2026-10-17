@@ -245,6 +245,15 @@ function undoMessage(message, oldData) {
           : `${oldItem.amount}:${oldItem.transaction_amount ?? ''}@${oldItem.acct}`,
       };
     }
+    // A row's raw category is restored, not the category its lane shows,
+    // so its lane pointer keeps its owner (MC-10).
+    if (
+      message.dataset === 'transactions' &&
+      message.column === 'category' &&
+      'raw_category' in oldItem
+    ) {
+      return { ...message, value: oldItem.raw_category };
+    }
     let column = message.column;
     if (message.dataset === 'spreadsheet_cells') {
       // The spreadsheet messages use the `expr` column, but only as a
@@ -280,6 +289,18 @@ function undoMessage(message, oldData) {
           return { ...message, value: null };
         }
         return null;
+      } else if (message.dataset === 'pocket_budgets') {
+        // An absent cell returns to absence: no authority, no carry flag.
+        if (message.column === 'budget_pair') {
+          return { ...message, value: null };
+        }
+        if (message.column === 'carryover') return { ...message, value: 0 };
+        return null;
+      } else if (message.dataset === 'category_slot_meta') {
+        if (message.column === 'sort_order') {
+          return { ...message, value: null };
+        }
+        return { ...message, value: 0 };
       } else if (message.dataset === 'notes') {
         return { ...message, value: null };
       }
@@ -340,6 +361,8 @@ function redoResurrections(messages, oldData): Message[] {
         'zero_budget_months',
         'zero_budgets',
         'reflect_budgets',
+        'pocket_budgets',
+        'category_slot_meta',
         'notes',
         'category_mapping',
         'payee_mapping',
