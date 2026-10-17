@@ -10184,7 +10184,7 @@ __metadata:
     glob-hasher-linux-arm64-gnu: "npm:1.4.2"
     husky: "npm:^9.1.7"
     knip: "npm:^6.41.0"
-    lage: "npm:^2.15.17"
+    lage: "npm:^2.17.0"
     minimatch: "npm:^10.2.5"
     nano-staged: "npm:^1.0.2"
     npm-run-all: "npm:^4.1.5"
@@ -18570,9 +18570,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lage@npm:^2.15.17":
-  version: 2.15.17
-  resolution: "lage@npm:2.15.17"
+"lage@npm:^2.17.0":
+  version: 2.17.0
+  resolution: "lage@npm:2.17.0"
   dependencies:
     fsevents: "npm:~2.3.2"
     glob-hasher: "npm:^1.4.2"
@@ -18582,7 +18582,7 @@ __metadata:
   bin:
     lage: dist/lage.js
     lage-server: dist/lage-server.js
-  checksum: 10/87980d7402ffdd000bfe08cd74031345df9ae1ab67f5f81e98beba57d737203b3a3110f6f3ac515211313e8fd357e38ff948d83e7cec306757edcaa4b63d4d95
+  checksum: 10/70edefa369499132a48e9c0a19a74ba2654aeac3811788018d1a2088587eeb83a7746d63927ab5404bc52ccee6bd80ccf6e0633bdef02c68f5c024aafcd5f007
   languageName: node
   linkType: hard
 
