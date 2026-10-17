@@ -9374,7 +9374,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/utils@npm:^8.54.0, @typescript-eslint/utils@npm:^8.60.0, @typescript-eslint/utils@npm:^8.70.0":
+"@typescript-eslint/utils@npm:^8.60.0, @typescript-eslint/utils@npm:^8.70.0":
   version: 8.71.2
   resolution: "@typescript-eslint/utils@npm:8.71.2"
   dependencies:
@@ -14611,7 +14611,7 @@ __metadata:
   dependencies:
     "@oxlint/plugins": "npm:^1.74.0"
     "@types/estree": "npm:^1.0.9"
-    eslint-vitest-rule-tester: "npm:^3.1.0"
+    eslint-vitest-rule-tester: "npm:^3.2.0"
     vitest: "npm:^5.0.4"
   languageName: unknown
   linkType: soft
@@ -14691,15 +14691,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-vitest-rule-tester@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "eslint-vitest-rule-tester@npm:3.1.0"
+"eslint-vitest-rule-tester@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "eslint-vitest-rule-tester@npm:3.2.0"
   dependencies:
-    "@typescript-eslint/utils": "npm:^8.54.0"
+    "@typescript-eslint/utils": "npm:^8.70.0"
   peerDependencies:
     eslint: ^9.10.0 || ^10.0.0
-    vitest: ^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0
-  checksum: 10/abe75424c14479eedab7a935a831e6b0a1c189f0e1989c222f0d7614365c15796036da0cb5a941c7786d0dfdf54e381b55dec9f28a601a816bd93d1fc904b5fe
+    vitest: ^1.0.0 || ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
+  checksum: 10/4c3bf41db222b16bd6951fdb8cf73d2a1cb31d53c81d4921eecbf39cc8da6171843a3c7071c05a6ea318f6ebc4e7b20530252f3441330df020e95702d3d42234
   languageName: node
   linkType: hard
 
