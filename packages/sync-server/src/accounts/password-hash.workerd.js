@@ -23,11 +23,12 @@ export function hashPassword(password) {
   return argon2w.hash(password, ARGON2_OPTIONS);
 }
 
-function verifyArgon2Noble(password, phc) {
-  // $argon2id$v=19$m=47104,t=1,p=1$<salt>$<hash>
+// Parses $argon2id$v=19$m=47104,t=1,p=1$<salt>$<hash>. Native argon2 0.45+
+// writes the params as m,p,t, so don't depend on their order.
+function parseArgon2idPhc(phc) {
   const [, type, version, params, salt, hash] = phc.split('$');
-  if (type !== 'argon2id' || version !== 'v=19' || !salt || !hash) {
-    return false;
+  if (type !== 'argon2id' || version !== 'v=19' || !params || !salt || !hash) {
+    return null;
   }
 
   const options = Object.fromEntries(
@@ -37,14 +38,18 @@ function verifyArgon2Noble(password, phc) {
     }),
   );
   if (![options.m, options.t, options.p].every(Number.isInteger)) {
-    return false;
+    return null;
   }
 
+  return { m: options.m, t: options.t, p: options.p, salt, hash };
+}
+
+function verifyArgon2Noble(password, { m, t, p, salt, hash }) {
   const expected = fromB64(hash);
   const actual = argon2id(password, fromB64(salt), {
-    m: options.m,
-    t: options.t,
-    p: options.p,
+    m,
+    t,
+    p,
     dkLen: expected.length,
   });
 
@@ -60,12 +65,16 @@ export async function verifyPassword(password, hash) {
 
   if (hash.startsWith('$argon2')) {
     try {
-      if (argon2w.parsePHC(hash).memoryCost <= argon2w.MAX_MEMORY_KIB) {
-        return await argon2w.verify(hash, password, {
+      const phc = parseArgon2idPhc(hash);
+      if (!phc) return false;
+      if (phc.m <= argon2w.MAX_MEMORY_KIB) {
+        // argon2w only parses the m,t,p order.
+        const canonical = `$argon2id$v=19$m=${phc.m},t=${phc.t},p=${phc.p}$${phc.salt}$${phc.hash}`;
+        return await argon2w.verify(canonical, password, {
           maxMemoryKib: argon2w.MAX_MEMORY_KIB,
         });
       }
-      return verifyArgon2Noble(password, hash);
+      return verifyArgon2Noble(password, phc);
     } catch {
       return false;
     }

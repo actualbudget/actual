@@ -1,3 +1,4 @@
+import * as argon2 from 'argon2';
 import * as bcrypt from 'bcrypt';
 
 import * as nativeHash from './password-hash';
@@ -14,6 +15,19 @@ describe('workerd password hashing', () => {
 
   it('verifies hashes made by the native argon2 implementation', async () => {
     const hash = await nativeHash.hashPassword('correct horse');
+
+    expect(await workerdHash.verifyPassword('correct horse', hash)).toBe(true);
+    expect(await workerdHash.verifyPassword('wrong', hash)).toBe(false);
+  });
+
+  it('verifies hashes with params in m,p,t order', async () => {
+    const hash = await argon2.hash('correct horse', {
+      type: argon2.argon2id,
+      memoryCost: 19456,
+      timeCost: 1,
+      parallelism: 1,
+    });
+    expect(hash).toMatch(/\$m=19456,p=1,t=1\$/);
 
     expect(await workerdHash.verifyPassword('correct horse', hash)).toBe(true);
     expect(await workerdHash.verifyPassword('wrong', hash)).toBe(false);
