@@ -194,6 +194,26 @@ describe('Web sqlite', () => {
     expect(rows[0].id).toBe('id1');
   });
 
+  it('should not match anything with an invalid regex', async () => {
+    const db = await openDatabase();
+    execQuery(db, initSQL);
+
+    runQuery(
+      db,
+      "INSERT INTO textstrings (id, string) VALUES ('id1', 'asdf\\')",
+    );
+
+    for (const pattern of ['\\', 'asdf\\', '[']) {
+      const rows = runQuery(
+        db,
+        'SELECT id FROM textstrings where REGEXP(?, string)',
+        [pattern],
+        true,
+      );
+      expect(rows).toEqual([]);
+    }
+  });
+
   it('should free statements it prepares', async () => {
     const db = await openDatabase();
     execQuery(db, initSQL);
