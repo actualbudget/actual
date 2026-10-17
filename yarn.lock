@@ -131,7 +131,7 @@ __metadata:
     buffer: "npm:^6.0.3"
     cross-env: "npm:^10.1.0"
     crypto-browserify: "npm:^3.12.1"
-    csv-parse: "npm:^7.0.2"
+    csv-parse: "npm:^7.0.3"
     csv-stringify: "npm:^6.9.0"
     date-fns: "npm:^4.4.0"
     es-toolkit: "npm:^1.52.0"
@@ -12851,10 +12851,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-parse@npm:^7.0.2":
-  version: 7.0.2
-  resolution: "csv-parse@npm:7.0.2"
-  checksum: 10/66158491d25b2070908c6d28130c1d439bec0e0d1ab3fad372973909e573bcc85a46ca317ae410f0178157f272112e3741b164aaf850d8241128c30ea2137670
+"csv-parse@npm:^7.0.3":
+  version: 7.0.3
+  resolution: "csv-parse@npm:7.0.3"
+  checksum: 10/98d80273b47603cbf754f4b75e7ea769ea63eb83fa18e4c92061e64b3575694eb98151100ddbb907670e7210ef7eac594ef850ecd3f23119062eeb8d9a2e2684
   languageName: node
   linkType: hard
 
