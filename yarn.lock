@@ -212,6 +212,7 @@ __metadata:
     pluggy-sdk: "npm:^0.89.0"
     supertest: "npm:^7.2.2"
     typescript-strict-plugin: "npm:^2.4.4"
+    undici: "npm:^7.25.0"
     uuid: "npm:^14.0.2"
     vite: "npm:^8.1.5"
     vitest: "npm:^5.0.0"
