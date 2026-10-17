@@ -132,7 +132,7 @@ __metadata:
     cross-env: "npm:^10.1.0"
     crypto-browserify: "npm:^3.12.1"
     csv-parse: "npm:^7.0.2"
-    csv-stringify: "npm:^6.8.1"
+    csv-stringify: "npm:^6.9.0"
     date-fns: "npm:^4.4.0"
     es-toolkit: "npm:^1.49.0"
     fake-indexeddb: "npm:^6.2.5"
@@ -268,7 +268,7 @@ __metadata:
     babel-plugin-react-compiler: "npm:^1.0.0"
     cmdk: "npm:^1.1.1"
     cross-env: "npm:^10.1.0"
-    csv-stringify: "npm:^6.8.1"
+    csv-stringify: "npm:^6.9.0"
     date-fns: "npm:^4.4.0"
     downshift: "npm:9.4.0"
     es-toolkit: "npm:^1.49.0"
@@ -12851,10 +12851,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csv-stringify@npm:^6.8.1":
-  version: 6.8.1
-  resolution: "csv-stringify@npm:6.8.1"
-  checksum: 10/b866fa222277e1be2819d98286d49a2e158cf9d3a90c670106c1a8b6d45837201dc7b468f531397c449fc87f181d29ed41879a4f9f4ccc3462b2a001afedaeb8
+"csv-stringify@npm:^6.9.0":
+  version: 6.9.0
+  resolution: "csv-stringify@npm:6.9.0"
+  checksum: 10/af8bb8999ee023183fcec2b95693cb7fda90466e1961509936eda55886963e4e01ce9109fce7e22da4c2c42ebdaf8bcddf178974c5508e8e2ea12fe42670e524
   languageName: node
   linkType: hard
 
