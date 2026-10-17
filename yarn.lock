@@ -243,8 +243,8 @@ __metadata:
     "@codemirror/state": "npm:^6.7.6"
     "@codemirror/view": "npm:^6.43.14"
     "@emotion/css": "npm:^11.13.5"
-    "@fontsource-variable/inter": "npm:^5.2.8"
-    "@fontsource/redacted-script": "npm:^5.2.8"
+    "@fontsource-variable/inter": "npm:^5.3.0"
+    "@fontsource/redacted-script": "npm:^5.3.0"
     "@internationalized/date": "npm:^3.12.4"
     "@lezer/highlight": "npm:^1.2.5"
     "@playwright/test": "npm:1.61.1"
@@ -4516,17 +4516,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/inter@npm:^5.2.8":
-  version: 5.2.8
-  resolution: "@fontsource-variable/inter@npm:5.2.8"
-  checksum: 10/7f45ab415f0d3c43f31129dd9972dcbfb60ebe51801891b9a88a7ba395d4be664c507b0027138f42307b9ffe91bdd564fcae98bce5b244046274f4aceae07382
+"@fontsource-variable/inter@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/inter@npm:5.3.0"
+  checksum: 10/b7d30aa2605cc1b4db5d87ddc06de7b315c7b0e67c919052c8002d11670ee41fc0a0fcb01b7adbe8243bb889230ab61fbc0b0b84d34fd1fd4cf6f6f641a0ff73
   languageName: node
   linkType: hard
 
-"@fontsource/redacted-script@npm:^5.2.8":
-  version: 5.2.8
-  resolution: "@fontsource/redacted-script@npm:5.2.8"
-  checksum: 10/e61a6fc45a07165f96c18e7d92970f40f724bf3986ab43d57f2359136277fef513b13dbfe9ce96e1ae485cd4d1f2af58cadac1c48694614a0a50ea0157514076
+"@fontsource/redacted-script@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/redacted-script@npm:5.3.0"
+  checksum: 10/c179020334342b012dd3f1dc2b7d2029cfaa4ac09c571f3001443c313758850c92e757754811db3177713ebcb560eb242ab9b6fb4ee5797eae607590bf4e2dfb
   languageName: node
   linkType: hard
 
