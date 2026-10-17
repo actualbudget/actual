@@ -33,7 +33,7 @@
     "@actual-app/ci-actions": "workspace:*",
     "@docusaurus/module-type-aliases": "^3.10.2",
     "@docusaurus/types": "^3.10.2",
-    "@types/react": "^19.2.17"
+    "@types/react": "^19.3.0"
   },
   "browserslist": {
     "production": [

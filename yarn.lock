@@ -93,7 +93,7 @@ __metadata:
     "@svgr/cli": "npm:^8.1.0"
     "@svgr/core": "npm:^8.1.0"
     "@testing-library/react": "npm:16.3.3"
-    "@types/react": "npm:^19.2.17"
+    "@types/react": "npm:^19.3.0"
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.0.3"
     babel-plugin-react-compiler: "npm:^1.0.0"
@@ -257,8 +257,8 @@ __metadata:
     "@testing-library/jest-dom": "npm:^6.9.1"
     "@testing-library/react": "npm:16.3.3"
     "@testing-library/user-event": "npm:14.6.8"
-    "@types/react": "npm:^19.2.17"
-    "@types/react-dom": "npm:^19.2.3"
+    "@types/react": "npm:^19.3.0"
+    "@types/react-dom": "npm:^19.3.0"
     "@typescript/native-preview": "npm:beta"
     "@uiw/react-codemirror": "npm:^4.25.11"
     "@use-gesture/react": "npm:^10.3.1"
@@ -9034,12 +9034,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^19.2.3":
-  version: 19.2.3
-  resolution: "@types/react-dom@npm:19.2.3"
+"@types/react-dom@npm:^19.3.0":
+  version: 19.3.0
+  resolution: "@types/react-dom@npm:19.3.0"
   peerDependencies:
-    "@types/react": ^19.2.0
-  checksum: 10/616c4a8aee250ea05fb1e7b98e7e00475dd3a6c1c30d7be18b4b93caba832f4203106b3a496a6b147e5acc2da14575eca47bce234c633bca1f8430ef8ffb234a
+    "@types/react": ^19.3.0
+  checksum: 10/e24ee9948dc3a6c81e8aa4acf120a1194d3a3b68e97205b1e5e24e087b9f0c0c2e40b128fd258663ccb5889c852aeee558c0daa3255c3d82e0fc1c5d64c4b69a
   languageName: node
   linkType: hard
 
@@ -9075,12 +9075,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:^19.2.17":
-  version: 19.2.17
-  resolution: "@types/react@npm:19.2.17"
+"@types/react@npm:*, @types/react@npm:^19.3.0":
+  version: 19.3.0
+  resolution: "@types/react@npm:19.3.0"
   dependencies:
     csstype: "npm:^3.2.2"
-  checksum: 10/8debb092bd0bb9c99176a31824c7587c27c775a6526b60060e7b9e8dc2af53aee2ffadc7a1e3845953792437db5699d34a9054e198c9d4e54a74728ff47c6725
+  checksum: 10/2f4589222fd9c512e1ef78e65f334ade8777400add8ec0803fcc3a044761679b7984ba8410a890af24255383c3251a568bb692b60acfa22397ba0a64b2e032bf
   languageName: node
   linkType: hard
 
@@ -13712,7 +13712,7 @@ __metadata:
     "@easyops-cn/docusaurus-search-local": "npm:^0.55.2"
     "@mdx-js/react": "npm:^3.1.1"
     "@r74tech/docusaurus-plugin-panzoom": "npm:^2.4.2"
-    "@types/react": "npm:^19.2.17"
+    "@types/react": "npm:^19.3.0"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.2.7"
     react-dom: "npm:19.2.7"
