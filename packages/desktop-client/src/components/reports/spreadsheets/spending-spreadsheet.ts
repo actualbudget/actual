@@ -49,20 +49,18 @@ export function getSpendingBudgetFilters({
       (cond.field === 'category' || cond.field === 'category_group'),
   );
 
-  if (budgetConditions.length === 0) {
-    return [];
-  }
-
-  if (!budgetConditions.every(isSupportedCategoryCondition)) {
-    return [];
-  }
-
-  const matchingCategoryIds = filterCategoriesByConditions(
-    categories,
-    categoryGroups,
-    budgetConditions,
-    conditionsOp ?? 'and',
-  ).map(category => category.id);
+  const expenseCategories = categories.filter(category => !category.is_income);
+  const matchingCategories = budgetConditions.every(
+    isSupportedCategoryCondition,
+  )
+    ? filterCategoriesByConditions(
+        expenseCategories,
+        categoryGroups,
+        budgetConditions,
+        conditionsOp ?? 'and',
+      )
+    : expenseCategories;
+  const matchingCategoryIds = matchingCategories.map(category => category.id);
 
   return [{ category: { $oneof: matchingCategoryIds } }];
 }
@@ -194,21 +192,15 @@ export function createSpendingSpreadsheet({
     const budgetMonth = parseInt(compareMonth.replace('-', ''));
     const budgetTable =
       budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
-    const hasBudgetConditions = conditions.some(
-      cond =>
-        !cond.customName &&
-        (cond.field === 'category' || cond.field === 'category_group'),
+    const budgetFilters = await send('get-categories').then(
+      ({ list, grouped }) =>
+        getSpendingBudgetFilters({
+          categories: list,
+          categoryGroups: grouped,
+          conditions,
+          conditionsOp,
+        }),
     );
-    const budgetFilters = hasBudgetConditions
-      ? await send('get-categories').then(({ list, grouped }) =>
-          getSpendingBudgetFilters({
-            categories: list,
-            categoryGroups: grouped,
-            conditions,
-            conditionsOp,
-          }),
-        )
-      : [];
     const [budgets] = await Promise.all([
       aqlQuery(
         q(budgetTable)
