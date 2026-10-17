@@ -122,7 +122,7 @@
     "cross-env": "^10.1.0",
     "http-proxy-middleware": "^4.2.0",
     "nodemon": "^3.1.14",
-    "supertest": "^7.2.2",
+    "supertest": "^7.3.1",
     "typescript-strict-plugin": "^2.4.4",
     "vite": "^8.3.4",
     "vitest": "^5.0.4"
