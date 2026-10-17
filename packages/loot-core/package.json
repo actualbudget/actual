@@ -208,7 +208,7 @@
     "fflate": "^0.8.3",
     "handlebars": "^4.7.10",
     "hyperformula": "^3.5.0",
-    "lru-cache": "^11.5.2",
+    "lru-cache": "^11.5.3",
     "mitt": "^3.0.1",
     "uuid": "^14.0.3",
     "xml2js": "^0.6.2"
