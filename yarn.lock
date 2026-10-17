@@ -62,7 +62,7 @@ __metadata:
   resolution: "@actual-app/cli@workspace:packages/cli"
   dependencies:
     "@actual-app/api": "workspace:*"
-    "@types/node": "npm:^22.20.1"
+    "@types/node": "npm:^22.20.5"
     "@types/proper-lockfile": "npm:^4"
     "@typescript/native-preview": "npm:beta"
     cli-table3: "npm:^0.6.5"
@@ -122,7 +122,7 @@ __metadata:
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
     "@types/better-sqlite3": "npm:^9.6.0"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
-    "@types/node": "npm:^22.20.1"
+    "@types/node": "npm:^22.20.5"
     "@typescript/native-preview": "npm:beta"
     absurd-sql: "npm:0.0.54"
     assert: "npm:^2.1.0"
@@ -188,7 +188,7 @@ __metadata:
     "@types/cors": "npm:^2.8.19"
     "@types/express": "npm:^5.0.6"
     "@types/jws": "npm:^3.2.11"
-    "@types/node": "npm:^22.20.1"
+    "@types/node": "npm:^22.20.5"
     "@types/supertest": "npm:^7.2.1"
     "@typescript/native-preview": "npm:beta"
     akahu: "npm:^2.5.1"
@@ -8963,12 +8963,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.20.1":
-  version: 22.20.1
-  resolution: "@types/node@npm:22.20.1"
+"@types/node@npm:^22.20.5":
+  version: 22.20.5
+  resolution: "@types/node@npm:22.20.5"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/0949e49d0383569ebd1222a2f65a9adb9328a6a6dbed459a02cdb37c61147755386c004c4ffbe436de59f5859df1774b1dd6bf168f7aeee46884bb190e0c384f
+  checksum: 10/a223a73e00e948b751b00144523674ecc73e7a3f14f48a0f3a6fca40745ff548a8b0ff5baca090d45ae8b61481cc56c1158db4df312970baeb6fc1b81fc511a1
   languageName: node
   linkType: hard
 
@@ -9924,7 +9924,7 @@ __metadata:
   dependencies:
     "@monorepo-utils/workspaces-to-typescript-project-references": "npm:^2.11.0"
     "@octokit/rest": "npm:^22.0.1"
-    "@types/node": "npm:^22.20.1"
+    "@types/node": "npm:^22.20.5"
     "@types/prompts": "npm:^2.4.9"
     "@typescript/native-preview": "npm:beta"
     "@yarnpkg/types": "npm:^4.0.1"
@@ -21849,7 +21849,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "plugins-service@workspace:packages/plugins-service"
   dependencies:
-    "@types/node": "npm:^22.20.1"
+    "@types/node": "npm:^22.20.5"
     "@typescript/native-preview": "npm:beta"
     cross-env: "npm:^10.1.0"
     typescript-strict-plugin: "npm:^2.4.4"
