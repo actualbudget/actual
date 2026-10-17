@@ -850,6 +850,32 @@ describe('Transaction rules', () => {
     ]);
   });
 
+  test('transactions can be queried by a notes regex that is still being typed', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      notes: 'Invoice #123',
+      amount: 123,
+    });
+
+    // An incomplete pattern matches nothing instead of failing the query
+    for (const value of ['#\\', '#[', '#\\d+(']) {
+      const transactions = await getMatchingTransactions([
+        { field: 'notes', op: 'matches', value },
+      ]);
+      expect(transactions).toEqual([]);
+    }
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '#\\d+' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('transactions can be queried by hasTags if no "#" is included', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
@@ -1287,6 +1313,56 @@ describe('Learning categories', () => {
       2,
       'bar',
     );
+  });
+
+  test('does not create a rule if a "one of" rule already sets the category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(1);
+    expect(getRules()[0].conditions[0].op).toBe('oneOf');
+  });
+
+  test('creates a rule if a "one of" rule sets a different category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(2);
+    expectCategoryRule(getRules()[1], 'food', 'foo');
   });
 
   test('updates rules correctly even if multiple rules exist', async () => {

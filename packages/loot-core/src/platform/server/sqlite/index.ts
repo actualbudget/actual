@@ -5,6 +5,7 @@ import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
 import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
+import { regexp } from './regexp';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -113,10 +114,16 @@ export function runQuery<T>(
     if (fetchAll) {
       try {
         stmt.bind(params);
+        const columns = stmt.getColumnNames();
         const rows = [];
 
         while (stmt.step()) {
-          rows.push(stmt.getAsObject());
+          const values = stmt.get();
+          const row = {};
+          for (let i = 0; i < columns.length; i++) {
+            row[columns[i]] = values[i];
+          }
+          rows.push(row);
         }
         return rows;
       } catch (e) {
@@ -209,10 +216,6 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
       db.exec('COMMIT');
     }
   }
-}
-
-function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
