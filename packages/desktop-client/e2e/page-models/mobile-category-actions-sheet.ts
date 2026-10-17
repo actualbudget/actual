@@ -6,6 +6,7 @@ export class CategoryActionsSheet {
   readonly page: Page;
   readonly locator: Locator;
   readonly editBudgetedAmountRow: Locator;
+  readonly autoHoldRow: Locator;
   readonly copyLastMonthBudgetRow: Locator;
   readonly setTo3MonthAverageRow: Locator;
   readonly setTo6MonthAverageRow: Locator;
@@ -23,6 +24,7 @@ export class CategoryActionsSheet {
     this.editBudgetedAmountRow = locator.getByRole('button', {
       name: /^Edit budgeted amount/,
     });
+    this.autoHoldRow = locator.getByRole('button', { name: /^Auto hold/ });
     this.copyLastMonthBudgetRow = locator.getByRole('button', {
       name: /^Copy last month.s budget$/,
     });

@@ -1,15 +1,18 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 export class BudgetAmountSheet {
   readonly page: Page;
   readonly locator: Locator;
   readonly amountInput: Locator;
+  readonly editNotesRow: Locator;
 
   constructor(locator: Locator) {
     this.locator = locator;
     this.page = locator.page();
 
     this.amountInput = locator.getByTestId('amount-input');
+    this.editNotesRow = locator.getByRole('button', { name: 'Edit notes' });
   }
 
   async close() {
@@ -17,11 +20,8 @@ export class BudgetAmountSheet {
   }
 
   async setBudgetAmount(newAmount: string) {
-    if (!(await this.amountInput.isVisible())) {
-      await this.locator
-        .getByRole('button', { name: /^-?[\d,]+\.\d{2}$/ })
-        .click();
-    }
+    await expect(this.amountInput).toBeVisible();
+    await expect(this.amountInput).toBeFocused();
     await this.amountInput.fill(newAmount);
     await this.amountInput.blur();
     await this.close();

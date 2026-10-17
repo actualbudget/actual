@@ -109,8 +109,10 @@ export function ExpenseCategoryListItem({
         <ExpenseCategoryCells
           key={`${category.id}-${show3Columns}-${showBudgetedColumn}`}
           category={category}
+          month={month}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
+          wasRecentLongPress={wasRecentLongPress}
         />
       </View>
     </GridListItem>

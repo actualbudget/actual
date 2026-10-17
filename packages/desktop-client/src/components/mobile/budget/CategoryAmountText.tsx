@@ -14,7 +14,7 @@ type CategoryAmountTextProps = {
   maxFontSizePx?: number;
   style?: CSSProperties;
   className?: string;
-  'aria-label'?: string;
+  getAriaLabel?: (formattedValue: string) => string;
 };
 
 export function CategoryAmountText({
@@ -22,9 +22,10 @@ export function CategoryAmountText({
   maxFontSizePx = 12,
   style,
   className,
-  'aria-label': ariaLabel,
+  getAriaLabel,
 }: CategoryAmountTextProps) {
   const format = useFormat();
+  const formattedValue = format(value, 'financial');
 
   return (
     <View style={AMOUNT_WRAPPER_STYLE}>
@@ -32,14 +33,14 @@ export function CategoryAmountText({
         <AutoTextSize
           key={value}
           as={Text}
-          minFontSizePx={6}
+          minFontSizePx={10}
           maxFontSizePx={maxFontSizePx}
           mode="oneline"
           style={style}
           className={className}
-          aria-label={ariaLabel}
+          aria-label={getAriaLabel?.(formattedValue)}
         >
-          {format(value, 'financial')}
+          {formattedValue}
         </AutoTextSize>
       </PrivacyFilter>
     </View>

@@ -415,6 +415,33 @@ budgetTypes.forEach(budgetType => {
       await expect(budgetPage.categoryNames.nth(0)).toHaveText(secondName);
       await expect(budgetPage.categoryNames.nth(1)).toHaveText(firstName);
 
+      const rowCount = await budgetPage.categoryRows.count();
+      await budgetPage.tapGroupHandle(0);
+      await expect(budgetPage.categoryRows).toHaveCount(rowCount);
+
+      await budgetPage.exitReorderMode();
+    });
+
+    test('moves a category to another group in reorder mode', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const firstGroup = await budgetPage.getCategoryGroupNameForRow(0);
+      const secondGroup = await budgetPage.getCategoryGroupNameForRow(1);
+      const firstGroupNames = budgetPage.getGroupCategoryNames(firstGroup);
+      const secondGroupNames = budgetPage.getGroupCategoryNames(secondGroup);
+      const firstGroupCount = await firstGroupNames.count();
+      const movedName = await secondGroupNames.first().textContent();
+      expect(movedName).not.toBeNull();
+
+      await budgetPage.enterReorderMode();
+      await budgetPage.dragCategoryToRow(firstGroupCount, firstGroupCount - 1);
+
+      await expect(firstGroupNames.nth(firstGroupCount - 1)).toHaveText(
+        movedName!,
+      );
+      await expect(firstGroupNames).toHaveCount(firstGroupCount + 1);
+      await expect(secondGroupNames.first()).not.toHaveText(movedName!);
+
       await budgetPage.exitReorderMode();
     });
 
@@ -487,15 +514,16 @@ budgetTypes.forEach(budgetType => {
 
     // Budgeted Cell Tests
 
-    test('checks that clicking the budgeted cell opens the category page', async () => {
+    test('opens the budget amount sheet from the budgeted cell', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
       const categoryName = await budgetPage.getCategoryNameForRow(0);
-      const categoryPage =
-        await budgetPage.openCategoryFromBudgeted(categoryName);
+      const amountSheet =
+        await budgetPage.openBudgetAmountFromCell(categoryName);
 
-      await expect(categoryPage.heading).toContainText(categoryName);
-      await expect(categoryPage.budgetedButton).toBeVisible();
+      await expect(amountSheet.amountInput).toBeVisible();
+      await expect(amountSheet.amountInput).toBeFocused();
+      await expect(amountSheet.editNotesRow).toBeVisible();
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -629,32 +657,41 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
-    // Spent Cell Tests
-
-    test('checks that clicking spent cell opens the category transactions', async () => {
+    test('shows the received amount on the income category page', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
-      const categoryName = await budgetPage.getCategoryNameForRow(0);
-      const categoryPage = await budgetPage.openCategoryFromSpent(categoryName);
+      const received = await budgetPage.getReceivedForIncomeCategory('Income');
+      const categoryPage = await budgetPage.openCategory('Income');
 
-      await expect(categoryPage.heading).toContainText(categoryName);
-      await expect(categoryPage.transactionList).toBeVisible();
-      await expect(page).toMatchThemeScreenshots();
+      await expect(categoryPage.heading).toContainText('Income');
+      await expect(categoryPage.balance).toHaveText(received);
+      if (budgetType === 'Envelope') {
+        await expect(categoryPage.budgetedButton).toHaveCount(0);
+      } else {
+        await expect(categoryPage.budgetedButton).toBeVisible();
+      }
     });
 
-    // Balance Cell Tests
+    if (budgetType === 'Envelope') {
+      test('toggles auto hold from the income category actions', async () => {
+        const budgetPage = await navigation.goToBudgetPage();
 
-    test('checks that clicking the balance cell opens the category page', async () => {
-      const budgetPage = await navigation.goToBudgetPage();
+        const categoryPage = await budgetPage.openCategory('Income');
+        const actionsSheet = await categoryPage.openActions();
 
-      const categoryName = await budgetPage.getCategoryNameForRow(0);
-      const categoryPage =
-        await budgetPage.openCategoryFromBalance(categoryName);
-
-      await expect(categoryPage.heading).toContainText(categoryName);
-      await expect(categoryPage.balance).toBeVisible();
-      await expect(page).toMatchThemeScreenshots();
-    });
+        await expect(actionsSheet.editBudgetedAmountRow).toHaveCount(0);
+        await expect(actionsSheet.autoHoldRow).toHaveAttribute(
+          'aria-pressed',
+          'false',
+        );
+        await actionsSheet.autoHoldRow.click();
+        await expect(actionsSheet.autoHoldRow).toHaveAttribute(
+          'aria-pressed',
+          'true',
+        );
+        await actionsSheet.close();
+      });
+    }
 
     if (budgetType === 'Envelope') {
       test('checks that clicking the To Budget/Overbudgeted amount opens the budget summary menu modal', async () => {

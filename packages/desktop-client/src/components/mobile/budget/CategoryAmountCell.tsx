@@ -10,12 +10,12 @@ type CategoryAmountCellProps = {
     'envelope-budget' | 'tracking-budget',
     'budget' | 'sum-amount'
   >;
-  'aria-label': string;
+  getAriaLabel: (formattedValue: string) => string;
 };
 
 export function CategoryAmountCell({
   binding,
-  'aria-label': ariaLabel,
+  getAriaLabel,
 }: CategoryAmountCellProps) {
   return (
     <CellValue<'envelope-budget' | 'tracking-budget', 'budget' | 'sum-amount'>
@@ -25,7 +25,7 @@ export function CategoryAmountCell({
       {({ value }) => (
         <CategoryAmountText
           value={value}
-          aria-label={ariaLabel}
+          getAriaLabel={getAriaLabel}
           style={{ ...AMOUNT_TEXT_STYLE, ...makeAmountGrey(value) }}
         />
       )}

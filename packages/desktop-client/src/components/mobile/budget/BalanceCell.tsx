@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
 import type { CategoryEntity } from '@actual-app/core/types/models';
@@ -18,15 +16,14 @@ type BalanceCellProps = {
     'leftover' | 'sum-amount'
   >;
   category: CategoryEntity;
-  'aria-label': string;
+  getAriaLabel: (formattedValue: string) => string;
 };
 
 export function BalanceCell({
   binding,
   category,
-  'aria-label': ariaLabel,
+  getAriaLabel,
 }: BalanceCellProps) {
-  const { t } = useTranslation();
   const bindings = useBudgetBindings();
 
   return (
@@ -40,21 +37,19 @@ export function BalanceCell({
     >
       <View style={{ position: 'relative', maxWidth: '100%' }}>
         <BalanceWithCarryover
-          aria-label={t('Balance for {{categoryName}} category', {
-            categoryName: category.name,
-          })}
           type="financial"
           carryover={bindings.catCarryover(category.id)}
           balance={binding}
           goal={bindings.catGoal(category.id)}
           budgeted={bindings.catBudgeted(category.id)}
           longGoal={bindings.catLongGoal(category.id)}
+          isDisabled
           CarryoverIndicator={MobileCarryoverIndicator}
         >
           {({ value, className: defaultClassName }) => (
             <CategoryAmountText
               value={value}
-              aria-label={ariaLabel}
+              getAriaLabel={getAriaLabel}
               className={cx(
                 defaultClassName,
                 css({

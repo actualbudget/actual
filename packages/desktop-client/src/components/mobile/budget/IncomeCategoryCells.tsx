@@ -6,13 +6,19 @@ import { useBudgetBindings } from '#hooks/useBudgetBindings';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { BalanceCell } from './BalanceCell';
-import { CategoryAmountCell } from './CategoryAmountCell';
+import { CategoryBudgetedCell } from './CategoryBudgetedCell';
 
 type IncomeCategoryCellsProps = {
   category: CategoryEntity;
+  month: string;
+  wasRecentLongPress: () => boolean;
 };
 
-export function IncomeCategoryCells({ category }: IncomeCategoryCellsProps) {
+export function IncomeCategoryCells({
+  category,
+  month,
+  wasRecentLongPress,
+}: IncomeCategoryCellsProps) {
   const { t } = useTranslation();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const bindings = useBudgetBindings();
@@ -20,19 +26,21 @@ export function IncomeCategoryCells({ category }: IncomeCategoryCellsProps) {
   return (
     <>
       {budgetType === 'tracking' && (
-        <CategoryAmountCell
-          binding={bindings.catBudgeted(category.id)}
-          aria-label={t('Budgeted amount for {{categoryName}} category', {
-            categoryName: category.name,
-          })}
+        <CategoryBudgetedCell
+          category={category}
+          month={month}
+          wasRecentLongPress={wasRecentLongPress}
         />
       )}
       <BalanceCell
         binding={bindings.catSumAmount(category.id)}
         category={category}
-        aria-label={t('Received amount for {{categoryName}} category', {
-          categoryName: category.name,
-        })}
+        getAriaLabel={amount =>
+          t('Received amount for {{categoryName}} category, {{amount}}', {
+            categoryName: category.name,
+            amount,
+          })
+        }
       />
     </>
   );

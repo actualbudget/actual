@@ -102,7 +102,11 @@ export function IncomeCategoryListItem({
         }}
       >
         <CategoryRowName category={category} month={month} />
-        <IncomeCategoryCells category={category} />
+        <IncomeCategoryCells
+          category={category}
+          month={month}
+          wasRecentLongPress={wasRecentLongPress}
+        />
       </View>
     </GridListItem>
   );
