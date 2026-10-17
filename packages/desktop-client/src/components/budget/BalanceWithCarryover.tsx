@@ -1,9 +1,10 @@
 // @ts-strict-ignore
-import React, { useCallback } from 'react';
+import { Fragment, useCallback } from 'react';
 import type {
   ComponentPropsWithoutRef,
   ComponentType,
   CSSProperties,
+  ReactNode,
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -51,6 +52,20 @@ export function CarryoverIndicator({ style }: CarryoverIndicatorProps) {
   );
 }
 
+function InlineBalanceRow({ children }: { children: ReactNode }) {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {children}
+    </View>
+  );
+}
+
 function GoalTooltipRow({ children }) {
   return (
     <div
@@ -93,6 +108,13 @@ type BalanceWithCarryoverProps = Omit<
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
   shouldInlineGoalStatus?: boolean;
+  /**
+   * Renders the carryover indicator in a row alongside the balance instead of
+   * letting it position itself against the nearest positioned ancestor. Use
+   * this when the balance is rendered inside a column layout, where the
+   * indicator would otherwise end up below the balance.
+   */
+  shouldInlineCarryoverIndicator?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
   tooltipDisabled?: boolean;
 };
@@ -105,6 +127,7 @@ export function BalanceWithCarryover({
   longGoal,
   isDisabled,
   shouldInlineGoalStatus,
+  shouldInlineCarryoverIndicator,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   tooltipDisabled,
   children,
@@ -242,49 +265,53 @@ export function BalanceWithCarryover({
     [budgetedValue, format, getDifferenceToGoal, goalValue, longGoalValue, t],
   );
 
+  const Wrapper = shouldInlineCarryoverIndicator ? InlineBalanceRow : Fragment;
+
   return (
     <CellValue binding={balance} type="financial" {...props}>
       {({ type, name, value: balanceValue }) => (
         <>
-          <Tooltip
-            content={
-              <View style={{ padding: 10 }}>
-                {GoalStatusDisplay(balanceValue, type)}
-              </View>
-            }
-            style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
-            placement="bottom"
-            triggerProps={{
-              delay: 750,
-              isDisabled:
-                !isGoalTemplatesEnabled ||
-                goalValue == null ||
-                isNarrowWidth ||
-                tooltipDisabled,
-            }}
-          >
-            {children ? (
-              children({
-                type,
-                name,
-                value: balanceValue,
-                className: getDefaultClassName(balanceValue),
-              })
-            ) : (
-              <CellValueText
-                type={type}
-                name={name}
-                value={balanceValue}
-                className={getDefaultClassName(balanceValue)}
+          <Wrapper>
+            <Tooltip
+              content={
+                <View style={{ padding: 10 }}>
+                  {GoalStatusDisplay(balanceValue, type)}
+                </View>
+              }
+              style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
+              placement="bottom"
+              triggerProps={{
+                delay: 750,
+                isDisabled:
+                  !isGoalTemplatesEnabled ||
+                  goalValue == null ||
+                  isNarrowWidth ||
+                  tooltipDisabled,
+              }}
+            >
+              {children ? (
+                children({
+                  type,
+                  name,
+                  value: balanceValue,
+                  className: getDefaultClassName(balanceValue),
+                })
+              ) : (
+                <CellValueText
+                  type={type}
+                  name={name}
+                  value={balanceValue}
+                  className={getDefaultClassName(balanceValue)}
+                />
+              )}
+            </Tooltip>
+
+            {carryoverValue && (
+              <CarryoverIndicatorComponent
+                style={getBalanceAmountStyle(balanceValue)}
               />
             )}
-          </Tooltip>
-
-          {carryoverValue && (
-            <CarryoverIndicatorComponent
-              style={getBalanceAmountStyle(balanceValue)}
-            />
-          )}
+          </Wrapper>
           {shouldInlineGoalStatus &&
             isGoalTemplatesEnabled &&
             goalValue !== null && (

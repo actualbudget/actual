@@ -42,6 +42,7 @@ export function MobileSheetBalanceHeader({
       <BalanceWithCarryover
         isDisabled
         shouldInlineGoalStatus
+        shouldInlineCarryoverIndicator
         CarryoverIndicator={MobileSheetCarryoverIndicator}
         {...bindings}
       >
