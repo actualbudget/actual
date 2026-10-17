@@ -85,7 +85,7 @@ __metadata:
     "@chromatic-com/storybook": "npm:^5.5.1"
     "@emotion/css": "npm:^11.13.5"
     "@internationalized/date": "npm:^3.12.4"
-    "@rolldown/plugin-babel": "npm:~0.2.3"
+    "@rolldown/plugin-babel": "npm:~0.2.4"
     "@storybook/addon-a11y": "npm:^10.6.2"
     "@storybook/addon-docs": "npm:^10.6.2"
     "@storybook/react-vite": "npm:^10.6.2"
@@ -250,7 +250,7 @@ __metadata:
     "@playwright/test": "npm:1.61.1"
     "@react-aria/interactions": "npm:^3.28.1"
     "@reduxjs/toolkit": "npm:^2.12.0"
-    "@rolldown/plugin-babel": "npm:~0.2.3"
+    "@rolldown/plugin-babel": "npm:~0.2.4"
     "@rollup/plugin-inject": "npm:^5.0.5"
     "@tanstack/react-query": "npm:^5.101.2"
     "@testing-library/dom": "npm:10.4.1"
@@ -7360,11 +7360,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rolldown/plugin-babel@npm:~0.2.3":
-  version: 0.2.3
-  resolution: "@rolldown/plugin-babel@npm:0.2.3"
+"@rolldown/plugin-babel@npm:~0.2.4":
+  version: 0.2.4
+  resolution: "@rolldown/plugin-babel@npm:0.2.4"
   dependencies:
-    picomatch: "npm:^4.0.4"
+    picomatch: "npm:^4.0.7"
   peerDependencies:
     "@babel/core": ^7.29.0 || ^8.0.0-rc.1
     "@babel/plugin-transform-runtime": ^7.29.0 || ^8.0.0-rc.1
@@ -7378,7 +7378,7 @@ __metadata:
       optional: true
     vite:
       optional: true
-  checksum: 10/dd40e5605dc6e0482a54545ee7ac9cdc9a7d29db7e75ac9be1999eafec30618a574f6a1356ad6e4337d220eb38ac980dc4d8c5f552eaa985ea331a7c0e07375a
+  checksum: 10/9178a6ecbe9dd77e9f2c2704472597aa8d04e9466c3f678121ce0dd783a75eb57c150a58fb22a2910bdd838b6edc72b06a9e23e65471ce49c4d61737d9392e61
   languageName: node
   linkType: hard
 

@@ -69,7 +69,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.5.1",
-    "@rolldown/plugin-babel": "~0.2.3",
+    "@rolldown/plugin-babel": "~0.2.4",
     "@storybook/addon-a11y": "^10.6.2",
     "@storybook/addon-docs": "^10.6.2",
     "@storybook/react-vite": "^10.6.2",
