@@ -42,7 +42,7 @@
     "@types/node": "^22.20.5",
     "@types/proper-lockfile": "^4",
     "@typescript/native-preview": "beta",
-    "rollup-plugin-visualizer": "^7.0.1",
+    "rollup-plugin-visualizer": "^7.1.1",
     "vite": "^8.1.5",
     "vitest": "^5.0.4"
   },

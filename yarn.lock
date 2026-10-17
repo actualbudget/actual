@@ -35,7 +35,7 @@ __metadata:
     "@typescript/native-preview": "npm:beta"
     better-sqlite3: "npm:^13.0.3"
     compare-versions: "npm:^6.1.1"
-    rollup-plugin-visualizer: "npm:^7.0.1"
+    rollup-plugin-visualizer: "npm:^7.1.1"
     typescript-strict-plugin: "npm:^2.4.4"
     uuid: "npm:^14.0.3"
     vite: "npm:^8.1.5"
@@ -69,7 +69,7 @@ __metadata:
     commander: "npm:^15.0.0"
     cosmiconfig: "npm:^9.0.2"
     proper-lockfile: "npm:^4.1.2"
-    rollup-plugin-visualizer: "npm:^7.0.1"
+    rollup-plugin-visualizer: "npm:^7.1.1"
     vite: "npm:^8.1.5"
     vitest: "npm:^5.0.4"
   bin:
@@ -147,7 +147,7 @@ __metadata:
     mockdate: "npm:^3.0.5"
     npm-run-all: "npm:^4.1.5"
     path-browserify: "npm:^1.0.1"
-    rollup-plugin-visualizer: "npm:^7.0.1"
+    rollup-plugin-visualizer: "npm:^7.1.1"
     stream-browserify: "npm:^3.0.0"
     timers-browserify: "npm:^2.0.12"
     typescript-strict-plugin: "npm:^2.4.4"
@@ -169,7 +169,7 @@ __metadata:
     "@bufbuild/protoc-gen-es": "npm:^2.12.1"
     "@typescript/native-preview": "npm:beta"
     murmurhash: "npm:^2.0.1"
-    rollup-plugin-visualizer: "npm:^7.0.1"
+    rollup-plugin-visualizer: "npm:^7.1.1"
     uuid: "npm:^14.0.3"
     vite: "npm:^8.1.5"
     vitest: "npm:^5.0.4"
@@ -305,7 +305,7 @@ __metadata:
     rehype-external-links: "npm:^3.0.0"
     remark-gfm: "npm:^4.0.1"
     rolldown: "npm:^1.2.0"
-    rollup-plugin-visualizer: "npm:^7.0.1"
+    rollup-plugin-visualizer: "npm:^7.1.1"
     sass: "npm:^1.101.0"
     typescript-strict-plugin: "npm:^2.4.4"
     usehooks-ts: "npm:^3.1.1"
@@ -16017,6 +16017,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"get-east-asian-width@npm:^1.5.0":
+  version: 1.7.0
+  resolution: "get-east-asian-width@npm:1.7.0"
+  checksum: 10/8d8d96b54d1cfb6510f1b6dce51c4a6000b4d122757780d519d0147d968a6f5401421dbeff2e6bd3dc742e9b502fbcdbb98a50bf7f62730a6a8d6749a632279c
+  languageName: node
+  linkType: hard
+
 "get-intrinsic@npm:^1.2.4, get-intrinsic@npm:^1.2.5, get-intrinsic@npm:^1.2.6, get-intrinsic@npm:^1.2.7, get-intrinsic@npm:^1.3.0":
   version: 1.3.1
   resolution: "get-intrinsic@npm:1.3.1"
@@ -24927,14 +24934,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup-plugin-visualizer@npm:^7.0.1":
-  version: 7.0.1
-  resolution: "rollup-plugin-visualizer@npm:7.0.1"
+"rollup-plugin-visualizer@npm:^7.1.1":
+  version: 7.1.1
+  resolution: "rollup-plugin-visualizer@npm:7.1.1"
   dependencies:
     open: "npm:^11.0.0"
-    picomatch: "npm:^4.0.2"
-    source-map: "npm:^0.7.4"
-    yargs: "npm:^18.0.0"
+    picomatch: "npm:^4.0.5"
+    source-map: "npm:^0.8.0"
+    yargs: "npm:^18.1.0"
   peerDependencies:
     rolldown: 1.x || ^1.0.0-beta || ^1.0.0-rc
     rollup: 2.x || 3.x || 4.x
@@ -24945,7 +24952,7 @@ __metadata:
       optional: true
   bin:
     rollup-plugin-visualizer: dist/bin/cli.js
-  checksum: 10/7952139acccd6fce6f8676afcbf3440edd5cc53c329370d02df132a862754aa8c5d8be181ec17b26bc9c599d9ba8d6792fd9cc41718d58a001f8699c66ac977a
+  checksum: 10/82b9c43653dd8de61dd02522c74070aeddd40c7612b2e7df7d81247c19d4e55e8eb79dacd097a2706c56dc24317f463885d66e932e8556583acb4cdc48c77e93
   languageName: node
   linkType: hard
 
@@ -25940,10 +25947,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map@npm:^0.7.0, source-map@npm:^0.7.4":
+"source-map@npm:^0.7.0":
   version: 0.7.6
   resolution: "source-map@npm:0.7.6"
   checksum: 10/c8d2da7c57c14f3fd7568f764b39ad49bbf9dd7632b86df3542b31fed117d4af2fb74a4f886fc06baf7a510fee68e37998efc3080aacdac951c36211dc29a7a3
+  languageName: node
+  linkType: hard
+
+"source-map@npm:^0.8.0":
+  version: 0.8.0
+  resolution: "source-map@npm:0.8.0"
+  checksum: 10/ad71b0c03715d970c2d114f0d403cc02c1e60e9ce997715f0a69bde2604b1d1ac287760f93d9763313a2a2b2c297df901f3378569f750a240e936ac5ddfd6b31
   languageName: node
   linkType: hard
 
@@ -26226,6 +26240,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"string-width@npm:^8.2.1":
+  version: 8.3.0
+  resolution: "string-width@npm:8.3.0"
+  dependencies:
+    get-east-asian-width: "npm:^1.5.0"
+    strip-ansi: "npm:^7.1.2"
+  checksum: 10/4cd652495ffb29964d83c341741264b45ffa9843070d553846907bc1f1e10c41399ea3742cb7bca202f2804659967ca713f5caac46675e200fc74fef58c63043
+  languageName: node
+  linkType: hard
+
 "string.prototype.matchall@npm:^4.0.12":
   version: 4.0.12
   resolution: "string.prototype.matchall@npm:4.0.12"
@@ -26352,7 +26376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"strip-ansi@npm:^7.0.1, strip-ansi@npm:^7.1.0":
+"strip-ansi@npm:^7.0.1, strip-ansi@npm:^7.1.0, strip-ansi@npm:^7.1.2":
   version: 7.2.0
   resolution: "strip-ansi@npm:7.2.0"
   dependencies:
@@ -29145,6 +29169,20 @@ __metadata:
     y18n: "npm:^5.0.5"
     yargs-parser: "npm:^22.0.0"
   checksum: 10/5af36234871390386b31cac99f00e79fcbc2ead858a61b30a8ca381c5fde5df8af0b407c36b000d3f774bcbe4aec5833f2f1c915f6ddc49ce97b78176b651801
+  languageName: node
+  linkType: hard
+
+"yargs@npm:^18.1.0":
+  version: 18.2.0
+  resolution: "yargs@npm:18.2.0"
+  dependencies:
+    cliui: "npm:^9.0.1"
+    escalade: "npm:^3.1.1"
+    get-caller-file: "npm:^2.0.5"
+    string-width: "npm:^8.2.1"
+    y18n: "npm:^5.0.5"
+    yargs-parser: "npm:^22.0.0"
+  checksum: 10/a780cc1fa693028baa50c0c88bcc2c59c92817f0f8e2dfbd226aa1c27cf0dbfb1743511012b73a4f415119d9caa22a6de19350c781d5ef75f874359ae7601ac3
   languageName: node
   linkType: hard
 
