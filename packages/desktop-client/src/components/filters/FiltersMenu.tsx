@@ -34,7 +34,12 @@ import {
 } from 'date-fns';
 
 import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
-import { AmountInput } from '#components/util/AmountInput';
+import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
+import { BetweenDateInput } from '#components/util/BetweenDateInput';
+import {
+  normalizeAmountRange,
+  normalizeDateRange,
+} from '#components/util/betweenRange';
 import { GenericInput } from '#components/util/GenericInput';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -122,7 +127,12 @@ function ConfigureField<T extends RuleConditionEntity>({
   }, [subfield]);
 
   const type = FIELD_TYPES.get(field);
-  let ops = getValidOps(field).filter(op => op !== 'isbetween');
+  const isBetweenOp = (op: T['op']) => op === 'isbetween';
+  // Ranges aren't offered on the inflow/outflow subfields, matching the rules
+  // editor (see `ConditionsList` in `RuleEditor`)
+  let ops = getValidOps(field).filter(
+    op => !isBetweenOp(op) || !(fieldOptions?.inflow || fieldOptions?.outflow),
+  );
 
   // Month and year fields are quite hacky right now! Figure out how
   // to clean this up later
@@ -144,6 +154,13 @@ function ConfigureField<T extends RuleConditionEntity>({
     }
     return value;
   }, [value, field, subfield, dateFormat]);
+
+  // The reducer seeds `{ num1, num2 }` when the op is selected, but guard
+  // against a value that hasn't been converted yet (e.g. a hand-edited filter).
+  // Submitting goes through the same values, so the range that is saved can't
+  // drift from the one the inputs show.
+  const betweenAmountValue = normalizeAmountRange(value);
+  const betweenDateValue = normalizeDateRange(value);
 
   // For ops that filter based on IDs
   const isIdOp = (op: T['op']) =>
@@ -364,7 +381,13 @@ function ConfigureField<T extends RuleConditionEntity>({
               onChange={sub => {
                 setSubfield(sub);
 
-                if (sub === 'month' || sub === 'year') {
+                if (
+                  sub === 'month' ||
+                  sub === 'year' ||
+                  // `isbetween` isn't offered for inflow/outflow amounts
+                  (isBetweenOp(op) &&
+                    (sub === 'amount-inflow' || sub === 'amount-outflow'))
+                ) {
                   dispatch({ type: 'set-op', op: 'is' });
                 }
               }}
@@ -447,7 +470,12 @@ function ConfigureField<T extends RuleConditionEntity>({
           let submitValue = value;
           let storableField = field;
 
-          if (field === 'amount' && inputRef.current) {
+          if (isBetweenOp(op) && (type === 'date' || type === 'number')) {
+            // Keep what is submitted in step with what the range inputs show
+            submitValue = (
+              type === 'date' ? betweenDateValue : betweenAmountValue
+            ) as typeof value;
+          } else if (field === 'amount' && inputRef.current) {
             try {
               if (inputRef.current.getCurrentAmount) {
                 submitValue = inputRef.current.getCurrentAmount();
@@ -481,7 +509,16 @@ function ConfigureField<T extends RuleConditionEntity>({
           });
         }}
       >
-        {field === 'amount' && (
+        {field === 'amount' && isBetweenOp(op) && (
+          <View style={{ marginTop: 10 }}>
+            <BetweenAmountInput
+              defaultValue={betweenAmountValue}
+              zeroSign="+"
+              onChange={v => dispatch({ type: 'set-value', value: v })}
+            />
+          </View>
+        )}
+        {field === 'amount' && !isBetweenOp(op) && (
           <AmountInput
             ref={inputRef}
             value={typeof value === 'number' ? value : 0}
@@ -493,7 +530,17 @@ function ConfigureField<T extends RuleConditionEntity>({
             onUpdate={v => dispatch({ type: 'set-value', value: v })}
           />
         )}
+        {field === 'date' && isBetweenOp(op) && (
+          <View style={{ marginTop: 10 }}>
+            <BetweenDateInput
+              value={betweenDateValue}
+              dateFormat={dateFormat}
+              onChange={v => dispatch({ type: 'set-value', value: v })}
+            />
+          </View>
+        )}
         {field !== 'amount' &&
+          !isBetweenOp(op) &&
           type !== 'boolean' &&
           (field !== 'notes' || !isTagOp(op)) &&
           (field !== 'payee' || !isIdOp(op)) &&
