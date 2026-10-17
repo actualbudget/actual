@@ -23,6 +23,7 @@ import {
 import { useLocale } from '#hooks/useLocale';
 import { useSchedules } from '#hooks/useSchedules';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { getSkipScheduleText } from '#util/schedule';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -85,6 +86,7 @@ export function ScheduledTransactionMenuModal({
           </View>
           <ScheduledTransactionMenu
             transactionId={transactionId}
+            nextDate={schedule?.next_date}
             onPost={onPost}
             onSkip={onSkip}
             onComplete={onComplete}
@@ -103,6 +105,7 @@ type ScheduledTransactionMenuProps = Omit<
   'onMenuSelect' | 'items'
 > & {
   transactionId: string;
+  nextDate?: string | null;
   onSkip: (transactionId: string) => void;
   onPost: (transactionId: string, today?: boolean) => void;
   onComplete: (transactionId: string) => void;
@@ -110,6 +113,7 @@ type ScheduledTransactionMenuProps = Omit<
 
 function ScheduledTransactionMenu({
   transactionId,
+  nextDate,
   onSkip,
   onPost,
   onComplete,
@@ -147,7 +151,7 @@ function ScheduledTransactionMenu({
         { name: 'post', text: t('Post transaction') },
         { name: 'post-today', text: t('Post transaction today') },
         ...(canBeSkipped
-          ? [{ name: 'skip', text: t('Skip next scheduled date') }]
+          ? [{ name: 'skip', text: getSkipScheduleText(nextDate) }]
           : []),
         ...(canBeCompleted
           ? [{ name: 'complete', text: t('Mark as completed') }]

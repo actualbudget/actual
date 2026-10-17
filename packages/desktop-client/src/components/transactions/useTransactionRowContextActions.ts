@@ -16,6 +16,7 @@ import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { getSkipScheduleText } from '#util/schedule';
 
 type TransactionRowContextMenuProps = {
   rowRef: RefObject<HTMLElement | null>;
@@ -173,7 +174,7 @@ export function useTransactionRowContextActions({
     },
     {
       name: 'skip',
-      text: t('Skip next scheduled date'),
+      text: getSkipScheduleText(selectedSchedules.map(s => s?.next_date)),
       onClick: () => onScheduleAction('skip', selectedIds),
       hidden: !canBeSkipped,
     },
