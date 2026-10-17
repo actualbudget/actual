@@ -18,6 +18,7 @@
   ],
   "type": "module",
   "imports": {
+    "#app-openid": "./src/app-openid.ts",
     "#db": "./src/db.js",
     "#account-db": "./src/account-db.js",
     "#load-config": "./src/load-config.js",
@@ -46,6 +47,7 @@
   },
   "publishConfig": {
     "imports": {
+      "#app-openid": "./build/src/app-openid.js",
       "#db": "./build/src/db.js",
       "#account-db": "./build/src/account-db.js",
       "#load-config": "./build/src/load-config.js",

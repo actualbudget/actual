@@ -193,3 +193,9 @@ Use `oauth2` for providers like GitHub that don't fully support OpenID discovery
 :::tip
 Configuring the OpenID provider from options supports discovery; otherwise, use [file configuration](./oauth-auth.md#configuration-using-a-configuration-file)
 :::
+
+## Completing a Login
+
+Start an OpenID login from the Actual client you intend to use. Complete it in the same browser, or return to the Electron app that opened your browser. Callback links cannot be used to sign in on another device. If a login expires, start again from Actual.
+
+Update the server and all clients together. Older clients that expect a session token in the callback URL cannot complete a login with the updated server.

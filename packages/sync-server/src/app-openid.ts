@@ -2,6 +2,7 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 
 import { disableOpenID, enableOpenID, isAdmin } from './account-db';
+import { exchangeHandoff } from './accounts/handoff';
 import { isValidRedirectUrl, loginWithOpenIdFinalize } from './accounts/openid';
 import { checkPassword } from './accounts/password';
 import * as UserService from './services/user-service';
@@ -94,6 +95,16 @@ app.post('/config', openIdConfigRateLimiter, async (req, res) => {
       .status(500)
       .send({ status: 'error', reason: 'Invalid OpenID configuration' });
   }
+});
+
+app.post('/exchange', (req, res) => {
+  const result = exchangeHandoff(req.body.code, req.body.verifier);
+  res.setHeader('Cache-Control', 'no-store');
+  if (result.error) {
+    res.status(400).send({ status: 'error', reason: result.error });
+    return;
+  }
+  res.send({ status: 'ok', data: { token: result.token } });
 });
 
 app.get('/callback', async (req, res) => {
