@@ -399,3 +399,50 @@ describe('File import', () => {
     ]);
   });
 });
+
+describe('Account hint', () => {
+  const files = __dirname + '/../../../mocks/files/';
+
+  test('ofx bank statement uses bank id and account id', async () => {
+    const { accountHint } = await parseFile(files + 'data.ofx');
+    expect(accountHint).toEqual({
+      source: 'ofx',
+      id: '012345678:123456789123',
+    });
+  });
+
+  test('ofx credit card statement uses account id', async () => {
+    const { accountHint } = await parseFile(files + 'credit-card.ofx');
+    expect(accountHint).toEqual({
+      source: 'ofx',
+      id: ':7DC6A2FD-2124-457A-A14',
+    });
+  });
+
+  test('camt statement uses iban', async () => {
+    const { accountHint } = await parseFile(files + 'camt/camt.053.xml');
+    expect(accountHint).toEqual({
+      source: 'camt',
+      id: 'DE14740618130000033626',
+    });
+  });
+
+  test('qif with an account header uses the account name', async () => {
+    const { accountHint, transactions, errors } = await parseFile(
+      files + 'qif-account.qif',
+    );
+    expect(errors).toEqual([]);
+    expect(transactions).toHaveLength(1);
+    expect(accountHint).toEqual({ source: 'qif', id: 'CHECKINGMAIN' });
+  });
+
+  test('qif without an account header has no hint', async () => {
+    const { accountHint } = await parseFile(files + 'data.qif');
+    expect(accountHint).toBeNull();
+  });
+
+  test('csv has no hint', async () => {
+    const { accountHint } = await parseFile(files + 'utf-8-bom.csv');
+    expect(accountHint).toBeUndefined();
+  });
+});
