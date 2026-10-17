@@ -35,11 +35,15 @@ export function ExportBudget() {
 
     if (response.data) {
       setWarnings(response.warnings ?? []);
-      void window.Actual.saveFile(
-        response.data,
-        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
-        t('Export budget'),
-      );
+      try {
+        await window.Actual.saveFile(
+          response.data,
+          `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
+          t('Export budget'),
+        );
+      } catch (error) {
+        setError(error instanceof Error ? error.message : String(error));
+      }
     }
     setIsLoading(false);
   }

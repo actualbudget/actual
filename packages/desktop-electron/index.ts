@@ -823,7 +823,7 @@ ipcMain.handle(
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
     return new Promise<void>((resolve, reject) => {
-      if (fileLocation) {
+      if (!fileLocation.canceled) {
         const contents =
           typeof fileContents === 'string'
             ? fileContents
