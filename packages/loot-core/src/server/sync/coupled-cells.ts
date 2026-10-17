@@ -1,3 +1,4 @@
+import { derivePocketBudget } from '#server/budget/pockets';
 import * as db from '#server/db';
 import { isMissingSchemaError } from '#shared/errors';
 import { parseRate } from '#shared/exchange-rate';
@@ -10,6 +11,8 @@ import { parseRate } from '#shared/exchange-rate';
 type Coupled = {
   table: string;
   authority: string;
+  /** Also derive rows whose authority is absent. */
+  nullable?: boolean;
   derive: (
     value: unknown,
     row: Record<string, unknown>,
@@ -73,7 +76,7 @@ export function effectiveEncoding(
     : encodingOf(currency, precision);
 }
 
-function parseEncoding(
+export function parseEncoding(
   value: unknown,
 ): { currency: string | null; currency_precision: number | null } | null {
   if (value === '') return { currency: null, currency_precision: null };
@@ -203,7 +206,19 @@ const COUPLED: Coupled[] = [
   {
     table: 'transactions',
     authority: 'amount_pair',
-    derive: deriveTransactionAmounts,
+    derive: value => {
+      const derived = deriveTransactionAmounts(value);
+      return (
+        derived && { ...derived, pair_encoding: pairEncoding(value) ?? null }
+      );
+    },
+  },
+  // After the lanes whose encodings judge their cells.
+  {
+    table: 'pocket_budgets',
+    authority: 'budget_pair',
+    nullable: true,
+    derive: (value, row) => derivePocketBudget(value, row),
   },
 ];
 
@@ -292,11 +307,39 @@ export function withTransferCounterparts(
   return [...all];
 }
 
+/** A lane's cells are judged by its encoding, which can arrive after them. */
+function cellsOfLanes(lanes: string[]): string[] {
+  const ids: string[] = [];
+  const unique = [...new Set(lanes)];
+  for (let i = 0; i < unique.length; i += 500) {
+    const chunk = unique.slice(i, i + 500);
+    try {
+      for (const row of db.runQuery<{ id: string }>(
+        `SELECT id FROM pocket_budgets WHERE lane IN (${chunk.map(() => '?').join(', ')})`,
+        chunk,
+        true,
+      )) {
+        ids.push(row.id);
+      }
+    } catch (e) {
+      if (isMissingSchemaError(e)) return ids;
+      throw e;
+    }
+  }
+  return ids;
+}
+
 /** Recompute dependent columns for the rows touched by an apply batch. */
 export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
   for (const coupled of COUPLED) {
     const { table } = coupled;
-    const ids = idsPerTable[table] ?? [];
+    const ids =
+      table === 'pocket_budgets'
+        ? [
+            ...(idsPerTable.pocket_budgets ?? []),
+            ...cellsOfLanes(idsPerTable.category_pockets ?? []),
+          ]
+        : (idsPerTable[table] ?? []);
     if (ids.length === 0) continue;
     const unique = [...new Set(ids)];
     // Chunk to stay well inside SQLite's bound-parameter limit.
@@ -306,7 +349,7 @@ export function deriveCoupledCells(idsPerTable: Record<string, string[]>) {
       try {
         rows = db.runQuery<Record<string, unknown>>(
           `SELECT * FROM ${table} WHERE id IN (${chunk.map(() => '?').join(', ')})
-             AND ${coupled.authority} IS NOT NULL`,
+             ${coupled.nullable ? '' : `AND ${coupled.authority} IS NOT NULL`}`,
           chunk,
           true,
         );
@@ -349,7 +392,7 @@ export function deriveAllCoupledCells(): Set<string> {
         table,
         coupled,
         db.runQuery<Record<string, unknown>>(
-          `SELECT * FROM ${table} WHERE ${coupled.authority} IS NOT NULL`,
+          `SELECT * FROM ${table}${coupled.nullable ? '' : ` WHERE ${coupled.authority} IS NOT NULL`}`,
           [],
           true,
         ),
