@@ -184,15 +184,15 @@ describe('buildMonteCarloYearStory', () => {
     // 20% raise takes it to 0.299 - so spending rose from 14,946.78 to
     // 17,936.13, nowhere near the 60,000 planned
     const raiseStillBelowPlan = makeRow({
-      withdrawal: 17_936.13,
-      plannedSpending: 17_936.13,
-      spent: 17_936.13,
+      withdrawal: 17_936,
+      plannedSpending: 17_936,
+      spent: 17_936,
       ruleExplanation: {
         kind: 'factor',
         rule: 'guardrails',
         factor: 0.298936,
         planned: 60_000,
-        adjusted: 17_936.13,
+        adjusted: 17_936,
         action: 'raise',
         currentRate: 0.01504,
         referenceRate: 0.053553,
@@ -206,7 +206,7 @@ describe('buildMonteCarloYearStory', () => {
         },
       })[0],
     ).toBe(
-      "Guardrails raised this year's spending from 14946.80 to 17936.13 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is still below the 60000.00 planned.",
+      "Guardrails raised this year's spending from 14947.00 to 17936.00 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is still below the 60000.00 planned.",
     );
 
     const cutStillAbovePlan = makeRow({
@@ -300,18 +300,18 @@ describe('buildMonteCarloYearStory', () => {
   });
 
   it('says where income went when contributions took it', () => {
-    // The user's year 66: 12,547.60 income, all paid into the cash pot
+    // The user's year 66: 12,548 income, all paid into the cash pot
     const allContributed = makeRow({
-      income: 12_547.6,
-      incomeAmounts: [12_547.6],
-      contributions: 12_547.6,
-      withdrawal: 24_282.41,
-      taxPaid: 4_282.41,
+      income: 12_548,
+      incomeAmounts: [12_548],
+      contributions: 12_548,
+      withdrawal: 24_282,
+      taxPaid: 4_282,
       plannedSpending: 20_000,
       spent: 20_000,
     });
     expect(story(allContributed, { hasSurplusPot: true })).toEqual([
-      'The 12547.60 income all went into contributions, so the 20000.00 spent came from the pots.',
+      'The 12548.00 income all went into contributions, so the 20000.00 spent came from the pots.',
     ]);
 
     const partlyContributed = makeRow({
