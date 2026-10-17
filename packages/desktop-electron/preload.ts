@@ -37,6 +37,9 @@ contextBridge.exposeInMainWorld('Actual', {
 
   isSyncServerRunning: () => ipcRenderer.invoke('is-sync-server-running'),
 
+  completeOAuthServer: (nonce: string, success: boolean) =>
+    ipcRenderer.invoke('complete-oauth-server', nonce, success),
+  cancelOAuthServer: () => ipcRenderer.invoke('cancel-oauth-server'),
   startOAuthServer: () => ipcRenderer.invoke('start-oauth-server'),
 
   relaunch: () => {

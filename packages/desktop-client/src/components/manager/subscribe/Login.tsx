@@ -99,6 +99,7 @@ function OpenIdLogin({ setError }) {
   const navigate = useNavigate();
   const [openIdConfig, setOpenIdConfig] = useState<OpenIdConfig | null>(null);
   const [firstLoginPassword, setFirstLoginPassword] = useState<string>('');
+  const [waitingForOpenId, setWaitingForOpenId] = useState(false);
 
   async function onSetOpenId(config: OpenIdConfig) {
     setError(null);
@@ -133,9 +134,13 @@ function OpenIdLogin({ setError }) {
     });
 
     if (error) {
+      if (isElectron()) {
+        await window.Actual.cancelOAuthServer();
+      }
       setError(error);
     } else {
       if (isElectron()) {
+        setWaitingForOpenId(true);
         window.Actual?.openURLInBrowser(redirectUrl);
       } else {
         window.location.href = redirectUrl;
@@ -165,6 +170,16 @@ function OpenIdLogin({ setError }) {
                 }}
                 style={{ flex: 1 }}
               />
+            )}
+            {waitingForOpenId && (
+              <Button
+                onPress={async () => {
+                  await window.Actual.cancelOAuthServer();
+                  setWaitingForOpenId(false);
+                }}
+              >
+                <Trans>Cancel</Trans>
+              </Button>
             )}
             <Button
               variant="primary"

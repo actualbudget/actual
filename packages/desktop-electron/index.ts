@@ -1,6 +1,4 @@
 import fs from 'fs';
-import { createServer } from 'http';
-import type { Server } from 'http';
 import {
   cp,
   mkdir,
@@ -35,6 +33,7 @@ import type {
 
 import { openExternalUrl, revealLocalFile } from './external-links';
 import { getMenu } from './menu';
+import { createOAuthListener } from './oauth-server';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
 import { isInternalUrl } from './trusted-url';
@@ -86,7 +85,8 @@ let syncServerProcess: UtilityProcess | null;
 // told about it instead of waiting forever for a reply.
 let lastAppInitFailure: AppInitFailurePayload | null = null;
 
-let oAuthServer: ReturnType<typeof createServer> | null;
+let oAuthServer: Awaited<ReturnType<typeof createOAuthListener>> | null;
+let oauthStart: Promise<string> | undefined;
 
 let queuedClientWinLogs: string[] = []; // logs that are queued up until the client window is ready
 
@@ -106,57 +106,24 @@ const logMessage = (loglevel: 'info' | 'error', message: string) => {
   }
 };
 
-const createOAuthServer = async () => {
-  const port = 3010;
-
-  if (oAuthServer) {
-    logMessage('info', `OAuth server is already running on port: ${port}`);
-
-    return { url: `http://localhost:${port}`, server: oAuthServer };
-  }
-
-  return new Promise<{ url: string; server: Server }>(resolve => {
-    const server = createServer(async (req, res) => {
-      const query = new URL(req.url || '', `http://localhost:${port}`)
-        .searchParams;
-
-      const code = query.get('code');
-      const state = query.get('state');
-      const callback = new URLSearchParams({
-        code: code || '',
-        state: state || '',
+function createOAuthServer() {
+  oauthStart = (oauthStart ?? Promise.resolve(''))
+    .catch(() => '')
+    .then(async () => {
+      await oAuthServer?.close();
+      oAuthServer = await createOAuthListener({
+        onCallback: async params => {
+          if (!clientWin) {
+            throw new Error('No application window');
+          }
+          const origin = isDev ? 'http://localhost:3001' : 'app://actual';
+          await clientWin.loadURL(`${origin}/openid-cb?${params.toString()}`);
+        },
       });
-      if (code && state && clientWin) {
-        if (isDev) {
-          void clientWin.loadURL(`http://localhost:3001/openid-cb?${callback}`);
-        } else {
-          void clientWin.loadURL(`app://actual/openid-cb?${callback}`);
-        }
-
-        // Respond to the browser
-        res.writeHead(200, { 'Content-Type': 'text/plain' });
-        res.end('OpenID login successful! You can close this tab.');
-
-        // Clean up the server after receiving the code. Wait for the listener
-        // to fully release port 3010 before clearing the reference, otherwise a
-        // subsequent start-oauth-server request could try to bind the port
-        // while this listener is still shutting down.
-        await new Promise<void>(closeResolve => {
-          server.close(() => closeResolve());
-        });
-        oAuthServer = null;
-      } else {
-        res.writeHead(400, { 'Content-Type': 'text/plain' });
-        res.end('No login code received.');
-      }
+      return oAuthServer.url;
     });
-
-    server.listen(port, '127.0.0.1', () => {
-      logMessage('info', `OAuth server started on port: ${port}`);
-      resolve({ url: `http://localhost:${port}`, server });
-    });
-  });
-};
+  return oauthStart;
+}
 
 if (isDev) {
   process.traceProcessWarnings = true;
@@ -704,6 +671,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  void oAuthServer?.close();
   if (serverProcess) {
     const processToKill = serverProcess;
     serverProcess = null;
@@ -739,10 +707,26 @@ ipcMain.handle('is-sync-server-running', async () =>
   syncServerProcess ? true : false,
 );
 
+ipcMain.handle(
+  'complete-oauth-server',
+  async (_event, nonce: string, success: boolean) => {
+    await oAuthServer?.complete(nonce, success);
+  },
+);
+
+ipcMain.handle('cancel-oauth-server', async () => {
+  oauthStart = (oauthStart ?? Promise.resolve(''))
+    .catch(() => '')
+    .then(async () => {
+      await oAuthServer?.close();
+      oAuthServer = null;
+      return '';
+    });
+  await oauthStart;
+});
+
 ipcMain.handle('start-oauth-server', async () => {
-  const { url, server: newServer } = await createOAuthServer();
-  oAuthServer = newServer;
-  return url;
+  return createOAuthServer();
 });
 
 ipcMain.handle('restart-server', () => {

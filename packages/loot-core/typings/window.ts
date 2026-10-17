@@ -52,6 +52,8 @@ type Actual = {
   startSyncServer: () => Promise<void>;
   stopSyncServer: () => Promise<void>;
   isSyncServerRunning: () => Promise<boolean>;
+  completeOAuthServer: (nonce: string, success: boolean) => Promise<void>;
+  cancelOAuthServer: () => Promise<void>;
   startOAuthServer: () => Promise<string>;
 };
 
