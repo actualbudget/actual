@@ -76,7 +76,7 @@ describe('sheet language', () => {
     );
   });
 
-  it('preserves backslashes before dollar signs in string literals', () => {
+  it('keeps a backslash in front of a dollar sign in string literals', () => {
     const result = generateSQLWithState(
       q('payees')
         .filter({ name: escapeAqlLiteral('\\$Rent') })
@@ -88,8 +88,16 @@ describe('sheet language', () => {
     expect(sqlLines(result.sql)).toEqual(
       sqlLines(`
         SELECT payees.name AS name, payees.id AS id FROM payees
-        WHERE (payees.name = '\\$Rent')`),
+        WHERE (payees.name = '\\\\$Rent')`),
     );
+  });
+
+  it('escapes backslashes before dollar signs', () => {
+    // The backslash has to go first: escaping `$` while raw backslashes are still
+    // in the value would let a backslash-dollar pair close the escape early.
+    expect(escapeAqlLiteral('$Rent')).toEqual('\\$Rent');
+    expect(escapeAqlLiteral('\\$Rent')).toEqual('\\\\\\$Rent');
+    expect(escapeAqlLiteral('back\\slash')).toEqual('back\\\\slash');
   });
 
   it('`select` should select fields', () => {

@@ -176,5 +176,7 @@ export function q(table: QueryState['table']) {
 }
 
 export function escapeAqlLiteral(value: string) {
-  return value.replace(/\$/g, '\\$');
+  // Backslashes first: escaping the dollar signs of a value that still holds raw
+  // backslashes would let `\$` end the escape early and shift every later quote.
+  return value.replace(/\\/g, '\\\\').replace(/\$/g, '\\$');
 }
