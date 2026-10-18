@@ -89,6 +89,30 @@ You can place all of these in a batch script for a 1 click or single command upd
 $ docker stop my_actual_budget && docker container rm my_actual_budget && docker run --pull=always --restart=unless-stopped -d -p 5006:5006 -v YOUR/PATH/TO/DATA:/data --name my_actual_budget actualbudget/actual-server:latest
 ```
 
+## File Ownership
+
+The server runs inside the container as the `actual` user (uid and gid `1001`), not as root. When the container starts, it changes the owner of any files in your data folder that belong to another user. Data written by older images, which ran as root, keeps working after an update, and you can still go back to an older image if you need to.
+
+On Linux, this means the data folder on your host will show as owned by uid `1001`. To have it owned by your own user instead, set the `PUID` and `PGID` environment variables to that user's ids (run `id -u` and `id -g` to find them):
+
+```yaml
+services:
+  actual_server:
+    environment:
+      - PUID=1000
+      - PGID=1000
+```
+
+Alternatively, start the container as that user with `--user 1000:1000` (or `user: '1000:1000'` in Docker Compose). In that case the container doesn't change any owners, so the user needs write access to the data folder already.
+
+On Kubernetes, set `runAsUser: 1001`, `runAsGroup: 1001` and `fsGroup: 1001` in the pod's `securityContext`.
+
+The server keeps running as root, and logs a warning explaining why, if:
+
+- the user can't write to the data folder, for example on a network share that doesn't allow changing file owners,
+- the user can't read a file the server needs from outside the data folder, such as a TLS certificate or a secret passed with a `_FILE` variable, or
+- the container was started without the capabilities needed to switch users, for example with `--cap-drop ALL`.
+
 ## Test connection within local network
 
 On another PC within the local network connect to http://_serverIP_:_chosenPort_
