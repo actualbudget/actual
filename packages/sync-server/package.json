@@ -103,6 +103,7 @@
     "express-winston": "^4.2.0",
     "ipaddr.js": "^2.5.0",
     "jws": "^4.0.1",
+    "lib-fints": "^1.5.2",
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.92.0",
