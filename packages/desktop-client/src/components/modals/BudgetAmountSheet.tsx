@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { styles } from '@actual-app/components/styles';
@@ -50,6 +50,7 @@ export function BudgetAmountSheet({
   const { showUndoNotification } = useUndo();
   const isMobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
+  const budgetedLabelId = useId();
   const notesId = `${categoryId}-${month}`;
   const notes = useNotes(notesId);
 
@@ -70,7 +71,10 @@ export function BudgetAmountSheet({
           name: 'notes',
           options: {
             id: notesId,
-            name: `${category.name} - ${monthUtils.format(month, "MMMM ''yy", locale)}`,
+            name: t('{{categoryName}} - {{month}}', {
+              categoryName: category.name,
+              month: monthUtils.format(month, "MMMM ''yy", locale),
+            }),
             onSave: (id, note) => void send('notes-save', { id, note }),
           },
         },
@@ -113,6 +117,7 @@ export function BudgetAmountSheet({
             }}
           >
             <Text
+              id={budgetedLabelId}
               style={{
                 ...styles.smallText,
                 color: theme.pageTextLight,
@@ -122,6 +127,7 @@ export function BudgetAmountSheet({
               <Trans>Budgeted</Trans>
             </Text>
             <AmountInput
+              aria-labelledby={budgetedLabelId}
               value={integerToAmount(
                 budgeted || 0,
                 format.currency.decimalPlaces,

@@ -197,8 +197,9 @@ export function BudgetMonthPickerSheet({
                   key={candidate}
                   variant="bare"
                   isDisabled={!isSelectable(candidate)}
-                  aria-pressed={isSelected}
-                  aria-current={isCurrent ? 'date' : undefined}
+                  aria-current={
+                    isCurrent ? 'date' : isSelected ? 'true' : undefined
+                  }
                   onPress={() => {
                     close();
                     onSelectMonth(candidate);

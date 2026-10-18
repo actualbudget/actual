@@ -35,11 +35,16 @@ export function IncomeCategoryCells({
       <BalanceCell
         binding={bindings.catSumAmount(category.id)}
         category={category}
-        getAriaLabel={amount =>
-          t('Received amount for {{categoryName}} category, {{amount}}', {
-            categoryName: category.name,
-            amount,
-          })
+        getAriaLabel={(amount, isCarryover) =>
+          isCarryover
+            ? t(
+                'Received amount for {{categoryName}} category, {{amount}}, rolls over to next month',
+                { categoryName: category.name, amount },
+              )
+            : t('Received amount for {{categoryName}} category, {{amount}}', {
+                categoryName: category.name,
+                amount,
+              })
         }
       />
     </>

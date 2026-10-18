@@ -5,6 +5,7 @@ import { css, cx } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { useBudgetBindings } from '#hooks/useBudgetBindings';
+import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
 import { CategoryAmountText } from './CategoryAmountText';
@@ -16,7 +17,7 @@ type BalanceCellProps = {
     'leftover' | 'sum-amount'
   >;
   category: CategoryEntity;
-  getAriaLabel: (formattedValue: string) => string;
+  getAriaLabel: (formattedValue: string, isCarryover: boolean) => string;
 };
 
 export function BalanceCell({
@@ -25,6 +26,11 @@ export function BalanceCell({
   getAriaLabel,
 }: BalanceCellProps) {
   const bindings = useBudgetBindings();
+  const carryover = useSheetValue<
+    'envelope-budget' | 'tracking-budget',
+    'carryover'
+  >(bindings.catCarryover(category.id));
+  const isCarryover = Boolean(carryover);
 
   return (
     <View
@@ -49,7 +55,7 @@ export function BalanceCell({
           {({ value, className: defaultClassName }) => (
             <CategoryAmountText
               value={value}
-              getAriaLabel={getAriaLabel}
+              getAriaLabel={amount => getAriaLabel(amount, isCarryover)}
               className={cx(
                 defaultClassName,
                 css({

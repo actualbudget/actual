@@ -16,6 +16,7 @@ export function MobileCarryoverIndicator({
 }: MobileCarryoverIndicatorProps) {
   return (
     <View
+      aria-hidden="true"
       style={{
         position: 'absolute',
         right: -(PILL_SIZE + 2),

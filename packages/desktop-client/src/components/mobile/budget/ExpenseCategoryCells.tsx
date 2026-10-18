@@ -49,11 +49,16 @@ export function ExpenseCategoryCells({
       <BalanceCell
         binding={bindings.catBalance(category.id)}
         category={category}
-        getAriaLabel={amount =>
-          t('Balance for {{categoryName}} category, {{amount}}', {
-            categoryName: category.name,
-            amount,
-          })
+        getAriaLabel={(amount, isCarryover) =>
+          isCarryover
+            ? t(
+                'Balance for {{categoryName}} category, {{amount}}, rolls over to next month',
+                { categoryName: category.name, amount },
+              )
+            : t('Balance for {{categoryName}} category, {{amount}}', {
+                categoryName: category.name,
+                amount,
+              })
         }
       />
     </>
