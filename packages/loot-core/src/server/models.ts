@@ -1,6 +1,9 @@
+import { isSupportedCurrencyCode } from '#shared/fx/currency';
+import { MAX_EXCHANGE_RATE, MIN_EXCHANGE_RATE } from '#shared/fx/rates';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
+  ExchangeRateEntity,
   PayeeEntity,
 } from '#types/models';
 
@@ -71,7 +74,89 @@ export const accountModel = {
       update,
     );
 
+    if (
+      account.currency != null &&
+      !isSupportedCurrencyCode(account.currency)
+    ) {
+      throw new ValidationError(
+        `account has an unsupported currency: ${account.currency}`,
+      );
+    }
+
     return account as DbAccount;
+  },
+
+  // Checks a currency an account is given on its own, e.g. when it changes.
+  validateCurrency(currency: DbAccount['currency'] | undefined) {
+    if (currency == null) {
+      return;
+    }
+    if (!isSupportedCurrencyCode(currency)) {
+      throw new ValidationError(
+        `account has an unsupported currency: ${currency}`,
+      );
+    }
+  },
+};
+
+function isValidDateString(date: unknown): date is string {
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return false;
+  }
+  const parsed = new Date(`${date}T00:00:00Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === date
+  );
+}
+
+export const exchangeRateModel = {
+  validate<T extends Partial<ExchangeRateEntity>>(exchangeRate: T): T {
+    requiredFields<
+      Partial<ExchangeRateEntity>,
+      'from_currency' | 'to_currency' | 'rate' | 'date'
+    >('exchangeRate', exchangeRate, [
+      'from_currency',
+      'to_currency',
+      'rate',
+      'date',
+    ]);
+
+    const { from_currency, to_currency, rate, date } = exchangeRate;
+    for (const code of [from_currency, to_currency]) {
+      if (code !== undefined && !isSupportedCurrencyCode(code)) {
+        throw new ValidationError(
+          `exchangeRate has an unsupported currency: ${code}`,
+        );
+      }
+    }
+    if (
+      from_currency !== undefined &&
+      to_currency !== undefined &&
+      from_currency === to_currency
+    ) {
+      throw new ValidationError(
+        'exchangeRate must convert between two different currencies',
+      );
+    }
+    if (
+      rate !== undefined &&
+      (typeof rate !== 'number' ||
+        !Number.isFinite(rate) ||
+        rate < MIN_EXCHANGE_RATE ||
+        rate > MAX_EXCHANGE_RATE)
+    ) {
+      throw new ValidationError(
+        `exchangeRate must have a positive rate between 0.000000001 and 1000000000: ${String(rate)}`,
+      );
+    }
+    if (date !== undefined && !isValidDateString(date)) {
+      throw new ValidationError(
+        `exchangeRate has an invalid date: ${String(date)}`,
+      );
+    }
+
+    return exchangeRate;
   },
 };
 
