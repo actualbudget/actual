@@ -262,14 +262,27 @@ function rejectCredentials(
 }
 
 export function stripMarkup(challenge: string | undefined): string | undefined {
+  if (challenge == null) {
+    return undefined;
+  }
+
   // Challenges may contain the HHD formatting subset (<br>, <b>, <ul>, ...).
-  // The result is plain text: line breaks are kept, the tags removed, and
-  // any angle bracket left over is dropped as well, so that no tag survives
-  // however it is nested (e.g. "<scr<b>ipt>").
-  return challenge
-    ?.replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/?li>/gi, '\n')
-    .replace(/<[^>]*>/g, '')
+  // The result is plain text with the line breaks kept. Removing a tag can
+  // join what is left into a new tag (e.g. "<scr<b>ipt>"), so the tags are
+  // removed repeatedly until nothing changes.
+  let text = challenge;
+  let previous;
+  do {
+    previous = text;
+    text = text
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/?li>/gi, '\n')
+      .replace(/<[^>]*>/g, '');
+  } while (text !== previous);
+
+  // A tag that is never closed ("<img ...") has no ">" to match; drop any
+  // angle bracket left over.
+  return text
     .replace(/[<>]/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
