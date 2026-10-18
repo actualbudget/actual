@@ -164,13 +164,19 @@ These are types.
 
 <Method name="getBudgetMonth" args={[{ name: 'month', type: 'month' }]} returns="Promise<Budget>" />
 
+A category budgeted in more than one currency reports its totals in the budget's default currency, and a `currencies` list with the `currency` and the same values for each of its currencies, the default one first, each amount in its own currency.
+
 #### `setBudgetAmount`
 
-<Method name="setBudgetAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'value', type: 'amount' }]} returns="Promise<null>" />
+<Method name="setBudgetAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'value', type: 'amount' }, { name: 'currency', type: 'string?' }]} returns="Promise<null>" />
+
+With a `currency` the category budgets on its own line, the amount is in that currency. It throws when the category has no line for that currency, or when the line starts after `month`.
 
 #### `setBudgetCarryover`
 
-<Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }]} returns="Promise<null>" />
+<Method name="setBudgetCarryover" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }, { name: 'flag', type: 'bool' }, { name: 'currency', type: 'string?' }]} returns="Promise<null>" />
+
+With a `currency` the category budgets on its own line, the rollover of that line is set. It throws in the same cases as `setBudgetAmount`.
 
 #### `holdBudgetForNextMonth`
 
