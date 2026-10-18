@@ -8,8 +8,12 @@ services:
   actual-development:
     build: .
     image: actual-development
+    # Run as the host user so files written to the bind mount aren't owned by
+    # root. Export UID and GID first if yours aren't 1000.
+    user: '${UID:-1000}:${GID:-1000}'
     environment:
       - HTTPS
+      - HOME=/tmp
     ports:
       - '3001:3001'
     volumes:
