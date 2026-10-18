@@ -59,20 +59,33 @@ function TransactionListWithPreviews() {
     currentQuery,
   );
 
-  const { isSearching, search: onSearch } = useTransactionsSearch({
+  const { isSearching, search } = useTransactionsSearch({
     updateQuery: updateFn =>
       setTransactionsQuery(query => (query ? updateFn(query) : query)),
     resetQuery: () => setTransactionsQuery(currentQuery),
     dateFormat,
   });
 
+  const [searchText, setSearchText] = useState('');
+  const onSearch = useCallback(
+    (text: string) => {
+      setSearchText(text);
+      search(text);
+    },
+    [search],
+  );
+
   const [prevHideReconciled, setPrevHideReconciled] = useState(hideReconciled);
   if (hideReconciled !== prevHideReconciled) {
     setPrevHideReconciled(hideReconciled);
-    if (!isFiltered && !isSearching) {
+    if (!isFiltered) {
       const query = makeRootTransactionsQuery();
       setCurrentQuery(query);
-      setTransactionsQuery(query);
+      if (searchText !== '') {
+        search(searchText);
+      } else {
+        setTransactionsQuery(query);
+      }
     }
   }
 
