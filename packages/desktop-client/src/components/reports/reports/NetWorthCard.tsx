@@ -27,6 +27,7 @@ import { useAccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 type NetWorthCardProps = {
@@ -74,6 +75,7 @@ export function NetWorthCard({
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
   const convertBalance = useAccountBalanceConverter();
+  const { defaultCurrencyCode } = useMultiCurrency();
 
   const params = useMemo(
     () =>
@@ -88,10 +90,11 @@ export function NetWorthCard({
         firstDayOfWeekIdx,
         format,
         dateFormat,
-        { convertBalance },
+        { convertBalance, defaultCurrencyCode },
       ),
     [
       convertBalance,
+      defaultCurrencyCode,
       start,
       end,
       accounts,

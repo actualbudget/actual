@@ -617,9 +617,11 @@ async function fetchTransferData(
         ],
       })
       .filter({ transfer_id: { $ne: null }, 'account.offbudget': false })
+      // Each side of a transfer between currencies has its own amount;
+      // both count in the default currency
       .select([
         { id: 'id' },
-        { amount: 'amount' },
+        { amount: CONVERTED_AMOUNT },
         { accountId: { $id: '$account.id' } },
         { accountName: { $id: '$account.name' } },
         { transfer_id: 'transfer_id' },
