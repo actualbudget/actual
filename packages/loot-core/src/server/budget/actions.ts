@@ -10,6 +10,7 @@ import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
+import { getAmountSql } from './base';
 import {
   getWeeklyAverageWindow,
   trimWeeklyAverageWindow,
@@ -454,10 +455,10 @@ export async function getCategoryWeeklyAverage({
     return 0;
   }
 
-  // Same filters as the `sum-amount` cells so weekly and monthly averages
-  // agree on which transactions count.
+  // Same filters and conversion as the `sum-amount` cells so weekly and
+  // monthly averages agree on which transactions count, and for how much.
   const total = await db.first<{ amount: number | null }>(
-    `SELECT SUM(t.amount) AS amount
+    `SELECT SUM(${getAmountSql()}) AS amount
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
       WHERE t.category = ?
