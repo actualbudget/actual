@@ -85,6 +85,24 @@ export function FinTSAuthModal({
     onComplete(false);
   }
 
+  // The modal can also disappear without being closed, e.g. when navigating
+  // to another page closes all modals. Report the cancellation then too, or
+  // a sync waiting for this login would never finish. The check is deferred
+  // by a tick because strict mode unmounts and remounts once on purpose.
+  const isMountedRef = useRef(false);
+  const cancelIfStillOpen = useEffectEvent(() => onClose());
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      setTimeout(() => {
+        if (!isMountedRef.current) {
+          cancelIfStillOpen();
+        }
+      }, 0);
+    };
+  }, []);
+
   // Only the first step starts automatically. The ref keeps a double-invoked
   // effect (strict mode) from asking the bank twice.
   const hasStartedRef = useRef(false);
