@@ -12,7 +12,11 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
-import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
+import {
+  exportQueryToCSV,
+  exportToCSV,
+  getDefaultCurrencyCode,
+} from './export/export-to-csv';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
@@ -117,7 +121,13 @@ async function exportTransactions({
   categoryGroups: CategoryGroupEntity[];
   payees: PayeeEntity[];
 }) {
-  return exportToCSV(transactions, accounts, categoryGroups, payees);
+  return exportToCSV(
+    transactions,
+    accounts,
+    categoryGroups,
+    payees,
+    await getDefaultCurrencyCode(),
+  );
 }
 
 async function exportTransactionsQuery({
