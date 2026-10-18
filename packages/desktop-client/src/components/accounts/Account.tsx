@@ -1956,6 +1956,7 @@ class AccountInternal extends PureComponent<
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 filteredAmount={filteredAmount}
+                filteredQuery={this.paged?.query ?? null}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
                 reconcileAmount={reconcileAmount}
