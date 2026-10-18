@@ -30,3 +30,17 @@ export function formatRate(rate: number, significantDigits = 10) {
     .format(rate)
     .replace('.', getNumberFormat().decimalSeparator);
 }
+
+// A rate between two currencies as "1 USD = 1.4129 CAD": how many units of
+// `to` one unit of `from` is worth, or the other way round when `inverted`,
+// so pairs like CAD and COP can show the currency worth more on the left
+export function formatPairRate(
+  rate: number,
+  from: string,
+  to: string,
+  inverted = rate < 1,
+) {
+  const value = inverted ? 1 / rate : rate;
+  const text = formatRate(value, 6);
+  return inverted ? `1 ${to} = ${text} ${from}` : `1 ${from} = ${text} ${to}`;
+}

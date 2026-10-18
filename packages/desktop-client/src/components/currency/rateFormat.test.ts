@@ -1,6 +1,6 @@
 import { setNumberFormat } from '@actual-app/core/shared/util';
 
-import { formatRate, parseRate } from './rateFormat';
+import { formatPairRate, formatRate, parseRate } from './rateFormat';
 
 const FORMATS = [
   'comma-dot',
@@ -65,4 +65,16 @@ describe('rate format', () => {
     expect(formatRate(1 / 30_000_000, 6)).toBe('0.0000000333333');
     expect(formatRate(30_000_000)).toBe('30000000');
   });
+
+  it.each([
+    [1.5, 'USD', 'CAD', undefined, '1 USD = 1.5 CAD'],
+    [1 / 1.5, 'CAD', 'USD', undefined, '1 USD = 1.5 CAD'],
+    [3000, 'CAD', 'COP', undefined, '1 CAD = 3000 COP'],
+    [0.75, 'CAD', 'USD', false, '1 CAD = 0.75 USD'],
+  ] as const)(
+    'shows a rate of %d from %s to %s',
+    (rate, from, to, inverted, expected) => {
+      expect(formatPairRate(rate, from, to, inverted)).toBe(expected);
+    },
+  );
 });
