@@ -7,9 +7,13 @@ import { SvgExclamationOutline } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { FINTS_AUTH_REQUIRED } from '@actual-app/core/shared/fints';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
-import { useUnlinkAccountMutation } from '#accounts';
+import {
+  useSyncAndDownloadMutation,
+  useUnlinkAccountMutation,
+} from '#accounts';
 import { getFailedSyncError, isAccountFailedSync } from '#accounts/syncStatus';
 import { Link } from '#components/common/Link';
 import { authorizeBank as authorizeEnableBanking } from '#enablebanking';
@@ -81,6 +85,26 @@ function useErrorMessage() {
           'This account was not found in SimpleFIN. Try unlinking and relinking the account.',
         );
 
+      case FINTS_AUTH_REQUIRED:
+        return t(
+          'Your bank needs your PIN or a TAN approval before it sends new transactions.',
+        );
+
+      case 'BANK_ERROR':
+        return t(
+          'Your bank reported an error. Try again later or check your online banking.',
+        );
+
+      case 'BANK_URL_BLOCKED':
+        return t(
+          'The server refused to contact the bank address of this FinTS login.',
+        );
+
+      case 'CONNECTION_NOT_FOUND':
+        return t(
+          'The FinTS bank login of this account was removed. Unlink the account and link it again.',
+        );
+
       default:
     }
 
@@ -108,19 +132,23 @@ export function AccountSyncCheck() {
   const triggerRef = useRef(null);
   const { getErrorMessage } = useErrorMessage();
 
+  const syncAndDownload = useSyncAndDownloadMutation();
   const reauth = useCallback(
     (acc: AccountEntity) => {
       setOpen(false);
 
       if (acc.account_id) {
-        if (acc.account_sync_source === 'enableBanking') {
+        if (acc.account_sync_source === 'fints') {
+          // Syncing asks for the PIN or TAN the bank needs.
+          syncAndDownload.mutate({ id: acc.id });
+        } else if (acc.account_sync_source === 'enableBanking') {
           void authorizeEnableBanking(dispatch);
         } else if (acc.account_sync_source === 'goCardless') {
           void authorizeGoCardless(dispatch);
         }
       }
     },
-    [dispatch],
+    [dispatch, syncAndDownload],
   );
 
   const unlinkAccount = useUnlinkAccountMutation();
@@ -167,7 +195,8 @@ export function AccountSyncCheck() {
   const { type, code } = error;
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
-    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
+    (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN') ||
+    code === FINTS_AUTH_REQUIRED;
   const isGoCardlessNotConfigured = type === 'GOCARDLESS_NOT_CONFIGURED';
 
   return (

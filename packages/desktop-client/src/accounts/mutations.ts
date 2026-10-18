@@ -2,12 +2,17 @@ import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
 import type { SyncResponseWithErrors } from '@actual-app/core/server/accounts/app';
+import {
+  FINTS_AUTH_REQUIRED,
+  getFinTSConnectionId,
+} from '@actual-app/core/shared/fints';
 import type {
   AccountEntity,
   AccountGroupEntity,
   CategoryEntity,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
+  SyncServerFinTSAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -18,6 +23,7 @@ import type { QueryClient, QueryKey } from '@tanstack/react-query';
 import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
+import { authorizeFinTS, MAX_FINTS_AUTH_ATTEMPTS } from '#fints';
 import { useAccounts } from '#hooks/useAccounts';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
@@ -589,6 +595,112 @@ export function useLinkAccountEnableBankingMutation() {
   });
 }
 
+type LinkAccountFinTSPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerFinTSAccount;
+};
+
+/**
+ * Links FinTS accounts one after another. When the bank wants a TAN for the
+ * first download, the user is asked and the account is synced again with the
+ * chosen starting date.
+ */
+export function useLinkAccountsFinTSMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (payloads: LinkAccountFinTSPayload[]) => {
+      for (const payload of payloads) {
+        let result = await send('fints-accounts-link', payload);
+        const connectionId = getFinTSConnectionId(
+          payload.externalAccount.account_id,
+        );
+
+        for (
+          let attempt = 0;
+          result.needsAuth && connectionId && attempt < MAX_FINTS_AUTH_ATTEMPTS;
+          attempt++
+        ) {
+          const isReady = await authorizeFinTS(dispatch, {
+            connectionId,
+            connectionName: payload.externalAccount.institution,
+          });
+          if (!isReady) {
+            break;
+          }
+          result = await send('fints-accounts-link', {
+            ...payload,
+            upgradingId: result.id,
+          });
+        }
+      }
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account via FinTS:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account via FinTS. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+function needsFinTSAuth(res: SyncResponseWithErrors) {
+  return res.errors.some(
+    error =>
+      'type' in error &&
+      error.type === 'SyncError' &&
+      error.code === FINTS_AUTH_REQUIRED,
+  );
+}
+
+/**
+ * Syncs a FinTS account interactively: when the bank needs a PIN or a TAN,
+ * the user is asked and the account is synced again. A login the user
+ * cancelled is not asked for again within the same sync run.
+ */
+async function syncFinTSAccount(
+  dispatch: AppDispatch,
+  account: AccountEntity,
+  cancelledConnections: Set<string>,
+): Promise<SyncResponseWithErrors> {
+  let res = await send('accounts-bank-sync', { ids: [account.id] });
+  const connectionId = account.account_id
+    ? getFinTSConnectionId(account.account_id)
+    : null;
+  if (!connectionId) {
+    return res;
+  }
+
+  for (
+    let attempt = 0;
+    needsFinTSAuth(res) &&
+    !cancelledConnections.has(connectionId) &&
+    attempt < MAX_FINTS_AUTH_ATTEMPTS;
+    attempt++
+  ) {
+    const isReady = await authorizeFinTS(dispatch, {
+      connectionId,
+      connectionName: account.bankName ?? account.name,
+    });
+    if (!isReady) {
+      cancelledConnections.add(connectionId);
+      break;
+    }
+    res = await send('accounts-bank-sync', { ids: [account.id] });
+  }
+
+  return res;
+}
+
 type SyncAccountsPayload = {
   id?: AccountEntity['id'] | undefined;
 };
@@ -684,14 +796,24 @@ export function useSyncAccountsMutation() {
         dispatch(setAccountsSyncing({ ids: accountIdsToSync }));
       }
 
+      const cancelledFinTSConnections = new Set<string>();
+
       // Loop through the accounts and perform sync operation.. one by one
       for (let idx = 0; idx < accountIdsToSync.length; idx++) {
         const accountId = accountIdsToSync[idx];
+        const account = accounts.find(a => a.id === accountId);
 
         // Perform sync operation
-        const res = await send('accounts-bank-sync', {
-          ids: [accountId],
-        });
+        const res =
+          account?.account_sync_source === 'fints'
+            ? await syncFinTSAccount(
+                dispatch,
+                account,
+                cancelledFinTSConnections,
+              )
+            : await send('accounts-bank-sync', {
+                ids: [accountId],
+              });
 
         const success = handleSyncResponse(
           accountId,

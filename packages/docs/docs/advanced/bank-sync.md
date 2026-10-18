@@ -15,6 +15,7 @@ Here are a couple of considerations to know about before making the decision to 
 
 - [Akahu](./bank-sync/akahu.md) (New Zealand Banks)
 - [Enable Banking](./bank-sync/enable-banking.md) (European Banks)
+- [FinTS](./bank-sync/fints.md) (German Banks)
 - GoCardless [BankAccountData](./bank-sync/gocardless.md) (European Banks, **not accepting new accounts**)
 - [SimpleFIN Bridge](./bank-sync/simplefin.md) (North American Banks)
 - [Pluggy.ai](./bank-sync/pluggyai.md) (Brazilian Banks)

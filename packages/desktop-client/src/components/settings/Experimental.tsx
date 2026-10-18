@@ -289,6 +289,11 @@ export function ExperimentalFeatures() {
           <Trans>Akahu Bank Sync (NZ banks)</Trans>
         </FeatureToggle>
       )}
+      {isUsingServer && (
+        <FeatureToggle flag="finTSBankSync">
+          <Trans>FinTS Bank Sync (German banks)</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"

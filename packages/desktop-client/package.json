@@ -30,6 +30,7 @@
     "#global-events": "./src/global-events.ts",
     "#enablebanking": "./src/enablebanking.ts",
     "#gocardless": "./src/gocardless.ts",
+    "#fints": "./src/fints.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",
     "#mocks/*": "./src/mocks/*.ts",

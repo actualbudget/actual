@@ -15,6 +15,7 @@ import { useAkahuStatus } from '#hooks/useAkahuStatus';
 import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFinTSStatus } from '#hooks/useFinTSStatus';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
@@ -123,6 +124,9 @@ export function useBuiltInBankSyncProviders({
   const { configuredSimpleFin } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
   const { configuredAkahu } = useAkahuStatus(akahuEnabled);
+  const finTSEnabled = useFeatureFlag('finTSBankSync');
+  const { finTSStatus, refresh: refreshFinTSStatus } =
+    useFinTSStatus(finTSEnabled);
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
@@ -235,6 +239,19 @@ export function useBuiltInBankSyncProviders({
       }),
     );
   }, [dispatch]);
+
+  const onFinTSInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'fints-init',
+          options: {
+            onSuccess: () => void refreshFinTSStatus(),
+          },
+        },
+      }),
+    );
+  }, [dispatch, refreshFinTSStatus]);
 
   const notifyResetFailure = useCallback(
     (providerName: string, error: unknown) => {
@@ -386,6 +403,37 @@ export function useBuiltInBankSyncProviders({
       notifyResetFailure('Akahu', error);
     }
   }, [notifyResetFailure]);
+
+  const onFinTSReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'fints_productId',
+          value: null,
+        }),
+        'Failed to clear FinTS product registration number',
+      );
+      await refreshFinTSStatus();
+    } catch (error) {
+      notifyResetFailure('FinTS', error);
+    }
+  }, [notifyResetFailure, refreshFinTSStatus]);
+
+  const onConnectFinTS = useCallback(() => {
+    if (!finTSStatus?.configured) {
+      onFinTSInit();
+      return;
+    }
+
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'fints-connect',
+          options: { upgradingAccountId },
+        },
+      }),
+    );
+  }, [dispatch, finTSStatus?.configured, onFinTSInit, upgradingAccountId]);
 
   const onConnectGoCardless = useCallback(() => {
     if (!isGoCardlessSetupComplete) {
@@ -653,6 +701,7 @@ export function useBuiltInBankSyncProviders({
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
+    fints: Boolean(finTSStatus?.configured),
   } satisfies Record<BankSyncProviders, boolean>;
 
   const providers = useMemo<BuiltInBankSyncProviderState[]>(() => {
@@ -747,6 +796,26 @@ export function useBuiltInBankSyncProviders({
       });
     }
 
+    if (finTSEnabled) {
+      baseProviders.push({
+        id: 'fints',
+        displayName: 'FinTS',
+        description: t(
+          'Link a German bank account directly with your online banking login (PIN/TAN).',
+        ),
+        isConfigured: configuredProviders.fints,
+        credentialSource: 'global',
+        supportsPerBudgetFile: false,
+        // The registration number may also come from the server config,
+        // which cannot be changed from here.
+        canConfigure:
+          canConfigureProviders && !finTSStatus?.productIdFromConfig,
+        onConfigure: onFinTSInit,
+        onLink: onConnectFinTS,
+        onReset: onFinTSReset,
+      });
+    }
+
     return baseProviders;
   }, [
     canConfigureProviders,
@@ -757,6 +826,12 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
+    configuredProviders.fints,
+    finTSEnabled,
+    finTSStatus?.productIdFromConfig,
+    onConnectFinTS,
+    onFinTSInit,
+    onFinTSReset,
     pluggyAiStatus,
     syncServerStatus,
     enableBankingEnabled,
