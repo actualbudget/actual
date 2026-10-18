@@ -7,10 +7,7 @@ import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import {
-  convertWithRates,
-  getEffectiveRate,
-} from '@actual-app/core/shared/fx/convert';
+import { getEffectiveRate } from '@actual-app/core/shared/fx/convert';
 import { findRate } from '@actual-app/core/shared/fx/rates';
 import type { RateIndex } from '@actual-app/core/shared/fx/rates';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -28,6 +25,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useExchangeRates } from '#hooks/useExchangeRates';
+import { convertTransferAmountWithRates } from '#hooks/useTransferAmountConverter';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type TransferAmountModalProps = Extract<
@@ -110,8 +108,13 @@ function TransferAmountForm({
 
   const marketRate = findRate(rateIndex, currency, transferCurrency, date);
   const suggestedAmount = Math.abs(
-    convertWithRates(amount, currency, transferCurrency, rateIndex, date)
-      .amount,
+    convertTransferAmountWithRates(
+      amount,
+      currency,
+      transferCurrency,
+      rateIndex,
+      date,
+    ),
   );
   const suggestedText = integerToCurrencyWithDecimal(
     suggestedAmount,
@@ -137,13 +140,13 @@ function TransferAmountForm({
   // arrived
   const otherValue =
     enteredAmount !== null
-      ? convertWithRates(
+      ? convertTransferAmountWithRates(
           enteredAmount,
           transferCurrency,
           currency,
           rateIndex,
           date,
-        ).amount
+        )
       : null;
   const cost =
     otherValue === null

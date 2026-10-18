@@ -16,6 +16,7 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 import { SelectedItemsButton } from '#components/table';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
+import { useIsCrossCurrencyTransfer } from '#hooks/useTransferAmountConverter';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -69,6 +70,7 @@ export function SelectedTransactionsButton({
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const isCrossCurrencyTransfer = useIsCrossCurrencyTransfer();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 
@@ -132,8 +134,13 @@ export function SelectedTransactionsButton({
       return false;
     }
     const [fromTrans, toTrans] = twoTransactions;
-    return validForTransfer(fromTrans, toTrans);
-  }, [twoTransactions]);
+    return validForTransfer(fromTrans, toTrans, {
+      isCrossCurrency: isCrossCurrencyTransfer(
+        fromTrans.account,
+        toTrans.account,
+      ),
+    });
+  }, [isCrossCurrencyTransfer, twoTransactions]);
 
   const canMerge = useMemo(() => {
     return Boolean(

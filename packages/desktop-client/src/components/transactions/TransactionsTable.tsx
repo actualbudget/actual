@@ -29,6 +29,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgInformationOutline,
 } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
@@ -89,6 +90,7 @@ import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocompl
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
+import { TransferRateDetails } from '#components/currency/TransferRateDetails';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -1011,8 +1013,8 @@ function PayeeIcons({
         </Button>
       )}
       {transferAccount && (
-        <CrossCurrencyTransferWarning
-          accountId={transaction.account}
+        <CrossCurrencyTransferInfo
+          transaction={transaction}
           transferAccount={transferAccount}
         />
       )}
@@ -1020,20 +1022,20 @@ function PayeeIcons({
   );
 }
 
-type CrossCurrencyTransferWarningProps = {
-  accountId: AccountEntity['id'];
+type CrossCurrencyTransferInfoProps = {
+  transaction: TransactionEntity;
   transferAccount: AccountEntity;
 };
 
-// Transfers copy the same number to the other account, so a transfer
-// between two currencies needs its other side corrected by hand. Only
-// rendered for transfers, so other rows don't look up their account.
-function CrossCurrencyTransferWarning({
-  accountId,
+// A transfer between two currencies keeps its own amount on each side;
+// hovering shows what arrived or left there and the rate it amounts to.
+// Only rendered for transfers, so other rows don't look up their account.
+function CrossCurrencyTransferInfo({
+  transaction,
   transferAccount,
-}: CrossCurrencyTransferWarningProps) {
+}: CrossCurrencyTransferInfoProps) {
   const { t } = useTranslation();
-  const account = useAccount(accountId);
+  const account = useAccount(transaction.account);
   const { isEnabled, getAccountCurrency } = useMultiCurrency();
 
   if (!isEnabled || !account) {
@@ -1047,17 +1049,23 @@ function CrossCurrencyTransferWarning({
 
   return (
     <Tooltip
-      content={t(
-        'This transfer is between {{from}} and {{to}}, but both sides record the same number. Record what left and what arrived as two separate transactions instead.',
-        { from: fromCurrency, to: toCurrency },
-      )}
+      content={
+        <TransferRateDetails
+          transaction={transaction}
+          account={account}
+          transferAccount={transferAccount}
+        />
+      }
       placement="bottom start"
     >
-      <SvgAlertTriangle
-        aria-label={t('Transfer between currencies')}
+      <SvgInformationOutline
+        aria-label={t('Transfer between {{from}} and {{to}}', {
+          from: fromCurrency,
+          to: toCurrency,
+        })}
         style={{
           ...transferIconStyle,
-          color: theme.warningText,
+          color: theme.pageTextLight,
           marginRight: 4,
           flexShrink: 0,
         }}
