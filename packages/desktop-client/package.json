@@ -54,6 +54,7 @@
     "#components/budget/util": "./src/components/budget/util.ts",
     "#components/codemirror/autocompleteTabAccept": "./src/components/codemirror/autocompleteTabAccept.ts",
     "#components/currency/displayMode": "./src/components/currency/displayMode.ts",
+    "#components/currency/formatCurrencyAmount": "./src/components/currency/formatCurrencyAmount.ts",
     "#components/currency/useCurrencyOptions": "./src/components/currency/useCurrencyOptions.ts",
     "#components/formula/queryTimeFrame": "./src/components/formula/queryTimeFrame.ts",
     "#components/mobile/utils": "./src/components/mobile/utils.ts",
