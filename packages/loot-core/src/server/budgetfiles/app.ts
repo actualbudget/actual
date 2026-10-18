@@ -36,6 +36,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '#server/util/budget-name';
+import { resetSqlConversionState } from '#shared/fx/sql';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
 
@@ -310,6 +311,9 @@ async function closeBudget() {
   await mainApp.stopServices();
 
   db.closeDatabase();
+  // The rates and currency settings of this budget must never convert
+  // amounts of the next one
+  resetSqlConversionState();
 
   try {
     await asyncStorage.setItem('lastBudget', '');

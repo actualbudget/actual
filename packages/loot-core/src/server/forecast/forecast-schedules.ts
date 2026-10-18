@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { runRules } from '#server/transactions/transaction-rules';
+import { convertTransferAmount } from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -265,7 +266,15 @@ export async function buildFutureScheduleOccurrences(
         {
           id: `${sourceTransaction.id}-transfer`,
           account: transferAccountId,
-          amount: -sourceTransaction.amount,
+          // Arrives in the currency of the other account, at the rate of
+          // the day as when the schedule is posted. Either account can be
+          // outside the forecast, so currencies come from all of them.
+          amount: convertTransferAmount(
+            -sourceTransaction.amount,
+            ruleAccountsById.get(sourceTransaction.account)?.currency,
+            ruleAccountsById.get(transferAccountId)?.currency,
+            sourceTransaction.date,
+          ),
           payee: reverseTransferPayee?.id ?? null,
           date: sourceTransaction.date,
           transfer_id: sourceTransaction.id,

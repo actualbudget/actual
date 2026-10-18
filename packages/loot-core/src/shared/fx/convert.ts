@@ -143,3 +143,17 @@ export function convertTotal(
 
   return { total, withoutRate, hasFallback };
 }
+
+// The rate actually applied between two amounts, e.g. the two sides of a
+// transfer between currencies: how many units of `toCurrency` one unit of
+// `fromCurrency` bought, fees and spread included. Null when nothing left.
+export function getEffectiveRate(
+  fromAmount: IntegerAmount,
+  toAmount: IntegerAmount,
+): number | null {
+  if (fromAmount === 0) {
+    return null;
+  }
+  // Both amounts are stored at the same scale, whatever their currency
+  return Math.abs(toAmount / fromAmount);
+}

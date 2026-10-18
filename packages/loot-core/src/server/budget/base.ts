@@ -2,7 +2,10 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
-import { isSqlConversionEnabled } from '#shared/fx/sql';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -104,32 +107,62 @@ function getMonthSpanBounds(months: string[]) {
 // default currency at the rate of the transaction's date. Before a pair's
 // first rate its earliest later rate is used, so adding a rate re-values
 // the months that had no earlier one. While multiple currencies are off,
-// and for accounts without a currency, amounts are used as they are.
+// and for accounts without a currency or in the default one, amounts are
+// used as they are.
 function getAmountSql() {
-  return isSqlConversionEnabled()
-    ? 'CASE WHEN a.currency IS NULL THEN t.amount ELSE FX_CONVERT_ON_DATE(t.amount, a.currency, t.date) END'
-    : 't.amount';
+  if (!isSqlConversionEnabled()) {
+    return 't.amount';
+  }
+  const defaultCurrency = getSqlDefaultCurrencyCode().replace(/'/g, "''");
+  return `CASE WHEN a.currency IS NULL OR a.currency = '${defaultCurrency}' THEN t.amount ELSE FX_CONVERT_ON_DATE(t.amount, a.currency, t.date) END`;
 }
 
-// Recomputes the category sums that include transactions of accounts in
-// another currency, after their rates or the default currency change
-function recomputeConvertedSums(months: Set<string>) {
-  const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
-    `SELECT DISTINCT(t.category) as category FROM transactions t
-       JOIN accounts a ON a.id = t.acct
-     WHERE a.currency IS NOT NULL AND t.category IS NOT NULL`,
-    [],
+// Recomputes the category sums that include transactions of accounts with
+// a currency of their own, in the months with such transactions on or
+// after `fromDate` (in every month without one). Only the transactions the
+// sums count are looked at: alive and in on-budget accounts.
+function recomputeConvertedSums(
+  months: Set<string>,
+  {
+    fromDate = null,
+    skipDefaultCurrency = false,
+  }: { fromDate?: number | null; skipDefaultCurrency?: boolean } = {},
+) {
+  const conditions = [
+    'a.currency IS NOT NULL',
+    'a.offbudget = 0',
+    't.category IS NOT NULL',
+  ];
+  const params: Array<string | number> = [];
+  if (fromDate !== null) {
+    conditions.push('t.date >= ?');
+    params.push(fromDate);
+  }
+  if (skipDefaultCurrency) {
+    conditions.push('a.currency != ?');
+    params.push(getSqlDefaultCurrencyCode());
+  }
+
+  const rows = db.runQuery<{ category: string; month: number }>(
+    `SELECT DISTINCT t.category AS category, t.date / 100 AS month
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+      WHERE ${conditions.join(' AND ')}`,
+    params,
     true,
   );
 
-  months.forEach(month => {
-    const sheetName = monthUtils.sheetForMonth(month);
-    rows.forEach(row => {
+  const sheetNames = new Set(
+    [...months].map(month => monthUtils.sheetForMonth(month)),
+  );
+  for (const row of rows) {
+    const sheetName = monthUtils.sheetForMonth(String(row.month));
+    if (sheetNames.has(sheetName)) {
       sheet
         .get()
         .recompute(resolveName(sheetName, 'sum-amount-' + row.category));
-    });
-  });
+    }
+  }
 }
 
 const CONVERSION_PREFERENCES = new Set([
@@ -137,6 +170,134 @@ const CONVERSION_PREFERENCES = new Set([
   'flags.multiCurrency',
   'defaultCurrencyCode',
 ]);
+
+type RateRow = Pick<
+  db.DbExchangeRate,
+  | 'id'
+  | 'from_currency'
+  | 'to_currency'
+  | 'rate'
+  | 'date'
+  | 'source'
+  | 'created_at'
+  | 'tombstone'
+>;
+
+function isSameRate(a: RateRow | undefined, b: RateRow) {
+  return (
+    a != null &&
+    a.from_currency === b.from_currency &&
+    a.to_currency === b.to_currency &&
+    a.rate === b.rate &&
+    a.date === b.date &&
+    a.source === b.source &&
+    a.created_at === b.created_at &&
+    a.tombstone === b.tombstone
+  );
+}
+
+// Whether conversions use the rate at all; changes sync column by column,
+// so a row can be partly written
+function isUsableRate(rate: RateRow | undefined): rate is RateRow {
+  return (
+    rate != null &&
+    !rate.tombstone &&
+    rate.from_currency != null &&
+    rate.to_currency != null &&
+    rate.from_currency !== rate.to_currency &&
+    rate.date != null &&
+    Number.isFinite(rate.rate) &&
+    rate.rate > 0
+  );
+}
+
+// The earliest date whose conversions the changed rates can affect: a rate
+// is used from its date until the pair's next one. The first rate of a
+// pair is also used for every date before it, so changing it (or adding
+// an earlier one) affects every date, which is null. Undefined when no
+// rate actually changed, e.g. for messages that were already applied.
+function getEarliestAffectedRateDate(
+  oldRates: Map<string, RateRow> | undefined,
+  newRates: Map<string, RateRow>,
+): number | null | undefined {
+  const changed = [...newRates.values()].filter(
+    rate => !isSameRate(oldRates?.get(rate.id), rate),
+  );
+  // The versions conversions used before the change and use after it
+  const versions = changed
+    .flatMap(rate => [oldRates?.get(rate.id), rate])
+    .filter(isUsableRate);
+  if (versions.length === 0) {
+    return undefined;
+  }
+
+  const changedIds = new Set(changed.map(rate => rate.id));
+  // The first date of each pair among the rates that didn't change
+  const firstUnchangedDates = new Map<string, number | null>();
+  const getFirstUnchangedDate = (from: string, to: string) => {
+    const key = `${from}>${to}`;
+    if (!firstUnchangedDates.has(key)) {
+      const rows = db.runQuery<Pick<db.DbExchangeRate, 'id' | 'date'>>(
+        `SELECT id, date FROM exchange_rates
+          WHERE tombstone = 0 AND from_currency = ? AND to_currency = ?
+            AND date IS NOT NULL AND rate > 0
+          ORDER BY date`,
+        [from, to],
+        true,
+      );
+      firstUnchangedDates.set(
+        key,
+        rows.find(row => !changedIds.has(row.id))?.date ?? null,
+      );
+    }
+    return firstUnchangedDates.get(key);
+  };
+
+  let earliest: number | undefined;
+  for (const version of versions) {
+    const firstDate = getFirstUnchangedDate(
+      version.from_currency,
+      version.to_currency,
+    );
+    if (firstDate == null || version.date <= firstDate) {
+      return null;
+    }
+    earliest =
+      earliest === undefined ? version.date : Math.min(earliest, version.date);
+  }
+  return earliest;
+}
+
+// Exchange rates and the currency settings change the converted category
+// sums. Only actual changes count: synced messages that were already
+// applied come with rows that didn't change.
+function handleConversionChanges(months: Set<string>, oldValues, newValues) {
+  const oldPreferences = oldValues.get('preferences');
+  const isPreferenceChanged = [
+    ...(newValues.get('preferences')?.values() ?? []),
+  ].some(
+    pref =>
+      CONVERSION_PREFERENCES.has(pref.id) &&
+      oldPreferences?.get(pref.id)?.value !== pref.value,
+  );
+  if (isPreferenceChanged) {
+    recomputeConvertedSums(months);
+    return;
+  }
+
+  // While multiple currencies are off rates don't count
+  const newRates = newValues.get('exchange_rates');
+  if (!isSqlConversionEnabled() || !newRates) {
+    return;
+  }
+  const fromDate = getEarliestAffectedRateDate(
+    oldValues.get('exchange_rates'),
+    newRates,
+  );
+  if (fromDate !== undefined) {
+    recomputeConvertedSums(months, { fromDate, skipDefaultCurrency: true });
+  }
+}
 
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
@@ -328,14 +489,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
   sheet.startTransaction();
 
   try {
-    const conversionChanged =
-      newValues.has('exchange_rates') ||
-      [...(newValues.get('preferences')?.values() ?? [])].some(pref =>
-        CONVERSION_PREFERENCES.has(pref.id),
-      );
-    if (conversionChanged) {
-      recomputeConvertedSums(createdMonths);
-    }
+    handleConversionChanges(createdMonths, oldValues, newValues);
 
     newValues.forEach((items, table) => {
       const old = oldValues.get(table);
