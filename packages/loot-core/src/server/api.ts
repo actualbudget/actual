@@ -552,6 +552,56 @@ handlers['api/budget-reset-hold'] = withMutation(async function ({ month }) {
   return handlers['budget/reset-hold']({ month });
 });
 
+handlers['api/budget-apply-category-template'] = withMutation(async function ({
+  month,
+  categoryId,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  await validateExpenseCategory('budget-apply-category-template', categoryId);
+  const result = await handlers['budget/apply-single-template']({
+    month,
+    category: categoryId,
+  });
+  if (result.message === 'template-errors') {
+    throw APIError(`budget-apply-category-template: ${result.pre}`);
+  }
+  // A category with a template is always applied, so any other answer
+  // means it has none.
+  if (result.message !== 'templates-applied') {
+    throw APIError(
+      `budget-apply-category-template: category "${categoryId}" has no template`,
+    );
+  }
+});
+
+handlers['api/budget-get-category-template-amount'] = withMutation(
+  async function ({ month, categoryId }) {
+    checkFileOpen();
+    await validateMonth(month);
+    await validateExpenseCategory(
+      'budget-get-category-template-amount',
+      categoryId,
+    );
+    // Note templates reach `goal_def` only once stored, as applying does first.
+    await handlers['budget/store-note-templates']([categoryId]);
+    const templates = (
+      await handlers['budget/get-category-automations'](categoryId)
+    )[categoryId];
+    if (!templates || templates.length === 0) {
+      throw APIError(
+        `budget-get-category-template-amount: category "${categoryId}" has no template`,
+      );
+    }
+    const { budgeted } = await handlers['budget/dry-run-category-template']({
+      month,
+      categoryId,
+      templates,
+    });
+    return budgeted;
+  },
+);
+
 handlers['api/transactions-export'] = async function ({
   transactions,
   categoryGroups,

@@ -409,6 +409,23 @@ export function resetBudgetHold(month: string) {
   return send('api/budget-reset-hold', { month });
 }
 
+export function applyCategoryTemplate(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-apply-category-template', { month, categoryId });
+}
+
+export function getCategoryTemplateAmount(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-get-category-template-amount', {
+    month,
+    categoryId,
+  });
+}
+
 export function createSchedule(schedule: Omit<APIScheduleEntity, 'id'>) {
   return send('api/schedule-create', schedule);
 }

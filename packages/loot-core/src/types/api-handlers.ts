@@ -98,6 +98,16 @@ export type ApiHandlers = {
 
   'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
 
+  'api/budget-apply-category-template': (arg: {
+    month: string;
+    categoryId: APICategoryEntity['id'];
+  }) => Promise<void>;
+
+  'api/budget-get-category-template-amount': (arg: {
+    month: string;
+    categoryId: APICategoryEntity['id'];
+  }) => Promise<number>;
+
   'api/transactions-export': (arg: {
     transactions: TransactionEntity[];
     categoryGroups: CategoryGroupEntity[];

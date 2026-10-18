@@ -367,6 +367,49 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: applyCategoryTemplate, getCategoryTemplateAmount
+  test('Budgets: successfully apply a category template', async () => {
+    const month = '2023-10';
+    global.currentMonth = month;
+
+    const groupId = await api.createCategoryGroup({
+      name: 'tests',
+    });
+    const categoryId = await api.createCategory({
+      name: 'test-template',
+      group_id: groupId,
+    });
+    const noTemplateId = await api.createCategory({
+      name: 'test-no-template',
+      group_id: groupId,
+    });
+    await api.updateNote(categoryId, '#template 50');
+
+    expect(await api.getCategoryTemplateAmount(month, categoryId)).toBe(5000);
+
+    await api.setBudgetAmount(month, categoryId, 100);
+    await api.applyCategoryTemplate(month, categoryId);
+
+    const budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
+          ]),
+        }),
+      ]),
+    );
+
+    await expect(
+      api.applyCategoryTemplate(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+    await expect(
+      api.getCategoryTemplateAmount(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+  });
+
   //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
   test('Accounts: successfully complete account operators', async () => {
     const accountId1 = await api.createAccount(
