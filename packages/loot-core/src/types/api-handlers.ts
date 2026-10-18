@@ -9,6 +9,7 @@ import type {
   APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIExchangeRateEntity,
   APIFileEntity,
   APIPayeeEntity,
   APIRuleEntity,
@@ -187,6 +188,21 @@ export type ApiHandlers = {
 
   'api/account-group-delete': (arg: {
     id: APIAccountGroupEntity['id'];
+  }) => Promise<void>;
+
+  'api/exchange-rates-get': () => Promise<APIExchangeRateEntity[]>;
+
+  'api/exchange-rate-create': (arg: {
+    exchangeRate: Omit<APIExchangeRateEntity, 'id' | 'source'>;
+  }) => Promise<APIExchangeRateEntity['id']>;
+
+  'api/exchange-rate-update': (arg: {
+    id: APIExchangeRateEntity['id'];
+    fields: Partial<Omit<APIExchangeRateEntity, 'id' | 'source'>>;
+  }) => Promise<void>;
+
+  'api/exchange-rate-delete': (arg: {
+    id: APIExchangeRateEntity['id'];
   }) => Promise<void>;
 
   'api/categories-get': (arg: {

@@ -34,6 +34,7 @@ import {
   budgetModel,
   categoryGroupModel,
   categoryModel,
+  exchangeRateModel,
   payeeModel,
   remoteFileModel,
   ruleModel,
@@ -47,6 +48,7 @@ import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError, withErrorCode } from './errors';
+import { checkAccountCurrencyChange } from './fx/accountCurrency';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
@@ -693,10 +695,14 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (account.currency != null) {
+    accountModel.validateCurrency(account.currency);
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
+    currency: account.currency ?? null,
     // Current the API expects an amount but it really should expect
     // an integer
     balance: initialBalance != null ? integerToAmount(initialBalance) : null,
@@ -706,7 +712,16 @@ handlers['api/account-create'] = withMutation(async function ({
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   // @ts-expect-error - fix me
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  const { currency, ...otherFields } = accountModel.fromExternal(fields);
+  // Scripts can write back an account as they read it, so a currency it
+  // already has is left as it is
+  const isCurrencyChanged =
+    currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  return db.updateAccount({
+    id,
+    ...otherFields,
+    ...(isCurrencyChanged && { currency }),
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -766,6 +781,55 @@ handlers['api/account-group-update'] = withMutation(async function ({
 handlers['api/account-group-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   await handlers['account-group-delete']({ id });
+});
+
+handlers['api/exchange-rates-get'] = async function () {
+  checkFileOpen();
+  const exchangeRates = await handlers['exchange-rates-get']();
+  return exchangeRates.map(exchangeRate =>
+    exchangeRateModel.toExternal(exchangeRate),
+  );
+};
+
+handlers['api/exchange-rate-create'] = withMutation(async function ({
+  exchangeRate,
+}) {
+  checkFileOpen();
+  if (exchangeRate == null || typeof exchangeRate !== 'object') {
+    throw APIError('exchangeRate is required');
+  }
+  return handlers['exchange-rate-create']({
+    from_currency: exchangeRate.from_currency,
+    to_currency: exchangeRate.to_currency,
+    rate: exchangeRate.rate,
+    date: exchangeRate.date,
+  });
+});
+
+handlers['api/exchange-rate-update'] = withMutation(async function ({
+  id,
+  fields,
+}) {
+  checkFileOpen();
+  if (fields == null || typeof fields !== 'object') {
+    throw APIError('fields is required');
+  }
+  await handlers['exchange-rate-update']({
+    id,
+    ...(fields.from_currency !== undefined && {
+      from_currency: fields.from_currency,
+    }),
+    ...(fields.to_currency !== undefined && {
+      to_currency: fields.to_currency,
+    }),
+    ...(fields.rate !== undefined && { rate: fields.rate }),
+    ...(fields.date !== undefined && { date: fields.date }),
+  });
+});
+
+handlers['api/exchange-rate-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  await handlers['exchange-rate-delete']({ id });
 });
 
 handlers['api/categories-get'] = async function ({
