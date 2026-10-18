@@ -3,7 +3,12 @@ import { randomUUID } from 'node:crypto';
 import { SecretName, secretsService } from '#services/secrets-service';
 
 import { getConnection, putConnection } from './fints-connections';
-import { authenticate, fetchTransactions, listAccounts } from './fints-service';
+import {
+  authenticate,
+  fetchTransactions,
+  listAccounts,
+  stripMarkup,
+} from './fints-service';
 
 type FakeConfig = {
   url?: string;
@@ -235,6 +240,31 @@ afterAll(() => {
 beforeEach(() => {
   vi.clearAllMocks();
   bank.synchronize.mockImplementation(bankSynchronizes);
+});
+
+describe('stripMarkup', () => {
+  it('turns a TAN challenge into plain text with its line breaks', () => {
+    expect(
+      stripMarkup(
+        'Bitte <b>bestätigen</b> Sie<br>die Anmeldung<br/>in der App',
+      ),
+    ).toBe('Bitte bestätigen Sie\ndie Anmeldung\nin der App');
+  });
+
+  it('leaves no tag behind, however it is nested', () => {
+    for (const challenge of [
+      '<scr<b>ipt>alert(1)</scr</b>ipt>',
+      '<<script>script>alert(1)<</script>/script>',
+      '<img src=x onerror=alert(1)//',
+    ]) {
+      const text = stripMarkup(challenge) ?? '';
+      expect(text).not.toMatch(/[<>]/);
+    }
+  });
+
+  it('keeps an empty challenge empty', () => {
+    expect(stripMarkup(undefined)).toBeUndefined();
+  });
 });
 
 describe('authenticate', () => {

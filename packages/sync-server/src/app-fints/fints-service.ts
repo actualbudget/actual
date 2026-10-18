@@ -261,12 +261,16 @@ function rejectCredentials(
   }));
 }
 
-function stripMarkup(challenge: string | undefined): string | undefined {
+export function stripMarkup(challenge: string | undefined): string | undefined {
   // Challenges may contain the HHD formatting subset (<br>, <b>, <ul>, ...).
+  // The result is plain text: line breaks are kept, the tags removed, and
+  // any angle bracket left over is dropped as well, so that no tag survives
+  // however it is nested (e.g. "<scr<b>ipt>").
   return challenge
     ?.replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/?li>/gi, '\n')
     .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
