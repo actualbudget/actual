@@ -10,6 +10,8 @@ export type AccountEntity = {
   last_reconciled: string | null;
   tombstone: 0 | 1;
   account_group_id: AccountGroupEntity['id'] | null;
+  // null means the account follows the budget's default currency
+  currency: string | null;
 
   // Sync fields
   account_id: string | null;
