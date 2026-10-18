@@ -22,6 +22,7 @@ import type {
   MarkdownWidget,
 } from '@actual-app/core/types/models';
 
+import { ReportsCurrencyWarning } from '#components/currency/ReportsCurrencyWarning';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useAccounts } from '#hooks/useAccounts';
@@ -762,6 +763,7 @@ export function Overview({ dashboard }: OverviewProps) {
         <LoadingIndicator message={t('Import is running...')} />
       ) : (
         <div>
+          <ReportsCurrencyWarning />
           <View
             data-testid="reports-overview"
             innerRef={containerRef}

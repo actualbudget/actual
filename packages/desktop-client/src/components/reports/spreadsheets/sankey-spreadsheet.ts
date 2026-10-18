@@ -1,5 +1,6 @@
 import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -553,7 +554,7 @@ async function fetchCategoryData(
               .select([
                 { accountId: { $id: '$account.id' } },
                 { accountName: { $id: '$account.name' } },
-                { amount: { $sum: '$amount' } },
+                { amount: { $sum: CONVERTED_AMOUNT } },
                 { payeeId: { $id: '$payee.id' } },
                 { payeeName: { $id: '$payee.name' } },
               ]),
