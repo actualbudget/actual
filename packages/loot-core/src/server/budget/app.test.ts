@@ -47,4 +47,15 @@ describe('category-update', () => {
 
     expect(db.updateCategory).not.toHaveBeenCalled();
   });
+
+  it('rejects updates that only carry ignored fields', async () => {
+    await expect(
+      app.handlers['category-update']({
+        id: 'category-id',
+        _ignored: true,
+      } as unknown as Parameters<(typeof app.handlers)['category-update']>[0]),
+    ).rejects.toThrow('No fields to update');
+
+    expect(db.updateCategory).not.toHaveBeenCalled();
+  });
 });

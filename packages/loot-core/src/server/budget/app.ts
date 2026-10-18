@@ -338,16 +338,15 @@ async function updateCategory(category: CategoryEntity): Promise<void> {
       ...category,
       ...(category.name !== undefined && { name: category.name.trim() }),
     };
-    const hasWritableField = Object.keys(payload).some(
-      key => key !== 'id' && Reflect.get(payload, key) !== undefined,
-    );
+    // Convert first so ignored/underscore fields are dropped before we decide
+    // whether anything writable remains (e.g. `{ id, _ignored: true }` → `{ id }`).
+    const update = categoryModel.toDb(payload, { update: true });
+    const hasWritableField = Object.keys(update).some(key => key !== 'id');
     if (!hasWritableField) {
       throw APIError('No fields to update');
     }
 
-    // Use update conversion so insert defaults (e.g. template_settings) are
-    // not applied and accidentally overwrite existing values.
-    await db.updateCategory(categoryModel.toDb(payload, { update: true }));
+    await db.updateCategory(update);
   } catch (e) {
     if (
       e instanceof Error &&
