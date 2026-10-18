@@ -1,6 +1,7 @@
 import {
   currencyToAmount,
   getNumberFormat,
+  integerToCurrencyForEdit,
   integerToCurrencyWithDecimal,
   looselyParseAmount,
   setNumberFormat,
@@ -283,5 +284,24 @@ describe('utility functions', () => {
       expect(integerToCurrencyWithDecimal(1234)).toBe('12.34');
       expect(integerToCurrencyWithDecimal(1200)).toBe('12.00');
     });
+  });
+
+  describe('integerToCurrencyForEdit', () => {
+    beforeEach(() => {
+      setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    });
+
+    it.each<[number, string, string]>([
+      [150000, 'JPY', '1,500'],
+      [1526, 'JPY', '15.26'],
+      [-1520, 'JPY', '-15.20'],
+      [1526, 'USD', '15.26'],
+      [150000, 'USD', '1,500.00'],
+    ])(
+      'edits %s in %s as %s, also with decimals hidden',
+      (amount, currency, expected) => {
+        expect(integerToCurrencyForEdit(amount, currency)).toBe(expected);
+      },
+    );
   });
 });
