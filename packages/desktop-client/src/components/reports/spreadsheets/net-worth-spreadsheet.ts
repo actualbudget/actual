@@ -11,6 +11,7 @@ import type { Locale } from 'date-fns';
 import { keyBy } from 'es-toolkit';
 
 import { getIntervalFormat } from '#components/reports/ReportOptions';
+import type { AccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
 import type { FormatType } from '#hooks/useFormat';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 import { aqlQuery } from '#queries/aqlQuery';
@@ -52,11 +53,24 @@ export function createSpreadsheet(
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
   dateFormat?: string,
+  {
+    convertBalance,
+  }: {
+    // Values balances of accounts in other currencies in the default one;
+    // null while the exchange rates are still loading
+    convertBalance?: AccountBalanceConverter | null;
+  } = {},
 ) {
   return async (
     spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: ReturnType<typeof recalculate>) => void,
   ) => {
+    // Nothing is shown until the rates are known, rather than first
+    // adding all currencies up 1:1
+    if (convertBalance === null) {
+      return;
+    }
+
     const { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
@@ -258,9 +272,29 @@ export function createSpreadsheet(
         firstDayOfWeekIdx,
         format,
         dateFormat,
+        convertBalance,
       ),
     );
   };
+}
+
+// The last day an interval covers; balances are valued on that day
+function getIntervalEndDate(
+  intervalItem: string,
+  interval: string,
+  endDate: string,
+): string {
+  let end: string;
+  if (interval === 'Daily') {
+    end = intervalItem;
+  } else if (interval === 'Weekly') {
+    end = monthUtils.addDays(intervalItem, 6);
+  } else if (interval === 'Yearly') {
+    end = `${intervalItem}-12-31`;
+  } else {
+    end = monthUtils.lastDayOfMonth(intervalItem);
+  }
+  return end > endDate ? endDate : end;
 }
 
 function alignInternalTransferDates(
@@ -370,6 +404,7 @@ function recalculate(
   firstDayOfWeekIdx: string = '0',
   format: (value: unknown, type?: FormatType) => string,
   dateFormat?: string,
+  convertBalance?: AccountBalanceConverter,
 ) {
   // Get intervals using the same pattern as other working spreadsheets
   const intervals =
@@ -384,18 +419,46 @@ function recalculate(
               monthUtils.getMonth(endDate),
             );
 
+  // Balances of accounts in other currencies are valued in the default
+  // currency on the last day of each interval
+  let hasApproximateConversion = false;
+  const toDefaultCurrency = (
+    amount: number,
+    accountId: string,
+    date: string,
+  ) => {
+    // A zero balance is zero in every currency, so it is never approximate
+    if (!convertBalance || amount === 0) {
+      return amount;
+    }
+    const converted = convertBalance(amount, accountId, date);
+    hasApproximateConversion =
+      hasApproximateConversion || converted.isApproximate;
+    return converted.amount;
+  };
+
   const accountBalances = data.map(account => {
     let balance = account.starting;
     return intervals.map(intervalItem => {
       if (account.balances[intervalItem]) {
         balance += account.balances[intervalItem].amount;
       }
-      return balance;
+      return toDefaultCurrency(
+        balance,
+        account.id,
+        getIntervalEndDate(intervalItem, interval, endDate),
+      );
     });
   });
 
   const priorPeriodNetWorth = data.reduce(
-    (sum, account) => sum + account.starting,
+    (sum, account) =>
+      sum +
+      toDefaultCurrency(
+        account.starting,
+        account.id,
+        monthUtils.subDays(startDate, 1),
+      ),
     0,
   );
 
@@ -505,6 +568,9 @@ function recalculate(
     },
     netWorth: endNetWorth,
     totalChange: endNetWorth - startNetWorth,
+    // Some balances used a rate from a later date, or counted 1:1 for lack
+    // of a rate
+    hasApproximateConversion,
     lowestNetWorth,
     highestNetWorth,
     accounts: data

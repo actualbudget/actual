@@ -3,6 +3,7 @@ import type { JSX } from 'react';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { send } from '@actual-app/core/platform/client/connection';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
@@ -51,7 +52,7 @@ export function simpleCashFlow(
           'account.offbudget': false,
           'payee.transfer_acct': null,
         })
-        .calculate({ $sum: '$amount' });
+        .calculate({ $sum: CONVERTED_AMOUNT });
     }
 
     return runAll(
@@ -113,7 +114,7 @@ export function cashFlowByDate(
           .select([
             { date: { $month: '$date' } },
             { isTransfer: 'payee.transfer_acct' },
-            { amount: { $sum: '$amount' } },
+            { amount: { $sum: CONVERTED_AMOUNT } },
           ]);
       }
 
@@ -122,7 +123,7 @@ export function cashFlowByDate(
         .select([
           'date',
           { isTransfer: 'payee.transfer_acct' },
-          { amount: { $sum: '$amount' } },
+          { amount: { $sum: CONVERTED_AMOUNT } },
         ]);
     }
 
@@ -134,7 +135,7 @@ export function cashFlowByDate(
             date: { $transform: '$month', $lt: start },
             'account.offbudget': false,
           })
-          .calculate({ $sum: '$amount' }),
+          .calculate({ $sum: CONVERTED_AMOUNT }),
         makeQuery().filter({ amount: { $gt: 0 } }),
         makeQuery().filter({ amount: { $lt: 0 } }),
       ],

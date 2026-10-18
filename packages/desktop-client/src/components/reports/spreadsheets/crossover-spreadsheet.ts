@@ -1,3 +1,4 @@
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { AccountEntity } from '@actual-app/core/types/models';
@@ -137,7 +138,7 @@ export function createCrossoverSpreadsheet({
         .groupBy({ $month: '$date' })
         .select([
           { date: { $month: '$date' } },
-          { amount: { $sum: '$amount' } },
+          { amount: { $sum: CONVERTED_AMOUNT } },
         ]);
 
       const { data } = await aqlQuery(query);
@@ -154,7 +155,7 @@ export function createCrossoverSpreadsheet({
             .filter({
               date: { $lte: monthUtils.lastDayOfMonth(start) },
             })
-            .calculate({ $sum: '$amount' }),
+            .calculate({ $sum: CONVERTED_AMOUNT }),
         ).then(({ data }) => (typeof data === 'number' ? data : 0));
         // Get all transactions from the start month onwards for balance calculations
         // We need to exclude the first month since we already have its ending balance as starting
@@ -171,7 +172,7 @@ export function createCrossoverSpreadsheet({
             .groupBy({ $month: '$date' })
             .select([
               { date: { $month: '$date' } },
-              { amount: { $sum: '$amount' } },
+              { amount: { $sum: CONVERTED_AMOUNT } },
             ]),
         ).then(({ data }) => data as MonthlyAgg[]);
 

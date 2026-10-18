@@ -23,6 +23,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { useAccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -72,6 +73,7 @@ export function NetWorthCard({
   );
   const onCardHover = useCallback(() => setIsCardHovered(true), []);
   const onCardHoverEnd = useCallback(() => setIsCardHovered(false), []);
+  const convertBalance = useAccountBalanceConverter();
 
   const params = useMemo(
     () =>
@@ -86,8 +88,10 @@ export function NetWorthCard({
         firstDayOfWeekIdx,
         format,
         dateFormat,
+        { convertBalance },
       ),
     [
+      convertBalance,
       start,
       end,
       accounts,
