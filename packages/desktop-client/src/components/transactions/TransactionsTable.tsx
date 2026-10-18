@@ -29,6 +29,7 @@ import {
   SvgArrowDown,
   SvgArrowUp,
   SvgCheveronDown,
+  SvgInformationOutline,
 } from '@actual-app/components/icons/v1';
 import {
   SvgAlertTriangle,
@@ -89,6 +90,7 @@ import { CategoryAutocomplete } from '#components/autocomplete/CategoryAutocompl
 import { PayeeAutocomplete } from '#components/autocomplete/PayeeAutocomplete';
 import { TagAutocomplete } from '#components/autocomplete/TagAutocomplete';
 import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
+import { TransferRateDetails } from '#components/currency/TransferRateDetails';
 import { getStatusProps } from '#components/schedules/StatusBadge';
 import type { StatusTypes } from '#components/schedules/StatusBadge';
 import { DateSelect } from '#components/select/DateSelect';
@@ -110,6 +112,7 @@ import type {
   TableNavigator,
   TableProps,
 } from '#components/table';
+import { useAccount } from '#hooks/useAccount';
 import {
   SchedulesProvider,
   useCachedSchedules,
@@ -129,6 +132,7 @@ import type {
 } from '#hooks/useDragDrop';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { usePrevious } from '#hooks/usePrevious';
 import { useProperFocus } from '#hooks/useProperFocus';
 import { useResizeObserver } from '#hooks/useResizeObserver';
@@ -1008,7 +1012,65 @@ function PayeeIcons({
           />
         </Button>
       )}
+      {transferAccount && (
+        <CrossCurrencyTransferInfo
+          transaction={transaction}
+          transferAccount={transferAccount}
+        />
+      )}
     </>
+  );
+}
+
+type CrossCurrencyTransferInfoProps = {
+  transaction: TransactionEntity;
+  transferAccount: AccountEntity;
+};
+
+// A transfer between two currencies keeps its own amount on each side;
+// hovering shows what arrived or left there and the rate it amounts to.
+// Only rendered for transfers, so other rows don't look up their account.
+function CrossCurrencyTransferInfo({
+  transaction,
+  transferAccount,
+}: CrossCurrencyTransferInfoProps) {
+  const { t } = useTranslation();
+  const account = useAccount(transaction.account);
+  const { isEnabled, getAccountCurrency } = useMultiCurrency();
+
+  if (!isEnabled || !account) {
+    return null;
+  }
+  const fromCurrency = getAccountCurrency(account);
+  const toCurrency = getAccountCurrency(transferAccount);
+  if (fromCurrency === toCurrency) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      content={
+        <TransferRateDetails
+          transaction={transaction}
+          account={account}
+          transferAccount={transferAccount}
+        />
+      }
+      placement="bottom start"
+    >
+      <SvgInformationOutline
+        aria-label={t('Transfer between {{from}} and {{to}}', {
+          from: fromCurrency,
+          to: toCurrency,
+        })}
+        style={{
+          ...transferIconStyle,
+          color: theme.pageTextLight,
+          marginRight: 4,
+          flexShrink: 0,
+        }}
+      />
+    </Tooltip>
   );
 }
 

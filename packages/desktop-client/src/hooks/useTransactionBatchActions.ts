@@ -12,7 +12,7 @@ import {
 } from '@actual-app/core/shared/transactions';
 import { validForTransfer } from '@actual-app/core/shared/transfer';
 import { applyChanges, applyFindReplace } from '@actual-app/core/shared/util';
-import type { Diff } from '@actual-app/core/shared/util';
+import type { Diff, IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   PayeeEntity,
@@ -27,6 +27,8 @@ import type {
 } from '#modals/modalsSlice';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+
+import { useIsCrossCurrencyTransfer } from './useTransferAmountConverter';
 
 type BatchReconciledReason = Extract<
   ConfirmTransactionEditReason,
@@ -77,6 +79,7 @@ type BatchUnlinkScheduleProps = {
 
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
+  const isCrossCurrencyTransfer = useIsCrossCurrencyTransfer();
   const { t } = useTranslation();
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
@@ -283,6 +286,43 @@ export function useTransactionBatchActions() {
     }
   };
 
+  // Duplicates of transfers between currencies keep what arrived on the
+  // other side of the original rather than the exchange rate of the day.
+  // Until saved, a duplicate still carries the original's `transfer_id`.
+  const getDuplicatedTransferAmounts = async (
+    duplicates: readonly TransactionEntity[],
+  ) => {
+    const amounts: Record<TransactionEntity['id'], IntegerAmount> = {};
+    const transferIds = duplicates.flatMap(t =>
+      t.transfer_id ? [t.transfer_id] : [],
+    );
+    if (transferIds.length === 0) {
+      return amounts;
+    }
+
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: transferIds } })
+        .options({ splits: 'all' })
+        .select(['id', 'account', 'amount']),
+    );
+    const counterparts = data as Array<
+      Pick<TransactionEntity, 'id' | 'account' | 'amount'>
+    >;
+    for (const duplicate of duplicates) {
+      const counterpart = counterparts.find(
+        t => t.id === duplicate.transfer_id,
+      );
+      if (
+        counterpart &&
+        isCrossCurrencyTransfer(duplicate.account, counterpart.account)
+      ) {
+        amounts[duplicate.id] = counterpart.amount;
+      }
+    }
+    return amounts;
+  };
+
   const onBatchDuplicate = async ({ ids, onSuccess }: BatchDuplicateProps) => {
     const onConfirmDuplicate = async (ids: Array<TransactionEntity['id']>) => {
       const { data } = await aqlQuery(
@@ -294,22 +334,23 @@ export function useTransactionBatchActions() {
 
       const transactions = data as TransactionEntity[];
 
-      const changes = {
-        added: transactions.reduce(
-          (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
-            return newTransactions.concat(
-              realizeTempTransactions(ungroupTransaction(trans)).map(t => ({
-                ...t,
-                cleared: false,
-                reconciled: false,
-              })),
-            );
-          },
-          [],
-        ),
-      };
+      const added = transactions.reduce(
+        (newTransactions: TransactionEntity[], trans: TransactionEntity) => {
+          return newTransactions.concat(
+            realizeTempTransactions(ungroupTransaction(trans)).map(t => ({
+              ...t,
+              cleared: false,
+              reconciled: false,
+            })),
+          );
+        },
+        [],
+      );
 
-      await send('transactions-batch-update', changes);
+      await send('transactions-batch-update', {
+        added,
+        transferAmounts: await getDuplicatedTransferAmounts(added),
+      });
 
       onSuccess?.(ids);
     };
@@ -530,7 +571,15 @@ export function useTransactionBatchActions() {
       );
       const [fromTrans, toTrans] = transactions;
 
-      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
+      if (
+        transactions.length === 2 &&
+        validForTransfer(fromTrans, toTrans, {
+          isCrossCurrency: isCrossCurrencyTransfer(
+            fromTrans.account,
+            toTrans.account,
+          ),
+        })
+      ) {
         const fromPayee = payees.find(
           p => p.transfer_acct === fromTrans.account,
         );
