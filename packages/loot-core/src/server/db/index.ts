@@ -48,6 +48,7 @@ import type {
   DbCategoryGroup,
   DbCategoryMapping,
   DbClockMessage,
+  DbExchangeRate,
   DbPayee,
   DbPayeeMapping,
   DbTag,
@@ -879,6 +880,57 @@ export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
     }
     await delete_('account_groups', group.id);
   });
+}
+
+const EXCHANGE_RATE_COLUMNS =
+  'id, from_currency, to_currency, rate, date, source, created_at, tombstone';
+
+export function getExchangeRates() {
+  return all<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE tombstone = 0
+       ORDER BY date DESC, from_currency, to_currency, id`,
+  );
+}
+
+export function getExchangeRate(id: DbExchangeRate['id']) {
+  return first<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE id = ? AND tombstone = 0`,
+    [id],
+  );
+}
+
+export function findExchangeRate({
+  from_currency,
+  to_currency,
+  date,
+  source,
+}: Pick<DbExchangeRate, 'from_currency' | 'to_currency' | 'date' | 'source'>) {
+  return first<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE from_currency = ? AND to_currency = ? AND date = ? AND source = ?
+         AND tombstone = 0
+       ORDER BY created_at DESC, id DESC
+       LIMIT 1`,
+    [from_currency, to_currency, date, source],
+  );
+}
+
+export function insertExchangeRate(
+  exchangeRate: Omit<DbExchangeRate, 'id' | 'tombstone'>,
+): Promise<DbExchangeRate['id']> {
+  return insertWithUUID('exchange_rates', exchangeRate);
+}
+
+export function updateExchangeRate(
+  exchangeRate: WithRequired<Partial<DbExchangeRate>, 'id'>,
+) {
+  return update('exchange_rates', exchangeRate);
+}
+
+export function deleteExchangeRate(exchangeRate: Pick<DbExchangeRate, 'id'>) {
+  return delete_('exchange_rates', exchangeRate.id);
 }
 
 export async function getTransaction(id: DbViewTransaction['id']) {
