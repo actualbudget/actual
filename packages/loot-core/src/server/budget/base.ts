@@ -105,6 +105,17 @@ function getMonthSpanBounds(months: string[]) {
   };
 }
 
+// Envelope budgets leave rows of foreign currency pockets out of category
+// spending: they reach To Budget through reservation-changes (MC-10).
+// Tracking budgets count every lane by effective category.
+function envelopeLaneFilter() {
+  return getBudgetType() === 'envelope'
+    ? `AND NOT EXISTS (SELECT 1 FROM v_transaction_lanes l
+         JOIN category_pockets p ON p.id = l.lane AND p.kind = 'foreign'
+         WHERE l.id = t.id)`
+    : '';
+}
+
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
 // `sum-amount` cells on a cold build so we avoid running one
@@ -125,6 +136,7 @@ function getSumAmountsByMonth(
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
         AND t.category IS NOT NULL
         AND a.offbudget = 0
+        ${envelopeLaneFilter()}
       GROUP BY t.category, t.date / 100`,
     [],
     true,
@@ -185,7 +197,8 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
-           AND category = '${cat.id}' AND a.offbudget = 0`,
+           AND category = '${cat.id}' AND a.offbudget = 0
+           ${envelopeLaneFilter()}`,
         [],
         true,
       );
@@ -260,6 +273,8 @@ function handleTransactionChange(transaction, changedFields) {
       changedFields.has('acct') ||
       changedFields.has('amount') ||
       changedFields.has('category') ||
+      changedFields.has('pocket') ||
+      changedFields.has('pair_encoding') ||
       changedFields.has('tombstone') ||
       changedFields.has('isParent')) &&
     transaction.date &&
@@ -312,9 +327,22 @@ function handleBudgetChange(budget) {
   }
 }
 
-/** Whether a change can move the valuation of holdings in other currencies. */
+// Tables whose changes can move a currency pocket reservation (MC-10).
+const RESERVATION_TABLES = [
+  'exchange_rates',
+  'category_pockets',
+  'pocket_budgets',
+  'slot_retirements',
+  'categories',
+  'category_mapping',
+];
+
+/**
+ * Whether a change can move the valuation of holdings in other currencies
+ * or a currency pocket reservation.
+ */
 function affectsFxValuation(oldValues, newValues) {
-  if (newValues.has('exchange_rates')) return true;
+  if (RESERVATION_TABLES.some(table => newValues.has(table))) return true;
   for (const [id, account] of newValues.get('accounts') ?? new Map()) {
     const old = oldValues.get('accounts')?.get(id);
     if (
