@@ -20,6 +20,7 @@ import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
 import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
+import { loadSqlConversionState } from '#server/fx/sqlState';
 import { handleBudgetImport } from '#server/importers';
 import type { ImportableBudgetType } from '#server/importers';
 import { app as mainApp } from '#server/main-app';
@@ -44,6 +45,7 @@ import {
   uniqueBudgetName,
   validateBudgetName,
 } from '#server/util/budget-name';
+import { resetSqlConversionState } from '#shared/fx/sql';
 import * as Platform from '#shared/platform';
 import type { Budget } from '#types/budget';
 
@@ -354,6 +356,9 @@ async function unloadBudget() {
   } catch (error) {
     captureException(error);
   }
+  // The rates and currency settings of this budget must never convert
+  // amounts of the next one
+  resetSqlConversionState();
 
   try {
     await asyncStorage.setItem('lastBudget', '');
@@ -747,6 +752,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await closeBudget();
     return { error: 'opening-budget' };
   }
+
+  // Conversions in budget and report queries need the exchange rates
+  loadSqlConversionState();
 
   // This is a bit leaky, but we need to set the initial budget type
   const { value: budgetType = 'envelope' } =
