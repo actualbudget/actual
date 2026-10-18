@@ -81,11 +81,11 @@ function TransactionListWithPreviews() {
     if (!isFiltered) {
       const query = makeRootTransactionsQuery();
       setCurrentQuery(query);
-      if (searchText !== '') {
-        search(searchText);
-      } else {
-        setTransactionsQuery(query);
-      }
+      setTransactionsQuery(
+        searchText !== ''
+          ? queries.transactionsSearch(query, searchText, dateFormat)
+          : query,
+      );
     }
   }
 
