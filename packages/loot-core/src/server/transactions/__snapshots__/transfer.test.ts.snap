@@ -68,17 +68,18 @@ exports[`Transfer > split transfers are retained on child transactions 2`] = `
 -     "is_parent": 0,
 +     "is_parent": 1,
       "notes": null,
+      "number": null,
       "parent_id": null,
       "payee": "id3",
-      "payee_name": "",
-      "raw_synced_data": null,"
+      "payee_name": "","
 `;
 
 exports[`Transfer > split transfers are retained on child transactions 3`] = `
 "- First value
 + Second value
 
-@@ -23,9 +23,59 @@
+@@ -23,10 +23,60 @@
+      "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": "id6",
     },
@@ -229,7 +230,7 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
 "- First value
 + Second value
 
-@@ -1,21 +1,21 @@
+@@ -1,10 +1,10 @@
   Array [
     Object {
       "account": "one",
@@ -241,10 +242,11 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
       "error": null,
       "id": "id6",
       "imported_id": null,
-      "imported_payee": null,
+@@ -12,22 +12,22 @@
       "is_child": 0,
       "is_parent": 0,
       "notes": "hi",
+      "number": null,
       "parent_id": null,
 -     "payee": "id4",
 +     "payee": "id3",
@@ -253,7 +255,7 @@ exports[`Transfer > transfers are properly de-categorized 3`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
-@@ -23,10 +23,10 @@
+      "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": "id7",
     },
@@ -301,7 +303,8 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 2`] = `
 "- First value
 + Second value
 
-@@ -22,5 +22,55 @@
+@@ -22,6 +22,56 @@
+      "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": null,
@@ -436,22 +439,22 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 3`] = `
       "is_parent": 0,
 -     "notes": null,
 +     "notes": "This is a note",
+      "number": null,
       "parent_id": null,
       "payee": "id2",
       "payee_name": "",
-      "raw_synced_data": null,
-      "reconciled": 0,"
+      "raw_synced_data": null,"
 `;
 
 exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
 "- First value
 + Second value
 
-@@ -11,11 +11,11 @@
-      "imported_payee": null,
+@@ -12,11 +12,11 @@
       "is_child": 0,
       "is_parent": 0,
       "notes": "This is a note",
+      "number": null,
       "parent_id": null,
 -     "payee": "id3",
 +     "payee": "id4",
@@ -460,7 +463,8 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 4`] = `
       "reconciled": 0,
       "schedule": null,
       "sort_order": 123456789,
-@@ -48,10 +48,10 @@
+@@ -48,11 +48,11 @@
+      "starting_balance_flag": 0,
       "tombstone": 0,
       "transfer_id": null,
     },
@@ -478,8 +482,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
 "- First value
 + Second value
 
-@@ -11,20 +11,20 @@
-      "imported_payee": null,
+@@ -12,19 +12,19 @@
       "is_child": 0,
       "is_parent": 0,
       "notes": "This is a note",
@@ -502,7 +505,8 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 5`] = `
       "account": "one",
       "amount": 5000,
       "category": null,
-@@ -46,31 +46,6 @@
+@@ -46,32 +46,7 @@
+      "schedule": null,
       "sort_order": 123456789,
       "starting_balance_flag": 0,
       "tombstone": 0,
@@ -540,12 +544,11 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 "- First value
 + Second value
 
-@@ -11,20 +11,45 @@
-      "imported_payee": null,
+@@ -12,19 +12,44 @@
       "is_child": 0,
       "is_parent": 0,
       "notes": "This is a note",
-+     "number": null,
+      "number": null,
       "parent_id": null,
 -     "payee": "id9",
 -     "payee_name": "Not transferred anymore",
@@ -572,7 +575,7 @@ exports[`Transfer > transfers are properly inserted/updated/deleted 6`] = `
 +     "is_child": 0,
 +     "is_parent": 0,
 +     "notes": "This is a note",
-      "number": null,
++     "number": null,
 +     "parent_id": null,
 +     "payee": "id2",
 +     "payee_name": "",
