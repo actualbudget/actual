@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import { findCategoryMonthCell } from '@actual-app/core/shared/budget-cells';
 import {
   createBudgetQueryPrefetchKey,
   setCachedUserPreferences,
 } from '@actual-app/core/shared/formulas/customFunctions';
 import type { FormulaQueryContext } from '@actual-app/core/shared/formulas/customFunctions';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
@@ -347,9 +349,10 @@ async function prefetchAccountBalances(
 
 async function fetchAccountBalance(accountId: string): Promise<number> {
   try {
+    // In the default currency, like QUERY, so both can be combined
     const balanceQuery = q('transactions')
       .filter({ account: accountId })
-      .calculate({ $sum: '$amount' });
+      .calculate({ $sum: CONVERTED_AMOUNT });
     const { data } = await send('query', balanceQuery.serialize());
     return integerToAmount(data || 0, 2);
   } catch (err) {
@@ -427,7 +430,8 @@ export async function buildFilteredTransactionsQuery(
 async function fetchQuerySum(config: QueryConfig): Promise<number> {
   try {
     const transQuery = await buildFilteredTransactionsQuery(config);
-    const summedQuery = transQuery.calculate({ $sum: '$amount' });
+    // Queries can span accounts in different currencies
+    const summedQuery = transQuery.calculate({ $sum: CONVERTED_AMOUNT });
     const { data } = await send('query', summedQuery.serialize());
     return data || 0;
   } catch (err) {
@@ -562,8 +566,12 @@ function getMonthDataValue(
   pattern: string,
   catId: string,
 ): string | number | boolean {
-  const fieldName = pattern.replace('{catId}', catId);
-  const cell = monthData.find(c => c.name.endsWith(fieldName));
+  // A category budgeted in several currencies counts its total
+  const kind = pattern.replace('-{catId}', '');
+  const cell =
+    kind === 'budget' || kind === 'sum-amount' || kind === 'leftover'
+      ? findCategoryMonthCell(monthData, kind, catId)
+      : monthData.find(c => c.name.endsWith(pattern.replace('{catId}', catId)));
   return cell?.value ?? 0;
 }
 
