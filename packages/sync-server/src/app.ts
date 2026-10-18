@@ -20,6 +20,7 @@ import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
+import { listen } from './util/listen';
 
 const debugSensitive = createDebug('actual-sensitive:server');
 
@@ -229,12 +230,10 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    await listen(https.createServer(httpsOptions, app), port, hostname);
   } else {
-    app.listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    const http = await import('node:http');
+    await listen(http.createServer(app), port, hostname);
   }
+  sendServerStartedMessage();
 }
