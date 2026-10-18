@@ -3,6 +3,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -1616,7 +1617,9 @@ function TransactionEditUnconnected({
     TransactionEntity[]
   >([]);
   const transactionsRef = useRef(transactions);
-  transactionsRef.current = transactions;
+  useLayoutEffect(() => {
+    transactionsRef.current = transactions;
+  }, [transactions]);
   const isAdding = useRef(false);
   const isDeleted = useRef(false);
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
@@ -1842,10 +1845,27 @@ function TransactionEditUnconnected({
           !merged.subtransactions &&
           (merged.is_parent || latestTransaction.is_parent)
         ) {
-          merged.subtransactions = prevTransactions.filter(
+          const children = prevTransactions.filter(
             t => t.is_child && t.parent_id === merged.id,
           );
+          merged.subtransactions = children;
           merged.is_parent = true;
+
+          const updated = updateTransaction(prevTransactions, merged).data;
+          // updateTransaction → makeChild clears child.error; restore any that
+          // were already on the flat list so split-error UI stays correct.
+          const childErrors = new Map(
+            children
+              .filter(c => c.error != null)
+              .map(c => [c.id, c.error!] as const),
+          );
+          if (childErrors.size === 0) {
+            return updated;
+          }
+          return updated.map(t => {
+            const error = childErrors.get(t.id);
+            return error !== undefined ? { ...t, error } : t;
+          });
         }
 
         return updateTransaction(prevTransactions, merged).data;
