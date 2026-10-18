@@ -1,4 +1,7 @@
+import type { IntegerAmount } from '#shared/util';
+
 import { convertAmount } from './convert';
+import { getEffectiveCurrency } from './currency';
 import { buildRateIndex, findRate } from './rates';
 import type { RateIndex, RateRecord } from './rates';
 
@@ -70,6 +73,45 @@ function getRate(
     findRate(state.index, fromCurrency, toCurrency, toDateString(date))?.rate ??
     1
   );
+}
+
+// Even while the feature is off, e.g. for the other side of a transfer
+// between accounts in different currencies
+export function convertBetweenCurrencies(
+  amount: IntegerAmount,
+  fromCurrency: string,
+  toCurrency: string,
+  date: string | undefined,
+): IntegerAmount {
+  return (
+    convertAmount(
+      amount,
+      toCurrency,
+      getRate(fromCurrency, toCurrency, date),
+    ) ?? amount
+  );
+}
+
+// The other side of a transfer, in the currency of its own account. While
+// multiple currencies are off transfers mirror their amount, as they
+// always have.
+export function convertTransferAmount(
+  amount: IntegerAmount,
+  fromAccountCurrency: string | null | undefined,
+  toAccountCurrency: string | null | undefined,
+  date: string | undefined,
+): IntegerAmount {
+  if (!state.enabled) {
+    return amount;
+  }
+  const from = getEffectiveCurrency(
+    fromAccountCurrency,
+    state.defaultCurrencyCode,
+  );
+  const to = getEffectiveCurrency(toAccountCurrency, state.defaultCurrencyCode);
+  return from && to && from !== to
+    ? convertBetweenCurrencies(amount, from, to, date)
+    : amount;
 }
 
 // Converts an amount of an account in `currency` into the default currency
