@@ -67,7 +67,7 @@ export function AccountPage() {
               <AccountHeader account={account} />
             ) : accountIdParam === 'all' ? (
               <AllAccountsHeader />
-              ) : (
+            ) : (
               <NameOnlyHeader name={nameFromId(accountIdParam)} />
             )
           }
