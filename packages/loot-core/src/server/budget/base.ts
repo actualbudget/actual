@@ -2,6 +2,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
+import { isSqlConversionEnabled } from '#shared/fx/sql';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -99,6 +100,44 @@ function getMonthSpanBounds(months: string[]) {
   };
 }
 
+// Category amounts of accounts in another currency count in the budget's
+// default currency at the rate of the transaction's date. Before a pair's
+// first rate its earliest later rate is used, so adding a rate re-values
+// the months that had no earlier one. While multiple currencies are off,
+// and for accounts without a currency, amounts are used as they are.
+function getAmountSql() {
+  return isSqlConversionEnabled()
+    ? 'CASE WHEN a.currency IS NULL THEN t.amount ELSE FX_CONVERT_ON_DATE(t.amount, a.currency, t.date) END'
+    : 't.amount';
+}
+
+// Recomputes the category sums that include transactions of accounts in
+// another currency, after their rates or the default currency change
+function recomputeConvertedSums(months: Set<string>) {
+  const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
+    `SELECT DISTINCT(t.category) as category FROM transactions t
+       JOIN accounts a ON a.id = t.acct
+     WHERE a.currency IS NOT NULL AND t.category IS NOT NULL`,
+    [],
+    true,
+  );
+
+  months.forEach(month => {
+    const sheetName = monthUtils.sheetForMonth(month);
+    rows.forEach(row => {
+      sheet
+        .get()
+        .recompute(resolveName(sheetName, 'sum-amount-' + row.category));
+    });
+  });
+}
+
+const CONVERSION_PREFERENCES = new Set([
+  'flags.currency',
+  'flags.multiCurrency',
+  'defaultCurrencyCode',
+]);
+
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
 // `sum-amount` cells on a cold build so we avoid running one
@@ -113,7 +152,7 @@ function getSumAmountsByMonth(
   const rows = db.runQuery<{ month: number; category: string; amount: number }>(
     `SELECT t.category AS category,
             t.date / 100 AS month,
-            SUM(t.amount) AS amount
+            SUM(${getAmountSql()}) AS amount
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
@@ -176,7 +215,8 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     run: () => {
       // Making this sync is faster!
       const rows = db.runQuery<{ amount: number }>(
-        `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+        `SELECT SUM(${getAmountSql()}) as amount
+           FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
            AND category = '${cat.id}' AND a.offbudget = 0`,
@@ -197,7 +237,12 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function handleAccountChange(months, oldValue, newValue) {
-  if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
+  if (
+    !oldValue ||
+    oldValue.offbudget !== newValue.offbudget ||
+    // While multiple currencies are off amounts count as they are
+    (oldValue.currency !== newValue.currency && isSqlConversionEnabled())
+  ) {
     const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
       `
         SELECT DISTINCT(category) as category FROM transactions
@@ -283,6 +328,15 @@ export function triggerBudgetChanges(oldValues, newValues) {
   sheet.startTransaction();
 
   try {
+    const conversionChanged =
+      newValues.has('exchange_rates') ||
+      [...(newValues.get('preferences')?.values() ?? [])].some(pref =>
+        CONVERSION_PREFERENCES.has(pref.id),
+      );
+    if (conversionChanged) {
+      recomputeConvertedSums(createdMonths);
+    }
+
     newValues.forEach((items, table) => {
       const old = oldValues.get(table);
 

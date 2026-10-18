@@ -1,4 +1,6 @@
 import * as db from '#server/db';
+import { app as fxApp } from '#server/fx/app';
+import { loadSqlConversionState } from '#server/fx/sqlState';
 import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
@@ -623,5 +625,69 @@ describe('Base budget', () => {
 
     const jan = monthUtils.sheetForMonth('2017-01');
     expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1000);
+  });
+
+  it('Converts category amounts of accounts in another currency', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'income',
+      is_income: 1,
+    });
+    const catId = await db.insertCategory({
+      name: 'Groceries',
+      cat_group: 'group1',
+    });
+
+    await db.update('preferences', { id: 'flags.currency', value: 'true' });
+    await db.update('preferences', {
+      id: 'flags.multiCurrency',
+      value: 'true',
+    });
+    await db.update('preferences', { id: 'defaultCurrencyCode', value: 'CAD' });
+    loadSqlConversionState();
+    await createAllBudgets();
+
+    await db.insertAccount({ id: 'cad', name: 'Chequing' });
+    await db.insertAccount({ id: 'usd', name: 'US Card', currency: 'USD' });
+    await db.insertTransaction({
+      date: '2017-01-10',
+      amount: -1000,
+      account: 'cad',
+      category: catId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'usd',
+      category: catId,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const sheetName = monthUtils.sheetForMonth('2017-01');
+    // No rate yet: the USD purchase counts 1:1
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2000);
+
+    // A rate on or before the purchase date converts it
+    await fxApp.handlers['exchange-rate-create']({
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.25,
+      date: '2017-01-01',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2250);
+
+    // A later rate doesn't change the past month
+    await fxApp.handlers['exchange-rate-create']({
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 2,
+      date: '2017-02-01',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2250);
   });
 });

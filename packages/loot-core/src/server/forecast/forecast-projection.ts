@@ -1,5 +1,6 @@
 import { addMonths, format } from 'date-fns';
 
+import { convertToDefaultCurrency } from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import type { TransactionEntity } from '#types/models';
 import type { ForecastDataPoint, ForecastResult } from '#types/models/forecast';
@@ -189,6 +190,10 @@ function buildAccountForecastDataPoints(
   forecastDays: string[],
 ): ForecastDataPoint[] {
   let runningBalance = postedTransactions.startingBalance;
+  // The forecast adds accounts up, so amounts of accounts in another
+  // currency are shown in the default currency at the latest rate
+  const toDefaultCurrency = (amount: number) =>
+    convertToDefaultCurrency(amount, account.currency);
 
   return forecastDays.map(day => {
     const txDelta = postedTransactions.txsByDay[day] || 0;
@@ -198,11 +203,11 @@ function buildAccountForecastDataPoints(
 
     return {
       date: day,
-      balance: runningBalance,
+      balance: toDefaultCurrency(runningBalance),
       accountId: account.id,
       accountName: account.name,
       transactions: scheduleTxns.map(scheduleTxn => ({
-        amount: scheduleTxn.amount,
+        amount: toDefaultCurrency(scheduleTxn.amount),
         payee: scheduleTxn.payee,
         scheduleId: scheduleTxn.scheduleId,
         scheduleName: scheduleTxn.scheduleName,
@@ -244,7 +249,9 @@ function calculateLowestBalance(
     return {
       date: forecastStartDate,
       balance: accounts.reduce(
-        (sum, account) => sum + account.balance_current,
+        (sum, account) =>
+          sum +
+          convertToDefaultCurrency(account.balance_current, account.currency),
         0,
       ),
       accountId: '',
