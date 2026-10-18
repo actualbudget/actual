@@ -491,7 +491,9 @@ await updateAccount(marcusSavingsId, { account_group_id: groupId });
 
 <StructType fields={objects.exchangeRate} />
 
-Exchange rates convert balances of accounts in other currencies into the budget's default currency. Rates are dated: a conversion uses the latest rate on or before the date it needs. A rate only needs to be stored in one direction; the inverse is derived.
+Exchange rates convert balances of accounts in other currencies into the budget's default currency. Rates are dated: a conversion uses the latest rate on or before the date it needs. A rate only needs to be stored in one direction; the inverse is derived. A rate must be between 0.000000001 and 1,000,000,000.
+
+Creating or updating rates, creating an account with a `currency`, and changing an account's `currency` with `updateAccount` need the `currency` and `multiCurrency` feature flags and a default currency; otherwise they throw. Any currency Actual supports can be given to an account. `updateAccount` leaves an unchanged `currency` alone, and setting a currency on an account that doesn't exist throws. `getExchangeRates` and `deleteExchangeRate` always work.
 
 #### Methods
 

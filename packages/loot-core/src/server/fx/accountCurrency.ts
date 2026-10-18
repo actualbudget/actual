@@ -1,6 +1,15 @@
 import * as db from '#server/db';
 import { ValidationError } from '#server/errors';
 import { accountModel } from '#server/models';
+import { isSqlConversionEnabled } from '#shared/fx/sql';
+
+// Accounts only get or change a currency of their own while multiple
+// currencies are on, as through the API
+export function checkMultipleCurrenciesEnabled() {
+  if (!isSqlConversionEnabled()) {
+    throw new ValidationError('multiple currencies are not enabled');
+  }
+}
 
 // Checks that an account can be given `currency`, and returns whether that
 // changes its currency. An account keeps a currency it already has, even

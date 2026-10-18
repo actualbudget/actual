@@ -1,3 +1,7 @@
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 import { getNormalisedString } from '#shared/normalisation';
 import type { QueryState } from '#shared/query';
 
@@ -534,8 +538,9 @@ const compileFunction = saveStack('function', (state, func) => {
   }
 
   let args = argExprs;
-  // `$condition` is a special-case where it will be evaluated later
-  if (name !== '$condition') {
+  // `$condition` and `$fx` are special-cases where they will be evaluated
+  // later
+  if (name !== '$condition' && name !== '$fx') {
     args = argExprs.map(arg => compileExpr(state, arg));
   }
 
@@ -598,6 +603,40 @@ const compileFunction = saveStack('function', (state, func) => {
       return typed(
         `(${val(state, args[0])} / ${val(state, args[1])})`,
         args[0].type,
+      );
+    }
+    // [amount, currency, date]: the amount converted into the budget's
+    // default currency (see FX_CONVERT)
+    case '$fx': {
+      validateArgLength(args, 3);
+      // While multiple currencies are off only the amount is compiled, so
+      // the query is exactly the one without conversion: no join to the
+      // account and no extra dependencies
+      if (!isSqlConversionEnabled()) {
+        const amount = compileExpr(state, args[0]);
+        return typed(val(state, amount, 'float'), amount.type);
+      }
+
+      const compiled = args.map(arg => compileExpr(state, arg));
+      const [amount, currency, date] = valArray(state, compiled, [
+        'float',
+        'string',
+        'date',
+      ]);
+      // Rates and the currency settings change the result
+      for (const tableName of ['exchange_rates', 'preferences']) {
+        if (!state.dependencies.includes(tableName)) {
+          state.dependencies.push(tableName);
+        }
+      }
+      // Amounts already in the default currency skip the conversion
+      const defaultCurrency = val(
+        state,
+        typed(getSqlDefaultCurrencyCode(), 'string', { literal: true }),
+      );
+      return typed(
+        `CASE WHEN ${currency} IS NULL OR ${currency} = ${defaultCurrency} THEN ${amount} ELSE FX_CONVERT(${amount}, ${currency}, ${date}) END`,
+        compiled[0].type,
       );
     }
 

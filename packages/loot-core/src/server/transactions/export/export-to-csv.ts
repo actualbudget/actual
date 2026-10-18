@@ -2,8 +2,11 @@
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
 import { aqlQuery } from '#server/aql';
-import * as db from '#server/db';
 import { getEffectiveCurrency } from '#shared/fx/currency';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 import { integerToAmount } from '#shared/util';
 
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
@@ -16,20 +19,11 @@ const csvStringifyOptions = {
   },
 };
 
-export async function getDefaultCurrencyCode(): Promise<string> {
-  const preference = await db.first<Pick<db.DbPreference, 'value'>>(
-    'SELECT value FROM preferences WHERE id = ?',
-    ['defaultCurrencyCode'],
-  );
-  return preference?.value ?? '';
-}
-
 export async function exportToCSV(
   transactions,
   accounts,
   categoryGroups,
   payees,
-  defaultCurrencyCode = '',
 ) {
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
@@ -41,9 +35,10 @@ export async function exportToCSV(
   }, {});
   // Only exports with accounts in their own currency get a Currency column,
   // so other exports stay exactly as they were
-  const hasCurrencies = transactions.some(
-    ({ account }) => accountCurrenciesById[account],
-  );
+  const defaultCurrencyCode = getSqlDefaultCurrencyCode();
+  const hasCurrencies =
+    isSqlConversionEnabled() &&
+    transactions.some(({ account }) => accountCurrenciesById[account]);
 
   const categoryNamesById = categoryGroups.reduce(
     (reduced, { name, categories: subCategories }) => {
@@ -108,7 +103,9 @@ export async function exportQueryToCSV(query) {
         { CategoryGroup: 'category.group.name' },
         { Category: 'category.name' },
         { Amount: 'amount' },
-        { AccountCurrency: 'account.currency' },
+        ...(isSqlConversionEnabled()
+          ? [{ AccountCurrency: 'account.currency' }]
+          : []),
         { Cleared: 'cleared' },
         { Reconciled: 'reconciled' },
       ])
@@ -116,9 +113,7 @@ export async function exportQueryToCSV(query) {
   );
 
   const hasCurrencies = transactions.some(trans => trans.AccountCurrency);
-  const defaultCurrencyCode = hasCurrencies
-    ? await getDefaultCurrencyCode()
-    : '';
+  const defaultCurrencyCode = getSqlDefaultCurrencyCode();
 
   // initialize a map to allow splits to have correct number of split from
   const parentsChildCount: Map<number, number> = new Map();

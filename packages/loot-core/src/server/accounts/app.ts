@@ -12,7 +12,10 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
-import { checkAccountCurrencyChange } from '#server/fx/accountCurrency';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+} from '#server/fx/accountCurrency';
 import { app as mainApp } from '#server/main-app';
 import { accountModel } from '#server/models';
 import { mutator } from '#server/mutators';
@@ -112,6 +115,9 @@ async function updateAccount({
   // left as it is
   const isCurrencyChanged =
     currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultipleCurrenciesEnabled();
+  }
   await db.update('accounts', {
     id,
     ...(name !== undefined && { name }),
@@ -136,6 +142,9 @@ async function setAccountsCurrency({
     if (await checkAccountCurrencyChange(id, currency)) {
       changedIds.push(id);
     }
+  }
+  if (changedIds.length > 0) {
+    checkMultipleCurrenciesEnabled();
   }
   await batchMessages(async () => {
     for (const id of changedIds) {
@@ -604,6 +613,9 @@ async function createAccount({
   currency?: AccountEntity['currency'] | undefined;
 }) {
   accountModel.validateCurrency(currency);
+  if (currency) {
+    checkMultipleCurrenciesEnabled();
+  }
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
