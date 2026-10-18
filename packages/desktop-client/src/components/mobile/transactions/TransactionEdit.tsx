@@ -101,6 +101,7 @@ import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
 import { usePayees } from '#hooks/usePayees';
+import { usePromptTransferAmounts } from '#hooks/usePromptTransferAmounts';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
@@ -628,7 +629,7 @@ type TransactionEditInnerProps = {
   payees: PayeeEntity[];
   dateFormat: string;
   transactions: TransactionEntity[];
-  onSave: (transactions: TransactionEntity[]) => void;
+  onSave: (transactions: TransactionEntity[]) => Promise<void>;
   onUpdate: <Field extends keyof TransactionEntity>(
     transaction: TransactionEntity,
     field: Field,
@@ -755,8 +756,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [categories, isBudgetTransfer, t],
     );
 
+    // Whether the page was left, e.g. with the back button, while a save
+    // was still asking about a transfer
+    const isPageLeft = useRef(false);
+    useEffect(
+      () => () => {
+        isPageLeft.current = true;
+      },
+      [],
+    );
+
     const onSaveInner = useCallback(async () => {
-      const onConfirmSave = () => {
+      const onConfirmSave = async () => {
         let transactionsToSave = unserializedTransactions;
         if (isAdding) {
           transactionsToSave = realizeTempTransactions(
@@ -764,8 +775,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           );
         }
 
-        onSave(transactionsToSave);
-        void navigate(-1);
+        // Asks how much arrived on the other side of a transfer between
+        // currencies before leaving the page. Leaving it meanwhile still
+        // saves, without going back once more.
+        await onSave(transactionsToSave);
+        if (!isPageLeft.current) {
+          void navigate(-1);
+        }
       };
 
       if (unserializedTransactions.some(t => t.reconciled)) {
@@ -778,7 +794,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             modal: {
               name: 'confirm-transaction-edit',
               options: {
-                onConfirm: onConfirmSave,
+                onConfirm: () => void onConfirmSave(),
                 confirmReason: 'editReconciled',
               },
             },
@@ -804,17 +820,17 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 modal: {
                   name: 'confirm-transaction-edit',
                   options: {
-                    onConfirm: onConfirmSave,
+                    onConfirm: () => void onConfirmSave(),
                     confirmReason: 'batchEditWithReconciledTransfer',
                   },
                 },
               }),
             );
           } else {
-            onConfirmSave();
+            await onConfirmSave();
           }
         } else {
-          onConfirmSave();
+          await onConfirmSave();
         }
       }
     }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
@@ -1679,6 +1695,7 @@ function TransactionEditUnconnected({
   const isDeleted = useRef(false);
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
+  const promptTransferAmounts = usePromptTransferAmounts();
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1954,6 +1971,9 @@ function TransactionEditUnconnected({
     [dateFormat, isLocationGranted],
   );
 
+  // Resolves once nothing more needs to be asked, i.e. how much arrived on
+  // the other side of a new transfer between currencies. The page can then
+  // be left while the changes are saved, as before.
   const onSave = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       if (isDeleted.current) {
@@ -1961,33 +1981,51 @@ function TransactionEditUnconnected({
       }
 
       const changes = diffItems(fetchedTransactions || [], newTransactions);
-      if (
+      const hasChanges =
         changes.added.length > 0 ||
         changes.updated.length > 0 ||
-        changes.deleted.length
-      ) {
-        const _remoteUpdates = await send('transactions-batch-update', {
-          added: changes.added,
-          deleted: changes.deleted,
-          updated: changes.updated,
-          learnCategories: isLearnCategoriesEnabled,
-        });
+        changes.deleted.length > 0;
+      const changedIds = new Set(
+        [...changes.added, ...changes.updated].map(t => t.id),
+      );
+      const transferAmounts = hasChanges
+        ? await promptTransferAmounts(
+            newTransactions.filter(t => changedIds.has(t.id)),
+            fetchedTransactions || [],
+          )
+        : {};
 
-        // if (onTransactionsChange) {
-        //   onTransactionsChange({
-        //     ...changes,
-        //     updated: changes.updated.concat(remoteUpdates),
-        //   });
-        // }
-      }
+      void (async () => {
+        if (hasChanges) {
+          const _remoteUpdates = await send('transactions-batch-update', {
+            added: changes.added,
+            deleted: changes.deleted,
+            updated: changes.updated,
+            learnCategories: isLearnCategoriesEnabled,
+            transferAmounts,
+          });
 
-      if (isAdding.current) {
-        // The first one is always the "parent" and the only one we care
-        // about
-        dispatch(setLastTransaction({ transaction: newTransactions[0] }));
-      }
+          // if (onTransactionsChange) {
+          //   onTransactionsChange({
+          //     ...changes,
+          //     updated: changes.updated.concat(remoteUpdates),
+          //   });
+          // }
+        }
+
+        if (isAdding.current) {
+          // The first one is always the "parent" and the only one we care
+          // about
+          dispatch(setLastTransaction({ transaction: newTransactions[0] }));
+        }
+      })();
     },
-    [dispatch, fetchedTransactions, isLearnCategoriesEnabled],
+    [
+      dispatch,
+      fetchedTransactions,
+      isLearnCategoriesEnabled,
+      promptTransferAmounts,
+    ],
   );
 
   const onDelete = useCallback(
