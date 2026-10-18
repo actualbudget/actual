@@ -1,10 +1,12 @@
 import * as db from '#server/db';
+import { app as fxApp } from '#server/fx/app';
+import { loadSqlConversionState } from '#server/fx/sqlState';
 import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
 import { setBudget, setCategoryCarryover } from './actions';
-import { createAllBudgets, getBudgetRange } from './base';
+import { createAllBudgets, getBudgetRange, triggerBudgetChanges } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
@@ -623,5 +625,281 @@ describe('Base budget', () => {
 
     const jan = monthUtils.sheetForMonth('2017-01');
     expect(sheet.getCellValue(jan, `sum-amount-${foodId}`)).toBe(-1000);
+  });
+
+  it('Converts category amounts of accounts in another currency', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'income',
+      is_income: 1,
+    });
+    const catId = await db.insertCategory({
+      name: 'Groceries',
+      cat_group: 'group1',
+    });
+
+    await db.update('preferences', { id: 'flags.currency', value: 'true' });
+    await db.update('preferences', {
+      id: 'flags.multiCurrency',
+      value: 'true',
+    });
+    await db.update('preferences', { id: 'defaultCurrencyCode', value: 'CAD' });
+    loadSqlConversionState();
+    await createAllBudgets();
+
+    await db.insertAccount({ id: 'cad', name: 'Chequing' });
+    await db.insertAccount({ id: 'usd', name: 'US Card', currency: 'USD' });
+    await db.insertTransaction({
+      date: '2017-01-10',
+      amount: -1000,
+      account: 'cad',
+      category: catId,
+    });
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'usd',
+      category: catId,
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const sheetName = monthUtils.sheetForMonth('2017-01');
+    // No rate yet: the USD purchase counts 1:1
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2000);
+
+    // A rate on or before the purchase date converts it
+    await fxApp.handlers['exchange-rate-create']({
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.25,
+      date: '2017-01-01',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2250);
+
+    // A later rate doesn't change the past month
+    await fxApp.handlers['exchange-rate-create']({
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 2,
+      date: '2017-02-01',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `sum-amount-${catId}`)).toBe(-2250);
+  });
+});
+
+describe('Converted category sums', () => {
+  const jan = monthUtils.sheetForMonth('2017-01');
+  const mar = monthUtils.sheetForMonth('2017-03');
+  let catId: string;
+  let janRateId: string;
+
+  async function setPreference(id: string, value: string) {
+    await db.update('preferences', { id, value });
+  }
+
+  function getSum(sheetName: string, category = catId) {
+    return sheet.getCellValue(sheetName, `sum-amount-${category}`);
+  }
+
+  // The sum-amount cells recomputed by `change`
+  async function getRecomputedSums(change: () => Promise<unknown>) {
+    await sheet.waitOnSpreadsheet();
+    const recompute = vi.spyOn(sheet.get(), 'recompute');
+    try {
+      await change();
+      await sheet.waitOnSpreadsheet();
+      return recompute.mock.calls
+        .map(([name]) => name)
+        .filter(name => name.includes('!sum-amount-'));
+    } finally {
+      recompute.mockRestore();
+    }
+  }
+
+  beforeEach(async () => {
+    await sheet.loadSpreadsheet(db);
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'income',
+      is_income: 1,
+    });
+    catId = await db.insertCategory({ name: 'Groceries', cat_group: 'group1' });
+
+    await setPreference('flags.currency', 'true');
+    await setPreference('flags.multiCurrency', 'true');
+    await setPreference('defaultCurrencyCode', 'CAD');
+    await db.insertAccount({ id: 'usd', name: 'US Card', currency: 'USD' });
+    janRateId = await fxApp.handlers['exchange-rate-create']({
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.25,
+      date: '2017-01-01',
+    });
+    await db.insertTransaction({
+      date: '2017-01-15',
+      amount: -1000,
+      account: 'usd',
+      category: catId,
+    });
+    await db.insertTransaction({
+      date: '2017-03-15',
+      amount: -1000,
+      account: 'usd',
+      category: catId,
+    });
+
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+  });
+
+  it('recomputes the converted sums when a rate changes', async () => {
+    expect(getSum(jan)).toBe(-1250);
+    expect(getSum(mar)).toBe(-1250);
+
+    // A later rate only applies from its date on
+    const recomputed = await getRecomputedSums(() =>
+      fxApp.handlers['exchange-rate-create']({
+        from_currency: 'USD',
+        to_currency: 'CAD',
+        rate: 2,
+        date: '2017-03-01',
+      }),
+    );
+    expect(recomputed).toEqual(
+      expect.arrayContaining([
+        `${jan}!sum-amount-${catId}`,
+        `${mar}!sum-amount-${catId}`,
+      ]),
+    );
+    expect(getSum(jan)).toBe(-1250);
+    expect(getSum(mar)).toBe(-2000);
+
+    // The first rate of a pair is also used before its date
+    await getRecomputedSums(() =>
+      fxApp.handlers['exchange-rate-update']({
+        id: janRateId,
+        rate: 1.5,
+        date: '2017-02-01',
+      }),
+    );
+    expect(getSum(jan)).toBe(-1500);
+    expect(getSum(mar)).toBe(-2000);
+  });
+
+  it('ignores rates that did not change', async () => {
+    const rate = await db.first<db.DbExchangeRate>(
+      'SELECT * FROM exchange_rates WHERE id = ?',
+      [janRateId],
+    );
+    const recomputed = await getRecomputedSums(async () =>
+      triggerBudgetChanges(
+        new Map([['exchange_rates', new Map([[rate.id, rate]])]]),
+        new Map([['exchange_rates', new Map([[rate.id, { ...rate }]])]]),
+      ),
+    );
+    expect(recomputed).toEqual([]);
+  });
+
+  it('skips deleted transactions and off-budget accounts', async () => {
+    const otherCatId = await db.insertCategory({
+      name: 'Travel',
+      cat_group: 'group1',
+    });
+    await db.insertAccount({
+      id: 'usd-offbudget',
+      name: 'US Savings',
+      currency: 'USD',
+      offbudget: 1,
+    });
+    await db.insertTransaction({
+      date: '2017-03-20',
+      amount: -1000,
+      account: 'usd-offbudget',
+      category: otherCatId,
+    });
+    const deletedId = await db.insertTransaction({
+      date: '2017-03-20',
+      amount: -1000,
+      account: 'usd',
+      category: otherCatId,
+    });
+    await db.deleteTransaction({ id: deletedId });
+
+    const recomputed = await getRecomputedSums(() =>
+      fxApp.handlers['exchange-rate-create']({
+        from_currency: 'USD',
+        to_currency: 'CAD',
+        rate: 2,
+        date: '2017-03-01',
+      }),
+    );
+    expect(recomputed.sort()).toEqual(
+      [`${jan}!sum-amount-${catId}`, `${mar}!sum-amount-${catId}`].sort(),
+    );
+  });
+
+  it('recomputes the sums of an account whose currency changes', async () => {
+    await db.insertAccount({ id: 'cad', name: 'Chequing' });
+    await db.insertTransaction({
+      date: '2017-01-20',
+      amount: -1000,
+      account: 'cad',
+      category: catId,
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-2250);
+
+    await db.update('accounts', { id: 'cad', currency: 'USD' });
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-2500);
+
+    await db.update('accounts', { id: 'cad', currency: null });
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-2250);
+  });
+
+  it('recomputes the sums when the default currency changes', async () => {
+    expect(getSum(jan)).toBe(-1250);
+
+    // USD amounts now count as they are
+    await setPreference('defaultCurrencyCode', 'USD');
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-1000);
+    expect(getSum(mar)).toBe(-1000);
+
+    await setPreference('defaultCurrencyCode', 'CAD');
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-1250);
+  });
+
+  it('adds amounts up as they are while multiple currencies are off', async () => {
+    await setPreference('flags.multiCurrency', 'false');
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-1000);
+    expect(getSum(mar)).toBe(-1000);
+
+    // Rates and account currencies don't count while it is off
+    const recomputed = await getRecomputedSums(async () => {
+      await fxApp.handlers['exchange-rate-create']({
+        from_currency: 'USD',
+        to_currency: 'CAD',
+        rate: 2,
+        date: '2017-03-01',
+      });
+      await db.update('accounts', { id: 'usd', currency: 'EUR' });
+    });
+    expect(recomputed).toEqual([]);
+    await db.update('accounts', { id: 'usd', currency: 'USD' });
+
+    await setPreference('flags.multiCurrency', 'true');
+    await sheet.waitOnSpreadsheet();
+    expect(getSum(jan)).toBe(-1250);
+    expect(getSum(mar)).toBe(-2000);
   });
 });
