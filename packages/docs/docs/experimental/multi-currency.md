@@ -86,8 +86,21 @@ When you export transactions to a CSV file, amounts keep the currency of their a
 
 Because the budget uses the rate of each transaction's date, while account totals use the latest rate, the two can differ for foreign on-budget accounts. That difference is the exchange gain or loss on money held in another currency.
 
+## Transfers Between Currencies
+
+When you send money from an account in one currency to an account in another, each side keeps its own amount: what left one account and what arrived in the other. Services such as Wise or a bank each apply their own rate and fees, so the two amounts rarely match the exchange rate exactly. With multiple currencies turned off, transfers copy the same amount to both sides, as before.
+
+- **Choosing a transfer payee** for an account in another currency asks how much arrived (or left) on the other side. The amount is filled in with the exchange rate of the transaction's date, so you only change it when your bank or service gave you a different one. The dialog shows the rate of this transfer, the exchange rate of the day, and the fees and spread that the difference amounts to. Closing it, or leaving the page, keeps the exchange rate of the day.
+- **Editing one side later** never changes the other side's amount, because what arrived doesn't change when you correct what left. Only a change of sign is followed. Setting one side to zero leaves the other side as it is, and when both sides are edited together, each keeps what you set.
+- **Moving a transfer** to another account in the same currency as before keeps the amount; moving it to an account in another currency asks again.
+- **Duplicating a transfer** keeps the other side's amount from the original.
+- **Transfers created for you**, by schedules, rules, bank sync or when closing an account into one with another currency, use the exchange rate of their date. Without a rate the amount counts 1:1. A transfer created without an amount gets the exchange rate of its date once it gets one.
+- **Make transfer** links two existing transactions in different currencies when one is money out and the other money in, keeping both amounts as they are.
+- Hover the information icon next to the payee of a transfer between currencies to see what arrived on the other side and the rate it amounts to. On mobile, it is shown under the payee.
+
+Fees and spread aren't recorded as a separate expense: totals and reports convert each side on its own, so the cost of the transfer shows up as the difference in value between what left and what arrived.
+
 ## Known Limitations
 
-- Transfers between accounts in different currencies aren't linked. Services such as Wise or a bank each apply their own rate and fees, so record what left one account and what arrived in the other as two separate transactions. A transfer between currencies records the same number on both sides.
 - Amounts outside the transactions and balances of an account, such as in rules, schedules and filters, use the format of the default currency. In a budget in yen, an amount in dollars there shows without its cents until you edit it; it is always kept as you entered it.
 - Rates can't be fetched automatically yet.
