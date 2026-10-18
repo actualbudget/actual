@@ -180,11 +180,68 @@ export const objects = {
         </span>
       ),
     },
+    {
+      name: 'currency',
+      type: 'string | null',
+      description: (
+        <span>
+          ISO 4217 code of the account&apos;s currency, e.g. <code>USD</code>.{' '}
+          <code>null</code> means the account uses the budget&apos;s default
+          currency. Defaults to <code>null</code>. Its amounts are stored like
+          those of any other account, as <code>value * 100</code> whatever the
+          currency (see <code>amount</code>).
+        </span>
+      ),
+    },
   ],
 
   accountGroup: [
     { name: 'id', type: types.id },
     { name: 'name', type: 'string', required: true },
+  ],
+
+  exchangeRate: [
+    { name: 'id', type: types.id },
+    {
+      name: 'from_currency',
+      type: 'string',
+      required: true,
+      description: <span>ISO 4217 code being converted from</span>,
+    },
+    {
+      name: 'to_currency',
+      type: 'string',
+      required: true,
+      description: <span>ISO 4217 code being converted to</span>,
+    },
+    {
+      name: 'rate',
+      type: 'number',
+      required: true,
+      description: (
+        <span>
+          How many units of <code>to_currency</code> one unit of{' '}
+          <code>from_currency</code> is worth, between 0.000000001 and
+          1,000,000,000
+        </span>
+      ),
+    },
+    {
+      name: 'date',
+      type: types.date,
+      required: true,
+      description: <span>The date the rate applies from</span>,
+    },
+    {
+      name: 'source',
+      type: 'string',
+      description: (
+        <span>
+          Where the rate came from. Read only; rates created through the API are{' '}
+          <code>manual</code>
+        </span>
+      ),
+    },
   ],
 
   category: [

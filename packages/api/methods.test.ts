@@ -424,6 +424,81 @@ describe('API CRUD operations', () => {
     );
   });
 
+  describe('multiple currencies', () => {
+    const usdToCad = {
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.38,
+      date: '2026-10-01',
+    };
+
+    //apis: createAccount, getAccounts, updateAccount, getAccountBalance
+    test('Accounts: successfully set account currencies', async () => {
+      const accountId = await api.createAccount(
+        { name: 'test-usd-account', currency: 'USD' },
+        12345,
+      );
+      expect(await api.getAccounts()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: accountId, currency: 'USD' }),
+        ]),
+      );
+      expect(await api.getAccountBalance(accountId)).toEqual(12345);
+
+      // Currencies without decimals too, with amounts at the same scale
+      const yenId = await api.createAccount(
+        { name: 'test-yen-account', currency: 'JPY' },
+        150000,
+      );
+      expect(await api.getAccountBalance(yenId)).toEqual(150000);
+      await api.updateAccount(accountId, { currency: 'JPY' });
+      expect(await api.getAccountBalance(accountId)).toEqual(12345);
+
+      await api.updateAccount(accountId, { currency: null });
+      expect(await api.getAccounts()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: accountId, currency: null }),
+        ]),
+      );
+    });
+
+    //apis: getExchangeRates, createExchangeRate, updateExchangeRate, deleteExchangeRate
+    test('Exchange rates: successfully complete exchange rate operations', async () => {
+      const id = await api.createExchangeRate(usdToCad);
+      expect(await api.getExchangeRates()).toEqual([
+        { id, ...usdToCad, source: 'manual' },
+      ]);
+
+      await api.updateExchangeRate(id, { rate: 1.4, date: '2026-10-02' });
+      expect(await api.getExchangeRates()).toEqual([
+        { id, ...usdToCad, rate: 1.4, date: '2026-10-02', source: 'manual' },
+      ]);
+
+      await api.deleteExchangeRate(id);
+      expect(await api.getExchangeRates()).toEqual([]);
+    });
+
+    //apis: createExchangeRate, updateExchangeRate
+    test('Exchange rates: invalid rates are rejected', async () => {
+      for (const rate of [0, 1e-320, 1e15, Number.NaN]) {
+        await expect(
+          api.createExchangeRate({ ...usdToCad, rate }),
+        ).rejects.toThrow(/positive rate between/);
+      }
+      await expect(
+        api.createExchangeRate({ ...usdToCad, to_currency: 'USD' }),
+      ).rejects.toThrow(/different currencies/);
+
+      const id = await api.createExchangeRate(usdToCad);
+      await expect(api.updateExchangeRate(id, { rate: 1e15 })).rejects.toThrow(
+        /positive rate between/,
+      );
+      expect(await api.getExchangeRates()).toEqual([
+        expect.objectContaining({ id, rate: 1.38 }),
+      ]);
+    });
+  });
+
   // apis: createPayee, getPayees, updatePayee, deletePayee
   test('Payees: successfully update payees', async () => {
     const payeeId1 = await api.createPayee({ name: 'test-payee1' });
