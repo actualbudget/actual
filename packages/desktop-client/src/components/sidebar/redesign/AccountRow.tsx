@@ -218,6 +218,7 @@ export function AccountRow({
               <Text style={styles.visuallyHidden}>{statusLabel}</Text>
               <SidebarBalance
                 binding={bindings.accountBalance(account.id)}
+                account={account}
                 style={{
                   fontSize: 12,
                   color: 'inherit',
