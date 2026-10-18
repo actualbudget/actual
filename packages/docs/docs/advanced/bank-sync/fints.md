@@ -1,6 +1,6 @@
 # FinTS Setup
 
-<ExperimentalFeatureWarning />
+<ExperimentalFeatureWarning issueId="9259" />
 
 :::warning
 All functionality described here may not be available in the latest stable release. See [Experimental Features](../../experimental/index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.

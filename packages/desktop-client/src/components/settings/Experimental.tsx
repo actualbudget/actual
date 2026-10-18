@@ -290,7 +290,10 @@ export function ExperimentalFeatures() {
         </FeatureToggle>
       )}
       {isUsingServer && (
-        <FeatureToggle flag="finTSBankSync">
+        <FeatureToggle
+          flag="finTSBankSync"
+          feedbackLink="https://github.com/actualbudget/actual/issues/9259"
+        >
           <Trans>FinTS Bank Sync (German banks)</Trans>
         </FeatureToggle>
       )}
