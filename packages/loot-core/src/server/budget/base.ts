@@ -2,6 +2,10 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -99,6 +103,105 @@ function getMonthSpanBounds(months: string[]) {
   };
 }
 
+// Category amounts of accounts in another currency count in the budget's
+// default currency at the rate of the transaction's date. Before a pair's
+// first rate its earliest later rate is used, so adding a rate re-values
+// the months that had no earlier one. While multiple currencies are off,
+// and for accounts without a currency or in the default one, amounts are
+// used as they are.
+function getAmountSql() {
+  if (!isSqlConversionEnabled()) {
+    return 't.amount';
+  }
+  const defaultCurrency = getSqlDefaultCurrencyCode().replace(/'/g, "''");
+  return `CASE WHEN a.currency IS NULL OR a.currency = '${defaultCurrency}' THEN t.amount ELSE FX_CONVERT_ON_DATE(t.amount, a.currency, t.date) END`;
+}
+
+// Recomputes the category sums that include transactions of accounts with
+// a currency of their own. Only the transactions the sums count are looked
+// at: alive and in on-budget accounts.
+function recomputeConvertedSums(months: Set<string>) {
+  const rows = db.runQuery<{ category: string; month: number }>(
+    `SELECT DISTINCT t.category AS category, t.date / 100 AS month
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+      WHERE a.currency IS NOT NULL
+        AND a.offbudget = 0
+        AND t.category IS NOT NULL`,
+    [],
+    true,
+  );
+
+  const sheetNames = new Set(
+    [...months].map(month => monthUtils.sheetForMonth(month)),
+  );
+  for (const row of rows) {
+    const sheetName = monthUtils.sheetForMonth(String(row.month));
+    if (sheetNames.has(sheetName)) {
+      sheet
+        .get()
+        .recompute(resolveName(sheetName, 'sum-amount-' + row.category));
+    }
+  }
+}
+
+const CONVERSION_PREFERENCES = new Set([
+  'flags.currency',
+  'flags.multiCurrency',
+  'defaultCurrencyCode',
+]);
+
+type RateRow = Pick<
+  db.DbExchangeRate,
+  | 'id'
+  | 'from_currency'
+  | 'to_currency'
+  | 'rate'
+  | 'date'
+  | 'source'
+  | 'created_at'
+  | 'tombstone'
+>;
+
+function isSameRate(a: RateRow | undefined, b: RateRow) {
+  return (
+    a != null &&
+    a.from_currency === b.from_currency &&
+    a.to_currency === b.to_currency &&
+    a.rate === b.rate &&
+    a.date === b.date &&
+    a.source === b.source &&
+    a.created_at === b.created_at &&
+    a.tombstone === b.tombstone
+  );
+}
+
+// Exchange rates and the currency settings change the converted category
+// sums. Only actual changes count: synced messages that were already
+// applied come with rows that didn't change.
+function handleConversionChanges(months: Set<string>, oldValues, newValues) {
+  const oldPreferences = oldValues.get('preferences');
+  const isPreferenceChanged = [
+    ...(newValues.get('preferences')?.values() ?? []),
+  ].some(
+    pref =>
+      CONVERSION_PREFERENCES.has(pref.id) &&
+      oldPreferences?.get(pref.id)?.value !== pref.value,
+  );
+
+  // While multiple currencies are off rates don't count
+  const oldRates = oldValues.get('exchange_rates');
+  const isRateChanged =
+    isSqlConversionEnabled() &&
+    [...(newValues.get('exchange_rates')?.values() ?? [])].some(
+      (rate: RateRow) => !isSameRate(oldRates?.get(rate.id), rate),
+    );
+
+  if (isPreferenceChanged || isRateChanged) {
+    recomputeConvertedSums(months);
+  }
+}
+
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
 // `sum-amount` cells on a cold build so we avoid running one
@@ -113,7 +216,7 @@ function getSumAmountsByMonth(
   const rows = db.runQuery<{ month: number; category: string; amount: number }>(
     `SELECT t.category AS category,
             t.date / 100 AS month,
-            SUM(t.amount) AS amount
+            SUM(${getAmountSql()}) AS amount
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
@@ -176,7 +279,8 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     run: () => {
       // Making this sync is faster!
       const rows = db.runQuery<{ amount: number }>(
-        `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
+        `SELECT SUM(${getAmountSql()}) as amount
+           FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
            AND category = '${cat.id}' AND a.offbudget = 0`,
@@ -197,7 +301,12 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
 }
 
 function handleAccountChange(months, oldValue, newValue) {
-  if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
+  if (
+    !oldValue ||
+    oldValue.offbudget !== newValue.offbudget ||
+    // While multiple currencies are off amounts count as they are
+    (oldValue.currency !== newValue.currency && isSqlConversionEnabled())
+  ) {
     const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
       `
         SELECT DISTINCT(category) as category FROM transactions
@@ -283,6 +392,8 @@ export function triggerBudgetChanges(oldValues, newValues) {
   sheet.startTransaction();
 
   try {
+    handleConversionChanges(createdMonths, oldValues, newValues);
+
     newValues.forEach((items, table) => {
       const old = oldValues.get(table);
 
