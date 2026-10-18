@@ -331,15 +331,23 @@ async function createCategory({
 
 async function updateCategory(category: CategoryEntity): Promise<void> {
   try {
-    await db.updateCategory(
-      categoryModel.toDb({
-        ...category,
-        // The API types `fields` as a Partial, and db.update() only writes the
-        // keys it is given, so a partial that omits `name` must stay omitted
-        // rather than being trimmed into a TypeError (#8857).
-        ...(category.name !== undefined && { name: category.name.trim() }),
-      }),
+    // The API types `fields` as a Partial, and db.update() only writes the
+    // keys it is given, so a partial that omits `name` must stay omitted
+    // rather than being trimmed into a TypeError (#8857).
+    const payload = {
+      ...category,
+      ...(category.name !== undefined && { name: category.name.trim() }),
+    };
+    const hasWritableField = Object.keys(payload).some(
+      key => key !== 'id' && Reflect.get(payload, key) !== undefined,
     );
+    if (!hasWritableField) {
+      throw APIError('No fields to update');
+    }
+
+    // Use update conversion so insert defaults (e.g. template_settings) are
+    // not applied and accidentally overwrite existing values.
+    await db.updateCategory(categoryModel.toDb(payload, { update: true }));
   } catch (e) {
     if (
       e instanceof Error &&

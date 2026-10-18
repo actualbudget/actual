@@ -37,4 +37,14 @@ describe('category-update', () => {
     const [updated] = vi.mocked(db.updateCategory).mock.calls[0];
     expect(updated).toMatchObject({ name: 'Groceries' });
   });
+
+  it('rejects an empty update with a clear error', async () => {
+    await expect(
+      app.handlers['category-update']({
+        id: 'category-id',
+      } as Parameters<(typeof app.handlers)['category-update']>[0]),
+    ).rejects.toThrow('No fields to update');
+
+    expect(db.updateCategory).not.toHaveBeenCalled();
+  });
 });
