@@ -286,7 +286,7 @@ export function CurrencySettings() {
               <Trans>
                 Results are only accurate when there is an exchange rate on or
                 before every transaction date. Amounts dated before your
-                earliest rate use a later one instead.
+                earliest rate use a later one instead and are marked with ≈.
               </Trans>
             </Text>
           )}
