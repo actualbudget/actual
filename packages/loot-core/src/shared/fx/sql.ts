@@ -2,6 +2,7 @@ import { lastDayOfMonth } from '#shared/months';
 import type { IntegerAmount } from '#shared/util';
 
 import { convertAmount } from './convert';
+import { getEffectiveCurrency } from './currency';
 import type { OwnLineStarts } from './ownLines';
 import { buildRateIndex, findRate } from './rates';
 import type { RateIndex, RateRecord } from './rates';
@@ -145,6 +146,28 @@ export function convertBudgetAmount(
     return 0;
   }
   return convertAtMonthRate(amount, currency, state.defaultCurrencyCode, month);
+}
+
+// The other side of a transfer, in the currency of its own account. While
+// multiple currencies are off transfers mirror their amount, as they
+// always have.
+export function convertTransferAmount(
+  amount: IntegerAmount,
+  fromAccountCurrency: string | null | undefined,
+  toAccountCurrency: string | null | undefined,
+  date: string | undefined,
+): IntegerAmount {
+  if (!state.enabled) {
+    return amount;
+  }
+  const from = getEffectiveCurrency(
+    fromAccountCurrency,
+    state.defaultCurrencyCode,
+  );
+  const to = getEffectiveCurrency(toAccountCurrency, state.defaultCurrencyCode);
+  return from !== to
+    ? convertBetweenCurrencies(amount, from, to, date)
+    : amount;
 }
 
 // Converts an amount of an account in `currency` into the default currency
