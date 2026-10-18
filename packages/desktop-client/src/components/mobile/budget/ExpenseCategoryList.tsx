@@ -60,7 +60,7 @@ export function ExpenseCategoryList({
     onMoveCategory(categoryId, {
       groupId: categoryGroup.id,
       ...findSortDown(
-        categories,
+        categories.filter(c => c.id !== categoryId),
         dropPosition === 'before' ? 'top' : 'bottom',
         String(targetKey),
       ),

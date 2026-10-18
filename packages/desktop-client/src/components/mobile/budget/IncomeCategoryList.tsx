@@ -44,15 +44,20 @@ export function IncomeCategoryList({
     id: CategoryEntity['id'],
     targetId: CategoryEntity['id'] | null,
   ) {
-    const category = categories.find(c => c.id === id);
-    if (!category) {
+    const currentIndex = categories.findIndex(c => c.id === id);
+    const category = categories[currentIndex];
+    if (!category || targetId === id) {
       return;
     }
     const others = categories.filter(c => c.id !== id);
     const targetIndex = targetId
       ? others.findIndex(c => c.id === targetId)
       : -1;
-    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    const newIndex = targetIndex === -1 ? others.length : targetIndex;
+    if (newIndex === currentIndex) {
+      return;
+    }
+    const position = newIndex + 1;
     moveCategoryMutation.mutate(
       { id, groupId: categoryGroup.id, targetId },
       {
@@ -102,12 +107,13 @@ export function IncomeCategoryList({
     },
     onReorder: e => {
       const [key] = e.keys;
+      const draggedId = String(key);
       const { targetId } = findSortDown(
-        categories,
+        categories.filter(c => c.id !== draggedId),
         e.target.dropPosition === 'before' ? 'top' : 'bottom',
         String(e.target.key),
       );
-      moveCategory(String(key), targetId);
+      moveCategory(draggedId, targetId);
     },
   });
 

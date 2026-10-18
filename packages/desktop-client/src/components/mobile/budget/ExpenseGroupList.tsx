@@ -74,7 +74,19 @@ export function ExpenseGroupList({
       .flatMap(group => group.categories ?? [])
       .find(c => c.id === id);
     const group = categoryGroups.find(g => g.id === groupId);
-    if (!category || !group) {
+    if (!category || !group || targetId === id) {
+      return;
+    }
+    const visibleCategories = (group.categories ?? []).filter(
+      c => !c.hidden || showHiddenCategories,
+    );
+    const currentIndex = visibleCategories.findIndex(c => c.id === id);
+    const others = visibleCategories.filter(c => c.id !== id);
+    const targetIndex = targetId
+      ? others.findIndex(c => c.id === targetId)
+      : -1;
+    const newIndex = targetIndex === -1 ? others.length : targetIndex;
+    if (currentIndex !== -1 && newIndex === currentIndex) {
       return;
     }
     const hasNameConflict = (group.categories ?? []).some(
@@ -84,13 +96,7 @@ export function ExpenseGroupList({
       reorderCategory.mutate({ id, groupId, targetId });
       return;
     }
-    const others = (group.categories ?? []).filter(
-      c => c.id !== id && (!c.hidden || showHiddenCategories),
-    );
-    const targetIndex = targetId
-      ? others.findIndex(c => c.id === targetId)
-      : -1;
-    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    const position = newIndex + 1;
     reorderCategory.mutate(
       { id, groupId, targetId },
       {
@@ -114,15 +120,20 @@ export function ExpenseGroupList({
     id: CategoryGroupEntity['id'],
     targetId: CategoryGroupEntity['id'] | null,
   ) {
-    const group = categoryGroups.find(g => g.id === id);
-    if (!group) {
+    const currentIndex = categoryGroups.findIndex(g => g.id === id);
+    const group = categoryGroups[currentIndex];
+    if (!group || targetId === id) {
       return;
     }
     const others = categoryGroups.filter(g => g.id !== id);
     const targetIndex = targetId
       ? others.findIndex(g => g.id === targetId)
       : -1;
-    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    const newIndex = targetIndex === -1 ? others.length : targetIndex;
+    if (newIndex === currentIndex) {
+      return;
+    }
+    const position = newIndex + 1;
     moveCategoryGroup.mutate(
       { id, targetId },
       {
@@ -193,12 +204,13 @@ export function ExpenseGroupList({
     },
     onReorder: e => {
       const [key] = e.keys;
+      const draggedId = String(key);
       const { targetId } = findSortDown(
-        categoryGroups,
+        categoryGroups.filter(g => g.id !== draggedId),
         e.target.dropPosition === 'before' ? 'top' : 'bottom',
         String(e.target.key),
       );
-      moveGroup(String(key), targetId);
+      moveGroup(draggedId, targetId);
     },
   });
 
