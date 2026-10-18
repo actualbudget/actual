@@ -5,18 +5,25 @@ import { styles } from '@actual-app/components/styles';
 import * as Platform from '@actual-app/core/shared/platform';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useForeignCurrencyCode } from '#hooks/useMultiCurrency';
 
 import { CalculatorAmountInput } from './CalculatorAmountInput';
 import type { CalculatorAmountInputProps } from './CalculatorAmountInput';
 import { FocusableAmountInput } from './FocusableAmountInput';
 
-export type AmountInputProps = Omit<CalculatorAmountInputProps, 'onFocus'> & {
+export type AmountInputProps = Omit<
+  CalculatorAmountInputProps,
+  'onFocus' | 'currencyCode'
+> & {
   disableNativeAutoFocusOnIOS?: boolean;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string;
   onFocus?: (event?: FocusEvent<HTMLInputElement>) => void;
 };
 
 export const AmountInput = memo(function AmountInput({
   autoFocus = false,
+  currencyCode,
   disableNativeAutoFocusOnIOS = false,
   disabled,
   inputRef,
@@ -30,6 +37,7 @@ export const AmountInput = memo(function AmountInput({
   ...props
 }: AmountInputProps) {
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
+  const foreignCurrencyCode = useForeignCurrencyCode(currencyCode);
   const fallbackAutoFocus =
     autoFocus && !(disableNativeAutoFocusOnIOS && Platform.isIOSAgent);
   const [focused, setFocused] = useState(fallbackAutoFocus);
@@ -46,6 +54,7 @@ export const AmountInput = memo(function AmountInput({
         {...props}
         autoFocus={autoFocus}
         autoFocusIndirect={disableNativeAutoFocusOnIOS}
+        currencyCode={foreignCurrencyCode}
         disabled={disabled}
         inputRef={inputRef}
         negate={negate}
@@ -62,6 +71,7 @@ export const AmountInput = memo(function AmountInput({
   return (
     <FocusableAmountInput
       {...props}
+      currencyCode={currencyCode}
       disabled={disabled}
       focused={focused}
       inputRef={inputRef}
