@@ -408,6 +408,11 @@ describe('API CRUD operations', () => {
     await expect(
       api.getCategoryTemplateAmount(month, noTemplateId),
     ).rejects.toThrow('has no template');
+
+    await api.updateNote(categoryId, '#goal 100\n#goal 200');
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('Only one #goal is allowed per category');
   });
 
   //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance

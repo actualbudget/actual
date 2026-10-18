@@ -376,13 +376,16 @@ export async function dryRunCategoryTemplate({
   if (categoryData.length === 0) {
     return { budgeted: 0, perTemplate: templates.map(() => 0) };
   }
-  const { contexts } = await computeTemplates(
+  const { contexts, errors } = await computeTemplates(
     month,
     true,
     { [categoryId]: templates },
     categoryData,
     true,
   );
+  if (errors.length > 0) {
+    throw new Error(errors.join('\n\n'));
+  }
   const ctx = contexts.find(c => c.category.id === categoryId);
   if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
   const values = ctx.getValues();

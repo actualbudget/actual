@@ -253,6 +253,23 @@ describe('dryRunCategoryTemplate', () => {
     expect(result.budgeted).toBe(500000);
     expect(result.perTemplate).toEqual([180000, 320000]);
   });
+
+  it('throws when the templates fail validation', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+    setupAqlForCategoryLookup(category);
+
+    const templates: Template[] = [
+      { type: 'goal', amount: 100, directive: 'goal' },
+      { type: 'goal', amount: 200, directive: 'goal' },
+    ];
+    await expect(
+      dryRunCategoryTemplate({
+        month: '2024-01',
+        categoryId: category.id,
+        templates,
+      }),
+    ).rejects.toThrow('Groceries: Only one #goal is allowed per category');
+  });
 });
 
 describe('applyMultipleCategoryTemplates', () => {

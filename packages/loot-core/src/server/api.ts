@@ -593,12 +593,16 @@ handlers['api/budget-get-category-template-amount'] = withMutation(
         `budget-get-category-template-amount: category "${categoryId}" has no template`,
       );
     }
-    const { budgeted } = await handlers['budget/dry-run-category-template']({
-      month,
-      categoryId,
-      templates,
-    });
-    return budgeted;
+    try {
+      const { budgeted } = await handlers['budget/dry-run-category-template']({
+        month,
+        categoryId,
+        templates,
+      });
+      return budgeted;
+    } catch (e) {
+      throw APIError(`budget-get-category-template-amount: ${e.message}`);
+    }
   },
 );
 
