@@ -1,6 +1,6 @@
 import { logger } from '#platform/server/log';
 import * as db from '#server/db';
-import type { RateResolution } from '#server/exchange-rates/app';
+import type { RateResolution, selectRate } from '#server/exchange-rates/app';
 import * as sheet from '#server/sheet';
 import {
   getDefaultCurrencyCode,
@@ -9,9 +9,16 @@ import {
 import { nativeToBase } from '#shared/exchange-rate';
 import * as monthUtils from '#shared/months';
 import { MAX_SAFE_NUMBER } from '#shared/util';
-import type { FxRateUsed } from '#types/models';
+import type { ExchangeRateEntity, FxRateUsed } from '#types/models';
+
+import {
+  readReservationInputs,
+  setReservations,
+  walkReservations,
+} from './reservations';
 
 type RateUsed = FxRateUsed;
+type SelectRate = typeof selectRate;
 
 type UnavailableReason =
   | 'rate-unavailable'
@@ -117,6 +124,94 @@ export type FxWalkRow = {
   transaction_amount: number | null;
 };
 
+type ValuationSnapshot = {
+  accounts: FxWalkAccount[];
+  /** Each account's dated top-level rows in date order, future included. */
+  rows: Map<string, FxWalkRow[]>;
+  rates: ExchangeRateEntity[];
+};
+
+/** The valuation inputs, read synchronously. */
+function readValuationSnapshot(budgetCurrency: string): ValuationSnapshot {
+  const accounts = db.runQuery<FxWalkAccount>(
+    `SELECT id, name, currency, currency_precision FROM accounts
+       WHERE tombstone = 0 AND offbudget = 0 AND currency IS NOT NULL
+         AND currency != ?
+       ORDER BY sort_order, name`,
+    [budgetCurrency],
+    true,
+  );
+  const rows = new Map<string, FxWalkRow[]>(
+    accounts.map(account => [account.id, []]),
+  );
+  for (const row of db.runQuery<{
+    acct: string;
+    date: number;
+    amount: number;
+    transaction_amount: number | null;
+  }>(
+    `SELECT t.acct, t.date, t.amount, t.transaction_amount FROM transactions t
+       JOIN accounts a ON a.id = t.acct
+       WHERE a.tombstone = 0 AND a.offbudget = 0 AND a.currency IS NOT NULL
+         AND a.currency != ? AND t.tombstone = 0 AND t.isChild = 0
+         AND t.date IS NOT NULL
+       ORDER BY t.date, t.id`,
+    [budgetCurrency],
+    true,
+  )) {
+    rows.get(row.acct)?.push({
+      date: db.fromDateRepr(row.date),
+      amount: row.amount,
+      transaction_amount: row.transaction_amount,
+    });
+  }
+  const rates = db.runQuery<ExchangeRateEntity>(
+    'SELECT * FROM exchange_rates WHERE base_currency = ? AND tombstone = 0',
+    [budgetCurrency],
+    true,
+  );
+  return { accounts, rows, rates };
+}
+
+/** The valuation rate on a day, from the snapshot's rate rows. */
+function snapshotRates(
+  snapshot: ValuationSnapshot,
+  budgetCurrency: string,
+  selectRate: SelectRate,
+) {
+  return (currency: string, date: string) =>
+    rateUsed(
+      selectRate(snapshot.rates, {
+        baseCurrency: budgetCurrency,
+        quoteCurrency: currency,
+        date,
+      }),
+    );
+}
+
+function walkSnapshot(
+  snapshot: ValuationSnapshot,
+  months: string[],
+  today: string,
+  rateOn: (currency: string, date: string) => RateUsed | null,
+) {
+  return walkFxValuation({
+    accounts: snapshot.accounts,
+    rowsOf: id =>
+      (snapshot.rows.get(id) ?? []).filter(row => row.date <= today),
+    months,
+    today,
+    basePrecision: getRecordedAmountPrecision(),
+    rateOn,
+  });
+}
+
+// Loaded on use: the rates app registers handlers when imported, and the
+// budget modules that import this one load before the handler registry.
+async function loadSelectRate(): Promise<SelectRate> {
+  return (await import('#server/exchange-rates/app')).selectRate;
+}
+
 /**
  * The monthly valuation bridge (MC-8.1) of on-budget accounts in other
  * currencies, from the first given month through the current one: each
@@ -130,65 +225,14 @@ export async function fxValuation(
   const current = monthUtils.monthFromDate(today);
   if (!months.some(m => m <= current)) return [];
   const budgetCurrency = await getDefaultCurrencyCode();
-  const bp = getRecordedAmountPrecision();
-  const accounts = await db.all<FxWalkAccount>(
-    `SELECT id, name, currency, currency_precision FROM accounts
-       WHERE tombstone = 0 AND offbudget = 0 AND currency IS NOT NULL
-         AND currency != ?
-       ORDER BY sort_order, name`,
-    [budgetCurrency],
+  const selectRate = await loadSelectRate();
+  const snapshot = readValuationSnapshot(budgetCurrency);
+  return walkSnapshot(
+    snapshot,
+    months,
+    today,
+    snapshotRates(snapshot, budgetCurrency, selectRate),
   );
-  const rows = new Map<string, FxWalkRow[]>();
-  for (const account of accounts) {
-    rows.set(
-      account.id,
-      (
-        await db.all<{
-          date: number;
-          amount: number;
-          transaction_amount: number | null;
-        }>(
-          `SELECT date, amount, transaction_amount FROM transactions
-           WHERE acct = ? AND tombstone = 0 AND isChild = 0
-             AND date IS NOT NULL AND date <= ? ORDER BY date, id`,
-          [account.id, db.toDateRepr(today)],
-        )
-      ).map(row => ({ ...row, date: db.fromDateRepr(row.date) })),
-    );
-  }
-  const walk = (rateOn: (currency: string, date: string) => RateUsed | null) =>
-    walkFxValuation({
-      accounts,
-      rowsOf: id => rows.get(id) ?? [],
-      months,
-      today,
-      basePrecision: bp,
-      rateOn,
-    });
-  // Which closes need a rate depends only on the row sums, so a first pass
-  // finds them; each is then resolved once, in walk order.
-  const rates = new Map<string, RateUsed | null>();
-  walk((currency, date) => {
-    rates.set(`${currency}|${date}`, null);
-    return null;
-  });
-  // Loaded on use: the rates app registers handlers when imported, and the
-  // budget modules that import this one load before the handler registry.
-  const { resolveRate } = await import('#server/exchange-rates/app');
-  for (const key of rates.keys()) {
-    const [currency, date] = key.split('|');
-    rates.set(
-      key,
-      rateUsed(
-        await resolveRate({
-          baseCurrency: budgetCurrency,
-          quoteCurrency: currency,
-          date,
-        }),
-      ),
-    );
-  }
-  return walk((currency, date) => rates.get(`${currency}|${date}`) ?? null);
 }
 
 /**
@@ -408,8 +452,10 @@ export function walkFxValuation({
 }
 
 /**
- * Writes each created month's `fx-changes` cell from the bridge (envelope
- * budgets only); months after the current one hold 0.
+ * Writes each created month's `fx-changes` cell from the bridge, and its
+ * `reservation-changes` from the currency pockets (envelope budgets only),
+ * from one synchronous snapshot in one sheet transaction. Months after the
+ * current one hold no FX change.
  */
 export async function refreshFxChanges() {
   const pass = ++refreshPass;
@@ -418,11 +464,18 @@ export async function refreshFxChanges() {
   const meta = spreadsheet.meta();
   if (meta.budgetType !== 'envelope' || !meta.createdMonths) return;
   const months = [...(meta.createdMonths as Set<string>)];
-  // ponytail: a full pass over months and foreign accounts; narrow it to
+  // ponytail: a full pass over months, accounts and lanes; narrow it to
   // the months after the earliest change if it measurably slows loads.
   const today = monthUtils.currentDay();
+  const budgetCurrency = await getDefaultCurrencyCode();
+  const selectRate = await loadSelectRate();
+  if (pass !== refreshPass || sheet.get() !== spreadsheet) return;
+
+  const snapshot = readValuationSnapshot(budgetCurrency);
+  const rateOn = memoRates(snapshotRates(snapshot, budgetCurrency, selectRate));
+  const fx = walkSnapshot(snapshot, months, today, rateOn);
   const bridge = new Map(
-    (await fxValuation(months, today)).map(entry => [
+    fx.map(entry => [
       entry.month,
       {
         value: sumAmounts([entry.posted, entry.broughtForward]).value,
@@ -430,28 +483,82 @@ export async function refreshFxChanges() {
       },
     ]),
   );
-  if (pass !== refreshPass || sheet.get() !== spreadsheet) return;
+  const reservations = walkReservations({
+    months,
+    today,
+    basePrecision: getRecordedAmountPrecision(),
+    accounts: snapshot.accounts,
+    rowsOf: id => snapshot.rows.get(id) ?? [],
+    ...readReservationInputs(),
+    fx,
+    rateOn,
+  });
+
   sheet.startTransaction();
   try {
+    const write = (
+      sheetName: string,
+      name: string,
+      value: number | boolean | string,
+    ) => {
+      if (spreadsheet.getCellValueLoose(sheetName, name) !== value) {
+        spreadsheet.set(`${sheetName}!${name}`, value);
+      }
+    };
     for (const month of months) {
       const sheetName = monthUtils.sheetForMonth(month);
       const result = bridge.get(month);
       const value = result?.value ?? null;
-      const incomplete = result ? result.incomplete || value === null : false;
       // Incomplete aggregates contribute zero on every device and reopen.
-      const adjustment = value ?? 0;
-      if (spreadsheet.getCellValue(sheetName, 'fx-incomplete') !== incomplete) {
-        spreadsheet.set(`${sheetName}!fx-incomplete`, incomplete);
-      }
-      if (spreadsheet.getCellValue(sheetName, 'fx-changes') !== adjustment) {
-        spreadsheet.set(`${sheetName}!fx-changes`, adjustment);
+      write(
+        sheetName,
+        'fx-incomplete',
+        result ? result.incomplete || value === null : false,
+      );
+      write(sheetName, 'fx-changes', value ?? 0);
+      const reserved = reservations.get(month);
+      write(sheetName, 'reservation-changes', reserved?.changes ?? 0);
+      write(sheetName, 'reservation-incomplete', reserved?.incomplete ?? false);
+      // Each foreign lane's value, with its status: a sheet cell cannot
+      // hold an unknown value, so it holds 0 beside the reason.
+      for (const { lane, value: laneValue } of reserved?.laneValues ?? []) {
+        const representable =
+          laneValue !== null &&
+          laneValue <= BigInt(MAX_SAFE_NUMBER) &&
+          laneValue >= -BigInt(MAX_SAFE_NUMBER);
+        write(
+          sheetName,
+          `pocket-value-${lane}`,
+          representable ? Number(laneValue) : 0,
+        );
+        write(
+          sheetName,
+          `pocket-value-status-${lane}`,
+          representable
+            ? 'resolved'
+            : laneValue === null
+              ? 'unknown'
+              : 'amount-out-of-range',
+        );
       }
     }
+    setReservations(reservations);
   } finally {
     sheet.endTransaction();
   }
   lastDay = today;
   if (monthUtils.currentDay() !== today) scheduleFxRefresh();
+}
+
+function memoRates(
+  lookup: (currency: string, date: string) => RateUsed | null,
+) {
+  const rates = new Map<string, RateUsed | null>();
+  return (currency: string, date: string) => {
+    const key = `${currency}|${date}`;
+    if (!rates.has(key)) rates.set(key, lookup(currency, date));
+    return rates.get(key)!;
+  };
 }
 
 function refreshInBackground() {
@@ -489,6 +596,7 @@ export function startFxDayWatch() {
 
 export function stopFxDayWatch() {
   refreshPass++;
+  setReservations(new Map());
   if (dayWatch) clearInterval(dayWatch);
   if (pending) clearTimeout(pending);
   dayWatch = null;

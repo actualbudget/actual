@@ -1,6 +1,5 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import * as exchangeRates from '#server/exchange-rates/app';
 import {
   exchangeRateId,
   app as exchangeRatesApp,
@@ -8,6 +7,7 @@ import {
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import { amountPair } from '#server/sync/coupled-cells';
+import * as currency from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 
 import { createAllBudgets } from './base';
@@ -483,14 +483,15 @@ describe('Sol review regressions', () => {
     const release = new Promise<void>(resolve => {
       releaseRead = resolve;
     });
-    const resolveRate = exchangeRates.resolveRate;
+    // The pass's last await before its synchronous snapshot.
+    const getCode = currency.getDefaultCurrencyCode;
     const spy = vi
-      .spyOn(exchangeRates, 'resolveRate')
-      .mockImplementationOnce(async options => {
-        const old = await resolveRate(options);
+      .spyOn(currency, 'getDefaultCurrencyCode')
+      .mockImplementationOnce(async () => {
+        const code = await getCode();
         notifyReached();
         await release;
-        return old;
+        return code;
       });
     onTestFinished(() => {
       releaseRead();
