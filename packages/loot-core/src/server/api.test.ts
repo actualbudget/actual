@@ -8,6 +8,7 @@ import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
+import { app as fxApp } from './fx/app';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
@@ -219,6 +220,68 @@ describe('API handlers', () => {
       await expect(handlers['api/account-groups-get']()).resolves.toEqual([]);
       const after = await handlers['api/accounts-get']();
       expect(after[0].account_group_id).toBeNull();
+    });
+  });
+
+  describe('api/exchange-rates', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+
+      handlers['exchange-rates-get'] = fxApp.handlers['exchange-rates-get'];
+      handlers['exchange-rate-create'] = fxApp.handlers['exchange-rate-create'];
+      handlers['exchange-rate-update'] = fxApp.handlers['exchange-rate-update'];
+      handlers['exchange-rate-delete'] = fxApp.handlers['exchange-rate-delete'];
+      handlers['accounts-get'] = accountsApp.handlers['accounts-get'];
+      handlers['account-create'] = accountsApp.handlers['account-create'];
+    });
+
+    it('round-trips exchange rates', async () => {
+      const id = await handlers['api/exchange-rate-create']({
+        exchangeRate: {
+          from_currency: 'USD',
+          to_currency: 'CAD',
+          rate: 1.38,
+          date: '2026-10-01',
+        },
+      });
+      await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([
+        {
+          id,
+          from_currency: 'USD',
+          to_currency: 'CAD',
+          rate: 1.38,
+          date: '2026-10-01',
+          source: 'manual',
+        },
+      ]);
+
+      await handlers['api/exchange-rate-update']({ id, fields: { rate: 1.4 } });
+      const updated = await handlers['api/exchange-rates-get']();
+      expect(updated[0].rate).toBe(1.4);
+
+      await handlers['api/exchange-rate-delete']({ id });
+      await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([]);
+    });
+
+    it('exposes and updates the account currency', async () => {
+      const id = await handlers['api/account-create']({
+        account: { name: 'US Savings', currency: 'USD' },
+        initialBalance: 12345,
+      });
+      let accounts = await handlers['api/accounts-get']();
+      expect(accounts[0]).toMatchObject({ id, currency: 'USD' });
+
+      const [starting] = await db.getTransactions(id);
+      expect(starting.amount).toBe(12345);
+
+      await handlers['api/account-update']({
+        id,
+        fields: { currency: null },
+      });
+      accounts = await handlers['api/accounts-get']();
+      expect(accounts[0].currency).toBeNull();
     });
   });
 
