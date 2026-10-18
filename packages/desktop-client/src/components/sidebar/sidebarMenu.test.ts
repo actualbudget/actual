@@ -5,7 +5,9 @@ import {
   moveSidebarMenuItem,
   parseSidebarMenuItems,
   parseSidebarStartPage,
+  serializeSidebarMenuItems,
 } from './sidebarMenu';
+import type { SidebarMenuItemId } from './sidebarMenu';
 
 describe('parseSidebarMenuItems', () => {
   it('returns the defaults when nothing is saved', () => {
@@ -17,6 +19,7 @@ describe('parseSidebarMenuItems', () => {
       { id: 'tags', hidden: true },
       { id: 'rules', hidden: true },
       { id: 'bank-sync', hidden: true },
+      { id: 'exchange-rates', hidden: true },
     ]);
   });
 
@@ -35,6 +38,7 @@ describe('parseSidebarMenuItems', () => {
       { id: 'tags', hidden: true },
       { id: 'rules', hidden: false },
       { id: 'bank-sync', hidden: true },
+      { id: 'exchange-rates', hidden: true },
     ];
 
     expect(parseSidebarMenuItems(JSON.stringify(saved))).toEqual(saved);
@@ -53,7 +57,7 @@ describe('parseSidebarMenuItems', () => {
     expect(items.filter(item => item.id === 'reports')).toEqual([
       { id: 'reports', hidden: false },
     ]);
-    expect(items).toHaveLength(7);
+    expect(items).toHaveLength(8);
   });
 
   it('inserts missing pages at their default position', () => {
@@ -72,6 +76,7 @@ describe('parseSidebarMenuItems', () => {
       'tags',
       'rules',
       'bank-sync',
+      'exchange-rates',
     ]);
     expect(items.find(item => item.id === 'reports')?.hidden).toBe(false);
     expect(items.find(item => item.id === 'payees')?.hidden).toBe(true);
@@ -88,6 +93,46 @@ describe('parseSidebarMenuItems', () => {
       { id: 'budget', hidden: false },
       { id: 'reports', hidden: false },
     ]);
+  });
+});
+
+describe('serializeSidebarMenuItems', () => {
+  // Exchange Rates is only available with multiple currencies on
+  const isAvailable = (id: SidebarMenuItemId) => id !== 'exchange-rates';
+
+  it('leaves out an unavailable page that was never saved', () => {
+    const items = moveSidebarMenuItem(
+      parseSidebarMenuItems(undefined),
+      'rules',
+      'budget',
+      'before',
+    );
+
+    expect(
+      JSON.parse(serializeSidebarMenuItems(items, undefined, isAvailable)),
+    ).toEqual(items.filter(item => item.id !== 'exchange-rates'));
+  });
+
+  it('keeps an unavailable page that was saved before', () => {
+    const savedRaw = JSON.stringify(getDefaultSidebarMenuItems());
+    const items = moveSidebarMenuItem(
+      parseSidebarMenuItems(savedRaw),
+      'rules',
+      'budget',
+      'before',
+    );
+
+    expect(
+      JSON.parse(serializeSidebarMenuItems(items, savedRaw, isAvailable)),
+    ).toEqual(items);
+  });
+
+  it('saves every available page', () => {
+    const items = getDefaultSidebarMenuItems();
+
+    expect(
+      JSON.parse(serializeSidebarMenuItems(items, undefined, () => true)),
+    ).toEqual(items);
   });
 });
 

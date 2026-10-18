@@ -6,6 +6,7 @@ export const SIDEBAR_MENU_ITEM_IDS = [
   'tags',
   'rules',
   'bank-sync',
+  'exchange-rates',
 ] as const;
 
 export type SidebarMenuItemId = (typeof SIDEBAR_MENU_ITEM_IDS)[number];
@@ -21,6 +22,7 @@ const SETTINGS_SECTION_IDS = [
   'tags',
   'rules',
   'bank-sync',
+  'exchange-rates',
 ] as const;
 
 export type SettingsSectionId = (typeof SETTINGS_SECTION_IDS)[number];
@@ -65,7 +67,8 @@ export function getSidebarMenuItemPath(
   return isSettingsSection(id) && !isInSidebar ? `/settings/${id}` : `/${id}`;
 }
 
-export function parseSidebarMenuItems(
+// The known pages of a saved list, in their saved order
+function parseSavedSidebarMenuItems(
   raw: string | undefined,
 ): SidebarMenuItem[] {
   let saved: SidebarMenuItem[] = [];
@@ -97,6 +100,14 @@ export function parseSidebarMenuItems(
     }
   }
 
+  return saved;
+}
+
+export function parseSidebarMenuItems(
+  raw: string | undefined,
+): SidebarMenuItem[] {
+  const saved = parseSavedSidebarMenuItems(raw);
+
   for (const [defaultIdx, item] of getDefaultSidebarMenuItems().entries()) {
     if (saved.some(savedItem => savedItem.id === item.id)) {
       continue;
@@ -112,6 +123,24 @@ export function parseSidebarMenuItems(
   }
 
   return saved;
+}
+
+// The list to save. A page that isn't available, like Exchange Rates while
+// multiple currencies are off, is left out unless it was saved before, so
+// arranging the sidebar doesn't save pages of features that are off.
+export function serializeSidebarMenuItems(
+  items: SidebarMenuItem[],
+  savedRaw: string | undefined,
+  isItemAvailable: (id: SidebarMenuItemId) => boolean,
+): string {
+  const saved = parseSavedSidebarMenuItems(savedRaw);
+  return JSON.stringify(
+    items.filter(
+      item =>
+        isItemAvailable(item.id) ||
+        saved.some(savedItem => savedItem.id === item.id),
+    ),
+  );
 }
 
 export function parseSidebarStartPage(

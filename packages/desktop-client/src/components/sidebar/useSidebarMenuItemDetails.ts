@@ -2,6 +2,7 @@ import type { ComponentType, SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  SvgCurrencyDollar,
   SvgLibrary,
   SvgReports,
   SvgTag,
@@ -34,5 +35,6 @@ export function useSidebarMenuItemDetails(): Record<
     tags: { title: t('Tags'), Icon: SvgTag },
     rules: { title: t('Rules'), Icon: SvgTuning },
     'bank-sync': { title: t('Bank Sync'), Icon: SvgLibrary },
+    'exchange-rates': { title: t('Exchange Rates'), Icon: SvgCurrencyDollar },
   };
 }
