@@ -92,25 +92,12 @@ export function getGoCardlessErrorDetails(
   error: unknown,
 ): GoCardlessErrorDetails | undefined {
   const apiError = findApiError(error);
-
-  let status: number | undefined;
-  let body: unknown;
-
-  if (apiError) {
-    status = apiError.response.status;
-    body = apiError.response.data;
-  } else if (error instanceof Error && 'details' in error) {
-    // `GenericGoCardlessError` carries the raw response body rather than a
-    // `GoCardlessApiError`, so there is no status to report.
-    body = (error as { details: unknown }).details;
-  } else {
+  if (!apiError) {
     return undefined;
   }
 
-  const details = {
-    ...(status !== undefined ? { status } : {}),
-    ...readErrorBody(body),
+  return {
+    status: apiError.response.status,
+    ...readErrorBody(apiError.response.data),
   };
-
-  return Object.keys(details).length > 0 ? details : undefined;
 }

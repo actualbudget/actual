@@ -67,16 +67,28 @@ describe('getGoCardlessErrorDetails', () => {
     });
   });
 
-  it('reads a raw response body carried by GenericGoCardlessError', () => {
-    const error = new GenericGoCardlessError({
-      summary: 'Institution service unavailable',
-      detail: 'The institution is temporarily unavailable',
-    });
+  it('reads the GoCardless response wrapped by GenericGoCardlessError', () => {
+    const error = new GenericGoCardlessError(
+      apiError(502, {
+        summary: 'Institution service unavailable',
+        detail: 'The institution is temporarily unavailable',
+      }),
+    );
 
     expect(getGoCardlessErrorDetails(error)).toEqual({
+      status: 502,
       summary: 'Institution service unavailable',
       detail: 'The institution is temporarily unavailable',
     });
+  });
+
+  it('ignores details that did not come from a GoCardless response', () => {
+    const error = new GenericGoCardlessError({
+      summary: 'Not from GoCardless',
+      detail: 'Must not reach the client',
+    });
+
+    expect(getGoCardlessErrorDetails(error)).toBeUndefined();
   });
 
   it('keeps the status when GoCardless sent no parseable body', () => {
