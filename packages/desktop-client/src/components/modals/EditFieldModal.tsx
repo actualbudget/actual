@@ -113,6 +113,7 @@ export function EditFieldModal({
           embedded
           autoFocus
           onSelect={apply}
+          clearOnBlur={false}
         />
       );
       break;
