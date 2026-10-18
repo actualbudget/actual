@@ -30,9 +30,10 @@ import { CellValue } from '#components/spreadsheet/CellValue';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useDragRef } from '#hooks/useDragRef';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { openAccountCloseModal } from '#modals/modalsSlice';
+import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { isTouchDevice } from '#util/isTouchDevice';
@@ -123,6 +124,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const needsTooltip = !!account?.id && !isTouchDevice();
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
   const balanceCell = <CellValue binding={query} type="financial" />;
 
@@ -153,6 +155,23 @@ export function Account<FieldName extends SheetFields<'account'>>({
             onClick: () =>
               dispatch(openAccountCloseModal({ accountId: account.id })),
           },
+      ...(account && isMultiCurrencyEnabled
+        ? [
+            {
+              name: 'account-settings',
+              text: t('Account settings'),
+              onClick: () =>
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'account-settings',
+                      options: { accountId: account.id },
+                    },
+                  }),
+                ),
+            },
+          ]
+        : []),
     ],
   });
 
