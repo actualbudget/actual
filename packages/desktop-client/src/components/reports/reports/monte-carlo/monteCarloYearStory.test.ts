@@ -84,6 +84,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'guardrails',
         factor: 0.75,
+        previousFactor: 1,
         planned: 40_000,
         adjusted: 16_875,
         action: 'cut',
@@ -91,15 +92,7 @@ describe('buildMonteCarloYearStory', () => {
         referenceRate: 0.0714,
       },
     });
-    expect(
-      story(row, {
-        hasSurplusPot: true,
-        withdrawalRule: {
-          ...WITHDRAWAL_RULE_DEFAULTS,
-          preservationCutPct: 0.25,
-        },
-      }),
-    ).toEqual([
+    expect(story(row, { hasSurplusPot: true })).toEqual([
       "Guardrails cut this year's spending from 40000.00 to 16875.00 because the withdrawal rate had climbed too far above the plan.",
       'The minimum spending floor then lifted it to 20000.00.',
       'Spent 20000.00 as planned, funded from the pots.',
@@ -118,6 +111,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'guardrails',
         factor: 1,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 4_000,
         action: 'none',
@@ -137,6 +131,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'boundaries',
         factor: 0.9,
+        previousFactor: 0.9,
         planned: 4_000,
         adjusted: 3_600,
         action: 'none',
@@ -153,6 +148,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'boundaries',
         factor: 0.9,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 3_600,
         action: 'cut',
@@ -168,6 +164,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'ratcheting',
         factor: 1.05,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 4_200,
         action: 'raise',
@@ -191,6 +188,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'guardrails',
         factor: 0.298936,
+        previousFactor: 0.298936 / 1.2,
         planned: 60_000,
         adjusted: 17_936,
         action: 'raise',
@@ -198,14 +196,7 @@ describe('buildMonteCarloYearStory', () => {
         referenceRate: 0.053553,
       },
     });
-    expect(
-      story(raiseStillBelowPlan, {
-        withdrawalRule: {
-          ...WITHDRAWAL_RULE_DEFAULTS,
-          prosperityIncreasePct: 0.2,
-        },
-      })[0],
-    ).toBe(
+    expect(story(raiseStillBelowPlan)[0]).toBe(
       "Guardrails raised this year's spending from 14947.00 to 17936.00 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is below the 60000.00 planned.",
     );
 
@@ -214,6 +205,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'boundaries',
         factor: 1.2 * 0.9,
+        previousFactor: 1.2,
         planned: 4_000,
         adjusted: 4_320,
         action: 'cut',
@@ -222,6 +214,26 @@ describe('buildMonteCarloYearStory', () => {
     });
     expect(story(cutStillAbovePlan)[0]).toBe(
       "Boundaries cut this year's spending from 4800.00 to 4320.00 because the withdrawal rate rose above 6%. With earlier changes included, that is above the 4000.00 planned.",
+    );
+  });
+
+  it('survives a 100% cut, which zeroes the factor', () => {
+    const row = makeRow({
+      withdrawal: 0,
+      plannedSpending: 0,
+      spent: 0,
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'guardrails',
+        factor: 0,
+        previousFactor: 0.8,
+        planned: 4_000,
+        adjusted: 0,
+        action: 'cut',
+      },
+    });
+    expect(story(row)[0]).toBe(
+      "Guardrails cut this year's spending from 3200.00 to 0.00 because the withdrawal rate had climbed too far above the plan. With earlier changes included, that is below the 4000.00 planned.",
     );
   });
 

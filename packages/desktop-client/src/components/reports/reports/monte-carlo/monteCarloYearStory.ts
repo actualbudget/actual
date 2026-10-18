@@ -99,29 +99,6 @@ function getRuleName(
   return translate('Boundaries');
 }
 
-// The step this year's decision applied to the rule's running factor,
-// signed: -0.1 for a 10% cut, 0.2 for a 20% raise, 0 when nothing changed
-function getRuleStep(
-  explanation: Extract<MonteCarloRuleExplanation, { kind: 'factor' }>,
-  withdrawalRule: MonteCarloWithdrawalRuleConfig,
-): number {
-  if (explanation.action === 'cut') {
-    return explanation.rule === 'boundaries'
-      ? -withdrawalRule.upperCutPct
-      : -withdrawalRule.preservationCutPct;
-  }
-  if (explanation.action === 'raise') {
-    if (explanation.rule === 'boundaries') {
-      return withdrawalRule.lowerIncreasePct;
-    }
-    if (explanation.rule === 'ratcheting') {
-      return withdrawalRule.ratchetIncreasePct;
-    }
-    return withdrawalRule.prosperityIncreasePct;
-  }
-  return 0;
-}
-
 // Where the rule's result sits against the plan once earlier years'
 // changes are counted - only worth saying when there were some, since a
 // first change moves from the planned amount itself
@@ -193,18 +170,15 @@ function getRuleDecisionSentence(
   const adjusted = format(explanation.adjusted, 'financial');
   // A change steps the running factor, so spending moves from last
   // year's adjusted level - the planned amount only when nothing had
-  // changed before
-  const previousFactor =
-    explanation.factor / (1 + getRuleStep(explanation, withdrawalRule));
-  // Rounded because amounts are whole minor units and the formatter
-  // rejects fractions
+  // changed before. Rounded because amounts are whole minor units and
+  // the formatter rejects fractions
   const from = format(
-    Math.round(explanation.planned * previousFactor),
+    Math.round(explanation.planned * explanation.previousFactor),
     'financial',
   );
   const earlierChanges = getEarlierChangesSentence(
     explanation,
-    previousFactor,
+    explanation.previousFactor,
     format,
     translate,
   );
