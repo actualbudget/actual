@@ -13,6 +13,7 @@ import type {
 import { css } from '@emotion/css';
 
 import { useMoveCategoryMutation } from '#budget';
+import { findSortDown } from '#components/budget/util';
 import { useTouchReorder } from '#hooks/useTouchReorder';
 import { useUndo } from '#hooks/useUndo';
 
@@ -34,41 +35,46 @@ export function IncomeCategoryList({
   onShowCategory,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
-  const moveCategory = useMoveCategoryMutation();
+  const moveCategoryMutation = useMoveCategoryMutation();
   const { showUndoNotification } = useUndo();
   const isReordering = useReorderMode();
   const [announcement, setAnnouncement] = useState('');
 
+  function moveCategory(
+    id: CategoryEntity['id'],
+    targetId: CategoryEntity['id'] | null,
+  ) {
+    const category = categories.find(c => c.id === id);
+    if (!category) {
+      return;
+    }
+    const others = categories.filter(c => c.id !== id);
+    const targetIndex = targetId
+      ? others.findIndex(c => c.id === targetId)
+      : -1;
+    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    moveCategoryMutation.mutate(
+      { id, groupId: categoryGroup.id, targetId },
+      {
+        onSuccess: () => {
+          setAnnouncement(
+            t('{{name}} moved to position {{position}} in {{groupName}}', {
+              name: category.name,
+              position,
+              groupName: categoryGroup.name,
+            }),
+          );
+          showUndoNotification({
+            message: t('Moved {{name}}', { name: category.name }),
+          });
+        },
+      },
+    );
+  }
+
   const touchReorder = useTouchReorder({
     isEnabled: isReordering,
-    onMoveCategory: (id, { groupId, targetId }) => {
-      const category = categories.find(c => c.id === id);
-      if (!category) {
-        return;
-      }
-      const others = categories.filter(c => c.id !== id);
-      const targetIndex = targetId
-        ? others.findIndex(c => c.id === targetId)
-        : -1;
-      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
-      moveCategory.mutate(
-        { id, groupId, targetId },
-        {
-          onSuccess: () => {
-            setAnnouncement(
-              t('{{name}} moved to position {{position}} in {{groupName}}', {
-                name: category.name,
-                position,
-                groupName: categoryGroup.name,
-              }),
-            );
-            showUndoNotification({
-              message: t('Moved {{name}}', { name: category.name }),
-            });
-          },
-        },
-      );
-    },
+    onMoveCategory: (id, { targetId }) => moveCategory(id, targetId),
   });
 
   const { dragAndDropHooks } = useDragAndDrop({
@@ -96,53 +102,12 @@ export function IncomeCategoryList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
-
-      if (!categoryToMove) {
-        throw new Error(
-          `Internal error: category with ID ${categoryIdToMove} not found.`,
-        );
-      }
-
-      if (!categoryToMove.group) {
-        throw new Error(
-          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
-        );
-      }
-
-      const targetCategoryId = e.target.key as CategoryEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          targetId: targetCategoryId,
-        });
-      } else if (e.target.dropPosition === 'after') {
-        const targetCategoryIndex = categories.findIndex(
-          c => c.id === targetCategoryId,
-        );
-
-        if (targetCategoryIndex === -1) {
-          throw new Error(
-            `Internal error: category with ID ${targetCategoryId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categories[targetCategoryIndex + 1];
-
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          // Due to the way `moveCategory` works, we use the category next to the
-          // actual target category here because `moveCategory` always shoves the
-          // category *before* the target category.
-          // On the other hand, using `null` as `targetId` moves the category
-          // to the end of the list.
-          targetId: nextToTargetCategory?.id || null,
-        });
-      }
+      const { targetId } = findSortDown(
+        categories,
+        e.target.dropPosition === 'before' ? 'top' : 'bottom',
+        String(e.target.key),
+      );
+      moveCategory(String(key), targetId);
     },
   });
 

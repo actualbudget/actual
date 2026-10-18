@@ -16,7 +16,9 @@ import {
   useMoveCategoryGroupMutation,
   useReorderCategoryMutation,
 } from '#budget';
+import { findSortDown } from '#components/budget/util';
 import { useTouchReorder } from '#hooks/useTouchReorder';
+import type { CategoryDropTarget } from '#hooks/useTouchReorder';
 import { useUndo } from '#hooks/useUndo';
 
 import { ExpenseGroupHeader } from './ExpenseGroupHeader';
@@ -53,77 +55,96 @@ export function ExpenseGroupList({
   const { showUndoNotification } = useUndo();
   const isReordering = useReorderMode();
   const [announcement, setAnnouncement] = useState('');
+  const [wasReordering, setWasReordering] = useState(isReordering);
+
+  if (wasReordering !== isReordering) {
+    setWasReordering(isReordering);
+    setAnnouncement(
+      isReordering
+        ? t('Reorder mode on, use the drag handles to move categories')
+        : t('Reorder mode off'),
+    );
+  }
+
+  function moveCategory(
+    id: CategoryEntity['id'],
+    { groupId, targetId }: CategoryDropTarget,
+  ) {
+    const category = categoryGroups
+      .flatMap(group => group.categories ?? [])
+      .find(c => c.id === id);
+    const group = categoryGroups.find(g => g.id === groupId);
+    if (!category || !group) {
+      return;
+    }
+    const hasNameConflict = (group.categories ?? []).some(
+      c => c.id !== id && c.name.toUpperCase() === category.name.toUpperCase(),
+    );
+    if (hasNameConflict) {
+      reorderCategory.mutate({ id, groupId, targetId });
+      return;
+    }
+    const others = (group.categories ?? []).filter(
+      c => c.id !== id && (!c.hidden || showHiddenCategories),
+    );
+    const targetIndex = targetId
+      ? others.findIndex(c => c.id === targetId)
+      : -1;
+    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    reorderCategory.mutate(
+      { id, groupId, targetId },
+      {
+        onSuccess: () => {
+          setAnnouncement(
+            t('{{name}} moved to position {{position}} in {{groupName}}', {
+              name: category.name,
+              position,
+              groupName: group.name,
+            }),
+          );
+          showUndoNotification({
+            message: t('Moved {{name}}', { name: category.name }),
+          });
+        },
+      },
+    );
+  }
+
+  function moveGroup(
+    id: CategoryGroupEntity['id'],
+    targetId: CategoryGroupEntity['id'] | null,
+  ) {
+    const group = categoryGroups.find(g => g.id === id);
+    if (!group) {
+      return;
+    }
+    const others = categoryGroups.filter(g => g.id !== id);
+    const targetIndex = targetId
+      ? others.findIndex(g => g.id === targetId)
+      : -1;
+    const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
+    moveCategoryGroup.mutate(
+      { id, targetId },
+      {
+        onSuccess: () => {
+          setAnnouncement(
+            t('{{name}} moved to position {{position}}', {
+              name: group.name,
+              position,
+            }),
+          );
+          showUndoNotification({
+            message: t('Moved {{name}}', { name: group.name }),
+          });
+        },
+      },
+    );
+  }
 
   const touchReorder = useTouchReorder({
     isEnabled: isReordering,
-    onMoveCategory: (id, { groupId, targetId }) => {
-      const category = categoryGroups
-        .flatMap(group => group.categories ?? [])
-        .find(c => c.id === id);
-      const group = categoryGroups.find(g => g.id === groupId);
-      if (!category || !group) {
-        return;
-      }
-      const hasNameConflict = (group.categories ?? []).some(
-        c =>
-          c.id !== id && c.name.toUpperCase() === category.name.toUpperCase(),
-      );
-      if (hasNameConflict) {
-        reorderCategory.mutate({ id, groupId, targetId });
-        return;
-      }
-      const others = (group.categories ?? []).filter(
-        c => c.id !== id && (!c.hidden || showHiddenCategories),
-      );
-      const targetIndex = targetId
-        ? others.findIndex(c => c.id === targetId)
-        : -1;
-      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
-      reorderCategory.mutate(
-        { id, groupId, targetId },
-        {
-          onSuccess: () => {
-            setAnnouncement(
-              t('{{name}} moved to position {{position}} in {{groupName}}', {
-                name: category.name,
-                position,
-                groupName: group.name,
-              }),
-            );
-            showUndoNotification({
-              message: t('Moved {{name}}', { name: category.name }),
-            });
-          },
-        },
-      );
-    },
-    onMoveGroup: (id, targetId) => {
-      const group = categoryGroups.find(g => g.id === id);
-      if (!group) {
-        return;
-      }
-      const others = categoryGroups.filter(g => g.id !== id);
-      const targetIndex = targetId
-        ? others.findIndex(g => g.id === targetId)
-        : -1;
-      const position = (targetIndex === -1 ? others.length : targetIndex) + 1;
-      moveCategoryGroup.mutate(
-        { id, targetId },
-        {
-          onSuccess: () => {
-            setAnnouncement(
-              t('{{name}} moved to position {{position}}', {
-                name: group.name,
-                position,
-              }),
-            );
-            showUndoNotification({
-              message: t('Moved {{name}}', { name: group.name }),
-            });
-          },
-        },
-      );
-    },
+    onMoveCategory: moveCategory,
+    onMoveGroup: moveGroup,
   });
 
   const { dragAndDropHooks } = useDragAndDrop({
@@ -172,45 +193,12 @@ export function ExpenseGroupList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const groupIdToMove = key as CategoryGroupEntity['id'];
-      const groupToMove = categoryGroups.find(c => c.id === groupIdToMove);
-
-      if (!groupToMove) {
-        throw new Error(
-          `Internal error: category group with ID ${groupIdToMove} not found.`,
-        );
-      }
-
-      const targetGroupId = e.target.key as CategoryEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        moveCategoryGroup.mutate({
-          id: groupToMove.id,
-          targetId: targetGroupId,
-        });
-      } else if (e.target.dropPosition === 'after') {
-        const targetGroupIndex = categoryGroups.findIndex(
-          c => c.id === targetGroupId,
-        );
-
-        if (targetGroupIndex === -1) {
-          throw new Error(
-            `Internal error: category group with ID ${targetGroupId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categoryGroups[targetGroupIndex + 1];
-
-        moveCategoryGroup.mutate({
-          id: groupToMove.id,
-          // Due to the way `moveCategory` works, we use the category next to the
-          // actual target category here because `moveCategory` always shoves the
-          // category *before* the target category.
-          // On the other hand, using `null` as `targetId` moves the category
-          // to the end of the list.
-          targetId: nextToTargetCategory?.id || null,
-        });
-      }
+      const { targetId } = findSortDown(
+        categoryGroups,
+        e.target.dropPosition === 'before' ? 'top' : 'bottom',
+        String(e.target.key),
+      );
+      moveGroup(String(key), targetId);
     },
   });
 
@@ -229,6 +217,7 @@ export function ExpenseGroupList({
           isCollapsed,
           onToggleCollapse,
           touchReorder.draggingId,
+          moveCategory,
         ]}
         dragAndDropHooks={dragAndDropHooks}
       >
@@ -239,6 +228,7 @@ export function ExpenseGroupList({
             month={month}
             onShowCategoryGroup={onShowCategoryGroup}
             onShowCategory={onShowCategory}
+            onMoveCategory={moveCategory}
             showBudgetedColumn={showBudgetedColumn}
             show3Columns={show3Columns}
             showHiddenCategories={showHiddenCategories}

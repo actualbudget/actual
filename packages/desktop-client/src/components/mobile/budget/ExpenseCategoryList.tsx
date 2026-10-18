@@ -14,8 +14,8 @@ import type {
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { useReorderCategoryMutation } from '#budget';
 import { findSortDown } from '#components/budget/util';
+import type { CategoryDropTarget } from '#hooks/useTouchReorder';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
@@ -29,6 +29,10 @@ type ExpenseCategoryListProps = {
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
   onShowCategory: (id: string) => void;
+  onMoveCategory: (
+    id: CategoryEntity['id'],
+    target: CategoryDropTarget,
+  ) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
   draggingId: string | null;
@@ -39,13 +43,13 @@ export function ExpenseCategoryList({
   categories,
   month,
   onShowCategory,
+  onMoveCategory,
   show3Columns,
   showBudgetedColumn,
   shouldHideCategory,
   draggingId,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
-  const reorderCategory = useReorderCategoryMutation();
 
   // Moves a dragged category into this group, before or after the drop target.
   // Handles drops from this group and from other expense groups.
@@ -53,8 +57,7 @@ export function ExpenseCategoryList({
     categoryId: CategoryEntity['id'],
     { key: targetKey, dropPosition }: ItemDropTarget,
   ) => {
-    reorderCategory.mutate({
-      id: categoryId,
+    onMoveCategory(categoryId, {
       groupId: categoryGroup.id,
       ...findSortDown(
         categories,

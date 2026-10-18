@@ -9,6 +9,8 @@ import type {
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
+import type { CategoryDropTarget } from '#hooks/useTouchReorder';
+
 import { ExpenseCategoryList } from './ExpenseCategoryList';
 import { ExpenseGroupHeader } from './ExpenseGroupHeader';
 
@@ -19,6 +21,10 @@ type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
   showHiddenCategories: boolean;
   onShowCategoryGroup: (id: CategoryGroupEntity['id']) => void;
   onShowCategory: (id: CategoryEntity['id']) => void;
+  onMoveCategory: (
+    id: CategoryEntity['id'],
+    target: CategoryDropTarget,
+  ) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   showBudgetedColumn: boolean;
@@ -30,6 +36,7 @@ type ExpenseGroupListItemProps = ComponentPropsWithoutRef<
 export function ExpenseGroupListItem({
   onShowCategoryGroup,
   onShowCategory,
+  onMoveCategory,
   month,
   showBudgetedColumn,
   show3Columns,
@@ -83,6 +90,7 @@ export function ExpenseGroupListItem({
           categories={categories}
           month={month}
           onShowCategory={onShowCategory}
+          onMoveCategory={onMoveCategory}
           shouldHideCategory={shouldHideCategory}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}

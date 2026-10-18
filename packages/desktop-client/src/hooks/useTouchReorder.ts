@@ -191,12 +191,14 @@ export function useTouchReorder({
   const cleanupRef = useRef<(() => void) | null>(null);
   const onMoveCategoryRef = useRef(onMoveCategory);
   const onMoveGroupRef = useRef(onMoveGroup);
+  const isEnabledRef = useRef(isEnabled);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [indicatorTop, setIndicatorTop] = useState<number | null>(null);
 
   useEffect(() => {
     onMoveCategoryRef.current = onMoveCategory;
     onMoveGroupRef.current = onMoveGroup;
+    isEnabledRef.current = isEnabled;
   });
 
   useEffect(() => {
@@ -305,6 +307,7 @@ export function useTouchReorder({
       setIndicatorTop(null);
       if (
         !shouldCommit ||
+        !isEnabledRef.current ||
         dropSlot == null ||
         isSameSlot(dropSlot, originalSlot)
       ) {
