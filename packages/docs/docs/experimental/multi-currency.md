@@ -63,9 +63,21 @@ Inside a foreign account, amounts are always entered in the account's currency. 
 
 **Hide decimals** applies to amounts in the default currency, including accounts set to it explicitly. Amounts in other currencies always show their decimals. Amounts in another currency without decimals, such as the yen in a budget in dollars, are shown in whole units, and amounts converted into a currency without decimals are rounded to whole units.
 
+With **Show balances of other currencies as**, you can choose how the balance of a foreign account is shown: in its header, its running balance and its chart. It applies to all accounts from settings, and **Show balance as** in an account's settings overrides it for that account:
+
+- **Original currency**: `USD$760.03`
+- **Converted to default currency**: `1,053.62`
+- **Both**: `USD$760.03 (1,053.62)`
+
 Converted amounts are never editable. An amount marked with ≈ is approximate: there is no exchange rate for it yet, or only one from a later date.
 
+The balance chart of a foreign account follows the same choice. With **Both**, the two balances are drawn on top of each other, each on its own scale, so pesos and dollars are both readable and you can see how the value of money held in another currency changed. Each month is valued with the **Convert past amounts with** setting: the latest rate, or the rate on each date. Charts of several accounts together, such as All accounts, show converted balances.
+
 When you export transactions to a CSV file, amounts keep the currency of their account. Once an exported account has a currency of its own, the file gets a **Currency** column; other exports are unchanged.
+
+## Totals
+
+- **Account totals**, such as All accounts, On budget or account groups, convert every account at the latest rate and update as soon as a rate changes.
 
 ## Known Limitations
 
