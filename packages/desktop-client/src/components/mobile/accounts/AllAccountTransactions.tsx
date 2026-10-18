@@ -10,7 +10,9 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { getAccountsInScope } from '#components/currency/totalScopes';
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
+import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
@@ -35,6 +37,7 @@ export function AllAccountTransactions() {
 }
 
 function TransactionListWithPreviews() {
+  const { data: allAccounts = [] } = useAccounts();
   const { t } = useTranslation();
   const location = useLocation();
   // Filter conditions passed by drill-downs (e.g. report activity)
@@ -203,6 +206,7 @@ function TransactionListWithPreviews() {
       }
       transactions={transactionsToDisplay}
       balance={balanceBindings.balance}
+      balanceAccounts={getAccountsInScope(allAccounts, 'all')}
       isLoadingMore={isLoadingMoreTransactions}
       onLoadMore={fetchMoreTransactions}
       searchPlaceholder={t('Search All Accounts')}
