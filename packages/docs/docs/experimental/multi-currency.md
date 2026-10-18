@@ -55,6 +55,26 @@ The same tab exports all your rates in this format, for example to move them to 
 
 Until a currency has a rate, its amounts count 1:1 against the default currency, the same way they added up before the feature existed. Such amounts are marked with ≈.
 
+## How Amounts Are Shown
+
+Amounts in the default currency show no symbol unless you choose otherwise in **Settings → General → Currency**: you already know they are your own money, the same way a price tag at home says $100 rather than CAD$100. Amounts in another currency always show its code, for example `USD$760.03`, so what is different stands out and can't be confused with default-currency amounts.
+
+Inside a foreign account, amounts are always entered in the account's currency. The column headers of the transaction table show it, for example **Payment (USD)**, and each transaction shows its amount in that currency; hover it to see its value in the default currency. On a phone, transactions show their amount in that currency too, and the value in the default currency is shown under the amount when you open one. Reconciling a foreign account works in its currency too: its balances, and the bank balance you enter, keep all of that currency's decimals.
+
+**Hide decimals** applies to amounts in the default currency, including accounts set to it explicitly. Amounts in other currencies always show their decimals. Amounts in another currency without decimals, such as the yen in a budget in dollars, are shown in whole units, and amounts converted into a currency without decimals are rounded to whole units.
+
+With **Show balances of other currencies as**, you can choose how the balance of a foreign account is shown: in its header, its running balance and its chart. It applies to all accounts from settings, and **Show balance as** in an account's settings overrides it for that account:
+
+- **Original currency**: `USD$760.03`
+- **Converted to default currency**: `1,053.62`
+- **Both**: `USD$760.03 (1,053.62)`
+
+Converted amounts are never editable. An amount marked with ≈ is approximate: there is no exchange rate for it yet, or only one from a later date.
+
+When you export transactions to a CSV file, amounts keep the currency of their account. Once an exported account has a currency of its own, the file gets a **Currency** column; other exports are unchanged.
+
 ## Known Limitations
 
+- Transfers between accounts in different currencies aren't linked. Services such as Wise or a bank each apply their own rate and fees, so record what left one account and what arrived in the other as two separate transactions. A transfer between currencies records the same number on both sides and is marked with a warning.
+- Amounts outside the transactions and balances of an account, such as in rules, schedules and filters, use the format of the default currency. In a budget in yen, an amount in dollars there shows without its cents until you edit it; it is always kept as you entered it.
 - Rates can't be fetched automatically yet.
