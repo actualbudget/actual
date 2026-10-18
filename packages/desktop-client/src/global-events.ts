@@ -101,6 +101,12 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       );
     }
 
+    // Undoing a synced preference, e.g. the default currency, only changes
+    // the database
+    if (tables.includes('preferences')) {
+      promises.push(store.dispatch(loadPrefs()));
+    }
+
     const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
