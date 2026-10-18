@@ -13,6 +13,7 @@ import type {
   SidebarMenuItemId,
 } from '#components/sidebar/sidebarMenu';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { mergeSyncedPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
@@ -25,9 +26,18 @@ export function useSidebarMenu() {
   const syncServerStatus = useSyncServerStatus();
   const isTestEnv = useIsTestEnv();
   const isUsingServer = syncServerStatus !== 'no-server' || isTestEnv;
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
-  const isItemAvailable = (id: SidebarMenuItemId) =>
-    id !== 'bank-sync' || isUsingServer;
+  const isItemAvailable = (id: SidebarMenuItemId) => {
+    switch (id) {
+      case 'bank-sync':
+        return isUsingServer;
+      case 'exchange-rates':
+        return isMultiCurrencyEnabled;
+      default:
+        return true;
+    }
+  };
 
   const items = parseSidebarMenuItems(itemsPref);
   const availableItems = items.filter(item => isItemAvailable(item.id));
