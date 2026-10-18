@@ -75,9 +75,16 @@ The balance chart of a foreign account follows the same choice. With **Both**, t
 
 When you export transactions to a CSV file, amounts keep the currency of their account. Once an exported account has a currency of its own, the file gets a **Currency** column; other exports are unchanged.
 
-## Totals
+## Totals, Reports and the Budget
 
 - **Account totals**, such as All accounts, On budget or account groups, convert every account at the latest rate and update as soon as a rate changes.
+- **Reports** follow the **Convert past amounts with** setting, and so do the balance chart, running balances and the value in the default currency shown for a transaction:
+  - **Latest rate** values past amounts at today's rate.
+  - **Rate on each date** values them at the rate of their date. The net worth report then shows how exchange rates moved your net worth over time. This is only accurate when there are rates on or before every transaction date; the reports page warns when a currency has transactions older than its first rate.
+- **The budget** converts spending and income of foreign on-budget accounts with the rate of each transaction's date, whatever the setting. Months before a pair's first rate use its earliest rate. Adding or changing a rate revalues the budget from that rate's date until the pair's next rate, and every earlier month too when it is the pair's first rate; it can also change conversions that go through that currency.
+- **Formula cards** convert `QUERY` and `BALANCE_OF` results into the default currency, following the **Convert past amounts with** setting.
+
+Because the budget uses the rate of each transaction's date, while account totals use the latest rate, the two can differ for foreign on-budget accounts. That difference is the exchange gain or loss on money held in another currency.
 
 ## Known Limitations
 
