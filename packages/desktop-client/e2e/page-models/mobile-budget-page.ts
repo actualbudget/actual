@@ -211,8 +211,39 @@ export class MobileBudgetPage {
     await this.page.mouse.up();
   }
 
+  async dragGroupBelow(groupName: string, targetGroupName: string) {
+    const sourceRow = this.#getRowForCategoryGroup(groupName);
+    const targetRow = this.#getRowForCategoryGroup(targetGroupName);
+    const handle = sourceRow.getByTestId('reorder-handle');
+    await targetRow.evaluate(element =>
+      element.scrollIntoView({ block: 'center' }),
+    );
+    const handleBox = await handle.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+    if (!handleBox || !targetBox) {
+      throw new Error('Could not locate the group handle or target group row.');
+    }
+    const x = handleBox.x + handleBox.width / 2;
+    const y = handleBox.y + handleBox.height / 2;
+    await this.page.mouse.move(x, y);
+    await this.page.mouse.down();
+    await this.page.mouse.move(x, y - 5, { steps: 2 });
+    await this.page.mouse.move(x, targetBox.y + targetBox.height * 0.75, {
+      steps: 8,
+    });
+    await this.page.mouse.up();
+  }
+
   async tapGroupHandle(idx: number) {
     await this.categoryGroupRows.nth(idx).getByTestId('reorder-handle').click();
+  }
+
+  #getRowForCategoryGroup(categoryGroupName: string) {
+    return this.categoryGroupRows.filter({
+      has: this.page
+        .getByTestId('category-group-name')
+        .getByText(categoryGroupName, { exact: true }),
+    });
   }
 
   getGroupCategoryNames(categoryGroupName: string) {

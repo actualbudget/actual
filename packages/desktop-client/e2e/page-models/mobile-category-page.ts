@@ -1,3 +1,4 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import type { Locator, Page } from '@playwright/test';
 
 import { BudgetAmountSheet } from './mobile-budget-amount-sheet';
@@ -11,6 +12,7 @@ export class MobileCategoryPage {
   readonly balance: Locator;
   readonly budgetedButton: Locator;
   readonly transactionList: Locator;
+  readonly spendingHistoryHeading: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -25,6 +27,22 @@ export class MobileCategoryPage {
       name: /^Edit budgeted amount for/,
     });
     this.transactionList = page.getByLabel('Transaction list');
+    this.spendingHistoryHeading = page.getByText(
+      /^(Spending|Income) · last \d+ months$/,
+    );
+  }
+
+  getSpendingHistoryBar(month: string) {
+    const escaped = monthUtils
+      .format(month, 'MMMM yyyy')
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return this.page.getByRole('button', { name: new RegExp(`^${escaped}: `) });
+  }
+
+  getSpendingHistoryDetail(month: string, amount: string) {
+    return this.page.getByText(
+      `${monthUtils.format(month, "MMMM ''yy")} · ${amount}`,
+    );
   }
 
   async waitFor(...options: Parameters<Locator['waitFor']>) {

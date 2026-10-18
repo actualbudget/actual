@@ -7,6 +7,9 @@ export class CategoryActionsSheet {
   readonly locator: Locator;
   readonly editBudgetedAmountRow: Locator;
   readonly autoHoldRow: Locator;
+  readonly rolloverRow: Locator;
+  readonly transferRow: Locator;
+  readonly coverRow: Locator;
   readonly copyLastMonthBudgetRow: Locator;
   readonly setTo3MonthAverageRow: Locator;
   readonly setTo6MonthAverageRow: Locator;
@@ -25,6 +28,15 @@ export class CategoryActionsSheet {
       name: /^Edit budgeted amount/,
     });
     this.autoHoldRow = locator.getByRole('button', { name: /^Auto hold/ });
+    this.rolloverRow = locator.getByRole('button', {
+      name: /^Rollover overspending/,
+    });
+    this.transferRow = locator.getByRole('button', {
+      name: 'Transfer to another category',
+    });
+    this.coverRow = locator.getByRole('button', {
+      name: 'Cover overspending',
+    });
     this.copyLastMonthBudgetRow = locator.getByRole('button', {
       name: /^Copy last month.s budget$/,
     });
@@ -87,7 +99,19 @@ export class CategoryActionsSheet {
     return this.page.getByRole('dialog', { name: 'Modal dialog' });
   }
 
+  async transfer() {
+    await this.transferRow.click();
+
+    return this.page.getByRole('dialog', { name: 'Modal dialog' });
+  }
+
   async delete() {
     await this.deleteCategoryRow.click();
+  }
+
+  async confirmDelete() {
+    await this.locator
+      .getByRole('button', { name: 'Delete', exact: true })
+      .click();
   }
 }

@@ -332,6 +332,40 @@ budgetTypes.forEach(budgetType => {
       await expect(page).toMatchThemeScreenshots();
     });
 
+    test('shows the spending history on the category page and toggles a month', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const selectedMonth = await budgetPage.getSelectedMonth();
+      const historyMonth = monthUtils.prevMonth(selectedMonth);
+      const categoryPage = await budgetPage.openCategory('Food');
+
+      await expect(categoryPage.spendingHistoryHeading).toBeVisible();
+
+      const bar = categoryPage.getSpendingHistoryBar(historyMonth);
+      const barLabel = await bar.getAttribute('aria-label');
+      const amount = barLabel?.split(': ')[1];
+      if (!amount) {
+        throw new Error('Failed to read the spending history bar amount.');
+      }
+      const detail = categoryPage.getSpendingHistoryDetail(
+        historyMonth,
+        amount,
+      );
+
+      await expect(bar).toHaveAttribute('aria-pressed', 'false');
+      await expect(detail).toHaveCount(0);
+
+      await bar.click();
+
+      await expect(bar).toHaveAttribute('aria-pressed', 'true');
+      await expect(detail).toBeVisible();
+
+      await bar.click();
+
+      await expect(bar).toHaveAttribute('aria-pressed', 'false');
+      await expect(detail).toHaveCount(0);
+    });
+
     test('moves a category to another group with drag and drop', async () => {
       // Keep both rows on screen so the drag doesn't scroll the page midway.
       await page.setViewportSize({ width: 350, height: 1000 });
@@ -440,6 +474,39 @@ budgetTypes.forEach(budgetType => {
       await budgetPage.exitReorderMode();
     });
 
+    test('reorders category groups with the handle in reorder mode', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const firstGroup = await budgetPage.getCategoryGroupNameForRow(0);
+      const secondGroup = await budgetPage.getCategoryGroupNameForRow(1);
+
+      await budgetPage.enterReorderMode();
+      await budgetPage.dragGroupBelow(firstGroup, secondGroup);
+
+      await expect(budgetPage.categoryGroupNames.nth(0)).toHaveText(
+        secondGroup,
+      );
+      await expect(budgetPage.categoryGroupNames.nth(1)).toHaveText(firstGroup);
+
+      await budgetPage.exitReorderMode();
+    });
+
+    test('disables the budgeted cell while reorder mode is on', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const budgetedButton =
+        await budgetPage.getButtonForBudgeted(categoryName);
+
+      await expect(budgetedButton).toBeEnabled();
+
+      await budgetPage.enterReorderMode();
+      await expect(budgetedButton).toBeDisabled();
+
+      await budgetPage.exitReorderMode();
+      await expect(budgetedButton).toBeEnabled();
+    });
+
     test('checks that the category menu opens from the category page', async () => {
       const budgetPage = await navigation.goToBudgetPage();
 
@@ -507,6 +574,44 @@ budgetTypes.forEach(budgetType => {
       ).toBeVisible();
     });
 
+    test('deletes a category from the category page and returns to the budget', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryGroupName = await budgetPage.getCategoryGroupNameForRow(0);
+      const categoryGroupActions =
+        await budgetPage.openCategoryGroupActions(categoryGroupName);
+      await categoryGroupActions.addCategoryRow.click();
+
+      const newCategoryModal = page.getByRole('dialog', {
+        name: 'Modal dialog',
+      });
+      await newCategoryModal
+        .getByPlaceholder('Category name')
+        .fill('Temporary');
+      await newCategoryModal.getByRole('button', { name: 'Add' }).click();
+      await expect(newCategoryModal).toBeHidden();
+
+      const temporaryRow = budgetPage.categoryNames.filter({
+        hasText: 'Temporary',
+      });
+      await expect(temporaryRow).toHaveCount(1);
+
+      const categoryPage = await budgetPage.openCategory('Temporary');
+      const actionsSheet = await categoryPage.openActions();
+      await actionsSheet.delete();
+
+      await expect(actionsSheet.locator).toContainText('Delete Temporary?');
+      await expect(
+        actionsSheet.locator.getByRole('button', { name: 'Category' }),
+      ).toHaveCount(0);
+
+      await actionsSheet.confirmDelete();
+
+      await expect(page).toHaveURL(/\/budget(\?|$)/);
+      await budgetPage.waitFor();
+      await expect(temporaryRow).toHaveCount(0);
+    });
+
     // Budgeted Cell Tests
 
     test('opens the budget amount sheet from the budgeted cell', async () => {
@@ -520,6 +625,28 @@ budgetTypes.forEach(budgetType => {
       await expect(amountSheet.amountInput).toBeFocused();
       await expect(amountSheet.editNotesRow).toBeVisible();
       await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('edits the month notes from the budget amount sheet', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const noteText = 'Stock up before the party';
+      let amountSheet = await budgetPage.openBudgetAmountFromCell(categoryName);
+
+      await expect(amountSheet.locator).not.toContainText(noteText);
+
+      const notesModal = await amountSheet.openNotes();
+      await notesModal
+        .getByPlaceholder('Notes (markdown supported)')
+        .fill(noteText);
+      await notesModal.getByRole('button', { name: 'Save notes' }).click();
+      await expect(notesModal).toBeHidden();
+
+      amountSheet = await budgetPage.openBudgetAmountFromCell(categoryName);
+
+      await expect(amountSheet.amountInput).toBeVisible();
+      await expect(amountSheet.locator).toContainText(noteText);
     });
 
     test('updates the budgeted amount', async () => {
@@ -666,6 +793,50 @@ budgetTypes.forEach(budgetType => {
         await expect(categoryPage.budgetedButton).toBeVisible();
       }
     });
+
+    test('toggles rollover overspending from the category actions', async () => {
+      const budgetPage = await navigation.goToBudgetPage();
+
+      const categoryName = await budgetPage.getCategoryNameForRow(0);
+      const actionsSheet =
+        await budgetPage.openCategoryActionsWithLongPress(categoryName);
+
+      await expect(actionsSheet.rolloverRow).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      );
+      await actionsSheet.rolloverRow.click();
+      await expect(actionsSheet.rolloverRow).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+      await expect(actionsSheet.locator).toContainText(categoryName);
+      await actionsSheet.close();
+      await budgetPage.waitFor();
+    });
+
+    if (budgetType === 'Envelope') {
+      test('shows the transfer row for a category with a positive balance', async () => {
+        const budgetPage = await navigation.goToBudgetPage();
+
+        const categoryName = await budgetPage.getCategoryNameForRow(0);
+        const amountSheet =
+          await budgetPage.openBudgetAmountFromCell(categoryName);
+        await amountSheet.setBudgetAmount('99999900');
+
+        const actionsSheet =
+          await budgetPage.openCategoryActionsWithLongPress(categoryName);
+
+        await expect(actionsSheet.transferRow).toBeVisible();
+        await expect(actionsSheet.coverRow).toHaveCount(0);
+
+        const transferModal = await actionsSheet.transfer();
+
+        await expect(transferModal).toBeVisible();
+        await expect(transferModal).toContainText(categoryName);
+        await expect(transferModal).toContainText('Transfer this amount:');
+      });
+    }
 
     if (budgetType === 'Envelope') {
       test('toggles auto hold from the income category actions', async () => {

@@ -19,6 +19,12 @@ export class BudgetAmountSheet {
     await this.locator.press('Escape');
   }
 
+  async openNotes() {
+    await this.editNotesRow.click();
+
+    return this.page.getByRole('dialog', { name: 'Modal dialog' });
+  }
+
   async setBudgetAmount(newAmount: string) {
     await expect(this.amountInput).toBeVisible();
     await expect(this.amountInput).toBeFocused();
