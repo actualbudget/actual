@@ -72,4 +72,25 @@ describe('Transfer', () => {
       ),
     ).toBeFalsy();
   });
+
+  test.each([
+    [-150000, 100000, true],
+    [100000, -150000, true],
+    [-150000, -100000, false],
+    [0, 100000, false],
+    [-150000, 0, false],
+  ])(
+    'links %i and %i between currencies: %s',
+    async (fromAmount, toAmount, expected) => {
+      await prepareDatabase();
+
+      expect(
+        transfer.validForTransfer(
+          await createTransaction('one', fromAmount),
+          await createTransaction('two', toAmount),
+          { isCrossCurrency: true },
+        ),
+      ).toBe(expected);
+    },
+  );
 });
