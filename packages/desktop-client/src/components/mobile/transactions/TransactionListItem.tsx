@@ -35,6 +35,7 @@ import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon'
 import { useAccount } from '#hooks/useAccount';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDisplayPayee } from '#hooks/useDisplayPayee';
 import { usePayee } from '#hooks/usePayee';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
@@ -93,6 +94,27 @@ export function TransactionListItem({
   const displayPayee = useDisplayPayee({ transaction });
 
   const account = useAccount(transaction?.account || '');
+  const {
+    isForeignCurrency,
+    getAccountCurrency,
+    formatAmount,
+    formatAccountAmount,
+  } = useCurrencyFormatter();
+  const accountCurrency = account ? getAccountCurrency(account) : null;
+  const isForeign =
+    accountCurrency !== null && isForeignCurrency(accountCurrency);
+  // Transactions of accounts in another currency show their own amount, e.g.
+  // USD$7.60, as on desktop; their value in the default currency is on the
+  // transaction's page. The running balance follows the account's display
+  // mode, like its balance.
+  const formatRowAmount = (value: number) =>
+    isForeign && accountCurrency !== null
+      ? formatAmount(value, accountCurrency)
+      : integerToCurrency(value);
+  const formatRunningBalance = (value: number) =>
+    account && isForeign
+      ? formatAccountAmount(value, account, { date: transaction?.date })
+      : integerToCurrency(value);
   const transferAccount = useAccount(payee?.transfer_acct || '');
   const isPreview = isPreviewId(transaction?.id || '');
   const { schedules = [] } = useCachedSchedules();
@@ -319,7 +341,7 @@ export function TransactionListItem({
                   ...textStyle,
                 }}
               >
-                {integerToCurrency(amount)}
+                {formatRowAmount(amount)}
               </Text>
               {showRunningBalance && runningBalance !== undefined && (
                 <Text
@@ -334,7 +356,7 @@ export function TransactionListItem({
                     }),
                   }}
                 >
-                  {integerToCurrency(runningBalance)}
+                  {formatRunningBalance(runningBalance)}
                 </Text>
               )}
             </View>

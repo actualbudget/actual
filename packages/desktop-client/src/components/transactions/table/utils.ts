@@ -2,9 +2,13 @@ import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { currentDay } from '@actual-app/core/shared/months';
 import {
   amountToInteger,
+  integerToCurrencyForEdit,
   integerToCurrencyWithDecimal,
 } from '@actual-app/core/shared/util';
-import type { CurrencyAmount } from '@actual-app/core/shared/util';
+import type {
+  CurrencyAmount,
+  IntegerAmount,
+} from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -28,9 +32,23 @@ export type TransactionUpdateFunction = <T extends keyof SerializedTransaction>(
   value: SerializedTransaction[T],
 ) => void;
 
+// `foreignCurrencyCode` is given for accounts in another currency than the
+// default one: hiding decimals is chosen for the default currency, so their
+// amounts always show all of that currency's decimal places, and more when
+// they have more.
+function formatEditAmount(
+  amount: IntegerAmount,
+  foreignCurrencyCode: string | undefined,
+) {
+  return foreignCurrencyCode === undefined
+    ? integerToCurrencyWithDecimal(amount)
+    : integerToCurrencyForEdit(amount, foreignCurrencyCode);
+}
+
 export function serializeTransaction(
   transaction: TransactionEntity,
   showZeroInDeposit?: boolean,
+  foreignCurrencyCode?: string,
 ): SerializedTransaction {
   const { amount, date: originalDate } = transaction;
 
@@ -61,8 +79,8 @@ export function serializeTransaction(
   return {
     ...transaction,
     date,
-    debit: debit != null ? integerToCurrencyWithDecimal(debit) : '',
-    credit: credit != null ? integerToCurrencyWithDecimal(credit) : '',
+    debit: debit != null ? formatEditAmount(debit, foreignCurrencyCode) : '',
+    credit: credit != null ? formatEditAmount(credit, foreignCurrencyCode) : '',
   };
 }
 
