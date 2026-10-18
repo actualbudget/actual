@@ -47,6 +47,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -740,7 +741,8 @@ type AccountMenuProps = {
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'account-settings',
   ) => void;
 };
 
@@ -755,6 +757,7 @@ function AccountMenu({
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
   return (
     <Menu
@@ -786,6 +789,14 @@ function AccountMenu({
               {
                 name: 'account-group',
                 text: t('Set account group'),
+              } as const,
+            ]
+          : []),
+        ...(isMultiCurrencyEnabled
+          ? [
+              {
+                name: 'account-settings',
+                text: t('Account settings'),
               } as const,
             ]
           : []),
