@@ -1,23 +1,25 @@
-import { Trans } from 'react-i18next';
-
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
+import { makeAmountFullStyle } from '#components/budget/util';
+import { CellValue } from '#components/spreadsheet/CellValue';
+import { useBudgetBindings } from '#hooks/useBudgetBindings';
 import { useLongPress } from '#hooks/useLongPress';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
 import {
-  COLUMN_HEADING_STYLE,
   getRowGridStyle,
+  GROUP_AMOUNT_STYLE,
   ROW_PRESSABLE_STYLE,
 } from './budgetTableStyles';
+import { CategoryAmountText } from './CategoryAmountText';
 import { CategoryGroupRowName } from './CategoryGroupRowName';
+import { useReorderMode } from './ReorderModeContext';
 
 type IncomeGroupHeaderProps = {
   group: CategoryGroupEntity;
@@ -35,6 +37,7 @@ export function IncomeGroupHeader({
   onToggleCollapse,
 }: IncomeGroupHeaderProps) {
   const dispatch = useDispatch();
+  const isReordering = useReorderMode();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const isTracking = budgetType === 'tracking';
   const { handlers: longPressHandlers, wasRecentLongPress } = useLongPress(
@@ -58,7 +61,7 @@ export function IncomeGroupHeader({
           onToggleCollapse(group.id);
         }
       }}
-      {...longPressHandlers}
+      {...(isReordering ? {} : longPressHandlers)}
       style={{
         ...ROW_PRESSABLE_STYLE,
         ...getRowGridStyle(isTracking ? 1 : 0),
@@ -81,14 +84,46 @@ export function IncomeGroupHeader({
         onPress={() => onShowCategoryGroup(group.id)}
         onToggleCollapse={() => onToggleCollapse(group.id)}
       />
-      {isTracking && (
-        <Text style={{ ...COLUMN_HEADING_STYLE, textAlign: 'right' }}>
-          <Trans>Budgeted</Trans>
-        </Text>
-      )}
-      <Text style={{ ...COLUMN_HEADING_STYLE, textAlign: 'right' }}>
-        <Trans>Received</Trans>
-      </Text>
+      <IncomeGroupCells group={group} isTracking={isTracking} />
     </View>
+  );
+}
+
+type IncomeGroupCellsProps = {
+  group: CategoryGroupEntity;
+  isTracking: boolean;
+};
+
+function IncomeGroupCells({ group, isTracking }: IncomeGroupCellsProps) {
+  const bindings = useBudgetBindings();
+
+  return (
+    <>
+      {isTracking && (
+        <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
+          binding={bindings.groupBudgeted(group.id)}
+          type="financial"
+        >
+          {({ value }) => (
+            <CategoryAmountText value={value} style={GROUP_AMOUNT_STYLE} />
+          )}
+        </CellValue>
+      )}
+      <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
+        binding={bindings.groupSumAmount(group.id)}
+        type="financial"
+      >
+        {({ value }) => (
+          <CategoryAmountText
+            value={value}
+            style={{
+              ...GROUP_AMOUNT_STYLE,
+              fontWeight: 700,
+              ...makeAmountFullStyle(value),
+            }}
+          />
+        )}
+      </CellValue>
+    </>
   );
 }

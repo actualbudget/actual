@@ -62,3 +62,10 @@ export function getRowGridStyle(amountColumns: number): CSSProperties {
     paddingRight: ROW_PADDING_X,
   };
 }
+
+export const GROUP_AMOUNT_STYLE: CSSProperties = {
+  ...styles.tnum,
+  ...styles.verySmallText,
+  color: theme.pageTextLight,
+  textAlign: 'right',
+};

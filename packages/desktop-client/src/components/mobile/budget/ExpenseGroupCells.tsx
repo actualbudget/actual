@@ -1,20 +1,11 @@
-import { styles } from '@actual-app/components/styles';
-import type { CSSProperties } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import type { CategoryGroupEntity } from '@actual-app/core/types/models';
 
 import { makeAmountFullStyle } from '#components/budget/util';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { useBudgetBindings } from '#hooks/useBudgetBindings';
 
+import { GROUP_AMOUNT_STYLE } from './budgetTableStyles';
 import { CategoryAmountText } from './CategoryAmountText';
-
-const GROUP_AMOUNT_STYLE: CSSProperties = {
-  ...styles.tnum,
-  ...styles.verySmallText,
-  color: theme.pageTextLight,
-  textAlign: 'right',
-};
 
 type ExpenseGroupCellsProps = {
   group: CategoryGroupEntity;
