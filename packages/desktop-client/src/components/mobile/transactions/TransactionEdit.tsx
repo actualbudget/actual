@@ -58,6 +58,7 @@ import {
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -93,6 +94,7 @@ import {
 } from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
@@ -174,7 +176,11 @@ function deserializeTransaction(
       monthUtils.currentDay();
   }
 
-  return { ...realTransaction, date, amount: amountToInteger(amount || 0) };
+  return {
+    ...realTransaction,
+    date,
+    amount: amountToInteger(amount || 0),
+  };
 }
 
 export function lookupName(items: CategoryEntity[], id?: CategoryEntity['id']) {
@@ -246,6 +252,8 @@ type FooterProps = {
   onEmptySplitFound: (id: TransactionEntity['id']) => void;
   editingField?: string;
   isFuture: boolean;
+  // Formats an amount of the transaction, in the currency of its account
+  formatAmount: (amount: IntegerAmount) => string;
   onEditField: (
     id: TransactionEntity['id'],
     field: 'category' | 'payee' | 'account' | 'date' | 'amount' | 'notes',
@@ -264,6 +272,7 @@ function Footer({
   editingField,
   onEditField,
   isFuture,
+  formatAmount,
 }: FooterProps) {
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
@@ -329,7 +338,7 @@ function Footer({
               <Trans>
                 Add new split -{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: formatAmount(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
@@ -341,7 +350,7 @@ function Footer({
               <Trans>
                 Amount left:{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: formatAmount(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
@@ -418,6 +427,8 @@ type ChildTransactionEditProps = {
     transaction: TransactionEntity,
   ) => AccountEntity | undefined;
   isOffBudget: boolean;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string;
   isBudgetTransfer: (transaction: TransactionEntity) => boolean;
   onEditField: (
     id: TransactionEntity['id'],
@@ -444,6 +455,7 @@ const ChildTransactionEdit = forwardRef<
       getPayee,
       getTransferAccount,
       isOffBudget,
+      currencyCode,
       isBudgetTransfer,
       onEditField,
       onUpdate,
@@ -506,6 +518,7 @@ const ChildTransactionEdit = forwardRef<
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <SplitAmountInput
               keyboardHeader={keyboardHeader}
+              currencyCode={currencyCode}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
@@ -653,6 +666,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const {
+      defaultCurrencyCode,
+      isForeignCurrency,
+      getAccountCurrency,
+      formatAmount,
+    } = useCurrencyFormatter();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
       'upcomingScheduledTransactionLength',
@@ -1186,6 +1205,17 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const account = getAccount(transaction);
     const isOffBudget = account ? !!account.offbudget : false;
+    const accountCurrency = account ? getAccountCurrency(account) : null;
+    // In another currency, amounts left to split carry its code, like the
+    // amount of the transaction
+    const formatAmountLeft = (amount: IntegerAmount) =>
+      accountCurrency && isForeignCurrency(accountCurrency)
+        ? formatAmount(amount, accountCurrency)
+        : integerToCurrency(amount);
+    const amountLabel =
+      accountCurrency && isForeignCurrency(accountCurrency)
+        ? t('Amount ({{currency}})', { currency: accountCurrency })
+        : t('Amount');
     const title = getPrettyPayee({
       t,
       transaction,
@@ -1229,6 +1259,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
             isFuture={isFuture}
+            formatAmount={formatAmountLeft}
             onEditField={onEditFieldInner}
           />
         }
@@ -1243,9 +1274,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               alignItems: 'center',
             }}
           >
-            <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
+            <FieldLabel title={amountLabel} flush style={{ marginBottom: 0 }} />
             <AmountInput
               value={transaction.amount}
+              currencyCode={account?.currency ?? undefined}
               negate
               disabled={
                 !!editingField &&
@@ -1260,6 +1292,27 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onChange={onTotalAmountUpdate}
               variant="large"
             />
+            {/* Touch screens can't hover to see it, as on desktop */}
+            {accountCurrency &&
+              isForeignCurrency(accountCurrency) &&
+              transaction.amount !== 0 && (
+                <Text
+                  style={{
+                    marginTop: 4,
+                    color: theme.pageTextLight,
+                    fontSize: 13,
+                  }}
+                >
+                  {t('Worth {{amount}} in {{currency}}', {
+                    amount: formatAmount(
+                      Math.abs(amountToInteger(transaction.amount)),
+                      accountCurrency,
+                      { mode: 'converted', date: dateDefaultValue },
+                    ),
+                    currency: defaultCurrencyCode,
+                  })}
+                </Text>
+              )}
           </View>
 
           <View>
@@ -1404,6 +1457,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 };
               }}
               isOffBudget={isOffBudget}
+              currencyCode={account?.currency ?? undefined}
               getCategory={getCategory}
               getPayee={getPayee}
               getTransferAccount={getTransferAccount}
@@ -1414,6 +1468,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               keyboardHeader={
                 <FillRemainingButton
                   remaining={remaining}
+                  formatAmount={formatAmountLeft}
                   onPress={() => {
                     void onUpdateInner(
                       childTrans,
@@ -2170,9 +2225,11 @@ export const TransactionEdit = () => {
 
 function FillRemainingButton({
   remaining,
+  formatAmount,
   onPress,
 }: {
   readonly remaining: number;
+  readonly formatAmount: (amount: IntegerAmount) => string;
   readonly onPress: () => void;
 }) {
   return (
@@ -2192,7 +2249,7 @@ function FillRemainingButton({
         <Trans>
           Use remaining:{' '}
           {{
-            amount: integerToCurrency(Math.abs(remaining)),
+            amount: formatAmount(Math.abs(remaining)),
           }}
         </Trans>
       </Text>
