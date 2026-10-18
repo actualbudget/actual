@@ -46,6 +46,9 @@ import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
+import { FinTSAuthModal } from './modals/FinTSAuthModal';
+import { FinTSConnectModal } from './modals/FinTSConnectModal';
+import { FinTSInitialiseModal } from './modals/FinTSInitialiseModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
@@ -200,6 +203,15 @@ export function Modals() {
 
         case 'akahu-init':
           return <AkahuInitialiseModal key={key} {...modal.options} />;
+
+        case 'fints-init':
+          return <FinTSInitialiseModal key={key} {...modal.options} />;
+
+        case 'fints-connect':
+          return <FinTSConnectModal key={key} {...modal.options} />;
+
+        case 'fints-auth':
+          return <FinTSAuthModal key={key} {...modal.options} />;
 
         case 'enablebanking-init':
           return <EnableBankingInitialiseModal key={key} {...modal.options} />;

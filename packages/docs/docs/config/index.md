@@ -15,7 +15,7 @@ Running into issues with your configuration not being interpreted correctly? Che
 :::
 
 :::tip
-Secrets can be read from a file rather than passed in the environment, which works with Docker secrets and Kubernetes secret volumes. Set `ACTUAL_OPENID_CLIENT_SECRET_FILE` or `ACTUAL_GITHUB_TOKEN_FILE` to the path of a file holding the value. `_FILE`-suffixed environment variables take priority over regular ones. The [CLI](../api/cli.md#environment-variables) supports the same suffix for its own secrets.
+Secrets can be read from a file rather than passed in the environment, which works with Docker secrets and Kubernetes secret volumes. Set `ACTUAL_OPENID_CLIENT_SECRET_FILE`, `ACTUAL_GITHUB_TOKEN_FILE` or `ACTUAL_FINTS_PRODUCT_ID_FILE` to the path of a file holding the value. `_FILE`-suffixed environment variables take priority over regular ones. The [CLI](../api/cli.md#environment-variables) supports the same suffix for its own secrets.
 :::
 
 ## `ACTUAL_DATA_DIR` (config.json: `dataDir`)
@@ -114,3 +114,26 @@ Updates the servers request forwarding trust to remove known proxy IPs from the 
 ## `trustedAuthProxies`
 
 Configure the clients that are allowed to authenticate with HTTP headers. This defaults to what is set in `trustedProxies`, but can be overridden independently. (environment variable: `ACTUAL_TRUSTED_AUTH_PROXIES`, comma separated string).
+
+## `fints`
+
+Settings for [FinTS bank sync](../advanced/bank-sync/fints.md) with German banks.
+
+- `productId`: your personal FinTS product registration number (environment variable: `ACTUAL_FINTS_PRODUCT_ID`). You can also put the number in a file and set `ACTUAL_FINTS_PRODUCT_ID_FILE` to the path of that file. When set, admins cannot change the number from inside Actual.
+- `bankListPath`: optional path to a newer version of the FinTS bank list `fints_institute.csv` (environment variable: `ACTUAL_FINTS_BANK_LIST_PATH`). Actual includes the Deutsche Kreditwirtschaft's list of FinTS banks, which users search when adding a bank login; this setting is only needed to use a newer version than the included one.
+
+### Updating the FinTS Bank List
+
+The Deutsche Kreditwirtschaft publishes new versions of the bank list from time to time, and new versions of Actual include the latest one. To use a newer list before that, set `bankListPath` to it. To update it later, save the new `fints_institute.csv` over the old one. Actual checks the file every few seconds and uses the new list without a restart; the server log shows how many banks it loaded. If the file cannot be read, Actual keeps using the previous list, or the included one, and logs a warning.
+
+:::tip
+When running Actual in Docker, mount the folder that contains the list, not the file itself. A mounted single file keeps showing the old version after the file is replaced.
+
+```yaml
+environment:
+  - ACTUAL_FINTS_BANK_LIST_PATH=/banklist/fints_institute.csv
+volumes:
+  - ./fints-bank-list:/banklist:ro
+```
+
+:::

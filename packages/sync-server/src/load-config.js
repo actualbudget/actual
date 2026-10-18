@@ -288,6 +288,22 @@ const configSchema = convict({
       env: 'ACTUAL_GITHUB_TOKEN',
     },
   },
+  fints: {
+    doc: 'FinTS (German online banking) bank sync configuration.',
+
+    productId: {
+      doc: 'FinTS product registration number issued by the Deutsche Kreditwirtschaft. It is personal to the registrant and must not be shared.',
+      format: String,
+      default: '',
+      env: 'ACTUAL_FINTS_PRODUCT_ID',
+    },
+    bankListPath: {
+      doc: 'Optional path to the FinTS bank list CSV (fints_institute.csv) to look up bank URLs by bank code.',
+      format: String,
+      default: '',
+      env: 'ACTUAL_FINTS_BANK_LIST_PATH',
+    },
+  },
   corsProxy: {
     doc: 'CORS proxy configuration for frontend plugins.',
 
@@ -327,6 +343,7 @@ if (fs.existsSync(configPath)) {
 for (const [fileEnvVar, settingPath] of [
   ['ACTUAL_OPENID_CLIENT_SECRET_FILE', 'openId.client_secret'],
   ['ACTUAL_GITHUB_TOKEN_FILE', 'github.token'],
+  ['ACTUAL_FINTS_PRODUCT_ID_FILE', 'fints.productId'],
 ]) {
   if (applyFileEnv(configSchema, fileEnvVar, settingPath)) {
     debug(`Loaded ${settingPath} from ${fileEnvVar}`);

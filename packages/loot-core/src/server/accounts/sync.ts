@@ -395,6 +395,44 @@ async function downloadEnableBankingTransactions(
   };
 }
 
+async function downloadFinTSTransactions(
+  acctId: AccountEntity['id'],
+  since: string,
+  fileId?: string,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from FinTS');
+
+  const res = await post(
+    getServer().FINTS_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+      ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
+    },
+    // Bank dialogs are slow; a statement download can take a while.
+    120000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code, {
+      reason: res.reason,
+    });
+  }
+
+  const singleRes = res as BankSyncResponse;
+  return {
+    transactions: singleRes.transactions.all,
+    accountBalance: singleRes.balances,
+    startingBalance: singleRes.startingBalance,
+  };
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -1166,7 +1204,10 @@ async function processBankSyncDownload(
         return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'akahu') {
+    } else if (
+      acctRow.account_sync_source === 'akahu' ||
+      acctRow.account_sync_source === 'fints'
+    ) {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) =>
@@ -1265,6 +1306,8 @@ export async function syncAccount(
     );
   } else if (acctRow.account_sync_source === 'akahu') {
     download = await downloadAkahuTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'fints') {
+    download = await downloadFinTSTransactions(acctId, syncStartDate, fileId);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,

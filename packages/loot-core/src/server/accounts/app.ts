@@ -20,6 +20,7 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
 import { isNonProductionEnvironment } from '#shared/environment';
+import { FINTS_AUTH_REQUIRED, getFinTSConnectionId } from '#shared/fints';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
@@ -30,10 +31,17 @@ import type {
   BankSyncProviderStatus,
   BankSyncStatus,
   CategoryEntity,
+  FinTSAuthInput,
+  FinTSAuthState,
+  FinTSBank,
+  FinTSConnection,
+  FinTSConnectionInput,
+  FinTSStatus,
   GoCardlessToken,
   ImportTransactionEntity,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
+  SyncServerFinTSAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -62,6 +70,7 @@ export type AccountHandlers = {
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'akahu-accounts-link': typeof linkAkahuAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
+  'fints-accounts-link': typeof linkFinTSAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -81,6 +90,13 @@ export type AccountHandlers = {
   'enablebanking-poll-auth': typeof enableBankingPollAuth;
   'enablebanking-poll-auth-stop': typeof stopEnableBankingPollAuth;
   'enablebanking-configure': typeof enableBankingConfigure;
+  'fints-status': typeof finTSStatus;
+  'fints-bank-lookup': typeof finTSBankLookup;
+  'fints-bank-search': typeof finTSBankSearch;
+  'fints-connection-save': typeof finTSConnectionSave;
+  'fints-connection-remove': typeof finTSConnectionRemove;
+  'fints-auth': typeof finTSAuth;
+  'fints-accounts': typeof finTSAccounts;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'akahu-accounts': typeof akahuAccounts;
@@ -551,6 +567,92 @@ async function linkEnableBankingAccount({
   });
 
   return 'ok';
+}
+
+async function linkFinTSAccount({
+  externalAccount,
+  upgradingId,
+  offBudget = false,
+  startingDate,
+  startingBalance,
+}: LinkAccountBaseParams & {
+  externalAccount: SyncServerFinTSAccount;
+}): Promise<{ id: AccountEntity['id']; needsAuth: boolean }> {
+  let id: string;
+  const fileId = getPrefs()?.cloudFileId;
+
+  // One bank entry per bank login: the connection id is part of each
+  // account id and identifies the login on the server.
+  const bank = await link.findOrCreateBank(
+    { name: externalAccount.institution ?? null },
+    externalAccount.orgId ??
+      getFinTSConnectionId(externalAccount.account_id) ??
+      undefined,
+  );
+
+  if (upgradingId) {
+    const accRow = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+
+    if (!accRow) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+
+    id = accRow.id;
+    await db.update('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      bank: bank.id,
+      account_sync_source: 'fints',
+    });
+  } else {
+    id = uuidv4();
+    await db.insertWithUUID('accounts', {
+      id,
+      account_id: externalAccount.account_id,
+      name: externalAccount.name,
+      official_name: externalAccount.name,
+      bank: bank.id,
+      offbudget: offBudget ? 1 : 0,
+      account_sync_source: 'fints',
+    });
+    await db.insertPayee({
+      name: '',
+      transfer_acct: id,
+    });
+  }
+
+  try {
+    const syncRes = await bankSync.syncAccount(
+      undefined,
+      undefined,
+      id,
+      externalAccount.account_id,
+      bank.bank_id,
+      startingDate,
+      startingBalance,
+      fileId,
+    );
+    await handleSyncResponse(syncRes, id);
+  } catch (err) {
+    // The bank wants a TAN for the first download. The account stays linked;
+    // the client asks the user and links it again with `upgradingId` so the
+    // initial sync keeps the chosen starting date.
+    if (isBankSyncError(err) && err.code === FINTS_AUTH_REQUIRED) {
+      await persistBankSyncError(id, err);
+      return { id, needsAuth: true };
+    }
+    throw err;
+  }
+
+  connection.send('sync-event', {
+    type: 'success',
+    tables: ['transactions', 'accounts'],
+  });
+
+  return { id, needsAuth: false };
 }
 
 async function createAccount({
@@ -1223,6 +1325,83 @@ async function enableBankingConfigure(config: {
   });
 }
 
+async function postFinTS<T>(
+  path: string,
+  body: object,
+): Promise<T | { error: string; reason?: string }> {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  const fileId = getPrefs()?.cloudFileId;
+  try {
+    return await post(
+      serverConfig.FINTS_SERVER + path,
+      body,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+        ...(fileId ? { 'X-Actual-File-Id': fileId } : {}),
+      },
+      // A bank dialog can take a while, especially the first one.
+      120000,
+    );
+  } catch (error) {
+    return {
+      error: 'failed',
+      reason: error instanceof PostError ? error.reason : undefined,
+    };
+  }
+}
+
+async function finTSStatus() {
+  return postFinTS<FinTSStatus>('/status', {});
+}
+
+async function finTSBankLookup({ blz }: { blz: string }) {
+  return postFinTS<{ bank: FinTSBank | null }>('/bank-lookup', { blz });
+}
+
+async function finTSBankSearch({ query }: { query: string }) {
+  return postFinTS<{ banks: FinTSBank[] }>('/bank-search', { query });
+}
+
+async function finTSConnectionSave({
+  connection,
+}: {
+  connection: FinTSConnectionInput;
+}) {
+  return postFinTS<{ connection: FinTSConnection }>('/connections/save', {
+    connection,
+  });
+}
+
+async function finTSConnectionRemove({
+  connectionId,
+}: {
+  connectionId: string;
+}) {
+  return postFinTS<{ removed: boolean }>('/connections/remove', {
+    connectionId,
+  });
+}
+
+async function finTSAuth(input: FinTSAuthInput) {
+  return postFinTS<FinTSAuthState>('/auth', input);
+}
+
+async function finTSAccounts({ connectionId }: { connectionId: string }) {
+  return postFinTS<{ accounts: SyncServerFinTSAccount[] }>('/accounts', {
+    connectionId,
+  });
+}
+
 async function getGoCardlessBanks(country: string) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1369,6 +1548,19 @@ function handleSyncError(
       };
     }
 
+    // Providers like FinTS pass on the bank's own explanation.
+    const reason =
+      'details' in err &&
+      typeof err.details === 'object' &&
+      err.details !== null &&
+      'reason' in err.details &&
+      typeof err.details.reason === 'string'
+        ? err.details.reason
+        : null;
+    if (reason) {
+      return { ...syncError, message: `${syncError.message}\n${reason}` };
+    }
+
     return syncError;
   }
 
@@ -1397,7 +1589,8 @@ function getBankSyncStatusFromError(
       (err.category === 'ITEM_ERROR' && err.code === 'ITEM_LOGIN_REQUIRED') ||
       (err.category === 'INVALID_INPUT' &&
         err.code === 'INVALID_ACCESS_TOKEN') ||
-      err.category === 'INVALID_ACCESS_TOKEN'
+      err.category === 'INVALID_ACCESS_TOKEN' ||
+      err.code === FINTS_AUTH_REQUIRED
     ) {
       return 'reauth-required';
     }
@@ -1791,6 +1984,7 @@ app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('akahu-accounts-link', linkAkahuAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
+app.method('fints-accounts-link', linkFinTSAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1810,6 +2004,13 @@ app.method('enablebanking-complete-auth', enableBankingCompleteAuth);
 app.method('enablebanking-poll-auth', enableBankingPollAuth);
 app.method('enablebanking-poll-auth-stop', stopEnableBankingPollAuth);
 app.method('enablebanking-configure', enableBankingConfigure);
+app.method('fints-status', finTSStatus);
+app.method('fints-bank-lookup', finTSBankLookup);
+app.method('fints-bank-search', finTSBankSearch);
+app.method('fints-connection-save', finTSConnectionSave);
+app.method('fints-connection-remove', finTSConnectionRemove);
+app.method('fints-auth', finTSAuth);
+app.method('fints-accounts', finTSAccounts);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('akahu-accounts', akahuAccounts);

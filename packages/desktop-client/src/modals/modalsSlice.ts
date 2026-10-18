@@ -145,6 +145,27 @@ export type Modal =
       };
     }
   | {
+      name: 'fints-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'fints-connect';
+      options: {
+        upgradingAccountId?: string;
+      };
+    }
+  | {
+      name: 'fints-auth';
+      options: {
+        connectionId: string;
+        connectionName?: string;
+        refresh?: boolean;
+        onComplete: (isReady: boolean) => void;
+      };
+    }
+  | {
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;

@@ -16,6 +16,7 @@ import type {
   AccountEntity,
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
+  SyncServerFinTSAccount,
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
@@ -27,6 +28,7 @@ import {
   useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
+  useLinkAccountsFinTSMutation,
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
 } from '#accounts';
@@ -192,6 +194,12 @@ export type SelectLinkedAccountsModalProps =
       externalAccounts: SyncServerAkahuAccount[];
       syncSource: 'akahu';
       upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerFinTSAccount[];
+      syncSource: 'fints';
+      upgradingAccountId?: string;
     };
 
 export function SelectLinkedAccountsModal({
@@ -240,6 +248,12 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerEnableBankingAccount[],
             upgradingAccountId,
           };
+        case 'fints':
+          return {
+            syncSource: 'fints',
+            externalAccounts: toSort as SyncServerFinTSAccount[],
+            upgradingAccountId,
+          };
         default:
           throw new Error(`Unrecognized sync source: ${String(syncSource)}`);
       }
@@ -282,6 +296,7 @@ export function SelectLinkedAccountsModal({
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
   const linkAccountAkahu = useLinkAccountAkahuMutation();
   const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
+  const linkAccountsFinTS = useLinkAccountsFinTSMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -292,6 +307,11 @@ export function SelectLinkedAccountsModal({
       .filter(acc => acc.account_id)
       .filter(acc => !chosenLocalAccountIds.includes(acc.id))
       .forEach(acc => unlinkAccount.mutate({ id: acc.id }));
+
+    // FinTS accounts are linked one after another, since each may need the
+    // user to approve a TAN.
+    const finTSAccountsToLink: Parameters<typeof linkAccountsFinTS.mutate>[0] =
+      [];
 
     // Link new accounts
     Object.entries(chosenAccounts).forEach(
@@ -358,6 +378,21 @@ export function SelectLinkedAccountsModal({
             startingDate,
             startingBalance,
           });
+        } else if (propsWithSortedExternalAccounts.syncSource === 'fints') {
+          finTSAccountsToLink.push({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
         } else if (
           propsWithSortedExternalAccounts.syncSource === 'enableBanking'
         ) {
@@ -396,6 +431,10 @@ export function SelectLinkedAccountsModal({
     );
 
     dispatch(closeModal());
+
+    if (finTSAccountsToLink.length > 0) {
+      linkAccountsFinTS.mutate(finTSAccountsToLink);
+    }
   }
 
   // Only reserve accounts chosen by visible rows; stale provider links should
@@ -419,7 +458,8 @@ export function SelectLinkedAccountsModal({
       | SyncServerGoCardlessAccount
       | SyncServerSimpleFinAccount
       | SyncServerPluggyAiAccount
-      | SyncServerAkahuAccount,
+      | SyncServerAkahuAccount
+      | SyncServerFinTSAccount,
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
@@ -645,7 +685,8 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount
   | SyncServerAkahuAccount
-  | SyncServerEnableBankingAccount;
+  | SyncServerEnableBankingAccount
+  | SyncServerFinTSAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -906,7 +947,8 @@ function getInstitutionName(
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
     | SyncServerPluggyAiAccount
-    | SyncServerEnableBankingAccount,
+    | SyncServerEnableBankingAccount
+    | SyncServerFinTSAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

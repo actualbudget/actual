@@ -14,6 +14,7 @@ import { pushModal } from '#modals/modalsSlice';
 import { AccountSyncCheck } from './AccountSyncCheck';
 
 const mockDispatch = vi.fn();
+const mockSyncAndDownload = vi.fn();
 
 vi.mock('react-router', async importOriginal => ({
   ...(await importOriginal()),
@@ -33,6 +34,7 @@ vi.mock('#hooks/useFailedAccounts', () => ({
 }));
 
 vi.mock('#accounts', () => ({
+  useSyncAndDownloadMutation: () => ({ mutate: mockSyncAndDownload }),
   useUnlinkAccountMutation: () => ({ mutate: vi.fn() }),
 }));
 
@@ -148,6 +150,45 @@ describe('AccountSyncCheck', () => {
     expect(
       screen.getByRole('button', { name: 'Reauthorize' }),
     ).toBeInTheDocument();
+  });
+
+  it('syncs a FinTS account again to ask for the PIN or TAN', async () => {
+    vi.mocked(useAccounts).mockReturnValue({
+      data: [
+        {
+          ...baseAccount,
+          account_sync_source: 'fints',
+          account_id: 'conn-1|1234567',
+        },
+      ],
+      isLoading: false,
+    } as ReturnType<typeof useAccounts>);
+    vi.mocked(useFailedAccounts).mockReturnValue(
+      new Map([
+        ['acc-1', { type: 'FINTS_AUTH_REQUIRED', code: 'FINTS_AUTH_REQUIRED' }],
+      ]),
+    );
+
+    render(
+      <TestProviders>
+        <AccountSyncCheck />
+      </TestProviders>,
+    );
+
+    await userEvent.click(
+      screen.getByText(
+        "This account is experiencing connection problems. Let's fix it.",
+      ),
+    );
+
+    expect(
+      screen.getByText(
+        'Your bank needs your PIN or a TAN approval before it sends new transactions.',
+      ),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reauthorize' }));
+    expect(mockSyncAndDownload).toHaveBeenCalledWith({ id: 'acc-1' });
   });
 
   it('hides Configure button and only shows Unlink account for non-admin users', async () => {
