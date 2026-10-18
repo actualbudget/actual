@@ -219,7 +219,7 @@ export function CategoryActionsSheet({
                 fromCategoryName: category.name,
                 toCategoryName:
                   toCategoryId === 'to-budget'
-                    ? t('To be budgeted')
+                    ? t('To Budget')
                     : getCategoryName(toCategoryId),
               },
             ),

@@ -30,7 +30,7 @@ export function CategoryScheduleIndicator({
       ? theme.errorText
       : scheduleStatus === 'due'
         ? theme.warningText
-        : theme.pageTextLink;
+        : theme.upcomingText;
 
   const Icon = isScheduleRecurring ? SvgArrowsSynchronize : SvgCalendar3;
 

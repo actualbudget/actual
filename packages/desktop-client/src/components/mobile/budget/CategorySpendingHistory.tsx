@@ -116,7 +116,7 @@ export function CategorySpendingHistory({
             }}
           >
             {t('{{month}} · {{amount}}', {
-              month: monthUtils.format(activeMonth, 'MMM yyyy', locale),
+              month: monthUtils.format(activeMonth, "MMMM ''yy", locale),
               amount: format(
                 spentAmounts[months.indexOf(activeMonth)],
                 'financial',
