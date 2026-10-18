@@ -8,6 +8,10 @@ export function listenWithFallback(
 ): void {
   const isDefaultIpv6 = hostname === '::';
 
+  const fallbackErrorHandler = (fallbackErr: NodeJS.ErrnoException) => {
+    console.error(`Failed to start server on 0.0.0.0:${port}:`, fallbackErr);
+  };
+
   const errorHandler = (err: NodeJS.ErrnoException) => {
     // If IPv6 binding fails (e.g. IPv6 disabled on the host, EINVAL, EAFNOSUPPORT, EADDRNOTAVAIL, ENOTFOUND)
     // and the hostname was the default '::', attempt to fall back to IPv4 '0.0.0.0'.
@@ -21,15 +25,15 @@ export function listenWithFallback(
       console.warn(
         `Failed to bind to IPv6 address '::' (${err.code}). Falling back to IPv4 '0.0.0.0'...`,
       );
-      server.removeListener('error', errorHandler);
+      server.once('error', fallbackErrorHandler);
       server.listen(port, '0.0.0.0', () => {
+        server.removeListener('error', fallbackErrorHandler);
         onListening('0.0.0.0');
       });
       return;
     }
 
     console.error(`Failed to start server on ${hostname}:${port}:`, err);
-    throw err;
   };
 
   server.once('error', errorHandler);
