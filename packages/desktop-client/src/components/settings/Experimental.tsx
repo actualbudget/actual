@@ -3,7 +3,9 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { send } from '@actual-app/core/platform/client/connection';
 import { isElectron } from '@actual-app/core/shared/environment';
+import { isSupportedCurrencyCode } from '@actual-app/core/shared/fx/currency';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -29,6 +31,7 @@ type FeatureToggleProps = {
   note?: ReactNode;
   isSubFeature?: boolean;
   subFeatures?: ReactNode;
+  onEnable?: () => void;
   onDisable?: () => void;
 };
 
@@ -41,6 +44,7 @@ function FeatureToggle({
   note,
   isSubFeature = false,
   subFeatures,
+  onEnable,
   onDisable,
 }: FeatureToggleProps) {
   const enabled = useFeatureFlag(flagName);
@@ -66,6 +70,8 @@ function FeatureToggle({
               setFlagPref(String(!enabled));
               if (enabled) {
                 onDisable?.();
+              } else {
+                onEnable?.();
               }
             }}
             disabled={disableToggle}
@@ -167,6 +173,7 @@ export function ExperimentalFeatures() {
   const currencyEnabled = useFeatureFlag('currency');
   const multiCurrencyEnabled = useFeatureFlag('multiCurrency');
   const [, setMultiCurrencyPref] = useSyncedPref('flags.multiCurrency');
+  const [defaultCurrencyCode = ''] = useSyncedPref('defaultCurrencyCode');
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
@@ -231,6 +238,15 @@ export function ExperimentalFeatures() {
               flag="multiCurrency"
               feedbackLink="https://github.com/actualbudget/actual/issues/5191"
               isSubFeature
+              onEnable={() => {
+                // Accounts without a currency of their own take the
+                // default, so changing it later doesn't relabel them
+                if (isSupportedCurrencyCode(defaultCurrencyCode)) {
+                  void send('accounts-pin-currency', {
+                    currency: defaultCurrencyCode,
+                  });
+                }
+              }}
             >
               <Trans>Multiple currencies</Trans>
             </FeatureToggle>
