@@ -38,3 +38,42 @@ test('isValidYearMonthDay validates the day against the month and year', () => {
   expect(monthUtils.isValidYearMonthDay('2024-02-00')).toBe(false);
   expect(monthUtils.isValidYearMonthDay('2024-02')).toBe(false);
 });
+
+test('isCurrentMonth accepts dates and Date objects', () => {
+  const currentMonth = monthUtils.currentMonth();
+  const previousMonth = monthUtils.prevMonth(currentMonth);
+
+  expect(monthUtils.isCurrentMonth(currentMonth)).toBe(true);
+  expect(monthUtils.isCurrentMonth(`${currentMonth}-15`)).toBe(true);
+  expect(monthUtils.isCurrentMonth(monthUtils.parseDate(currentMonth))).toBe(
+    true,
+  );
+  const [year, month] = currentMonth.split('-').map(Number);
+  const overflowMonth = `${year - 1}-${String(month + 12).padStart(2, '0')}`;
+
+  expect(monthUtils.isCurrentMonth(previousMonth)).toBe(false);
+  expect(monthUtils.isCurrentMonth(`${previousMonth}-15`)).toBe(false);
+  expect(monthUtils.isCurrentMonth(overflowMonth)).toBe(false);
+  expect(monthUtils.isCurrentMonth('invalid')).toBe(false);
+  expect(monthUtils.isCurrentMonth(new Date(Number.NaN))).toBe(false);
+});
+
+test('isCurrentDay accepts Date objects', () => {
+  const currentDay = monthUtils.currentDay();
+  const previousDay = monthUtils.subDays(currentDay, 1);
+  const previousMonth = monthUtils.prevMonth(currentDay);
+  const overflowDay = `${previousMonth}-${String(
+    Number(monthUtils.lastDayOfMonth(previousMonth).slice(-2)) +
+      Number(currentDay.slice(-2)),
+  ).padStart(2, '0')}`;
+
+  expect(monthUtils.isCurrentDay(currentDay)).toBe(true);
+  expect(monthUtils.isCurrentDay(monthUtils.parseDate(currentDay))).toBe(true);
+  expect(monthUtils.isCurrentDay(previousDay)).toBe(false);
+  expect(monthUtils.isCurrentDay(overflowDay)).toBe(false);
+  expect(monthUtils.isCurrentDay(monthUtils.parseDate(previousDay))).toBe(
+    false,
+  );
+  expect(monthUtils.isCurrentDay('invalid')).toBe(false);
+  expect(monthUtils.isCurrentDay(new Date(Number.NaN))).toBe(false);
+});
