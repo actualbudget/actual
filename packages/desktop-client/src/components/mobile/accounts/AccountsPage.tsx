@@ -28,11 +28,13 @@ import { css } from '@emotion/css';
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
+import { ConvertedCellValue } from '#components/currency/ConvertedCellValue';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -50,6 +52,9 @@ type AccountHeaderProps<SheetFieldName extends SheetFields<'account'>> = {
   id: string;
   name: string;
   amount: Binding<'account', SheetFieldName>;
+  // The accounts that `amount` adds up, so balances in other currencies
+  // can be converted first
+  totalAccounts: AccountEntity[];
   style?: CSSProperties;
   showCheveronDown?: boolean;
   onPress?: () => void;
@@ -59,6 +64,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
   id,
   name,
   amount,
+  totalAccounts,
   style = {},
   showCheveronDown = false,
   onPress,
@@ -104,14 +110,18 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
           height={styles.text.fontSize}
         />
       </View>
-      <CellValue binding={amount} type="financial">
+      <ConvertedCellValue<'account', SheetFieldName>
+        binding={amount}
+        accounts={totalAccounts}
+        type="financial"
+      >
         {props => (
           <CellValueText<'account', SheetFieldName>
             {...props}
             style={{ ...styles.text }}
           />
         )}
-      </CellValue>
+      </ConvertedCellValue>
     </Button>
   );
 }
@@ -139,6 +149,7 @@ function AccountListItem({
   ...props
 }: AccountListItemProps) {
   const { value: account } = props;
+  const { formatAmount, getAccountCurrency } = useCurrencyFormatter();
 
   if (!account) {
     return null;
@@ -207,6 +218,9 @@ function AccountListItem({
             {props => (
               <CellValueText<'account', 'balance'>
                 {...props}
+                formatter={value =>
+                  formatAmount(value ?? 0, getAccountCurrency(account))
+                }
                 style={{
                   fontSize: 16,
                   ...makeAmountFullStyle(props.value, {
@@ -364,12 +378,14 @@ function AllAccountList({
               id={ALL_ACCOUNTS_ID}
               name={t('All accounts')}
               amount={getAllAccountsBalance()}
+              totalAccounts={[...onBudgetAccounts, ...offBudgetAccounts]}
             />
             {onBudgetAccounts.length > 0 && (
               <AccountHeader
                 id="onbudget"
                 name={t('On budget')}
                 amount={getOnBudgetBalance()}
+                totalAccounts={onBudgetAccounts}
               />
             )}
             <AccountList
@@ -383,6 +399,7 @@ function AllAccountList({
                 id="offbudget"
                 name={t('Off budget')}
                 amount={getOffBudgetBalance()}
+                totalAccounts={offBudgetAccounts}
               />
             )}
             <AccountList
@@ -397,6 +414,7 @@ function AllAccountList({
                 name={t('Closed')}
                 onPress={onToggleClosedAccounts}
                 amount={getClosedAccountsBalance()}
+                totalAccounts={closedAccounts}
                 style={{ marginTop: 30 }}
                 showCheveronDown={showClosedAccounts}
               />
