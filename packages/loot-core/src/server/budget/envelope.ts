@@ -126,6 +126,11 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
   // available-funds it reaches To Budget once and rolls forward with it.
   sheet.get().createStatic(sheetName, 'fx-changes', 0);
   sheet.get().createStatic(sheetName, 'fx-incomplete', false);
+  // The month's change in the reservation of currency pockets that To
+  // Budget includes (MC-10), written by the same refresh. Foreign pocket
+  // assignments and spending reach To Budget only through it.
+  sheet.get().createStatic(sheetName, 'reservation-changes', 0);
+  sheet.get().createStatic(sheetName, 'reservation-incomplete', false);
 
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
@@ -205,13 +210,15 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       'last-month-overspent',
       'total-budgeted',
       'buffered-selected',
+      'reservation-changes',
     ],
-    run: (available, lastOverspent, totalBudgeted, buffered) => {
+    run: (available, lastOverspent, totalBudgeted, buffered, reserved) => {
       return safeNumber(
         number(available) +
           number(lastOverspent) +
           number(totalBudgeted) -
-          number(buffered),
+          number(buffered) -
+          number(reserved),
       );
     },
   });

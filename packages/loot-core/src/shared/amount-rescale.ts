@@ -95,6 +95,25 @@ export function allocateFractions(
   denominator: bigint,
   totalNumerator?: bigint,
 ): Array<{ id: string; amount: number }> {
+  const allocated = allocateFractionsExact(rows, denominator, totalNumerator);
+  safeAmount(
+    roundEven(
+      totalNumerator ?? rows.reduce((sum, row) => sum + row.numerator, 0n),
+      denominator,
+    ),
+  );
+  return allocated.map(row => ({ id: row.id, amount: safeAmount(row.amount) }));
+}
+
+/**
+ * {@link allocateFractions} without the safe-integer bound: the total and
+ * every allocated amount stay exact.
+ */
+export function allocateFractionsExact(
+  rows: ReadonlyArray<{ id: string; numerator: bigint }>,
+  denominator: bigint,
+  totalNumerator?: bigint,
+): Array<{ id: string; amount: bigint }> {
   if (new Set(rows.map(row => row.id)).size !== rows.length) {
     throw new Error('Amount group must have unique row IDs');
   }
@@ -112,7 +131,6 @@ export function allocateFractions(
     totalNumerator ?? rows.reduce((sum, row) => sum + row.numerator, 0n),
     denominator,
   );
-  safeAmount(total);
   const remaining = total - scaled.reduce((sum, row) => sum + row.amount, 0n);
   const ranked = [...scaled].sort((a, b) => {
     if (a.remainder !== b.remainder) {
@@ -129,5 +147,5 @@ export function allocateFractions(
       row.amount += each + (BigInt(index) < extra * sign ? sign : 0n);
     }
   }
-  return scaled.map(row => ({ id: row.id, amount: safeAmount(row.amount) }));
+  return scaled.map(row => ({ id: row.id, amount: row.amount }));
 }

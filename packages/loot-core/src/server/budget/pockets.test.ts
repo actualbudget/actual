@@ -168,7 +168,10 @@ const freshSum = (month: string, category: string) => {
     db.firstSync<{ amount: number | null }>(
       `SELECT SUM(amount) AS amount FROM v_transactions_internal_alive t
          LEFT JOIN accounts a ON a.id = t.account
-       WHERE t.date >= ? AND t.date <= ? AND category = ? AND a.offbudget = 0`,
+       WHERE t.date >= ? AND t.date <= ? AND category = ? AND a.offbudget = 0
+         AND NOT EXISTS (SELECT 1 FROM v_transaction_lanes l
+           JOIN category_pockets p ON p.id = l.lane AND p.kind = 'foreign'
+           WHERE l.id = t.id)`,
       [start, end, category],
     )?.amount ?? 0
   );
@@ -985,7 +988,8 @@ describe('attribution and write intent', () => {
     it('leaves every lane on a remote off-budget move (AT6)', async () => {
       await createAllBudgets();
       await sheet.waitOnSpreadsheet();
-      expect(sumAmount('2017-01', 'food')).toBe(-3000);
+      // Foreign pocket rows reach envelope budgets only as reservations.
+      expect(sumAmount('2017-01', 'food')).toBe(0);
       await applyMessages([remote('accounts', 'jpy', 'offbudget', 1)]);
       await sheet.waitOnSpreadsheet();
       expect(laneOf('t')).toBeNull();
@@ -1025,7 +1029,7 @@ describe('attribution and write intent', () => {
     it('keeps warm totals fresh when the account is tombstoned remotely', async () => {
       await createAllBudgets();
       await expectWarmSums(['food', 'travel']);
-      expect(sumAmount('2017-01', 'food')).toBe(-3000);
+      expect(sumAmount('2017-01', 'food')).toBe(0);
       await applyMessages([remote('accounts', 'jpy', 'tombstone', 1)]);
       expect(laneOf('t')).toBeNull();
       await expectWarmSums(['food', 'travel']);
@@ -1049,18 +1053,20 @@ describe('attribution and write intent', () => {
       expect(laneOf('legacy')).toBe(travelJpy);
       await createAllBudgets();
       await expectWarmSums(['food', 'travel']);
-      expect(sumAmount('2017-01', 'food')).toBe(-3700);
+      expect(sumAmount('2017-01', 'food')).toBe(0);
       await applyMessages([remote('accounts', 'jpy', 'encoding', 'JPY.3')]);
       // JPY.0 no longer admits the account's stamp; the stamped row stays.
       expect(laneOf('legacy')).toBe('travel');
       expect(laneOf('t')).toBe(travelJpy);
       await expectWarmSums(['food', 'travel']);
+      expect(sumAmount('2017-01', 'travel')).toBe(-700);
     });
 
     it('moves the attribution when a retirement arrives', async () => {
       await createAllBudgets();
       await sheet.waitOnSpreadsheet();
-      expect(sumAmount('2017-01', 'food')).toBe(-3000);
+      // In a foreign pocket both before and after: no category spending.
+      expect(sumAmount('2017-01', 'food')).toBe(0);
       expect(sumAmount('2017-01', 'travel')).toBe(0);
       await applyMessages([
         remote('slot_retirements', travelJpy, 'tombstone', 1),
@@ -1068,7 +1074,7 @@ describe('attribution and write intent', () => {
       await sheet.waitOnSpreadsheet();
       expect(await shownCategory('t')).toBe('travel');
       expect(sumAmount('2017-01', 'food')).toBe(0);
-      expect(sumAmount('2017-01', 'travel')).toBe(-3000);
+      expect(sumAmount('2017-01', 'travel')).toBe(0);
     });
 
     it.each([false, true])(
