@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
 
 import { convertWithRates } from '@actual-app/core/shared/fx/convert';
-import { getEffectiveCurrency } from '@actual-app/core/shared/fx/currency';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
 import { parseConversionRateMode } from '#components/currency/displayMode';
 
-import { useAccounts } from './useAccounts';
+import { useAccountCurrencies } from './useAccountCurrencies';
 import { useExchangeRates } from './useExchangeRates';
 import { useMultiCurrency } from './useMultiCurrency';
 import { useSyncedPref } from './useSyncedPref';
@@ -29,22 +28,16 @@ export function useAccountBalanceConverter():
   | null {
   const { isEnabled, defaultCurrencyCode } = useMultiCurrency();
   const { rateIndex, isLoading } = useExchangeRates({ enabled: isEnabled });
-  const { data: accounts } = useAccounts();
+  const currencyByAccount = useAccountCurrencies();
   const [rateModePref] = useSyncedPref('currency-conversion-rate');
   const rateMode = parseConversionRateMode(rateModePref);
 
   // Reports reload whenever the converter changes, so it must keep its
   // identity across renders
   return useMemo(() => {
-    if (!isEnabled || !accounts) {
+    if (!isEnabled) {
       return undefined;
     }
-    const currencyByAccount = new Map(
-      accounts.map(account => [
-        account.id,
-        getEffectiveCurrency(account.currency, defaultCurrencyCode),
-      ]),
-    );
     const hasOtherCurrencies = [...currencyByAccount.values()].some(
       currency => currency !== defaultCurrencyCode,
     );
@@ -75,7 +68,7 @@ export function useAccountBalanceConverter():
     return convert;
   }, [
     isEnabled,
-    accounts,
+    currencyByAccount,
     defaultCurrencyCode,
     rateIndex,
     rateMode,
