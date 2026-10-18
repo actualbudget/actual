@@ -2,7 +2,9 @@ import { MAX_SAFE_NUMBER } from '#shared/util';
 
 import type { RateRecord } from './rates';
 import {
+  convertBetweenCurrencies,
   convertSqlAmount,
+  convertTransferAmount,
   getSqlDefaultCurrencyCode,
   isSqlConversionEnabled,
   resetSqlConversionState,
@@ -91,6 +93,38 @@ describe('convertSqlAmount', () => {
   });
 });
 
+describe('convertBetweenCurrencies', () => {
+  it('converts with the rate on or before the date', () => {
+    setState({ enabled: false });
+    expect(convertBetweenCurrencies(10000, 'USD', 'CAD', '2026-01-15')).toBe(
+      12500,
+    );
+    expect(convertBetweenCurrencies(15000, 'CAD', 'USD', '2026-07-01')).toBe(
+      10000,
+    );
+  });
+
+  it('keeps the amount instead of throwing when it is too large', () => {
+    setState();
+    expect(
+      convertBetweenCurrencies(MAX_SAFE_NUMBER, 'USD', 'CAD', '2026-01-15'),
+    ).toBe(MAX_SAFE_NUMBER);
+  });
+});
+
+describe('convertTransferAmount', () => {
+  it('mirrors the amount while multiple currencies are off', () => {
+    setState({ enabled: false });
+    expect(convertTransferAmount(10000, 'USD', null, '2026-01-15')).toBe(10000);
+  });
+
+  it('converts between the currencies of both accounts', () => {
+    setState();
+    expect(convertTransferAmount(10000, 'USD', null, '2026-01-15')).toBe(12500);
+    expect(convertTransferAmount(10000, null, 'CAD', '2026-01-15')).toBe(10000);
+  });
+});
+
 describe('resetSqlConversionState', () => {
   it('forgets the rates and settings', () => {
     setState();
@@ -98,6 +132,8 @@ describe('resetSqlConversionState', () => {
 
     expect(isSqlConversionEnabled()).toBe(false);
     expect(getSqlDefaultCurrencyCode()).toBe('');
-    expect(convertSqlAmount(10000, 'USD', 20260115, false)).toBe(10000);
+    expect(convertBetweenCurrencies(10000, 'USD', 'CAD', '2026-01-15')).toBe(
+      10000,
+    );
   });
 });
