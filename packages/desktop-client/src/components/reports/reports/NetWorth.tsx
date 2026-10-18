@@ -43,6 +43,7 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNavigate } from '#hooks/useNavigate';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -129,6 +130,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const convertBalance = useAccountBalanceConverter();
+  const { defaultCurrencyCode } = useMultiCurrency();
 
   const reportParams = useMemo(
     () =>
@@ -143,10 +145,11 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         firstDayOfWeekIdx,
         format,
         dateFormat,
-        { convertBalance },
+        { convertBalance, defaultCurrencyCode },
       ),
     [
       convertBalance,
+      defaultCurrencyCode,
       start,
       end,
       accounts,
