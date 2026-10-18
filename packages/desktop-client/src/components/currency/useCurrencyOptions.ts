@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { currencies } from '@actual-app/core/shared/currencies';
+import { isSupportedCurrencyCode } from '@actual-app/core/shared/fx/currency';
 
 export function useCurrencyOptions() {
   const { t } = useTranslation();
@@ -82,5 +83,24 @@ export function useCurrencyOptions() {
     getCurrencyLabel(currency.code),
   ]);
 
-  return { currencyOptions, getCurrencyName, getCurrencyLabel };
+  // The currencies an account can be given, plus the one it already has so a
+  // picker can still show it
+  const getAccountCurrencyOptions = (
+    currentCurrency: string | null,
+  ): Array<[string, string]> => {
+    const options = currencyOptions.filter(([code]) =>
+      isSupportedCurrencyCode(code),
+    );
+    return currentCurrency &&
+      !options.some(([code]) => code === currentCurrency)
+      ? [...options, [currentCurrency, getCurrencyLabel(currentCurrency)]]
+      : options;
+  };
+
+  return {
+    currencyOptions,
+    getAccountCurrencyOptions,
+    getCurrencyName,
+    getCurrencyLabel,
+  };
 }

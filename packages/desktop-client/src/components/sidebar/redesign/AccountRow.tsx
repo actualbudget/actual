@@ -16,6 +16,7 @@ import { css } from '@emotion/css';
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
@@ -55,6 +56,7 @@ export function AccountRow({
 
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
   const isContextMenuOpen = useSelector(state =>
     state.contextMenu.items.some(
@@ -97,6 +99,23 @@ export function AccountRow({
             }),
           ),
       },
+      ...(isMultiCurrencyEnabled
+        ? [
+            {
+              name: 'account-settings',
+              text: t('Account settings'),
+              onClick: () =>
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'account-settings',
+                      options: { accountId: account.id },
+                    },
+                  }),
+                ),
+            },
+          ]
+        : []),
     ],
   });
 

@@ -60,6 +60,7 @@ type CreateAccountPayload = {
   name: string;
   balance: number;
   offBudget: boolean;
+  currency?: AccountEntity['currency'];
 };
 
 export function useCreateAccountMutation() {
@@ -68,11 +69,17 @@ export function useCreateAccountMutation() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ name, balance, offBudget }: CreateAccountPayload) => {
+    mutationFn: async ({
+      name,
+      balance,
+      offBudget,
+      currency,
+    }: CreateAccountPayload) => {
       const id = await send('account-create', {
         name,
         balance,
         offBudget,
+        currency,
       });
       return id;
     },
@@ -171,6 +178,34 @@ export function useUpdateAccountMutation() {
       dispatchErrorNotification(
         dispatch,
         t('There was an error updating the account. Please try again.'),
+        error,
+      );
+    },
+  });
+}
+
+type SetAccountsCurrencyPayload = {
+  ids: Array<AccountEntity['id']>;
+  currency: AccountEntity['currency'];
+};
+
+export function useSetAccountsCurrencyMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({ ids, currency }: SetAccountsCurrencyPayload) => {
+      await send('accounts-set-currency', { ids, currency });
+    },
+    onSuccess: () => invalidateQueries(queryClient),
+    onError: error => {
+      console.error('Error setting the currency of accounts:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error setting the currency of the accounts. Please try again.',
+        ),
         error,
       );
     },
