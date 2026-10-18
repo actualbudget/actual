@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { getEffectiveCurrency } from '@actual-app/core/shared/fx/currency';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -55,10 +56,13 @@ export function createSpreadsheet(
   dateFormat?: string,
   {
     convertBalance,
+    defaultCurrencyCode = '',
   }: {
     // Values balances of accounts in other currencies in the default one;
     // null while the exchange rates are still loading
     convertBalance?: AccountBalanceConverter | null;
+    // The currency of accounts without one of their own
+    defaultCurrencyCode?: string;
   } = {},
 ) {
   return async (
@@ -254,13 +258,26 @@ export function createSpreadsheet(
     }
 
     // Prevent paired internal transfers from changing net worth between their
-    // two posting dates.
-    alignInternalTransferDates(data, allTransferLegs, {
-      startDate,
-      endDate,
-      interval,
-      firstDayOfWeekIdx,
-    });
+    // two posting dates. Transfers only have a side in another currency
+    // while balances in other currencies are converted.
+    alignInternalTransferDates(
+      data,
+      allTransferLegs,
+      {
+        startDate,
+        endDate,
+        interval,
+        firstDayOfWeekIdx,
+      },
+      convertBalance
+        ? new Map(
+            accounts.map(account => [
+              account.id,
+              getEffectiveCurrency(account.currency, defaultCurrencyCode),
+            ]),
+          )
+        : null,
+    );
 
     setData(
       recalculate(
@@ -301,6 +318,8 @@ function alignInternalTransferDates(
   data: AccountBalanceData[],
   transferLegs: TransferLeg[],
   range: IntervalRange,
+  // Null while all accounts count in one currency
+  currencyByAccount: ReadonlyMap<string, string> | null,
 ) {
   const accountsById = new Map(data.map(account => [account.id, account]));
   const transfersById = new Map(transferLegs.map(leg => [leg.id, leg]));
@@ -312,11 +331,20 @@ function alignInternalTransferDates(
     }
 
     const counterpart = transfersById.get(leg.transfer_id);
+    // Between currencies each side keeps its own amount, so only the signs
+    // are opposite
+    const isCrossCurrency =
+      counterpart !== undefined &&
+      currencyByAccount !== null &&
+      currencyByAccount.get(leg.account) !==
+        currencyByAccount.get(counterpart.account);
     if (
       !counterpart ||
       counterpart.transfer_id !== leg.id ||
       counterpart.account === leg.account ||
-      counterpart.amount + leg.amount !== 0 ||
+      (isCrossCurrency
+        ? Math.sign(counterpart.amount) !== -Math.sign(leg.amount)
+        : counterpart.amount + leg.amount !== 0) ||
       !accountsById.has(leg.account) ||
       !accountsById.has(counterpart.account)
     ) {
