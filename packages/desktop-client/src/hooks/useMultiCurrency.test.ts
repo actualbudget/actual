@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
-import { useMultiCurrency } from './useMultiCurrency';
+import { useForeignCurrencyCode, useMultiCurrency } from './useMultiCurrency';
 
 let mockPrefs: Record<string, string | undefined> = {};
 
@@ -48,5 +48,40 @@ describe('useMultiCurrency', () => {
         defaultCurrencyCode: 'CAD',
       }).isEnabled,
     ).toBe(false);
+  });
+});
+
+describe('useForeignCurrencyCode', () => {
+  function renderForeignCurrencyCode(
+    prefs: Record<string, string | undefined>,
+    currencyCode: string | null | undefined,
+  ) {
+    mockPrefs = prefs;
+    return renderHook(() => useForeignCurrencyCode(currencyCode)).result
+      .current;
+  }
+
+  it.each([
+    ['USD', 'USD'],
+    ['JPY', 'JPY'],
+    ['CAD', undefined],
+    [null, undefined],
+    [undefined, undefined],
+  ])('gives %s in a CAD budget as %s', (currencyCode, expected) => {
+    expect(
+      renderForeignCurrencyCode(
+        { ...flagsOn, defaultCurrencyCode: 'CAD' },
+        currencyCode,
+      ),
+    ).toBe(expected);
+  });
+
+  it('gives no currency while multiple currencies are off', () => {
+    expect(
+      renderForeignCurrencyCode(
+        { 'flags.currency': 'true', defaultCurrencyCode: 'CAD' },
+        'JPY',
+      ),
+    ).toBeUndefined();
   });
 });
