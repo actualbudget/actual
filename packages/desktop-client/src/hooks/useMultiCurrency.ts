@@ -24,3 +24,15 @@ export function useMultiCurrency() {
       getEffectiveCurrency(account.currency, defaultCurrencyCode),
   };
 }
+
+// The currency of an amount while multiple currencies are on, when it isn't
+// the default one. Amounts in the default currency, even of an account set
+// to it explicitly, follow the budget's format.
+export function useForeignCurrencyCode(
+  currencyCode: string | null | undefined,
+): string | undefined {
+  const { isEnabled, defaultCurrencyCode } = useMultiCurrency();
+  return isEnabled && currencyCode && currencyCode !== defaultCurrencyCode
+    ? currencyCode
+    : undefined;
+}
