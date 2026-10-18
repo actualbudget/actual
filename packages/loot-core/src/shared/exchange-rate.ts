@@ -94,6 +94,23 @@ export function nativeToBaseFraction(
   };
 }
 
+/**
+ * {@link nativeToBaseFraction} for any integer, including totals outside
+ * the safe range; it equals it wherever the input is safe.
+ */
+export function bigNativeToBaseFraction(
+  nativeInteger: bigint,
+  nativePrecision: number,
+  basePrecision: number,
+  rate: string,
+): { numerator: bigint; denominator: bigint } {
+  const { numerator, denominator } = rateFraction(rate);
+  return {
+    numerator: nativeInteger * scale(basePrecision) * denominator,
+    denominator: numerator * scale(nativePrecision),
+  };
+}
+
 /** The exact native value of a base integer, before rounding. */
 export function baseToNativeFraction(
   baseInteger: number,
