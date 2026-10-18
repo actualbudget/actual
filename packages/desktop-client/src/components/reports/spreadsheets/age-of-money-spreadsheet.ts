@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -513,7 +514,7 @@ export function createAgeOfMoneySpreadsheet({
           ...transferFilter,
           amount: { $gt: 0 },
         })
-        .select(['id', 'date', 'amount']);
+        .select(['id', 'date', { amount: CONVERTED_AMOUNT }]);
     }
 
     // Query for ALL expense transactions up to the end date
@@ -532,7 +533,7 @@ export function createAgeOfMoneySpreadsheet({
           ...transferFilter,
           amount: { $lt: 0 },
         })
-        .select(['id', 'date', 'amount']);
+        .select(['id', 'date', { amount: CONVERTED_AMOUNT }]);
     }
 
     return runAll([makeIncomeQuery(), makeExpenseQuery()], data => {

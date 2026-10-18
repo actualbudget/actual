@@ -1050,4 +1050,20 @@ describe('Currency conversion', () => {
       "accounts1.currency = 'C''D' THEN",
     );
   });
+
+  it('`$min` selects the smallest value of a group', () => {
+    const { sql, state } = generateSQLWithState(
+      q('transactions')
+        .groupBy('account')
+        .select(['account', { date: { $min: '$date' } }])
+        .withoutValidatedRefs()
+        .serialize(),
+      schemaWithCurrencies,
+    );
+    expect(sqlLines(sql)).toEqual([
+      'SELECT transactions.account AS account, MIN(transactions.date) AS date FROM transactions',
+      'GROUP BY transactions.account',
+    ]);
+    expect(state.outputTypes.get('date')).toBe('date');
+  });
 });
