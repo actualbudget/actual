@@ -63,6 +63,29 @@ export function CategorySummary({
     'envelope-budget' | 'tracking-budget',
     'carryover'
   >(bindings.catCarryover(category.id));
+  const longGoal = useSheetValue<
+    'envelope-budget' | 'tracking-budget',
+    'long-goal'
+  >(bindings.catLongGoal(category.id));
+
+  const goalValue = goalTemplatesEnabled ? goal : null;
+  const goalFunding = longGoal === 1 ? balance : budgeted;
+  const showGoalStatus = !category.is_income && goalValue != null;
+  const goalDifference = goalFunding - (goalValue ?? 0);
+  const goalStatusText =
+    goalDifference === 0
+      ? t('Fully funded')
+      : goalDifference > 0
+        ? t('Overfunded ({{amount}})', {
+            amount: format(goalDifference, 'financial'),
+          })
+        : t('Underfunded ({{amount}})', {
+            amount: format(goalDifference, 'financial'),
+          });
+  const goalStatusColor =
+    goalDifference < 0
+      ? theme.templateNumberUnderFunded
+      : theme.templateNumberFunded;
 
   const automationCount = countAutomations(category);
   const showAutomations =
@@ -76,7 +99,7 @@ export function CategorySummary({
   const heroValue = category.is_income ? spent : balance;
   const balanceStyle = category.is_income
     ? makeBalanceAmountStyle(spent)
-    : makeBalanceAmountStyle(balance, goal, budgeted);
+    : makeBalanceAmountStyle(balance, goalValue, goalFunding);
   const tileLabelStyle = {
     ...LABEL_STYLE,
     textAlign: 'center',
@@ -122,8 +145,34 @@ export function CategorySummary({
           >
             {format(heroValue, 'financial')}
           </Text>
-          {carryover && <MobileCarryoverIndicator style={balanceStyle} />}
+          {carryover && (
+            <>
+              <MobileCarryoverIndicator style={balanceStyle} />
+              <Text style={styles.visuallyHidden}>
+                <Trans>Rolls over to next month</Trans>
+              </Text>
+            </>
+          )}
         </View>
+        {showGoalStatus && (
+          <Text
+            style={{
+              ...styles.tnum,
+              ...styles.verySmallText,
+              fontWeight: 600,
+              marginTop: spacing.xxs,
+              textAlign: 'center',
+            }}
+          >
+            <Text style={{ color: goalStatusColor }}>{goalStatusText}</Text>
+            <Text style={{ color: theme.pageTextLight }}>
+              {' · '}
+              {t('Goal: {{amount}}', {
+                amount: format(goalValue, 'financial'),
+              })}
+            </Text>
+          </Text>
+        )}
         {note && (
           <Text
             style={{
