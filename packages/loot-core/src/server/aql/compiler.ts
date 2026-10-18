@@ -1,3 +1,4 @@
+import { isSqlConversionEnabled } from '#shared/fx/sql';
 import { getNormalisedString } from '#shared/normalisation';
 import type { QueryState } from '#shared/query';
 
@@ -599,6 +600,29 @@ const compileFunction = saveStack('function', (state, func) => {
         `(${val(state, args[0])} / ${val(state, args[1])})`,
         args[0].type,
       );
+    }
+    // [amount, currency, date]: the amount converted into the budget's
+    // default currency (see FX_CONVERT)
+    case '$fx': {
+      validateArgLength(args, 3);
+      // Rates and the currency settings change the result
+      for (const tableName of ['exchange_rates', 'preferences']) {
+        if (!state.dependencies.includes(tableName)) {
+          state.dependencies.push(tableName);
+        }
+      }
+      // While multiple currencies are off the amount is used as it is,
+      // without joining the account or calling FX_CONVERT
+      if (!isSqlConversionEnabled()) {
+        const [amount] = valArray(state, [args[0]], ['float']);
+        return typed(amount, args[0].type);
+      }
+      const [amount, currency, date] = valArray(state, args, [
+        'float',
+        'string',
+        'date',
+      ]);
+      return typed(`FX_CONVERT(${amount}, ${currency}, ${date})`, args[0].type);
     }
 
     // id functions

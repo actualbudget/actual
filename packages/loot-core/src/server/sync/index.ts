@@ -17,6 +17,7 @@ import {
 } from '#server/budget/base';
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
+import { updateSqlConversionState } from '#server/fx/sqlState';
 import { app } from '#server/main-app';
 import { runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
@@ -568,6 +569,10 @@ async function _applyMessages(messages: Message[], isReceived = false) {
     void prefs.savePrefs(prefsToSet, { avoidSync: true });
     connection.send('prefs-updated');
   }
+
+  // Budget and report queries convert with the rates; they must see the
+  // new ones before reacting to this change
+  updateSqlConversionState(newData);
 
   // In testing, sometimes the spreadsheet isn't loaded, and that's ok
   if (sheet.get()) {

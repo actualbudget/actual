@@ -424,6 +424,138 @@ describe('API CRUD operations', () => {
     );
   });
 
+  describe('multiple currencies', () => {
+    const usdToCad = {
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.38,
+      date: '2026-10-01',
+    };
+
+    async function enableMultiCurrency(defaultCurrencyCode = 'CAD') {
+      await api.setPreference('flags.currency', 'true');
+      await api.setPreference('flags.multiCurrency', 'true');
+      await api.setPreference('defaultCurrencyCode', defaultCurrencyCode);
+    }
+
+    //apis: createAccount, getAccounts, updateAccount, getAccountBalance
+    test('Accounts: successfully set account currencies', async () => {
+      await enableMultiCurrency();
+
+      const accountId = await api.createAccount(
+        { name: 'test-usd-account', currency: 'USD' },
+        12345,
+      );
+      expect(await api.getAccounts()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: accountId, currency: 'USD' }),
+        ]),
+      );
+      expect(await api.getAccountBalance(accountId)).toEqual(12345);
+
+      // Currencies without decimals too, with amounts at the same scale
+      const yenId = await api.createAccount(
+        { name: 'test-yen-account', currency: 'JPY' },
+        150000,
+      );
+      expect(await api.getAccountBalance(yenId)).toEqual(150000);
+      await api.updateAccount(accountId, { currency: 'JPY' });
+      expect(await api.getAccountBalance(accountId)).toEqual(12345);
+
+      await api.updateAccount(accountId, { currency: null });
+      expect(await api.getAccounts()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: accountId, currency: null }),
+        ]),
+      );
+    });
+
+    //apis: getExchangeRates, createExchangeRate, updateExchangeRate, deleteExchangeRate
+    test('Exchange rates: successfully complete exchange rate operations', async () => {
+      await enableMultiCurrency();
+
+      const id = await api.createExchangeRate(usdToCad);
+      expect(await api.getExchangeRates()).toEqual([
+        { id, ...usdToCad, source: 'manual' },
+      ]);
+
+      await api.updateExchangeRate(id, { rate: 1.4, date: '2026-10-02' });
+      expect(await api.getExchangeRates()).toEqual([
+        { id, ...usdToCad, rate: 1.4, date: '2026-10-02', source: 'manual' },
+      ]);
+
+      await api.deleteExchangeRate(id);
+      expect(await api.getExchangeRates()).toEqual([]);
+    });
+
+    //apis: createExchangeRate, updateExchangeRate
+    test('Exchange rates: invalid rates are rejected', async () => {
+      await enableMultiCurrency();
+
+      await expect(
+        // @ts-expect-error - scripts without types can leave the rate out
+        api.createExchangeRate(),
+      ).rejects.toThrow('exchangeRate is required');
+      for (const rate of [0, 1e-320, 1e15, Number.NaN]) {
+        await expect(
+          api.createExchangeRate({ ...usdToCad, rate }),
+        ).rejects.toThrow(/positive rate between/);
+      }
+      await expect(
+        api.createExchangeRate({ ...usdToCad, to_currency: 'USD' }),
+      ).rejects.toThrow(/different currencies/);
+
+      const id = await api.createExchangeRate(usdToCad);
+      await expect(api.updateExchangeRate(id, { rate: 1e15 })).rejects.toThrow(
+        /positive rate between/,
+      );
+      expect(await api.getExchangeRates()).toEqual([
+        expect.objectContaining({ id, rate: 1.38 }),
+      ]);
+    });
+
+    //apis: createAccount, updateAccount, createExchangeRate, updateExchangeRate
+    test('Accounts and exchange rates: refused while multiple currencies are off', async () => {
+      const notEnabled = /Multiple currencies are not enabled/;
+
+      await expect(
+        api.createAccount({ name: 'test-usd-account', currency: 'USD' }, 0),
+      ).rejects.toThrow(notEnabled);
+      const accountId = await api.createAccount({ name: 'test-account' }, 0);
+      await expect(
+        api.updateAccount(accountId, { currency: 'USD' }),
+      ).rejects.toThrow(notEnabled);
+      await expect(api.createExchangeRate(usdToCad)).rejects.toThrow(
+        notEnabled,
+      );
+      expect(await api.getExchangeRates()).toEqual([]);
+
+      // A script can still write an account back as it read it
+      const account = (await api.getAccounts()).find(
+        ({ id }) => id === accountId,
+      );
+      await api.updateAccount(accountId, {
+        ...account,
+        name: 'test-account-renamed',
+      });
+      expect(await api.getAccounts()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: accountId,
+            name: 'test-account-renamed',
+            currency: null,
+          }),
+        ]),
+      );
+
+      // So does a default currency this version doesn't know
+      await enableMultiCurrency('XYZ');
+      await expect(api.createExchangeRate(usdToCad)).rejects.toThrow(
+        notEnabled,
+      );
+    });
+  });
+
   // apis: createPayee, getPayees, updatePayee, deletePayee
   test('Payees: successfully update payees', async () => {
     const payeeId1 = await api.createPayee({ name: 'test-payee1' });
