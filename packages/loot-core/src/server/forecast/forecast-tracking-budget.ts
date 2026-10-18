@@ -1,4 +1,5 @@
 import * as sheet from '#server/sheet';
+import { convertToDefaultCurrency } from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import type { ForecastDataPoint } from '#types/models/forecast';
 
@@ -43,7 +44,10 @@ export function projectTrackingBudgetForecast({
 }) {
   let runningBalance = accounts.reduce(
     (sum, account) =>
-      account.offbudget === 0 ? sum + account.balance_current : sum,
+      account.offbudget === 0
+        ? sum +
+          convertToDefaultCurrency(account.balance_current, account.currency)
+        : sum,
     0,
   );
   const forecastStartMonth = monthUtils.monthFromDate(

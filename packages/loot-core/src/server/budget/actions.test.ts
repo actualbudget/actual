@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
+import { resetSqlConversionState, setSqlConversionState } from '#shared/fx/sql';
 
 import {
   copyUntilYearEnd,
@@ -226,6 +227,50 @@ describe('getCategoryWeeklyAverage', () => {
         categoryId: 'cat1',
       }),
     ).toBe(-200.5);
+  });
+
+  it('converts spending of accounts in another currency, like the budget', async () => {
+    setSqlConversionState({
+      enabled: true,
+      defaultCurrencyCode: 'CAD',
+      rateMode: 'latest',
+      rates: [
+        {
+          id: 'usd-cad',
+          from_currency: 'USD',
+          to_currency: 'CAD',
+          rate: 1.25,
+          date: '2016-10-01',
+          source: 'manual',
+          created_at: 1,
+        },
+      ],
+    });
+    try {
+      await db.insertAccount({ id: 'usd', name: 'US card', currency: 'USD' });
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      await db.insertCategory({
+        id: 'cat1',
+        name: 'cat1',
+        cat_group: 'group1',
+      });
+      await db.insertTransaction({
+        date: '2016-10-20',
+        amount: -400,
+        account: 'usd',
+        category: 'cat1',
+      });
+
+      expect(
+        await getCategoryWeeklyAverage({
+          month: '2016-11',
+          numWeeks: 2,
+          categoryId: 'cat1',
+        }),
+      ).toBe(-250);
+    } finally {
+      resetSqlConversionState();
+    }
   });
 });
 
