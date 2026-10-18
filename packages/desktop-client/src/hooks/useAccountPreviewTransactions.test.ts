@@ -4,7 +4,7 @@ import type {
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import {
   inverseBasedOnAccount,
@@ -170,6 +170,37 @@ describe('inverseBasedOnAccount', () => {
     expect(result.transactions[0]).not.toHaveProperty('parent_id');
     expect(result.runningBalances.get('preview/savings-transfer')).toBe(
       540_000,
+    );
+  });
+
+  test('projects a transfer to another currency with its converted amount', () => {
+    const convertTransferAmount = vi.fn(
+      (amount: number, fromAccountId: string, toAccountId: string) =>
+        fromAccountId === checking.id && toAccountId === savings.id
+          ? Math.round(amount / 1.25)
+          : amount,
+    );
+    const result = inverseBasedOnAccount({
+      accountId: savings.id,
+      transactions,
+      startingBalance: 500_000,
+      runningBalances: new Map(),
+      getPayeeByTransferAccount,
+      getTransferAccountByPayee,
+      convertTransferAmount,
+    });
+
+    expect(result.transactions).toEqual([
+      expect.objectContaining({ amount: 32_000, inversed: true }),
+    ]);
+    expect(convertTransferAmount).toHaveBeenCalledWith(
+      40_000,
+      checking.id,
+      savings.id,
+      '2026-08-15',
+    );
+    expect(result.runningBalances.get('preview/savings-transfer')).toBe(
+      532_000,
     );
   });
 
