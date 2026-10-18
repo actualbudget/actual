@@ -11,8 +11,10 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-// Accounts created before multiple currencies were turned on have no
-// currency of their own; list them once so the user can review them
+// Accounts get the default currency as their own when multiple currencies
+// are turned on, so changing the default later doesn't relabel them. List
+// the accounts in the default currency until dismissed, so the user can
+// correct one that holds another currency.
 export function ImplicitCurrencyNudge() {
   const dispatch = useDispatch();
   const { isEnabled, defaultCurrencyCode } = useMultiCurrency();
@@ -21,11 +23,13 @@ export function ImplicitCurrencyNudge() {
   );
   const { data: accounts = [] } = useAccounts();
 
-  const implicitAccounts = accounts.filter(
-    account => !account.closed && account.currency == null,
+  const defaultAccounts = accounts.filter(
+    account =>
+      !account.closed &&
+      (account.currency == null || account.currency === defaultCurrencyCode),
   );
 
-  if (!isEnabled || dismissed === 'true' || implicitAccounts.length === 0) {
+  if (!isEnabled || dismissed === 'true' || defaultAccounts.length === 0) {
     return null;
   }
 
@@ -41,15 +45,14 @@ export function ImplicitCurrencyNudge() {
     >
       <Text style={{ lineHeight: 1.5 }}>
         <Trans>
-          These accounts use the budget&apos;s default currency (
-          {{ currency: defaultCurrencyCode }}). If one of them holds another
-          currency, open it and choose its currency. Choosing{' '}
-          {{ currency: defaultCurrencyCode }} explicitly removes it from this
-          list.
+          These accounts are in {{ currency: defaultCurrencyCode }}, and stay in
+          it if you change the default currency later. If one of them holds
+          another currency, open it and choose its currency: its amounts are
+          relabeled, not converted.
         </Trans>
       </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-        {implicitAccounts.map(account => (
+        {defaultAccounts.map(account => (
           <Button
             key={account.id}
             onPress={() =>

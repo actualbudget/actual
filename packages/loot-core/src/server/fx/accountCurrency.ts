@@ -1,6 +1,18 @@
 import * as db from '#server/db';
 import { ValidationError } from '#server/errors';
 import { accountModel } from '#server/models';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
+
+// Accounts only get or change a currency of their own while multiple
+// currencies are on, as through the API
+export function checkMultipleCurrenciesEnabled() {
+  if (!isSqlConversionEnabled()) {
+    throw new ValidationError('multiple currencies are not enabled');
+  }
+}
 
 // Checks that an account can be given `currency`, and returns whether that
 // changes its currency. An account keeps a currency it already has, even
@@ -24,4 +36,27 @@ export async function checkAccountCurrencyChange(
   }
   accountModel.validateCurrency(currency);
   return true;
+}
+
+// New accounts get the default currency as their own while multiple
+// currencies are on, so changing the default later doesn't relabel them
+export function getNewAccountCurrency(): { currency?: string } {
+  return isSqlConversionEnabled()
+    ? { currency: getSqlDefaultCurrencyCode() }
+    : {};
+}
+
+// Gives every account without a currency of its own, closed ones included,
+// `currency` as its own. Amounts don't change: these accounts were already
+// shown in it. Returns the accounts it changed.
+export async function pinAccountCurrencies(
+  currency: string,
+): Promise<Array<db.DbAccount['id']>> {
+  const accounts = await db.all<Pick<db.DbAccount, 'id'>>(
+    'SELECT id FROM accounts WHERE tombstone = 0 AND currency IS NULL',
+  );
+  for (const { id } of accounts) {
+    await db.update('accounts', { id, currency });
+  }
+  return accounts.map(account => account.id);
 }

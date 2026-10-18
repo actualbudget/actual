@@ -12,15 +12,21 @@ vi.mock('#hooks/useSyncedPref', () => ({
 
 vi.mock('#hooks/useAccounts', () => ({
   useAccounts: () => ({
-    data: [{ id: 'chequing', name: 'Chequing', closed: 0, currency: null }],
+    data: [
+      { id: 'chequing', name: 'Chequing', closed: 0, currency: 'CAD' },
+      { id: 'cash', name: 'Cash', closed: 0, currency: null },
+      { id: 'us', name: 'US card', closed: 0, currency: 'USD' },
+      { id: 'old', name: 'Old savings', closed: 1, currency: 'CAD' },
+    ],
   }),
 }));
 
-function renderNudge(defaultCurrencyCode: string) {
+function renderNudge(defaultCurrencyCode: string, dismissed?: string) {
   mockPrefs = {
     'flags.currency': 'true',
     'flags.multiCurrency': 'true',
     defaultCurrencyCode,
+    'multi-currency-nudge-dismissed': dismissed,
   };
   render(
     <TestProviders>
@@ -30,19 +36,29 @@ function renderNudge(defaultCurrencyCode: string) {
 }
 
 describe('ImplicitCurrencyNudge', () => {
-  it('lists accounts without a currency of their own', () => {
+  it('lists the open accounts in the default currency for review', () => {
     renderNudge('CAD');
 
+    expect(screen.getByText(/These accounts are in CAD/)).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Chequing' }),
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cash' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'US card' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Old savings' })).toBeNull();
   });
 
-  it('lists them with a default currency without decimals too', () => {
-    renderNudge('JPY');
+  it('lists them with another default currency too', () => {
+    renderNudge('USD');
 
-    expect(
-      screen.getByRole('button', { name: 'Chequing' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'US card' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cash' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Chequing' })).toBeNull();
+  });
+
+  it('stays away once dismissed', () => {
+    renderNudge('CAD', 'true');
+
+    expect(screen.queryByRole('button', { name: 'Chequing' })).toBeNull();
   });
 });

@@ -12,7 +12,12 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
-import { checkAccountCurrencyChange } from '#server/fx/accountCurrency';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+  getNewAccountCurrency,
+  pinAccountCurrencies,
+} from '#server/fx/accountCurrency';
 import { app as mainApp } from '#server/main-app';
 import { accountModel } from '#server/models';
 import { mutator } from '#server/mutators';
@@ -22,6 +27,7 @@ import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
 import { undoable, withUndo } from '#server/undo';
 import { isNonProductionEnvironment } from '#shared/environment';
+import { isSupportedCurrencyCode } from '#shared/fx/currency';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
@@ -57,6 +63,7 @@ type LinkAccountBaseParams = {
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-set-currency': typeof setAccountsCurrency;
+  'accounts-pin-currency': typeof pinAccountsToDefaultCurrency;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
@@ -112,6 +119,9 @@ async function updateAccount({
   // left as it is
   const isCurrencyChanged =
     currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultipleCurrenciesEnabled();
+  }
   await db.update('accounts', {
     id,
     ...(name !== undefined && { name }),
@@ -137,12 +147,35 @@ async function setAccountsCurrency({
       changedIds.push(id);
     }
   }
+  if (changedIds.length > 0) {
+    checkMultipleCurrenciesEnabled();
+  }
   await batchMessages(async () => {
     for (const id of changedIds) {
       await db.update('accounts', { id, currency });
     }
   });
   return {};
+}
+
+// Gives every account without a currency of its own `currency`, the
+// default one, when multiple currencies are turned on, so changing the
+// default later doesn't relabel them. The currency is passed rather than
+// read, as the preferences turning the feature on may still be saving.
+// Returns the accounts it changed.
+async function pinAccountsToDefaultCurrency({
+  currency,
+}: {
+  currency: string;
+}): Promise<Array<AccountEntity['id']>> {
+  if (!isSupportedCurrencyCode(currency)) {
+    return [];
+  }
+  let ids: Array<AccountEntity['id']> = [];
+  await batchMessages(async () => {
+    ids = await pinAccountCurrencies(currency);
+  });
+  return ids;
 }
 
 async function getAccounts(): Promise<AccountEntity[]> {
@@ -246,6 +279,7 @@ async function linkGoCardlessAccount({
       official_name: account.official_name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      ...getNewAccountCurrency(),
       account_sync_source: 'goCardless',
     });
     await db.insertPayee({
@@ -323,6 +357,7 @@ async function linkSimpleFinAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      ...getNewAccountCurrency(),
       account_sync_source: 'simpleFin',
     });
     await db.insertPayee({
@@ -402,6 +437,7 @@ async function linkPluggyAiAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      ...getNewAccountCurrency(),
       account_sync_source: 'pluggyai',
     });
     await db.insertPayee({
@@ -477,6 +513,7 @@ async function linkAkahuAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      ...getNewAccountCurrency(),
       account_sync_source: 'akahu',
     });
     await db.insertPayee({
@@ -558,6 +595,7 @@ async function linkEnableBankingAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
+      ...getNewAccountCurrency(),
       account_sync_source: 'enableBanking',
     });
     await db.insertPayee({
@@ -604,11 +642,14 @@ async function createAccount({
   currency?: AccountEntity['currency'] | undefined;
 }) {
   accountModel.validateCurrency(currency);
+  if (currency) {
+    checkMultipleCurrenciesEnabled();
+  }
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
-    ...(currency && { currency }),
+    ...(currency ? { currency } : getNewAccountCurrency()),
   });
 
   await db.insertPayee({
@@ -1834,6 +1875,10 @@ export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-set-currency', mutator(undoable(setAccountsCurrency)));
+app.method(
+  'accounts-pin-currency',
+  mutator(undoable(pinAccountsToDefaultCurrency)),
+);
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);

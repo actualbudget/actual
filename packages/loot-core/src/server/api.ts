@@ -49,7 +49,10 @@ import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError, withErrorCode } from './errors';
-import { checkAccountCurrencyChange } from './fx/accountCurrency';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+} from './fx/accountCurrency';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
@@ -194,6 +197,18 @@ function validateScheduleDate(date: RecurConfig | string) {
 function checkFileOpen() {
   if (!(prefs.getPrefs() || {}).id) {
     throw APIError('No budget file is open');
+  }
+}
+
+// Account currencies and exchange rates can only be set while multiple
+// currencies are on, which also needs a default currency they support
+function checkMultiCurrencyEnabled() {
+  try {
+    checkMultipleCurrenciesEnabled();
+  } catch {
+    throw APIError(
+      'Multiple currencies are not enabled: turn on the currency and multiCurrency feature flags and set a default currency',
+    );
   }
 }
 
@@ -780,6 +795,7 @@ handlers['api/account-create'] = withMutation(async function ({
   checkFileOpen();
   if (account.currency != null) {
     accountModel.validateCurrency(account.currency);
+    checkMultiCurrencyEnabled();
   }
   return handlers['account-create']({
     name: account.name,
@@ -800,6 +816,9 @@ handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   // already has is left as it is
   const isCurrencyChanged =
     currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultiCurrencyEnabled();
+  }
   return db.updateAccount({
     id,
     ...otherFields,
@@ -878,6 +897,7 @@ handlers['api/exchange-rate-create'] = withMutation(async function ({
   exchangeRate,
 }) {
   checkFileOpen();
+  checkMultiCurrencyEnabled();
   if (exchangeRate == null || typeof exchangeRate !== 'object') {
     throw APIError('exchangeRate is required');
   }
@@ -894,6 +914,7 @@ handlers['api/exchange-rate-update'] = withMutation(async function ({
   fields,
 }) {
   checkFileOpen();
+  checkMultiCurrencyEnabled();
   if (fields == null || typeof fields !== 'object') {
     throw APIError('fields is required');
   }

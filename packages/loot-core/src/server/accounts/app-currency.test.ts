@@ -1,11 +1,26 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { setSqlConversionState } from '#shared/fx/sql';
 
 import { app } from './app';
+
+function setMultiCurrencyEnabled(enabled: boolean) {
+  setSqlConversionState({
+    enabled,
+    defaultCurrencyCode: 'CAD',
+    rateMode: 'latest',
+    rates: [],
+  });
+}
 
 beforeEach(async () => {
   await global.emptyDatabase()();
   await loadMappings();
+  setMultiCurrencyEnabled(true);
+});
+
+afterEach(() => {
+  setMultiCurrencyEnabled(false);
 });
 
 async function getCurrencies() {
@@ -168,5 +183,47 @@ describe('account-create', () => {
 
     expect(await getCurrencies()).toEqual({ [id]: 'JPY' });
     expect(await getAmounts(id)).toEqual([150000]);
+  });
+});
+
+describe('while multiple currencies are off', () => {
+  beforeEach(() => {
+    setMultiCurrencyEnabled(false);
+  });
+
+  it('refuses to change the currency of an account', async () => {
+    await db.insertAccount({ id: 'acct', name: 'Chequing' });
+
+    await expect(
+      app.handlers['account-update']({ id: 'acct', currency: 'USD' }),
+    ).rejects.toThrow('multiple currencies are not enabled');
+    await expect(
+      app.handlers['accounts-set-currency']({ ids: ['acct'], currency: 'USD' }),
+    ).rejects.toThrow('multiple currencies are not enabled');
+    expect(await getCurrencies()).toEqual({ acct: null });
+  });
+
+  it('refuses to create an account with a currency', async () => {
+    await expect(
+      app.handlers['account-create']({ name: 'US Savings', currency: 'USD' }),
+    ).rejects.toThrow('multiple currencies are not enabled');
+    expect(await getCurrencies()).toEqual({});
+  });
+
+  it('still saves accounts whose currency stays the same', async () => {
+    await db.insertAccount({ id: 'acct', name: 'Savings', currency: 'USD' });
+    const id = await app.handlers['account-create']({ name: 'Chequing' });
+
+    await app.handlers['account-update']({
+      id: 'acct',
+      name: 'US Savings',
+      currency: 'USD',
+    });
+    await app.handlers['accounts-set-currency']({
+      ids: ['acct'],
+      currency: 'USD',
+    });
+
+    expect(await getCurrencies()).toEqual({ acct: 'USD', [id]: null });
   });
 });
