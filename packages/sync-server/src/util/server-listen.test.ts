@@ -27,25 +27,23 @@ describe('listenWithFallback', () => {
     async code => {
       const fakeServer = new http.Server();
       let listenCallCount = 0;
-      const listenSpy = vi
-        .spyOn(fakeServer, 'listen')
-        .mockImplementation(((
-          _port?: unknown,
-          _host?: unknown,
-          cb?: () => void,
-        ) => {
-          listenCallCount++;
-          if (listenCallCount === 1) {
-            const err = new Error(
-              `IPv6 bind failed (${code})`,
-            ) as NodeJS.ErrnoException;
-            err.code = code;
-            process.nextTick(() => fakeServer.emit('error', err));
-          } else if (listenCallCount === 2) {
-            if (typeof cb === 'function') cb();
-          }
-          return fakeServer;
-        }) as typeof fakeServer.listen);
+      const listenSpy = vi.spyOn(fakeServer, 'listen').mockImplementation(((
+        _port?: unknown,
+        _host?: unknown,
+        cb?: () => void,
+      ) => {
+        listenCallCount++;
+        if (listenCallCount === 1) {
+          const err = new Error(
+            `IPv6 bind failed (${code})`,
+          ) as NodeJS.ErrnoException;
+          err.code = code;
+          process.nextTick(() => fakeServer.emit('error', err));
+        } else if (listenCallCount === 2) {
+          if (typeof cb === 'function') cb();
+        }
+        return fakeServer;
+      }) as typeof fakeServer.listen);
 
       const warnSpy = vi
         .spyOn(console, 'warn')
