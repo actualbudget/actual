@@ -57,4 +57,42 @@ describe('exportToCSV', () => {
     const { row } = await payeeCell('Acme', -2500);
     expect(row.Amount).toBe('-25');
   });
+
+  it('has no currency column when no account has its own currency', async () => {
+    const { csv } = await payeeCell('Acme');
+    const rows = csvParse(csv, { columns: true }) as Array<
+      Record<string, string>
+    >;
+    expect(Object.keys(rows[0])).toEqual([
+      'Account',
+      'Date',
+      'Payee',
+      'Notes',
+      'Category',
+      'Amount',
+      'Cleared',
+      'Reconciled',
+    ]);
+  });
+
+  it('exports amounts with the currency of their account', async () => {
+    const csv = await exportToCSV(
+      [
+        makeTransaction({ account: 'a1', amount: 10050 }),
+        // ¥1,234, stored with two implied decimals like every amount
+        makeTransaction({ account: 'a2', amount: 123400 }),
+      ],
+      [...accounts, { id: 'a2', name: 'Tokyo', currency: 'JPY' }],
+      categoryGroups,
+      [{ id: 'p1', name: 'Acme' }],
+      'CAD',
+    );
+    const rows = csvParse(csv, { columns: true }) as Array<
+      Record<string, string>
+    >;
+    expect(rows.map(row => [row.Account, row.Amount, row.Currency])).toEqual([
+      ['Checking', '100.5', 'CAD'],
+      ['Tokyo', '1234', 'JPY'],
+    ]);
+  });
 });
