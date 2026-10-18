@@ -15,6 +15,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -36,6 +37,7 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createSpreadsheet as netWorthSpreadsheet } from '#components/reports/spreadsheets/net-worth-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useAccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -126,6 +128,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const convertBalance = useAccountBalanceConverter();
 
   const reportParams = useMemo(
     () =>
@@ -140,8 +143,10 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
         firstDayOfWeekIdx,
         format,
         dateFormat,
+        { convertBalance },
       ),
     [
+      convertBalance,
       start,
       end,
       accounts,
@@ -377,6 +382,16 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
             <Change amount={data.totalChange} />
           </PrivacyFilter>
         </View>
+
+        {data.hasApproximateConversion && (
+          <Text style={{ color: theme.warningText, marginBottom: 10 }}>
+            <Trans>
+              Some balances in other currencies are approximate: there is no
+              exchange rate on or before their date, so a later rate is used or
+              they count 1:1.
+            </Trans>
+          </Text>
+        )}
 
         <NetWorthGraph
           graphData={data.graphData}

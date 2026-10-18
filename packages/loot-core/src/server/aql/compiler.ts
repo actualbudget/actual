@@ -566,6 +566,12 @@ const compileFunction = saveStack('function', (state, func) => {
       return typed(`COUNT(${arg1})`, 'integer');
     }
 
+    case '$min': {
+      validateArgLength(args, 1);
+      const [arg1] = valArray(state, args);
+      return typed(`MIN(${arg1})`, args[0].type);
+    }
+
     // string functions
     case '$substr': {
       validateArgLength(args, 2, 3);
@@ -1010,7 +1016,7 @@ const compileOrderBy = saveStack('orderBy', (state, exprs) => {
   return orderBy.join(', ');
 });
 
-const AGGREGATE_FUNCTIONS = ['$sum', '$count'];
+const AGGREGATE_FUNCTIONS = ['$sum', '$count', '$min'];
 function isAggregateFunction(expr) {
   if (typeof expr !== 'object' || Array.isArray(expr)) {
     return false;

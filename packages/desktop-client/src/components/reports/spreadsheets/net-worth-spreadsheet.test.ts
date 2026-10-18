@@ -6,6 +6,8 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import { enUS } from 'date-fns/locale';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { AccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
+
 import { createSpreadsheet } from './net-worth-spreadsheet';
 
 vi.mock(
@@ -66,6 +68,7 @@ async function runReport({
   end = '2026-08',
   interval = 'Monthly',
   earliestTransactionDate = '2026-07-01',
+  convertBalance,
 }: {
   accounts: AccountEntity[];
   accountQueryResults: AccountQueryResult[];
@@ -74,6 +77,7 @@ async function runReport({
   end?: string;
   interval?: string;
   earliestTransactionDate?: string;
+  convertBalance?: AccountBalanceConverter;
 }) {
   const remainingAccountResults = [...accountQueryResults];
 
@@ -122,6 +126,8 @@ async function runReport({
     interval,
     '0',
     value => String(value),
+    undefined,
+    { convertBalance },
   );
 
   // The net worth factory does not use its spreadsheet dependency.
@@ -374,4 +380,91 @@ describe('net worth transfers', () => {
       expect(totals).toEqual(totals.map(() => 100_000));
     },
   );
+});
+
+describe('net worth in multiple currencies', () => {
+  it('values each balance on the last day of its interval', async () => {
+    // USD savings: worth 1.30 CAD in July and 1.40 CAD in August
+    const rates: Record<string, number> = {
+      'savings@2026-07-31': 1.3,
+      'savings@2026-08-31': 1.4,
+    };
+    const convertBalance = vi.fn<AccountBalanceConverter>(
+      (amount, accountId, date) => ({
+        amount: Math.round(amount * (rates[`${accountId}@${date}`] ?? 1)),
+        isApproximate: false,
+      }),
+    );
+
+    const report = await runReport({
+      accounts,
+      accountQueryResults: [100_000, [], 10_000, []],
+      convertBalance,
+    });
+
+    // The USD balance didn't change, but its CAD value did
+    expect(report.graphData.data.map(point => point.y)).toEqual([
+      100_000 + 13_000,
+      100_000 + 14_000,
+    ]);
+    expect(convertBalance).toHaveBeenCalledWith(
+      10_000,
+      'savings',
+      '2026-07-31',
+    );
+    expect(convertBalance).toHaveBeenCalledWith(
+      10_000,
+      'savings',
+      '2026-08-31',
+    );
+    expect(report.hasApproximateConversion).toBe(false);
+  });
+
+  it('computes nothing while the exchange rates are loading', async () => {
+    const setData = vi.fn();
+    const spreadsheet = createSpreadsheet(
+      '2026-07',
+      '2026-08',
+      accounts,
+      [],
+      'and',
+      enUS,
+      'Monthly',
+      '0',
+      value => String(value),
+      undefined,
+      { convertBalance: null },
+    );
+
+    await spreadsheet(undefined as never, setData);
+
+    expect(setData).not.toHaveBeenCalled();
+  });
+
+  it('reports balances converted approximately', async () => {
+    const report = await runReport({
+      accounts,
+      accountQueryResults: [100_000, [], 10_000, []],
+      convertBalance: (amount, accountId) => ({
+        amount,
+        isApproximate: accountId === 'savings',
+      }),
+    });
+
+    expect(report.hasApproximateConversion).toBe(true);
+  });
+
+  it('does not report a zero balance as converted approximately', async () => {
+    const report = await runReport({
+      accounts,
+      // Savings has no balance yet, e.g. before the first exchange rate
+      accountQueryResults: [100_000, [], 0, []],
+      convertBalance: (amount, accountId) => ({
+        amount,
+        isApproximate: accountId === 'savings',
+      }),
+    });
+
+    expect(report.hasApproximateConversion).toBe(false);
+  });
 });

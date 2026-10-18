@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -104,7 +105,7 @@ export function summarySpreadsheet(
         })
         .select([
           'date',
-          { amount: { $sum: '$amount' } },
+          { amount: { $sum: CONVERTED_AMOUNT } },
           { count: { $count: '*' } },
         ]);
 
@@ -293,7 +294,7 @@ async function calculatePercentage(
       .filter({
         [conditionsOpKey]: filters,
       })
-      .select([{ amount: { $sum: '$amount' } }]);
+      .select([{ amount: { $sum: CONVERTED_AMOUNT } }]);
 
   let query = makeDivisorQuery();
 

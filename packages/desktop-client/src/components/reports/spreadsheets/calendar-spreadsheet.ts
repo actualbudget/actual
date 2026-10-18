@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
@@ -86,7 +87,7 @@ export function calendarSpreadsheet(
           [conditionsOpKey]: filters,
         })
         .groupBy(['date'])
-        .select(['date', { amount: { $sum: '$amount' } }]);
+        .select(['date', { amount: { $sum: CONVERTED_AMOUNT } }]);
 
     let expenseData;
     try {

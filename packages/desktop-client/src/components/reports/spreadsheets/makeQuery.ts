@@ -1,3 +1,4 @@
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import { q } from '@actual-app/core/shared/query';
 import type { ObjectExpression } from '@actual-app/core/shared/query';
 
@@ -58,7 +59,7 @@ export function makeQuery(
     { accountOffBudget: { $id: '$account.offbudget' } },
     { payee: { $id: '$payee.id' } },
     { transferAccount: { $id: '$payee.transfer_acct.id' } },
-    { amount: { $sum: '$amount' } },
+    { amount: { $sum: CONVERTED_AMOUNT } },
   ];
 
   if (groupBy === 'Tag') {
