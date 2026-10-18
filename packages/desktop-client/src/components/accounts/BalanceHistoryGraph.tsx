@@ -12,14 +12,33 @@ import { integerToCurrency } from '@actual-app/core/shared/util';
 import { eachMonthOfInterval, format, subMonths } from 'date-fns';
 import { Area, AreaChart, Tooltip as RechartsTooltip, YAxis } from 'recharts';
 
+import type { CurrencyDisplayMode } from '#components/currency/displayMode';
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  getColorScale,
+  useRechartsAnimation,
+} from '#components/reports/chart-theme';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { useAccount } from '#hooks/useAccount';
+import { useAccountBalanceConverter } from '#hooks/useAccountBalanceConverter';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useLocale } from '#hooks/useLocale';
 import * as query from '#queries';
 import { liveQuery } from '#queries/liveQuery';
 
+import { buildBalanceHistory } from './balanceHistory';
+import type { AccountAmount, AccountMonthAmount } from './balanceHistory';
+
 const LABEL_WIDTH = 70;
+// Amounts in another currency carry its code, e.g. USD$1,234.56
+const WIDE_LABEL_WIDTH = 100;
+
+type ChartPoint = {
+  date: string;
+  balance: number;
+  converted: number;
+  isApproximate: boolean;
+};
 
 type BalanceHistoryGraphProps = {
   accountId?: string;
@@ -34,168 +53,165 @@ export function BalanceHistoryGraph({
 }: BalanceHistoryGraphProps) {
   const locale = useLocale();
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
-  const [balanceData, setBalanceData] = useState<
-    Array<{ date: string; balance: number }>
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [hoveredValue, setHoveredValue] = useState<{
-    date: string;
-    balance: number;
-  } | null>(null);
-  const [startingBalance, setStartingBalance] = useState<number | null>(null);
-  const [monthlyTotals, setMonthlyTotals] = useState<Array<{
-    date: string;
-    balance: number;
-  }> | null>(null);
+  const account = useAccount(accountId ?? '');
+  const {
+    defaultCurrencyCode,
+    getAccountCurrency,
+    getDisplayMode,
+    isForeignCurrency,
+    formatAmount,
+  } = useCurrencyFormatter();
+  // Undefined when no account uses another currency; null while the rates
+  // are still loading
+  const convertBalance = useAccountBalanceConverter();
+  const currency = account ? getAccountCurrency(account) : null;
+  const isForeignAccount = currency !== null && isForeignCurrency(currency);
 
-  const percentageChange = useMemo(() => {
-    if (balanceData.length < 2) return 0;
-    const firstBalance = balanceData[0].balance;
-    const lastBalance = balanceData[balanceData.length - 1].balance;
-    if (firstBalance === 0) return 0;
-    return ((lastBalance - firstBalance) / Math.abs(firstBalance)) * 100;
-  }, [balanceData]);
-  const color = useMemo(
-    () => (percentageChange >= 0 ? theme.noticeTextLight : theme.errorText),
-    [percentageChange],
-  );
+  // A foreign account follows its display mode; graphs that add up several
+  // accounts in different currencies show converted balances
+  const mode: CurrencyDisplayMode =
+    convertBalance === undefined
+      ? 'original'
+      : account && isForeignAccount
+        ? getDisplayMode(account.id)
+        : 'converted';
+  // Converting needs each account's balance on its own
+  const groupByAccount = convertBalance !== undefined;
+
+  const [startingBalances, setStartingBalances] = useState<
+    AccountAmount[] | null
+  >(null);
+  const [monthlyAmounts, setMonthlyAmounts] = useState<
+    AccountMonthAmount[] | null
+  >(null);
+  const [hoveredPoint, setHoveredPoint] = useState<ChartPoint | null>(null);
+  // The months shown and today's date, fixed when the queries start
+  const [range, setRange] = useState<{
+    months: string[];
+    today: string;
+  } | null>(null);
 
   useEffect(() => {
-    // Reset state when accountId changes
-    setStartingBalance(null);
-    setMonthlyTotals(null);
-    setLoading(true);
+    // Reset state when the account changes
+    setStartingBalances(null);
+    setMonthlyAmounts(null);
+    setHoveredPoint(null);
 
     const endDate = new Date();
     const startDate = subMonths(endDate, 12);
+    setRange({
+      months: eachMonthOfInterval({ start: startDate, end: endDate }).map(
+        month => format(month, 'yyyy-MM'),
+      ),
+      today: monthUtils.currentDay(),
+    });
 
-    const startingBalanceQuery = query
-      .transactions(accountId)
-      .filter({
-        date: { $lt: monthUtils.firstDayOfMonth(startDate) },
-      })
-      .calculate({ $sum: '$amount' });
-    const monthlyTotalsQuery = query
-      .transactions(accountId)
-      .filter({
-        $and: [
-          { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
-          { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
-        ],
-      })
-      .groupBy({ $month: '$date' })
-      .select([{ date: { $month: '$date' } }, { amount: { $sum: '$amount' } }]);
+    const before = query.transactions(accountId).filter({
+      date: { $lt: monthUtils.firstDayOfMonth(startDate) },
+    });
+    const during = query.transactions(accountId).filter({
+      $and: [
+        { date: { $gte: monthUtils.firstDayOfMonth(startDate) } },
+        { date: { $lte: monthUtils.lastDayOfMonth(endDate) } },
+      ],
+    });
 
-    const startingBalanceLive: ReturnType<typeof liveQuery<number>> = liveQuery(
-      startingBalanceQuery,
+    const onError = (error: Error) => {
+      console.error('Error fetching the balance history:', error);
+    };
+
+    const startingBalancesLive = groupByAccount
+      ? liveQuery<AccountAmount>(
+          before
+            .groupBy('account')
+            .select(['account', { amount: { $sum: '$amount' } }]),
+          { onData: setStartingBalances, onError },
+        )
+      : liveQuery<number>(before.calculate({ $sum: '$amount' }), {
+          onData: data =>
+            setStartingBalances([{ account: '', amount: data[0] || 0 }]),
+          onError,
+        });
+
+    const monthlyAmountsLive = liveQuery<{
+      account?: string;
+      date: string;
+      amount: number;
+    }>(
+      (groupByAccount
+        ? during.groupBy(['account', { $month: '$date' }])
+        : during.groupBy({ $month: '$date' })
+      ).select([
+        ...(groupByAccount ? ['account'] : []),
+        { date: { $month: '$date' } },
+        { amount: { $sum: '$amount' } },
+      ]),
       {
-        onData: (data: number[]) => {
-          setStartingBalance(data[0] || 0);
-        },
-        onError: error => {
-          console.error('Error fetching starting balance:', error);
-          setLoading(false);
-        },
+        onData: data =>
+          setMonthlyAmounts(
+            data.map(row => ({
+              account: row.account ?? '',
+              month: row.date,
+              amount: row.amount,
+            })),
+          ),
+        onError,
       },
     );
 
-    const monthlyTotalsLive: ReturnType<
-      typeof liveQuery<{ date: string; amount: number }>
-    > = liveQuery(monthlyTotalsQuery, {
-      onData: (data: Array<{ date: string; amount: number }>) => {
-        setMonthlyTotals(
-          data.map(d => ({
-            date: d.date,
-            balance: d.amount,
-          })),
-        );
-      },
-      onError: error => {
-        console.error('Error fetching monthly totals:', error);
-        setLoading(false);
-      },
-    });
-
     return () => {
-      startingBalanceLive?.unsubscribe();
-      monthlyTotalsLive?.unsubscribe();
+      startingBalancesLive.unsubscribe();
+      monthlyAmountsLive.unsubscribe();
     };
-  }, [accountId, locale]);
+  }, [accountId, groupByAccount]);
 
-  // Process data when both startingBalance and monthlyTotals are available
-  useEffect(() => {
-    if (startingBalance !== null && monthlyTotals !== null) {
-      const endDate = new Date();
-      const startDate = subMonths(endDate, 12);
-      const months = eachMonthOfInterval({
-        start: startDate,
-        end: endDate,
-      }).map(m => format(m, 'yyyy-MM'));
-
-      function processData(
-        startingBalanceValue: number,
-        monthlyTotalsValue: Array<{ date: string; balance: number }>,
-      ) {
-        let currentBalance = startingBalanceValue;
-        const totals = [...monthlyTotalsValue];
-        totals.reverse().forEach(month => {
-          currentBalance = currentBalance + month.balance;
-          month.balance = currentBalance;
-        });
-
-        // if the account doesn't have recent transactions
-        // then the empty months will be missing from our data
-        // so add in entries for those here
-        if (totals.length === 0) {
-          //handle case of no transactions in the last year
-          months.forEach(expectedMonth =>
-            totals.push({
-              date: expectedMonth,
-              balance: startingBalanceValue,
-            }),
-          );
-        } else if (totals.length < months.length) {
-          // iterate through each array together and add in missing data
-          let totalsIndex = 0;
-          let mostRecent = startingBalanceValue;
-          months.forEach(expectedMonth => {
-            if (totalsIndex > totals.length - 1) {
-              // fill in the data at the end of the window
-              totals.push({
-                date: expectedMonth,
-                balance: mostRecent,
-              });
-            } else if (totals[totalsIndex].date === expectedMonth) {
-              // a matched month
-              mostRecent = totals[totalsIndex].balance;
-              totalsIndex += 1;
-            } else {
-              // a missing month in the middle
-              totals.push({
-                date: expectedMonth,
-                balance: mostRecent,
-              });
-            }
-          });
-        }
-
-        const balances = totals
-          .sort((a, b) => monthUtils.differenceInCalendarMonths(a.date, b.date))
-          .map(t => {
-            return {
-              balance: t.balance,
-              date: monthUtils.format(t.date, 'MMM yyyy', locale),
-            };
-          });
-
-        setBalanceData(balances);
-        setHoveredValue(balances[balances.length - 1]);
-        setLoading(false);
-      }
-
-      processData(startingBalance, monthlyTotals);
+  const data = useMemo((): ChartPoint[] | null => {
+    if (
+      range === null ||
+      startingBalances === null ||
+      monthlyAmounts === null ||
+      convertBalance === null
+    ) {
+      return null;
     }
-  }, [startingBalance, monthlyTotals, locale]);
+
+    return buildBalanceHistory({
+      months: range.months,
+      today: range.today,
+      startingBalances,
+      monthlyAmounts,
+      convertBalance,
+    }).map(point => ({
+      date: monthUtils.format(point.month, 'MMM yyyy', locale),
+      balance: point.balance,
+      converted: point.converted,
+      isApproximate: point.isApproximate,
+    }));
+  }, [range, startingBalances, monthlyAmounts, convertBalance, locale]);
+
+  // 'both' follows the account's own currency for the trend
+  const trendKey = mode === 'converted' ? 'converted' : 'balance';
+  const percentageChange = useMemo(() => {
+    if (!data || data.length < 2) return 0;
+    const firstBalance = data[0][trendKey];
+    const lastBalance = data[data.length - 1][trendKey];
+    if (firstBalance === 0) return 0;
+    return ((lastBalance - firstBalance) / Math.abs(firstBalance)) * 100;
+  }, [data, trendKey]);
+  const color = percentageChange >= 0 ? theme.noticeTextLight : theme.errorText;
+  const [originalColor, convertedColor] = getColorScale('qualitative');
+
+  const formatOriginal = (value: number) =>
+    currency !== null && isForeignAccount
+      ? formatAmount(value, currency)
+      : integerToCurrency(value);
+  const formatConverted = (point: ChartPoint) =>
+    (point.isApproximate ? '≈ ' : '') +
+    formatAmount(point.converted, defaultCurrencyCode);
+
+  const shownPoint = hoveredPoint ?? data?.[data.length - 1] ?? null;
+  const labelWidth =
+    mode === 'original' && !isForeignAccount ? LABEL_WIDTH : WIDE_LABEL_WIDTH;
 
   // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
   const [isHovered, setIsHovered] = useState(false);
@@ -208,7 +224,7 @@ export function BalanceHistoryGraph({
             return null;
           }
 
-          if (loading) {
+          if (data === null) {
             return (
               <div style={{ width, height }}>
                 <LoadingIndicator />
@@ -225,12 +241,22 @@ export function BalanceHistoryGraph({
                   justifyContent: 'space-between',
                 }}
                 onMouseEnter={() => setIsHovered(true)}
-                onMouseLeave={() => setIsHovered(false)}
+                onMouseLeave={() => {
+                  setIsHovered(false);
+                  setHoveredPoint(null);
+                }}
               >
                 <AreaChart
-                  data={balanceData}
-                  width={width - LABEL_WIDTH}
+                  data={data}
+                  width={width - labelWidth}
                   height={height}
+                  // Set here rather than while the tooltip renders
+                  onMouseMove={state => {
+                    const point = data[Number(state.activeTooltipIndex)];
+                    if (point) {
+                      setHoveredPoint(point);
+                    }
+                  }}
                 >
                   <defs>
                     <linearGradient
@@ -262,32 +288,70 @@ export function BalanceHistoryGraph({
                       />
                     </linearGradient>
                   </defs>
-                  <YAxis domain={['dataMin', 'dataMax']} hide />
+                  {mode === 'both' ? (
+                    // Each currency is scaled on its own axis, so a balance
+                    // in pesos doesn't flatten one in dollars
+                    <>
+                      <YAxis
+                        yAxisId="balance"
+                        domain={['dataMin', 'dataMax']}
+                        hide
+                      />
+                      <YAxis
+                        yAxisId="converted"
+                        domain={['dataMin', 'dataMax']}
+                        hide
+                      />
+                    </>
+                  ) : (
+                    <YAxis domain={['dataMin', 'dataMax']} hide />
+                  )}
                   <RechartsTooltip
                     contentStyle={{
                       display: 'none',
                     }}
-                    labelFormatter={(label, items) => {
-                      const data = items[0]?.payload;
-                      if (data) {
-                        setHoveredValue(data);
-                      }
-                      return '';
-                    }}
+                    labelFormatter={() => ''}
                     isAnimationActive={false}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="balance"
-                    stroke={color}
-                    strokeWidth={2}
-                    {...animationProps}
-                    fill={
-                      color === theme.noticeTextLight
-                        ? 'url(#fillLight)'
-                        : 'url(#fillError)'
-                    }
-                  />
+                  {mode === 'both' ? (
+                    // The two series overlap rather than stack, each on its
+                    // own scale
+                    <>
+                      <Area
+                        yAxisId="balance"
+                        type="monotone"
+                        dataKey="balance"
+                        stroke={originalColor}
+                        fill={originalColor}
+                        fillOpacity={0.25}
+                        strokeWidth={2}
+                        {...animationProps}
+                      />
+                      <Area
+                        yAxisId="converted"
+                        type="monotone"
+                        dataKey="converted"
+                        stroke={convertedColor}
+                        fill={convertedColor}
+                        fillOpacity={0.25}
+                        strokeWidth={2}
+                        {...animationProps}
+                      />
+                    </>
+                  ) : (
+                    <Area
+                      type="monotone"
+                      dataKey={trendKey}
+                      stroke={color}
+                      strokeWidth={2}
+                      {...animationProps}
+                      fill={
+                        color === theme.noticeTextLight
+                          ? 'url(#fillLight)'
+                          : 'url(#fillError)'
+                      }
+                    />
+                  )}
                 </AreaChart>
 
                 <SpaceBetween
@@ -295,7 +359,7 @@ export function BalanceHistoryGraph({
                   style={{
                     alignItems: 'flex-end',
                     justifyContent: 'space-between',
-                    width: LABEL_WIDTH,
+                    width: labelWidth,
                     textAlign: 'right',
                     ...styles.verySmallText,
                   }}
@@ -309,13 +373,28 @@ export function BalanceHistoryGraph({
                     </Text>
                   )}
 
-                  {hoveredValue && (
+                  {shownPoint && (
                     <View>
-                      <Text style={{ fontWeight: 800 }}>
-                        {hoveredValue.date}
-                      </Text>
+                      <Text style={{ fontWeight: 800 }}>{shownPoint.date}</Text>
                       <PrivacyFilter activationFilters={[() => !isHovered]}>
-                        <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+                        {mode !== 'converted' && (
+                          <Text
+                            style={
+                              mode === 'both' ? { color: originalColor } : {}
+                            }
+                          >
+                            {formatOriginal(shownPoint.balance)}
+                          </Text>
+                        )}
+                        {mode !== 'original' && (
+                          <Text
+                            style={
+                              mode === 'both' ? { color: convertedColor } : {}
+                            }
+                          >
+                            {formatConverted(shownPoint)}
+                          </Text>
+                        )}
                       </PrivacyFilter>
                     </View>
                   )}
