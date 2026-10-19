@@ -84,7 +84,7 @@ export function BalanceForecastCard({
   const startDate = monthUtils.firstDayOfMonth(start);
   const endDate = monthUtils.lastDayOfMonth(end);
 
-  const yAxisBase = meta?.yAxisBase ?? 'Zero Based';
+  const yAxisBase = meta?.yAxisBase ?? 'Auto';
 
   const {
     data: forecastData,
@@ -249,6 +249,7 @@ export function BalanceForecastCard({
                     <YAxis
                       hide // do not show the axis labels (balance)
                       domain={[yAxisBase === 'Zero Based' ? 0 : 'auto', 'auto']}
+                      allowDataOverflow={false} // false by default but explicit > implicit
                     />
                     <defs>
                       <linearGradient

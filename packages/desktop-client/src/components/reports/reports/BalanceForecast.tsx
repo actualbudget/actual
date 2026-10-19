@@ -108,8 +108,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const [end, setEnd] = useState(
     widget?.meta?.timeFrame?.end ??
-      widget?.meta?.endDate ??
-      monthUtils.addMonths(currentMonth, 11),
+    widget?.meta?.endDate ??
+    monthUtils.addMonths(currentMonth, 11),
   );
   const [mode, setMode] = useState<TimeFrame['mode']>(
     widget?.meta?.timeFrame?.mode ?? 'static',
@@ -117,8 +117,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
-  const [yAxisBase, setYaxisbase] = useState<'Zero Based' | 'Auto'>(
-    widget?.meta?.yAxisBase ?? 'Zero Based',
+  const [yAxisBase, setYaxisbase] = useState<'Auto' | 'Zero Based'>(
+    widget?.meta?.yAxisBase ?? 'Auto',
   );
   const [source, setSource] = useState<ForecastSource>(
     widget?.meta?.source === 'tracking-budget' && budgetType === 'tracking'
@@ -366,8 +366,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         onChange={setYaxisbase}
         disabled={isTrackingBudgetForecast}
         options={[
-          ['Zero Based', t('Zero Based')],
           ['Auto', t('Auto')],
+          ['Zero Based', t('Zero Based')],
         ]}
       />
     </>
@@ -558,10 +558,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       />
                       <YAxis
                         // if hasNegativeBalance, the builtin behavior of recharts (allowDataOverflow = false), prevents data from being hidden "under" the axis
+                        // also explicitly stated for future contributors
                         domain={[
                           yAxisBase === 'Zero Based' ? 0 : 'auto',
                           'auto',
                         ]} //
+                        allowDataOverflow={false}
                         tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}
