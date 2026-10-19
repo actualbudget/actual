@@ -15,12 +15,23 @@ import {
 
 import { legacyDatabaseExists } from './absurd-migration';
 import { BudgetInUseError } from './errors';
-import { getSqliteFileRow } from './files-store';
+import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
 import { readSqliteWasm, seedLegacyDatabase } from './test-helpers';
 
 const noSleep = () => Promise.resolve();
+
+async function makeDatabaseBytes(): Promise<Uint8Array> {
+  const db = await openDatabase();
+  execQuery(
+    db,
+    "CREATE TABLE __migrations__ (id INTEGER PRIMARY KEY); CREATE TABLE t (v TEXT); INSERT INTO t VALUES ('x');",
+  );
+  const bytes = await exportDatabase(db);
+  closeDatabase(db);
+  return bytes;
+}
 
 const PATH = '/documents/Actual/budget-one/db.sqlite';
 
@@ -298,5 +309,48 @@ describe('OPFS pool store', () => {
     const db = await openDatabase();
     expect(() => applyFilePragmas(db as never)).not.toThrow();
     closeDatabase(db);
+  });
+
+  it('promotes a database the IndexedDB fallback kept into the pool', async () => {
+    const bytes = await makeDatabaseBytes();
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: bytes,
+      storage: 'memory-idb',
+      rev: 3,
+    });
+    const pool = fakePool();
+    const sqlite3 = fakeSqlite3(pool);
+    const store = createOpfsStore({
+      sqlite3: () => sqlite3,
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH, { create: false });
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect(pool.files.get('/db.sqlite')?.byteLength).toBe(bytes.byteLength);
+    const row = await getSqliteFileRow(PATH);
+    expect(row?.storage).toBe('opfs');
+    expect(row?.contents).toBe('');
+    expect(row?.rev).toBe(3);
+  });
+
+  it('does not treat an empty fallback row as data to promote', async () => {
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: new Uint8Array(0),
+      storage: 'memory-idb',
+    });
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await expect(store.open(PATH, { create: false })).rejects.toThrow(
+      /does not exist/,
+    );
+    expect(pool.importDb).not.toHaveBeenCalled();
   });
 });

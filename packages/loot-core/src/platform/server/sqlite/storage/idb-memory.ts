@@ -11,7 +11,11 @@ import {
   deleteLegacyDatabase,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
-import { BudgetInUseError, StorageMigrationError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './errors';
 import {
   deleteSqliteFileRow,
   getSqliteFileRow,
@@ -209,6 +213,13 @@ export function createMemoryIdbStore({
       });
       try {
         const row = await getSqliteFileRow(path);
+        if (row?.storage === 'opfs') {
+          // The bytes live in an OPFS pool this session cannot reach;
+          // never shadow them with an empty database
+          throw new StorageUnavailableError(
+            `${path} is stored in OPFS, which is not available here`,
+          );
+        }
         const bytes = await loadBytes(path, row);
         if (bytes == null && !create) {
           throw new Error(`database does not exist: ${path}`);
