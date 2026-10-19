@@ -18,14 +18,20 @@ export type CommandBarRecentRef =
 
 export type CommandBarRecentNavigationId =
   | 'budget'
+  | 'reports-nav'
   | 'schedules'
   | 'payees'
   | 'rules'
   | 'tags'
+  | 'bank-sync'
   | 'settings'
   | 'accounts';
 
 type RecentCatalog = Readonly<{
+  navigationItems: readonly Readonly<{
+    id: CommandBarRecentNavigationId;
+    path: string;
+  }>[];
   accounts: readonly Readonly<{ id: string; tombstone?: boolean | number }>[];
   dashboardPages: readonly Readonly<{
     id: string;
@@ -37,11 +43,12 @@ type RecentCatalog = Readonly<{
   }>[];
 }>;
 
-const recentNavigationRoutes: readonly Readonly<{
+const fallbackNavigationRoutes: readonly Readonly<{
   id: CommandBarRecentNavigationId;
   path: string;
 }>[] = [
   { id: 'budget', path: '/budget' },
+  { id: 'reports-nav', path: '/reports' },
   { id: 'schedules', path: '/schedules' },
   { id: 'payees', path: '/payees' },
   { id: 'rules', path: '/rules' },
@@ -54,11 +61,19 @@ export function getCommandBarRecentRef(
   pathname: string,
   catalog: RecentCatalog,
 ): CommandBarRecentRef | null {
-  const navigation = recentNavigationRoutes.find(
+  const configuredNavigation = catalog.navigationItems.find(
     route => route.path === pathname,
   );
-  if (navigation) {
-    return { type: 'navigation', id: navigation.id };
+  if (configuredNavigation) {
+    return { type: 'navigation', id: configuredNavigation.id };
+  }
+  if (catalog.navigationItems.length === 0) {
+    const fallbackNavigation = fallbackNavigationRoutes.find(
+      route => route.path === pathname,
+    );
+    if (fallbackNavigation) {
+      return { type: 'navigation', id: fallbackNavigation.id };
+    }
   }
 
   const accountId = getPathSegment(pathname, '/accounts/');
@@ -100,11 +115,16 @@ export function commandBarRecentRefKey(ref: CommandBarRecentRef): string {
   return `${ref.type}:${ref.id}`;
 }
 
-export function commandBarRecentPath(ref: CommandBarRecentRef): string {
+export function commandBarRecentPath(
+  ref: CommandBarRecentRef,
+  navigationItems: readonly Readonly<{
+    id: CommandBarRecentNavigationId;
+    path: string;
+  }>[] = fallbackNavigationRoutes,
+): string {
   if (ref.type === 'navigation') {
     return (
-      recentNavigationRoutes.find(route => route.id === ref.id)?.path ??
-      '/budget'
+      navigationItems.find(route => route.id === ref.id)?.path ?? '/budget'
     );
   }
   if (ref.type === 'account') return `/accounts/${ref.id}`;

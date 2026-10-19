@@ -1279,7 +1279,7 @@ async function createGoCardlessWebToken({
   }
 }
 
-type SyncResponse = {
+export type SyncResponse = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   updatedAccounts: Array<AccountEntity['id']>;
@@ -1416,6 +1416,15 @@ function getBankSyncStatusFromError(
 
     if (err.category === 'ACCOUNT_MISSING') {
       return 'account-missing';
+    }
+
+    if (
+      err.category === 'GOCARDLESS_NOT_CONFIGURED' ||
+      err.category === 'NOT_CONFIGURED' ||
+      err.code === 'GOCARDLESS_NOT_CONFIGURED' ||
+      err.code === 'NOT_CONFIGURED'
+    ) {
+      return 'not-configured';
     }
   }
 

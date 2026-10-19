@@ -2,35 +2,28 @@ import dns from 'dns';
 import { promisify } from 'util';
 
 import ipaddr from 'ipaddr.js';
+import { Agent } from 'undici';
 
 const dnsLookup = promisify(dns.lookup);
+const NAT64_PREFIX = ipaddr.IPv6.parseCIDR('64:ff9b::/96');
 
-// IP ranges (as classified by ipaddr.js) that are never a legitimate
-// destination and are the highest-risk SSRF targets, so they are blocked
-// unconditionally. linkLocal covers the cloud metadata endpoint
-// (169.254.169.254) — the credential-theft vector this protection primarily
-// guards against — and no real service is hosted on the reserved, broadcast or
-// unspecified ranges.
-const ALWAYS_BLOCKED_IP_RANGES = [
-  'linkLocal',
-  'unspecified',
-  'reserved',
-  'broadcast',
+// Only public unicast is allowed by default. Private-network mode additionally
+// permits these classes. Except for public IPv4 via the well-known NAT64 prefix,
+// neither mode permits transition, multicast, link-local,
+// or reserved addresses.
+const PRIVATE_IP_RANGES = [
+  'private',
+  'loopback',
+  'uniqueLocal',
+  'carrierGradeNat',
 ];
 
-// Private-network ranges (LAN, loopback, IPv6 unique-local). These are blocked
-// by default, but self-hosters legitimately run services such as their own
-// SimpleFIN bridge on them, so callers that expect to reach private
-// infrastructure can opt in with { allowPrivateNetwork: true }. Trusting the
-// local network by default keeps self-hosting working out of the box; the
-// always-blocked ranges above still close the worst-case (metadata) attack.
-const PRIVATE_IP_RANGES = ['private', 'loopback', 'uniqueLocal'];
-
 type SsrfOptions = {
-  // Allow requests to private/loopback/unique-local addresses. Defaults to
-  // false (strict). Set by callers like the SimpleFIN integration whose
-  // upstream may be a self-hosted server on the local network.
+  // Allow requests to private/loopback/unique-local/CGNAT addresses. Defaults to
+  // false (strict). Use allowedNetworks for administrator-approved exceptions.
   allowPrivateNetwork?: boolean;
+  // Only private classes may be exempted; always-blocked ranges stay blocked.
+  allowedNetworks?: string[];
 };
 
 /**
@@ -41,7 +34,7 @@ type SsrfOptions = {
  */
 export function isBlockedIp(
   address: string,
-  { allowPrivateNetwork = false }: SsrfOptions = {},
+  { allowPrivateNetwork = false, allowedNetworks = [] }: SsrfOptions = {},
 ): boolean {
   if (!ipaddr.isValid(address)) {
     return false;
@@ -49,13 +42,28 @@ export function isBlockedIp(
 
   // process() normalizes IPv4-mapped IPv6 addresses (e.g. ::ffff:127.0.0.1)
   // back to their IPv4 form so their range is classified correctly.
-  const range = ipaddr.process(address).range();
-
-  if (ALWAYS_BLOCKED_IP_RANGES.includes(range)) {
-    return true;
+  const parsed = ipaddr.process(address);
+  if (parsed instanceof ipaddr.IPv6 && parsed.match(NAT64_PREFIX)) {
+    // The well-known NAT64 prefix is only for globally routable IPv4.
+    return (
+      ipaddr.fromByteArray(parsed.toByteArray().slice(12)).range() !== 'unicast'
+    );
   }
+  const range = parsed.range();
 
-  return !allowPrivateNetwork && PRIVATE_IP_RANGES.includes(range);
+  return (
+    range !== 'unicast' &&
+    !(
+      PRIVATE_IP_RANGES.includes(range) &&
+      (allowPrivateNetwork ||
+        allowedNetworks.some(network => {
+          const [subnet, prefix] = parseAllowedNetwork(network);
+          return (
+            parsed.kind() === subnet.kind() && parsed.match(subnet, prefix)
+          );
+        }))
+    )
+  );
 }
 
 /**
@@ -64,9 +72,8 @@ export function isBlockedIp(
  * via DNS so that hostnames pointing at private/local/link-local addresses are
  * rejected as well as literal IPs. Throws if the URL is not allowed.
  *
- * Pass { allowPrivateNetwork: true } for callers (e.g. SimpleFIN) whose
- * upstream may legitimately be a self-hosted server on the local network; the
- * always-blocked ranges (cloud metadata, reserved, broadcast) remain blocked
+ * Use allowedNetworks for specific private IPs or CIDR ranges; the
+ * other address classes (including transition, multicast and link-local) remain blocked
  * regardless.
  */
 export async function assertUrlAllowed(
@@ -115,4 +122,42 @@ export async function assertUrlAllowed(
       );
     }
   }
+}
+
+// Validate configuration at startup as well as when matching addresses.
+export function parseAllowedNetwork(network: string) {
+  if (network.includes('/')) {
+    return ipaddr.parseCIDR(network);
+  }
+  const address = ipaddr.parse(network);
+  return [address, address.kind() === 'ipv4' ? 32 : 128] as const;
+}
+
+// Validate the addresses used by the socket, avoiding a second unchecked DNS
+// resolution after assertUrlAllowed. Literal IPs are checked by assertUrlAllowed.
+export function createSsrfDispatcher(options: SsrfOptions) {
+  return new Agent({
+    connect: {
+      lookup(hostname, lookupOptions, callback) {
+        dns.lookup(
+          hostname,
+          { ...lookupOptions, all: true },
+          (error, addresses) => {
+            if (error) {
+              callback(error, []);
+            } else if (
+              !addresses.length ||
+              addresses.some(({ address }) => isBlockedIp(address, options))
+            ) {
+              callback(new Error('Blocked request to private/local IP'), []);
+            } else if (lookupOptions.all) {
+              callback(null, addresses);
+            } else {
+              callback(null, addresses[0].address, addresses[0].family);
+            }
+          },
+        );
+      },
+    },
+  });
 }

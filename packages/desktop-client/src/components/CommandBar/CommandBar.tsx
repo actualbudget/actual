@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ComponentType, SVGProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
@@ -14,11 +14,7 @@ import {
   SvgLibrary,
   SvgLockOpen,
   SvgReports,
-  SvgStoreFront,
   SvgSwap,
-  SvgTag,
-  SvgTuning,
-  SvgWallet,
   SvgWindowOpen,
 } from '@actual-app/components/icons/v1';
 import {
@@ -62,7 +58,10 @@ import {
   commandBarRecentRefKey,
   getCommandBarRecentRef,
 } from '#commandbar/commandBarRecent';
-import type { CommandBarRecentRef } from '#commandbar/commandBarRecent';
+import type {
+  CommandBarRecentNavigationId,
+  CommandBarRecentRef,
+} from '#commandbar/commandBarRecent';
 import { useCommandBarCommands } from '#commandbar/commandBarRegistry';
 import {
   closeCommandBar,
@@ -70,6 +69,9 @@ import {
   setCommandBarOpen,
 } from '#commandbar/commandBarSlice';
 import { AccountStatusIndicator } from '#components/accounts/AccountStatusIndicator';
+import { getSidebarMenuItemPath } from '#components/sidebar/sidebarMenu';
+import type { SidebarMenuItemId } from '#components/sidebar/sidebarMenu';
+import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
 import { useTour } from '#components/tour/TourProvider';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardPages } from '#hooks/useDashboardPages';
@@ -79,6 +81,7 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
+import { useSidebarMenu } from '#hooks/useSidebarMenu';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -145,8 +148,23 @@ type ResolvedRecentItem = Readonly<{
   key: string;
   path: string;
   name: string;
-  Icon: ComponentType<SVGProps<SVGSVGElement>>;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
 }>;
+
+type NavigationItem = Readonly<{
+  id: CommandBarRecentNavigationId;
+  name: string;
+  path: string;
+  Icon:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
+}>;
+
+function getNavigationId(id: SidebarMenuItemId): CommandBarRecentNavigationId {
+  return id === 'reports' ? 'reports-nav' : id;
+}
 
 function isMacPlatform() {
   return (
@@ -164,6 +182,8 @@ function contextualFavoriteRef(item: ContextualItem): CommandBarFavoriteRef {
 
 export function CommandBar() {
   const { t } = useTranslation();
+  const { availableItems: sidebarItems } = useSidebarMenu();
+  const sidebarItemDetails = useSidebarMenuItemDetails();
   const open = useSelector(state => state.commandBar.open);
   const [search, setSearch] = useState('');
   // 'themes' is a nested palette page (VS Code-style): the "Change theme…"
@@ -332,33 +352,24 @@ export function CommandBar() {
     }
   }, [budgetName, dispatch, t]);
 
-  // Not memoized: rows embed the current search (via <Highlight>), and the
-  // component re-renders on every keystroke anyway.
-  const navigationItems = [
-    { id: 'budget', name: t('Budget'), path: '/budget', Icon: SvgWallet },
-    {
-      id: 'reports-nav',
-      name: t('Reports'),
-      path: '/reports',
-      Icon: SvgReports,
-    },
-    {
-      id: 'schedules',
-      name: t('Schedules'),
-      path: '/schedules',
-      Icon: SvgCalendar3,
-    },
-    { id: 'payees', name: t('Payees'), path: '/payees', Icon: SvgStoreFront },
-    { id: 'rules', name: t('Rules'), path: '/rules', Icon: SvgTuning },
-    { id: 'tags', name: t('Tags'), path: '/tags', Icon: SvgTag },
-    { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
-    {
-      id: 'accounts',
-      name: t('All Accounts'),
-      path: '/accounts',
-      Icon: SvgLibrary,
-    },
-  ];
+  const navigationItems = useMemo<readonly NavigationItem[]>(
+    () => [
+      ...sidebarItems.map(item => ({
+        id: getNavigationId(item.id),
+        name: sidebarItemDetails[item.id].title,
+        path: getSidebarMenuItemPath(item.id, !item.hidden),
+        Icon: sidebarItemDetails[item.id].Icon,
+      })),
+      { id: 'settings', name: t('Settings'), path: '/settings', Icon: SvgCog },
+      {
+        id: 'accounts',
+        name: t('All Accounts'),
+        path: '/accounts',
+        Icon: SvgLibrary,
+      },
+    ],
+    [sidebarItems, sidebarItemDetails, t],
+  );
 
   useEffect(() => {
     // Reset search and page when closing
@@ -398,6 +409,7 @@ export function CommandBar() {
 
   useEffect(() => {
     const recentRef = getCommandBarRecentRef(location.pathname, {
+      navigationItems,
       accounts: allAccounts,
       dashboardPages,
       customReports,
@@ -419,7 +431,13 @@ export function CommandBar() {
         ),
       ].slice(0, 4);
     });
-  }, [allAccounts, customReports, dashboardPages, location.pathname]);
+  }, [
+    allAccounts,
+    customReports,
+    dashboardPages,
+    location.pathname,
+    navigationItems,
+  ]);
 
   const accounts = allAccounts.filter(acc => !acc.closed);
   const closedAccounts = allAccounts.filter(acc => !!acc.closed);
@@ -787,6 +805,7 @@ export function CommandBar() {
         : [];
 
   const currentRecentRef = getCommandBarRecentRef(location.pathname, {
+    navigationItems,
     accounts: allAccounts,
     dashboardPages,
     customReports,
@@ -1091,7 +1110,10 @@ export function CommandBar() {
 
   const favoriteItems = favoriteRefs.flatMap(ref => {
     let name: string | undefined;
-    let Icon: ComponentType<SVGProps<SVGSVGElement>> | undefined;
+    let Icon:
+      | ComponentType<SVGProps<SVGElement>>
+      | ComponentType<SVGProps<SVGSVGElement>>
+      | undefined;
     if (ref.type === 'account') {
       name =
         ref.id === 'onbudget'
@@ -1262,10 +1284,10 @@ export function CommandBar() {
 
   const selectedRootRef =
     page === 'root' ? rootRefForValue(selectedValue) : null;
-  const openSelectedContextualPage = useCallback(() => {
+  function openSelectedContextualPage() {
     if (page !== 'root' || selectedRootRef == null) return;
     openActionForRef(selectedRootRef, selectedValue);
-  }, [openActionForRef, page, selectedRootRef, selectedValue]);
+  }
 
   const genericActionSections: readonly ActionSection[] =
     actionPageRef == null || contextualItem != null
@@ -1273,7 +1295,10 @@ export function CommandBar() {
       : (() => {
           const ref = actionPageRef;
           let name = '';
-          let Icon: ComponentType<SVGProps<SVGSVGElement>> | undefined;
+          let Icon:
+            | ComponentType<SVGProps<SVGElement>>
+            | ComponentType<SVGProps<SVGSVGElement>>
+            | undefined;
           let run: (() => void | Promise<void>) | undefined;
           let destructive = false;
           if (ref.type === 'navigation') {

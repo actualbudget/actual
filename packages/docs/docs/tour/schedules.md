@@ -11,4 +11,4 @@ The system is very flexible:
 
 For more details, see [Schedules](../schedules.md).
 
-![Overview of the schedule screen](/img/a-tour-of-actual/tour-schedules-overview.webp)
+![The Schedules page listing four schedules](/img/a-tour-of-actual/tour-schedules-overview@2x.webp)

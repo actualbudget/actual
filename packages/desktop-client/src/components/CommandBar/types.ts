@@ -11,7 +11,9 @@ export type SearchableItem = Readonly<{
    * Meant for complex items that want to display more than just static text.
    */
   readonly content?: ReactNode;
-  readonly Icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  readonly Icon?:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   /** Custom leading element; takes precedence over {@link SearchableItem.Icon `Icon`} */
   readonly leading?: ReactNode;
   readonly destructive?: boolean;
@@ -59,7 +61,9 @@ export type ActionSection = Readonly<{
 export type ActionPageHeader = Readonly<{
   readonly name: string;
   readonly typeLabel: string;
-  readonly Icon?: ComponentType<SVGProps<SVGSVGElement>>;
+  readonly Icon?:
+    | ComponentType<SVGProps<SVGElement>>
+    | ComponentType<SVGProps<SVGSVGElement>>;
   readonly leading?: ReactNode;
   readonly secondary?: ReactNode;
   readonly favorite?: FavoriteControl;

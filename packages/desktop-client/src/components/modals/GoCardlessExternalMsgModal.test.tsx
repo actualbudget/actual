@@ -39,9 +39,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     // Mock timezone to Germany
     global.Intl = {
       ...originalIntl,
-      DateTimeFormat: vi.fn(() => ({
-        resolvedOptions: () => ({ timeZone: 'Europe/Berlin' }),
-      })) as unknown as typeof Intl.DateTimeFormat,
+      DateTimeFormat: vi.fn(function () {
+        return { resolvedOptions: () => ({ timeZone: 'Europe/Berlin' }) };
+      }) as unknown as typeof Intl.DateTimeFormat,
     } as typeof Intl;
 
     Object.defineProperty(global, 'navigator', {
@@ -64,9 +64,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     // Mock timezone to US (not supported)
     global.Intl = {
       ...originalIntl,
-      DateTimeFormat: vi.fn(() => ({
-        resolvedOptions: () => ({ timeZone: 'America/New_York' }),
-      })) as unknown as typeof Intl.DateTimeFormat,
+      DateTimeFormat: vi.fn(function () {
+        return { resolvedOptions: () => ({ timeZone: 'America/New_York' }) };
+      }) as unknown as typeof Intl.DateTimeFormat,
     } as typeof Intl;
 
     // But locale is UK
@@ -89,9 +89,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     // Mock timezone to US
     global.Intl = {
       ...originalIntl,
-      DateTimeFormat: vi.fn(() => ({
-        resolvedOptions: () => ({ timeZone: 'America/New_York' }),
-      })) as unknown as typeof Intl.DateTimeFormat,
+      DateTimeFormat: vi.fn(function () {
+        return { resolvedOptions: () => ({ timeZone: 'America/New_York' }) };
+      }) as unknown as typeof Intl.DateTimeFormat,
     } as typeof Intl;
 
     // Locale is also US
@@ -114,9 +114,9 @@ describe('GoCardlessExternalMsgModal - Country Auto-selection', () => {
     // Mock timezone to France
     global.Intl = {
       ...originalIntl,
-      DateTimeFormat: vi.fn(() => ({
-        resolvedOptions: () => ({ timeZone: 'Europe/Paris' }),
-      })) as unknown as typeof Intl.DateTimeFormat,
+      DateTimeFormat: vi.fn(function () {
+        return { resolvedOptions: () => ({ timeZone: 'Europe/Paris' }) };
+      }) as unknown as typeof Intl.DateTimeFormat,
     } as typeof Intl;
 
     // Locale is German

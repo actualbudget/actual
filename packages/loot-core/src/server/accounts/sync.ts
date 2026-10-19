@@ -358,6 +358,7 @@ async function downloadAkahuTransactions(
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  aspspName?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) return;
@@ -369,6 +370,7 @@ async function downloadEnableBankingTransactions(
     {
       accountId: acctId,
       startDate: since,
+      aspspName,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -666,6 +668,13 @@ export async function reconcileTransactions(
 
   // Finally, generate & commit the changes
   for (const { trans, subtransactions, match } of transactionsStep3) {
+    // A skipped transaction still takes part in the matching above, so the
+    // other transactions match the same way as in the import preview. It is
+    // not imported or merged.
+    if (trans.skipTransaction) {
+      continue;
+    }
+
     if (match && !trans.forceAddTransaction) {
       // Skip updating already reconciled (locked) transactions
       if (match.reconciled) {
@@ -1266,7 +1275,12 @@ export async function syncAccount(
       newAccount,
     );
   } else if (acctRow.account_sync_source === 'enableBanking') {
-    download = await downloadEnableBankingTransactions(acctId, syncStartDate);
+    const bankRow = await db.select('banks', acctRow.bank);
+    download = await downloadEnableBankingTransactions(
+      acctId,
+      syncStartDate,
+      bankRow?.name,
+    );
   } else {
     throw new Error(
       `Unrecognized bank-sync provider: ${acctRow.account_sync_source}`,

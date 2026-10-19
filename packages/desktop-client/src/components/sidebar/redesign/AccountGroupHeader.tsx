@@ -36,6 +36,7 @@ import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
 import { dropZoneStyle, groupLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
+import { useTreeItemEditing } from './treeItemEditing';
 import { treeKeys } from './treeKeys';
 
 type AccountGroupHeaderProps = {
@@ -57,7 +58,9 @@ export function AccountGroupHeader({
 }: AccountGroupHeaderProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useTreeItemEditing(
+    treeKeys.group(group.id),
+  );
   const updateGroup = useUpdateAccountGroupMutation();
   const deleteGroup = useDeleteAccountGroupMutation();
 

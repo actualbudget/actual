@@ -583,6 +583,36 @@ describe('Account sync', () => {
     ]);
   });
 
+  test('reconcile matches a skipped transaction but does not import it', async () => {
+    const { id } = await prepareDatabase();
+    await reconcileTransactions(id, [
+      { date: '2024-04-05', amount: -899, payee_name: 'Netflix' },
+    ]);
+
+    // The Netflix row matches the existing transaction and is skipped (the
+    // user unchecked it). It must still take the match, so the coffee row
+    // with the same amount is added and not merged into Netflix.
+    const { added, updated } = await reconcileTransactions(id, [
+      {
+        date: '2024-04-05',
+        amount: -899,
+        payee_name: 'Netflix',
+        notes: 'Subscription',
+        skipTransaction: true,
+      },
+      { date: '2024-04-03', amount: -899, payee_name: 'Corner Coffee' },
+    ]);
+
+    expect(added).toHaveLength(1);
+    expect(updated).toHaveLength(0);
+    expect(
+      (await getAllTransactions()).map(t => [t.date, t.payee_name, t.notes]),
+    ).toEqual([
+      [20240405, 'Netflix', null],
+      [20240403, 'Corner Coffee', null],
+    ]);
+  });
+
   test("reconcile does not merge transactions with different 'imported_id' values", async () => {
     const { id } = await prepareDatabase();
 
@@ -957,6 +987,8 @@ describe('Account sync', () => {
 });
 
 describe('SimpleFin batch sync', () => {
+  let previousGoCardlessTransactionsHandler;
+
   function mockSimpleFinTransactions(response) {
     vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
     handlers['/simplefin/transactions'] = () => response;
@@ -964,6 +996,12 @@ describe('SimpleFin batch sync', () => {
 
   afterEach(() => {
     delete handlers['/simplefin/transactions'];
+    if (previousGoCardlessTransactionsHandler) {
+      handlers['/gocardless/transactions'] =
+        previousGoCardlessTransactionsHandler;
+    } else {
+      delete handlers['/gocardless/transactions'];
+    }
   });
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
@@ -1163,5 +1201,57 @@ describe('SimpleFin batch sync', () => {
     expect(missingResult).toBeDefined();
     expect(missingResult.res.error_code).toBe('ACCOUNT_MISSING');
     expect(missingResult.res.error_type).toBe('ACCOUNT_MISSING');
+  });
+
+  test('preserves GOCARDLESS_NOT_CONFIGURED error through bank sync pipeline', async () => {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+    vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+      'user-id': 'user-1',
+      'user-key': 'key-1',
+    });
+
+    db.runQuery(
+      'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+      ['bank-1', 'gc-bank', 'GoCardless Bank'],
+    );
+
+    const acctId = await db.insertAccount({
+      id: 'acct-gc-1',
+      account_id: 'ext-gc-1',
+      name: 'GoCardless Checking',
+      bank: 'bank-1',
+      account_sync_source: 'goCardless',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + acctId,
+      name: '',
+      transfer_acct: acctId,
+    });
+
+    previousGoCardlessTransactionsHandler =
+      handlers['/gocardless/transactions'];
+    handlers['/gocardless/transactions'] = () => ({
+      error_type: 'GOCARDLESS_NOT_CONFIGURED',
+      error_code: 'GOCARDLESS_NOT_CONFIGURED',
+      reason: 'GoCardless credentials are missing',
+    });
+
+    const result = await accountsApp.handlers['accounts-bank-sync']({
+      ids: [acctId],
+    });
+
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toMatchObject({
+      type: 'SyncError',
+      accountId: acctId,
+      category: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+    });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      [acctId],
+    );
+    expect(account!.bank_sync_status).toBe('not-configured');
   });
 });
