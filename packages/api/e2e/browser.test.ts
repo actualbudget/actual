@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 // Structural view of the module harness.html loads from dist/browser.js
 // (`typeof import` would pull the whole loot-core type graph in here).
@@ -27,10 +28,50 @@ declare global {
   }
 }
 
+// Where the open page keeps its budgets: absurd-sql's per-file databases
+// must be gone, and every sqlite row must carry the sqlite-wasm marker.
+async function readStorageLayout(page: Page) {
+  return page.evaluate(async () => {
+    const names = (await indexedDB.databases()).map(
+      database => database.name ?? '',
+    );
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('actual');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    type FileRow = { filepath: string; storage?: string };
+    const rows = await new Promise<FileRow[]>((resolve, reject) => {
+      const request = db
+        .transaction(['files'], 'readonly')
+        .objectStore('files')
+        .getAll();
+      request.onsuccess = () => resolve(request.result as FileRow[]);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return {
+      legacyDatabases: names.filter(name => name.startsWith('documents-')),
+      sqliteStorage: rows
+        .filter(row => row.filepath.endsWith('.sqlite'))
+        .map(row => row.storage),
+    };
+  });
+}
+
 test('boots, imports a budget, reads it back, and persists', async ({
   page,
 }) => {
   await page.goto('/e2e/harness.html');
+
+  // The harness is served without cross-origin isolation, so the engine
+  // has to manage without SharedArrayBuffer
+  expect(
+    await page.evaluate(() => ({
+      isolated: window.crossOriginIsolated,
+      sharedArrayBuffer: typeof SharedArrayBuffer,
+    })),
+  ).toEqual({ isolated: false, sharedArrayBuffer: 'undefined' });
 
   await page.evaluate(async () => {
     const api = await window.apiReady;
@@ -77,7 +118,14 @@ test('boots, imports a budget, reads it back, and persists', async ({
   expect(result.accountNames).toEqual(['Checking']);
   expect(result.amounts).toEqual([-1250, 50000]);
 
-  // Reload the page: the budget must survive in IndexedDB.
+  const layout = await readStorageLayout(page);
+  expect(layout.legacyDatabases).toEqual([]);
+  expect(layout.sqliteStorage.length).toBeGreaterThan(0);
+  for (const kind of layout.sqliteStorage) {
+    expect(['opfs', 'memory-idb']).toContain(kind);
+  }
+
+  // Reload the page: the budget must survive in the browser's storage.
   await page.evaluate(async () => {
     const api = await window.apiReady;
     await api.shutdown();
@@ -112,7 +160,7 @@ test('supports a custom dataDir and persists it', async ({ page }) => {
   });
   expect(result.accountNames).toEqual(['Savings']);
 
-  // Reload the page: the budget must survive in IndexedDB.
+  // Reload the page: the budget must survive in the browser's storage.
   await page.evaluate(async () => {
     const api = await window.apiReady;
     await api.shutdown();
