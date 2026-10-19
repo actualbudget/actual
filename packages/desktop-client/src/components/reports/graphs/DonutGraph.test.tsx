@@ -1,17 +1,22 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router';
 
+import type {
+  DataEntity,
+  GroupedEntity,
+  LegendEntity,
+} from '@actual-app/core/types/models';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { TestProviders } from '#mocks';
 
 import {
-  DonutGraph,
+  buildColorMap,
   colorToRgb,
+  DonutGraph,
   hslToRgb,
   shadeColor,
-  buildColorMap,
 } from './DonutGraph';
 
 describe('DonutGraph Color Helpers', () => {
@@ -120,8 +125,16 @@ describe('DonutGraph Color Helpers', () => {
 
     it('returns black fallback for empty, non-string, or unparseable input', () => {
       expect(colorToRgb('')).toEqual({ r: 0, g: 0, b: 0 });
-      expect(colorToRgb(null as any)).toEqual({ r: 0, g: 0, b: 0 });
-      expect(colorToRgb(undefined as any)).toEqual({ r: 0, g: 0, b: 0 });
+      expect(colorToRgb(null as unknown as string)).toEqual({
+        r: 0,
+        g: 0,
+        b: 0,
+      });
+      expect(colorToRgb(undefined as unknown as string)).toEqual({
+        r: 0,
+        g: 0,
+        b: 0,
+      });
       expect(colorToRgb('invalid-color')).toEqual({ r: 0, g: 0, b: 0 });
     });
   });
@@ -151,25 +164,53 @@ describe('DonutGraph Color Helpers', () => {
 
   describe('buildColorMap', () => {
     it('builds color map for grouped categories using hsl colors', () => {
-      const groupedData = [
+      const groupedData: GroupedEntity[] = [
         {
           id: 'group-1',
           name: 'Bills',
+          totalAssets: 0,
+          totalDebts: 0,
+          totalTotals: 0,
+          netAssets: 0,
+          netDebts: 0,
+          totalBudgeted: 0,
+          intervalData: [],
           categories: [
-            { id: 'cat-1', name: 'Rent' },
-            { id: 'cat-2', name: 'Utilities' },
+            {
+              id: 'cat-1',
+              name: 'Rent',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 0,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
+            {
+              id: 'cat-2',
+              name: 'Utilities',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 0,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
           ],
         },
       ];
-      const legend = [
+      const legend: LegendEntity[] = [
         {
           id: 'group-1',
           name: 'Bills',
           color: 'hsl(210, 100%, 50%)',
+          dataKey: 'group-1',
         },
       ];
 
-      const colorMap = buildColorMap(groupedData as any, legend as any);
+      const colorMap = buildColorMap(groupedData, legend);
 
       expect(colorMap.get('group-1')).toBe('hsl(210, 100%, 50%)');
       const cat1Color = colorMap.get('cat-1');
@@ -188,35 +229,69 @@ describe('DonutGraph Color Helpers', () => {
 
 describe('DonutGraph Component', () => {
   it('renders concentric donut chart with hsl colors without throwing', () => {
-    const sampleData = {
+    const sampleData: DataEntity = {
       groupedData: [
         {
           id: 'group-1',
           name: 'Food',
+          totalAssets: 0,
+          totalDebts: 0,
+          totalTotals: 0,
+          netAssets: 0,
+          netDebts: 0,
+          totalBudgeted: 0,
+          intervalData: [],
           categories: [
-            { id: 'cat-1', name: 'Groceries', value: 300 },
-            { id: 'cat-2', name: 'Dining', value: 150 },
+            {
+              id: 'cat-1',
+              name: 'Groceries',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 300,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
+            {
+              id: 'cat-2',
+              name: 'Dining',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 150,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
           ],
         },
       ],
+      intervalData: [],
+      totalAssets: 0,
+      totalDebts: 0,
+      netAssets: 0,
+      netDebts: 0,
+      totalTotals: 450,
+      totalBudgeted: 0,
       legend: [
         {
           id: 'group-1',
           name: 'Food',
           color: 'hsl(120, 80%, 40%)',
+          dataKey: 'group-1',
         },
       ],
-      splitData: 'groupedData',
     };
 
     render(
       <MemoryRouter>
         <TestProviders>
           <DonutGraph
-            data={sampleData as any}
+            data={sampleData}
             groupBy="CategoryGroup"
-            showActiveShape={false}
-            compact={false}
+            filters={[]}
+            balanceTypeOp="totalDebts"
             viewLabels={false}
           />
         </TestProviders>
