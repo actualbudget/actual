@@ -36,12 +36,16 @@ type AmountInputProps = {
   onChangeValue?: (value: string) => void;
   onUpdate?: (value: string) => void;
   onUpdateAmount?: (value: number) => void;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
 };
 
 const AmountInput = memo(function AmountInput({
   focused,
   style,
   textStyle,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: AmountInputProps) {
   const [editing, setEditing] = useState(false);
@@ -131,6 +135,8 @@ const AmountInput = memo(function AmountInput({
       value={text}
       inputMode="decimal"
       autoCapitalize="none"
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy}
       onChange={e => onChangeText(e.target.value)}
       onFocus={onFocus}
       onBlur={onBlur}

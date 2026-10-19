@@ -10,7 +10,6 @@ import { GridList, GridListItem } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Card } from '@actual-app/components/card';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
@@ -29,26 +28,20 @@ import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { groupById } from '@actual-app/core/shared/util';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
 
 import { sync } from '#app/appSlice';
-import {
-  useBudgetActions,
-  useCreateCategoryGroupMutation,
-  useCreateCategoryMutation,
-  useDeleteCategoryGroupMutation,
-  useDeleteCategoryMutation,
-  useSaveCategoryGroupMutation,
-  useSaveCategoryMutation,
-  useSortCategoriesMutation,
-} from '#budget';
+import { useBudgetActions, useCreateCategoryGroupMutation } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -65,7 +58,14 @@ import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
-import { BudgetTable, PILL_STYLE } from './BudgetTable';
+import { BudgetTable } from './BudgetTable';
+import { ReorderModeContext } from './ReorderModeContext';
+
+const PILL_STYLE = {
+  borderRadius: 16,
+  color: theme.pillText,
+  backgroundColor: theme.pillBackgroundLight,
+};
 
 function isBudgetType(input?: string): input is 'envelope' | 'tracking' {
   return ['envelope', 'tracking'].includes(input);
@@ -75,15 +75,13 @@ export function BudgetPage() {
   const { t } = useTranslation();
   const locale = useLocale();
   const {
-    data: { list: categories, grouped: categoryGroups } = {
+    data: { grouped: categoryGroups } = {
       list: [],
       grouped: [],
     },
   } = useCategories();
   const [budgetTypePref] = useSyncedPref('budgetType');
   const budgetType = isBudgetType(budgetTypePref) ? budgetTypePref : 'envelope';
-  const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
 
   const currMonth = monthUtils.currentMonth();
@@ -93,20 +91,15 @@ export function BudgetPage() {
     start: startMonth,
     end: startMonth,
   });
-  // const [editMode, setEditMode] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [isReorderMode, setIsReorderMode] = useState(false);
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const applyBudgetAction = useBudgetActions();
-  const createCategory = useCreateCategoryMutation();
-  const saveCategory = useSaveCategoryMutation();
-  const deleteCategory = useDeleteCategoryMutation();
   const createCategoryGroup = useCreateCategoryGroupMutation();
-  const saveCategoryGroup = useSaveCategoryGroupMutation();
-  const deleteCategoryGroup = useDeleteCategoryGroupMutation();
-  const sortCategories = useSortCategoriesMutation();
 
   useEffect(() => {
     async function init() {
@@ -122,7 +115,7 @@ export function BudgetPage() {
   }, [budgetType, startMonth, dispatch, spreadsheet]);
 
   const onBudgetAction = useCallback(
-    async (month, type, args) => {
+    async (month, type, args?) => {
       applyBudgetAction.mutate({ month, type, args });
     },
     [applyBudgetAction],
@@ -161,7 +154,7 @@ export function BudgetPage() {
         modal: {
           name: 'new-category-group',
           options: {
-            onValidate: name => (!name ? 'Name is required.' : null),
+            onValidate: name => (!name ? t('Name is required.') : null),
             onSubmit: async name => {
               createCategoryGroup.mutate(
                 { name },
@@ -178,85 +171,7 @@ export function BudgetPage() {
         },
       }),
     );
-  }, [dispatch, createCategoryGroup]);
-
-  const onOpenNewCategoryModal = useCallback(
-    (groupId, isIncome) => {
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'new-category',
-            options: {
-              onValidate: name => (!name ? 'Name is required.' : null),
-              onSubmit: async name => {
-                createCategory.mutate(
-                  {
-                    name,
-                    groupId,
-                    isIncome,
-                    isHidden: false,
-                  },
-                  {
-                    onSettled: () => {
-                      dispatch(
-                        collapseModals({
-                          rootModalName: 'category-group-menu',
-                        }),
-                      );
-                    },
-                  },
-                );
-              },
-            },
-          },
-        }),
-      );
-    },
-    [dispatch, createCategory],
-  );
-
-  const onSaveGroup = useCallback(
-    group => {
-      saveCategoryGroup.mutate({ group });
-    },
-    [saveCategoryGroup],
-  );
-
-  const onApplyBudgetTemplatesInGroup = useCallback(
-    async categories => {
-      applyBudgetAction.mutate({
-        month: startMonth,
-        type: 'apply-multiple-templates',
-        args: {
-          categories,
-        },
-      });
-    },
-    [applyBudgetAction, startMonth],
-  );
-
-  const onDeleteGroup = useCallback(
-    (groupId, transferId) => {
-      dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-      deleteCategoryGroup.mutate({ id: groupId, transferId });
-    },
-    [deleteCategoryGroup, dispatch],
-  );
-
-  const onSaveCategory = useCallback(
-    category => {
-      saveCategory.mutate({ category });
-    },
-    [saveCategory],
-  );
-
-  const onDeleteCategory = useCallback(
-    (categoryId, transferId) => {
-      dispatch(collapseModals({ rootModalName: 'category-menu' }));
-      deleteCategory.mutate({ id: categoryId, transferId });
-    },
-    [deleteCategory, dispatch],
-  );
+  }, [dispatch, createCategoryGroup, t]);
 
   const onPrevMonth = useCallback(async () => {
     const month = monthUtils.subMonths(startMonth, 1);
@@ -278,167 +193,9 @@ export function BudgetPage() {
     setInitialized(true);
   }, [budgetType, setStartMonthPref, spreadsheet, currMonth]);
 
-  // const onOpenMonthActionMenu = () => {
-  //   const options = [
-  //     'Copy last month's budget',
-  //     'Set budgets to zero',
-  //     'Set budgets to 3 month average',
-  //     budgetType === 'tracking' && 'Apply to all future budgets',
-  //   ].filter(Boolean);
-
-  //   props.showActionSheetWithOptions(
-  //     {
-  //       options,
-  //       cancelButtonIndex: options.length - 1,
-  //       title: 'Actions',
-  //     },
-  //     idx => {
-  //       switch (idx) {
-  //         case 0:
-  //           setEditMode(true);
-  //           break;
-  //         case 1:
-  //           onBudgetAction('copy-last');
-  //           break;
-  //         case 2:
-  //           onBudgetAction('set-zero');
-  //           break;
-  //         case 3:
-  //           onBudgetAction('set-3-avg');
-  //           break;
-  //         case 4:
-  //           if (budgetType === 'tracking') {
-  //             onBudgetAction('set-all-future');
-  //           }
-  //           break;
-  //         default:
-  //       }
-  //     },
-  //   );
-  // };
-
   const onSaveNotes = useCallback(async (id, notes) => {
     await send('notes-save', { id, note: notes });
   }, []);
-
-  const onOpenCategoryGroupNotesModal = useCallback(
-    id => {
-      const group = categoryGroups.find(g => g.id === id);
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'notes',
-            options: {
-              id,
-              name: group.name,
-              onSave: onSaveNotes,
-            },
-          },
-        }),
-      );
-    },
-    [categoryGroups, dispatch, onSaveNotes],
-  );
-
-  const onOpenCategoryNotesModal = useCallback(
-    id => {
-      const category = categories.find(c => c.id === id);
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'notes',
-            options: {
-              id,
-              name: category.name,
-              onSave: onSaveNotes,
-            },
-          },
-        }),
-      );
-    },
-    [categories, dispatch, onSaveNotes],
-  );
-
-  const onOpenCategoryGroupMenuModal = useCallback(
-    id => {
-      const group = categoryGroups.find(g => g.id === id);
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'category-group-menu',
-            options: {
-              groupId: group.id,
-              onSave: onSaveGroup,
-              onAddCategory: onOpenNewCategoryModal,
-              onEditNotes: onOpenCategoryGroupNotesModal,
-              onDelete: onDeleteGroup,
-              onApplyBudgetTemplatesInGroup,
-              onSortCategories: (groupId, direction) => {
-                sortCategories.mutate({ groupId, direction });
-              },
-            },
-          },
-        }),
-      );
-    },
-    [
-      categoryGroups,
-      dispatch,
-      onDeleteGroup,
-      onOpenCategoryGroupNotesModal,
-      onOpenNewCategoryModal,
-      onSaveGroup,
-      onApplyBudgetTemplatesInGroup,
-      sortCategories,
-    ],
-  );
-
-  const onOpenCategoryMenuModal = useCallback(
-    id => {
-      const category = categories.find(c => c.id === id);
-      const canEditAutomations =
-        goalTemplatesEnabled &&
-        goalTemplatesUIEnabled &&
-        !(category.is_income && budgetType !== 'tracking');
-      dispatch(
-        pushModal({
-          modal: {
-            name: 'category-menu',
-            options: {
-              categoryId: category.id,
-              onSave: onSaveCategory,
-              onEditNotes: onOpenCategoryNotesModal,
-              onDelete: onDeleteCategory,
-              ...(canEditAutomations && {
-                onEditAutomations: (categoryId: string) => {
-                  dispatch(collapseModals({ rootModalName: 'category-menu' }));
-                  dispatch(
-                    pushModal({
-                      modal: {
-                        name: 'category-automations-edit',
-                        options: { categoryId, month: startMonth },
-                      },
-                    }),
-                  );
-                },
-              }),
-            },
-          },
-        }),
-      );
-    },
-    [
-      budgetType,
-      categories,
-      dispatch,
-      goalTemplatesEnabled,
-      goalTemplatesUIEnabled,
-      onDeleteCategory,
-      onOpenCategoryNotesModal,
-      onSaveCategory,
-      startMonth,
-    ],
-  );
 
   const [showHiddenCategories, setShowHiddenCategoriesPref] = useLocalPref(
     'budget.showHiddenCategories',
@@ -449,7 +206,7 @@ export function BudgetPage() {
   }, [setShowHiddenCategoriesPref, showHiddenCategories]);
 
   const onOpenBudgetMonthNotesModal = useCallback(
-    month => {
+    (month: string) => {
       dispatch(
         pushModal({
           modal: {
@@ -470,23 +227,59 @@ export function BudgetPage() {
     void dispatch(closeBudget());
   }, [dispatch]);
 
-  const onOpenBudgetMonthMenu = useCallback(
-    month => {
+  const onShowCategoryGroup = useCallback(
+    (groupId: CategoryGroupEntity['id']) => {
       dispatch(
         pushModal({
           modal: {
-            name: `${budgetType}-budget-month-menu`,
-            options: {
-              month,
-              onBudgetAction,
-              onEditNotes: onOpenBudgetMonthNotesModal,
-            },
+            name: 'category-group-actions',
+            options: { groupId, month: startMonth },
           },
         }),
       );
     },
-    [budgetType, dispatch, onBudgetAction, onOpenBudgetMonthNotesModal],
+    [dispatch, startMonth],
   );
+
+  const onShowCategory = useCallback(
+    (categoryId: CategoryEntity['id']) => {
+      void navigate(`/categories/${categoryId}?month=${startMonth}`);
+    },
+    [navigate, startMonth],
+  );
+
+  const onSelectMonth = useCallback(
+    async (month: string) => {
+      await prewarmMonth(budgetType, spreadsheet, month);
+      setStartMonthPref(month);
+      setInitialized(true);
+    },
+    [budgetType, setStartMonthPref, spreadsheet],
+  );
+
+  const onOpenMonthPicker = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'budget-month-picker',
+          options: {
+            month: startMonth,
+            monthBounds,
+            onSelectMonth,
+            onBudgetAction,
+            onEditNotes: onOpenBudgetMonthNotesModal,
+          },
+        },
+      }),
+    );
+  }, [
+    dispatch,
+    monthBounds,
+    onBudgetAction,
+    onOpenBudgetMonthNotesModal,
+    onSelectMonth,
+    startMonth,
+  ]);
 
   const onOpenBudgetPageMenu = useCallback(() => {
     dispatch(
@@ -494,8 +287,10 @@ export function BudgetPage() {
         modal: {
           name: 'budget-page-menu',
           options: {
+            isReorderMode,
             onAddCategoryGroup: onOpenNewCategoryGroupModal,
             onToggleHiddenCategories,
+            onToggleReorderMode: () => setIsReorderMode(mode => !mode),
             onSwitchBudgetFile,
           },
         },
@@ -503,6 +298,7 @@ export function BudgetPage() {
     );
   }, [
     dispatch,
+    isReorderMode,
     onOpenNewCategoryGroupModal,
     onSwitchBudgetFile,
     onToggleHiddenCategories,
@@ -533,7 +329,7 @@ export function BudgetPage() {
             <MonthSelector
               month={startMonth}
               monthBounds={monthBounds}
-              onOpenMonthMenu={onOpenBudgetMonthMenu}
+              onOpenMonthMenu={onOpenMonthPicker}
               onPrevMonth={onPrevMonth}
               onNextMonth={onNextMonth}
             />
@@ -558,15 +354,30 @@ export function BudgetPage() {
             </Button>
           }
           rightContent={
-            !monthUtils.isCurrentMonth(startMonth) && (
+            isReorderMode ? (
               <Button
                 variant="bare"
-                onPress={onCurrentMonth}
-                aria-label={t('Today')}
-                style={{ margin: 10 }}
+                onPress={() => setIsReorderMode(false)}
+                style={{
+                  ...styles.mediumText,
+                  fontWeight: 600,
+                  margin: 10,
+                  color: theme.mobileHeaderText,
+                }}
               >
-                <SvgCalendar width={20} height={20} />
+                <Trans>Done</Trans>
               </Button>
+            ) : (
+              !monthUtils.isCurrentMonth(startMonth) && (
+                <Button
+                  variant="bare"
+                  onPress={onCurrentMonth}
+                  aria-label={t('Today')}
+                  style={{ margin: 10 }}
+                >
+                  <SvgCalendar width={20} height={20} />
+                </Button>
+              )
             )
           }
         />
@@ -581,18 +392,19 @@ export function BudgetPage() {
           {({ onRefresh }) => (
             <>
               <Banners month={startMonth} onBudgetAction={onBudgetAction} />
-              <BudgetTable
-                // This key forces the whole table rerender when the number
-                // format changes
-                key={`${numberFormat}${hideFraction}`}
-                categoryGroups={categoryGroups}
-                month={startMonth}
-                onShowBudgetSummary={onShowBudgetSummary}
-                onBudgetAction={onBudgetAction}
-                onRefresh={onRefresh}
-                onEditCategoryGroup={onOpenCategoryGroupMenuModal}
-                onEditCategory={onOpenCategoryMenuModal}
-              />
+              <ReorderModeContext.Provider value={isReorderMode}>
+                <BudgetTable
+                  // This key forces the whole table rerender when the number
+                  // format changes
+                  key={`${numberFormat}${hideFraction}`}
+                  categoryGroups={categoryGroups}
+                  month={startMonth}
+                  onShowBudgetSummary={onShowBudgetSummary}
+                  onRefresh={onRefresh}
+                  onShowCategoryGroup={onShowCategoryGroup}
+                  onShowCategory={onShowCategory}
+                />
+              </ReorderModeContext.Provider>
             </>
           )}
         </SyncRefresh>
@@ -625,13 +437,13 @@ function Banners({ month, onBudgetAction }) {
 
 function Banner({ type = 'info', children }) {
   return (
-    <Card
+    <View
       style={{
-        height: 50,
-        marginTop: 10,
-        marginBottom: 10,
-        padding: 10,
+        minHeight: 50,
+        padding: '10px 15px',
         justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderColor: theme.tableBorder,
         backgroundColor:
           type === 'critical'
             ? theme.errorBackground
@@ -641,7 +453,7 @@ function Banner({ type = 'info', children }) {
       }}
     >
       {children}
-    </Card>
+    </View>
   );
 }
 

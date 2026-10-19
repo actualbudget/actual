@@ -1,30 +1,86 @@
+import { useState } from 'react';
 import type { DragItem } from 'react-aria';
 import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import type { CategoryEntity } from '@actual-app/core/types/models';
+import { View } from '@actual-app/components/view';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
 import { useMoveCategoryMutation } from '#budget';
+import { findSortDown } from '#components/budget/util';
+import { useTouchReorder } from '#hooks/useTouchReorder';
+import { useUndo } from '#hooks/useUndo';
 
 import { IncomeCategoryListItem } from './IncomeCategoryListItem';
+import { ReorderDropIndicator } from './ReorderDropIndicator';
+import { useReorderMode } from './ReorderModeContext';
 
 type IncomeCategoryListProps = {
+  categoryGroup: CategoryGroupEntity;
   categories: CategoryEntity[];
   month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategory: (id: string) => void;
 };
 
 export function IncomeCategoryList({
+  categoryGroup,
   categories,
   month,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategory,
 }: IncomeCategoryListProps) {
   const { t } = useTranslation();
-  const moveCategory = useMoveCategoryMutation();
+  const moveCategoryMutation = useMoveCategoryMutation();
+  const { showUndoNotification } = useUndo();
+  const isReordering = useReorderMode();
+  const [announcement, setAnnouncement] = useState('');
+
+  function moveCategory(
+    id: CategoryEntity['id'],
+    targetId: CategoryEntity['id'] | null,
+  ) {
+    const currentIndex = categories.findIndex(c => c.id === id);
+    const category = categories[currentIndex];
+    if (!category || targetId === id) {
+      return;
+    }
+    const others = categories.filter(c => c.id !== id);
+    const targetIndex = targetId
+      ? others.findIndex(c => c.id === targetId)
+      : -1;
+    const newIndex = targetIndex === -1 ? others.length : targetIndex;
+    if (newIndex === currentIndex) {
+      return;
+    }
+    const position = newIndex + 1;
+    moveCategoryMutation.mutate(
+      { id, groupId: categoryGroup.id, targetId },
+      {
+        onSuccess: () => {
+          setAnnouncement(
+            t('{{name}} moved to position {{position}} in {{groupName}}', {
+              name: category.name,
+              position,
+              groupName: categoryGroup.name,
+            }),
+          );
+          showUndoNotification({
+            message: t('Moved {{name}}', { name: category.name }),
+          });
+        },
+      },
+    );
+  }
+
+  const touchReorder = useTouchReorder({
+    isEnabled: isReordering,
+    onMoveCategory: (id, { targetId }) => moveCategory(id, targetId),
+  });
 
   const { dragAndDropHooks } = useDragAndDrop({
     getItems: keys =>
@@ -51,72 +107,44 @@ export function IncomeCategoryList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
-
-      if (!categoryToMove) {
-        throw new Error(
-          `Internal error: category with ID ${categoryIdToMove} not found.`,
-        );
-      }
-
-      if (!categoryToMove.group) {
-        throw new Error(
-          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
-        );
-      }
-
-      const targetCategoryId = e.target.key as CategoryEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          targetId: targetCategoryId,
-        });
-      } else if (e.target.dropPosition === 'after') {
-        const targetCategoryIndex = categories.findIndex(
-          c => c.id === targetCategoryId,
-        );
-
-        if (targetCategoryIndex === -1) {
-          throw new Error(
-            `Internal error: category with ID ${targetCategoryId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categories[targetCategoryIndex + 1];
-
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          // Due to the way `moveCategory` works, we use the category next to the
-          // actual target category here because `moveCategory` always shoves the
-          // category *before* the target category.
-          // On the other hand, using `null` as `targetId` moves the category
-          // to the end of the list.
-          targetId: nextToTargetCategory?.id || null,
-        });
-      }
+      const draggedId = String(key);
+      const { targetId } = findSortDown(
+        categories.filter(c => c.id !== draggedId),
+        e.target.dropPosition === 'before' ? 'top' : 'bottom',
+        String(e.target.key),
+      );
+      moveCategory(draggedId, targetId);
     },
   });
 
   return (
-    <GridList
-      aria-label={t('Income categories')}
-      items={categories}
-      dragAndDropHooks={dragAndDropHooks}
-      dependencies={[month, onEditCategory, onBudgetAction]}
+    <View
+      {...touchReorder.containerProps}
+      data-reorder-group-id={categoryGroup.id}
+      style={{ position: 'relative' }}
     >
-      {category => (
-        <IncomeCategoryListItem
-          key={category.id}
-          value={category}
-          month={month}
-          onEdit={onEditCategory}
-          onBudgetAction={onBudgetAction}
-        />
+      <GridList
+        aria-label={t('Income categories')}
+        items={categories}
+        dragAndDropHooks={dragAndDropHooks}
+        dependencies={[month, onShowCategory, touchReorder.draggingId]}
+      >
+        {category => (
+          <IncomeCategoryListItem
+            key={category.id}
+            value={category}
+            month={month}
+            isDragging={category.id === touchReorder.draggingId}
+            onShowCategory={onShowCategory}
+          />
+        )}
+      </GridList>
+      {touchReorder.indicatorTop != null && (
+        <ReorderDropIndicator top={touchReorder.indicatorTop} />
       )}
-    </GridList>
+      <View aria-live="polite" aria-atomic style={styles.visuallyHidden}>
+        {announcement}
+      </View>
+    </View>
   );
 }

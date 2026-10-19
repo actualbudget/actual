@@ -37,8 +37,9 @@ test.describe('Mobile budget automations', () => {
     const budgetPage = await navigation.goToBudgetPage();
     const categoryName = await budgetPage.getCategoryNameForRow(1);
 
-    const categoryMenuModal = await budgetPage.openCategoryMenu(categoryName);
-    const automationsModal = await categoryMenuModal.editAutomations();
+    const categoryPage = await budgetPage.openCategory(categoryName);
+    const actionsSheet = await categoryPage.openActions();
+    const automationsModal = await actionsSheet.editAutomations();
 
     await expect(automationsModal.getByText(categoryName)).toBeVisible();
     const addAutomation = automationsModal.getByRole('button', {

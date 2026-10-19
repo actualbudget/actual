@@ -14,8 +14,8 @@ import type {
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { useReorderCategoryMutation } from '#budget';
 import { findSortDown } from '#components/budget/util';
+import type { CategoryDropTarget } from '#hooks/useTouchReorder';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
 
@@ -28,24 +28,28 @@ type ExpenseCategoryListProps = {
   categories: CategoryEntity[];
   shouldHideCategory: (category: CategoryEntity) => boolean;
   month: string;
-  onEditCategory: (id: string) => void;
-  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowCategory: (id: string) => void;
+  onMoveCategory: (
+    id: CategoryEntity['id'],
+    target: CategoryDropTarget,
+  ) => void;
   show3Columns: boolean;
   showBudgetedColumn: boolean;
+  draggingId: string | null;
 };
 
 export function ExpenseCategoryList({
   categoryGroup,
   categories,
   month,
-  onEditCategory,
-  onBudgetAction,
+  onShowCategory,
+  onMoveCategory,
   show3Columns,
   showBudgetedColumn,
   shouldHideCategory,
+  draggingId,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
-  const reorderCategory = useReorderCategoryMutation();
 
   // Moves a dragged category into this group, before or after the drop target.
   // Handles drops from this group and from other expense groups.
@@ -53,11 +57,10 @@ export function ExpenseCategoryList({
     categoryId: CategoryEntity['id'],
     { key: targetKey, dropPosition }: ItemDropTarget,
   ) => {
-    reorderCategory.mutate({
-      id: categoryId,
+    onMoveCategory(categoryId, {
       groupId: categoryGroup.id,
       ...findSortDown(
-        categories,
+        categories.filter(c => c.id !== categoryId),
         dropPosition === 'before' ? 'top' : 'bottom',
         String(targetKey),
       ),
@@ -106,11 +109,11 @@ export function ExpenseCategoryList({
       dragAndDropHooks={dragAndDropHooks}
       dependencies={[
         month,
-        onEditCategory,
-        onBudgetAction,
+        onShowCategory,
         shouldHideCategory,
         show3Columns,
         showBudgetedColumn,
+        draggingId,
       ]}
     >
       {category => (
@@ -118,9 +121,9 @@ export function ExpenseCategoryList({
           key={category.id}
           value={category}
           month={month}
-          onEditCategory={onEditCategory}
-          onBudgetAction={onBudgetAction}
+          onShowCategory={onShowCategory}
           isHidden={shouldHideCategory(category)}
+          isDragging={category.id === draggingId}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
         />

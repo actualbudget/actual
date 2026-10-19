@@ -17,12 +17,14 @@ import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
+import { BudgetAmountSheet } from './modals/BudgetAmountSheet';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
+import { BudgetMonthPickerSheet } from './modals/BudgetMonthPickerSheet';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
+import { CategoryActionsSheet } from './modals/CategoryActionsSheet';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
+import { CategoryGroupActionsSheet } from './modals/CategoryGroupActionsSheet';
 import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
-import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
-import { CategoryMenuModal } from './modals/CategoryMenuModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
@@ -41,11 +43,7 @@ import { EditRuleModal } from './modals/EditRuleModal';
 import { EditUserFinanceApp } from './modals/EditUser';
 import { EnableBankingExternalMsgModal } from './modals/EnableBankingExternalMsgModal';
 import { EnableBankingInitialiseModal } from './modals/EnableBankingInitialiseModal';
-import { EnvelopeBalanceMenuModal } from './modals/EnvelopeBalanceMenuModal';
-import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
-import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
-import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
@@ -75,9 +73,6 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
-import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
-import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
-import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
 import { TransactionTableColumnsModal } from './modals/TransactionTableColumnsModal';
 import { TransferModal } from './modals/TransferModal';
@@ -288,54 +283,34 @@ export function Modals() {
         case 'account-reconcile':
           return <AccountReconcileModal key={key} {...modal.options} />;
 
-        case 'category-menu':
-          return <CategoryMenuModal key={key} {...modal.options} />;
-
-        case 'envelope-budget-menu':
+        case 'category-actions':
           return (
             <SheetNameProvider
               key={key}
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
-              <EnvelopeBudgetMenuModal {...modal.options} />
+              <CategoryActionsSheet {...modal.options} />
             </SheetNameProvider>
           );
 
-        case 'tracking-budget-menu':
+        case 'budget-amount':
           return (
             <SheetNameProvider
               key={key}
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
-              <TrackingBudgetMenuModal {...modal.options} />
+              <BudgetAmountSheet {...modal.options} />
             </SheetNameProvider>
           );
 
-        case 'category-group-menu':
-          return <CategoryGroupMenuModal key={key} {...modal.options} />;
+        case 'category-group-actions':
+          return <CategoryGroupActionsSheet key={key} {...modal.options} />;
+
+        case 'budget-month-picker':
+          return <BudgetMonthPickerSheet key={key} {...modal.options} />;
 
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;
-
-        case 'envelope-balance-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <EnvelopeBalanceMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
-
-        case 'envelope-income-balance-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <EnvelopeIncomeBalanceMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
 
         case 'hold-buffer':
           return (
@@ -344,16 +319,6 @@ export function Modals() {
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
               <HoldBufferModal {...modal.options} />
-            </SheetNameProvider>
-          );
-
-        case 'tracking-balance-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <TrackingBalanceMenuModal {...modal.options} />
             </SheetNameProvider>
           );
 
@@ -368,26 +333,6 @@ export function Modals() {
 
         case 'budget-page-menu':
           return <BudgetPageMenuModal key={key} {...modal.options} />;
-
-        case 'envelope-budget-month-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <EnvelopeBudgetMonthMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
-
-        case 'tracking-budget-month-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <TrackingBudgetMonthMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
 
         case 'delete-budget':
           return <DeleteFileModal key={key} {...modal.options} />;

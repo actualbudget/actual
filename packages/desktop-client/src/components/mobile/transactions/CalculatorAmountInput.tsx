@@ -56,6 +56,8 @@ export type CalculatorAmountInputProps = {
   autoFocusDelay?: number;
   autoFocusIndirect?: boolean;
   disabled?: boolean;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
 };
 
 const placeholderClassName = css({
@@ -78,6 +80,8 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   onEnter,
   variant = 'normal',
   keyboardHeader,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: CalculatorAmountInputProps) {
   const internalInputRef = useRef<HTMLInputElement>(null);
@@ -192,6 +196,8 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
         type="text"
         value={expression}
         placeholder="0.00"
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
         onChange={e => onChangeExpression(e.target.value)}
         onFocus={e => {
           onInputFocus();
