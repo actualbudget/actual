@@ -216,14 +216,20 @@ async function ensureUsable(dir) {
 
 // The storage flag asks for a backend; data already moved to the new
 // storage wins over it, so a cleared flag never shows an empty app
+// The flag picks the engine, but data that already moved wins: only the
+// OPFS store can read its pool, and it promotes fallback rows, so migrated
+// data always means the sqlite-wasm engine.
 async function resolveStorageBackend(
   requested: StorageBackend,
 ): Promise<StorageBackend> {
-  if (requested !== 'legacy') {
-    return requested;
-  }
   const migrated = await sqlite.findMigratedStorageBackend();
-  return migrated ?? 'legacy';
+  if (migrated === 'opfs') {
+    return 'opfs';
+  }
+  if (migrated === 'memory-idb' && requested === 'legacy') {
+    return 'memory-idb';
+  }
+  return requested;
 }
 
 export async function initApp(

@@ -4,6 +4,61 @@ import { logger } from '#platform/server/log';
 
 type BridgeMessage = { type?: string; [key: string]: unknown };
 
+// How long a leaving leader waits for the backend to let go of its storage
+// before the worker is terminated regardless
+const STORAGE_RELEASE_TIMEOUT_MS = 300;
+const STORAGE_RELEASE_REQUEST_ID = '__storage-release';
+const RESTORE_REQUEST_ID = '__restore-budget';
+
+/** The part of a Worker the release step needs; fakes stand in for tests. */
+export type TerminatableWorker = {
+  onmessage: ((event: MessageEvent) => void) | null;
+  postMessage: (message: unknown) => void;
+  addEventListener: (
+    type: 'message',
+    handler: (event: MessageEvent) => void,
+  ) => void;
+  terminate: () => void;
+};
+
+/**
+ * Asks the backend to let go of its storage before the worker is
+ * terminated: the IndexedDB fallback persists its pending write, the OPFS
+ * store closes its access handles and releases the budget lock. A worker
+ * terminated outright releases access handles asynchronously, which makes
+ * the next leader's pool install retry. Terminates after a short timeout
+ * either way, so a hung backend cannot block the handover.
+ */
+export function releaseStorageThenTerminate(
+  worker: TerminatableWorker,
+  timeoutMs = STORAGE_RELEASE_TIMEOUT_MS,
+) {
+  // Nothing else may hear from this worker now: its messages would reach a
+  // coordinator that no longer routes for it
+  worker.onmessage = null;
+  let isTerminated = false;
+  const terminate = () => {
+    if (!isTerminated) {
+      isTerminated = true;
+      clearTimeout(timer);
+      worker.terminate();
+    }
+  };
+  const timer = setTimeout(terminate, timeoutMs);
+  worker.addEventListener('message', event => {
+    const message = event.data as BridgeMessage | null;
+    if (message?.id === STORAGE_RELEASE_REQUEST_ID) {
+      terminate();
+    }
+  });
+  worker.postMessage({
+    id: STORAGE_RELEASE_REQUEST_ID,
+    name: 'storage-release',
+    args: undefined,
+    catchErrors: true,
+  });
+}
+
 /** The Worker-like surface the connection layer interacts with. */
 export type WorkerLike = {
   onmessage: ((e: MessageEvent) => void) | null;
@@ -32,6 +87,9 @@ export class WorkerBridge {
   _currentBudgetId: string | null;
   _wasHidden: boolean;
   _onVisibilityChange: () => void;
+  // Requests forwarded while a new leader is still restoring its budget;
+  // they would otherwise run against a backend with no database open
+  _heldRequests: unknown[] | null;
   localBackendWorker: Worker | null;
   backendWorkerUrl: URL;
 
@@ -43,6 +101,7 @@ export class WorkerBridge {
     this._isInitialized = false;
     this._currentBudgetId = null;
     this._wasHidden = document.visibilityState === 'hidden';
+    this._heldRequests = null;
     this.localBackendWorker = null;
     this.backendWorkerUrl = backendWorkerUrl;
 
@@ -92,9 +151,11 @@ export class WorkerBridge {
   }
 
   _terminateLocalBackendWorker() {
-    if (this.localBackendWorker) {
-      this.localBackendWorker.terminate();
+    const worker = this.localBackendWorker;
+    this._heldRequests = null;
+    if (worker) {
       this.localBackendWorker = null;
+      releaseStorageThenTerminate(worker);
     }
   }
 
@@ -120,7 +181,9 @@ export class WorkerBridge {
 
     // Forward requests from SharedWorker to our local Worker
     if (msg && msg.type === '__to-worker') {
-      if (this.localBackendWorker) {
+      if (this._heldRequests) {
+        this._heldRequests.push(msg.msg);
+      } else if (this.localBackendWorker) {
         this.localBackendWorker.postMessage(msg.msg);
       }
       return;
@@ -225,6 +288,9 @@ export class WorkerBridge {
     const localWorker = new Worker(this.backendWorkerUrl);
     this.localBackendWorker = localWorker;
     initSQLBackend(localWorker);
+    // Followers keep sending requests during a takeover; hold them until
+    // the restored budget is open (the restore reply releases them)
+    this._heldRequests = budgetToRestore ? [] : null;
 
     const sharedPort = this._sharedPort;
     localWorker.onmessage = workerEvent => {
@@ -248,7 +314,7 @@ export class WorkerBridge {
           const id = budgetToRestore;
           budgetToRestore = null;
           localWorker.postMessage({
-            id: '__restore-budget',
+            id: RESTORE_REQUEST_ID,
             name: 'load-budget',
             args: { id },
             catchErrors: true,
@@ -257,13 +323,24 @@ export class WorkerBridge {
           // currentBudgetId gets updated when the reply arrives.
           sharedPort.postMessage({
             type: '__track-restore',
-            requestId: '__restore-budget',
+            requestId: RESTORE_REQUEST_ID,
             budgetId: id,
           });
         } else if (pendingMsg) {
           const toSend = pendingMsg;
           pendingMsg = null;
           localWorker.postMessage(toSend);
+        }
+      }
+      if (
+        workerMsg.id === RESTORE_REQUEST_ID &&
+        this._heldRequests &&
+        this.localBackendWorker === localWorker
+      ) {
+        const held = this._heldRequests;
+        this._heldRequests = null;
+        for (const request of held) {
+          localWorker.postMessage(request);
         }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });

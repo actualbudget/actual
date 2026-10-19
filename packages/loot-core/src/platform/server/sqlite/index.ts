@@ -11,6 +11,7 @@ import {
   getSqliteStore,
   hasSqliteStore,
   initSqliteStorage,
+  revertToLegacy,
 } from './storage';
 import type {
   Database,
@@ -110,6 +111,14 @@ export async function flushSqliteStorage(): Promise<void> {
 export async function releaseSqliteStorage(): Promise<void> {
   if (hasSqliteStore()) {
     await getSqliteStore().releaseAll();
+  }
+}
+
+// Move every budget back to absurd-sql's layout (the opt-in phase's way
+// back); the next start then picks the legacy engine
+export async function revertSqliteStorageToLegacy(): Promise<void> {
+  if (hasSqliteStore()) {
+    await revertToLegacy();
   }
 }
 
