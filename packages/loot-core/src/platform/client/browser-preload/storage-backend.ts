@@ -7,11 +7,11 @@ import type { StorageBackend } from '#platform/server/sqlite';
 
 export const STORAGE_BACKEND_KEY = 'actual:storage-backend';
 export const STORAGE_BACKEND_URL_PARAM = 'storage';
-// The previous engine stays reachable for one release via `?storage=legacy`
-// or the settings toggle
 export const DEFAULT_STORAGE_BACKEND: StorageBackend = 'opfs';
 
-const STORAGE_BACKENDS: readonly string[] = ['legacy', 'opfs', 'memory-idb'];
+// `memory-idb` forces the fallback (tests); a stale `legacy` from before
+// the previous engine was removed falls back to the default
+const STORAGE_BACKENDS: readonly string[] = ['opfs', 'memory-idb'];
 
 export function isStorageBackend(value: unknown): value is StorageBackend {
   return typeof value === 'string' && STORAGE_BACKENDS.includes(value);

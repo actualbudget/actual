@@ -107,22 +107,17 @@ jobs:
           retention-days: 1
           overwrite: true
 
-  # The same suite on the previous storage engine (absurd-sql), which stays
-  # reachable for one release through `?storage=legacy`. Kept out of the
-  # Depot report so the two runs are not merged.
-  functional-legacy-storage:
-    name: Functional, previous storage (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
+  # The storage and multi-tab tests once more on the sqlite-wasm fallback
+  # (memory plus IndexedDB), which browsers without sync access handles get.
+  functional-fallback-storage:
+    name: Functional, storage fallback
     runs-on: depot-ubuntu-latest-4
     needs: build-web
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-jammy
     env:
       E2E_USE_BUILD: '1'
-      E2E_STORAGE_BACKEND: legacy
+      E2E_STORAGE_BACKEND: memory-idb
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -138,18 +133,12 @@ jobs:
         with:
           name: desktop-client-build
           path: packages/desktop-client/build/
-      - name: Set E2E port
-        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
-        run: echo "E2E_PORT=$((3000 + ${{ matrix.shard }}))" >> "$GITHUB_ENV"
-      - name: Run E2E Tests
-        if: ${{ matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
-        env:
-          SHARD_TOTAL: ${{ vars.E2E_SHARD_TOTAL || '3' }}
-        run: yarn e2e --shard=${{ matrix.shard }}/$SHARD_TOTAL
+      - name: Run storage E2E tests
+        run: yarn e2e storage.test.ts multitab.test.ts
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ failure() && matrix.shard <= fromJson(vars.E2E_SHARD_TOTAL || '3') }}
+        if: failure()
         with:
-          name: desktop-client-test-results-legacy-storage-shard-${{ matrix.shard }}
+          name: desktop-client-test-results-fallback-storage
           path: packages/desktop-client/test-results/
           retention-days: 30
           overwrite: true

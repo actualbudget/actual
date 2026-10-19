@@ -10,7 +10,6 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   flushSqliteStorage,
-  hasMigratedSqliteFiles,
   StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
@@ -636,10 +635,6 @@ async function _loadBudget(id: Budget['id']): Promise<{
   // What the user calls the budget, where it got as far as its
   // preferences, for the client to say which one this is about
   budgetName?: string;
-  // With `storage-migration-failed`: whether the budget could be opened
-  // on the previous storage engine instead, or null where that could not
-  // be found out
-  canKeepPreviousStorage?: boolean | null;
 }> {
   let dir: string;
   try {
@@ -674,23 +669,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     }
     if (e instanceof StorageMigrationError) {
       logger.error('Storage migration failed', e);
-      return {
-        error: 'storage-migration-failed',
-        budgetName,
-        // Offered while no other budget lives in the new storage: going
-        // back moves every budget there back first, which with others
-        // moved is left to the setting. This budget's own row does not
-        // count; it has one when it was being taken over from the
-        // fallback store, and goes back like any other. A lookup that
-        // fails says neither
-        canKeepPreviousStorage: await hasMigratedSqliteFiles(
-          undefined,
-          fs.join(dir, 'db.sqlite'),
-        ).then(
-          hasOthers => !hasOthers,
-          () => null,
-        ),
-      };
+      return { error: 'storage-migration-failed', budgetName };
     }
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);

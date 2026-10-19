@@ -73,24 +73,15 @@ self.addEventListener('message', async event => {
           { maxRetries: isDev ? 5 : 3 },
         );
 
-        backend
-          .initApp(isDev, self, {
-            storageBackend,
-            isSharedArrayBufferOverrideEnabled:
-              !!msg.isSharedArrayBufferOverrideEnabled,
-          })
-          .catch(err => {
-            console.log(err);
-            appInitFailureInterval = postMessageWithRetry({
-              type: 'app-init-failure',
-              IDBFailure: err.message.includes('indexeddb-failure'),
-              SharedArrayBufferMissing: err.message.includes(
-                'shared-array-buffer-missing',
-              ),
-            });
-
-            throw err;
+        backend.initApp(isDev, self, { storageBackend }).catch(err => {
+          console.log(err);
+          appInitFailureInterval = postMessageWithRetry({
+            type: 'app-init-failure',
+            IDBFailure: err.message.includes('indexeddb-failure'),
           });
+
+          throw err;
+        });
       }
     }
 

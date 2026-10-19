@@ -59,11 +59,10 @@ export const loadBudget = createAppAsyncThunk(
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const {
-      error,
-      budgetName,
-      canKeepPreviousStorage = null,
-    } = await send('load-budget', { id, ...options });
+    const { error, budgetName } = await send('load-budget', {
+      id,
+      ...options,
+    });
 
     if (error) {
       // By the name the user knows the budget by, where the backend got
@@ -74,7 +73,7 @@ export const loadBudget = createAppAsyncThunk(
           pushModal({
             modal: {
               name: 'storage-migration-failed',
-              options: { budgetId: id, message, canKeepPreviousStorage },
+              options: { message },
             },
           }),
         );
@@ -121,9 +120,6 @@ export const closeBudget = createAppAsyncThunk(
       dispatch(setAppState({ loadingText: t('Closing...') }));
       await send('close-budget');
       dispatch(setAppState({ loadingText: null }));
-      if (localStorage.getItem('SharedArrayBufferOverride')) {
-        window.location.reload();
-      }
     }
   },
 );
