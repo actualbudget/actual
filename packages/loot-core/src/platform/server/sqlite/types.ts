@@ -52,4 +52,6 @@ export type SqliteEngine = {
   flushStorage?(): Promise<void>;
   // Let go of storage handles and locks so another worker can take over
   releaseStorage?(): Promise<void>;
+  // Move every budget back to the legacy layout (the opt-in phase's way back)
+  revertStorageToLegacy?(): Promise<void>;
 };

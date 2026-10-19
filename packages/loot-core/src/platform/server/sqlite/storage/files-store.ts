@@ -38,20 +38,27 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await idb.del(store, path);
 }
 
-// Any sqlite file already moved off absurd-sql. Used at startup: once data
-// lives in the new storage the legacy engine must not be chosen, whatever
-// the flag says.
-export async function findMigratedStorageKind(): Promise<FileStoreKind | null> {
+// Rows of sqlite files held by the sqlite-wasm storage
+export async function listSqliteFileRows(): Promise<SqliteFileRow[]> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
   const rows = await new Promise<SqliteFileRow[]>((resolve, reject) => {
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result as SqliteFileRow[]);
     request.onerror = () => reject(request.error);
   });
-  for (const row of rows) {
-    if (row.storage === 'opfs' || row.storage === 'memory-idb') {
-      return row.storage;
-    }
+  return rows.filter(
+    row => row.storage === 'opfs' || row.storage === 'memory-idb',
+  );
+}
+
+// Any sqlite file already moved off absurd-sql. Used at startup: once data
+// lives in the new storage the legacy engine must not be chosen, whatever
+// the flag says. OPFS wins over fallback rows, which the OPFS store
+// promotes into its pool on their next open.
+export async function findMigratedStorageKind(): Promise<FileStoreKind | null> {
+  const rows = await listSqliteFileRows();
+  if (rows.some(row => row.storage === 'opfs')) {
+    return 'opfs';
   }
-  return null;
+  return rows.length > 0 ? 'memory-idb' : null;
 }

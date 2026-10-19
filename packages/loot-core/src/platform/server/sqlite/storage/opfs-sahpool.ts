@@ -150,6 +150,33 @@ export function createOpfsStore({
     pool.releaseLock = null;
   }
 
+  // `quick_check` plus the migrations table: catches a truncated or
+  // foreign file before the import is committed
+  function verifyImported(pool: Pool, fileName: string) {
+    const db = new (sqlite3().oo1.DB)({
+      filename: fileName,
+      flags: 'w',
+      vfs: pool.util.vfsName,
+    });
+    try {
+      const result = db.selectValue('PRAGMA quick_check');
+      if (result !== 'ok') {
+        throw new Error(`quick_check: ${String(result)}`);
+      }
+      db.selectValue('SELECT 1 FROM __migrations__ LIMIT 1');
+    } finally {
+      db.close();
+    }
+  }
+
+  function discardImport(pool: Pool, fileName: string) {
+    try {
+      pool.util.unlink(fileName);
+    } catch {
+      // Nothing to clean up
+    }
+  }
+
   async function migrateLegacy(
     pool: Pool,
     path: string,
@@ -166,26 +193,9 @@ export function createOpfsStore({
     try {
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
-      const db = new (sqlite3().oo1.DB)({
-        filename: fileName,
-        flags: 'w',
-        vfs: pool.util.vfsName,
-      });
-      try {
-        const result = db.selectValue('PRAGMA quick_check');
-        if (result !== 'ok') {
-          throw new Error(`quick_check: ${String(result)}`);
-        }
-        db.selectValue('SELECT 1 FROM __migrations__ LIMIT 1');
-      } finally {
-        db.close();
-      }
+      verifyImported(pool, fileName);
     } catch (error) {
-      try {
-        pool.util.unlink(fileName);
-      } catch {
-        // Nothing to clean up
-      }
+      discardImport(pool, fileName);
       contents.close();
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
@@ -206,6 +216,55 @@ export function createOpfsStore({
     return true;
   }
 
+  // A session without sync access handles (or an older build) may have
+  // kept the database in the IndexedDB fallback's row; bring it into the
+  // pool so the data follows the user to the faster store
+  async function promoteFallbackRow(
+    pool: Pool,
+    path: string,
+    fileName: string,
+  ): Promise<boolean> {
+    const row = await getSqliteFileRow(path);
+    if (
+      row?.storage !== 'memory-idb' ||
+      !ArrayBuffer.isView(row.contents) ||
+      row.contents.byteLength === 0
+    ) {
+      return false;
+    }
+    const bytes = row.contents;
+    try {
+      await pool.util.importDb(
+        fileName,
+        new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+      );
+      verifyImported(pool, fileName);
+    } catch (error) {
+      discardImport(pool, fileName);
+      throw new StorageMigrationError(path, error);
+    }
+    await putSqliteFileRow({
+      filepath: path,
+      contents: '',
+      storage: 'opfs',
+      rev: row.rev,
+    });
+    return true;
+  }
+
+  // Whatever already holds this database: absurd-sql's layout, or the
+  // fallback store's row
+  async function importExisting(
+    pool: Pool,
+    path: string,
+    fileName: string,
+  ): Promise<boolean> {
+    if (await migrateLegacy(pool, path, fileName)) {
+      return true;
+    }
+    return promoteFallbackRow(pool, path, fileName);
+  }
+
   const store: SqliteFileStore = {
     kind: 'opfs',
 
@@ -219,7 +278,7 @@ export function createOpfsStore({
       try {
         let present = pool.util.getFileNames().includes(fileName);
         if (!present) {
-          present = await migrateLegacy(pool, path, fileName);
+          present = await importExisting(pool, path, fileName);
         }
         if (!present && !create) {
           throw new Error(`database does not exist: ${path}`);
@@ -272,7 +331,7 @@ export function createOpfsStore({
       const pool = await acquire(dirId, path);
       try {
         if (!pool.util.getFileNames().includes(fileName)) {
-          const migrated = await migrateLegacy(pool, path, fileName);
+          const migrated = await importExisting(pool, path, fileName);
           if (!migrated) {
             throw new Error('File does not exist: ' + path);
           }

@@ -133,6 +133,12 @@ export async function releaseSqliteStorage(): Promise<void> {
   await activeEngine.releaseStorage?.();
 }
 
+// Move every budget back to absurd-sql's layout (the opt-in phase's way
+// back); the next start then picks the legacy engine
+export async function revertSqliteStorageToLegacy(): Promise<void> {
+  await activeEngine.revertStorageToLegacy?.();
+}
+
 export function prepare(db: Database, sql: string): Statement {
   return activeEngine.prepare(db, sql);
 }

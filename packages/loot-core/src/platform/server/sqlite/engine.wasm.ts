@@ -1,6 +1,11 @@
 import { logger } from '#platform/server/log';
 
-import { getSqliteStore, hasSqliteStore, initSqliteStorage } from './storage';
+import {
+  getSqliteStore,
+  hasSqliteStore,
+  initSqliteStorage,
+  revertToLegacy,
+} from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
@@ -168,6 +173,11 @@ export const wasmEngine: SqliteEngine = {
   releaseStorage: async () => {
     if (hasSqliteStore()) {
       await getSqliteStore().releaseAll();
+    }
+  },
+  revertStorageToLegacy: async () => {
+    if (hasSqliteStore()) {
+      await revertToLegacy();
     }
   },
 };
