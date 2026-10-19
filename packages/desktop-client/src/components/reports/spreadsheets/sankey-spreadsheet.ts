@@ -2021,11 +2021,16 @@ export function convertToSankeyData(
 ): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => {
     const drilldown = getNodeDrilldown(key, data.type, data.isNegative);
-    // Some synthetic placeholder nodes (e.g. AvailableIncome, AllAccounts,
-    // the budget-mode overspend node) are typed as Account too, but aren't
+    // Some synthetic placeholder nodes (e.g. AvailableIncome, the
+    // budget-mode overspend node) are typed as Account too, but aren't
     // real accounts - getNodeDrilldown already excludes them from
     // click-to-filter, so gate the in/out/net tooltip totals the same way.
-    const isRealAccount = data.type === GraphLayers.Account && drilldown;
+    // AllAccounts is the exception: with "Group accounts" on, it stands in
+    // for every real account, so it should show the same in/out/net totals
+    // one would get with grouping off.
+    const showInOutTotals =
+      (data.type === GraphLayers.Account && Boolean(drilldown)) ||
+      key === SpecialNodeKeys.AllAccounts;
 
     return {
       key,
@@ -2035,8 +2040,8 @@ export function convertToSankeyData(
       percentageLabel: data.percentageLabel ?? '',
       color: data.color ?? undefined,
       drilldown,
-      inflow: isRealAccount ? getIncomingValue(totalsGraph, key) : undefined,
-      outflow: isRealAccount ? getOutgoingValue(totalsGraph, key) : undefined,
+      inflow: showInOutTotals ? getIncomingValue(totalsGraph, key) : undefined,
+      outflow: showInOutTotals ? getOutgoingValue(totalsGraph, key) : undefined,
     };
   });
   const links = Array.from(graph).flatMap(([key, data]) =>
