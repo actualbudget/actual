@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test';
 
 import { addE2EInitScripts, expect, test } from './fixtures';
+import { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 
@@ -28,6 +29,16 @@ async function addTransactionAndCheck(page: Page, notes: string) {
   // The demo account has later-dated transactions, so look for the note
   await expect(accountPage.transactionTable.getByText(notes)).toBeVisible();
   return accountPage;
+}
+
+function budgetedAmount(page: Page, category: string) {
+  return page
+    .getByTestId('budget-table')
+    .getByTestId('row')
+    .filter({ hasText: category })
+    .first()
+    .getByTestId('budget')
+    .nth(0);
 }
 
 test.describe('Multiple tabs on one budget', () => {
@@ -80,5 +91,23 @@ test.describe('Multiple tabs on one budget', () => {
     });
 
     await addTransactionAndCheck(follower, 'after handover');
+  });
+  test('a leader that was hidden keeps its budget after resuming', async () => {
+    // Switching tabs hides the leader; on return the bridge reports the
+    // budget it was told about, which must match the coordinator's view
+    for (const state of ['hidden', 'visible']) {
+      await leader.evaluate(visibility => {
+        Object.defineProperty(document, 'visibilityState', {
+          value: visibility,
+          configurable: true,
+        });
+        document.dispatchEvent(new Event('visibilitychange'));
+      }, state);
+      await leader.waitForTimeout(500);
+    }
+
+    await new BudgetPage(leader).setBudgetedAmount('Food', '123');
+    await expect(budgetedAmount(leader, 'Food')).toHaveText('123.00');
+    await expect(budgetedAmount(follower, 'Food')).toHaveText('123.00');
   });
 });
