@@ -1,3 +1,6 @@
+import { format } from 'node:util';
+
+import createDebug from 'debug';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,8 +9,10 @@ import { assertUrlAllowed } from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
 
-vi.mock('#util/ssrf', () => ({
+vi.mock('#util/ssrf', async importOriginal => ({
+  ...(await importOriginal()),
   assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
+  createSsrfDispatcher: vi.fn(),
 }));
 
 const VALID_ACCESS_KEY = 'https://user:pass@bridge.example.com/simplefin';
@@ -46,6 +51,28 @@ describe('app-simplefin', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('preserves format sequences in sensitive provider diagnostics', async () => {
+    const previous = createDebug.disable();
+    createDebug.enable('actual-sensitive:simplefin');
+    const log = vi
+      .spyOn(createDebug, 'log')
+      .mockImplementation(() => undefined);
+    const response = 'Rejected: %O %s %%';
+    mockFetch({ claim: okResponse(response) });
+    secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+    try {
+      await post('/accounts');
+      expect(log.mock.calls.map(args => format(...args)).join('\n')).toContain(
+        response,
+      );
+      expect(JSON.stringify(vi.mocked(console.log).mock.calls)).not.toContain(
+        response,
+      );
+    } finally {
+      createDebug.enable(previous);
+    }
   });
 
   describe('/status', () => {

@@ -106,7 +106,7 @@ Keep your Actual Budget password safe, as it cannot be retrieved. If you forget 
 
 :::
 
-![Image connecting to Actual](/img/a-tour-of-actual/server-connecting-first-time.webp)
+<img width="498" alt="The Welcome to Actual screen asking you to set a server password" src="/img/install/server-set-password@2x.webp" />
 <br />
 <br />
 

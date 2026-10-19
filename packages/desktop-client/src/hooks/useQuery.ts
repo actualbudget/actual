@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { DependencyList } from 'react';
 
 import type { Query } from '@actual-app/core/shared/query';
@@ -18,8 +18,15 @@ export function useQuery<Response = unknown>(
 ): UseQueryResult<Response> {
   // Memo the resulting query. We don't care if the function
   // that creates the query changes, only the resulting query.
-  // oxlint-disable-next-line react-hooks/exhaustive-deps -- caller owns deps
-  const query = useMemo(makeQuery, dependencies);
+  const [memoizedQuery, setMemoizedQuery] = useState(() => ({
+    dependencies,
+    query: makeQuery(),
+  }));
+  let query = memoizedQuery.query;
+  if (!areDependenciesEqual(memoizedQuery.dependencies, dependencies)) {
+    query = makeQuery();
+    setMemoizedQuery({ dependencies, query });
+  }
 
   const [data, setData] = useState<ReadonlyArray<Response> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,4 +63,11 @@ export function useQuery<Response = unknown>(
     isLoading,
     ...(error && { error }),
   };
+}
+
+function areDependenciesEqual(a: DependencyList, b: DependencyList) {
+  return (
+    a.length === b.length &&
+    a.every((value, index) => Object.is(value, b[index]))
+  );
 }

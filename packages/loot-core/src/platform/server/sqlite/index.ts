@@ -5,6 +5,7 @@ import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
 import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
+import { regexp } from './regexp';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -109,28 +110,37 @@ export function runQuery<T>(
 
   const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
 
-  if (fetchAll) {
-    try {
-      stmt.bind(params);
-      const rows = [];
+  try {
+    if (fetchAll) {
+      try {
+        stmt.bind(params);
+        const columns = stmt.getColumnNames();
+        const rows = [];
 
-      while (stmt.step()) {
-        rows.push(stmt.getAsObject());
+        while (stmt.step()) {
+          const values = stmt.get();
+          const row = {};
+          for (let i = 0; i < columns.length; i++) {
+            row[columns[i]] = values[i];
+          }
+          rows.push(row);
+        }
+        return rows;
+      } catch (e) {
+        logger.log(sql);
+        throw e;
       }
-
-      if (typeof sql === 'string') {
-        stmt.free();
-      } else {
-        stmt.reset();
-      }
-      return rows;
-    } catch (e) {
-      logger.log(sql);
-      throw e;
     }
-  } else {
+
     stmt.run(params);
     return { changes: db.getRowsModified() };
+  } finally {
+    // sql.js keeps statements alive in the WASM heap until they are freed.
+    if (typeof sql === 'string') {
+      stmt.free();
+    } else {
+      stmt.reset();
+    }
   }
 }
 
@@ -206,10 +216,6 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
       db.exec('COMMIT');
     }
   }
-}
-
-function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
