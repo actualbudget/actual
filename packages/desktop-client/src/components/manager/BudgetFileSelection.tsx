@@ -544,13 +544,14 @@ export function BudgetFileSelection({
   const userData = useSelector(state => state.user.data);
   const serverStatus = useSyncServerStatus();
 
+  const userId = userData?.userId;
   const fetchUsers = useCallback(async () => {
     try {
-      setCurrentUserId(userData?.userId ?? '');
+      setCurrentUserId(userId ?? '');
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
-  }, [userData?.userId]);
+  }, [userId]);
 
   useEffect(() => {
     if (multiuserEnabled && !userData?.offline) {

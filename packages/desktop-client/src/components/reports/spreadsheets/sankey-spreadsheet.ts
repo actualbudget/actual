@@ -122,7 +122,7 @@ type NodeKey = string;
 export type NodeData = {
   to: Map<NodeKey, number>;
   value?: number;
-  type: GraphLayers;
+  type: GraphLayer;
   name?: string;
   labelKey?: string;
   labelParams?: Record<string, string>;
@@ -151,8 +151,6 @@ const SpecialNodeKeys = {
   HiddenSuffix: '__HIDDEN',
   NegativeSuffix: '__NEGATIVE',
 } as const;
-type SpecialNodeKeys = (typeof SpecialNodeKeys)[keyof typeof SpecialNodeKeys];
-
 export const GraphLayers = {
   IncomePayee: 'payee',
   IncomeCategory: 'income_category',
@@ -161,7 +159,7 @@ export const GraphLayers = {
   CategoryGroup: 'category_group',
   Category: 'category',
 } as const;
-export type GraphLayers = (typeof GraphLayers)[keyof typeof GraphLayers];
+export type GraphLayer = (typeof GraphLayers)[keyof typeof GraphLayers];
 
 export const GRAPH_LAYER_ORDER = [
   GraphLayers.IncomePayee,
@@ -172,7 +170,7 @@ export const GRAPH_LAYER_ORDER = [
   GraphLayers.Category,
 ] as const;
 
-export function isGraphLayer(value: unknown): value is GraphLayers {
+export function isGraphLayer(value: unknown): value is GraphLayer {
   return (
     typeof value === 'string' &&
     (Object.values(GraphLayers) as string[]).includes(value)
@@ -253,8 +251,8 @@ export function buildSankeyData(
   topNcategories: number,
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
+  layerFrom: GraphLayer,
+  layerTo: GraphLayer,
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
 
@@ -1004,7 +1002,7 @@ export function createTransactionsGraph(
 export function addNode(
   graph: Graph,
   key: NodeKey,
-  type: GraphLayers,
+  type: GraphLayer,
   name?: string,
 ) {
   if (!graph.has(key)) {
@@ -1019,7 +1017,7 @@ export function addNode(
 export function addNodeWithLabel(
   graph: Graph,
   key: NodeKey,
-  type: GraphLayers,
+  type: GraphLayer,
   labelKey: string,
   labelParams?: Record<string, string>,
   isNegative?: boolean,
@@ -1228,7 +1226,7 @@ function groupOtherCategories(
     );
   }
 
-  Object.entries(GraphLayers).forEach(([_, layer]) => {
+  Object.values(GraphLayers).forEach(layer => {
     let ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
     let otherNodes = nodesInLayer(graph, layer).filter(s =>
       s.endsWith(SpecialNodeKeys.OtherSuffix),
@@ -1264,7 +1262,7 @@ function groupOtherCategories(
   return toolTipInfoMap;
 }
 
-export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
+export function nodesInLayer(graph: Graph, layer: GraphLayer): NodeKey[] {
   return Array.from(graph)
     .filter(([, data]) => data.type === layer)
     .map(([key]) => key);
@@ -1392,8 +1390,8 @@ export function sortGraph(
 ): Graph {
   function sortRelatedNodesAroundAnchors(
     entries: Array<[string, NodeData]>,
-    anchorLayer: GraphLayers,
-    relatedLayer: GraphLayers,
+    anchorLayer: GraphLayer,
+    relatedLayer: GraphLayer,
     placement: 'before' | 'after',
   ) {
     const anchorKeys = nodesInLayer(graph, anchorLayer);
@@ -1694,7 +1692,7 @@ export function addHiddenNodes(graph: Graph) {
   // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
 
   // Group nodes by type
-  const nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>> =
+  const nodesByType: Partial<Record<GraphLayer, Array<[NodeKey, NodeData]>>> =
     {};
 
   for (const [key, node] of graph) {
@@ -1710,12 +1708,12 @@ export function addHiddenNodes(graph: Graph) {
   const activeLayerOrder = GRAPH_LAYER_ORDER.filter(
     layer => (nodesByType[layer]?.length ?? 0) > 0,
   );
-  const layerIndex = new Map<GraphLayers, number>();
+  const layerIndex = new Map<GraphLayer, number>();
   activeLayerOrder.forEach((layer, index) => {
     layerIndex.set(layer, index);
   });
 
-  function addHiddenParentChain(key: NodeKey, type: GraphLayers) {
+  function addHiddenParentChain(key: NodeKey, type: GraphLayer) {
     const typeIndex = layerIndex.get(type);
     if (typeIndex === undefined || typeIndex <= 0) {
       return;
@@ -1734,7 +1732,7 @@ export function addHiddenNodes(graph: Graph) {
     }
   }
 
-  function addHiddenChildChain(key: NodeKey, type: GraphLayers) {
+  function addHiddenChildChain(key: NodeKey, type: GraphLayer) {
     const typeIndex = layerIndex.get(type);
     if (
       typeIndex === undefined ||
@@ -1862,10 +1860,10 @@ function getDeepestParentKey(
 
 function buildTypeConnectivity(
   graph: Map<NodeKey, NodeData>,
-  nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>>,
+  nodesByType: Partial<Record<GraphLayer, Array<[NodeKey, NodeData]>>>,
 ) {
-  const typeHasParent = {} as Record<GraphLayers, boolean>;
-  const typeHasChild = {} as Record<GraphLayers, boolean>;
+  const typeHasParent = {} as Record<GraphLayer, boolean>;
+  const typeHasChild = {} as Record<GraphLayer, boolean>;
 
   for (const typeStr in nodesByType) {
     if (!isGraphLayer(typeStr)) continue;
@@ -1898,8 +1896,8 @@ export function hasChild(node: NodeData): boolean {
 
 export function filterGraphByLayers(
   graph: Graph,
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
+  layerFrom: GraphLayer,
+  layerTo: GraphLayer,
 ): void {
   const layerIndices = new Map<string, number>();
   GRAPH_LAYER_ORDER.forEach((layer, index) => {
@@ -2051,13 +2049,13 @@ export function convertToSankeyData(
       tooltipInfo.sort((a, b) => b.value - a.value);
 
       let color: string | undefined;
-      const sourceLayersWithOwnColor: readonly GraphLayers[] = [
+      const sourceLayersWithOwnColor: readonly GraphLayer[] = [
         GraphLayers.IncomePayee,
         GraphLayers.IncomeCategory,
         GraphLayers.Account,
         GraphLayers.CategoryGroup,
       ];
-      const targetLayersWithTargetColor: readonly GraphLayers[] = [
+      const targetLayersWithTargetColor: readonly GraphLayer[] = [
         GraphLayers.Category,
         GraphLayers.Budget,
       ];

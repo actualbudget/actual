@@ -48,6 +48,7 @@ import {
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
   Graph,
+  GraphLayer,
   SankeyNodeDrilldown,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -87,18 +88,18 @@ type GraphMode = 'budgeted' | 'spent';
 
 type LayerDirection = 'from' | 'to';
 type LayerRange = {
-  from: GraphLayers;
-  to: GraphLayers;
+  from: GraphLayer;
+  to: GraphLayer;
 };
 
-function getAvailableLayers(mode: GraphMode): GraphLayers[] {
+function getAvailableLayers(mode: GraphMode): GraphLayer[] {
   return GRAPH_LAYER_ORDER.filter(layer => {
     if (mode === 'budgeted') {
       return layer !== GraphLayers.IncomePayee;
     }
 
     return layer !== GraphLayers.Budget;
-  }) as GraphLayers[];
+  }) as GraphLayer[];
 }
 
 export function getDefaultLayerRange(mode: GraphMode): LayerRange {
@@ -161,8 +162,8 @@ function normalizeLayerRange(
 function getLayerMenuItems(
   mode: GraphMode,
   direction: LayerDirection,
-  otherLayer: GraphLayers,
-): GraphLayers[] {
+  otherLayer: GraphLayer,
+): GraphLayer[] {
   const availableLayers = getAvailableLayers(mode);
   const otherIndex = availableLayers.indexOf(otherLayer);
 
@@ -288,10 +289,10 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
 
 type LayerSelectorProps = {
   direction: LayerDirection;
-  value: GraphLayers;
-  layerLabels: Record<GraphLayers, string>;
-  menuItems: GraphLayers[];
-  onChange: (layer: GraphLayers) => void;
+  value: GraphLayer;
+  layerLabels: Record<GraphLayer, string>;
+  menuItems: GraphLayer[];
+  onChange: (layer: GraphLayer) => void;
 };
 
 function LayerSelector({
@@ -327,7 +328,7 @@ function LayerSelector({
       >
         <Menu
           onMenuSelect={item => {
-            onChange(item as GraphLayers);
+            onChange(item as GraphLayer);
             setIsOpen(false);
           }}
           items={menuItems.map(layer => ({
@@ -526,10 +527,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const [layerRange, setLayerRange] = useState<LayerRange>(() =>
     normalizeLayerRange(widget?.meta?.mode ?? 'spent', {
       from:
-        (widget?.meta?.layerFrom as GraphLayers) ??
+        (widget?.meta?.layerFrom as GraphLayer) ??
         getDefaultLayerRange(widget?.meta?.mode ?? 'spent').from,
       to:
-        (widget?.meta?.layerTo as GraphLayers) ??
+        (widget?.meta?.layerTo as GraphLayer) ??
         getDefaultLayerRange(widget?.meta?.mode ?? 'spent').to,
     }),
   );
@@ -541,7 +542,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     setLayerRange(prev => normalizeLayerRange(graphMode, prev));
   }, [graphMode]);
 
-  const layerLabels = useMemo<Record<GraphLayers, string>>(
+  const layerLabels = useMemo<Record<GraphLayer, string>>(
     () => ({
       [GraphLayers.IncomePayee]: t('Payee'),
       [GraphLayers.IncomeCategory]: t('Income category'),
@@ -562,7 +563,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     [graphMode, layerFrom],
   );
 
-  function onChangeLayer(direction: LayerDirection, layer: GraphLayers) {
+  function onChangeLayer(direction: LayerDirection, layer: GraphLayer) {
     setLayerRange(prev => {
       const next =
         direction === 'from'
