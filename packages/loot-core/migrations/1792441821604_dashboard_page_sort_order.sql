@@ -1,6 +1,10 @@
 BEGIN TRANSACTION;
 
-ALTER TABLE dashboard_pages ADD COLUMN sort_order REAL;
+-- The default keeps a page created by a client that predates this column
+-- (which syncs id and name but no sort_order) sorting last rather than
+-- first: SQLite orders NULL ahead of every number, which would have such a
+-- page displace the seeded one below.
+ALTER TABLE dashboard_pages ADD COLUMN sort_order REAL DEFAULT 1000000000;
 
 -- Backfill in insertion order. The page the `multiple_dashboards` migration
 -- seeded is always the first row in this table, so it sorts first on every

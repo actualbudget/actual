@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { aqlQuery } from '#server/aql';
+import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { SORT_INCREMENT } from '#server/db/sort';
 import { runMutator } from '#server/mutators';
@@ -55,6 +56,21 @@ describe('dashboard page ordering', () => {
       'Main',
       'Second',
       'Third',
+    ]);
+  });
+
+  it('sorts a page from a client without the column last', async () => {
+    // A client that predates sort_order syncs a page's id and name only,
+    // leaving the column at its default. It must not displace the seeded
+    // page, which is what adopts widgets synced from another device
+    db.runQuery('INSERT INTO dashboard_pages (id, name) VALUES (?, ?)', [
+      'from-an-older-client',
+      'Older',
+    ]);
+
+    expect((await getPages()).map(({ name }) => name)).toEqual([
+      'Main',
+      'Older',
     ]);
   });
 
