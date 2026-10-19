@@ -1,6 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import { logger } from '#platform/server/log';
+import type { StorageBackend } from '#platform/server/sqlite';
 import * as Platform from '#shared/platform';
 
 import { WorkerBridge } from './worker-bridge';
@@ -10,6 +11,11 @@ export type StartBackendInit = {
   isDev: boolean;
   publicUrl?: string;
   hash?: string;
+  /**
+   * Engine for budget files (see `resolveStorageBackend`). Part of the init
+   * message because the coordinator replays it to every new leader.
+   */
+  storageBackend?: StorageBackend;
 };
 
 export type StartBackendOptions = {

@@ -777,4 +777,21 @@ describe('OPFS pool store', () => {
     expect(() => applyFilePragmas(db as never)).not.toThrow();
     closeDatabase(db);
   });
+
+  it('does not treat an empty fallback row as data to promote', async () => {
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: new Uint8Array(0),
+      storage: 'memory-idb',
+    });
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await store.open(PATH);
+    expect(pool.importDb).not.toHaveBeenCalled();
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+  });
 });

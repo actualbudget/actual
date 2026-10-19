@@ -469,6 +469,10 @@ export function createMemoryIdbStore({
       return (await getSqliteFileRow(path)) != null;
     },
 
+    isOpen(path) {
+      return entries.has(path);
+    },
+
     // Rejects when a file could not be written, so callers never take a
     // flush for durability it did not deliver
     async flush() {
@@ -485,6 +489,13 @@ export function createMemoryIdbStore({
           'sqlite storage: not written: ' + notWritten.join(', '),
         );
       }
+    },
+
+    async releaseAll() {
+      for (const entry of [...entries.values()]) {
+        store.close(entry.path, entry.db);
+      }
+      await Promise.all([...pendingWrites.values()]);
     },
 
     onWrite(db) {
