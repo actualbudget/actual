@@ -63,4 +63,16 @@ describe('startListening', () => {
     expect(started).toBe(true);
     await new Promise<void>(resolve => server.close(() => resolve()));
   });
+
+  it('removes the startup error listener once the server is listening', async () => {
+    const server = createServer();
+
+    await startListening(server, 0, '127.0.0.1');
+
+    // A leftover listener would swallow runtime server errors: a registered
+    // 'error' listener replaces Node's default uncaught-exception behaviour.
+    expect(server.listenerCount('error')).toBe(0);
+
+    await new Promise<void>(resolve => server.close(() => resolve()));
+  });
 });

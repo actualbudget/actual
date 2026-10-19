@@ -37,6 +37,10 @@ export function describeListenError(
  * that cannot bind its configured address looks like it exits for no reason.
  * Converting the failure into a rejection — carrying `describeListenError`'s
  * message — lets the caller report it and exit with a non-zero status.
+ *
+ * The listener covers the startup window only: it is removed as soon as the
+ * server is listening, so a runtime server error afterwards keeps Node's
+ * default uncaught-exception behaviour instead of being swallowed.
  */
 export function startListening(
   server: Server,
@@ -45,11 +49,13 @@ export function startListening(
   onListening?: () => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    server.on('error', (err: Error) => {
+    const onError = (err: Error) => {
       reject(new Error(describeListenError(err, port, hostname)));
-    });
+    };
+    server.once('error', onError);
 
     server.listen(port, hostname, () => {
+      server.off('error', onError);
       onListening?.();
       resolve();
     });
