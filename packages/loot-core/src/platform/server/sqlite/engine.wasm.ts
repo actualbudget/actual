@@ -1,11 +1,6 @@
 import { logger } from '#platform/server/log';
 
-import {
-  getSqliteStore,
-  hasSqliteStore,
-  initSqliteStorage,
-  revertToLegacy,
-} from './storage';
+import { getSqliteStore, hasSqliteStore, initSqliteStorage } from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
@@ -18,9 +13,8 @@ import type { PreparedStatement, WasmDatabase } from './wasm';
 
 export type { WasmDatabase, PreparedStatement };
 
-// sqlite engine over the official `@sqlite.org/sqlite-wasm` build. It is
-// bundled only by entry points that register it with the facade in
-// `index.ts` (see `engines.web.ts`). File-backed databases are opened
+// sqlite engine over the official `@sqlite.org/sqlite-wasm` build, behind
+// the facade in `index.ts`. File-backed databases are opened
 // through the sqlite storage (OPFS, or IndexedDB as a whole file);
 // `:memory:` and byte buffers live in memory. The module-level pieces
 // (init, user functions, memory databases) live in `wasm.ts` so the
@@ -173,11 +167,6 @@ export const wasmEngine: SqliteEngine = {
   releaseStorage: async () => {
     if (hasSqliteStore()) {
       await getSqliteStore().releaseAll();
-    }
-  },
-  revertStorageToLegacy: async () => {
-    if (hasSqliteStore()) {
-      await revertToLegacy();
     }
   },
 };

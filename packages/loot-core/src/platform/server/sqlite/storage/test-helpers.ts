@@ -1,8 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
-import { init, registerEngine } from '#platform/server/sqlite';
-import { wasmEngine } from '#platform/server/sqlite/engine.wasm';
+import { init } from '#platform/server/sqlite';
 import type { StorageBackend } from '#platform/server/sqlite/types';
 
 import { pageSizeFromHeader } from './absurd-migration';
@@ -14,12 +13,10 @@ export function readSqliteWasm(): Buffer {
   return readFileSync(require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'));
 }
 
-// Registers the sqlite-wasm engine (the worker entry does this in the app)
-// and starts it on the given storage
+// Starts the sqlite-wasm engine on the given storage
 export function initWasmEngine(
   storage: Exclude<StorageBackend, 'legacy'> = 'memory-idb',
 ) {
-  registerEngine('wasm', wasmEngine);
   return init({ storage, wasmBinary: readSqliteWasm() });
 }
 

@@ -41,7 +41,7 @@ async function databaseBytes(): Promise<Uint8Array> {
 
 describe('web filesystem (sqlite-wasm storage)', () => {
   it('stores persisted files in IndexedDB and transient files in memory', async () => {
-    await init({ storage: 'memory-idb' });
+    await init();
 
     await writeFile('/documents/foo.txt', 'hello');
     expect(await readFile('/documents/foo.txt')).toBe('hello');
@@ -76,7 +76,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
   });
 
   it('routes sqlite files to the sqlite storage', async () => {
-    await init({ storage: 'memory-idb' });
+    await init();
     const bytes = await databaseBytes();
 
     await writeFile('/documents/Actual/b1/db.sqlite', bytes);
@@ -100,7 +100,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
   });
 
   it('copies databases between budgets and removes budget directories', async () => {
-    await init({ storage: 'memory-idb' });
+    await init();
     const bytes = await databaseBytes();
     await writeFile('/documents/Actual/b1/db.sqlite', bytes);
     await writeFile('/documents/Actual/b1/metadata.json', '{"id":"b1"}');
@@ -153,7 +153,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
       storage: 'memory-idb',
     });
 
-    await init({ storage: 'memory-idb' });
+    await init();
 
     expect(await readFile('/documents/ok.txt')).toBe('oh yeah');
     expect(await exists('/documents/deep')).toBe(true);
@@ -166,7 +166,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
   });
 
   it('persists files under a custom document dir', async () => {
-    await init({ storage: 'memory-idb' });
+    await init();
     _setDocumentDir('/budget');
     expect(await exists('/budget')).toBe(true);
 

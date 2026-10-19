@@ -91,7 +91,7 @@ describe('WorkerBridge takeover', () => {
       this.posted.push(message);
     }
     addEventListener() {
-      // absurd-sql's main-thread helper listens here; nothing to do
+      // The release step listens here; nothing to record
     }
     terminate() {
       // Nothing to release in the fake

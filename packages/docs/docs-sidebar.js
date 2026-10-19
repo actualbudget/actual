@@ -307,7 +307,6 @@ const sidebars = {
           items: [
             'troubleshooting/server',
             'troubleshooting/browser-storage',
-            'troubleshooting/shared-array-buffer',
             'troubleshooting/data-folder-access',
             'troubleshooting/reset_password',
             'troubleshooting/edge-browser',

@@ -1,42 +1,24 @@
 import type { Page } from '@playwright/test';
 
-import {
-  addE2EInitScripts,
-  E2E_STORAGE_BACKEND,
-  expect,
-  MANUAL_STORAGE_BACKEND_FLAG,
-  test,
-} from './fixtures';
+import { addE2EInitScripts, expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
 import { inspectStorage } from './page-models/storage-inspector';
 import type { StorageSnapshot } from './page-models/storage-inspector';
 
-// Mirrors loot-core/src/platform/client/browser-preload/storage-backend.ts
-const STORAGE_BACKEND_KEY = 'actual:storage-backend';
-// Unset means the app's default, which is the sqlite-wasm engine
-const requestedBackend = E2E_STORAGE_BACKEND ?? 'opfs';
-const usesNewStorage = requestedBackend !== 'legacy';
 // The IndexedDB fallback persists on a one second debounce
 const PERSIST_WAIT_MS = 2000;
+const SEEDED_BUDGET_ID = 'seeded-budget';
+const SEEDED_BUDGET_NAME = 'Seeded Budget';
 
-function expectStorageLayout(
-  snapshot: StorageSnapshot,
-  layout: 'legacy' | 'new',
-) {
+// Every sqlite file is held by the sqlite-wasm storage and nothing is left
+// in the previous engine's per-file databases
+function expectNewStorageLayout(snapshot: StorageSnapshot) {
   expect(snapshot.sqliteRows.length).toBeGreaterThan(0);
-  const legacyDatabases = snapshot.databases.filter(name =>
-    name.startsWith('documents-'),
-  );
-  if (layout === 'legacy') {
-    expect(legacyDatabases.length).toBeGreaterThan(0);
-    for (const row of snapshot.sqliteRows) {
-      expect(row.storage).toBeUndefined();
-    }
-    return;
-  }
-  expect(legacyDatabases).toEqual([]);
+  expect(
+    snapshot.databases.filter(name => name.startsWith('documents-')),
+  ).toEqual([]);
   for (const row of snapshot.sqliteRows) {
     expect(['opfs', 'memory-idb']).toContain(row.storage);
     if (row.storage === 'opfs') {
@@ -49,24 +31,84 @@ function expectStorageLayout(
   }
 }
 
-async function openAllySavings(page: Page) {
+async function readAllySavingsBalance(page: Page) {
   const accountPage = await new Navigation(page).goToAccountPage(
     'Ally Savings',
   );
   await accountPage.waitFor();
-  return accountPage;
-}
-
-// The header shows 0.00 until the account's query has answered
-async function readAllySavingsBalance(page: Page) {
-  const accountPage = await openAllySavings(page);
+  // The header shows 0.00 until the account's query has answered
   await expect(accountPage.accountBalance).not.toHaveText(/^(0\.00)?$/);
   return (await accountPage.accountBalance.textContent())?.trim();
 }
 
-async function expectAllySavingsBalance(page: Page, balance?: string) {
-  const accountPage = await openAllySavings(page);
-  await expect(accountPage.accountBalance).toHaveText(balance ?? '');
+// Writes a budget the way the previous engine (absurd-sql) left it: marker
+// rows in the `actual` database and the sqlite file as page-sized blocks in
+// a database of its own. The bundled default budget is a valid, empty file.
+async function seedPreviousEngineBudget(page: Page) {
+  await page.evaluate(
+    async ({ id, name }) => {
+      const response = await fetch('/data/default-db.sqlite');
+      const bytes = new Uint8Array(await response.arrayBuffer());
+      const pageSize = (bytes[16] << 8) | bytes[17];
+      const directory = `/documents/Actual/${id}`;
+      const open = (
+        databaseName: string,
+        version: number,
+        upgrade: (database: IDBDatabase) => void,
+      ) =>
+        new Promise<IDBDatabase>((resolve, reject) => {
+          const request = indexedDB.open(databaseName, version);
+          request.onupgradeneeded = () => upgrade(request.result);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      const settled = (transaction: IDBTransaction) =>
+        new Promise<void>((resolve, reject) => {
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+        });
+
+      const actual = await open('actual', 9, database => {
+        if (!database.objectStoreNames.contains('asyncStorage')) {
+          database.createObjectStore('asyncStorage');
+        }
+        if (!database.objectStoreNames.contains('files')) {
+          database.createObjectStore('files', { keyPath: 'filepath' });
+        }
+      });
+      const files = actual.transaction(['files'], 'readwrite');
+      files.objectStore('files').put({
+        filepath: `${directory}/metadata.json`,
+        contents: JSON.stringify({ id, budgetName: name }),
+      });
+      files
+        .objectStore('files')
+        .put({ filepath: `${directory}/db.sqlite`, contents: '' });
+      await settled(files);
+      actual.close();
+
+      const legacyName = `${directory}/db.sqlite`
+        .replace(/^\//, '')
+        .replace(/\//g, '-');
+      const legacy = await open(legacyName, 2, database => {
+        database.createObjectStore('data');
+      });
+      const data = legacy.transaction(['data'], 'readwrite');
+      data.objectStore('data').put({ size: bytes.length }, -1);
+      for (
+        let offset = 0, key = 0;
+        offset < bytes.length;
+        offset += pageSize, key++
+      ) {
+        const block = new Uint8Array(pageSize);
+        block.set(bytes.subarray(offset, offset + pageSize));
+        data.objectStore('data').put(block.buffer, key);
+      }
+      await settled(data);
+      legacy.close();
+    },
+    { id: SEEDED_BUDGET_ID, name: SEEDED_BUDGET_NAME },
+  );
 }
 
 test.describe('Browser storage', () => {
@@ -84,10 +126,7 @@ test.describe('Browser storage', () => {
     expect(balance).toBeTruthy();
 
     await page.waitForTimeout(PERSIST_WAIT_MS);
-    expectStorageLayout(
-      await inspectStorage(page),
-      usesNewStorage ? 'new' : 'legacy',
-    );
+    expectNewStorageLayout(await inspectStorage(page));
 
     await page.reload();
     const accountPage = new AccountPage(page);
@@ -95,78 +134,29 @@ test.describe('Browser storage', () => {
     await expect(accountPage.accountBalance).toHaveText(balance ?? '');
   });
 
-  test('moves a budget created under the legacy storage', async ({
-    browser,
-  }) => {
-    test.skip(!usesNewStorage, 'only meaningful for the new storage');
-
+  test('moves a budget left by the previous engine', async ({ browser }) => {
     page = await browser.newPage();
-    // The URL flag wins over the stored choice for this first load
-    await page.goto(`/?storage=legacy`);
-    await page.evaluate(
-      flag => sessionStorage.setItem(flag, '1'),
-      MANUAL_STORAGE_BACKEND_FLAG,
-    );
-    await new ConfigurationPage(page).createTestFile();
-    const balance = await readAllySavingsBalance(page);
-    expectStorageLayout(await inspectStorage(page), 'legacy');
-
-    // Switch the flag and reload: the budget is moved when it is reopened
-    await page.evaluate(
-      ([key, backend]) => localStorage.setItem(key, backend),
-      [STORAGE_BACKEND_KEY, requestedBackend],
-    );
+    // Let the app create its IndexedDB schema, then plant the old layout
     await page.goto('/');
+    await page
+      .getByRole('button', { name: 'Try the demo', exact: true })
+      .waitFor({ timeout: 60_000 });
+    await seedPreviousEngineBudget(page);
+
+    // The budget is listed and moved into the new storage when opened
+    await page.goto('/');
+    await page.getByText(SEEDED_BUDGET_NAME).click({ timeout: 60_000 });
     await expect(page.getByTestId('budget-table')).toBeVisible({
       timeout: 60_000,
     });
-    await expectAllySavingsBalance(page, balance);
 
     await page.waitForTimeout(PERSIST_WAIT_MS);
-    expectStorageLayout(await inspectStorage(page), 'new');
-  });
-
-  test('switches back to the legacy storage from the settings', async ({
-    browser,
-  }) => {
-    test.skip(!usesNewStorage, 'only meaningful for the new storage');
-
-    page = await browser.newPage();
-    await page.goto('/');
-    await new ConfigurationPage(page).createTestFile();
-    const balance = await readAllySavingsBalance(page);
-    await page.evaluate(
-      flag => sessionStorage.setItem(flag, '1'),
-      MANUAL_STORAGE_BACKEND_FLAG,
-    );
-
-    const settingsPage = await new Navigation(page).goToSettingsPage();
-    await settingsPage.goToSection('Experimental');
-    const toggle = page.getByRole('checkbox', {
-      name: 'Browser storage engine',
-    });
-    await expect(toggle).toBeChecked();
-    // Moves every budget back, then reloads into the legacy engine, which
-    // reopens the budget on the settings page
-    const reloaded = page.waitForEvent('load', { timeout: 60_000 });
-    await toggle.click();
-    await reloaded;
-    await settingsPage.waitFor({ timeout: 60_000 });
-    await expectAllySavingsBalance(page, balance);
-    expectStorageLayout(await inspectStorage(page), 'legacy');
-    expect(
-      await page.evaluate(
-        key => localStorage.getItem(key),
-        STORAGE_BACKEND_KEY,
-      ),
-    ).toBe('legacy');
+    expectNewStorageLayout(await inspectStorage(page));
   });
 
   test('a second tab cannot open the same budget at the same time', async ({
     browser,
   }) => {
-    test.skip(!usesNewStorage, 'the legacy storage has no budget lock');
-
     const context = await browser.newContext();
     await addE2EInitScripts(context);
     page = await context.newPage();

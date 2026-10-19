@@ -8,7 +8,6 @@ import type { MigrationProgress } from './types';
 // storage, and write it back so the opt-in can be reversed.
 
 const LEGACY_STORE = 'data';
-const LEGACY_VERSION = 2;
 // Opening at a higher version makes absurd-sql connections in other tabs
 // close (they listen for `versionchange`), so nothing writes during a copy
 const MIGRATION_VERSION = 3;
@@ -247,47 +246,6 @@ export async function readLegacyDatabaseBytes(
     throw new StorageMigrationError(path, error);
   } finally {
     contents.close();
-  }
-}
-
-// Writes a sqlite file back into absurd-sql's layout so switching the
-// storage flag off again keeps the data.
-export async function writeLegacyDatabaseBytes(
-  name: string,
-  bytes: Uint8Array,
-): Promise<void> {
-  const blockSize = pageSizeFromHeader(bytes) ?? 4096;
-  await deleteLegacyDatabase(name);
-  const database = await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(name, LEGACY_VERSION);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(LEGACY_STORE);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-  try {
-    const transaction = database.transaction([LEGACY_STORE], 'readwrite');
-    const store = transaction.objectStore(LEGACY_STORE);
-    store.put({ size: bytes.length }, -1);
-    for (
-      let offset = 0, key = 0;
-      offset < bytes.length;
-      offset += blockSize, key++
-    ) {
-      const block = new Uint8Array(blockSize);
-      block.set(
-        bytes.subarray(offset, Math.min(offset + blockSize, bytes.length)),
-      );
-      store.put(block.buffer, key);
-    }
-    await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
-  } finally {
-    database.close();
   }
 }
 

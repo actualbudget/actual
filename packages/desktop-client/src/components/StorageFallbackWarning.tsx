@@ -14,14 +14,11 @@ import { Link } from '#components/common/Link';
 
 const STORAGE_DOCS_URL =
   'https://actualbudget.org/docs/troubleshooting/browser-storage';
-const SHARED_ARRAY_BUFFER_DOCS_URL =
-  'https://actualbudget.org/docs/troubleshooting/shared-array-buffer';
 
 /**
- * Title bar warning for budgets that are not on the fast path: the
- * sqlite-wasm engine fell back to memory plus IndexedDB because the browser
- * has no sync access handles, or the previous engine runs without
- * SharedArrayBuffer.
+ * Title bar warning when budgets are not on the fast path: the browser has
+ * no OPFS sync access handles, so the engine keeps the database in memory
+ * and saves it to IndexedDB on a short debounce.
  */
 export function StorageFallbackWarning() {
   const [backend, setBackend] = useState<StorageBackend | null>(null);
@@ -41,10 +38,7 @@ export function StorageFallbackWarning() {
     };
   }, []);
 
-  const isFallback = backend === 'memory-idb';
-  const isLegacyWithoutSharedArrayBuffer =
-    backend === 'legacy' && typeof SharedArrayBuffer === 'undefined';
-  if (isElectron() || (!isFallback && !isLegacyWithoutSharedArrayBuffer)) {
+  if (isElectron() || backend !== 'memory-idb') {
     return null;
   }
 
@@ -52,18 +46,11 @@ export function StorageFallbackWarning() {
     <Tooltip
       placement="bottom start"
       content={
-        isFallback ? (
-          <Trans>
-            This browser cannot use Actual's faster storage, so budgets are kept
-            in memory and saved about once a second. Keep a budget open in one
-            tab at a time. Click to learn more.
-          </Trans>
-        ) : (
-          <Trans>
-            Your environment does not support SharedArrayBuffer. You may
-            experience data loss or degraded functionality. Click to learn more.
-          </Trans>
-        )
+        <Trans>
+          This browser cannot use Actual's faster storage, so budgets are kept
+          in memory and saved about once a second. Keep a budget open in one tab
+          at a time. Click to learn more.
+        </Trans>
       }
       style={{
         ...styles.tooltip,
@@ -75,7 +62,7 @@ export function StorageFallbackWarning() {
     >
       <Link
         variant="external"
-        to={isFallback ? STORAGE_DOCS_URL : SHARED_ARRAY_BUFFER_DOCS_URL}
+        to={STORAGE_DOCS_URL}
         className={css({
           color: `${theme.warningText} !important`,
           textDecoration: 'none',

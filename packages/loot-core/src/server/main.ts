@@ -5,7 +5,6 @@ import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import type { StorageBackend } from '#platform/server/sqlite';
-import { registerSqliteEngines } from '#platform/server/sqlite/engines';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
@@ -239,11 +238,10 @@ export async function initApp(
   { storageBackend = 'legacy' }: { storageBackend?: StorageBackend } = {},
 ) {
   asyncStorage.init();
-  registerSqliteEngines();
   const storage = await sqlite.init({
     storage: await resolveStorageBackend(storageBackend),
   });
-  await fs.init({ storage });
+  await fs.init();
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -286,9 +284,9 @@ export async function initApp(
 
 type BaseInitConfig = {
   /**
-   * Browser build only: which storage holds budgets. `legacy` is the
-   * absurd-sql IndexedDB store; `opfs` uses the origin private file
-   * system, falling back to `memory-idb` where unavailable.
+   * Browser build only: which storage holds budgets. `opfs` uses the origin
+   * private file system, falling back to `memory-idb` where unavailable.
+   * Budgets left by earlier versions are migrated when next opened.
    */
   storageBackend?: StorageBackend;
   /**
@@ -345,11 +343,10 @@ export async function init(config: InitConfig) {
   }
 
   asyncStorage.init({ persist: false });
-  registerSqliteEngines();
-  const storage = await sqlite.init({
+  await sqlite.init({
     storage: await resolveStorageBackend(config?.storageBackend ?? 'legacy'),
   });
-  await fs.init({ storage });
+  await fs.init();
   fs._setDocumentDir(dataDir || process.cwd());
 
   if (serverURL) {

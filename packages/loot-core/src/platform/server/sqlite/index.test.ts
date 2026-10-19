@@ -4,9 +4,6 @@ import { createRequire } from 'node:module';
 
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { patchFetchForSqlJS } from '#mocks/util';
-
-import { wasmEngine } from './engine.wasm';
 import type { Database } from './types';
 
 import {
@@ -16,7 +13,6 @@ import {
   init,
   openDatabase,
   prepare,
-  registerEngine,
   runQuery,
   transaction,
 } from './index';
@@ -42,8 +38,6 @@ function expectConstraintFailure(fn: () => void) {
   consoleSpy.mockRestore();
 }
 
-// The same contract is expected of both web engines; each describe block
-// below switches the facade to one of them.
 function itBehavesLikeSqlite() {
   it('runs statements and reports changes', async () => {
     const db = await openWithSchema();
@@ -296,45 +290,12 @@ function itBehavesLikeSqlite() {
   });
 }
 
-describe('legacy sql.js engine', () => {
-  beforeAll(() => {
-    const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-    patchFetchForSqlJS(baseURL);
-    return init({ baseURL });
-  });
-
-  itBehavesLikeSqlite();
-
-  it('frees the statements it prepares', async () => {
-    const db = await openWithSchema();
-    // The facade hands out an opaque handle; the legacy engine's statements
-    // are plain sql.js objects underneath
-    const prepareSpy = vi.spyOn(
-      db as unknown as { prepare: (sql: string) => { run: () => void } },
-      'prepare',
-    );
-
-    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
-    runQuery(db, 'SELECT * FROM numbers', [], true);
-    expectConstraintFailure(() =>
-      runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 5)"),
-    );
-
-    expect(prepareSpy).toHaveBeenCalledTimes(3);
-    for (const { value: statement } of prepareSpy.mock.results) {
-      expect(() => statement.run()).toThrow(/Statement closed/);
-    }
-    closeDatabase(db);
-  });
-});
-
 describe('sqlite-wasm engine', () => {
   beforeAll(() => {
     // No fetch in tests: hand the engine the wasm bytes directly
     const wasmBinary = readFileSync(
       require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'),
     );
-    registerEngine('wasm', wasmEngine);
     return init({ storage: 'memory-idb', wasmBinary });
   });
 
