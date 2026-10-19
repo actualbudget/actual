@@ -64,8 +64,8 @@ self.addEventListener('message', async event => {
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
-        // Only the legacy engine (absurd-sql) needs SharedArrayBuffer
-        const storageBackend = msg.storageBackend ?? 'legacy';
+        // Only the previous engine (absurd-sql) needs SharedArrayBuffer
+        const storageBackend = msg.storageBackend ?? 'opfs';
 
         if (
           storageBackend === 'legacy' &&

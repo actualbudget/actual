@@ -306,6 +306,7 @@ const sidebars = {
           collapsed: true,
           items: [
             'troubleshooting/server',
+            'troubleshooting/browser-storage',
             'troubleshooting/shared-array-buffer',
             'troubleshooting/data-folder-access',
             'troubleshooting/reset_password',
