@@ -65,33 +65,146 @@ const getDonutDimensions = (
 // ---------------------------------------------------------------------------
 
 const resolveCSSVariable = (color: string): string => {
-  if (!color.startsWith('var(')) return color;
+  if (!color || typeof color !== 'string' || !color.startsWith('var(')) {
+    return color || '';
+  }
   const inner = color.slice(4, -1).trim();
   const varName = inner.split(',')[0].trim();
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
+  if (typeof document === 'undefined') return color;
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim() || color
+  );
 };
 
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
+export const hslToRgb = (
+  h: number,
+  s: number,
+  l: number,
+): { r: number; g: number; b: number } => {
+  const normalizedH = ((h % 360) + 360) % 360;
+  const normalizedS = Math.max(0, Math.min(1, s));
+  const normalizedL = Math.max(0, Math.min(1, l));
+
+  const c = (1 - Math.abs(2 * normalizedL - 1)) * normalizedS;
+  const x = c * (1 - Math.abs(((normalizedH / 60) % 2) - 1));
+  const m = normalizedL - c / 2;
+
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+
+  if (normalizedH >= 0 && normalizedH < 60) {
+    r1 = c;
+    g1 = x;
+    b1 = 0;
+  } else if (normalizedH >= 60 && normalizedH < 120) {
+    r1 = x;
+    g1 = c;
+    b1 = 0;
+  } else if (normalizedH >= 120 && normalizedH < 180) {
+    r1 = 0;
+    g1 = c;
+    b1 = x;
+  } else if (normalizedH >= 180 && normalizedH < 240) {
+    r1 = 0;
+    g1 = x;
+    b1 = c;
+  } else if (normalizedH >= 240 && normalizedH < 300) {
+    r1 = x;
+    g1 = 0;
+    b1 = c;
+  } else {
+    r1 = c;
+    g1 = 0;
+    b1 = x;
+  }
+
+  return {
+    r: Math.round((r1 + m) * 255),
+    g: Math.round((g1 + m) * 255),
+    b: Math.round((b1 + m) * 255),
+  };
+};
+
+export const colorToRgb = (
+  color: string,
+): { r: number; g: number; b: number } => {
+  if (!color || typeof color !== 'string') return { r: 0, g: 0, b: 0 };
+  const trimmed = color.trim();
+
+  // 1. HSL / HSLA (e.g. "hsl(210, 50%, 50%)", "hsla(210, 50%, 50%, 0.5)", "hsl(-120deg 50% 50%)", "hsl(0.5turn 50% 50%)")
+  const hslMatch =
+    /^hsla?\(\s*(-?[\d.]+)(deg|turn|rad|grad)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%/i.exec(
+      trimmed,
+    );
+  if (hslMatch) {
+    let h = parseFloat(hslMatch[1]);
+    const unit = hslMatch[2]?.toLowerCase();
+    if (unit === 'turn') h *= 360;
+    else if (unit === 'rad') h *= 180 / Math.PI;
+    else if (unit === 'grad') h *= 0.9;
+    const s = parseFloat(hslMatch[3]) / 100;
+    const l = parseFloat(hslMatch[4]) / 100;
+    return hslToRgb(h, s, l);
+  }
+
+  // 2. RGB / RGBA (e.g. "rgb(255, 0, 0)", "rgba(255, 0, 0, 0.5)", "rgb(100%, 0%, 0%)")
+  const rgbMatch =
+    /^rgba?\(\s*([\d.]+)(%?)[\s,]+([\d.]+)(%?)[\s,]+([\d.]+)(%?)/i.exec(
+      trimmed,
+    );
+  if (rgbMatch) {
+    const parseChannel = (val: string, isPercent: string) => {
+      const num = parseFloat(val);
+      if (isPercent === '%') {
+        return Math.min(255, Math.max(0, Math.round((num / 100) * 255)));
       }
-    : { r: 0, g: 0, b: 0 };
+      return Math.min(255, Math.max(0, Math.round(num)));
+    };
+    return {
+      r: parseChannel(rgbMatch[1], rgbMatch[2]),
+      g: parseChannel(rgbMatch[3], rgbMatch[4]),
+      b: parseChannel(rgbMatch[5], rgbMatch[6]),
+    };
+  }
+
+  // 3. 3-digit or 4-digit hex: #rgb or #rgba
+  const hex3 = /^#?([a-f\d])([a-f\d])([a-f\d])([a-f\d])?$/i.exec(trimmed);
+  if (hex3) {
+    return {
+      r: parseInt(hex3[1] + hex3[1], 16),
+      g: parseInt(hex3[2] + hex3[2], 16),
+      b: parseInt(hex3[3] + hex3[3], 16),
+    };
+  }
+
+  // 4. 6-digit or 8-digit hex: #rrggbb or #rrggbbaa
+  const hex6 = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(
+    trimmed,
+  );
+  if (hex6) {
+    return {
+      r: parseInt(hex6[1], 16),
+      g: parseInt(hex6[2], 16),
+      b: parseInt(hex6[3], 16),
+    };
+  }
+
+  return { r: 0, g: 0, b: 0 };
 };
 
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
+export const hexToRgb = colorToRgb;
+
+export const shadeColor = (color: string, percent: number): string => {
+  const { r, g, b } = colorToRgb(color);
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
 };
 
-const buildColorMap = (
+export const buildColorMap = (
   groupedData: GroupedEntity[],
   legend: LegendEntity[],
 ): Map<string, string> => {
