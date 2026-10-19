@@ -60,7 +60,7 @@ describe('web filesystem', () => {
     });
     const binResult = await idb.get(store, '/documents/foo.bin');
     expect(binResult.filepath).toBe('/documents/foo.bin');
-    expect(Array.from(binResult.contents)).toEqual(
+    expect(Array.from(binResult.contents as Uint8Array)).toEqual(
       Array.from(new Uint8Array(buf)),
     );
 

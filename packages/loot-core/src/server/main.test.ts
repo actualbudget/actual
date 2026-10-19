@@ -561,7 +561,7 @@ describe('Budget shutdown', () => {
       });
     let savedPrefs;
     vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
-      const metadata = JSON.parse(contents);
+      const metadata = JSON.parse(contents as string);
       if (metadata.lastScheduleRun) {
         writeStarted.resolve();
         await writeGate.promise;
