@@ -48,12 +48,24 @@ function expectStorageLayout(
   }
 }
 
-async function readAllySavingsBalance(page: Page) {
+async function openAllySavings(page: Page) {
   const accountPage = await new Navigation(page).goToAccountPage(
     'Ally Savings',
   );
   await accountPage.waitFor();
+  return accountPage;
+}
+
+// The header shows 0.00 until the account's query has answered
+async function readAllySavingsBalance(page: Page) {
+  const accountPage = await openAllySavings(page);
+  await expect(accountPage.accountBalance).not.toHaveText(/^(0\.00)?$/);
   return (await accountPage.accountBalance.textContent())?.trim();
+}
+
+async function expectAllySavingsBalance(page: Page, balance?: string) {
+  const accountPage = await openAllySavings(page);
+  await expect(accountPage.accountBalance).toHaveText(balance ?? '');
 }
 
 test.describe('Browser storage', () => {
@@ -107,7 +119,7 @@ test.describe('Browser storage', () => {
     await expect(page.getByTestId('budget-table')).toBeVisible({
       timeout: 60_000,
     });
-    expect(await readAllySavingsBalance(page)).toBe(balance);
+    await expectAllySavingsBalance(page, balance);
 
     await page.waitForTimeout(PERSIST_WAIT_MS);
     expectStorageLayout(await inspectStorage(page), 'new');
@@ -139,7 +151,7 @@ test.describe('Browser storage', () => {
     await toggle.click();
     await reloaded;
     await settingsPage.waitFor({ timeout: 60_000 });
-    expect(await readAllySavingsBalance(page)).toBe(balance);
+    await expectAllySavingsBalance(page, balance);
     expectStorageLayout(await inspectStorage(page), 'legacy');
     expect(
       await page.evaluate(
