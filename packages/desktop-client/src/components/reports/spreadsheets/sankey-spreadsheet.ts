@@ -1977,7 +1977,7 @@ const NON_DRILLDOWN_NODE_KEYS: ReadonlySet<string> = new Set([
 // source for expense links at once.
 const DRILLDOWN_BY_LAYER: Partial<
   Record<
-    GraphLayers,
+    GraphLayer,
     { field: SankeyNodeDrilldownField; direction?: 'inflow' | 'outflow' }
   >
 > = {
@@ -1990,7 +1990,7 @@ const DRILLDOWN_BY_LAYER: Partial<
 
 function getNodeDrilldown(
   key: NodeKey,
-  type: GraphLayers,
+  type: GraphLayer,
   isNegative?: boolean,
 ): SankeyNodeDrilldown | undefined {
   if (
