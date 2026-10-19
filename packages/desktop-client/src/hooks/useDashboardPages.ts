@@ -1,4 +1,3 @@
-import { DEFAULT_DASHBOARD_PAGE_ID } from '@actual-app/core/shared/dashboard';
 import type {
   DashboardPageEntity,
   DashboardWidgetEntity,
@@ -19,14 +18,13 @@ export function useDashboardPageWidgets<W extends DashboardWidgetEntity>(
   const knownPageIds = new Set((dashboardPages ?? []).map(page => page.id));
 
   // A widget whose page does not exist locally would be filtered off every
-  // page and so be invisible — which is what used to happen to widgets
-  // synced from a device with a different default page id. Surface them on
-  // the adopting page: the default page when it exists, else the first one.
-  const adoptingPageId = knownPageIds.has(DEFAULT_DASHBOARD_PAGE_ID)
-    ? DEFAULT_DASHBOARD_PAGE_ID
-    : dashboardPages?.[0]?.id;
+  // page and so be invisible. That is what happens to widgets synced from
+  // another device: the default page is seeded by a migration, which runs
+  // locally and emits no sync messages, so each device generated its own
+  // id for it. Show those widgets on the first page, which `sort_order`
+  // makes the seeded one on every device.
   const isAdoptingPage =
-    dashboardPageId != null && dashboardPageId === adoptingPageId;
+    dashboardPageId != null && dashboardPageId === dashboardPages?.[0]?.id;
 
   return useQuery({
     ...dashboardQueries.listDashboardWidgets<W>(),
