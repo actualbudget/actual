@@ -8,7 +8,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Embed loot-core's default filesystem (wasm + default DB + migrations) into
+// Embed loot-core's default filesystem (SQLite wasm + default DB + migrations) into
 // the worker as a virtual module, so the browser build performs no PUBLIC_URL
 // asset fetches and consumers serve no extra files. loot-core owns the bytes
 // and the wire format; this just inlines them.
@@ -28,6 +28,34 @@ function embeddedAssets(): Plugin {
         `export const dataIndex = ${JSON.stringify(index)};`,
         `export const dataFiles = ${JSON.stringify(dataFiles)};`,
       ].join('\n');
+    },
+  };
+}
+
+// The worker is an IIFE, where Rolldown replaces `import.meta` with `{}`.
+// The sqlite-wasm glue reads `import.meta.url` to locate its script, and
+// inside a blob-URL worker `self.location.href` is that script. Rewriting it
+// before Vite's own analysis also stops Vite from bundling the glue's helper
+// workers (the Worker1 API and the SharedArrayBuffer OPFS proxy), which
+// Actual never starts; anything still emitted for them is dropped so the
+// package stays a single file.
+function sqliteWasmInWorker(): Plugin {
+  return {
+    name: 'actual-sqlite-wasm-in-worker',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/@sqlite\.org\/sqlite-wasm\//.test(id)) return undefined;
+      return {
+        code: code.replace(/\bimport\.meta\.url\b/g, 'self.location.href'),
+        map: null,
+      };
+    },
+    generateBundle(_options, bundle) {
+      for (const fileName of Object.keys(bundle)) {
+        if (/sqlite3-(worker1|opfs-async-proxy)/.test(fileName)) {
+          delete bundle[fileName];
+        }
+      }
     },
   };
 }
@@ -64,7 +92,7 @@ export default defineConfig({
   ],
   worker: {
     format: 'iife',
-    plugins: () => [embeddedAssets(), peggyLoader()],
+    plugins: () => [sqliteWasmInWorker(), embeddedAssets(), peggyLoader()],
   },
   build: {
     target: 'esnext',
