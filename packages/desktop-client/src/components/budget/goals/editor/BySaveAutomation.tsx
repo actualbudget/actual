@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgInformationCircle } from '@actual-app/components/icons/v2';
@@ -42,10 +42,12 @@ export const BySaveAutomation = ({
 
   const committedRepeat = template.repeat ?? 1;
   const [rawRepeat, setRawRepeat] = useState(String(committedRepeat));
-
-  useEffect(() => {
+  const [prevCommittedRepeat, setPrevCommittedRepeat] =
+    useState(committedRepeat);
+  if (committedRepeat !== prevCommittedRepeat) {
+    setPrevCommittedRepeat(committedRepeat);
     setRawRepeat(String(committedRepeat));
-  }, [committedRepeat]);
+  }
 
   const onRepeatChange = (value: string) => {
     setRawRepeat(value);

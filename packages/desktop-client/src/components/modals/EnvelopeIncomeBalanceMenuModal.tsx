@@ -1,25 +1,10 @@
-import React from 'react';
-import type { CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Menu } from '@actual-app/components/menu';
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-
-import {
-  BalanceWithCarryover,
-  CarryoverIndicator,
-} from '#components/budget/BalanceWithCarryover';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
-import { CellValueText } from '#components/spreadsheet/CellValue';
+import { MobileSheet } from '#components/mobile/MobileSheet';
+import { MobileSheetBalanceHeader } from '#components/mobile/MobileSheetBalanceHeader';
+import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
+import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useCategory } from '#hooks/useCategory';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
@@ -34,16 +19,8 @@ export function EnvelopeIncomeBalanceMenuModal({
   onCarryover,
   onShowActivity,
 }: EnvelopeIncomeBalanceMenuModalProps) {
-  const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mobileMenuItem,
-    color: theme.menuItemText,
-    borderRadius: 0,
-    borderTop: `1px solid ${theme.pillBorder}`,
-  };
-
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
-
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
@@ -53,83 +30,25 @@ export function EnvelopeIncomeBalanceMenuModal({
   }
 
   return (
-    <Modal name="envelope-income-balance-menu">
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <Text size="extra-large" style={{ fontWeight: 400 }}>
-              <Trans>Balance</Trans>
-            </Text>
-            <BalanceWithCarryover
-              isDisabled
-              shouldInlineGoalStatus
-              carryover={envelopeBudget.catCarryover(categoryId)}
-              balance={envelopeBudget.catSumAmount(categoryId)}
-              goal={envelopeBudget.catGoal(categoryId)}
-              budgeted={envelopeBudget.catBudgeted(categoryId)}
-              longGoal={envelopeBudget.catLongGoal(categoryId)}
-              CarryoverIndicator={({ style }) => (
-                <CarryoverIndicator
-                  style={{
-                    width: 15,
-                    height: 15,
-                    display: 'inline-flex',
-                    position: 'relative',
-                    ...style,
-                  }}
-                />
-              )}
-            >
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{
-                    textAlign: 'center',
-                    ...styles.veryLargeText,
-                  }}
-                />
-              )}
-            </BalanceWithCarryover>
-          </View>
-          <Menu
-            getItemStyle={() => defaultMenuItemStyle}
-            onMenuSelect={name => {
-              switch (name) {
-                case 'carryover':
-                  onCarryover?.(!carryover);
-                  break;
-                case 'view':
-                  onShowActivity?.();
-                  break;
-                default:
-                  throw new Error(`Unrecognized menu option: ${String(name)}`);
-              }
-            }}
-            items={[
-              {
-                name: 'carryover',
-                text: carryover
-                  ? t('Disable auto hold')
-                  : t('Enable auto hold'),
-              },
-              {
-                name: 'view',
-                text: t('View transactions'),
-              },
-            ]}
-          />
-        </>
-      )}
-    </Modal>
+    <MobileSheet name="envelope-income-balance-menu" title={category.name}>
+      <MobileSheetBalanceHeader
+        label={<Trans>Received</Trans>}
+        carryover={envelopeBudget.catCarryover(categoryId)}
+        balance={envelopeBudget.catSumAmount(categoryId)}
+        goal={envelopeBudget.catGoal(categoryId)}
+        budgeted={envelopeBudget.catBudgeted(categoryId)}
+        longGoal={envelopeBudget.catLongGoal(categoryId)}
+      />
+      <MobileSheetSection>
+        <MobileSheetRow
+          label={carryover ? t('Disable auto hold') : t('Enable auto hold')}
+          onPress={() => onCarryover(!carryover)}
+        />
+        <MobileSheetRow
+          label={t('View transactions')}
+          onPress={() => onShowActivity()}
+        />
+      </MobileSheetSection>
+    </MobileSheet>
   );
 }

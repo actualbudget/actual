@@ -69,6 +69,7 @@ export function useBudgetAutomationsEditor({
   onClose,
 }: UseBudgetAutomationsEditorArgs) {
   const dispatch = useDispatch();
+  const [today] = useState(() => new Date());
   const { groups: cleanupGroups, createGroup: createCleanupGroup } =
     useCleanupGroups();
 
@@ -215,7 +216,7 @@ export function useBudgetAutomationsEditor({
       entry.displayType,
       templates,
       schedules,
-      new Date(),
+      today,
       validPercentageSources,
     ),
   );
