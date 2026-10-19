@@ -77,7 +77,10 @@ describe('QuickAddTransactionModal', () => {
   let addedTransactions: TransactionEntity[][];
   let onAdded: Mock<() => void>;
 
+  let saveError: Error | null;
+
   beforeEach(() => {
+    saveError = null;
     addedTransactions = [];
     createdPayees.length = 0;
     onAdded = vi.fn();
@@ -88,6 +91,9 @@ describe('QuickAddTransactionModal', () => {
       'get-cell': async () => ({ name: 'cell', value: 0 }),
       'payees-get': async () => [{ id: 'payee-target', name: 'Target' }],
       'transactions-batch-update': async ({ added = [] }) => {
+        if (saveError) {
+          throw saveError;
+        }
         addedTransactions.push(added);
         return { added: [], updated: [], deleted: [], errors: [] };
       },
@@ -119,6 +125,7 @@ describe('QuickAddTransactionModal', () => {
         </SpreadsheetProvider>
       </TestProviders>,
     );
+    return store;
   }
 
   it('adds the transaction through the normal save path', async () => {
@@ -163,6 +170,34 @@ describe('QuickAddTransactionModal', () => {
     await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
     expect(createdPayees).toEqual(['Landlord']);
     expect(addedTransactions[0][0].payee).toBe('payee-new');
+  });
+
+  it('reports a failed save and keeps the preview open', async () => {
+    saveError = new Error('disk full');
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    const store = renderModal(parsedTargetPurchase, 'account-checking');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    await waitFor(() =>
+      expect(store.getState().notifications.notifications).toEqual([
+        expect.objectContaining({
+          type: 'error',
+          message:
+            'There was an error adding the transaction. Please try again.',
+          pre: 'disk full',
+        }),
+      ]),
+    );
+    expect(onAdded).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Add' })).toBeEnabled();
+    expect(consoleError).toHaveBeenCalledWith(
+      'Error adding transaction:',
+      saveError,
+    );
+    consoleError.mockRestore();
   });
 
   it('requires an account to be picked when none is given', () => {

@@ -152,7 +152,12 @@ export function QuickAddTransactionModal({
     try {
       let payeeId = existingPayeeId;
       if (!payeeId && payeeName.trim() !== '') {
-        payeeId = await createPayee.mutateAsync({ name: payeeName });
+        try {
+          payeeId = await createPayee.mutateAsync({ name: payeeName });
+        } catch {
+          // The payee mutation already shows an error notification
+          return;
+        }
       }
 
       const transaction: TransactionEntity = {
@@ -179,6 +184,19 @@ export function QuickAddTransactionModal({
       );
       onAdded();
       close();
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t(
+              'There was an error adding the transaction. Please try again.',
+            ),
+            pre: error instanceof Error ? error.message : undefined,
+          },
+        }),
+      );
     } finally {
       setIsSaving(false);
     }
