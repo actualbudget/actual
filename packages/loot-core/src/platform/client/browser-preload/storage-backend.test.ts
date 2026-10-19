@@ -5,7 +5,6 @@ import {
   resolveStorageBackend,
   setStoredStorageBackend,
   STORAGE_BACKEND_KEY,
-  STORAGE_PREFS_KEY,
 } from './storage-backend';
 
 afterEach(() => {
@@ -15,9 +14,9 @@ afterEach(() => {
 });
 
 describe('storage backend flag', () => {
-  it('defaults to the legacy engine', () => {
-    expect(getStoredStorageBackend()).toBe('legacy');
-    expect(resolveStorageBackend()).toBe('legacy');
+  it('defaults to the sqlite-wasm engine on OPFS', () => {
+    expect(getStoredStorageBackend()).toBe('opfs');
+    expect(resolveStorageBackend()).toBe('opfs');
   });
 
   it('stores and reads the chosen backend', () => {
@@ -28,6 +27,12 @@ describe('storage backend flag', () => {
 
   it('ignores values that are not a backend', () => {
     localStorage.setItem(STORAGE_BACKEND_KEY, 'floppy');
+    expect(getStoredStorageBackend()).toBe('opfs');
+  });
+
+  it('keeps an explicit choice of the previous engine', () => {
+    window.history.replaceState(null, '', '/?storage=legacy');
+    expect(resolveStorageBackend()).toBe('legacy');
     expect(getStoredStorageBackend()).toBe('legacy');
   });
 
@@ -45,18 +50,11 @@ describe('storage backend flag', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('full', 'QuotaExceededError');
     });
-    window.history.replaceState(null, '', '/?storage=opfs');
-    expect(resolveStorageBackend()).toBe('opfs');
+    window.history.replaceState(null, '', '/?storage=memory-idb');
+    expect(resolveStorageBackend()).toBe('memory-idb');
     expect(window.location.search).toBe('');
     // Nothing was stored, so the next load is back on the default
-    expect(resolveStorageBackend()).toBe('legacy');
-  });
-
-  it('reveals the engine setting when the URL flag is used', () => {
-    expect(localStorage.getItem(STORAGE_PREFS_KEY)).toBeNull();
-    window.history.replaceState(null, '', '/?storage=opfs');
-    resolveStorageBackend();
-    expect(localStorage.getItem(STORAGE_PREFS_KEY)).toBe('true');
+    expect(resolveStorageBackend()).toBe('opfs');
   });
 
   it('drops an unknown URL parameter without changing the stored choice', () => {
@@ -70,6 +68,6 @@ describe('storage backend flag', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('denied');
     });
-    expect(getStoredStorageBackend()).toBe('legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
   });
 });
