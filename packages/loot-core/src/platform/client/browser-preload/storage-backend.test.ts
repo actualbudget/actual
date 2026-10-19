@@ -14,9 +14,9 @@ afterEach(() => {
 });
 
 describe('storage backend flag', () => {
-  it('defaults to the legacy engine', () => {
-    expect(getStoredStorageBackend()).toBe('legacy');
-    expect(resolveStorageBackend()).toBe('legacy');
+  it('defaults to the sqlite-wasm engine on OPFS', () => {
+    expect(getStoredStorageBackend()).toBe('opfs');
+    expect(resolveStorageBackend()).toBe('opfs');
   });
 
   it('stores and reads the chosen backend', () => {
@@ -27,6 +27,12 @@ describe('storage backend flag', () => {
 
   it('ignores values that are not a backend', () => {
     localStorage.setItem(STORAGE_BACKEND_KEY, 'floppy');
+    expect(getStoredStorageBackend()).toBe('opfs');
+  });
+
+  it('keeps an explicit choice of the previous engine', () => {
+    window.history.replaceState(null, '', '/?storage=legacy');
+    expect(resolveStorageBackend()).toBe('legacy');
     expect(getStoredStorageBackend()).toBe('legacy');
   });
 
@@ -51,6 +57,6 @@ describe('storage backend flag', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('denied');
     });
-    expect(getStoredStorageBackend()).toBe('legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
   });
 });
