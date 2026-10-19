@@ -81,14 +81,17 @@ export function StorageBackendToggle() {
   return (
     <SettingsRow
       htmlFor="settings-storage-backend"
-      title={<Trans>New browser storage engine</Trans>}
+      title={<Trans>Browser storage engine</Trans>}
       description={
         <Text style={{ color: theme.warningText }}>
           <Trans>
-            Keeps budget files in the browser's private file system using
-            SQLite's own WebAssembly build. Budgets move over when they are next
-            opened. Close Actual in all other tabs before changing this; the app
-            reloads.
+            Budgets are kept in the browser's private file system using SQLite's
+            own WebAssembly build, or in memory and saved to IndexedDB where
+            that is unavailable. Untick to move every budget in this browser
+            back to the previous engine, which will be removed in a coming
+            release. Export a backup first if a budget exists only on this
+            device, close Actual in all other tabs, and expect the app to
+            reload.
           </Trans>{' '}
           {backendDescription && (
             <Trans>Currently active: {{ backendDescription }}.</Trans>
