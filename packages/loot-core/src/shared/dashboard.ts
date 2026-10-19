@@ -1,16 +1,5 @@
 import type { NewDashboardWidgetEntity } from '#types/models';
 
-// The id of the dashboard page every budget file starts out with.
-//
-// This has to be a constant rather than a generated uuid: migrations run
-// locally on each device and emit no sync messages, so a generated id would
-// differ per device. Widgets *do* sync, carrying their `dashboard_page_id`
-// with them, so a per-device page id leaves widgets pointing at a page the
-// other device has never heard of — and they get filtered out of the UI
-// entirely. Dashboard page ids are scoped to a single budget file, so
-// sharing one constant across files is safe.
-export const DEFAULT_DASHBOARD_PAGE_ID = 'b9c3b1b8-0f52-4a4f-9e5e-1c6a7d3f6a21';
-
 export const DEFAULT_DASHBOARD_STATE: NewDashboardWidgetEntity[] = [
   // Top row: Key metrics at a glance
   {
