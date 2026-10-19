@@ -128,15 +128,32 @@ export const hslToRgb = (
   };
 };
 
-export const parseColor = (
-  color: string,
-): { r: number; g: number; b: number } | null => {
+export type ParsedColor = {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+};
+
+const parseAlpha = (val: string | undefined): number | undefined => {
+  if (val == null) return undefined;
+  const trimmed = val.trim();
+  if (trimmed === '') return undefined;
+  const num = parseFloat(trimmed);
+  if (isNaN(num)) return undefined;
+  if (trimmed.endsWith('%')) {
+    return Math.min(1, Math.max(0, num / 100));
+  }
+  return Math.min(1, Math.max(0, num));
+};
+
+export const parseColor = (color: string): ParsedColor | null => {
   if (!color || typeof color !== 'string') return null;
   const trimmed = color.trim();
 
-  // 1. HSL / HSLA (e.g. "hsl(210, 50%, 50%)", "hsl(210 50 50)", "hsla(210, 50%, 50%, 0.5)", "hsl(-120deg 50% 50%)", "hsl(0.5turn 50% 50%)")
+  // 1. HSL / HSLA (e.g. "hsl(210, 50%, 50%)", "hsl(210 50 50)", "hsla(210, 50%, 50%, 0.5)", "hsl(210 50 50 / 0.5)", "hsl(0 100% 50% / 0)")
   const hslMatch =
-    /^hsla?\(\s*(-?[\d.]+)(deg|turn|rad|grad)?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?/i.exec(
+    /^hsla?\(\s*(-?[\d.]+)(deg|turn|rad|grad)?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?(?:[\s,/]+([\d.]+%?))?\s*\)/i.exec(
       trimmed,
     );
   if (hslMatch) {
@@ -147,12 +164,14 @@ export const parseColor = (
     else if (unit === 'grad') h *= 0.9;
     const s = parseFloat(hslMatch[3]) / 100;
     const l = parseFloat(hslMatch[4]) / 100;
-    return hslToRgb(h, s, l);
+    const rgb = hslToRgb(h, s, l);
+    const a = parseAlpha(hslMatch[5]);
+    return a !== undefined ? { ...rgb, a } : rgb;
   }
 
-  // 2. RGB / RGBA (e.g. "rgb(255, 0, 0)", "rgba(255, 0, 0, 0.5)", "rgb(100%, 0%, 0%)")
+  // 2. RGB / RGBA (e.g. "rgb(255, 0, 0)", "rgba(255, 0, 0, 0.5)", "rgb(100%, 0%, 0%)", "rgb(255 0 0 / 0.5)")
   const rgbMatch =
-    /^rgba?\(\s*([\d.]+)(%?)[\s,]+([\d.]+)(%?)[\s,]+([\d.]+)(%?)/i.exec(
+    /^rgba?\(\s*([\d.]+)(%?)[\s,]+([\d.]+)(%?)[\s,]+([\d.]+)(%?)(?:[\s,/]+([\d.]+%?))?\s*\)/i.exec(
       trimmed,
     );
   if (rgbMatch) {
@@ -163,21 +182,24 @@ export const parseColor = (
       }
       return Math.min(255, Math.max(0, Math.round(num)));
     };
-    return {
-      r: parseChannel(rgbMatch[1], rgbMatch[2]),
-      g: parseChannel(rgbMatch[3], rgbMatch[4]),
-      b: parseChannel(rgbMatch[5], rgbMatch[6]),
-    };
+    const r = parseChannel(rgbMatch[1], rgbMatch[2]);
+    const g = parseChannel(rgbMatch[3], rgbMatch[4]);
+    const b = parseChannel(rgbMatch[5], rgbMatch[6]);
+    const a = parseAlpha(rgbMatch[7]);
+    return a !== undefined ? { r, g, b, a } : { r, g, b };
   }
 
   // 3. 3-digit or 4-digit hex: #rgb or #rgba
   const hex3 = /^#?([a-f\d])([a-f\d])([a-f\d])([a-f\d])?$/i.exec(trimmed);
   if (hex3) {
-    return {
-      r: parseInt(hex3[1] + hex3[1], 16),
-      g: parseInt(hex3[2] + hex3[2], 16),
-      b: parseInt(hex3[3] + hex3[3], 16),
-    };
+    const r = parseInt(hex3[1] + hex3[1], 16);
+    const g = parseInt(hex3[2] + hex3[2], 16);
+    const b = parseInt(hex3[3] + hex3[3], 16);
+    if (hex3[4]) {
+      const a = parseInt(hex3[4] + hex3[4], 16) / 255;
+      return { r, g, b, a };
+    }
+    return { r, g, b };
   }
 
   // 4. 6-digit or 8-digit hex: #rrggbb or #rrggbbaa
@@ -185,11 +207,14 @@ export const parseColor = (
     trimmed,
   );
   if (hex6) {
-    return {
-      r: parseInt(hex6[1], 16),
-      g: parseInt(hex6[2], 16),
-      b: parseInt(hex6[3], 16),
-    };
+    const r = parseInt(hex6[1], 16);
+    const g = parseInt(hex6[2], 16);
+    const b = parseInt(hex6[3], 16);
+    if (hex6[4]) {
+      const a = parseInt(hex6[4], 16) / 255;
+      return { r, g, b, a };
+    }
+    return { r, g, b };
   }
 
   return null;
@@ -197,17 +222,25 @@ export const parseColor = (
 
 export const colorToRgb = (
   color: string,
-): { r: number; g: number; b: number } =>
-  parseColor(color) ?? { r: 0, g: 0, b: 0 };
+): { r: number; g: number; b: number } => {
+  const parsed = parseColor(color);
+  return parsed
+    ? { r: parsed.r, g: parsed.g, b: parsed.b }
+    : { r: 0, g: 0, b: 0 };
+};
 
 export const hexToRgb = colorToRgb;
 
 export const shadeColor = (color: string, percent: number): string => {
   const parsed = parseColor(color);
   if (!parsed) return color;
-  const { r, g, b } = parsed;
+  const { r, g, b, a } = parsed;
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
+  if (a !== undefined && a < 1) {
+    const roundedAlpha = Math.round(a * 1000) / 1000;
+    return `rgba(${adjust(r)}, ${adjust(g)}, ${adjust(b)}, ${roundedAlpha})`;
+  }
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
 };
 

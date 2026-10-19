@@ -16,6 +16,7 @@ import {
   colorToRgb,
   DonutGraph,
   hslToRgb,
+  parseColor,
   shadeColor,
 } from './DonutGraph';
 
@@ -172,6 +173,19 @@ describe('DonutGraph Color Helpers', () => {
       );
       expect(shadeColor('invalid-color', 0.5)).toBe('invalid-color');
     });
+
+    it('preserves alpha when shading category colors', () => {
+      expect(shadeColor('#f000', 0.2)).toBe('rgba(255, 51, 51, 0)');
+      expect(shadeColor('hsl(0 100% 50% / 0)', 0.2)).toBe(
+        'rgba(255, 51, 51, 0)',
+      );
+      expect(shadeColor('rgba(255, 0, 0, 0.5)', 0.2)).toBe(
+        'rgba(255, 51, 51, 0.5)',
+      );
+      expect(shadeColor('hsl(210 100% 50% / 50%)', 0.2)).toBe(
+        'rgba(51, 153, 255, 0.5)',
+      );
+    });
   });
 
   describe('buildColorMap', () => {
@@ -235,6 +249,58 @@ describe('DonutGraph Color Helpers', () => {
       const cat2Rgb = colorToRgb(cat2Color!);
       expect(cat1Rgb.b).toBeGreaterThan(200);
       expect(cat2Rgb.b).toBeGreaterThan(200);
+    });
+
+    it('generates expected shaded category fills for hsl group color', () => {
+      const groupedData: GroupedEntity[] = [
+        {
+          id: 'group-1',
+          name: 'Food',
+          totalAssets: 0,
+          totalDebts: 0,
+          totalTotals: 450,
+          netAssets: 0,
+          netDebts: 0,
+          totalBudgeted: 0,
+          intervalData: [],
+          categories: [
+            {
+              id: 'cat-1',
+              name: 'Groceries',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 300,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
+            {
+              id: 'cat-2',
+              name: 'Dining',
+              totalAssets: 0,
+              totalDebts: 0,
+              totalTotals: 150,
+              netAssets: 0,
+              netDebts: 0,
+              totalBudgeted: 0,
+              intervalData: [],
+            },
+          ],
+        },
+      ];
+      const legend: LegendEntity[] = [
+        {
+          id: 'group-1',
+          name: 'Food',
+          color: 'hsl(120, 80%, 40%)',
+          dataKey: 'group-1',
+        },
+      ];
+
+      const colorMap = buildColorMap(groupedData, legend);
+      expect(colorMap.get('cat-1')).toBe('rgb(55, 195, 55)');
+      expect(colorMap.get('cat-2')).toBe('rgb(114, 212, 114)');
     });
   });
 });
