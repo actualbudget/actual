@@ -36,6 +36,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { OverspendingAlertsSettings } from './OverspendingAlertsSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
@@ -282,6 +283,7 @@ export function GeneralSettings() {
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
+        <OverspendingAlertsSettings />
       </SettingsGroup>
       {serverURL && (
         <SettingsGroup title={t('Security')}>
