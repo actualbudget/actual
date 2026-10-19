@@ -68,13 +68,9 @@ export async function releaseSqliteStorage(): Promise<void> {
   // Nothing to release on native sqlite
 }
 
-export async function revertSqliteStorageToLegacy(): Promise<void> {
-  // Only the browser has a legacy storage layout
-}
-
-// Parity with the browser sqlite backend (which instantiates sql.js from an
-// embedded wasm binary). better-sqlite3 has no wasm, so this is a no-op; it
-// exists so callers can reference `setWasmBinary` regardless of platform.
+// Parity with the browser sqlite backend (which can be handed the SQLite
+// wasm binary). better-sqlite3 has no wasm, so this is a no-op; it exists so
+// callers can reference `setWasmBinary` regardless of platform.
 export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
   // no-op on native sqlite
 }

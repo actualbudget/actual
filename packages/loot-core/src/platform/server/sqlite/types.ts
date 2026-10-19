@@ -19,8 +19,10 @@ export type TransactionOptions = {
   immediate?: boolean;
 };
 
-// Which storage engine backs sqlite on the web. `legacy` is sql.js over
-// absurd-sql (IndexedDB blocks, needs SharedArrayBuffer); the other two
-// use the official sqlite-wasm build, persisted to OPFS or, when sync
-// access handles are unavailable, to IndexedDB as a whole file.
+// Which engine holds budget files. `opfs` is the official sqlite-wasm build
+// over the origin private file system, `memory-idb` the same engine kept in
+// memory and persisted to IndexedDB where sync access handles are missing.
+// `legacy` is the platform's native engine (Electron and the node API use
+// better-sqlite3); the browser's previous absurd-sql engine of that name is
+// gone, and asking for it yields the default.
 export type StorageBackend = 'legacy' | 'opfs' | 'memory-idb';

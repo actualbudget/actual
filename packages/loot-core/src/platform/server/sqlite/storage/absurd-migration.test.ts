@@ -16,7 +16,6 @@ import {
   legacyDatabaseExists,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
-  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import { StorageMigrationError } from './errors';
 import { legacyDatabaseName } from './paths';
@@ -124,14 +123,9 @@ describe('absurd-sql migration helpers', () => {
     expect(await legacyDatabaseExists(NAME)).toBe(true);
   });
 
-  it('round-trips through the legacy layout and deletes it', async () => {
-    const bytes = await makeDatabaseBytes(20);
-    await writeLegacyDatabaseBytes(NAME, bytes);
-    const read = await readLegacyDatabaseBytes(PATH, NAME);
-    expect(Buffer.from(read as Uint8Array).equals(Buffer.from(bytes))).toBe(
-      true,
-    );
-
+  it('deletes a legacy database', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(20));
+    expect(await legacyDatabaseExists(NAME)).toBe(true);
     expect(await deleteLegacyDatabase(NAME)).toBe(true);
     expect(await legacyDatabaseExists(NAME)).toBe(false);
   });

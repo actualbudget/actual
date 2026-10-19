@@ -123,11 +123,6 @@ global.getDatabaseDump = async function (tables) {
   return grouped;
 };
 
-// If you want to test the sql.js backend, you need this so it knows
-// where to find the webassembly file
-// process.env.PUBLIC_URL =
-//   __dirname + '/../../../../node_modules/@jlongster/sql.js/dist/';
-
 global.emptyDatabase = function (avoidUpdate) {
   return async () => {
     const path = ':memory:';

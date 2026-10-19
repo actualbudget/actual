@@ -5,7 +5,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { isElectron } from '@actual-app/core/shared/environment';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
 import { useAuth } from '#auth/AuthProvider';
@@ -20,7 +19,6 @@ import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
-import { StorageBackendToggle } from './StorageBackendToggle';
 
 type FeatureToggleProps = {
   flag: FeatureFlag;
@@ -190,8 +188,6 @@ export function ExperimentalFeatures() {
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
-  // Only the web app has a choice of storage engine
-  const showStoragePrefs = !isElectron();
 
   return (
     <SettingsGroup
@@ -302,7 +298,6 @@ export function ExperimentalFeatures() {
           <Trans>Client-Side plugins (soon)</Trans>
         </ServerFeatureToggle>
       )}
-      {showStoragePrefs && <StorageBackendToggle />}
     </SettingsGroup>
   );
 }

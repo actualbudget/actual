@@ -6,12 +6,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: [
-      'src/platform/server/sqlite/index.test.ts',
       'src/platform/server/sqlite/engine.wasm.test.ts',
       'src/platform/server/sqlite/storage/*.test.ts',
       'src/platform/client/browser-preload/storage-backend.test.ts',
       'src/platform/client/browser-preload/worker-bridge.test.ts',
-      'src/platform/server/fs/index.test.ts',
       'src/platform/server/fs/fs.web.test.ts',
       'src/platform/server/fs/memfs.test.ts',
     ],
