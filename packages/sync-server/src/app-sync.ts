@@ -26,6 +26,7 @@ import {
   validateUploadedFile,
 } from './app-sync/validation';
 import { config } from './load-config';
+import { SecretName, secretsService } from './services/secrets-service';
 import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
 import {
@@ -571,6 +572,9 @@ app.post('/delete-user-file', (req, res) => {
   }
 
   filesService.update(file.id, new FileUpdate({ deleted: true }));
+  for (const name of Object.values(SecretName)) {
+    secretsService.reset(name, file.id);
+  }
 
   res.send(OK_RESPONSE);
 });
