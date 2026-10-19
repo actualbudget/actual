@@ -136,7 +136,7 @@ export class ReportsPage {
   }
 
   async selectYAxisBase(yAxisBase: string) {
-    await this.pageContent.getByRole('button', { name: 'Zero Based' }).click();
+    await this.pageContent.getByRole('button', { name: 'Auto' }).click();
     const option = this.page.getByRole('button', { name: yAxisBase });
     await option.waitFor({ state: 'visible' });
     await option.click();
