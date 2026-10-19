@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     include: [
       'src/platform/server/sqlite/index.test.ts',
+      'src/platform/server/sqlite/engine.wasm.test.ts',
       'src/platform/server/fs/index.test.ts',
     ],
     maxWorkers: 2,

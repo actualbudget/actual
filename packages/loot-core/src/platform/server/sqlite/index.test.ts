@@ -217,7 +217,12 @@ describe('Web sqlite', () => {
   it('should free statements it prepares', async () => {
     const db = await openDatabase();
     execQuery(db, initSQL);
-    const prepare = vi.spyOn(db, 'prepare');
+    // The facade hands out an opaque handle; the legacy engine's statements
+    // are plain sql.js objects underneath
+    const prepare = vi.spyOn(
+      db as unknown as { prepare: (sql: string) => { run: () => void } },
+      'prepare',
+    );
 
     runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
     runQuery(db, 'SELECT * FROM numbers', [], true);

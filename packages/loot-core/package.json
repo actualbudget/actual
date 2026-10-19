@@ -199,6 +199,7 @@
     "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
+    "@sqlite.org/sqlite-wasm": "3.53.4-build2",
     "absurd-sql": "0.0.54",
     "better-sqlite3": "^13.0.3",
     "csv-parse": "^7.0.3",
