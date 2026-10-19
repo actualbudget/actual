@@ -22,8 +22,11 @@ export type SqliteFileStore = {
   // first file goes, so a directory never ends up half deleted
   removeFiles(paths: string[]): Promise<void>;
   exists(path: string): Promise<boolean>;
+  isOpen(path: string): boolean;
   // Persist anything pending (the fallback store writes lazily)
   flush(): Promise<void>;
+  // Let go of every handle and lock so another worker can take over
+  releaseAll(): Promise<void>;
   // Called by the engine after a statement that may have written
   onWrite?(db: WasmDatabase): void;
 };

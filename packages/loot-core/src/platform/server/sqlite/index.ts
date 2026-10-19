@@ -5,7 +5,7 @@ import type {
 
 import * as legacy from './engine.sqljs.legacy';
 import { wasmEngine } from './engine.wasm';
-import { getSqliteStore, initSqliteStorage } from './storage';
+import { getSqliteStore, initSqliteStorage, revertToLegacy } from './storage';
 import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
@@ -72,6 +72,7 @@ const legacyEngine: SqliteEngine = {
 };
 
 let activeEngine: SqliteEngine = legacyEngine;
+let activeBackend: StorageBackend = 'legacy';
 
 // The browser build of `@actual-app/api` embeds sql.js's wasm; the
 // sqlite-wasm engine fetches its own file.
@@ -100,18 +101,38 @@ export async function init({
   if (requested === 'legacy') {
     activeEngine = legacyEngine;
     await legacyEngine.init({ baseURL, wasmBinary });
-    return 'legacy';
+    activeBackend = 'legacy';
+  } else {
+    activeEngine = wasmEngine;
+    await wasmEngine.init({ baseURL, wasmBinary });
+    activeBackend = await initSqliteStorage(requested);
   }
-  activeEngine = wasmEngine;
-  await wasmEngine.init({ baseURL, wasmBinary });
-  return initSqliteStorage(requested);
+  return activeBackend;
 }
 
-// Persist anything pending (the IndexedDB fallback writes lazily); rejects
-// when a file could not be written
+export function getStorageBackend(): StorageBackend {
+  return activeBackend;
+}
+
+// Persist anything pending (the IndexedDB fallback writes lazily)
 export async function flushSqliteStorage(): Promise<void> {
-  if (activeEngine === wasmEngine) {
+  if (activeBackend !== 'legacy') {
     await getSqliteStore().flush();
+  }
+}
+
+// Let go of storage handles and locks so another worker can take over
+export async function releaseSqliteStorage(): Promise<void> {
+  if (activeBackend !== 'legacy') {
+    await getSqliteStore().releaseAll();
+  }
+}
+
+// Move every budget back to absurd-sql's layout (the opt-in phase's way
+// back); the next start then picks the legacy engine
+export async function revertSqliteStorageToLegacy(): Promise<void> {
+  if (activeBackend !== 'legacy') {
+    await revertToLegacy();
   }
 }
 
