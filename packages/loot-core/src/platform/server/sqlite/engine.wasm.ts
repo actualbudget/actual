@@ -1,5 +1,6 @@
 import { logger } from '#platform/server/log';
 
+import { getSqliteStore, hasSqliteStore } from './storage';
 import type {
   Database,
   SqlParam,
@@ -17,11 +18,21 @@ import type { InitOptions, PreparedStatement, WasmDatabase } from './wasm';
 
 // sqlite engine over the official `@sqlite.org/sqlite-wasm` build. The
 // call shapes mirror the legacy sql.js engine so `server/db` and friends
-// do not change. File-backed databases arrive with the storage layer; for
-// now only `:memory:` and byte buffers can be opened.
+// do not change. File-backed databases are opened through the sqlite
+// storage (OPFS, or IndexedDB as a whole file); `:memory:` and byte
+// buffers live in memory.
 
 function asWasm(db: Database): WasmDatabase {
   return db as unknown as WasmDatabase;
+}
+
+// Databases opened by path, so they can be closed through their store
+const openPaths = new Map<WasmDatabase, string>();
+
+function notifyWrite(db: WasmDatabase) {
+  if (hasSqliteStore()) {
+    getSqliteStore().onWrite?.(db);
+  }
 }
 
 function asStatement(statement: Statement): PreparedStatement {
@@ -100,6 +111,7 @@ export function runQuery<T>(
     }
 
     statement.step();
+    notifyWrite(database);
     return { changes: database.changes() };
   } catch (error) {
     logger.log(sql);
@@ -117,6 +129,7 @@ export function runQuery<T>(
 
 export function execQuery(db: Database, sql: string) {
   asWasm(db).exec(sql);
+  notifyWrite(asWasm(db));
 }
 
 let transactionDepth = 0;
@@ -193,9 +206,8 @@ export async function openDatabase(
     // avoid `instanceof Uint8Array`
     db = openMemoryDatabase(pathOrBuffer);
   } else {
-    throw new Error(
-      `openDatabase: file-backed databases are not supported by the sqlite-wasm engine yet (${pathOrBuffer})`,
-    );
+    db = await getSqliteStore().open(pathOrBuffer);
+    openPaths.set(db, pathOrBuffer);
   }
 
   installUserFunctions(db);
@@ -203,7 +215,14 @@ export async function openDatabase(
 }
 
 export function closeDatabase(db: Database) {
-  asWasm(db).close();
+  const database = asWasm(db);
+  const path = openPaths.get(database);
+  if (path != null) {
+    openPaths.delete(database);
+    getSqliteStore().close(path, database);
+  } else {
+    database.close();
+  }
 }
 
 export async function exportDatabase(db: Database): Promise<Uint8Array> {

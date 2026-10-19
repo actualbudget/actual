@@ -126,11 +126,15 @@ export const readFile: typeof T.readFile = (
 };
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
+  const data =
+    contents instanceof ArrayBuffer
+      ? new Uint8Array(contents)
+      : (contents as string | NodeJS.ArrayBufferView);
   try {
     await promiseRetry(
       (retry, attempt) => {
         return new Promise((resolve, reject) => {
-          fs.writeFile(filepath, contents, 'utf8', err => {
+          fs.writeFile(filepath, data, 'utf8', err => {
             if (err) {
               logger.error(
                 `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,

@@ -1,4 +1,5 @@
 // @ts-strict-ignore
+import 'fake-indexeddb/auto';
 import { patchFetchForSqlJS } from '#mocks/util';
 
 import { execQuery, init, openDatabase, runQuery, transaction } from './index';

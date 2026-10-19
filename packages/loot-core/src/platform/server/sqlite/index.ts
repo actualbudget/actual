@@ -6,6 +6,12 @@ import type {
 
 import * as legacy from './engine.sqljs.legacy';
 import * as wasm from './engine.wasm';
+import {
+  findMigratedStorageKind,
+  getSqliteStore,
+  hasSqliteStore,
+  initSqliteStorage,
+} from './storage';
 import type {
   Database,
   SqlParam,
@@ -21,6 +27,11 @@ export type {
   StorageBackend,
   TransactionOptions,
 } from './types';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 // Used by the legacy filesystem layer and its tests
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';
@@ -29,6 +40,7 @@ export type { SqlJsModule } from './engine.sqljs.legacy';
 // build over absurd-sql, and the official sqlite-wasm build. `init`
 // picks one from the storage backend; everything else forwards to it.
 let useWasmEngine = false;
+let activeBackend: StorageBackend = 'legacy';
 
 function asSqlJs(db: Database): SqlJsDatabase {
   return db as unknown as SqlJsDatabase;
@@ -43,6 +55,8 @@ export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   wasm.setWasmBinary(binary);
 }
 
+// Resolves to the backend actually in use: `opfs` falls back to
+// `memory-idb` when sync access handles are unavailable.
 export async function init({
   baseURL,
   wasmBinary,
@@ -51,12 +65,40 @@ export async function init({
   baseURL?: string;
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
-} = {}): Promise<void> {
-  useWasmEngine = storage !== 'legacy';
-  if (useWasmEngine) {
-    await wasm.init({ baseURL, wasmBinary });
-  } else {
+} = {}): Promise<StorageBackend> {
+  if (storage === 'legacy') {
+    useWasmEngine = false;
     await legacy.init({ baseURL, wasmBinary });
+    activeBackend = 'legacy';
+  } else {
+    useWasmEngine = true;
+    await wasm.init({ baseURL, wasmBinary });
+    activeBackend = await initSqliteStorage(storage);
+  }
+  return activeBackend;
+}
+
+export function getStorageBackend(): StorageBackend {
+  return activeBackend;
+}
+
+// A backend already holding migrated data, if any. Chosen over the flag at
+// startup so a cleared flag can never show an empty app.
+export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
+  return findMigratedStorageKind();
+}
+
+// Persist anything pending (the IndexedDB fallback writes lazily)
+export async function flushSqliteStorage(): Promise<void> {
+  if (hasSqliteStore()) {
+    await getSqliteStore().flush();
+  }
+}
+
+// Let go of storage handles and locks so another worker can take over
+export async function releaseSqliteStorage(): Promise<void> {
+  if (hasSqliteStore()) {
+    await getSqliteStore().releaseAll();
   }
 }
 

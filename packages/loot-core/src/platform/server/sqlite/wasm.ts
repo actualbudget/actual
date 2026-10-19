@@ -46,6 +46,12 @@ export type InitOptions = {
 // from the same `kcab/` directory and precached with it.
 export const WASM_FILE_PATH = 'kcab/sqlite3.wasm';
 
+function isStepWarning(args: unknown[]): boolean {
+  return (
+    typeof args[0] === 'string' && args[0].startsWith('sqlite3_step() rc=')
+  );
+}
+
 export function initSqlite3({
   baseURL = process.env.PUBLIC_URL,
   wasmBinary = wasmBinaryOverride,
@@ -54,11 +60,19 @@ export function initSqlite3({
     return initPromise;
   }
 
-  // Only the memory VFS (and, later, opfs-sahpool) are used. Disabling
-  // the others keeps the library from touching SharedArrayBuffer,
-  // spawning its async proxy worker, or reading localStorage.
+  // Only the memory VFS and opfs-sahpool are used. Disabling the others
+  // keeps the library from touching SharedArrayBuffer, spawning its async
+  // proxy worker, or reading localStorage.
   (globalThis as { sqlite3ApiConfig?: unknown }).sqlite3ApiConfig = {
     disable: { vfs: { opfs: true, 'opfs-wl': true, kvvfs: true } },
+    warn: (...args: unknown[]) => {
+      // The oo1 API warns before it throws for a failed statement. Sync
+      // applies messages as insert-then-update, so the constraint failures
+      // are expected and the error is still thrown; log everything else.
+      if (!isStepWarning(args)) {
+        logger.warn(...args);
+      }
+    },
   };
 
   initPromise = initModule({
