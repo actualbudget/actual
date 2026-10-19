@@ -8,7 +8,7 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const distDir = path.resolve(__dirname, 'dist');
 
-// Embed loot-core's default filesystem (wasm + default DB + migrations) into
+// Embed loot-core's default filesystem (SQLite wasm + default DB + migrations) into
 // the worker as a virtual module, so the browser build performs no PUBLIC_URL
 // asset fetches and consumers serve no extra files. loot-core owns the bytes
 // and the wire format; this just inlines them.
