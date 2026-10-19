@@ -11,8 +11,7 @@ import type { MigrationProgress } from './types';
 // after the file path, with a single object store `data`: key -1 holds
 // `{ size }` and keys 0..N hold the file's blocks, one sqlite page each.
 // These helpers read that layout so a budget can be moved into the new
-// storage, finish the move the same way for both stores, and write it back
-// so the opt-in can be reversed.
+// storage, and finish the move the same way for both stores.
 
 const LEGACY_STORE = 'data';
 // absurd-sql opens its databases at this version
@@ -326,51 +325,6 @@ export async function readLegacyDatabaseBytes(
     offset += chunk.length;
   }
   return bytes;
-}
-
-// Writes a sqlite file back into absurd-sql's layout so switching the
-// storage flag off again keeps the data. Any previous contents are cleared
-// in the same transaction as the new blocks are written, so the store is
-// never left with a mix of the two.
-export async function writeLegacyDatabaseBytes(
-  name: string,
-  bytes: Uint8Array,
-): Promise<void> {
-  const blockSize = pageSizeFromHeader(bytes) ?? 4096;
-  const database = await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(name, LEGACY_VERSION);
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
-        request.result.createObjectStore(LEGACY_STORE);
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-  try {
-    const transaction = database.transaction([LEGACY_STORE], 'readwrite');
-    const store = transaction.objectStore(LEGACY_STORE);
-    store.clear();
-    store.put({ size: bytes.length }, -1);
-    for (
-      let offset = 0, key = 0;
-      offset < bytes.length;
-      offset += blockSize, key++
-    ) {
-      const block = new Uint8Array(blockSize);
-      block.set(
-        bytes.subarray(offset, Math.min(offset + blockSize, bytes.length)),
-      );
-      store.put(block.buffer, key);
-    }
-    await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
-  } finally {
-    database.close();
-  }
 }
 
 // What both stores check on a freshly copied database before trusting

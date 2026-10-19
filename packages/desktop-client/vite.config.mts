@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 import {
   defaultDbPath,
   migrationsDir,
-  sqlWasmPath,
 } from '@actual-app/core/default-filesystem';
 import babel from '@rolldown/plugin-babel';
 import inject from '@rollup/plugin-inject';
@@ -129,7 +128,7 @@ async function extractWorkerHash(): Promise<string> {
 }
 
 // Serve loot-core worker assets with correct content types so the browser can
-// stream-compile the sql.js wasm module.
+// stream-compile the SQLite wasm module.
 const CONTENT_TYPES: Record<string, string> = {
   '.js': 'application/javascript',
   '.mjs': 'application/javascript',
@@ -153,7 +152,6 @@ async function stagePublicData(): Promise<void> {
   await Promise.all([
     cp(migrationsDir, migrationsDest, { recursive: true }),
     cp(defaultDbPath, path.resolve(publicDataDir, 'default-db.sqlite')),
-    cp(sqlWasmPath, path.resolve(publicDir, 'sql-wasm.wasm')),
   ]);
 
   const entries = await readdir(publicDataDir, {
@@ -261,10 +259,6 @@ const pluginsServiceAssets = (): Plugin => ({
 export default defineConfig(async ({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isVitest = process.env.VITEST === 'true';
-  const devHeaders = {
-    'Cross-Origin-Opener-Policy': 'same-origin',
-    'Cross-Origin-Embedder-Policy': 'require-corp',
-  };
 
   // Forward Netlify env variables
   if (process.env.REVIEW_ID) {
@@ -349,7 +343,6 @@ export default defineConfig(async ({ mode, command }) => {
     },
     server: {
       host: true,
-      headers: devHeaders,
       port: +env.PORT || 5173,
       open: env.BROWSER
         ? ['chrome', 'firefox', 'edge', 'browser', 'browserPrivate'].includes(

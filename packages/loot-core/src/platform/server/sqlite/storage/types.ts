@@ -17,16 +17,10 @@ export type SqliteFileStore = {
   close(path: string, db: WasmDatabase): void;
   readFile(path: string): Promise<Uint8Array>;
   writeFile(path: string, bytes: Uint8Array): Promise<void>;
-  // A removal also drops the file's absurd-sql copy and its row
   removeFile(path: string): Promise<void>;
   // All or nothing: every budget involved is locked and checked before the
   // first file goes, so a directory never ends up half deleted
   removeFiles(paths: string[]): Promise<void>;
-  // Moves the file back to an absurd-sql copy and leaves the legacy
-  // filesystem's marker, holding the budget from the read to the cutover so
-  // the copy is never older than the file; a file recorded but never saved
-  // just loses its row
-  revertFile(path: string): Promise<void>;
   exists(path: string): Promise<boolean>;
   // Persist anything pending (the fallback store writes lazily)
   flush(): Promise<void>;
