@@ -62,17 +62,6 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await Promise.all([idb.del(store, path), committed(trans)]);
 }
 
-// Rows of sqlite files held by the sqlite-wasm storage
-export async function listSqliteFileRows(): Promise<Data[]> {
-  const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  const rows = await new Promise<Data[]>((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result as Data[]);
-    request.onerror = () => reject(request.error);
-  });
-  return rows.filter(row => row.storage != null);
-}
-
 // Whether any sqlite file already moved off absurd-sql. Used at startup:
 // once data lives in the new storage the legacy engine must not be chosen,
 // whatever the flag says. One store then serves every budget: one still in

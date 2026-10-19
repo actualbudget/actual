@@ -30,10 +30,12 @@ describe('storage backend flag', () => {
     expect(getStoredStorageBackend()).toBe('opfs');
   });
 
-  it('keeps an explicit choice of the previous engine', () => {
+  it('treats a stale choice of the removed engine as the default', () => {
+    localStorage.setItem(STORAGE_BACKEND_KEY, 'legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
     window.history.replaceState(null, '', '/?storage=legacy');
-    expect(resolveStorageBackend()).toBe('legacy');
-    expect(getStoredStorageBackend()).toBe('legacy');
+    expect(resolveStorageBackend()).toBe('opfs');
+    expect(window.location.search).toBe('');
   });
 
   it('takes a one-shot URL parameter, stores it and strips it', () => {
