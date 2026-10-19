@@ -24,7 +24,7 @@ import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { sync } from '#app/appSlice';
-import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
+import { StorageFallbackWarning } from '#components/StorageFallbackWarning';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNavigate } from '#hooks/useNavigate';
@@ -345,7 +345,7 @@ export function Titlebar({ style }: TitlebarProps) {
         <PrivacyButton />
         <NotificationsButton />
         {serverURL ? <ServerSyncButton /> : null}
-        <SharedArrayBufferWarning />
+        <StorageFallbackWarning />
         <LoggedInUser />
         <HelpMenu />
       </SpaceBetween>

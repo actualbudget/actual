@@ -190,9 +190,8 @@ export function ExperimentalFeatures() {
 
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
-  // The browser storage engine is hidden until it is ready for testers
-  const showStoragePrefs =
-    !isElectron() && localStorage.getItem('devEnableStoragePrefs') === 'true';
+  // Only the web app has a choice of storage engine
+  const showStoragePrefs = !isElectron();
 
   return (
     <SettingsGroup
