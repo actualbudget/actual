@@ -18,3 +18,9 @@ export type TransactionOptions = {
   // lands just after it fails with "TransactionInactiveError".
   immediate?: boolean;
 };
+
+// Which storage engine backs sqlite on the web. `legacy` is sql.js over
+// absurd-sql (IndexedDB blocks, needs SharedArrayBuffer); the other two
+// use the official sqlite-wasm build, persisted to OPFS or, when sync
+// access handles are unavailable, to IndexedDB as a whole file.
+export type StorageBackend = 'legacy' | 'opfs' | 'memory-idb';

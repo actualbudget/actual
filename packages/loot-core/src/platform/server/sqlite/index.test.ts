@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
@@ -331,7 +332,7 @@ describe('sqlite-wasm engine', () => {
     const wasmBinary = readFileSync(
       require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'),
     );
-    return init({ engine: 'wasm', wasmBinary });
+    return init({ storage: 'memory-idb', wasmBinary });
   });
 
   itBehavesLikeSqlite();
@@ -348,6 +349,23 @@ describe('sqlite-wasm engine', () => {
       db as unknown as { openStatementCount: () => number }
     ).openStatementCount();
     expect(openStatements).toBe(0);
+    closeDatabase(db);
+  });
+
+  it('does not log a warning when a statement fails', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => null);
+    try {
+      expectConstraintFailure(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      );
+      // The oo1 API warns before it throws; sync applies messages as
+      // insert-then-update, so that would flood the console
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
     closeDatabase(db);
   });
 });

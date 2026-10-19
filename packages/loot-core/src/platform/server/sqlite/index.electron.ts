@@ -7,15 +7,21 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type { SqlParam, TransactionOptions } from './types';
+import type { SqlParam, StorageBackend, TransactionOptions } from './types';
 import { unicodeLike } from './unicodeLike';
 
 export type {
   Database,
   SqlParam,
   Statement,
+  StorageBackend,
   TransactionOptions,
 } from './types';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -26,8 +32,30 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export async function init() {
-  // No need to initialise on electron
+export async function init(_options?: {
+  baseURL?: string;
+  wasmBinary?: ArrayBuffer | Uint8Array;
+  storage?: StorageBackend;
+}): Promise<StorageBackend> {
+  // No need to initialise on electron; the storage backend only exists on
+  // the web, so report the native build as `legacy`
+  return 'legacy';
+}
+
+export function getStorageBackend(): StorageBackend {
+  return 'legacy';
+}
+
+export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
+  return null;
+}
+
+export async function flushSqliteStorage(): Promise<void> {
+  // Native sqlite writes through to disk
+}
+
+export async function releaseSqliteStorage(): Promise<void> {
+  // Nothing to release on native sqlite
 }
 
 // Parity with the browser sqlite backend (which instantiates sql.js from an

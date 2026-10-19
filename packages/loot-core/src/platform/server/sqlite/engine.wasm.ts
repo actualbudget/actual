@@ -1,88 +1,41 @@
-import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import type {
-  PreparedStatement,
-  Sqlite3Static,
-  Database as WasmDatabase,
-} from '@sqlite.org/sqlite-wasm';
-
 import { logger } from '#platform/server/log';
 
-import { normalise } from './normalise';
-import { regexp } from './regexp';
+import { getSqliteStore, hasSqliteStore } from './storage';
 import type { SqlParam } from './types';
-import { unicodeLike } from './unicodeLike';
+import {
+  exportBytes,
+  initSqlite3,
+  installUserFunctions,
+  openMemoryDatabase,
+  setWasmBinary as setModuleWasmBinary,
+} from './wasm';
+import type { InitOptions, PreparedStatement, WasmDatabase } from './wasm';
 
 export type { WasmDatabase, PreparedStatement };
 
 // sqlite engine over the official `@sqlite.org/sqlite-wasm` build. The
 // call shapes mirror the legacy sql.js engine so the facade in `index.ts`
-// can forward to either. File-backed databases arrive with the storage
-// layer; for now only `:memory:` and byte buffers can be opened.
+// can forward to either. File-backed databases are opened through the
+// sqlite storage (OPFS, or IndexedDB as a whole file); `:memory:` and byte
+// buffers live in memory. The module-level pieces (init, user functions,
+// memory databases) live in `wasm.ts` so the storage layer can use them
+// without importing the engine.
 
-// The package types `init()` without parameters, but the runtime is the
-// Emscripten module factory and accepts the usual module options.
-type ModuleOptions = {
-  locateFile?: (file: string) => string;
-  wasmBinary?: ArrayBuffer | Uint8Array;
-  print?: (...args: unknown[]) => void;
-  printErr?: (...args: unknown[]) => void;
-};
-const initModule = sqlite3InitModule as unknown as (
-  options?: ModuleOptions,
-) => Promise<Sqlite3Static>;
+// Databases opened by path, so they can be closed through their store
+const openPaths = new Map<WasmDatabase, string>();
 
-let sqlite3: Sqlite3Static | null = null;
-let initPromise: Promise<void> | null = null;
-
-// Opt-in: when set, the wasm is instantiated from these bytes instead of
-// being fetched via `locateFile`. The browser build of `@actual-app/api`
-// uses this to ship a self-contained worker.
-let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
+function notifyWrite(db: WasmDatabase) {
+  if (hasSqliteStore()) {
+    getSqliteStore().onWrite?.(db);
+  }
+}
 
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  wasmBinaryOverride = binary;
+  setModuleWasmBinary(binary);
 }
 
-export function init({
-  baseURL = process.env.PUBLIC_URL,
-  wasmBinary = wasmBinaryOverride,
-}: { baseURL?: string; wasmBinary?: ArrayBuffer | Uint8Array } = {}) {
-  if (initPromise) {
-    return initPromise;
-  }
-
-  // Only the memory VFS (and, later, opfs-sahpool) are used. Disabling
-  // the others keeps the library from touching SharedArrayBuffer,
-  // spawning its async proxy worker, or reading localStorage.
-  (globalThis as { sqlite3ApiConfig?: unknown }).sqlite3ApiConfig = {
-    disable: { vfs: { opfs: true, 'opfs-wl': true, kvvfs: true } },
-  };
-
-  initPromise = initModule({
-    // The wasm is emitted next to the backend worker bundle (see
-    // vite.config.mts), so it is served from `kcab/` and precached with it
-    locateFile: () => `${baseURL ?? ''}kcab/sqlite3.wasm`,
-    ...(wasmBinary ? { wasmBinary } : {}),
-    print: (...args) => logger.log(...args),
-    printErr: (...args) => logger.error(...args),
-  }).then(
-    module => {
-      sqlite3 = module;
-    },
-    error => {
-      // Let a later call retry instead of caching the failure
-      initPromise = null;
-      throw error;
-    },
-  );
-  return initPromise;
-}
-
-function getSqlite3(): Sqlite3Static {
-  if (sqlite3 == null) {
-    throw new Error('sqlite-wasm must be initialized first');
-  }
-  return sqlite3;
+export async function init(options: InitOptions = {}): Promise<void> {
+  await initSqlite3(options);
 }
 
 function verifyParamTypes(sql: string | PreparedStatement, params: SqlParam[]) {
@@ -147,6 +100,7 @@ export function runQuery<T>(
     }
 
     statement.step();
+    notifyWrite(db);
     return { changes: db.changes() };
   } catch (error) {
     logger.log(sql);
@@ -164,84 +118,20 @@ export function runQuery<T>(
 
 export function execQuery(db: WasmDatabase, sql: string) {
   db.exec(sql);
-}
-
-type ScalarFunction = (...args: Array<string | null>) => unknown;
-
-function defineFunction(
-  db: WasmDatabase,
-  name: string,
-  arity: number,
-  fn: ScalarFunction,
-) {
-  db.createFunction(name, {
-    arity,
-    deterministic: true,
-    xFunc: (_context, ...args) => {
-      // The app only passes text or NULL to these functions; SqlValue is
-      // wider (numbers, blobs) but narrowing it here keeps the helpers plain
-      const result = fn(...(args as Array<string | null>));
-      // SQL NULL is `null`; `undefined` is not a valid result
-      return (result ?? null) as string | number | null;
-    },
-  });
-}
-
-// Unicode-aware LOWER, UPPER and LIKE, plus REGEXP and NORMALISE. The
-// build has no ICU, and the app's queries rely on these names.
-function installUserFunctions(db: WasmDatabase) {
-  defineFunction(db, 'UNICODE_LOWER', 1, value => value?.toLowerCase());
-  defineFunction(db, 'UNICODE_UPPER', 1, value => value?.toUpperCase());
-  defineFunction(db, 'UNICODE_LIKE', 2, (pattern, value) =>
-    unicodeLike(pattern, value),
-  );
-  defineFunction(db, 'REGEXP', 2, (pattern, text) => regexp(pattern, text));
-  defineFunction(db, 'NORMALISE', 1, value => normalise(value));
-}
-
-function pointerOf(db: WasmDatabase): number {
-  if (db.pointer == null) {
-    throw new Error('sqlite: database is closed');
-  }
-  return db.pointer;
+  notifyWrite(db);
 }
 
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<WasmDatabase> {
-  if (typeof pathOrBuffer === 'string' && pathOrBuffer !== ':memory:') {
-    throw new Error(
-      `openDatabase: file-backed databases are not supported by the sqlite-wasm engine yet (${pathOrBuffer})`,
-    );
-  }
-
-  const { oo1, wasm, capi } = getSqlite3();
-  const db = new oo1.DB(':memory:', 'c');
-  if (typeof pathOrBuffer !== 'string' && pathOrBuffer?.byteLength) {
-    // The bytes may be a view from another realm (worker message, jsdom)
-    // and the allocator checks the constructor, so re-wrap them here
-    const view = new Uint8Array(
-      pathOrBuffer.buffer,
-      pathOrBuffer.byteOffset,
-      pathOrBuffer.byteLength,
-    );
-    // `sqlite3_deserialize` takes ownership of the buffer (FREEONCLOSE),
-    // so it has to come from sqlite's own allocator.
-    const pointer = wasm.allocFromTypedArray(view);
-    const rc = capi.sqlite3_deserialize(
-      pointerOf(db),
-      'main',
-      pointer,
-      view.byteLength,
-      view.byteLength,
-      capi.SQLITE_DESERIALIZE_FREEONCLOSE | capi.SQLITE_DESERIALIZE_RESIZEABLE,
-    );
-    if (rc !== 0) {
-      db.close();
-      throw new Error(
-        `openDatabase: sqlite3_deserialize failed: ${capi.sqlite3_js_rc_str(rc)}`,
-      );
-    }
+  let db: WasmDatabase;
+  if (pathOrBuffer == null || pathOrBuffer === ':memory:') {
+    db = openMemoryDatabase();
+  } else if (typeof pathOrBuffer !== 'string') {
+    db = openMemoryDatabase(pathOrBuffer);
+  } else {
+    db = await getSqliteStore().open(pathOrBuffer);
+    openPaths.set(db, pathOrBuffer);
   }
 
   installUserFunctions(db);
@@ -249,10 +139,15 @@ export async function openDatabase(
 }
 
 export function closeDatabase(db: WasmDatabase) {
-  db.close();
+  const path = openPaths.get(db);
+  if (path != null) {
+    openPaths.delete(db);
+    getSqliteStore().close(path, db);
+  } else {
+    db.close();
+  }
 }
 
-// The bytes of the database file, whether it lives in memory or on disk
 export async function exportDatabase(db: WasmDatabase): Promise<Uint8Array> {
-  return getSqlite3().capi.sqlite3_js_db_export(pointerOf(db));
+  return exportBytes(db);
 }

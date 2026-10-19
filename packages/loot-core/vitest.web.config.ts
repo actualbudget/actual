@@ -7,7 +7,10 @@ export default defineConfig({
     globals: true,
     include: [
       'src/platform/server/sqlite/index.test.ts',
+      'src/platform/server/sqlite/storage/*.test.ts',
       'src/platform/server/fs/index.test.ts',
+      'src/platform/server/fs/fs.web.test.ts',
+      'src/platform/server/fs/memfs.test.ts',
     ],
     maxWorkers: 2,
     reporters: process.env.CI
