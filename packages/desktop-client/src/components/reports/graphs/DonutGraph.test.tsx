@@ -101,6 +101,11 @@ describe('DonutGraph Color Helpers', () => {
         g: 255,
         b: 0,
       });
+      expect(colorToRgb('hsl(210 100 50)')).toEqual({
+        r: 0,
+        g: 128,
+        b: 255,
+      });
       expect(colorToRgb('hsl(-120, 100%, 50%)')).toEqual({
         r: 0,
         g: 0,
@@ -159,6 +164,13 @@ describe('DonutGraph Color Helpers', () => {
       expect(b).toBe(255);
       expect(g).toBeGreaterThan(128);
       expect(r).toBeGreaterThan(0);
+    });
+
+    it('returns unparseable color unchanged without falling back to black', () => {
+      expect(shadeColor('var(--custom-unresolved)', 0.3)).toBe(
+        'var(--custom-unresolved)',
+      );
+      expect(shadeColor('invalid-color', 0.5)).toBe('invalid-color');
     });
   });
 
@@ -291,13 +303,14 @@ describe('DonutGraph Component', () => {
             data={sampleData}
             groupBy="CategoryGroup"
             filters={[]}
-            balanceTypeOp="totalDebts"
+            balanceTypeOp="totalTotals"
             viewLabels={false}
           />
         </TestProviders>
       </MemoryRouter>,
     );
 
-    expect(document.querySelector('svg')).toBeInTheDocument();
+    const svg = document.querySelector('svg');
+    expect(svg).toBeInTheDocument();
   });
 });

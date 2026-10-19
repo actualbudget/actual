@@ -128,15 +128,15 @@ export const hslToRgb = (
   };
 };
 
-export const colorToRgb = (
+export const parseColor = (
   color: string,
-): { r: number; g: number; b: number } => {
-  if (!color || typeof color !== 'string') return { r: 0, g: 0, b: 0 };
+): { r: number; g: number; b: number } | null => {
+  if (!color || typeof color !== 'string') return null;
   const trimmed = color.trim();
 
-  // 1. HSL / HSLA (e.g. "hsl(210, 50%, 50%)", "hsla(210, 50%, 50%, 0.5)", "hsl(-120deg 50% 50%)", "hsl(0.5turn 50% 50%)")
+  // 1. HSL / HSLA (e.g. "hsl(210, 50%, 50%)", "hsl(210 50 50)", "hsla(210, 50%, 50%, 0.5)", "hsl(-120deg 50% 50%)", "hsl(0.5turn 50% 50%)")
   const hslMatch =
-    /^hsla?\(\s*(-?[\d.]+)(deg|turn|rad|grad)?[\s,]+([\d.]+)%[\s,]+([\d.]+)%/i.exec(
+    /^hsla?\(\s*(-?[\d.]+)(deg|turn|rad|grad)?[\s,]+([\d.]+)%?[\s,]+([\d.]+)%?/i.exec(
       trimmed,
     );
   if (hslMatch) {
@@ -192,13 +192,20 @@ export const colorToRgb = (
     };
   }
 
-  return { r: 0, g: 0, b: 0 };
+  return null;
 };
+
+export const colorToRgb = (
+  color: string,
+): { r: number; g: number; b: number } =>
+  parseColor(color) ?? { r: 0, g: 0, b: 0 };
 
 export const hexToRgb = colorToRgb;
 
 export const shadeColor = (color: string, percent: number): string => {
-  const { r, g, b } = colorToRgb(color);
+  const parsed = parseColor(color);
+  if (!parsed) return color;
+  const { r, g, b } = parsed;
   const adjust = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
   return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
