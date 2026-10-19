@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { UNSUPPORTED_NEWS_FEED_FORMAT } from '#news/fetchNewsFeed';
 import { newsQueries } from '#news/queries';
 import type { NewsEntry } from '#news/types';
 import { getNewestDate, getUnseenEntries } from '#news/utils';
@@ -7,6 +8,21 @@ import { getNewestDate, getUnseenEntries } from '#news/utils';
 import { useGlobalPref } from './useGlobalPref';
 
 const EMPTY_ENTRIES: NewsEntry[] = [];
+
+/**
+ * Why the feed couldn't be shown: it couldn't be downloaded (usually offline),
+ * or it is in a newer format than this version of the app understands.
+ */
+type NewsFeedErrorKind = 'unavailable' | 'unsupported';
+
+function getErrorKind(error: Error | null): NewsFeedErrorKind | undefined {
+  if (!error) {
+    return undefined;
+  }
+  return error.message === UNSUPPORTED_NEWS_FEED_FORMAT
+    ? 'unsupported'
+    : 'unavailable';
+}
 
 export function useNewsFeed() {
   // The setting (on by default) lets the user opt out of the feed and of the
@@ -35,6 +51,7 @@ export function useNewsFeed() {
     lastSeenNewsDate,
     markAllSeen,
     isLoading: isEnabled && query.isPending,
-    error: query.error,
+    errorKind: getErrorKind(query.error),
+    retry: () => void query.refetch(),
   };
 }

@@ -348,10 +348,12 @@ export class Spreadsheet {
     });
   }
 
-  recomputeAll(): void {
-    // Recompute everything!
+  // Recompute everything, except any cells in `skip` — those are expected to
+  // have already been given their final value with `load`.
+  recomputeAll(skip?: ReadonlySet<string>): void {
     this.transaction(() => {
-      this.dirtyCells = [...this.nodes.keys()];
+      const names = [...this.nodes.keys()];
+      this.dirtyCells = skip ? names.filter(name => !skip.has(name)) : names;
     });
   }
 

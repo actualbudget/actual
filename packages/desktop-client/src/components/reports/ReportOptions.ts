@@ -19,6 +19,7 @@ export const defaultReport: CustomReportEntity = {
   dateRange: 'Last 6 months',
   mode: 'total',
   groupBy: 'Category',
+  tagScope: { mode: 'all' },
   interval: 'Monthly',
   balanceType: 'Payment',
   sortBy: 'desc',
@@ -61,6 +62,7 @@ const groupByOptions = [
   { description: t('Category+Group'), key: 'CategoryGroup' }, // new: two-ring donut support
   { description: t('Payee'), key: 'Payee' },
   { description: t('Account'), key: 'Account' },
+  { description: t('Tag'), key: 'Tag' },
   { description: t('Interval'), key: 'Interval' },
 ];
 
@@ -325,7 +327,7 @@ export function getIntervalFormat(
 
 export type QueryDataEntity = {
   date: string;
-  category: string;
+  category: string | null;
   categoryHidden: boolean;
   categoryGroup: string;
   categoryGroupHidden: boolean;
@@ -333,6 +335,8 @@ export type QueryDataEntity = {
   accountOffBudget: boolean;
   payee: string;
   transferAccount: string;
+  notes?: string | null;
+  tagBucketId?: string;
   amount: number;
 };
 
@@ -343,6 +347,7 @@ export type UncategorizedEntity = Pick<
   'id' | 'name' | 'hidden'
 > & {
   uncategorized_id?: UncategorizedId;
+  bucketTagNames?: string[];
 };
 
 const uncategorizedCategory: UncategorizedEntity = {
@@ -415,10 +420,15 @@ export const groupBySelections = (
   accounts: UncategorizedEntity[],
 ): [
   UncategorizedEntity[],
-  'category' | 'categoryGroup' | 'payee' | 'account',
+  'category' | 'categoryGroup' | 'payee' | 'account' | 'tagBucketId',
 ] => {
   let groupByList: UncategorizedEntity[];
-  let groupByLabel: 'category' | 'categoryGroup' | 'payee' | 'account';
+  let groupByLabel:
+    | 'category'
+    | 'categoryGroup'
+    | 'payee'
+    | 'account'
+    | 'tagBucketId';
   switch (groupBy) {
     case 'Category':
       groupByList = categoryList;
@@ -460,6 +470,10 @@ export const groupBySelections = (
         return { id: account.id, name: account.name, hidden: false };
       });
       groupByLabel = 'account';
+      break;
+    case 'Tag':
+      groupByList = [];
+      groupByLabel = 'tagBucketId';
       break;
     case 'Interval':
       groupByList = categoryList;

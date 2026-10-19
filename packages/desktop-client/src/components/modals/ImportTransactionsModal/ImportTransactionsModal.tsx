@@ -350,7 +350,6 @@ export function ImportTransactionsModal({
         }
 
         const category_id = parseCategoryFields(trans, categories);
-        trans.category = category_id;
 
         const {
           inflow: _inflow,
@@ -365,6 +364,7 @@ export function ImportTransactionsModal({
         } = trans;
         previewTransactions.push({
           ...finalTransaction,
+          category: category_id,
           date,
           amount: amountToInteger(amount),
           cleared: clearOnImport,
@@ -643,11 +643,11 @@ export function ImportTransactionsModal({
     for (let trans of transactions) {
       if (
         trans.isMatchedTransaction ||
-        (reconcile && !trans.selected && !trans.ignored)
+        (reconcile && !trans.selected && !trans.ignored && !trans.existing)
       ) {
         // skip transactions that are
         // - matched transaction (existing transaction added to show update changes)
-        // - unselected transactions that are not ignored by the reconcilation algorithm (only when reconcilation is enabled)
+        // - unselected transactions that are not ignored or merged by the reconcilation algorithm (only when reconcilation is enabled)
         continue;
       }
 
@@ -681,7 +681,6 @@ export function ImportTransactionsModal({
       }
 
       const category_id = parseCategoryFields(trans, categories);
-      trans.category = category_id;
 
       const {
         inflow: _inflow,
@@ -706,8 +705,15 @@ export function ImportTransactionsModal({
         finalTransaction.forceAddTransaction = true;
       }
 
+      if (reconcile && trans.existing && !trans.selected) {
+        // unselected transactions with existing are still sent, so they keep
+        // their match and the other transactions match as in the preview
+        finalTransaction.skipTransaction = true;
+      }
+
       finalTransactions.push({
         ...finalTransaction,
+        category: category_id,
         date,
         amount: amountToInteger(amount),
         cleared: clearOnImport,

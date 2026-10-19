@@ -4,13 +4,13 @@ If you want to transfer money between accounts, you will want to do it in a way 
 
 When you create a transfer in Actual, those two transactions are linked, and updating one automatically updates the other. For example, if you typed something into the **Notes** column it would appear in both transactions. Some fields are always kept in sync this way, while others will be kept independent or synced optionally. See [Modifying a Transfer](#modifying-a-transfer) below for the full breakdown.
 
-![](/img/transfers/transfer-complete.webp)
+<img width="860" alt="Both halves of a transfer in All accounts: 500.00 out of Bank of America and into Ally Savings, with the category Transfer" src="/img/transactions/transfers-linked-pair@2x.webp" />
 
 ## Creating a Transfer
 
 In the **Payee** field of a transaction, choose the account in the dropdown you want to transfer to/from. You can press **Make Transfer** if you want to just see a list of accounts and hide other payees.
 
-![](/img/transfers/payees-dropdown.webp)
+<img width="349" alt="The payee dropdown after pressing Make transfer, listing the accounts under Transfer To/From" src="/img/transactions/transfers-payees-dropdown@2x.webp" />
 
 :::caution
 A transaction in the corresponding account will automatically be created.
@@ -30,11 +30,11 @@ This process will only apply when the below conditions are met
 
 Make a transfer of existing transactions in the same way you [bulk-edit transactions](./bulk-editing.md).
 
-![](/img/transfers/make-transfer-tooltip.webp)
+<img width="860" alt="Two Card payment transactions in different accounts selected, with Make transfer highlighted in the selection menu" src="/img/transactions/transfers-make-transfer@2x.webp" />
 
 1. Go to a multi-account view like "All accounts" so that you can see all transactions.
 2. Identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
-3. Go to the drop down top right (the arrow below "2 transactions")
+3. Go to the drop down top right (the arrow next to "2 transactions")
 4. If the transactions are valid to be converted to a transfer, you can click **Make transfer**.
 
 ## Modifying a Transfer
@@ -60,7 +60,7 @@ By default, changing the date on one side of a transfer leaves the other side wh
 
 If you want both dates to move together, tick **Sync both transfer dates** at the bottom of the date picker, then choose the new date. The other side of the transfer is moved to the same date.
 
-![Date picker for a transfer with the Sync both transfer dates checkbox ticked](/img/transfers/transfers-sync-both-dates.png)
+<img width="249" alt="Date picker for a transfer with the Sync both transfer dates checkbox ticked" src="/img/transactions/transfers-sync-both-dates@2x.webp" />
 
 The checkbox stays ticked for future edits until you untick it, so you can pick the behavior you use most often and forget about it.
 

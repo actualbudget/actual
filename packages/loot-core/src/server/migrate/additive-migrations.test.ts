@@ -9,6 +9,7 @@ import * as sqlite from '#platform/server/sqlite';
 import {
   ADDITIVE_ONLY_CUTOFF,
   applyMigration,
+  getAppliedMigrations,
   getMigrationId,
   getMigrationList,
   migrate,
@@ -115,6 +116,9 @@ describe('migrations are additive-only', () => {
         ADDITIVE_ONLY_CUTOFF + 1,
       ]);
       await migrate(db);
+      expect(await getAppliedMigrations(db)).toContain(
+        ADDITIVE_ONLY_CUTOFF + 1,
+      );
     });
     sqlite.closeDatabase(db);
   });
