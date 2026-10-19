@@ -57,6 +57,7 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -581,6 +582,27 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
+  const { data: payees = [] } = usePayees();
+  // Every account has an auto-created "transfer payee" whose transfer_acct
+  // points back to it; a transfer transaction on one account uses the other
+  // account's transfer payee. Used below to restrict an account -> account
+  // link's drilldown to just the transfer transactions between those two
+  // accounts.
+  const transferPayeeIdsByAccount = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const payee of payees) {
+      if (payee.transfer_acct) {
+        const existing = map.get(payee.transfer_acct);
+        if (existing) {
+          existing.push(payee.id);
+        } else {
+          map.set(payee.transfer_acct, [payee.id]);
+        }
+      }
+    }
+    return map;
+  }, [payees]);
+
   const baseGraphParams = useMemo(() => {
     if (!datesInitialized) {
       return null;
@@ -710,7 +732,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   // fields (e.g. a category -> account link) go together with "and". Two
   // on the *same* field (an account -> account transfer link) become a
   // single "oneOf", since the transaction's account is either leg of the
-  // transfer, not both at once.
+  // transfer, not both at once - plus a payee "oneOf" restricting to the
+  // two accounts' transfer payees, so the drilldown is just the transfer
+  // transactions between them rather than every transaction on either
+  // account.
   function buildIdConditions(
     drilldowns: SankeyNodeDrilldown[],
   ): RuleConditionEntity[] {
@@ -719,11 +744,30 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       drilldowns[0].field === drilldowns[1].field
     ) {
       const { field } = drilldowns[0];
+      const idCondition = {
+        field: field === 'group' ? 'category_group' : field,
+        op: 'oneOf',
+        value: drilldowns.map(d => d.id),
+        type: 'id',
+      } satisfies RuleConditionEntity;
+
+      if (field !== 'account') {
+        return [idCondition];
+      }
+
+      const transferPayeeIds = drilldowns.flatMap(
+        d => transferPayeeIdsByAccount.get(d.id) ?? [],
+      );
+      if (transferPayeeIds.length === 0) {
+        return [idCondition];
+      }
+
       return [
+        idCondition,
         {
-          field: field === 'group' ? 'category_group' : field,
+          field: 'payee',
           op: 'oneOf',
-          value: drilldowns.map(d => d.id),
+          value: transferPayeeIds,
           type: 'id',
         } satisfies RuleConditionEntity,
       ];
