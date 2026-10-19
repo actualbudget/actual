@@ -3,6 +3,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -81,7 +82,10 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
-import { propagateRuleChangeToSubtransactions } from '#components/transactions/applyRulesToTransaction';
+import {
+  propagateRuleChangeToSubtransactions,
+  transactionForRulesFromList,
+} from '#components/transactions/applyRulesToTransaction';
 import {
   getClearedFieldNames,
   shouldApplyRuleChange,
@@ -1612,6 +1616,10 @@ function TransactionEditUnconnected({
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
   >([]);
+  const transactionsRef = useRef(transactions);
+  useLayoutEffect(() => {
+    transactionsRef.current = transactions;
+  }, [transactions]);
   const isAdding = useRef(false);
   const isDeleted = useRef(false);
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
@@ -1749,10 +1757,19 @@ function TransactionEditUnconnected({
           newTransaction.id,
         );
 
+        // Mobile keeps splits as a flat parent+children list. Group them
+        // before rules-run so an already-applied split rule sees existing
+        // children (same as desktop). Otherwise re-running the rule creates
+        // new child ids and later parent edits (notes/account) fail (#9189).
+        const transactionForRules = transactionForRulesFromList(
+          transactionsRef.current,
+          newTransaction,
+        );
+
         const afterRules = await send('rules-run', {
-          transaction: newTransaction,
+          transaction: transactionForRules,
         });
-        const diff = getChangedValues(newTransaction, afterRules);
+        const diff = getChangedValues(transactionForRules, afterRules);
 
         if (diff) {
           Object.keys(diff).forEach(key => {
@@ -1767,7 +1784,7 @@ function TransactionEditUnconnected({
               (updatedField === 'payee' ||
                 shouldApplyRuleChange(
                   field,
-                  newTransaction[field],
+                  Reflect.get(transactionForRules, field),
                   diff[field],
                 ))
             ) {
@@ -1776,14 +1793,30 @@ function TransactionEditUnconnected({
             }
           });
 
+          const parentForPropagate: TransactionEntity = {
+            ...transactionForRules,
+            ...newTransaction,
+          };
           const subtransactions = propagateRuleChangeToSubtransactions(
-            newTransaction,
+            parentForPropagate,
             diff.subtransactions,
             updatedField,
             clearedFields.current,
           );
           if (subtransactions) {
             newTransaction.subtransactions = subtransactions;
+            changedFields.add('subtransactions');
+          } else if (
+            diff.subtransactions &&
+            (updatedField === 'payee' ||
+              shouldApplyRuleChange(
+                'subtransactions',
+                transactionForRules.subtransactions,
+                diff.subtransactions,
+              ))
+          ) {
+            // First time a split rule converts this row into a parent.
+            newTransaction.subtransactions = diff.subtransactions;
             changedFields.add('subtransactions');
           }
         }
@@ -1804,6 +1837,37 @@ function TransactionEditUnconnected({
         for (const field of changedFields) {
           (merged as Record<string, unknown>)[field] = newTransaction[field];
         }
+
+        // When editing a split parent without a fresh subtransactions payload
+        // from rules, re-attach the latest children so updateTransaction keeps
+        // the existing split structure.
+        if (
+          !merged.subtransactions &&
+          (merged.is_parent || latestTransaction.is_parent)
+        ) {
+          const children = prevTransactions.filter(
+            t => t.is_child && t.parent_id === merged.id,
+          );
+          merged.subtransactions = children;
+          merged.is_parent = true;
+
+          const updated = updateTransaction(prevTransactions, merged).data;
+          // updateTransaction → makeChild clears child.error; restore any that
+          // were already on the flat list so split-error UI stays correct.
+          const childErrors = new Map(
+            children
+              .filter(c => c.error != null)
+              .map(c => [c.id, c.error!] as const),
+          );
+          if (childErrors.size === 0) {
+            return updated;
+          }
+          return updated.map(t => {
+            const error = childErrors.get(t.id);
+            return error !== undefined ? { ...t, error } : t;
+          });
+        }
+
         return updateTransaction(prevTransactions, merged).data;
       });
 
