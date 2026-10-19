@@ -2059,7 +2059,7 @@ export function Account() {
     `show-account-${params.id}-net-worth-chart`,
   );
   const [hideReconciled, setHideReconciled] = useSyncedPref(
-    `hide-reconciled-${params.id}`,
+    `hide-reconciled-${params.id || 'all'}`, // "All accounts" view provides no ID
   );
   const [showExtraBalances, setShowExtraBalances] = useSyncedPref(
     `show-extra-balances-${params.id || 'all-accounts'}`,
