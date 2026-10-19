@@ -152,12 +152,17 @@ async function updateDashboard(
     (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
 
-  await Promise.all(
-    widgets
-      // Perform an update query only if the widget actually has changes
-      .filter(widget => !isMatch(dbWidgetMap.get(widget.id) ?? {}, widget))
-      .map(widget => db.update('dashboard', widget)),
-  );
+  // One batch for the whole layout change: without it each widget is its
+  // own set of messages and schedules its own full sync, so a single drag
+  // fires as many syncs as there are moved widgets
+  await batchMessages(async () => {
+    await Promise.all(
+      widgets
+        // Perform an update query only if the widget actually has changes
+        .filter(widget => !isMatch(dbWidgetMap.get(widget.id) ?? {}, widget))
+        .map(widget => db.updateWithSchema('dashboard', widget)),
+    );
+  });
 }
 
 async function updateDashboardWidget(
