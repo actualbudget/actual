@@ -304,5 +304,54 @@ describe('Import transactions', () => {
         parseCategoryFields({ category: 'Missing category' }, categories),
       ).toBeNull();
     });
+
+    describe('with category groups', () => {
+      const groups = [
+        { id: 'group-usual', name: 'Usual Expenses' },
+        { id: 'group-bills', name: 'Bills' },
+      ];
+      const groupedCategories = [
+        { id: 'cat-rent', name: 'Rent', group: 'group-usual' },
+        { id: 'cat-power', name: 'Power', group: 'group-bills' },
+        { id: 'cat-misc-usual', name: 'Misc', group: 'group-usual' },
+        { id: 'cat-misc-bills', name: 'Misc', group: 'group-bills' },
+      ];
+
+      function parse(category: string) {
+        return parseCategoryFields({ category }, groupedCategories, groups);
+      }
+
+      it('matches a plain category name', () => {
+        expect(parse('Rent')).toBe('cat-rent');
+      });
+
+      it('matches "Group:Category"', () => {
+        expect(parse('Usual Expenses:Rent')).toBe('cat-rent');
+      });
+
+      it('ignores spaces around the colon', () => {
+        expect(parse('Usual Expenses : Rent')).toBe('cat-rent');
+        expect(parse(' Bills:  Power ')).toBe('cat-power');
+      });
+
+      it('ignores letter case in "Group:Category"', () => {
+        expect(parse('usual expenses:RENT')).toBe('cat-rent');
+      });
+
+      it('resolves a name shared by two groups using the group', () => {
+        expect(parse('Usual Expenses:Misc')).toBe('cat-misc-usual');
+        expect(parse('Bills:Misc')).toBe('cat-misc-bills');
+      });
+
+      it('keeps the existing first-match behavior for an ambiguous plain name', () => {
+        expect(parse('Misc')).toBe('cat-misc-usual');
+      });
+
+      it('returns null when the group or category does not match', () => {
+        expect(parse('Bills:Rent')).toBeNull();
+        expect(parse('Food:Groceries')).toBeNull();
+        expect(parse('Usual Expenses:')).toBeNull();
+      });
+    });
   });
 });
