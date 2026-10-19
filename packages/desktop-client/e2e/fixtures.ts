@@ -35,8 +35,8 @@ const disableAnimationsInitScript = () => {
 
 /**
  * Storage engine the backend worker runs on. Set E2E_STORAGE_BACKEND to
- * `legacy` to run the suite on the previous engine (or `memory-idb` to force
- * the sqlite-wasm fallback); unset means the app's default. The key mirrors
+ * `memory-idb` to force the fallback of browsers without OPFS sync access
+ * handles; unset means the app's default. The key mirrors
  * loot-core/src/platform/client/browser-preload/storage-backend.ts.
  */
 export const E2E_STORAGE_BACKEND = process.env.E2E_STORAGE_BACKEND;

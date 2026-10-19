@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// Compares the browser storage engines on the built web bundle: legacy
-// (absurd-sql over IndexedDB), opfs (sqlite-wasm on the private file
-// system) and memory-idb (sqlite-wasm in memory, saved to IndexedDB).
+// Compares the browser storage engines on the built web bundle: opfs
+// (sqlite-wasm on the private file system) and memory-idb (sqlite-wasm in
+// memory, saved to IndexedDB, the fallback for browsers without sync access
+// handles).
 //
 // Build first, then run from the repository root:
 //
 //   yarn build:browser
 //   node packages/desktop-client/bin/storage-bench.mjs [--budget export.zip]
-//     [--runs 3] [--backends legacy,opfs,memory-idb] [--rows 100] [--port 3195]
+//     [--runs 3] [--backends opfs,memory-idb] [--rows 100] [--port 3195]
 //
 // Each run uses a fresh browser profile. It imports the given Actual export
 // (or creates the demo budget), reloads to measure a cold open, deletes
@@ -171,7 +172,7 @@ function parseArguments(args) {
   const parsed = {
     budget: null,
     runs: 3,
-    backends: ['legacy', 'opfs', 'memory-idb'],
+    backends: ['opfs', 'memory-idb'],
     rows: 100,
     port: 3195,
   };

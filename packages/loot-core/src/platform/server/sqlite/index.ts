@@ -1,9 +1,3 @@
-import type {
-  Database as SqlJsDatabase,
-  Statement as SqlJsStatement,
-} from '@jlongster/sql.js';
-
-import * as legacy from './engine.sqljs.legacy';
 import * as wasm from './engine.wasm';
 import type { PreparedStatement, WasmDatabase } from './engine.wasm';
 import {
@@ -11,7 +5,6 @@ import {
   getSqliteStore,
   hasSqliteStore,
   initSqliteStorage,
-  revertToLegacy,
 } from './storage';
 import type {
   Database,
@@ -33,27 +26,12 @@ export {
   StorageMigrationError,
   StorageUnavailableError,
 } from './storage/errors';
-// Used by the legacy filesystem layer and its tests
-export { _getModule } from './engine.sqljs.legacy';
-export type { SqlJsModule } from './engine.sqljs.legacy';
 
-// The web sqlite module is a facade over two engines: the legacy sql.js
-// build over absurd-sql, and the official sqlite-wasm build. `init` picks
-// one from the storage backend; everything else forwards to it. Callers
-// only see the opaque `Database` and `Statement` handles from `./types`.
-let activeBackend: StorageBackend = 'legacy';
-
-function isWasmEngineActive() {
-  return activeBackend !== 'legacy';
-}
-
-function asSqlJs(db: Database): SqlJsDatabase {
-  return db as unknown as SqlJsDatabase;
-}
-
-function asSqlJsStatement(sql: string | Statement): string | SqlJsStatement {
-  return sql as unknown as string | SqlJsStatement;
-}
+// The web sqlite module: the official sqlite-wasm build over the OPFS pool
+// store, or over the in-memory store persisted to IndexedDB where sync
+// access handles are unavailable. Callers only see the opaque `Database`
+// and `Statement` handles from `./types`.
+let activeBackend: StorageBackend = 'opfs';
 
 function asWasm(db: Database): WasmDatabase {
   return db as unknown as WasmDatabase;
@@ -63,30 +41,29 @@ function asWasmStatement(sql: string | Statement): string | PreparedStatement {
   return sql as unknown as string | PreparedStatement;
 }
 
-// The browser build of `@actual-app/api` embeds the sqlite-wasm binary and
-// runs that engine only; the web app fetches it from `kcab/`.
+// The browser build of `@actual-app/api` embeds the sqlite-wasm binary; the
+// web app fetches it from `kcab/`.
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   wasm.setWasmBinary(binary);
 }
 
 // Resolves to the backend actually in use: `opfs` falls back to
-// `memory-idb` when sync access handles are unavailable.
+// `memory-idb` when sync access handles are unavailable. `legacy` (the
+// removed absurd-sql engine) is treated as the default; its data is
+// migrated when a budget is next opened.
 export async function init({
   baseURL,
   wasmBinary,
-  storage = 'legacy',
+  storage = 'opfs',
 }: {
   baseURL?: string;
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
-  if (storage === 'legacy') {
-    await legacy.init({ baseURL, wasmBinary });
-    activeBackend = 'legacy';
-  } else {
-    await wasm.init({ baseURL, wasmBinary });
-    activeBackend = await initSqliteStorage(storage);
-  }
+  await wasm.init({ baseURL, wasmBinary });
+  activeBackend = await initSqliteStorage(
+    storage === 'legacy' ? 'opfs' : storage,
+  );
   return activeBackend;
 }
 
@@ -114,30 +91,15 @@ export async function releaseSqliteStorage(): Promise<void> {
   }
 }
 
-// Move every budget back to absurd-sql's layout (the opt-in phase's way
-// back); the next start then picks the legacy engine
-export async function revertSqliteStorageToLegacy(): Promise<void> {
-  if (hasSqliteStore()) {
-    await revertToLegacy();
-  }
-}
-
 export function prepare(db: Database, sql: string): Statement {
-  const statement = isWasmEngineActive()
-    ? wasm.prepare(asWasm(db), sql)
-    : legacy.prepare(asSqlJs(db), sql);
-  return statement as unknown as Statement;
+  return wasm.prepare(asWasm(db), sql) as unknown as Statement;
 }
 
 // Frees a prepared statement that is no longer needed (for example when
 // it is evicted from a statement cache). Closing the database also frees
 // its statements, so this is only an optimisation for long sessions.
 export function finalizeStatement(statement: Statement) {
-  if (isWasmEngineActive()) {
-    wasm.finalizeStatement(statement as unknown as PreparedStatement);
-  } else {
-    (statement as unknown as SqlJsStatement).free();
-  }
+  wasm.finalizeStatement(statement as unknown as PreparedStatement);
 }
 
 export function runQuery(
@@ -158,22 +120,13 @@ export function runQuery<T>(
   params: SqlParam[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
-  if (isWasmEngineActive()) {
-    return fetchAll
-      ? wasm.runQuery<T>(asWasm(db), asWasmStatement(sql), params, true)
-      : wasm.runQuery(asWasm(db), asWasmStatement(sql), params, false);
-  }
   return fetchAll
-    ? legacy.runQuery<T>(asSqlJs(db), asSqlJsStatement(sql), params, true)
-    : legacy.runQuery(asSqlJs(db), asSqlJsStatement(sql), params, false);
+    ? wasm.runQuery<T>(asWasm(db), asWasmStatement(sql), params, true)
+    : wasm.runQuery(asWasm(db), asWasmStatement(sql), params, false);
 }
 
 export function execQuery(db: Database, sql: string) {
-  if (isWasmEngineActive()) {
-    wasm.execQuery(asWasm(db), sql);
-  } else {
-    legacy.execQuery(asSqlJs(db), sql);
-  }
+  wasm.execQuery(asWasm(db), sql);
 }
 
 let transactionDepth = 0;
@@ -240,22 +193,14 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<Database> {
-  const db = isWasmEngineActive()
-    ? await wasm.openDatabase(pathOrBuffer)
-    : await legacy.openDatabase(pathOrBuffer);
+  const db = await wasm.openDatabase(pathOrBuffer);
   return db as unknown as Database;
 }
 
 export function closeDatabase(db: Database) {
-  if (isWasmEngineActive()) {
-    wasm.closeDatabase(asWasm(db));
-  } else {
-    legacy.closeDatabase(asSqlJs(db));
-  }
+  wasm.closeDatabase(asWasm(db));
 }
 
 export async function exportDatabase(db: Database): Promise<Uint8Array> {
-  return isWasmEngineActive()
-    ? wasm.exportDatabase(asWasm(db))
-    : legacy.exportDatabase(asSqlJs(db));
+  return wasm.exportDatabase(asWasm(db));
 }
