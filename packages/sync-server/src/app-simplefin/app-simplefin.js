@@ -1,7 +1,6 @@
 import createDebug from 'debug';
 import express from 'express';
 
-import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
@@ -32,10 +31,7 @@ app.use((req, res, next) => {
       res.status(400).send({ status: 'error', reason: 'invalid-file-id' });
       return;
     }
-    if (
-      !isAdmin(res.locals.user_id) &&
-      UserService.countUserAccess(fileId, res.locals.user_id) === 0
-    ) {
+    if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
       res.status(403).send({ status: 'error', reason: 'file-access-denied' });
       return;
     }

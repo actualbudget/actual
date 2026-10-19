@@ -302,6 +302,12 @@ describe('per-budget credentials', () => {
   const keyB = 'https://other:password@bridge.example.com/simplefin';
 
   beforeEach(() => {
+    for (const fileId of [fileA, fileB]) {
+      getAccountDb().mutate(
+        'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+        [fileId, 'genericAdmin'],
+      );
+    }
     for (const fileId of [null, fileA, fileB]) {
       secretsService.reset(SecretName.simplefin_token, fileId);
       secretsService.reset(SecretName.simplefin_accessKey, fileId);
@@ -311,6 +317,9 @@ describe('per-budget credentials', () => {
   });
 
   afterEach(() => {
+    for (const fileId of [fileA, fileB]) {
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+    }
     for (const fileId of [null, fileA, fileB]) {
       secretsService.reset(SecretName.simplefin_token, fileId);
       secretsService.reset(SecretName.simplefin_accessKey, fileId);
@@ -423,6 +432,31 @@ describe('per-budget credentials', () => {
   });
 
   it.each(['/status', '/accounts', '/transactions'])(
+    'rejects deleted budgets before %s even with retained credentials',
+    async path => {
+      secretsService.set(
+        SecretName.simplefin_accessKey,
+        VALID_ACCESS_KEY,
+        fileA,
+      );
+      getAccountDb().mutate('UPDATE files SET deleted = 1 WHERE id = ?', [
+        fileA,
+      ]);
+      const fetch = vi.spyOn(global, 'fetch');
+      for (const token of ['valid-token', 'valid-token-user']) {
+        for (const fileId of [fileA, 'missing-budget']) {
+          await request(app)
+            .post(path)
+            .set('x-actual-token', token)
+            .set('X-Actual-File-Id', fileId)
+            .expect(403);
+        }
+      }
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['/status', '/accounts', '/transactions'])(
     'checks budget access before %s',
     async path => {
       const fetch = vi.spyOn(global, 'fetch');
@@ -434,10 +468,6 @@ describe('per-budget credentials', () => {
         .expect(403);
       expect(fetch).not.toHaveBeenCalled();
 
-      getAccountDb().mutate(
-        'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
-        [fileA, 'genericAdmin'],
-      );
       getAccountDb().mutate(
         'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
         [fileA, 'genericUser'],
@@ -452,7 +482,6 @@ describe('per-budget credentials', () => {
         getAccountDb().mutate('DELETE FROM user_access WHERE file_id = ?', [
           fileA,
         ]);
-        getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileA]);
       }
     },
   );
