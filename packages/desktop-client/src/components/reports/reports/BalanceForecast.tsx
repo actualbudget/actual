@@ -108,8 +108,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const [end, setEnd] = useState(
     widget?.meta?.timeFrame?.end ??
-    widget?.meta?.endDate ??
-    monthUtils.addMonths(currentMonth, 11),
+      widget?.meta?.endDate ??
+      monthUtils.addMonths(currentMonth, 11),
   );
   const [mode, setMode] = useState<TimeFrame['mode']>(
     widget?.meta?.timeFrame?.mode ?? 'static',
