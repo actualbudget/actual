@@ -558,7 +558,8 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  const filesService = new FilesService(getAccountDb());
+  const accountDb = getAccountDb();
+  const filesService = new FilesService(accountDb);
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
   if (!file) {
     return;
@@ -571,10 +572,12 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  filesService.update(file.id, new FileUpdate({ deleted: true }));
-  for (const name of Object.values(SecretName)) {
-    secretsService.reset(name, file.id);
-  }
+  accountDb.transaction(() => {
+    filesService.update(file.id, new FileUpdate({ deleted: true }));
+    for (const name of Object.values(SecretName)) {
+      secretsService.reset(name, file.id);
+    }
+  });
 
   res.send(OK_RESPONSE);
 });

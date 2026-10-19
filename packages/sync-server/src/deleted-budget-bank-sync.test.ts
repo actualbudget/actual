@@ -86,6 +86,43 @@ describe('deleted budget bank sync', () => {
     expect(denied.status).toBe(403);
   });
 
+  it('rolls back deletion and earlier secret resets when cleanup fails, allowing a retry', async () => {
+    const db = getAccountDb();
+    const names = [SecretName.simplefin_token, SecretName.simplefin_accessKey];
+    for (const name of names) {
+      secretsService.set(name, 'budget-secret', fileId);
+    }
+    db.exec(`CREATE TEMP TRIGGER fail_secret_cleanup BEFORE DELETE ON secrets
+      WHEN OLD.name = 'simplefin_accessKey:deleted-bank-sync-budget'
+      BEGIN SELECT RAISE(ABORT, 'simulated cleanup failure'); END`);
+    try {
+      await request(sync)
+        .post('/delete-user-file')
+        .set('x-actual-token', 'valid-token-user')
+        .send({ fileId })
+        .expect(500);
+      expect(
+        db.first('SELECT deleted FROM files WHERE id = ?', [fileId]),
+      ).toEqual({ deleted: 0 });
+      for (const name of names) {
+        expect(secretsService.get(name, fileId)).toBe('budget-secret');
+      }
+    } finally {
+      db.exec('DROP TRIGGER fail_secret_cleanup');
+    }
+    await request(sync)
+      .post('/delete-user-file')
+      .set('x-actual-token', 'valid-token-user')
+      .send({ fileId })
+      .expect(200);
+    expect(
+      db.first('SELECT deleted FROM files WHERE id = ?', [fileId]),
+    ).toEqual({ deleted: 1 });
+    for (const name of names) {
+      expect(secretsService.get(name, fileId)).toBeNull();
+    }
+  });
+
   it('clears only the deleted budget secrets through the deletion endpoint', async () => {
     const globals = Object.values(SecretName).map(name =>
       secretsService.get(name),
