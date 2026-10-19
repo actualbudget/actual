@@ -3,4 +3,4 @@ category: Bugfix
 authors: [jfdoming]
 ---
 
-Prevent Pluggy bank sync for deleted budgets and remove saved bank credentials when deleting a budget.
+Prevent per-budget bank sync credential reuse after a budget is deleted
