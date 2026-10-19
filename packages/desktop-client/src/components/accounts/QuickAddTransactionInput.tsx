@@ -64,13 +64,13 @@ export function QuickAddTransactionInput({
 
   return (
     <Input
-      aria-label={t('Quick add transaction')}
-      placeholder={t('Quick add: Spent $40 at Target yesterday')}
+      aria-label={t('Quick Add')}
+      placeholder={t('Quick Add: Spent $90 at Whole Foods for food')}
       value={text}
       onChangeValue={setText}
       onEnter={onEnter}
       onEscape={() => setText('')}
-      style={{ width: 260 }}
+      style={{ width: 300 }}
     />
   );
 }

@@ -74,6 +74,26 @@ describe('parseQuickAddText', () => {
     expect(result.isUnparsed).toBe(false);
   });
 
+  it('parses the example shown in the quick add box', () => {
+    const result = parse('Spent $90 at Whole Foods for food', {
+      categoryGroups: [
+        {
+          id: 'group-usual',
+          name: 'Usual Expenses',
+          categories: [{ id: 'cat-food', name: 'Food' }],
+        },
+      ],
+    });
+
+    expect(result.amount.value).toBe(9000);
+    expect(result.direction.value).toBe('outflow');
+    expect(result.payee.value).toEqual({ id: null, name: 'Whole Foods' });
+    expect(result.category).toMatchObject({
+      value: 'cat-food',
+      confidence: 'high',
+    });
+  });
+
   it('parses "paid 12.50 to Starbucks" with no category or date', () => {
     const result = parse('paid 12.50 to Starbucks');
 

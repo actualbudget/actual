@@ -50,7 +50,7 @@ describe('QuickAddTransactionInput', () => {
         <QuickAddTransactionInput accountId={accountId} onAdded={onAdded} />
       </TestProviders>,
     );
-    return screen.getByRole('textbox', { name: 'Quick add transaction' });
+    return screen.getByRole('textbox', { name: 'Quick Add' });
   }
 
   function openModals() {
