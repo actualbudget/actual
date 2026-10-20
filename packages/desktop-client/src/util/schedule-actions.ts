@@ -74,6 +74,19 @@ export async function createSingleTimeScheduleFromTransaction(
         });
       }
 
+      // A split without a payee action takes the parent's payee when the
+      // schedule posts, so set each split's own payee explicitly.
+      if (split.payee) {
+        actions.push({
+          op: 'set',
+          field: 'payee',
+          value: split.payee,
+          options: {
+            splitIndex,
+          },
+        });
+      }
+
       if (split.category) {
         actions.push({
           op: 'set',
