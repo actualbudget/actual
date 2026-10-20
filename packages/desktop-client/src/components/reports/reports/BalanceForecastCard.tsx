@@ -248,7 +248,7 @@ export function BalanceForecastCard({
                   >
                     <YAxis
                       hide // do not show the axis labels (balance)
-                      domain={[yAxisBase === 'Zero Based' ? 0 : 'auto', 'auto']}
+                      domain={[yAxisBase === 'Zero-Based' ? 0 : 'auto', 'auto']}
                       allowDataOverflow={false} // false by default but explicit > implicit
                     />
                     <defs>

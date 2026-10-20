@@ -117,7 +117,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
-  const [yAxisBase, setYaxisbase] = useState<'Auto' | 'Zero Based'>(
+  const [yAxisBase, setYaxisbase] = useState<'Auto' | 'Zero-Based'>(
     widget?.meta?.yAxisBase ?? 'Auto',
   );
   const [source, setSource] = useState<ForecastSource>(
@@ -367,7 +367,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         disabled={isTrackingBudgetForecast}
         options={[
           ['Auto', t('Auto')],
-          ['Zero Based', t('Zero Based')],
+          ['Zero-Based', t('Zero-Based')],
         ]}
       />
     </>
@@ -560,7 +560,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         // if hasNegativeBalance, the builtin behavior of recharts (allowDataOverflow = false), prevents data from being hidden "under" the axis
                         // also explicitly stated for future contributors
                         domain={[
-                          yAxisBase === 'Zero Based' ? 0 : 'auto',
+                          yAxisBase === 'Zero-Based' ? 0 : 'auto',
                           'auto',
                         ]} //
                         allowDataOverflow={false}
