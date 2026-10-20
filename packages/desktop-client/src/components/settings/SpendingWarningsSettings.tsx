@@ -28,7 +28,7 @@ export function SpendingWarningsSettings() {
   const { t } = useTranslation();
   const thresholds = useSpendingWarningThresholds();
   const [, setPrefs] = useSyncedPrefs();
-  // Bumped to reset the fields after an invalid entry
+  // Bumped to reset the fields after an invalid or empty entry
   const [resetCount, setResetCount] = useState(0);
 
   const currentValue = (
@@ -75,7 +75,8 @@ export function SpendingWarningsSettings() {
                   <View key={field}>
                     <FormLabel title={fieldLabel(field)} htmlFor={id} />
                     <Input
-                      // Remount to show the saved value after an invalid entry
+                      // Remount to show the active value after an invalid or
+                      // empty entry
                       key={`${id}-${value}-${resetCount}`}
                       id={id}
                       type="number"
@@ -95,6 +96,10 @@ export function SpendingWarningsSettings() {
                           setPrefs({
                             [spendingWarningPrefKey(tier, field)]: newValue,
                           });
+                          if (newValue === '') {
+                            // Show the default even if it was already in use
+                            setResetCount(count => count + 1);
+                          }
                         } else {
                           setResetCount(count => count + 1);
                         }

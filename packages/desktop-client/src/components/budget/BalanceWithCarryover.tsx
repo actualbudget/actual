@@ -265,9 +265,13 @@ export function BalanceWithCarryover({
               <View style={{ padding: 10, gap: 6 }}>
                 {isSpendingWarning && spendingAlert && (
                   <span style={{ fontWeight: 'bold' }}>
-                    {t('{{percent}}% of budget used with {{days}} days left', {
+                    {t('{{percent}}% of budget used with {{count}} days left', {
                       percent: Math.floor(spendingAlert.percentSpent ?? 0),
-                      days: spendingAlert.daysRemaining,
+                      count: spendingAlert.daysRemaining ?? 0,
+                      defaultValue_one:
+                        '{{percent}}% of budget used with {{count}} day left',
+                      defaultValue_other:
+                        '{{percent}}% of budget used with {{count}} days left',
                     })}
                   </span>
                 )}
