@@ -152,9 +152,6 @@ async function updateDashboard(
     (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
 
-  // One batch for the whole layout change: without it each widget is its
-  // own set of messages and schedules its own full sync, so a single drag
-  // fires as many syncs as there are moved widgets
   await batchMessages(async () => {
     await Promise.all(
       widgets
