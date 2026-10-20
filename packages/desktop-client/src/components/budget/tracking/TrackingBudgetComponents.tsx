@@ -19,6 +19,7 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { useCategorySpendingAlert } from '#components/budget/useCategorySpendingAlert';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -194,11 +195,18 @@ export const GroupMonth = memo(function GroupMonth({
 export const CategoryMonth = memo(function CategoryMonth({
   month,
   category,
+  categoryGroup,
   editing,
   onEdit,
   onBudgetAction,
   onShowActivity,
 }: CategoryMonthProps) {
+  const spendingAlert = useCategorySpendingAlert({
+    budgetType: 'tracking',
+    month,
+    category,
+    categoryGroup,
+  });
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
   const format = useFormat();
@@ -481,6 +489,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               goal={trackingBudget.catGoal(category.id)}
               budgeted={trackingBudget.catBudgeted(category.id)}
               longGoal={trackingBudget.catLongGoal(category.id)}
+              spendingAlert={spendingAlert}
             />
           </Button>
 

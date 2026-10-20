@@ -22,6 +22,8 @@ import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
+import { isWarningTier } from './spendingAlerts';
+import type { SpendingAlertStatus } from './spendingAlerts';
 import { makeBalanceAmountStyle } from './util';
 
 type CarryoverIndicatorProps = {
@@ -95,6 +97,8 @@ type BalanceWithCarryoverProps = Omit<
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
   tooltipDisabled?: boolean;
+  /** Set to colour the balance and explain it when spending is ahead of pace. */
+  spendingAlert?: SpendingAlertStatus;
 };
 
 export function BalanceWithCarryover({
@@ -107,6 +111,7 @@ export function BalanceWithCarryover({
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   tooltipDisabled,
+  spendingAlert,
   children,
   ...props
 }: BalanceWithCarryoverProps) {
@@ -117,16 +122,25 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const isSpendingWarning = isWarningTier(spendingAlert?.tier);
   const getBalanceAmountStyle = useCallback(
     (balanceValue: number) =>
       makeBalanceAmountStyle(
         balanceValue,
         isGoalTemplatesEnabled ? goalValue : null,
         longGoalValue === 1 ? balanceValue : budgetedValue,
+        isSpendingWarning,
       ),
-    [budgetedValue, goalValue, isGoalTemplatesEnabled, longGoalValue],
+    [
+      budgetedValue,
+      goalValue,
+      isGoalTemplatesEnabled,
+      isSpendingWarning,
+      longGoalValue,
+    ],
   );
   const format = useFormat();
+  const isGoalTooltipEnabled = isGoalTemplatesEnabled && goalValue != null;
 
   const getDifferenceToGoal = useCallback(
     (balanceValue: number) =>
@@ -248,8 +262,16 @@ export function BalanceWithCarryover({
         <>
           <Tooltip
             content={
-              <View style={{ padding: 10 }}>
-                {GoalStatusDisplay(balanceValue, type)}
+              <View style={{ padding: 10, gap: 6 }}>
+                {isSpendingWarning && spendingAlert && (
+                  <span style={{ fontWeight: 'bold' }}>
+                    {t('{{percent}}% of budget used with {{days}} days left', {
+                      percent: Math.floor(spendingAlert.percentSpent ?? 0),
+                      days: spendingAlert.daysRemaining,
+                    })}
+                  </span>
+                )}
+                {isGoalTooltipEnabled && GoalStatusDisplay(balanceValue, type)}
               </View>
             }
             style={{ ...styles.tooltip, borderRadius: '0px 5px 5px 0px' }}
@@ -257,8 +279,7 @@ export function BalanceWithCarryover({
             triggerProps={{
               delay: 750,
               isDisabled:
-                !isGoalTemplatesEnabled ||
-                goalValue == null ||
+                (!isGoalTooltipEnabled && !isSpendingWarning) ||
                 isNarrowWidth ||
                 tooltipDisabled,
             }}

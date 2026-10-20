@@ -4,7 +4,6 @@ import type { KeyboardEvent } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
@@ -22,7 +21,6 @@ import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
-import { useOverspendingAlerts } from './useOverspendingAlerts';
 import {
   findSortDown,
   findSortUp,
@@ -111,31 +109,6 @@ export function BudgetTable(props: BudgetTableProps) {
   const onEditName = (id: string) => {
     setEditing(id ? { id, cell: 'name' } : null);
   };
-
-  const visibleMonths = useMemo(
-    () =>
-      monthUtils.rangeInclusive(
-        startMonth,
-        monthUtils.addMonths(startMonth, numMonths - 1),
-      ),
-    [startMonth, numMonths],
-  );
-
-  useOverspendingAlerts({
-    months: visibleMonths,
-    onShowCategory: (categoryId, month) => {
-      const group = categoryGroups.find(group =>
-        group.categories?.some(category => category.id === categoryId),
-      );
-      if (group && collapsedGroupIds.includes(group.id)) {
-        setCollapsedGroupIdsPref(
-          collapsedGroupIds.filter(id => id !== group.id),
-        );
-      }
-      // Editing the budgeted cell scrolls the category into view
-      onEditMonth(categoryId, month);
-    },
-  });
 
   const _onReorderCategory = (
     id: string,

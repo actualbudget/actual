@@ -84,9 +84,15 @@ export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
+  isSpendingWarning = false,
 ) {
   if (isOverspentBalance(value)) {
     return { color: theme.budgetNumberNegative };
+  }
+
+  // Spending ahead of pace, see spendingAlerts.ts
+  if (isSpendingWarning) {
+    return { color: theme.budgetNumberWarning };
   }
 
   const currencyValue = normalizeIntegerValue(value);

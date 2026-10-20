@@ -112,6 +112,7 @@ export function ExpenseCategory({
                 editingCell.cell === month
               }
               category={cat}
+              categoryGroup={categoryGroup}
               onEdit={onEditMonth}
               onBudgetAction={onBudgetAction}
               onShowActivity={onShowActivity}

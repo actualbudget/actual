@@ -20,7 +20,8 @@ export type FeatureFlag =
 export type SyncedPrefs = Partial<
   Record<
     | 'budgetType'
-    | 'overspendingAlerts'
+    // Early spending warning thresholds, see spendingAlerts.ts in the web app
+    | `spending-warning-${'warn50' | 'warn80'}-${'percent' | 'days'}`
     | 'upcomingScheduledTransactionLength'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'

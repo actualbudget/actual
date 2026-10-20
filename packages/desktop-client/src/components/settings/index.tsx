@@ -36,7 +36,6 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
-import { OverspendingAlertsSettings } from './OverspendingAlertsSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
@@ -44,6 +43,7 @@ import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
 import { SettingsRow } from './SettingsRow';
 import { SidebarSettings } from './SidebarSettings';
+import { SpendingWarningsSettings } from './SpendingWarningsSettings';
 import { ThemeSettings } from './Themes';
 
 function About() {
@@ -283,7 +283,7 @@ export function GeneralSettings() {
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
-        <OverspendingAlertsSettings />
+        <SpendingWarningsSettings />
       </SettingsGroup>
       {serverURL && (
         <SettingsGroup title={t('Security')}>
