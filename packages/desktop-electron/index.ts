@@ -821,18 +821,12 @@ ipcMain.handle(
   ) => {
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
-    return new Promise<void>((resolve, reject) => {
-      if (fileLocation) {
-        const contents =
-          typeof fileContents === 'string'
-            ? fileContents
-            : new Uint8Array(fileContents.buffer);
-        fs.writeFile(fileLocation.filePath, contents, error => {
-          return reject(error);
-        });
-      }
-      resolve();
-    });
+    if (fileLocation.canceled || !fileLocation.filePath) {
+      return;
+    }
+
+    // A Buffer's .buffer can be a shared pool slab, so write the Buffer view itself.
+    await fs.promises.writeFile(fileLocation.filePath, fileContents);
   },
 );
 
