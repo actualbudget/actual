@@ -110,12 +110,26 @@ test.describe('Reports', () => {
     });
 
     test('loads balance forecast report with monthly granularity', async () => {
+      // monthly granularity, auto y axis
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('switches to daily granularity', async () => {
+      // daily granularity, auto y-axis
       await reportsPage.selectForecastGranularity('Daily');
+      await expect(page).toMatchThemeScreenshots();
+    });
 
+    test('switches to Zero-Based Y-Axis', async () => {
+      // monthly granularity, zero-based y-axis
+      await reportsPage.selectYAxisBase('Zero-Based');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('switches to daily granularity and Zero-Based Y-Axis', async () => {
+      // daily granularity, zero-based y-axis
+      await reportsPage.selectForecastGranularity('Daily');
+      await reportsPage.selectYAxisBase('Zero-Based');
       await expect(page).toMatchThemeScreenshots();
     });
 
