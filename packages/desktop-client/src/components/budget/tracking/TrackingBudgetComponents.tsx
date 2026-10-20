@@ -18,8 +18,10 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import { t } from 'i18next';
 
-import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
-import { CategoryFundingStatus } from '#components/budget/goals/CategoryFundingStatus';
+import {
+  BalanceWithCarryover,
+  GoalStatus,
+} from '#components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -290,9 +292,6 @@ export const CategoryMonth = memo(function CategoryMonth({
             >
               <Button
                 ref={triggerRef}
-                aria-label={t('Budget menu for {{category}}', {
-                  category: category.name,
-                })}
                 variant="bare"
                 onPress={() => setMenuOpen(true)}
                 style={{
@@ -312,13 +311,6 @@ export const CategoryMonth = memo(function CategoryMonth({
                 onOpenChange={() => setMenuOpen(false)}
                 placement="bottom start"
               >
-                {category.is_income && (
-                  <CategoryFundingStatus
-                    category={category}
-                    month={month}
-                    onFunded={() => setMenuOpen(false)}
-                  />
-                )}
                 <BudgetMenu
                   onCopyLastMonthAverage={() => {
                     onMenuAction(month, 'copy-single-last', {
@@ -501,13 +493,20 @@ export const CategoryMonth = memo(function CategoryMonth({
             onOpenChange={() => setBalanceMenuOpen(false)}
             placement="bottom end"
           >
-            <CategoryFundingStatus
-              category={category}
-              month={month}
-              onFunded={() => setBalanceMenuOpen(false)}
-            />
             <BalanceMenu
               categoryId={category.id}
+              header={
+                <GoalStatus
+                  balance={trackingBudget.catBalance(category.id)}
+                  goal={trackingBudget.catGoal(category.id)}
+                  budgeted={trackingBudget.catBudgeted(category.id)}
+                  longGoal={trackingBudget.catLongGoal(category.id)}
+                  style={{
+                    padding: 10,
+                    borderBottom: '1px solid ' + theme.menuBorder,
+                  }}
+                />
+              }
               onCarryover={carryover => {
                 onMenuAction(month, 'carryover', {
                   category: category.id,

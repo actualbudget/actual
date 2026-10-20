@@ -12,7 +12,6 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -105,7 +104,6 @@ function IncomeCategoryCells({
   const { t } = useTranslation();
   const columnWidth = getColumnWidth();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   const budgeted =
     budgetType === 'tracking'
@@ -155,7 +153,7 @@ function IncomeCategoryCells({
           category={category}
           onPress={onPress}
           aria-label={
-            budgetType === 'envelope' || isGoalTemplatesEnabled
+            budgetType === 'envelope'
               ? t('Open balance menu for {{categoryName}} category', {
                   categoryName: category.name,
                 })
@@ -187,11 +185,7 @@ export function IncomeCategoryListItem({
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const balanceMenuModalName =
-    budgetType === 'tracking'
-      ? 'tracking-balance-menu'
-      : 'envelope-income-balance-menu';
+  const balanceMenuModalName = `envelope-income-balance-menu`;
 
   const onShowActivity = useCallback(() => {
     if (!category) {
@@ -273,9 +267,7 @@ export function IncomeCategoryListItem({
           month={month}
           onBudgetAction={onBudgetAction}
           onPress={
-            budgetType === 'envelope' || isGoalTemplatesEnabled
-              ? onOpenBalanceMenu
-              : onShowActivity
+            budgetType === 'envelope' ? onOpenBalanceMenu : onShowActivity
           }
         />
       </View>

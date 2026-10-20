@@ -487,6 +487,7 @@ export type Modal =
         onCarryover?: (carryover: boolean) => void;
         onTransfer?: () => void;
         onCover?: () => void;
+        onFundGoal?: (amount: IntegerAmount) => void;
       };
     }
   | {
@@ -503,7 +504,6 @@ export type Modal =
       options: {
         categoryId: CategoryEntity['id'];
         month: string;
-        onShowActivity?: () => void;
         onCarryover: (carryover: boolean) => void;
       };
     }

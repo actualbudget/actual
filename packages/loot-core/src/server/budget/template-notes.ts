@@ -69,7 +69,7 @@ export async function checkTemplateNotes(): Promise<TemplateNotification> {
   };
 }
 
-export async function getCategoriesWithTemplates(
+async function getCategoriesWithTemplates(
   categoryIds?: string[],
 ): Promise<CategoryWithTemplateNotes[]> {
   const templatesForCategory: CategoryWithTemplateNotes[] = [];

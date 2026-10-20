@@ -1,7 +1,8 @@
 import React, { useCallback, useRef, useState } from 'react';
 
-import { CategoryFundingStatus } from '#components/budget/goals/CategoryFundingStatus';
-import { useCategory } from '#hooks/useCategory';
+import { theme } from '@actual-app/components/theme';
+
+import { GoalStatus } from '#components/budget/BalanceWithCarryover';
 import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
@@ -24,7 +25,6 @@ export function BalanceMovementMenu({
   onClose,
 }: BalanceMovementMenuProps) {
   const format = useFormat();
-  const { data: category } = useCategory(categoryId);
 
   const catBalance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
@@ -43,16 +43,21 @@ export function BalanceMovementMenu({
 
   return (
     <span tabIndex={-1} ref={ref}>
-      {menu === 'menu' && category && (
-        <CategoryFundingStatus
-          category={category}
-          month={month}
-          onFunded={onClose}
-        />
-      )}
       {menu === 'menu' && (
         <BalanceMenu
           categoryId={categoryId}
+          header={
+            <GoalStatus
+              balance={envelopeBudget.catBalance(categoryId)}
+              goal={envelopeBudget.catGoal(categoryId)}
+              budgeted={envelopeBudget.catBudgeted(categoryId)}
+              longGoal={envelopeBudget.catLongGoal(categoryId)}
+              style={{
+                padding: 10,
+                borderBottom: '1px solid ' + theme.menuBorder,
+              }}
+            />
+          }
           onCarryover={carryover => {
             onBudgetAction(month, 'carryover', {
               category: categoryId,
@@ -62,6 +67,13 @@ export function BalanceMovementMenu({
           }}
           onTransfer={() => setMenu('transfer')}
           onCover={() => setMenu('cover')}
+          onFundGoal={amount => {
+            onBudgetAction(month, 'transfer-available', {
+              amount,
+              category: categoryId,
+            });
+            onClose();
+          }}
         />
       )}
 
