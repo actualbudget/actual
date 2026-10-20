@@ -707,7 +707,7 @@ export function Overview({ dashboard }: OverviewProps) {
                                 void onResetDashboard();
                                 break;
                               case 'export':
-                                onExport();
+                                void onExport();
                                 break;
                               case 'import':
                                 void onImport();
