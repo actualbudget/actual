@@ -228,6 +228,18 @@ export const theme = {
   toBudgetNegative: 'var(--color-toBudgetNegative)',
   templateNumberFunded: 'var(--color-templateNumberFunded)',
   templateNumberUnderFunded: 'var(--color-templateNumberUnderFunded)',
+  templatePillUnderFundedBackground:
+    'var(--color-templatePillUnderFundedBackground, var(--color-warningBackground))',
+  templatePillUnderFundedText:
+    'var(--color-templatePillUnderFundedText, var(--color-warningTextDark))',
+  templatePillFundedBackground:
+    'var(--color-templatePillFundedBackground, var(--color-noticeBackground))',
+  templatePillFundedText:
+    'var(--color-templatePillFundedText, var(--color-noticeTextDark))',
+  templatePillOverspentBackground:
+    'var(--color-templatePillOverspentBackground, var(--color-errorBackground))',
+  templatePillOverspentText:
+    'var(--color-templatePillOverspentText, var(--color-errorTextDarker))',
   noteTagBackground: 'var(--color-noteTagBackground)',
   noteTagBackgroundHover: 'var(--color-noteTagBackgroundHover)',
   noteTagDefault: 'var(--color-noteTagDefault)',

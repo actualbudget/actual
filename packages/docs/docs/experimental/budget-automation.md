@@ -298,7 +298,7 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, each category’s budget indicator appears as the color of its balance text. Click a balance to see its goal status at the top of the balance menu.
+After automations run, each category’s balance appears as a colored pill with an icon: a green check when funded, a yellow clock when underfunded and a red exclamation mark when overspent. Categories without an automation keep the plain balance. Click a balance to see its goal status at the top of the balance menu.
 
 The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
 
