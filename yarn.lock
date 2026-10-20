@@ -120,7 +120,7 @@ __metadata:
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
-    "@sqlite.org/sqlite-wasm": "npm:3.53.4-build2"
+    "@sqlite.org/sqlite-wasm": "npm:3.54.1-build1"
     "@types/better-sqlite3": "npm:^9.6.0"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.20.5"
@@ -7777,10 +7777,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sqlite.org/sqlite-wasm@npm:3.53.4-build2":
-  version: 3.53.4-build2
-  resolution: "@sqlite.org/sqlite-wasm@npm:3.53.4-build2"
-  checksum: 10/fa89557a5ede085c7436283ef207ae9d3d41f2b0b67b66e99685867841a2a166893aab5018bf0bfcb8aa3e617b43d9324cee852b31f46af9206757719a69ae4b
+"@sqlite.org/sqlite-wasm@npm:3.54.1-build1":
+  version: 3.54.1-build1
+  resolution: "@sqlite.org/sqlite-wasm@npm:3.54.1-build1"
+  checksum: 10/f7260015e3ecb56f5213eea2280d9adb81802d92578db24b9fc6cc55726a213e65a39ff02c7993aa94685710761e9286645f4b2511cd064719638297aaf6e0f7
   languageName: node
   linkType: hard
 
