@@ -200,6 +200,25 @@ describe('QuickAddTransactionModal', () => {
     consoleError.mockRestore();
   });
 
+  it('keeps an inflow when the amount is typed in the preview', async () => {
+    renderModal(
+      {
+        ...parsedTargetPurchase,
+        amount: { value: null, confidence: 'none' },
+        direction: { value: 'inflow', confidence: 'high', text: 'received' },
+      },
+      'account-checking',
+    );
+
+    const amountInput = screen.getByLabelText('Amount (inflow)');
+    await userEvent.type(amountInput, '500');
+    await userEvent.tab();
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    await waitFor(() => expect(onAdded).toHaveBeenCalledTimes(1));
+    expect(addedTransactions[0][0].amount).toBe(50000);
+  });
+
   it('requires an account to be picked when none is given', () => {
     renderModal(parsedTargetPurchase, null);
 

@@ -137,6 +137,9 @@ export function QuickAddTransactionModal({
   // Only look up a fallback when the payee changes
   useEffect(() => lookUpFallbackCategory(), [existingPayeeId]);
 
+  const isInflow =
+    amount > 0 || (amount === 0 && parsed.direction.value === 'inflow');
+
   const canAdd = !!accountId && amount !== 0 && !!date && !isSaving;
 
   async function onSubmit(
@@ -281,9 +284,7 @@ export function QuickAddTransactionModal({
               </QuickAddPreviewField>
 
               <QuickAddPreviewField
-                label={
-                  amount > 0 ? t('Amount (inflow)') : t('Amount (outflow)')
-                }
+                label={isInflow ? t('Amount (inflow)') : t('Amount (outflow)')}
                 htmlFor="quick-add-amount"
                 isMissing={amount === 0}
                 hint={
@@ -304,7 +305,9 @@ export function QuickAddTransactionModal({
                 <AmountInput
                   id="quick-add-amount"
                   value={amount}
-                  zeroSign="-"
+                  // With no amount found yet, keep the direction the
+                  // parser found for whatever the user types
+                  zeroSign={parsed.direction.value === 'inflow' ? '+' : '-'}
                   onUpdate={value => {
                     setAmount(value);
                     setIsAmountEdited(true);
