@@ -360,7 +360,7 @@ In the budget header menu you will see the following options:
 
 <img width="724" alt="The category group menu with Overwrite with templates highlighted" src="/img/experimental/goal-templates-group-menu@2x.webp" />
 
-- **Fund a single goal from To Budget** (envelope budgeting only): If a category is underfunded and you have money left in To Budget, click the category balance and choose "Fund goal from To Budget". This adds the missing amount to the category's budget, but never more than what is left in To Budget for that month. Unlike "Overwrite with template", it never lowers the budgeted amount. It is not offered for long-term goals. As with any amount you budget, this also reduces To Budget in the following months.
+- **Fund a single goal from To Budget** (envelope budgeting only): If a category is underfunded and you have money left in To Budget, click the category balance and choose "Fund goal from To Budget". This adds the missing amount to the category's budget, but never more than what is left in To Budget for that month. Unlike "Overwrite with template", it never lowers the budgeted amount. It is not offered for long-term goals. This normally also reduces To Budget in the following months. If the category is overspent and does not use rollover, the added budget can offset the overspending carry-forward, so the following month's To Budget can remain unchanged for that amount.
 
 ---
 
