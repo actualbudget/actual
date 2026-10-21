@@ -302,7 +302,7 @@ After automations run, each category’s balance appears as a colored pill with 
 
 The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
 
-<img width="724" alt="Category balances in the normal, empty, green, orange and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
+<img width="732" alt="Category balances in the normal and empty states, and as green, yellow and red goal status pills" src="/img/experimental/budget-automation-indicators@2x.webp" />
 
 The goal status gives you more information about your budget and balance, including a progress bar:
 
