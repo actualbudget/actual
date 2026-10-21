@@ -150,7 +150,6 @@ function mockNearbyPayeesResult(
     isStale: false,
     isSuccess: true,
     isEnabled: true,
-    promise: Promise.resolve(data),
     refetch: vi.fn(),
     status: 'success',
   };

@@ -9,8 +9,10 @@ import { assertUrlAllowed } from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
 
-vi.mock('#util/ssrf', () => ({
+vi.mock('#util/ssrf', async importOriginal => ({
+  ...(await importOriginal()),
   assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
+  createSsrfDispatcher: vi.fn(),
 }));
 
 const VALID_ACCESS_KEY = 'https://user:pass@bridge.example.com/simplefin';
