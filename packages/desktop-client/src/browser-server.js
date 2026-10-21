@@ -64,18 +64,7 @@ self.addEventListener('message', async event => {
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
-
-        if (
-          !self.SharedArrayBuffer &&
-          !msg.isSharedArrayBufferOverrideEnabled
-        ) {
-          appInitFailureInterval = postMessageWithRetry({
-            type: 'app-init-failure',
-            SharedArrayBufferMissing: true,
-          });
-
-          return;
-        }
+        const storageBackend = msg.storageBackend ?? 'opfs';
 
         // A single failed importScripts bricks the SharedWorker until
         // it's evicted, so retry in production too.
@@ -84,7 +73,7 @@ self.addEventListener('message', async event => {
           { maxRetries: isDev ? 5 : 3 },
         );
 
-        backend.initApp(isDev, self).catch(err => {
+        backend.initApp(isDev, self, { storageBackend }).catch(err => {
           console.log(err);
           appInitFailureInterval = postMessageWithRetry({
             type: 'app-init-failure',

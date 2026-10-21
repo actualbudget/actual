@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Minimal static file server for the prebuilt browser bundle at
-// packages/desktop-client/build. Serves with the COOP/COEP headers required
-// by the app (SharedArrayBuffer/SQLite). Intended for CI e2e runs where
-// starting the full Vite dev server is unnecessary overhead.
+// packages/desktop-client/build. The app needs no special headers; this is
+// for CI e2e runs where starting the full Vite dev server is unnecessary
+// overhead.
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -37,8 +37,6 @@ const MIME = {
 };
 
 function setSharedHeaders(res) {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
   res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
 }
 

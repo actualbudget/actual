@@ -448,6 +448,22 @@ export function createCoordinator({
         portToBudget.set(p, newBudgetId);
       }
 
+      // Bridges learn their budget from role changes. Without this a tab
+      // that resumes after being hidden reports its old (or no) budget and
+      // is moved to unassigned, which terminates the leader's Worker.
+      leaderPort.postMessage({
+        type: '__role-change',
+        role: 'LEADER',
+        budgetId: newBudgetId,
+      });
+      for (const p of oldGroup.followers) {
+        p.postMessage({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: newBudgetId,
+        });
+      }
+
       logger.log(
         `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
       );
@@ -608,13 +624,18 @@ export function createCoordinator({
               if (workerMsg.type === 'reply' && name === 'close-budget') {
                 handleBudgetClosed(targetPort, portBudget!);
               }
+              // Prefs name the budget the leader's Worker actually has
+              // open. A group keyed by a placeholder (the lobby, a
+              // creation or deletion) or by a budget this leader has since
+              // replaced is re-keyed, so later tabs join it instead of
+              // electing a second leader for the same budget.
               if (
                 workerMsg.type === 'reply' &&
                 name === 'load-prefs' &&
                 portBudget &&
-                portBudget.startsWith('__creating-') &&
                 workerMsg.result &&
-                (workerMsg.result as Record<string, unknown>).id
+                (workerMsg.result as Record<string, unknown>).id &&
+                (workerMsg.result as Record<string, unknown>).id !== portBudget
               ) {
                 handleBudgetLoaded(
                   port,

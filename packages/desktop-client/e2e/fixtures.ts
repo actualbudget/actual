@@ -1,5 +1,5 @@
 import { test as base, expect as baseExpect } from '@playwright/test';
-import type { Browser, Locator, Page } from '@playwright/test';
+import type { Browser, BrowserContext, Locator, Page } from '@playwright/test';
 
 /**
  * Disable CSS transitions and animations globally in e2e (non-VRT) runs.
@@ -33,6 +33,51 @@ const disableAnimationsInitScript = () => {
   }
 };
 
+/**
+ * Storage engine the backend worker runs on. Set E2E_STORAGE_BACKEND to
+ * `memory-idb` to force the fallback of browsers without OPFS sync access
+ * handles; unset means the app's default. The key mirrors
+ * loot-core/src/platform/client/browser-preload/storage-backend.ts.
+ */
+export const E2E_STORAGE_BACKEND = process.env.E2E_STORAGE_BACKEND;
+const STORAGE_BACKEND_KEY = 'actual:storage-backend';
+/** A test that drives the flag itself sets this in sessionStorage first. */
+export const MANUAL_STORAGE_BACKEND_FLAG = 'e2e-manual-storage-backend';
+
+const storageBackendInitScript = ({
+  key,
+  backend,
+  manualFlag,
+}: {
+  key: string;
+  backend: string;
+  manualFlag: string;
+}) => {
+  try {
+    if (!sessionStorage.getItem(manualFlag)) {
+      localStorage.setItem(key, backend);
+    }
+  } catch {
+    // Without storage the app uses its default engine
+  }
+};
+
+/**
+ * Installs the e2e init scripts on a page or context. `browser.newPage`
+ * gets them automatically; tests that create their own context (several
+ * tabs sharing storage) call this themselves.
+ */
+export async function addE2EInitScripts(target: Page | BrowserContext) {
+  await target.addInitScript(disableAnimationsInitScript);
+  if (E2E_STORAGE_BACKEND) {
+    await target.addInitScript(storageBackendInitScript, {
+      key: STORAGE_BACKEND_KEY,
+      backend: E2E_STORAGE_BACKEND,
+      manualFlag: MANUAL_STORAGE_BACKEND_FLAG,
+    });
+  }
+}
+
 export const test = process.env.VRT
   ? base
   : base.extend<object, { browser: Browser }>({
@@ -41,7 +86,7 @@ export const test = process.env.VRT
           const originalNewPage = browser.newPage.bind(browser);
           browser.newPage = async options => {
             const page = await originalNewPage(options);
-            await page.addInitScript(disableAnimationsInitScript);
+            await addE2EInitScripts(page);
             return page;
           };
           await runWithBrowser(browser);

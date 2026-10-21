@@ -196,10 +196,9 @@
     "postpack": "node scripts/restore-package-json.mts"
   },
   "dependencies": {
-    "@jlongster/sql.js": "^1.6.7",
     "@rschedule/core": "^1.5.0",
     "@rschedule/standard-date-adapter": "^1.5.0",
-    "absurd-sql": "0.0.54",
+    "@sqlite.org/sqlite-wasm": "3.54.1-build1",
     "better-sqlite3": "^13.0.3",
     "csv-parse": "^7.0.3",
     "csv-stringify": "^6.9.0",
@@ -217,7 +216,6 @@
     "@actual-app/crdt": "workspace:*",
     "@actual-app/vite-plugin-peggy": "workspace:*",
     "@types/better-sqlite3": "^9.6.0",
-    "@types/jlongster__sql.js": "npm:@types/sql.js@latest",
     "@types/node": "^22.20.5",
     "@typescript/native-preview": "beta",
     "assert": "^2.1.0",

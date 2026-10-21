@@ -4,13 +4,13 @@
 export const migrationsDir: string;
 /** Absolute path to loot-core's default budget database. */
 export const defaultDbPath: string;
-/** Absolute path to the sql.js wasm binary loot-core depends on. */
-export const sqlWasmPath: string;
+/** Absolute path to the official SQLite wasm binary the sqlite-wasm engine runs on. */
+export const sqliteWasmPath: string;
 
 /** The `data-file-index.txt` manifest listing every file under `data/`. */
 export function buildDataFileIndex(names?: string[]): string;
 
-/** The base64-encoded assets a self-contained browser worker embeds. */
+/** The base64-encoded assets a self-contained browser worker embeds (the wasm is the official SQLite build). */
 export function collectEmbeddedAssets(): {
   wasmBase64: string;
   dataFiles: Record<string, string>;

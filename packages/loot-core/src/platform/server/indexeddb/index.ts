@@ -58,7 +58,14 @@ function _openDatabase() {
   });
 }
 
-type Data = { filepath: string; contents: string };
+export type Data = {
+  filepath: string;
+  contents: string | Uint8Array;
+  // Set on sqlite files held by the sqlite-wasm storage
+  storage?: 'opfs' | 'memory-idb';
+  rev?: number;
+  legacyCleanup?: 'pending';
+};
 
 export const getStore = function (db: IDBDatabase, name: string) {
   const trans = db.transaction([name], 'readwrite');

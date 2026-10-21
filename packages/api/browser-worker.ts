@@ -1,9 +1,13 @@
 // Web Worker entry for the browser build; owns the real loot-core backend.
 //
-// Fully self-contained: the sql.js wasm and the default filesystem data
+// Fully self-contained: the SQLite wasm and the default filesystem data
 // (migrations + default budget DB) are embedded at build time. The worker
 // performs NO `PUBLIC_URL` asset fetches, so a consumer needs to serve no extra
 // files and configure no bundler — just `import` the package and `init()`.
+//
+// Only the sqlite-wasm engine ships here: budgets live in the origin private
+// file system, or in IndexedDB where sync access handles are unavailable.
+// Nothing uses SharedArrayBuffer, so the page needs no cross-origin isolation.
 
 import * as connection from '@actual-app/core/platform/server/connection';
 import { setWasmBinary } from '@actual-app/core/platform/server/sqlite';
@@ -67,8 +71,9 @@ self.fetch = function patchedFetch(
   'api-browser/init'
 ] = async function (args?: unknown) {
   const { config } = (args ?? {}) as { config?: InitConfig };
+  const storageBackend = config?.storageBackend ?? 'opfs';
   // There is no meaningful `process.cwd()` to fall back to in a worker
-  await init({ dataDir: '/documents', ...config });
+  await init({ dataDir: '/documents', ...config, storageBackend });
 };
 
 connection.init(self, handlers);
