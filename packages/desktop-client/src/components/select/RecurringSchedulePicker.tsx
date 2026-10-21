@@ -23,6 +23,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { sendCatch } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { hasShortMonthFallback } from '@actual-app/core/shared/schedules';
 import type { RecurConfig, RecurPattern } from '@actual-app/core/types/models';
 import type {
   TransObjectLiteral,
@@ -129,18 +130,6 @@ function boundedRecurrence({
     return { [field]: value, value: MAX_DAY_OF_WEEK_INTERVAL };
   }
   return { [field]: value };
-}
-
-function usesLastDayForShortMonths(config: StateConfig) {
-  const dayValues = (config.patterns ?? [])
-    .filter(recurrence => recurrence.type === 'day')
-    .map(recurrence => recurrence.value);
-
-  return (
-    config.endMode !== 'after_n_occurrences' ||
-    dayValues.includes(-1) ||
-    (dayValues.length === 1 && dayValues[0] === 31)
-  );
 }
 
 type StateConfig = Omit<
@@ -383,8 +372,9 @@ function MonthlyPatterns({
             </Button>
           </View>
           {recurrence.type === 'day' &&
-            recurrence.value >= 29 &&
-            usesLastDayForShortMonths(config) && (
+            (recurrence.value === 31 ||
+              (config.endMode !== 'after_n_occurrences' &&
+                hasShortMonthFallback(unparseConfig(config)))) && (
               <View
                 style={{
                   display: 'flex',
@@ -552,7 +542,9 @@ function RecurringScheduleTooltip({
       {config.frequency === 'monthly' &&
       (config.patterns == null || config.patterns.length === 0) &&
       startDay >= 29 &&
-      (config.endMode !== 'after_n_occurrences' || startDay === 31) ? (
+      (startDay === 31 ||
+        (config.endMode !== 'after_n_occurrences' &&
+          hasShortMonthFallback(unparseConfig(config)))) ? (
         <View
           style={{
             display: 'flex',

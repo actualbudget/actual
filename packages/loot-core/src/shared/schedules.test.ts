@@ -16,6 +16,7 @@ import {
   getScheduleOccurrenceMatchStartDate,
   getStatus,
   getUpcomingDays,
+  hasShortMonthFallback,
   indexPostedScheduleTransactions,
   isCustomUpcomingLength,
   isScheduleOccurrencePosted,
@@ -800,6 +801,41 @@ describe('schedules', () => {
       ]);
     });
 
+    it('does not add an unreachable fallback rule for day 30 on an every-other-month grid', () => {
+      const dateCond = dayConfig('2026-09-30', [{ value: 30, type: 'day' }], {
+        interval: 2,
+      });
+      expect(getOccurrences(dateCond, '2026-09-29', 4)).toEqual([
+        '2026-09-30',
+        '2026-11-30',
+        '2027-01-30',
+        '2027-03-30',
+      ]);
+    });
+
+    it('keeps the Feb fallback when the interval grid visits February', () => {
+      const dateCond = dayConfig('2027-02-28', [{ value: 30, type: 'day' }], {
+        interval: 2,
+      });
+      expect(getOccurrences(dateCond, '2027-02-27', 3)).toEqual([
+        '2027-02-28',
+        '2027-04-30',
+        '2027-06-30',
+      ]);
+    });
+
+    it('clamps day 31 on an every-other-month grid anchored in October', () => {
+      const dateCond = dayConfig('2026-10-31', [{ value: 31, type: 'day' }], {
+        interval: 2,
+      });
+      expect(getOccurrences(dateCond, '2026-10-30', 4)).toEqual([
+        '2026-10-31',
+        '2026-12-31',
+        '2027-02-28',
+        '2027-04-30',
+      ]);
+    });
+
     it('clamps a bare monthly schedule starting on day 31', () => {
       const dateCond = dayConfig('2026-10-31', []);
       expect(getOccurrences(dateCond, '2026-10-30', 4)).toEqual([
@@ -874,6 +910,56 @@ describe('schedules', () => {
         expect(rules[0].byDayOfMonth).toEqual([30, 31]);
         expect(rules[1].byMonthOfYear).toEqual([2, 4, 6, 9, 11]);
         expect(rules[1].byDayOfMonth).toEqual([-1]);
+      });
+
+      it('omits the fallback rule when the interval grid never reaches a short month', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2026-09-30',
+          interval: 2,
+          patterns: [{ value: 30, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toEqual([30]);
+        expect(rules[0].byMonthOfYear).toBeUndefined();
+      });
+
+      it('keeps the Feb fallback rule when the interval grid reaches February', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2027-02-28',
+          interval: 2,
+          patterns: [{ value: 30, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(2);
+        expect(rules[1].byMonthOfYear).toEqual([2]);
+        expect(rules[1].byDayOfMonth).toEqual([-1]);
+      });
+
+      it('reports fallback reachability for the UI hint', () => {
+        expect(
+          hasShortMonthFallback({
+            frequency: 'monthly',
+            start: '2026-09-30',
+            interval: 2,
+            patterns: [{ value: 30, type: 'day' }],
+          }),
+        ).toBe(false);
+        expect(
+          hasShortMonthFallback({
+            frequency: 'monthly',
+            start: '2027-02-28',
+            interval: 2,
+            patterns: [{ value: 30, type: 'day' }],
+          }),
+        ).toBe(true);
+        expect(
+          hasShortMonthFallback({
+            frequency: 'monthly',
+            start: '2024-01-30',
+            patterns: [{ value: 30, type: 'day' }],
+          }),
+        ).toBe(true);
       });
 
       it('keeps only the primary rule for day 29 with after_n_occurrences', () => {

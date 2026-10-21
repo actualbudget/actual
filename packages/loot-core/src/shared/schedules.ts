@@ -3,7 +3,11 @@ import type { IRuleOptions } from '@rschedule/core';
 import * as d from 'date-fns';
 
 import { Condition } from '#server/rules';
-import type { RuleConditionEntity, ScheduleEntity } from '#types/models';
+import type {
+  RecurConfig,
+  RuleConditionEntity,
+  ScheduleEntity,
+} from '#types/models';
 
 import * as monthUtils from './months';
 import { q } from './query';
@@ -200,6 +204,53 @@ type ScheduleRuleOptions = IRuleOptions & {
   byMonthOfYear?: number[];
 };
 
+function getShortMonthDayValues(config: RecurConfig): number[] {
+  const patterns = config.patterns ?? [];
+  const days = patterns.filter(p => p.type === 'day');
+
+  if (days.length > 0) {
+    return days.map(p => p.value);
+  }
+
+  if (patterns.length === 0) {
+    const startDay = parseInt(monthUtils.format(config.start, 'd'), 10);
+    return startDay >= 29 ? [startDay] : [];
+  }
+
+  return [];
+}
+
+function getShortMonthFallbackMonths(config: RecurConfig): number[] {
+  const dayValues = getShortMonthDayValues(config);
+
+  if (
+    dayValues.length === 0 ||
+    dayValues.includes(-1) ||
+    (dayValues.length === 1 && dayValues[0] === 31) ||
+    !dayValues.some(v => v >= 29) ||
+    config.endMode === 'after_n_occurrences'
+  ) {
+    return [];
+  }
+
+  const interval = config.interval ?? 1;
+  const startMonth = parseInt(config.start.slice(5, 7), 10);
+
+  return [
+    ...new Set(
+      dayValues
+        .filter(v => v >= 29)
+        .flatMap(v => (v === 31 ? [2, 4, 6, 9, 11] : [2])),
+    ),
+  ]
+    .sort((a, b) => a - b)
+    .filter(m => (((m - startMonth) % interval) + interval) % interval === 0);
+}
+
+export function hasShortMonthFallback(config: RecurConfig): boolean {
+  return getShortMonthFallbackMonths(config).length > 0;
+}
+
 export function recurConfigToRSchedule(config) {
   const base: ScheduleRuleOptions = {
     start: monthUtils.parseDate(config.start),
@@ -261,18 +312,9 @@ export function recurConfigToRSchedule(config) {
         } else if (dayValues.length === 1 && dayValues[0] === 31) {
           dayRules = [{ ...base, byDayOfMonth: [31, -1] }];
         } else if (dayValues.some(v => v >= 29)) {
-          if (config.endMode === 'after_n_occurrences') {
-            // count is per-rule in rschedule, so a fallback rule would double the total occurrences beyond the requested end
-            dayRules = [dayRule];
-          } else {
-            const fallbackMonths = [
-              ...new Set(
-                dayValues
-                  .filter(v => v >= 29)
-                  .flatMap(v => (v === 31 ? [2, 4, 6, 9, 11] : [2])),
-              ),
-            ].sort((a, b) => a - b);
+          const fallbackMonths = getShortMonthFallbackMonths(config);
 
+          if (fallbackMonths.length > 0) {
             dayRules = [
               dayRule,
               {
@@ -281,6 +323,8 @@ export function recurConfigToRSchedule(config) {
                 byDayOfMonth: [-1],
               },
             ];
+          } else {
+            dayRules = [dayRule];
           }
         } else {
           dayRules = [dayRule];
