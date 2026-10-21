@@ -64,8 +64,11 @@ self.addEventListener('message', async event => {
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
+        // Only the previous engine (absurd-sql) needs SharedArrayBuffer
+        const storageBackend = msg.storageBackend ?? 'opfs';
 
         if (
+          storageBackend === 'legacy' &&
           !self.SharedArrayBuffer &&
           !msg.isSharedArrayBufferOverrideEnabled
         ) {
@@ -84,7 +87,7 @@ self.addEventListener('message', async event => {
           { maxRetries: isDev ? 5 : 3 },
         );
 
-        backend.initApp(isDev, self).catch(err => {
+        backend.initApp(isDev, self, { storageBackend }).catch(err => {
           console.log(err);
           appInitFailureInterval = postMessageWithRetry({
             type: 'app-init-failure',

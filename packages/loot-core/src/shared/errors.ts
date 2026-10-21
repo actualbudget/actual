@@ -161,6 +161,10 @@ export function getSyncError(error: string, id: string, meta?: unknown) {
     return getSchemaMismatchError();
   } else if (error === 'budget-not-found') {
     return `Budget "${id}" not found. Check the ID of your budget in the Advanced section of the settings page.`;
+  } else if (error === 'budget-in-use') {
+    return `Budget "${id}" is already open in another tab or window of this browser. Close it there and try again.`;
+  } else if (error === 'storage-migration-failed') {
+    return `Moving budget "${id}" to the new browser storage failed. Nothing was deleted; reload the page and try again.`;
   } else if (error === 'clock-drift') {
     return 'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
   } else {
