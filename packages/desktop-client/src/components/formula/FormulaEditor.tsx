@@ -461,6 +461,7 @@ export function FormulaEditor({
             value={`${timeframePicker.month}-01`}
             dateFormat={dateFormat}
             embedded
+            autoFocus
             isOpen
             onSelect={applyTimeframePickerValue}
           />

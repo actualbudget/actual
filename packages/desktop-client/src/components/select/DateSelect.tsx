@@ -540,6 +540,7 @@ function DateSelectDesktop({
             attached={!!onTransferDateSyncChange}
             embedded={embedded}
             onUpdate={date => {
+              if (embedded) setValue(format(date, dateFormat));
               setSelectedValue(format(date, dateFormat));
               onUpdate?.(format(date, 'yyyy-MM-dd'));
             }}
