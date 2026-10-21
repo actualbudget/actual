@@ -18,10 +18,8 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import { t } from 'i18next';
 
-import {
-  BalanceWithCarryover,
-  GoalStatus,
-} from '#components/budget/BalanceWithCarryover';
+import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { GoalStatus } from '#components/budget/GoalStatus';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';

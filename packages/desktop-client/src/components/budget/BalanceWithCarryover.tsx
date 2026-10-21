@@ -5,22 +5,18 @@ import type {
   ComponentType,
   CSSProperties,
 } from 'react';
-import { ProgressBar } from 'react-aria-components';
-import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { css } from '@emotion/css';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
+import { GoalStatus } from './GoalStatus';
 import { makeBalanceAmountStyle } from './util';
 
 type CarryoverIndicatorProps = {
@@ -47,22 +43,6 @@ export function CarryoverIndicator({ style }: CarryoverIndicatorProps) {
         style={style}
       />
     </View>
-  );
-}
-
-function GoalTooltipRow({ children }) {
-  return (
-    <div
-      style={{
-        ...styles.tnum,
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: 10,
-      }}
-    >
-      {children}
-    </div>
   );
 }
 
@@ -187,147 +167,5 @@ export function BalanceWithCarryover({
         </>
       )}
     </CellValue>
-  );
-}
-
-type GoalStatusProps = {
-  balance: BalanceWithCarryoverProps['balance'];
-  goal: BalanceWithCarryoverProps['goal'];
-  budgeted: BalanceWithCarryoverProps['budgeted'];
-  longGoal: BalanceWithCarryoverProps['longGoal'];
-  style?: CSSProperties;
-};
-
-export function GoalStatus({
-  balance,
-  goal,
-  budgeted,
-  longGoal,
-  style,
-}: GoalStatusProps) {
-  const { t } = useTranslation();
-  const format = useFormat();
-  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  const balanceValue = useSheetValue(balance) ?? 0;
-  const goalValue = useSheetValue(goal);
-  const budgetedValue = useSheetValue(budgeted) ?? 0;
-  const longGoalValue = useSheetValue(longGoal);
-
-  if (!isGoalTemplatesEnabled || goalValue == null) {
-    return null;
-  }
-
-  const have = longGoalValue === 1 ? balanceValue : budgetedValue;
-  const diff = have - goalValue;
-  // Round down while underfunded so the bar only reads 100% once the goal is met
-  const progress =
-    diff < 0 ? Math.floor(Math.max(0, have / goalValue) * 100) : 100;
-
-  return (
-    <View style={{ minWidth: 160, ...style }}>
-      <span style={{ fontWeight: 'bold' }}>
-        {diff === 0 ? (
-          <span style={{ color: theme.templateNumberFunded }}>
-            <Trans>Fully funded</Trans>
-          </span>
-        ) : diff > 0 ? (
-          <span style={{ color: theme.templateNumberFunded }}>
-            <Trans>
-              Overfunded (
-              {{
-                amount: format(diff, 'financial'),
-              }}
-              )
-            </Trans>
-          </span>
-        ) : (
-          <span style={{ color: theme.templateNumberUnderFunded }}>
-            <Trans>
-              Underfunded (
-              {{
-                amount: format(diff, 'financial'),
-              }}
-              )
-            </Trans>
-          </span>
-        )}
-      </span>
-      {goalValue > 0 && (
-        <ProgressBar
-          value={progress}
-          aria-label={t('Goal progress')}
-          style={{ alignSelf: 'stretch', margin: '6px 0' }}
-        >
-          <View
-            style={{
-              height: 4,
-              borderRadius: 2,
-              backgroundColor: theme.tableBorder,
-              overflow: 'hidden',
-            }}
-          >
-            <View
-              style={{
-                height: '100%',
-                width: `${progress}%`,
-                backgroundColor:
-                  diff >= 0
-                    ? theme.templateNumberFunded
-                    : theme.templateNumberUnderFunded,
-              }}
-            />
-          </View>
-        </ProgressBar>
-      )}
-      <GoalTooltipRow>
-        <Trans>
-          <div>Goal Type:</div>
-          <div>
-            {
-              {
-                type: longGoalValue === 1 ? t('Goal') : t('Automation'),
-              } as TransObjectLiteral
-            }
-          </div>
-        </Trans>
-      </GoalTooltipRow>
-      <GoalTooltipRow>
-        <Trans>
-          <div>Goal:</div>
-          <div>
-            {
-              {
-                amount: format(goalValue, 'financial'),
-              } as TransObjectLiteral
-            }
-          </div>
-        </Trans>
-      </GoalTooltipRow>
-      <GoalTooltipRow>
-        {longGoalValue !== 1 ? (
-          <Trans>
-            <div>Budgeted:</div>
-            <div>
-              {
-                {
-                  amount: format(budgetedValue, 'financial'),
-                } as TransObjectLiteral
-              }
-            </div>
-          </Trans>
-        ) : (
-          <Trans>
-            <div>Balance:</div>
-            <div>
-              {
-                {
-                  amount: format(balanceValue, 'financial'),
-                } as TransObjectLiteral
-              }
-            </div>
-          </Trans>
-        )}
-      </GoalTooltipRow>
-    </View>
   );
 }

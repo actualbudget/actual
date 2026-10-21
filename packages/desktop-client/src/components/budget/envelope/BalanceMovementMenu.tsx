@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { theme } from '@actual-app/components/theme';
 
-import { GoalStatus } from '#components/budget/BalanceWithCarryover';
+import { GoalStatus } from '#components/budget/GoalStatus';
 import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
