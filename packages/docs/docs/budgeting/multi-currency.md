@@ -272,9 +272,11 @@ On the **Budget** page for October, **FX changes (included)** is $300.00. **To B
 
 The calculated valuation is opening valuation $0.00, transaction activity $2,450.00, monthly FX changes $300.00, brought-forward FX $0.00, and closing valuation $2,750.00.
 
+**Reserved in other currencies** is $0.00. Assigned this month is $0.00, and spending, resets and revaluation are $0.00. Nothing is set aside in euros or pesos, so To Budget does not change. The Budget summary adds **Reserved in other currencies** only when that amount is not zero, or when the reservation is incomplete.
+
 BNP Paribas books $2,200.00 and closes at $2,500.00. Its monthly FX change is $300.00. The closing formula for 10/31/2026 is 1 EUR = 1.25 USD. BBVA México books $250.00 and closes at $250.00, so its FX change is $0.00. Its closing formula is 1 MXN = 0.05 USD.
 
-<img width="620" alt="FX valuation details for October 2026, with $300.00 included in To Budget and BNP Paribas closing at $2,500.00" src="/img/budgeting/multi-currency-fx-details@2x.png" />
+<img width="620" alt="FX valuation details for October 2026, with $300.00 included in To Budget and $0.00 reserved in other currencies" src="/img/budgeting/multi-currency-fx-details@2x.png" />
 
 ## FX impact report
 
@@ -306,6 +308,8 @@ For October, euros contribute -$34.06 and pesos -$2.53, making the selected tota
 
 ### Reconcile with the budget and export
 
-The final table, **FX changes included in To Budget**, shows amounts already included in available funds. Do not add them again. Each month in this example is **Up to date** and matches the selected total above. Brought forward is $0.00.
+The final table, **FX changes included in To Budget**, shows amounts already included in available funds. Do not add them again. Each month in this example is **Up to date** and matches the selected total above. Brought forward and **Reserved in other currencies** are $0.00 because the example has no currency reservations.
+
+<img width="1040" alt="Selected FX totals and FX changes already included in To Budget for June through October, with every month up to date" src="/img/budgeting/multi-currency-fx-included-history.png" />
 
 Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. The CSV retains full rate precision for checking the displayed amounts.

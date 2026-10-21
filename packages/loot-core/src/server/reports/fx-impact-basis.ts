@@ -1,3 +1,4 @@
+import type { PocketSnapshot } from '#server/budget/pocket-readers';
 import { pairEncoding } from '#server/sync/coupled-cells';
 import { allocateFractions, roundEven } from '#shared/amount-rescale';
 import type { ExchangeRateEntity, FxImpactReason } from '#types/models';
@@ -39,6 +40,8 @@ export type FxSnapshot = {
   /** Live rows dated through today. */
   rows: FxSnapshotRow[];
   rates: ExchangeRateEntity[];
+  /** Currency pocket reservation inputs and cells, on the same boundary. */
+  pockets?: PocketSnapshot;
 };
 
 /**

@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { send } from '@actual-app/core/platform/client/connection';
+import type { PocketIncompleteReason } from '@actual-app/core/server/budget/reservations';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
@@ -8,23 +9,30 @@ import type {
 
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
+import { addKnown, categoryPockets } from './budgetMonthCell';
 import type { BudgetMonthCell } from './budgetMonthCell';
 
-type BudgetAnalysisIntervalData = {
+/**
+ * Amounts are null when unknown. Categories with currency pockets add an
+ * FX contribution and the reasons for unknown amounts.
+ */
+export type BudgetAnalysisIntervalData = {
   date: string;
-  budgeted: number;
-  spent: number;
-  balance: number;
-  overspendingAdjustment: number;
+  budgeted: number | null;
+  spent: number | null;
+  balance: number | null;
+  overspendingAdjustment: number | null;
+  fxContribution?: number | null;
+  incomplete?: PocketIncompleteReason[];
 };
 
 type BudgetAnalysisData = {
   intervalData: BudgetAnalysisIntervalData[];
   startDate: string;
   endDate: string;
-  totalBudgeted: number;
-  totalSpent: number;
-  totalOverspendingAdjustment: number;
+  totalBudgeted: number | null;
+  totalSpent: number | null;
+  totalOverspendingAdjustment: number | null;
   finalOverspendingAdjustment: number;
 };
 
@@ -147,6 +155,65 @@ export function summarizeMonthCategories(
     carryoverToNextMonth,
     overspendingThisMonth,
     hasBudgetData,
+  };
+}
+
+/** A pocket category's last recorded balance, null with its reasons. */
+type PocketBalance = {
+  balance: number | null;
+  incomplete: PocketIncompleteReason[];
+};
+
+/**
+ * Categories with currency pockets report their own valued balance, reset
+ * and FX contribution, so they are summed rather than reconstructed. A month
+ * without a category's entry passes its last balance through.
+ */
+export function summarizePocketCategories(
+  monthData: BudgetMonthCell[],
+  categoryIds: string[],
+  lastBalances: Map<string, PocketBalance>,
+) {
+  let budgeted: number | null = 0;
+  let spent: number | null = 0;
+  let fxContribution: number | null = 0;
+  let balance: number | null = 0;
+  let reset: number | null = 0;
+  let hasBudgetData = false;
+  const incomplete = new Set<PocketIncompleteReason>();
+  for (const id of categoryIds) {
+    const pockets = categoryPockets(monthData, id);
+    if (!pockets) {
+      // A recorded unknown stays unknown, with its reasons.
+      const last = lastBalances.get(id);
+      balance = addKnown(balance, last ? last.balance : 0);
+      if (last?.balance === null) {
+        for (const reason of last.incomplete) incomplete.add(reason);
+      }
+      continue;
+    }
+    hasBudgetData ||= [pockets.budgeted, pockets.spent, pockets.balance].some(
+      value => value !== 0,
+    );
+    budgeted = addKnown(budgeted, pockets.budgeted);
+    spent = addKnown(spent, pockets.spent);
+    fxContribution = addKnown(fxContribution, pockets.fxContribution);
+    balance = addKnown(balance, pockets.balance);
+    reset = addKnown(reset, pockets.reset);
+    lastBalances.set(id, {
+      balance: pockets.balance,
+      incomplete: pockets.incomplete,
+    });
+    for (const reason of pockets.incomplete) incomplete.add(reason);
+  }
+  return {
+    budgeted,
+    spent,
+    fxContribution,
+    balance,
+    reset,
+    hasBudgetData,
+    incomplete: [...incomplete],
   };
 }
 
@@ -300,7 +367,6 @@ export function createBudgetAnalysisSpreadsheet({
 
     const intervalData: BudgetAnalysisIntervalData[] = [];
 
-    // Track running balance that respects carryover flags
     // Get the balance from the month before the start period to initialize properly
     const monthBeforeStart = monthUtils.subMonths(
       monthUtils.getMonth(startDate),
@@ -309,62 +375,100 @@ export function createBudgetAnalysisSpreadsheet({
     const prevMonthData = await send('envelope-budget-month', {
       month: monthBeforeStart,
     });
+    // This uses the same calculations as the budget page
+    const monthsData: BudgetMonthCell[][] = [];
+    for (const month of intervals) {
+      monthsData.push(await send('envelope-budget-month', { month }));
+    }
 
-    // Calculate the carryover from the previous month
+    // Categories with currency pockets in the range report their own
+    // balances; the others are reconstructed from their cells.
+    const pocketIds = categoriesToInclude
+      .filter(cat =>
+        [prevMonthData, ...monthsData].some(data =>
+          categoryPockets(data, cat.id),
+        ),
+      )
+      .map(cat => cat.id);
+    const ordinary = categoriesToInclude.filter(
+      cat => !pocketIds.includes(cat.id),
+    );
+    const lastBalances = new Map<string, PocketBalance>();
+    summarizePocketCategories(prevMonthData, pocketIds, lastBalances);
+
+    // Track running balance that respects carryover flags
     let runningBalance = summarizeMonthCategories(
       prevMonthData,
-      categoriesToInclude,
+      ordinary,
     ).carryoverToNextMonth;
 
     // Track totals across all months
-    let totalBudgeted = 0;
-    let totalSpent = 0;
-    let totalOverspendingAdjustment = 0;
+    let totalBudgeted: number | null = 0;
+    let totalSpent: number | null = 0;
+    let totalOverspendingAdjustment: number | null = 0;
 
     // Track overspending from previous month to apply in next month
     let overspendingFromPrevMonth = 0;
 
     // Process each month
-    for (const month of intervals) {
-      // Get budget values from the server for this month
-      // This uses the same calculations as the budget page
-      const monthData = await send('envelope-budget-month', { month });
+    intervals.forEach((month, index) => {
+      const monthData = monthsData[index];
+      const summary = summarizeMonthCategories(monthData, ordinary);
+      const pockets =
+        pocketIds.length > 0
+          ? summarizePocketCategories(monthData, pocketIds, lastBalances)
+          : null;
 
-      const {
-        budgeted,
-        spent,
-        carryoverToNextMonth,
-        overspendingThisMonth,
-        hasBudgetData,
-      } = summarizeMonthCategories(monthData, categoriesToInclude);
-
-      // Apply overspending adjustment from previous month (negative value)
-      const overspendingAdjustment = overspendingFromPrevMonth;
+      // Overspending reset from the previous month (negative value); a
+      // pocket category reports its own reset.
+      const overspendingAdjustment = addKnown(
+        overspendingFromPrevMonth,
+        pockets ? pockets.reset : 0,
+      );
+      const adjustment =
+        overspendingAdjustment === null
+          ? null
+          : Math.abs(overspendingAdjustment);
+      const budgeted = addKnown(
+        summary.budgeted,
+        pockets ? pockets.budgeted : 0,
+      );
+      const spent = addKnown(summary.spent, pockets ? pockets.spent : 0);
 
       // This month's balance = budgeted + spent + running balance + overspending adjustment
-      const monthBalance = budgeted + spent + runningBalance;
+      const monthBalance = addKnown(
+        summary.budgeted + summary.spent + runningBalance,
+        pockets ? pockets.balance : 0,
+      );
 
       // Update totals
-      totalBudgeted += budgeted;
-      totalSpent += spent;
-      totalOverspendingAdjustment += Math.abs(overspendingAdjustment);
+      totalBudgeted = addKnown(totalBudgeted, budgeted);
+      totalSpent = addKnown(totalSpent, spent);
+      totalOverspendingAdjustment = addKnown(
+        totalOverspendingAdjustment,
+        adjustment,
+      );
 
       intervalData.push({
         date: month,
         budgeted,
         spent,
         balance: monthBalance,
-        overspendingAdjustment: Math.abs(overspendingAdjustment),
+        overspendingAdjustment: adjustment,
+        ...(pockets && {
+          fxContribution: pockets.fxContribution,
+          incomplete: pockets.incomplete,
+        }),
       });
 
       runningBalance = getNextRunningBalance({
-        hasBudgetData,
-        carryoverToNextMonth,
+        hasBudgetData: summary.hasBudgetData || !!pockets?.hasBudgetData,
+        carryoverToNextMonth: summary.carryoverToNextMonth,
         runningBalance,
       });
       // Save this month's overspending to apply in next month
-      overspendingFromPrevMonth = overspendingThisMonth;
-    }
+      overspendingFromPrevMonth = summary.overspendingThisMonth;
+    });
 
     setData({
       intervalData,

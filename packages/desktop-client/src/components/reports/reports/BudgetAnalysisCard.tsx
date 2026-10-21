@@ -73,7 +73,8 @@ export function BudgetAnalysisCard({
     data && data.intervalData.length > 0
       ? data.intervalData[data.intervalData.length - 1]
       : undefined;
-  const balance = latestInterval?.balance ?? 0;
+  // Null when a currency pocket amount is unknown.
+  const balance = latestInterval ? latestInterval.balance : 0;
   return (
     <ReportCard
       widgetId={widgetId}
@@ -113,12 +114,17 @@ export function BudgetAnalysisCard({
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color: balance >= 0 ? theme.noticeTextLight : theme.errorText,
+                  color:
+                    balance === null || balance >= 0
+                      ? theme.noticeTextLight
+                      : theme.errorText,
                 }}
               >
                 <FinancialText>
                   <PrivacyFilter activationFilters={[!isCardHovered]}>
-                    {format(balance, 'financial')}
+                    {balance === null
+                      ? t('Unavailable')
+                      : format(balance, 'financial')}
                   </PrivacyFilter>
                 </FinancialText>
               </Block>

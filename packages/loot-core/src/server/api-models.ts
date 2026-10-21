@@ -14,6 +14,11 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import type {
+  CategoryPocketsMonth,
+  PocketLaneMonth,
+  PocketMonth,
+} from './budget/pocket-readers';
 import type { RemoteFile } from './cloud-storage';
 import * as models from './models';
 
@@ -96,6 +101,54 @@ export type APIMoneyTransactionEntity = Omit<
   /** Account currency, foreign-currency accounts only. */
   transaction_amount?: Money | null;
   subtransactions?: APIMoneyTransactionEntity[];
+};
+
+/** Replaces amount fields with raw integers or Money; null stays null. */
+type Amounts<T, K extends keyof T, A> = Omit<T, K> & { [P in K]: A | null };
+
+type LaneAmount =
+  | 'budgeted'
+  | 'budgetedBase'
+  | 'spent'
+  | 'spentBase'
+  | 'balance'
+  | 'balanceBase';
+
+export type APIPocketLaneMonth<A extends number | Money = number> = Amounts<
+  PocketLaneMonth,
+  LaneAmount,
+  A
+>;
+
+/**
+ * A currency pocket's month. Native fields (`budgeted`, `spent`, `balance`)
+ * are integers at `precision`, or Money in `currency`; the rest are in the
+ * budget currency.
+ */
+export type APIPocketMonth<A extends number | Money = number> = Amounts<
+  Omit<PocketMonth, 'lanes'>,
+  LaneAmount | 'fxContribution' | 'carryIn' | 'reset',
+  A
+> & { lanes: Array<APIPocketLaneMonth<A>> };
+
+/**
+ * Fields of a category with currency pockets: slot totals in the budget
+ * currency, the balance valued, null with a reason in `incomplete`.
+ */
+export type APICategoryPockets<A extends number | Money = number> = Amounts<
+  Omit<CategoryPocketsMonth, 'base' | 'pockets'>,
+  'budgeted' | 'spent' | 'balance' | 'carryIn' | 'reset' | 'fxContribution',
+  A
+> & {
+  base: {
+    budgeted: A;
+    spent: A;
+    balance: A;
+    carryIn: A;
+    reset: A;
+    carryover: boolean;
+  };
+  pockets: Array<APIPocketMonth<A>>;
 };
 
 export type APIBudgetMonth<A extends number | Money = number> = {

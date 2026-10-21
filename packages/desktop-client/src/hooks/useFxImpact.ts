@@ -42,7 +42,19 @@ type Snapshot = {
   isFetching: boolean;
 };
 
-const fxTables = ['transactions', 'accounts', 'exchange_rates', 'preferences'];
+const fxTables = [
+  'transactions',
+  'accounts',
+  'exchange_rates',
+  'preferences',
+  'category_pockets',
+  'pocket_budgets',
+  'slot_retirements',
+  'category_slot_meta',
+  // Reservations count under the categories these decide.
+  'categories',
+  'category_mapping',
+];
 const budgetCell = /^budget(\d{4})(\d{2})!(.+)$/;
 
 /**
@@ -56,7 +68,14 @@ function isRelevantCell(
   const match = budgetCell.exec(name);
   if (!match) return false;
   const [, year, monthOfYear, cell] = match;
-  if (cell === 'fx-changes' || cell === 'fx-incomplete') return true;
+  if (
+    cell === 'fx-changes' ||
+    cell === 'fx-incomplete' ||
+    cell.startsWith('reservation-') ||
+    cell.startsWith('pocket-value-')
+  ) {
+    return true;
+  }
   const month = `${year}-${monthOfYear}`;
   return (
     !createdMonths || month < createdMonths.first || month > createdMonths.last
