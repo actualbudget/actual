@@ -1,6 +1,7 @@
 import MockDate from 'mockdate';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { setBudget } from '#server/budget/actions';
 import { createAllBudgets } from '#server/budget/base';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
@@ -243,6 +244,47 @@ describe('forecast app', () => {
         transactions: [],
       },
     ]);
+  });
+
+  it('includes saved tracking allocations before future sheets are initialized without extrapolating blank months', async () => {
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'tracking';
+    await db.update('preferences', { id: 'budgetType', value: 'tracking' });
+    await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'salary',
+      name: 'Salary',
+      cat_group: 'income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'rent',
+      name: 'Rent',
+      cat_group: 'expenses',
+    });
+    await db.insertCategory({
+      id: 'hidden',
+      name: 'Hidden',
+      cat_group: 'expenses',
+      hidden: 1,
+    });
+    await createAllBudgets();
+    await setBudget({ category: 'salary', month: '2030-01', amount: 5000 });
+    await setBudget({ category: 'rent', month: '2030-01', amount: 2000 });
+    await setBudget({ category: 'hidden', month: '2030-01', amount: 1000 });
+
+    const result = await generateForecast({
+      source: 'tracking-budget',
+      startDate: '2030-01-01',
+      endDate: '2030-02-28',
+    });
+
+    expect(result.dataPoints.map(point => point.balance)).toEqual([3000, 3000]);
   });
 
   it('ignores reconstructed schedule occurrences before today', async () => {

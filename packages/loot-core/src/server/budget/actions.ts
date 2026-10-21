@@ -11,6 +11,8 @@ import { integerToCurrency, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
+import { getBudgetRange } from './base';
+
 export async function getSheetValue(
   sheetName: string,
   cell: string,
@@ -42,7 +44,7 @@ function calcBufferedAmount(
 
 type BudgetTable = 'reflect_budgets' | 'zero_budgets';
 
-function getBudgetTable(): BudgetTable {
+export function getBudgetTable(): BudgetTable {
   return isTrackingBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
@@ -103,7 +105,19 @@ function getAllMonths(startMonth: string): string[] {
       latest = month;
     }
   }
-  return monthUtils.rangeInclusive(startMonth, latest);
+  if (latest == null) {
+    return [];
+  }
+  if (isTrackingBudget()) {
+    const currentMonth = monthUtils.currentMonth();
+    const { end } = getBudgetRange(currentMonth, currentMonth);
+    if (latest > end) {
+      latest = end;
+    }
+  }
+  return startMonth <= latest
+    ? monthUtils.rangeInclusive(startMonth, latest)
+    : [];
 }
 
 // TODO: Valid month format in all the functions below
@@ -690,9 +704,9 @@ export async function copyUntilYearEnd({
 
   const yearEnd = monthUtils.getYearEnd(month);
   const { createdMonths } = sheet.get().meta();
-  const futureMonths = [...(createdMonths as Set<string>)]
-    .filter(m => m > month && m <= yearEnd)
-    .sort();
+  const futureMonths = getAllMonths(month).filter(
+    m => m > month && m <= yearEnd && createdMonths.has(m),
+  );
 
   await batchMessages(async () => {
     for (const futureMonth of futureMonths) {

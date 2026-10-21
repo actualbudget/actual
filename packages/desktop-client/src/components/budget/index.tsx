@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
+import { useErrorBoundary } from 'react-error-boundary';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
@@ -21,6 +21,7 @@ import {
   useSaveCategoryMutation,
   useSortCategoriesMutation,
 } from '#budget';
+import { useBudgetBounds } from '#hooks/useBudgetBounds';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -39,16 +40,18 @@ import { prewarmAllMonths, prewarmMonth } from './util';
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
+  const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const navigate = useNavigate();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
   const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
-  const [bounds, setBounds] = useState({
+  const { data: loadedBounds } = useBudgetBounds();
+  const bounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
-  });
+  };
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
@@ -58,31 +61,24 @@ export function Budget() {
 
   const init = useEffectEvent(() => {
     async function run() {
-      const { start, end } = await send('get-budget-bounds');
-      setBounds({ start, end });
+      if (!loadedBounds) {
+        return;
+      }
 
-      await prewarmAllMonths(
-        budgetType,
-        spreadsheet,
-        { start, end },
-        startMonth,
-      );
+      const validMonth =
+        startMonth < loadedBounds.start
+          ? loadedBounds.start
+          : startMonth > loadedBounds.end
+            ? loadedBounds.end
+            : startMonth;
+      await prewarmAllMonths(budgetType, spreadsheet, loadedBounds, validMonth);
 
       setInitialized(true);
     }
 
-    void run();
+    void run().catch(showErrorBoundary);
   });
-  useEffect(() => init(), []);
-
-  const loadBoundBudgets = useEffectEvent(() => {
-    void send('get-budget-bounds').then(({ start, end }) => {
-      if (bounds.start !== start || bounds.end !== end) {
-        setBounds({ start, end });
-      }
-    });
-  });
-  useEffect(() => loadBoundBudgets(), []);
+  useEffect(() => init(), [budgetType, loadedBounds]);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);

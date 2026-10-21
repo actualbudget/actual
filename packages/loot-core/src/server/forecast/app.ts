@@ -1,4 +1,5 @@
 import { createApp } from '#server/app';
+import { createAllBudgets } from '#server/budget/base';
 import * as db from '#server/db';
 import type { RuleConditionEntity } from '#types/models';
 import type { ForecastResult, ForecastSource } from '#types/models/forecast';
@@ -79,6 +80,8 @@ export async function generateForecast({
       );
     }
 
+    // Saved tracking plans can extend beyond the months initialized so far.
+    await createAllBudgets();
     const accounts = await resolveForecastAccounts({
       accountIds: undefined,
       plainConditions: [],
