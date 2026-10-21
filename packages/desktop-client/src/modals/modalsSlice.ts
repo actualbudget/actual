@@ -487,6 +487,7 @@ export type Modal =
         onCarryover?: (carryover: boolean) => void;
         onTransfer?: () => void;
         onCover?: () => void;
+        onFundGoal?: (amount: IntegerAmount) => void;
       };
     }
   | {
