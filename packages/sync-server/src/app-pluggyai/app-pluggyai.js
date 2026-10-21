@@ -5,6 +5,7 @@ import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -24,6 +25,7 @@ function canAccessFile(fileId, userId) {
 
 app.post(
   '/status',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
     if (!!fileId) {
@@ -60,6 +62,7 @@ app.post(
 
 app.post(
   '/accounts',
+  rejectApiTokenMiddleware,
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
     if (!!fileId) {
@@ -125,6 +128,10 @@ app.post(
   }),
 );
 
+// API tokens are intentionally permitted on this route: token-driven data sync
+// may invoke bank sync. This route operates on server-level bank credentials
+// (accountId) rather than a budget fileId, so budget-scope enforcement does not
+// apply here.
 app.post(
   '/transactions',
   handleError(async (req, res) => {

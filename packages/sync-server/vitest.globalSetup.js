@@ -70,26 +70,26 @@ export async function setup() {
   // Insert a fake "valid-token" fixture that can be reused
   const db = getAccountDb();
   try {
-    await db.mutate('BEGIN TRANSACTION');
+    db.mutate('BEGIN TRANSACTION');
 
-    await db.mutate('DELETE FROM sessions');
-    await db.mutate(
+    db.mutate('DELETE FROM sessions');
+    db.mutate(
       'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
       ['valid-token', NEVER_EXPIRES, 'genericAdmin'],
     );
-    await db.mutate(
+    db.mutate(
       'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
       ['valid-token-admin', NEVER_EXPIRES, 'genericAdmin'],
     );
 
-    await db.mutate(
+    db.mutate(
       'INSERT INTO sessions (token, expires_at, user_id) VALUES (?, ?, ?)',
       ['valid-token-user', NEVER_EXPIRES, 'genericUser'],
     );
 
-    await db.mutate('COMMIT');
+    db.mutate('COMMIT');
   } catch (error) {
-    await db.mutate('ROLLBACK');
+    db.mutate('ROLLBACK');
     throw new Error(`Failed to setup test sessions: ${error.message}`);
   }
 

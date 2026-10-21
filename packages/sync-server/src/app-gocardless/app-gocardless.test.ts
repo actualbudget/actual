@@ -10,6 +10,8 @@ vi.mock('#util/middlewares', () => ({
     next(),
   validateSessionMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),
+  rejectApiTokenMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
+    next(),
 }));
 
 vi.mock('./services/gocardless-service', () => ({
