@@ -660,11 +660,22 @@ class AccountInternal extends PureComponent<
       accountName && accountName.replace(/[()]/g, '').replace(/\s+/g, '-');
     const filename = `${normalizedName || 'transactions'}.csv`;
 
-    void window.Actual.saveFile(
-      exportedTransactions,
-      filename,
-      t('Export transactions'),
-    );
+    try {
+      await window.Actual.saveFile(
+        exportedTransactions,
+        filename,
+        t('Export transactions'),
+      );
+    } catch {
+      this.props.dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to export transactions.'),
+          },
+        }),
+      );
+    }
   };
 
   onTransactionsChange = (updatedTransaction: TransactionEntity) => {

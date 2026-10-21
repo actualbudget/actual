@@ -181,9 +181,11 @@ if (isDev) {
   );
 }
 
-function parseHTTPSConfig(value: string) {
+export function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
-    return value;
+    // Values passed via environment variables may escape newlines as `\n`.
+    // Restore them so the PEM data is valid.
+    return value.replace(/\\n/g, '\n');
   }
   return fs.readFileSync(value);
 }
