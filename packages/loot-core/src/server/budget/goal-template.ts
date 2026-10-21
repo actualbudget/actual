@@ -356,6 +356,7 @@ async function processTemplate(
 export type DryRunCategoryResult = {
   budgeted: number;
   perTemplate: number[];
+  errors: string[];
 };
 
 export async function dryRunCategoryTemplate({
@@ -374,7 +375,7 @@ export async function dryRunCategoryTemplate({
     q('categories').filter({ id: categoryId }).select('*'),
   );
   if (categoryData.length === 0) {
-    return { budgeted: 0, perTemplate: templates.map(() => 0) };
+    return { budgeted: 0, perTemplate: templates.map(() => 0), errors: [] };
   }
   const { contexts, errors } = await computeTemplates(
     month,
@@ -383,14 +384,12 @@ export async function dryRunCategoryTemplate({
     categoryData,
     true,
   );
-  if (errors.length > 0) {
-    throw new Error(errors.join('\n\n'));
-  }
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
+  if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0), errors };
   const values = ctx.getValues();
   return {
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
+    errors,
   };
 }

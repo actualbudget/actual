@@ -216,7 +216,7 @@ describe('dryRunCategoryTemplate', () => {
       categoryId: 'missing',
       templates,
     });
-    expect(result).toEqual({ budgeted: 0, perTemplate: [0] });
+    expect(result).toEqual({ budgeted: 0, perTemplate: [0], errors: [] });
   });
 
   it('shows full demand even when To Budget cannot cover it', async () => {
@@ -254,7 +254,7 @@ describe('dryRunCategoryTemplate', () => {
     expect(result.perTemplate).toEqual([180000, 320000]);
   });
 
-  it('throws when the templates fail validation', async () => {
+  it('returns the errors when the templates fail validation', async () => {
     setupSheetMock({ 'to-budget': 100000 });
     setupAqlForCategoryLookup(category);
 
@@ -262,13 +262,16 @@ describe('dryRunCategoryTemplate', () => {
       { type: 'goal', amount: 100, directive: 'goal' },
       { type: 'goal', amount: 200, directive: 'goal' },
     ];
-    await expect(
-      dryRunCategoryTemplate({
-        month: '2024-01',
-        categoryId: category.id,
-        templates,
-      }),
-    ).rejects.toThrow('Groceries: Only one #goal is allowed per category');
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    expect(result.errors).toEqual([
+      expect.stringContaining(
+        'Groceries: Only one #goal is allowed per category',
+      ),
+    ]);
   });
 });
 
