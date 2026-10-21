@@ -122,6 +122,29 @@ async function validateExpenseCategory(debug, id) {
   }
 }
 
+// A `#template` line that fails to parse is stored as an error template,
+// which the template runner skips, so it is rejected here instead.
+async function getCategoryTemplates(debug, categoryId) {
+  // Note templates reach `goal_def` only once stored, as applying does first.
+  await handlers['budget/store-note-templates']([categoryId]);
+  const templates =
+    (await handlers['budget/get-category-automations'](categoryId))[
+      categoryId
+    ] ?? [];
+  if (templates.length === 0) {
+    throw APIError(`${debug}: category "${categoryId}" has no template`);
+  }
+  const parseErrors = templates.flatMap(template =>
+    template.type === 'error'
+      ? [`${template.line}\nError: ${template.error}`]
+      : [],
+  );
+  if (parseErrors.length > 0) {
+    throw APIError(`${debug}: ${parseErrors.join('\n\n')}`);
+  }
+  return templates;
+}
+
 function validateDay(name: string, value: string) {
   if (typeof value !== 'string' || !monthUtils.isValidYearMonthDay(value)) {
     throw APIError(`Invalid ${name}, use YYYY-MM-DD: ${value}`);
@@ -559,6 +582,7 @@ handlers['api/budget-apply-category-template'] = withMutation(async function ({
   checkFileOpen();
   await validateMonth(month);
   await validateExpenseCategory('budget-apply-category-template', categoryId);
+  await getCategoryTemplates('budget-apply-category-template', categoryId);
   const result = await handlers['budget/apply-single-template']({
     month,
     category: categoryId,
@@ -566,11 +590,10 @@ handlers['api/budget-apply-category-template'] = withMutation(async function ({
   if (result.message === 'template-errors') {
     throw APIError(`budget-apply-category-template: ${result.pre}`);
   }
-  // A category with a template is always applied, so any other answer
-  // means it has none.
+  // The templates were checked above, so a category is always applied.
   if (result.message !== 'templates-applied') {
     throw APIError(
-      `budget-apply-category-template: category "${categoryId}" has no template`,
+      `budget-apply-category-template: unexpected result "${result.message}"`,
     );
   }
 });
@@ -583,16 +606,10 @@ handlers['api/budget-get-category-template-amount'] = withMutation(
       'budget-get-category-template-amount',
       categoryId,
     );
-    // Note templates reach `goal_def` only once stored, as applying does first.
-    await handlers['budget/store-note-templates']([categoryId]);
-    const templates = (
-      await handlers['budget/get-category-automations'](categoryId)
-    )[categoryId];
-    if (!templates || templates.length === 0) {
-      throw APIError(
-        `budget-get-category-template-amount: category "${categoryId}" has no template`,
-      );
-    }
+    const templates = await getCategoryTemplates(
+      'budget-get-category-template-amount',
+      categoryId,
+    );
     const { budgeted, errors } = await handlers[
       'budget/dry-run-category-template'
     ]({

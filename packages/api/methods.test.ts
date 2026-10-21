@@ -413,6 +413,25 @@ describe('API CRUD operations', () => {
     await expect(
       api.getCategoryTemplateAmount(month, categoryId),
     ).rejects.toThrow('Only one #goal is allowed per category');
+
+    await api.updateNote(categoryId, '#template 70\n#template nonsense');
+    await expect(
+      api.applyCategoryTemplate(month, categoryId),
+    ).rejects.toThrow('#template nonsense');
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('#template nonsense');
+    const unchangedMonth = await api.getBudgetMonth(month);
+    expect(unchangedMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
+          ]),
+        }),
+      ]),
+    );
   });
 
   //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
