@@ -306,9 +306,9 @@ The example below shows these states: normal (no automation), empty (no automati
 
 The goal status gives you more information about your budget and balance, including a progress bar:
 
-<img width="243" alt="The goal status for a fully funded category" src="/img/experimental/budget-automation-fully-funded@2x.webp" />
+<img width="228" alt="The balance menu showing the goal status for a fully funded category" src="/img/experimental/budget-automation-fully-funded@2x.webp" />
 
-<img width="247" alt="The goal status for an underfunded category" src="/img/experimental/budget-automation-underfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the goal status for an underfunded category" src="/img/experimental/budget-automation-underfunded@2x.webp" />
 
 ### Long-term Goal {#long-term-goal}
 
@@ -326,11 +326,11 @@ Once you hit your goal, the balance will turn green. Note that if you remove fun
 
 The goal status shows your progress:
 
-<img width="239" alt="The long-term goal status for an underfunded category" src="/img/experimental/budget-automation-long-term-underfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for an underfunded category" src="/img/experimental/budget-automation-long-term-underfunded@2x.webp" />
 
-<img width="222" alt="The long-term goal status for a fully funded category" src="/img/experimental/budget-automation-long-term-fully-funded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for a fully funded category" src="/img/experimental/budget-automation-long-term-fully-funded@2x.webp" />
 
-<img width="230" alt="The long-term goal status for an overfunded category" src="/img/experimental/budget-automation-long-term-overfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for an overfunded category" src="/img/experimental/budget-automation-long-term-overfunded@2x.webp" />
 
 ---
 
