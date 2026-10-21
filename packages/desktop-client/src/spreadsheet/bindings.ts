@@ -212,6 +212,8 @@ export const envelopeBudget = {
   incomeAvailable: 'available-funds',
   fxChanges: 'fx-changes',
   fxIncomplete: 'fx-incomplete',
+  reservationChanges: 'reservation-changes',
+  reservationIncomplete: 'reservation-incomplete',
   lastMonthOverspent: 'last-month-overspent',
   forNextMonth: 'buffered-selected',
   totalBudgeted: 'total-budgeted',

@@ -224,8 +224,10 @@ export async function prewarmMonth(
 
   const values = await send(method, { month });
 
-  for (const value of values) {
-    spreadsheet.prewarmCache(value.name, value);
+  for (const { name, value } of values) {
+    // A category's currency pocket month is a reader entry, not a cell.
+    if (typeof value === 'object') continue;
+    spreadsheet.prewarmCache(name, { name, value });
   }
 }
 

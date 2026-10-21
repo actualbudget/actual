@@ -50,6 +50,8 @@ import type {
 } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import { readCategoryPockets } from './budget/pocket-readers';
+import type { CategoryPocketsMonth } from './budget/pocket-readers';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
@@ -575,6 +577,53 @@ handlers['api/budget-month'] = async function ({ month, options }) {
       return toMoney(v ?? 0, budgetCurrencyCode);
     }
 
+    const pockets = await readCategoryPockets(month);
+    /** A pocket category's amounts; null stays null, with its reason. */
+    function pocketFields(category: CategoryPocketsMonth) {
+      const base = (v: number | null) =>
+        v === null || !asMoney ? v : toMoney(v, budgetCurrencyCode);
+      const native = (v: number | null, code: string) =>
+        v === null || !asMoney ? v : toMoney(v, code);
+      return {
+        budgeted: base(category.budgeted),
+        spent: base(category.spent),
+        balance: base(category.balance),
+        carryIn: base(category.carryIn),
+        reset: base(category.reset),
+        fxContribution: base(category.fxContribution),
+        base: {
+          ...category.base,
+          budgeted: base(category.base.budgeted),
+          spent: base(category.base.spent),
+          balance: base(category.base.balance),
+          carryIn: base(category.base.carryIn),
+          reset: base(category.base.reset),
+        },
+        pockets: category.pockets.map(pocket => ({
+          ...pocket,
+          budgeted: native(pocket.budgeted, pocket.currency),
+          budgetedBase: base(pocket.budgetedBase),
+          spent: native(pocket.spent, pocket.currency),
+          spentBase: base(pocket.spentBase),
+          balance: native(pocket.balance, pocket.currency),
+          balanceBase: base(pocket.balanceBase),
+          fxContribution: base(pocket.fxContribution),
+          carryIn: base(pocket.carryIn),
+          reset: base(pocket.reset),
+          lanes: pocket.lanes.map(lane => ({
+            ...lane,
+            budgeted: native(lane.budgeted, pocket.currency),
+            budgetedBase: base(lane.budgetedBase),
+            spent: native(lane.spent, pocket.currency),
+            spentBase: base(lane.spentBase),
+            balance: native(lane.balance, pocket.currency),
+            balanceBase: base(lane.balanceBase),
+          })),
+        })),
+        incomplete: category.incomplete,
+      };
+    }
+
     // This is duplicated from main.js because the return format is
     // different (for now)
     return {
@@ -626,13 +675,17 @@ handlers['api/budget-month'] = async function ({ month, options }) {
           spent: amount(`group-sum-amount-${group.id}`),
           balance: amount(`group-leftover-${group.id}`),
 
-          categories: group.categories.map(cat => ({
-            ...categoryModel.toExternal(cat),
-            budgeted: amount(`budget-${cat.id}`),
-            spent: amount(`sum-amount-${cat.id}`),
-            balance: amount(`leftover-${cat.id}`),
-            carryover: value(`carryover-${cat.id}`),
-          })),
+          categories: group.categories.map(cat => {
+            const category = pockets.get(cat.id);
+            return {
+              ...categoryModel.toExternal(cat),
+              budgeted: amount(`budget-${cat.id}`),
+              spent: amount(`sum-amount-${cat.id}`),
+              balance: amount(`leftover-${cat.id}`),
+              carryover: value(`carryover-${cat.id}`),
+              ...(category && pocketFields(category)),
+            };
+          }),
         };
       }),
     };

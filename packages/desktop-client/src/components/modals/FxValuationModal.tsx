@@ -13,6 +13,10 @@ import {
   ModalHeader,
 } from '#components/common/Modal';
 import { FinancialText } from '#components/FinancialText';
+import {
+  ReservationCurrency,
+  ReservationsSummary,
+} from '#components/fx/ReservationDetails';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useBudgetPrecision } from '#hooks/useAmountPrecision';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -145,6 +149,21 @@ function FxValuationDetails({ month }: { month: string }) {
                       this month.
                     </Trans>
                   </Text>
+                )}
+                {bridge.reservations && (
+                  <>
+                    <ReservationsSummary
+                      reservations={bridge.reservations}
+                      amount={amount}
+                    />
+                    {bridge.reservations.currencies.map(currency => (
+                      <ReservationCurrency
+                        key={currency.currency}
+                        currency={currency}
+                        amount={amount}
+                      />
+                    ))}
+                  </>
                 )}
                 {bridge.accounts.map(account => (
                   <View

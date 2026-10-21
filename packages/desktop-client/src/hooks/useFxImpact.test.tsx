@@ -258,28 +258,32 @@ describe('notifications', () => {
 
   it('reads once per applied event naming a relevant table, and ignores others', async () => {
     const { calls } = await displayed();
+    // Categories and mappings decide which category a reservation counts
+    // under (MC-10).
     for (const table of [
       'transactions',
       'accounts',
       'exchange_rates',
       'preferences',
+      'categories',
+      'category_mapping',
     ]) {
       const before = calls.length;
       serverPush('sync-event', { type: 'applied', tables: [table] });
       await waitFor(() => expect(calls).toHaveLength(before + 1));
       await act(async () => calls[before].resolve(labelled(table)));
     }
-    serverPush('sync-event', { type: 'applied', tables: ['categories'] });
+    serverPush('sync-event', { type: 'applied', tables: ['notes'] });
     serverPush('sync-event', { type: 'success', tables: ['transactions'] });
     await settle();
-    expect(calls).toHaveLength(5);
+    expect(calls).toHaveLength(7);
     serverPush('sync-event', {
       type: 'applied',
       tables: ['transactions', 'accounts', 'preferences'],
     });
-    await waitFor(() => expect(calls).toHaveLength(6));
+    await waitFor(() => expect(calls).toHaveLength(8));
     await settle();
-    expect(calls).toHaveLength(6);
+    expect(calls).toHaveLength(8);
   });
 
   it('reads for FX cells of any month and for sheets outside the created months only', async () => {

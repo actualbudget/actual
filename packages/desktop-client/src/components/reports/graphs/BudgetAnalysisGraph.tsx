@@ -33,20 +33,17 @@ import { computePadding } from './util/computePadding';
  */
 type BudgetAnalysisIntervalData = {
   date: string;
-  budgeted: number;
-  spent: number;
-  balance: number;
-  overspendingAdjustment: number;
+  /** Null when unknown (an out-of-range currency pocket amount). */
+  budgeted: number | null;
+  spent: number | null;
+  balance: number | null;
+  overspendingAdjustment: number | null;
+  /** Present when the selection has currency pockets (MC-10). */
+  fxContribution?: number | null;
 };
 
 type PayloadItem = {
-  payload: {
-    date: string;
-    budgeted: number;
-    spent: number;
-    balance: number;
-    overspendingAdjustment: number;
-  };
+  payload: BudgetAnalysisIntervalData;
 };
 
 type BudgetAnalysisGraphProps = {
@@ -85,6 +82,8 @@ function CustomTooltip({
   }
 
   const [{ payload: data }] = payload;
+  const amount = (value: number | null) =>
+    value === null ? t('Unavailable') : format(value, 'financial');
 
   return (
     <div
@@ -123,11 +122,7 @@ function CustomTooltip({
                   <Trans>Budgeted:</Trans>
                 </span>
               }
-              right={
-                <FinancialText>
-                  {format(data.budgeted, 'financial')}
-                </FinancialText>
-              }
+              right={<FinancialText>{amount(data.budgeted)}</FinancialText>}
             />
           )}
           {!balanceOnly && (
@@ -145,9 +140,7 @@ function CustomTooltip({
                   <Trans>Spent:</Trans>
                 </span>
               }
-              right={
-                <FinancialText>{format(data.spent, 'financial')}</FinancialText>
-              }
+              right={<FinancialText>{amount(data.spent)}</FinancialText>}
             />
           )}
           {!balanceOnly && (
@@ -167,8 +160,16 @@ function CustomTooltip({
               }
               right={
                 <FinancialText>
-                  {format(data.overspendingAdjustment, 'financial')}
+                  {amount(data.overspendingAdjustment)}
                 </FinancialText>
+              }
+            />
+          )}
+          {!balanceOnly && data.fxContribution !== undefined && (
+            <AlignedText
+              left={t('FX contribution:')}
+              right={
+                <FinancialText>{amount(data.fxContribution)}</FinancialText>
               }
             />
           )}
@@ -189,7 +190,7 @@ function CustomTooltip({
               }
               right={
                 <FinancialText>
-                  <strong>{format(data.balance, 'financial')}</strong>
+                  <strong>{amount(data.balance)}</strong>
                 </FinancialText>
               }
             />
@@ -231,12 +232,15 @@ export function BudgetAnalysisGraph({
     return monthUtils.format(date, 'MMM d', locale);
   };
 
-  const allValues = graphData.flatMap(item => [
-    item.budgeted,
-    item.spent,
-    item.balance,
-    item.overspendingAdjustment,
-  ]);
+  // Unknown amounts leave a gap rather than a point.
+  const allValues = graphData
+    .flatMap(item => [
+      item.budgeted,
+      item.spent,
+      item.balance,
+      item.overspendingAdjustment,
+    ])
+    .filter(value => value !== null);
 
   const leftPadding = computePadding(allValues, value =>
     format(value, 'financial-no-decimals'),

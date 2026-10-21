@@ -9,6 +9,7 @@ import {
 } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { ReservationsBridge } from '@actual-app/core/server/budget/pocket-readers';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   FxAccountMonth,
@@ -24,6 +25,10 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
+import {
+  ReservationCurrency,
+  ReservationsSummary,
+} from '#components/fx/ReservationDetails';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import {
   CurrencyFormatProvider,
@@ -515,6 +520,84 @@ function BridgeMonth({
         bridge?.accounts.map(row => (
           <BridgeAccountRow key={row.accountId} row={row} accounts={accounts} />
         ))}
+      {bridge?.reservations && (
+        <ReservationsRow
+          month={month.month}
+          reservations={bridge.reservations}
+        />
+      )}
+    </>
+  );
+}
+
+/** The reservation To Budget subtracts, beside the FX it includes (MC-10). */
+function ReservationsRow({
+  month,
+  reservations,
+}: {
+  month: string;
+  reservations: ReservationsBridge;
+}) {
+  const { t } = useTranslation();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const monthName = useMonthName(month);
+  const amount = (value: number | null) => <FxAmount value={value} />;
+  return (
+    <>
+      <tr>
+        <th scope="row" style={{ ...rowHeaderStyle, paddingLeft: 30 }}>
+          <Trans>Reserved in other currencies</Trans>
+          {reservations.currencies.length > 0 && (
+            <Toggle
+              isExpanded={isExpanded}
+              onToggle={() => setIsExpanded(!isExpanded)}
+              label={t('Reservations for {{month}}', { month: monthName })}
+            >
+              <Trans>Currencies</Trans>
+            </Toggle>
+          )}
+        </th>
+        <td style={cellStyle}>
+          <FxAmount value={reservations.cell.changes} />
+        </td>
+        <td style={cellStyle}>
+          <View style={{ gap: 2 }}>
+            {reservations.pending ? (
+              <span>
+                <Trans>Pending: the next refresh will include</Trans>{' '}
+                <FxAmount value={reservations.changes} />
+              </span>
+            ) : (
+              <Trans>Up to date</Trans>
+            )}
+            {(reservations.incomplete || reservations.cell.incomplete) && (
+              <Note>
+                <Trans>Reservation incomplete</Trans>
+              </Note>
+            )}
+          </View>
+        </td>
+        <td style={cellStyle} />
+      </tr>
+      {isExpanded && (
+        <tr>
+          <td colSpan={4} style={cellStyle}>
+            <View style={{ gap: 10 }}>
+              <ReservationsSummary
+                reservations={reservations}
+                amount={amount}
+              />
+              {reservations.currencies.map(currency => (
+                <ReservationCurrency
+                  key={currency.currency}
+                  currency={currency}
+                  amount={amount}
+                />
+              ))}
+            </View>
+          </td>
+        </tr>
+      )}
     </>
   );
 }

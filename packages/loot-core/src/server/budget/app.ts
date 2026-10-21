@@ -18,8 +18,17 @@ import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import { editEffects } from './edit-effects';
-import { fxValuation } from './fx-valuation';
+import type { FxMonth } from './fx-valuation';
 import * as goalActions from './goal-template';
+import {
+  readCategoryPockets,
+  readPockets,
+  reservationsBridge,
+} from './pocket-readers';
+import type {
+  CategoryPocketsMonth,
+  ReservationsBridge,
+} from './pocket-readers';
 import { createPocket, setSlotMeta } from './pockets';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -268,7 +277,16 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
     }
   }
 
-  return values;
+  // Each category with currency pockets also reports its slot totals, the
+  // valued balance and its pockets, under a name no sheet cell uses.
+  const pockets: Array<{ name: string; value: CategoryPocketsMonth }> = [];
+  for (const [id, entry] of await readCategoryPockets(month)) {
+    pockets.push({
+      name: resolveName(sheetName, `category-pockets-${id}`),
+      value: entry,
+    });
+  }
+  return [...values, ...pockets];
 }
 
 async function trackingBudgetMonth({ month }: { month: string }) {
@@ -531,15 +549,24 @@ async function isCategoryTransferRequired({
   });
 }
 
-/** One month's valuation bridge for its display (MC-8.2). */
-async function monthFxValuation({ month }: { month: string }) {
+/**
+ * One month's valuation bridge for its display (MC-8.2), with the currency
+ * pocket reservations explained, from one snapshot.
+ */
+async function monthFxValuation({
+  month,
+}: {
+  month: string;
+}): Promise<FxMonth & { reservations?: ReservationsBridge | null }> {
+  const { snapshot, valuation, reservations: walked } = await readPockets();
+  const reservations = reservationsBridge(snapshot, walked, month);
   // The bridge needs the months before it for its latest resolved close.
-  const months = sheet.get().meta().createdMonths as Set<string> | undefined;
-  const range = [...(months ?? [])].filter(m => m <= month);
-  return (
-    (await fxValuation(range.length > 0 ? range : [month])).find(
-      entry => entry.month === month,
-    ) ?? {
+  const range = snapshot.createdMonths.filter(m => m <= month);
+  const bridge = valuation(range.length > 0 ? range : [month]).find(
+    entry => entry.month === month,
+  );
+  return {
+    ...(bridge ?? {
       month,
       opening: 0,
       closing: 0,
@@ -549,6 +576,7 @@ async function monthFxValuation({ month }: { month: string }) {
       incomplete: false,
       unavailableReason: null,
       accounts: [],
-    }
-  );
+    }),
+    reservations,
+  };
 }
