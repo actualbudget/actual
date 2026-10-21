@@ -415,9 +415,9 @@ describe('API CRUD operations', () => {
     ).rejects.toThrow('Only one #goal is allowed per category');
 
     await api.updateNote(categoryId, '#template 70\n#template nonsense');
-    await expect(
-      api.applyCategoryTemplate(month, categoryId),
-    ).rejects.toThrow('#template nonsense');
+    await expect(api.applyCategoryTemplate(month, categoryId)).rejects.toThrow(
+      '#template nonsense',
+    );
     await expect(
       api.getCategoryTemplateAmount(month, categoryId),
     ).rejects.toThrow('#template nonsense');
