@@ -396,7 +396,7 @@ export const GenericInput = ({
           break;
 
         default:
-          if (typeof props.value !== 'string') {
+          if (typeof props.value !== 'string' && props.value !== null) {
             content = (
               <RecurringSchedulePicker
                 value={props.value}
