@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 type ScheduleEntry = {
   scheduleName?: string;
@@ -18,6 +18,7 @@ export class ScheduleEditModal {
   readonly addButton: Locator;
   readonly saveButton: Locator;
   readonly cancelButton: Locator;
+  readonly recurringPickerButton: Locator;
 
   constructor(locator: Locator) {
     this.locator = locator;
@@ -33,6 +34,9 @@ export class ScheduleEditModal {
     this.addButton = locator.getByRole('button', { name: 'Add' });
     this.saveButton = locator.getByRole('button', { name: 'Save' });
     this.cancelButton = locator.getByRole('button', { name: 'Cancel' });
+    this.recurringPickerButton = locator.getByTestId(
+      'recurring-picker-trigger',
+    );
   }
 
   async fill(data: ScheduleEntry) {
@@ -66,6 +70,30 @@ export class ScheduleEditModal {
       .filter({ hasText: content })
       .first()
       .click();
+  }
+
+  async openRecurringPicker() {
+    await this.recurringPickerButton.click();
+
+    const popover = this.page
+      .locator('[data-popover]')
+      .filter({ hasText: 'Repeat every' });
+    await expect(popover).toBeVisible();
+    await popover.getByText('From').click();
+
+    return popover;
+  }
+
+  async addSpecificDays(popover: Locator) {
+    const addDaysButton = popover.getByRole('button', {
+      name: 'Add specific days',
+    });
+    await expect(addDaysButton).toBeVisible();
+    await addDaysButton.click();
+    await expect(
+      popover.getByRole('button', { name: '1', exact: true }),
+    ).toBeVisible();
+    await this.page.keyboard.press('Escape');
   }
 
   async save() {
