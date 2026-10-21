@@ -1,11 +1,10 @@
 import React, { useMemo } from 'react';
-import type { ComponentPropsWithoutRef, CSSProperties } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { format } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
@@ -14,12 +13,9 @@ import {
   scheduleIsRecurring,
 } from '@actual-app/core/shared/schedules';
 
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
+import { MobileSheet } from '#components/mobile/MobileSheet';
+import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
+import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useLocale } from '#hooks/useLocale';
 import { useSchedules } from '#hooks/useSchedules';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -36,13 +32,8 @@ export function ScheduledTransactionMenuModal({
   onPost,
   onComplete,
 }: ScheduledTransactionMenuModalProps) {
+  const { t } = useTranslation();
   const locale = useLocale();
-  const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mobileMenuItem,
-    color: theme.menuItemText,
-    borderRadius: 0,
-    borderTop: `1px solid ${theme.pillBorder}`,
-  };
   const scheduleId = transactionId?.split('/')?.[1];
   const schedulesQuery = useMemo(
     () => q('schedules').filter({ id: scheduleId }).select('*'),
@@ -57,106 +48,62 @@ export function ScheduledTransactionMenuModal({
   }
 
   const schedule = schedules?.[0];
+  if (!schedule) {
+    return null;
+  }
+
   const { date: dateCond } = extractScheduleConds(schedule._conditions);
 
   const canBeSkipped = scheduleIsRecurring(dateCond);
   const canBeCompleted = !scheduleIsRecurring(dateCond);
 
   return (
-    <Modal name="scheduled-transaction-menu">
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={<ModalTitle title={schedule?.name || ''} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+    <MobileSheet
+      name="scheduled-transaction-menu"
+      title={schedule.name || t('Schedule')}
+    >
+      <View
+        style={{
+          alignItems: 'center',
+          padding: `${spacing.xs}px ${spacing.md}px ${spacing.md}px`,
+        }}
+      >
+        <Text
+          style={{
+            ...styles.smallText,
+            color: theme.pageTextLight,
+            marginBottom: spacing.xxs,
+          }}
+        >
+          <Trans>Scheduled date</Trans>
+        </Text>
+        <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
+          {format(schedule.next_date || '', 'MMMM dd, yyyy', locale)}
+        </Text>
+      </View>
+
+      <MobileSheetSection>
+        <MobileSheetRow
+          label={t('Post transaction')}
+          onPress={() => onPost(transactionId)}
+        />
+        <MobileSheetRow
+          label={t('Post transaction today')}
+          onPress={() => onPost(transactionId, true)}
+        />
+        {canBeSkipped && (
+          <MobileSheetRow
+            label={getSkipScheduleText(schedule.next_date)}
+            onPress={() => onSkip(transactionId)}
           />
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <Text style={{ fontSize: 17, fontWeight: 400 }}>
-              <Trans>Scheduled date</Trans>
-            </Text>
-            <Text style={{ fontSize: 17, fontWeight: 700 }}>
-              {format(schedule?.next_date || '', 'MMMM dd, yyyy', locale)}
-            </Text>
-          </View>
-          <ScheduledTransactionMenu
-            transactionId={transactionId}
-            nextDate={schedule?.next_date}
-            onPost={onPost}
-            onSkip={onSkip}
-            onComplete={onComplete}
-            canBeSkipped={canBeSkipped}
-            canBeCompleted={canBeCompleted}
-            getItemStyle={() => defaultMenuItemStyle}
+        )}
+        {canBeCompleted && (
+          <MobileSheetRow
+            label={t('Mark as completed')}
+            onPress={() => onComplete(transactionId)}
           />
-        </>
-      )}
-    </Modal>
-  );
-}
-
-type ScheduledTransactionMenuProps = Omit<
-  ComponentPropsWithoutRef<typeof Menu>,
-  'onMenuSelect' | 'items'
-> & {
-  transactionId: string;
-  nextDate?: string | null;
-  onSkip: (transactionId: string) => void;
-  onPost: (transactionId: string, today?: boolean) => void;
-  onComplete: (transactionId: string) => void;
-};
-
-function ScheduledTransactionMenu({
-  transactionId,
-  nextDate,
-  onSkip,
-  onPost,
-  onComplete,
-  canBeSkipped,
-  canBeCompleted,
-  ...props
-}: ScheduledTransactionMenuProps & {
-  canBeCompleted: boolean;
-  canBeSkipped: boolean;
-}) {
-  const { t } = useTranslation();
-
-  return (
-    <Menu
-      {...props}
-      onMenuSelect={name => {
-        switch (name) {
-          case 'post':
-            onPost?.(transactionId);
-            break;
-          case 'post-today':
-            onPost?.(transactionId, true);
-            break;
-          case 'skip':
-            onSkip?.(transactionId);
-            break;
-          case 'complete':
-            onComplete?.(transactionId);
-            break;
-          default:
-            throw new Error(`Unrecognized menu option: ${name}`);
-        }
-      }}
-      items={[
-        { name: 'post', text: t('Post transaction') },
-        { name: 'post-today', text: t('Post transaction today') },
-        ...(canBeSkipped
-          ? [{ name: 'skip', text: getSkipScheduleText(nextDate) }]
-          : []),
-        ...(canBeCompleted
-          ? [{ name: 'complete', text: t('Mark as completed') }]
-          : []),
-      ]}
-    />
+        )}
+      </MobileSheetSection>
+    </MobileSheet>
   );
 }

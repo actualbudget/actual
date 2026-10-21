@@ -20,23 +20,33 @@ import { resolveName } from './spreadsheet/util';
 let globalSheet: Spreadsheet;
 let globalOnChange;
 let globalCacheDb;
+let globalCacheTarget;
 
 export function get(): Spreadsheet {
   return globalSheet;
 }
 
+// Prepared once per database: a cold build writes hundreds of thousands of
+// rows, and preparing the statement for each one dominated the write.
+const cacheInsertStatements = new WeakMap();
+
 async function updateSpreadsheetCache(rawDb, names: string[]) {
+  let insert = cacheInsertStatements.get(rawDb);
+  if (!insert) {
+    insert = sqlite.prepare(
+      rawDb,
+      'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
+    );
+    cacheInsertStatements.set(rawDb, insert);
+  }
+
   sqlite.transaction(rawDb, () => {
     names.forEach(name => {
       const node = globalSheet._getNode(name);
 
       // Don't cache query nodes yet
       if (node.sql == null) {
-        sqlite.runQuery(
-          rawDb,
-          'INSERT OR REPLACE INTO kvcache (key, value) VALUES (?, ?)',
-          [name, JSON.stringify(node.value)],
-        );
+        sqlite.runQuery(rawDb, insert, [name, JSON.stringify(node.value)]);
       }
     });
   });
@@ -130,6 +140,7 @@ export async function loadSpreadsheet(
   }
 
   let sheet;
+  globalCacheTarget = cacheEnabled ? cacheDb : null;
   if (cacheEnabled) {
     sheet = new Spreadsheet(
       updateSpreadsheetCache.bind(null, cacheDb),
@@ -188,6 +199,13 @@ export function unloadSpreadsheet(): void {
     sqlite.closeDatabase(globalCacheDb);
     globalCacheDb = null;
   }
+  globalCacheTarget = null;
+}
+
+export function clearCache(): void {
+  if (globalCacheTarget) {
+    sqlite.runQuery(globalCacheTarget, 'DELETE FROM kvcache');
+  }
 }
 
 export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
@@ -218,32 +236,39 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
 
   sheet.startTransaction();
 
-  // Load all the budget amounts and carryover values
-  for (const budget of budgets) {
-    if (budget.month && budget.category) {
-      const sheetName = `budget${budget.month}`;
-      sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
-      sheet.set(
-        `${sheetName}!carryover-${budget.category}`,
-        budget.carryover === 1 ? true : false,
+  try {
+    // Load all the budget amounts and carryover values
+    for (const budget of budgets) {
+      if (budget.month && budget.category) {
+        const sheetName = `budget${budget.month}`;
+        sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
+        sheet.set(
+          `${sheetName}!carryover-${budget.category}`,
+          budget.carryover === 1 ? true : false,
+        );
+        sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
+        sheet.set(
+          `${sheetName}!long-goal-${budget.category}`,
+          budget.long_goal,
+        );
+      }
+    }
+
+    // For zero-based budgets, load the buffered amounts
+    if (budgetType !== 'tracking') {
+      const budgetMonths = await db.all<DbZeroBudgetMonth>(
+        'SELECT * FROM zero_budget_months',
       );
-      sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
-      sheet.set(`${sheetName}!long-goal-${budget.category}`, budget.long_goal);
+      for (const budgetMonth of budgetMonths) {
+        const sheetName = sheetForMonth(budgetMonth.id);
+        sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
+      }
     }
+  } finally {
+    // The query above runs inside the transaction, so a failure would
+    // otherwise leave it open and wedge the spreadsheet for the session.
+    sheet.endTransaction();
   }
-
-  // For zero-based budgets, load the buffered amounts
-  if (budgetType !== 'tracking') {
-    const budgetMonths = await db.all<DbZeroBudgetMonth>(
-      'SELECT * FROM zero_budget_months',
-    );
-    for (const budgetMonth of budgetMonths) {
-      const sheetName = sheetForMonth(budgetMonth.id);
-      sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
-    }
-  }
-
-  sheet.endTransaction();
 }
 
 export function getCell(sheet: string, name: string) {

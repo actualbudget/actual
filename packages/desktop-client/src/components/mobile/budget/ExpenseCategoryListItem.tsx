@@ -248,9 +248,8 @@ export function ExpenseCategoryListItem({
         category: category.id,
         flag: carryover,
       });
-      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
     },
-    [category, onBudgetAction, month, dispatch, balanceMenuModalName],
+    [category, onBudgetAction, month],
   );
 
   const catBalance = useSheetValue<

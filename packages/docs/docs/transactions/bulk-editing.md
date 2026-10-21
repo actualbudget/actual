@@ -18,36 +18,36 @@ This guidance is not compatible with split transactions, bulk editing produces s
 
 There are various components of a transaction that can be changed through bulk edit. These can be seen here.
 
-![](/img/bulk-edit/1.webp)
+<img width="224" alt="The selection menu, with the fields that can be edited listed under Edit field" src="/img/transactions/bulk-editing-fields@2x.webp" />
 
 To Access this drop down first go to "All accounts" so that you can see all transactions.
 
-![](/img/elements/sidebar/sidebar-all-accounts@2x.webp)
+<img width="240" alt="The sidebar with All accounts highlighted" src="/img/elements/sidebar/sidebar-all-accounts@2x.webp" />
 
 Then Search or Filter to identify the transactions that you wish to change and select the tick box in the left hand column (by the date column).
 
-![](/img/bulk-edit/3.webp)
+<img width="860" alt="All accounts searched for City Water, showing four transactions with tick boxes" src="/img/transactions/bulk-editing-search@2x.webp" />
 
-![](/img/bulk-edit/4.webp)
+<img width="860" alt="The four transactions ticked, with the 4 transactions button highlighted" src="/img/transactions/bulk-editing-selected@2x.webp" />
 
-Now you are ready to alter one or more components of these selected transactions. Go to the drop down top right (in this case the arrow below "30 transactions")
+Now you are ready to alter one or more components of these selected transactions. Go to the drop down top right (in this case the arrow next to "4 transactions")
 
-![](/img/bulk-edit/5.webp)
+![The selection menu open next to 4 transactions](/img/transactions/bulk-editing-selection-menu@2x.webp)
 
 Now select the component you wish to change. In this case we are going to add a Note
 
-![](/img/bulk-edit/6.webp)
+<img width="512" alt="The Notes dialog with Water bill typed in" src="/img/transactions/bulk-editing-notes@2x.webp" />
 
 Press "Enter" and all the selected transactions are changed.
 
-![](/img/bulk-edit/7.webp)
+<img width="860" alt="The four selected transactions, now all with the note Water bill" src="/img/transactions/bulk-editing-notes-result@2x.webp" />
 
 Here is another example. This time to bulk change a Category.
 
-![](/img/bulk-edit/8.webp)
+<img width="512" alt="The Category dialog filtered to the Water category" src="/img/transactions/bulk-editing-category@2x.webp" />
 
 ### Duplicating Transactions
 
 To duplicate transactions (one or more), simply navigate to the Accounts page as described above, and select the tick box in the left hand column. Once selected, go to the drop down menu on the top right of the page, above the table header. Open the menu and select "Duplicate". Your newly duplicated transactions will appear in the transactions table!
 
-![](/img/bulk-edit/duplicate-transactions.webp)
+<img width="860" alt="The selection menu with Duplicate highlighted" src="/img/transactions/bulk-editing-duplicate@2x.webp" />
