@@ -1,4 +1,9 @@
 import { rateUsed, walkFxValuation } from '#server/budget/fx-valuation';
+import {
+  readPocketSnapshot,
+  reservationsBridge,
+  walkPocketSnapshot,
+} from '#server/budget/pocket-readers';
 import * as db from '#server/db';
 import { selectRate } from '#server/exchange-rates/app';
 import * as sheet from '#server/sheet';
@@ -187,6 +192,7 @@ export function readFxSnapshot(today: string): FxSnapshot {
       transferId: row.transferred_id,
     })),
     rates,
+    pockets: readPocketSnapshot(today),
   };
 }
 
@@ -583,6 +589,10 @@ export function calculateFxImpact(
       rateOn,
     }).map(entry => [entry.month, entry]),
   );
+  // The reservations the refresh computes from the same boundary.
+  const reserved = snapshot.pockets
+    ? walkPocketSnapshot(snapshot.pockets, selectRate).reservations
+    : null;
   const staleSince = new Map<string, string>();
   for (const row of snapshot.rows) {
     const stamp = pairEncoding(row.pair);
@@ -640,6 +650,10 @@ export function calculateFxImpact(
         unavailableReason: a.unavailableReason,
         stale: (staleSince.get(a.account) ?? '9999') <= closeDate,
       })),
+      reservations:
+        snapshot.pockets && reserved
+          ? reservationsBridge(snapshot.pockets, reserved, month)
+          : null,
     };
   };
 

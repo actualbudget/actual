@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { send } from '@actual-app/core/platform/client/connection';
+import type { CategoryPocketsMonth } from '@actual-app/core/server/budget/pocket-readers';
 import {
   createBudgetQueryPrefetchKey,
   setCachedUserPreferences,
@@ -25,6 +26,8 @@ import {
   asMonthSlidingTimeFrame,
   calculateTimeRange,
 } from '#components/reports/reportRanges';
+import { categoryPockets } from '#components/reports/spreadsheets/budgetMonthCell';
+import type { BudgetMonthCell } from '#components/reports/spreadsheets/budgetMonthCell';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
 import { useAmountPrecision } from './useAmountPrecision';
@@ -572,22 +575,31 @@ async function getCategoriesFromConditions(
 }
 
 // Helper: Get month data from envelope-budget-month RPC
-async function getMonthBudgetData(
-  month: string,
-): Promise<Array<{ name: string; value: string | number | boolean }>> {
+async function getMonthBudgetData(month: string): Promise<BudgetMonthCell[]> {
   const monthData = await send('envelope-budget-month', { month });
   return monthData || [];
 }
 
 // Helper: Extract value from month data by field pattern
 function getMonthDataValue(
-  monthData: Array<{ name: string; value: string | number | boolean }>,
+  monthData: BudgetMonthCell[],
   pattern: string,
   catId: string,
 ): string | number | boolean {
   const fieldName = pattern.replace('{catId}', catId);
-  const cell = monthData.find(c => c.name.endsWith(fieldName));
-  return cell?.value ?? 0;
+  const value = monthData.find(c => c.name.endsWith(fieldName))?.value ?? 0;
+  return typeof value === 'object' ? 0 : value;
+}
+
+/** A currency pocket amount; unknown is a formula error, never zero. */
+function knownPocketAmount(
+  pockets: CategoryPocketsMonth,
+  value: number | null,
+): number {
+  if (value === null) {
+    throw new Error(pockets.incomplete.join(', ') || 'amount-unavailable');
+  }
+  return value;
 }
 
 // Helper: Extract categories from a named query (for QUERY_EXTRACT_CATEGORIES)
@@ -664,6 +676,7 @@ async function fetchBudgetDimensionValueDirect(
     'balance_start',
     'balance_end',
     'goal',
+    'fx_contribution',
   ]);
   const dim = dimension.toLowerCase();
   if (!allowed.has(dim)) {
@@ -671,43 +684,94 @@ async function fetchBudgetDimensionValueDirect(
   }
 
   const intervals = monthUtils.rangeInclusive(startMonth, endMonth);
+  const monthBeforeStart = monthUtils.subMonths(startMonth, 1);
+  const monthsData = new Map<string, BudgetMonthCell[]>();
+  for (const month of [monthBeforeStart, ...intervals]) {
+    monthsData.set(month, await getMonthBudgetData(month));
+  }
+  const monthDataOf = (month: string) => monthsData.get(month) ?? [];
+  // Categories with currency pockets in the range report their own valued
+  // amounts; the others are reconstructed from their cells.
+  const pocketIds = categoryIds.filter(id =>
+    [...monthsData.values()].some(data => categoryPockets(data, id)),
+  );
+  const ordinaryIds = categoryIds.filter(id => !pocketIds.includes(id));
 
   // Helper: sum a dimension across all months/categories
-  const sumDimension = async (fieldPattern: string): Promise<number> => {
+  const sumDimension = (
+    fieldPattern: string | null,
+    pocketField?: 'budgeted' | 'spent' | 'fxContribution',
+  ): number => {
     let total = 0;
     for (const month of intervals) {
-      const monthData = await getMonthBudgetData(month);
-      for (const catId of categoryIds) {
-        const value = getMonthDataValue(monthData, fieldPattern, catId);
+      const monthData = monthDataOf(month);
+      const ordinary = pocketField ? ordinaryIds : categoryIds;
+      for (const catId of fieldPattern ? ordinary : []) {
+        const value = getMonthDataValue(monthData, fieldPattern!, catId);
         total +=
           typeof value === 'number' && Number.isSafeInteger(value) ? value : 0;
+      }
+      for (const catId of pocketField ? pocketIds : []) {
+        const pockets = categoryPockets(monthData, catId);
+        if (pockets) {
+          total += knownPocketAmount(pockets, pockets[pocketField!]);
+        }
       }
     }
     return total;
   };
 
   if (dim === 'budgeted') {
-    return decodeStoredAmount(await sumDimension('budget-{catId}'), precision);
-  }
-
-  if (dim === 'spent') {
     return decodeStoredAmount(
-      await sumDimension('sum-amount-{catId}'),
+      sumDimension('budget-{catId}', 'budgeted'),
       precision,
     );
   }
 
+  if (dim === 'spent') {
+    return decodeStoredAmount(
+      sumDimension('sum-amount-{catId}', 'spent'),
+      precision,
+    );
+  }
+
+  if (dim === 'fx_contribution') {
+    // Only currency pockets have an FX contribution.
+    return decodeStoredAmount(sumDimension(null, 'fxContribution'), precision);
+  }
+
   if (dim === 'goal') {
-    return decodeStoredAmount(await sumDimension('goal-{catId}'), precision);
+    return decodeStoredAmount(sumDimension('goal-{catId}'), precision);
   }
 
   // Handle balance dimensions: chain month-by-month with carryover logic
   if (dim === 'balance_start' || dim === 'balance_end') {
     let runningBalance = 0;
-    const monthBeforeStart = monthUtils.subMonths(startMonth, 1);
-    const prevMonthData = await getMonthBudgetData(monthBeforeStart);
+    const prevMonthData = monthDataOf(monthBeforeStart);
+    // A pocket category reports its own valued boundary: its carry-in at
+    // the start, its closing balance at the end. A month without its entry
+    // passes the last recorded balance through, unknown if that was.
+    // Only the requested boundary is read.
+    const loaded = [monthBeforeStart, ...intervals];
+    const pocketBoundary = (month: string, field: 'carryIn' | 'balance') => {
+      let total = 0;
+      for (const catId of pocketIds) {
+        const pockets = categoryPockets(monthDataOf(month), catId);
+        if (pockets) {
+          total += knownPocketAmount(pockets, pockets[field]);
+          continue;
+        }
+        const last = loaded
+          .filter(m => m < month)
+          .reverse()
+          .map(m => categoryPockets(monthDataOf(m), catId))
+          .find(entry => entry !== undefined);
+        if (last) total += knownPocketAmount(last, last.balance);
+      }
+      return total;
+    };
 
-    for (const catId of categoryIds) {
+    for (const catId of ordinaryIds) {
       const catBalanceValue = getMonthDataValue(
         prevMonthData,
         'leftover-{catId}',
@@ -729,12 +793,12 @@ async function fetchBudgetDimensionValueDirect(
     const balances: Record<string, { start: number; end: number }> = {};
 
     for (const month of intervals) {
-      const monthData = await getMonthBudgetData(month);
+      const monthData = monthDataOf(month);
       let budgeted = 0;
       let spent = 0;
       let carryoverToNextMonth = 0;
 
-      for (const catId of categoryIds) {
+      for (const catId of ordinaryIds) {
         const catBudgeted =
           Number(getMonthDataValue(monthData, 'budget-{catId}', catId)) || 0;
         const catSpent =
@@ -762,10 +826,15 @@ async function fetchBudgetDimensionValueDirect(
     }
 
     if (dim === 'balance_start') {
-      return decodeStoredAmount(balances[intervals[0]]?.start || 0, precision);
+      return decodeStoredAmount(
+        (balances[intervals[0]]?.start || 0) +
+          pocketBoundary(intervals[0], 'carryIn'),
+        precision,
+      );
     }
+    const endMonth = intervals[intervals.length - 1];
     return decodeStoredAmount(
-      balances[intervals[intervals.length - 1]]?.end || 0,
+      (balances[endMonth]?.end || 0) + pocketBoundary(endMonth, 'balance'),
       precision,
     );
   }

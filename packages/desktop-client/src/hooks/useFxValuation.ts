@@ -17,7 +17,16 @@ const valuationTables = [
   'accounts',
   'exchange_rates',
   'preferences',
+  // Currency pocket reservations and the categories they count under.
+  'category_pockets',
+  'pocket_budgets',
+  'slot_retirements',
+  'category_slot_meta',
+  'categories',
+  'category_mapping',
 ];
+/** Reservation and lane value cells can change while the FX pair holds. */
+const reservationCell = /!(reservation-|pocket-value-)/;
 
 /** Mounted only by the open details dialog. The worker read also works offline. */
 export function useFxValuation(
@@ -34,18 +43,25 @@ export function useFxValuation(
     const timer = setInterval(() => setDay(currentDay()), 60_000);
     return () => clearInterval(timer);
   }, []);
-  useEffect(
-    () =>
-      listen('sync-event', event => {
-        if (
-          event.type === 'applied' &&
-          event.tables.some(table => valuationTables.includes(table))
-        ) {
-          void queryClient.invalidateQueries({ queryKey: valuationKey });
-        }
-      }),
-    [queryClient],
-  );
+  useEffect(() => {
+    const invalidate = () =>
+      void queryClient.invalidateQueries({ queryKey: valuationKey });
+    const stopSync = listen('sync-event', event => {
+      if (
+        event.type === 'applied' &&
+        event.tables.some(table => valuationTables.includes(table))
+      ) {
+        invalidate();
+      }
+    });
+    const stopCells = listen('cells-changed', nodes => {
+      if (nodes.some(node => reservationCell.test(node.name))) invalidate();
+    });
+    return () => {
+      stopSync();
+      stopCells();
+    };
+  }, [queryClient]);
 
   const query = useQuery({
     queryKey: [

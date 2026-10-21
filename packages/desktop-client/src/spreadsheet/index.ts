@@ -40,6 +40,8 @@ export type Spreadsheets = {
     'available-funds': number;
     'fx-changes': number;
     'fx-incomplete': boolean;
+    'reservation-changes': number;
+    'reservation-incomplete': boolean;
     'last-month-overspent': number;
     buffered: number;
     'buffered-auto': number;

@@ -8,7 +8,10 @@ import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
-import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import {
+  EnvelopeCellValue,
+  useEnvelopeSheetValue,
+} from '#components/budget/envelope/EnvelopeBudgetComponents';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -59,6 +62,13 @@ export function TotalsList({
 }: TotalsListProps) {
   const format = useFormat();
   const fx = useFxSummary();
+  // Currency pockets reserve funds that To Budget subtracts (MC-10).
+  const reservationChanges = useEnvelopeSheetValue(
+    envelopeBudget.reservationChanges,
+  );
+  const reservationIncomplete =
+    useEnvelopeSheetValue(envelopeBudget.reservationIncomplete) === true;
+  const reserved = (reservationChanges ?? 0) !== 0 || reservationIncomplete;
   const dispatch = useDispatch();
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
@@ -171,6 +181,21 @@ export function TotalsList({
               />
             )}
           </EnvelopeCellValue>
+
+          {reserved && (
+            <EnvelopeCellValue
+              binding={envelopeBudget.reservationChanges}
+              type="financial"
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  style={{ fontWeight: 600 }}
+                  formatter={invertedSignedFormatter}
+                />
+              )}
+            </EnvelopeCellValue>
+          )}
         </View>
 
         <View>
@@ -194,8 +219,19 @@ export function TotalsList({
           <Block>
             <Trans>For next month</Trans>
           </Block>
+
+          {reserved && (
+            <Block>
+              <Trans>Reserved in other currencies</Trans>
+            </Block>
+          )}
         </View>
       </View>
+      {reservationIncomplete && (
+        <Block role="status" style={{ textAlign: 'center' }}>
+          <Trans>Reservation incomplete</Trans>
+        </Block>
+      )}
       {fx.visible && (
         <View style={{ alignItems: 'center', gap: 3 }}>
           {fx.incomplete && (

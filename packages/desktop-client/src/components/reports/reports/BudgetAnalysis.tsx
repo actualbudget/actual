@@ -372,7 +372,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   }
 
   const latestInterval = data.intervalData[data.intervalData.length - 1];
-  const endingBalance = latestInterval?.balance ?? 0;
+  // Null when a currency pocket amount is unknown.
+  const endingBalance = latestInterval ? latestInterval.balance : 0;
 
   const title = widget?.meta?.name || t('Budget Analysis');
 
@@ -523,7 +524,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(data.totalBudgeted, 'financial')}
+                                {data.totalBudgeted === null
+                                  ? t('Unavailable')
+                                  : format(data.totalBudgeted, 'financial')}
                               </PrivacyFilter>
                             </FinancialText>
                           }
@@ -538,7 +541,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(data.totalSpent, 'financial')}
+                                {data.totalSpent === null
+                                  ? t('Unavailable')
+                                  : format(data.totalSpent, 'financial')}
                               </PrivacyFilter>
                             </FinancialText>
                           }
@@ -571,7 +576,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           right={
                             <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                <Change amount={endingBalance} />
+                                {endingBalance === null ? (
+                                  <Trans>Unavailable</Trans>
+                                ) : (
+                                  <Change amount={endingBalance} />
+                                )}
                               </PrivacyFilter>
                             </FinancialText>
                           }

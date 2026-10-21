@@ -1,3 +1,4 @@
+import type { ReservationsBridge } from '@actual-app/core/server/budget/pocket-readers';
 import type {
   FxAccountMonth,
   FxBridgeAccount,
@@ -42,6 +43,41 @@ const END = [
   'reference rate',
 ];
 
+// [label, field, native] for each currency's reservation figures.
+const RESERVATION_FIGURES = [
+  ['Holdings', 'holdings', true],
+  ['Booked holdings', 'bookedHoldings', false],
+  ['Held at valuation', 'heldAtValuation', true],
+  ['Booked at valuation', 'bookedAtValuation', false],
+  ['Reserved', 'reserved', true],
+  ['Unreserved', 'unreserved', true],
+  ['Holdings value', 'holdingsValue', false],
+  ['Gap', 'gap', false],
+  ['Excluded FX', 'excludedFx', false],
+  ['Included FX', 'includedFx', false],
+  ['Included value', 'includedValue', false],
+  ['Market holdings', 'marketHoldings', false],
+  ['Market unreserved', 'marketUnreserved', false],
+  ['Account rounding', 'accountRounding', false],
+  ['Planning', 'planning', false],
+  ['Pocket total', 'pocketTotal', false],
+  ['Included reservation', 'includedReservation', false],
+  ['Exact change', 'exactChange', false],
+  ['Written change', 'writtenChange', false],
+  ['Spent base', 'spentBase', false],
+] as const;
+const LANE_FIGURES = [
+  ['Budgeted', 'budgeted', true],
+  ['Budgeted base', 'budgetedBase', false],
+  ['Spent', 'spent', true],
+  ['Lane spent base', 'spentBase', false],
+  ['Carry in', 'carryIn', true],
+  ['Reset', 'reset', true],
+  ['Balance', 'balance', true],
+  ['Balance base', 'balanceBase', false],
+  ['Reservation FX', 'reservationFx', false],
+] as const;
+
 // Stable machine-readable headers, like the type and reason codes below.
 const COLUMNS = [
   'Type',
@@ -76,6 +112,22 @@ const COLUMNS = [
   ...['Source', 'Destination'].flatMap(end =>
     END.map(part => `${end} ${part}`),
   ),
+  // Currency pocket reservations (MC-10): natives at the currency's
+  // precision, the rest in the budget currency.
+  'Valuation',
+  'Rule',
+  'Carried from',
+  ...RESERVATION_FIGURES.map(([label]) => label),
+  'Funds',
+  'Shortage',
+  'Assigned',
+  'Remainder',
+  'Lane ID',
+  'Category ID',
+  ...LANE_FIGURES.map(([label]) => label),
+  'Capture date',
+  'Value kind',
+  'Carryover',
   'Reasons',
   'Incomplete accounts',
   'Note',
@@ -182,6 +234,67 @@ export function buildFxImpactRecords(result: FxImpactResult): CsvRecord[] {
     };
   };
 
+  /** The reservation section: captured cells, split, currencies, lanes. */
+  const reservationRecords = (
+    month: string,
+    reservations: ReservationsBridge | null,
+  ): CsvRecord[] => {
+    if (!reservations) return [];
+    return [
+      {
+        Type: 'reservations',
+        Month: month,
+        Contribution: money(reservations.changes),
+        'Contribution incomplete': flag(reservations.incomplete),
+        'Included in To Budget': money(reservations.cell.changes),
+        'Included incomplete': flag(reservations.cell.incomplete),
+        Pending: flag(reservations.pending),
+        Assigned: money(reservations.assigned),
+        Remainder: money(reservations.remainder),
+      },
+      ...reservations.currencies.flatMap(currency => {
+        const amount = (value: number | null, native: boolean) =>
+          native ? exactDecimal(value, currency.precision) : money(value);
+        return [
+          {
+            Type: 'reservation-currency',
+            Month: month,
+            Currency: text(currency.currency),
+            Valuation: currency.valuation,
+            Rule: currency.rule === null ? '' : String(currency.rule),
+            'Carried from': currency.carriedFrom ?? '',
+            ...rateCells('Closing', currency.valuationDate, currency.rate),
+            ...Object.fromEntries(
+              RESERVATION_FIGURES.map(([label, field, native]) => [
+                label,
+                amount(currency[field], native),
+              ]),
+            ),
+            Funds: money(currency.funds),
+            Shortage: flag(currency.backing.shortage),
+            Reasons: text(currency.incomplete.join('; ')),
+          },
+          ...currency.lanes.map(lane => ({
+            Type: 'reservation-lane',
+            Month: month,
+            Currency: text(currency.currency),
+            'Lane ID': text(lane.laneId),
+            'Category ID': text(lane.categoryId),
+            ...Object.fromEntries(
+              LANE_FIGURES.map(([label, field, native]) => [
+                label,
+                amount(lane[field], native),
+              ]),
+            ),
+            'Capture date': lane.captureDate ?? '',
+            'Value kind': lane.valueKind,
+            Carryover: flag(lane.carryover),
+          })),
+        ];
+      }),
+    ];
+  };
+
   const complete = (record: CsvRecord): CsvRecord =>
     Object.fromEntries(COLUMNS.map(column => [column, record[column] ?? '']));
 
@@ -242,6 +355,7 @@ export function buildFxImpactRecords(result: FxImpactResult): CsvRecord[] {
           Incomplete: flag(bridge.incomplete),
         },
         ...bridge.accounts.map(values => bridgeAccount(month.month, values)),
+        ...reservationRecords(month.month, bridge.reservations ?? null),
       );
     }
     records.push(
