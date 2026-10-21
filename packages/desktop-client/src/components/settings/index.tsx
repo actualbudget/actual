@@ -50,11 +50,11 @@ function About() {
   const serverURL = useServerURL();
   const version = useServerVersion();
   const versionInfo = useSelector(state => state.app.versionInfo);
+  const dispatch = useDispatch();
   const [notifyWhenUpdateIsAvailable, setNotifyWhenUpdateIsAvailablePref] =
     useGlobalPref('notifyWhenUpdateIsAvailable', () => {
       void dispatch(getLatestAppVersion());
     });
-  const dispatch = useDispatch();
   const [showNewsFeed, setShowNewsFeedPref] = useGlobalPref('showNewsFeed');
   const isNewsFeedEnabled = Boolean(showNewsFeed);
 

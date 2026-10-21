@@ -286,12 +286,14 @@ export function ConfigServer() {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = useSelector(state => state.user.data);
-  const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
-  useEffect(() => {
+  const [url, setUrl] = useState(currentUrl);
+  const [prevCurrentUrl, setPrevCurrentUrl] = useState(currentUrl);
+  if (currentUrl !== prevCurrentUrl) {
+    setPrevCurrentUrl(currentUrl);
     setUrl(currentUrl);
-  }, [currentUrl]);
+  }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

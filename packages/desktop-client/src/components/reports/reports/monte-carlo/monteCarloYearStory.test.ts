@@ -12,7 +12,14 @@ const translate = ((key: string, options?: Record<string, unknown>) =>
     String(options?.[name]),
   )) as unknown as TFunction;
 
-const format = (amount: number) => amount.toFixed(2);
+// Rejects fractions like the real formatter, which only takes whole
+// minor units
+const format = (amount: number) => {
+  if (!Number.isInteger(amount)) {
+    throw new Error(`not an integer: ${amount}`);
+  }
+  return amount.toFixed(2);
+};
 
 function makeRow(
   overrides: Partial<MonteCarloRunDetailRow> = {},
@@ -77,6 +84,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'guardrails',
         factor: 0.75,
+        previousFactor: 1,
         planned: 40_000,
         adjusted: 16_875,
         action: 'cut',
@@ -103,6 +111,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'guardrails',
         factor: 1,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 4_000,
         action: 'none',
@@ -122,6 +131,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'boundaries',
         factor: 0.9,
+        previousFactor: 0.9,
         planned: 4_000,
         adjusted: 3_600,
         action: 'none',
@@ -138,6 +148,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'boundaries',
         factor: 0.9,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 3_600,
         action: 'cut',
@@ -153,6 +164,7 @@ describe('buildMonteCarloYearStory', () => {
         kind: 'factor',
         rule: 'ratcheting',
         factor: 1.05,
+        previousFactor: 1,
         planned: 4_000,
         adjusted: 4_200,
         action: 'raise',
@@ -161,6 +173,67 @@ describe('buildMonteCarloYearStory', () => {
     });
     expect(story(ratchetRaise)[0]).toBe(
       "Ratcheting raised this year's spending from 4000.00 to 4200.00 because the balance had stayed above 1.5× its starting level for 3 years.",
+    );
+  });
+
+  it("measures a change from last year's level when earlier changes still apply", () => {
+    // The screenshot year 57: earlier cuts had the factor at 0.249, a
+    // 20% raise takes it to 0.299 - so spending rose from 14,946.78 to
+    // 17,936.13, nowhere near the 60,000 planned
+    const raiseStillBelowPlan = makeRow({
+      withdrawal: 17_936,
+      plannedSpending: 17_936,
+      spent: 17_936,
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'guardrails',
+        factor: 0.298936,
+        previousFactor: 0.298936 / 1.2,
+        planned: 60_000,
+        adjusted: 17_936,
+        action: 'raise',
+        currentRate: 0.01504,
+        referenceRate: 0.053553,
+      },
+    });
+    expect(story(raiseStillBelowPlan)[0]).toBe(
+      "Guardrails raised this year's spending from 14947.00 to 17936.00 because the withdrawal rate had fallen well below the plan. With earlier changes included, that is below the 60000.00 planned.",
+    );
+
+    const cutStillAbovePlan = makeRow({
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'boundaries',
+        factor: 1.2 * 0.9,
+        previousFactor: 1.2,
+        planned: 4_000,
+        adjusted: 4_320,
+        action: 'cut',
+        currentRate: 0.07,
+      },
+    });
+    expect(story(cutStillAbovePlan)[0]).toBe(
+      "Boundaries cut this year's spending from 4800.00 to 4320.00 because the withdrawal rate rose above 6%. With earlier changes included, that is above the 4000.00 planned.",
+    );
+  });
+
+  it('survives a 100% cut, which zeroes the factor', () => {
+    const row = makeRow({
+      withdrawal: 0,
+      plannedSpending: 0,
+      spent: 0,
+      ruleExplanation: {
+        kind: 'factor',
+        rule: 'guardrails',
+        factor: 0,
+        previousFactor: 0.8,
+        planned: 4_000,
+        adjusted: 0,
+        action: 'cut',
+      },
+    });
+    expect(story(row)[0]).toBe(
+      "Guardrails cut this year's spending from 3200.00 to 0.00 because the withdrawal rate had climbed too far above the plan. With earlier changes included, that is below the 4000.00 planned.",
     );
   });
 
@@ -239,18 +312,18 @@ describe('buildMonteCarloYearStory', () => {
   });
 
   it('says where income went when contributions took it', () => {
-    // The user's year 66: 12,547.60 income, all paid into the cash pot
+    // The user's year 66: 12,548 income, all paid into the cash pot
     const allContributed = makeRow({
-      income: 12_547.6,
-      incomeAmounts: [12_547.6],
-      contributions: 12_547.6,
-      withdrawal: 24_282.41,
-      taxPaid: 4_282.41,
+      income: 12_548,
+      incomeAmounts: [12_548],
+      contributions: 12_548,
+      withdrawal: 24_282,
+      taxPaid: 4_282,
       plannedSpending: 20_000,
       spent: 20_000,
     });
     expect(story(allContributed, { hasSurplusPot: true })).toEqual([
-      'The 12547.60 income all went into contributions, so the 20000.00 spent came from the pots.',
+      'The 12548.00 income all went into contributions, so the 20000.00 spent came from the pots.',
     ]);
 
     const partlyContributed = makeRow({

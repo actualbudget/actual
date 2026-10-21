@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
@@ -58,7 +58,13 @@ function AppInner() {
     setI18NextLanguage(null);
   }, []);
 
+  const isInitialized = useRef(false);
   useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+    isInitialized.current = true;
+
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T | void> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
@@ -126,9 +132,7 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
-    // Removed cloudFileId & t from dependencies to prevent hard crash when closing budget in Electron
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, showErrorBoundary]);
+  }, [cloudFileId, dispatch, showErrorBoundary, t]);
 
   useEffect(() => {
     if (userData?.tokenExpired) {
