@@ -372,7 +372,8 @@ function MonthlyPatterns({
             </Button>
           </View>
           {recurrence.type === 'day' &&
-            (recurrence.value === 31 ||
+            ((recurrence.value === 31 &&
+              config.patterns.filter(p => p.type === 'day').length === 1) ||
               (config.endMode !== 'after_n_occurrences' &&
                 hasShortMonthFallback(unparseConfig(config)))) && (
               <View

@@ -836,6 +836,30 @@ describe('schedules', () => {
       ]);
     });
 
+    it('reaches February through year wraparound on a wide interval grid', () => {
+      const dateCond = dayConfig('2026-04-30', [{ value: 30, type: 'day' }], {
+        interval: 10,
+      });
+      const dates = getOccurrences(dateCond, '2026-04-29', 4);
+      expect(dates).toEqual([
+        '2026-04-30',
+        '2027-02-28',
+        '2027-12-30',
+        '2028-10-30',
+      ]);
+      expect(dates.filter(d => d === '2027-02-28')).toHaveLength(1);
+    });
+
+    it('deduplicates the leap-day occurrence shared by the primary and fallback rules', () => {
+      const dateCond = dayConfig('2027-04-29', [{ value: 29, type: 'day' }], {
+        interval: 10,
+      });
+      const dates = getOccurrences(dateCond, '2027-04-28', 3);
+      expect(dates[0]).toBe('2027-04-29');
+      expect(dates[1]).toBe('2028-02-29');
+      expect(dates.filter(d => d === '2028-02-29')).toHaveLength(1);
+    });
+
     it('clamps a bare monthly schedule starting on day 31', () => {
       const dateCond = dayConfig('2026-10-31', []);
       expect(getOccurrences(dateCond, '2026-10-30', 4)).toEqual([
@@ -929,6 +953,18 @@ describe('schedules', () => {
           frequency: 'monthly',
           start: '2027-02-28',
           interval: 2,
+          patterns: [{ value: 30, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(2);
+        expect(rules[1].byMonthOfYear).toEqual([2]);
+        expect(rules[1].byDayOfMonth).toEqual([-1]);
+      });
+
+      it('keeps the Feb fallback for a wide interval whose grid wraps to February', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2026-04-30',
+          interval: 10,
           patterns: [{ value: 30, type: 'day' }],
         }) as MonthlyRule[];
         expect(rules).toHaveLength(2);
