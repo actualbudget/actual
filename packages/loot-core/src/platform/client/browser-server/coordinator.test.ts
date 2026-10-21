@@ -864,6 +864,82 @@ describe('SharedWorker coordinator', () => {
       expect(state.budgetGroups.has('new-budget-123')).toBe(true);
       expect(state.portToBudget.get(creator)).toBe('new-budget-123');
     });
+
+    it('re-keys a lobby leader that created a budget when its prefs load', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+      leader.postMessage.mockClear();
+
+      // The lobby leader creates the demo budget in its own Worker, so no
+      // temp group is created for it
+      sendMsg(leader, { id: 'cdb-1', name: 'create-demo-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cdb-1', result: {} },
+      });
+      sendMsg(leader, { id: 'lp-1', name: 'load-prefs' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lp-1', result: { id: '_demo-budget' } },
+      });
+
+      const state = coordinator.getState();
+      expect(state.budgetGroups.has('__lobby')).toBe(false);
+      expect(state.portToBudget.get(leader)).toBe('_demo-budget');
+
+      // A second tab on that budget joins as a follower instead of
+      // starting a second Worker on the same database
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      follower.postMessage.mockClear();
+      sendMsg(follower, {
+        id: 'lb-2',
+        name: 'load-budget',
+        args: { id: '_demo-budget' },
+      });
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: '_demo-budget',
+        }),
+      );
+    });
+
+    it('tells a re-keyed leader its budget so resuming keeps it attached', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+      sendMsg(leader, { id: 'cdb-1', name: 'create-demo-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cdb-1', result: {} },
+      });
+      leader.postMessage.mockClear();
+      sendMsg(leader, { id: 'lp-1', name: 'load-prefs' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lp-1', result: { id: '_demo-budget' } },
+      });
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '_demo-budget',
+        }),
+      );
+
+      // The tab was hidden and comes back, reporting the budget it was told
+      leader.postMessage.mockClear();
+      sendMsg(leader, { type: '__resume-tab', budgetId: '_demo-budget' });
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'UNASSIGNED' }),
+      );
+      const state = coordinator.getState();
+      expect(state.budgetGroups.get('_demo-budget').leaderPort).toBe(leader);
+      expect(state.portToBudget.get(leader)).toBe('_demo-budget');
+    });
   });
 
   // ── Delete budget ───────────────────────────────────────────────────

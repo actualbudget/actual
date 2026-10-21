@@ -7,6 +7,10 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+} from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
@@ -582,7 +586,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'loading-budget'
     | 'out-of-sync-migrations'
     | 'out-of-sync-data'
-    | 'opening-budget';
+    | 'opening-budget'
+    | 'budget-in-use'
+    | 'storage-migration-failed';
 }> {
   let dir: string;
   try {
@@ -607,8 +613,16 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
-    captureException(e);
     await closeBudget();
+    // Expected conditions on the web storage, not bugs
+    if (e instanceof BudgetInUseError) {
+      return { error: 'budget-in-use' };
+    }
+    if (e instanceof StorageMigrationError) {
+      logger.error('Storage migration failed', e);
+      return { error: 'storage-migration-failed' };
+    }
+    captureException(e);
     return { error: 'opening-budget' };
   }
 

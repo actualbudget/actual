@@ -1,4 +1,4 @@
-import { listen } from '@actual-app/core/platform/client/connection';
+import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
@@ -195,6 +195,43 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     void window.Actual.reload();
   });
 
+  // Progress while a budget is moved into the new browser storage; the
+  // budget loader shows it on the loading screen
+  const unlistenStorageMigration = listen(
+    'storage-migration',
+    ({ phase, percent }) => {
+      let loadingText: string;
+      if (phase === 'copy') {
+        loadingText = t(
+          'Moving your budget to the new storage... {{percent}}%',
+          { percent: Math.round(percent ?? 0) },
+        );
+      } else if (phase === 'verify') {
+        loadingText = t('Checking the moved budget...');
+      } else if (phase === 'cleanup') {
+        loadingText = t('Cleaning up the old storage...');
+      } else {
+        loadingText = t('Loading...');
+      }
+      store.dispatch(setAppState({ loadingText }));
+    },
+  );
+
+  // The IndexedDB fallback of the new storage persists lazily; ask for a
+  // flush whenever the tab may be about to go away
+  const flushStorage = () => {
+    send('storage-flush').catch(() => {
+      // No backend to flush, or it is already gone
+    });
+  };
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      flushStorage();
+    }
+  };
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('pagehide', flushStorage);
+
   return () => {
     unlistenServerError();
     unlistenOrphanedPayees();
@@ -209,5 +246,8 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenFinishImport();
     unlistenShowBudgets();
     unlistenApiFetchRedirected();
+    unlistenStorageMigration();
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+    window.removeEventListener('pagehide', flushStorage);
   };
 }
