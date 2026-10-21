@@ -66,7 +66,7 @@ You can also apply selections of templates if you want.
 ### Goal Indicators
 
 After having run the templates in a given month and category, the status of a respective category goal will be indicated as a colored pill with an icon around the category balance: a green check when funded, a yellow clock when underfunded and a red exclamation mark when overspent.
-The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met(green), goal not met(orange), and a negative balance(red).
+The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met(green), goal not met(yellow), and a negative balance(red).
 
 <img width="732" alt="Category balances in the normal, empty, goal met, goal not met and negative states, with goal status pills" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
 
