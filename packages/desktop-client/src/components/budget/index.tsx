@@ -269,6 +269,7 @@ export type BudgetSummaryProps = {
 export type CategoryMonthProps = {
   month: string;
   category: CategoryEntity;
+  categoryGroup?: CategoryGroupEntity;
   editing: boolean;
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;

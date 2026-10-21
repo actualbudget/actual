@@ -17,6 +17,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { useCategorySpendingAlert } from '#components/budget/useCategorySpendingAlert';
 import { makeAmountGrey } from '#components/budget/util';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -195,6 +196,7 @@ export const ExpenseGroupMonth = memo(function ExpenseGroupMonth({
 export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
   month,
   category,
+  categoryGroup,
   editing,
   onEdit,
   onBudgetAction,
@@ -202,6 +204,12 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
 }: CategoryMonthProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const spendingAlert = useCategorySpendingAlert({
+    budgetType: 'envelope',
+    month,
+    category,
+    categoryGroup,
+  });
 
   const budgetMenuTriggerRef = useRef(null);
   const balanceMenuTriggerRef = useRef(null);
@@ -523,6 +531,7 @@ export const ExpenseCategoryMonth = memo(function ExpenseCategoryMonth({
             goal={envelopeBudget.catGoal(category.id)}
             budgeted={envelopeBudget.catBudgeted(category.id)}
             longGoal={envelopeBudget.catLongGoal(category.id)}
+            spendingAlert={spendingAlert}
             tooltipDisabled={balanceMenuOpen}
           />
         </Button>

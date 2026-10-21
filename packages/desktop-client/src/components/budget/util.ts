@@ -68,23 +68,34 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs.
+function normalizeIntegerValue(val: number | null | undefined) {
+  return typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+}
+
+// A category balance is overspent when it is shown in red on the budget page.
+export function isOverspentBalance(value: number | null | undefined) {
+  return normalizeIntegerValue(value) < 0;
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
+  isSpendingWarning = false,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
-  const currencyValue = normalizeIntegerValue(value);
-
-  if (currencyValue < 0) {
+  if (isOverspentBalance(value)) {
     return { color: theme.budgetNumberNegative };
   }
+
+  // Spending ahead of pace, see spendingAlerts.ts
+  if (isSpendingWarning) {
+    return { color: theme.budgetNumberWarning };
+  }
+
+  const currencyValue = normalizeIntegerValue(value);
 
   if (goalValue == null) {
     const greyed = makeAmountGrey(currencyValue);

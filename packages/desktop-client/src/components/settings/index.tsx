@@ -43,6 +43,7 @@ import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
 import { SettingsRow } from './SettingsRow';
 import { SidebarSettings } from './SidebarSettings';
+import { SpendingWarningsSettings } from './SpendingWarningsSettings';
 import { ThemeSettings } from './Themes';
 
 function About() {
@@ -282,6 +283,7 @@ export function GeneralSettings() {
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
+        <SpendingWarningsSettings />
       </SettingsGroup>
       {serverURL && (
         <SettingsGroup title={t('Security')}>
