@@ -192,6 +192,9 @@ function undoMessage(message, oldData) {
         if (['buffered', 'amount', 'carryover'].includes(message.column)) {
           return { ...message, value: 0 };
         }
+        if (['goal', 'long_goal'].includes(message.column)) {
+          return { ...message, value: null };
+        }
         return null;
       } else if (message.dataset === 'notes') {
         return { ...message, value: null };
