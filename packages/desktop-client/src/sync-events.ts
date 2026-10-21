@@ -17,6 +17,7 @@ import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
+import { dashboardQueries, reportQueries } from './reports';
 import { signOut } from './users/usersSlice';
 
 // Notifications for sync events that can fire during budget load
@@ -137,6 +138,18 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       if (tables.includes('account_groups')) {
         void queryClient.invalidateQueries({
           queryKey: accountGroupQueries.lists(),
+        });
+      }
+
+      if (tables.includes('dashboard') || tables.includes('dashboard_pages')) {
+        void queryClient.invalidateQueries({
+          queryKey: dashboardQueries.lists(),
+        });
+      }
+
+      if (tables.includes('custom_reports')) {
+        void queryClient.invalidateQueries({
+          queryKey: reportQueries.lists(),
         });
       }
     } else if (event.type === 'error') {
