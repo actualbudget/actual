@@ -308,9 +308,13 @@ async function createBackgroundProcess() {
   };
 
   if (globalPrefs['server-self-signed-cert']) {
+    // The backend process trusts this certificate via tls.setDefaultCACertificates
+    // (see certificates.ts). NODE_EXTRA_CA_CERTS can't be used for this: the
+    // packaged app disables the Electron `nodeOptions` fuse, which makes
+    // Electron ignore both NODE_OPTIONS and NODE_EXTRA_CA_CERTS.
     envVariables = {
       ...envVariables,
-      NODE_EXTRA_CA_CERTS: globalPrefs['server-self-signed-cert'], // add self signed cert to env - fetch can pick it up
+      ACTUAL_SERVER_SELF_SIGNED_CERT: globalPrefs['server-self-signed-cert'],
     };
   }
 
@@ -817,18 +821,12 @@ ipcMain.handle(
   ) => {
     const fileLocation = await dialog.showSaveDialog({ title, defaultPath });
 
-    return new Promise<void>((resolve, reject) => {
-      if (fileLocation) {
-        const contents =
-          typeof fileContents === 'string'
-            ? fileContents
-            : new Uint8Array(fileContents.buffer);
-        fs.writeFile(fileLocation.filePath, contents, error => {
-          return reject(error);
-        });
-      }
-      resolve();
-    });
+    if (fileLocation.canceled || !fileLocation.filePath) {
+      return;
+    }
+
+    // A Buffer's .buffer can be a shared pool slab, so write the Buffer view itself.
+    await fs.promises.writeFile(fileLocation.filePath, fileContents);
   },
 );
 

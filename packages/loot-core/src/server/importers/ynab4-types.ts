@@ -69,6 +69,7 @@ export type RenameCondition = {
 
 export type MonthlyBudget = {
   entityType: string;
+  note?: string;
   monthlySubCategoryBudgets: MonthlySubCategoryBudget[];
   month: string;
   entityVersion: string;
@@ -77,6 +78,7 @@ export type MonthlyBudget = {
 
 export type MonthlySubCategoryBudget = {
   entityType: string;
+  note?: string;
   categoryId: string;
   budgeted: number;
   overspendingHandling?: string | undefined | null;

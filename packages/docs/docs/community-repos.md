@@ -66,12 +66,21 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
 - **Actual Bench** - https://github.com/x-rous/actual-bench
   - _Admin and workbench companion for Actual Budget. Bulk-edit data, manage, merge and diagnose rules, 12-month budget view, snapshot inspection, and ActualQL queries - all changes staged until you save._
-- **actual-budget-mcp** - https://github.com/henfrydls/actual-budget-mcp
-  - _Connect Actual to Claude and other AI assistants. Ask about your budget in plain language, get spending analysis and projections, and create, edit, or delete transactions. Deletions wait for your confirmation, and an optional read-only mode hides the write tools entirely._
 - **actual2ics** - https://github.com/Ildana-ai/actual2ics
   - _Writes Actual's scheduled transactions to a standard .ics calendar file: rent, payday and the car payment beside everything else you plan around. Read-only, filters by account or schedule, stays current on a cron line without duplicate events._
 - **receipt2actual** - https://github.com/Ildana-ai/receipt2actual
   - _Pairs receipt files to transactions: copies each receipt into a local folder and writes its path onto the transaction note, so the desktop app opens the file in Finder or Explorer on click. `verify` re-checks every pairing and exits non-zero on any mismatch. No OCR, no cloud, only the note field is written._
+
+## AI Assistant Integrations (MCP)
+
+These servers implement the [Model Context Protocol](https://modelcontextprotocol.io/), letting Claude and other MCP-compatible AI assistants read from (and optionally write to) your Actual budget. For setup instructions, see the respective repositories.
+
+- **actual-budget-mcp** - https://github.com/henfrydls/actual-budget-mcp
+  - _Connect Actual to Claude and other AI assistants. Ask about your budget in plain language, get spending analysis and projections, and create, edit, or delete transactions. Deletions wait for your confirmation, and an optional read-only mode hides the write tools entirely._
+- **actual-mcp** - https://github.com/s-stefanov/actual-mcp
+  - _Lets Claude and other LLM assistants query your accounts, transactions and reports (spending by category or payee, budget vs. actual, net worth, cash flow, trends). Read-only by default; the `--enable-write` flag adds tools to manage transactions, categories, payees, rules, custom reports and dashboards. Runs over stdio or HTTP (with optional bearer-token auth), via npx or Docker._
+- **actual-mcp-server** - https://github.com/agigante80/actual-mcp-server
+  - _Broad coverage of the Actual API, including transactions and splits, transfers, budgets, schedules, rules, tags, notes, ActualQL queries and bank sync. Runs locally over stdio for Claude Desktop, or as a remote HTTP server for LibreChat, LobeChat and other clients with bearer-token or OIDC multi-user auth. Supports switching between multiple budgets mid-conversation. Available via npx, Docker or Unraid Community Applications._
 
 ## Others
 

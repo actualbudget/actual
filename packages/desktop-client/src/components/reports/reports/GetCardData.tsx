@@ -13,6 +13,7 @@ import type {
   CategoryGroupEntity,
   CustomReportEntity,
   PayeeEntity,
+  TagEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
@@ -70,6 +71,7 @@ export function GetCardData({
   payees,
   accounts,
   categories,
+  tags,
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
@@ -79,6 +81,7 @@ export function GetCardData({
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  tags: TagEntity[];
   earliestTransaction: string;
   latestTransaction: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
@@ -160,6 +163,8 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       payees,
       accounts,
+      tags,
+      tagScope: report.tagScope,
       graphType: report.graphType,
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
@@ -170,6 +175,7 @@ export function GetCardData({
     categories,
     payees,
     accounts,
+    tags,
     startDate,
     endDate,
     firstDayOfWeekIdx,
