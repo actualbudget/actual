@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import type { ComponentProps } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -63,21 +63,31 @@ const DynamicBudgetTable = ({
   const numMonths = Math.min(numPossible, maxMonths);
   const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
 
+  const getValidMonth = useCallback(
+    (month: string) => {
+      const start = monthBounds.start;
+      const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+
+      if (month < start) {
+        return start;
+      } else if (month > end) {
+        return end;
+      }
+      return month;
+    },
+    [monthBounds.start, monthBounds.end, numMonths],
+  );
+
+  useEffect(() => {
+    const validMonth = getValidMonth(startMonth);
+    if (validMonth !== startMonth) {
+      onMonthSelect(validMonth, numMonths);
+    }
+  }, [getValidMonth, numMonths, onMonthSelect, startMonth]);
+
   useEffect(() => {
     setDisplayMax(numPossible);
   }, [setDisplayMax, numPossible]);
-
-  function getValidMonth(month) {
-    const start = monthBounds.start;
-    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
-
-    if (month < start) {
-      return start;
-    } else if (month > end) {
-      return end;
-    }
-    return month;
-  }
 
   function _onMonthSelect(month) {
     onMonthSelect(getValidMonth(month), numMonths);

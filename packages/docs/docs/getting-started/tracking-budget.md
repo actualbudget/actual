@@ -32,6 +32,14 @@ When you receive new income or spend from your categories, enter those transacti
 Your budget is not static, so there will be times when you do not have enough budgeted for your spending.
 When one of your categories is overdrawn, increase the budgeted amount for that category so it is 0 or greater.
 
+## Planning Future Months
+
+Tracking mode supports planning beyond the usual 12-month range. When you enter budgeted income or expenses near the end of the available range, more months become available automatically. The range extends to the later of 12 months ahead of the current month or three months after the latest month with a non-zero allocation.
+
+For example, if the current month is October 2026, you can initially plan through October 2027. Entering an allocation in October 2027 makes months through January 2028 available.
+
+Automatic extension is available only in Tracking mode. Envelope mode retains its existing limit of 12 months ahead.
+
 ## The Monthly Summary Explained
 
 As you can see in the following example, your total budgeted items show in the right hand side of the summary for both your **Income** and **Expenses** and your actual expenses and income are totaled in the left hand side of the summary. The **Projected Savings** field is calculated from your budgeted income minus budgeted expenses, so expect the **Projected Savings** to decrease when covering overspending.

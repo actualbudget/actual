@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
+import { useErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -47,6 +48,7 @@ import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
+import { useBudgetBounds } from '#hooks/useBudgetBounds';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -85,14 +87,16 @@ export function BudgetPage() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
+  const { showBoundary: showErrorBoundary } = useErrorBoundary();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
-  const [monthBounds, setMonthBounds] = useState({
+  const { data: loadedBounds } = useBudgetBounds();
+  const monthBounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
-  });
+  };
   // const [editMode, setEditMode] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [_numberFormat] = useSyncedPref('numberFormat');
@@ -110,16 +114,31 @@ export function BudgetPage() {
 
   useEffect(() => {
     async function init() {
-      const { start, end } = await send('get-budget-bounds');
-      setMonthBounds({ start, end });
+      if (!loadedBounds) {
+        return;
+      }
+      const { start, end } = loadedBounds;
+      const validMonth =
+        startMonth < start ? start : startMonth > end ? end : startMonth;
+      if (validMonth !== startMonth) {
+        setStartMonthPref(validMonth);
+      }
 
-      await prewarmMonth(budgetType, spreadsheet, startMonth);
+      await prewarmMonth(budgetType, spreadsheet, validMonth);
 
       setInitialized(true);
     }
 
-    void init();
-  }, [budgetType, startMonth, dispatch, spreadsheet]);
+    void init().catch(showErrorBoundary);
+  }, [
+    budgetType,
+    startMonth,
+    dispatch,
+    spreadsheet,
+    loadedBounds,
+    setStartMonthPref,
+    showErrorBoundary,
+  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -958,7 +977,7 @@ function MonthSelector({
   const locale = useLocale();
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
-  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
+  const nextEnabled = month < monthBounds.end;
 
   const arrowButtonStyle = {
     padding: 10,

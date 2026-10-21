@@ -512,10 +512,11 @@ async function isCategoryTransferRequired({
 
   // If there are any non-zero budget values, also force the user to
   // transfer the category.
-  return [...(sheet.get().meta().createdMonths as Set<string>)].some(month => {
-    const sheetName = monthUtils.sheetForMonth(month);
-    const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
-
-    return value != null && value !== 0;
-  });
+  const table = actions.getBudgetTable();
+  return Boolean(
+    db.firstSync<{ id: string }>(
+      `SELECT id FROM ${table} WHERE category = ? AND amount != 0 LIMIT 1`,
+      [id],
+    ),
+  );
 }
