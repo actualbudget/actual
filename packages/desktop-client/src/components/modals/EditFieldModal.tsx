@@ -158,7 +158,7 @@ export function EditFieldModal({
               gap: 5,
             }}
           >
-            {Object.keys(noteAmendStrings).map((mode, _) => (
+            {Object.keys(noteAmendStrings).map((mode) => (
               <Button
                 key={mode}
                 style={{
