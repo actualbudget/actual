@@ -5,11 +5,24 @@ export function listenWithFallback(
   port: number,
   hostname: string,
   onListening: (actualHostname: string) => void,
+  onError?: (err: NodeJS.ErrnoException) => void,
 ): void {
   const isDefaultIpv6 = hostname === '::';
 
+  const terminate = (err: NodeJS.ErrnoException, targetHost: string) => {
+    console.error(`Failed to start server on ${targetHost}:${port}:`, err);
+    try {
+      server.close();
+    } catch {
+      // server may not be listening yet or already closed
+    }
+    if (onError) {
+      onError(err);
+    }
+  };
+
   const fallbackErrorHandler = (fallbackErr: NodeJS.ErrnoException) => {
-    console.error(`Failed to start server on 0.0.0.0:${port}:`, fallbackErr);
+    terminate(fallbackErr, '0.0.0.0');
   };
 
   const errorHandler = (err: NodeJS.ErrnoException) => {
@@ -33,7 +46,7 @@ export function listenWithFallback(
       return;
     }
 
-    console.error(`Failed to start server on ${hostname}:${port}:`, err);
+    terminate(err, hostname);
   };
 
   server.once('error', errorHandler);

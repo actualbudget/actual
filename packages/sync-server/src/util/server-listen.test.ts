@@ -76,7 +76,7 @@ describe('listenWithFallback', () => {
     },
   );
 
-  it('logs an error if the 0.0.0.0 fallback attempt also fails', async () => {
+  it('closes the server and propagates error via onError if the 0.0.0.0 fallback attempt also fails', async () => {
     const fakeServer = new http.Server();
     let listenCallCount = 0;
     const fallbackErr = new Error('Port in use') as NodeJS.ErrnoException;
@@ -94,6 +94,10 @@ describe('listenWithFallback', () => {
       return fakeServer;
     }) as typeof fakeServer.listen);
 
+    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
+      return fakeServer;
+    }) as typeof fakeServer.close);
+
     const warnSpy = vi
       .spyOn(console, 'warn')
       .mockImplementation(() => undefined);
@@ -101,12 +105,15 @@ describe('listenWithFallback', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
     const onListening = vi.fn();
+    const onError = vi.fn();
 
-    listenWithFallback(fakeServer, 5006, '::', onListening);
+    listenWithFallback(fakeServer, 5006, '::', onListening, onError);
     await new Promise<void>(resolve => process.nextTick(resolve));
     await new Promise<void>(resolve => process.nextTick(resolve));
 
     expect(onListening).not.toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(fallbackErr);
     expect(errorSpy).toHaveBeenCalledWith(
       'Failed to start server on 0.0.0.0:5006:',
       fallbackErr,
@@ -115,7 +122,7 @@ describe('listenWithFallback', () => {
     errorSpy.mockRestore();
   });
 
-  it('does not fall back if a custom hostname was specified', async () => {
+  it('closes the server, propagates error, and does not fall back if a custom hostname was specified', async () => {
     const fakeServer = new http.Server();
     const err = new Error('Address not available') as NodeJS.ErrnoException;
     err.code = 'EADDRNOTAVAIL';
@@ -125,18 +132,59 @@ describe('listenWithFallback', () => {
       return fakeServer;
     }) as typeof fakeServer.listen);
 
+    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
+      return fakeServer;
+    }) as typeof fakeServer.close);
+
     const errorSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
     const onListening = vi.fn();
+    const onError = vi.fn();
 
-    listenWithFallback(fakeServer, 5006, 'custom-host', onListening);
+    listenWithFallback(fakeServer, 5006, 'custom-host', onListening, onError);
     await new Promise<void>(resolve => process.nextTick(resolve));
 
     expect(listenSpy).toHaveBeenCalledTimes(1);
     expect(onListening).not.toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(err);
     expect(errorSpy).toHaveBeenCalledWith(
       'Failed to start server on custom-host:5006:',
+      err,
+    );
+    errorSpy.mockRestore();
+  });
+
+  it('closes the server, propagates error, and does not fall back if a non-fallback error occurs on ::', async () => {
+    const fakeServer = new http.Server();
+    const err = new Error('Address in use') as NodeJS.ErrnoException;
+    err.code = 'EADDRINUSE';
+
+    const listenSpy = vi.spyOn(fakeServer, 'listen').mockImplementation((() => {
+      process.nextTick(() => fakeServer.emit('error', err));
+      return fakeServer;
+    }) as typeof fakeServer.listen);
+
+    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
+      return fakeServer;
+    }) as typeof fakeServer.close);
+
+    const errorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    const onListening = vi.fn();
+    const onError = vi.fn();
+
+    listenWithFallback(fakeServer, 5006, '::', onListening, onError);
+    await new Promise<void>(resolve => process.nextTick(resolve));
+
+    expect(listenSpy).toHaveBeenCalledTimes(1);
+    expect(onListening).not.toHaveBeenCalled();
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(err);
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Failed to start server on :::5006:',
       err,
     );
     errorSpy.mockRestore();

@@ -232,14 +232,30 @@ export async function run() {
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
     const server = https.createServer(httpsOptions, app);
-    listenWithFallback(server, port, hostname, actualHost => {
-      sendServerStartedMessage(actualHost);
-    });
+    listenWithFallback(
+      server,
+      port,
+      hostname,
+      actualHost => {
+        sendServerStartedMessage(actualHost);
+      },
+      () => {
+        process.exit(1);
+      },
+    );
   } else {
     const http = await import('node:http');
     const server = http.createServer(app);
-    listenWithFallback(server, port, hostname, actualHost => {
-      sendServerStartedMessage(actualHost);
-    });
+    listenWithFallback(
+      server,
+      port,
+      hostname,
+      actualHost => {
+        sendServerStartedMessage(actualHost);
+      },
+      () => {
+        process.exit(1);
+      },
+    );
   }
 }
