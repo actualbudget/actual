@@ -1,3 +1,5 @@
+import type { ReservationsBridge } from '#server/budget/pocket-readers';
+
 /** A rate used for a valuation: its value, kind, source and timestamp. */
 export type FxRateUsed = {
   rate: string;
@@ -138,6 +140,11 @@ export type FxBridgeMonth = {
   /** Cell value or incomplete flag differs from the computed pair. */
   pending: boolean;
   accounts: FxBridgeAccount[];
+  /**
+   * Currency pocket reservations, explained like the holdings bridge;
+   * absent or null without them (tracking budgets).
+   */
+  reservations?: ReservationsBridge | null;
 };
 
 export type FxImpactMonth = {
