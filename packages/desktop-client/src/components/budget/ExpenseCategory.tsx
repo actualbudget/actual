@@ -18,6 +18,7 @@ import type {
 import { Row } from '#components/table';
 import { useDragRef } from '#hooks/useDragRef';
 
+import { CategoryParentMonth } from './envelope/PocketRows';
 import { RenderMonths } from './RenderMonths';
 import { SidebarCategory } from './SidebarCategory';
 
@@ -36,6 +37,8 @@ type ExpenseCategoryProps = {
   onBudgetAction: (month: string, action: string, arg: unknown) => void;
   onShowActivity: (id: CategoryEntity['id'], month: string) => void;
   onReorder: OnDropCallback;
+  /** Its currency pockets show in any visible month. */
+  hasPockets?: boolean;
 };
 
 export function ExpenseCategory({
@@ -51,6 +54,7 @@ export function ExpenseCategory({
   onShowActivity,
   onDragChange,
   onReorder,
+  hasPockets = false,
 }: ExpenseCategoryProps) {
   let dragging = dragState && dragState.item === cat;
 
@@ -104,7 +108,9 @@ export function ExpenseCategory({
 
         <RenderMonths>
           {({ month }) => (
-            <MonthComponent
+            <CategoryParentMonth
+              MonthComponent={MonthComponent}
+              hasPockets={hasPockets}
               month={month}
               editing={
                 editingCell &&
