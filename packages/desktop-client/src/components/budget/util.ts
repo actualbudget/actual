@@ -68,19 +68,42 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs
+// and the currency's decimal places.
+function normalizeIntegerValue(
+  val: number | null | undefined,
+  decimalPlaces = 2,
+) {
+  return typeof val === 'number'
+    ? currencyToAmount(integerToCurrency(val, undefined, decimalPlaces))
+    : 0;
+}
+
+/**
+ * Compares what a category has towards its goal with the goal, as displayed:
+ * -1 when short of it, 0 when they match and 1 when over it. With hidden
+ * decimals, amounts that round to the same number count as equal.
+ */
+export function compareToGoal(
+  have: number | null | undefined,
+  goalValue: number,
+  decimalPlaces = 2,
+): -1 | 0 | 1 {
+  const diff =
+    normalizeIntegerValue(have, decimalPlaces) -
+    normalizeIntegerValue(goalValue, decimalPlaces);
+  return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
+  decimalPlaces = 2,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
-  const currencyValue = normalizeIntegerValue(value);
+  const currencyValue = normalizeIntegerValue(value, decimalPlaces);
 
   if (currencyValue < 0) {
     return { color: theme.budgetNumberNegative };
@@ -93,10 +116,7 @@ export function makeBalanceAmountStyle(
     }
     return { color: theme.budgetNumberPositive };
   } else {
-    const budgetedAmount = normalizeIntegerValue(budgetedValue);
-    const goalAmount = normalizeIntegerValue(goalValue);
-
-    if (budgetedAmount < goalAmount) {
+    if (compareToGoal(budgetedValue, goalValue, decimalPlaces) < 0) {
       return { color: theme.templateNumberUnderFunded };
     }
     return { color: theme.templateNumberFunded };

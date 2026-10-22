@@ -13,6 +13,8 @@ import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
+import { compareToGoal } from './util';
+
 type GoalStatusProps = {
   balance: Binding<
     'envelope-budget' | 'tracking-budget',
@@ -45,18 +47,24 @@ export function GoalStatus({
 
   const have = longGoalValue === 1 ? balanceValue : budgetedValue;
   const diff = have - goalValue;
+  // Compare as displayed, like the balance colour
+  const comparison = compareToGoal(
+    have,
+    goalValue,
+    format.currency.decimalPlaces,
+  );
   // Round down while underfunded so the bar only reads 100% once the goal is met
   const progress =
-    diff < 0 ? Math.floor(Math.max(0, have / goalValue) * 100) : 100;
+    comparison < 0 ? Math.floor(Math.max(0, have / goalValue) * 100) : 100;
 
   return (
     <View style={{ minWidth: 160, ...style }}>
       <span style={{ fontWeight: 'bold' }}>
-        {diff === 0 ? (
+        {comparison === 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>Fully funded</Trans>
           </span>
-        ) : diff > 0 ? (
+        ) : comparison > 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>
               Overfunded (
@@ -97,7 +105,7 @@ export function GoalStatus({
                 height: '100%',
                 width: `${progress}%`,
                 backgroundColor:
-                  diff >= 0
+                  comparison >= 0
                     ? theme.templateNumberFunded
                     : theme.templateNumberUnderFunded,
               }}
