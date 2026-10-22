@@ -275,9 +275,7 @@ describe('storeTemplates with a month', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(statements.getActiveSchedules).mockResolvedValue(
-      [] as Awaited<ReturnType<typeof statements.getActiveSchedules>>,
-    );
+    vi.mocked(statements.getActiveSchedules).mockResolvedValue([]);
     vi.mocked(db.getCategories).mockResolvedValue([]);
     setupAqlForCategoryLookup(category);
   });
