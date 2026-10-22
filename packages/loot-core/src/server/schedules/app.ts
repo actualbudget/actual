@@ -22,7 +22,7 @@ import {
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
-import { currentDay, dayFromDate } from '#shared/months';
+import { currentDay, dayFromDate, parseDate, subDays } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
@@ -209,6 +209,20 @@ async function fixRuleForSchedule(id) {
   return getRules().find(rule => rule.id === newId);
 }
 
+// `getNextDate` only looks at occurrences from `today` on, before moving them
+// off the weekend, so it misses an earlier occurrence moved `after` the
+// weekend onto `today` or later. `getNextDateAfter` sees that one, and it is
+// only used when it comes first, so every other case keeps its next date.
+function getNextDateFrom(dateCond, today: Date) {
+  const nextDate = getNextDate(dateCond, today);
+  const movedOntoToday = getNextDateAfter(dateCond, subDays(today, 1));
+
+  return movedOntoToday != null &&
+    (nextDate == null || movedOntoToday < nextDate)
+    ? movedOntoToday
+    : nextDate;
+}
+
 export async function setNextDate({
   id,
   conditions,
@@ -238,7 +252,7 @@ export async function setNextDate({
   if (dateCond) {
     const newNextDate = advance
       ? getNextDateAfter(dateCond, nextDate)
-      : getNextDate(dateCond, new Date());
+      : getNextDateFrom(dateCond, new Date());
 
     if (newNextDate != null && newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
@@ -335,7 +349,7 @@ export async function createSchedule({
     throw new Error('Date is required');
   }
 
-  const nextDate = getNextDate(dateCond);
+  const nextDate = getNextDateFrom(dateCond, parseDate(currentDay()));
   const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
   const scheduleFields = schedule && {
     ...schedule,

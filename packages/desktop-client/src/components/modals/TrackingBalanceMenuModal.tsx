@@ -1,24 +1,10 @@
-import React from 'react';
-import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
-import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-
-import {
-  BalanceWithCarryover,
-  CarryoverIndicator,
-} from '#components/budget/BalanceWithCarryover';
-import { BalanceMenu } from '#components/budget/tracking/BalanceMenu';
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
-import { CellValueText } from '#components/spreadsheet/CellValue';
+import { useBalanceMenu } from '#components/budget/tracking/BalanceMenu';
+import { MobileSheet } from '#components/mobile/MobileSheet';
+import { MobileSheetBalanceHeader } from '#components/mobile/MobileSheetBalanceHeader';
+import { MobileSheetMenuRows } from '#components/mobile/MobileSheetMenuRows';
+import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useCategory } from '#hooks/useCategory';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { trackingBudget } from '#spreadsheet/bindings';
@@ -32,74 +18,26 @@ export function TrackingBalanceMenuModal({
   categoryId,
   onCarryover,
 }: TrackingBalanceMenuModalProps) {
-  const defaultMenuItemStyle: CSSProperties = {
-    ...styles.mobileMenuItem,
-    color: theme.menuItemText,
-    borderRadius: 0,
-    borderTop: `1px solid ${theme.pillBorder}`,
-  };
-
   const { data: category } = useCategory(categoryId);
+  const { items, onMenuSelect } = useBalanceMenu({ categoryId, onCarryover });
 
   if (!category) {
     return null;
   }
 
   return (
-    <Modal name="tracking-balance-menu">
-      {({ state }) => (
-        <>
-          <ModalHeader
-            title={<ModalTitle title={category.name} shrinkOnOverflow />}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 20,
-            }}
-          >
-            <Text size="extra-large" style={{ fontWeight: 400 }}>
-              <Trans>Balance</Trans>
-            </Text>
-            <BalanceWithCarryover
-              isDisabled
-              carryover={trackingBudget.catCarryover(categoryId)}
-              balance={trackingBudget.catBalance(categoryId)}
-              goal={trackingBudget.catGoal(categoryId)}
-              budgeted={trackingBudget.catBudgeted(categoryId)}
-              longGoal={trackingBudget.catLongGoal(categoryId)}
-              CarryoverIndicator={({ style }) => (
-                <CarryoverIndicator
-                  style={{
-                    width: 15,
-                    height: 15,
-                    display: 'inline-flex',
-                    position: 'relative',
-                    ...style,
-                  }}
-                />
-              )}
-            >
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{
-                    textAlign: 'center',
-                    ...styles.veryLargeText,
-                  }}
-                />
-              )}
-            </BalanceWithCarryover>
-          </View>
-          <BalanceMenu
-            categoryId={categoryId}
-            getItemStyle={() => defaultMenuItemStyle}
-            onCarryover={onCarryover}
-          />
-        </>
-      )}
-    </Modal>
+    <MobileSheet name="tracking-balance-menu" title={category.name}>
+      <MobileSheetBalanceHeader
+        label={<Trans>Balance</Trans>}
+        carryover={trackingBudget.catCarryover(categoryId)}
+        balance={trackingBudget.catBalance(categoryId)}
+        goal={trackingBudget.catGoal(categoryId)}
+        budgeted={trackingBudget.catBudgeted(categoryId)}
+        longGoal={trackingBudget.catLongGoal(categoryId)}
+      />
+      <MobileSheetSection>
+        <MobileSheetMenuRows items={items} onSelect={onMenuSelect} />
+      </MobileSheetSection>
+    </MobileSheet>
   );
 }

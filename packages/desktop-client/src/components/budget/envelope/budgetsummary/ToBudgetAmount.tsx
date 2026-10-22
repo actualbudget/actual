@@ -25,7 +25,7 @@ type ToBudgetAmountProps = {
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
-  onClick: () => void;
+  onClick?: () => void;
   onContextMenu?: MouseEventHandler;
   isTotalsListTooltipDisabled?: boolean;
 };
@@ -89,7 +89,7 @@ export function ToBudgetAmount({
                 {
                   fontWeight: 400,
                   userSelect: 'none',
-                  cursor: 'pointer',
+                  cursor: onClick ? 'pointer' : 'default',
                   color: isPositive
                     ? theme.toBudgetPositive
                     : isNegative
