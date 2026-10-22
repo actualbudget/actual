@@ -872,3 +872,53 @@ describe('inspection 3 regressions', () => {
     expect(explained).toMatchObject({ carryIn: 0, balance: 0 });
   });
 });
+
+describe('MC-10.4 inspection 1: base slot visibility (B5)', () => {
+  const create = (category: string, currency: string) =>
+    runMutator(() =>
+      budgetApp.handlers['budget/pocket-create']({ category, currency }),
+    );
+
+  it('reports the current base slot and whether it is shown', async () => {
+    await create('travel', 'JPY');
+    await refresh();
+    const before = await budgetMonthEntry('2026-06', 'travel');
+    // An empty category gaining a pocket keeps its base slot hidden.
+    expect(before?.baseSlot).toEqual({ id: 'travel', shown: false });
+    // Existing fields are unchanged by the new one.
+    expect(before?.base).toEqual({
+      budgeted: 0,
+      spent: 0,
+      balance: 0,
+      carryover: false,
+      carryIn: 0,
+      reset: 0,
+    });
+
+    // Add Currency in the budget currency shows it.
+    await create('travel', 'USD');
+    expect((await budgetMonthEntry('2026-06', 'travel'))?.baseSlot).toEqual({
+      id: 'travel',
+      shown: true,
+    });
+  });
+
+  it('shows a base slot with activity that nets to zero', async () => {
+    await create('food', 'JPY');
+    await row('usd', '2026-06-02', -500, null, 'food');
+    await row('usd', '2026-06-03', 500, null, 'food');
+    await refresh();
+    expect((await budgetMonthEntry('2026-06', 'food'))?.baseSlot).toEqual({
+      id: 'food',
+      shown: true,
+    });
+  });
+
+  it('keeps the base slot out of api/budget-month', async () => {
+    await create('travel', 'JPY');
+    await refresh();
+    const category = await apiCategory('2026-06', 'travel');
+    expect(category).toBeDefined();
+    expect(category).not.toHaveProperty('baseSlot');
+  });
+});

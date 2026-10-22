@@ -315,3 +315,19 @@ The final table, **FX changes included in To Budget**, shows amounts already inc
 <img width="1040" alt="Selected FX totals and FX changes already included in To Budget for June through October, with every month up to date" src="/img/budgeting/multi-currency-fx-included-history.png" />
 
 Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. The CSV retains full rate precision for checking the displayed amounts.
+
+## Add a currency to a category
+
+On the **Budget** page, right-click **Food** and choose **Add currency…**. Choose **EUR - Euro (€)**. The dialog says: "Every device that edits this budget needs an up-to-date version of Actual."
+
+<img width="540" alt="Add currency to Food, with EUR - Euro (€) selected" src="/img/budgeting/multi-currency-add-currency@2x.png" />
+
+**Add currency** puts a **EUR** row under Food. Food stays at $0.00 budgeted, $0.00 spent, and $0.00 balance. **Usual Expenses** stays at $0.00. The euro row is €0.00 in each column.
+
+<img width="696" alt="Budget category Food with a EUR row of €0.00 under the dollar amounts" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
+
+The euro balance opens **Food: EUR**. Budgeted, spent, and balance are €0.00. Value is $0.00. Assigned in the budget currency is $0.00, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 0.8", the standing rate saved above. Reserved is €0.00 and held is €0.00. **Hide currency** is at the bottom of the sheet.
+
+<img width="512" alt="Food: EUR details with €0.00 budgeted, a market rate of 0.8, and Hide currency" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
+
+On a phone, tap **Food**. The menu includes **Add currency**. The budget list shows the same euro row under Food.

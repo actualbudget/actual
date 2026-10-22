@@ -16,6 +16,7 @@ import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
+import { AddCurrencyModal } from './modals/AddCurrencyModal';
 import { AddExchangeRateModal } from './modals/AddExchangeRateModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
@@ -26,6 +27,7 @@ import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
+import { CategoryPocketModal } from './modals/CategoryPocketModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
@@ -333,6 +335,12 @@ export function Modals() {
 
         case 'category-menu':
           return <CategoryMenuModal key={key} {...modal.options} />;
+
+        case 'category-pocket':
+          return <CategoryPocketModal key={key} {...modal.options} />;
+
+        case 'add-currency':
+          return <AddCurrencyModal key={key} {...modal.options} />;
 
         case 'envelope-budget-menu':
           return (

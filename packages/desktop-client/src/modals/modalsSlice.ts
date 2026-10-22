@@ -517,6 +517,18 @@ export type Modal =
       options: { month: string };
     }
   | {
+      name: 'category-pocket';
+      options: {
+        categoryId: CategoryEntity['id'];
+        pocketId: string;
+        month: string;
+      };
+    }
+  | {
+      name: 'add-currency';
+      options: { categoryId: CategoryEntity['id']; categoryName: string };
+    }
+  | {
       name: 'tracking-balance-menu';
       options: {
         categoryId: CategoryEntity['id'];
