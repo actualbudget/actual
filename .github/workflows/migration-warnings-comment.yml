@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   comment:
     if: github.event.workflow_run.event == 'pull_request'
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       pull-requests: write

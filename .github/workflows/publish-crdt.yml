@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   check-version:
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     name: Check if publish is needed
     outputs:
       should-publish: ${{ steps.check.outputs.should-publish }}

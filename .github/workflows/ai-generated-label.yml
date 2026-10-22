@@ -18,7 +18,7 @@ permissions:
 jobs:
   add-ai-generated-label:
     name: Add 'AI generated' label
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.title, '[AI]')
     steps:
       - name: Add 'AI generated' label

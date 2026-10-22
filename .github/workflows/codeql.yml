@@ -14,7 +14,7 @@ concurrency:
 jobs:
   analyze:
     name: Analyze
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read

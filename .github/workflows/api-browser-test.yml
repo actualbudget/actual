@@ -21,7 +21,7 @@ concurrency:
 jobs:
   api-browser:
     name: API browser e2e
-    runs-on: depot-ubuntu-latest-4
+    runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-jammy
     steps:

@@ -23,7 +23,7 @@ permissions:
 jobs:
   welcome:
     name: Post Welcome Message
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     # Skip PRs from organisation members and repo collaborators (maintainers),
     # even when opened from a fork.
     if: >-

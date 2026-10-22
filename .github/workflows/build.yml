@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   setup:
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -37,7 +37,7 @@ jobs:
 
   api:
     needs: setup
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -65,7 +65,7 @@ jobs:
 
   crdt:
     needs: setup
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -93,7 +93,7 @@ jobs:
 
   web:
     needs: setup
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -115,7 +115,7 @@ jobs:
 
   mobile:
     needs: setup
-    runs-on: depot-macos-latest
+    runs-on: macos-latest
     env:
       ANDROID_HOME: /Users/runner/Library/Android/sdk
       ANDROID_SDK_ROOT: /Users/runner/Library/Android/sdk
@@ -135,7 +135,7 @@ jobs:
 
   cli:
     needs: setup
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -163,7 +163,7 @@ jobs:
 
   server:
     needs: setup
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:

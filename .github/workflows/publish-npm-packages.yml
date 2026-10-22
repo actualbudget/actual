@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build-and-pack:
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     name: Build and pack npm packages
     if: github.event_name == 'push' || (github.event.repository.fork == false)
     steps:

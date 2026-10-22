@@ -19,7 +19,7 @@ jobs:
       && github.head_ref != 'release'
       && startsWith(github.head_ref, 'release-notes/') == false
       && github.event.pull_request.user.login != 'dependabot[bot]'
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
@@ -69,7 +69,7 @@ jobs:
 
   generate-release-notes:
     if: github.event_name == 'push'
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     environment: release
     permissions:
       contents: write

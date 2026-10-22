@@ -38,7 +38,7 @@ permissions:
 jobs:
   spelling:
     name: Check Spelling
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     concurrency:
       group: spelling-${{ github.event.pull_request.number || github.ref }}
       cancel-in-progress: true

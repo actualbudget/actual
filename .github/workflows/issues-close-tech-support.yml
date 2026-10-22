@@ -10,7 +10,7 @@ permissions:
 jobs:
   tech-support:
     if: ${{ github.event.label.name == 'tech-support' }}
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Create comment and close issue
         run: |

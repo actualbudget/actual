@@ -27,11 +27,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-24.04
-            runner: depot-ubuntu-24.04-8
+            runner: ubuntu-24.04
           - os: windows-latest
-            runner: depot-windows-2022-8
+            runner: windows-2022
           - os: macos-latest
-            runner: depot-macos-latest
+            runner: macos-latest
     runs-on: ${{ matrix.runner }}
     environment: release
     if: github.event.repository.fork == false

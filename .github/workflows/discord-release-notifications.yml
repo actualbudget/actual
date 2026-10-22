@@ -21,7 +21,7 @@ permissions:
 jobs:
   notify:
     name: Notify Discord
-    runs-on: depot-ubuntu-latest
+    runs-on: ubuntu-latest
     if: github.repository == 'actualbudget/actual'
     environment: nightly-alerts
     timeout-minutes: 5
