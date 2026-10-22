@@ -351,8 +351,12 @@ test.describe('Reports', () => {
       await page.getByRole('button', { name: 'Save widget' }).click();
       const reportUrl = page.url();
       reportsPage = await navigation.goToReportsPage();
-      const card =
-        await reportsPage.scrollDashboardCardIntoView(/^Balance Forecast/);
+      await page
+        .getByTestId('reports-page')
+        .locator('.react-grid-item')
+        .last()
+        .scrollIntoViewIfNeeded();
+      const card = page.getByRole('button', { name: /^Balance Forecast/ });
       await expect(card).toContainText('From today: 2017-01-01 – 2017-06-30');
       await expect(card).toContainText('2017-06-30');
       await card.click();
