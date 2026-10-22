@@ -1,0 +1,43 @@
+name: Production Backup
+
+on:
+  schedule:
+    - cron: '17 1,2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: actual-production-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Run production backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check scheduled run time
+        id: schedule
+        if: github.event_name == 'schedule'
+        run: |
+          local_time=$(TZ=Europe/Budapest date +'%H%M')
+          if [[ "$local_time" > "0316" && "$local_time" < "0400" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping non-matching UTC schedule occurrence (local time: $local_time)"
+          fi
+
+      - name: Set up flyctl
+        if: github.event_name == 'workflow_dispatch' || steps.schedule.outputs.run == 'true'
+        uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # setup-flyctl
+        with:
+          version: 0.4.120
+
+      - name: Run and verify production backup
+        if: github.event_name == 'workflow_dispatch' || steps.schedule.outputs.run == 'true'
+        run: flyctl ssh console --app actual-gm-budget-2026 --command "node /app/backup-trigger.cjs" --pty=false
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
