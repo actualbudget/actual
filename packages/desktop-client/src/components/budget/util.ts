@@ -5,6 +5,7 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import {
+  amountToInteger,
   currencyToAmount,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
@@ -82,19 +83,21 @@ function normalizeIntegerValue(
 }
 
 /**
- * Compares what a category has towards its goal with the goal, as displayed:
- * -1 when short of it, 0 when they match and 1 when over it. With hidden
- * decimals, amounts that round to the same number count as equal.
+ * How far what a category has towards its goal is from the goal, as the
+ * amounts are displayed: negative when short of it, 0 when they match and
+ * positive when over it. With hidden decimals, amounts that round to the same
+ * number count as equal.
  */
-export function compareToGoal(
+export function getGoalDifference(
   have: number | null | undefined,
   goalValue: number,
   decimalPlaces = 2,
-): -1 | 0 | 1 {
-  const diff =
+): number {
+  return amountToInteger(
     normalizeIntegerValue(have, decimalPlaces) -
-    normalizeIntegerValue(goalValue, decimalPlaces);
-  return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+      normalizeIntegerValue(goalValue, decimalPlaces),
+    decimalPlaces,
+  );
 }
 
 export function makeBalanceAmountStyle(
@@ -116,7 +119,7 @@ export function makeBalanceAmountStyle(
     }
     return { color: theme.budgetNumberPositive };
   } else {
-    if (compareToGoal(budgetedValue, goalValue, decimalPlaces) < 0) {
+    if (getGoalDifference(budgetedValue, goalValue, decimalPlaces) < 0) {
       return { color: theme.templateNumberUnderFunded };
     }
     return { color: theme.templateNumberFunded };

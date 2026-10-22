@@ -102,6 +102,20 @@ describe('BalanceMovementMenu', () => {
     }
   });
 
+  it('shows the shortfall between the displayed amounts when decimals are hidden', async () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    sheetValues['budget202401!goal-groceries'] = 40051;
+    sheetValues['budget202401!budget-groceries'] = 40049;
+    try {
+      renderMenu({ hideFraction: 'true' });
+
+      expect(await screen.findByText('Underfunded (-1)')).toBeInTheDocument();
+      expect(screen.getByText('Fund goal from To Budget')).toBeInTheDocument();
+    } finally {
+      setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    }
+  });
+
   it('does not offer funding when To Budget is empty', async () => {
     sheetValues['budget202401!to-budget'] = 0;
     renderMenu();

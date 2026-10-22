@@ -6,7 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItemObject } from '@actual-app/components/menu';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
-import { compareToGoal } from '#components/budget/util';
+import { getGoalDifference } from '#components/budget/util';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
@@ -50,7 +50,7 @@ export function useBalanceMenu({
     onFundGoal &&
     goal != null &&
     longGoal !== 1 &&
-    compareToGoal(budgeted, goal, format.currency.decimalPlaces) < 0
+    getGoalDifference(budgeted, goal, format.currency.decimalPlaces) < 0
       ? Math.min(goal - budgeted, toBudget)
       : 0;
 
