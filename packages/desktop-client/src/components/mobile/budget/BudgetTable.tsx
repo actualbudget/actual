@@ -24,6 +24,7 @@ import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue } from '#components/spreadsheet/CellValue';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
+import { usePocketInvalidation } from '#hooks/useCategoryPockets';
 import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSheetValue } from '#hooks/useSheetValue';
@@ -363,6 +364,7 @@ export function BudgetTable({
   );
 
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  usePocketInvalidation();
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
 
