@@ -44,7 +44,7 @@ export function useTransactionsSearch({
           setIsSearching(true);
         }
       }, delayMs),
-    [dateFormat, delayMs],
+    [dateFormat, delayMs, resetQueryRef, updateQueryRef],
   );
 
   useEffect(() => {

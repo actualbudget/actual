@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { send } from '@actual-app/core/platform/client/connection';
@@ -113,17 +113,6 @@ export function useBuiltInBankSyncProviders({
   const { cloudFileId, isAdmin, isFileOwner } = useCurrentAccess();
   const canConfigureProviders = isAdmin;
 
-  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
-    boolean | null
-  >(null);
-  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
-    boolean | null
-  >(null);
-  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
-    useState<boolean | null>(null);
-  const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
-    boolean | null
-  >(null);
   const [loadingSimpleFinAccounts, setLoadingSimpleFinAccounts] =
     useState(false);
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
@@ -137,21 +126,44 @@ export function useBuiltInBankSyncProviders({
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
-  useEffect(() => {
+  const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
+    boolean | null
+  >(configuredGoCardless);
+  const [prevConfiguredGoCardless, setPrevConfiguredGoCardless] =
+    useState(configuredGoCardless);
+  if (configuredGoCardless !== prevConfiguredGoCardless) {
+    setPrevConfiguredGoCardless(configuredGoCardless);
     setIsGoCardlessSetupComplete(configuredGoCardless);
-  }, [configuredGoCardless]);
+  }
 
-  useEffect(() => {
+  const [isSimpleFinSetupComplete, setIsSimpleFinSetupComplete] = useState<
+    boolean | null
+  >(configuredSimpleFin);
+  const [prevConfiguredSimpleFin, setPrevConfiguredSimpleFin] =
+    useState(configuredSimpleFin);
+  if (configuredSimpleFin !== prevConfiguredSimpleFin) {
+    setPrevConfiguredSimpleFin(configuredSimpleFin);
     setIsSimpleFinSetupComplete(configuredSimpleFin);
-  }, [configuredSimpleFin]);
+  }
 
-  useEffect(() => {
+  const [isEnableBankingSetupComplete, setIsEnableBankingSetupComplete] =
+    useState<boolean | null>(configuredEnableBanking);
+  const [prevConfiguredEnableBanking, setPrevConfiguredEnableBanking] =
+    useState(configuredEnableBanking);
+  if (configuredEnableBanking !== prevConfiguredEnableBanking) {
+    setPrevConfiguredEnableBanking(configuredEnableBanking);
     setIsEnableBankingSetupComplete(configuredEnableBanking);
-  }, [configuredEnableBanking]);
+  }
 
-  useEffect(() => {
+  const [isAkahuSetupComplete, setIsAkahuSetupComplete] = useState<
+    boolean | null
+  >(configuredAkahu);
+  const [prevConfiguredAkahu, setPrevConfiguredAkahu] =
+    useState(configuredAkahu);
+  if (configuredAkahu !== prevConfiguredAkahu) {
+    setPrevConfiguredAkahu(configuredAkahu);
     setIsAkahuSetupComplete(configuredAkahu);
-  }, [configuredAkahu]);
+  }
 
   const onGoCardlessInit = useCallback(() => {
     dispatch(

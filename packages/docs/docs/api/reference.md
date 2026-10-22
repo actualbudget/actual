@@ -875,9 +875,23 @@ Synchronizes the locally cached budget files with the server's copy.
 
 #### `runBankSync`
 
-<Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<void>" />
+<Method name="runBankSync" args={[{ name: 'args?', properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<{ newTransactions: string[]; matchedTransactions: string[]; updatedAccounts: string[] }>" />
 
 Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will download the transactions and insert them into the ledger.
+
+Omit the argument to sync every linked account. If you pass the argument, include `accountId`.
+
+Resolves with what the sync reconciled, so a caller can tell an idle sync from one that imported something without querying the ledger:
+
+```js
+{
+  newTransactions: ['id', ...],     // transactions the sync added
+  matchedTransactions: ['id', ...], // existing transactions it updated
+  updatedAccounts: ['id', ...]      // accounts the sync added transactions to
+}
+```
+
+A sync that adds or updates nothing resolves with three empty arrays. Errors still reject, so a resolved promise always means the sync succeeded. When syncing every account, one failing account rejects the whole call, but transactions already imported for the other accounts stay in the ledger and are not reported. After a rejection, check the ledger instead of assuming nothing was imported.
 
 #### `runImport`
 

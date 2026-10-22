@@ -111,6 +111,12 @@ export async function sync() {
   return send('api/sync');
 }
 
+/**
+ * Run bank sync for one account, or for every linked account when no
+ * `accountId` is given. Resolves with the ids of the transactions the sync
+ * reconciled, so callers can tell an idle sync from one that imported
+ * something without querying the transaction table themselves.
+ */
 export async function runBankSync(args?: {
   accountId: APIAccountEntity['id'];
 }) {
