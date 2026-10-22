@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
@@ -45,10 +46,10 @@ export const LimitAutomation = ({
     template.amount,
     format.currency.decimalPlaces,
   );
-  const start =
-    template.start ??
-    defaultWeeklyStart ??
-    dayFromDate(firstDayOfMonth(new Date()));
+  const [currentMonthStart] = useState(() =>
+    dayFromDate(firstDayOfMonth(new Date())),
+  );
+  const start = template.start ?? defaultWeeklyStart ?? currentMonthStart;
   const dayOfWeek = getDay(parseDate(start));
   const hold = template.hold;
 

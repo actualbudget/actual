@@ -547,7 +547,7 @@ function ActionEditor({
                   // @ts-expect-error fix this
                   op={op}
                   // @ts-expect-error fix this
-                  value={options?.template ?? value}
+                  value={options?.template ?? value ?? ''}
                   onChange={v => onChange('value', v)}
                   numberFormatType="currency"
                   inputStyle={{ height: 30 }}
@@ -662,7 +662,7 @@ function ActionEditor({
                 numberFormatType={
                   options.method === 'fixed-percent' ? 'percentage' : 'currency'
                 }
-                value={value}
+                value={value ?? ''}
                 onChange={v => onChange('value', v)}
               />
             ) : null}
@@ -721,7 +721,7 @@ function ActionEditor({
               field={field}
               type="string"
               op={op}
-              value={value}
+              value={value ?? ''}
               onChange={v => onChange('value', v)}
             />
           </View>
