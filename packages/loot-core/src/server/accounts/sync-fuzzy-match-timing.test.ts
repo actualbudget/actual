@@ -289,6 +289,97 @@ describe('fuzzy matching: two bank transactions in one sync', () => {
   });
 });
 
+// After closest-first assignment, a transaction left unmatched may take a
+// candidate whose holder can move to another candidate (recursively).
+describe('fuzzy matching: repairing an unmatched transaction within one sync', () => {
+  test('repair can move a chain of two holders', async () => {
+    // Closest-first: 12→12 and 19→19, leaving 05 (only in range of 09-12)
+    // unmatched. Repair moves 19→26 and 12→19 to free 09-12 for 05.
+    await enter(['2024-09-12', '2024-09-19', '2024-09-26']);
+    await sync([bank('2024-09-05'), bank('2024-09-12'), bank('2024-09-19')]);
+    expect(await ledger()).toEqual([
+      'user-09-12 ← bank-09-05',
+      'user-09-19 ← bank-09-12',
+      'user-09-26 ← bank-09-19',
+    ]);
+  });
+
+  test('repair chain gives the same result with the batch reversed', async () => {
+    await enter(['2024-09-12', '2024-09-19', '2024-09-26']);
+    await sync([bank('2024-09-19'), bank('2024-09-12'), bank('2024-09-05')]);
+    expect(await ledger()).toEqual([
+      'user-09-12 ← bank-09-05',
+      'user-09-19 ← bank-09-12',
+      'user-09-26 ← bank-09-19',
+    ]);
+  });
+
+  test('repair leaves a transaction unmatched when the chain dead-ends', async () => {
+    // Same as the chain above, but without the 09-26 row there is nowhere
+    // for the last holder to move, so 05 stays unmatched.
+    await enter(['2024-09-12', '2024-09-19']);
+    await sync([bank('2024-09-05'), bank('2024-09-12'), bank('2024-09-19')]);
+    expect(await ledger()).toEqual([
+      'new-09-05 ← bank-09-05',
+      'user-09-12 ← bank-09-12',
+      'user-09-19 ← bank-09-19',
+    ]);
+  });
+
+  test('repair works within the payee pass', async () => {
+    await enter(['2024-09-12', '2024-09-13'], { payee: 'acme' });
+    await sync([
+      bank('2024-09-05', { payeeName: 'Acme' }),
+      bank('2024-09-12', { payeeName: 'Acme' }),
+    ]);
+    expect(await ledger()).toEqual([
+      'user-09-12 ← bank-09-05',
+      'user-09-13 ← bank-09-12',
+    ]);
+  });
+
+  test('repair does not move a payee-pass match to fix a date-only match', async () => {
+    // The review scenario, except 09-12 has a payee that the 09-12 bank
+    // transaction matches. That payee match is higher fidelity and is
+    // settled before the date-only pass, so 05 can't take its row.
+    await enter(['2024-09-12'], { payee: 'acme' });
+    await enter(['2024-09-13']);
+    await sync([bank('2024-09-05'), bank('2024-09-12', { payeeName: 'Acme' })]);
+    expect(await ledger()).toEqual([
+      'new-09-05 ← bank-09-05',
+      'user-09-12 ← bank-09-12',
+      'user-09-13 ← (none)',
+    ]);
+  });
+
+  test('repair does not move a row claimed by imported_id', async () => {
+    // The review scenario, except 12 was linked to 09-12 by an earlier sync
+    // and is re-sent here, so its row is settled before fuzzy matching.
+    await enter(['2024-09-12', '2024-09-13']);
+    await sync([bank('2024-09-12')]);
+    await sync([bank('2024-09-05'), bank('2024-09-12')]);
+    expect(await ledger()).toEqual([
+      'new-09-05 ← bank-09-05',
+      'user-09-12 ← bank-09-12',
+      'user-09-13 ← (none)',
+    ]);
+  });
+
+  test('repair moves holders closest-first, even when a single move would do', async () => {
+    // Closest-first: 16→16 and 15→13, leaving 08 (only in range of 09-13)
+    // unmatched. 15 could simply move to the free 09-20, but repair tries
+    // 15's closer candidate 09-16 first, moving 16 on to 09-20 instead.
+    await enter(['2024-09-13', '2024-09-16', '2024-09-20', '2024-09-22']);
+    await sync([bank('2024-09-08'), bank('2024-09-15'), bank('2024-09-16')]);
+    expect(await ledger()).toEqual([
+      'user-09-13 ← bank-09-08',
+      'user-09-16 ← bank-09-15',
+      'user-09-20 ← bank-09-16',
+      'user-09-22 ← (none)',
+    ]);
+  });
+});
+
 describe('fuzzy matching: across multiple syncs', () => {
   test('review scenario, synced between the two bank dates (bank re-sends): both match', async () => {
     await enter(['2024-09-12', '2024-09-13']);
