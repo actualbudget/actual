@@ -233,7 +233,7 @@ function getShortMonthFallbackMonths(config: RecurConfig): number[] {
     return [];
   }
 
-  const interval = config.interval ?? 1;
+  const interval = config.interval || 1;
   const startMonth = parseInt(config.start.slice(5, 7), 10);
   const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
   const step = gcd(interval, 12);

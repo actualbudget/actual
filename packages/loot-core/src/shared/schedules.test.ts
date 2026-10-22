@@ -737,6 +737,57 @@ describe('schedules', () => {
       ]);
     });
 
+    it('keeps a single unclamped rule for mixed days with after_n_occurrences', () => {
+      const rules = recurConfigToRSchedule({
+        frequency: 'monthly',
+        start: '2024-01-01',
+        endMode: 'after_n_occurrences',
+        endOccurrences: 3,
+        patterns: [
+          { value: 15, type: 'day' },
+          { value: 31, type: 'day' },
+        ],
+      }) as MonthlyRule[];
+      expect(rules).toHaveLength(1);
+      expect(rules[0].byDayOfMonth).toEqual([15, 31]);
+      expect(rules[0].byMonthOfYear).toBeUndefined();
+
+      const dateCond = dayConfig(
+        '2024-01-01',
+        [
+          { value: 15, type: 'day' },
+          { value: 31, type: 'day' },
+        ],
+        { endMode: 'after_n_occurrences', endOccurrences: 3 },
+      );
+      expect(getOccurrences(dateCond, '2023-12-31', 5)).toEqual([
+        '2024-01-15',
+        '2024-01-31',
+        '2024-02-15',
+      ]);
+    });
+
+    it('bounds the short-month fallback rule by the end date', () => {
+      const dateCond = dayConfig(
+        '2024-01-01',
+        [
+          { value: 30, type: 'day' },
+          { value: 31, type: 'day' },
+        ],
+        { endMode: 'on_date', endDate: '2024-06-15' },
+      );
+      expect(getOccurrences(dateCond, '2023-12-31', 9)).toEqual([
+        '2024-01-30',
+        '2024-01-31',
+        '2024-02-29',
+        '2024-03-30',
+        '2024-03-31',
+        '2024-04-30',
+        '2024-05-30',
+        '2024-05-31',
+      ]);
+    });
+
     it('combines days 30 and 31 with a single clamped Feb occurrence', () => {
       const dateCond = dayConfig('2024-01-01', [
         { value: 30, type: 'day' },
@@ -921,6 +972,46 @@ describe('schedules', () => {
         expect(rules[0].byDayOfMonth).toEqual([31, -1]);
       });
 
+      it('merges -1 with other day values into a single rule', () => {
+        const with31 = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-31',
+          patterns: [
+            { value: -1, type: 'day' },
+            { value: 31, type: 'day' },
+          ],
+        }) as MonthlyRule[];
+        expect(with31).toHaveLength(1);
+        expect(with31[0].byDayOfMonth).toEqual([-1, 31]);
+        expect(with31[0].byMonthOfYear).toBeUndefined();
+
+        const with15 = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2024-01-31',
+          patterns: [
+            { value: -1, type: 'day' },
+            { value: 15, type: 'day' },
+          ],
+        }) as MonthlyRule[];
+        expect(with15).toHaveLength(1);
+        expect(with15[0].byDayOfMonth).toEqual([-1, 15]);
+        expect(with15[0].byMonthOfYear).toBeUndefined();
+      });
+
+      it('keeps weekday-only patterns on the byDayOfWeek rule without derived days', () => {
+        const config = {
+          frequency: 'monthly',
+          start: '2024-01-31',
+          patterns: [{ value: 1, type: 'FR' }],
+        } as RecurConfig;
+        const rules = recurConfigToRSchedule(config) as MonthlyRule[];
+        expect(rules).toHaveLength(1);
+        expect(rules[0].byDayOfMonth).toBeUndefined();
+        expect(rules[0].byMonthOfYear).toBeUndefined();
+        expect(rules[0].byDayOfWeek).toEqual([['FR', 1]]);
+        expect(hasShortMonthFallback(config)).toBe(false);
+      });
+
       it('adds a short-month fallback rule for days >= 29', () => {
         const rules = recurConfigToRSchedule({
           frequency: 'monthly',
@@ -972,6 +1063,18 @@ describe('schedules', () => {
         expect(rules[1].byDayOfMonth).toEqual([-1]);
       });
 
+      it('keeps the Feb fallback when a 24-month grid is anchored in February', () => {
+        const rules = recurConfigToRSchedule({
+          frequency: 'monthly',
+          start: '2027-02-28',
+          interval: 24,
+          patterns: [{ value: 30, type: 'day' }],
+        }) as MonthlyRule[];
+        expect(rules).toHaveLength(2);
+        expect(rules[1].byMonthOfYear).toEqual([2]);
+        expect(rules[1].byDayOfMonth).toEqual([-1]);
+      });
+
       it('reports fallback reachability for the UI hint', () => {
         expect(
           hasShortMonthFallback({
@@ -996,6 +1099,15 @@ describe('schedules', () => {
             patterns: [{ value: 30, type: 'day' }],
           }),
         ).toBe(true);
+        expect(
+          hasShortMonthFallback({
+            frequency: 'monthly',
+            start: '2024-01-30',
+            endMode: 'after_n_occurrences',
+            endOccurrences: 5,
+            patterns: [{ value: 30, type: 'day' }],
+          }),
+        ).toBe(false);
       });
 
       it('keeps only the primary rule for day 29 with after_n_occurrences', () => {
