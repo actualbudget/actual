@@ -730,7 +730,7 @@ describe('Transactions', () => {
   });
 
   test('keybinding escape resets the value', async () => {
-    const { container } = renderTransactions();
+    const { container, getTransactions } = renderTransactions();
 
     let input = await editField(container, 'notes', 2);
     let oldValue = input.value;
@@ -738,7 +738,9 @@ describe('Transactions', () => {
     await userEvent.type(input, 'yo new value');
     expect(input.value).toEqual('yo new value');
     await userEvent.type(input, '[Escape]');
-    expect(input.value).toEqual(oldValue);
+    expect(queryField(container, 'notes', 'input', 2)).toBeNull();
+    expect(queryField(container, 'notes', '', 2)).toHaveTextContent(oldValue);
+    expect(getTransactions()[2].notes).toBe(oldValue);
 
     input = await editField(container, 'category', 2);
     oldValue = input.value;
@@ -747,28 +749,31 @@ describe('Transactions', () => {
     expect(input.value).toEqual('Gener');
     await userEvent.type(input, '[Escape]');
     expect(input.value).toEqual(oldValue);
+    await userEvent.keyboard('[Escape]');
+    expect(queryField(container, 'category', 'input', 2)).toBeNull();
+    expect(getTransactions()[2].category).toBe(
+      categories.find(category => category.name === oldValue)?.id,
+    );
   });
 
-  test('text fields save when moved away from', async () => {
+  test.each([
+    '[Tab]',
+    '[Enter]',
+    '{Shift>}[Tab]{/Shift}',
+    '{Shift>}[Enter]{/Shift}',
+  ])('text fields save when moved away from with %s', async key => {
     const { container, getTransactions } = renderTransactions();
 
     // All of these keys move to a different field, and the value in
     // the previous input should be saved
-    const ks = [
-      '[Tab]',
-      '[Enter]',
-      '{Shift>}[Tab]{/Shift}',
-      '{Shift>}[Enter]{/Shift}',
-    ];
-
-    for (const [idx] of ks.entries()) {
+    for (let idx = 0; idx < 2; idx++) {
       const input = await editField(container, 'notes', 2);
       const oldValue = input.value;
       await userEvent.clear(input);
       await userEvent.type(input, 'a happy little note' + idx);
       // It's not saved yet
       expect(getTransactions()[2].notes).toBe(oldValue);
-      await userEvent.type(input, '[Tab]');
+      await userEvent.type(input, key);
       // Now it should be saved!
       expect(getTransactions()[2].notes).toBe('a happy little note' + idx);
       expect(queryField(container, 'notes', 'div', 2).textContent).toBe(
@@ -785,6 +790,51 @@ describe('Transactions', () => {
     // Blur the input to make it stop editing
     await userEvent.tab();
     expect(getTransactions()[2].notes).toBe('another happy note');
+  });
+
+  test.each(['payee', 'category'] as const)(
+    '%s mouse selection saves after revisiting an unchanged or canceled cell',
+    async field => {
+      const { container, getTransactions } = renderTransactions();
+      const initialValue = getTransactions()[2][field];
+
+      // Merely visiting a cell must not prevent its next edit from saving.
+      await editField(container, field, 2);
+      await editField(container, 'notes', 3);
+      await editField(container, field, 2);
+      await userEvent.keyboard('[Escape][Escape]');
+      expect(queryField(container, field, 'input', 2)).toBeNull();
+      expect(getTransactions()[2][field]).toBe(initialValue);
+
+      // Select using the mouse, with no typing to reactivate the session.
+      await editField(container, field, 2);
+      const target =
+        field === 'payee'
+          ? screen.getByTestId('Alice-payee-item')
+          : within(screen.getByTestId('autocomplete')).getByText('General');
+      await userEvent.click(target);
+      await editField(container, 'notes', 3);
+
+      const expectedValue =
+        field === 'payee'
+          ? 'alice-id'
+          : categories.find(category => category.name === 'General')?.id;
+      expect(getTransactions()[2][field]).toBe(expectedValue);
+      expect(queryField(container, field, '', 2)).toHaveTextContent(
+        field === 'payee' ? 'Alice' : 'General',
+      );
+    },
+  );
+
+  test('notes can be canceled twice without typing or leaving the account', async () => {
+    const { container, getTransactions } = renderTransactions();
+    const originalValue = getTransactions()[2].notes;
+    for (let session = 0; session < 2; session++) {
+      await editField(container, 'notes', 2);
+      await userEvent.keyboard('[Escape]');
+      expect(queryField(container, 'notes', 'input', 2)).toBeNull();
+      expect(getTransactions()[2].notes).toBe(originalValue);
+    }
   });
 
   test('dropdown automatically opens and can be filtered', async () => {

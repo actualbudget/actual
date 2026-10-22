@@ -2423,8 +2423,8 @@ type NewTransactionProps = {
   accounts: AccountEntity[];
   categoryGroups: CategoryGroupEntity[];
   dateFormat: string;
-  editingTransaction: TransactionEntity['id'];
-  focusedField: string;
+  editingTransaction: TransactionEntity['id'] | null;
+  focusedField: string | null;
   hideFraction: boolean;
   onSchedule: () => void;
   onAdd: () => void;
@@ -2534,7 +2534,9 @@ function NewTransaction({
           transferAccountsByTransaction={transferAccountsByTransaction}
           columns={columns}
           focusedField={
-            editingTransaction === transaction.id ? focusedField : undefined
+            editingTransaction === transaction.id
+              ? (focusedField ?? undefined)
+              : undefined
           }
           showZeroInDeposit={isDeposit}
           accounts={accounts}
@@ -2866,7 +2868,9 @@ function TransactionTableInner({
         showZeroInDeposit={isChildDeposit}
         balance={balances?.[trans.id] ?? 0}
         amountColumnWidths={amountColumnWidths}
-        focusedField={editing ? tableNavigator.focusedField : undefined}
+        focusedField={
+          editing ? (tableNavigator.focusedField ?? undefined) : undefined
+        }
         accounts={accounts}
         categoryGroups={categoryGroups}
         payees={payees}
@@ -3658,6 +3662,9 @@ export const TransactionTable = forwardRef(
     function onCheckEnter(e: KeyboardEvent) {
       if (e.key === 'Enter' && !e.shiftKey) {
         const { editingId: id, focusedField } = tableNavigator;
+        if (id === null) {
+          return;
+        }
 
         afterSave(() => {
           const transactions = latestState.current.transactions;
@@ -3866,7 +3873,10 @@ export const TransactionTable = forwardRef(
           if (trans.amount === null) {
             tableNavigator.onEdit(trans.id, 'debit');
           } else {
-            tableNavigator.onEdit(newId, tableNavigator.focusedField);
+            tableNavigator.onEdit(
+              newId,
+              tableNavigator.focusedField ?? undefined,
+            );
           }
         }
       };
@@ -3887,13 +3897,13 @@ export const TransactionTable = forwardRef(
           setNewTransactions(data);
           newNavigator.onEdit(
             diff.added[0].id,
-            latestState.current.newNavigator.focusedField,
+            latestState.current.newNavigator.focusedField ?? undefined,
           );
         } else {
           const newId = onAddSplitProp(id);
           tableNavigator.onEdit(
             newId,
-            latestState.current.tableNavigator.focusedField,
+            latestState.current.tableNavigator.focusedField ?? undefined,
           );
         }
       },

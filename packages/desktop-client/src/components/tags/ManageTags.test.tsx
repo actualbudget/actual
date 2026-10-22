@@ -149,4 +149,23 @@ describe('ManageTags', () => {
     // editing on to the next row's tag field
     expect(screen.queryAllByTestId('tag')).toHaveLength(0);
   });
+
+  it('can rename after canceling an earlier edit without saving the canceled draft', async () => {
+    await startRenaming('Reimbursable');
+    const input = screen.getByDisplayValue('Reimbursable');
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Discarded{Escape}');
+    expect(screen.queryAllByTestId('tag')).toHaveLength(0);
+    expect(renameTag).not.toHaveBeenCalled();
+
+    await startRenaming('Reimbursable');
+    const reopenedInput = screen.getByDisplayValue('Reimbursable');
+    await userEvent.clear(reopenedInput);
+    await userEvent.type(reopenedInput, 'ToBeReimbursed{Enter}');
+    expect(renameTag).toHaveBeenCalledExactlyOnceWith({
+      id: 'tag-1',
+      tag: 'ToBeReimbursed',
+    });
+    expect(screen.queryAllByTestId('tag')).toHaveLength(0);
+  });
 });

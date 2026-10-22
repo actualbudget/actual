@@ -73,6 +73,13 @@ test.describe('Keyboard navigation', () => {
 
       await expect(input).toBeHidden();
       expect(await budgetCell.textContent()).toBe(committedText);
+
+      // Canceling must leave the next unchanged edit usable too.
+      await budgetCell.click();
+      await expect(input).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(input).toBeHidden();
+      expect(await budgetCell.textContent()).toBe(committedText);
     });
   });
 
@@ -92,6 +99,71 @@ test.describe('Keyboard navigation', () => {
 
     test.afterEach(async () => {
       await page?.close();
+    });
+
+    for (const field of ['payee', 'category'] as const) {
+      test(`${field} mouse selection persists after revisiting the cell`, async () => {
+        const accountPage = await navigation.createAccount({
+          name: `Repeated ${field} editing`,
+          offBudget: false,
+          balance: 100,
+        });
+        const transaction = accountPage.getNthTransaction(0);
+        const cell = transaction[field];
+        const popup = page.getByTestId('autocomplete');
+        const option =
+          field === 'payee'
+            ? popup.getByTestId('Fast Internet-payee-item')
+            : popup.getByText('Food', { exact: true });
+
+        // Visit without typing or changing the value, then return.
+        await cell.click();
+        await expect(cell.locator('input')).toBeVisible();
+        await transaction.notes.click();
+        await cell.click();
+        await option.click();
+        await transaction.notes.click();
+        await expect(cell).toHaveText(
+          field === 'payee' ? 'Fast Internet' : 'Food',
+        );
+
+        // Reopening and saving the same option must also leave a usable editor.
+        await cell.click();
+        await option.click();
+        await transaction.notes.click();
+        await cell.click();
+        await expect(popup).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(popup).toBeHidden();
+        await page.keyboard.press('Escape');
+        await expect(cell.locator('input')).toBeHidden();
+        await cell.click();
+        const nextOption =
+          field === 'payee'
+            ? popup.getByTestId('Home Depot-payee-item')
+            : popup.getByText('Starting Balances', { exact: true });
+        await nextOption.click();
+        await transaction.notes.click();
+        await expect(cell).toHaveText(
+          field === 'payee' ? 'Home Depot' : 'Starting Balances',
+        );
+      });
+    }
+
+    test('notes can be canceled repeatedly without typing', async () => {
+      const accountPage = await navigation.createAccount({
+        name: 'Repeated notes editing',
+        offBudget: false,
+        balance: 100,
+      });
+      const notes = accountPage.getNthTransaction(0).notes;
+      for (let session = 0; session < 2; session++) {
+        await notes.click();
+        await expect(notes.locator('input')).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(notes.locator('input')).toBeHidden();
+        await expect(notes).toHaveText('');
+      }
     });
 
     test('escape on a cell exits edit mode and reverts the typed value', async () => {
@@ -216,6 +288,7 @@ test.describe('Keyboard navigation', () => {
       await page.keyboard.press('Escape');
 
       // First Escape: popup closed, input remains visible.
+      await expect(page.getByTestId('autocomplete')).toBeHidden();
       await expect(input).toBeVisible();
       await expect(accountPage.selectButton).toBeVisible();
 
@@ -293,6 +366,39 @@ test.describe('Keyboard navigation', () => {
       await expect(input).toBeHidden();
       expect(await dateCell.textContent()).toBe(committedDate);
     });
+
+    for (const previousAction of ['cancel', 'leave unchanged']) {
+      test(`calendar selection saves after reopening following ${previousAction}`, async () => {
+        const accountPage = await navigation.createAccount({
+          name: `Calendar after ${previousAction}`,
+          offBudget: false,
+          balance: 100,
+        });
+        const transaction = accountPage.getNthTransaction(0);
+        const dateCell = transaction.date;
+        const originalDate = await dateCell.textContent();
+        await dateCell.click();
+        await expect(dateCell.locator('input')).toBeVisible();
+        if (previousAction === 'cancel') {
+          await page.keyboard.press('Escape');
+          await expect(page.getByTestId('date-select-tooltip')).toBeHidden();
+          await page.keyboard.press('Escape');
+        } else {
+          await transaction.notes.click();
+        }
+        await expect(dateCell.locator('input')).toBeHidden();
+        await dateCell.click();
+        const calendar = page.locator('[data-date-picker]');
+        await expect(calendar).toBeVisible();
+        // The fixture's starting balance is January 1; choose January 2.
+        const originalInput = await dateCell.locator('input').inputValue();
+        const selectedDate = originalInput.replace('01/01/', '01/02/');
+        expect(selectedDate).not.toBe(originalDate);
+        await calendar.getByRole('button', { name: /January 2,/ }).click();
+        await transaction.notes.click();
+        await expect(dateCell).toHaveText(selectedDate);
+      });
+    }
 
     test('escape in the add-new amount field exits the cell without discarding the row', async () => {
       const accountPage = await navigation.createAccount({

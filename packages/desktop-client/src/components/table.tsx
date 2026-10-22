@@ -324,6 +324,7 @@ type EditSessionState = 'active' | 'committed' | 'canceled';
 
 export type UseCellEditorOptions<T> = {
   committedValue: T;
+  isEditing?: boolean;
   onUpdate?: (value: T) => void;
   onExit?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -332,6 +333,7 @@ export type UseCellEditorOptions<T> = {
 
 export function useCellEditor<T>({
   committedValue,
+  isEditing = true,
   onUpdate,
   onExit,
   onKeyDown: userOnKeyDown,
@@ -340,15 +342,24 @@ export function useCellEditor<T>({
   const [value, setValue] = useState<T>(committedValue);
   const [prevCommittedValue, setPrevCommittedValue] =
     useState<T>(committedValue);
+  const [wasEditing, setWasEditing] = useState(isEditing);
   const sessionState = useRef<EditSessionState>('active');
   const valueRef = useRef<T>(committedValue);
   valueRef.current = value;
 
-  if (prevCommittedValue !== committedValue) {
+  const isStartingEdit = isEditing && !wasEditing;
+  if (wasEditing !== isEditing) {
+    setWasEditing(isEditing);
+  }
+  if (prevCommittedValue !== committedValue || isStartingEdit) {
     setValue(committedValue);
     setPrevCommittedValue(committedValue);
-    sessionState.current = 'active';
     valueRef.current = committedValue;
+  }
+  // Cells stay mounted between edits. Only entering edit mode starts a
+  // fresh session; receiving a saved value must not enable another blur save.
+  if (isStartingEdit) {
+    sessionState.current = 'active';
   }
 
   const setValueWrapped = useCallback((next: T | ((prev: T) => T)) => {
@@ -589,6 +600,7 @@ export function CustomCell<T = string | undefined>({
 }: CustomCellProps<T>) {
   const cellEditor = useCellEditor<T>({
     committedValue: defaultValue as T,
+    isEditing: props.exposed ?? false,
     onUpdate,
     onExit,
     onBlur: onBlur ? (e: FocusEvent) => fireBlur(onBlur, e) : undefined,
@@ -1143,8 +1155,8 @@ export const Table = forwardRef(
         beginEdit: () => {},
         exitEdit: () => {},
         onEdit: () => {},
-        editingId: null as unknown as TableItem['id'],
-        focusedField: null as unknown as string,
+        editingId: null,
+        focusedField: null,
         getNavigatorProps: (props =>
           props) as TableNavigator<TableItem>['getNavigatorProps'],
       };
@@ -1422,8 +1434,8 @@ export type TableNavigator<T extends TableItem = TableItem> = {
   beginEdit: (id: T['id'], field?: string) => void;
   exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
-  editingId: T['id'];
-  focusedField: string;
+  editingId: T['id'] | null;
+  focusedField: string | null;
   getNavigatorProps: <P extends object>(
     userProps?: P,
   ) => P & {
@@ -1484,12 +1496,8 @@ export function useTableNavigator<T extends TableItem>(
     [beginEdit, exitEdit],
   );
 
-  const editingId = (isEditing && cursor
-    ? cursor.id
-    : null) as unknown as T['id'];
-  const focusedField = (cursor
-    ? (cursor.field ?? null)
-    : null) as unknown as string;
+  const editingId = isEditing && cursor ? cursor.id : null;
+  const focusedField = cursor?.field ?? null;
 
   function flashInput() {
     // Force the container to be focused which suppresses the "space
@@ -1680,7 +1688,9 @@ export function useTableNavigator<T extends TableItem>(
             containerRef.current === e.relatedTarget) &&
           prevNumModals === numModals
         ) {
-          exitEdit();
+          // Let the clicked control receive focus. exitEdit also focuses
+          // this table, which is appropriate for Escape but not for blur.
+          setIsEditing(false);
         }
       },
     };
