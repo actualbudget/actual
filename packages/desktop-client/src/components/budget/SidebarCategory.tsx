@@ -16,6 +16,10 @@ import type {
 import { InputCell } from '#components/table';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
@@ -63,6 +67,12 @@ export function SidebarCategory({
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
   const temporary = category.id === 'new';
+  const dispatch = useDispatch();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const canAddCurrency =
+    useMulticurrencyAvailable() &&
+    budgetType === 'envelope' &&
+    !category.is_income;
   const triggerRef = useRef(null);
   const { handleContextMenu } = useContextMenu({
     triggerRef,
@@ -71,6 +81,22 @@ export function SidebarCategory({
         name: 'rename',
         text: t('Rename'),
         onClick: () => onEditName(category.id),
+      },
+      canAddCurrency && {
+        name: 'add-currency',
+        text: t('Add currency…'),
+        onClick: () =>
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'add-currency',
+                options: {
+                  categoryId: category.id,
+                  categoryName: category.name,
+                },
+              },
+            }),
+          ),
       },
       !categoryGroup?.hidden && {
         name: 'toggle-visibility',

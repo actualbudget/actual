@@ -8,7 +8,7 @@ import type { ExchangeRateEntity, FxRateUsed } from '#types/models';
 
 import { rateUsed, walkFxValuation } from './fx-valuation';
 import type { FxMonth, FxWalkAccount, FxWalkRow } from './fx-valuation';
-import { encodingCurrency } from './pockets';
+import { baseSlotShown, encodingCurrency, slotFor } from './pockets';
 import type { LaneStatus } from './pockets';
 import { readReservationInputs, walkReservations } from './reservations';
 import type {
@@ -122,6 +122,12 @@ export type CategoryPocketsMonth = {
   };
   pockets: PocketMonth[];
   incomplete: PocketIncompleteReason[];
+  /**
+   * The category's current base slot and whether the budget shows it: after
+   * Add Currency in the budget currency, history or activity, unless hidden
+   * (B5). Set by the reader; envelope-budget-month only.
+   */
+  baseSlot?: { id: string | null; shown: boolean };
 };
 
 type LaneValueCell = { value: number; status: string };
@@ -548,6 +554,7 @@ export function categoryPocketMonths(
       base,
       pockets,
       incomplete: [...reasons],
+      baseSlot: { id: slotFor(category, ''), shown: baseSlotShown(category) },
     });
   }
   return result;

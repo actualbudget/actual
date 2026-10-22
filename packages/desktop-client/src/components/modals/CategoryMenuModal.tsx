@@ -9,8 +9,12 @@ import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
 import { useCategoryGroup } from '#hooks/useCategoryGroup';
 import { useDeleteCategoryFlow } from '#hooks/useDeleteCategoryFlow';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type CategoryMenuModalProps = Extract<
   ModalType,
@@ -35,6 +39,9 @@ export function CategoryMenuModal({
     },
   } = useCategories();
   const notes = useNotes(categoryId);
+  const dispatch = useDispatch();
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const multicurrencyAvailable = useMulticurrencyAvailable();
   const deleteFlow = useDeleteCategoryFlow({
     categoryIds: [categoryId],
     onDelete: transferCategoryId => onDelete(categoryId, transferCategoryId),
@@ -85,6 +92,26 @@ export function CategoryMenuModal({
                 label={t('Edit notes')}
                 onPress={() => onEditNotes(category.id)}
               />
+              {multicurrencyAvailable &&
+                budgetType === 'envelope' &&
+                !isIncome && (
+                  <MobileSheetRow
+                    label={t('Add currency')}
+                    onPress={() =>
+                      dispatch(
+                        pushModal({
+                          modal: {
+                            name: 'add-currency',
+                            options: {
+                              categoryId: category.id,
+                              categoryName: category.name,
+                            },
+                          },
+                        }),
+                      )
+                    }
+                  />
+                )}
               {onEditAutomations && (
                 <MobileSheetRow
                   label={t('Budget automations')}
