@@ -243,23 +243,21 @@ describe('fuzzy matching: two bank transactions in one sync', () => {
   });
 
   // The scenario raised in review on #9005.
-  test('early bank transaction only in range of one candidate, listed first: duplicate', async () => {
+  test('early bank transaction only in range of one candidate, listed first: both match', async () => {
     await enter(['2024-09-12', '2024-09-13']);
     await sync([bank('2024-09-05'), bank('2024-09-12')]);
     expect(await ledger()).toEqual([
-      'new-09-05 ← bank-09-05',
-      'user-09-12 ← bank-09-12',
-      'user-09-13 ← (none)',
+      'user-09-12 ← bank-09-05',
+      'user-09-13 ← bank-09-12',
     ]);
   });
 
-  test('early bank transaction only in range of one candidate, listed second: duplicate', async () => {
+  test('early bank transaction only in range of one candidate, listed second: both match', async () => {
     await enter(['2024-09-12', '2024-09-13']);
     await sync([bank('2024-09-12'), bank('2024-09-05')]);
     expect(await ledger()).toEqual([
-      'new-09-05 ← bank-09-05',
-      'user-09-12 ← bank-09-12',
-      'user-09-13 ← (none)',
+      'user-09-12 ← bank-09-05',
+      'user-09-13 ← bank-09-12',
     ]);
   });
 

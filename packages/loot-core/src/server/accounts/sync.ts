@@ -807,9 +807,10 @@ export async function reconcileTransactions(
 // still-available candidate from its own `fuzzyDataset`, processing
 // entries in ascending order of that distance instead of relying solely
 // on `dataList`'s own order. (`dataList` order is still used as a
-// tie-breaker.) Recomputes the best remaining candidate for every unmatched
-// entry on each round, since claiming a candidate can change what's left
-// available to the others. `hasMatched` is shared across both
+// tie-breaker.) Then, for any entry left unmatched, tries to free up a
+// candidate by reshuffling this pass's own assignments (see
+// `tryAugment`), so a batch never ends up with a duplicate that a
+// different pairing could have avoided. `hasMatched` is shared across both
 // fuzzy-matching passes (and the id/imported_id pass before them), so a
 // candidate claimed here can't be claimed again later.
 function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
@@ -839,10 +840,43 @@ function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
       a.rowIndex - b.rowIndex,
   );
 
+  // Each entry's candidates, closest first, and which entry currently holds
+  // each candidate claimed in this pass.
+  const candidatesByData = new Map();
+  for (const { data, row } of edges) {
+    if (!candidatesByData.has(data)) candidatesByData.set(data, []);
+    candidatesByData.get(data).push(row);
+  }
+  const holderByRowId = new Map();
+
   for (const { data, row } of edges) {
     if (data.match || hasMatched.has(row.id)) continue;
     hasMatched.add(row.id);
+    holderByRowId.set(row.id, data);
     data.match = row;
+  }
+
+  // Looks for a free candidate for `data`, possibly by moving the current
+  // holder of one of its candidates onto another candidate (recursively).
+  // Only assignments made in this pass can move; `visited` stops cycles.
+  function tryAugment(data, visited) {
+    for (const row of candidatesByData.get(data)) {
+      if (visited.has(row.id)) continue;
+      visited.add(row.id);
+      const holder = holderByRowId.get(row.id);
+      if (holder ? !tryAugment(holder, visited) : hasMatched.has(row.id)) {
+        continue;
+      }
+      hasMatched.add(row.id);
+      holderByRowId.set(row.id, data);
+      data.match = row;
+      return true;
+    }
+    return false;
+  }
+
+  for (const data of candidatesByData.keys()) {
+    if (!data.match) tryAugment(data, new Set());
   }
 
   return results;
