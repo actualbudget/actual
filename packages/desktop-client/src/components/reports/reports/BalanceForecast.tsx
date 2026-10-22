@@ -59,15 +59,15 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import {
+  buildFromTodayForecastPresets,
+  resolveBalanceForecastRange,
+} from './balanceForecastRange';
 import { buildForecastSeriesChart } from './balanceForecastSeries';
 import { ForecastSeriesEditor } from './ForecastSeriesEditor';
 import { getForecastSeriesStyle } from './ForecastSeriesKey';
 import { ForecastSeriesSummary } from './ForecastSeriesSummary';
 import { ForecastSeriesTooltip } from './ForecastSeriesTooltip';
-import {
-  buildFromTodayForecastPresets,
-  resolveBalanceForecastRange,
-} from './balanceForecastRange';
 
 export function BalanceForecast() {
   const params = useParams();

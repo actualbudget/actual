@@ -36,11 +36,11 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import { resolveBalanceForecastRange } from './balanceForecastRange';
 import { buildForecastSeriesChart } from './balanceForecastSeries';
 import { getForecastSeriesStyle } from './ForecastSeriesKey';
 import { ForecastSeriesSummary } from './ForecastSeriesSummary';
 import { ForecastSeriesTooltip } from './ForecastSeriesTooltip';
-import { resolveBalanceForecastRange } from './balanceForecastRange';
 
 type BalanceForecastCardProps = {
   widgetId: string;
