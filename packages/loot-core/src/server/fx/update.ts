@@ -2,6 +2,7 @@ import * as db from '#server/db';
 import { exchangeRateModel } from '#server/models';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
+import { buildRateIndex, findRate } from '#shared/fx/rates';
 import {
   getSqlDefaultCurrencyCode,
   isSqlConversionEnabled,
@@ -154,6 +155,8 @@ type PairDates = {
   hasFetched: boolean;
   oldestFetched: string | null;
   newestFetched: string | null;
+  oldest: string | null;
+  newest: string | null;
 };
 
 function getPairDates(
@@ -169,6 +172,8 @@ function getPairDates(
     hasFetched: false,
     oldestFetched: null,
     newestFetched: null,
+    oldest: null,
+    newest: null,
   };
   for (const rate of rates) {
     const isPair =
@@ -180,6 +185,12 @@ function getPairDates(
     }
     pair.dates.add(rate.date);
     pair.months.add(rate.date.slice(0, 7));
+    if (pair.oldest === null || rate.date < pair.oldest) {
+      pair.oldest = rate.date;
+    }
+    if (pair.newest === null || rate.date > pair.newest) {
+      pair.newest = rate.date;
+    }
     if (rate.source === FRANKFURTER_SOURCE) {
       pair.hasFetched = true;
       if (pair.oldestFetched === null || rate.date < pair.oldestFetched) {
@@ -483,4 +494,112 @@ export async function updateExchangeRates({
     }
   });
   return result;
+}
+
+export type MissingExchangeRates = {
+  currency: string;
+  // Whether the newest rate is older than yesterday, and its date (null
+  // without any rate)
+  isOutdated: boolean;
+  outdatedSince: string | null;
+  // The first transaction, when it is older than the first rate
+  olderTransactionsFrom: string | null;
+  // For fetched rates, the first and last day of the days or months
+  // missing in between, e.g. after rates were deleted
+  holes: DateRange | null;
+};
+
+// Currencies of open accounts whose rates stop before yesterday, or whose
+// transactions start before their first rate. Yesterday rather than today,
+// so a rate not published yet, or a time zone ahead of the provider's,
+// doesn't count as missing. Rates through a third currency count, as they
+// do for conversions.
+export async function findMissingExchangeRates(): Promise<
+  MissingExchangeRates[]
+> {
+  if (!isSqlConversionEnabled()) {
+    return [];
+  }
+  const defaultCurrency = getSqlDefaultCurrencyCode();
+  const rows = await db.all<Pick<db.DbAccount, 'currency'>>(
+    `SELECT DISTINCT currency FROM accounts
+       WHERE tombstone = 0 AND closed = 0 AND currency IS NOT NULL`,
+  );
+  const currencies = rows
+    .map(row => row.currency)
+    .filter(
+      (currency): currency is string =>
+        typeof currency === 'string' &&
+        currency !== '' &&
+        currency !== defaultCurrency,
+    )
+    .sort();
+  if (currencies.length === 0) {
+    return [];
+  }
+
+  const savedRates = await getExchangeRates();
+  const providerGaps = await loadProviderGaps();
+  const index = buildRateIndex(savedRates);
+  const today = monthUtils.currentDay();
+  const yesterday = monthUtils.subDays(today, 1);
+  const dailyFrom = monthUtils.subDays(today, DAILY_HISTORY_DAYS);
+  const missing: MissingExchangeRates[] = [];
+  for (const currency of currencies) {
+    const latest = findRate(index, currency, defaultCurrency, today);
+    const isOutdated = !latest || (latest.date ?? '') < yesterday;
+    const firstTransaction = await getFirstTransactionDate(currency);
+    const atFirstTransaction =
+      firstTransaction === null
+        ? null
+        : findRate(index, currency, defaultCurrency, firstTransaction);
+    const hasOlderTransactions =
+      firstTransaction !== null &&
+      (!atFirstTransaction || atFirstTransaction.isFallback);
+
+    // Only where a fetched series is expected: from the first transaction
+    // (as updates fetch it) or the oldest rate when that is later, up to
+    // the newest rate that isn't in the future, so older transactions and
+    // outdated rates aren't reported twice
+    const pair = getPairDates(
+      savedRates,
+      currency,
+      defaultCurrency,
+      providerGaps[currency] ?? [],
+    );
+    const seriesStart = firstTransaction ?? pair.oldestFetched;
+    const innerStart =
+      seriesStart !== null && pair.oldest !== null && seriesStart > pair.oldest
+        ? seriesStart
+        : pair.oldest;
+    const innerEnd =
+      pair.newest !== null && pair.newest > today
+        ? ([...pair.dates]
+            .filter(date => date <= today)
+            .sort()
+            .at(-1) ?? null)
+        : pair.newest;
+    const inner =
+      pair.hasFetched && innerStart !== null && innerEnd !== null
+        ? findHoles(pair, innerStart, innerEnd, dailyFrom)
+        : [];
+    const holes =
+      inner.length > 0
+        ? {
+            startDate: inner[0].startDate,
+            endDate: inner[inner.length - 1].endDate,
+          }
+        : null;
+
+    if (isOutdated || hasOlderTransactions || holes) {
+      missing.push({
+        currency,
+        isOutdated,
+        outdatedSince: isOutdated ? (latest?.date ?? null) : null,
+        olderTransactionsFrom: hasOlderTransactions ? firstTransaction : null,
+        holes,
+      });
+    }
+  }
+  return missing;
 }
