@@ -720,6 +720,51 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   });
 });
 
+handlers['api/pocket-create'] = withMutation(async function ({
+  categoryId,
+  currency,
+}) {
+  checkFileOpen();
+  return handlers['budget/pocket-create']({ category: categoryId, currency });
+});
+
+handlers['api/pocket-update'] = withMutation(async function ({
+  id,
+  hidden,
+  sortOrder,
+}) {
+  checkFileOpen();
+  return handlers['budget/slot-meta-set']({
+    id,
+    hidden,
+    ...(sortOrder !== undefined && { sort_order: sortOrder }),
+  });
+});
+
+handlers['api/pocket-budget-set'] = withMutation(async function ({
+  month,
+  pocketId,
+  amount,
+  encoding,
+  baseAmount,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  return handlers['budget/pocket-budget-set']({
+    month,
+    pocketId,
+    amount,
+    encoding,
+    baseAmount,
+  });
+});
+
+handlers['api/pockets-finalize'] = withMutation(async function ({ cells }) {
+  checkFileOpen();
+  for (const { month } of cells) await validateMonth(month);
+  return handlers['budget/pockets-finalize']({ cells });
+});
+
 handlers['api/budget-hold-for-next-month'] = withMutation(async function ({
   month,
   amount,

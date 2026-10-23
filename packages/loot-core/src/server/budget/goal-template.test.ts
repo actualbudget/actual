@@ -17,6 +17,7 @@ import {
 import * as statements from './statements';
 
 vi.mock('./actions', () => ({
+  getBaseSlotCarryIn: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
   isTrackingBudget: vi.fn(),

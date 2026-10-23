@@ -19,6 +19,7 @@ import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
+  getBaseSlotCarryIn: vi.fn(),
   getCategoryAverage: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),

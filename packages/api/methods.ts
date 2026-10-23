@@ -195,6 +195,55 @@ export function setBudgetAmount(
   return send('api/budget-set-amount', { month, categoryId, amount: value });
 }
 
+/** Adds a currency pocket to an expense category, or returns its slot. */
+export function createPocket(
+  categoryId: APICategoryEntity['id'],
+  currency: string,
+) {
+  return send('api/pocket-create', { categoryId, currency });
+}
+
+/** Hides, shows or orders a currency slot; it changes no amount. */
+export function updatePocket(
+  id: string,
+  fields: { hidden?: boolean; sortOrder?: number | null },
+) {
+  return send('api/pocket-update', { id, ...fields });
+}
+
+/**
+ * Sets a currency slot's displayed budget for a month. `amount` is an
+ * integer at `encoding` (`CUR.precision`), such as the pocket's reported
+ * `currency` and `precision`; a different currency or an unsupported
+ * precision returns `{ status: 'encoding-mismatch' }` and writes nothing.
+ * `baseAmount` freezes the written cell's budget-currency equivalent.
+ */
+export function setPocketBudget(
+  month: string,
+  pocketId: string,
+  amount: number,
+  encoding: string,
+  baseAmount?: number,
+) {
+  return send('api/pocket-budget-set', {
+    month,
+    pocketId,
+    amount,
+    encoding,
+    ...(baseAmount !== undefined && { baseAmount }),
+  });
+}
+
+/**
+ * Finalizes pending budget-currency equivalents of named pocket cells, with
+ * a supplied base or the entry rate on each cell's capture date.
+ */
+export function finalizePockets(
+  cells: Array<{ month: string; laneId: string; baseAmount?: number }>,
+) {
+  return send('api/pockets-finalize', { cells });
+}
+
 export function setBudgetCarryover(
   month: string,
   categoryId: APICategoryEntity['id'],

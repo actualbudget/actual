@@ -16,6 +16,7 @@ import type {
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
+import { PocketBudgetInput } from '#components/budget/PocketBudgetInput';
 import {
   Amount,
   GroupAmount,
@@ -206,10 +207,9 @@ function SlotRow({
     />
   );
   return (
-    <Button
-      variant="bare"
-      aria-label={t('Details and actions for {{name}}', { name })}
-      onPress={() => openPocket(category.id, pocket.id, month)}
+    <View
+      role="group"
+      aria-label={name}
       style={{
         ...childRowStyle(month),
         width: '100%',
@@ -224,11 +224,18 @@ function SlotRow({
       <AmountColumns
         {...columns}
         amounts={[
-          native(pocket.budgeted),
+          <PocketBudgetInput pocket={pocket} month={month} name={name} />,
           native(pocket.spent),
-          native(pocket.balance),
+          <Button
+            variant="bare"
+            aria-label={t('Details and actions for {{name}}', { name })}
+            onPress={() => openPocket(category.id, pocket.id, month)}
+            style={{ padding: 0, justifyContent: 'flex-end' }}
+          >
+            {native(pocket.balance)}
+          </Button>,
         ]}
       />
-    </Button>
+    </View>
   );
 }

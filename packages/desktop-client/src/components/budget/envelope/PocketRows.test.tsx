@@ -85,6 +85,23 @@ it('AN2 shows a currency slot in native units', () => {
   expect(plain(slot.textContent)).not.toContain('$');
 });
 
+it('a newly added zero-budget pocket is editable directly in its row', () => {
+  setup(
+    <PocketSlotMonth
+      categoryId="travel"
+      categoryName="Travel"
+      month="2026-01"
+      pocket={{ ...an2Months['2026-01'].pockets[0], budgeted: 0 }}
+      backing={undefined}
+    />,
+  );
+  expect(
+    screen.getByRole('textbox', {
+      name: 'Budgeted for Travel JPY, January 2026',
+    }),
+  ).toBeEnabled();
+});
+
 it('K1 labels the included-rate valuation and the pending equivalent', () => {
   setup(
     <PocketSlotMonth
