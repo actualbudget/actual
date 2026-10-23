@@ -78,6 +78,7 @@ const DynamicBudgetTable = ({
     [monthBounds.start, monthBounds.end, numMonths],
   );
 
+  // Move the first column back when shrinking would put the last column out of range.
   useEffect(() => {
     const validMonth = getValidMonth(startMonth);
     if (validMonth !== startMonth) {

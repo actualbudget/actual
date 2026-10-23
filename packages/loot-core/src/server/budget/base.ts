@@ -11,50 +11,13 @@ import type { CategoryGroupEntity } from '#types/models';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
+import { getBudgetRange } from './util';
+
+export { getBudgetRange } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
   return meta.budgetType || 'envelope';
-}
-
-export function getBudgetRange(start: string, end: string) {
-  start = monthUtils.getMonth(start);
-  end = monthUtils.getMonth(end);
-
-  // The start date should never be after the end date. If that
-  // happened, the month range might be a valid range and weird
-  // things happen
-  if (start > end) {
-    start = end;
-  }
-
-  // Include three months before the earliest needed month and at least
-  // 12 months after the current month. Tracking budgets also include three
-  // months after the latest non-zero allocation so planning can continue.
-  // Empty amounts, carryover flags, and goals do not extend the range.
-  // Reducing the available range does not delete saved budget values.
-  start = monthUtils.subMonths(start, 3);
-  end = monthUtils.addMonths(end, 12);
-
-  if (getBudgetType() === 'tracking') {
-    const latest = db.firstSync<{ month: number | null }>(
-      `SELECT MAX(b.month) AS month FROM reflect_budgets b
-       JOIN categories c ON c.id = b.category
-       WHERE c.tombstone = 0 AND b.amount != 0`,
-    );
-    if (latest?.month) {
-      const plannedMonth = String(latest.month);
-      const plannedEnd = monthUtils.addMonths(
-        `${plannedMonth.slice(0, 4)}-${plannedMonth.slice(4)}`,
-        3,
-      );
-      if (plannedEnd > end) {
-        end = plannedEnd;
-      }
-    }
-  }
-
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
 }
 
 // The day range spanning the given months. They aren't guaranteed to be
@@ -322,19 +285,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
 }
 
 export async function doTransfer(categoryIds, transferId) {
-  if (categoryIds.length === 0) {
-    return;
-  }
+  const { createdMonths: months } = sheet.get().meta();
 
-  const table = budgetActions.getBudgetTable();
-  const plannedMonths = await db.all<{ month: number }>(
-    `SELECT DISTINCT month FROM ${table}
-     WHERE category IN (${categoryIds.map(() => '?').join(',')}) AND amount != 0`,
-    categoryIds,
-  );
-  for (const { month: savedMonth } of plannedMonths) {
-    const plannedMonth = String(savedMonth);
-    const month = `${plannedMonth.slice(0, 4)}-${plannedMonth.slice(4)}`;
+  [...months].forEach(month => {
     const totalValue = categoryIds
       .map(id => {
         return budgetActions.getBudget({ month, category: id });
@@ -346,12 +299,12 @@ export async function doTransfer(categoryIds, transferId) {
       category: transferId,
     });
 
-    await budgetActions.setBudget({
+    void budgetActions.setBudget({
       month,
       category: transferId,
       amount: totalValue + transferValue,
     });
-  }
+  });
 }
 
 export async function createBudget(months) {
@@ -466,8 +419,7 @@ export async function createAllBudgets() {
 
   const meta = sheet.get().meta();
   const createdMonths = meta.createdMonths || new Set();
-  // Keep existing sheets cached when the navigation range shrinks; only
-  // create missing months. Bulk actions must use the current range bounds.
+  // Shrinking changes navigation bounds; previously initialized sheets stay cached.
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
