@@ -381,6 +381,102 @@ describe('exchange rates app', () => {
     });
   });
 
+  describe('exchange-rates-check', () => {
+    beforeEach(async () => {
+      for (const [id, value] of [
+        ['flags.currency', 'true'],
+        ['flags.multiCurrency', 'true'],
+        ['defaultCurrencyCode', 'CAD'],
+      ]) {
+        await db.update('preferences', { id, value });
+      }
+      loadSqlConversionState();
+      await db.insertAccount({ id: 'usd', name: 'US', currency: 'USD' });
+    });
+
+    it('reminds of missing rates while automatic updates are off', async () => {
+      expect(await app.handlers['exchange-rates-check']()).toEqual({
+        missing: [expect.objectContaining({ currency: 'USD' })],
+        errors: [],
+        unsupported: [],
+      });
+    });
+
+    it('has nothing to remind of when rates are up to date', async () => {
+      await app.handlers['exchange-rate-create']({
+        ...usdToCad,
+        date: '2017-01-01',
+      });
+
+      expect(await app.handlers['exchange-rates-check']()).toBeNull();
+    });
+
+    describe('with automatic updates on', () => {
+      const status = {
+        added: 0,
+        updated: 0,
+        unchanged: 0,
+        unsupported: [],
+        errors: [],
+        // Midday, so the day is the same in every time zone
+        time: '2017-01-01T12:00:00.000Z',
+      };
+
+      beforeEach(async () => {
+        await db.update('preferences', {
+          id: 'exchange-rates-auto-update',
+          value: 'true',
+        });
+        await prefs.loadPrefs();
+      });
+
+      afterEach(() => {
+        prefs.unloadPrefs();
+      });
+
+      it('only reminds when the last update failed', async () => {
+        await prefs.savePrefs({
+          exchangeRatesUpdateStatus: JSON.stringify(status),
+        });
+        expect(await app.handlers['exchange-rates-check']()).toBeNull();
+
+        await prefs.savePrefs({
+          exchangeRatesUpdateStatus: JSON.stringify({
+            ...status,
+            unsupported: ['USD'],
+            errors: ['offline'],
+          }),
+        });
+        expect(await app.handlers['exchange-rates-check']()).toEqual({
+          missing: [expect.objectContaining({ currency: 'USD' })],
+          errors: ['offline'],
+          unsupported: ['USD'],
+        });
+      });
+
+      it('does not remind of an earlier day failing, as today may fix it', async () => {
+        await prefs.savePrefs({
+          exchangeRatesUpdateStatus: JSON.stringify({
+            ...status,
+            errors: ['offline'],
+            time: '2016-12-31T12:00:00.000Z',
+          }),
+        });
+
+        expect(await app.handlers['exchange-rates-check']()).toBeNull();
+      });
+
+      it('ignores a saved status it can not read', async () => {
+        await prefs.savePrefs({
+          exchangeRatesUpdateStatus: JSON.stringify({ added: 1 }),
+        });
+
+        expect(await app.handlers['exchange-rates-update-status']()).toBeNull();
+        expect(await app.handlers['exchange-rates-check']()).toBeNull();
+      });
+    });
+  });
+
   describe('daily automatic update', () => {
     const mockedFetch = vi.mocked(fetch);
 
