@@ -280,6 +280,7 @@ export type DbCustomReport = {
 export type DbDashboardPage = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: 1 | 0;
 };
 

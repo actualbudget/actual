@@ -6,6 +6,7 @@ import * as fs from '#platform/server/fs';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { SORT_INCREMENT } from '#server/db/sort';
 import { ValidationError } from '#server/errors';
 import { requiredFields } from '#server/models';
 import { mutator } from '#server/mutators';
@@ -107,8 +108,14 @@ const exportModel = {
 };
 
 async function createDashboardPage({ name }: { name: string }) {
+  const lastPage = await db.first<Pick<db.DbDashboardPage, 'sort_order'>>(
+    `SELECT sort_order FROM dashboard_pages
+     ORDER BY sort_order DESC, id DESC LIMIT 1`,
+  );
+  const sort_order = (lastPage?.sort_order ?? 0) + SORT_INCREMENT;
+
   const id = uuidv4();
-  await db.insertWithSchema('dashboard_pages', { id, name });
+  await db.insertWithSchema('dashboard_pages', { id, name, sort_order });
 
   return id;
 }
