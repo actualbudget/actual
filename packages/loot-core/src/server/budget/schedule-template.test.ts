@@ -1432,4 +1432,92 @@ describe('solveMonthlyContribution', () => {
     // Empty in January with $1,200 due in March: $400/month until then.
     expect(solveMonthlyContribution(0, yearlyBillsOutflow(0))).toBe(40000);
   });
+
+  it('spreads the catch-up evenly up to the first bill when bills start a few months out', () => {
+    // $190 a month in bills, first due two months from now. The months
+    // before the first bill don't pull the steady rate below $190, so the
+    // catch-up is $190 over three months, not nearly $190 up front.
+    const outflowFrom = (month: number) =>
+      Array.from({ length: 60 }, (_, i) => (month + i >= 2 ? 19000 : 0));
+    let balance = 0;
+    const contributions: number[] = [];
+    for (let month = 0; month < 6; month++) {
+      const outflow = outflowFrom(month);
+      const contribution = solveMonthlyContribution(balance, outflow);
+      contributions.push(contribution);
+      balance += contribution - outflow[0];
+      expect(balance).toBeGreaterThanOrEqual(0);
+    }
+    expect(contributions).toEqual([6334, 6333, 6333, 19000, 19000, 19000]);
+  });
+});
+
+// Budgets attached to the review of actualbudget/actual#8862.
+describe('runScheduleForecast on reviewer budgets', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+  });
+
+  const template = (name: string) =>
+    ({ type: 'schedule', name, priority: 0, directive: 'template' }) as const;
+
+  it('saves up evenly for monthly bills that start a few months out', async () => {
+    const template_lines = [template('Bill A'), template('Bill B')];
+    mockSchedulesByName({
+      'Bill A': {
+        spec: { start: '2026-10-22', amount: -10000, frequency: 'monthly' },
+      },
+      'Bill B': {
+        spec: { start: '2026-10-22', amount: -9000, frequency: 'monthly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2026-08',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // $190 due in October, saved over August, September and October.
+    expect(result.to_budget).toBe(6334);
+  });
+
+  it('gives the catch-up to the schedules that are behind, not a monthly bill that is on pace', async () => {
+    const template_lines = [
+      template('Monthly'),
+      template('Yearly 1'),
+      template('Yearly 2'),
+    ];
+    mockSchedulesByName({
+      Monthly: {
+        spec: { start: '2026-10-01', amount: -100000, frequency: 'monthly' },
+      },
+      'Yearly 1': {
+        spec: { start: '2027-02-01', amount: -500000, frequency: 'yearly' },
+      },
+      'Yearly 2': {
+        spec: { start: '2027-04-01', amount: -500000, frequency: 'yearly' },
+      },
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2026-10',
+      0,
+      0,
+      defaultCategory,
+      defaultCurrency,
+    );
+
+    // $17,000 due October through April, over those seven months.
+    expect(result.to_budget).toBe(242858);
+    expect(result.perScheduleMonthly.get(template_lines[0])).toBe(100000);
+    expect(result.perScheduleMonthly.get(template_lines[1])).toBe(71429);
+    expect(result.perScheduleMonthly.get(template_lines[2])).toBe(71429);
+  });
 });

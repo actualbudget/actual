@@ -187,8 +187,8 @@ describe('runScheduleForecast against a real database', () => {
   it('does not charge a bill paid early in the previous month when budgeting ahead', async () => {
     // Oct 26, budgeting November. Rent is due on the 1st; November's was
     // paid and linked on Oct 25, so it already came out of the balance
-    // carried into November. Only December onward is left to fund:
-    // $5,900 over the 60-month window, or $98.34 a month.
+    // carried into November. Only December onward is left to fund, so
+    // December's $100 is saved over November and December.
     vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-26');
     const { category, payRent, template } = await setUpRent('2024-01-01');
     await payRent('2024-10-01');
@@ -203,13 +203,13 @@ describe('runScheduleForecast against a real database', () => {
       currency,
     );
 
-    expect(result.to_budget).toBe(9834);
+    expect(result.to_budget).toBe(5000);
   });
 
   it('does not charge a bill paid early in the previous month when budgeting the current month', async () => {
     // Oct 15, budgeting October. October's rent, due on the 1st, was paid
     // and linked on Sep 29, so it already came out of the balance carried
-    // into October.
+    // into October. November's $100 is saved over October and November.
     vi.mocked(monthUtils.currentDay).mockReturnValue('2024-10-15');
     const { category, payRent, template } = await setUpRent('2024-01-01');
     await payRent('2024-09-29');
@@ -223,7 +223,7 @@ describe('runScheduleForecast against a real database', () => {
       currency,
     );
 
-    expect(result.to_budget).toBe(9834);
+    expect(result.to_budget).toBe(5000);
   });
 
   it('reserves an unposted one-time bill from an earlier month when budgeting ahead', async () => {

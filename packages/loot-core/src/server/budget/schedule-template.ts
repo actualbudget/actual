@@ -662,54 +662,103 @@ function getMonthlyBaseContribution(schedule: ScheduleTemplateTarget) {
   }
 }
 
+// The steady rate is averaged from this month of the forecast on. The
+// months before it can hold bills that haven't started yet or one-off
+// spending, which say nothing about the long run; four whole years after
+// it cover every yearly schedule evenly.
+const STEADY_RATE_FROM_MONTH = 12;
+
 // Pure, synchronous: given a starting balance and a projected
 // monthly-outflow array (an entry can be negative — an unlinked inflow
 // transaction offsets that month's need), returns this month's whole-cent
-// contribution.
+// contribution, and the last month of the catch-up (see below).
 //
-// The steady rate is the window's average monthly outflow. The required
-// balance is the smallest starting balance from which contributing the
-// steady rate every month never lets the projected balance go negative.
+// The answer is the smallest of two kinds of plan, each of which keeps
+// the projected balance non-negative across the whole window.
 //
-// Short of the required balance, the answer is the minimal constant
-// contribution that keeps the projected balance non-negative across the
-// whole window. Each month i's balance is affine in `candidate`:
-//   balance[i] = startingBalance + (i + 1) * candidate - cumsum[i]
-// so balance[i] >= 0 for all i  <=>  candidate >= threshold_i for all i,
-// where threshold_i = (cumsum[i] - startingBalance) / (i + 1). The answer
-// is max_i(threshold_i), which is at least the steady rate here.
+// Using up a surplus: the required balance is the smallest starting
+// balance from which contributing the steady rate every month never lets
+// the projected balance go negative. Anything above it is used up before
+// anything new is asked for: the steady rate less the surplus, never below
+// zero. Nothing is ever taken back out of the category; the user can move
+// a surplus elsewhere by hand.
 //
-// Above the required balance, the surplus is used up before anything new
-// is asked for: the contribution is the steady rate less the surplus,
-// never below zero. Nothing is ever taken back out of the category; the
-// user can move a surplus elsewhere by hand. In the month the surplus
-// runs out, the contribution covers only what the surplus doesn't, and the
-// steady rate from then on keeps every month covered.
+// Catching up: a constant contribution c through some month k, then the
+// steady rate. Each month i's balance is affine in c:
+//   balance[i] = startingBalance + (i + 1) * c - cumsum[i]
+// so c covers months 0..k when c >= (cumsum[i] - startingBalance) / (i + 1)
+// for each i <= k, and leaves the steady rate enough from then on when
+// balance[k] is at least what the rest of the window needs at that rate.
+// The catch-up ends in a month whose bills reach the steady rate: that's
+// what the money is being saved for. Ending it in a quieter month just
+// puts off saving and then asks for the steady rate all at once. Money
+// already saved toward that month counts toward it, so a catch-up already
+// under way carries on at the same pace.
+function solveForecast(
+  startingBalance: number,
+  monthlyOutflow: number[],
+): { contribution: number; catchUpEnd: number } {
+  const months = monthlyOutflow.length;
+  const steadyMonths = monthlyOutflow.slice(
+    months > STEADY_RATE_FROM_MONTH ? STEADY_RATE_FROM_MONTH : 0,
+  );
+  const steadyRate = Math.max(
+    0,
+    Math.ceil(
+      steadyMonths.reduce((sum, value) => sum + value, 0) / steadyMonths.length,
+    ),
+  );
+
+  const cumsum: number[] = [];
+  let total = 0;
+  for (const outflow of monthlyOutflow) {
+    total += outflow;
+    cumsum.push(total);
+  }
+  // How far the bills through month i run ahead of the steady rate.
+  const ahead = cumsum.map((sum, i) => sum - steadyRate * (i + 1));
+  const requiredBalance = Math.max(0, ...ahead);
+
+  const surplus = startingBalance - requiredBalance;
+  const best = {
+    contribution: surplus > 0 ? Math.max(0, steadyRate - surplus) : Infinity,
+    catchUpEnd: 0,
+  };
+
+  // The balance the steady rate needs at the end of month i to cover
+  // every month after it.
+  const neededAfter = new Array<number>(months);
+  let laterAhead = -Infinity;
+  for (let i = months - 1; i >= 0; i--) {
+    neededAfter[i] = Math.max(0, laterAhead - ahead[i]);
+    laterAhead = Math.max(laterAhead, ahead[i]);
+  }
+
+  const fallback = { contribution: Infinity, catchUpEnd: 0 };
+  let coversSoFar = 0;
+  for (let k = 0; k < months; k++) {
+    coversSoFar = Math.max(
+      coversSoFar,
+      Math.ceil((cumsum[k] - startingBalance) / (k + 1)),
+    );
+    const contribution = Math.max(
+      coversSoFar,
+      Math.ceil((cumsum[k] + neededAfter[k] - startingBalance) / (k + 1)),
+    );
+    const option = monthlyOutflow[k] >= steadyRate ? best : fallback;
+    if (contribution < option.contribution) {
+      option.contribution = contribution;
+      option.catchUpEnd = k;
+    }
+  }
+  return best.contribution < Infinity ? best : fallback;
+}
+
 export function solveMonthlyContribution(
   startingBalance: number,
   monthlyOutflow: number[],
 ): number {
-  const totalOutflow = monthlyOutflow.reduce((sum, value) => sum + value, 0);
-  const steadyRate = Math.max(
-    0,
-    Math.ceil(totalOutflow / monthlyOutflow.length),
-  );
-  let candidate = 0;
-  let requiredBalance = 0;
-  let cumsum = 0;
-
-  for (let i = 0; i < monthlyOutflow.length; i++) {
-    cumsum += monthlyOutflow[i];
-    const threshold = Math.ceil((cumsum - startingBalance) / (i + 1));
-    candidate = Math.max(candidate, threshold);
-    requiredBalance = Math.max(requiredBalance, cumsum - steadyRate * (i + 1));
-  }
-
-  const surplus = startingBalance - requiredBalance;
-  if (surplus <= 0) {
-    return candidate;
-  }
-  return Math.max(0, steadyRate - surplus);
+  return solveForecast(startingBalance, monthlyOutflow).contribution;
 }
 
 export async function runScheduleForecast(
@@ -776,7 +825,10 @@ export async function runScheduleForecast(
   );
   // Full-flag bills are paid from fullContribution, which is added on top,
   // so they don't draw on the balance the forecast starts from.
-  const candidate = solveMonthlyContribution(balance, monthlyOutflow);
+  const { contribution: candidate, catchUpEnd } = solveForecast(
+    balance,
+    monthlyOutflow,
+  );
 
   // Split the single smoothed candidate back out across the smooth
   // schedules that share this category, proportional to each schedule's
@@ -794,24 +846,46 @@ export async function runScheduleForecast(
   );
   const splitEntries =
     upcomingEntries.length > 0 ? upcomingEntries : smoothEntries;
-  const totalMonthlyWeight = splitEntries.reduce(
-    (s, c) => s + getMonthlyBaseContribution(c),
-    0,
-  );
+  const weights = splitEntries.map(getMonthlyBaseContribution);
+  const totalMonthlyWeight = weights.reduce((s, weight) => s + weight, 0);
 
-  for (const entry of splitEntries) {
+  // A catch-up above the steady rate goes to the schedules that are behind:
+  // each one's shortfall is what falls due through the catch-up beyond what
+  // its own monthly equivalent would have put by. A schedule on pace keeps
+  // its monthly equivalent.
+  const catchUp = candidate - totalMonthlyWeight;
+  const catchUpMonths = catchUpEnd + 1;
+  const catchUpEndDay = monthUtils.firstDayOfMonth(
+    monthUtils.addMonths(current_month, catchUpMonths),
+  );
+  const shortfalls = splitEntries.map((entry, i) =>
+    catchUp > 0
+      ? Math.max(
+          0,
+          getOccurrencesBetween(
+            entry.dateConditions,
+            monthUtils.firstDayOfMonth(current_month),
+            catchUpEndDay,
+          ).length *
+            entry.perOccurrenceAmount -
+            weights[i] * catchUpMonths,
+        )
+      : 0,
+  );
+  const totalShortfall = shortfalls.reduce((s, shortfall) => s + shortfall, 0);
+
+  for (const [i, entry] of splitEntries.entries()) {
     // When the smooth schedules sharing this category net to a zero total
     // monthly-equivalent weight (e.g. two schedules with offsetting signs),
     // dividing by zero would yield NaN or +/-Infinity — never valid for a
     // money-typed map. Fall back to an even split across the entries,
     // which is always finite.
     const share =
-      totalMonthlyWeight === 0
-        ? Math.round(candidate / splitEntries.length)
-        : Math.round(
-            (getMonthlyBaseContribution(entry) / totalMonthlyWeight) *
-              candidate,
-          ) || 0;
+      totalShortfall > 0
+        ? Math.round(weights[i] + (catchUp * shortfalls[i]) / totalShortfall)
+        : totalMonthlyWeight === 0
+          ? Math.round(candidate / splitEntries.length)
+          : Math.round((weights[i] / totalMonthlyWeight) * candidate) || 0;
     perScheduleMonthly.set(
       entry.template,
       (perScheduleMonthly.get(entry.template) ?? 0) + share,
