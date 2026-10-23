@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Select } from '@actual-app/components/select';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -11,6 +12,7 @@ import {
   getCurrencyDisplaySymbol,
   parseDefaultCurrencySymbol,
 } from '@actual-app/core/shared/fx/symbols';
+import { isWebAddress } from '@actual-app/core/shared/fx/webAddress';
 import { q } from '@actual-app/core/shared/query';
 import { css } from '@emotion/css';
 
@@ -30,6 +32,7 @@ import { useFormat } from '#hooks/useFormat';
 import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useQuery } from '#hooks/useQuery';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUpdateExchangeRates } from '#hooks/useUpdateExchangeRates';
 
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
@@ -68,6 +71,14 @@ export function CurrencySettings() {
   const [conversionRatePref, setConversionRatePref] = useSyncedPref(
     'currency-conversion-rate',
   );
+  const [autoUpdatePref, setAutoUpdatePref] = useSyncedPref(
+    'exchange-rates-auto-update',
+  );
+  const updateRates = useUpdateExchangeRates();
+  const [providerUrlPref, setProviderUrlPref] = useSyncedPref(
+    'exchange-rates-provider-url',
+  );
+  const [providerUrlError, setProviderUrlError] = useState<string | null>(null);
 
   // A new default currency waiting for the user to decide what happens to
   // accounts that follow the default
@@ -290,6 +301,73 @@ export function CurrencySettings() {
               </Trans>
             </Text>
           )}
+        </SettingsRow>
+      )}
+      {isMultiCurrencyEnabled && (
+        <SettingsRow
+          htmlFor="settings-exchangeRatesAutoUpdate"
+          title={t('Update exchange rates automatically')}
+          description={t(
+            'Once a day, fetches the rates your currencies are missing from Frankfurter, which publishes the reference rates of central banks. Only currency codes and dates are sent; your budget never leaves your device. Rates you enter yourself always win.',
+          )}
+          control={
+            <Checkbox
+              id="settings-exchangeRatesAutoUpdate"
+              checked={autoUpdatePref === 'true'}
+              onChange={e => {
+                setAutoUpdatePref(e.target.checked ? 'true' : 'false');
+                // Right away rather than at the next sync, so the rates show
+                // up while the user is looking
+                if (e.target.checked) {
+                  void updateRates({ showProgress: true });
+                }
+              }}
+              style={{ marginRight: 0 }}
+            />
+          }
+        >
+          {/* Also used by the Update now buttons, so shown either way */}
+          <View style={{ gap: 5 }}>
+            <Text style={{ color: theme.pageTextLight }}>
+              <Trans>
+                Server address, to use your own Frankfurter server instead of
+                the public one (optional):
+              </Trans>
+            </Text>
+            <Input
+              aria-label={t('Frankfurter server address')}
+              aria-invalid={providerUrlError !== null}
+              aria-describedby={
+                providerUrlError
+                  ? 'settings-exchangeRatesProviderUrl-error'
+                  : undefined
+              }
+              defaultValue={providerUrlPref ?? ''}
+              placeholder="https://api.frankfurter.dev"
+              onUpdate={value => {
+                const url = value.trim();
+                if (url !== '' && !isWebAddress(url)) {
+                  setProviderUrlError(
+                    t('Enter an address that starts with https:// or http://.'),
+                  );
+                  return;
+                }
+                setProviderUrlError(null);
+                if (url !== (providerUrlPref ?? '')) {
+                  setProviderUrlPref(url);
+                }
+              }}
+              style={{ maxWidth: 400 }}
+            />
+            {providerUrlError && (
+              <Text
+                id="settings-exchangeRatesProviderUrl-error"
+                style={{ color: theme.errorText }}
+              >
+                {providerUrlError}
+              </Text>
+            )}
+          </View>
         </SettingsRow>
       )}
       {isMultiCurrencyEnabled && (
