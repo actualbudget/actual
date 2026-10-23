@@ -27,6 +27,7 @@ import { isTouchDevice } from '#util/isTouchDevice';
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
+import { shadeColor } from './util/shadeColor';
 
 const RADIAN = Math.PI / 180;
 
@@ -71,24 +72,6 @@ const resolveCSSVariable = (color: string): string => {
   return getComputedStyle(document.documentElement)
     .getPropertyValue(varName)
     .trim();
-};
-
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : { r: 0, g: 0, b: 0 };
-};
-
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
-  const adjust = (c: number) =>
-    Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
-  return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
 };
 
 const buildColorMap = (
