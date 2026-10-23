@@ -68,38 +68,66 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs.
+function normalizeIntegerValue(val: number | null | undefined) {
+  return typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+}
+
+/**
+ * Compares what a category has towards its goal with the goal, as displayed:
+ * -1 when short of it, 0 when they match and 1 when over it. With hidden
+ * decimals, amounts that round to the same number count as equal.
+ */
+export function compareToGoal(
+  have: number | null | undefined,
+  goalValue: number,
+): -1 | 0 | 1 {
+  const diff = normalizeIntegerValue(have) - normalizeIntegerValue(goalValue);
+  return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+}
+
+export type GoalFundingState = 'overspent' | 'underfunded' | 'funded';
+
+/**
+ * The state behind a category balance's colour and goal status pill:
+ * overspent below zero, otherwise underfunded or funded against the goal,
+ * or null when there is no goal. Amounts are compared as displayed, so with
+ * hidden decimals a balance that rounds to zero is not overspent.
+ */
+export function getGoalFundingState(
+  value: number,
+  goalValue?: number | null,
+  budgetedValue?: number | null,
+): GoalFundingState | null {
+  if (normalizeIntegerValue(value) < 0) {
+    return 'overspent';
+  }
+  if (goalValue == null) {
+    return null;
+  }
+  return compareToGoal(budgetedValue, goalValue) < 0 ? 'underfunded' : 'funded';
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
-  const currencyValue = normalizeIntegerValue(value);
-
-  if (currencyValue < 0) {
-    return { color: theme.budgetNumberNegative };
-  }
-
-  if (goalValue == null) {
-    const greyed = makeAmountGrey(currencyValue);
-    if (greyed) {
-      return greyed;
-    }
-    return { color: theme.budgetNumberPositive };
-  } else {
-    const budgetedAmount = normalizeIntegerValue(budgetedValue);
-    const goalAmount = normalizeIntegerValue(goalValue);
-
-    if (budgetedAmount < goalAmount) {
+  switch (getGoalFundingState(value, goalValue, budgetedValue)) {
+    case 'overspent':
+      return { color: theme.budgetNumberNegative };
+    case 'underfunded':
       return { color: theme.templateNumberUnderFunded };
-    }
-    return { color: theme.templateNumberFunded };
+    case 'funded':
+      return { color: theme.templateNumberFunded };
+    default:
+      return (
+        makeAmountGrey(normalizeIntegerValue(value)) ?? {
+          color: theme.budgetNumberPositive,
+        }
+      );
   }
 }
 
