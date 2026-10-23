@@ -1548,9 +1548,8 @@ describe('runSchedule with split rules', () => {
       defaultCurrency,
     );
 
-    // Expected 3000 (the categorized split only). The uncategorized remainder
-    // split inherits the budgeted category in the template simulation, so the
-    // current result is 10000.
+    // Only the categorized split ($30.00) counts; the uncategorized remainder
+    // split must not inherit the budgeted category.
     expect(result.to_budget).toBe(3000);
     expect(result.errors).toHaveLength(0);
   });
