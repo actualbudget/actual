@@ -5,6 +5,7 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import {
+  amountToInteger,
   currencyToAmount,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
@@ -68,19 +69,44 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs
+// and the currency's decimal places.
+function normalizeIntegerValue(
+  val: number | null | undefined,
+  decimalPlaces = 2,
+) {
+  return typeof val === 'number'
+    ? currencyToAmount(integerToCurrency(val, undefined, decimalPlaces))
+    : 0;
+}
+
+/**
+ * How far what a category has towards its goal is from the goal, as the
+ * amounts are displayed: negative when short of it, 0 when they match and
+ * positive when over it. With hidden decimals, amounts that round to the same
+ * number count as equal.
+ */
+export function getGoalDifference(
+  have: number | null | undefined,
+  goalValue: number,
+  decimalPlaces = 2,
+): number {
+  return amountToInteger(
+    normalizeIntegerValue(have, decimalPlaces) -
+      normalizeIntegerValue(goalValue, decimalPlaces),
+    decimalPlaces,
+  );
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
+  decimalPlaces = 2,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
-  const currencyValue = normalizeIntegerValue(value);
+  const currencyValue = normalizeIntegerValue(value, decimalPlaces);
 
   if (currencyValue < 0) {
     return { color: theme.budgetNumberNegative };
@@ -93,10 +119,7 @@ export function makeBalanceAmountStyle(
     }
     return { color: theme.budgetNumberPositive };
   } else {
-    const budgetedAmount = normalizeIntegerValue(budgetedValue);
-    const goalAmount = normalizeIntegerValue(goalValue);
-
-    if (budgetedAmount < goalAmount) {
+    if (getGoalDifference(budgetedValue, goalValue, decimalPlaces) < 0) {
       return { color: theme.templateNumberUnderFunded };
     }
     return { color: theme.templateNumberFunded };
