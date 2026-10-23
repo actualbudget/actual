@@ -47,11 +47,30 @@ type AggregatedBudget = {
   endMonth: string;
 };
 
+export type SankeyNodeDrilldownField =
+  | 'account'
+  | 'category'
+  | 'group'
+  | 'payee';
+export type SankeyNodeDrilldown = {
+  field: SankeyNodeDrilldownField;
+  id: string;
+  // Which side of the ledger this node's value is drawn from - unset for
+  // Account nodes, which can be both (see SankeyNode.inflow/outflow below).
+  direction?: 'inflow' | 'outflow';
+};
+
 type SankeyNode = {
   name: string;
   percentageLabel?: string;
   key: string;
   color?: string;
+  drilldown?: SankeyNodeDrilldown;
+  // Account nodes can sit between income and expense layers and carry both
+  // directions at once, so their displayed total alone can be misleading;
+  // these let the UI show the two sides (and their net) instead.
+  inflow?: number;
+  outflow?: number;
 };
 
 type SankeyLink = {
@@ -247,9 +266,14 @@ export function buildSankeyData(
   addHiddenNodes(sortedGraph);
   addPercentageLabels(sortedGraph);
   addColors(sortedGraph);
+  // filterGraphByLayers deletes nodes (and the links stored on them) outside
+  // the selected layer range. Account inflow/outflow totals need the full
+  // picture regardless of which layers are currently shown, so snapshot the
+  // graph before filtering and use it just for those totals.
+  const totalsGraph = cloneGraph(sortedGraph);
   filterGraphByLayers(sortedGraph, layerFrom, layerTo);
 
-  return convertToSankeyData(sortedGraph, toolTipInfoMap);
+  return convertToSankeyData(sortedGraph, toolTipInfoMap, totalsGraph);
 }
 
 export function createBudgetSpreadsheet(
@@ -1538,6 +1562,36 @@ export function moveNodeToStart(
   }
 }
 
+// Sum of a node's outgoing link values, ignoring links into layout-only
+// hidden nodes (which don't represent real money movement).
+function getOutgoingValue(graph: Graph, key: NodeKey): number {
+  const node = graph.get(key);
+  if (!node) {
+    return 0;
+  }
+
+  let total = 0;
+  node.to.forEach((value, targetKey) => {
+    if (!isHiddenNodeKey(targetKey)) {
+      total += value ?? 0;
+    }
+  });
+  return total;
+}
+
+// Sum of a node's incoming link values, ignoring links from layout-only
+// hidden nodes. Unlike getNodeValue, this isn't root-position-dependent -
+// it's the node's actual incoming total regardless of where it sits.
+function getIncomingValue(graph: Graph, key: NodeKey): number {
+  let total = 0;
+  graph.forEach((data, sourceKey) => {
+    if (!isHiddenNodeKey(sourceKey)) {
+      total += data.to.get(key) ?? 0;
+    }
+  });
+  return total;
+}
+
 export function getNodeValue(
   graph: Graph,
   key: NodeKey,
@@ -1545,42 +1599,15 @@ export function getNodeValue(
 ): number {
   const resolvedLayersByNode =
     computedLayersByNode ?? getComputedNodeLayers(graph);
-  let nodeValue: number = 0;
 
   if ((resolvedLayersByNode.get(key) ?? 0) === 0) {
     // Look at outgoing links for root nodes
-    const node = graph.get(key);
-    if (node) {
-      node.to.forEach((value, targetKey) => {
-        if (isHiddenNodeKey(targetKey)) {
-          return;
-        }
-        nodeValue += value ?? 0;
-      });
-    }
-  } else {
-    graph.forEach((data, sourceKey) => {
-      if (isHiddenNodeKey(sourceKey)) {
-        return;
-      }
-      nodeValue += data.to.get(key) ?? 0;
-    });
-
-    // If node is in reality a root node, masked behind hidden nodes
-    if (nodeValue < 0) {
-      nodeValue = 0;
-      const node = graph.get(key);
-      if (node) {
-        node.to.forEach((value, targetKey) => {
-          if (isHiddenNodeKey(targetKey)) {
-            return;
-          }
-          nodeValue += value;
-        });
-      }
-    }
+    return getOutgoingValue(graph, key);
   }
-  return nodeValue;
+
+  const incomingValue = getIncomingValue(graph, key);
+  // If node is in reality a root node, masked behind hidden nodes
+  return incomingValue < 0 ? getOutgoingValue(graph, key) : incomingValue;
 }
 
 export function addPercentageLabels(graph: Graph): void {
@@ -1929,18 +1956,92 @@ export function cleanUpNodes(graph: Graph) {
   }
 }
 
+// Node keys that are synthetic placeholders (budget totals, income summary
+// buckets, etc.) rather than real entity ids, so they can't be turned into a
+// transaction filter.
+const NON_DRILLDOWN_NODE_KEYS: ReadonlySet<string> = new Set([
+  SpecialNodeKeys.ToBudget,
+  SpecialNodeKeys.Budgeted,
+  SpecialNodeKeys.LastMonthOverspent,
+  SpecialNodeKeys.ForNextMonth,
+  SpecialNodeKeys.FromPrevMonth,
+  SpecialNodeKeys.AvailableIncome,
+  SpecialNodeKeys.AllAccounts,
+]);
+
+// Category/CategoryGroup nodes are always the expense side and
+// IncomeCategory/IncomePayee nodes always the income side (see
+// createTransactionsGraph - the "isNegative" entries that would blur this
+// land on a separate, suffixed node that's excluded below). Account nodes
+// have no fixed direction: they can be a target for income links and a
+// source for expense links at once.
+const DRILLDOWN_BY_LAYER: Partial<
+  Record<
+    GraphLayer,
+    { field: SankeyNodeDrilldownField; direction?: 'inflow' | 'outflow' }
+  >
+> = {
+  [GraphLayers.Account]: { field: 'account' },
+  [GraphLayers.Category]: { field: 'category', direction: 'outflow' },
+  [GraphLayers.IncomeCategory]: { field: 'category', direction: 'inflow' },
+  [GraphLayers.CategoryGroup]: { field: 'group', direction: 'outflow' },
+  [GraphLayers.IncomePayee]: { field: 'payee', direction: 'inflow' },
+};
+
+function getNodeDrilldown(
+  key: NodeKey,
+  type: GraphLayer,
+  isNegative?: boolean,
+): SankeyNodeDrilldown | undefined {
+  if (
+    NON_DRILLDOWN_NODE_KEYS.has(key) ||
+    key.endsWith(SpecialNodeKeys.OtherSuffix) ||
+    key.endsWith(SpecialNodeKeys.HiddenSuffix) ||
+    key.endsWith(SpecialNodeKeys.NegativeSuffix) ||
+    // `isNegative` nodes are budget-mode accounting placeholders (e.g. the
+    // "From {{category}}" overspend node, keyed by the category's own id
+    // but typed as an Account) rather than the real entity their key names.
+    isNegative
+  ) {
+    return undefined;
+  }
+
+  const mapping = DRILLDOWN_BY_LAYER[type];
+  return mapping
+    ? { field: mapping.field, id: key, direction: mapping.direction }
+    : undefined;
+}
+
 export function convertToSankeyData(
   graph: Graph,
   toolTipInfoMap: TooltipInfoMap,
+  totalsGraph: Graph = graph,
 ): SankeyData {
-  const nodes = Array.from(graph, ([key, data]) => ({
-    key,
-    name: data.labelKey
-      ? t(data.labelKey, data.labelParams)
-      : (data.name ?? key),
-    percentageLabel: data.percentageLabel ?? '',
-    color: data.color ?? undefined,
-  }));
+  const nodes = Array.from(graph, ([key, data]) => {
+    const drilldown = getNodeDrilldown(key, data.type, data.isNegative);
+    // Some synthetic placeholder nodes (e.g. AvailableIncome, the
+    // budget-mode overspend node) are typed as Account too, but aren't
+    // real accounts - getNodeDrilldown already excludes them from
+    // click-to-filter, so gate the in/out/net tooltip totals the same way.
+    // AllAccounts is the exception: with "Group accounts" on, it stands in
+    // for every real account, so it should show the same in/out/net totals
+    // one would get with grouping off.
+    const showInOutTotals =
+      (data.type === GraphLayers.Account && Boolean(drilldown)) ||
+      key === SpecialNodeKeys.AllAccounts;
+
+    return {
+      key,
+      name: data.labelKey
+        ? t(data.labelKey, data.labelParams)
+        : (data.name ?? key),
+      percentageLabel: data.percentageLabel ?? '',
+      color: data.color ?? undefined,
+      drilldown,
+      inflow: showInOutTotals ? getIncomingValue(totalsGraph, key) : undefined,
+      outflow: showInOutTotals ? getOutgoingValue(totalsGraph, key) : undefined,
+    };
+  });
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {
       const tooltipInfo = toolTipInfoMap.get(key)?.get(targetKey) ?? [];
