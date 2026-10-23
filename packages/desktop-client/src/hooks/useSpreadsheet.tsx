@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { Query } from '@actual-app/core/shared/query';
@@ -71,6 +71,9 @@ function makeSpreadsheet() {
             if (observers) {
               observers.forEach(func => func(node));
               cellCache[node.name] = Promise.resolve(node);
+              LRUValueCache.set(node.name, node);
+            } else if (LRUValueCache.has(node.name)) {
+              // Keep cached values fresh for views that require remount later
               LRUValueCache.set(node.name, node);
             }
           });
