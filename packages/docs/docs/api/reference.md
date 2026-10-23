@@ -507,7 +507,7 @@ Get all exchange rates, newest first. Returns an array of [`Exchange Rate`](#exc
 
 <Method name="createExchangeRate" args={[{ name: 'exchangeRate', type: 'ExchangeRate' }]} returns="Promise<id>" />
 
-Create an exchange rate. If a rate already exists for the same currencies and date, its value is replaced instead and its `id` is returned.
+Create an exchange rate. If you already created, entered or imported a rate for the same currencies and date, its value is replaced instead and its `id` is returned. A rate fetched from Frankfurter for that date is kept, and the one you create takes precedence over it.
 
 #### `updateExchangeRate`
 

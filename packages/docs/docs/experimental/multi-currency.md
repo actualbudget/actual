@@ -53,6 +53,23 @@ Rates in the file are plain numbers with a dot as the decimal mark and no thousa
 
 The same tab exports all your rates in this format, for example to move them to another budget.
 
+### Updating Rates Automatically
+
+Rates can also be fetched from [Frankfurter](https://frankfurter.dev), a free, open source service that publishes the daily reference rates of central banks. Turn on **Update exchange rates automatically** in **Settings → General → Currency**, which fetches the missing rates right away, or use **Get missing rates from Frankfurter** on the Exchange Rates page at any time. You don't need to add a currency pair first: a currency that has no rates yet gets its pair added.
+
+- Once a day, when your budget opens, the rates your currencies are missing are fetched up to today, including the days the app wasn't opened. Updates go back to the first transaction of each currency, also when you later add an older one: every day of the last year, and one average rate per month before that, dated the first of the month. Rates deleted in between are fetched again; days the provider has no rate for, such as some holidays, are remembered and skipped. If an update fails, for example while offline, it's tried again at a later sync, at most once an hour.
+- Only currency codes and dates are sent; your budget never leaves your device.
+- Fetched rates show **Frankfurter** as their source and are added to the pair's existing tab. Rates you enter or import yourself always win over fetched ones for the same day, and editing a fetched rate turns it into your own.
+- To use your own Frankfurter server instead of the public one, enter its address below the setting.
+
+When a currency you use is missing rates (its last rate is older than yesterday, some of its transactions are older than its first rate, or fetched rates are missing in between), Actual tells you:
+
+- once a day when the budget opens, with a button to update them; with automatic updates on, only when that day's update failed or Frankfurter doesn't cover a currency;
+- with a banner on the page of each account in that currency, until the rates are complete or you dismiss it for the session;
+- on the Exchange Rates page.
+
+Gaps between rates you enter by hand, for example one rate a month, aren't reported.
+
 Until a currency has a rate, its amounts count 1:1 against the default currency, the same way they added up before the feature existed. Such amounts are marked with ≈.
 
 ## How Amounts Are Shown
@@ -103,4 +120,4 @@ Fees and spread aren't recorded as a separate expense: totals and reports conver
 ## Known Limitations
 
 - Amounts outside the transactions and balances of an account, such as in rules, schedules and filters, use the format of the default currency. In a budget in yen, an amount in dollars there shows without its cents until you edit it; it is always kept as you entered it.
-- Rates can't be fetched automatically yet.
+- Rates can only be fetched from Frankfurter, so currencies it doesn't cover still need their rates entered by hand.
