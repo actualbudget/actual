@@ -1,8 +1,6 @@
-import path from 'node:path';
-
 import { load } from 'migrate';
 
-import { config } from './load-config';
+import { getMigrationStateStore } from '#storage';
 
 type MigrationCallback = (err?: Error) => void;
 type MigrationModule = {
@@ -51,7 +49,7 @@ export async function run(direction: 'up' | 'down' = 'up'): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       load(
         {
-          stateStore: `${path.join(config.get('dataDir'), '.migrate')}${config.get('mode') === 'test' ? '-test' : ''}`,
+          stateStore: getMigrationStateStore(),
           migrations: migrationsModules,
         },
         (err, set) => {

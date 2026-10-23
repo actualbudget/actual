@@ -42,7 +42,13 @@
     "#scripts/*": "./src/scripts/*.js",
     "#services/*": "./src/services/*.js",
     "#util/title": "./src/util/title/index.js",
-    "#util/*": "./src/util/*.ts"
+    "#util/*": "./src/util/*.ts",
+    "#create-app": "./src/create-app.ts",
+    "#password-hash": "./src/accounts/password-hash.ts",
+    "#storage": "./src/storage/node.ts",
+    "#storage/types": "./src/storage/types.ts",
+    "#sync-simple": "./src/sync-simple.js",
+    "#sync-core": "./src/sync-core.ts"
   },
   "publishConfig": {
     "imports": {
@@ -70,7 +76,13 @@
       "#scripts/*": "./build/src/scripts/*.js",
       "#services/*": "./build/src/services/*.js",
       "#util/title": "./build/src/util/title/index.js",
-      "#util/*": "./build/src/util/*.js"
+      "#util/*": "./build/src/util/*.js",
+      "#create-app": "./build/src/create-app.js",
+      "#password-hash": "./build/src/accounts/password-hash.js",
+      "#storage": "./build/src/storage/node.js",
+      "#storage/types": "./build/src/storage/types.js",
+      "#sync-simple": "./build/src/sync-simple.js",
+      "#sync-core": "./build/src/sync-core.js"
     }
   },
   "scripts": {

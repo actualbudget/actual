@@ -1,11 +1,10 @@
 // @ts-strict-ignore
 import { Buffer } from 'node:buffer';
-import fs from 'node:fs/promises';
-import { resolve } from 'node:path';
 
 import {
   create,
   fromBinary,
+  MessageEnvelopeSchema,
   SyncRequestSchema,
   SyncResponseSchema,
   toBinary,
@@ -13,6 +12,8 @@ import {
 import type { Request, Response } from 'express';
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+
+import { blobStore, syncStore } from '#storage';
 
 import { getAccountDb, isAdmin } from './account-db';
 import { FileNotFound } from './app-sync/errors';
@@ -27,18 +28,12 @@ import {
 } from './app-sync/validation';
 import { config } from './load-config';
 import * as UserService from './services/user-service';
-import * as simpleSync from './sync-simple';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
-import {
-  getPathForGroupFile,
-  getPathForUserFile,
-  isValidFileId,
-  isValidGroupId,
-} from './util/paths';
+import { isValidFileId, isValidGroupId } from './util/paths';
 import type { GroupId } from './util/paths';
 
 const app = express();
@@ -188,11 +183,11 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
+  const { trie, newMessages } = await syncStore.sync(messages, since, groupId);
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),
-    messages: newMessages,
+    messages: newMessages.map(msg => create(MessageEnvelopeSchema, msg)),
   });
 
   res.set('Content-Type', 'application/actual-sync');
@@ -286,7 +281,7 @@ app.post('/reset-user-file', async (req, res) => {
 
   if (groupId) {
     try {
-      await fs.unlink(getPathForGroupFile(groupId));
+      await syncStore.deleteGroup(groupId);
     } catch {
       console.log(`Unable to delete sync data for group "${groupId}"`);
     }
@@ -364,7 +359,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   try {
-    await fs.writeFile(getPathForUserFile(fileId), req.body);
+    await blobStore.write(fileId, req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
@@ -446,16 +441,8 @@ app.get('/download-user-file', async (req, res) => {
     return;
   }
 
-  const path = getPathForUserFile(fileId);
-
-  if (!path.startsWith(resolve(config.get('userFiles')))) {
-    //Ensure the user doesn't try to access files outside of the user files directory
-    res.status(403).send('Access denied');
-    return;
-  }
-
   res.setHeader('Content-Disposition', `attachment;filename=${fileId}`);
-  res.sendFile(path, { dotfiles: 'allow' });
+  await blobStore.send(fileId, res);
 });
 
 app.post('/update-user-filename', (req, res) => {
