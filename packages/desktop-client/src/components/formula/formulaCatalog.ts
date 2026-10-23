@@ -609,6 +609,80 @@ export function getFormulaFunctionCatalog(): Record<
         { name: 'new_text', description: t('Replacement text') },
       ],
     },
+    REGEXEXTRACT: {
+      name: 'REGEXEXTRACT',
+      category: 'text',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Extracts the first matching substrings according to a regular expression.',
+      ),
+      parameters: [
+        { name: 'text', description: t('The input text.') },
+        {
+          name: 'regex',
+          description: t(
+            'The first part of `text` that matches this expression will be returned.',
+          ),
+        },
+        {
+          name: 'flags',
+          description: t(
+            'Optional regular expression flags. For example, "i" for case-insensitive matching.',
+          ),
+        },
+      ],
+    },
+    REGEXMATCH: {
+      name: 'REGEXMATCH',
+      category: 'text',
+      modes: ['query', 'transaction'],
+      description: t('Whether a piece of text matches a regular expression.'),
+      parameters: [
+        { name: 'text', description: t('The text to search.') },
+        {
+          name: 'regex',
+          description: t('The regular expression to test the text against.'),
+        },
+        {
+          name: 'flags',
+          description: t(
+            'Optional regular expression flags. For example, "i" for case-insensitive matching.',
+          ),
+        },
+      ],
+    },
+    REGEXREPLACE: {
+      name: 'REGEXREPLACE',
+      category: 'text',
+      modes: ['query', 'transaction'],
+      description: t(
+        'Replaces part of a text string with a different text string using regular expressions.',
+      ),
+      parameters: [
+        {
+          name: 'text',
+          description: t('The text, a part of which will be replaced.'),
+        },
+        {
+          name: 'regex',
+          description: t(
+            'The regular expression. All matching instances in `text` will be replaced.',
+          ),
+        },
+        {
+          name: 'replacement',
+          description: t(
+            'The text which will be inserted into the original text. Does support capture groups by $1, $2 etc.',
+          ),
+        },
+        {
+          name: 'flags',
+          description: t(
+            'Optional regular expression flags. For example, "i" for case-insensitive matching.',
+          ),
+        },
+      ],
+    },
     FIND: {
       name: 'FIND',
       category: 'text',
