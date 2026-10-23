@@ -7,6 +7,7 @@ import messagesSql from './sql/messages.sql?raw';
 // Storage-agnostic sync logic for a database holding one sync group's messages.
 
 export type SyncDatabase = {
+  // Database drivers return untyped rows; each query determines their shape.
   all(sql: string, params?: string[]): unknown[];
   mutate(
     sql: string,
@@ -60,6 +61,7 @@ function addMessages(db: SyncDatabase, messages: SyncMessage[]) {
 }
 
 function getMerkle(db: SyncDatabase): merkle.TrieNode {
+  // messagesSql defines messages_merkles.merkle as serialized JSON text.
   const rows = db.all('SELECT * FROM messages_merkles') as { merkle: string }[];
 
   if (rows.length > 0) {
@@ -81,6 +83,7 @@ export function syncGroup(
   messages: SyncMessage[],
   since: string,
 ): SyncResult {
+  // The selected columns are defined by the messages_binary schema in messagesSql.
   const newMessages = db.all(
     `SELECT * FROM messages_binary
          WHERE timestamp > ?
