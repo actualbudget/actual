@@ -86,5 +86,8 @@ test.describe('Mobile Accounts', () => {
 
     await accountPage.lockTransactions();
     await expect(accountPage.reconcilingBanner).not.toBeVisible();
+
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await expect(accountsPage.accountList).toBeVisible();
   });
 });
