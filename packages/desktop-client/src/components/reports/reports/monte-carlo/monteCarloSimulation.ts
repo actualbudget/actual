@@ -1037,6 +1037,8 @@ export type MonteCarloRuleExplanation =
       rule: 'guardrails' | 'ratcheting' | 'boundaries';
       /** The running adjustment factor after this year's decision */
       factor: number;
+      /** The factor before it - what a cut or raise moved spending from */
+      previousFactor: number;
       /** The year's planned spending, in minor units (display-deflated) */
       planned: number;
       /** planned x factor - the rule's result before any minimum floor */
@@ -2195,6 +2197,7 @@ export function runMonteCarloSimulation(
             accessibleStartByYear[year] > 0
           ) {
             const currentRate = (planned * adjustmentFactor) / accessibleTotal;
+            const factorBeforeDecision = adjustmentFactor;
             let ruleAction: 'cut' | 'raise' | 'none' = 'none';
             if (rule.type === 'guardrails') {
               // Drift is measured against the planned spending path, not
@@ -2249,6 +2252,7 @@ export function runMonteCarloSimulation(
                 kind: 'factor',
                 rule: rule.type,
                 factor: adjustmentFactor,
+                previousFactor: factorBeforeDecision,
                 planned: toSafeAmount(Math.round(planned * startDeflator)),
                 adjusted: toSafeAmount(
                   Math.round(planned * adjustmentFactor * startDeflator),

@@ -27,6 +27,7 @@ import {
   validateUploadedFile,
 } from './app-sync/validation';
 import { config } from './load-config';
+import { SecretName, secretsService } from './services/secrets-service';
 import * as UserService from './services/user-service';
 import {
   errorMiddleware,
@@ -544,7 +545,8 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  const filesService = new FilesService(getAccountDb());
+  const accountDb = getAccountDb();
+  const filesService = new FilesService(accountDb);
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
   if (!file) {
     return;
@@ -557,7 +559,12 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  filesService.update(file.id, new FileUpdate({ deleted: true }));
+  accountDb.transaction(() => {
+    filesService.update(file.id, new FileUpdate({ deleted: true }));
+    for (const name of Object.values(SecretName)) {
+      secretsService.reset(name, file.id);
+    }
+  });
 
   res.send(OK_RESPONSE);
 });

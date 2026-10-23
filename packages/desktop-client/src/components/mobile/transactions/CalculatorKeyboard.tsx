@@ -9,6 +9,8 @@ import { View } from '@actual-app/components/view';
 
 import { CalculatorButtons } from '#components/common/CalculatorButtons';
 
+export const CALCULATOR_KEYBOARD_HEIGHT = 'min(400px, max(320px, 50dvh))';
+
 export const CalculatorKeyboard = memo(function CalculatorAmountInput({
   inputRef,
   header,
