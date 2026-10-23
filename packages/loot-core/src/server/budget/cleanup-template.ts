@@ -3,7 +3,12 @@ import * as db from '#server/db';
 import * as monthUtils from '#shared/months';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
-import { getSheetValue, setBudget, setGoal } from './actions';
+import {
+  getSheetValue,
+  getUncarriedOverspending,
+  setBudget,
+  setGoal,
+} from './actions';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import type { TemplateNotification } from './template-notification';
 
@@ -26,7 +31,6 @@ async function applyGroupCleanups(
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
-  const db_month = parseInt(month.replace('-', ''));
   let groupLength = sourceGroups.length;
   while (groupLength > 0) {
     //function for each unique group
@@ -86,34 +90,30 @@ async function applyGroupCleanups(
           sheetName,
           `budget-${overspendGroup[ii].category}`,
         );
-        const to_budget = budgeted + Math.abs(balance);
         const categoryId = overspendGroup[ii].category;
-        let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-          [db_month, categoryId],
+        // The overspending that resets, per lane of the current base slot.
+        const overspent = await getUncarriedOverspending(
+          categoryId,
+          month,
+          balance,
         );
-
-        if (carryover === null) {
-          carryover = { carryover: 0 };
-        }
+        const to_budget = budgeted + overspent;
 
         if (
           // We have enough to fully cover the overspent.
-          balance < 0 &&
-          Math.abs(balance) <= available_amount &&
-          carryover.carryover === 0
+          overspent > 0 &&
+          overspent <= available_amount
         ) {
           await setBudget({
             category: categoryId,
             month,
             amount: to_budget,
           });
-          available_amount -= Math.abs(balance);
+          available_amount -= overspent;
         } else if (
           // We can only cover this category partially.
-          balance < 0 &&
-          carryover.carryover === 0 &&
-          Math.abs(balance) > available_amount
+          overspent > 0 &&
+          overspent > available_amount
         ) {
           await setBudget({
             category: categoryId,
@@ -160,7 +160,6 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     weight: number;
   };
   const sinkCategory: SinkCategoryRow[] = [];
-  const db_month = parseInt(month.replace('-', ''));
 
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -247,33 +246,24 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     const budgetAvailable = await getSheetValue(sheetName, `to-budget`);
     const balance = await getSheetValue(sheetName, `leftover-${category.id}`);
     const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
-    const to_budget = budgeted + Math.abs(balance);
-    const categoryId = category.id;
-    let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-      `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-      [db_month, categoryId],
+    // The overspending that resets, per lane of the current base slot.
+    const overspent = await getUncarriedOverspending(
+      category.id,
+      month,
+      balance,
     );
+    const to_budget = budgeted + overspent;
 
-    if (carryover === null) {
-      carryover = { carryover: 0 };
-    }
-
-    if (
-      balance < 0 &&
-      Math.abs(balance) <= budgetAvailable &&
-      !category.is_income &&
-      carryover.carryover === 0
-    ) {
+    if (overspent > 0 && overspent <= budgetAvailable && !category.is_income) {
       await setBudget({
         category: category.id,
         month,
         amount: to_budget,
       });
     } else if (
-      balance < 0 &&
+      overspent > 0 &&
       !category.is_income &&
-      carryover.carryover === 0 &&
-      Math.abs(balance) > budgetAvailable
+      overspent > budgetAvailable
     ) {
       await setBudget({
         category: category.id,

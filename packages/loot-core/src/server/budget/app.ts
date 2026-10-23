@@ -21,6 +21,11 @@ import { editEffects } from './edit-effects';
 import type { FxMonth } from './fx-valuation';
 import * as goalActions from './goal-template';
 import {
+  finalizePockets,
+  setPocketBudget,
+  transferPocketAmount,
+} from './pocket-flows';
+import {
   readCategoryPockets,
   readPockets,
   reservationsBridge,
@@ -60,6 +65,9 @@ export type BudgetHandlers = {
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/pocket-create': typeof createPocket;
   'budget/slot-meta-set': typeof setSlotMeta;
+  'budget/pocket-budget-set': typeof setPocketBudget;
+  'budget/pocket-transfer': typeof transferPocketAmount;
+  'budget/pockets-finalize': typeof finalizePockets;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
@@ -90,6 +98,9 @@ export const app = createApp<BudgetHandlers>();
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
 app.method('budget/pocket-create', mutator(undoable(createPocket)));
 app.method('budget/slot-meta-set', mutator(undoable(setSlotMeta)));
+app.method('budget/pocket-budget-set', mutator(undoable(setPocketBudget)));
+app.method('budget/pocket-transfer', mutator(undoable(transferPocketAmount)));
+app.method('budget/pockets-finalize', mutator(undoable(finalizePockets)));
 app.method('budget/edit-effects', editEffects);
 app.method('budget/fx-valuation', monthFxValuation);
 app.method(

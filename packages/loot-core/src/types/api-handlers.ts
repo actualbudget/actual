@@ -23,6 +23,10 @@ import type {
   APITagEntity,
   APITransactionUpdateFields,
 } from '#server/api-models';
+import type {
+  finalizePockets,
+  PocketWriteResult,
+} from '#server/budget/pocket-flows';
 import type { BudgetFileHandlers } from '#server/budgetfiles/app';
 import type { batchUpdateTransactions } from '#server/transactions';
 import type { Money } from '#shared/money';
@@ -92,6 +96,29 @@ export type ApiHandlers = {
     categoryId: string;
     flag: boolean;
   }) => Promise<void>;
+
+  'api/pocket-create': (arg: {
+    categoryId: string;
+    currency: string;
+  }) => Promise<{ id: string }>;
+
+  'api/pocket-update': (arg: {
+    id: string;
+    hidden?: boolean;
+    sortOrder?: number | null;
+  }) => Promise<void>;
+
+  'api/pocket-budget-set': (arg: {
+    month: string;
+    pocketId: string;
+    amount: number;
+    encoding: string;
+    baseAmount?: number;
+  }) => Promise<PocketWriteResult>;
+
+  'api/pockets-finalize': (arg: {
+    cells: Array<{ month: string; laneId: string; baseAmount?: number }>;
+  }) => ReturnType<typeof finalizePockets>;
 
   'api/budget-hold-for-next-month': (arg: {
     month: string;

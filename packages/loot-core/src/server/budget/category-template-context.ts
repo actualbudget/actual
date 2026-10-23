@@ -24,6 +24,7 @@ import type {
 } from '#types/models/templates';
 
 import {
+  getBaseSlotCarryIn,
   getCategoryAverage,
   getCategoryWeeklyAverage,
   getSheetBoolean,
@@ -80,6 +81,10 @@ export class CategoryTemplateContext {
     ) {
       fromLastMonth = 0;
     }
+    // A base slot made of several lanes carries in what each lane carries
+    // after its own reset, which one carry rule cannot express (MC-10.5).
+    const carriedIn = await getBaseSlotCarryIn(category.id, month);
+    if (carriedIn != null) fromLastMonth = carriedIn;
 
     // run all checks
     CategoryTemplateContext.checkPeriodicInterval(templates);

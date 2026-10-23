@@ -8,6 +8,11 @@ import { cleanupTemplate } from './cleanup-template';
 
 vi.mock('./actions', () => ({
   getSheetValue: vi.fn(),
+  // No carryover rows: every negative balance resets.
+  getUncarriedOverspending: vi.fn(
+    async (_category: string, _month: string, balance: number) =>
+      balance < 0 ? -balance : 0,
+  ),
   setBudget: vi.fn(),
   setGoal: vi.fn(),
 }));
