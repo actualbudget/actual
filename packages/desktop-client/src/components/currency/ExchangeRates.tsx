@@ -35,6 +35,7 @@ import { getErrorMessage } from './errors';
 import { ExchangeRatesTable, useDeleteRates } from './ExchangeRatesTable';
 import { ImplicitCurrencyNudge } from './ImplicitCurrencyNudge';
 import { formatRate, parseRate } from './rateFormat';
+import { RatesUpdate } from './RatesUpdate';
 import { useCurrencyOptions } from './useCurrencyOptions';
 
 type CurrencyPair = { from: string; to: string };
@@ -236,7 +237,7 @@ export function ExchangeRates() {
       {missingCurrencies.length > 0 && (
         <Text style={{ color: theme.warningText, lineHeight: 1.5 }}>
           {t(
-            'Accounts in {{currencies}} are counted 1:1 against {{currency}} until a rate is added.',
+            'Accounts in {{currencies}} are counted 1:1 against {{currency}} until a rate is added. Get missing rates from Frankfurter adds the pair for you.',
             {
               currencies: missingCurrencies.join(', '),
               currency: defaultCurrencyCode,
@@ -244,6 +245,8 @@ export function ExchangeRates() {
           )}
         </Text>
       )}
+
+      <RatesUpdate />
 
       <TabbedView
         aria-label={t('Exchange Rates')}
