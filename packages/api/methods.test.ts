@@ -954,6 +954,56 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(1);
   });
 
+  test('Transactions: updating a split child keeps its other fields', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+    const groupId = await api.createCategoryGroup({ name: 'tests' });
+    const categoryId = await api.createCategory({
+      name: 'test-split',
+      group_id: groupId,
+    });
+
+    await api.addTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        amount: 300,
+        subtransactions: [
+          { amount: 100, category: categoryId, notes: 'first' },
+          { amount: 200, category: categoryId, notes: 'second' },
+        ],
+      },
+    ]);
+
+    let [parent] = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    const child = parent.subtransactions?.find(t => t.notes === 'first');
+    if (!child) {
+      throw new Error('split child not found');
+    }
+
+    await api.updateTransaction(child.id, { notes: 'updated' });
+
+    [parent] = await api.getTransactions(accountId, '2023-11-01', '2023-11-30');
+    expect(parent.subtransactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: child.id,
+          notes: 'updated',
+          amount: 100,
+          category: categoryId,
+        }),
+        expect.objectContaining({
+          notes: 'second',
+          amount: 200,
+          category: categoryId,
+        }),
+      ]),
+    );
+    expect(parent.amount).toBe(300);
+  });
+
   // apis: mergeTransactions
   test('Transactions: successfully merge two transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
