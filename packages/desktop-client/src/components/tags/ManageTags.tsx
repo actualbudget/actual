@@ -3,14 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgAdd } from '@actual-app/components/icons/v1';
-import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
-import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { listen } from '@actual-app/core/platform/client/connection';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 
+import { EmptyMessage } from '#components/common/EmptyMessage';
+import { ManagePage } from '#components/common/ManagePage';
 import { Search } from '#components/common/Search';
 import { useTableNavigator } from '#components/table';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
@@ -49,43 +49,32 @@ export function ManageTags() {
 
   return (
     <SelectedProvider instance={selectedInst}>
-      <View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            padding: '0 0 15px',
-            flexShrink: 0,
-          }}
-        >
-          <View
-            style={{
-              color: theme.pageTextLight,
-              flexDirection: 'row',
-              alignItems: 'center',
-              width: '50%',
-            }}
-          >
-            <Trans>User defined tags with color and description.</Trans>
-          </View>
-        </View>
-        <SpaceBetween gap={10} style={{ marginTop: 12, alignItems: 'center' }}>
+      <ManagePage
+        actions={
           <Button variant="bare" onPress={() => setCreate(true)}>
-            <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
-            <Trans>Add New</Trans>
+            <SvgAdd
+              width={10}
+              height={10}
+              style={{ marginRight: spacing.xs }}
+            />
+            <Trans>Add new tag</Trans>
           </Button>
-          <View style={{ flex: 1 }} />
+        }
+        search={
           <Search
-            placeholder={t('Filter tags...')}
+            placeholder={t('Filter tags…')}
             value={filter}
             onChange={setFilter}
           />
+        }
+        selection={
           <SelectedTagsButton
             onRename={id => tableNavigator.onEdit(id, 'tag')}
           />
-          <TagsMenuButton />
-        </SpaceBetween>
-        <View style={{ marginTop: 12, ...styles.tableContainer }}>
+        }
+        menu={<TagsMenuButton />}
+      >
+        <View style={styles.tableContainer}>
           <TagsHeader />
           {create && (
             <TagCreationRow onClose={() => setCreate(false)} tags={tags} />
@@ -98,19 +87,12 @@ export function ManageTags() {
               onHover={id => setHoveredTag(id ?? undefined)}
             />
           ) : (
-            <View
-              style={{
-                background: theme.tableBackground,
-                fontStyle: 'italic',
-              }}
-            >
-              <Text style={{ margin: 'auto', padding: '20px' }}>
-                <Trans>No Tags</Trans>
-              </Text>
-            </View>
+            <EmptyMessage>
+              <Trans>No tags</Trans>
+            </EmptyMessage>
           )}
         </View>
-      </View>
+      </ManagePage>
     </SelectedProvider>
   );
 }
