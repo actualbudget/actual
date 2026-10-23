@@ -349,6 +349,43 @@ test.describe('Accounts', () => {
       await expect(income.getByTestId('category')).toHaveText('Income');
     });
 
+    test('matches CSV categories written as "Group:Category"', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles({
+        name: 'group-categories.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from(
+          'Date,Payee,Notes,Category,Amount\n' +
+            '2024-08-02,Plain Cafe,,Food,-5.00\n' +
+            '2024-08-03,Grouped Cafe,,Usual Expenses:Food,-6.00\n' +
+            '2024-08-04,City Power,,bills : POWER,-7.00\n',
+        ),
+      });
+
+      const dialog = page.getByRole('dialog');
+      const previewRow = (payee: string) =>
+        dialog.getByTestId('row').filter({ hasText: payee });
+      await expect(previewRow('Plain Cafe')).toContainText('Food');
+      await expect(previewRow('Grouped Cafe')).toContainText('Food');
+      await expect(previewRow('City Power')).toContainText('Power');
+
+      await dialog
+        .getByRole('button', { name: 'Import 3 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      const importedCategory = (payee: string) =>
+        accountPage.transactionTableRow
+          .filter({ hasText: payee })
+          .getByTestId('category');
+      await expect(importedCategory('Plain Cafe')).toHaveText('Food');
+      await expect(importedCategory('Grouped Cafe')).toHaveText('Food');
+      await expect(importedCategory('City Power')).toHaveText('Power');
+    });
+
     test('import csv file twice', async () => {
       await importCsv(false);
 
