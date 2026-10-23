@@ -329,7 +329,11 @@ const ExchangeRateRow = memo(
           width={100}
           style={{ color: theme.tableTextLight }}
           value={
-            exchangeRate.source === 'manual' ? t('Manual') : exchangeRate.source
+            exchangeRate.source === 'manual'
+              ? t('Manual')
+              : exchangeRate.source === 'frankfurter'
+                ? t('Frankfurter')
+                : exchangeRate.source
           }
         />
       </Row>
