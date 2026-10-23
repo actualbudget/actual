@@ -32,6 +32,11 @@ vi.mock('#prefs/prefsSlice', async importOriginal => ({
   loadPrefs: () => mockLoadPrefs(),
 }));
 
+const mockUpdateRates = vi.fn();
+vi.mock('#hooks/useUpdateExchangeRates', () => ({
+  useUpdateExchangeRates: () => mockUpdateRates,
+}));
+
 vi.mock('#hooks/useAccounts', () => ({
   useAccounts: () => ({ data: mockAccounts }),
 }));
@@ -251,5 +256,64 @@ describe('CurrencySettings', () => {
 
     expect(screen.getByText(text)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Change' })).toBeInTheDocument();
+  });
+
+  it('turns automatic exchange rate updates on and fetches rates right away', async () => {
+    mockUpdateRates.mockClear();
+    renderSettings();
+
+    await userEvent.click(
+      screen.getByRole('checkbox', {
+        name: 'Update exchange rates automatically',
+      }),
+    );
+
+    expect(mockSetPref).toHaveBeenCalledWith(
+      'exchange-rates-auto-update',
+      'true',
+    );
+    expect(mockUpdateRates).toHaveBeenCalled();
+  });
+
+  it('fetches nothing when automatic exchange rate updates are turned off', async () => {
+    mockUpdateRates.mockClear();
+    mockPrefs['exchange-rates-auto-update'] = 'true';
+    renderSettings();
+
+    await userEvent.click(
+      screen.getByRole('checkbox', {
+        name: 'Update exchange rates automatically',
+      }),
+    );
+
+    expect(mockSetPref).toHaveBeenCalledWith(
+      'exchange-rates-auto-update',
+      'false',
+    );
+    expect(mockUpdateRates).not.toHaveBeenCalled();
+  });
+
+  it('only saves a Frankfurter server address that is a web address', async () => {
+    renderSettings();
+    const input = screen.getByRole('textbox', {
+      name: 'Frankfurter server address',
+    });
+
+    await userEvent.type(input, 'rates.example.com');
+    fireEvent.blur(input);
+    expect(
+      screen.getByText(
+        'Enter an address that starts with https:// or http://.',
+      ),
+    ).toBeInTheDocument();
+    expect(mockSetPref).not.toHaveBeenCalled();
+
+    await userEvent.clear(input);
+    await userEvent.type(input, 'https://rates.example.com');
+    fireEvent.blur(input);
+    expect(mockSetPref).toHaveBeenCalledWith(
+      'exchange-rates-provider-url',
+      'https://rates.example.com',
+    );
   });
 });
