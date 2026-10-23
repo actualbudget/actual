@@ -27,6 +27,7 @@ import { resetApp, setAppState } from '#app/appSlice';
 import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
+import type { QuickAddResult } from '#transactions/quickAddParser';
 import { signOut } from '#users/usersSlice';
 
 const sliceName = 'modals';
@@ -257,6 +258,15 @@ export type Modal =
         hasExistingKey?: boolean;
         cloudFileId?: string;
         onSuccess?: () => void;
+      };
+    }
+  | {
+      name: 'quick-add-transaction';
+      options: {
+        parsed: QuickAddResult;
+        /** The account to add to, or null when the user must pick one. */
+        accountId: AccountEntity['id'] | null;
+        onAdded: () => void;
       };
     }
   | {

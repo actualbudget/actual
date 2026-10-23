@@ -1893,6 +1893,7 @@ class AccountInternal extends PureComponent<
                 onShowTransactions={this.onShowTransactions}
                 onMenuSelect={this.onMenuSelect}
                 onAddTransaction={this.onAddTransaction}
+                onQuickAddTransaction={this.refetchTransactions}
                 onToggleExtraBalances={this.onToggleExtraBalances}
                 onSaveName={this.onSaveName}
                 saveNameError={this.state.nameError}

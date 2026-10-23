@@ -72,6 +72,49 @@ async function saveDiff(diff, learnCategories) {
   return {};
 }
 
+// Saves newly entered transactions. Also used by quick add, so both save
+// new transactions the same way.
+export async function addNewTransactions(
+  newTransactions: TransactionEntity[],
+  learnCategories: boolean,
+) {
+  await saveDiff(
+    { added: realizeTempTransactions(newTransactions) },
+    learnCategories,
+  );
+}
+
+// Runs rules on a transaction being entered, keeping the values the user
+// typed. Also used by quick add.
+export async function applyRulesToNewTransaction(
+  transaction: TransactionEntity,
+  dispatch: ReturnType<typeof useDispatch>,
+  updatedFieldName: string | null = null,
+  clearedFields?: ClearedFieldsByTransaction,
+) {
+  const afterRules = await send('rules-run', { transaction });
+
+  // Show formula errors if any
+  if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'error',
+          message: `Formula errors in rules:\n${afterRules._ruleErrors.join('\n')}`,
+          sticky: true,
+        },
+      }),
+    );
+  }
+
+  return applyRulesToTransaction(
+    transaction,
+    afterRules,
+    updatedFieldName,
+    clearedFields,
+  );
+}
+
 async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
   const remoteDiff = await saveDiff(diff, learnCategories);
   onChange(
@@ -189,8 +232,7 @@ export function TransactionList({
 
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
-      newTransactions = realizeTempTransactions(newTransactions);
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+      await addNewTransactions(newTransactions, isLearnCategoriesEnabled);
       onRefetch();
     },
     [isLearnCategoriesEnabled, onRefetch],
@@ -267,29 +309,13 @@ export function TransactionList({
       transaction: TransactionEntity,
       updatedFieldName: string | null = null,
       clearedFields?: ClearedFieldsByTransaction,
-    ) => {
-      const afterRules = await send('rules-run', { transaction });
-
-      // Show formula errors if any
-      if (afterRules._ruleErrors && afterRules._ruleErrors.length > 0) {
-        dispatch(
-          addNotification({
-            notification: {
-              type: 'error',
-              message: `Formula errors in rules:\n${afterRules._ruleErrors.join('\n')}`,
-              sticky: true,
-            },
-          }),
-        );
-      }
-
-      return applyRulesToTransaction(
+    ) =>
+      applyRulesToNewTransaction(
         transaction,
-        afterRules,
+        dispatch,
         updatedFieldName,
         clearedFields,
-      );
-    },
+      ),
     [dispatch],
   );
 
