@@ -265,6 +265,7 @@ __metadata:
     "@use-gesture/react": "npm:^10.3.1"
     "@vitejs/plugin-basic-ssl": "npm:^2.3.0"
     "@vitejs/plugin-react": "npm:^6.1.2"
+    "@zumer/snapdom": "npm:^3.3.6"
     auto-text-size: "npm:^0.2.3"
     babel-plugin-react-compiler: "npm:^1.0.0"
     cmdk: "npm:^1.1.1"
@@ -274,7 +275,6 @@ __metadata:
     downshift: "npm:9.4.0"
     es-toolkit: "npm:^1.52.0"
     fzf: "npm:^0.5.2"
-    html-to-image: "npm:^1.11.13"
     hyperformula: "npm:^3.5.0"
     i18next: "npm:^26.4.4"
     i18next-parser: "npm:^9.4.0"
@@ -9883,6 +9883,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zumer/snapdom@npm:^3.3.6":
+  version: 3.3.6
+  resolution: "@zumer/snapdom@npm:3.3.6"
+  checksum: 10/d6ee02b203951a281076ce3ea188307d4f0adb95cb79df0275b02816f0bede7caddfbff4c0b090eeb7274c5639860daef6d97ab5790e8c85c33cac1644b31cc4
+  languageName: node
+  linkType: hard
+
 "abbrev@npm:^3.0.0":
   version: 3.0.1
   resolution: "abbrev@npm:3.0.1"
@@ -16691,13 +16698,6 @@ __metadata:
   version: 3.3.1
   resolution: "html-tags@npm:3.3.1"
   checksum: 10/d0e808544b92d8b999cbcc86d539577255a2f0f2f4f73110d10749d1d36e6fe6ad706a0355a8477afb6e000ecdc93d8455b3602951f9a2b694ac9e28f1b52878
-  languageName: node
-  linkType: hard
-
-"html-to-image@npm:^1.11.13":
-  version: 1.11.13
-  resolution: "html-to-image@npm:1.11.13"
-  checksum: 10/f5950a0221b4ed4e59853db09917606309ebe3ddd2051c2f89aed3e37026d1893880f76e61bc2ca2280e3f1bbc0ad5b9ea5325188ff339987c8eeccbe8284f3f
   languageName: node
   linkType: hard
 
