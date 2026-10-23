@@ -5,9 +5,10 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import { looselyParseAmount } from '#shared/util';
 
+import type { ImportAccountHint } from './account-hint';
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
-import { xmlCAMT2json } from './xmlcamt2json';
+import { xmlCAMT2jsonWithAccount } from './xmlcamt2json';
 
 /**
  * Parse OFX amount strings to numbers.
@@ -88,6 +89,7 @@ type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
   errors: ParseError[];
   transactions?: Transaction[];
+  accountHint?: ImportAccountHint | null;
 };
 
 export type ParseFileOptions = {
@@ -215,6 +217,7 @@ async function parseQIF(
 
   return {
     errors: [],
+    accountHint: data.account,
     transactions: data.transactions
       .map(trans => {
         const payeeSource = swap ? trans.memo : trans.payee;
@@ -261,6 +264,7 @@ async function parseOFX(
 
   return {
     errors,
+    accountHint: data.account,
     transactions: data.transactions.map(trans => {
       const parsedAmount = parseOfxAmount(trans.amount);
       if (parsedAmount === null) {
@@ -295,9 +299,9 @@ async function parseCAMT(
   // the XML header instead of decoding the file as UTF-8.
   const contents = await fs.readFile(filepath, 'binary');
 
-  let data: Awaited<ReturnType<typeof xmlCAMT2json>>;
+  let data: Awaited<ReturnType<typeof xmlCAMT2jsonWithAccount>>;
   try {
-    data = await xmlCAMT2json(contents);
+    data = await xmlCAMT2jsonWithAccount(contents);
   } catch (err) {
     logger.error(err);
     errors.push({
@@ -311,7 +315,8 @@ async function parseCAMT(
 
   return {
     errors,
-    transactions: data.map(trans => {
+    accountHint: data.account,
+    transactions: data.transactions.map(trans => {
       const payeeSource = swap ? trans.notes : trans.payee_name;
       const memoSource = swap ? trans.payee_name : trans.notes;
       const fallbackUsed = !payeeSource && swap;

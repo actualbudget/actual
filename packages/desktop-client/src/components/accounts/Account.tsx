@@ -46,6 +46,10 @@ import {
   useUpdateAccountMutation,
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
+import {
+  detectImportAccount,
+  pairImportedAccount,
+} from '#accounts/importAccount';
 import * as reconciliation from '#accounts/reconciliation';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
@@ -619,37 +623,75 @@ class AccountInternal extends PureComponent<
     const accountId = this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
-    if (account) {
-      const res = await window.Actual.openFileDialog({
-        filters: [
-          {
-            name: t('Financial files'),
-            extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
-          },
-        ],
-      });
-
-      if (res) {
-        if (accountId && res?.length > 0) {
-          this.props.dispatch(
-            pushModal({
-              modal: {
-                name: 'import-transactions',
-                options: {
-                  accountId,
-                  filename: res[0],
-                  onImported: (didChange: boolean) => {
-                    if (didChange) {
-                      this.fetchTransactions();
-                    }
-                  },
-                },
-              },
-            }),
-          );
-        }
-      }
+    // Importing is also available from views that aren't a single account
+    // (e.g. All Accounts); the account is then resolved from the file.
+    if (account?.closed) {
+      return;
     }
+
+    const res = await window.Actual.openFileDialog({
+      filters: [
+        {
+          name: t('Financial files'),
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+        },
+      ],
+    });
+
+    if (!res || res.length === 0) {
+      return;
+    }
+
+    const filename = res[0];
+    const { hintId, matchedAccountId, suggestedAccountId } =
+      await detectImportAccount(filename);
+    const onImported = (didChange: boolean) => {
+      if (didChange) {
+        this.fetchTransactions();
+      }
+    };
+
+    // On an account page the account is already known: only interrupt
+    // when the file looks like it belongs to a different account.
+    if (!account || (matchedAccountId && matchedAccountId !== account.id)) {
+      this.props.dispatch(
+        pushModal({
+          modal: {
+            name: 'import-account',
+            options: {
+              filename,
+              hintId,
+              matchedAccountId,
+              suggestedAccountId,
+              startedFromAccountId: account?.id,
+              onImported,
+            },
+          },
+        }),
+      );
+      return;
+    }
+
+    this.props.dispatch(
+      pushModal({
+        modal: {
+          name: 'import-transactions',
+          options: {
+            accountId: account.id,
+            filename,
+            onImported: (didChange: boolean) => {
+              onImported(didChange);
+              void pairImportedAccount({
+                hintId,
+                accountId: account.id,
+                accounts: this.props.accounts,
+                dispatch: this.props.dispatch,
+              });
+            },
+          },
+        },
+      }),
+    );
   };
 
   onExport = async (accountName: string) => {
