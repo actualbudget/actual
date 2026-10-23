@@ -26,6 +26,8 @@ import type { PocketBacking } from '#hooks/useCategoryPockets';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
+import { PocketActions } from './PocketActions';
+
 type CategoryPocketModalProps = Extract<
   ModalType,
   { name: 'category-pocket' }
@@ -61,6 +63,14 @@ export function CategoryPocketModal({
         pocket && (
           <>
             <PocketDetails pocket={pocket} backing={backing} />
+            <View style={{ padding: `0 ${spacing.lg}px` }}>
+              <PocketActions
+                pocket={pocket}
+                categoryId={categoryId}
+                month={month}
+                onDone={close}
+              />
+            </View>
             <MobileSheetSection>
               <MobileSheetRow
                 label={pocket.hidden ? t('Show currency') : t('Hide currency')}
