@@ -103,7 +103,7 @@ services:
       - PGID=1000
 ```
 
-Alternatively, start the container as that user with `--user 1000:1000` (or `user: '1000:1000'` in Docker Compose). In that case the container doesn't change any owners, so the user needs write access to the data folder already.
+Alternatively, start the container as that user with `--user 1000:1000` (or `user: '1000:1000'` in Docker Compose). In that case the container doesn't change any owners, so the user needs write access to the data folder already. If it doesn't, the container stops at startup with an error explaining how to fix it. For data from an older image, start it once without `--user` (with `PUID` and `PGID` set) to hand the folder over, then switch to `--user`.
 
 On Kubernetes, set `runAsUser: 1001`, `runAsGroup: 1001` and `fsGroup: 1001` in the pod's `securityContext`.
 

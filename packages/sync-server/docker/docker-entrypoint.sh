@@ -8,8 +8,23 @@ set -e
 # those images are handed over to that user first.
 #####################################################
 
-# Already running as a non-root user (e.g. `docker run --user`), nothing to do.
+data_dirs="${ACTUAL_DATA_DIR:-/data} ${ACTUAL_SERVER_FILES:-} ${ACTUAL_USER_FILES:-}"
+
+# Started as a non-root user (e.g. `docker run --user`), so nothing can be
+# handed over. Fail early if the data is still root-owned: otherwise the server
+# starts and passes its health check, but every sign-in fails with
+# SQLITE_READONLY. Write a real file rather than using `test -w`: busybox's
+# `test -w` only checks permission bits, so it misses read-only and
+# root-squashed mounts.
 if [ "$(id -u)" != "0" ]; then
+  for dir in $data_dirs; do
+    if [ -d "$dir" ] && ! (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null; then
+      echo "Error: uid $(id -u) can't write to $dir." >&2
+      echo "Data from older images is owned by root. Start the container without --user once" >&2
+      echo "to hand it over automatically, or run: chown -R $(id -u):$(id -g) <your data folder>" >&2
+      exit 1
+    fi
+  done
   exec "$@"
 fi
 
@@ -34,8 +49,6 @@ if ! run_as true 2>/dev/null; then
   exec "$@"
 fi
 
-data_dirs="${ACTUAL_DATA_DIR:-/data} ${ACTUAL_SERVER_FILES:-} ${ACTUAL_USER_FILES:-}"
-
 for dir in $data_dirs; do
   if [ -d "$dir" ]; then
     # Only touch files the run user doesn't already own, so restarts are cheap.
@@ -46,8 +59,7 @@ for dir in $data_dirs; do
   fi
 done
 
-# Write a real file rather than using `test -w`: busybox's `test -w` only checks
-# permission bits, so it misses read-only and root-squashed network mounts.
+# Same real-file probe as above, run as the target user.
 can_write() {
   run_as sh -c 'probe="$1/.actual-write-test" && touch "$probe" && rm -f "$probe"' sh "$1" 2>/dev/null
 }
