@@ -276,6 +276,52 @@ describe('buildBalanceForecastChartData', () => {
 });
 
 describe('countForecastScheduledOccurrences', () => {
+  it('keeps separate due dates distinct when transfer occurrences land on one day', () => {
+    const forecastData = {
+      dataPoints: ['checking', 'savings'].map(accountId => ({
+        date: '2024-03-20',
+        balance: 0,
+        accountId,
+        accountName: accountId,
+        transactions: ['2024-01-20', '2024-02-20'].map(originalDueDate => ({
+          occurrenceId: `transfer:${originalDueDate}`,
+          originalDueDate,
+          isMissed: originalDueDate === '2024-01-20',
+          amount: accountId === 'checking' ? -250 : 250,
+          payee: 'Transfer',
+          scheduleId: 'transfer',
+          scheduleName: 'Transfer',
+        })),
+      })),
+      lowestBalance: {
+        date: '2024-03-20',
+        balance: 0,
+        accountId: '',
+        accountName: '',
+      },
+      forecastStartDate: '2024-03-01',
+      forecastEndDate: '2024-03-31',
+    };
+
+    expect(
+      countForecastScheduledOccurrences({
+        forecastData,
+        start: '2024-03',
+        end: '2024-03',
+        granularity: 'Monthly',
+        missedOnly: true,
+      }),
+    ).toBe(1);
+    expect(
+      countForecastScheduledOccurrences({
+        forecastData,
+        start: '2024-03',
+        end: '2024-03',
+        granularity: 'Monthly',
+      }),
+    ).toBe(2);
+  });
+
   it('counts a transfer schedule once across both account legs', () => {
     const forecastData = {
       dataPoints: [

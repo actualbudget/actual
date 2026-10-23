@@ -9,6 +9,7 @@ const dateContext: ForecastDateContext = {
   forecastEndDate: '2024-05-31',
   forecastDays: [],
   firstForecastDate: '2024-03-10',
+  today: '2024-03-10',
   endDateObj: new Date('2024-05-31T00:00:00'),
 };
 

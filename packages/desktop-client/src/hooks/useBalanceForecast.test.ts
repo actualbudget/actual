@@ -3,6 +3,17 @@ import { describe, expect, it } from 'vitest';
 import { buildBalanceForecastRequest } from './useBalanceForecast';
 
 describe('buildBalanceForecastRequest', () => {
+  it('forwards both missed-schedule experiment settings', () => {
+    expect(
+      buildBalanceForecastRequest({
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        missedSchedules: 'payments',
+        missedOccurrences: 'all',
+      }),
+    ).toMatchObject({ missedSchedules: 'payments', missedOccurrences: 'all' });
+  });
+
   it('keeps schedule forecast filters and account selection', () => {
     expect(
       buildBalanceForecastRequest({
