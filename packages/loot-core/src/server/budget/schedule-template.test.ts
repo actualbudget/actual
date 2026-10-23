@@ -1341,7 +1341,7 @@ describe('solveMonthlyContribution', () => {
   it('finds the minimal whole-cent contribution for a single one-time bill', () => {
     const monthlyOutflow = new Array(60).fill(0);
     monthlyOutflow[30] = 60000; // one bill, due in month 30
-    const candidate = solveMonthlyContribution(0, monthlyOutflow);
+    const candidate = solveMonthlyContribution(0, monthlyOutflow, 0);
     // 60000 / 31 months = 1935.48 -> ceil to 1936; verify it actually
     // covers month 30 and is the minimal such whole-cent amount.
     expect(candidate * 31).toBeGreaterThanOrEqual(60000);
@@ -1366,7 +1366,7 @@ describe('solveMonthlyContribution', () => {
     outflow[0] = 100;
     outflow[59] = 8940 - 100;
 
-    const candidate = solveMonthlyContribution(0, outflow);
+    const candidate = solveMonthlyContribution(0, outflow, 0);
     expect(candidate).toBe(149); // threshold_59, the true max — not threshold_0 (100)
 
     let runningBalance = 0;
@@ -1390,20 +1390,28 @@ describe('solveMonthlyContribution', () => {
 
   it('budgets the steady rate once a category holds exactly what its bills need', () => {
     // The lowest balance the steady $150/month covers is $750 in January.
-    expect(solveMonthlyContribution(75000, yearlyBillsOutflow(0))).toBe(15000);
+    expect(solveMonthlyContribution(75000, yearlyBillsOutflow(0), 15000)).toBe(
+      15000,
+    );
   });
 
   it('budgets nothing while the category holds more than its bills need', () => {
-    expect(solveMonthlyContribution(500000, yearlyBillsOutflow(0))).toBe(0);
+    expect(solveMonthlyContribution(500000, yearlyBillsOutflow(0), 15000)).toBe(
+      0,
+    );
   });
 
   it('covers only what a small surplus does not', () => {
     // $50 over the $750 needed: $150 less the $50 surplus.
-    expect(solveMonthlyContribution(80000, yearlyBillsOutflow(0))).toBe(10000);
+    expect(solveMonthlyContribution(80000, yearlyBillsOutflow(0), 15000)).toBe(
+      10000,
+    );
   });
 
   it('never asks for less than nothing', () => {
-    expect(solveMonthlyContribution(10000000, yearlyBillsOutflow(0))).toBe(0);
+    expect(
+      solveMonthlyContribution(10000000, yearlyBillsOutflow(0), 15000),
+    ).toBe(0);
   });
 
   it('uses up a surplus, then settles at the steady rate without going negative', () => {
@@ -1411,7 +1419,7 @@ describe('solveMonthlyContribution', () => {
     const contributions: number[] = [];
     for (let month = 0; month < 72; month++) {
       const outflow = yearlyBillsOutflow(month);
-      const contribution = solveMonthlyContribution(balance, outflow);
+      const contribution = solveMonthlyContribution(balance, outflow, 15000);
       contributions.push(contribution);
       balance += contribution - outflow[0];
       expect(balance).toBeGreaterThanOrEqual(0);
@@ -1430,7 +1438,9 @@ describe('solveMonthlyContribution', () => {
 
   it('catches up faster than the steady rate when the category is short', () => {
     // Empty in January with $1,200 due in March: $400/month until then.
-    expect(solveMonthlyContribution(0, yearlyBillsOutflow(0))).toBe(40000);
+    expect(solveMonthlyContribution(0, yearlyBillsOutflow(0), 15000)).toBe(
+      40000,
+    );
   });
 
   it('spreads the catch-up evenly up to the first bill when bills start a few months out', () => {
@@ -1443,7 +1453,7 @@ describe('solveMonthlyContribution', () => {
     const contributions: number[] = [];
     for (let month = 0; month < 6; month++) {
       const outflow = outflowFrom(month);
-      const contribution = solveMonthlyContribution(balance, outflow);
+      const contribution = solveMonthlyContribution(balance, outflow, 19000);
       contributions.push(contribution);
       balance += contribution - outflow[0];
       expect(balance).toBeGreaterThanOrEqual(0);

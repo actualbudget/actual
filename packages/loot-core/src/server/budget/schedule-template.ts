@@ -27,10 +27,9 @@ type ScheduleTemplateTarget = {
   target: number;
   // The un-aggregated amount of a single occurrence of this schedule,
   // computed before `target` is summed across every occurrence landing
-  // in the schedule's monthly-equivalent aggregation window below. Unlike
-  // `target` (whose value is a monthly-equivalent aggregate that
-  // the full-flag path and `getMonthlyBaseContribution` depend on), this is the
-  // right value to multiply by an occurrence count elsewhere (e.g.
+  // in the month of the schedule's next occurrence below. Unlike `target`
+  // (the full-flag path budgets that whole month's total), this is the
+  // right value to multiply by an occurrence count (e.g. in
   // `buildMonthlyOutflow`, which buckets one entry per occurrence date).
   perOccurrenceAmount: number;
   next_date_string: string;
@@ -626,51 +625,40 @@ export async function buildMonthlyOutflow(
   return monthlyOutflow;
 }
 
-function getMonthlyBaseContribution(schedule: ScheduleTemplateTarget) {
-  let prevDate;
-  let intervalMonths;
-  switch (schedule.target_frequency) {
-    case 'yearly':
-      return schedule.target / schedule.target_interval / 12;
-    case 'monthly':
-      return schedule.target / schedule.target_interval;
-    case 'weekly':
-      prevDate = monthUtils.subWeeks(
-        schedule.next_date_string,
-        schedule.target_interval,
-      );
-      intervalMonths = monthUtils.differenceInCalendarMonths(
-        schedule.next_date_string,
-        prevDate,
-      );
-      if (intervalMonths === 0) intervalMonths = 1;
-      return schedule.target / intervalMonths;
+const DAYS_PER_YEAR = 365.25;
+
+// What a schedule costs a month in the long run; the forecast's steady
+// rate is the sum of these. Daily and weekly schedules recur every fixed
+// number of days. Monthly and yearly ones count their occurrences over
+// whole months, twelve times the interval long: twelve cycles of a monthly
+// schedule or one of a yearly one, however the dates fall, so day-of-month
+// and weekday patterns (the 1st and 15th, the last Friday) count in full.
+// The count starts the month after the next occurrence, so a schedule that
+// hasn't started yet still counts at its full rate.
+function getMonthlyRate(entry: ScheduleTemplateTarget) {
+  if (!entry.repeat || entry.completed) return 0;
+  const interval = entry.target_interval;
+  switch (entry.target_frequency) {
     case 'daily':
-      prevDate = monthUtils.subDays(
-        schedule.next_date_string,
-        schedule.target_interval,
-      );
-      intervalMonths = monthUtils.differenceInCalendarMonths(
-        schedule.next_date_string,
-        prevDate,
-      );
-      if (intervalMonths === 0) intervalMonths = 1;
-      return schedule.target / intervalMonths;
-    default:
-      // default to same math as monthly for now for non-reoccuring
-      return schedule.target / schedule.target_interval;
+      return (entry.perOccurrenceAmount * DAYS_PER_YEAR) / 12 / interval;
+    case 'weekly':
+      return (entry.perOccurrenceAmount * DAYS_PER_YEAR) / 7 / 12 / interval;
+    default: {
+      const months = 12 * interval;
+      const from = monthUtils.addMonths(entry.next_date_string, 1);
+      const occurrences = getOccurrencesBetween(
+        entry.dateConditions,
+        `${from}-01`,
+        `${monthUtils.addMonths(from, months)}-01`,
+      ).length;
+      return (entry.perOccurrenceAmount * occurrences) / months;
+    }
   }
 }
 
-// The steady rate is averaged from this month of the forecast on. The
-// months before it can hold bills that haven't started yet or one-off
-// spending, which say nothing about the long run; four whole years after
-// it cover every yearly schedule evenly.
-const STEADY_RATE_FROM_MONTH = 12;
-
-// Pure, synchronous: given a starting balance and a projected
-// monthly-outflow array (an entry can be negative — an unlinked inflow
-// transaction offsets that month's need), returns this month's whole-cent
+// Pure, synchronous: given a starting balance, a projected monthly-outflow
+// array (an entry can be negative — an unlinked inflow transaction offsets
+// that month's need) and the steady rate, returns this month's whole-cent
 // contribution, and the last month of the catch-up (see below).
 //
 // The answer is the smallest of two kinds of plan, each of which keeps
@@ -697,18 +685,9 @@ const STEADY_RATE_FROM_MONTH = 12;
 function solveForecast(
   startingBalance: number,
   monthlyOutflow: number[],
+  steadyRate: number,
 ): { contribution: number; catchUpEnd: number } {
   const months = monthlyOutflow.length;
-  const steadyMonths = monthlyOutflow.slice(
-    months > STEADY_RATE_FROM_MONTH ? STEADY_RATE_FROM_MONTH : 0,
-  );
-  const steadyRate = Math.max(
-    0,
-    Math.ceil(
-      steadyMonths.reduce((sum, value) => sum + value, 0) / steadyMonths.length,
-    ),
-  );
-
   const cumsum: number[] = [];
   let total = 0;
   for (const outflow of monthlyOutflow) {
@@ -757,8 +736,10 @@ function solveForecast(
 export function solveMonthlyContribution(
   startingBalance: number,
   monthlyOutflow: number[],
+  steadyRate: number,
 ): number {
-  return solveForecast(startingBalance, monthlyOutflow).contribution;
+  return solveForecast(startingBalance, monthlyOutflow, steadyRate)
+    .contribution;
 }
 
 export async function runScheduleForecast(
@@ -823,36 +804,35 @@ export async function runScheduleForecast(
     category,
     fullEntries.map(c => c.scheduleId),
   );
+  const steadyRate = Math.max(
+    0,
+    Math.ceil(smoothEntries.reduce((s, c) => s + getMonthlyRate(c), 0)),
+  );
   // Full-flag bills are paid from fullContribution, which is added on top,
   // so they don't draw on the balance the forecast starts from.
   const { contribution: candidate, catchUpEnd } = solveForecast(
     balance,
     monthlyOutflow,
+    steadyRate,
   );
 
   // Split the single smoothed candidate back out across the smooth
-  // schedules that share this category, proportional to each schedule's
-  // own monthly-equivalent contribution (getMonthlyBaseContribution divides a
-  // yearly/weekly/daily target down to a monthly-equivalent amount; using
-  // raw `entry.target` instead would treat a yearly schedule's full
-  // lump-sum as if it were a monthly amount, and would also understate
-  // every schedule's share relative to the 60-month total outflow, which
-  // is a different, larger quantity entirely).
-  // A past-due or completed schedule has no monthly equivalent going
-  // forward, so it only shares when nothing else in the category is left
-  // to take the amount.
+  // schedules that share this category. Each starts from its own monthly
+  // rate. A past-due or completed schedule has no rate going forward, so it
+  // only shares when nothing else in the category is left to take the
+  // amount.
   const upcomingEntries = smoothEntries.filter(
     c => !c.isPastDue && !c.completed,
   );
   const splitEntries =
     upcomingEntries.length > 0 ? upcomingEntries : smoothEntries;
-  const weights = splitEntries.map(getMonthlyBaseContribution);
+  const weights = splitEntries.map(getMonthlyRate);
   const totalMonthlyWeight = weights.reduce((s, weight) => s + weight, 0);
 
   // A catch-up above the steady rate goes to the schedules that are behind:
   // each one's shortfall is what falls due through the catch-up beyond what
-  // its own monthly equivalent would have put by. A schedule on pace keeps
-  // its monthly equivalent.
+  // its own monthly rate would have put by. A schedule on pace keeps its
+  // monthly rate.
   const catchUp = candidate - totalMonthlyWeight;
   const catchUpMonths = catchUpEnd + 1;
   const catchUpEndDay = monthUtils.firstDayOfMonth(
@@ -876,7 +856,7 @@ export async function runScheduleForecast(
 
   for (const [i, entry] of splitEntries.entries()) {
     // When the smooth schedules sharing this category net to a zero total
-    // monthly-equivalent weight (e.g. two schedules with offsetting signs),
+    // monthly rate (e.g. two schedules with offsetting signs),
     // dividing by zero would yield NaN or +/-Infinity — never valid for a
     // money-typed map. Fall back to an even split across the entries,
     // which is always finite.
