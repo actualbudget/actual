@@ -1292,6 +1292,38 @@ describe('CommandBar', () => {
     );
   });
 
+  it('notifies without an unhandled rejection when saving an export fails', async () => {
+    const user = userEvent.setup();
+    const store = renderOpenCommandBar();
+    const unhandledRejections: unknown[] = [];
+    const onUnhandledRejection = (reason: unknown) => {
+      unhandledRejections.push(reason);
+    };
+    process.on('unhandledRejection', onUnhandledRejection);
+    mocks.saveFile.mockRejectedValue(new Error('save failed'));
+
+    try {
+      await user.click(screen.getByText('Export budget data', { exact: true }));
+
+      await waitFor(() =>
+        expect(store.getState().notifications.notifications).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              type: 'error',
+              message:
+                'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
+            }),
+          ]),
+        ),
+      );
+      await new Promise(resolve => setImmediate(resolve));
+
+      expect(unhandledRejections).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', onUnhandledRejection);
+    }
+  });
+
   it('closes after a normal quick action selection', async () => {
     const user = userEvent.setup();
     const store = renderOpenCommandBar();

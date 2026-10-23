@@ -298,20 +298,24 @@ export function CommandBar() {
     [currentTheme, dispatch, setInstalledLightThemeJson, switchTheme, t],
   );
 
+  const notifyExportError = useCallback(() => {
+    dispatch(
+      addNotification({
+        notification: {
+          type: 'error',
+          message: t(
+            'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
+          ),
+        },
+      }),
+    );
+  }, [dispatch, t]);
+
   const exportBudget = useCallback(async () => {
     const response = await send('export-budget');
     if ('error' in response && response.error) {
       console.log('Export error code:', response.error);
-      dispatch(
-        addNotification({
-          notification: {
-            type: 'error',
-            message: t(
-              'An unknown error occurred while exporting. Please report this as a new issue on GitHub.',
-            ),
-          },
-        }),
-      );
+      notifyExportError();
       return;
     }
     if (response.data) {
@@ -344,13 +348,17 @@ export function CommandBar() {
         );
       }
 
-      void window.Actual.saveFile(
-        response.data,
-        `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
-        t('Export budget'),
-      );
+      try {
+        await window.Actual.saveFile(
+          response.data,
+          `${format(new Date(), 'yyyy-MM-dd')}-${budgetName}.zip`,
+          t('Export budget'),
+        );
+      } catch {
+        notifyExportError();
+      }
     }
-  }, [budgetName, dispatch, t]);
+  }, [budgetName, dispatch, notifyExportError, t]);
 
   const navigationItems = useMemo<readonly NavigationItem[]>(
     () => [
