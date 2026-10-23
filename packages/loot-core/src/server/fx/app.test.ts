@@ -2,9 +2,16 @@ import * as nodeFs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
 
+import { fetch } from '#platform/server/fetch';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { app } from '#server/fx/app';
+import { app, updateExchangeRatesDaily } from '#server/fx/app';
+import { loadSqlConversionState } from '#server/fx/sqlState';
+import * as prefs from '#server/prefs';
+
+vi.mock('#platform/server/fetch', () => ({
+  fetch: vi.fn(),
+}));
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -194,6 +201,36 @@ describe('exchange rates app', () => {
         }),
       ).rejects.toThrow(/already/);
     });
+
+    it('turns an edited fetched rate into a manual one', async () => {
+      const id = await app.handlers['exchange-rate-create']({
+        ...usdToCad,
+        source: 'frankfurter',
+      });
+
+      await app.handlers['exchange-rate-update']({ id, rate: 1.4 });
+
+      const [rate] = await app.handlers['exchange-rates-get']();
+      expect(rate).toMatchObject({ id, rate: 1.4, source: 'manual' });
+    });
+
+    it('changes the user rate of that day when a fetched duplicate is edited', async () => {
+      const manualId = await app.handlers['exchange-rate-create'](usdToCad);
+      const fetchedId = await app.handlers['exchange-rate-create']({
+        ...usdToCad,
+        rate: 1.39,
+        source: 'frankfurter',
+      });
+
+      await app.handlers['exchange-rate-update']({ id: fetchedId, rate: 1.4 });
+
+      const rates = await app.handlers['exchange-rates-get']();
+      expect(rates.find(rate => rate.id === manualId)?.rate).toBe(1.4);
+      expect(rates.find(rate => rate.id === fetchedId)).toMatchObject({
+        rate: 1.39,
+        source: 'frankfurter',
+      });
+    });
   });
 
   describe('exchange-rate-delete', () => {
@@ -341,6 +378,103 @@ describe('exchange rates app', () => {
       });
       expect(result).toMatchObject({ added: 0, updated: 0, unchanged: 0 });
       expect(result.errors[0].message).toMatch(/Could not open the file/);
+    });
+  });
+
+  describe('daily automatic update', () => {
+    const mockedFetch = vi.mocked(fetch);
+
+    function respond(body: unknown) {
+      return new Response(JSON.stringify(body), { status: 200 });
+    }
+
+    beforeEach(async () => {
+      for (const [id, value] of [
+        ['flags.currency', 'true'],
+        ['flags.multiCurrency', 'true'],
+        ['defaultCurrencyCode', 'CAD'],
+        ['exchange-rates-auto-update', 'true'],
+      ]) {
+        await db.update('preferences', { id, value });
+      }
+      loadSqlConversionState();
+      await db.insertAccount({ id: 'usd', name: 'US', currency: 'USD' });
+      await prefs.loadPrefs();
+      mockedFetch.mockReset();
+      mockedFetch.mockImplementation(async input =>
+        String(input).includes('/v2/currencies')
+          ? respond([{ iso_code: 'CAD' }, { iso_code: 'USD' }])
+          : respond([
+              { date: '2017-01-01', base: 'CAD', quote: 'USD', rate: 0.7 },
+            ]),
+      );
+    });
+
+    afterEach(() => {
+      prefs.unloadPrefs();
+      vi.restoreAllMocks();
+    });
+
+    it('runs after a sync', async () => {
+      app.events.emit('sync', { type: 'success', tables: [] });
+
+      await vi.waitFor(() =>
+        expect(prefs.getPrefs().lastExchangeRateUpdate).toBe('2017-01-01'),
+      );
+      expect(await app.handlers['exchange-rates-get']()).toEqual([
+        expect.objectContaining({ date: '2017-01-01', source: 'frankfurter' }),
+      ]);
+    });
+
+    it('runs once a day', async () => {
+      await updateExchangeRatesDaily();
+      const calls = mockedFetch.mock.calls.length;
+      expect(calls).toBeGreaterThan(0);
+
+      await updateExchangeRatesDaily();
+
+      expect(mockedFetch).toHaveBeenCalledTimes(calls);
+    });
+
+    it('counts a successful update on demand for the day', async () => {
+      await app.handlers['exchange-rates-update']();
+      expect(prefs.getPrefs().lastExchangeRateUpdate).toBe('2017-01-01');
+      const calls = mockedFetch.mock.calls.length;
+
+      await updateExchangeRatesDaily();
+
+      expect(mockedFetch).toHaveBeenCalledTimes(calls);
+    });
+
+    it('updates on demand while automatic updates are off', async () => {
+      await db.update('preferences', {
+        id: 'exchange-rates-auto-update',
+        value: 'false',
+      });
+      prefs.unloadPrefs();
+
+      expect(await app.handlers['exchange-rates-update']()).toMatchObject({
+        added: 1,
+        errors: [],
+      });
+    });
+
+    it('tries a failed update again an hour later', async () => {
+      const now = Date.now();
+      mockedFetch.mockRejectedValueOnce(new Error('offline'));
+      await updateExchangeRatesDaily();
+      expect(await app.handlers['exchange-rates-update-status']()).toEqual(
+        expect.objectContaining({ errors: ['offline'] }),
+      );
+      expect(prefs.getPrefs().lastExchangeRateUpdate).toBeUndefined();
+
+      await updateExchangeRatesDaily();
+      expect(mockedFetch).toHaveBeenCalledTimes(1);
+
+      // Succeeding clears the failure, so later tests aren't held back
+      vi.spyOn(Date, 'now').mockReturnValue(now + 61 * 60 * 1000);
+      await updateExchangeRatesDaily();
+      expect(prefs.getPrefs().lastExchangeRateUpdate).toBe('2017-01-01');
     });
   });
 });
