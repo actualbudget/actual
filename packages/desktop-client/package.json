@@ -55,6 +55,7 @@
     "#components/codemirror/autocompleteTabAccept": "./src/components/codemirror/autocompleteTabAccept.ts",
     "#components/currency/displayMode": "./src/components/currency/displayMode.ts",
     "#components/currency/errors": "./src/components/currency/errors.ts",
+    "#components/currency/missingRates": "./src/components/currency/missingRates.ts",
     "#components/currency/rateFormat": "./src/components/currency/rateFormat.ts",
     "#components/currency/formatCurrencyAmount": "./src/components/currency/formatCurrencyAmount.ts",
     "#components/currency/totalScopes": "./src/components/currency/totalScopes.ts",

@@ -14,10 +14,13 @@ import { useExchangeRates } from '#hooks/useExchangeRates';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { updateExchangeRates } from '#hooks/useUpdateExchangeRates';
 
+import { describeMissingRates } from './missingRates';
+import type { MissingExchangeRates } from './missingRates';
+
 type UpdateStatus = Awaited<ReturnType<Handlers['exchange-rates-update']>>;
 
 // Fetches the missing rates now, and shows how the last update on this
-// device went
+// device went and which rates are still missing
 export function RatesUpdate() {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -26,6 +29,7 @@ export function RatesUpdate() {
   const { exchangeRates, isLoading } = useExchangeRates();
   const [status, setStatus] = useState<UpdateStatus | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [missing, setMissing] = useState<MissingExchangeRates[]>([]);
 
   useEffect(() => {
     if (isLoading) {
@@ -39,6 +43,14 @@ export function RatesUpdate() {
         }
       })
       // Without it, the page explains how rates are updated instead
+      .catch(() => null);
+    send('exchange-rates-missing')
+      .then(missingRates => {
+        if (isCurrent) {
+          setMissing(missingRates);
+        }
+      })
+      // The warnings stay as they were until the next change
       .catch(() => null);
     return () => {
       isCurrent = false;
@@ -73,6 +85,16 @@ export function RatesUpdate() {
         {isUpdating ? t('Updating…') : t('Get missing rates from Frankfurter')}
       </Button>
       <View style={{ flex: 1, minWidth: 200, lineHeight: 1.5 }}>
+        {describeMissingRates(
+          // Currencies without any rate are already listed above
+          missing.filter(rates => rates.outdatedSince || !rates.isOutdated),
+          t,
+          dateFormat,
+        ).map(sentence => (
+          <Text key={sentence} style={{ color: theme.warningText }}>
+            {sentence}
+          </Text>
+        ))}
         {status ? (
           <>
             {status.added > 0 ? (

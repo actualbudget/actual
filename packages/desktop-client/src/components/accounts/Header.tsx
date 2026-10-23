@@ -39,6 +39,7 @@ import { format as formatDate } from 'date-fns';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { AnimatedRefresh } from '#components/AnimatedRefresh';
 import { Search } from '#components/common/Search';
+import { MissingRatesBanner } from '#components/currency/MissingRatesBanner';
 import { FilterButton } from '#components/filters/FiltersMenu';
 import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
@@ -336,6 +337,7 @@ export function AccountHeader({
             }}
           />
         </View>
+        {account && <MissingRatesBanner account={account} />}
         <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
             <Button

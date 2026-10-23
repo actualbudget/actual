@@ -145,6 +145,11 @@ export type LocalPrefs = Partial<{
    * back-to-back sync attempts.
    */
   'bankSync.lastAutomaticRun': number;
+  /**
+   * The day this device last reminded the user of missing exchange rates,
+   * so the reminder shows at most once a day.
+   */
+  'exchangeRates.lastReminder': string;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;
