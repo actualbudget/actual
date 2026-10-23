@@ -29,6 +29,11 @@ import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  canShowBaselineChanges,
+  defaultBaseline,
+  getBaselineRange,
+} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
   defaultsGraphList,
@@ -51,6 +56,10 @@ import { ReportSummary } from '#components/reports/ReportSummary';
 import { ReportTopbar } from '#components/reports/ReportTopbar';
 import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
+import {
+  createBaselineGroupedSpreadsheet,
+  createBaselineSpreadsheet,
+} from '#components/reports/spreadsheets/baseline-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { normalizeTagScope } from '#components/reports/tagScope';
@@ -59,6 +68,7 @@ import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -297,6 +307,10 @@ function CustomReportInner({
     loadReport.showTrendLines,
   );
   const [graphType, setGraphType] = useState(loadReport.graphType);
+  const [baseline, setBaseline] = useState(
+    loadReport.baseline ?? defaultBaseline,
+  );
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const dateRangeLine =
@@ -520,8 +534,22 @@ function CustomReportInner({
     });
   }, [balanceTypeOp, conditions, onApplyFilter]);
 
+  // Live baselines are resolved again so saved dates don't go stale
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    baseline,
+    earliestTransactionDate,
+    latestTransactionDate,
+    firstDayOfWeekIdx,
+  );
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  const projectToFullPeriod = baseline.projectToFullPeriod;
+  // Amounts are drawn with the baseline unless changes are asked for
+  const showAmounts = !(
+    baseline.showChanges && canShowBaselineChanges(graphType)
+  );
+
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -537,8 +565,21 @@ function CustomReportInner({
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineGroupedSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+          showAmounts,
+        })
+      : createGroupedSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
+    showAmounts,
     startDate,
     endDate,
     interval,
@@ -557,7 +598,7 @@ function CustomReportInner({
   ]);
 
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -580,8 +621,21 @@ function CustomReportInner({
       graphType,
       firstDayOfWeekIdx,
       dateFormat,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+          showAmounts,
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
+    showAmounts,
     startDate,
     endDate,
     interval,
@@ -633,6 +687,7 @@ function CustomReportInner({
     showUncategorized,
     trimIntervals,
     showTrendLines,
+    baseline,
     graphType,
     conditions,
     conditionsOp,
@@ -782,6 +837,7 @@ function CustomReportInner({
     setShowUncategorized(input.showUncategorized);
     setTrimIntervals(input.trimIntervals);
     setShowTrendLines(input.showTrendLines);
+    setBaseline(input.baseline ?? defaultBaseline);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => {
@@ -929,6 +985,7 @@ function CustomReportInner({
             setShowUncategorized={setShowUncategorized}
             setTrimIntervals={setTrimIntervals}
             setShowTrendLines={setShowTrendLines}
+            setBaseline={setBaseline}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -1046,7 +1103,13 @@ function CustomReportInner({
                     }}
                   >
                     <AlignedText
-                      left={<Block>{balanceType}:</Block>}
+                      left={
+                        <Block>
+                          {isBaselineEnabled
+                            ? t('{{balanceType}} vs baseline:', { balanceType })
+                            : `${balanceType}:`}
+                        </Block>
+                      }
                       right={
                         <FinancialText>
                           <PrivacyFilter>
@@ -1074,6 +1137,8 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
+                    showAmounts={showAmounts}
+                    changeFromBaseline={baseline.changeFromBaseline}
                     intervalsCount={intervals.length}
                   />
                 ) : (

@@ -1,17 +1,13 @@
 // @ts-strict-ignore
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
-  LegendEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   CartesianGrid,
   Line,
@@ -22,7 +18,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import { FinancialText } from '#components/FinancialText';
+import { getBaselineKey } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
@@ -30,117 +26,12 @@ import { numberFormatterTooltip } from '#components/reports/numberFormatter';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
-import type { FormatType } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
+import { SeriesTooltip } from './SeriesTooltip';
 import { showActivity } from './showActivity';
 import { computeTrendLines } from './util/computeTrendLines';
-
-type PayloadItem = {
-  dataKey: string;
-  value: number;
-  date: string;
-  color: string;
-  payload: {
-    date: string;
-  };
-};
-
-type CustomTooltipProps = {
-  compact: boolean;
-  tooltip: string;
-  legend: LegendEntity[];
-  active?: boolean;
-  payload?: PayloadItem[];
-  format: (value: unknown, type: FormatType) => string;
-};
-
-const CustomTooltip = ({
-  compact,
-  tooltip,
-  legend,
-  active,
-  payload,
-  format,
-}: CustomTooltipProps) => {
-  const { t } = useTranslation();
-
-  const dataKeyToName = useMemo(() => {
-    return new Map(legend.map(entry => [entry.dataKey, entry.name]));
-  }, [legend]);
-
-  const { sumTotals, items } = useMemo(() => {
-    return (payload ?? [])
-      .sort((p1: PayloadItem, p2: PayloadItem) => p2.value - p1.value)
-      .reduce(
-        (acc, item) => {
-          acc.sumTotals += item.value;
-          acc.items.push(item);
-          return acc;
-        },
-        {
-          sumTotals: 0,
-          items: [] as PayloadItem[],
-        },
-      );
-  }, [payload]);
-
-  if (active && items.length) {
-    return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.date}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {items.map((p: PayloadItem, index: number) => {
-              const displayName = dataKeyToName.get(p.dataKey) ?? p.dataKey;
-              return (
-                (compact ? index < 4 : true) && (
-                  <AlignedText
-                    key={index}
-                    left={displayName}
-                    right={
-                      <FinancialText>
-                        {format(p.value, 'financial')}
-                      </FinancialText>
-                    }
-                    style={{
-                      color: p.color,
-                      textDecoration:
-                        tooltip === p.dataKey ? 'underline' : 'inherit',
-                    }}
-                  />
-                )
-              );
-            })}
-            {payload.length > 5 && compact && '...'}
-            <AlignedText
-              left={t('Total')}
-              right={
-                <FinancialText>{format(sumTotals, 'financial')}</FinancialText>
-              }
-              style={{
-                fontWeight: 600,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-};
 
 type LineGraphProps = {
   style?: CSSProperties;
@@ -154,6 +45,7 @@ type LineGraphProps = {
   showTrendLines?: boolean;
   showTooltip?: boolean;
   interval?: string;
+  showAmounts?: boolean;
 };
 
 export function LineGraph({
@@ -168,6 +60,7 @@ export function LineGraph({
   showTrendLines = false,
   showTooltip = true,
   interval,
+  showAmounts = false,
 }: LineGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -179,14 +72,24 @@ export function LineGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
+  // Amounts against a baseline draw each series beside a faint baseline line
+  const isAmounts = showAmounts && !!data.baseline;
+
   const largestValue = data.intervalData
-    .map(c => c[balanceTypeOp])
+    .flatMap(c =>
+      isAmounts ? [c.amount ?? 0, c.baselineAmount ?? 0] : [c[balanceTypeOp]],
+    )
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 5;
 
   const trendLines = showTrendLines
-    ? computeTrendLines(data.intervalData, data.legend)
+    ? computeTrendLines(
+        data.intervalData,
+        data.legend,
+        // Budgets are set per interval rather than accrued per day
+        balanceTypeOp === 'totalBudgeted' ? undefined : interval,
+      )
     : [];
 
   const onShowActivity = (id, payload, uncategorizedId, bucketTagNames) => {
@@ -232,11 +135,13 @@ export function LineGraph({
               {showTooltip && (
                 <Tooltip
                   content={
-                    <CustomTooltip
+                    <SeriesTooltip
                       compact={compact}
-                      tooltip={tooltip}
+                      balanceTypeOp={balanceTypeOp}
+                      hoveredKey={tooltip}
                       legend={data.legend}
                       format={format}
+                      order="value"
                     />
                   }
                   formatter={numberFormatterTooltip}
@@ -274,6 +179,22 @@ export function LineGraph({
                   ifOverflow="extendDomain"
                 />
               ))}
+              {isAmounts &&
+                data.legend.map(entry => (
+                  <Line
+                    key={getBaselineKey(entry.dataKey)}
+                    strokeWidth={2}
+                    type="monotone"
+                    dataKey={getBaselineKey(entry.dataKey)}
+                    stroke={entry.color}
+                    strokeOpacity={0.35}
+                    dot={false}
+                    activeDot={false}
+                    tooltipType="none"
+                    legendType="none"
+                    {...animationProps}
+                  />
+                ))}
               {data.legend.map((entry, index) => {
                 return (
                   <Line
