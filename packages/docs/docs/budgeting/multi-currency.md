@@ -322,12 +322,16 @@ On the **Budget** page, right-click **Food** and choose **Add currency…**. Cho
 
 <img width="540" alt="Add currency to Food, with EUR - Euro (€) selected" src="/img/budgeting/multi-currency-add-currency@2x.png" />
 
-**Add currency** puts a **EUR** row under Food. Food stays at $0.00 budgeted, $0.00 spent, and $0.00 balance. **Usual Expenses** stays at $0.00. The euro row is €0.00 in each column.
+**Add currency** puts a **EUR** row under Food. Click its **Budgeted** cell and enter 100. Food and **Usual Expenses** then show $125.00 budgeted and $125.00 balance. The euro budgeted cell shows 100, spent is €0.00, and the balance is €100.00.
 
-<img width="696" alt="Budget category Food with a EUR row of €0.00 under the dollar amounts" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
+<img width="840" alt="Food budgeted at $125.00, with the EUR row budgeted at 100 and a balance of €100.00" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
 
-The euro balance opens **Food: EUR**. Budgeted, spent, and balance are €0.00. Value is $0.00. Assigned in the budget currency is $0.00, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 0.8", the standing rate saved above. Reserved is €0.00 and held is €0.00. **Hide currency** is at the bottom of the sheet.
+October lists **Reserved in other currencies** as -$125.00. **To Budget** is $5,125.00. Available funds stays $5,250.00, and **FX changes (included)** stays $300.00.
 
-<img width="512" alt="Food: EUR details with €0.00 budgeted, a market rate of 0.8, and Hide currency" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
+The euro balance opens **Food: EUR**. Budgeted is €100.00, spent is €0.00, and the balance is €100.00. Value is $125.00. Assigned in the budget currency is $125.00, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 0.8". Reserved is €100.00. Held is €2,000.00, the balance of BNP Paribas.
 
-On a phone, tap **Food**. The menu includes **Add currency**. The budget list shows the same euro row under Food.
+**Edit EUR budget** shows **Budgeted (EUR)** and **Save budget**. **Turn rollover on** is beside it. **Transfer EUR** takes an **Amount (EUR)** and **To**. The first choice is **To Budget**. **Hide currency** is at the bottom of the sheet.
+
+<img width="512" alt="Food: EUR with €100.00 budgeted, $125.00 value, rollover, and a transfer back to To Budget" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
+
+On a phone, tap **Food**. The menu includes **Add currency**, and the euro budgeted amount is in the list.

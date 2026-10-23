@@ -13,6 +13,7 @@ import type {
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
+import { PocketBudgetInput } from '#components/budget/PocketBudgetInput';
 import {
   Amount,
   GroupAmount,
@@ -195,7 +196,7 @@ export function PocketSlotMonth({
           }}
         >
           <PocketLabels labels={labels} />
-          {native(pocket.budgeted)}
+          <PocketBudgetInput pocket={pocket} month={month} name={name} />
         </View>
       </Field>
       <Field name="spent" width="flex" style={fieldStyle('spent')}>
