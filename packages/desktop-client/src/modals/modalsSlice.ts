@@ -128,7 +128,8 @@ export type Modal =
   | {
       name: 'simplefin-init';
       options: {
-        onSuccess: () => void;
+        onSuccess: (perBudgetFile: boolean) => void;
+        credentialSource: BankSyncCredentialSource;
       };
     }
   | {
@@ -367,6 +368,12 @@ export type Modal =
       };
     }
   | {
+      name: 'all-accounts-menu';
+      options: {
+        onClose?: () => void;
+      };
+    }
+  | {
       name: 'account-reconcile';
       options: {
         accountId: AccountEntity['id'];
@@ -481,6 +488,7 @@ export type Modal =
         onCarryover?: (carryover: boolean) => void;
         onTransfer?: () => void;
         onCover?: () => void;
+        onFundGoal?: (amount: IntegerAmount) => void;
       };
     }
   | {

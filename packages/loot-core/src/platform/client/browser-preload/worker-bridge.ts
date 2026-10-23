@@ -4,6 +4,8 @@ import { logger } from '#platform/server/log';
 
 type BridgeMessage = { type?: string; [key: string]: unknown };
 
+const RESTORE_REQUEST_ID = '__restore-budget';
+
 /** The Worker-like surface the connection layer interacts with. */
 export type WorkerLike = {
   onmessage: ((e: MessageEvent) => void) | null;
@@ -32,6 +34,9 @@ export class WorkerBridge {
   _currentBudgetId: string | null;
   _wasHidden: boolean;
   _onVisibilityChange: () => void;
+  // Requests forwarded while a new leader is still restoring its budget;
+  // they would otherwise run against a backend with no database open
+  _heldRequests: unknown[] | null;
   localBackendWorker: Worker | null;
   backendWorkerUrl: URL;
 
@@ -43,6 +48,7 @@ export class WorkerBridge {
     this._isInitialized = false;
     this._currentBudgetId = null;
     this._wasHidden = document.visibilityState === 'hidden';
+    this._heldRequests = null;
     this.localBackendWorker = null;
     this.backendWorkerUrl = backendWorkerUrl;
 
@@ -92,6 +98,7 @@ export class WorkerBridge {
   }
 
   _terminateLocalBackendWorker() {
+    this._heldRequests = null;
     if (this.localBackendWorker) {
       this.localBackendWorker.terminate();
       this.localBackendWorker = null;
@@ -120,7 +127,9 @@ export class WorkerBridge {
 
     // Forward requests from SharedWorker to our local Worker
     if (msg && msg.type === '__to-worker') {
-      if (this.localBackendWorker) {
+      if (this._heldRequests) {
+        this._heldRequests.push(msg.msg);
+      } else if (this.localBackendWorker) {
         this.localBackendWorker.postMessage(msg.msg);
       }
       return;
@@ -225,6 +234,9 @@ export class WorkerBridge {
     const localWorker = new Worker(this.backendWorkerUrl);
     this.localBackendWorker = localWorker;
     initSQLBackend(localWorker);
+    // Followers keep sending requests during a takeover; hold them until
+    // the restored budget is open (the restore reply releases them)
+    this._heldRequests = budgetToRestore ? [] : null;
 
     const sharedPort = this._sharedPort;
     localWorker.onmessage = workerEvent => {
@@ -248,7 +260,7 @@ export class WorkerBridge {
           const id = budgetToRestore;
           budgetToRestore = null;
           localWorker.postMessage({
-            id: '__restore-budget',
+            id: RESTORE_REQUEST_ID,
             name: 'load-budget',
             args: { id },
             catchErrors: true,
@@ -257,13 +269,24 @@ export class WorkerBridge {
           // currentBudgetId gets updated when the reply arrives.
           sharedPort.postMessage({
             type: '__track-restore',
-            requestId: '__restore-budget',
+            requestId: RESTORE_REQUEST_ID,
             budgetId: id,
           });
         } else if (pendingMsg) {
           const toSend = pendingMsg;
           pendingMsg = null;
           localWorker.postMessage(toSend);
+        }
+      }
+      if (
+        workerMsg.id === RESTORE_REQUEST_ID &&
+        this._heldRequests &&
+        this.localBackendWorker === localWorker
+      ) {
+        const held = this._heldRequests;
+        this._heldRequests = null;
+        for (const request of held) {
+          localWorker.postMessage(request);
         }
       }
       sharedPort.postMessage({ type: '__from-worker', msg: workerMsg });

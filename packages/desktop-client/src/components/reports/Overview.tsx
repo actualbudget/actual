@@ -298,7 +298,7 @@ export function Overview({ dashboard }: OverviewProps) {
     });
   };
 
-  const onExport = () => {
+  const onExport = async () => {
     const data = {
       version: 1,
       widgets: desktopLayout.map(item => {
@@ -327,11 +327,22 @@ export function Overview({ dashboard }: OverviewProps) {
       }),
     } satisfies ExportImportDashboard;
 
-    void window.Actual.saveFile(
-      JSON.stringify(data, null, 2),
-      'dashboard.json',
-      t('Export Dashboard'),
-    );
+    try {
+      await window.Actual.saveFile(
+        JSON.stringify(data, null, 2),
+        'dashboard.json',
+        t('Export Dashboard'),
+      );
+    } catch {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to export the dashboard file.'),
+          },
+        }),
+      );
+    }
   };
 
   const importDashboardPageMutation = useImportDashboardPageMutation();
@@ -696,7 +707,7 @@ export function Overview({ dashboard }: OverviewProps) {
                                 void onResetDashboard();
                                 break;
                               case 'export':
-                                onExport();
+                                void onExport();
                                 break;
                               case 'import':
                                 void onImport();
