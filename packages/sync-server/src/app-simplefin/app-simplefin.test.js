@@ -300,6 +300,7 @@ describe('per-budget credentials', () => {
   const fileA = 'simplefin-budget-a';
   const fileB = 'simplefin-budget-b';
   const keyB = 'https://other:password@bridge.example.com/simplefin';
+  const keyC = 'https://third:secret@bridge.example.com/simplefin';
 
   beforeEach(() => {
     for (const fileId of [fileA, fileB]) {
@@ -329,7 +330,7 @@ describe('per-budget credentials', () => {
 
   it('claims and stores the budget key without using or replacing global credentials', async () => {
     secretsService.set(SecretName.simplefin_token, SETUP_TOKEN, fileA);
-    secretsService.set(SecretName.simplefin_accessKey, keyB, fileB);
+    secretsService.set(SecretName.simplefin_accessKey, keyC, fileB);
     mockFetch({
       claim: okResponse(keyB),
       accounts: okResponse(JSON.stringify({ accounts: [], errors: [] })),
@@ -353,7 +354,7 @@ describe('per-budget credentials', () => {
       keyB,
     );
     expect(secretsService.get(SecretName.simplefin_accessKey, fileB)).toBe(
-      keyB,
+      keyC,
     );
     expect(secretsService.get(SecretName.simplefin_accessKey)).toBe(
       VALID_ACCESS_KEY,
