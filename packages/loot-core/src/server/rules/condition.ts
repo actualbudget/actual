@@ -22,15 +22,28 @@ import { extractTagsForFilter } from '#shared/tags';
 import {
   assert,
   parseBetweenAmount,
+  parseBetweenDate,
   parseDateString,
   parseRecurDate,
 } from './rule-utils';
 
 export const CONDITION_TYPES = {
   date: {
-    ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
+    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
     parse(op, value, fieldName) {
+      // `isbetween` is the only op taking a pair of dates, and it only
+      // accepts exact dates (no months, years, or recurring schedules)
+      if (op === 'isbetween') {
+        const parsed = parseBetweenDate(value);
+        assert(
+          parsed,
+          'date-format',
+          `Invalid between date value for "${op}" (field: ${fieldName})`,
+        );
+        return parsed;
+      }
+
       const parsed =
         typeof value === 'string'
           ? parseDateString(value)
@@ -324,8 +337,9 @@ export class Condition {
       case 'isNot':
         return fieldValue !== this.value;
       case 'isbetween': {
-        // The parsing logic already checks that the value is of the
-        // right type (only numbers with high and low)
+        // The parsing logic already checks that the value is a pair of
+        // bounds of the right type. Numbers and `YYYY-MM-DD` dates both
+        // sort and compare correctly with the operators below.
         const [low, high] = sortNumbers(this.value.num1, this.value.num2);
         return fieldValue >= low && fieldValue <= high;
       }
