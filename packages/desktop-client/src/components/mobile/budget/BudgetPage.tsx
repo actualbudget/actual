@@ -7,7 +7,6 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
-import { useErrorBoundary } from 'react-error-boundary';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -31,9 +30,11 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { groupById } from '@actual-app/core/shared/util';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
+import { useQuery } from '@tanstack/react-query';
 
 import { sync } from '#app/appSlice';
 import {
+  budgetBoundsQueries,
   useBudgetActions,
   useCreateCategoryGroupMutation,
   useCreateCategoryMutation,
@@ -48,7 +49,6 @@ import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
-import { useBudgetBounds } from '#hooks/useBudgetBounds';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -87,12 +87,11 @@ export function BudgetPage() {
   const goalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goalTemplatesUIEnabled = useFeatureFlag('goalTemplatesUIEnabled');
   const spreadsheet = useSpreadsheet();
-  const { showBoundary: showErrorBoundary } = useErrorBoundary();
 
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
-  const { data: loadedBounds } = useBudgetBounds();
+  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
   const monthBounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
@@ -117,6 +116,7 @@ export function BudgetPage() {
       if (!loadedBounds) {
         return;
       }
+      // A cleared allocation or mode switch can leave the selected month out of range.
       const { start, end } = loadedBounds;
       const validMonth =
         startMonth < start ? start : startMonth > end ? end : startMonth;
@@ -129,7 +129,7 @@ export function BudgetPage() {
       setInitialized(true);
     }
 
-    void init().catch(showErrorBoundary);
+    void init();
   }, [
     budgetType,
     startMonth,
@@ -137,7 +137,6 @@ export function BudgetPage() {
     spreadsheet,
     loadedBounds,
     setStartMonthPref,
-    showErrorBoundary,
   ]);
 
   const onBudgetAction = useCallback(

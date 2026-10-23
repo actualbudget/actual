@@ -11,7 +11,7 @@ import { integerToCurrency, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
-import { getBudgetRange } from './base';
+import { getBudgetRange } from './util';
 
 export async function getSheetValue(
   sheetName: string,
@@ -44,7 +44,7 @@ function calcBufferedAmount(
 
 type BudgetTable = 'reflect_budgets' | 'zero_budgets';
 
-export function getBudgetTable(): BudgetTable {
+function getBudgetTable(): BudgetTable {
   return isTrackingBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
@@ -108,13 +108,10 @@ function getAllMonths(startMonth: string): string[] {
   if (latest == null) {
     return [];
   }
-  if (isTrackingBudget()) {
-    const currentMonth = monthUtils.currentMonth();
-    const { end } = getBudgetRange(currentMonth, currentMonth);
-    if (latest > end) {
-      latest = end;
-    }
-  }
+  // Cached months can outlive the visible range; bulk edits must stop at its end.
+  const currentMonth = monthUtils.currentMonth();
+  const { end } = getBudgetRange(currentMonth, currentMonth);
+  if (latest > end) latest = end;
   return startMonth <= latest
     ? monthUtils.rangeInclusive(startMonth, latest)
     : [];

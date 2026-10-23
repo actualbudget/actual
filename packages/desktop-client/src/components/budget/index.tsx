@@ -1,7 +1,6 @@
 // @ts-strict-ignore
 import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
-import { useErrorBoundary } from 'react-error-boundary';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -10,8 +9,10 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
 import {
+  budgetBoundsQueries,
   useBudgetActions,
   useDeleteCategoryGroupMutation,
   useDeleteCategoryMutation,
@@ -21,7 +22,6 @@ import {
   useSaveCategoryMutation,
   useSortCategoriesMutation,
 } from '#budget';
-import { useBudgetBounds } from '#hooks/useBudgetBounds';
 import { useCategories } from '#hooks/useCategories';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -40,14 +40,13 @@ import { prewarmAllMonths, prewarmMonth } from './util';
 export function Budget() {
   const currentMonth = monthUtils.currentMonth();
   const spreadsheet = useSpreadsheet();
-  const { showBoundary: showErrorBoundary } = useErrorBoundary();
   const navigate = useNavigate();
   const [summaryCollapsed, setSummaryCollapsedPref] = useLocalPref(
     'budget.summaryCollapsed',
   );
   const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
-  const { data: loadedBounds } = useBudgetBounds();
+  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
   const bounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
@@ -76,7 +75,7 @@ export function Budget() {
       setInitialized(true);
     }
 
-    void run().catch(showErrorBoundary);
+    void run();
   });
   useEffect(() => init(), [budgetType, loadedBounds]);
 

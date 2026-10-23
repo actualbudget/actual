@@ -112,18 +112,21 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         void store.dispatch(loadPrefs());
       }
 
+      // Local edits, undo, and incoming sync can expand or shrink either mode.
       if (
         budgetTypeChanged ||
         tables.some(table =>
-          ['reflect_budgets', 'transactions', 'categories'].includes(table),
+          [
+            'zero_budgets',
+            'reflect_budgets',
+            'transactions',
+            'categories',
+          ].includes(table),
         )
       ) {
         void queryClient.invalidateQueries({
           queryKey: budgetBoundsQueries.all(),
         });
-      }
-      if (budgetTypeChanged || tables.includes('reflect_budgets')) {
-        void queryClient.invalidateQueries({ queryKey: ['balance-forecast'] });
       }
 
       if (
