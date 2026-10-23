@@ -45,6 +45,11 @@ export type SyncedPrefs = Partial<
     // line in its category automatically; see `shared/fx/ownLines.ts`
     | 'currency-own-lines'
     | 'multi-currency-nudge-dismissed'
+    // 'true' to fetch exchange rates once a day, 'false' (default) not to
+    | 'exchange-rates-auto-update'
+    // Base URL of a self-hosted Frankfurter instance; empty for the public
+    // service
+    | 'exchange-rates-provider-url'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     // @deprecated: superseded by `transaction-table-columns-${string}`; only
@@ -106,6 +111,13 @@ export type MetadataPrefs = Partial<{
   lastSyncedTimestamp: string;
   resetClock: boolean;
   lastScheduleRun: string;
+  // The day exchange rates were last fetched automatically on this device
+  lastExchangeRateUpdate: string;
+  // The outcome of the last fetch on this device, as JSON
+  exchangeRatesUpdateStatus: string;
+  // Days the provider has no rate for, per currency, as JSON (e.g.
+  // holidays), so they aren't asked for or reported as missing again
+  exchangeRatesProviderGaps: string;
   userId: string; // TODO: delete this (unused)
 }>;
 
