@@ -13,6 +13,7 @@ import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
 import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
+import { useExchangeRatesReminder } from '#hooks/useExchangeRatesReminder';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -119,6 +120,7 @@ export function FinancesApp() {
   const multiuserEnabled = useMultiuserEnabled();
 
   useAutomaticBankSync();
+  useExchangeRatesReminder();
   useNewsNotification();
 
   const init = useEffectEvent(() => {
