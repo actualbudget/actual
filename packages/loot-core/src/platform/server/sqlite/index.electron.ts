@@ -7,10 +7,31 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type { SqlParam } from './types';
+import type {
+  Database,
+  SqlParam,
+  Statement,
+  StorageBackend,
+  TransactionOptions,
+} from './types';
 import { unicodeLike } from './unicodeLike';
 
-export type { SqlParam } from './types';
+export type {
+  Database,
+  SqlParam,
+  Statement,
+  StorageBackend,
+  TransactionOptions,
+} from './types';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
+
+function asNative(db: Database): SQL.Database {
+  return db as unknown as SQL.Database;
+}
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -21,8 +42,30 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export async function init() {
-  // No need to initialise on electron
+export async function init(_options?: {
+  baseURL?: string;
+  wasmBinary?: ArrayBuffer | Uint8Array;
+  storage?: StorageBackend;
+}): Promise<StorageBackend> {
+  // No need to initialise on electron; the storage backend only exists on
+  // the web, so report the native build as `legacy`
+  return 'legacy';
+}
+
+export function getStorageBackend(): StorageBackend {
+  return 'legacy';
+}
+
+export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
+  return null;
+}
+
+export async function flushSqliteStorage(): Promise<void> {
+  // Native sqlite writes through to disk
+}
+
+export async function releaseSqliteStorage(): Promise<void> {
+  // Nothing to release on native sqlite
 }
 
 // Parity with the browser sqlite backend (which instantiates sql.js from an
@@ -32,13 +75,17 @@ export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
   // no-op on native sqlite
 }
 
-export function prepare(db, sql) {
-  return db.prepare(sql);
+export function prepare(db: Database, sql: string): Statement {
+  return asNative(db).prepare(sql) as unknown as Statement;
+}
+
+export function finalizeStatement(_statement: Statement) {
+  // better-sqlite3 statements are garbage collected; nothing to free.
 }
 
 export function runQuery(
-  db: SQL.Database,
-  sql: string | SQL.Statement,
+  db: Database,
+  sql: string | Statement,
   params: SqlParam[] = [],
   fetchAll = false,
 ) {
@@ -48,7 +95,10 @@ export function runQuery(
 
   let stmt: SQL.Statement;
   try {
-    stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
+    stmt =
+      typeof sql === 'string'
+        ? asNative(db).prepare(sql)
+        : (sql as unknown as SQL.Statement);
   } catch (e) {
     logger.log('error', sql);
     throw e;
@@ -68,22 +118,16 @@ export function runQuery(
   }
 }
 
-export function execQuery(db: SQL.Database, sql: string) {
-  db.exec(sql);
+export function execQuery(db: Database, sql: string) {
+  asNative(db).exec(sql);
 }
 
-export type TransactionOptions = {
-  // Take the write lock up front (`BEGIN IMMEDIATE`). Only matters on
-  // the web backend, but keep the signature the same on every platform.
-  immediate?: boolean;
-};
-
 export function transaction(
-  db: SQL.Database,
+  db: Database,
   fn: () => void,
   { immediate = false }: TransactionOptions = {},
 ) {
-  const run = db.transaction(fn);
+  const run = asNative(db).transaction(fn);
   if (immediate) {
     run.immediate();
   } else {
@@ -97,14 +141,11 @@ export function transaction(
 // it. This is rarely used, and only needed for specific cases (like
 // batch importing a bunch of data). Don't use this.
 let transactionDepth = 0;
-export async function asyncTransaction(
-  db: SQL.Database,
-  fn: () => Promise<void>,
-) {
+export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   // Support nested transactions by "coalescing" them into the parent
   // one if one is already started
   if (transactionDepth === 0) {
-    db.exec('BEGIN TRANSACTION');
+    asNative(db).exec('BEGIN TRANSACTION');
   }
   transactionDepth++;
 
@@ -117,12 +158,12 @@ export async function asyncTransaction(
     // lost. Right now we are only using transactions for speed
     // purposes unfortunately
     if (transactionDepth === 0) {
-      db.exec('COMMIT');
+      asNative(db).exec('COMMIT');
     }
   }
 }
 
-export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
+export function openDatabase(pathOrBuffer: string | Buffer): Database {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
@@ -135,19 +176,19 @@ export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
   db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
   db.function('REGEXP', { deterministic: true }, regexp);
   db.function('NORMALISE', { deterministic: true }, normalise);
-  return db;
+  return db as unknown as Database;
 }
 
-export function closeDatabase(db: SQL.Database) {
-  db.close();
+export function closeDatabase(db: Database) {
+  asNative(db).close();
 }
 
-export async function exportDatabase(db: SQL.Database) {
+export async function exportDatabase(db: Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
   const name = `${getDataDir()}/backup-for-export-${uuidv4()}.db`;
 
-  await db.backup(name);
+  await asNative(db).backup(name);
 
   const data = await readFile(name, 'binary');
   await removeFile(name);

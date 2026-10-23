@@ -1,9 +1,39 @@
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'path';
 
 import { peggyLoader } from '@actual-app/vite-plugin-peggy';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+
+const require = createRequire(import.meta.url);
+const sqliteWasmPath = require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm');
+
+// Library builds inline every imported asset, so the sqlite wasm is
+// emitted as a sibling of the worker bundle instead. It is served from the
+// same `kcab/` directory and precached with it; the engine locates it via
+// `WASM_FILE_PATH` in src/platform/server/sqlite/wasm.ts.
+//
+// The glue also spawns a worker for its deprecated "Worker1" API, which
+// Vite bundles into a 1.3 MB `assets/sqlite3-worker1-*.js`. Nothing calls
+// that API, so drop the chunk rather than ship and precache it.
+const sqliteWasmAssets = (): Plugin => ({
+  name: 'sqlite-wasm-assets',
+  generateBundle(_options, bundle) {
+    for (const fileName of Object.keys(bundle)) {
+      if (/(^|\/)sqlite3-worker1[^/]*\.js(\.map)?$/.test(fileName)) {
+        delete bundle[fileName];
+      }
+    }
+    this.emitFile({
+      type: 'asset',
+      fileName: 'sqlite3.wasm',
+      source: readFileSync(sqliteWasmPath),
+    });
+  },
+});
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -69,9 +99,15 @@ export default defineConfig(({ mode }) => {
       'process.env.PUBLIC_URL': JSON.stringify(process.env.PUBLIC_URL || '/'),
       'process.env.ACTUAL_DATA_DIR': JSON.stringify('/'),
       'process.env.ACTUAL_DOCUMENT_DIR': JSON.stringify('/documents'),
+      // The worker is a classic IIFE loaded with importScripts. Rolldown
+      // replaces `import.meta` with `{}` there, which would leave the
+      // sqlite-wasm glue without a script URL; the worker's location is
+      // the right value.
+      'import.meta.url': 'self.location.href',
     },
     plugins: [
       peggyLoader(),
+      sqliteWasmAssets(),
       nodePolyfills({
         include: [
           'process',
