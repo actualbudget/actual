@@ -237,8 +237,9 @@ export const objects = {
       type: 'string',
       description: (
         <span>
-          Where the rate came from. Read only; rates created through the API are{' '}
-          <code>manual</code>
+          Where the rate came from: <code>manual</code> for rates entered by
+          hand, imported or created through the API, and{' '}
+          <code>frankfurter</code> for fetched ones. Read only
         </span>
       ),
     },
