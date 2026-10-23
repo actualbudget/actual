@@ -9,7 +9,7 @@ import * as prefs from '#server/prefs';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
 import { isSqlConversionEnabled } from '#shared/fx/sql';
-import { currentDay } from '#shared/months';
+import { currentDay, dayFromDate } from '#shared/months';
 import type { ExchangeRateEntity } from '#types/models';
 
 import { formatExchangeRatesCsv, parseExchangeRatesCsv } from './import';
@@ -21,8 +21,8 @@ import {
   upsertExchangeRates,
 } from './store';
 import type { ExchangeRatesUpsertResult, ValidExchangeRate } from './store';
-import { updateExchangeRates } from './update';
-import type { ExchangeRatesUpdateResult } from './update';
+import { findMissingExchangeRates, updateExchangeRates } from './update';
+import type { ExchangeRatesUpdateResult, MissingExchangeRates } from './update';
 
 export type ExchangeRatesHandlers = {
   'exchange-rates-get': typeof getExchangeRates;
@@ -34,6 +34,8 @@ export type ExchangeRatesHandlers = {
   'exchange-rates-export': typeof exportExchangeRates;
   'exchange-rates-update': typeof updateExchangeRatesNow;
   'exchange-rates-update-status': typeof getUpdateStatus;
+  'exchange-rates-missing': typeof findMissingExchangeRates;
+  'exchange-rates-check': typeof checkExchangeRates;
 };
 
 export const app = createApp<ExchangeRatesHandlers>();
@@ -49,6 +51,8 @@ app.method('exchange-rates-export', exportExchangeRates);
 // undoable either: undoing an update would only bring the missing days back.
 app.method('exchange-rates-update', updateExchangeRatesNow);
 app.method('exchange-rates-update-status', getUpdateStatus);
+app.method('exchange-rates-missing', findMissingExchangeRates);
+app.method('exchange-rates-check', checkExchangeRates);
 
 app.events.on('sync', ({ type }) => {
   if (type === 'success' && prefs.getPrefs() && db.getDatabase()) {
@@ -362,4 +366,48 @@ export async function updateExchangeRatesDaily() {
     lastFailure = { budgetId, time: Date.now() };
     logger.warn('Could not update exchange rates', err);
   }
+}
+
+export type ExchangeRatesCheck = {
+  missing: MissingExchangeRates[];
+  // Why the last automatic update failed, when it did
+  errors: string[];
+  unsupported: string[];
+};
+
+// What to remind the user of when a budget opens: missing rates, unless
+// automatic updates are on and today's update worked, since they fill
+// themselves in. An update still running is waited for, so the answer
+// reflects it; none is started, as the budget's first sync starts it once
+// other devices' rates have arrived. An earlier day's failure isn't
+// reported, as today's update may still fix it.
+async function checkExchangeRates(): Promise<ExchangeRatesCheck | null> {
+  if (!isSqlConversionEnabled()) {
+    return null;
+  }
+  const isAutomatic = await isAutoUpdateOn();
+  const running = runningUpdate;
+  if (
+    isAutomatic &&
+    running !== null &&
+    running.budgetId === prefs.getPrefs()?.id
+  ) {
+    await running.promise.catch(() => null);
+  }
+  const missing = await findMissingExchangeRates();
+  if (missing.length === 0) {
+    return null;
+  }
+  if (!isAutomatic) {
+    return { missing, errors: [], unsupported: [] };
+  }
+  const status = await getUpdateStatus();
+  if (
+    !status ||
+    dayFromDate(new Date(status.time)) !== currentDay() ||
+    (status.errors.length === 0 && status.unsupported.length === 0)
+  ) {
+    return null;
+  }
+  return { missing, errors: status.errors, unsupported: status.unsupported };
 }

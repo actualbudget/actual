@@ -7,7 +7,7 @@ import * as monthUtils from '#shared/months';
 import type { FetchFn } from './providers/frankfurter';
 import { loadSqlConversionState } from './sqlState';
 import { getExchangeRates } from './store';
-import { updateExchangeRates } from './update';
+import { findMissingExchangeRates, updateExchangeRates } from './update';
 
 // CAD is worth 0.7 USD and 2,000 COP every day
 const RATES: Record<string, number> = { USD: 0.7, COP: 2000 };
@@ -411,3 +411,125 @@ async function deleteFetchedRates(matches: (date: string) => boolean) {
     }
   }
 }
+
+describe('findMissingExchangeRates', () => {
+  it('finds nothing when rates cover every transaction up to yesterday', async () => {
+    await insertRate('2015-08-01');
+    await insertRate('2016-12-31');
+
+    expect(await findMissingExchangeRates()).toEqual([]);
+  });
+
+  it('reports rates that stop before yesterday', async () => {
+    await insertRate('2015-08-01');
+    await insertRate('2016-12-20');
+
+    expect(await findMissingExchangeRates()).toEqual([
+      {
+        currency: 'USD',
+        isOutdated: true,
+        outdatedSince: '2016-12-20',
+        olderTransactionsFrom: null,
+        holes: null,
+      },
+    ]);
+  });
+
+  it('reports transactions older than the first rate', async () => {
+    await insertRate('2016-01-01');
+    await insertRate('2017-01-01');
+
+    expect(await findMissingExchangeRates()).toEqual([
+      {
+        currency: 'USD',
+        isOutdated: false,
+        outdatedSince: null,
+        olderTransactionsFrom: '2015-08-15',
+        holes: null,
+      },
+    ]);
+  });
+
+  it('reports a currency without any rate', async () => {
+    expect(await findMissingExchangeRates()).toEqual([
+      {
+        currency: 'USD',
+        isOutdated: true,
+        outdatedSince: null,
+        olderTransactionsFrom: '2015-08-15',
+        holes: null,
+      },
+    ]);
+  });
+
+  it('reports fetched rates missing in between', async () => {
+    await fetchAll();
+    await deleteFetchedRates(date =>
+      ['2015-10-01', '2016-06-10', '2016-06-11'].includes(date),
+    );
+
+    expect(await findMissingExchangeRates()).toEqual([
+      {
+        currency: 'USD',
+        isOutdated: false,
+        outdatedSince: null,
+        olderTransactionsFrom: null,
+        holes: { startDate: '2015-10-01', endDate: '2016-06-11' },
+      },
+    ]);
+  });
+
+  it('does not report days before the first transaction as missing', async () => {
+    // Hand-entered rates from before the first transaction, then fetched
+    // ones from it on
+    await insertRate('2015-01-01');
+    await fetchAll();
+
+    expect(await findMissingExchangeRates()).toEqual([]);
+  });
+
+  it('does not let a rate dated in the future hide older missing rates', async () => {
+    await fetchAll();
+    await deleteFetchedRates(date => date >= '2016-12-20');
+    await insertRate('2017-03-01');
+
+    expect(await findMissingExchangeRates()).toEqual([
+      {
+        currency: 'USD',
+        isOutdated: true,
+        outdatedSince: '2016-12-19',
+        olderTransactionsFrom: null,
+        holes: null,
+      },
+    ]);
+  });
+
+  it('does not report days the provider has no rate for', async () => {
+    await updateExchangeRates({
+      fetchFn: createFetch({ skip: ['2016-06-10'] }),
+    });
+
+    expect(await findMissingExchangeRates()).toEqual([]);
+  });
+
+  it('does not report gaps between rates entered by hand', async () => {
+    await insertRate('2015-08-01');
+    await insertRate('2016-06-01');
+    await insertRate('2016-12-31');
+
+    expect(await findMissingExchangeRates()).toEqual([]);
+  });
+
+  it('ignores closed accounts and does nothing while multiple currencies are off', async () => {
+    await db.update('accounts', { id: 'usd', closed: 1 });
+    expect(await findMissingExchangeRates()).toEqual([]);
+
+    await db.update('accounts', { id: 'usd', closed: 0 });
+    await db.update('preferences', {
+      id: 'flags.multiCurrency',
+      value: 'false',
+    });
+    loadSqlConversionState();
+    expect(await findMissingExchangeRates()).toEqual([]);
+  });
+});
