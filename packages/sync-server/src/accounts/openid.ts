@@ -28,6 +28,29 @@ export type ConfigParameter = {
 const debugSensitive = createDebug('actual-sensitive:openid');
 
 export async function bootstrapOpenId(configParameter: ConfigParameter) {
+  const prepared = await prepareOpenId(configParameter);
+  if ('error' in prepared) {
+    return prepared;
+  }
+
+  try {
+    saveOpenIdConfig(prepared.config);
+  } catch (error) {
+    console.error('Error updating auth table');
+    debugSensitive('Error updating auth table: %O', error);
+    return { error: 'database-error' };
+  }
+
+  return {};
+}
+
+/**
+ * Validates the OpenID config and checks the provider is reachable. Does not
+ * touch the database, so callers can await it before opening a transaction.
+ */
+export async function prepareOpenId(
+  configParameter: ConfigParameter,
+): Promise<{ error: string } | { config: ConfigParameter }> {
   if (!('issuer' in configParameter) && !('discoveryURL' in configParameter)) {
     return { error: 'missing-issuer-or-discoveryURL' };
   }
@@ -60,23 +83,20 @@ export async function bootstrapOpenId(configParameter: ConfigParameter) {
     return { error: 'configuration-error' };
   }
 
-  const accountDb = getAccountDb();
-  try {
-    accountDb.transaction(() => {
-      accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
-      accountDb.mutate('UPDATE auth SET active = 0');
-      accountDb.mutate(
-        "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
-        [JSON.stringify(configParameter)],
-      );
-    });
-  } catch (error) {
-    console.error('Error updating auth table');
-    debugSensitive('Error updating auth table: %O', error);
-    return { error: 'database-error' };
-  }
+  return { config: configParameter };
+}
 
-  return {};
+/** Stores a config returned by `prepareOpenId` as the active login method. */
+export function saveOpenIdConfig(configParameter: ConfigParameter) {
+  const accountDb = getAccountDb();
+  accountDb.transaction(() => {
+    accountDb.mutate('DELETE FROM auth WHERE method = ?', ['openid']);
+    accountDb.mutate('UPDATE auth SET active = 0');
+    accountDb.mutate(
+      "INSERT INTO auth (method, display_name, extra_data, active) VALUES ('openid', 'OpenID', ?, 1)",
+      [JSON.stringify(configParameter)],
+    );
+  });
 }
 
 async function setupOpenIdClient(configParameter) {
