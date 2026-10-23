@@ -250,22 +250,23 @@ export function createFutureAwareToBudget(
 ) {
   const activeMonths = months.filter(month => month >= currentMonth);
   const currentSheetName = monthUtils.sheetForMonth(currentMonth);
-  const futureBudgetDependencies = activeMonths
-    .slice(1)
-    .map(futureMonth =>
-      resolveName(monthUtils.sheetForMonth(futureMonth), 'total-budgeted'),
-    );
+  const budgetDependencies = activeMonths.map(budgetMonth =>
+    resolveName(monthUtils.sheetForMonth(budgetMonth), 'total-budgeted'),
+  );
 
-  activeMonths.forEach(month => {
+  activeMonths.forEach((month, index) => {
     const sheetName = monthUtils.sheetForMonth(month);
     if (replace) {
       sheet.get().deleteCell(sheetName, 'assigned-in-future');
       sheet.get().deleteCell(sheetName, 'ready-to-assign');
+      sheet.get().deleteCell(sheetName, 'available-funds-with-future');
+      sheet.get().deleteCell(sheetName, 'total-income-with-future');
+      sheet.get().deleteCell(sheetName, 'from-last-month-with-future');
     }
 
     sheet.get().createDynamic(sheetName, 'assigned-in-future', {
       initialValue: 0,
-      dependencies: futureBudgetDependencies,
+      dependencies: budgetDependencies.slice(index + 1),
       run: (...futureBudgetedAmounts) => {
         const futureBudgeted = sumAmounts(...futureBudgetedAmounts);
         return futureBudgeted === 0 ? 0 : -futureBudgeted;
@@ -277,15 +278,46 @@ export function createFutureAwareToBudget(
         resolveName(currentSheetName, 'to-budget'),
         resolveName(currentSheetName, 'buffered-selected'),
         resolveName(currentSheetName, 'total-overspent'),
-        'assigned-in-future',
+        ...budgetDependencies.slice(1),
       ],
-      run: (toBudget, buffered, overspent, budgetedInFuture) =>
+      run: (toBudget, buffered, overspent, ...futureBudgetedAmounts) =>
         safeNumber(
           number(toBudget) +
             number(buffered) +
-            (month > currentMonth ? number(overspent) : 0) -
+            (month > currentMonth ? number(overspent) : 0) +
+            sumAmounts(...futureBudgetedAmounts),
+        ),
+    });
+
+    // Reconcile the viewed month's summary with To Budget. That amount uses
+    // current funds only, so future income must not inflate Available funds.
+    sheet.get().createDynamic(sheetName, 'available-funds-with-future', {
+      initialValue: 0,
+      dependencies: [
+        'ready-to-assign',
+        'last-month-overspent',
+        'total-budgeted',
+        'assigned-in-future',
+      ],
+      run: (toBudget, overspent, budgeted, budgetedInFuture) =>
+        safeNumber(
+          number(toBudget) -
+            number(overspent) -
+            number(budgeted) +
             number(budgetedInFuture),
         ),
+    });
+
+    sheet.get().createDynamic(sheetName, 'total-income-with-future', {
+      initialValue: 0,
+      dependencies: ['total-income'],
+      run: income => (month === currentMonth ? number(income) : 0),
+    });
+    sheet.get().createDynamic(sheetName, 'from-last-month-with-future', {
+      initialValue: 0,
+      dependencies: ['available-funds-with-future', 'total-income-with-future'],
+      run: (available, income) =>
+        safeNumber(number(available) - number(income)),
     });
   });
 }

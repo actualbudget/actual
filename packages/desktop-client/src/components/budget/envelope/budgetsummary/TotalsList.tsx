@@ -14,7 +14,6 @@ import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
-import { useLocale } from '#hooks/useLocale';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
@@ -54,15 +53,6 @@ type TotalsListProps = {
 export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
   const { includesFutureAssignments } = useToBudgetMode(month);
-  const locale = useLocale();
-  const currentMonth = monthUtils.currentMonth();
-  const deductsCurrentOverspending =
-    includesFutureAssignments && month > currentMonth;
-  const currentMonthName = monthUtils.format(currentMonth, 'MMM', locale);
-  const summaryMonth = includesFutureAssignments ? currentMonth : month;
-  const summaryPrevMonthName = includesFutureAssignments
-    ? monthUtils.format(monthUtils.prevMonth(currentMonth), 'MMM', locale)
-    : prevMonthName;
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
@@ -75,7 +65,7 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
         ...style,
       }}
     >
-      <SheetNameProvider name={monthUtils.sheetForMonth(summaryMonth)}>
+      <SheetNameProvider name={monthUtils.sheetForMonth(month)}>
         <View
           style={{
             textAlign: 'right',
@@ -91,7 +81,11 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
                   left="Income:"
                   right={
                     <EnvelopeCellValue
-                      binding={envelopeBudget.totalIncome}
+                      binding={
+                        includesFutureAssignments
+                          ? envelopeBudget.totalIncomeWithFuture
+                          : envelopeBudget.totalIncome
+                      }
                       type="financial"
                     />
                   }
@@ -100,7 +94,11 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
                   left="From Last Month:"
                   right={
                     <EnvelopeCellValue
-                      binding={envelopeBudget.fromLastMonth}
+                      binding={
+                        includesFutureAssignments
+                          ? envelopeBudget.fromLastMonthWithFuture
+                          : envelopeBudget.fromLastMonth
+                      }
                       type="financial"
                     />
                   }
@@ -110,7 +108,11 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
             placement="bottom end"
           >
             <EnvelopeCellValue
-              binding={envelopeBudget.incomeAvailable}
+              binding={
+                includesFutureAssignments
+                  ? envelopeBudget.incomeAvailableWithFuture
+                  : envelopeBudget.incomeAvailable
+              }
               type="financial"
             >
               {props => (
@@ -144,21 +146,6 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
               />
             )}
           </EnvelopeCellValue>
-
-          {deductsCurrentOverspending && (
-            <EnvelopeCellValue
-              binding={envelopeBudget.totalOverspent}
-              type="financial"
-            >
-              {props => (
-                <CellValueText
-                  {...props}
-                  style={{ fontWeight: 600 }}
-                  formatter={signedFormatter}
-                />
-              )}
-            </EnvelopeCellValue>
-          )}
 
           {!includesFutureAssignments && (
             <EnvelopeCellValue
@@ -198,18 +185,12 @@ export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
         </Block>
 
         <Block>
-          <Trans>Overspent in {{ prevMonthName: summaryPrevMonthName }}</Trans>
+          <Trans>Overspent in {{ prevMonthName }}</Trans>
         </Block>
 
         <Block>
           <Trans>Budgeted</Trans>
         </Block>
-
-        {deductsCurrentOverspending && (
-          <Block>
-            <Trans>Overspent in {{ prevMonthName: currentMonthName }}</Trans>
-          </Block>
-        )}
 
         {!includesFutureAssignments && (
           <Block>
