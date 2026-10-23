@@ -6,7 +6,7 @@ import { t } from 'i18next';
 import { accountGroupQueries } from './account-groups';
 import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
-import { categoryQueries } from './budget';
+import { budgetBoundsQueries, categoryQueries } from './budget';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -104,8 +104,29 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
 
       const tables = event.tables;
 
-      if (tables.includes('prefs')) {
+      const preferenceChanges =
+        event.type === 'applied' ? event.data?.get('preferences') : undefined;
+      const budgetTypeChanged =
+        preferenceChanges instanceof Map && preferenceChanges.has('budgetType');
+      if (tables.includes('prefs') || budgetTypeChanged) {
         void store.dispatch(loadPrefs());
+      }
+
+      // Local edits, undo, and incoming sync can expand or shrink either mode.
+      if (
+        budgetTypeChanged ||
+        tables.some(table =>
+          [
+            'zero_budgets',
+            'reflect_budgets',
+            'transactions',
+            'categories',
+          ].includes(table),
+        )
+      ) {
+        void queryClient.invalidateQueries({
+          queryKey: budgetBoundsQueries.all(),
+        });
       }
 
       if (

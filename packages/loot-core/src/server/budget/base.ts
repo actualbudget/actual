@@ -11,31 +11,13 @@ import type { CategoryGroupEntity } from '#types/models';
 import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
+import { getBudgetRange } from './util';
+
+export { getBudgetRange } from './util';
 
 export function getBudgetType() {
   const meta = sheet.get().meta();
   return meta.budgetType || 'envelope';
-}
-
-export function getBudgetRange(start: string, end: string) {
-  start = monthUtils.getMonth(start);
-  end = monthUtils.getMonth(end);
-
-  // The start date should never be after the end date. If that
-  // happened, the month range might be a valid range and weird
-  // things happen
-  if (start > end) {
-    start = end;
-  }
-
-  // Budgets should exist 3 months before the earliest needed date
-  // (either the oldest transaction or the current month if no
-  // transactions yet), and a year from the current date. There's no
-  // need to ever have budgets outside that range.
-  start = monthUtils.subMonths(start, 3);
-  end = monthUtils.addMonths(end, 12);
-
-  return { start, end, range: monthUtils.rangeInclusive(start, end) };
 }
 
 // The day range spanning the given months. They aren't guaranteed to be
@@ -437,6 +419,7 @@ export async function createAllBudgets() {
 
   const meta = sheet.get().meta();
   const createdMonths = meta.createdMonths || new Set();
+  // Shrinking changes navigation bounds; previously initialized sheets stay cached.
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {

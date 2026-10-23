@@ -30,9 +30,11 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { groupById } from '@actual-app/core/shared/util';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
+import { useQuery } from '@tanstack/react-query';
 
 import { sync } from '#app/appSlice';
 import {
+  budgetBoundsQueries,
   useBudgetActions,
   useCreateCategoryGroupMutation,
   useCreateCategoryMutation,
@@ -89,10 +91,11 @@ export function BudgetPage() {
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
-  const [monthBounds, setMonthBounds] = useState({
+  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
+  const monthBounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
-  });
+  };
   // const [editMode, setEditMode] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [_numberFormat] = useSyncedPref('numberFormat');
@@ -110,16 +113,31 @@ export function BudgetPage() {
 
   useEffect(() => {
     async function init() {
-      const { start, end } = await send('get-budget-bounds');
-      setMonthBounds({ start, end });
+      if (!loadedBounds) {
+        return;
+      }
+      // A cleared allocation or mode switch can leave the selected month out of range.
+      const { start, end } = loadedBounds;
+      const validMonth =
+        startMonth < start ? start : startMonth > end ? end : startMonth;
+      if (validMonth !== startMonth) {
+        setStartMonthPref(validMonth);
+      }
 
-      await prewarmMonth(budgetType, spreadsheet, startMonth);
+      await prewarmMonth(budgetType, spreadsheet, validMonth);
 
       setInitialized(true);
     }
 
     void init();
-  }, [budgetType, startMonth, dispatch, spreadsheet]);
+  }, [
+    budgetType,
+    startMonth,
+    dispatch,
+    spreadsheet,
+    loadedBounds,
+    setStartMonthPref,
+  ]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -958,7 +976,7 @@ function MonthSelector({
   const locale = useLocale();
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
-  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
+  const nextEnabled = month < monthBounds.end;
 
   const arrowButtonStyle = {
     padding: 10,

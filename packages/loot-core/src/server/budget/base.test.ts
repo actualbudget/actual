@@ -3,13 +3,114 @@ import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
-import { createAllBudgets } from './base';
+import { copyUntilYearEnd, getBudget, setBudget } from './actions';
+import { createAllBudgets, getBudgetRange } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
 });
 
 describe('Base budget', () => {
+  describe.each(['tracking', 'envelope'] as const)(
+    'automatic range (%s)',
+    budgetType => {
+      beforeEach(async () => {
+        await db.insertCategoryGroup({
+          id: 'income',
+          name: 'Income',
+          is_income: 1,
+        });
+        await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+        await db.insertCategory({
+          id: 'planned',
+          name: 'Planned',
+          cat_group: 'expenses',
+        });
+        db.runQuery(
+          "INSERT INTO preferences (id, value) VALUES ('budgetType', ?)",
+          [budgetType],
+        );
+        await sheet.loadSpreadsheet(db);
+        sheet.get().meta().budgetType = budgetType;
+      });
+
+      it('extends from saved allocations and shrinks without rebuilding cached months', async () => {
+        const initial = await createAllBudgets();
+        expect(initial.end).toBe(
+          monthUtils.addMonths(monthUtils.currentMonth(), 12),
+        );
+        const cell = sheet.getCell('budget201701', 'total-budgeted');
+        await setBudget({
+          category: 'planned',
+          month: initial.end,
+          amount: 200,
+        });
+        const extended = await createAllBudgets();
+        expect(extended.end).toBe(monthUtils.addMonths(initial.end, 3));
+        expect(sheet.getCell('budget201701', 'total-budgeted')).toBe(cell);
+        await setBudget({
+          category: 'planned',
+          month: extended.end,
+          amount: -100,
+        });
+        expect((await createAllBudgets()).end).toBe(
+          monthUtils.addMonths(extended.end, 3),
+        );
+        await setBudget({
+          category: 'planned',
+          month: extended.end,
+          amount: 0,
+        });
+        expect((await createAllBudgets()).end).toBe(extended.end);
+        expect(getBudget({ category: 'planned', month: initial.end })).toBe(
+          200,
+        );
+        await setBudget({ category: 'planned', month: initial.end, amount: 0 });
+        expect((await createAllBudgets()).end).toBe(initial.end);
+        expect(sheet.getCell('budget201701', 'total-budgeted')).toBe(cell);
+      });
+
+      it('uses only the active mode and restores the range on reopening', async () => {
+        await setBudget({ category: 'planned', month: '2028-12', amount: 200 });
+        sheet.unloadSpreadsheet();
+        await sheet.loadSpreadsheet(db);
+        sheet.get().meta().budgetType = budgetType;
+        expect(getBudgetRange('2026-10', '2026-10').end).toBe('2029-03');
+        sheet.get().meta().budgetType =
+          budgetType === 'tracking' ? 'envelope' : 'tracking';
+        expect(getBudgetRange('2026-10', '2026-10').end).toBe('2027-10');
+      });
+
+      it('keeps bulk copies inside the reduced range', async () => {
+        const { end } = await createAllBudgets();
+        const distantMonth = monthUtils.addMonths(end, 12);
+        await setBudget({
+          category: 'planned',
+          month: distantMonth,
+          amount: 100,
+        });
+        await createAllBudgets();
+        await setBudget({
+          category: 'planned',
+          month: distantMonth,
+          amount: 0,
+        });
+        await createAllBudgets();
+        const month = end;
+        await setBudget({ category: 'planned', month, amount: 200 });
+        const { end: reducedEnd } = await createAllBudgets();
+        await copyUntilYearEnd({ month, category: 'planned' });
+        expect(getBudget({ category: 'planned', month: reducedEnd })).toBe(200);
+        expect(
+          getBudget({
+            category: 'planned',
+            month: monthUtils.addMonths(reducedEnd, 1),
+          }),
+        ).toBe(0);
+      });
+    },
+  );
+
   it('Recomputes budget cells when account fields change', async () => {
     await sheet.loadSpreadsheet(db);
 
