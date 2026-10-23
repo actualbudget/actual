@@ -3,7 +3,7 @@ import {
   initServer,
 } from '@actual-app/core/platform/client/connection';
 import { buildRateIndex } from '@actual-app/core/shared/fx/rates';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -28,8 +28,17 @@ const status = {
   time: '2026-10-23T12:00:00.000Z',
 };
 
+const missingUsd = {
+  currency: 'USD',
+  isOutdated: false,
+  outdatedSince: null,
+  olderTransactionsFrom: null,
+  holes: { startDate: '2026-06-10', endDate: '2026-06-11' },
+};
+
 describe('RatesUpdate', () => {
   const getStatus = vi.fn();
+  const findMissing = vi.fn();
   const update = vi.fn();
 
   function renderUpdate() {
@@ -50,9 +59,11 @@ describe('RatesUpdate', () => {
       isLoading: false,
     });
     getStatus.mockResolvedValue(status);
+    findMissing.mockResolvedValue([]);
     update.mockResolvedValue({ ...status, added: 5 });
     initServer({
       'exchange-rates-update-status': getStatus,
+      'exchange-rates-missing': findMissing,
       'exchange-rates-update': update,
     });
   });
@@ -121,5 +132,28 @@ describe('RatesUpdate', () => {
       screen.getByText('Frankfurter has no rates for XAF.'),
     ).toBeInTheDocument();
     expect(screen.queryByText(/Up to date/)).not.toBeInTheDocument();
+  });
+
+  it('lists missing rates again when rates change', async () => {
+    findMissing.mockResolvedValue([missingUsd]);
+    const { rerender } = renderUpdate();
+    expect(
+      await screen.findByText(/Some USD rates between .* are missing/),
+    ).toBeInTheDocument();
+
+    findMissing.mockResolvedValue([]);
+    vi.mocked(useExchangeRates).mockReturnValue({
+      exchangeRates: [],
+      rateIndex: buildRateIndex([]),
+      isLoading: false,
+    });
+    rerender();
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Some USD rates between .* are missing/),
+      ).not.toBeInTheDocument(),
+    );
+    expect(findMissing).toHaveBeenCalledTimes(2);
   });
 });
