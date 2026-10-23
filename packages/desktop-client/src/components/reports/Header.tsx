@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,6 +9,8 @@ import type {
   DateRangePreset,
 } from '@actual-app/components/date-range-picker';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { Menu } from '@actual-app/components/menu';
+import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -33,6 +36,9 @@ type HeaderProps = {
   show1Month?: boolean;
   showFutureRange?: boolean;
   hideModeToggle?: boolean;
+  // Offers a third mode next to static/live that pins the start date and lets
+  // the range always end today.
+  showUntilTodayMode?: boolean;
   allMonths: Array<{ name: string }>;
   earliestTransaction: string;
   latestTransaction: string;
@@ -78,6 +84,7 @@ export function Header({
   show1Month,
   showFutureRange,
   hideModeToggle,
+  showUntilTodayMode,
   allMonths,
   earliestTransaction,
   latestTransaction,
@@ -126,23 +133,39 @@ export function Header({
         }}
       >
         <SpaceBetween gap={isNarrowWidth ? 5 : undefined}>
-          {mode && !hideModeToggle && (
-            <Button
-              variant={mode === 'static' ? 'normal' : 'primary'}
-              onPress={() => {
-                const newMode = mode === 'static' ? 'sliding-window' : 'static';
-                const [newStart, newEnd] = calculateTimeRange({
-                  start,
-                  end,
-                  mode: newMode,
-                });
+          {mode &&
+            !hideModeToggle &&
+            (showUntilTodayMode ? (
+              <TimeFrameModeSelector
+                mode={mode}
+                onChange={newMode => {
+                  const [newStart, newEnd] = calculateTimeRange({
+                    start,
+                    end,
+                    mode: newMode,
+                  });
 
-                onChangeDates(newStart, newEnd, newMode);
-              }}
-            >
-              {mode === 'static' ? t('Static') : t('Live')}
-            </Button>
-          )}
+                  onChangeDates(newStart, newEnd, newMode);
+                }}
+              />
+            ) : (
+              <Button
+                variant={mode === 'static' ? 'normal' : 'primary'}
+                onPress={() => {
+                  const newMode =
+                    mode === 'static' ? 'sliding-window' : 'static';
+                  const [newStart, newEnd] = calculateTimeRange({
+                    start,
+                    end,
+                    mode: newMode,
+                  });
+
+                  onChangeDates(newStart, newEnd, newMode);
+                }}
+              >
+                {mode === 'static' ? t('Static') : t('Live')}
+              </Button>
+            ))}
 
           <DateRangePicker
             start={start}
@@ -178,7 +201,15 @@ export function Header({
             }}
             presets={presets}
             onChangeDates={(newStart, newEnd) =>
-              onChangeDates(newStart, newEnd, 'static')
+              // Picking a new start keeps an "until today" range live; moving
+              // the end away from today pins the whole range.
+              onChangeDates(
+                newStart,
+                newEnd,
+                mode === 'until-today' && newEnd === end
+                  ? 'until-today'
+                  : 'static',
+              )
             }
           />
           {filters && (
@@ -219,5 +250,55 @@ export function Header({
         </View>
       )}
     </View>
+  );
+}
+
+type TimeFrameModeSelectorProps = {
+  mode: TimeFrame['mode'];
+  onChange: (mode: TimeFrame['mode']) => void;
+};
+
+function TimeFrameModeSelector({ mode, onChange }: TimeFrameModeSelectorProps) {
+  const { t } = useTranslation();
+
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const options: Array<{ name: TimeFrame['mode']; text: string }> = [
+    { name: 'sliding-window', text: t('Live') },
+    { name: 'until-today', text: t('Until today') },
+    { name: 'static', text: t('Static') },
+  ];
+
+  // Preset ranges (e.g. last month) are live ranges too.
+  const currentLabel =
+    options.find(option => option.name === mode)?.text ?? t('Live');
+
+  return (
+    <>
+      <Button
+        ref={triggerRef}
+        variant={mode === 'static' ? 'normal' : 'primary'}
+        aria-label={t('Change date range mode')}
+        onPress={() => setIsOpen(true)}
+      >
+        {currentLabel}
+      </Button>
+
+      <Popover
+        triggerRef={triggerRef}
+        placement="bottom start"
+        isOpen={isOpen}
+        onOpenChange={() => setIsOpen(false)}
+      >
+        <Menu
+          onMenuSelect={item => {
+            onChange(item as TimeFrame['mode']);
+            setIsOpen(false);
+          }}
+          items={options}
+        />
+      </Popover>
+    </>
   );
 }
