@@ -1,1 +1,6 @@
-Fix an error when creating schedules with names starting with `$` or `:`.
+---
+category: Bugfix
+authors: [walidchaabane]
+---
+
+Fix schedule creation errors for names starting with `$` or `:`.
