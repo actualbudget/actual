@@ -4,6 +4,8 @@ import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
+const runningBackgroundMethods = new Set<Promise<unknown>>();
+const runningMutators = new Set<Promise<unknown>>();
 
 let currentContext = null;
 const mutatingMethods = new WeakMap();
@@ -20,18 +22,26 @@ export function isMutating(handler) {
   return mutatingMethods.has(handler);
 }
 
-async function flushRunningMethods() {
+async function flushRunningMethods(methods = runningMethods) {
   // Give the client some time to invoke new requests
   await wait(200);
 
-  while (runningMethods.size > 0) {
+  while (methods.size > 0 || runningMutators.size > 0) {
     // Wait for all of them; rejections already went to their callers.
-    await Promise.allSettled([...runningMethods.values()]);
+    await Promise.allSettled([
+      ...methods.values(),
+      ...runningMutators.values(),
+    ]);
 
     // We give clients more time to make other requests. This lets them continue
     // to do an async workflow
     await wait(100);
   }
+}
+
+export function flushRunningBackgroundMethods() {
+  // The closing API handler may itself be tracked in runningMethods.
+  return flushRunningMethods(runningBackgroundMethods);
 }
 
 function wait(time) {
@@ -41,7 +51,7 @@ function wait(time) {
 export async function runHandler<T extends Handlers[keyof Handlers]>(
   handler: T,
   args?: Parameters<T>[0],
-  { undoTag, name }: { undoTag?; name? } = {},
+  { undoTag, name, background }: { undoTag?; name?; background?: boolean } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
@@ -57,17 +67,22 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   // When closing a file, it clears out all global state for the file. That
-  // means any async workflows currently executed would be cut off. We handle
-  // this by letting all async workflows finish executing before closing the
-  // file
+  // means any async workflows or mutators currently executing would be cut
+  // off. We handle this by letting them finish before closing the file.
   if (name === 'close-budget') {
     await flushRunningMethods();
   }
 
   const promise = handler(args);
   runningMethods.add(promise);
+  if (background) {
+    runningBackgroundMethods.add(promise);
+  }
   // Remove on rejection too — a stale promise poisons every later flush.
-  const remove = () => runningMethods.delete(promise);
+  const remove = () => {
+    runningMethods.delete(promise);
+    runningBackgroundMethods.delete(promise);
+  };
   void promise.then(remove, remove);
   return promise as Promise<ReturnType<T>>;
 }
@@ -95,7 +110,19 @@ function _runMutator<T extends () => Promise<unknown>>(
   }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
-export const runMutator = sequential(_runMutator) as typeof _runMutator;
+const runMutatorSequential = sequential(_runMutator) as typeof _runMutator;
+
+export function runMutator<T extends () => Promise<unknown>>(
+  func: T,
+  initialContext = {},
+): Promise<Awaited<ReturnType<T>>> {
+  const promise = runMutatorSequential(func, initialContext);
+  runningMutators.add(promise);
+
+  const remove = () => runningMutators.delete(promise);
+  void promise.then(remove, remove);
+  return promise;
+}
 
 export function withMutatorContext<T>(
   context: { undoListening: boolean; undoTag?: unknown },
