@@ -50,6 +50,7 @@ import {
   applyFieldMappings,
   dateFormats,
   filterByStartDate,
+  findNumberField,
   isDateFormat,
   parseAmountFields,
   parseCategoryFields,
@@ -114,6 +115,8 @@ function getInitialMappings(transactions) {
     return entry ? entry[0] : null;
   }
 
+  const numberField = findNumberField(fields.map(([name]) => name));
+
   const dateField = key(
     fields.find(([name]) => name.toLowerCase().includes('date')) ||
       fields.find(([, value]) => String(value)?.match(/^\d+[-/]\d+[-/]\d+$/)),
@@ -121,7 +124,10 @@ function getInitialMappings(transactions) {
 
   const amountField = key(
     fields.find(([name]) => name.toLowerCase().includes('amount')) ||
-      fields.find(([, value]) => String(value)?.match(/^-?[.,\d]+$/)),
+      fields.find(
+        ([name, value]) =>
+          name !== numberField && String(value)?.match(/^-?[.,\d]+$/),
+      ),
   );
 
   const categoryField = key(
@@ -132,7 +138,10 @@ function getInitialMappings(transactions) {
     fields.find(([name]) => name.toLowerCase().includes('payee')) ||
       fields.find(
         ([name]) =>
-          name !== dateField && name !== amountField && name !== categoryField,
+          name !== dateField &&
+          name !== amountField &&
+          name !== categoryField &&
+          name !== numberField,
       ),
   );
 
@@ -143,7 +152,8 @@ function getInitialMappings(transactions) {
           name !== dateField &&
           name !== amountField &&
           name !== categoryField &&
-          name !== payeeField,
+          name !== payeeField &&
+          name !== numberField,
       ),
   );
 
@@ -153,7 +163,8 @@ function getInitialMappings(transactions) {
         name !== dateField &&
         name !== amountField &&
         name !== payeeField &&
-        name !== notesField,
+        name !== notesField &&
+        name !== numberField,
     ),
   );
 
@@ -162,6 +173,7 @@ function getInitialMappings(transactions) {
     amount: amountField,
     payee: payeeField,
     notes: notesField,
+    number: numberField,
     inOut: inOutField,
     category: categoryField,
   };
@@ -427,10 +439,13 @@ export function ImportTransactionsModal({
 
         if (filetype === 'csv') {
           if (!preserveImportSettings) {
-            let mappings = prefs[`csv-mappings-${accountId}`];
-            mappings = mappings
-              ? JSON.parse(mappings)
-              : getInitialMappings(transactions);
+            const initialMappings = getInitialMappings(transactions);
+
+            let csvMappings = prefs[`csv-mappings-${accountId}`];
+            csvMappings = csvMappings ? JSON.parse(csvMappings) : {};
+
+            // Merge mappings together with csvMappings overwriting
+            const mappings = Object.assign({}, initialMappings, csvMappings);
 
             // @ts-expect-error - mappings might not have outflow/inflow properties
             setFieldMappings(mappings);
@@ -718,6 +733,7 @@ export function ImportTransactionsModal({
         amount: amountToInteger(amount),
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
+        number: finalTransaction.number || null,
       });
     }
 
@@ -905,6 +921,7 @@ export function ImportTransactionsModal({
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
+    { name: t('Number'), width: 100 },
     { name: t('Payee'), width: 'flex' },
     { name: t('Notes'), width: 'flex' },
     { name: t('Category'), width: 'flex' },
@@ -977,7 +994,7 @@ export function ImportTransactionsModal({
                     !trans.isMatchedTransaction ||
                     (trans.isMatchedTransaction && reconcile),
                 )}
-                fields={['payee', 'category', 'amount']}
+                fields={['number', 'payee', 'category', 'amount']}
                 style={{ backgroundColor: theme.tableHeaderBackground }}
                 getItemKey={index => String(index)}
                 renderEmpty={() => {
@@ -1002,6 +1019,7 @@ export function ImportTransactionsModal({
                       showParsed={filetype === 'csv' || filetype === 'qif'}
                       parseDateFormat={parseDateFormat}
                       dateFormat={dateFormat}
+                      showNumber
                       fieldMappings={fieldMappings}
                       splitMode={splitMode}
                       inOutMode={inOutMode}

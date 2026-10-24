@@ -423,6 +423,33 @@ test.describe('Accounts', () => {
       ).toHaveCount(0);
     });
 
+    test('imports transaction numbers from a CSV file', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/test-number.csv'));
+
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('1001', { exact: true })).toBeVisible();
+
+      await dialog
+        .getByRole('button', { name: 'Import 2 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      await accountPage.setTransactionColumnVisibility('number', true);
+
+      const first = accountPage.transactionTableRow.filter({
+        hasText: 'Hardware Store',
+      });
+      const second = accountPage.transactionTableRow.filter({
+        hasText: 'Grocery Store',
+      });
+      await expect(first.getByTestId('number')).toHaveText('1001');
+      await expect(second.getByTestId('number')).toHaveText('1002-A');
+    });
+
     test('import notes checkbox is not shown for CSV files', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
       await accountPage.page.getByRole('button', { name: 'Import' }).click();
