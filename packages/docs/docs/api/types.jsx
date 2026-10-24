@@ -28,9 +28,10 @@ export const types = {
     description: (
       <span>
         A currency amount is an integer representing the value without any
-        decimal places. Usually it's <code>value * 100</code>, but it depends on
-        your currency. For example, a USD amount of <code>$120.30</code> would
-        be <code>12030</code>.
+        decimal places. It is always <code>value * 100</code>, whatever the
+        currency. For example, a USD amount of <code>$120.30</code> would be{' '}
+        <code>12030</code>, and a JPY amount of <code>¥1,500</code> would be{' '}
+        <code>150000</code>.
       </span>
     ),
   },
