@@ -17,6 +17,7 @@ import {
 } from '#server/budget/base';
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { app } from '#server/main-app';
 import { flushRunningMutators, runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
@@ -590,9 +591,22 @@ async function _applyMessages(messages: Message[], isReceived = false) {
     clock.merkle = currentMerkle;
   }
 
-  // Save any synced prefs
-  if (Object.keys(prefsToSet).length > 0) {
+  // Publish the in-memory metadata before capturing the new FX context.
+  const hasSyncedPrefs = Object.keys(prefsToSet).length > 0;
+  if (hasSyncedPrefs) {
     void prefs.savePrefs(prefsToSet, { avoidSync: true });
+  }
+  const changedPreferences = newData.get('preferences');
+  if (
+    (changedPreferences instanceof Map &&
+      (changedPreferences.has('defaultCurrencyCode') ||
+        changedPreferences.has('amountEncoding'))) ||
+    Object.hasOwn(prefsToSet, 'amountEncoding')
+  ) {
+    await notifyFxContextChanged('budget');
+  }
+
+  if (hasSyncedPrefs) {
     connection.send('prefs-updated');
   }
 
