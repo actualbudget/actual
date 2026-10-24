@@ -16,6 +16,7 @@ import type { TransactionEntity } from '@actual-app/core/types/models';
 import { SelectedItemsButton } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
 import { useOpenAmountDetails } from '#hooks/useOpenAmountDetails';
+import { useRouteToPockets } from '#hooks/useRouteToPockets';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
@@ -76,6 +77,7 @@ export function SelectedTransactionsButton({
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
   const { data: accounts = [] } = useAccounts();
+  const routeToPockets = useRouteToPockets();
   // Foreign amounts are frozen until foreign edits and splits are supported.
   const hasForeign = selectedIds.some(id => {
     const trans = getTransaction(id);
@@ -423,6 +425,7 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : []),
+              ...(routeToPockets?.items ?? []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
               { name: 'date', text: t('Date'), key: 'E' } as const,
@@ -437,6 +440,7 @@ export function SelectedTransactionsButton({
             ]),
       ]}
       onSelect={name => {
+        if (routeToPockets?.select(name, selectedIds)) return;
         switch (name) {
           case 'show':
             onShow(selectedIds);
