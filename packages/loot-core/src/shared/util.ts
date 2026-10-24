@@ -416,6 +416,11 @@ export type CurrencyAmount = string;
  */
 export type IntegerAmount = number;
 
+// Stored amounts always have two implied decimal places, whatever the
+// currency: $15.26 is stored as 1526 and ¥1,500 as 150000. A currency's
+// own decimal places only decide how many digits are shown.
+export const STORED_DECIMAL_PLACES = 2;
+
 // We dont use `Number.MAX_SAFE_NUMBER` and such here because those
 // numbers are so large that it's not safe to convert them to floats
 // (i.e. N / 100). For example, `9007199254740987 / 100 ===
@@ -447,7 +452,7 @@ export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
 export function integerToCurrency(
   integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
-  decimalPlaces: number = 2,
+  decimalPlaces: number = STORED_DECIMAL_PLACES,
 ) {
   const divisor = Math.pow(10, decimalPlaces);
   const amount = safeNumber(integerAmount) / divisor;
@@ -464,7 +469,6 @@ export function integerToCurrencyWithDecimal(
     return integerToCurrency(
       integerAmount,
       getNumberFormat({ ...numberFormatConfig, decimalPlaces: dp }).formatter,
-      dp,
     );
   }
 
@@ -480,10 +484,6 @@ export function integerToCurrencyWithDecimal(
   }
 
   return integerToCurrency(integerAmount);
-}
-
-export function amountToCurrencyInteger(amount: number, code: string): number {
-  return amountToInteger(amount, getDecimalPlaces(code));
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
@@ -540,7 +540,7 @@ export function stringToInteger(str: string): number | null {
 
 export function amountToInteger(
   amount: Amount,
-  decimalPlaces: number = 2,
+  decimalPlaces: number = STORED_DECIMAL_PLACES,
 ): IntegerAmount {
   const multiplier = Math.pow(10, decimalPlaces);
   return Math.round(amount * multiplier);
@@ -548,7 +548,7 @@ export function amountToInteger(
 
 export function integerToAmount(
   integerAmount: IntegerAmount,
-  decimalPlaces: number = 2,
+  decimalPlaces: number = STORED_DECIMAL_PLACES,
 ): Amount {
   const divisor = Math.pow(10, decimalPlaces);
   return integerAmount / divisor;
