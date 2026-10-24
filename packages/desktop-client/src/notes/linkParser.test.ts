@@ -295,12 +295,5 @@ describe('linkParser', () => {
       expect(removeNthTag('##escaped #real', 0)).toBe('##escaped');
       expect(removeNthTag('#real ##escaped', 0)).toBe('##escaped');
     });
-
-    it('should leave notes untouched for a segment from other notes', () => {
-      const [stale] = getTags('some #tag');
-      expect(removeTagFromNotes('different text', stale)).toBe(
-        'different text',
-      );
-    });
   });
 });

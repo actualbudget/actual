@@ -272,16 +272,13 @@ function parseTextWithTags(text: string, baseOffset: number): ParsedSegment[] {
  * `#`). The whitespace left behind is tidied so removing a tag doesn't leave a
  * double space or leading/trailing whitespace. Line breaks are kept, so the
  * text on either side of the tag stays on its own line.
+ *
+ * `segment` must come from parsing these same `notes`.
  */
 export function removeTagFromNotes(
   notes: string,
-  segment: Pick<TagSegment, 'content' | 'start' | 'end'>,
+  segment: Pick<TagSegment, 'start' | 'end'>,
 ): string {
-  // Guard against a segment parsed from a different (stale) notes string.
-  if (notes.slice(segment.start, segment.end) !== segment.content) {
-    return notes;
-  }
-
   let before = notes.slice(0, segment.start);
   let after = notes.slice(segment.end);
 
