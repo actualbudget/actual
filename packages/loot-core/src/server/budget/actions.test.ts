@@ -13,6 +13,7 @@ import {
   setCategoryCarryover,
   setNMonthAvg,
   transferAvailable,
+  transferCategory,
 } from './actions';
 import * as budget from './base';
 
@@ -229,6 +230,32 @@ describe('coverOverbudgeted', () => {
     const sheetName = 'budget202402';
     expect(await getSheetValue(sheetName, 'to-budget')).toBe(-80);
     expect(await getSheetValue(sheetName, 'leftover-cat3')).toBe(0);
+  });
+});
+
+describe('transferCategory', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  it('notes amounts of a currency without decimals at their real value', async () => {
+    await prepareDatabase();
+
+    // ¥1,500 is stored as 150000, like every amount
+    await transferCategory({
+      month: '2024-02',
+      amount: 150000,
+      from: 'cat1',
+      to: 'cat3',
+      currencyCode: 'JPY',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    const { note } = await db.first<Pick<db.DbNote, 'note'>>(
+      'SELECT note FROM notes WHERE id = ?',
+      ['budget-2024-02'],
+    );
+    expect(note).toContain('1,500');
+    expect(note).not.toContain('150,000');
   });
 });
 
