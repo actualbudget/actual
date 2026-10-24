@@ -40,7 +40,15 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
         borderRadius: 16,
         userSelect: 'none',
         backgroundColor,
-        // !important is used to override the hover text color in button.tsx used to style the tag button
+        // The tag is a bare Button, and Button's hover style switches the text
+        // to the normal page text colour. For default tags that's harmless:
+        // the page text is close enough to the tag text to stay readable. For
+        // custom colours the text was picked as black or white to contrast
+        // with the user's background, and the page text colour can be
+        // unreadable on it, so !important keeps the chosen colour on hover.
+        // getTagCSSColors returns plain colours (callers like the remove
+        // badge mix them into other CSS, where !important would be invalid),
+        // so the suffix is added here, only where it was needed.
         color: isCustomColor ? `${color} !important` : color,
         cursor: 'pointer',
         '&[data-hovered]': {
