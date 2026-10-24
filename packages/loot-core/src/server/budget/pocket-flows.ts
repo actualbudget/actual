@@ -58,7 +58,10 @@ function precisionOf(encoding: string): number {
 }
 
 /** A request encoding's precision, or null when it is not supported. */
-function requestPrecision(encoding: unknown, currency: string): number | null {
+export function requestPrecision(
+  encoding: unknown,
+  currency: string,
+): number | null {
   const match = typeof encoding === 'string' ? ENCODING.exec(encoding) : null;
   if (!match || match[1] !== currency) return null;
   const precision = Number(match[2]);
@@ -69,7 +72,7 @@ const up = (value: bigint, from: number, to: number) =>
   value * 10n ** BigInt(to - from);
 
 /** The capture date of an entry: today, or month end for a past month. */
-function captureDate(month: string) {
+export function captureDate(month: string) {
   return month < monthUtils.currentMonth()
     ? monthUtils.getMonthEnd(`${month}-01`)
     : monthUtils.currentDay();
@@ -287,7 +290,7 @@ export function slotMonth(slot: Slot, month: string): SlotMonth {
   };
 }
 
-async function entryRate(currency: string, date: string) {
+export async function entryRate(currency: string, date: string) {
   const { resolveRate } = await import('#server/exchange-rates/app');
   const rate = await resolveRate({
     baseCurrency: await getDefaultCurrencyCode(),
@@ -298,7 +301,7 @@ async function entryRate(currency: string, date: string) {
   return rate.status === 'resolved' ? rate.rate : null;
 }
 
-function toBase(native: number, precision: number, rate: string) {
+export function toBase(native: number, precision: number, rate: string) {
   try {
     return nativeToBase(native, precision, getRecordedAmountPrecision(), rate);
   } catch {

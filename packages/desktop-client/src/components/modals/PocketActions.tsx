@@ -21,6 +21,8 @@ import { useCategoryPockets } from '#hooks/useCategoryPockets';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
+import { PocketRepairs } from './PocketRepairs';
+
 type PocketActionsProps = {
   pocket: PocketMonth;
   categoryId: string;
@@ -31,8 +33,8 @@ type PocketActionsProps = {
 /**
  * A currency slot's actions (MC-10.5): its native budget, rollover from
  * this month, transfers, covering overspending and finalizing pending
- * budget-currency equivalents. Every native amount is sent with the
- * encoding the slot was read at.
+ * budget-currency equivalents, then its deletion and repairs (MC-10.6).
+ * Every native amount is sent with the encoding the slot was read at.
  */
 export function PocketActions({
   pocket,
@@ -96,6 +98,12 @@ export function PocketActions({
           )}
         </Text>
       )}
+      <PocketRepairs
+        pocket={pocket}
+        categoryId={categoryId}
+        month={month}
+        onDone={onDone}
+      />
     </View>
   );
 }
@@ -336,7 +344,7 @@ function CoverForm({
   );
 }
 
-function ActionForm({
+export function ActionForm({
   name,
   error,
   onSubmit,
@@ -371,7 +379,7 @@ function ActionForm({
  * An amount input parsed at a currency's precision (the budget currency
  * when none is given). Reports null while the text is not an amount.
  */
-function AmountField({
+export function AmountField({
   currency,
   precision,
   ...props
@@ -419,7 +427,7 @@ function AmountInput({
   );
 }
 
-function SelectField({
+export function SelectField({
   label,
   value,
   onChange,
@@ -441,7 +449,7 @@ function SelectField({
 }
 
 /** An entered native amount with the encoding its integer was parsed at. */
-function requestAmount(
+export function requestAmount(
   amount: number | null,
   currency: string,
   precision: number,

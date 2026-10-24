@@ -186,6 +186,12 @@ export function getBudget({
   month: string;
 }): number {
   const table = getBudgetTable();
+  // Envelope budgets read a category's base slot as setBudget writes it:
+  // its displayed amount, own plus inherited lanes (MC-10).
+  if (table === 'zero_budgets' && laneInfo(category)) {
+    const slot = baseSlotOf(category);
+    return slot ? Number(slotMonth(slot, month).displayed ?? 0) : 0;
+  }
   const existing = db.firstSync<db.DbZeroBudget | db.DbReflectBudget>(
     `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
     [dbMonth(month), category],

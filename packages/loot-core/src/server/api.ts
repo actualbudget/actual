@@ -765,6 +765,39 @@ handlers['api/pockets-finalize'] = withMutation(async function ({ cells }) {
   return handlers['budget/pockets-finalize']({ cells });
 });
 
+handlers['api/pocket-delete'] = withMutation(async function ({
+  id,
+  transferCategoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/pocket-delete']({
+    id,
+    transferId: transferCategoryId,
+  });
+});
+
+handlers['api/base-child-delete'] = withMutation(async function ({
+  categoryId,
+  transferCategoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/base-child-delete']({
+    category: categoryId,
+    transferId: transferCategoryId,
+  });
+});
+
+handlers['api/route-to-pockets'] = withMutation(async function ({
+  transactionIds,
+  categoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/route-to-pockets']({
+    ids: transactionIds,
+    ...(categoryId !== undefined && { category: categoryId }),
+  });
+});
+
 handlers['api/budget-hold-for-next-month'] = withMutation(async function ({
   month,
   amount,

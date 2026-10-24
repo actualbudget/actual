@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import { recoverLocalEncoding } from '#server/amount-encoding/files';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
+import { syncBaseSlots } from '#server/budget/base-slots';
 import { stopFxDayWatch } from '#server/budget/fx-valuation';
 import { rebuildSlotResolution } from '#server/budget/pockets';
 import * as cloudStorage from '#server/cloud-storage';
@@ -170,6 +171,8 @@ async function resetBudgetCache() {
     spreadsheet.startTransaction();
     try {
       await sheet.loadUserBudgets(db);
+      // Base slots with retired or later-generation lanes (MC-10).
+      syncBaseSlots();
 
       // Seeding the spend totals from a single grouped query keeps the
       // recompute from running a `SELECT SUM(amount)` per category per month.

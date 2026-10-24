@@ -21,6 +21,7 @@ import { AddExchangeRateModal } from './modals/AddExchangeRateModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
 import { AmountEncodingModal } from './modals/AmountEncodingModal';
+import { BaseSlotModal } from './modals/BaseSlotModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -341,6 +342,9 @@ export function Modals() {
 
         case 'add-currency':
           return <AddCurrencyModal key={key} {...modal.options} />;
+
+        case 'base-slot':
+          return <BaseSlotModal key={key} {...modal.options} />;
 
         case 'envelope-budget-menu':
           return (

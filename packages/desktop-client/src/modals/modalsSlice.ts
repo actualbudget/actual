@@ -525,6 +525,10 @@ export type Modal =
       };
     }
   | {
+      name: 'base-slot';
+      options: { categoryId: CategoryEntity['id']; month: string };
+    }
+  | {
       name: 'add-currency';
       options: { categoryId: CategoryEntity['id']; categoryName: string };
     }

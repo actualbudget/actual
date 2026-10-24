@@ -9,6 +9,7 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import { syncBaseSlots } from './base-slots';
 import * as envelopeBudget from './envelope';
 import {
   refreshFxChanges,
@@ -453,6 +454,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
         }
       });
     });
+    // Base slots with retired or later-generation lanes, after the budget
+    // handlers wrote their category cells.
+    syncBaseSlots();
   } finally {
     sheet.endTransaction();
   }
@@ -599,6 +603,9 @@ export async function createAllBudgets() {
   if (newMonths.length > 0) {
     await createBudget(range);
   }
+  // Budget cells were loaded from zero_budgets; base slots with retired or
+  // later-generation lanes show their own (MC-10).
+  syncBaseSlots();
   // Holdings in other currencies are valued for the months now created.
   await refreshFxChanges();
   startFxDayWatch();

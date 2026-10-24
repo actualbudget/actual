@@ -14,12 +14,26 @@ import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import { baseSlotCategories, baseSlotLanes } from './base-slots';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import { editEffects } from './edit-effects';
 import type { FxMonth } from './fx-valuation';
 import * as goalActions from './goal-template';
+import {
+  chooseLaneOwner,
+  deleteAffectedCategories,
+  deleteAffectedCategory,
+  deleteBaseChild,
+  deletePocket,
+  isPocketAffected,
+  mergeLane,
+  moveInheritedBalance,
+  pocketHistoryRequiresTransfer,
+  reenterPocketAmount,
+  routeToPockets,
+} from './pocket-deletion';
 import {
   finalizePockets,
   setPocketBudget,
@@ -68,6 +82,15 @@ export type BudgetHandlers = {
   'budget/pocket-budget-set': typeof setPocketBudget;
   'budget/pocket-transfer': typeof transferPocketAmount;
   'budget/pockets-finalize': typeof finalizePockets;
+  'budget/pocket-delete': typeof deletePocket;
+  'budget/base-child-delete': typeof deleteBaseChild;
+  'budget/route-to-pockets': typeof routeToPockets;
+  'budget/pocket-merge': typeof mergeLane;
+  'budget/pocket-choose-owner': typeof chooseLaneOwner;
+  'budget/pocket-move-inherited': typeof moveInheritedBalance;
+  'budget/pocket-reenter': typeof reenterPocketAmount;
+  'budget/base-slot-lanes': typeof baseSlotLanes;
+  'budget/base-slot-categories': typeof baseSlotCategories;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
@@ -101,6 +124,18 @@ app.method('budget/slot-meta-set', mutator(undoable(setSlotMeta)));
 app.method('budget/pocket-budget-set', mutator(undoable(setPocketBudget)));
 app.method('budget/pocket-transfer', mutator(undoable(transferPocketAmount)));
 app.method('budget/pockets-finalize', mutator(undoable(finalizePockets)));
+app.method('budget/pocket-delete', mutator(undoable(deletePocket)));
+app.method('budget/base-child-delete', mutator(undoable(deleteBaseChild)));
+app.method('budget/route-to-pockets', mutator(undoable(routeToPockets)));
+app.method('budget/pocket-merge', mutator(undoable(mergeLane)));
+app.method('budget/pocket-choose-owner', mutator(undoable(chooseLaneOwner)));
+app.method(
+  'budget/pocket-move-inherited',
+  mutator(undoable(moveInheritedBalance)),
+);
+app.method('budget/pocket-reenter', mutator(undoable(reenterPocketAmount)));
+app.method('budget/base-slot-lanes', baseSlotLanes);
+app.method('budget/base-slot-categories', baseSlotCategories);
 app.method('budget/edit-effects', editEffects);
 app.method('budget/fx-valuation', monthFxValuation);
 app.method(
@@ -449,6 +484,17 @@ async function deleteCategory({
       throw new Error('Cannot transfer between income and expense categories.');
     }
 
+    // A category with currency pockets, later base lanes or inherited
+    // lanes retires its lanes instead of transferring envelope budgets
+    // (MC-10). Tracking budgets still transfer their own assignments.
+    if (isPocketAffected(id)) {
+      if (row.is_income === 0 && transferId && isTracking()) {
+        await budget.doTransfer([id], transferId);
+      }
+      await deleteAffectedCategory(id, transferId);
+      return;
+    }
+
     // Update spreadsheet values if it's an expense category
     // TODO: We should do this for income too if it's a tracking budget
     if (row.is_income === 0) {
@@ -520,15 +566,33 @@ async function deleteCategoryGroup({
     [id],
   );
 
+  // Categories with currency pockets, later base lanes or inherited lanes
+  // retire their lanes; the others transfer their budgets (MC-10). Tracking
+  // budgets transfer every category's own assignment.
+  const affected = groupCategories.filter(c => isPocketAffected(c.id));
+  const transferred = isTracking()
+    ? groupCategories
+    : groupCategories.filter(c => !affected.includes(c));
+
   await batchMessages(async () => {
-    if (transferId) {
+    if (transferId && (affected.length === 0 || transferred.length > 0)) {
       await budget.doTransfer(
-        groupCategories.map(c => c.id),
+        transferred.map(c => c.id),
+        transferId,
+      );
+    }
+    if (affected.length > 0) {
+      await deleteAffectedCategories(
+        affected.map(c => c.id),
         transferId,
       );
     }
     await db.deleteCategoryGroup({ id }, transferId);
   });
+}
+
+function isTracking() {
+  return budget.getBudgetType() === 'tracking';
 }
 
 async function isCategoryTransferRequired({
@@ -547,6 +611,11 @@ async function isCategoryTransferRequired({
   // If there are transactions with this category, return early since
   // we already know it needs to be tranferred
   if (res[0].count !== 0) {
+    return true;
+  }
+
+  // History in any lane the category owns or shows (MC-10).
+  if (isPocketAffected(id) && pocketHistoryRequiresTransfer(id)) {
     return true;
   }
 
