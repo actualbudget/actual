@@ -244,6 +244,38 @@ export function finalizePockets(
   return send('api/pockets-finalize', { cells });
 }
 
+/**
+ * Deletes a currency pocket. A pocket with history needs a destination
+ * category: its history moves to that category's pocket in the same
+ * currency, so no budget figure changes. An empty pocket is removed.
+ */
+export function deletePocket(id: string, transferCategoryId?: string) {
+  return send('api/pocket-delete', { id, transferCategoryId });
+}
+
+/**
+ * Deletes a category's budget-currency child. Its history moves to the
+ * destination category's base budget and the category keeps its currency
+ * pockets, with an empty new base budget.
+ */
+export function deleteBaseChild(
+  categoryId: APICategoryEntity['id'],
+  transferCategoryId?: APICategoryEntity['id'],
+) {
+  return send('api/base-child-delete', { categoryId, transferCategoryId });
+}
+
+/**
+ * Routes transactions to the budget pockets of their shown category, or of
+ * `categoryId`, as if they were entered there now.
+ */
+export function routeToPockets(
+  transactionIds: string[],
+  categoryId?: APICategoryEntity['id'],
+) {
+  return send('api/route-to-pockets', { transactionIds, categoryId });
+}
+
 export function setBudgetCarryover(
   month: string,
   categoryId: APICategoryEntity['id'],
