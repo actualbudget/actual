@@ -55,12 +55,13 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
   );
 }
 
-type TagColors = {
+type TagPillColors = {
   color: string;
   backgroundColor: string;
   backgroundColorHovered: string;
-  isHidden: boolean;
 };
+
+type TagColors = TagPillColors & { isHidden: boolean };
 
 /**
  * Returns a getter for a tag's raw pill colours, for callers that need to
@@ -86,7 +87,10 @@ export function useTagColors() {
   };
 }
 
-function getTagCSSColors(theme: Theme, color?: string | null) {
+function getTagCSSColors(
+  theme: Theme,
+  color?: string | null,
+): TagPillColors & { isCustomColor: boolean } {
   if (!color) {
     return {
       color: themeStyle.noteTagText,
