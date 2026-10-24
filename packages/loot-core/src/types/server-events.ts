@@ -130,6 +130,7 @@ type StartLoadEvent = undefined;
 type ApiFetchRedirectedEvent = undefined;
 
 export type ServerEvents = {
+  'fx-provider-context': { context: string };
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;

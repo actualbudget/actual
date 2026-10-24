@@ -28,7 +28,7 @@ export function isValidBaseURL(base: string): boolean {
   }
 }
 
-export function setServer(url: string): void {
+export function setServer(url: string | null): void {
   if (url == null) {
     config = null;
   } else {

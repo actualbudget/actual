@@ -27,18 +27,44 @@ import type {
   OperationRate,
 } from '#types/models';
 
+import { startFxContext } from './context';
+import {
+  historyExport,
+  historyPage,
+  importCancel,
+  importCommit,
+  importPreview,
+  importPreviewBegin,
+  removeFetched,
+} from './history';
+
 export type ExchangeRatesHandlers = {
   'exchange-rates/save': typeof saveRate;
   'exchange-rates/remove': typeof removeRate;
   'exchange-rates/resolve': typeof resolveRateHandler;
+  'exchange-rates/import-preview-begin': typeof importPreviewBegin;
+  'exchange-rates/import-preview': typeof importPreview;
+  'exchange-rates/import-commit': typeof importCommit;
+  'exchange-rates/import-cancel': typeof importCancel;
+  'exchange-rates/history-page': typeof historyPage;
+  'exchange-rates/history-export': typeof historyExport;
+  'exchange-rates/remove-fetched': typeof removeFetched;
 };
 
 export const app = createApp<ExchangeRatesHandlers>();
+app.service(startFxContext);
 // Undo history is recorded only around actual rate writes, so validation
 // failures and no-op captures keep the redo stack intact.
 app.method('exchange-rates/save', mutator(saveRate));
 app.method('exchange-rates/remove', mutator(removeRate));
 app.method('exchange-rates/resolve', resolveRateHandler);
+app.method('exchange-rates/import-preview-begin', importPreviewBegin);
+app.method('exchange-rates/import-preview', importPreview);
+app.method('exchange-rates/import-commit', importCommit);
+app.method('exchange-rates/import-cancel', importCancel);
+app.method('exchange-rates/history-page', historyPage);
+app.method('exchange-rates/history-export', historyExport);
+app.method('exchange-rates/remove-fetched', removeFetched);
 
 // Rate ids derive from the logical key so offline saves of the same key on
 // different devices write one row instead of creating duplicates. Kind is
@@ -120,8 +146,8 @@ async function liveManualRate(
   return existing && !existing.tombstone ? existing : null;
 }
 
-/** The only daily manual writer: Settings and manual rate CSV import. */
-async function writeManualRate({
+/** The only daily manual writer: Settings Save fallback and manual rate CSV import. */
+export async function writeManualRate({
   baseCurrency,
   quoteCurrency,
   rate,
