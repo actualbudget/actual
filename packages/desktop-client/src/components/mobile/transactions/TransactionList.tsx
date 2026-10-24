@@ -51,6 +51,7 @@ import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePayees } from '#hooks/usePayees';
+import { useRouteToPockets } from '#hooks/useRouteToPockets';
 import { useScrollListener } from '#hooks/useScrollListener';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
@@ -299,7 +300,7 @@ type SelectedTransactionsFloatingActionBarProps = {
   showMakeTransfer: boolean;
 };
 
-function SelectedTransactionsFloatingActionBar({
+export function SelectedTransactionsFloatingActionBar({
   transactions,
   style = {},
   showMakeTransfer,
@@ -434,6 +435,9 @@ function SelectedTransactionsFloatingActionBar({
       disabled: !canMerge,
     },
   ];
+
+  const routeToPockets = useRouteToPockets();
+  moreOptionsMenuItems.push(...(routeToPockets?.items ?? []));
 
   if (showMakeTransfer) {
     moreOptionsMenuItems.splice(2, 0, {
@@ -623,6 +627,10 @@ function SelectedTransactionsFloatingActionBar({
               getItemStyle={getMenuItemStyle}
               style={{ backgroundColor: theme.floatingActionBarBackground }}
               onMenuSelect={type => {
+                if (routeToPockets?.select(type, selectedTransactionsArray)) {
+                  setIsMoreOptionsMenuOpen(false);
+                  return;
+                }
                 if (type === 'duplicate') {
                   void onBatchDuplicate?.({
                     ids: selectedTransactionsArray,

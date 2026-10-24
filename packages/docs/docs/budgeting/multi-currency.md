@@ -324,12 +324,20 @@ On the **Budget** page, right-click **Food** and choose **Add currency…**. Cho
 
 <img width="840" alt="Food budgeted at $125.00, with the EUR row budgeted at 100 and a balance of €100.00" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
 
-October lists **Reserved in other currencies** as -$125.00. **To Budget** is $5,125.00. Available funds stays $5,250.00, and **FX changes (included)** stays $300.00.
+October lists **Reserved in other currencies** as -$125.00. **To Budget** is $5,125.00. Available funds stays $5,250.00, and **FX changes (included)** stays $300.00. November's **To Budget** is $5,125.00.
 
 The euro balance opens **Food: EUR**. Budgeted is €100.00, spent is €0.00, and the balance is €100.00. Value is $125.00. Assigned in the budget currency is $125.00, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 0.8". Reserved is €100.00. Held is €2,000.00, the balance of BNP Paribas.
 
-**Edit EUR budget** shows **Budgeted (EUR)** and **Save budget**. **Turn rollover on** is beside it. **Transfer EUR** takes an **Amount (EUR)** and **To**. The first choice is **To Budget**. **Hide currency** is at the bottom of the sheet.
+**Edit EUR budget** shows **Budgeted (EUR)** and **Save budget**. **Turn rollover on** is beside it. **Transfer EUR** takes an **Amount (EUR)** and **To**. The first choice is **To Budget**.
 
 <img width="512" alt="Food: EUR with €100.00 budgeted, $125.00 value, rollover, and a transfer back to To Budget" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
+
+**Delete EUR** shows **Move its history to**, set to **No category**. The list is No category, General, Bills, Bills (Flexible), and Savings. The button is **Delete currency**. **Delete base budget** shows the same list, and its button is **Delete base budget**. **Hide currency** is below those forms.
+
+<img width="512" alt="Delete EUR and Delete base budget, each set to No category, with Hide currency below" src="/img/budgeting/multi-currency-pocket-delete@2x.png" />
+
+Select the starting balance in BNP Paribas and open **1 transaction**. The menu includes **Route to currency pockets** and **Route to currency pockets in category…**.
+
+<img width="182" alt="Transaction menu including Route to currency pockets and Route to currency pockets in category" src="/img/budgeting/multi-currency-route-pockets@2x.png" />
 
 On a phone, tap **Food**. The menu includes **Add currency**, and the euro budgeted amount is in the list.
