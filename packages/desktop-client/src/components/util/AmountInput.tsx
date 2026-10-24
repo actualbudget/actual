@@ -14,6 +14,7 @@ import { baseInputStyle, Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { STORED_DECIMAL_PLACES } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
@@ -136,7 +137,12 @@ export function AmountInput({
         newText = '';
       } else {
         const intValue = parseInt(digits, 10);
-        newText = format.forEdit(intValue);
+        // The typed digits fill the currency's smallest unit (cents, or
+        // whole yen), while stored amounts always have two decimal places
+        newText = format.forEdit(
+          intValue *
+            10 ** (STORED_DECIMAL_PLACES - format.currency.decimalPlaces),
+        );
       }
     }
 

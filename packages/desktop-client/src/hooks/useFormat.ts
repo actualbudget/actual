@@ -43,7 +43,6 @@ function format(
   value: unknown,
   type: FormatType,
   formatter: { format: (value: number) => string },
-  decimalPlaces: number,
 ): FormatResult {
   switch (type) {
     case 'string': {
@@ -95,11 +94,7 @@ function format(
 
       return {
         numericValue: localValue,
-        formattedString: integerToCurrency(
-          localValue,
-          formatter,
-          decimalPlaces,
-        ),
+        formattedString: integerToCurrency(localValue, formatter),
       };
     }
     default:
@@ -189,7 +184,6 @@ export function useFormat(): UseFormatResult {
         value,
         type,
         intlFormatter,
-        activeCurrency.decimalPlaces,
       );
 
       let styledValue = formattedString;
@@ -217,15 +211,10 @@ export function useFormat(): UseFormatResult {
     ],
   );
 
-  const toAmount = useCallback(
-    (value: number) => integerToAmount(value, activeCurrency.decimalPlaces),
-    [activeCurrency.decimalPlaces],
-  );
-
-  const fromAmount = useCallback(
-    (value: number) => amountToInteger(value, activeCurrency.decimalPlaces),
-    [activeCurrency.decimalPlaces],
-  );
+  // Stored amounts are always ×100 (see STORED_DECIMAL_PLACES); the
+  // currency only decides how many digits are shown
+  const toAmount = useCallback((value: number) => integerToAmount(value), []);
+  const fromAmount = useCallback((value: number) => amountToInteger(value), []);
 
   const forEdit = useCallback(
     (value: IntegerAmount) => {

@@ -12,10 +12,12 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { getCurrency } from '@actual-app/core/shared/currencies';
 import {
   amountToCurrency,
   appendDecimals,
   currencyToAmount,
+  getNumberFormat,
   reapplyThousandSeparators,
 } from '@actual-app/core/shared/util';
 import { css } from '@emotion/css';
@@ -49,6 +51,7 @@ const AmountInput = memo(function AmountInput({
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -118,7 +121,14 @@ const AmountInput = memo(function AmountInput({
 
   const onChangeText = (text: string) => {
     text = reapplyThousandSeparators(text);
-    text = appendDecimals(text, String(hideFraction) === 'true');
+    text =
+      getCurrency(defaultCurrencyCode || '').decimalPlaces === 0
+        ? // Currencies without decimals take typed digits as whole units,
+          // even when decimal places are shown
+          getNumberFormat({ decimalPlaces: 0 }).formatter.format(
+            currencyToAmount(text.replace(/\D/g, '')) ?? 0,
+          )
+        : appendDecimals(text, String(hideFraction) === 'true');
     setEditing(true);
     setText(text);
     props.onChangeValue?.(text);
