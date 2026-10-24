@@ -64,18 +64,9 @@ class TestCategoryTemplateContext extends CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
-    currencyCode: string = 'USD',
     hideDecimal: boolean = false,
   ) {
-    super(
-      templates,
-      category,
-      month,
-      fromLastMonth,
-      budgeted,
-      currencyCode,
-      hideDecimal,
-    );
+    super(templates, category, month, fromLastMonth, budgeted, hideDecimal);
   }
 }
 
@@ -1593,7 +1584,7 @@ describe('CategoryTemplateContext', () => {
       await instance.runTemplatesForPriority(1, 100000, 100000);
       const values = instance.getValues();
 
-      expect(values.budgeted).toBe(50);
+      expect(values.budgeted).toBe(5000);
     });
 
     it('should handle small amounts with JPY correctly', async () => {
@@ -1625,7 +1616,7 @@ describe('CategoryTemplateContext', () => {
       await instance.runTemplatesForPriority(1, 100000, 100000);
       const values = instance.getValues();
 
-      expect(values.budgeted).toBe(5);
+      expect(values.budgeted).toBe(500);
     });
 
     it('should handle larger amounts with JPY correctly', async () => {
@@ -1656,7 +1647,7 @@ describe('CategoryTemplateContext', () => {
       await instance.runTemplatesForPriority(1, 100000, 100000);
       const values = instance.getValues();
 
-      expect(values.budgeted).toBe(250);
+      expect(values.budgeted).toBe(25000);
     });
 
     it('should handle weekly limit with JPY correctly', async () => {
@@ -1691,8 +1682,8 @@ describe('CategoryTemplateContext', () => {
 
       const result = CategoryTemplateContext.runSimple(template, instance);
 
-      expect(result).toBeGreaterThanOrEqual(400);
-      expect(result).toBeLessThanOrEqual(500);
+      expect(result).toBeGreaterThanOrEqual(40000);
+      expect(result).toBeLessThanOrEqual(50000);
     });
 
     it('should handle periodic template with JPY correctly', async () => {
@@ -1722,14 +1713,14 @@ describe('CategoryTemplateContext', () => {
         0,
       );
 
-      await instance.runTemplatesForPriority(1, 100000, 100000);
+      await instance.runTemplatesForPriority(1, 100_000_000, 100_000_000);
       const values = instance.getValues();
 
-      expect(values.budgeted).toBeGreaterThan(3500);
-      expect(values.budgeted).toBeLessThan(5500);
+      expect(values.budgeted).toBeGreaterThan(350000);
+      expect(values.budgeted).toBeLessThan(550000);
     });
 
-    it('should compare JPY vs USD for same template', async () => {
+    it('stores JPY and USD templates at the same scale', async () => {
       const category: CategoryEntity = {
         id: 'test',
         name: 'Test Category',
@@ -1769,7 +1760,7 @@ describe('CategoryTemplateContext', () => {
       await instanceUSD.runTemplatesForPriority(1, 100000, 100000);
       const valuesUSD = instanceUSD.getValues();
 
-      expect(valuesJPY.budgeted).toBe(100);
+      expect(valuesJPY.budgeted).toBe(10000);
       expect(valuesUSD.budgeted).toBe(10000);
     });
   });
@@ -2394,7 +2385,6 @@ describe('CategoryTemplateContext', () => {
         '2024-01',
         0,
         0,
-        'USD',
         true,
       );
       const result = instance.runRemainder(20000, 12345);

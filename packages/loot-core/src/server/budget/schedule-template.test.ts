@@ -1,7 +1,6 @@
 import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
-import type { Currency } from '#shared/currencies';
 import type { CategoryEntity } from '#types/models';
 import type { ScheduleTemplate } from '#types/models/templates';
 
@@ -17,15 +16,6 @@ vi.mock('#server/schedules/app', async () => {
     getRuleForSchedule: vi.fn(),
   };
 });
-
-const defaultCurrency: Currency = {
-  code: '',
-  symbol: '',
-  name: '',
-  decimalPlaces: 2,
-  numberFormat: 'comma-dot',
-  symbolFirst: false,
-};
 
 const defaultCategory = { id: '1', name: 'Test Category' } as CategoryEntity;
 
@@ -130,7 +120,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -162,7 +151,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(1000);
@@ -194,7 +182,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.perScheduleMonthly.get(template_lines[0])).toBe(10000);
@@ -234,7 +221,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.errors).toHaveLength(0);
@@ -271,7 +257,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
     expect(result.perScheduleMonthly.get(template_lines[0])).toBeUndefined();
@@ -312,7 +297,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -346,7 +330,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(11000); // $100 × 1.10
   });
@@ -377,7 +360,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(10500); // $100 + $5
   });
@@ -405,7 +387,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
@@ -434,7 +415,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(3100); // 31 days × $1
   });
@@ -476,7 +456,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.errors).toHaveLength(0);
@@ -518,7 +497,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.errors).toContainEqual(
       expect.stringMatching(/Schedule Past is in the Past/),
@@ -554,7 +532,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(10000);
   });
@@ -588,7 +565,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(6000);
   });
@@ -622,7 +598,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(3000);
   });
@@ -661,7 +636,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(10000);
   });
@@ -692,7 +666,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
@@ -725,7 +698,6 @@ describe('runSchedule', () => {
       0,
       [],
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
