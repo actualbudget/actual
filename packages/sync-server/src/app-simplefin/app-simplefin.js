@@ -4,10 +4,12 @@ import express from 'express';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
+import * as UserService from '#services/user-service';
 import {
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
+import { isValidFileId } from '#util/paths';
 import { assertUrlAllowed, createSsrfDispatcher } from '#util/ssrf';
 
 const debugSensitive = createDebug('actual-sensitive:simplefin');
@@ -22,16 +24,48 @@ app.use(requestLoggerMiddleware);
 app.use(express.json());
 app.use(validateSessionMiddleware);
 
+app.use((req, res, next) => {
+  const fileId = req.get('X-Actual-File-Id');
+  if (fileId != null) {
+    if (!isValidFileId(fileId)) {
+      res.status(400).send({ status: 'error', reason: 'invalid-file-id' });
+      return;
+    }
+    if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
+      res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+      return;
+    }
+  }
+
+  // Select the pair together, even if a budget's setup token is invalid.
+  // Falling back in that case could expose global accounts unexpectedly.
+  res.locals.credentialFileId =
+    fileId != null &&
+    (secretsService.exists(SecretName.simplefin_token, fileId) ||
+      secretsService.exists(SecretName.simplefin_accessKey, fileId))
+      ? fileId
+      : null;
+  next();
+});
+
 app.post(
   '/status',
   handleError(async (req, res) => {
-    const token = secretsService.get(SecretName.simplefin_token);
+    const token = secretsService.get(
+      SecretName.simplefin_token,
+      res.locals.credentialFileId,
+    );
     const configured = token != null && !isForbidden(token);
 
     res.send({
       status: 'ok',
       data: {
         configured,
+        source: res.locals.credentialFileId
+          ? 'per-budget-file'
+          : configured
+            ? 'global'
+            : null,
       },
     });
   }),
@@ -40,10 +74,16 @@ app.post(
 app.post(
   '/accounts',
   handleError(async (req, res) => {
-    let accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    let accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      res.locals.credentialFileId,
+    );
 
     if (isInvalidAccessKey(accessKey)) {
-      const token = secretsService.get(SecretName.simplefin_token);
+      const token = secretsService.get(
+        SecretName.simplefin_token,
+        res.locals.credentialFileId,
+      );
       if (token == null || isForbidden(token)) {
         invalidToken(res);
         return;
@@ -76,7 +116,11 @@ app.post(
         return;
       }
 
-      secretsService.set(SecretName.simplefin_accessKey, accessKey);
+      secretsService.set(
+        SecretName.simplefin_accessKey,
+        accessKey,
+        res.locals.credentialFileId,
+      );
     }
 
     try {
@@ -100,7 +144,10 @@ app.post(
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
-    const accessKey = secretsService.get(SecretName.simplefin_accessKey);
+    const accessKey = secretsService.get(
+      SecretName.simplefin_accessKey,
+      res.locals.credentialFileId,
+    );
 
     if (isInvalidAccessKey(accessKey)) {
       invalidToken(res);
