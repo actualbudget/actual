@@ -20,7 +20,7 @@ import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { handleBudgetImport } from '#server/importers';
 import type { ImportableBudgetType } from '#server/importers';
 import { app as mainApp } from '#server/main-app';
-import { mutator } from '#server/mutators';
+import { mutator, notifyBudgetClosing } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
@@ -308,6 +308,8 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  // Cancels exchange-rate work first, so closing does not wait on it.
+  notifyBudgetClosing();
   await stopFullSync();
   try {
     return await unloadBudget();

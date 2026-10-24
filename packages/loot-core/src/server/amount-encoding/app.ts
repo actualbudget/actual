@@ -8,6 +8,7 @@ import { createApp } from '#server/app';
 import { createAllBudgets } from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { mutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
@@ -193,6 +194,7 @@ async function transition({
       amountEncoding: targetEncoding,
       amountEncodingTransition: pending,
     });
+    await notifyFxContextChanged('budget');
     resetFormulaPreferencesCache();
     await db.loadClock();
     if (checked.source.precision !== checked.target.precision) {
@@ -240,6 +242,7 @@ async function retry() {
     db.runQuery(
       "DELETE FROM preferences WHERE id = 'amountEncodingTransition'",
     );
+    await notifyFxContextChanged('budget');
     connection.send('prefs-updated');
     return {};
   } catch (error) {

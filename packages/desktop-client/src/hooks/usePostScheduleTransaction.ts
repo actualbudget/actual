@@ -6,17 +6,60 @@ import { useDispatch } from '#redux';
 import type { AppDispatch } from '#redux/store';
 
 /**
- * Posts a schedule's occurrence. A foreign schedule without a saved rate
- * opens the conversion dialog with the draft, so the user can enter a rate
- * or base amount; an exchange schedule without an estimate opens the
- * exchange dialog. Nothing is posted until then.
+ * Posts an occurrence with saved rates, fetching missing rates when a provider
+ * is available. Manual conversion keeps the draft available if no rate resolves.
  */
 export async function postScheduleTransaction(
   dispatch: AppDispatch,
   id: ScheduleEntity['id'],
   today?: boolean,
 ) {
-  const result = await send('schedule/post-transaction', { id, today });
+  let result = await send('schedule/post-transaction', { id, today });
+  if (
+    result?.type === 'rate-unavailable' ||
+    result?.type === 'exchange-unavailable'
+  ) {
+    try {
+      const status = await send('exchange-rates/provider-status');
+      if (status.status === 'superseded') return;
+      if (status.status === 'ok' && status.selected) {
+        const currencies =
+          result.type === 'rate-unavailable'
+            ? [result.currency]
+            : result.currencies;
+        const date =
+          result.type === 'rate-unavailable'
+            ? result.transaction.date
+            : result.date;
+        const rates = await Promise.all(
+          currencies.map(quoteCurrency =>
+            send('exchange-rates/ensure', {
+              quoteCurrency,
+              date,
+              forEntry: result?.type === 'rate-unavailable',
+            }),
+          ),
+        );
+        if (
+          rates.some(
+            rate => rate.status === 'superseded' || rate.status === 'stopped',
+          )
+        ) {
+          return;
+        }
+        if (
+          rates.every(
+            rate =>
+              'resolution' in rate && rate.resolution.status === 'resolved',
+          )
+        ) {
+          result = await send('schedule/post-transaction', { id, today });
+        }
+      }
+    } catch {
+      // The original missing-rate draft remains available for manual completion.
+    }
+  }
   if (result?.type === 'exchange-unavailable') {
     dispatch(
       pushModal({
