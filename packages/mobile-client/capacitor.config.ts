@@ -11,11 +11,6 @@ const baseConfig: CapacitorConfig = {
   appId: 'org.actualbudget',
   appName: 'Actual Budget',
   webDir: actualAppWebBuildPath,
-  plugins: {
-    SplashScreen: {
-      launchAutoHide: false,
-    },
-  },
 };
 
 const devConfig: CapacitorConfig = {
