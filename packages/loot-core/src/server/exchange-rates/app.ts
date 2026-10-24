@@ -23,20 +23,58 @@ import {
 } from '#shared/exchange-rate';
 import type { ExchangeRateEntity, ExchangeRateKind } from '#types/models';
 
+import { startFxContext } from './context';
+import {
+  backfillCancel,
+  backfillPlan,
+  backfillStart,
+  historyExport,
+  historyPage,
+  importCancel,
+  importCommit,
+  importPreview,
+  importPreviewBegin,
+  removeFetched,
+} from './history';
+import { providerStatus } from './provider';
+
 export type ExchangeRatesHandlers = {
   'exchange-rates/save': typeof saveRate;
   'exchange-rates/remove': typeof removeRate;
   'exchange-rates/resolve': typeof resolveRateHandler;
   'exchange-rates/capture-entry': typeof captureEntry;
+  'exchange-rates/provider-status': typeof providerStatus;
+  'exchange-rates/import-preview-begin': typeof importPreviewBegin;
+  'exchange-rates/import-preview': typeof importPreview;
+  'exchange-rates/import-commit': typeof importCommit;
+  'exchange-rates/import-cancel': typeof importCancel;
+  'exchange-rates/history-page': typeof historyPage;
+  'exchange-rates/history-export': typeof historyExport;
+  'exchange-rates/remove-fetched': typeof removeFetched;
+  'exchange-rates/backfill-plan': typeof backfillPlan;
+  'exchange-rates/backfill-start': typeof backfillStart;
+  'exchange-rates/backfill-cancel': typeof backfillCancel;
 };
 
 export const app = createApp<ExchangeRatesHandlers>();
+app.service(startFxContext);
 // Undo history is recorded only around actual rate writes, so validation
 // failures and no-op captures keep the redo stack intact.
 app.method('exchange-rates/save', mutator(saveRate));
 app.method('exchange-rates/remove', mutator(removeRate));
 app.method('exchange-rates/resolve', resolveRateHandler);
 app.method('exchange-rates/capture-entry', mutator(captureEntry));
+app.method('exchange-rates/provider-status', providerStatus);
+app.method('exchange-rates/import-preview-begin', importPreviewBegin);
+app.method('exchange-rates/import-preview', importPreview);
+app.method('exchange-rates/import-commit', importCommit);
+app.method('exchange-rates/import-cancel', importCancel);
+app.method('exchange-rates/history-page', historyPage);
+app.method('exchange-rates/history-export', historyExport);
+app.method('exchange-rates/remove-fetched', removeFetched);
+app.method('exchange-rates/backfill-plan', backfillPlan);
+app.method('exchange-rates/backfill-start', backfillStart);
+app.method('exchange-rates/backfill-cancel', backfillCancel);
 
 // Rate ids derive from the logical key so offline saves of the same key on
 // different devices write one row instead of creating duplicates. Kind is
@@ -165,6 +203,79 @@ export async function writeManualRate({
     }
   });
   return id;
+}
+
+/** The caller owns the short mutator and context guard. Cache writes are outside undo. */
+export async function writeFetchedRate({
+  baseCurrency,
+  quoteCurrency,
+  providerId,
+  rate,
+  effectiveDate,
+  replace = false,
+  beforeWrite = () => true,
+}: {
+  baseCurrency: string;
+  quoteCurrency: string;
+  providerId: string;
+  rate: string;
+  effectiveDate: string;
+  replace?: boolean;
+  beforeWrite?: () => boolean;
+}): Promise<'inserted' | 'existing' | 'replaced' | 'not-written'> {
+  validateQuote(quoteCurrency, baseCurrency);
+  validateDate(effectiveDate);
+  if (
+    !/^[a-z0-9][a-z0-9-]{0,39}$/.test(providerId) ||
+    parseRate(rate) !== rate
+  ) {
+    throw new Error('rate-invalid');
+  }
+  const source = `plugin:${providerId}`;
+  const timestamp = utcMidnight(effectiveDate);
+  const id = exchangeRateId(
+    baseCurrency,
+    quoteCurrency,
+    source,
+    'fetched',
+    timestamp,
+  );
+  const existing = await getRateRow(id);
+  if (!beforeWrite()) return 'not-written';
+  if (existing) {
+    if (!replace || (existing.rate === rate && !existing.tombstone)) {
+      return 'existing';
+    }
+    // A deterministic id alone does not authorize changing a different logical key.
+    if (
+      existing.base_currency !== baseCurrency ||
+      existing.quote_currency !== quoteCurrency ||
+      existing.source !== source ||
+      existing.kind !== 'fetched' ||
+      existing.timestamp !== timestamp
+    ) {
+      return 'existing';
+    }
+    await db.update('exchange_rates', {
+      id,
+      rate,
+      tombstone: 0,
+      spec: exchangeRateSpec({ ...existing, rate, kind: 'fetched' }),
+    });
+    return 'replaced';
+  }
+  const row = exchangeRateModel.validate({
+    id,
+    base_currency: baseCurrency,
+    quote_currency: quoteCurrency,
+    rate,
+    source,
+    kind: 'fetched',
+    timestamp,
+    tombstone: 0,
+  });
+  await db.insert('exchange_rates', { ...row, spec: exchangeRateSpec(row) });
+  return 'inserted';
 }
 
 async function saveRate({

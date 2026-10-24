@@ -6,6 +6,18 @@ import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
 const runningMutators = new Set<Promise<unknown>>();
+const budgetClosingListeners = new Set<() => void>();
+
+export function onBudgetClosing(callback: () => void) {
+  budgetClosingListeners.add(callback);
+  return () => {
+    budgetClosingListeners.delete(callback);
+  };
+}
+
+export function notifyBudgetClosing() {
+  for (const listener of budgetClosingListeners) listener();
+}
 
 let currentContext = null;
 const mutatingMethods = new WeakMap();
@@ -70,6 +82,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   // this by letting all async workflows finish executing before closing the
   // file
   if (name === 'close-budget') {
+    notifyBudgetClosing();
     await flushRunningMethods();
   }
 

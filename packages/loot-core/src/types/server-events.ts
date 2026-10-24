@@ -1,5 +1,6 @@
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
+import type { BackfillProgress } from '#types/models/exchange-rate-history';
 
 type SyncSubtype =
   | 'out-of-sync'
@@ -120,6 +121,8 @@ type StartLoadEvent = undefined;
 type ApiFetchRedirectedEvent = undefined;
 
 export type ServerEvents = {
+  'fx-provider-context': { context: string };
+  'fx-backfill-progress': BackfillProgress;
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;

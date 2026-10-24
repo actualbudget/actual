@@ -12,6 +12,7 @@ import {
   PROTECTED_DATABASE,
   readDatabaseEntries,
 } from '#server/amount-encoding/files';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import * as monthUtils from '#shared/months';
 
 import * as encryption from './encryption';
@@ -63,6 +64,7 @@ async function checkHTTPStatus(res) {
       const error = res.status === 403 ? body.data : body;
       if (getServerErrorReason(error) === 'token-expired') {
         await asyncStorage.removeItem('user-token');
+        await notifyFxContextChanged('session');
       }
     } catch {
       // Preserve the original HTTP error when the response is not JSON.
