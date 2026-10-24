@@ -165,6 +165,6 @@ export function evalArithmetic(
     return defaultValue;
   }
 
-  // Never return NaN
-  return isNaN(result) ? defaultValue : result;
+  // Never return a non-finite result
+  return Number.isFinite(result) ? result : defaultValue;
 }
