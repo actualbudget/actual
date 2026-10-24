@@ -74,7 +74,7 @@ This goal value is based on the maximum amount that the templates in a category 
 
 #### Goal Indicator Information
 
-If you hover over the balance value in a templated category, a tooltip will appear with info on the status of that category with respect to its templates.
+Click the balance value in a templated category to see its goal status at the top of the balance menu. It shows the status of that category with respect to its templates, including a progress bar.
 
 #### Long term goals
 
@@ -83,7 +83,7 @@ By default, the goal information displayed in the goal indicator is shown on a m
 If you would like the goal and associated indication color to be based on the category `Balance` instead of the budgeted amount, see the [Goal Directive option](#goal-directive).
 This is a special template that overrides the goal amount and bases the goal indicator on category balance.
 
-<img width="222" alt="The balance tooltip for a long-term goal" src="/img/experimental/goal-templates-goal-tooltip@2x.webp" />
+<img width="228" alt="The balance menu showing the goal status for a long-term goal" src="/img/experimental/goal-templates-goal-tooltip@2x.webp" />
 
 ### Multiple Template Lines
 
