@@ -32,7 +32,7 @@ export class WrappedDatabase {
 
   /**
    * @param {string} sql
-   * @param {(string | number | null | undefined)[]} params
+   * @param {(string | number | Uint8Array | null | undefined)[]} params
    */
   mutate(sql, params = []) {
     const stmt = this.db.prepare(sql);
