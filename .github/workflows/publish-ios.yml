@@ -14,15 +14,14 @@ on:
       - '**.md'
   release:
     types: [published]
+  # Pick the branch or tag to build from the "Use workflow from" selector.
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Release tag to build (e.g. v25.3.0). Leave empty to build the current branch.'
-        required: false
-        type: string
 
 concurrency:
   group: publish-ios
+  # Queue every run instead of replacing a pending one, so a release build is
+  # never dropped because a master push arrived right after it.
+  queue: max
   cancel-in-progress: false
 
 permissions:
@@ -36,11 +35,13 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ inputs.tag || github.ref }}
           persist-credentials: false
 
       - name: Set up environment
         uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
 
       - name: Import signing certificates
         env:
