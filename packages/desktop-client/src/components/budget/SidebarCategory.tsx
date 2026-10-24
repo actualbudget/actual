@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,12 +8,16 @@ import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
+import { MonthsContext } from '#components/budget/MonthsContext';
+import { useOpenBaseSlot } from '#components/budget/pocketDisplay';
 import { InputCell } from '#components/table';
+import { useBaseSlotRepairs } from '#hooks/useBaseSlotRepairs';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
@@ -73,6 +77,10 @@ export function SidebarCategory({
     useMulticurrencyAvailable() &&
     budgetType === 'envelope' &&
     !category.is_income;
+  // Categories with retired, duplicate or later-generation base lanes.
+  const repairable = useBaseSlotRepairs();
+  const openBaseSlot = useOpenBaseSlot();
+  const months = useContext(MonthsContext);
   const triggerRef = useRef(null);
   const { handleContextMenu } = useContextMenu({
     triggerRef,
@@ -98,6 +106,16 @@ export function SidebarCategory({
             }),
           ),
       },
+      canAddCurrency &&
+        repairable.has(category.id) && {
+          name: 'base-slot',
+          text: t('Base budget lanes…'),
+          onClick: () =>
+            openBaseSlot(
+              category.id,
+              months?.months[0] ?? monthUtils.currentMonth(),
+            ),
+        },
       !categoryGroup?.hidden && {
         name: 'toggle-visibility',
         text: category.hidden ? t('Show') : t('Hide'),

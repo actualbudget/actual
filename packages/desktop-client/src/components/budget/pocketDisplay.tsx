@@ -126,6 +126,17 @@ export function useOpenPocket() {
     );
 }
 
+/** Opens a category's base slot lanes and repairs for a month. */
+export function useOpenBaseSlot() {
+  const dispatch = useDispatch();
+  return (categoryId: string, month: string) =>
+    dispatch(
+      pushModal({
+        modal: { name: 'base-slot', options: { categoryId, month } },
+      }),
+    );
+}
+
 /** A group total; null with a reason when unknown. */
 type GroupTotal = { value: number | null; reason: string | null };
 export type GroupTotals = Record<'budgeted' | 'spent' | 'balance', GroupTotal>;

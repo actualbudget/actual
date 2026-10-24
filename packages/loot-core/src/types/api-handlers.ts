@@ -120,6 +120,21 @@ export type ApiHandlers = {
     cells: Array<{ month: string; laneId: string; baseAmount?: number }>;
   }) => ReturnType<typeof finalizePockets>;
 
+  'api/pocket-delete': (arg: {
+    id: string;
+    transferCategoryId?: string;
+  }) => Promise<void>;
+
+  'api/base-child-delete': (arg: {
+    categoryId: string;
+    transferCategoryId?: string;
+  }) => Promise<void>;
+
+  'api/route-to-pockets': (arg: {
+    transactionIds: string[];
+    categoryId?: string;
+  }) => Promise<{ routed: string[] }>;
+
   'api/budget-hold-for-next-month': (arg: {
     month: string;
     amount: number;

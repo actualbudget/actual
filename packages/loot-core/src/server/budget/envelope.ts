@@ -46,6 +46,10 @@ export function createCategory(cat, sheetName, prevSheetName) {
     }
 
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
+    // What the category's base lanes carry in by their own rules, beyond the
+    // single rule below (MC-10, base-slots.ts); 0 unless its base slot holds
+    // retired or later-generation lanes.
+    sheet.get().createStatic(sheetName, `carry-adjust-${cat.id}`, 0);
 
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,
@@ -55,12 +59,21 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `${prevSheetName}!carryover-${cat.id}`,
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!leftover-pos-${cat.id}`,
+        `carry-adjust-${cat.id}`,
       ],
-      run: (budgeted, spent, prevCarryover, prevLeftover, prevLeftoverPos) => {
+      run: (
+        budgeted,
+        spent,
+        prevCarryover,
+        prevLeftover,
+        prevLeftoverPos,
+        carryAdjust,
+      ) => {
         return safeNumber(
           number(budgeted) +
             number(spent) +
-            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
+            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)) +
+            number(carryAdjust),
         );
       },
     });
@@ -139,15 +152,23 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       safeNumber(number(income) + number(fromLastMonth) + number(fxChanges)),
   });
 
+  // The sum of every category's carry adjustment: overspending that base
+  // lanes reset by their own rules, which To Budget covers (MC-10).
+  sheet.get().createStatic(sheetName, 'carry-adjust-total', 0);
+
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
     initialValue: 0,
-    dependencies: flatten2(
-      expenseCategories.map(cat => [
-        `${prevSheetName}!leftover-${cat.id}`,
-        `${prevSheetName}!carryover-${cat.id}`,
-      ]),
-    ),
-    run: (...data) => {
+    // The adjustment comes first: category changes append leftover pairs.
+    dependencies: [
+      'carry-adjust-total',
+      ...flatten2(
+        expenseCategories.map(cat => [
+          `${prevSheetName}!leftover-${cat.id}`,
+          `${prevSheetName}!carryover-${cat.id}`,
+        ]),
+      ),
+    ],
+    run: (carryAdjust, ...data) => {
       data = unflatten2(data);
       return safeNumber(
         data.reduce((total, [leftover, carryover]) => {
@@ -155,7 +176,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
             return total;
           }
           return total + Math.min(0, number(leftover));
-        }, 0),
+        }, 0) - number(carryAdjust),
       );
     },
   });

@@ -1,10 +1,14 @@
 import { useTranslation } from 'react-i18next';
 
+import * as monthUtils from '@actual-app/core/shared/months';
+
+import { useOpenBaseSlot } from '#components/budget/pocketDisplay';
 import { MobileSheet } from '#components/mobile/MobileSheet';
 import { MobileSheetDeleteConfirm } from '#components/mobile/MobileSheetDeleteConfirm';
 import { MobileSheetNotes } from '#components/mobile/MobileSheetNotes';
 import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
 import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
+import { useBaseSlotRepairs } from '#hooks/useBaseSlotRepairs';
 import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
 import { useCategoryGroup } from '#hooks/useCategoryGroup';
@@ -42,6 +46,9 @@ export function CategoryMenuModal({
   const dispatch = useDispatch();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const multicurrencyAvailable = useMulticurrencyAvailable();
+  // Categories with retired, duplicate or later-generation base lanes.
+  const repairable = useBaseSlotRepairs();
+  const openBaseSlot = useOpenBaseSlot();
   const deleteFlow = useDeleteCategoryFlow({
     categoryIds: [categoryId],
     onDelete: transferCategoryId => onDelete(categoryId, transferCategoryId),
@@ -109,6 +116,17 @@ export function CategoryMenuModal({
                           },
                         }),
                       )
+                    }
+                  />
+                )}
+              {multicurrencyAvailable &&
+                budgetType === 'envelope' &&
+                !isIncome &&
+                repairable.has(category.id) && (
+                  <MobileSheetRow
+                    label={t('Base budget lanes')}
+                    onPress={() =>
+                      openBaseSlot(category.id, monthUtils.currentMonth())
                     }
                   />
                 )}

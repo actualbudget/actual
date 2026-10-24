@@ -232,6 +232,12 @@ function SlotSidebar({ label }: { label: string }) {
   );
 }
 
+/** Uses the same indentation as the native currency labels. */
+export function BaseSlotSidebar() {
+  const [budgetCurrency = ''] = useSyncedPref('defaultCurrencyCode');
+  return <SlotSidebar label={budgetCurrency} />;
+}
+
 type BaseSlotRowProps = {
   category: CategoryEntity;
   editingCell: { id: string; cell: string } | null;
@@ -251,12 +257,11 @@ export function BaseSlotRow({
   onBudgetAction,
   onShowActivity,
 }: BaseSlotRowProps) {
-  const [budgetCurrency = ''] = useSyncedPref('defaultCurrencyCode');
   const { ExpenseCategoryComponent: MonthComponent } = useBudgetComponents();
   return (
     <Row collapsed style={{ backgroundColor: theme.budgetCurrentMonth }}>
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        <SlotSidebar label={budgetCurrency} />
+        <BaseSlotSidebar />
         <RenderMonths>
           {({ month }) => (
             <MonthComponent

@@ -231,15 +231,63 @@ export const statusShop = entry({ balance: null }, [
         originCategoryId: 'old',
         status: 'orphan',
       }),
+      // The reader reports a lane with no owner as its own slot lane.
       lane({
         laneId: 'lateJpy',
-        kind: 'inherited',
+        kind: 'own',
         originCategoryId: 'shop',
         budgeted: 1000,
         balance: 1000,
         balanceBase: null,
         valueKind: 'unknown',
         status: 'unresolved',
+      }),
+    ],
+  }),
+]);
+
+/**
+ * Reader shapes of lanes without an owner (MC-10.6, pocket-deletion.test.ts
+ * "reader shapes for repairs"): W3's late allocation to a deleted empty
+ * Shop JPY lane, and an orphan of an older-client deletion whose mapped
+ * category has no JPY slot. Each is its own slot, with one own lane.
+ */
+export const unresolvedShop = entry({ balance: null }, [
+  pocket({
+    id: 'lateJpy',
+    budgeted: 1000,
+    balance: 1000,
+    balanceBase: null,
+    incomplete: ['owner-unresolved'],
+    lanes: [
+      lane({
+        laneId: 'lateJpy',
+        originCategoryId: 'shop',
+        budgeted: 1000,
+        balance: 1000,
+        balanceBase: null,
+        valueKind: 'unknown',
+        status: 'unresolved',
+      }),
+    ],
+  }),
+]);
+
+export const orphanFood = entry({ budgeted: 4000, balance: 4000 }, [
+  pocket({
+    id: 'travelJpy',
+    budgeted: 4000,
+    balance: 4000,
+    balanceBase: 4000,
+    lanes: [
+      lane({
+        laneId: 'travelJpy',
+        originCategoryId: 'travel',
+        budgeted: 4000,
+        budgetedBase: 4000,
+        balance: 4000,
+        balanceBase: 4000,
+        status: 'orphan',
       }),
     ],
   }),
