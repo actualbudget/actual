@@ -1,0 +1,102 @@
+name: Publish iOS
+
+# Uploads the Capacitor iOS app to App Store Connect. Every master push
+# produces a TestFlight build; a published release produces the build that
+# a human then submits for App Store review from App Store Connect.
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'packages/docs/**'
+      - 'upcoming-release-notes/**'
+      - '**.md'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build (e.g. v25.3.0). Leave empty to build the current branch.'
+        required: false
+        type: string
+
+concurrency:
+  group: publish-ios
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-ios:
+    runs-on: depot-macos-latest
+    environment: release
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+
+      - name: Import signing certificates
+        env:
+          P12_BASE64: ${{ secrets.APPLE_SIGNING_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.APPLE_SIGNING_P12_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/publish-ios.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -base64 32)"
+          echo "$P12_BASE64" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/signing.p12" -k "$KEYCHAIN" -P "$P12_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/xcodebuild
+          # Let codesign use the keys without a UI prompt.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain-db
+          rm -f "$RUNNER_TEMP/signing.p12"
+
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
+      - name: Write App Store Connect API key
+        env:
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          printf '%s\n' "$API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
+          chmod 600 "$RUNNER_TEMP/AuthKey.p8"
+
+      - name: Build web app
+        run: yarn build:browser
+
+      - name: Archive and upload to App Store Connect
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+        run: |
+          export XCODEBUILD_AUTH_ARGS="-authenticationKeyPath $RUNNER_TEMP/AuthKey.p8 -authenticationKeyID $API_KEY_ID -authenticationKeyIssuerID $API_ISSUER_ID"
+          yarn workspace mobile-client release:ios
+
+      - name: Summarize uploaded build
+        run: |
+          PLIST=packages/mobile-client/build/App.xcarchive/Products/Applications/App.app/Info.plist
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          {
+            echo "## iOS build uploaded to App Store Connect"
+            echo
+            echo "| Version | Build |"
+            echo "| --- | --- |"
+            echo "| $VERSION | $BUILD |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/publish-ios.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/signing.p12"
