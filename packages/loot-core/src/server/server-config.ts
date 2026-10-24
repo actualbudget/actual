@@ -1,5 +1,6 @@
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 
 type ServerConfig = {
   BASE_SERVER: string;
@@ -10,6 +11,7 @@ type ServerConfig = {
   PLUGGYAI_SERVER: string;
   AKAHU_SERVER: string;
   ENABLEBANKING_SERVER: string;
+  EXCHANGE_RATES_SERVER: string;
 };
 
 let config: ServerConfig | null = null;
@@ -28,12 +30,13 @@ export function isValidBaseURL(base: string): boolean {
   }
 }
 
-export function setServer(url: string): void {
+export function setServer(url: string | null): void {
   if (url == null) {
     config = null;
   } else {
     config = getServer(url);
   }
+  void notifyFxContextChanged('session');
 }
 
 // `url` is optional; if not given it will provide the global config
@@ -49,6 +52,7 @@ export function getServer(url?: string): ServerConfig | null {
         PLUGGYAI_SERVER: joinURL(url, '/pluggyai'),
         AKAHU_SERVER: joinURL(url, '/akahu'),
         ENABLEBANKING_SERVER: joinURL(url, '/enablebanking'),
+        EXCHANGE_RATES_SERVER: joinURL(url, '/exchange-rates'),
       };
     } catch (error) {
       logger.warn(

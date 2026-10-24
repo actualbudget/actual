@@ -5,6 +5,7 @@ import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import type { StorageBackend } from '#platform/server/sqlite';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
@@ -102,6 +103,7 @@ handlers['get-server-url'] = async function () {
 handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url == null) {
     await asyncStorage.removeItem('user-token');
+    await notifyFxContextChanged('session');
   } else {
     url = url.replace(/\/+$/, '');
 
@@ -248,6 +250,7 @@ export async function initApp(
 
   if (!url) {
     await asyncStorage.removeItem('user-token');
+    await notifyFxContextChanged('session');
   }
   setServer(url);
 

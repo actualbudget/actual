@@ -5,6 +5,7 @@ import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
 import { StorageUnavailableError } from '#platform/server/sqlite/storage/errors';
+import { parseRateCsv } from '#server/exchange-rates/import-csv';
 
 import {
   _setDocumentDir,
@@ -162,6 +163,22 @@ describe('web filesystem', () => {
     expect((await idb.get(after, late))?.storage).toBe('opfs');
     // The connection is shared across tests: leave no marker behind
     await idb.del(after, late);
+  });
+
+  test('reads UTF-8 CSV bytes for a manual-rate import without converting them to text', async () => {
+    await idb.openDatabase();
+    await sqlite.init();
+    await init();
+    const bytes = new TextEncoder().encode(
+      '\uFEFFquote_currency,rate,kind,date\r\nEUR,0.9200,standing,2026-02-28\r\n',
+    );
+    await writeFile('/documents/rates.csv', bytes);
+    const actual = await readFile('/documents/rates.csv', 'binary');
+    expect(Array.from(actual)).toEqual(Array.from(bytes));
+    expect(parseRateCsv(actual, 'USD')).toMatchObject({
+      status: 'ok',
+      rows: [{ class: 'new', quote: 'EUR', rate: '0.92' }],
+    });
   });
 
   test('basic reads/writes are stored in idb', async () => {
