@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -7,6 +7,7 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { MonteCarloWidget } from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
@@ -19,7 +20,6 @@ import {
   monteCarloConfigFromMeta,
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
-import type { MonteCarloResult } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useResolvedMonteCarloConfig } from '#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig';
 
 // Stable default so an unsaved widget doesn't bust the simulation's
@@ -52,22 +52,22 @@ export function MonteCarloCard({
     useResolvedMonteCarloConfig(config);
 
   // Thousands of simulations take a noticeable slice of a second, so they
-  // run after the dashboard has painted rather than inside render, and
-  // only once every linked balance is in (each arrival would otherwise
-  // trigger a full re-run on stale numbers)
-  const [result, setResult] = useState<MonteCarloResult | null>(null);
-  useEffect(() => {
-    if (!hasLiveBalances) {
-      return;
-    }
-    setResult(
+  // run as a query: after the dashboard has painted rather than inside
+  // render, only once every linked balance is in (each arrival would
+  // otherwise trigger a full re-run on stale numbers), and cached by
+  // config so coming back to the dashboard doesn't simulate again. The
+  // engine is deterministic, so a cached result never goes stale
+  const { data: result = null } = useQuery({
+    queryKey: ['monte-carlo-card', resolvedConfig],
+    queryFn: () =>
       runMonteCarloSimulation({
         ...resolvedConfig,
         horizonYears: getMonteCarloHorizonYears(resolvedConfig),
         deflateToTodaysMoney: true,
       }),
-    );
-  }, [resolvedConfig, hasLiveBalances]);
+    enabled: hasLiveBalances,
+    staleTime: Infinity,
+  });
 
   const endAge = config.currentAge + getMonteCarloHorizonYears(config);
   const successPercent =
