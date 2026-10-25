@@ -583,6 +583,7 @@ export function AccountHeader({
         <ReconcilingMessage
           targetBalance={reconcileAmount}
           accountId={account.id}
+          currencyCode={account.currency}
           onDone={onDoneReconciling}
           onExit={onExitReconciling}
           onCreateTransaction={onCreateReconciliationTransaction}
