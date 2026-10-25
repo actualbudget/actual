@@ -174,6 +174,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -591,6 +593,44 @@ describe('Transactions', () => {
       expect(queryField(container, 'payee', '', 0).textContent).toContain(
         'Alice',
       );
+    });
+  });
+
+  describe('Pointing out a transaction', () => {
+    function renderFocused() {
+      const onFocusedTransactionShown = vi.fn();
+      const result = renderTransactions({ onFocusedTransactionShown });
+      const focusedId = result.getTransactions()[2].id;
+      result.updateProps({ focusedTransactionId: focusedId });
+      return { ...result, onFocusedTransactionShown };
+    }
+
+    function getPulsingRows(container: HTMLElement) {
+      return [...container.querySelectorAll<HTMLElement>('[data-pulse]')];
+    }
+
+    test('pulses the focused transaction only', () => {
+      const { container } = renderFocused();
+
+      const rows = getPulsingRows(container);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+    });
+
+    test('reports once the transaction has been pointed out for a while', () => {
+      vi.useFakeTimers();
+      try {
+        const { onFocusedTransactionShown } = renderFocused();
+
+        expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+        vi.runOnlyPendingTimers();
+        expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 

@@ -211,6 +211,21 @@ function getField(field?: string) {
   }
 }
 
+type PendingFocus = {
+  id: TransactionEntity['id'];
+  // Whether the current query has it at all, once checked
+  exists?: boolean;
+};
+
+// The transaction a link to an account asks to bring into view, e.g. the
+// other side of a transfer opened from its arrow
+function getPendingFocus(
+  location: ReturnType<typeof useLocation>,
+): PendingFocus | null {
+  const id: unknown = location.state?.focusTransactionId;
+  return typeof id === 'string' ? { id } : null;
+}
+
 type AccountInternalProps = {
   accountId?:
     | AccountEntity['id']
@@ -290,6 +305,7 @@ type AccountInternalState = {
     prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
+  focusedTransactionId: TransactionEntity['id'] | null;
 };
 
 export type TableRef = RefObject<{
@@ -311,6 +327,8 @@ class AccountInternal extends PureComponent<
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
+  // A transaction to bring into view once it is loaded
+  pendingFocus: PendingFocus | null = null;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -334,6 +352,7 @@ class AccountInternal extends PureComponent<
       isAdding: false,
       sort: null,
       filteredAmount: null,
+      focusedTransactionId: null,
     };
   }
 
@@ -394,6 +413,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
+    this.pendingFocus = getPendingFocus(this.props.location);
     this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
@@ -487,7 +507,7 @@ class AccountInternal extends PureComponent<
       query = query.filter({ reconciled: { $eq: false } });
     }
 
-    this.paged = pagedQuery(query.select('*'), {
+    const paged = pagedQuery<TransactionEntity>(query.select('*'), {
       onData: async (groupedData, prevData) => {
         const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
@@ -551,6 +571,11 @@ class AccountInternal extends PureComponent<
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
+            // Results of a query replaced since, e.g. of the previous
+            // account, can't tell where the pending transaction is
+            if (this.pendingFocus != null && paged === this.paged) {
+              void this.showPendingFocus();
+            }
 
             setTimeout(() => {
               this.table.current?.setRowAnimation(true);
@@ -563,14 +588,21 @@ class AccountInternal extends PureComponent<
         onlySync: true,
       },
     });
+    this.paged = paged;
+    // Whether the new query has the pending transaction is yet to be checked
+    if (this.pendingFocus) {
+      this.pendingFocus.exists = undefined;
+    }
   }
 
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
+      this.pendingFocus = getPendingFocus(nextProps.location);
       this.setState(
         {
           loading: true,
+          focusedTransactionId: null,
           search: '',
           showBalances: nextProps.showBalances,
           balances: null,
@@ -585,7 +617,59 @@ class AccountInternal extends PureComponent<
     }
   }
 
+  // Brings the pending transaction into view: loads more of the account
+  // until it's there, then opens its split. Leaves the account at the top
+  // when the current view doesn't contain it, e.g. while reconciled
+  // transactions are hidden.
+  showPendingFocus = async () => {
+    const pending = this.pendingFocus;
+    const paged = this.paged;
+    if (pending == null || paged == null) {
+      return;
+    }
+    const { id } = pending;
+
+    const transaction = this.state.transactions.find(t => t.id === id);
+    if (transaction == null) {
+      if (pending.exists == null) {
+        const { data } = await aqlQuery(
+          paged.query.filter({ id }).select('id'),
+        );
+        if (this.pendingFocus !== pending || this.paged !== paged) {
+          return;
+        }
+        pending.exists = data.length > 0;
+      }
+      if (pending.exists && paged.hasNext) {
+        // The next page arrives through `onData`, which comes back here
+        void paged.fetchNext();
+        return;
+      }
+    }
+
+    this.pendingFocus = null;
+    if (
+      transaction == null ||
+      (transaction.reconciled && !this.state.showReconciled)
+    ) {
+      return;
+    }
+    if (transaction.parent_id) {
+      this.props.splitsExpandedDispatch({
+        type: 'open-split',
+        id: transaction.parent_id,
+      });
+    }
+    this.setState({ focusedTransactionId: id });
+  };
+
+  onFocusedTransactionShown = () => {
+    this.setState({ focusedTransactionId: null });
+  };
+
   onSearch = (value: string) => {
+    // The user moved on from the transaction asked for
+    this.pendingFocus = null;
     this.paged?.unsubscribe();
     this.setState({ search: value }, this.onSearchDone);
   };
@@ -1995,6 +2079,8 @@ class AccountInternal extends PureComponent<
                     this.onMakeAsNonSplitTransactions
                   }
                   onRefetch={this.refetchTransactions}
+                  focusedTransactionId={this.state.focusedTransactionId}
+                  onFocusedTransactionShown={this.onFocusedTransactionShown}
                   onCloseAddTransaction={() =>
                     this.setState({ isAdding: false })
                   }
