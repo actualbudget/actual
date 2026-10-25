@@ -110,25 +110,49 @@ afterEach(() => {
   setNumberFormat({ format: 'comma-dot', hideFraction: false });
 });
 
-describe('BalanceWithCarryover goal status pill', () => {
+describe('BalanceWithCarryover goal progress ring', () => {
   it.each([
-    ['underfunded', 'Underfunded: 400.00', {}],
-    ['funded', 'Funded: 650.00', { budget: 65000, leftover: 65000 }],
-    ['overspent', 'Overspent: -25.00', { budget: 65000, leftover: -2500 }],
+    ['underfunded', 61, 'Underfunded, 61% of goal', {}],
+    ['underfunded', 0, 'Underfunded, 0% of goal', { budget: 0 }],
+    ['funded', 100, 'Fully funded', { budget: 65000, leftover: 65000 }],
+    ['funded', 100, 'Fully funded', { budget: 90000, leftover: 90000 }],
     // Long goals compare the balance, not the budgeted amount
-    ['funded', 'Funded: 700.00', { longGoal: 1, budget: 0, leftover: 70000 }],
-    ['underfunded', 'Underfunded: 400.00', { longGoal: 1, budget: 90000 }],
+    [
+      'funded',
+      100,
+      'Fully funded',
+      { longGoal: 1, budget: 0, leftover: 70000 },
+    ],
+    [
+      'underfunded',
+      61,
+      'Underfunded, 61% of goal',
+      { longGoal: 1, budget: 90000 },
+    ],
   ] as const)(
-    'shows the %s pill with an icon and hidden label',
-    (state, text, values) => {
+    'draws the %s ring at %d%% beside the plain balance',
+    (state, progress, label, values) => {
       setSheetValues(values);
       const container = renderBalance();
-      const pill = container.querySelector('[data-goal-status]');
-      expect(pill).toHaveAttribute('data-goal-status', state);
-      expect(pill?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
-      expect(pill).toHaveTextContent(text);
+      const ring = container.querySelector('[data-goal-status]');
+      expect(ring).toHaveAttribute('data-goal-status', state);
+      expect(ring).toHaveAttribute('data-goal-progress', String(progress));
+      expect(ring).toHaveAttribute('aria-label', label);
+      expect(ring?.querySelector('title')).toHaveTextContent(label);
+      expect(
+        screen.getByTestId('budget202401!leftover-groceries'),
+      ).not.toHaveTextContent(label);
     },
   );
+
+  it('leaves an overspent balance red without a ring', () => {
+    setSheetValues({ budget: 65000, leftover: -2500 });
+    const container = renderBalance();
+    expect(container.querySelector('[data-goal-status]')).toBeNull();
+    expect(
+      screen.getByTestId('budget202401!leftover-groceries'),
+    ).toHaveTextContent('-25.00');
+  });
 
   it.each([
     ['without a goal', { goal: null }, true],
@@ -150,18 +174,23 @@ describe('BalanceWithCarryover goal status pill', () => {
       'data-goal-status',
       'funded',
     );
-    expect(screen.getByText('Fully funded')).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', { name: 'Goal progress' }),
+    ).toHaveAttribute('aria-valuenow', '100');
   });
 });
 
-describe('BalanceCell goal status pill', () => {
-  it('adds the icon and the status to the button label', () => {
+describe('BalanceCell goal progress ring', () => {
+  it('adds the ring and the status to the button label', () => {
     setSheetValues();
     renderBalance({ isMobile: true });
     const button = screen.getByRole('button', {
-      name: 'Open balance menu for Groceries category, Underfunded',
+      name: 'Open balance menu for Groceries category, Underfunded, 61% of goal',
     });
-    expect(button.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(button.querySelector('[data-goal-status]')).toHaveAttribute(
+      'data-goal-progress',
+      '61',
+    );
     expect(button).toHaveTextContent('400.00');
   });
 

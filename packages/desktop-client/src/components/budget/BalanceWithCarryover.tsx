@@ -3,31 +3,26 @@ import type {
   ComponentPropsWithoutRef,
   ComponentType,
   CSSProperties,
-  ReactNode,
-  SVGProps,
 } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import {
-  SvgArrowThinRight,
-  SvgCheckmark,
-  SvgExclamationOutline,
-  SvgTime,
-} from '@actual-app/components/icons/v1';
-import { styles } from '@actual-app/components/styles';
+import { SvgArrowThinRight } from '@actual-app/components/icons/v1';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { css, cx } from '@emotion/css';
-import type { TFunction } from 'i18next';
+import { css } from '@emotion/css';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
+import { GoalProgressRing } from './GoalProgressRing';
+import type { GoalRing } from './GoalProgressRing';
 import { GoalStatus } from './GoalStatus';
-import { getGoalFundingState, makeBalanceAmountStyle } from './util';
-import type { GoalFundingState } from './util';
+import {
+  getGoalFundingState,
+  getGoalProgress,
+  makeBalanceAmountStyle,
+} from './util';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;
@@ -62,8 +57,11 @@ type ChildrenWithClassName = (
   props: Parameters<CellValueChildren>[0] & {
     className: string;
   },
-  /** Set when the category has a goal, to draw the goal status pill. */
-  goalState: GoalFundingState | null,
+  /**
+   * Set when the category has a goal and is not overspent, to draw the goal
+   * progress ring beside the balance.
+   */
+  goalRing: GoalRing | null,
 ) => ReturnType<CellValueChildren>;
 
 type BalanceWithCarryoverProps = Omit<
@@ -105,23 +103,24 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
-  // Long goals count the balance towards the goal, others the budgeted amount
-  const getHave = (balanceValue: number) =>
-    longGoalValue === 1 ? balanceValue : budgetedValue;
-  const getBalanceAmountStyle = (balanceValue: number) =>
-    makeBalanceAmountStyle(
-      balanceValue,
-      isGoalTemplatesEnabled ? goalValue : null,
-      getHave(balanceValue),
-    );
-  const getGoalState = (balanceValue: number) =>
-    isGoalTemplatesEnabled && goalValue != null
-      ? getGoalFundingState(balanceValue, goalValue, getHave(balanceValue))
-      : null;
+
+  const getGoalRing = (balanceValue: number): GoalRing | null => {
+    if (!isGoalTemplatesEnabled || goalValue == null) {
+      return null;
+    }
+    // Long goals count the balance towards the goal, others the budgeted amount
+    const have = longGoalValue === 1 ? balanceValue : budgetedValue;
+    const state = getGoalFundingState(balanceValue, goalValue, have);
+    // An overspent balance is already red, like any other negative amount
+    if (state !== 'underfunded' && state !== 'funded') {
+      return null;
+    }
+    return { state, progress: getGoalProgress(have, goalValue) };
+  };
 
   const getDefaultClassName = (balanceValue: number) =>
     css({
-      ...getBalanceAmountStyle(balanceValue),
+      ...makeBalanceAmountStyle(balanceValue),
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       textAlign: 'right',
@@ -134,23 +133,21 @@ export function BalanceWithCarryover({
   return (
     <CellValue binding={balance} type="financial" {...props}>
       {({ type, name, value: balanceValue }) => {
-        const goalState = getGoalState(balanceValue);
-        const hasPill = !children && goalState != null;
+        const goalRing = getGoalRing(balanceValue);
+        const hasRing = !children && goalRing != null;
         return (
           <>
+            {hasRing && (
+              <GoalProgressRing {...goalRing} style={{ marginRight: 4 }} />
+            )}
             <View
-              style={
-                hasPill
-                  ? // Fill the cell so the pill can fit itself to the space
-                    {
-                      minHeight: 'auto',
-                      flex: '1 1 0',
-                      minWidth: 0,
-                      alignItems: 'flex-end',
-                      containerType: 'inline-size',
-                    }
-                  : { minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }
-              }
+              style={{
+                minHeight: 'auto',
+                flexShrink: 0,
+                // Leave room for the ring so a long amount truncates instead
+                // of overlapping it
+                maxWidth: hasRing ? 'calc(100% - 16px)' : '100%',
+              }}
             >
               {children ? (
                 children(
@@ -160,23 +157,8 @@ export function BalanceWithCarryover({
                     value: balanceValue,
                     className: getDefaultClassName(balanceValue),
                   },
-                  goalState,
+                  goalRing,
                 )
-              ) : goalState ? (
-                <GoalStatusPill
-                  state={goalState}
-                  className={getDefaultClassName(balanceValue)}
-                >
-                  <CellValueText
-                    type={type}
-                    name={name}
-                    value={balanceValue}
-                    className={css({
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    })}
-                  />
-                </GoalStatusPill>
               ) : (
                 <CellValueText
                   type={type}
@@ -189,7 +171,7 @@ export function BalanceWithCarryover({
 
             {carryoverValue && (
               <CarryoverIndicatorComponent
-                style={getBalanceAmountStyle(balanceValue)}
+                style={makeBalanceAmountStyle(balanceValue)}
               />
             )}
             {shouldInlineGoalStatus &&
@@ -215,86 +197,5 @@ export function BalanceWithCarryover({
         );
       }}
     </CellValue>
-  );
-}
-
-const GOAL_STATUS_PILLS = {
-  underfunded: {
-    Icon: SvgTime,
-    colors: {
-      backgroundColor: theme.templatePillUnderFundedBackground,
-      color: theme.templatePillUnderFundedText,
-    },
-  },
-  funded: {
-    Icon: SvgCheckmark,
-    colors: {
-      backgroundColor: theme.templatePillFundedBackground,
-      color: theme.templatePillFundedText,
-    },
-  },
-  overspent: {
-    Icon: SvgExclamationOutline,
-    colors: {
-      backgroundColor: theme.templatePillOverspentBackground,
-      color: theme.templatePillOverspentText,
-    },
-  },
-} satisfies Record<
-  GoalFundingState,
-  { Icon: ComponentType<SVGProps<SVGSVGElement>>; colors: CSSProperties }
->;
-
-export function getGoalStatusPill(state: GoalFundingState, t: TFunction) {
-  const labels = {
-    underfunded: t('Underfunded'),
-    funded: t('Funded'),
-    overspent: t('Overspent'),
-  } satisfies Record<GoalFundingState, string>;
-  return { ...GOAL_STATUS_PILLS[state], label: labels[state] };
-}
-
-type GoalStatusPillProps = {
-  state: GoalFundingState;
-  className: string;
-  children: ReactNode;
-};
-
-function GoalStatusPill({ state, className, children }: GoalStatusPillProps) {
-  const { t } = useTranslation();
-  const { Icon, colors, label } = getGoalStatusPill(state, t);
-  return (
-    <span
-      className={cx(
-        className,
-        css({
-          ...colors,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          borderRadius: 12,
-          padding: '2px 7px',
-          lineHeight: '18px',
-          maxWidth: '100%',
-          // Narrow month columns keep the colour but drop the icon to fit the amount
-          '@container (max-width: 100px)': {
-            padding: '2px 4px',
-            '& > svg': { display: 'none' },
-          },
-        }),
-      )}
-      data-goal-status={state}
-    >
-      <Icon
-        aria-hidden="true"
-        width={12}
-        height={12}
-        style={{ flexShrink: 0 }}
-      />
-      <span className={css(styles.visuallyHidden)}>
-        {t('{{status}}:', { status: label })}{' '}
-      </span>
-      {children}
-    </span>
   );
 }

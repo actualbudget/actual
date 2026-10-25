@@ -11,10 +11,11 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 import { AutoTextSize } from 'auto-text-size';
 
+import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import {
-  BalanceWithCarryover,
-  getGoalStatusPill,
-} from '#components/budget/BalanceWithCarryover';
+  getGoalRingLabel,
+  GoalProgressRing,
+} from '#components/budget/GoalProgressRing';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -82,12 +83,9 @@ export function BalanceCell({
       longGoal={longGoal}
       CarryoverIndicator={MobileCarryoverIndicator}
     >
-      {({ type, value, className: defaultClassName }, goalState) => {
-        // Goal statuses only describe spending, not income
-        const pill =
-          goalState && !category.is_income
-            ? getGoalStatusPill(goalState, t)
-            : null;
+      {({ type, value, className: defaultClassName }, goalRing) => {
+        // Goal progress only describes spending, not income
+        const ring = goalRing && !category.is_income ? goalRing : null;
         const amount = (
           <PrivacyFilter>
             <AutoTextSize
@@ -100,14 +98,11 @@ export function BalanceCell({
                 defaultClassName,
                 css({
                   ...styles.tnum,
-                  maxWidth: pill ? `calc(${columnWidth} - 30px)` : columnWidth,
+                  maxWidth: ring ? `calc(${columnWidth} - 30px)` : columnWidth,
                   textAlign: 'right',
                   fontSize: 12,
                   // AutoTextSize rounds widths, so a fraction of a pixel can overflow
-                  ...(pill && {
-                    color: pill.colors.color,
-                    textOverflow: 'clip',
-                  }),
+                  ...(ring && { textOverflow: 'clip' }),
                 }),
               )}
             >
@@ -121,28 +116,23 @@ export function BalanceCell({
             style={{
               ...PILL_STYLE,
               // AutoTextSize leaves alignItems on the button, so set it back
-              ...(pill && { ...pill.colors, gap: 4, alignItems: 'center' }),
+              ...(ring && { gap: 4, alignItems: 'center' }),
               maxWidth: columnWidth,
             }}
             onPress={onPress}
             aria-label={
-              pill && ariaLabel
+              ring && ariaLabel
                 ? t('{{label}}, {{status}}', {
                     label: ariaLabel,
-                    status: pill.label,
+                    status: getGoalRingLabel(ring, t),
                   })
                 : ariaLabel
             }
           >
-            {pill ? (
+            {ring ? (
               <>
-                <pill.Icon
-                  aria-hidden="true"
-                  width={12}
-                  height={12}
-                  style={{ flexShrink: 0 }}
-                />
-                {/* AutoTextSize sizes against its parent, so keep the icon out of it */}
+                <GoalProgressRing {...ring} />
+                {/* AutoTextSize sizes against its parent, so keep the ring out of it */}
                 <span
                   style={{
                     minWidth: 0,

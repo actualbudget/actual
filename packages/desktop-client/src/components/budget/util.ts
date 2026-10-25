@@ -91,10 +91,10 @@ export function compareToGoal(
 export type GoalFundingState = 'overspent' | 'underfunded' | 'funded';
 
 /**
- * The state behind a category balance's colour and goal status pill:
- * overspent below zero, otherwise underfunded or funded against the goal,
- * or null when there is no goal. Amounts are compared as displayed, so with
- * hidden decimals a balance that rounds to zero is not overspent.
+ * The state behind a category's goal progress ring: overspent below zero,
+ * otherwise underfunded or funded against the goal, or null when there is
+ * no goal. Amounts are compared as displayed, so with hidden decimals a
+ * balance that rounds to zero is not overspent.
  */
 export function getGoalFundingState(
   value: number,
@@ -110,25 +110,30 @@ export function getGoalFundingState(
   return compareToGoal(budgetedValue, goalValue) < 0 ? 'underfunded' : 'funded';
 }
 
-export function makeBalanceAmountStyle(
-  value: number,
-  goalValue?: number | null,
-  budgetedValue?: number | null,
-) {
-  switch (getGoalFundingState(value, goalValue, budgetedValue)) {
-    case 'overspent':
-      return { color: theme.budgetNumberNegative };
-    case 'underfunded':
-      return { color: theme.templateNumberUnderFunded };
-    case 'funded':
-      return { color: theme.templateNumberFunded };
-    default:
-      return (
-        makeAmountGrey(normalizeIntegerValue(value)) ?? {
-          color: theme.budgetNumberPositive,
-        }
-      );
+/**
+ * How much of the goal is funded, as a whole percentage from 0 to 100.
+ * Rounded down while underfunded so it only reads 100 once the goal is met.
+ */
+export function getGoalProgress(
+  have: number | null | undefined,
+  goalValue: number,
+): number {
+  if (compareToGoal(have, goalValue) >= 0) {
+    return 100;
   }
+  if (goalValue <= 0) {
+    return 0;
+  }
+  const ratio = Math.max(0, (have ?? 0) / goalValue);
+  return Math.min(99, Math.floor(ratio * 100));
+}
+
+export function makeBalanceAmountStyle(value: number) {
+  const amount = normalizeIntegerValue(value);
+  if (amount < 0) {
+    return { color: theme.budgetNumberNegative };
+  }
+  return makeAmountGrey(amount) ?? { color: theme.budgetNumberPositive };
 }
 
 export function makeAmountFullStyle(
