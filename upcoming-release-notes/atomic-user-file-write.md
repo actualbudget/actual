@@ -3,4 +3,4 @@ category: Bugfix
 authors: [laforcem]
 ---
 
-Fix a rare bug in the desktop app and sync server where a budget file could be left corrupted if saving was interrupted
+Fix budget files being left half-written if saving fails or the desktop app or sync server crashes mid-save

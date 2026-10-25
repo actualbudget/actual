@@ -20,8 +20,8 @@ export function isValidGroupId(id: string): id is GroupId {
 export function getPathForUserFile(fileId: FileId) {
   const userFilesDir = resolve(config.get('userFiles'));
   const filePath = resolve(userFilesDir, `file-${fileId}.blob`);
-  // isValidFileId already rules out traversal; this makes the containment
-  // explicit where the path is built. A filesystem root already ends in sep.
+  // isValidFileId already rules out traversal; this keeps the check where the
+  // path is built. Filesystem roots already end in sep.
   const prefix = userFilesDir.endsWith(sep) ? userFilesDir : userFilesDir + sep;
   if (!filePath.startsWith(prefix)) {
     throw new Error('Invalid file id');

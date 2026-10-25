@@ -3,8 +3,8 @@ import { dirname, isAbsolute, sep } from 'node:path';
 
 let tempFileCounter = 0;
 
-// Follows symlinks, including one whose target doesn't exist yet, so the
-// rename replaces the target and leaves the link in place.
+// Follows symlinks, including dangling ones, so the rename replaces the
+// link's target rather than the link.
 async function resolveTarget(filepath: string): Promise<string> {
   try {
     return await fs.realpath(filepath);
@@ -17,15 +17,15 @@ async function resolveTarget(filepath: string): Promise<string> {
   if (link === null) {
     return filepath;
   }
-  // Not path.resolve: it would collapse `..` before the filesystem follows
-  // any symlinked directories.
+  // Not path.resolve, which collapses `..` before symlinked directories are
+  // followed.
   return resolveTarget(
     isAbsolute(link) ? link : dirname(filepath) + sep + link,
   );
 }
 
-// Writes to a temp file next to the target and renames it into place, so an
-// interrupted write never leaves a partially written file behind.
+// Writes a temp file and renames it over the target, so a write that fails or
+// is killed partway leaves the original file intact.
 export async function atomicWriteFile(
   filepath: string,
   contents: string | NodeJS.ArrayBufferView,
@@ -40,7 +40,7 @@ export async function atomicWriteFile(
   try {
     await fs.writeFile(tmpPath, contents, { flush: true, mode });
     if (mode !== undefined) {
-      // The umask can strip bits at creation. Best-effort, as some
+      // Restore bits the umask stripped. Best-effort, as some
       // filesystems refuse chmod.
       await fs.chmod(tmpPath, mode).catch(() => undefined);
     }
