@@ -3,13 +3,37 @@ name: Publish iOS
 # Uploads the Capacitor iOS app to App Store Connect. Every master push
 # produces a TestFlight build; a published release produces the build that
 # a human then submits for App Store review from App Store Connect.
+#
+# Secrets (all in the `release` environment) and how to regenerate them:
+#
+# - APPLE_TEAM_ID: developer.apple.com -> Membership details -> Team ID.
+#   Shared with the Electron notarization workflows.
+# - APPLE_SIGNING_P12_BASE64 / APPLE_SIGNING_P12_PASSWORD: an "Apple
+#   Distribution" certificate plus its private key. Create one in Xcode
+#   (Settings -> Accounts -> Manage Certificates -> "+") or at
+#   developer.apple.com/account/resources/certificates, then in Keychain
+#   Access export the certificate (with its key) as a .p12 protected by a
+#   password. The secret is `base64 -i <file>.p12` and that password.
+# - APP_STORE_CONNECT_API_KEY_ID / APP_STORE_CONNECT_API_ISSUER_ID /
+#   APP_STORE_CONNECT_API_KEY_P8: an App Store Connect API team key.
+#   appstoreconnect.apple.com -> Users and Access -> Integrations ->
+#   App Store Connect API -> Team Keys -> "+", role "App Manager". The
+#   Issuer ID is shown above the key list, the Key ID in the row, and the
+#   .p8 file (downloadable only once) is the P8 secret's full contents.
 
 on:
   push:
     branches:
       - master
     paths-ignore:
+      # Packages that are not part of the mobile app bundle.
+      - 'packages/api/**'
+      - 'packages/ci-actions/**'
+      - 'packages/cli/**'
+      - 'packages/desktop-electron/**'
       - 'packages/docs/**'
+      - 'packages/eslint-plugin-actual/**'
+      - 'packages/sync-server/**'
       - 'upcoming-release-notes/**'
       - '**.md'
   release:
@@ -43,6 +67,10 @@ jobs:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
 
+      # Build before any signing material lands on the runner.
+      - name: Build web app
+        run: yarn build:browser
+
       - name: Import signing certificates
         env:
           P12_BASE64: ${{ secrets.APPLE_SIGNING_P12_BASE64 }}
@@ -70,9 +98,6 @@ jobs:
         run: |
           printf '%s\n' "$API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
           chmod 600 "$RUNNER_TEMP/AuthKey.p8"
-
-      - name: Build web app
-        run: yarn build:browser
 
       - name: Archive and upload to App Store Connect
         env:
