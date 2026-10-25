@@ -3,4 +3,4 @@ category: Enhancements
 authors: [mattm4444]
 ---
 
-Show a small ring beside the balance of categories whose goal is not yet funded that fills as the goal is funded and disappears once it is met
+Replace the gold balance text on categories whose goal is not yet funded with a small ring that fills as the goal is funded and disappears once it is met

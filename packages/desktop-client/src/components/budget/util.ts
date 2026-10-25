@@ -126,10 +126,21 @@ export function getGoalRingProgress(
   return getGoalProgress(have, goalValue);
 }
 
-export function makeBalanceAmountStyle(value: number) {
+/**
+ * The colour of a balance: red when overspent, green once its goal is funded
+ * and otherwise by its sign. An unmet goal is marked by the ring instead.
+ */
+export function makeBalanceAmountStyle(
+  value: number,
+  goalValue?: number | null,
+  have?: number | null,
+) {
   const amount = normalizeIntegerValue(value);
   if (amount < 0) {
     return { color: theme.budgetNumberNegative };
+  }
+  if (goalValue != null && compareToGoal(have, goalValue) >= 0) {
+    return { color: theme.templateNumberFunded };
   }
   return makeAmountGrey(amount) ?? { color: theme.budgetNumberPositive };
 }

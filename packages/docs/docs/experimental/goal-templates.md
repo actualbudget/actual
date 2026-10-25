@@ -65,10 +65,10 @@ You can also apply selections of templates if you want.
 
 ### Goal Indicators
 
-After having run the templates in a given month and category, a category whose goal is not yet met shows a small gold ring beside its balance. The ring fills as the goal is funded and disappears once the goal is met; hover over it to see how much of the goal is funded.
-The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met (plain balance), goal not met (partly filled ring), and a negative balance (red).
+After having run the templates in a given month and category, a category whose goal is not yet met shows a small gold ring beside its balance. The ring fills as the goal is funded and disappears once the goal is met, when the balance turns green. Hover over the ring to see how much of the goal is funded.
+The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met (green), goal not met (partly filled ring), and a negative balance (red).
 
-<img width="690" alt="Category balances in the normal, empty and goal met states as plain amounts, a partly filled ring beside a goal that is not met, and a red negative balance" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
+<img width="690" alt="Category balances in the normal and empty states as plain amounts, a green balance whose goal is met, a partly filled ring beside a goal that is not met, and a red negative balance" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
 
 This goal value is based on the maximum amount that the templates in a category request to be budgeted.
 

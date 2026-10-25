@@ -1,6 +1,7 @@
+import { theme } from '@actual-app/components/theme';
 import { setNumberFormat } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 
 import { BalanceCell } from '#components/mobile/budget/BalanceCell';
 import { SheetNameProvider } from '#hooks/useSheetName';
@@ -158,6 +159,32 @@ describe('BalanceWithCarryover goal progress ring', () => {
     },
   );
 
+  it.each([
+    ['funded', { budget: 65000, leftover: 65000 }],
+    ['funded by its balance', { longGoal: 1, budget: 0, leftover: 70000 }],
+  ])('turns the balance green when %s', (_, values) => {
+    setSheetValues(values);
+    renderBalance();
+    expect(screen.getByTestId('budget202401!leftover-groceries')).toHaveStyle({
+      color: theme.templateNumberFunded,
+    });
+  });
+
+  it.each([
+    ['underfunded', {}, true],
+    ['without a goal', { goal: null, budget: 65000, leftover: 65000 }, true],
+    ['with the feature flag off', { budget: 65000, leftover: 65000 }, false],
+  ])(
+    'keeps the usual balance colour when %s',
+    (_, values, isGoalTemplatesEnabled) => {
+      setSheetValues(values);
+      renderBalance({ isGoalTemplatesEnabled });
+      expect(screen.getByTestId('budget202401!leftover-groceries')).toHaveStyle(
+        { color: theme.budgetNumberPositive },
+      );
+    },
+  );
+
   it('reads as the amount followed by its status', () => {
     setSheetValues();
     renderBalance();
@@ -190,15 +217,20 @@ describe('BalanceCell goal progress ring', () => {
   });
 
   it.each([
-    ['without a goal', { goal: null }],
-    ['once funded', { budget: 65000, leftover: 65000 }],
-  ])('keeps the plain pill %s', (_, values) => {
+    ['without a goal', { goal: null }, theme.budgetNumberPositive],
+    [
+      'once funded',
+      { budget: 65000, leftover: 65000 },
+      theme.templateNumberFunded,
+    ],
+  ])('keeps the plain pill %s', (_, values, color) => {
     setSheetValues(values);
     renderBalance({ isMobile: true });
     const button = screen.getByRole('button', {
       name: 'Open balance menu for Groceries category',
     });
     expect(button.querySelector('svg')).toBeNull();
+    expect(within(button).getByText(/^[\d,.]+$/)).toHaveStyle({ color });
   });
 
   it('keeps the plain pill for income categories', () => {

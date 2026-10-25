@@ -101,19 +101,26 @@ export function BalanceWithCarryover({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
   // Income rows pass isDisabled; goals describe spending, not income
+  const hasGoal = isGoalTemplatesEnabled && !isDisabled;
+  // Long goals count the balance towards the goal, others the budgeted amount
+  const getHave = (balanceValue: number) =>
+    longGoalValue === 1 ? balanceValue : budgetedValue;
+
   const getRingProgress = (balanceValue: number) =>
-    isGoalTemplatesEnabled && !isDisabled
-      ? getGoalRingProgress(
-          balanceValue,
-          goalValue,
-          // Long goals count the balance towards the goal, others the budgeted amount
-          longGoalValue === 1 ? balanceValue : budgetedValue,
-        )
+    hasGoal
+      ? getGoalRingProgress(balanceValue, goalValue, getHave(balanceValue))
       : null;
+
+  const getBalanceAmountStyle = (balanceValue: number) =>
+    makeBalanceAmountStyle(
+      balanceValue,
+      hasGoal ? goalValue : null,
+      getHave(balanceValue),
+    );
 
   const getDefaultClassName = (balanceValue: number) =>
     css({
-      ...makeBalanceAmountStyle(balanceValue),
+      ...getBalanceAmountStyle(balanceValue),
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       textAlign: 'right',
@@ -162,7 +169,7 @@ export function BalanceWithCarryover({
 
             {carryoverValue && (
               <CarryoverIndicatorComponent
-                style={makeBalanceAmountStyle(balanceValue)}
+                style={getBalanceAmountStyle(balanceValue)}
               />
             )}
             {shouldInlineGoalStatus &&

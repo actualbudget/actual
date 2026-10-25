@@ -67,7 +67,7 @@ describe('getGoalProgress', () => {
 });
 
 describe('makeBalanceAmountStyle', () => {
-  it('colours the balance by its sign alone', () => {
+  it('colours a balance without a goal by its sign', () => {
     expect(makeBalanceAmountStyle(-2500)).toEqual({
       color: theme.budgetNumberNegative,
     });
@@ -79,10 +79,47 @@ describe('makeBalanceAmountStyle', () => {
     });
   });
 
-  it('treats a balance that rounds to zero as zero when decimals are hidden', () => {
+  it('turns green once the goal is funded', () => {
+    expect(makeBalanceAmountStyle(65000, 65000, 65000)).toEqual({
+      color: theme.templateNumberFunded,
+    });
+    expect(makeBalanceAmountStyle(90000, 65000, 90000)).toEqual({
+      color: theme.templateNumberFunded,
+    });
+    // Funded for the month and spent down to nothing is still funded
+    expect(makeBalanceAmountStyle(0, 65000, 65000)).toEqual({
+      color: theme.templateNumberFunded,
+    });
+  });
+
+  it('leaves an unmet goal to the ring and keeps the sign colour', () => {
+    expect(makeBalanceAmountStyle(40000, 65000, 40000)).toEqual({
+      color: theme.budgetNumberPositive,
+    });
+    expect(makeBalanceAmountStyle(0, 65000, 0)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+    expect(makeBalanceAmountStyle(0, 65000, null)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+  });
+
+  it('stays red when overspent, funded or not', () => {
+    expect(makeBalanceAmountStyle(-2500, 65000, 65000)).toEqual({
+      color: theme.budgetNumberNegative,
+    });
+    expect(makeBalanceAmountStyle(-2500, 65000, 0)).toEqual({
+      color: theme.budgetNumberNegative,
+    });
+  });
+
+  it('compares the displayed amounts when decimals are hidden', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: true });
     expect(makeBalanceAmountStyle(-40)).toEqual({
       color: theme.budgetNumberZero,
+    });
+    expect(makeBalanceAmountStyle(10000, 10040, 10000)).toEqual({
+      color: theme.templateNumberFunded,
     });
   });
 });
