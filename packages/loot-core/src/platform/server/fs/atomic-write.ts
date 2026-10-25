@@ -44,11 +44,7 @@ export async function atomicWriteFile(
     await promiseRetry(
       async (retry, attempt) => {
         try {
-          await fs.promises.writeFile(tmpPath, contents, {
-            encoding: 'utf8',
-            flush: true,
-            mode,
-          });
+          await fs.promises.writeFile(tmpPath, contents, { flush: true, mode });
           if (mode !== undefined) {
             // The umask can strip bits at creation. Best-effort, as some
             // filesystems refuse chmod.
