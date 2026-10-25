@@ -85,18 +85,29 @@ describe('atomicWriteFile', () => {
   });
 
   test('creates the target of a dangling symlink instead of replacing it', async () => {
-    const realTarget = path.join(dir, 'real-metadata.json');
-    const symlinkPath = path.join(dir, 'metadata.json');
-    fs.symlinkSync(realTarget, symlinkPath);
+    // A relative link reached through a symlinked directory, so `..` must
+    // resolve from the real directory.
+    const realDir = path.join(dir, 'actual', 'nested');
+    fs.mkdirSync(realDir, { recursive: true });
+    fs.symlinkSync(realDir, path.join(dir, 'storage'));
+    const symlinkPath = path.join(realDir, 'metadata.json');
+    fs.symlinkSync(path.join('..', 'metadata.json'), symlinkPath);
+    fs.writeFileSync(path.join(dir, 'metadata.json'), 'unrelated');
 
-    await atomicWriteFile(symlinkPath, 'new');
+    await atomicWriteFile(path.join(dir, 'storage', 'metadata.json'), 'new');
 
     expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
-    expect(fs.readFileSync(realTarget, 'utf8')).toBe('new');
+    expect(
+      fs.readFileSync(path.join(dir, 'actual', 'metadata.json'), 'utf8'),
+    ).toBe('new');
+    expect(fs.readFileSync(path.join(dir, 'metadata.json'), 'utf8')).toBe(
+      'unrelated',
+    );
   });
 
-  test.skipIf(process.platform === 'win32')(
+  test(
     'keeps the permissions of the file it replaces',
+    { skip: process.platform === 'win32' },
     async () => {
       const target = path.join(dir, 'metadata.json');
       fs.writeFileSync(target, 'original');

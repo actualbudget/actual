@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, isAbsolute, sep } from 'node:path';
 
 let tempFileCounter = 0;
 
@@ -14,9 +14,14 @@ async function resolveTarget(filepath: string): Promise<string> {
     }
   }
   const link = await fs.readlink(filepath).catch(() => null);
-  return link === null
-    ? filepath
-    : resolveTarget(resolve(dirname(filepath), link));
+  if (link === null) {
+    return filepath;
+  }
+  // Not path.resolve: it would collapse `..` before the filesystem follows
+  // any symlinked directories.
+  return resolveTarget(
+    isAbsolute(link) ? link : dirname(filepath) + sep + link,
+  );
 }
 
 // Writes to a temp file next to the target and renames it into place, so an
