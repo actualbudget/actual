@@ -12,27 +12,21 @@ import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import { isReviewedCurrency } from '@actual-app/core/shared/amount-encoding';
 import { currencies } from '@actual-app/core/shared/currencies';
-import { q } from '@actual-app/core/shared/query';
+import type {
+  HistoryFilter,
+  HistoryRow,
+} from '@actual-app/core/types/models/exchange-rate-history';
 
+import { useFxProviderContext } from '#hooks/useFxProviderContext';
 import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { aqlQuery } from '#queries/aqlQuery';
 
 import { useCurrencyOptions } from './Currency';
+import { ExchangeRateHistory } from './ExchangeRateHistory';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 
 type ManualKind = 'dated' | 'standing';
-
-type RateRow = {
-  id: string;
-  base_currency: string;
-  quote_currency: string;
-  rate: string;
-  kind: ManualKind | 'fetched';
-  source: string;
-  timestamp: string;
-};
 
 type RateResolution =
   | {
@@ -110,14 +104,42 @@ function describeResolution(
   return t('fetched rate {{rate}} from {{date}} ({{source}})', values);
 }
 
+function isManual(row: HistoryRow): row is HistoryRow & { kind: ManualKind } {
+  return row.kind === 'dated' || row.kind === 'standing';
+}
+
+function manualKind(value: string): ManualKind {
+  return value === 'standing' ? 'standing' : 'dated';
+}
+
+function historyFilter(quote: string): HistoryFilter {
+  return quote ? { quoteCurrency: quote } : {};
+}
+
 export function ExchangeRateSettings() {
   const { t } = useTranslation();
   const available = useMulticurrencyAvailable();
+  const fx = useFxProviderContext();
+  const fxRef = useRef(fx);
+  fxRef.current = fx;
   const [baseCurrency] = useSyncedPref('defaultCurrencyCode');
   const currencyOptions = useCurrencyOptions();
-  const [rows, setRows] = useState<RateRow[]>([]);
+  const [rows, setRows] = useState<HistoryRow[]>([]);
   const [version, setVersion] = useState(0);
   const [chosenQuote, setQuote] = useState('');
+  const [quoteFilter, setQuoteFilter] = useState('');
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [unpageableCount, setUnpageableCount] = useState(0);
+  const [invalidCount, setInvalidCount] = useState(0);
+  const [listLoaded, setListLoaded] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
+  const listGeneration = useRef(0);
+  const listMounted = useRef(true);
+  const pageRequest = useRef<{
+    generation: number;
+    cursor: string | null;
+    accepted: boolean;
+  } | null>(null);
   const [today, setToday] = useState(utcToday);
   const [kind, setKind] = useState<ManualKind>('dated');
   const [date, setDate] = useState(utcToday);
@@ -145,6 +167,7 @@ export function ExchangeRateSettings() {
     setRowsBase(baseCurrency);
     setRows([]);
     setQuote('');
+    setQuoteFilter('');
     setKind('dated');
     setDate(utcToday());
     setRate('');
@@ -168,40 +191,51 @@ export function ExchangeRateSettings() {
   }, []);
 
   useEffect(() => {
-    if (!baseCurrency) {
-      setRows([]);
-      return;
-    }
-    let cancelled = false;
-    // Rows saved under an earlier budget currency stay out of this list:
-    // save and remove address rows by the current budget currency.
-    void aqlQuery(
-      q('exchange_rates')
-        .filter({ base_currency: baseCurrency })
-        .select([
-          'id',
-          'base_currency',
-          'quote_currency',
-          'rate',
-          'kind',
-          'source',
-          'timestamp',
-        ]),
-    ).then(({ data }: { data: RateRow[] }) => {
-      if (cancelled) return;
-      setRows(
-        [...data].sort((a, b) => {
-          if (a.quote_currency !== b.quote_currency) {
-            return a.quote_currency < b.quote_currency ? -1 : 1;
-          }
-          return a.timestamp < b.timestamp ? 1 : -1;
-        }),
-      );
-    });
+    if (!available || !baseCurrency) return;
+    const generation = ++listGeneration.current;
+    const filter = historyFilter(quoteFilter);
+    pageRequest.current = { generation, cursor: null, accepted: false };
+    setRows([]);
+    setNextCursor(null);
+    setUnpageableCount(0);
+    setInvalidCount(0);
+    setListLoaded(false);
+    setListError(null);
+    let stopped = false;
+    void (async () => {
+      const result = await send('exchange-rates/history-page', filter);
+      if (
+        stopped ||
+        !listMounted.current ||
+        !acceptHistoryPage(generation, null)
+      ) {
+        return;
+      }
+      if (result.status !== 'ok') return;
+      fxRef.current.observe(result.context);
+      if (fxRef.current.current() !== result.context) return;
+      pageRequest.current = { generation, cursor: null, accepted: true };
+      setRows(result.rows);
+      setNextCursor(result.nextCursor);
+      setUnpageableCount(result.unpageableCount ?? 0);
+      setInvalidCount(result.invalidCount);
+      setListLoaded(true);
+    })();
     return () => {
-      cancelled = true;
+      stopped = true;
+      listGeneration.current += 1;
+      pageRequest.current = null;
     };
-  }, [baseCurrency, version]);
+  }, [available, baseCurrency, quoteFilter, version, fx.epoch]);
+
+  useEffect(() => {
+    listMounted.current = true;
+    return () => {
+      listMounted.current = false;
+      listGeneration.current += 1;
+      pageRequest.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const unlistenUndo = listen('undo-event', () => {
@@ -293,12 +327,73 @@ export function ExchangeRateSettings() {
     }
   }
 
-  async function remove(row: RateRow) {
-    // The server finds the row under the current budget currency.
-    if (row.kind === 'fetched' || row.base_currency !== baseCurrency) return;
+  function acceptHistoryPage(generation: number, cursor: string | null) {
+    const request = pageRequest.current;
+    return (
+      request !== null &&
+      request.generation === generation &&
+      request.cursor === cursor &&
+      !request.accepted
+    );
+  }
+
+  async function loadMore() {
+    const cursor = nextCursor;
+    if (!cursor) return;
+    const generation = listGeneration.current;
+    const filter = historyFilter(quoteFilter);
+    pageRequest.current = { generation, cursor, accepted: false };
+    const result = await send(
+      'exchange-rates/history-page',
+      cursor ? { ...filter, cursor } : filter,
+    );
+    if (
+      !listMounted.current ||
+      !acceptHistoryPage(generation, cursor) ||
+      result.status !== 'ok'
+    ) {
+      return;
+    }
+    fxRef.current.observe(result.context);
+    if (fxRef.current.current() !== result.context) return;
+    pageRequest.current = { generation, cursor, accepted: true };
+    setRows(current => [...current, ...result.rows]);
+    setNextCursor(result.nextCursor);
+    setInvalidCount(current => current + result.invalidCount);
+    setListLoaded(true);
+  }
+
+  async function remove(row: HistoryRow) {
     setBusy(true);
     setError(null);
+    setListError(null);
     try {
+      if (row.kind === 'fetched') {
+        const context = fxRef.current.current();
+        if (!context) return;
+        const result = await send('exchange-rates/remove-fetched', {
+          id: row.id,
+          context,
+          reviewed: {
+            rate: row.rate,
+            source: row.source,
+            timestamp: row.timestamp,
+          },
+        });
+        if (result.status === 'removed') {
+          setVersion(value => value + 1);
+        } else if (result.status === 'stale') {
+          setListError(
+            t(
+              'This rate changed after it was listed. Review the list and try again.',
+            ),
+          );
+        } else if (result.status === 'missing') {
+          setListError(t('This rate is no longer in the list.'));
+        }
+        return;
+      }
+      if (!isManual(row)) return;
       await send('exchange-rates/remove', {
         quoteCurrency: row.quote_currency,
         kind: row.kind,
@@ -354,7 +449,7 @@ export function ExchangeRateSettings() {
               disabled={busy}
               value={kind}
               onChange={value => {
-                setKind(value as ManualKind);
+                setKind(manualKind(value));
                 clearStatus();
               }}
               options={[
@@ -465,10 +560,51 @@ export function ExchangeRateSettings() {
         </SettingsRow>
         <SettingsRow
           title={t('Saved rates')}
+          htmlFor="exchange-rate-filter-quote"
           description={
-            rows.length === 0 ? t('No exchange rates saved yet.') : undefined
+            listLoaded && rows.length === 0
+              ? t('No exchange rates saved yet.')
+              : undefined
+          }
+          control={
+            <Select
+              id="exchange-rate-filter-quote"
+              value={quoteFilter}
+              onChange={value => {
+                setQuoteFilter(value);
+              }}
+              options={[['', t('All currencies')], ...quoteOptions]}
+              style={{ maxWidth: '100%' }}
+            />
           }
         >
+          {unpageableCount > 0 && (
+            <Text style={styles.smallText}>
+              {t(
+                'Saved rates that cannot be listed because their stored values cannot be read: {{count}}.',
+                { count: unpageableCount },
+              )}
+            </Text>
+          )}
+          {invalidCount > 0 && (
+            <Text style={styles.smallText}>
+              {t('Invalid saved rates left out of the list: {{count}}.', {
+                count: invalidCount,
+              })}
+            </Text>
+          )}
+          {rows.some(row => row.kind === 'fetched') && (
+            <Text style={styles.smallText}>
+              {t(
+                'A removed fetched rate stays removed. Only a backfill with Replace existing brings it back; Keep existing does not.',
+              )}
+            </Text>
+          )}
+          {listError && (
+            <Text style={{ ...styles.smallText, color: theme.errorText }}>
+              {listError}
+            </Text>
+          )}
           {rows.length > 0 && (
             <View style={{ gap: spacing.sm }}>
               {rows.map(row => (
@@ -496,17 +632,11 @@ export function ExchangeRateSettings() {
                     {utcDay(row.timestamp)}
                     {row.source !== 'manual' ? ` (${row.source})` : ''}
                   </Text>
-                  {row.kind !== 'fetched' && (
-                    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                    {isManual(row) && (
                       <Button
                         isDisabled={busy}
                         onPress={() => {
-                          if (
-                            row.kind === 'fetched' ||
-                            row.base_currency !== baseCurrency
-                          ) {
-                            return;
-                          }
                           setQuote(row.quote_currency);
                           setKind(row.kind);
                           setDate(utcDay(row.timestamp));
@@ -516,21 +646,38 @@ export function ExchangeRateSettings() {
                       >
                         <Trans>Edit</Trans>
                       </Button>
-                      <Button
-                        isDisabled={busy}
-                        onPress={() => {
-                          void remove(row);
-                        }}
-                      >
-                        <Trans>Remove</Trans>
-                      </Button>
-                    </View>
-                  )}
+                    )}
+                    <Button
+                      isDisabled={busy}
+                      onPress={() => {
+                        void remove(row);
+                      }}
+                    >
+                      <Trans>Remove</Trans>
+                    </Button>
+                  </View>
                 </View>
               ))}
             </View>
           )}
+          {nextCursor && (
+            <Button
+              onPress={() => {
+                void loadMore();
+              }}
+            >
+              <Trans>Load more</Trans>
+            </Button>
+          )}
         </SettingsRow>
+        <ExchangeRateHistory
+          fx={fx}
+          filter={historyFilter(quoteFilter)}
+          quoteOptions={quoteOptions}
+          onRatesChanged={() => {
+            setVersion(value => value + 1);
+          }}
+        />
       </SettingsGroup>
     </View>
   );
