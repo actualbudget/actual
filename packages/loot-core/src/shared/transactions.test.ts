@@ -392,7 +392,7 @@ describe('Transactions', () => {
     ];
 
     // Mirrors `api.updateTransaction(id, { subtransactions: [...] })`, which
-    // reaches this reducer as `updateTransaction(transactions, { id, ...fields })`
+    // reaches this reducer as `updateTransaction(transactions, { ...existing, ...fields })`
     // (see `api/transaction-update` in server/api.ts).
     const { data, diff } = updateTransaction(transactions, {
       id: 't1',
