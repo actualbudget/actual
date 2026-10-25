@@ -28,13 +28,13 @@ import {
 import { config } from './load-config';
 import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
+import { atomicWriteFile } from './util/atomic-write';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
-  atomicWriteUserFile,
   getPathForGroupFile,
   getPathForUserFile,
   isValidFileId,
@@ -361,7 +361,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   try {
-    await atomicWriteUserFile(getPathForUserFile(fileId), req.body);
+    await atomicWriteFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });

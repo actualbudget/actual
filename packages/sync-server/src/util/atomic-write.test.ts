@@ -3,9 +3,9 @@ import fsPromises from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { atomicWriteUserFile } from './paths';
+import { atomicWriteFile } from './atomic-write';
 
-describe('atomicWriteUserFile', () => {
+describe('atomicWriteFile', () => {
   let dir: string;
 
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('atomicWriteUserFile', () => {
     const target = path.join(dir, 'file-abc.blob');
     fs.writeFileSync(target, 'original');
 
-    await atomicWriteUserFile(target, Buffer.from('new'));
+    await atomicWriteFile(target, Buffer.from('new'));
 
     expect(fs.readFileSync(target, 'utf8')).toBe('new');
     expect(tempFiles()).toEqual([]);
@@ -37,9 +37,9 @@ describe('atomicWriteUserFile', () => {
       throw new Error('simulated disk failure');
     });
 
-    await expect(
-      atomicWriteUserFile(target, Buffer.from('new')),
-    ).rejects.toThrow('simulated disk failure');
+    await expect(atomicWriteFile(target, Buffer.from('new'))).rejects.toThrow(
+      'simulated disk failure',
+    );
 
     expect(fs.readFileSync(target, 'utf8')).toBe('original');
     expect(tempFiles()).toEqual([]);
@@ -51,7 +51,7 @@ describe('atomicWriteUserFile', () => {
     fs.writeFileSync(realTarget, 'original');
     fs.symlinkSync(realTarget, symlinkPath);
 
-    await atomicWriteUserFile(symlinkPath, Buffer.from('new'));
+    await atomicWriteFile(symlinkPath, Buffer.from('new'));
 
     expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
     expect(fs.readFileSync(realTarget, 'utf8')).toBe('new');
