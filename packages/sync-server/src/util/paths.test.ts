@@ -10,7 +10,9 @@ describe('getPathForUserFile', () => {
     () => {
       const userFiles = config.get('userFiles');
       config.set('userFiles', '/');
-      onTestFinished(() => config.set('userFiles', userFiles));
+      onTestFinished(() => {
+        config.set('userFiles', userFiles);
+      });
 
       expect(getPathForUserFile('abc' as FileId)).toBe('/file-abc.blob');
     },
