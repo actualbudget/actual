@@ -57,7 +57,7 @@ export function MonteCarloCard({
   // otherwise trigger a full re-run on stale numbers), and cached by
   // config so coming back to the dashboard doesn't simulate again. The
   // engine is deterministic, so a cached result never goes stale
-  const { data: result = null } = useQuery({
+  const { data } = useQuery({
     queryKey: ['monte-carlo-card', resolvedConfig],
     queryFn: () =>
       runMonteCarloSimulation({
@@ -68,6 +68,10 @@ export function MonteCarloCard({
     enabled: hasLiveBalances,
     staleTime: Infinity,
   });
+  // While the live balances are still loading the config holds the stored
+  // ones, and a result cached for those would flash a since-changed number
+  // before the live key replaces it
+  const result = hasLiveBalances ? (data ?? null) : null;
 
   const endAge = config.currentAge + getMonteCarloHorizonYears(config);
   const successPercent =
