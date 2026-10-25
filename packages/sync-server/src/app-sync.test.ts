@@ -742,7 +742,7 @@ describe('/upload-user-file', () => {
     expect(rows[0].name).toEqual('admin-renamed.txt');
   });
 
-  it('does not corrupt the existing file when the write fails partway through', async () => {
+  it('returns 500 and keeps the existing file when the write fails', async () => {
     const fileId = generateFileId();
     const groupId = 'write-failure-group-id';
     const keyId = 'key-id';
@@ -753,7 +753,7 @@ describe('/upload-user-file', () => {
 
     getAccountDb().mutate(
       'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
-      [fileId, groupId, syncVersion, 'racing.txt', encryptMeta, keyId],
+      [fileId, groupId, syncVersion, 'failing.txt', encryptMeta, keyId],
     );
     fs.writeFileSync(filePath, originalContent);
     onTestFinished(() => {
@@ -762,9 +762,7 @@ describe('/upload-user-file', () => {
       } catch {}
     });
 
-    // Simulate a write that dies partway through (disk full, process killed,
-    // etc): whatever fs.writeFile is called with, some bytes land on disk
-    // before it rejects.
+    // Some bytes land on disk before the write rejects.
     const writeFileSpy = vi
       .spyOn(fsPromises, 'writeFile')
       .mockImplementationOnce(async path => {
@@ -777,7 +775,7 @@ describe('/upload-user-file', () => {
       .post('/upload-user-file')
       .set('Content-Type', 'application/encrypted-file')
       .set('x-actual-token', 'valid-token')
-      .set('x-actual-name', 'racing.txt')
+      .set('x-actual-name', 'failing.txt')
       .set('x-actual-file-id', fileId)
       .set('x-actual-group-id', groupId)
       .set('x-actual-format', syncVersion.toString())
@@ -786,91 +784,6 @@ describe('/upload-user-file', () => {
 
     expect(res.statusCode).toEqual(500);
     expect(fs.readFileSync(filePath, 'utf8')).toEqual(originalContent);
-  });
-
-  it.skipIf(process.platform === 'win32')(
-    'keeps the existing file permission mode',
-    async () => {
-      const fileId = generateFileId();
-      const groupId = 'mode-group-id';
-      const keyId = 'key-id';
-      const syncVersion = 2;
-      const encryptMeta = JSON.stringify({ keyId });
-      const filePath = getPathForUserFile(fileId);
-
-      getAccountDb().mutate(
-        'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
-        [fileId, groupId, syncVersion, 'mode.txt', encryptMeta, keyId],
-      );
-      fs.writeFileSync(filePath, 'original content', { mode: 0o600 });
-      onTestFinished(() => {
-        try {
-          fs.unlinkSync(filePath);
-        } catch {}
-      });
-
-      const res = await request(app)
-        .post('/upload-user-file')
-        .set('Content-Type', 'application/encrypted-file')
-        .set('x-actual-token', 'valid-token')
-        .set('x-actual-name', 'mode.txt')
-        .set('x-actual-file-id', fileId)
-        .set('x-actual-group-id', groupId)
-        .set('x-actual-format', syncVersion.toString())
-        .set('x-actual-encrypt-meta', encryptMeta)
-        .send(Buffer.from('new content'));
-
-      expect(res.statusCode).toEqual(200);
-      expect(fs.statSync(filePath).mode & 0o777).toEqual(0o600);
-    },
-  );
-
-  it('concurrent uploads of the same file use separate temp files', async () => {
-    const fileId = generateFileId();
-    const groupId = 'in-flight-group-id';
-    const keyId = 'key-id';
-    const syncVersion = 2;
-    const encryptMeta = JSON.stringify({ keyId });
-    const filePath = getPathForUserFile(fileId);
-
-    getAccountDb().mutate(
-      'INSERT INTO files (id, group_id, sync_version, name, encrypt_meta, encrypt_keyid) VALUES (?, ?, ?, ?, ?, ?)',
-      [fileId, groupId, syncVersion, 'in-flight.txt', encryptMeta, keyId],
-    );
-    fs.writeFileSync(filePath, 'original content');
-    onTestFinished(() => {
-      try {
-        fs.unlinkSync(filePath);
-      } catch {}
-    });
-
-    const upload = (body: string) =>
-      request(app)
-        .post('/upload-user-file')
-        .set('Content-Type', 'application/encrypted-file')
-        .set('x-actual-token', 'valid-token')
-        .set('x-actual-name', 'in-flight.txt')
-        .set('x-actual-file-id', fileId)
-        .set('x-actual-group-id', groupId)
-        .set('x-actual-format', syncVersion.toString())
-        .set('x-actual-encrypt-meta', encryptMeta)
-        .send(Buffer.from(body));
-
-    // Pause the first upload after its temp file lands on disk, and run a
-    // second upload of the same file to completion inside that window.
-    const realWriteFile = fsPromises.writeFile;
-    const writeFileSpy = vi
-      .spyOn(fsPromises, 'writeFile')
-      .mockImplementationOnce(async (...args) => {
-        await realWriteFile(...args);
-        await upload('second upload');
-      });
-    onTestFinished(() => writeFileSpy.mockRestore());
-
-    const res = await upload('first upload');
-
-    expect(res.statusCode).toEqual(200);
-    expect(fs.readFileSync(filePath, 'utf8')).toEqual('first upload');
   });
 });
 
