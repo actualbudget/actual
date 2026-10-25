@@ -56,4 +56,30 @@ describe('atomicWriteFile', () => {
     expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
     expect(fs.readFileSync(realTarget, 'utf8')).toBe('new');
   });
+
+  it('creates the target of a dangling symlink instead of replacing it', async () => {
+    const realTarget = path.join(dir, 'real.blob');
+    const symlinkPath = path.join(dir, 'file-abc.blob');
+    fs.symlinkSync(realTarget, symlinkPath);
+
+    await atomicWriteFile(symlinkPath, Buffer.from('new'));
+
+    expect(fs.lstatSync(symlinkPath).isSymbolicLink()).toBe(true);
+    expect(fs.readFileSync(realTarget, 'utf8')).toBe('new');
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'keeps the permissions of the file it replaces',
+    async () => {
+      const target = path.join(dir, 'file-abc.blob');
+      fs.writeFileSync(target, 'original');
+      // Set after creation, as the umask would strip the group and other
+      // write bits.
+      fs.chmodSync(target, 0o666);
+
+      await atomicWriteFile(target, Buffer.from('new'));
+
+      expect(fs.statSync(target).mode & 0o777).toBe(0o666);
+    },
+  );
 });

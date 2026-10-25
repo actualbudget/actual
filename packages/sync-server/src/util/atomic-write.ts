@@ -1,21 +1,26 @@
 import fs from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
 
 let tempFileCounter = 0;
 
-// Follows a symlinked file so the rename replaces its target, not the link.
+// Follows symlinks, including one whose target doesn't exist yet, so the
+// rename replaces the target and leaves the link in place.
 async function resolveTarget(filepath: string): Promise<string> {
   try {
     return await fs.realpath(filepath);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      return filepath;
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw err;
     }
-    throw err;
   }
+  const link = await fs.readlink(filepath).catch(() => null);
+  return link === null
+    ? filepath
+    : resolveTarget(resolve(dirname(filepath), link));
 }
 
-// Writes to a temp file next to the target and renames it into place, so a
-// concurrent reader sees either the old or the new contents in full.
+// Writes to a temp file next to the target and renames it into place, so an
+// interrupted write never leaves a partially written file behind.
 export async function atomicWriteFile(
   filepath: string,
   contents: string | NodeJS.ArrayBufferView,
@@ -29,6 +34,11 @@ export async function atomicWriteFile(
 
   try {
     await fs.writeFile(tmpPath, contents, { flush: true, mode });
+    if (mode !== undefined) {
+      // The umask can strip bits at creation. Best-effort, as some
+      // filesystems refuse chmod.
+      await fs.chmod(tmpPath, mode).catch(() => undefined);
+    }
     await fs.rename(tmpPath, target);
   } catch (err) {
     await fs.rm(tmpPath, { force: true }).catch(() => undefined);

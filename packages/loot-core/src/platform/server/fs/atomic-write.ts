@@ -1,20 +1,25 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
 import { logger } from '#platform/server/log';
 import { retry as promiseRetry } from '#shared/retry';
 
 let tempFileCounter = 0;
 
-// Follows a symlinked file so the rename replaces its target, not the link.
+// Follows symlinks, including one whose target doesn't exist yet, so the
+// rename replaces the target and leaves the link in place.
 async function resolveTarget(filepath: string): Promise<string> {
   try {
     return await fs.promises.realpath(filepath);
   } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-      return filepath;
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw err;
     }
-    throw err;
   }
+  const link = await fs.promises.readlink(filepath).catch(() => null);
+  return link === null
+    ? filepath
+    : resolveTarget(path.resolve(path.dirname(filepath), link));
 }
 
 // Writes to a temp file next to the target and renames it into place, so the
@@ -39,6 +44,11 @@ export async function atomicWriteFile(
             flush: true,
             mode,
           });
+          if (mode !== undefined) {
+            // The umask can strip bits at creation. Best-effort, as some
+            // filesystems refuse chmod.
+            await fs.promises.chmod(tmpPath, mode).catch(() => undefined);
+          }
           await fs.promises.rename(tmpPath, target);
           if (attempt > 1) {
             logger.info(
