@@ -88,28 +88,6 @@ export function compareToGoal(
   return diff < 0 ? -1 : diff > 0 ? 1 : 0;
 }
 
-export type GoalFundingState = 'overspent' | 'underfunded' | 'funded';
-
-/**
- * The state behind a category's goal progress ring: overspent below zero,
- * otherwise underfunded or funded against the goal, or null when there is
- * no goal. Amounts are compared as displayed, so with hidden decimals a
- * balance that rounds to zero is not overspent.
- */
-export function getGoalFundingState(
-  value: number,
-  goalValue?: number | null,
-  budgetedValue?: number | null,
-): GoalFundingState | null {
-  if (normalizeIntegerValue(value) < 0) {
-    return 'overspent';
-  }
-  if (goalValue == null) {
-    return null;
-  }
-  return compareToGoal(budgetedValue, goalValue) < 0 ? 'underfunded' : 'funded';
-}
-
 /**
  * How much of the goal is funded, as a whole percentage from 0 to 100.
  * Rounded down while underfunded so it only reads 100 once the goal is met.
@@ -126,6 +104,26 @@ export function getGoalProgress(
   }
   const ratio = Math.max(0, (have ?? 0) / goalValue);
   return Math.min(99, Math.floor(ratio * 100));
+}
+
+/**
+ * The progress to draw in the ring beside a balance, or null when no ring is
+ * drawn: without a goal, when overspent (the red amount already says so) or
+ * once the goal is funded (nothing left to do). Amounts compare as displayed.
+ */
+export function getGoalRingProgress(
+  balance: number,
+  goalValue: number | null | undefined,
+  have: number | null | undefined,
+): number | null {
+  if (
+    goalValue == null ||
+    normalizeIntegerValue(balance) < 0 ||
+    compareToGoal(have, goalValue) >= 0
+  ) {
+    return null;
+  }
+  return getGoalProgress(have, goalValue);
 }
 
 export function makeBalanceAmountStyle(value: number) {

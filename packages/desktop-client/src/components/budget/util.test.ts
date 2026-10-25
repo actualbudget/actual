@@ -3,8 +3,8 @@ import { setNumberFormat } from '@actual-app/core/shared/util';
 
 import {
   compareToGoal,
-  getGoalFundingState,
   getGoalProgress,
+  getGoalRingProgress,
   makeBalanceAmountStyle,
 } from './util';
 
@@ -12,25 +12,36 @@ afterEach(() => {
   setNumberFormat({ format: 'comma-dot', hideFraction: false });
 });
 
-describe('getGoalFundingState', () => {
+describe('getGoalRingProgress', () => {
   it.each([
-    ['overspent', -2500, 65000, 65000],
-    ['underfunded', 40000, 65000, 40000],
-    ['underfunded', 0, 65000, 0],
-    ['funded', 65000, 65000, 65000],
-    ['funded', 90000, 65000, 90000],
-    ['funded', 0, 0, 0],
+    ['underfunded', 40000, 65000, 40000, 61],
+    ['underfunded with nothing budgeted', 0, 65000, 0, 0],
+    ['funded', 65000, 65000, 65000, null],
+    ['overfunded', 90000, 65000, 90000, null],
+    ['overspent', -2500, 65000, 65000, null],
+    ['overspent and underfunded', -2500, 65000, 40000, null],
+    ['funded with a goal of zero', 0, 0, 0, null],
+    // Long goals pass the balance as what they have
+    ['a long goal short of its balance', 40000, 65000, 40000, 61],
+    ['a long goal met by its balance', 70000, 65000, 70000, null],
   ] as const)(
-    'is %s for balance %d, goal %d and have %d',
-    (state, balance, goal, have) => {
-      expect(getGoalFundingState(balance, goal, have)).toBe(state);
+    'is %s: balance %d, goal %d, have %d',
+    (_, balance, goal, have, progress) => {
+      expect(getGoalRingProgress(balance, goal, have)).toBe(progress);
     },
   );
 
-  it('has no goal state without a goal, except when overspent', () => {
-    expect(getGoalFundingState(40000, null, 40000)).toBeNull();
-    expect(getGoalFundingState(0, undefined, 0)).toBeNull();
-    expect(getGoalFundingState(-2500, null, 0)).toBe('overspent');
+  it('draws nothing without a goal', () => {
+    expect(getGoalRingProgress(40000, null, 40000)).toBeNull();
+    expect(getGoalRingProgress(0, undefined, 0)).toBeNull();
+    expect(getGoalRingProgress(-2500, null, 0)).toBeNull();
+  });
+
+  it('compares the displayed amounts when decimals are hidden', () => {
+    expect(getGoalRingProgress(10000, 10040, 10000)).toBe(99);
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(getGoalRingProgress(10000, 10040, 10000)).toBeNull();
+    expect(getGoalRingProgress(-40, 10040, 10000)).toBeNull();
   });
 });
 
@@ -87,7 +98,6 @@ describe('compareToGoal', () => {
   it('compares the displayed amounts when decimals are hidden', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: true });
     expect(compareToGoal(10000, 10040)).toBe(0);
-    expect(getGoalFundingState(10000, 10040, 10000)).toBe('funded');
     expect(compareToGoal(10000, 10060)).toBe(-1);
   });
 });

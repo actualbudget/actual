@@ -62,11 +62,7 @@ export function GoalStatus({
           fontWeight: 'bold',
         }}
       >
-        <GoalProgressRing
-          state={comparison < 0 ? 'underfunded' : 'funded'}
-          progress={progress}
-          size={14}
-        />
+        {comparison < 0 && <GoalProgressRing progress={progress} size={12} />}
         {comparison === 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>Fully funded</Trans>

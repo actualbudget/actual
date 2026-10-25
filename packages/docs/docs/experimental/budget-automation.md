@@ -298,11 +298,11 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, a small ring appears beside the balance of each category with an automation. The ring fills up as the category is funded and becomes a green check once the projected budget is met. Categories without an automation keep the plain balance, and a negative balance is red like any other overspent category. Hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
+After automations run, categories whose projected budget is not yet met show a small gold ring beside the balance. The ring fills as the category is funded and disappears once the projected budget is met, so a fully funded category looks just like one without an automation. A negative balance is red like any other overspent category. Hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
 
-The example below shows these states: normal (no automation), empty (no automation), projected budget met (green check), projected budget not met (partly filled ring), and negative balance (red).
+The example below shows these states: normal (no automation), empty (no automation), projected budget met (plain balance), projected budget not met (partly filled ring), and negative balance (red).
 
-<img width="690" alt="Category balances in the normal and empty states, with a green check, a partly filled ring and a red negative balance" src="/img/experimental/budget-automation-indicators@2x.webp" />
+<img width="690" alt="Category balances in the normal, empty and met states as plain amounts, a partly filled ring beside a balance that is not met, and a red negative balance" src="/img/experimental/budget-automation-indicators@2x.webp" />
 
 The goal status gives you more information about your budget and balance, including a progress bar:
 
@@ -314,7 +314,7 @@ The goal status gives you more information about your budget and balance, includ
 
 Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the ring will show how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the ring will stay partly filled.
 
-Once you hit your goal, the ring will become a green check. Note that if you remove funds and fall short, it will open up again.
+Once you hit your goal, the ring disappears. Note that if you remove funds and fall short, it will come back.
 
 <img width="960" alt="The long-term goal form with a target of 1,500.00" src="/img/experimental/budget-automation-long-term@2x.webp" />
 

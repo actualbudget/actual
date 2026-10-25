@@ -16,13 +16,8 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
 import { GoalProgressRing } from './GoalProgressRing';
-import type { GoalRing } from './GoalProgressRing';
 import { GoalStatus } from './GoalStatus';
-import {
-  getGoalFundingState,
-  getGoalProgress,
-  makeBalanceAmountStyle,
-} from './util';
+import { getGoalRingProgress, makeBalanceAmountStyle } from './util';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;
@@ -58,10 +53,11 @@ type ChildrenWithClassName = (
     className: string;
   },
   /**
-   * Set when the category has a goal and is not overspent, to draw the goal
-   * progress ring beside the balance.
+   * How much of the goal is funded, to draw the goal progress ring beside the
+   * balance, or null when the balance has no ring: no goal, overspent or
+   * already funded.
    */
-  goalRing: GoalRing | null,
+  ringProgress: number | null,
 ) => ReturnType<CellValueChildren>;
 
 type BalanceWithCarryoverProps = Omit<
@@ -104,19 +100,16 @@ export function BalanceWithCarryover({
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
 
-  const getGoalRing = (balanceValue: number): GoalRing | null => {
-    if (!isGoalTemplatesEnabled || goalValue == null) {
-      return null;
-    }
-    // Long goals count the balance towards the goal, others the budgeted amount
-    const have = longGoalValue === 1 ? balanceValue : budgetedValue;
-    const state = getGoalFundingState(balanceValue, goalValue, have);
-    // An overspent balance is already red, like any other negative amount
-    if (state !== 'underfunded' && state !== 'funded') {
-      return null;
-    }
-    return { state, progress: getGoalProgress(have, goalValue) };
-  };
+  // Income rows pass isDisabled; goals describe spending, not income
+  const getRingProgress = (balanceValue: number) =>
+    isGoalTemplatesEnabled && !isDisabled
+      ? getGoalRingProgress(
+          balanceValue,
+          goalValue,
+          // Long goals count the balance towards the goal, others the budgeted amount
+          longGoalValue === 1 ? balanceValue : budgetedValue,
+        )
+      : null;
 
   const getDefaultClassName = (balanceValue: number) =>
     css({
@@ -133,21 +126,11 @@ export function BalanceWithCarryover({
   return (
     <CellValue binding={balance} type="financial" {...props}>
       {({ type, name, value: balanceValue }) => {
-        const goalRing = getGoalRing(balanceValue);
-        const hasRing = !children && goalRing != null;
+        const ringProgress = getRingProgress(balanceValue);
         return (
           <>
-            {hasRing && (
-              <GoalProgressRing {...goalRing} style={{ marginRight: 4 }} />
-            )}
             <View
-              style={{
-                minHeight: 'auto',
-                flexShrink: 0,
-                // Leave room for the ring so a long amount truncates instead
-                // of overlapping it
-                maxWidth: hasRing ? 'calc(100% - 16px)' : '100%',
-              }}
+              style={{ minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }}
             >
               {children ? (
                 children(
@@ -157,7 +140,7 @@ export function BalanceWithCarryover({
                     value: balanceValue,
                     className: getDefaultClassName(balanceValue),
                   },
-                  goalRing,
+                  ringProgress,
                 )
               ) : (
                 <CellValueText
@@ -168,6 +151,14 @@ export function BalanceWithCarryover({
                 />
               )}
             </View>
+            {!children && ringProgress != null && (
+              // Drawn before the amount, after it in the DOM so the button
+              // reads as the amount followed by its status
+              <GoalProgressRing
+                progress={ringProgress}
+                style={{ order: -1, marginRight: 4 }}
+              />
+            )}
 
             {carryoverValue && (
               <CarryoverIndicatorComponent
