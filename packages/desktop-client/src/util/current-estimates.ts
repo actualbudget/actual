@@ -3,6 +3,8 @@ import { invertRate, utcDay } from '@actual-app/core/shared/exchange-rate';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { TFunction } from 'i18next';
 
+import { rateSourceName } from './rate-source';
+
 type Formatting = {
   /** Formats a base amount in the budget currency. */
   formatBase: (amount: number) => string;
@@ -28,7 +30,7 @@ function rateOrigin(
       : estimate.kind === 'dated'
         ? t('manual rate for {{date}}', { date })
         : t('{{source}} rate from {{date}}', {
-            source: estimate.source,
+            source: rateSourceName(estimate.source),
             date,
           });
   return estimate.fallback

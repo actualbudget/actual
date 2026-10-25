@@ -152,6 +152,29 @@ it('reads again for pocket tables and budget cells, not for others', async () =>
   expect(read).toHaveBeenCalledTimes(before);
 });
 
+// FX-2.2 V9: a rate write alone names only exchange_rates. The server's
+// refreshFxChanges then rewrites the revalued month cells, which is what keeps
+// pockets current without a reload.
+it('V9 reads pockets again from the cells a rate refresh writes', async () => {
+  const read = vi.fn(async ({ month }: { month: string }) =>
+    pocketMonthCells(month, { travel: an2Months['2026-01'] }),
+  );
+  initServer({ 'envelope-budget-month': read });
+  renderHook(() => usePocketSlots(['2026-02']), { wrapper: wrapperFor() });
+  await waitFor(() => expect(read).toHaveBeenCalledTimes(1));
+  serverPush('sync-event', { type: 'applied', tables: ['exchange_rates'] });
+  await new Promise(r => setTimeout(r, 20));
+  expect(read).toHaveBeenCalledTimes(1);
+  // V9's literal values from history-valuation.test.ts, in one transaction.
+  serverPush('cells-changed', [
+    { name: 'budget202602!fx-changes', value: 2000 },
+    { name: 'budget202602!pocket-value-travelJpy', value: 4800 },
+    { name: 'budget202602!pocket-value-status-travelJpy', value: 'resolved' },
+  ]);
+  await waitFor(() => expect(read).toHaveBeenCalledTimes(2));
+  expect(read).toHaveBeenLastCalledWith({ month: '2026-02' });
+});
+
 it('RL6 reads each currency backing from the MC-8.2 details', async () => {
   const details = vi.fn(async () => ({
     ...fxValuationFixture,

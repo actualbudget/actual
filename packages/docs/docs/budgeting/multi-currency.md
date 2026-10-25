@@ -42,9 +42,13 @@ The rate is the foreign currency per 1 dollar. Save 0.909091 for euros, and 20 f
 
 Choose the currency. Set **Kind** to **Standing rate** or **One-day rate**, set the date, enter the rate, and click **Save rate**. A one-day rate is for that UTC day. A standing rate applies from its date when no fetched rate is available. You can keep both on the same date. Saving the same currency, kind, and date again asks you to replace the saved rate.
 
-**Rate in use today** names the rate on file. For pesos, both lines read `standing rate 20 from 2026-10-31`: the rate a new transaction today would use, and the rate Estimates and To Budget would use. **Edit** loads a saved row back into the form. **Remove** deletes it.
+**Rate in use today** names the rate on file. For pesos, both lines read `standing rate 20 from 2026-10-31`: the rate a new transaction today would use, and the rate Estimates and To Budget would use. **Saved rates** lists the euro and peso rows. **All currencies** can limit that list. **Edit** loads a saved row back into the form. **Remove** deletes it.
 
-<img width="632" alt="Exchange rates with a standing 0.909091 euro rate and a standing 20 peso rate per 1 dollar" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="616" alt="Exchange rates with a standing 0.909091 euro rate and a standing 20 peso rate per 1 dollar" src="/img/budgeting/multi-currency-rates@2x.png" />
+
+**Export rates** wrote that list to a file and said: "Rates exported: 2. Invalid rates left out: 0." **Choose file** read a CSV with a standing 0.85 euro rate on 2026-10-15 and the peso rate already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 standing 2026-10-31". **Keep existing** stayed selected. **Backfill** was set to euros from 10/01/2026 to 10/31/2026, with **Keep existing**. **Check dates** said: "Backfill needs a sync server. Rates you save or import work without one." **Start backfill** stayed off. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
+
+<img width="616" alt="Export of two rates, an import preview with one new row and one unchanged peso rate, and a backfill that needs a sync server" src="/img/budgeting/multi-currency-rate-history@2x.png" />
 
 ## Create the accounts
 
