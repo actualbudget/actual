@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -44,9 +44,11 @@ export const FixedAutomation = ({
   const [rawPeriodAmount, setRawPeriodAmount] = useState(String(periodAmount));
   // Resync when a different automation row is selected (the component
   // instance is reused across rows).
-  useEffect(() => {
+  const [prevPeriodAmount, setPrevPeriodAmount] = useState(periodAmount);
+  if (periodAmount !== prevPeriodAmount) {
+    setPrevPeriodAmount(periodAmount);
     setRawPeriodAmount(String(periodAmount));
-  }, [periodAmount]);
+  }
 
   const onPeriodAmountChange = (value: string) => {
     setRawPeriodAmount(value);

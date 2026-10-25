@@ -850,6 +850,32 @@ describe('Transaction rules', () => {
     ]);
   });
 
+  test('transactions can be queried by a notes regex that is still being typed', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      notes: 'Invoice #123',
+      amount: 123,
+    });
+
+    // An incomplete pattern matches nothing instead of failing the query
+    for (const value of ['#\\', '#[', '#\\d+(']) {
+      const transactions = await getMatchingTransactions([
+        { field: 'notes', op: 'matches', value },
+      ]);
+      expect(transactions).toEqual([]);
+    }
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '#\\d+' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('transactions can be queried by hasTags if no "#" is included', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
@@ -1036,7 +1062,7 @@ describe('Learning categories', () => {
     expect(rule.actions[0].value).toBe(category);
   }
 
-  async function insertTransaction(
+  async function expectRuleAfterInsert(
     transaction,
     expectedCategory,
     expectedRuleCount = 1,
@@ -1100,7 +1126,7 @@ describe('Learning categories', () => {
   test('creates rule when inserting transactions', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1112,7 +1138,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1124,7 +1150,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1139,7 +1165,7 @@ describe('Learning categories', () => {
   test('leaves existing rule alone if probable category is ambiguous', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1151,7 +1177,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1163,7 +1189,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1184,7 +1210,7 @@ describe('Learning categories', () => {
 
     // Even though the system couldn't figure out the category to set,
     // it should leave the existing rule alone
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-01',
@@ -1207,7 +1233,7 @@ describe('Learning categories', () => {
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1218,7 +1244,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1229,7 +1255,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1253,7 +1279,7 @@ describe('Learning categories', () => {
     });
 
     // Use a new payee, so the category should be remembered
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-03',
@@ -1264,7 +1290,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-03',
@@ -1275,7 +1301,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'five',
         date: '2016-12-03',

@@ -1,6 +1,5 @@
 import express from 'express';
 
-import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
@@ -18,10 +17,6 @@ app.use(requestLoggerMiddleware);
 app.use(express.json());
 app.use(validateSessionMiddleware);
 
-function canAccessFile(fileId, userId) {
-  return isAdmin(userId) || UserService.countUserAccess(fileId, userId) > 0;
-}
-
 app.post(
   '/status',
   handleError(async (req, res) => {
@@ -36,7 +31,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -72,7 +67,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -140,7 +135,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
