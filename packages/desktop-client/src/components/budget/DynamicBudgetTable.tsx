@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { ComponentProps } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -15,6 +15,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+import { clampMonth } from './MonthsContext';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -63,28 +64,34 @@ const DynamicBudgetTable = ({
   const numMonths = Math.min(numPossible, maxMonths);
   const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
 
-  const getValidMonth = useCallback(
-    (month: string) => {
-      const start = monthBounds.start;
-      const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+  // Every displayed column must stay inside the bounds, so the first
+  // column can go no later than `numMonths - 1` months before the end.
+  const latestStartMonth = monthUtils.subMonths(monthBounds.end, numMonths - 1);
 
-      if (month < start) {
-        return start;
-      } else if (month > end) {
-        return end;
-      }
-      return month;
-    },
-    [monthBounds.start, monthBounds.end, numMonths],
-  );
+  function getValidMonth(month: string) {
+    return clampMonth(month, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
+  }
 
-  // Move the first column back when shrinking would put the last column out of range.
+  // Keep the last column in range when the bounds change (e.g. switching
+  // budget type) or more columns fit on screen.
   useEffect(() => {
-    const validMonth = getValidMonth(startMonth);
+    const validMonth = clampMonth(startMonth, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
     if (validMonth !== startMonth) {
       onMonthSelect(validMonth, numMonths);
     }
-  }, [getValidMonth, numMonths, onMonthSelect, startMonth]);
+  }, [
+    monthBounds.start,
+    latestStartMonth,
+    numMonths,
+    onMonthSelect,
+    startMonth,
+  ]);
 
   useEffect(() => {
     setDisplayMax(numPossible);

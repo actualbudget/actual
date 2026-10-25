@@ -20,6 +20,16 @@ import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { signOut } from './users/usersSlice';
 
+// Tables whose changes can move the budget's month bounds. `preferences`
+// holds the synced budget type.
+const BUDGET_BOUNDS_TABLES = [
+  'zero_budgets',
+  'reflect_budgets',
+  'transactions',
+  'categories',
+  'preferences',
+];
+
 // Notifications for sync events that can fire during budget load
 const syncNotifications: Partial<
   Record<ServerEvents['sync-event']['type'], () => Notification>
@@ -104,26 +114,14 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
 
       const tables = event.tables;
 
-      const preferenceChanges =
-        event.type === 'applied' ? event.data?.get('preferences') : undefined;
-      const budgetTypeChanged =
-        preferenceChanges instanceof Map && preferenceChanges.has('budgetType');
-      if (tables.includes('prefs') || budgetTypeChanged) {
+      if (tables.includes('prefs')) {
         void store.dispatch(loadPrefs());
       }
 
-      // Local edits, undo, and incoming sync can expand or shrink either mode.
-      if (
-        budgetTypeChanged ||
-        tables.some(table =>
-          [
-            'zero_budgets',
-            'reflect_budgets',
-            'transactions',
-            'categories',
-          ].includes(table),
-        )
-      ) {
+      // Budget amounts, transactions, deleted categories and the budget type
+      // all change which months are available. Covers local edits, undo and
+      // incoming sync.
+      if (tables.some(table => BUDGET_BOUNDS_TABLES.includes(table))) {
         void queryClient.invalidateQueries({
           queryKey: budgetBoundsQueries.all(),
         });

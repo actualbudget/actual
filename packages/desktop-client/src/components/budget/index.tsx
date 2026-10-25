@@ -33,6 +33,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
+import { clampMonth } from './MonthsContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
@@ -58,26 +59,28 @@ export function Budget() {
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
 
-  const init = useEffectEvent(() => {
-    async function run() {
-      if (!loadedBounds) {
-        return;
+  // Re-runs whenever the bounds change so newly available months get warmed.
+  const init = useEffectEvent(
+    (type: typeof budgetType, monthBounds: typeof loadedBounds) => {
+      async function run() {
+        if (!monthBounds) {
+          return;
+        }
+
+        await prewarmAllMonths(
+          type,
+          spreadsheet,
+          monthBounds,
+          clampMonth(startMonth, monthBounds),
+        );
+
+        setInitialized(true);
       }
 
-      const validMonth =
-        startMonth < loadedBounds.start
-          ? loadedBounds.start
-          : startMonth > loadedBounds.end
-            ? loadedBounds.end
-            : startMonth;
-      await prewarmAllMonths(budgetType, spreadsheet, loadedBounds, validMonth);
-
-      setInitialized(true);
-    }
-
-    void run();
-  });
-  useEffect(() => init(), [budgetType, loadedBounds]);
+      void run();
+    },
+  );
+  useEffect(() => init(budgetType, loadedBounds), [budgetType, loadedBounds]);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);

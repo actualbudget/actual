@@ -11,8 +11,6 @@ import { integerToCurrency, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
-import { getBudgetRange } from './util';
-
 export async function getSheetValue(
   sheetName: string,
   cell: string,
@@ -105,16 +103,7 @@ function getAllMonths(startMonth: string): string[] {
       latest = month;
     }
   }
-  if (latest == null) {
-    return [];
-  }
-  // Cached months can outlive the visible range; bulk edits must stop at its end.
-  const currentMonth = monthUtils.currentMonth();
-  const { end } = getBudgetRange(currentMonth, currentMonth);
-  if (latest > end) latest = end;
-  return startMonth <= latest
-    ? monthUtils.rangeInclusive(startMonth, latest)
-    : [];
+  return monthUtils.rangeInclusive(startMonth, latest);
 }
 
 // TODO: Valid month format in all the functions below
@@ -701,9 +690,9 @@ export async function copyUntilYearEnd({
 
   const yearEnd = monthUtils.getYearEnd(month);
   const { createdMonths } = sheet.get().meta();
-  const futureMonths = getAllMonths(month).filter(
-    m => m > month && m <= yearEnd && createdMonths.has(m),
-  );
+  const futureMonths = [...(createdMonths as Set<string>)]
+    .filter(m => m > month && m <= yearEnd)
+    .sort();
 
   await batchMessages(async () => {
     for (const futureMonth of futureMonths) {

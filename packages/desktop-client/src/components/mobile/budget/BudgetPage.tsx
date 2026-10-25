@@ -45,6 +45,7 @@ import {
   useSortCategoriesMutation,
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -116,10 +117,9 @@ export function BudgetPage() {
       if (!loadedBounds) {
         return;
       }
-      // A cleared allocation or mode switch can leave the selected month out of range.
-      const { start, end } = loadedBounds;
-      const validMonth =
-        startMonth < start ? start : startMonth > end ? end : startMonth;
+      // Reopening the budget or switching budget type can leave the selected
+      // month out of range.
+      const validMonth = clampMonth(startMonth, loadedBounds);
       if (validMonth !== startMonth) {
         setStartMonthPref(validMonth);
       }
@@ -130,14 +130,7 @@ export function BudgetPage() {
     }
 
     void init();
-  }, [
-    budgetType,
-    startMonth,
-    dispatch,
-    spreadsheet,
-    loadedBounds,
-    setStartMonthPref,
-  ]);
+  }, [budgetType, startMonth, spreadsheet, loadedBounds, setStartMonthPref]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {

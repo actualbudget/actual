@@ -61,39 +61,24 @@ describe('listenForSyncEvent', () => {
     vi.clearAllMocks();
   });
 
-  it.each(['zero_budgets', 'reflect_budgets', 'transactions', 'categories'])(
-    'refreshes budget bounds after %s changes',
-    table => {
-      const { invalidateQueries } = setup();
-      publishSyncEvent(appliedEvent([table]));
-      expect(invalidateQueries).toHaveBeenCalledWith({
-        queryKey: budgetBoundsQueries.all(),
-      });
-    },
-  );
+  it.each([
+    'zero_budgets',
+    'reflect_budgets',
+    'transactions',
+    'categories',
+    'preferences',
+  ])('refreshes budget bounds after %s changes', table => {
+    const { invalidateQueries } = setup();
+    publishSyncEvent(appliedEvent([table]));
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: budgetBoundsQueries.all(),
+    });
+  });
 
   it('leaves budget bounds alone for unrelated changes', () => {
     const { invalidateQueries } = setup();
     publishSyncEvent(appliedEvent(['payees']));
     expect(invalidateQueries).not.toHaveBeenCalledWith({
-      queryKey: budgetBoundsQueries.all(),
-    });
-  });
-
-  it('refreshes budget bounds when the budgeting mode changes', () => {
-    const { invalidateQueries } = setup();
-    publishSyncEvent({
-      type: 'applied',
-      tables: ['preferences'],
-      prevData: new Map(),
-      data: new Map([
-        [
-          'preferences',
-          new Map([['budgetType', { id: 'budgetType', value: 'tracking' }]]),
-        ],
-      ]),
-    });
-    expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: budgetBoundsQueries.all(),
     });
   });

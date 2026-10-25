@@ -100,7 +100,6 @@ describe('copyUntilYearEnd', () => {
     db.runQuery(
       `INSERT INTO preferences (id, value) VALUES ('budgetType', 'tracking')`,
     );
-    sheet.get().meta().budgetType = 'tracking';
 
     await setBudget({ category: 'cat1', month: '2024-01', amount: 5000 });
     await setBudget({ category: 'cat1', month: '2024-02', amount: 1000 });

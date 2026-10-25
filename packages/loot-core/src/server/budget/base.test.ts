@@ -3,17 +3,48 @@ import * as sheet from '#server/sheet';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 
-import { copyUntilYearEnd, getBudget, setBudget } from './actions';
+import { setBudget, setCategoryCarryover } from './actions';
 import { createAllBudgets, getBudgetRange } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
 });
 
+describe('getBudgetRange', () => {
+  it('keeps 3 months before the start and 12 months after the end', () => {
+    const { start, end } = getBudgetRange('2026-01', '2026-10');
+    expect(start).toBe('2025-10');
+    expect(end).toBe('2027-10');
+  });
+
+  it('ignores allocations inside the minimum range', () => {
+    expect(getBudgetRange('2026-10', '2026-10', '2027-05').end).toBe('2027-10');
+  });
+
+  it('extends 3 months past the latest allocation', () => {
+    expect(getBudgetRange('2026-10', '2026-10', '2028-12').end).toBe('2029-03');
+  });
+
+  it('never extends more than 5 years ahead', () => {
+    expect(getBudgetRange('2026-10', '2026-10', '2099-01').end).toBe('2031-10');
+  });
+});
+
 describe('Base budget', () => {
   describe.each(['tracking', 'envelope'] as const)(
     'automatic range (%s)',
     budgetType => {
+      const table =
+        budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+      const otherTable =
+        budgetType === 'tracking' ? 'zero_budgets' : 'reflect_budgets';
+      const minEnd = () => monthUtils.addMonths(monthUtils.currentMonth(), 12);
+
+      async function loadBudget() {
+        await sheet.loadSpreadsheet(db);
+        sheet.get().meta().budgetType = budgetType;
+      }
+
       beforeEach(async () => {
         await db.insertCategoryGroup({
           id: 'income',
@@ -30,24 +61,20 @@ describe('Base budget', () => {
           "INSERT INTO preferences (id, value) VALUES ('budgetType', ?)",
           [budgetType],
         );
-        await sheet.loadSpreadsheet(db);
-        sheet.get().meta().budgetType = budgetType;
+        await loadBudget();
       });
 
-      it('extends from saved allocations and shrinks without rebuilding cached months', async () => {
+      it('extends from saved allocations without rebuilding existing months', async () => {
         const initial = await createAllBudgets();
-        expect(initial.end).toBe(
-          monthUtils.addMonths(monthUtils.currentMonth(), 12),
-        );
+        expect(initial.end).toBe(minEnd());
         const cell = sheet.getCell('budget201701', 'total-budgeted');
-        await setBudget({
-          category: 'planned',
-          month: initial.end,
-          amount: 200,
-        });
+
+        await setBudget({ category: 'planned', month: minEnd(), amount: 200 });
         const extended = await createAllBudgets();
-        expect(extended.end).toBe(monthUtils.addMonths(initial.end, 3));
+        expect(extended.end).toBe(monthUtils.addMonths(minEnd(), 3));
         expect(sheet.getCell('budget201701', 'total-budgeted')).toBe(cell);
+
+        // Negative amounts are allocations too
         await setBudget({
           category: 'planned',
           month: extended.end,
@@ -56,57 +83,43 @@ describe('Base budget', () => {
         expect((await createAllBudgets()).end).toBe(
           monthUtils.addMonths(extended.end, 3),
         );
-        await setBudget({
-          category: 'planned',
-          month: extended.end,
-          amount: 0,
-        });
-        expect((await createAllBudgets()).end).toBe(extended.end);
-        expect(getBudget({ category: 'planned', month: initial.end })).toBe(
-          200,
+      });
+
+      it('ignores amounts saved for the other budget type', async () => {
+        db.runQuery(
+          `INSERT INTO ${otherTable} (id, month, category, amount) VALUES (?, ?, ?, ?)`,
+          ['202812-planned', 202812, 'planned', 200],
         );
-        await setBudget({ category: 'planned', month: initial.end, amount: 0 });
-        expect((await createAllBudgets()).end).toBe(initial.end);
-        expect(sheet.getCell('budget201701', 'total-budgeted')).toBe(cell);
+        expect((await createAllBudgets()).end).toBe(minEnd());
       });
 
-      it('uses only the active mode and restores the range on reopening', async () => {
-        await setBudget({ category: 'planned', month: '2028-12', amount: 200 });
+      it('stays extended while open and shrinks on the next load', async () => {
+        await setBudget({ category: 'planned', month: minEnd(), amount: 200 });
+        const { end: extendedEnd } = await createAllBudgets();
+        await setBudget({ category: 'planned', month: minEnd(), amount: 0 });
+        expect((await createAllBudgets()).end).toBe(extendedEnd);
+
         sheet.unloadSpreadsheet();
-        await sheet.loadSpreadsheet(db);
-        sheet.get().meta().budgetType = budgetType;
-        expect(getBudgetRange('2026-10', '2026-10').end).toBe('2029-03');
-        sheet.get().meta().budgetType =
-          budgetType === 'tracking' ? 'envelope' : 'tracking';
-        expect(getBudgetRange('2026-10', '2026-10').end).toBe('2027-10');
+        await loadBudget();
+        expect((await createAllBudgets()).end).toBe(minEnd());
       });
 
-      it('keeps bulk copies inside the reduced range', async () => {
+      it('applies bulk changes to every visible month', async () => {
+        await setBudget({ category: 'planned', month: minEnd(), amount: 200 });
+        await createAllBudgets();
+        await setBudget({ category: 'planned', month: minEnd(), amount: 0 });
         const { end } = await createAllBudgets();
-        const distantMonth = monthUtils.addMonths(end, 12);
-        await setBudget({
+
+        await setCategoryCarryover({
+          startMonth: monthUtils.currentMonth(),
           category: 'planned',
-          month: distantMonth,
-          amount: 100,
+          flag: true,
         });
-        await createAllBudgets();
-        await setBudget({
-          category: 'planned',
-          month: distantMonth,
-          amount: 0,
-        });
-        await createAllBudgets();
-        const month = end;
-        await setBudget({ category: 'planned', month, amount: 200 });
-        const { end: reducedEnd } = await createAllBudgets();
-        await copyUntilYearEnd({ month, category: 'planned' });
-        expect(getBudget({ category: 'planned', month: reducedEnd })).toBe(200);
-        expect(
-          getBudget({
-            category: 'planned',
-            month: monthUtils.addMonths(reducedEnd, 1),
-          }),
-        ).toBe(0);
+        const row = db.firstSync<{ carryover: number }>(
+          `SELECT carryover FROM ${table} WHERE month = ? AND category = ?`,
+          [parseInt(end.replace('-', '')), 'planned'],
+        );
+        expect(row?.carryover).toBe(1);
       });
     },
   );
