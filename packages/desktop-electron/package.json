@@ -13,7 +13,10 @@
     "typecheck": "tsgo -b && tsc-strict",
     "copy-static-assets": "copyfiles --exclude 'build/**/*' **/*.html icons/**/* build/desktop-electron",
     "watch": "yarn build:dist && cross-env ACTUAL_DOCUMENT_DIR=\"../../data\" ACTUAL_DATA_DIR=\"../../data\" electron .",
-    "e2e": "npx playwright test"
+    "e2e": "npx playwright test",
+    "build:mas": "electron-builder --mac mas --arm64 --config.mac.bundleVersion=\"$(date -u +%Y%m%d%H%M)\"",
+    "build:mas-dev": "electron-builder --mac mas-dev --arm64",
+    "release:mas": "yarn build:mas && xcrun altool --upload-app -f dist/mas-arm64/Actual-mac-app-store-arm64.pkg --type macos --apiKey \"$APP_STORE_CONNECT_API_KEY_ID\" --apiIssuer \"$APP_STORE_CONNECT_API_ISSUER_ID\""
   },
   "dependencies": {
     "@actual-app/sync-server": "workspace:*",
@@ -68,7 +71,20 @@
             "arm64"
           ]
         }
-      ]
+      ],
+      "extendInfo": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "mas": {
+      "artifactName": "${productName}-mac-app-store-${arch}.${ext}",
+      "entitlements": "mas/entitlements.mas.plist",
+      "entitlementsInherit": "mas/entitlements.mas.inherit.plist",
+      "provisioningProfile": "mas/embedded.provisionprofile",
+      "hardenedRuntime": false
+    },
+    "masDev": {
+      "provisioningProfile": "mas/development.provisionprofile"
     },
     "linux": {
       "target": [

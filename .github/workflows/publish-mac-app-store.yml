@@ -1,0 +1,123 @@
+name: Publish Mac App Store
+
+# Uploads the sandboxed Electron app to App Store Connect. Every master push
+# produces a TestFlight build; a published release produces the build that
+# a human then submits for App Store review from App Store Connect.
+#
+# Secrets (all in the `release` environment) and how to regenerate them:
+#
+# - APPLE_SIGNING_P12_BASE64 / APPLE_SIGNING_P12_PASSWORD: the "Apple
+#   Distribution" certificate, shared with the iOS workflow (see
+#   publish-ios.yml for how it is exported).
+# - APPLE_MAS_INSTALLER_P12_BASE64 / APPLE_MAS_INSTALLER_P12_PASSWORD: a
+#   "Mac Installer Distribution" certificate plus its private key; it signs
+#   the .pkg. Create it at developer.apple.com/account/resources/certificates
+#   ("+" -> Mac Installer Distribution, upload a CSR from Keychain Access),
+#   then export it from Keychain Access as a password-protected .p12. The
+#   secret is `base64 -i <file>.p12` and that password.
+# - APPLE_MAS_PROVISIONING_PROFILE_BASE64: the Mac App Store provisioning
+#   profile for com.actualbudget.actual. Create it at
+#   developer.apple.com/account/resources/profiles ("+" -> Mac App Store
+#   Connect, pick the Apple Distribution certificate). The secret is
+#   `base64 -i <file>.provisionprofile`.
+# - APP_STORE_CONNECT_API_KEY_ID / APP_STORE_CONNECT_API_ISSUER_ID /
+#   APP_STORE_CONNECT_API_KEY_P8: the Admin App Store Connect API key shared
+#   with the iOS workflow.
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      # Packages that are not part of the desktop app bundle.
+      - 'packages/api/**'
+      - 'packages/ci-actions/**'
+      - 'packages/cli/**'
+      - 'packages/docs/**'
+      - 'packages/eslint-plugin-actual/**'
+      - 'packages/mobile-client/**'
+      - 'upcoming-release-notes/**'
+      - '**.md'
+  release:
+    types: [published]
+  # Pick the branch or tag to build from the "Use workflow from" selector.
+  workflow_dispatch:
+
+concurrency:
+  group: publish-mac-app-store
+  # Queue every run instead of replacing a pending one, so a release build is
+  # never dropped because a master push arrived right after it.
+  queue: max
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish-mac-app-store:
+    runs-on: depot-macos-latest
+    environment: release
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      # node-gyp needs setuptools to rebuild the native modules.
+      - run: |
+          mkdir .venv
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install setuptools
+
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          # Avoid restoring potentially poisoned caches in release jobs.
+          cache: 'false'
+
+      # Build before any signing material lands on the runner.
+      - name: Build web app and Electron sources
+        run: ./bin/package-electron --skip-translations --skip-exe-build
+
+      - name: Write provisioning profile and App Store Connect API key
+        env:
+          PROFILE_BASE64: ${{ secrets.APPLE_MAS_PROVISIONING_PROFILE_BASE64 }}
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+        run: |
+          echo "$PROFILE_BASE64" | base64 --decode > packages/desktop-electron/mas/embedded.provisionprofile
+          mkdir -p "$RUNNER_TEMP/private_keys"
+          printf '%s\n' "$API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_$API_KEY_ID.p8"
+          chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_$API_KEY_ID.p8"
+
+      - name: Package, sign and upload to App Store Connect
+        env:
+          # electron-builder imports both certificates into a temporary keychain.
+          CSC_LINK: ${{ secrets.APPLE_SIGNING_P12_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_SIGNING_P12_PASSWORD }}
+          CSC_INSTALLER_LINK: ${{ secrets.APPLE_MAS_INSTALLER_P12_BASE64 }}
+          CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.APPLE_MAS_INSTALLER_P12_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
+        run: yarn workspace desktop-electron release:mas
+
+      - name: Summarize uploaded build
+        run: |
+          PLIST=packages/desktop-electron/dist/mas-arm64/Actual.app/Contents/Info.plist
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          {
+            echo "## Mac App Store build uploaded to App Store Connect"
+            echo
+            echo "| Version | Build |"
+            echo "| --- | --- |"
+            echo "| $VERSION | $BUILD |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up signing material
+        if: always()
+        run: |
+          rm -rf "$RUNNER_TEMP/private_keys"
+          rm -f packages/desktop-electron/mas/embedded.provisionprofile
