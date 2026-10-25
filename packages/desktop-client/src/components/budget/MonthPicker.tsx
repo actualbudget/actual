@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -63,12 +63,15 @@ export const MonthPicker = ({
   const lastSelectedIndex = firstSelectedIndex + numDisplayed - 1;
 
   const [size, setSize] = useState('small');
-  const containerRef = useResizeObserver(rect => {
-    setSize(rect.width <= 400 ? 'small' : 'big');
-    setTargetMonthCount(
-      Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
-    );
-  });
+  const containerRef = useResizeObserver(
+    rect => {
+      setSize(rect.width <= 400 ? 'small' : 'big');
+      setTargetMonthCount(
+        Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
+      );
+    },
+    { measureOnAttach: true },
+  );
 
   const yearHeadersShown = [];
 
