@@ -65,30 +65,21 @@ const getDonutDimensions = (
 // ---------------------------------------------------------------------------
 
 const resolveCSSVariable = (color: string): string => {
-  if (!color.startsWith('var(')) return color;
+  if (!color || typeof color !== 'string' || !color.startsWith('var(')) {
+    return color || '';
+  }
   const inner = color.slice(4, -1).trim();
   const varName = inner.split(',')[0].trim();
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(varName)
-    .trim();
+  if (typeof document === 'undefined') return color;
+  return (
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim() || color
+  );
 };
 
-const hexToRgb = (hex: string) => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : { r: 0, g: 0, b: 0 };
-};
-
-const shadeColor = (resolvedHex: string, percent: number): string => {
-  const { r, g, b } = hexToRgb(resolvedHex);
-  const adjust = (c: number) =>
-    Math.min(255, Math.max(0, Math.round(c + (255 - c) * percent)));
-  return `rgb(${adjust(r)}, ${adjust(g)}, ${adjust(b)})`;
+const shadeColor = (color: string, percent: number): string => {
+  return `color-mix(in srgb, ${color}, white ${Math.round(percent * 100)}%)`;
 };
 
 const buildColorMap = (
@@ -109,7 +100,6 @@ const buildColorMap = (
 
     acc.set(group.id, groupColor);
 
-    // Fix 1: capture cats once to avoid group.categories.length on undefined
     const cats = group.categories ?? [];
     cats.forEach((cat, i) => {
       if (!cat.id) return;
