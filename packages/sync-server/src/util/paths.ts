@@ -21,8 +21,9 @@ export function getPathForUserFile(fileId: FileId) {
   const userFilesDir = resolve(config.get('userFiles'));
   const filePath = resolve(userFilesDir, `file-${fileId}.blob`);
   // isValidFileId already rules out traversal; this makes the containment
-  // explicit where the path is built.
-  if (!filePath.startsWith(userFilesDir + sep)) {
+  // explicit where the path is built. A filesystem root already ends in sep.
+  const prefix = userFilesDir.endsWith(sep) ? userFilesDir : userFilesDir + sep;
+  if (!filePath.startsWith(prefix)) {
     throw new Error('Invalid file id');
   }
   return filePath;
