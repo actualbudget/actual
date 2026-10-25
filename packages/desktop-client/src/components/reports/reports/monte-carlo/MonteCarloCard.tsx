@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
@@ -11,6 +11,7 @@ import type { MonteCarloWidget } from '@actual-app/core/types/models';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloGraph } from '#components/reports/graphs/MonteCarloGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import {
@@ -18,6 +19,7 @@ import {
   monteCarloConfigFromMeta,
   runMonteCarloSimulation,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
+import type { MonteCarloResult } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { useResolvedMonteCarloConfig } from '#components/reports/reports/monte-carlo/useResolvedMonteCarloConfig';
 
 // Stable default so an unsaved widget doesn't bust the simulation's
@@ -46,19 +48,30 @@ export function MonteCarloCard({
   // Memoised by hand so hovering the card (which toggles state) doesn't
   // re-run thousands of simulations
   const config = useMemo(() => monteCarloConfigFromMeta(meta), [meta]);
-  const resolvedConfig = useResolvedMonteCarloConfig(config);
-  const result = useMemo(
-    () =>
+  const { resolvedConfig, hasLiveBalances } =
+    useResolvedMonteCarloConfig(config);
+
+  // Thousands of simulations take a noticeable slice of a second, so they
+  // run after the dashboard has painted rather than inside render, and
+  // only once every linked balance is in (each arrival would otherwise
+  // trigger a full re-run on stale numbers)
+  const [result, setResult] = useState<MonteCarloResult | null>(null);
+  useEffect(() => {
+    if (!hasLiveBalances) {
+      return;
+    }
+    setResult(
       runMonteCarloSimulation({
         ...resolvedConfig,
         horizonYears: getMonteCarloHorizonYears(resolvedConfig),
         deflateToTodaysMoney: true,
       }),
-    [resolvedConfig],
-  );
+    );
+  }, [resolvedConfig, hasLiveBalances]);
 
-  const endAge = config.currentAge + result.horizonYears;
-  const successPercent = Math.round(result.successRate * 1000) / 10;
+  const endAge = config.currentAge + getMonteCarloHorizonYears(config);
+  const successPercent =
+    result != null ? Math.round(result.successRate * 1000) / 10 : null;
 
   return (
     <ReportCard
@@ -97,7 +110,9 @@ export function MonteCarloCard({
               }}
             >
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <FinancialText>{`${successPercent}%`}</FinancialText>
+                <FinancialText>
+                  {successPercent != null ? `${successPercent}%` : '…'}
+                </FinancialText>
               </PrivacyFilter>
             </Block>
             <Block
@@ -111,13 +126,17 @@ export function MonteCarloCard({
           </View>
         </View>
 
-        <MonteCarloGraph
-          percentileBands={result.percentileBands}
-          startAge={config.currentAge}
-          compact
-          showTooltip={!isEditing && !isNarrowWidth}
-          style={{ height: 'auto', flex: 1 }}
-        />
+        {result != null ? (
+          <MonteCarloGraph
+            percentileBands={result.percentileBands}
+            startAge={config.currentAge}
+            compact
+            showTooltip={!isEditing && !isNarrowWidth}
+            style={{ height: 'auto', flex: 1 }}
+          />
+        ) : (
+          <LoadingIndicator />
+        )}
       </View>
     </ReportCard>
   );
