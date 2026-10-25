@@ -298,17 +298,17 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, each category’s budget indicator appears as the color of its balance text. Hover over a balance to see the matching tooltip.
+After automations run, each category’s budget indicator appears as the color of its balance text. Click a balance to see its goal status at the top of the balance menu.
 
 The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
 
 <img width="724" alt="Category balances in the normal, empty, green, orange and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
 
-The tooltip will give you more information about your budget and balance:
+The goal status gives you more information about your budget and balance, including a progress bar:
 
-<img width="243" alt="The balance tooltip for a fully funded category" src="/img/experimental/budget-automation-fully-funded@2x.webp" />
+<img width="228" alt="The balance menu showing the goal status for a fully funded category" src="/img/experimental/budget-automation-fully-funded@2x.webp" />
 
-<img width="247" alt="The balance tooltip for an underfunded category" src="/img/experimental/budget-automation-underfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the goal status for an underfunded category" src="/img/experimental/budget-automation-underfunded@2x.webp" />
 
 ### Long-term Goal {#long-term-goal}
 
@@ -321,16 +321,16 @@ Once you hit your goal, the balance will turn green. Note that if you remove fun
 :::tip
 
 - The long-term goal does not automatically add funds or stop funds from being added after the goal has been hit. To stop automated funds from being added after you reach the goal, add a _Balance cap_ to the category.
-- You can have a long-term goal without any other automations and budget manually toward your goal. You will still need to run the automations on the category to see the indicator and tooltip.
+- You can have a long-term goal without any other automations and budget manually toward your goal. You will still need to run the automations on the category to see the indicator and goal status.
 :::
 
-The tooltip will give you information regarding your progress:
+The goal status shows your progress:
 
-<img width="239" alt="The long-term goal tooltip for an underfunded category" src="/img/experimental/budget-automation-long-term-underfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for an underfunded category" src="/img/experimental/budget-automation-long-term-underfunded@2x.webp" />
 
-<img width="222" alt="The long-term goal tooltip for a fully funded category" src="/img/experimental/budget-automation-long-term-fully-funded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for a fully funded category" src="/img/experimental/budget-automation-long-term-fully-funded@2x.webp" />
 
-<img width="230" alt="The long-term goal tooltip for an overfunded category" src="/img/experimental/budget-automation-long-term-overfunded@2x.webp" />
+<img width="228" alt="The balance menu showing the long-term goal status for an overfunded category" src="/img/experimental/budget-automation-long-term-overfunded@2x.webp" />
 
 ---
 
@@ -359,6 +359,8 @@ In the budget header menu you will see the following options:
 - **Apply automations to a single category group**: Use the "Overwrite with templates" option shown below from the category group drop-down menu to apply all automations to categories in a specific group. If you are viewing multiple months, it will apply them to the month furthest to the left in your budget view. This will overwrite any existing budgets in the categories in the group.
 
 <img width="724" alt="The category group menu with Overwrite with templates highlighted" src="/img/experimental/goal-templates-group-menu@2x.webp" />
+
+- **Fund a single goal from To Budget** (envelope budgeting only): If a category is underfunded and you have money left in To Budget, click the category balance and choose "Fund goal from To Budget". This adds the missing amount to the category's budget, but never more than what is left in To Budget for that month. Unlike "Overwrite with template", it never lowers the budgeted amount. It is not offered for long-term goals. This normally also reduces To Budget in the following months. If the category is overspent and does not use rollover, the added budget can offset the overspending carry-forward, so the following month's To Budget can remain unchanged for that amount.
 
 ---
 

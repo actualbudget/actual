@@ -3,6 +3,8 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { post } from '#server/post';
+import * as requests from '#server/post';
+import { loadPrefs, savePrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { setSyncingMode } from '#server/sync';
 import { handlers } from '#server/tests/mockSyncServer';
@@ -1003,6 +1005,48 @@ describe('SimpleFin batch sync', () => {
       delete handlers['/gocardless/transactions'];
     }
   });
+
+  test.each(['individual', 'batch'])(
+    'sends the budget ID for %s sync',
+    async mode => {
+      await loadPrefs();
+      await savePrefs({ cloudFileId: 'simplefin-budget' });
+      vi.mocked(asyncStorage.multiGet).mockResolvedValue({});
+      db.runQuery(
+        'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+        ['sf-bank', 'sf-bank', 'Bank'],
+      );
+      const id = await db.insertAccount({
+        id: 'sf-account',
+        bank: 'sf-bank',
+        account_id: 'external-account',
+        name: 'Checking',
+        account_sync_source: 'simpleFin',
+      });
+      mockSimpleFinTransactions({
+        error_type: 'INVALID_ACCESS_TOKEN',
+        error_code: 'INVALID_ACCESS_TOKEN',
+      });
+      const request = vi.spyOn(requests, 'post');
+      try {
+        const handler =
+          mode === 'batch' ? 'simplefin-batch-sync' : 'accounts-bank-sync';
+        await accountsApp.handlers[handler]({ ids: [id] });
+        expect(request).toHaveBeenCalledWith(
+          getServer().SIMPLEFIN_SERVER + '/transactions',
+          expect.objectContaining({
+            accountId:
+              mode === 'batch' ? ['external-account'] : 'external-account',
+          }),
+          expect.objectContaining({ 'X-Actual-File-Id': 'simplefin-budget' }),
+          expect.any(Number),
+        );
+      } finally {
+        request.mockRestore();
+        await loadPrefs();
+      }
+    },
+  );
 
   test('does not emit transaction CRDT messages when provider category appears later', async () => {
     const providerAccountId = 'sf-account-1';

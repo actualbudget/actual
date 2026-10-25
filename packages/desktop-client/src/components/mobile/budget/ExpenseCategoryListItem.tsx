@@ -12,6 +12,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { BudgetType } from '@actual-app/core/server/prefs';
 import * as monthUtils from '@actual-app/core/shared/months';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useCategoriesById } from '#hooks/useCategories';
@@ -360,6 +361,35 @@ export function ExpenseCategoryListItem({
     format,
   ]);
 
+  const onFundGoal = useCallback(
+    (amount: IntegerAmount) => {
+      if (!category) {
+        return;
+      }
+      onBudgetAction(month, 'transfer-available', {
+        amount,
+        category: category.id,
+      });
+      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
+      showUndoNotification({
+        message: t('Transferred {{amount}} to {{categoryName}}', {
+          amount: format(amount, 'financial'),
+          categoryName: category.name,
+        }),
+      });
+    },
+    [
+      category,
+      dispatch,
+      month,
+      onBudgetAction,
+      balanceMenuModalName,
+      showUndoNotification,
+      t,
+      format,
+    ],
+  );
+
   const onOpenBalanceMenu = useCallback(() => {
     if (!category) {
       return;
@@ -375,6 +405,7 @@ export function ExpenseCategoryListItem({
               onCarryover,
               onTransfer,
               onCover,
+              onFundGoal,
             },
           },
         }),
@@ -401,6 +432,7 @@ export function ExpenseCategoryListItem({
     onCarryover,
     onTransfer,
     onCover,
+    onFundGoal,
   ]);
 
   const navigate = useNavigate();
