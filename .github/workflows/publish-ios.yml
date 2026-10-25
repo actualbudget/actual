@@ -17,9 +17,11 @@ name: Publish iOS
 # - APP_STORE_CONNECT_API_KEY_ID / APP_STORE_CONNECT_API_ISSUER_ID /
 #   APP_STORE_CONNECT_API_KEY_P8: an App Store Connect API team key.
 #   appstoreconnect.apple.com -> Users and Access -> Integrations ->
-#   App Store Connect API -> Team Keys -> "+", role "App Manager". The
-#   Issuer ID is shown above the key list, the Key ID in the row, and the
-#   .p8 file (downloadable only once) is the P8 secret's full contents.
+#   App Store Connect API -> Team Keys -> "+", role "Admin" (lower roles
+#   fail the export with "Cloud signing permission error" because only
+#   Admin keys may create distribution profiles). The Issuer ID is shown
+#   above the key list, the Key ID in the row, and the .p8 file
+#   (downloadable only once) is the P8 secret's full contents.
 
 on:
   push:
