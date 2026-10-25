@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReactNode } from 'react';
 
 import { generateAccount } from '@actual-app/core/mocks';
 import { q } from '@actual-app/core/shared/query';
@@ -324,4 +325,126 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     expect(onReconcile).toHaveBeenCalledWith(null);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+});
+
+function renderWithPrefs(
+  ui: ReactNode,
+  prefs: Parameters<typeof mergeSyncedPrefs>[0],
+) {
+  const queryClient = createTestQueryClient();
+  const store = configureTestAppStore({ queryClient });
+  store.dispatch(mergeSyncedPrefs(prefs));
+  render(
+    <TestProviders queryClient={queryClient} store={store}>
+      {ui}
+    </TestProviders>,
+  );
+}
+
+describe('Reconciling an account in another currency', () => {
+  // A budget in yen, whose decimals are hidden, with an account in dollars
+  const dollarAccount: AccountEntity = {
+    ...generateAccount('Checking', false, false),
+    currency: 'USD',
+  };
+
+  const prefs = {
+    'flags.currency': 'true',
+    'flags.multiCurrency': 'true',
+    defaultCurrencyCode: 'JPY',
+    hideFraction: 'true',
+  } as const;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('starts from the cleared balance with all its decimals', async () => {
+    vi.mocked(useSheetValue).mockReturnValue(123456);
+    const onReconcile = vi.fn();
+
+    renderWithPrefs(
+      <ReconcileMenu
+        account={dollarAccount}
+        onReconcile={onReconcile}
+        onClose={vi.fn()}
+      />,
+      prefs,
+    );
+
+    expect(screen.getByRole<HTMLInputElement>('textbox').value).toBe(
+      '1,234.56',
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+    expect(onReconcile).toHaveBeenCalledWith(123456);
+  });
+
+  test('shows the balances and their difference in the account currency', () => {
+    vi.mocked(useSheetValue).mockReturnValue(3000);
+
+    renderWithPrefs(
+      <ReconcilingMessage
+        balanceQuery={{
+          name: 'balance-query-test',
+          query: q('transactions'),
+        }}
+        targetBalance={3026}
+        currencyCode="USD"
+        onDone={vi.fn()}
+        onCreateTransaction={vi.fn()}
+      />,
+      prefs,
+    );
+
+    expect(screen.getByText('‪USD$‬30.00')).toBeInTheDocument();
+    expect(screen.getByText('‪USD$‬30.26')).toBeInTheDocument();
+    expect(screen.getByText('+‪USD$‬0.26')).toBeInTheDocument();
+  });
+});
+
+describe('Reconciling an account in a currency without decimals', () => {
+  // A budget in Canadian dollars with an account in yen
+  const yenAccount: AccountEntity = {
+    ...generateAccount('Wallet', false, false),
+    currency: 'JPY',
+  };
+
+  const prefs = {
+    'flags.currency': 'true',
+    'flags.multiCurrency': 'true',
+    defaultCurrencyCode: 'CAD',
+  } as const;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test.each([
+    [150000, '1,500'],
+    // A fraction of a yen typed into the register is kept too
+    [1526, '15.26'],
+  ])(
+    'starts from a cleared balance of %s as %s',
+    async (clearedBalance, expected) => {
+      vi.mocked(useSheetValue).mockReturnValue(clearedBalance);
+      const onReconcile = vi.fn();
+
+      renderWithPrefs(
+        <ReconcileMenu
+          account={yenAccount}
+          onReconcile={onReconcile}
+          onClose={vi.fn()}
+        />,
+        prefs,
+      );
+
+      expect(screen.getByRole<HTMLInputElement>('textbox').value).toBe(
+        expected,
+      );
+
+      await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+      expect(onReconcile).toHaveBeenCalledWith(clearedBalance);
+    },
+  );
 });
