@@ -119,12 +119,14 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    text = reapplyThousandSeparators(text);
     if (format.currency.decimalPlaces === 0) {
       // Typed digits are whole units, whatever the hideFraction setting
       text = format.forEdit(amountToInteger(Number(text.replace(/\D/g, ''))));
     } else {
-      text = appendDecimals(text, String(hideFraction) === 'true');
+      text = appendDecimals(
+        reapplyThousandSeparators(text),
+        String(hideFraction) === 'true',
+      );
     }
     setEditing(true);
     setText(text);
