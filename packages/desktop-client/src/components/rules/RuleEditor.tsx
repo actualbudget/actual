@@ -683,6 +683,7 @@ function ActionEditor({
             style={{
               flex: 1,
               minWidth: options.method === 'fixed-percent' ? 45 : 70,
+              ...(isNarrowWidth && narrowValueStyle),
             }}
           >
             {options.method === 'formula' ? (
