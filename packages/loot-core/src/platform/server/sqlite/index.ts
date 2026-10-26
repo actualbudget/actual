@@ -86,10 +86,13 @@ export function registerEngine(name: EngineName, engine: SqliteEngine) {
   engines[name] = engine;
 }
 
-// The browser build of `@actual-app/api` embeds sql.js's wasm; the
-// sqlite-wasm engine fetches its own file.
+// Opt-in: the browser build of `@actual-app/api` embeds the wasm of the
+// engine it ships and hands it over here before `init`, so the engine is
+// instantiated from these bytes instead of fetching them.
+let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
+
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacyEngine.setWasmBinary(binary);
+  wasmBinaryOverride = binary;
 }
 
 // Resolves to the backend actually in use: `opfs` falls back to
@@ -109,7 +112,11 @@ export async function init({
     throw new Error(`sqlite engine "${name}" has not been registered`);
   }
   activeEngine = selected;
-  activeBackend = await activeEngine.init({ baseURL, wasmBinary, storage });
+  activeBackend = await activeEngine.init({
+    baseURL,
+    wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    storage,
+  });
   return activeBackend;
 }
 
