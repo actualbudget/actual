@@ -1,8 +1,8 @@
 name: Publish iOS
 
 # Uploads the Capacitor iOS app to App Store Connect. The nightly run
-# produces a TestFlight build from master; a published release uploads the
-# release build and submits it for App Store review.
+# produces a TestFlight build from master for the external "Beta testers"
+# group; a published release also submits the build for App Store review.
 #
 # Secrets (all in the `release` environment) and how to regenerate them:
 #
@@ -46,7 +46,7 @@ jobs:
   publish-ios:
     runs-on: depot-macos-latest
     environment: release
-    # Includes up to 45 minutes waiting for Apple to process a release build.
+    # Includes up to 45 minutes waiting for Apple to process the build.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
