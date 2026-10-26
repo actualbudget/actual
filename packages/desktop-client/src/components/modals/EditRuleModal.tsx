@@ -22,13 +22,17 @@ export function EditRuleModal({
   // Tag this modal on the undo state so that undoing a change made from here
   // reopens the rule rather than navigating back to the rules page.
   useEffect(() => {
+    // Restore rather than clear on cleanup: `openModal` is global, so a modal
+    // opened underneath this one would otherwise lose its own tag.
+    const previousOpenModal = undo.getUndoState('openModal');
+
     undo.setUndoState('openModal', {
       name: 'edit-rule',
       options: { rule: defaultRule },
     });
 
     return () => {
-      undo.setUndoState('openModal', null);
+      undo.setUndoState('openModal', previousOpenModal);
     };
   }, [defaultRule]);
 

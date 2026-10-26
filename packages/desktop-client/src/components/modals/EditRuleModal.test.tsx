@@ -53,4 +53,20 @@ describe('EditRuleModal', () => {
 
     expect(undo.getUndoState('openModal')).toBeNull();
   });
+
+  test('restores a modal tagged underneath it once closed', () => {
+    // `openModal` is global, so closing this modal must not clobber the tag
+    // belonging to a modal that was already open underneath it.
+    const underlying = { name: 'schedule-edit', options: { id: 'sched-1' } };
+    undo.setUndoState('openModal', underlying);
+
+    const { unmount } = renderModal();
+    expect(undo.getUndoState('openModal')).toEqual({
+      name: 'edit-rule',
+      options: { rule },
+    });
+
+    unmount();
+    expect(undo.getUndoState('openModal')).toEqual(underlying);
+  });
 });

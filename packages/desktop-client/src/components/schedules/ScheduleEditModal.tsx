@@ -36,13 +36,17 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   // Tag this modal on the undo state so that undoing a change made from here
   // reopens the schedule rather than navigating back to the schedules page.
   useEffect(() => {
+    // Restore rather than clear on cleanup: `openModal` is global, so a modal
+    // opened underneath this one would otherwise lose its own tag.
+    const previousOpenModal = undo.getUndoState('openModal');
+
     undo.setUndoState('openModal', {
       name: 'schedule-edit',
       options: { id, transaction },
     });
 
     return () => {
-      undo.setUndoState('openModal', null);
+      undo.setUndoState('openModal', previousOpenModal);
     };
   }, [id, transaction]);
 
