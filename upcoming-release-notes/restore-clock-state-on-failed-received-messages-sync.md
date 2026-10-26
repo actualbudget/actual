@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [jsoberg]
 ---
 
-Restores the clock state when messages fail to be applied in a sync. Timestamp.recv would otherwise advance the clock without applying messages, permanently bumping the clock state potentially causing clock drift
+Restore the sync clock when a batch of received changes fails to apply, so the failure no longer leaves the clock advanced

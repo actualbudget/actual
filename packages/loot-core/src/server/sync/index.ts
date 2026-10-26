@@ -441,12 +441,6 @@ async function _applyMessages(messages: Message[], isReceived = false) {
   // first and upgrading the lock later trips an absurd-sql bug on the
   // web (a cursor kept across the upgrade) that stalls the backend.
   const applyInTransaction = () => {
-    if (isReceived) {
-      // Receive inside the transaction so the clock saved below
-      // includes it
-      receiveTimestamps(messages);
-    }
-
     if (checkSyncingMode('enabled')) {
       // Compare the messages with the existing crdt. This filters out
       // already applied messages and determines if a message is old or
@@ -551,12 +545,10 @@ async function _applyMessages(messages: Message[], isReceived = false) {
 
     newData = fetchData(idsPerTable);
   };
-  const runTransaction = () =>
-    db.transaction(applyInTransaction, { immediate: true });
   if (isReceived) {
-    withClockRollback(runTransaction);
+    receiveInTransaction(messages, applyInTransaction);
   } else {
-    runTransaction();
+    db.transaction(applyInTransaction, { immediate: true });
   }
 
   // The transaction succeeded, so we can update in-memory objects now
@@ -648,25 +640,14 @@ async function _applyMessages(messages: Message[], isReceived = false) {
 
 export const applyMessages = sequential(_applyMessages);
 
-// A failed transaction must not leave the clock advanced by the
-// received timestamps
-function withClockRollback(fn: () => void) {
-  const { timestamp } = getClock();
-  const savedMillis = timestamp.millis();
-  const savedCounter = timestamp.counter();
-  try {
-    fn();
-  } catch (e) {
-    timestamp.setMillis(savedMillis);
-    timestamp.setCounter(savedCounter);
-    throw e;
-  }
-}
-
-function receiveTimestamps(messages: Message[]) {
-  // Receiving the latest timestamp preserves the clock and drift check while
-  // advancing the counter once per batch.
-  let latest = null;
+// Receiving the batch's latest timestamp inside the transaction advances
+// the clock once per batch and includes it in the saved `messages_clock`
+// row. If the transaction fails, the clock is restored along with it.
+function receiveInTransaction(
+  messages: Message[],
+  applyInTransaction: () => void,
+) {
+  let latest: Timestamp | null = null;
   for (const { timestamp } of messages) {
     if (
       latest === null ||
@@ -677,8 +658,24 @@ function receiveTimestamps(messages: Message[]) {
       latest = timestamp;
     }
   }
-  if (latest !== null) {
-    Timestamp.recv(latest);
+
+  const clock = getClock();
+  const savedMillis = clock.timestamp.millis();
+  const savedCounter = clock.timestamp.counter();
+  try {
+    db.transaction(
+      () => {
+        if (latest !== null) {
+          Timestamp.recv(latest);
+        }
+        applyInTransaction();
+      },
+      { immediate: true },
+    );
+  } catch (e) {
+    clock.timestamp.setMillis(savedMillis);
+    clock.timestamp.setCounter(savedCounter);
+    throw e;
   }
 }
 
