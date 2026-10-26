@@ -644,7 +644,6 @@ export class CategoryTemplateContext {
   }
 
   private removeFraction(amount: number): number {
-    // Whole units of the currency, e.g. whole dollars or whole yen
     return amountToInteger(Math.round(integerToAmount(amount)));
   }
 

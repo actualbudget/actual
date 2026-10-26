@@ -81,7 +81,7 @@ function normalizeIntegerValue(
   if (typeof val !== 'number') {
     return 0;
   }
-  // Stored amounts have two decimals; currencies with fewer show fewer
+  // Round to the currency's digits when it shows fewer than the stored two
   const formatter =
     decimalPlaces < 2
       ? getNumberFormat({ decimalPlaces }).formatter
