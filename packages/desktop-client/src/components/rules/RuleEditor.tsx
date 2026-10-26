@@ -69,11 +69,21 @@ import { FormulaActionEditor } from './FormulaActionEditor';
 const narrowValueStyle: CSSProperties = { order: 1, flexBasis: '100%' };
 const narrowButtonsStyle: CSSProperties = { marginLeft: 'auto' };
 
+// Columns SimpleTransactionsTable renders with a flexible width. Other fields
+// that end up in the list (for example `cleared`) are not rendered at all.
+const flexibleTableFields = [
+  'imported_payee',
+  'payee',
+  'category',
+  'account',
+  'notes',
+];
+
 // Width the transactions table needs on narrow screens so every flexible
 // column stays readable; the table then scrolls sideways. Mirrors the fixed
 // select, date and amount cell widths in SimpleTransactionsTable.
 function getNarrowTableMinWidth(fields: string[]) {
-  const flexCount = fields.filter(f => f !== 'date' && f !== 'amount').length;
+  const flexCount = fields.filter(f => flexibleTableFields.includes(f)).length;
   return 20 + 100 + 75 + flexCount * 200;
 }
 
