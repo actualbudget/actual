@@ -35,3 +35,5 @@ Backfill asks the sync server for one currency over an inclusive date range. The
 Changing any of those clears the summary. Start contacts the server only after you confirm a Replace summary, or immediately for Keep. Progress is announced as it advances, and Cancel stops the run. Rates already written stay saved.
 
 Backfill needs a sync server that has an exchange rate provider available. Saving a rate and importing a file work without one.
+
+The sync server includes the fawazahmed0 exchange-api market-data provider; its rates are not official. Check dates contacts only your sync server. Start backfill requests rates from jsDelivr, with Cloudflare as a fallback. These hosts can see the requested currency file code, the snapshot date, and your server's IP. A quote currency file is requested only when a reciprocal rate is needed. The saved date is the snapshot's effective day, not a verified capture time.

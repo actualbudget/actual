@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import { createExchangeRateHandlers } from './app-exchange-rates';
+import { createExchangeRateHandlers, handlers } from './app-exchange-rates';
 import type { RateProviderPlugin } from './app-exchange-rates';
 
 const lookup = vi.fn<RateProviderPlugin['lookup']>();
@@ -33,6 +33,51 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('direct exchange-rate routes', () => {
+  it('ships G2 metadata and answers a future snapshot without a GET', async () => {
+    const fetcher = vi.fn<typeof fetch>();
+    vi.stubGlobal('fetch', fetcher);
+    onTestFinished(() => {
+      vi.unstubAllGlobals();
+    });
+    const list = await request(handlers)
+      .post('/providers')
+      .set('x-actual-token', 'valid-token')
+      .send({});
+    expect(list.body).toEqual({
+      status: 'ok',
+      data: {
+        providers: [
+          {
+            id: 'fawazahmed0-exchange-api',
+            name: 'fawazahmed0 exchange-api (market data)',
+            version: '1.0.0',
+            origins: [
+              'https://cdn.jsdelivr.net',
+              'https://currency-api.pages.dev',
+            ],
+            fields: [],
+          },
+        ],
+      },
+    });
+    const result = await request(handlers)
+      .post('/lookup')
+      .set('x-actual-token', 'valid-token')
+      .send({
+        providerId: 'fawazahmed0-exchange-api',
+        base: 'USD',
+        quote: 'JPY',
+        date: '2099-12-31',
+      });
+    expect(result.body).toEqual({
+      status: 'ok',
+      data: {
+        outcome: 'missing',
+        plugin: { id: 'fawazahmed0-exchange-api', version: '1.0.0' },
+      },
+    });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
   it.each(['/providers', '/lookup'])(
     'redacts malformed JSON on %s before Express handles an exception',
     async path => {

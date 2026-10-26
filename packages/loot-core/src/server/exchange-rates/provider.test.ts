@@ -567,3 +567,147 @@ it('stores the exact inverse in a JPY budget and converts 10000 USD minor units 
     }),
   ).toMatchObject({ status: 'ok', baseAmount: 15000 });
 });
+
+const exchangeApiMetadata = {
+  id: 'fawazahmed0-exchange-api',
+  name: 'fawazahmed0 exchange-api (market data)',
+  version: '1.0.0',
+  origins: ['https://cdn.jsdelivr.net', 'https://currency-api.pages.dev'],
+  fields: [] satisfies JsonValue[],
+};
+
+it.each([
+  {
+    id: 'C1',
+    base: 'USD',
+    precision: 2,
+    quote: 'JPY',
+    nativePrecision: 0,
+    rate: '158.02740002',
+    amounts: [[15000, 9492]],
+  },
+  {
+    id: 'C2',
+    base: 'JPY',
+    precision: 0,
+    quote: 'USD',
+    nativePrecision: 2,
+    rate: '0.006328016533041',
+    amounts: [
+      [10000, 15803],
+      [1000000000, 1580274000],
+    ],
+  },
+  {
+    id: 'C2x',
+    base: 'JPY',
+    precision: 0,
+    quote: 'USD',
+    nativePrecision: 2,
+    rate: '0.0063280165',
+    amounts: [[1000000000, 1580274008]],
+  },
+  {
+    id: 'C3',
+    base: 'USD',
+    precision: 2,
+    quote: 'KWD',
+    nativePrecision: 3,
+    rate: '0.310849125948055',
+    amounts: [
+      [1000, 322],
+      [1000000000, 321699473],
+    ],
+  },
+  {
+    id: 'C3x',
+    base: 'USD',
+    precision: 2,
+    quote: 'KWD',
+    nativePrecision: 3,
+    rate: '0.31084913',
+    amounts: [[1000000000, 321699469]],
+  },
+  {
+    id: 'C4',
+    base: 'KWD',
+    precision: 3,
+    quote: 'USD',
+    nativePrecision: 2,
+    rate: '3.21699473',
+    amounts: [[10000, 31085]],
+  },
+  {
+    id: 'C5',
+    base: 'USD',
+    precision: 2,
+    quote: 'IQD',
+    nativePrecision: 0,
+    rate: '1515.96887131',
+    amounts: [[1000000, 65964]],
+  },
+  {
+    id: 'C6',
+    base: 'IRR',
+    precision: 0,
+    quote: 'KWD',
+    nativePrecision: 3,
+    rate: '0.000000173119011',
+    amounts: [[1000, 5776373]],
+  },
+])(
+  '$id captures the literal provider rate through the real coordinator',
+  async row => {
+    await db.update('preferences', {
+      id: 'defaultCurrencyCode',
+      value: row.base,
+    });
+    await prefs.savePrefs({
+      amountEncoding: JSON.stringify({
+        version: 1,
+        currencyCode: row.base,
+        precision: row.precision,
+      }),
+    });
+    for (const flag of ['currency', 'multicurrency']) {
+      await db.update('preferences', { id: `flags.${flag}`, value: 'true' });
+    }
+    vi.mocked(fxRequest).mockResolvedValue({
+      ok: true,
+      data: { providers: [exchangeApiMetadata] },
+    });
+    await ready();
+    const date = '2026-10-17';
+    vi.mocked(fxRequest).mockResolvedValue({
+      ok: true,
+      data: {
+        outcome: 'ok',
+        plugin: {
+          id: exchangeApiMetadata.id,
+          version: exchangeApiMetadata.version,
+        },
+        base: row.base,
+        quote: row.quote,
+        rate: row.rate,
+        effectiveDate: date,
+      },
+    });
+    expect(
+      await ensureRate({ quoteCurrency: row.quote, date, forEntry: false }),
+    ).toMatchObject({
+      status: 'inserted',
+      resolution: { rate: row.rate },
+    });
+    const { app } = await import('./app');
+    for (const [nativeAmount, baseAmount] of row.amounts) {
+      expect(
+        await app.handlers['exchange-rates/capture-entry']({
+          quoteCurrency: row.quote,
+          nativePrecision: row.nativePrecision,
+          date,
+          nativeAmount,
+        }),
+      ).toMatchObject({ status: 'ok', baseAmount });
+    }
+  },
+);
