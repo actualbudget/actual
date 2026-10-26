@@ -63,6 +63,11 @@ import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
+// On narrow screens a value editor needs most of the row. When the field and
+// operator selects leave less room than this, it wraps onto its own line
+// instead of squeezing long values (e.g. payee names) next to them.
+const narrowValueEditorStyle = { minWidth: '70%' };
+
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
 }
@@ -272,6 +277,7 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
+  const { isNarrowWidth } = useResponsive();
   const {
     field: originalField,
     op,
@@ -345,7 +351,15 @@ function ConditionEditor({
       />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
-      <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
+      <View
+        style={{
+          flex: 1,
+          minWidth: 80,
+          ...(isNarrowWidth && narrowValueEditorStyle),
+        }}
+      >
+        {valueEditor}
+      </View>
 
       <SpaceBetween direction="horizontal" gap={0}>
         <EditorButtons
@@ -486,6 +500,7 @@ function ActionEditor({
   onAdd,
 }: ActionEditorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const {
     field,
     op,
@@ -530,7 +545,9 @@ function ActionEditor({
             onChange={value => onChange('field', value)}
           />
 
-          <View style={{ flex: 1 }}>
+          <View
+            style={{ flex: 1, ...(isNarrowWidth && narrowValueEditorStyle) }}
+          >
             <View style={{ flex: 1 }}>
               {hasFormula ? (
                 <FormulaActionEditor
@@ -714,7 +731,9 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View style={{ flex: 1 }}>
+          <View
+            style={{ flex: 1, ...(isNarrowWidth && narrowValueEditorStyle) }}
+          >
             <GenericInput
               key={inputKey}
               // @ts-expect-error fix this
@@ -1034,6 +1053,7 @@ export function RuleEditor({
   style,
 }: RuleEditorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const [conditions, setConditions] = useState(
     defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
   );
@@ -1555,15 +1575,32 @@ export function RuleEditor({
             </Button>
           </SpaceBetween>
 
-          {/* @ts-expect-error fix this */}
-          <SimpleTransactionsTable
-            transactions={transactions}
-            fields={getTransactionFields(conditions, getActions(actionSplits))}
+          <View
             style={{
-              border: '1px solid ' + theme.tableBorder,
-              borderRadius: '6px 6px 0 0',
+              flex: 1,
+              ...(isNarrowWidth && {
+                ...styles.horizontalScrollbar,
+                overflowX: 'auto',
+              }),
             }}
-          />
+          >
+            {/* @ts-expect-error fix this */}
+            <SimpleTransactionsTable
+              transactions={transactions}
+              fields={getTransactionFields(
+                conditions,
+                getActions(actionSplits),
+              )}
+              style={{
+                border: '1px solid ' + theme.tableBorder,
+                borderRadius: '6px 6px 0 0',
+                // On narrow screens the fixed date and amount columns leave the
+                // payee columns only a few characters wide, so keep the table
+                // wide enough to read them and let it scroll sideways instead.
+                ...(isNarrowWidth && { minWidth: 600 }),
+              }}
+            />
+          </View>
 
           <SpaceBetween
             style={{
