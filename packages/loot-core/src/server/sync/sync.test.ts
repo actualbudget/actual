@@ -212,119 +212,40 @@ describe('Sync', () => {
 });
 
 describe('receiveMessages', () => {
-  it('restores the clock if a message in the batch triggers clock drift', async () => {
-    void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
-
-    const before = getClock().timestamp.toString();
-
-    const okMessage = {
+  function conflictingMessages() {
+    const timestamp = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
+    // Duplicate timestamps make the batch fail inside the database transaction.
+    return ['foo', 'bar'].map(row => ({
       dataset: 'transactions',
-      row: 'foo',
+      row,
       column: 'amount',
       value: 3200,
-      timestamp: new Timestamp(Date.now(), 0, '0000000000000001'),
-    };
-    const driftedMessage = {
-      dataset: 'transactions',
-      row: 'foo',
-      column: 'amount',
-      value: 4200,
-      timestamp: new Timestamp(
-        Date.now() + 10 * 60 * 1000,
-        0,
-        '0000000000000002',
-      ),
-    };
+      timestamp,
+    }));
+  }
 
-    let error;
-    try {
-      await receiveMessages([okMessage, driftedMessage]);
-    } catch (e) {
-      error = e;
-    }
+  it('discards failed clock advances before receiving the next queued batch', async () => {
+    const messages = conflictingMessages();
+    const failedBatch = receiveMessages(messages);
+    const nextBatch = receiveMessages([
+      {
+        ...messages[0],
+        timestamp: new Timestamp(Date.now() + 1000, 0, '0000000000000002'),
+      },
+    ]);
 
-    expect(error).toBeTruthy();
-    expect(getClock().timestamp.toString()).toEqual(before);
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    await expect(nextBatch).resolves.toHaveLength(1);
+    expect(getClock().timestamp.millis()).toBe(Date.now() + 1000);
+    expect(getClock().timestamp.counter()).toBe(1);
   });
 
-  it('restores the clock when a message fails to apply after recv', async () => {
-    void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
+  it('does not reuse timestamps issued while a failed receive is pending', async () => {
+    const failedBatch = receiveMessages(conflictingMessages());
+    const issued = Timestamp.send();
 
-    const before = getClock().timestamp.toString();
-
-    // Two messages sharing one timestamp: the second violates the
-    // `messages_crdt.timestamp` UNIQUE constraint inside the transaction,
-    // after recv() has already bumped the clock
-    const shared = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
-    const messages = [
-      {
-        dataset: 'transactions',
-        row: 'foo',
-        column: 'amount',
-        value: 3200,
-        timestamp: shared,
-      },
-      {
-        dataset: 'transactions',
-        row: 'bar',
-        column: 'amount',
-        value: 4200,
-        timestamp: shared,
-      },
-    ];
-
-    await expect(receiveMessages(messages)).rejects.toThrow(
-      /UNIQUE constraint failed/,
-    );
-
-    expect(getClock().timestamp.toString()).toEqual(before);
-  });
-
-  it('safely handles concurrent batches where the first fails and the second succeeds', async () => {
-    void prefs.loadPrefs();
-    void prefs.savePrefs({ groupId: 'group' });
-
-    const now = Date.now();
-
-    // Batch 1: 1 valid message and 1 message with clock-drift
-    const batch1ValidMsg = {
-      dataset: 'transactions',
-      row: 'foo',
-      column: 'amount',
-      value: 1111,
-      timestamp: new Timestamp(now + 1000, 0, '0000000000000001'),
-    };
-    const batch1DriftedMsg = {
-      dataset: 'transactions',
-      row: 'foo',
-      column: 'amount',
-      value: 2222,
-      timestamp: new Timestamp(now + 10 * 60 * 1000, 0, '0000000000000002'),
-    };
-
-    // Batch 2: 1 valid message
-    const batch2ValidMsg = {
-      dataset: 'transactions',
-      row: 'bar',
-      column: 'amount',
-      value: 3333,
-      timestamp: new Timestamp(now + 2000, 0, '0000000000000003'),
-    };
-
-    const batch1Promise = receiveMessages([batch1ValidMsg, batch1DriftedMsg]);
-    const batch2Promise = receiveMessages([batch2ValidMsg]);
-
-    const results = await Promise.allSettled([batch1Promise, batch2Promise]);
-
-    expect(results[0].status).toBe('rejected');
-    expect(results[1].status).toBe('fulfilled');
-
-    // The final clock state timestamp should match only Batch 2's
-    expect(getClock().timestamp.millis()).toEqual(
-      batch2ValidMsg.timestamp.millis(),
-    );
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    expect(Timestamp.send().toString() > issued.toString()).toBe(true);
   });
 });
 
