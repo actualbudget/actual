@@ -65,6 +65,8 @@ The projected amount to be budgeted will be shown in the top right of the automa
 
 Don't forget to **Save** your work when you are finished adding and editing automations.
 
+Saving also sets the category's goal for the month the projected amount is shown for (the month furthest to the left in your budget view, or the month you are viewing on mobile), so the [budget indicator](#budget-indicator) and goal status appear right away, and **Fund goal from To Budget** can be used without running the automations first. Saving never changes how much is budgeted. Other months get their goal when you apply automations to them.
+
 :::
 
 ### Priorities {#priorities}
@@ -321,7 +323,7 @@ Once you hit your goal, the balance will turn green. Note that if you remove fun
 :::tip
 
 - The long-term goal does not automatically add funds or stop funds from being added after the goal has been hit. To stop automated funds from being added after you reach the goal, add a _Balance cap_ to the category.
-- You can have a long-term goal without any other automations and budget manually toward your goal. You will still need to run the automations on the category to see the indicator and goal status.
+- You can have a long-term goal without any other automations and budget manually toward your goal. Saving the long-term goal shows the indicator and goal status for the month the automations editor is showing; for other months, you will still need to run the automations on the category.
 :::
 
 The goal status shows your progress:
