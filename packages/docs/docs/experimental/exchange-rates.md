@@ -57,3 +57,9 @@ The range is inclusive, at most 366 days, and cannot end after today. **Check da
 For a backfill, **Keep existing** treats a date as already saved when a fetched rate for that day exists, and it does not fetch that date. **Replace existing** fetches every date in the range and asks you to confirm, because those changes cannot be undone. **Cancel backfill** stops a run. Rates already written stay saved.
 
 Removing a fetched rate deletes that saved day. It stays deleted until a backfill with **Replace existing** brings it back. **Keep existing** does not restore it.
+
+## Where fetched rates come from
+
+The sync server includes the fawazahmed0 exchange-api provider. Its rates are market data, and they are not official rates. A fetched row in **Saved rates** shows its source as exchange-api.
+
+**Check dates** asks your sync server which provider is available. It does not download rates. **Start backfill** asks that server for rates. The server reads each snapshot from jsDelivr (`cdn.jsdelivr.net`), then from `currency-api.pages.dev` when jsDelivr does not have the file. Those hosts can see the currency code, the snapshot date, and the sync server's IP address. The server requests a quote-currency file only when the direct rate is below 1. The saved date is the snapshot's day, not a verified capture time.
