@@ -572,8 +572,12 @@ class AccountInternal extends PureComponent<
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
-            if (this.pendingFocus?.paged === paged && paged === this.paged) {
-              this.showPendingFocus(this.pendingFocus, paged, firstLoad);
+            if (
+              firstLoad &&
+              this.pendingFocus?.paged === paged &&
+              paged === this.paged
+            ) {
+              void this.showPendingFocus(this.pendingFocus.id, paged);
             }
 
             setTimeout(() => {
@@ -615,24 +619,27 @@ class AccountInternal extends PureComponent<
     }
   }
 
-  // Brings the pending transaction into view once it's loaded, then opens
-  // its split. Leaves the account at the top when it's hidden.
-  showPendingFocus = (
-    pending: PendingFocus,
+  // Brings the pending transaction into view, loading the account up to it
+  // when the first page doesn't have it, then opens its split. Leaves the
+  // account at the top when the current view doesn't contain it, e.g. while
+  // reconciled transactions are hidden.
+  showPendingFocus = async (
+    id: TransactionEntity['id'],
     paged: PagedQuery<TransactionEntity>,
-    isFirstLoad: boolean,
   ) => {
-    const { id } = pending;
-    const transaction = this.state.transactions.find(t => t.id === id);
-    if (transaction == null) {
-      if (isFirstLoad) {
-        void this.loadPendingFocus(pending, paged);
-      }
-      return;
+    this.pendingFocus = null;
+    if (!this.state.transactions.some(t => t.id === id)) {
+      // The query is in the default order, so by date
+      await paged.refetchUpToRow(id, { field: 'date', order: 'desc' });
     }
 
-    this.pendingFocus = null;
-    if (transaction.reconciled && !this.state.showReconciled) {
+    const transaction = ungroupTransactions(paged.data).find(t => t.id === id);
+    if (
+      transaction == null ||
+      (transaction.reconciled && !this.state.showReconciled) ||
+      // Another account or e.g. a sort replaced the query meanwhile
+      !paged.isRunning
+    ) {
       return;
     }
     if (transaction.parent_id) {
@@ -642,31 +649,6 @@ class AccountInternal extends PureComponent<
       });
     }
     this.setState({ focusedTransactionId: id });
-  };
-
-  // Loads the account up to the pending transaction when the first page
-  // doesn't have it. Its rows arrive through `onData`, which shows it. Loads
-  // again when a sync refreshes the account meanwhile, dropping the rows, and
-  // gives up when the account doesn't have it, e.g. while reconciled
-  // transactions are hidden.
-  loadPendingFocus = async (
-    pending: PendingFocus,
-    paged: PagedQuery<TransactionEntity>,
-  ) => {
-    // The query is in the default order, so by date
-    while (
-      await paged.refetchUpToRow(pending.id, { field: 'date', order: 'desc' })
-    ) {
-      if (this.pendingFocus !== pending || !paged.isRunning) {
-        return;
-      }
-    }
-    const isLoaded = ungroupTransactions(paged.data).some(
-      t => t.id === pending.id,
-    );
-    if (!isLoaded && this.pendingFocus === pending) {
-      this.pendingFocus = null;
-    }
   };
 
   onFocusedTransactionShown = () => {

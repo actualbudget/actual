@@ -178,8 +178,6 @@ export class LiveQuery<TResponse = unknown> {
     this.data = updateFn(this.data);
   };
 
-  // Resolves to whether a newer request superseded this one, dropping its
-  // data
   protected fetchData = async (
     runQuery: () => Promise<{
       data: Data<TResponse> | TResponse;
@@ -192,7 +190,6 @@ export class LiveQuery<TResponse = unknown> {
 
     const reqId = Math.random();
     this.inflightRequestId = reqId;
-    let isSuperseded = false;
 
     try {
       const { data, dependencies } = await runQuery();
@@ -206,8 +203,7 @@ export class LiveQuery<TResponse = unknown> {
 
       // Only fire events if this hasn't been cancelled and if we're
       // still subscribed (`this.unsubscribeSyncEvent` will exist)
-      isSuperseded = this.inflightRequestId !== reqId;
-      if (!isSuperseded && this._unsubscribeSyncEvent) {
+      if (this.inflightRequestId === reqId && this._unsubscribeSyncEvent) {
         const previousData = this.data;
 
         // For calculate queries, data is a raw value, not an array
@@ -229,6 +225,5 @@ export class LiveQuery<TResponse = unknown> {
         this.inflightRequestId = null;
       }
     }
-    return isSuperseded;
   };
 }
