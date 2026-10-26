@@ -211,14 +211,9 @@ export function useFormat(): UseFormatResult {
     ],
   );
 
-  // Stored amounts are always ×100 (see STORED_DECIMAL_PLACES); the
-  // currency only decides how many digits are shown
-  const toAmount = useCallback((value: number) => integerToAmount(value), []);
-  const fromAmount = useCallback((value: number) => amountToInteger(value), []);
-
   const forEdit = useCallback(
     (value: IntegerAmount) => {
-      const amount = toAmount(value);
+      const amount = integerToAmount(value);
       const decimalPlaces =
         hideFractionPref === 'true' ? 0 : activeCurrency.decimalPlaces;
       const editFormatter = getNumberFormat({
@@ -227,12 +222,7 @@ export function useFormat(): UseFormatResult {
       }).formatter;
       return editFormatter.format(amount);
     },
-    [
-      toAmount,
-      hideFractionPref,
-      activeCurrency.decimalPlaces,
-      numberFormatConfig.format,
-    ],
+    [hideFractionPref, activeCurrency.decimalPlaces, numberFormatConfig.format],
   );
 
   const fromEdit = useCallback(
@@ -260,12 +250,12 @@ export function useFormat(): UseFormatResult {
       }
 
       if (numericValue !== null && !isNaN(numericValue)) {
-        return fromAmount(numericValue);
+        return amountToInteger(numericValue);
       }
 
       return defaultValue;
     },
-    [fromAmount],
+    [],
   );
 
   return Object.assign(formatDisplay, {
