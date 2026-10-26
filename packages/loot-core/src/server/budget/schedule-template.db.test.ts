@@ -1,6 +1,10 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { createSchedule, updateSchedule } from '#server/schedules/app';
+import {
+  createSchedule,
+  setNextDate,
+  updateSchedule,
+} from '#server/schedules/app';
 import { loadRules } from '#server/transactions/transaction-rules';
 import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
@@ -69,12 +73,12 @@ async function setUpRent(start = '2024-01-25') {
       },
     ],
   });
-  const payRent = (date: string) =>
+  const payRent = (date: string, fromCategory: string | null = categoryId) =>
     db.insertTransaction({
       account,
       amount: -10000,
       date,
-      category: categoryId,
+      category: fromCategory,
       schedule: scheduleId,
     });
   const template = {
@@ -84,7 +88,7 @@ async function setUpRent(start = '2024-01-25') {
     priority: 0,
     directive: 'template',
   } as const;
-  return { category, payRent, template };
+  return { category, payRent, template, scheduleId };
 }
 
 async function setUpOneTimeBills() {
@@ -544,5 +548,65 @@ describe('runScheduleForecast against a real database', () => {
 
     expect(result.to_budget).toBe(5000);
     expect(result.perScheduleMonthly.get(templates[0])).toBe(5000);
+  });
+
+  it('reserves a bill whose linked payment is not categorized yet when budgeting ahead', async () => {
+    // Oct 26, budgeting November. October's rent (Oct 22) posted and is
+    // linked, so the schedule moved on to Nov 22, but the payment hasn't
+    // been categorized yet. The $100 carried into November still has to
+    // pay it, so November needs its own $100.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-26');
+    const { category, payRent, template, scheduleId } =
+      await setUpRent('2026-10-22');
+    await payRent('2026-10-22', null);
+    await setNextDate({ id: scheduleId, advance: true });
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      10000,
+      0,
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(10000);
+  });
+
+  it('does not reserve a skipped occurrence when budgeting ahead', async () => {
+    // Oct 26, budgeting November. October's rent was skipped, so the
+    // $100 carried into November is free toward November's.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-26');
+    const { category, template, scheduleId } = await setUpRent('2026-10-22');
+    await setNextDate({ id: scheduleId, advance: true });
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      10000,
+      0,
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(0);
+  });
+
+  it('reserves a bill that has not posted yet this month when budgeting ahead', async () => {
+    // Oct 20, budgeting November. October's rent (Oct 22) hasn't posted,
+    // so the $100 carried into November still has to pay it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-20');
+    const { category, template } = await setUpRent('2026-10-22');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      10000,
+      0,
+      category,
+      currency,
+    );
+
+    expect(result.to_budget).toBe(10000);
   });
 });

@@ -298,22 +298,26 @@ describe('buildMonthlyOutflow relative to today', () => {
     amount: number;
     date: string;
     schedule?: number | null;
+    category?: string | null;
   };
 
   // Answers each query the way the database would: the transactions inside
-  // its date range, limited to unlinked or linked ones where it asks.
+  // its date range, limited to unlinked or linked ones where it asks. A
+  // transaction is in defaultCategory unless it says otherwise.
   function mockTransactionQueries(transactions: MockTransaction[]) {
     vi.mocked(aqlQuery).mockImplementation(async rawQuery => {
       const query = rawQuery as ReturnType<typeof q>;
       const kind = queryKind(query);
       const range = dateFilter(kind, query);
-      const data = transactions.filter(
-        t =>
-          (range.$gte === undefined || t.date >= range.$gte) &&
-          (range.$lt === undefined || t.date < range.$lt) &&
-          (kind === 'posted' ||
-            (kind === 'unlinked' ? t.schedule == null : t.schedule != null)),
-      );
+      const data = transactions
+        .filter(
+          t =>
+            (range.$gte === undefined || t.date >= range.$gte) &&
+            (range.$lt === undefined || t.date < range.$lt) &&
+            (kind === 'posted' ||
+              (kind === 'unlinked' ? t.schedule == null : t.schedule != null)),
+        )
+        .map(t => ({ category: defaultCategory.id, ...t }));
       return { data, dependencies: [] };
     });
   }

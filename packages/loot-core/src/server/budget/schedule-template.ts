@@ -254,6 +254,7 @@ type PostedTransaction = {
   amount?: number;
   date: string;
   schedule: string | null;
+  category?: string | null;
 };
 
 // How far either side of a range to look for the occurrence nearest a
@@ -431,27 +432,16 @@ export async function buildMonthlyOutflow(
     return cutoff === undefined ? dates : dates.filter(d => d <= cutoff);
   };
 
-  // When budgeting ahead (current_month after the real current month), the
-  // carried-over balance still holds money for occurrences due between now
-  // and the window that haven't posted yet. Count those against month 0 so
-  // that money isn't treated as free. Occurrences missed before the real
-  // current month are ignored, so a long-stale next_date can't pile up.
-  const pendingEntries = isBudgetingAhead
-    ? smoothEntries.filter(
-        entry => entry.storedNextDate && entry.storedNextDate < windowStart,
-      )
-    : [];
   // next_date only advances once its date has passed, so a payment made
   // early leaves it in place. A linked payment already in the carried-over
   // balance (dated before the budget month) settles its nearest occurrence,
   // whether that is a pending one or one in the budget month itself. Only
-  // this category's payments count: one booked elsewhere didn't come out
-  // of this balance, and the same schedule can be linked from more than
-  // one category.
-  const { data: linkedBeforeWindow } = await aqlQuery(
+  // this category's payments count: one booked elsewhere (or not
+  // categorized yet) didn't come out of this balance, and the same
+  // schedule can be linked from more than one category.
+  const { data: linkedAnywhereBeforeWindow } = await aqlQuery(
     q('transactions')
       .filter({
-        category: category.id,
         schedule: { $oneof: smoothEntries.map(entry => entry.scheduleId) },
         'account.offbudget': false,
         date: [
@@ -461,7 +451,10 @@ export async function buildMonthlyOutflow(
           { $lt: windowStart },
         ],
       })
-      .select(['date', 'schedule']),
+      .select(['date', 'schedule', 'category']),
+  );
+  const linkedBeforeWindow = linkedAnywhereBeforeWindow.filter(
+    transaction => transaction.category === category.id,
   );
   // When budgeting the current or a past month, part (or all) of the
   // budget month has already happened. For that part, the category needs
@@ -498,30 +491,25 @@ export async function buildMonthlyOutflow(
   // Every range each schedule's occurrences are needed over below: the
   // forecast window, its pending occurrences, and the search around any
   // linked payments.
-  const pendingFromOf = (entry: ScheduleTemplateTarget) =>
-    entry.storedNextDate > currentMonthStart
-      ? entry.storedNextDate
-      : currentMonthStart;
   const linkedSchedules = new Set(
-    [...linkedBeforeWindow, ...postedTransactions].map(
+    [...linkedAnywhereBeforeWindow, ...postedTransactions].map(
       transaction => transaction.schedule,
     ),
   );
   const lookups = new Map<ScheduleTemplateTarget, OccurrencesBetween>();
   for (const entry of smoothEntries) {
     const ranges: Array<[string, string]> = [[windowStart, windowEnd]];
-    const isPending = pendingEntries.includes(entry);
-    if (isPending) {
-      ranges.push([pendingFromOf(entry), windowStart]);
+    if (isBudgetingAhead) {
+      ranges.push([currentMonthStart, windowStart]);
     }
     if (linkedSchedules.has(entry.scheduleId)) {
       ranges.push([
         linkedSearchStart(windowStart),
         linkedSearchEnd(budgetMonthEnd),
       ]);
-      if (isPending) {
+      if (isBudgetingAhead) {
         ranges.push([
-          linkedSearchStart(pendingFromOf(entry)),
+          linkedSearchStart(currentMonthStart),
           linkedSearchEnd(windowStart),
         ]);
       }
@@ -529,24 +517,43 @@ export async function buildMonthlyOutflow(
     lookups.set(entry, occurrenceLookup(entry, ranges));
   }
 
-  // Budgeting ahead: unposted occurrences before the window (see
-  // pendingEntries above) count against month 0.
-  for (const entry of pendingEntries) {
-    const occurrencesBetween = lookups.get(entry);
-    const pendingFrom = pendingFromOf(entry);
-    const pending = withinCutoff(
-      entry,
-      occurrencesBetween(pendingFrom, windowStart),
-    );
-    const settled = settledOccurrences(
-      entry,
-      linkedBeforeWindow,
-      pendingFrom,
-      windowStart,
-      occurrencesBetween,
-    ).size;
-    monthlyOutflow[0] +=
-      Math.max(0, pending.length - settled) * entry.perOccurrenceAmount;
+  // When budgeting ahead (current_month after the real current month), the
+  // carried-over balance still holds money for occurrences due between now
+  // and the window that haven't come out of this category yet. Count those
+  // against month 0 so that money isn't treated as free. That's every
+  // occurrence from next_date on, and any before it whose linked payment
+  // sits outside this category (not categorized yet, say): next_date moves
+  // past an occurrence once any linked payment exists. One next_date moved
+  // past with no payment at all was skipped. Occurrences missed before the
+  // real current month are ignored, so a long-stale next_date can't pile up.
+  if (isBudgetingAhead) {
+    for (const entry of smoothEntries) {
+      const occurrencesBetween = lookups.get(entry);
+      const paidAnywhere = settledOccurrences(
+        entry,
+        linkedAnywhereBeforeWindow,
+        currentMonthStart,
+        windowStart,
+        occurrencesBetween,
+      );
+      const settledHere = settledOccurrences(
+        entry,
+        linkedBeforeWindow,
+        currentMonthStart,
+        windowStart,
+        occurrencesBetween,
+      );
+      const pending = withinCutoff(
+        entry,
+        occurrencesBetween(currentMonthStart, windowStart),
+      ).filter(
+        date =>
+          !settledHere.has(date) &&
+          ((entry.storedNextDate && date >= entry.storedNextDate) ||
+            paidAnywhere.has(date)),
+      );
+      monthlyOutflow[0] += pending.length * entry.perOccurrenceAmount;
+    }
   }
 
   let dueByToday = 0;
