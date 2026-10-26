@@ -124,7 +124,7 @@ jobs:
         with:
           path: packages/mobile-client/build/export/*.ipa
           platform: IOS
-          submit-for-review: ${{ github.event_name == 'release' }}
+          submit-for-review: ${{ github.event_name == 'release' && !github.event.release.prerelease }}
           key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           issuer-id: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
