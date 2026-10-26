@@ -67,12 +67,6 @@ jobs:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
 
-      - name: Install App Store Connect CLI
-        run: |
-          python3 -m venv "$RUNNER_TEMP/asc"
-          "$RUNNER_TEMP/asc/bin/pip" install --quiet codemagic-cli-tools==0.70.0
-          echo "$RUNNER_TEMP/asc/bin" >> "$GITHUB_PATH"
-
       # Build before any signing material lands on the runner.
       - name: Build web app and Electron sources
         run: ./bin/package-electron --skip-translations --skip-exe-build
@@ -114,7 +108,7 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
         run: |
-          app-store-connect publish \
+          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
             --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
             --platform MAC_OS \
             --max-build-processing-wait 0
@@ -126,7 +120,7 @@ jobs:
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
         run: |
-          app-store-connect publish \
+          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
             --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
             --platform MAC_OS \
             --app-store \
