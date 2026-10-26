@@ -74,17 +74,18 @@ type TagPillColors = {
   backgroundColorHovered: string;
 };
 
-type TagColors = TagPillColors & { isHidden: boolean };
+type TagPillStyle = TagPillColors & { isHidden: boolean };
 
 /**
- * Returns a getter for a tag's raw pill colours, for callers that need to
+ * Returns a getter for what a tag's pill looks like (its plain colours, and
+ * whether the tag is hidden, which draws it faded), for callers that need to
  * build styles around the pill rather than use the pill class itself.
  */
-export function useTagColors() {
+export function useTagPillStyle() {
   const { data: tags = [] } = useTags();
   const [theme] = useTheme();
 
-  return (tag: string): TagColors => {
+  return (tag: string): TagPillStyle => {
     const tagObj = tags.find(t => t.tag === tag);
     const { color, backgroundColor, backgroundColorHovered } = getTagCSSColors(
       theme,

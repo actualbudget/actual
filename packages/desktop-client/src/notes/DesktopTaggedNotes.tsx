@@ -6,7 +6,7 @@ import { SvgRemove } from '@actual-app/components/icons/v2';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
-import { useTagColors, useTagCSS } from '#hooks/useTagCSS';
+import { useTagCSS, useTagPillStyle } from '#hooks/useTagCSS';
 
 type DesktopTaggedNotesProps = {
   content: string;
@@ -29,7 +29,7 @@ export function DesktopTaggedNotes({
 }: DesktopTaggedNotesProps) {
   const { t } = useTranslation();
   const getTagCSS = useTagCSS();
-  const getTagColors = useTagColors();
+  const getTagPillStyle = useTagPillStyle();
 
   const tagButton = (
     <Button
@@ -53,7 +53,7 @@ export function DesktopTaggedNotes({
   }
 
   const { color, backgroundColor, backgroundColorHovered, isHidden } =
-    getTagColors(tag);
+    getTagPillStyle(tag);
 
   // The wrapper only exists to anchor the remove badge: it takes exactly the
   // tag button's box, so the pill renders the same as without it.
