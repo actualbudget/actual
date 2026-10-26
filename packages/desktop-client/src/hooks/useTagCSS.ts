@@ -40,15 +40,20 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
         borderRadius: 16,
         userSelect: 'none',
         backgroundColor,
-        // The tag is a bare Button, and Button's hover style switches the text
-        // to the normal page text colour. For default tags that's harmless:
-        // the page text is close enough to the tag text to stay readable. For
-        // custom colours the text was picked as black or white to contrast
-        // with the user's background, and the page text colour can be
-        // unreadable on it, so !important keeps the chosen colour on hover.
+        // Users can give a tag its own colour on the Tags page; that colour
+        // becomes the pill's background, and the tag's label (e.g. "#food")
+        // is drawn in black or white, whichever contrasts with it. Tags
+        // without their own colour use the theme's default pill colours.
+        //
+        // The pill is a bare Button, and Button's hover style changes the
+        // label to the normal page text colour. On a default pill that's
+        // still readable, so it's left alone. On a user-coloured pill it can
+        // leave dark text on a dark background, so !important keeps the
+        // black or white label while hovered.
+        //
         // getTagCSSColors returns plain colours (callers like the remove
         // badge mix them into other CSS, where !important would be invalid),
-        // so the suffix is added here, only where it was needed.
+        // so the suffix is added here, only for user-coloured tags.
         color: isCustomColor ? `${color} !important` : color,
         cursor: 'pointer',
         '&[data-hovered]': {
