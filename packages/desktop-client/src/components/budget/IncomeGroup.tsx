@@ -10,6 +10,7 @@ import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
 import { useBudgetComponents } from '.';
+import type { CategoryGroupMonthProps } from '.';
 
 type IncomeGroupProps = {
   group: CategoryGroupEntity;
@@ -23,6 +24,7 @@ type IncomeGroupProps = {
   ) => void;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
   onShowNewCategory: (groupId: CategoryGroupEntity['id']) => void;
+  onBudgetAction?: CategoryGroupMonthProps['onBudgetAction'];
 };
 
 export function IncomeGroup({
@@ -34,6 +36,7 @@ export function IncomeGroup({
   onSortCategories,
   onToggleCollapse,
   onShowNewCategory,
+  onBudgetAction,
 }: IncomeGroupProps) {
   const { IncomeGroupComponent: MonthComponent } = useBudgetComponents();
   return (
@@ -59,7 +62,13 @@ export function IncomeGroup({
         onShowNewCategory={onShowNewCategory}
       />
       <RenderMonths>
-        {({ month }) => <MonthComponent month={month} group={group} />}
+        {({ month }) => (
+          <MonthComponent
+            month={month}
+            group={group}
+            onBudgetAction={onBudgetAction}
+          />
+        )}
       </RenderMonths>
     </Row>
   );

@@ -425,6 +425,27 @@ export type Modal =
       };
     }
   | {
+      name: 'envelope-group-budget-menu';
+      options: {
+        groupId: CategoryGroupEntity['id'];
+        month: string;
+        onCopyLastMonthAverage: () => void;
+        onSetMonthsAverage: (numberOfMonths: number) => void;
+        onApplyBudgetTemplate: () => void;
+      };
+    }
+  | {
+      name: 'tracking-group-budget-menu';
+      options: {
+        groupId: CategoryGroupEntity['id'];
+        month: string;
+        onCopyLastMonthAverage: () => void;
+        onSetMonthsAverage: (numberOfMonths: number) => void;
+        onApplyBudgetTemplate: () => void;
+        onCopyUntilYearEnd: () => void;
+      };
+    }
+  | {
       name: 'category-group-menu';
       options: {
         groupId: CategoryGroupEntity['id'];
