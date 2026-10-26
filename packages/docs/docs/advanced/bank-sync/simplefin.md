@@ -47,6 +47,10 @@ Server Version 24.10.0 or higher are required for this feature.
 
     <img width="510" alt="The Set-up SimpleFIN dialog with an empty Token field" src="/img/advanced/bank-sync/simplefin-setup-modal@2x.webp" />
 
+To use separate SimpleFIN credentials for this budget, enable **For this budget only** during setup. The budget must be uploaded to your sync server first. Administrators can choose global or budget-specific credentials; other budget owners can configure budget-specific credentials when global credentials are not active.
+
+Budget-specific credentials take precedence over global credentials. Resetting them affects only that budget, which will then use global credentials if available.
+
 ### Link Accounts with SimpleFIN
 
 1. Add the link to your accounts in actual (Existing or New).

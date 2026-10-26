@@ -14,7 +14,7 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
 import { GoalProgressRing } from './GoalProgressRing';
-import { compareToGoal, getGoalProgress } from './util';
+import { getGoalDifference, getGoalProgress } from './util';
 
 type GoalStatusProps = {
   balance: Binding<
@@ -47,10 +47,17 @@ export function GoalStatus({
   }
 
   const have = longGoalValue === 1 ? balanceValue : budgetedValue;
-  const diff = have - goalValue;
   // Compare as displayed, like the progress ring beside the balance
-  const comparison = compareToGoal(have, goalValue);
-  const progress = getGoalProgress(have, goalValue);
+  const diff = getGoalDifference(
+    have,
+    goalValue,
+    format.currency.decimalPlaces,
+  );
+  const progress = getGoalProgress(
+    have,
+    goalValue,
+    format.currency.decimalPlaces,
+  );
 
   return (
     <View style={{ minWidth: 160, ...style }}>
@@ -62,12 +69,12 @@ export function GoalStatus({
           fontWeight: 'bold',
         }}
       >
-        {comparison < 0 && <GoalProgressRing progress={progress} size={12} />}
-        {comparison === 0 ? (
+        {diff < 0 && <GoalProgressRing progress={progress} size={12} />}
+        {diff === 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>Fully funded</Trans>
           </span>
-        ) : comparison > 0 ? (
+        ) : diff > 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>
               Overfunded (
@@ -108,7 +115,7 @@ export function GoalStatus({
                 height: '100%',
                 width: `${progress}%`,
                 backgroundColor:
-                  comparison >= 0
+                  diff >= 0
                     ? theme.templateNumberFunded
                     : theme.templateNumberUnderFunded,
               }}

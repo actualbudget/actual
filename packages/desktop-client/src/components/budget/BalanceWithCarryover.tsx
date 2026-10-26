@@ -12,6 +12,7 @@ import { css } from '@emotion/css';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
@@ -99,6 +100,7 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const { decimalPlaces } = useFormat().currency;
 
   // Income rows pass isDisabled; goals describe spending, not income
   const hasGoal = isGoalTemplatesEnabled && !isDisabled;
@@ -108,7 +110,12 @@ export function BalanceWithCarryover({
 
   const getRingProgress = (balanceValue: number) =>
     hasGoal
-      ? getGoalRingProgress(balanceValue, goalValue, getHave(balanceValue))
+      ? getGoalRingProgress(
+          balanceValue,
+          goalValue,
+          getHave(balanceValue),
+          decimalPlaces,
+        )
       : null;
 
   const getBalanceAmountStyle = (balanceValue: number) =>
@@ -116,6 +123,7 @@ export function BalanceWithCarryover({
       balanceValue,
       hasGoal ? goalValue : null,
       getHave(balanceValue),
+      decimalPlaces,
     );
 
   const getDefaultClassName = (balanceValue: number) =>

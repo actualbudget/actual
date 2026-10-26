@@ -5,6 +5,7 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import {
+  amountToInteger,
   currencyToAmount,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
@@ -70,22 +71,33 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
 
 // Converts an integer currency value to a normalized decimal amount.
 // First converts the integer to currency format, then to a decimal amount.
-// Uses integerToCurrency to display the value correctly according to user prefs.
-function normalizeIntegerValue(val: number | null | undefined) {
-  return typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
+// Uses integerToCurrency to display the value correctly according to user prefs
+// and the currency's decimal places.
+function normalizeIntegerValue(
+  val: number | null | undefined,
+  decimalPlaces = 2,
+) {
+  return typeof val === 'number'
+    ? currencyToAmount(integerToCurrency(val, undefined, decimalPlaces))
+    : 0;
 }
 
 /**
- * Compares what a category has towards its goal with the goal, as displayed:
- * -1 when short of it, 0 when they match and 1 when over it. With hidden
- * decimals, amounts that round to the same number count as equal.
+ * How far what a category has towards its goal is from the goal, as the
+ * amounts are displayed: negative when short of it, 0 when they match and
+ * positive when over it. With hidden decimals, amounts that round to the same
+ * number count as equal.
  */
-export function compareToGoal(
+export function getGoalDifference(
   have: number | null | undefined,
   goalValue: number,
-): -1 | 0 | 1 {
-  const diff = normalizeIntegerValue(have) - normalizeIntegerValue(goalValue);
-  return diff < 0 ? -1 : diff > 0 ? 1 : 0;
+  decimalPlaces = 2,
+): number {
+  return amountToInteger(
+    normalizeIntegerValue(have, decimalPlaces) -
+      normalizeIntegerValue(goalValue, decimalPlaces),
+    decimalPlaces,
+  );
 }
 
 /**
@@ -95,8 +107,9 @@ export function compareToGoal(
 export function getGoalProgress(
   have: number | null | undefined,
   goalValue: number,
+  decimalPlaces = 2,
 ): number {
-  if (compareToGoal(have, goalValue) >= 0) {
+  if (getGoalDifference(have, goalValue, decimalPlaces) >= 0) {
     return 100;
   }
   if (goalValue <= 0) {
@@ -115,15 +128,16 @@ export function getGoalRingProgress(
   balance: number,
   goalValue: number | null | undefined,
   have: number | null | undefined,
+  decimalPlaces = 2,
 ): number | null {
   if (
     goalValue == null ||
-    normalizeIntegerValue(balance) < 0 ||
-    compareToGoal(have, goalValue) >= 0
+    normalizeIntegerValue(balance, decimalPlaces) < 0 ||
+    getGoalDifference(have, goalValue, decimalPlaces) >= 0
   ) {
     return null;
   }
-  return getGoalProgress(have, goalValue);
+  return getGoalProgress(have, goalValue, decimalPlaces);
 }
 
 /**
@@ -134,12 +148,16 @@ export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   have?: number | null,
+  decimalPlaces = 2,
 ) {
-  const amount = normalizeIntegerValue(value);
+  const amount = normalizeIntegerValue(value, decimalPlaces);
   if (amount < 0) {
     return { color: theme.budgetNumberNegative };
   }
-  if (goalValue != null && compareToGoal(have, goalValue) >= 0) {
+  if (
+    goalValue != null &&
+    getGoalDifference(have, goalValue, decimalPlaces) >= 0
+  ) {
     return { color: theme.templateNumberFunded };
   }
   return makeAmountGrey(amount) ?? { color: theme.budgetNumberPositive };

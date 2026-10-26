@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Mac App Store builds must run in the App Sandbox. The signing step
+         adds the application identifier, team identifier and app group
+         entitlements that Apple derives from the team automatically. -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <!-- Talking to a sync server and bank sync providers. -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- The bundled sync server and the OpenID login callback listen on a
+         local port. -->
+    <key>com.apple.security.network.server</key>
+    <true/>
+    <!-- Importing, exporting and backing up budgets through file dialogs. -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+  </dict>
+</plist>
