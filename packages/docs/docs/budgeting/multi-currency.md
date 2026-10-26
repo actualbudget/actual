@@ -292,6 +292,12 @@ This extends the same example budget for a family that has a Paris apartment the
 
 The history starts on May 31 with $2,500 in Checking, €2,000 in BNP Paribas and MX$5,000 in BBVA México. At each month-end from June through October, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin as sublease income. BBVA México pays MX$800 to Elena García as a remittance and MX$150 to José García as a gift. October ends with €2,000 and MX$250 in the foreign accounts.
 
+### Fetch historical market rates
+
+Connect the budget to a sync server, then open **Settings → Exchange rates**. This example uses the built-in **exchange-api** provider. For each currency tab, use **Backfill** with the opening date and each month-end. Choose **Keep existing**, select **Check dates**, then **Start backfill**. You can also backfill the whole May 31 through October 31 range. Fetch these rates before entering the transactions. See [exchange-rate history](../experimental/exchange-rates.md) for the controls and provider details. These screenshots use real rates fetched through the sync server, rather than the standing manual rates from the earlier examples. Each payment is booked using its transaction-date rate.
+
+The provider's dates identify its daily snapshots. These market rates may differ from a bank's executed exchange rate. Fetching rates does not rewrite the base amounts of posted payments.
+
 ### Read the report
 
 Positive amounts are gains. **Realized** records FX recognized when foreign holdings are spent. **Unrealized change** records the movement in the value still held. **Closing unrealized** is the remaining unrealized balance at month-end, rather than another amount to add to that month's change. Fee expense is a booked cost. This history has no exchange transfers or fees, so **Transfer carry**, **Internal settlement** and fee columns are zero.
@@ -316,7 +322,7 @@ The final table, **FX changes included in To Budget**, shows amounts already inc
 
 <img width="1040" alt="Selected FX totals and FX changes already included in To Budget for June through October, with every month up to date" src="/img/budgeting/multi-currency-fx-included-history.png" />
 
-Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. The CSV retains full rate precision for checking the displayed amounts.
+Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. Both closing rates are fetched snapshots from October 31, sourced from `plugin:exchange-api`. The CSV retains full rate precision for checking the displayed amounts.
 
 ## Add a currency to a category
 
