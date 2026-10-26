@@ -69,6 +69,15 @@ import { FormulaActionEditor } from './FormulaActionEditor';
 const narrowValueStyle: CSSProperties = { order: 1, flexBasis: '100%' };
 const narrowButtonsStyle: CSSProperties = { marginLeft: 'auto' };
 
+// Lets the split-amount method select share the first line with the
+// "allocate" label and the -/+ buttons, truncating its label when the row is
+// too narrow instead of wrapping and leaving the buttons on a line of their own.
+const narrowMethodSelectStyle: CSSProperties = {
+  flex: '1 1 0',
+  minWidth: 0,
+  maxWidth: 'max-content',
+};
+
 // Columns SimpleTransactionsTable renders with a flexible width. Other fields
 // that end up in the list (for example `cleared`) are not rendered at all.
 const flexibleTableFields = [
@@ -676,6 +685,7 @@ function ActionEditor({
           <SplitAmountMethodSelect
             options={getAllocationMethodOptions(isFormulaEnabled)}
             value={options.method}
+            style={isNarrowWidth ? narrowMethodSelectStyle : undefined}
             onChange={onChange}
           />
 
