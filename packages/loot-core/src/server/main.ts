@@ -263,6 +263,12 @@ export async function initApp(
 
 type BaseInitConfig = {
   /**
+   * Browser build only: which storage holds budgets. `opfs` uses the
+   * origin private file system, falling back to `memory-idb` where
+   * unavailable.
+   */
+  storageBackend?: StorageBackend;
+  /**
    * Directory where budget data is stored. In Node this is a directory on
    * disk (defaults to the current working directory) and must already exist.
    * In the browser build it is a path inside the worker's virtual filesystem
@@ -315,7 +321,7 @@ export async function init(config: InitConfig) {
     serverURL = process.env.ACTUAL_SERVER_URL;
   }
 
-  const storage = await sqlite.init();
+  const storage = await sqlite.init({ storage: config?.storageBackend });
   asyncStorage.init({ persist: false });
   await fs.init({ storage });
   fs._setDocumentDir(dataDir || process.cwd());

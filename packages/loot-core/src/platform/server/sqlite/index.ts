@@ -74,10 +74,13 @@ const legacyEngine: SqliteEngine = {
 let activeEngine: SqliteEngine = legacyEngine;
 let activeBackend: StorageBackend = 'legacy';
 
-// The browser build of `@actual-app/api` embeds sql.js's wasm; the
-// sqlite-wasm engine fetches its own file.
+// Opt-in: the browser build of `@actual-app/api` embeds the wasm of the
+// engine it ships and hands it over here before `init`, so the engine is
+// instantiated from these bytes instead of fetching them.
+let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
+
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacyEngine.setWasmBinary(binary);
+  wasmBinaryOverride = binary;
 }
 
 // Starts the engine for the requested storage and resolves to the backend
@@ -100,11 +103,17 @@ export async function init({
     storage === 'legacy' && (await hasMigratedSqliteFiles()) ? 'opfs' : storage;
   if (requested === 'legacy') {
     activeEngine = legacyEngine;
-    await legacyEngine.init({ baseURL, wasmBinary });
+    await legacyEngine.init({
+      baseURL,
+      wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    });
     activeBackend = 'legacy';
   } else {
     activeEngine = wasmEngine;
-    await wasmEngine.init({ baseURL, wasmBinary });
+    await wasmEngine.init({
+      baseURL,
+      wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    });
     activeBackend = await initSqliteStorage(requested);
   }
   return activeBackend;
