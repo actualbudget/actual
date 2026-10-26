@@ -623,6 +623,12 @@ function HeaderCell({
   );
 }
 
+// Opens the other account of a transfer, pointing out its other side
+type NavigateToTransferAccount = (
+  accountId: AccountEntity['id'],
+  transactionId?: TransactionEntity['id'],
+) => void;
+
 type PayeeCellProps = {
   id: TransactionEntity['id'];
   payee?: PayeeEntity;
@@ -640,10 +646,7 @@ type PayeeCellProps = {
   onUpdate: TransactionUpdateFunction;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
 };
 
@@ -911,10 +914,7 @@ const transferIconStyle = { width: 10, height: 10 };
 type PayeeIconsProps = {
   transaction: SerializedTransaction;
   transferAccount: AccountEntity | null;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
 };
 
@@ -1040,10 +1040,7 @@ type TransactionProps = {
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
   splitError?: ReactNode;
@@ -2457,10 +2454,7 @@ type NewTransactionProps = {
   onEdit: (id: TransactionEntity['id'], field: string) => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNotesTagClick: (tag: string) => void;
   onSave: (
     tx: TransactionEntity,
@@ -2682,10 +2676,7 @@ type TransactionTableInnerProps = {
   onAdd: (transactions: TransactionEntity[]) => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
   sortField: string;
@@ -3100,10 +3091,7 @@ export type TransactionTableProps = {
   onAdd: (transactions: TransactionEntity[]) => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
-  onNavigateToTransferAccount: (
-    accountId: AccountEntity['id'],
-    transactionId?: TransactionEntity['id'],
-  ) => void;
+  onNavigateToTransferAccount: NavigateToTransferAccount;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
   onNotesTagClick: (tag: string) => void;
   onSort: (field: string, ascDesc: 'asc' | 'desc') => void;

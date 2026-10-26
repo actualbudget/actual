@@ -137,8 +137,8 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       if (result.data.length === 0) {
         // This row is not part of this set anymore, we can't do
         // this. We stop early to avoid possibly pulling in a ton of
-        // data that we don't need
-        return;
+        // data that we don't need, and keep the data as it is
+        return { data: this.data, dependencies: result.dependencies };
       }
       const fullRow = result.data[0];
 

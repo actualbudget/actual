@@ -213,8 +213,9 @@ function getField(field?: string) {
 
 type PendingFocus = {
   id: TransactionEntity['id'];
-  // Whether the current query has it at all, once checked
-  exists?: boolean;
+  // The query it's looked for in: the account's first one, not e.g. one
+  // after the user sorts
+  paged?: PagedQuery<TransactionEntity>;
 };
 
 // The transaction a link to an account asks to bring into view, e.g. the
@@ -571,10 +572,8 @@ class AccountInternal extends PureComponent<
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
-            // Results of a query replaced since, e.g. of the previous
-            // account, can't tell where the pending transaction is
-            if (this.pendingFocus != null && paged === this.paged) {
-              void this.showPendingFocus();
+            if (this.pendingFocus?.paged === paged && paged === this.paged) {
+              this.showPendingFocus(this.pendingFocus.id, paged, firstLoad);
             }
 
             setTimeout(() => {
@@ -589,9 +588,8 @@ class AccountInternal extends PureComponent<
       },
     });
     this.paged = paged;
-    // Whether the new query has the pending transaction is yet to be checked
     if (this.pendingFocus) {
-      this.pendingFocus.exists = undefined;
+      this.pendingFocus.paged ??= paged;
     }
   }
 
@@ -617,34 +615,21 @@ class AccountInternal extends PureComponent<
     }
   }
 
-  // Brings the pending transaction into view: loads more of the account
-  // until it's there, then opens its split. Leaves the account at the top
-  // when the current view doesn't contain it, e.g. while reconciled
-  // transactions are hidden.
-  showPendingFocus = async () => {
-    const pending = this.pendingFocus;
-    const paged = this.paged;
-    if (pending == null || paged == null) {
-      return;
-    }
-    const { id } = pending;
-
+  // Brings the pending transaction into view, loading the account up to it
+  // when the first page doesn't have it, then opens its split. Leaves the
+  // account at the top when the current view doesn't contain it, e.g. while
+  // reconciled transactions are hidden.
+  showPendingFocus = (
+    id: TransactionEntity['id'],
+    paged: PagedQuery<TransactionEntity>,
+    isFirstLoad: boolean,
+  ) => {
     const transaction = this.state.transactions.find(t => t.id === id);
-    if (transaction == null) {
-      if (pending.exists == null) {
-        const { data } = await aqlQuery(
-          paged.query.filter({ id }).select('id'),
-        );
-        if (this.pendingFocus !== pending || this.paged !== paged) {
-          return;
-        }
-        pending.exists = data.length > 0;
-      }
-      if (pending.exists && paged.hasNext) {
-        // The next page arrives through `onData`, which comes back here
-        void paged.fetchNext();
-        return;
-      }
+    if (transaction == null && isFirstLoad) {
+      // The query is in the default order, so by date. The result arrives
+      // through `onData`, which comes back here.
+      void paged.refetchUpToRow(id, { field: 'date', order: 'desc' });
+      return;
     }
 
     this.pendingFocus = null;
@@ -668,8 +653,6 @@ class AccountInternal extends PureComponent<
   };
 
   onSearch = (value: string) => {
-    // The user moved on from the transaction asked for
-    this.pendingFocus = null;
     this.paged?.unsubscribe();
     this.setState({ search: value }, this.onSearchDone);
   };
