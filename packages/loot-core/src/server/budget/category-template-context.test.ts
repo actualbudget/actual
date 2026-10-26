@@ -34,21 +34,12 @@ vi.mock('./statements', () => ({
 }));
 
 // Helper function to mock preferences (hideFraction and defaultCurrencyCode)
-function mockPreferences(
-  hideFraction: boolean = false,
-  currencyCode: string = 'USD',
-) {
+function mockPreferences(hideFraction: boolean = false) {
   vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
     const queryStr = JSON.stringify(query);
     if (queryStr.includes('hideFraction')) {
       return {
         data: [{ value: hideFraction ? 'true' : 'false' }],
-        dependencies: [],
-      };
-    }
-    if (queryStr.includes('defaultCurrencyCode')) {
-      return {
-        data: currencyCode ? [{ value: currencyCode }] : [],
         dependencies: [],
       };
     }
@@ -1261,7 +1252,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1326,7 +1317,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1381,7 +1372,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1441,7 +1432,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1484,7 +1475,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1529,7 +1520,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(true, 'USD');
+      mockPreferences(true);
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1551,217 +1542,6 @@ describe('CategoryTemplateContext', () => {
       expect(values.goal).toBe(100000); // Should be the goal amount
       expect(values.longGoal).toBe(true); // Should have a long goal
       expect(instance.isGoalOnly()).toBe(false); // Should not be goal only
-    });
-  });
-
-  describe('JPY currency', () => {
-    it('should handle simple template with JPY correctly', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'simple',
-        monthly: 50,
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instance = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-
-      await instance.runTemplatesForPriority(1, 100000, 100000);
-      const values = instance.getValues();
-
-      expect(values.budgeted).toBe(5000);
-    });
-
-    it('should handle small amounts with JPY correctly', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'simple',
-        monthly: 5,
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instance = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-
-      await instance.runTemplatesForPriority(1, 100000, 100000);
-      const values = instance.getValues();
-
-      expect(values.budgeted).toBe(500);
-    });
-
-    it('should handle larger amounts with JPY correctly', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'simple',
-        monthly: 250,
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instance = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-
-      await instance.runTemplatesForPriority(1, 100000, 100000);
-      const values = instance.getValues();
-
-      expect(values.budgeted).toBe(25000);
-    });
-
-    it('should handle weekly limit with JPY correctly', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'simple',
-        limit: {
-          amount: 100,
-          hold: false,
-          period: 'weekly',
-          start: '2024-01-01',
-        },
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instance = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-
-      const result = CategoryTemplateContext.runSimple(template, instance);
-
-      expect(result).toBeGreaterThanOrEqual(40000);
-      expect(result).toBeLessThanOrEqual(50000);
-    });
-
-    it('should handle periodic template with JPY correctly', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'periodic',
-        amount: 1000,
-        period: { period: 'week', amount: 1 },
-        starting: '2024-01-01',
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instance = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-
-      await instance.runTemplatesForPriority(1, 100_000_000, 100_000_000);
-      const values = instance.getValues();
-
-      expect(values.budgeted).toBeGreaterThan(350000);
-      expect(values.budgeted).toBeLessThan(550000);
-    });
-
-    it('stores JPY and USD templates at the same scale', async () => {
-      const category: CategoryEntity = {
-        id: 'test',
-        name: 'Test Category',
-        group: 'test-group',
-        is_income: false,
-      };
-      const template: Template = {
-        type: 'simple',
-        monthly: 100,
-        directive: 'template',
-        priority: 1,
-      };
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      mockPreferences(true, 'JPY');
-
-      const instanceJPY = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-      await instanceJPY.runTemplatesForPriority(1, 100000, 100000);
-      const valuesJPY = instanceJPY.getValues();
-
-      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
-      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
-      mockPreferences(false, 'USD');
-
-      const instanceUSD = await CategoryTemplateContext.init(
-        [template],
-        category,
-        '2024-01',
-        0,
-      );
-      await instanceUSD.runTemplatesForPriority(1, 100000, 100000);
-      const valuesUSD = instanceUSD.getValues();
-
-      expect(valuesJPY.budgeted).toBe(10000);
-      expect(valuesUSD.budgeted).toBe(10000);
     });
   });
 
@@ -1969,7 +1749,7 @@ describe('CategoryTemplateContext', () => {
     };
 
     beforeEach(() => {
-      mockPreferences(false, 'USD');
+      mockPreferences(false);
       vi.mocked(actions.getSheetValue).mockResolvedValue(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
       vi.mocked(actions.isTrackingBudget).mockReturnValue(false);

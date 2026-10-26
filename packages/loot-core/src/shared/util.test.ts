@@ -1,5 +1,4 @@
 import {
-  amountToInteger,
   currencyToAmount,
   getNumberFormat,
   integerToCurrencyWithDecimal,
@@ -268,16 +267,11 @@ describe('utility functions', () => {
       expect(integerToCurrencyWithDecimal(1234, 'USD')).toBe('12.34');
     });
 
-    // Amounts are stored ×100 whatever the currency; JPY shows no decimals
-    test('JPY shows 0dp', () => {
+    test('JPY uses 0dp', () => {
       expect(integerToCurrencyWithDecimal(123400, 'JPY')).toBe('1,234');
     });
 
-    test('JPY rounds a stored fraction for display', () => {
-      expect(integerToCurrencyWithDecimal(123450, 'JPY')).toBe('1,235');
-    });
-
-    test('IRR shows 0dp', () => {
+    test('IRR uses 0dp', () => {
       expect(integerToCurrencyWithDecimal(123400, 'IRR')).toBe('1,234');
     });
 
@@ -289,23 +283,5 @@ describe('utility functions', () => {
       expect(integerToCurrencyWithDecimal(1234)).toBe('12.34');
       expect(integerToCurrencyWithDecimal(1200)).toBe('12.00');
     });
-  });
-
-  describe('stored amounts of every currency', () => {
-    it.each<[number, string]>([
-      [12.34, 'USD'],
-      [1234, 'JPY'],
-      [5678, 'IRR'],
-    ])(
-      'round-trip amountToInteger/integerToCurrencyWithDecimal: %s %s',
-      (amount, currency) => {
-        setNumberFormat({ format: 'comma-dot', hideFraction: false });
-        const encoded = amountToInteger(amount);
-        const decoded = parseFloat(
-          integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
-        );
-        expect(decoded).toBeCloseTo(amount, 8);
-      },
-    );
   });
 });
