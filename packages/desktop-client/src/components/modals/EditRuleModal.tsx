@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
+import * as undo from '@actual-app/core/platform/client/undo';
 import type { NewRuleEntity, RuleEntity } from '@actual-app/core/types/models';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
@@ -17,6 +18,19 @@ export function EditRuleModal({
   onSave: originalOnSave,
 }: EditRuleModalProps) {
   const { t } = useTranslation();
+
+  // Tag this modal on the undo state so that undoing a change made from here
+  // reopens the rule rather than navigating back to the rules page.
+  useEffect(() => {
+    undo.setUndoState('openModal', {
+      name: 'edit-rule',
+      options: { rule: defaultRule },
+    });
+
+    return () => {
+      undo.setUndoState('openModal', null);
+    };
+  }, [defaultRule]);
 
   return (
     <Modal name="edit-rule">

@@ -1,0 +1,56 @@
+import React from 'react';
+
+import * as undo from '@actual-app/core/platform/client/undo';
+import type { RuleEntity } from '@actual-app/core/types/models';
+import { render } from '@testing-library/react';
+
+import { TestProviders } from '#mocks';
+
+import { EditRuleModal } from './EditRuleModal';
+
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('#mocks/connection'),
+);
+
+vi.mock('#components/rules/RuleEditor', () => ({
+  RuleEditor: () => <div data-testid="rule-editor" />,
+}));
+
+const rule = {
+  id: 'rule-1',
+  stage: null,
+  conditionsOp: 'and',
+  conditions: [],
+  actions: [],
+} as unknown as RuleEntity;
+
+function renderModal() {
+  return render(
+    <TestProviders>
+      <EditRuleModal rule={rule} />
+    </TestProviders>,
+  );
+}
+
+describe('EditRuleModal', () => {
+  beforeEach(() => {
+    undo.setUndoState('openModal', null);
+  });
+
+  test('tags itself on the undo state while open', () => {
+    renderModal();
+
+    expect(undo.getUndoState('openModal')).toEqual({
+      name: 'edit-rule',
+      options: { rule },
+    });
+  });
+
+  test('clears the undo state once closed', () => {
+    const { unmount } = renderModal();
+    unmount();
+
+    expect(undo.getUndoState('openModal')).toBeNull();
+  });
+});
