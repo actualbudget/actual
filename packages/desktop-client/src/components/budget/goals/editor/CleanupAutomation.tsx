@@ -72,7 +72,7 @@ export function CleanupAutomation({
 
   return (
     <View style={{ gap: 14 }}>
-      <Text style={{ fontSize: 12, color: theme.pageTextLight }}>
+      <Text size="small" style={{ color: theme.pageTextLight }}>
         <Trans>
           End of month cleanup is a one-click reallocation of funds. Categories
           you choose to <strong>send leftover</strong> return their surplus to a

@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { Fragment, useMemo, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -50,10 +50,7 @@ export function CategorySelector({
     selectedCategories = categoryGroups.flatMap(cg => cg.categories);
   }
 
-  const selectedCategoryMap = useMemo(
-    () => selectedCategories.map(selected => selected.id),
-    [selectedCategories],
-  );
+  const selectedCategoryMap = selectedCategories.map(selected => selected.id);
 
   const allCategoriesSelected = selectAll.every(category =>
     selectedCategoryMap.includes(category.id),

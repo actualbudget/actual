@@ -6,6 +6,7 @@ import { useParams } from 'react-router';
 import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
@@ -28,6 +29,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { FinancialText } from '#components/FinancialText';
 import { Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Container } from '#components/reports/Container';
@@ -115,6 +117,9 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
+  const [yAxisBase, setYaxisbase] = useState<'Auto' | 'Zero-Based'>(
+    widget?.meta?.yAxisBase ?? 'Auto',
+  );
   const [source, setSource] = useState<ForecastSource>(
     widget?.meta?.source === 'tracking-budget' && budgetType === 'tracking'
       ? 'tracking-budget'
@@ -182,6 +187,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         startDate: start,
         endDate: end,
         granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
+        yAxisBase,
         source,
         timeFrame: {
           start,
@@ -355,6 +361,15 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           ['Daily', t('Daily')],
         ]}
       />
+      <Select
+        value={yAxisBase}
+        onChange={setYaxisbase}
+        disabled={isTrackingBudgetForecast}
+        options={[
+          ['Auto', t('Auto')],
+          ['Zero-Based', t('Zero-Based')],
+        ]}
+      />
     </>
   );
   const headerChildren = widget ? (
@@ -431,12 +446,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         ) : endingPoint ? (
           <View
             style={{
+              alignItems: 'flex-end',
               textAlign: 'right',
               paddingTop: 20,
               marginBottom: 20,
             }}
           >
-            <View
+            <FinancialText
               style={{
                 ...styles.largeText,
                 fontWeight: 400,
@@ -448,12 +464,12 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               <PrivacyFilter>
                 {format(endingPoint.balance, 'financial')}
               </PrivacyFilter>
-            </View>
+            </FinancialText>
             <View style={{ color: theme.pageTextLight }}>
               <Trans>Ending Balance</Trans>: {endingPoint.date}
             </View>
             {lowestPoint && lowestPoint.date !== endingPoint.date ? (
-              <View
+              <Text
                 style={{
                   color: theme.pageTextLight,
                   fontSize: 12,
@@ -461,11 +477,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                 }}
               >
                 <Trans>Lowest visible point</Trans>:{' '}
-                <PrivacyFilter>
-                  {format(lowestPoint.balance, 'financial')}
-                </PrivacyFilter>{' '}
+                <FinancialText>
+                  <PrivacyFilter>
+                    {format(lowestPoint.balance, 'financial')}
+                  </PrivacyFilter>
+                </FinancialText>{' '}
                 ({lowestPoint.date})
-              </View>
+              </Text>
             ) : null}
           </View>
         ) : null}
@@ -539,7 +557,13 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                         }}
                       />
                       <YAxis
-                        domain={['auto', 'auto']}
+                        // if hasNegativeBalance, the builtin behavior of recharts (allowDataOverflow = false), prevents data from being hidden "under" the axis
+                        // also explicitly stated for future contributors
+                        domain={[
+                          yAxisBase === 'Zero-Based' ? 0 : 'auto',
+                          'auto',
+                        ]} //
+                        allowDataOverflow={false}
                         tickFormatter={formatYTick}
                         tick={{ fill: theme.pageText }}
                         tickLine={{ stroke: theme.pageText }}

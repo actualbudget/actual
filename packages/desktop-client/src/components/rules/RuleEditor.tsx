@@ -240,8 +240,8 @@ function EditorButtons({ onAdd, onDelete }) {
 function FieldError({ type }) {
   return (
     <Text
+      size="small"
       style={{
-        fontSize: 12,
         textAlign: 'center',
         color: theme.errorText,
         marginBottom: 5,
@@ -547,7 +547,7 @@ function ActionEditor({
                   // @ts-expect-error fix this
                   op={op}
                   // @ts-expect-error fix this
-                  value={options?.template ?? value}
+                  value={options?.template ?? value ?? ''}
                   onChange={v => onChange('value', v)}
                   numberFormatType="currency"
                   inputStyle={{ height: 30 }}
@@ -556,8 +556,8 @@ function ActionEditor({
             </View>
             {templated && (
               <Text
+                size="medium"
                 style={{
-                  ...styles.smallText,
                   color: theme.warningText,
                   marginTop: 3,
                 }}
@@ -662,7 +662,7 @@ function ActionEditor({
                 numberFormatType={
                   options.method === 'fixed-percent' ? 'percentage' : 'currency'
                 }
-                value={value}
+                value={value ?? ''}
                 onChange={v => onChange('value', v)}
               />
             ) : null}
@@ -721,7 +721,7 @@ function ActionEditor({
               field={field}
               type="string"
               op={op}
-              value={value}
+              value={value ?? ''}
               onChange={v => onChange('value', v)}
             />
           </View>
@@ -1445,8 +1445,8 @@ export function RuleEditor({
                       style={{ justifyContent: 'space-between' }}
                     >
                       <Text
+                        size="medium"
                         style={{
-                          ...styles.smallText,
                           marginBottom: '10px',
                         }}
                       >

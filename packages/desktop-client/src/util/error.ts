@@ -118,6 +118,10 @@ export function getDownloadError({
       return t(
         'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.',
       );
+    case 'mismatched-cloud-file':
+      return t(
+        'The selected local budget does not match this cloud file. It has not been replaced.',
+      );
     case 'zip-too-large': {
       const zipMeta = getUnsafeZipMeta(meta);
       if (zipMeta) {

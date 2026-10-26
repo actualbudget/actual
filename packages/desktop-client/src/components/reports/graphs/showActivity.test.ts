@@ -167,4 +167,107 @@ describe('showActivity', () => {
       type: 'id',
     });
   });
+
+  it.each([
+    // Deposit and Payment charts
+    { balanceTypeOp: 'totalAssets', type: 'totals', inflow: true },
+    { balanceTypeOp: 'totalDebts', type: 'totals', inflow: false },
+    // Deposits and Payments columns of a Net table
+    { balanceTypeOp: 'totalTotals', type: 'assets', inflow: true },
+    { balanceTypeOp: 'totalTotals', type: 'debts', inflow: false },
+  ] as const)(
+    'filters a $balanceTypeOp $type interval drilldown to that interval and direction',
+    ({ balanceTypeOp, type, inflow }) => {
+      const navigate = vi.fn();
+
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters: [],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        type,
+        startDate: '2026-05-01',
+        endDate: '2026-05-31',
+      });
+
+      const [, options] = navigate.mock.calls[0];
+
+      expect(options.state.filterConditions).toEqual([
+        { field: 'date', op: 'gte', value: '2026-05-01', type: 'date' },
+        {
+          field: 'date',
+          op: 'lte',
+          value: '2026-05-31',
+          options: { date: true },
+        },
+        {
+          field: 'amount',
+          op: 'gte',
+          value: 0,
+          options: { type: 'number', inflow, outflow: !inflow },
+        },
+      ]);
+    },
+  );
+
+  it.each([
+    { interval: 'Monthly', startDate: '2026-06', expected: '2026-06-01' },
+    { interval: 'Yearly', startDate: '2026', expected: '2026-01-01' },
+  ])(
+    'expands a $interval interval key into a full start date',
+    ({ startDate, expected }) => {
+      const navigate = vi.fn();
+
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp: 'totalTotals',
+        filters: [],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        type: 'totals',
+        startDate,
+        endDate: '2026-06-30',
+      });
+
+      const [, options] = navigate.mock.calls[0];
+
+      expect(options.state.filterConditions).toContainEqual({
+        field: 'date',
+        op: 'gte',
+        value: expected,
+        type: 'date',
+      });
+    },
+  );
+
+  it.each(['totalTotals', 'netAssets', 'netDebts'] as const)(
+    'includes all transactions for a %s interval drilldown',
+    balanceTypeOp => {
+      const navigate = vi.fn();
+
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp,
+        filters: [],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        type: 'totals',
+        startDate: '2026-05-01',
+        endDate: '2026-05-31',
+      });
+
+      const [, options] = navigate.mock.calls[0];
+
+      expect(
+        options.state.filterConditions.map((f: { field: string }) => f.field),
+      ).toEqual(['date', 'date']);
+    },
+  );
 });

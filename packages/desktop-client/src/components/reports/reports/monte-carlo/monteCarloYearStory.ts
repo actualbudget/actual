@@ -99,6 +99,34 @@ function getRuleName(
   return translate('Boundaries');
 }
 
+// Where the rule's result sits against the plan once earlier years'
+// changes are counted - only worth saying when there were some, since a
+// first change moves from the planned amount itself
+function getEarlierChangesSentence(
+  explanation: Extract<MonteCarloRuleExplanation, { kind: 'factor' }>,
+  previousFactor: number,
+  format: MonteCarloYearStoryInput['format'],
+  translate: TFunction,
+): string | null {
+  if (Math.abs(previousFactor - 1) < 1e-6) {
+    return null;
+  }
+  const planned = format(explanation.planned, 'financial');
+  if (explanation.adjusted < explanation.planned) {
+    return translate(
+      'With earlier changes included, that is below the {{planned}} planned.',
+      { planned },
+    );
+  }
+  if (explanation.adjusted > explanation.planned) {
+    return translate(
+      'With earlier changes included, that is above the {{planned}} planned.',
+      { planned },
+    );
+  }
+  return null;
+}
+
 // What the rule decided, with the reason in words; null when the rule
 // did nothing worth telling
 function getRuleDecisionSentence(
@@ -140,50 +168,76 @@ function getRuleDecisionSentence(
   const rule = getRuleName(explanation.rule, translate);
   const planned = format(explanation.planned, 'financial');
   const adjusted = format(explanation.adjusted, 'financial');
+  // A change steps the running factor, so spending moves from last
+  // year's adjusted level - the planned amount only when nothing had
+  // changed before. Rounded because amounts are whole minor units and
+  // the formatter rejects fractions
+  const from = format(
+    Math.round(explanation.planned * explanation.previousFactor),
+    'financial',
+  );
+  const earlierChanges = getEarlierChangesSentence(
+    explanation,
+    explanation.previousFactor,
+    format,
+    translate,
+  );
+  const withEarlierChanges = (sentence: string) =>
+    earlierChanges == null ? sentence : `${sentence} ${earlierChanges}`;
   if (explanation.action === 'cut') {
     if (explanation.rule === 'boundaries') {
-      return translate(
-        "{{rule}} cut this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate rose above {{upper}}.",
-        {
-          rule,
-          planned,
-          adjusted,
-          upper: formatRuleRate(withdrawalRule.upperRateThreshold),
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} cut this year's spending from {{from}} to {{adjusted}} because the withdrawal rate rose above {{upper}}.",
+          {
+            rule,
+            from,
+            adjusted,
+            upper: formatRuleRate(withdrawalRule.upperRateThreshold),
+          },
+        ),
       );
     }
-    return translate(
-      "{{rule}} cut this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate had climbed too far above the plan.",
-      { rule, planned, adjusted },
+    return withEarlierChanges(
+      translate(
+        "{{rule}} cut this year's spending from {{from}} to {{adjusted}} because the withdrawal rate had climbed too far above the plan.",
+        { rule, from, adjusted },
+      ),
     );
   }
   if (explanation.action === 'raise') {
     if (explanation.rule === 'boundaries') {
-      return translate(
-        "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate fell below {{lower}}.",
-        {
-          rule,
-          planned,
-          adjusted,
-          lower: formatRuleRate(withdrawalRule.lowerRateThreshold),
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the withdrawal rate fell below {{lower}}.",
+          {
+            rule,
+            from,
+            adjusted,
+            lower: formatRuleRate(withdrawalRule.lowerRateThreshold),
+          },
+        ),
       );
     }
     if (explanation.rule === 'ratcheting') {
-      return translate(
-        "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the balance had stayed above {{multiple}} its starting level for {{years}} years.",
-        {
-          rule,
-          planned,
-          adjusted,
-          multiple: `${Number(withdrawalRule.balanceThresholdMultiple.toFixed(2))}×`,
-          years: withdrawalRule.consecutiveYears,
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the balance had stayed above {{multiple}} its starting level for {{years}} years.",
+          {
+            rule,
+            from,
+            adjusted,
+            multiple: `${Number(withdrawalRule.balanceThresholdMultiple.toFixed(2))}×`,
+            years: withdrawalRule.consecutiveYears,
+          },
+        ),
       );
     }
-    return translate(
-      "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate had fallen well below the plan.",
-      { rule, planned, adjusted },
+    return withEarlierChanges(
+      translate(
+        "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the withdrawal rate had fallen well below the plan.",
+        { rule, from, adjusted },
+      ),
     );
   }
   if (explanation.factor !== 1) {
