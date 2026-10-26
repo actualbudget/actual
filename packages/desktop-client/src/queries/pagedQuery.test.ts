@@ -619,6 +619,23 @@ describe('pagedQuery', () => {
     await wait(1000);
   });
 
+  it('pagedQuery tells when a sync refresh drops a fetch up to a row', async () => {
+    mockPagingServer(500, { delay: 10 });
+    const query = q('transactions').select(['id', 'date']);
+    const paged = pagedQuery(query, { options: { pageCount: 20 } });
+    await paged.run();
+
+    const refetch = paged.refetchUpToRow(300, { field: 'date', order: 'desc' });
+    await wait(1);
+    mockPublishEvent('sync-event', {
+      type: 'success',
+      tables: ['transactions'],
+    });
+
+    expect(await refetch).toBe(true);
+    expect(paged.data).toHaveLength(20);
+  });
+
   it('does not spin forever when unsubscribed during a refetch', async () => {
     // Regression test: unsubscribing while a refetch was in flight (e.g.
     // switching accounts while a scroll-triggered `fetchNext` was pending)

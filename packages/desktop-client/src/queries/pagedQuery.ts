@@ -46,7 +46,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   private _hasReachedEnd: boolean;
   private _onPageData?: (data: Data<TResponse>) => void;
   private _pageCount: number;
-  private _fetchDataPromise: Promise<void> | null;
+  private _fetchDataPromise: Promise<boolean> | null;
   private _totalCount: number;
 
   get hasNext() {
