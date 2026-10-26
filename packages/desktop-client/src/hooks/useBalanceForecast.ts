@@ -55,25 +55,15 @@ export function useBalanceForecastSeries({
           forecast: await send('forecast/generate', request),
         })),
       ),
-    // Keep the whole comparison together while its range changes. Adding,
-    // removing, or filtering a line must not relabel an earlier result.
+    // Keep the whole comparison visible while its dates or filters change.
+    // Drop previous results when line IDs or their order change.
     placeholderData: (previous, previousQuery) => {
       const previousRequests = previousQuery?.queryKey[1];
       if (!Array.isArray(previousRequests)) {
         return undefined;
       }
-      const withoutDates = (items: typeof requests) =>
-        items.map(
-          ({
-            id,
-            request: { startDate: _startDate, endDate: _endDate, ...request },
-          }) => ({
-            id,
-            request,
-          }),
-        );
-      return JSON.stringify(withoutDates(requests)) ===
-        JSON.stringify(withoutDates(previousRequests))
+      return requests.length === previousRequests.length &&
+        requests.every(({ id }, index) => id === previousRequests[index].id)
         ? previous
         : undefined;
     },

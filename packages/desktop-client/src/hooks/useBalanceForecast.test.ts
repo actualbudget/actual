@@ -1,9 +1,26 @@
-import { describe, expect, it } from 'vitest';
+import {
+  clearServer,
+  initServer,
+} from '@actual-app/core/platform/client/connection';
+import type {
+  ForecastResult,
+  ForecastSeries,
+} from '@actual-app/core/types/models/forecast';
+import { renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { TestProviders } from '#mocks';
 
 import {
   buildBalanceForecastRequest,
   buildBalanceForecastSeriesRequests,
+  useBalanceForecastSeries,
 } from './useBalanceForecast';
+
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('#mocks/connection'),
+);
 
 describe('buildBalanceForecastRequest', () => {
   it('keeps schedule forecast filters and account selection', () => {
@@ -142,5 +159,159 @@ describe('buildBalanceForecastSeriesRequests', () => {
     ).toEqual([
       { id: 'balance', request: buildBalanceForecastRequest(trackingParams) },
     ]);
+  });
+});
+
+describe('useBalanceForecastSeries while refetching', () => {
+  const params = { startDate: '2024-03-01', endDate: '2024-03-31' };
+  const series: ForecastSeries[] = ['checking', 'card'].map(id => ({
+    id,
+    name: id,
+    accounts: [id],
+    conditions: [],
+    conditionsOp: 'and',
+  }));
+  const forecast: ForecastResult = {
+    dataPoints: [
+      {
+        date: params.endDate,
+        balance: 10000,
+        accountId: 'checking',
+        accountName: 'Checking',
+        transactions: [],
+      },
+    ],
+    lowestBalance: {
+      date: params.endDate,
+      balance: 10000,
+      accountId: 'checking',
+      accountName: 'Checking',
+    },
+    forecastStartDate: params.startDate,
+    forecastEndDate: params.endDate,
+  };
+  const updatedForecast: ForecastResult = {
+    ...forecast,
+    dataPoints: forecast.dataPoints.map(point => ({
+      ...point,
+      balance: 20000,
+    })),
+    lowestBalance: { ...forecast.lowestBalance, balance: 20000 },
+  };
+
+  beforeEach(() => {
+    initServer({ 'forecast/generate': async () => forecast });
+  });
+
+  afterEach(async () => {
+    await clearServer();
+  });
+
+  it.each([
+    {
+      change: 'legacy account selections',
+      initial: { ...params, accountIds: ['checking'] },
+      updated: { ...params, accountIds: ['card'] },
+    },
+    {
+      change: 'legacy transaction filters',
+      initial: params,
+      updated: {
+        ...params,
+        conditions: [{ field: 'amount', op: 'gt', value: 0 }],
+      },
+    },
+    {
+      change: 'named line account selections and filters',
+      initial: { ...params, series },
+      updated: {
+        ...params,
+        series: series.map(line => ({
+          ...line,
+          accounts: ['savings'],
+          conditions: [{ field: 'amount', op: 'gt', value: 0 }],
+        })),
+      },
+    },
+    {
+      change: 'the date range',
+      initial: params,
+      updated: { ...params, endDate: '2024-04-30' },
+    },
+  ] satisfies Array<{
+    change: string;
+    initial: Parameters<typeof useBalanceForecastSeries>[0];
+    updated: Parameters<typeof useBalanceForecastSeries>[0];
+  }>)(
+    'keeps the report visible when changing $change',
+    async ({ initial, updated }) => {
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useBalanceForecastSeries>[0]) =>
+          useBalanceForecastSeries(props),
+        { initialProps: initial, wrapper: TestProviders },
+      );
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+      const previousData = result.current.data;
+
+      let completeForecast: (value: ForecastResult) => void = vi.fn();
+      const pendingForecast = new Promise<ForecastResult>(resolve => {
+        completeForecast = resolve;
+      });
+      initServer({ 'forecast/generate': () => pendingForecast });
+      rerender(updated);
+
+      expect(result.current.isFetching).toBe(true);
+      expect(result.current.isPending).toBe(false);
+      expect(result.current.isPlaceholderData).toBe(true);
+      expect(result.current.data).toBe(previousData);
+
+      completeForecast(updatedForecast);
+      await waitFor(() => expect(result.current.isFetching).toBe(false));
+      expect(result.current.isPlaceholderData).toBe(false);
+      expect(result.current.data?.map(line => line.forecast)).toEqual(
+        previousData?.map(() => updatedForecast),
+      );
+    },
+  );
+
+  it.each([
+    {
+      change: 'adding a line',
+      nextSeries: [
+        ...series,
+        { ...series[0], id: 'combined', accounts: ['checking', 'card'] },
+      ],
+    },
+    { change: 'removing a line', nextSeries: series.slice(0, 1) },
+    { change: 'reordering lines', nextSeries: [...series].reverse() },
+    {
+      change: 'replacing a line',
+      nextSeries: series.map(line => ({ ...line, id: `${line.id}-new` })),
+    },
+  ])('discards previous results when $change', async ({ nextSeries }) => {
+    const { result, rerender } = renderHook(
+      (lines: ForecastSeries[]) =>
+        useBalanceForecastSeries({ ...params, series: lines }),
+      { initialProps: series, wrapper: TestProviders },
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    let completeForecast: (value: ForecastResult) => void = vi.fn();
+    const pendingForecast = new Promise<ForecastResult>(resolve => {
+      completeForecast = resolve;
+    });
+    initServer({ 'forecast/generate': () => pendingForecast });
+    rerender(nextSeries);
+
+    expect(result.current.isFetching).toBe(true);
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.isPlaceholderData).toBe(false);
+    expect(result.current.data).toBeUndefined();
+
+    completeForecast(updatedForecast);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data).toEqual(
+      nextSeries.map(({ id }) => ({ id, forecast: updatedForecast })),
+    );
   });
 });
