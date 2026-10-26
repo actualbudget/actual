@@ -151,10 +151,13 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
           options: {
             accountId: account.id,
             onReconcile: (amount: number) => {
-              setSearchParams(prev => {
-                prev.set('reconcile', String(amount));
-                return prev;
-              });
+              setSearchParams(
+                prev => {
+                  prev.set('reconcile', String(amount));
+                  return prev;
+                },
+                { replace: true },
+              );
               dispatch(
                 collapseModals({
                   rootModalName: 'account-menu',

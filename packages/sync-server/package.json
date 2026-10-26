@@ -106,7 +106,7 @@
     "migrate": "^2.1.0",
     "openid-client": "^5.7.1",
     "pluggy-sdk": "^0.92.0",
-    "undici": "^7.25.0",
+    "undici": "^8.12.3",
     "uuid": "^14.0.3",
     "winston": "^3.19.0"
   },
@@ -121,7 +121,7 @@
     "@types/supertest": "^7.2.1",
     "@typescript/native-preview": "beta",
     "cross-env": "^10.1.0",
-    "http-proxy-middleware": "^4.2.0",
+    "http-proxy-middleware": "^4.2.1",
     "nodemon": "^3.1.14",
     "supertest": "^7.3.1",
     "typescript-strict-plugin": "^2.4.4",
