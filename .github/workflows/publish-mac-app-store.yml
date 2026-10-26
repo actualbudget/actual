@@ -67,34 +67,31 @@ jobs:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
 
+      - name: Install App Store Connect CLI
+        run: |
+          python3 -m venv "$RUNNER_TEMP/asc"
+          "$RUNNER_TEMP/asc/bin/pip" install --quiet codemagic-cli-tools==0.70.0
+          echo "$RUNNER_TEMP/asc/bin" >> "$GITHUB_PATH"
+
       # Build before any signing material lands on the runner.
       - name: Build web app and Electron sources
         run: ./bin/package-electron --skip-translations --skip-exe-build
 
-      - name: Write provisioning profile and App Store Connect API key
+      - name: Write provisioning profile
         env:
           PROFILE_BASE64: ${{ secrets.APPLE_MAS_PROVISIONING_PROFILE_BASE64 }}
-          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-        run: |
-          echo "$PROFILE_BASE64" | base64 --decode > packages/desktop-electron/mas/embedded.provisionprofile
-          mkdir -p "$RUNNER_TEMP/private_keys"
-          printf '%s\n' "$API_KEY_P8" > "$RUNNER_TEMP/private_keys/AuthKey_$API_KEY_ID.p8"
-          chmod 600 "$RUNNER_TEMP/private_keys/AuthKey_$API_KEY_ID.p8"
+        run: echo "$PROFILE_BASE64" | base64 --decode > packages/desktop-electron/mas/embedded.provisionprofile
 
-      - name: Package, sign and upload to App Store Connect
+      - name: Package and sign
         env:
           # electron-builder imports both certificates into a temporary keychain.
           CSC_LINK: ${{ secrets.APPLE_SIGNING_P12_BASE64 }}
           CSC_KEY_PASSWORD: ${{ secrets.APPLE_SIGNING_P12_PASSWORD }}
           CSC_INSTALLER_LINK: ${{ secrets.APPLE_MAS_INSTALLER_P12_BASE64 }}
           CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.APPLE_MAS_INSTALLER_P12_PASSWORD }}
-          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
-        run: yarn workspace desktop-electron release:mas
+        run: yarn workspace desktop-electron build:mas
 
-      - name: Record uploaded build
+      - name: Record build
         id: build_info
         run: |
           PLIST=packages/desktop-electron/dist/mas-arm64/Actual.app/Contents/Info.plist
@@ -103,28 +100,40 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
-            echo "## Mac App Store build uploaded to App Store Connect"
+            echo "## Mac App Store build"
             echo
             echo "| Version | Build |"
             echo "| --- | --- |"
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Submit for App Store review
+      - name: Upload to TestFlight
+        if: github.event_name != 'release'
+        env:
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          app-store-connect publish \
+            --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
+            --platform MAC_OS \
+            --max-build-processing-wait 0
+
+      - name: Upload and submit for App Store review
         if: github.event_name == 'release'
         env:
-          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          ASC_KEY_PATH: ${{ runner.temp }}/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
-          BUNDLE_ID: com.actualbudget.actual
-          PLATFORM: MAC_OS
-          VERSION: ${{ steps.build_info.outputs.version }}
-          BUILD_NUMBER: ${{ steps.build_info.outputs.build }}
-          WHATS_NEW: ${{ github.event.release.body }}
-        run: node .github/scripts/app-store-submit.mjs
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          app-store-connect publish \
+            --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
+            --platform MAC_OS \
+            --app-store \
+            --release-type AFTER_APPROVAL \
+            --whats-new 'Full release notes: https://actualbudget.org/docs/releases' \
+            --max-build-processing-wait 45
 
       - name: Clean up signing material
         if: always()
-        run: |
-          rm -rf "$RUNNER_TEMP/private_keys"
-          rm -f packages/desktop-electron/mas/embedded.provisionprofile
+        run: rm -f packages/desktop-electron/mas/embedded.provisionprofile

@@ -59,6 +59,12 @@ jobs:
           # Avoid restoring potentially poisoned caches in release jobs.
           cache: 'false'
 
+      - name: Install App Store Connect CLI
+        run: |
+          python3 -m venv "$RUNNER_TEMP/asc"
+          "$RUNNER_TEMP/asc/bin/pip" install --quiet codemagic-cli-tools==0.70.0
+          echo "$RUNNER_TEMP/asc/bin" >> "$GITHUB_PATH"
+
       # Build before any signing material lands on the runner.
       - name: Build web app
         run: yarn build:browser
@@ -91,16 +97,16 @@ jobs:
           printf '%s\n' "$API_KEY_P8" > "$RUNNER_TEMP/AuthKey.p8"
           chmod 600 "$RUNNER_TEMP/AuthKey.p8"
 
-      - name: Archive and upload to App Store Connect
+      - name: Archive and export the signed app
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
         run: |
           export XCODEBUILD_AUTH_ARGS="-authenticationKeyPath $RUNNER_TEMP/AuthKey.p8 -authenticationKeyID $API_KEY_ID -authenticationKeyIssuerID $API_ISSUER_ID"
-          yarn workspace mobile-client release:ios
+          yarn workspace mobile-client build:ipa
 
-      - name: Record uploaded build
+      - name: Record build
         id: build_info
         run: |
           PLIST=packages/mobile-client/build/App.xcarchive/Products/Applications/App.app/Info.plist
@@ -109,25 +115,39 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
-            echo "## iOS build uploaded to App Store Connect"
+            echo "## iOS build"
             echo
             echo "| Version | Build |"
             echo "| --- | --- |"
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Submit for App Store review
+      - name: Upload to TestFlight
+        if: github.event_name != 'release'
+        env:
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          app-store-connect publish \
+            --path 'packages/mobile-client/build/export/*.ipa' \
+            --platform IOS \
+            --max-build-processing-wait 0
+
+      - name: Upload and submit for App Store review
         if: github.event_name == 'release'
         env:
-          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
-          BUNDLE_ID: com.actualbudget.actual
-          PLATFORM: IOS
-          VERSION: ${{ steps.build_info.outputs.version }}
-          BUILD_NUMBER: ${{ steps.build_info.outputs.build }}
-          WHATS_NEW: ${{ github.event.release.body }}
-        run: node .github/scripts/app-store-submit.mjs
+          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+        run: |
+          app-store-connect publish \
+            --path 'packages/mobile-client/build/export/*.ipa' \
+            --platform IOS \
+            --app-store \
+            --release-type AFTER_APPROVAL \
+            --whats-new 'Full release notes: https://actualbudget.org/docs/releases' \
+            --max-build-processing-wait 45
 
       - name: Clean up signing material
         if: always()
