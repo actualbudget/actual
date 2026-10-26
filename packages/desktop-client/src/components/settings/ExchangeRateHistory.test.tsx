@@ -501,3 +501,18 @@ describe('import', () => {
     expect(server.sent('exchange-rates/import-preview')).toEqual([]);
   });
 });
+
+describe('missing rates', () => {
+  it('starts a manual run from Get missing rates', async () => {
+    const { server } = await setup();
+    server.on('exchange-rates/missing-start', () => ({ runId: 'run-a' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Get missing rates' }),
+    );
+    await waitFor(() =>
+      expect(server.sent('exchange-rates/missing-start')).toEqual([
+        { reason: 'manual' },
+      ]),
+    );
+  });
+});

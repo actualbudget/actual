@@ -32,6 +32,7 @@ import { rateSourceName } from '#util/rate-source';
 
 import { useCurrencyOptions } from './Currency';
 import { ExchangeRateHistory } from './ExchangeRateHistory';
+import { MissingRatesStatus } from './MissingRatesStatus';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 
@@ -555,6 +556,13 @@ export function ExchangeRateSettings() {
             })}
           </Text>
         )}
+        {rows.some(row => row.kind === 'fetched') && (
+          <Text style={styles.smallText}>
+            <Trans>
+              A removed fetched rate is fetched again by the next update.
+            </Trans>
+          </Text>
+        )}
         {listError && (
           <Text style={{ ...styles.smallText, color: theme.errorText }}>
             {listError}
@@ -645,6 +653,7 @@ export function ExchangeRateSettings() {
           'A fallback rate applies to its day only. A fetched rate for that day comes first; a fallback comes before an earlier fetched rate.',
         )}
       >
+        <MissingRatesStatus />
         <Tabs
           selectedKey={quote}
           onSelectionChange={key => {

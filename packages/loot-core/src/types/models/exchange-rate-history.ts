@@ -5,6 +5,18 @@ export type HistoryFilter = {
   to?: string;
 };
 
+/** In-memory status of the missing-history run; nothing here is persisted. */
+export type MissingRatesProgress = {
+  runId: string;
+  context: string;
+  state: 'running' | 'paused' | 'done' | 'stopped';
+  added: number;
+  missing: number;
+  errors: number;
+  /** Epoch milliseconds when a paused run resumes. */
+  retryAt?: number;
+};
+
 export type HistoryRow = {
   id: string;
   quote_currency: string;

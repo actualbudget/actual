@@ -87,6 +87,7 @@ export function fxServer() {
     'exchange-rates/import-commit',
     'exchange-rates/import-cancel',
     'exchange-rates/remove-fetched',
+    'exchange-rates/missing-start',
     'exchange-rates/resolve',
     'exchange-rates/save',
     'exchange-rates/remove',

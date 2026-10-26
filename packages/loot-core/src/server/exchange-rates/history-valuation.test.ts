@@ -8,21 +8,26 @@ import { writePocketBudgetCell } from '#server/budget/pockets';
 import { reservationDetails } from '#server/budget/reservations';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { exchangeRateModel } from '#server/models';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { getFxImpact } from '#server/reports/fx-impact';
 import * as sheet from '#server/sheet';
-import { exchangeRateSpec } from '#server/sync/coupled-cells';
 import { undo } from '#server/undo';
 import { sheetForMonth } from '#shared/months';
 
-import { computeEntryPair, exchangeRateId, app as rates } from './app';
+import { computeEntryPair, app as rates, writeFetchedRate } from './app';
 import { captureFxContext, startFxContext } from './context';
+import { lookupExchangeApi } from './exchange-api';
+import type * as ExchangeApi from './exchange-api';
 import { importCommit, importPreview, importPreviewBegin } from './history';
 import { historyExport, historyPage, removeFetched } from './history-reads';
+import { ensureRate } from './provider';
 
 vi.mock('#server/main', () => ({ getDefaultDocumentDir: vi.fn() }));
+vi.mock('./exchange-api', async importOriginal => ({
+  ...(await importOriginal<typeof ExchangeApi>()),
+  lookupExchangeApi: vi.fn(),
+}));
 let read: MockInstance<typeof fs.readFile>;
 const cell = (month: string, name: string) =>
   sheet.getCellValue(sheetForMonth(month), name);
@@ -111,6 +116,7 @@ beforeEach(async () => {
   onTestFinished(() => {
     read.mockRestore();
   });
+  vi.mocked(lookupExchangeApi).mockReset();
 });
 
 it('values month ends at their daily fallbacks, with reports and undo, preserving every posted row', async () => {
@@ -141,6 +147,7 @@ it('values month ends at their daily fallbacks, with reports and undo, preservin
   await settle('2026-03', 0);
   expect(cell('2026-02', 'fx-changes')).toBe(2500);
   expect(transactions()).toEqual(before);
+  expect(lookupExchangeApi).not.toHaveBeenCalled();
 });
 
 it('ignores a fallback dated after the current close date', async () => {
@@ -153,6 +160,16 @@ it('ignores a fallback dated after the current close date', async () => {
   await new Promise(resolve => setTimeout(resolve, 150));
   await sheet.waitOnSpreadsheet();
   expect(cell('2026-03', 'fx-changes')).toBe(0);
+  expect(transactions()).toEqual(before);
+});
+
+it('refreshes valuation after a direct fetch without changing posted pairs', async () => {
+  const before = transactions();
+  vi.mocked(lookupExchangeApi).mockResolvedValue({ status: 'ok', rate: '125' });
+  expect(
+    await ensureRate({ quoteCurrency: 'JPY', date: '2026-02-28' }),
+  ).toMatchObject({ status: 'inserted' });
+  await settle('2026-02', 2000);
   expect(transactions()).toEqual(before);
 });
 
@@ -217,22 +234,13 @@ it('uses an imported 3dp KWD fallback for an entry on its day', async () => {
 
 it('keeps import, export, paging and fetched removal entirely database-only', async () => {
   const before = transactions();
-  // A fetched row as another device's provider would write it.
-  const timestamp = '2026-02-27T00:00:00.000Z';
-  const fetched = exchangeRateModel.validate({
-    id: exchangeRateId('USD', 'JPY', 'plugin:fxtest', 'fetched', timestamp),
-    base_currency: 'USD',
-    quote_currency: 'JPY',
-    rate: '125',
-    kind: 'fetched',
-    source: 'plugin:fxtest',
-    timestamp,
-    tombstone: 0,
-  });
   await runMutator(() =>
-    db.insert('exchange_rates', {
-      ...fetched,
-      spec: exchangeRateSpec(fetched),
+    writeFetchedRate({
+      baseCurrency: 'USD',
+      quoteCurrency: 'JPY',
+      providerId: 'fxtest',
+      rate: '125',
+      effectiveDate: '2026-02-27',
     }),
   );
   const fetch = vi.spyOn(network, 'fetchQuiet');
@@ -260,5 +268,6 @@ it('keeps import, export, paging and fetched removal entirely database-only', as
     }),
   ).toEqual({ status: 'removed' });
   expect(fetch).not.toHaveBeenCalled();
+  expect(lookupExchangeApi).not.toHaveBeenCalled();
   expect(transactions()).toEqual(before);
 });

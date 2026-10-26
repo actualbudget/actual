@@ -389,7 +389,10 @@ type StartingBase =
   | { status: 'unavailable' }
   | { status: 'idle' };
 
-/** The converted starting balance at today's rate, when one is saved. */
+/**
+ * The converted starting balance at today's rate. Without a saved rate, today's
+ * rate is fetched before the dialog asks for a base amount.
+ */
 function useStartingBalanceBase({
   isEnabled,
   currency,
@@ -410,17 +413,26 @@ function useStartingBalanceBase({
   useEffect(() => {
     if (!isEnabled) return;
     let cancelled = false;
-    void send('exchange-rates/resolve', {
-      quoteCurrency: currency,
-      date: currentDay(),
-    }).then(result => {
+    const date = currentDay();
+    void (async () => {
+      let result = await send('exchange-rates/resolve', {
+        quoteCurrency: currency,
+        date,
+      });
+      if (result.status !== 'resolved') {
+        const fetched = await send('exchange-rates/ensure', {
+          quoteCurrency: currency,
+          date,
+        }).catch(() => null);
+        if (fetched && 'resolution' in fetched) result = fetched.resolution;
+      }
       if (!cancelled) {
         setResolution({
           currency,
           rate: result.status === 'resolved' ? result.rate : null,
         });
       }
-    });
+    })();
     return () => {
       cancelled = true;
     };

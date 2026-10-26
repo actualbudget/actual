@@ -101,6 +101,8 @@ export type MetadataPrefs = Partial<{
     targetEncoding: string | null;
     targetCurrencyCode: string;
   };
+  /** Settled exchange-rate gaps for this device; never synced. */
+  exchangeRateGaps: string[];
 }>;
 
 /**

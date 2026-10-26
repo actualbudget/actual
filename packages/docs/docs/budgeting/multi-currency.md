@@ -46,7 +46,7 @@ On **EUR to USD**, set the date, enter 1.10, and click **Save fallback**. On **M
 
 **Rate in use today** names the rate that applies today. On the euro tab it reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** on that tab lists the euro fallback as stored, 0.909090909090909 euros per dollar. **Edit** loads a saved row back into the form. **Remove** deletes it.
 
-<img width="672" alt="Exchange rates on the EUR to USD tab, with MXN to USD beside it and a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="672" alt="Exchange rates with Fetched rates and Get missing rates above the EUR to USD tab, which has a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
 **Export rates** on the euro tab wrote that currency's rates to a file and said: "Rates exported: 1. Invalid rates left out: 0." **Choose file** read a CSV with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 dated 2026-10-31". **Keep existing** stayed selected. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
 
@@ -64,7 +64,7 @@ Create three accounts:
 
 <img width="550" alt="Add account for BNP Paribas in euros, with a 2000 euro balance shown as $2,200.00" src="/img/budgeting/multi-currency-add-account@2x.png" />
 
-If no rate is saved for today, the dialog adds **Base amount** and says: "No exchange rate is saved for today. Enter the starting balance in the budget currency."
+If no rate is saved for today, the dialog first fetches today's rate from exchange-api. If none can be fetched, it adds **Base amount** and says: "No exchange rate is saved for today. Enter the starting balance in the budget currency."
 
 The BNP Paribas account then shows €2,000.00. Its register lists the starting balance as a 2,000.00 deposit. **All accounts** in the sidebar counts the $2,200.00 dollar amount. The peso account uses $, so its 5,000.00 peso balance looks like $5,000.00. That row is pesos. **All accounts** is dollars.
 
@@ -298,6 +298,12 @@ This extends the same example budget for a family that has a Paris apartment the
 
 The history starts on May 31 with $2,500 in Checking, €2,000 in BNP Paribas and MX$5,000 in BBVA México. At each month-end from June through October, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin as sublease income. BBVA México pays MX$800 to Elena García as a remittance and MX$150 to José García as a gift. October ends with €2,000 and MX$250 in the foreign accounts.
 
+### Fetch historical market rates
+
+Create the accounts with their May 31 opening balances, then open **Settings → Exchange rates** and click **Get missing rates**. It fetches every day of euro and peso history from May 31 through today from the built-in **exchange-api** provider. Do this before entering the transactions. See [Fetched rates](../experimental/exchange-rates.md#fetched-rates) for the hosts and what they see. These screenshots use real fetched rates, rather than the manual fallbacks from the earlier examples. Each payment is booked using its transaction-date rate.
+
+The provider's dates identify its daily snapshots. These market rates may differ from a bank's executed exchange rate. Fetching rates does not rewrite the base amounts of posted payments.
+
 ### Read the report
 
 Positive amounts are gains. **Realized** records FX recognized when foreign holdings are spent. **Unrealized change** records the movement in the value still held. **Closing unrealized** is the remaining unrealized balance at month-end, rather than another amount to add to that month's change. Fee expense is a booked cost. This history has no exchange transfers or fees, so **Transfer carry**, **Internal settlement** and fee columns are zero.
@@ -322,7 +328,7 @@ The final table, **FX changes included in To Budget**, shows amounts already inc
 
 <img width="1040" alt="Selected FX totals and FX changes already included in To Budget for June through October, with every month up to date" src="/img/budgeting/multi-currency-fx-included-history.png" />
 
-Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. The CSV retains full rate precision for checking the displayed amounts.
+Choose **Export as CSV** to download the same date range and filters, with account rows, currency totals, rate dates and sources, and budget reconciliation details. For October, BNP Paribas closes with native 2000.00 and booked 2331.94. BBVA México closes with native 250.00 and booked 20.25. Both closing rates are fetched snapshots from October 31, sourced from `plugin:exchange-api`. The CSV retains full rate precision for checking the displayed amounts.
 
 ## Add a currency to a category
 

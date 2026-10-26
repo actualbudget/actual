@@ -40,6 +40,7 @@ import {
   staleEditMessage,
 } from '#util/foreign-edit';
 import type { RowSnapshot } from '#util/foreign-edit';
+import { rateSourceName } from '#util/rate-source';
 
 type ForeignAmountModalProps = Extract<
   ModalType,
@@ -517,7 +518,7 @@ export function ForeignAmountModal({
                           ? t('fallback')
                           : t('fetched'),
                     }}
-                    , {{ source: resolution.source }},{' '}
+                    , {{ source: rateSourceName(resolution.source) }},{' '}
                     {{ date: resolution.timestamp?.slice(0, 10) ?? '' }})
                   </Trans>
                   {resolution.fallback && (

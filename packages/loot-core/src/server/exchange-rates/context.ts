@@ -3,12 +3,16 @@ import { onBudgetClosing } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { getDefaultCurrencyCode } from '#server/util/currency';
 
+import { EXCHANGE_API } from './exchange-api';
+
 export type FxCapture = {
   context: string;
   revision: number;
   budgetId: string;
   baseCurrency: string;
   amountEncoding: string;
+  providerId: string;
+  providerVersion: string;
 };
 
 let active = false;
@@ -79,6 +83,8 @@ export async function captureFxContext(): Promise<FxCapture | null> {
       budgetId,
       baseCurrency: currency,
       amountEncoding: encoding,
+      providerId: EXCHANGE_API.id,
+      providerVersion: EXCHANGE_API.version,
     };
   }
   return null;

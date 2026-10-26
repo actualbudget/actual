@@ -95,6 +95,12 @@ it('hides the currency picker for a legacy budget without a currency', () => {
 it('creates a foreign account, asking for a base amount when no rate applies', async () => {
   initServer({
     'exchange-rates/resolve': async () => ({ status: 'unavailable' }),
+    'exchange-rates/ensure': async () => ({
+      status: 'missing',
+      reason: 'snapshot-not-found',
+      context: 'budget',
+      resolution: { status: 'unavailable' },
+    }),
   });
   renderModal({
     ...jpyBudget,
@@ -126,6 +132,43 @@ it('creates a foreign account, asking for a base amount when no rate applies', a
       currency: 'USD',
       startingBalanceBase: 1800,
     },
+    expect.anything(),
+  );
+});
+
+it("fetches today's rate before asking for a base amount", async () => {
+  initServer({
+    'exchange-rates/resolve': async () => ({ status: 'unavailable' }),
+    'exchange-rates/ensure': async ({ quoteCurrency }) => ({
+      status: 'inserted',
+      effectiveDate: '2026-10-31',
+      context: 'budget',
+      resolution: {
+        status: 'resolved',
+        rate: quoteCurrency === 'USD' ? '0.01' : '1',
+        kind: 'fetched',
+        source: 'plugin:exchange-api',
+        timestamp: '2026-10-31T00:00:00.000Z',
+        fallback: false,
+      },
+    }),
+  });
+  renderModal({
+    ...jpyBudget,
+    'flags.currency': 'true',
+    'flags.multicurrency': 'true',
+  });
+  const user = userEvent.setup();
+  await user.click(currencySelect()!);
+  await user.click(await screen.findByText(/^USD - /));
+  submit('Dollars', '12');
+  expect(
+    await screen.findByText(/in the budget currency, at 1 USD = 100 JPY/),
+  ).toBeInTheDocument();
+  expect(screen.queryByText(/No exchange rate is saved for today/)).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+  expect(mutate).toHaveBeenCalledWith(
+    { name: 'Dollars', balance: 12, offBudget: false, currency: 'USD' },
     expect.anything(),
   );
 });

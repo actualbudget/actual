@@ -37,11 +37,18 @@ import {
   importPreviewBegin,
   removeFetched,
 } from './history';
+import {
+  missingRatesStatus,
+  startMissingRates,
+  stopMissingRates,
+} from './missing-rates';
+import { ensureRate } from './provider';
 
 export type ExchangeRatesHandlers = {
   'exchange-rates/save': typeof saveRate;
   'exchange-rates/remove': typeof removeRate;
   'exchange-rates/resolve': typeof resolveRateHandler;
+  'exchange-rates/ensure': typeof ensureRateHandler;
   'exchange-rates/import-preview-begin': typeof importPreviewBegin;
   'exchange-rates/import-preview': typeof importPreview;
   'exchange-rates/import-commit': typeof importCommit;
@@ -49,6 +56,9 @@ export type ExchangeRatesHandlers = {
   'exchange-rates/history-page': typeof historyPage;
   'exchange-rates/history-export': typeof historyExport;
   'exchange-rates/remove-fetched': typeof removeFetched;
+  'exchange-rates/missing-start': typeof startMissingRates;
+  'exchange-rates/missing-stop': typeof stopMissingRates;
+  'exchange-rates/missing-status': typeof missingRatesStatus;
   'exchange-rates/pairs': typeof ratePairs;
 };
 
@@ -59,6 +69,7 @@ app.service(startFxContext);
 app.method('exchange-rates/save', mutator(saveRate));
 app.method('exchange-rates/remove', mutator(removeRate));
 app.method('exchange-rates/resolve', resolveRateHandler);
+app.method('exchange-rates/ensure', ensureRateHandler);
 app.method('exchange-rates/import-preview-begin', importPreviewBegin);
 app.method('exchange-rates/import-preview', importPreview);
 app.method('exchange-rates/import-commit', importCommit);
@@ -66,6 +77,9 @@ app.method('exchange-rates/import-cancel', importCancel);
 app.method('exchange-rates/history-page', historyPage);
 app.method('exchange-rates/history-export', historyExport);
 app.method('exchange-rates/remove-fetched', removeFetched);
+app.method('exchange-rates/missing-start', startMissingRates);
+app.method('exchange-rates/missing-stop', stopMissingRates);
+app.method('exchange-rates/missing-status', missingRatesStatus);
 app.method('exchange-rates/pairs', ratePairs);
 
 // Rate ids derive from the logical key so offline saves of the same key on
@@ -229,6 +243,108 @@ export async function writeManualRate({
     }
   });
   return id;
+}
+
+/** Whether this row is the live, validated fetched observation for exactly this key. */
+export function isExactFetchedCoverage(
+  row: ExchangeRateEntity | null,
+  key: {
+    baseCurrency: string;
+    quoteCurrency: string;
+    date: string;
+    source: string;
+  },
+): boolean {
+  if (
+    !row ||
+    row.tombstone !== 0 ||
+    row.kind !== 'fetched' ||
+    row.base_currency !== key.baseCurrency ||
+    row.quote_currency !== key.quoteCurrency ||
+    row.source !== key.source ||
+    row.timestamp !== utcMidnight(key.date)
+  ) {
+    return false;
+  }
+  try {
+    exchangeRateModel.validate(row);
+    return row.spec === exchangeRateSpec(row);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The caller owns the short mutator and context guard. Cache writes are
+ * outside undo. A fetched tombstone of the same logical key is restored, so a
+ * deleted observation can be fetched again; manual rows are never touched.
+ */
+export async function writeFetchedRate({
+  baseCurrency,
+  quoteCurrency,
+  providerId,
+  rate,
+  effectiveDate,
+  beforeWrite = () => true,
+}: {
+  baseCurrency: string;
+  quoteCurrency: string;
+  providerId: string;
+  rate: string;
+  effectiveDate: string;
+  beforeWrite?: () => boolean;
+}): Promise<'inserted' | 'existing' | 'not-written'> {
+  validateQuote(quoteCurrency, baseCurrency);
+  validateDate(effectiveDate);
+  if (
+    !/^[a-z0-9][a-z0-9-]{0,39}$/.test(providerId) ||
+    parseRate(rate) !== rate
+  ) {
+    throw new Error('rate-invalid');
+  }
+  const source = `plugin:${providerId}`;
+  const timestamp = utcMidnight(effectiveDate);
+  const id = exchangeRateId(
+    baseCurrency,
+    quoteCurrency,
+    source,
+    'fetched',
+    timestamp,
+  );
+  const existing = await getRateRow(id);
+  if (!beforeWrite()) return 'not-written';
+  if (existing) {
+    // A deterministic id alone does not authorize changing a different logical key.
+    if (
+      !existing.tombstone ||
+      existing.base_currency !== baseCurrency ||
+      existing.quote_currency !== quoteCurrency ||
+      existing.source !== source ||
+      existing.kind !== 'fetched' ||
+      existing.timestamp !== timestamp
+    ) {
+      return 'existing';
+    }
+    await db.update('exchange_rates', {
+      id,
+      rate,
+      tombstone: 0,
+      spec: exchangeRateSpec({ ...existing, rate, kind: 'fetched' }),
+    });
+    return 'inserted';
+  }
+  const row = exchangeRateModel.validate({
+    id,
+    base_currency: baseCurrency,
+    quote_currency: quoteCurrency,
+    rate,
+    source,
+    kind: 'fetched',
+    timestamp,
+    tombstone: 0,
+  });
+  await db.insert('exchange_rates', { ...row, spec: exchangeRateSpec(row) });
+  return 'inserted';
 }
 
 async function saveRate({
@@ -558,4 +674,14 @@ export async function computeEntryPair({
     nativeAmount,
     ...(resolution && { rate: resolution }),
   };
+}
+
+export function ensureRateHandler(options: {
+  quoteCurrency: string;
+  date: string;
+}) {
+  return ensureRate({
+    quoteCurrency: options.quoteCurrency,
+    date: options.date,
+  });
 }

@@ -1,6 +1,7 @@
 import type { MigrationPhase } from '#platform/server/sqlite/storage/types';
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
+import type { MissingRatesProgress } from '#types/models/exchange-rate-history';
 
 type SyncSubtype =
   | 'out-of-sync'
@@ -131,6 +132,7 @@ type ApiFetchRedirectedEvent = undefined;
 
 export type ServerEvents = {
   'fx-provider-context': { context: string };
+  'exchange-rates-update': MissingRatesProgress;
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;

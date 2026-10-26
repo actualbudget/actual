@@ -119,7 +119,7 @@ it('aborts work before close-budget waits for running handlers', async () => {
   expect(await captureFxContext()).toBeNull();
 });
 
-it('keeps rate work when the server or sign-in changes', async () => {
+it('keeps direct-fetch work when the server or sign-in changes', async () => {
   vi.mocked(storage.multiRemove).mockImplementation(memoryStorage.multiRemove);
   const captured = await current();
   const controller = createFxController(captured);
@@ -127,6 +127,7 @@ it('keeps rate work when the server or sign-in changes', async () => {
   await auth.handlers['subscribe-sign-out']();
   expect(controller.signal.aborted).toBe(false);
   expect(await isFxContextCurrent(captured)).toBe(true);
+  expect(captured.providerId).toBe('exchange-api');
 });
 
 it('publishes the new context before prefs-updated after an encoding commit', async () => {

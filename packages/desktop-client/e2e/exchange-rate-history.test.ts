@@ -10,6 +10,7 @@ import type { SettingsPage } from './page-models/settings-page';
 
 // Browser execution is user-deferred. These tests are runnable definitions.
 // Every case is local: manual fallbacks, CSV import and export, and paging.
+// Direct exchange-api fetching is verified in a real browser separately.
 
 const dataDir = join(__dirname, 'data');
 

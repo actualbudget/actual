@@ -70,8 +70,8 @@ const fetchedRow = historyRow({
   source: 'plugin:fxtest',
   timestamp: '2026-02-25T00:00:00.000Z',
 });
-// Nothing on this screen reaches the network yet.
-const networkCalls: string[] = [];
+// Product calls that may reach the rate provider.
+const networkCalls = ['exchange-rates/missing-start'];
 
 function setup(prefs: Record<string, string> = fxPrefs) {
   const server = fxServer();
@@ -285,7 +285,7 @@ describe('ExchangeRateSettings', () => {
     }
   });
 
-  it('removes a fetched row with its reviewed values', async () => {
+  it('removes a fetched row with its reviewed values and explains refetching', async () => {
     const { server, wrapper } = setup();
     server.on('exchange-rates/history-page', () => page([fetchedRow]));
     server.on(
@@ -297,6 +297,11 @@ describe('ExchangeRateSettings', () => {
     );
     render(<ExchangeRateSettings />, { wrapper });
     await screen.findByText(/EUR \(Euro\): 0.91 fetched 2026-02-25 \(fxtest\)/);
+    expect(
+      screen.getByText(
+        'A removed fetched rate is fetched again by the next update.',
+      ),
+    ).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Edit' })).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
     await waitFor(() =>

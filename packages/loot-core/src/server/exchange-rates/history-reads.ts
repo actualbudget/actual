@@ -24,6 +24,7 @@ import {
   encodeHistoryCursor,
 } from './history-codec';
 import type { HistoryBoundary } from './history-codec';
+import { forgetMissingRates } from './provider';
 
 type Superseded = { status: 'superseded' };
 type FilterError = { status: 'error'; code: 'filter-invalid' };
@@ -298,6 +299,7 @@ export async function removeFetched({
       return { status: 'stale' };
     }
     await withUndo(() => db.update('exchange_rates', { id, tombstone: 1 }));
+    forgetMissingRates();
     return { status: 'removed' };
   });
 }

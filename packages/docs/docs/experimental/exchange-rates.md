@@ -8,11 +8,13 @@ When Multiple currencies is on, Settings has an **Exchange rates** page. The pag
 
 Each tab is one currency paired with the budget currency. An account in another currency gets a tab, and so does any other currency with saved rates. To save rates for a currency that has no account yet, choose it from **Add currency…**. The tab holds that pair's rate form, its saved rates, and the import and export tools.
 
+Above the tabs, **Fetched rates** says where fetched rates come from and offers **Get missing rates**. See [Fetched rates](#fetched-rates).
+
 The rate input takes dollars per 1 unit of the tab's currency. Use the swap button to enter the reverse. **Save fallback** saves a manual fallback for that date only. Saving another rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
 
 On **EUR to USD**, the date is 10/31/2026 and **Rate** reads `1 EUR = [rate] USD`. Entering 1.10 and clicking **Save fallback** saves the euro fallback. **Rate in use today** then reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** lists that euro row as stored, 0.909090909090909 euros per dollar. **Edit** loads it back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
 
-<img width="672" alt="Exchange rates on the EUR to USD tab, with MXN to USD beside it and a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="672" alt="Exchange rates with Fetched rates and Get missing rates above the EUR to USD tab, which has a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
 ## Which rate Actual uses
 
@@ -45,4 +47,14 @@ The preview covers every currency in the file, including rates for other tabs. A
 
 **Keep existing** leaves a saved fallback in place. **Replace existing** asks you to confirm how many saved rates differ, then overwrites those rates. The confirmation says you can undo the import. If the saved rates change after the preview, or the preview is no longer available, choose the file again.
 
-On a fetched rate, **Save fallback** loads it into the form, and saving makes a separate fallback for that day. **Remove** deletes that day's fetched rate.
+On a fetched rate, **Save fallback** loads it into the form, and saving makes a separate fallback for that day. **Remove** deletes that day's fetched rate. A removed fetched rate is fetched again by the next update.
+
+## Fetched Rates
+
+Daily rates come from the fawazahmed0 exchange-api, which publishes market data, not official rates. A fetched row in **Saved rates** shows its source as exchange-api. No sync server is needed.
+
+Actual reads each daily snapshot from jsDelivr (`cdn.jsdelivr.net`), then from Cloudflare (`currency-api.pages.dev`) when jsDelivr does not have the file. Those hosts can see the currency codes, the snapshot dates and your IP address. Actual requests the quote currency's file too when the direct rate is below 1, so small rates keep their precision. The saved date is the snapshot's day, not a verified capture time.
+
+**Get missing rates** fills the daily history that accounts in other currencies need. An open account needs every day from its first transaction through today. A closed account needs its days through its last transaction, or through today while it still holds a balance. Today, month ends and transaction dates are fetched first.
+
+**Add account** fetches today's rate when none is saved for an account in another currency. Posting a schedule by hand first tries the saved rates. When a rate is missing, Actual fetches the rate for that date and retries before it opens the conversion dialog.
