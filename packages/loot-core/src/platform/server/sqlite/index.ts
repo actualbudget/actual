@@ -63,10 +63,10 @@ function asWasmStatement(sql: string | Statement): string | PreparedStatement {
   return sql as unknown as string | PreparedStatement;
 }
 
-// The browser build of `@actual-app/api` embeds sql.js's wasm; the
-// sqlite-wasm engine fetches its own file.
+// The browser build of `@actual-app/api` embeds the sqlite-wasm binary and
+// runs that engine only; the web app fetches it from `kcab/`.
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacy.setWasmBinary(binary);
+  wasm.setWasmBinary(binary);
 }
 
 // Resolves to the backend actually in use: `opfs` falls back to
