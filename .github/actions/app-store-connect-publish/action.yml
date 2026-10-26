@@ -1,0 +1,46 @@
+name: Publish to App Store Connect
+description: Uploads a signed .ipa or .pkg and optionally submits it for App Store review
+
+inputs:
+  path:
+    description: Glob of the .ipa or .pkg to upload
+    required: true
+  platform:
+    description: IOS or MAC_OS
+    required: true
+  submit-for-review:
+    description: Wait for processing and submit the build for App Store review, releasing it after approval
+    required: false
+    default: 'false'
+  key-id:
+    description: App Store Connect API key ID
+    required: true
+  issuer-id:
+    description: App Store Connect API issuer ID
+    required: true
+  private-key:
+    description: App Store Connect API private key (.p8 contents)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upload
+      shell: bash
+      env:
+        APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ inputs.key-id }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ inputs.issuer-id }}
+        APP_STORE_CONNECT_PRIVATE_KEY: ${{ inputs.private-key }}
+        ARTIFACT_PATH: ${{ inputs.path }}
+        PLATFORM: ${{ inputs.platform }}
+        SUBMIT_FOR_REVIEW: ${{ inputs.submit-for-review }}
+      run: |
+        if [ "$SUBMIT_FOR_REVIEW" = 'true' ]; then
+          # Apple can take a while to process a build before it can be submitted.
+          EXTRA_ARGS=(--max-build-processing-wait 45 --app-store --release-type AFTER_APPROVAL \
+            --whats-new 'Full release notes: https://actualbudget.org/docs/releases')
+        else
+          EXTRA_ARGS=(--max-build-processing-wait 0)
+        fi
+        pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
+          --path "$ARTIFACT_PATH" --platform "$PLATFORM" "${EXTRA_ARGS[@]}"

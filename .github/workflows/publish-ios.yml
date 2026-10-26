@@ -100,14 +100,17 @@ jobs:
           export XCODEBUILD_AUTH_ARGS="-authenticationKeyPath $RUNNER_TEMP/AuthKey.p8 -authenticationKeyID $API_KEY_ID -authenticationKeyIssuerID $API_ISSUER_ID"
           yarn workspace mobile-client build:ipa
 
-      - name: Record build
-        id: build_info
+      - name: Clean up signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/publish-ios.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/signing.p12"
+
+      - name: Summarize build
         run: |
           PLIST=packages/mobile-client/build/App.xcarchive/Products/Applications/App.app/Info.plist
           VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
           BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
             echo "## iOS build"
             echo
@@ -116,35 +119,12 @@ jobs:
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload to TestFlight
-        if: github.event_name != 'release'
-        env:
-          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-        run: |
-          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
-            --path 'packages/mobile-client/build/export/*.ipa' \
-            --platform IOS \
-            --max-build-processing-wait 0
-
-      - name: Upload and submit for App Store review
-        if: github.event_name == 'release'
-        env:
-          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-        run: |
-          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
-            --path 'packages/mobile-client/build/export/*.ipa' \
-            --platform IOS \
-            --app-store \
-            --release-type AFTER_APPROVAL \
-            --whats-new 'Full release notes: https://actualbudget.org/docs/releases' \
-            --max-build-processing-wait 45
-
-      - name: Clean up signing material
-        if: always()
-        run: |
-          security delete-keychain "$RUNNER_TEMP/publish-ios.keychain-db" 2>/dev/null || true
-          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/signing.p12"
+      - name: Upload to App Store Connect
+        uses: ./.github/actions/app-store-connect-publish
+        with:
+          path: packages/mobile-client/build/export/*.ipa
+          platform: IOS
+          submit-for-review: ${{ github.event_name == 'release' }}
+          key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}

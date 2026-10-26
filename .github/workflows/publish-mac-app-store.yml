@@ -85,14 +85,15 @@ jobs:
           CSC_INSTALLER_KEY_PASSWORD: ${{ secrets.APPLE_MAS_INSTALLER_P12_PASSWORD }}
         run: yarn workspace desktop-electron build:mas
 
-      - name: Record build
-        id: build_info
+      - name: Clean up signing material
+        if: always()
+        run: rm -f packages/desktop-electron/mas/embedded.provisionprofile
+
+      - name: Summarize build
         run: |
           PLIST=packages/desktop-electron/dist/mas-arm64/Actual.app/Contents/Info.plist
           VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
           BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
             echo "## Mac App Store build"
             echo
@@ -101,33 +102,12 @@ jobs:
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Upload to TestFlight
-        if: github.event_name != 'release'
-        env:
-          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-        run: |
-          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
-            --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
-            --platform MAC_OS \
-            --max-build-processing-wait 0
-
-      - name: Upload and submit for App Store review
-        if: github.event_name == 'release'
-        env:
-          APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
-        run: |
-          pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
-            --path 'packages/desktop-electron/dist/mas-arm64/*.pkg' \
-            --platform MAC_OS \
-            --app-store \
-            --release-type AFTER_APPROVAL \
-            --whats-new 'Full release notes: https://actualbudget.org/docs/releases' \
-            --max-build-processing-wait 45
-
-      - name: Clean up signing material
-        if: always()
-        run: rm -f packages/desktop-electron/mas/embedded.provisionprofile
+      - name: Upload to App Store Connect
+        uses: ./.github/actions/app-store-connect-publish
+        with:
+          path: packages/desktop-electron/dist/mas-arm64/*.pkg
+          platform: MAC_OS
+          submit-for-review: ${{ github.event_name == 'release' }}
+          key-id: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          private-key: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
