@@ -4,6 +4,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 import { render, screen, within } from '@testing-library/react';
 
 import { BalanceCell } from '#components/mobile/budget/BalanceCell';
+import { MobileSheetBalanceHeader } from '#components/mobile/MobileSheetBalanceHeader';
 import { SheetNameProvider } from '#hooks/useSheetName';
 import {
   configureTestAppStore,
@@ -60,11 +61,13 @@ function setSheetValues({
 
 function renderBalance({
   isMobile = false,
+  isSheetHeader = false,
   isGoalTemplatesEnabled = true,
   isIncome = false,
   hideFraction = false,
 }: {
   isMobile?: boolean;
+  isSheetHeader?: boolean;
   isGoalTemplatesEnabled?: boolean;
   isIncome?: boolean;
   hideFraction?: boolean;
@@ -81,7 +84,16 @@ function renderBalance({
   const { container } = render(
     <TestProviders queryClient={client} store={store}>
       <SheetNameProvider name="budget202401">
-        {isMobile ? (
+        {isSheetHeader ? (
+          <MobileSheetBalanceHeader
+            label="Balance"
+            carryover={envelopeBudget.catCarryover(category.id)}
+            balance={envelopeBudget.catBalance(category.id)}
+            goal={envelopeBudget.catGoal(category.id)}
+            budgeted={envelopeBudget.catBudgeted(category.id)}
+            longGoal={envelopeBudget.catLongGoal(category.id)}
+          />
+        ) : isMobile ? (
           <BalanceCell
             binding={
               isIncome
@@ -223,7 +235,7 @@ describe('BalanceCell goal progress ring', () => {
       { budget: 65000, leftover: 65000 },
       theme.templateNumberFunded,
     ],
-  ])('keeps the plain pill %s', (_, values, color) => {
+  ])('keeps the plain balance %s', (_, values, color) => {
     setSheetValues(values);
     renderBalance({ isMobile: true });
     const button = screen.getByRole('button', {
@@ -233,7 +245,7 @@ describe('BalanceCell goal progress ring', () => {
     expect(within(button).getByText(/^[\d,.]+$/)).toHaveStyle({ color });
   });
 
-  it('keeps the plain pill for income categories', () => {
+  it('keeps the plain balance for income categories', () => {
     sheetValues = {
       'goal-groceries': 500000,
       'budget-groceries': 0,
@@ -244,5 +256,16 @@ describe('BalanceCell goal progress ring', () => {
       name: 'Open balance menu for Groceries category',
     });
     expect(button.querySelector('svg')).toBeNull();
+  });
+});
+
+describe('MobileSheetBalanceHeader goal colour', () => {
+  it('turns the balance green once the goal is funded', () => {
+    setSheetValues({ budget: 65000, leftover: 65000 });
+    renderBalance({ isSheetHeader: true });
+    expect(screen.getByText('Fully funded')).toBeInTheDocument();
+    expect(screen.getByTestId('budget202401!leftover-groceries')).toHaveStyle({
+      color: theme.templateNumberFunded,
+    });
   });
 });

@@ -79,6 +79,8 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
+  /** Goals describe spending, so income categories never show goal progress */
+  isIncome?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
@@ -90,6 +92,7 @@ export function BalanceWithCarryover({
   budgeted,
   longGoal,
   isDisabled,
+  isIncome,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
@@ -102,8 +105,7 @@ export function BalanceWithCarryover({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const { decimalPlaces } = useFormat().currency;
 
-  // Income rows pass isDisabled; goals describe spending, not income
-  const hasGoal = isGoalTemplatesEnabled && !isDisabled;
+  const hasGoal = isGoalTemplatesEnabled && !isIncome;
   // Long goals count the balance towards the goal, others the budgeted amount
   const getHave = (balanceValue: number) =>
     longGoalValue === 1 ? balanceValue : budgetedValue;
@@ -145,7 +147,15 @@ export function BalanceWithCarryover({
         return (
           <>
             <View
-              style={{ minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }}
+              style={{
+                minHeight: 'auto',
+                maxWidth: '100%',
+                // Let a long amount give way to the ring rather than push it
+                // out of the column
+                ...(ringProgress != null && !children
+                  ? { flexShrink: 1, minWidth: 0 }
+                  : { flexShrink: 0 }),
+              }}
             >
               {children ? (
                 children(

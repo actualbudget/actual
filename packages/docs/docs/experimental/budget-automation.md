@@ -300,7 +300,7 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, categories whose projected budget is not yet met show a small gold ring beside the balance. The ring fills as the category is funded and disappears once the projected budget is met, when the balance turns green. A negative balance is red like any other overspent category. Hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
+After automations run, categories whose projected budget is not yet met show a small gold ring beside the balance. The ring fills as the category is funded and disappears once the projected budget is met, when the balance turns green. A negative balance is red like any other overspent category. On desktop, hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
 
 The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (partly filled ring), and negative balance (red).
 

@@ -65,10 +65,10 @@ You can also apply selections of templates if you want.
 
 ### Goal Indicators
 
-After having run the templates in a given month and category, a category whose goal is not yet met shows a small gold ring beside its balance. The ring fills as the goal is funded and disappears once the goal is met, when the balance turns green. Hover over the ring to see how much of the goal is funded.
+After having run the templates in a given month and category, a category whose goal is not yet met shows a small gold ring beside its balance. The ring fills as the goal is funded and disappears once the goal is met, when the balance turns green. On desktop, hover over the ring to see how much of the goal is funded.
 The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met (green), goal not met (partly filled ring), and a negative balance (red).
 
-<img width="690" alt="Category balances in the normal and empty states as plain amounts, a green balance whose goal is met, a partly filled ring beside a goal that is not met, and a red negative balance" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
+<img width="690" alt="Category balances in the normal and empty states as plain amounts, a green balance whose goal is met, a partly filled ring beside a balance whose goal is not met, and a red negative balance" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
 
 This goal value is based on the maximum amount that the templates in a category request to be budgeted.
 
@@ -78,9 +78,9 @@ Click the balance value in a templated category to see its goal status at the to
 
 #### Long term goals
 
-By default, the goal information displayed in the goal indicator is shown on a monthly basis. It's what fully budgeting your templates would require for **this month**. The indicator color is based on the `Budgeted` amount and whether it meets the amount requested by the category templates.
+By default, the goal information displayed in the goal indicator is shown on a monthly basis. It's what fully budgeting your templates would require for **this month**. The indicator is based on the `Budgeted` amount and whether it meets the amount requested by the category templates.
 
-If you would like the goal and associated indication color to be based on the category `Balance` instead of the budgeted amount, see the [Goal Directive option](#goal-directive).
+If you would like the goal and its indicator to be based on the category `Balance` instead of the budgeted amount, see the [Goal Directive option](#goal-directive).
 This is a special template that overrides the goal amount and bases the goal indicator on category balance.
 
 <img width="228" alt="The balance menu showing the goal status for a long-term goal" src="/img/experimental/goal-templates-goal-tooltip@2x.webp" />
@@ -517,7 +517,7 @@ Notes on using the remainder template:
 
 This option is unique enough to warrant its own directive, `#goal`, instead of the standard `#template` option.
 The `#goal` option overrides how the goal indicator typically functions.
-In the standard `#templates`, the goal indication colors are based on the current month's budgeted value.
+In the standard `#templates`, the goal indicator is based on the current month's budgeted value.
 When using the `#goal` option, the indication is based on the total balance.
 This shifts the indication to a long-term goal you are saving up to instead of just the current monthly portion.
 A few examples have been given to illustrate this difference.
@@ -530,30 +530,30 @@ All examples assume that 400 was carried over from the previous month
 In this case, a balance greater than or equal to 500 will set the balance green, marking a met goal.
 If you run the template, you get the following:
 
-| Template Line(s) | Amount budgeted | Balance (color) |
-| :--------------- | :-------------: | :-------------: |
-| `#goal 500`      |        0        |  400 (yellow)   |
+| Template Line(s) | Amount budgeted |   Balance (indicator)    |
+| :--------------- | :-------------: | :----------------------: |
+| `#goal 500`      |        0        | 400 (partly filled ring) |
 
 If you were able to budget 100 this month, you would then hit your goal and get a green indication.
 
-| Template Line(s) | Amount budgeted | Balance (color) |
-| :--------------- | :-------------: | :-------------: |
-| `#goal 500`      |       100       |   500 (green)   |
+| Template Line(s) | Amount budgeted | Balance (indicator) |
+| :--------------- | :-------------: | :-----------------: |
+| `#goal 500`      |       100       |     500 (green)     |
 
 **2. I'm saving for a purchase, but I will budget 50 a month until I reach my goal.**
 In this example, a template is used to automatically budget 50 into the category when templates are run.
 The `#goal` line will override the goal indication from the `#template` line, and only go green when a balance of 500 is reached.
 If you run templates, you get the following:
 
-| Template Line(s)                  | Amount budgeted | Balance (color) |
-| :-------------------------------- | :-------------: | :-------------: |
-| `#template 50` <br /> `#goal 500` |       50        |  450 (yellow)   |
+| Template Line(s)                  | Amount budgeted |   Balance (indicator)    |
+| :-------------------------------- | :-------------: | :----------------------: |
+| `#template 50` <br /> `#goal 500` |       50        | 450 (partly filled ring) |
 
 If you have some extra funds after templates are run and can budget that last 50, you get the following:
 
-| Template Line(s)                  | Amount budgeted | Balance (color) |
-| :-------------------------------- | :-------------: | :-------------: |
-| `#template 50` <br /> `#goal 500` |       100       |   500 (green)   |
+| Template Line(s)                  | Amount budgeted | Balance (indicator) |
+| :-------------------------------- | :-------------: | :-----------------: |
+| `#template 50` <br /> `#goal 500` |       100       |     500 (green)     |
 
 #### Notes on The Goal Directive
 

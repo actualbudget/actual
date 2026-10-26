@@ -84,7 +84,7 @@ export function BalanceCell({
       goal={goal}
       budgeted={budgeted}
       longGoal={longGoal}
-      isDisabled={category.is_income}
+      isIncome={category.is_income}
       CarryoverIndicator={MobileCarryoverIndicator}
     >
       {({ type, value, className: defaultClassName }, ringProgress) => {
