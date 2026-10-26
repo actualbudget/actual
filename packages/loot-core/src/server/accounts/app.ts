@@ -1419,6 +1419,10 @@ function getBankSyncStatusFromError(
       return 'timed-out';
     }
 
+    if (err.category === 'SERVER_DOWN') {
+      return 'server-down';
+    }
+
     if (err.category === 'ACCOUNT_MISSING') {
       return 'account-missing';
     }
