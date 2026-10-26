@@ -1,5 +1,6 @@
+import createDebug from 'debug';
 import express from 'express';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 
 import { sha256String } from '#util/hash';
 import {
@@ -26,6 +27,8 @@ import { handleError } from './util/handle-error';
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const ELECTRON_APP_ORIGIN = 'app://actual';
 
@@ -97,6 +100,25 @@ app.post('/status', async (req, res) => {
     },
   });
 });
+
+const ensureConfigured = (
+  _req: Request,
+  res: Response,
+  next: express.NextFunction,
+) => {
+  if (!goCardlessService.isConfigured()) {
+    res.send({
+      status: 'ok',
+      data: {
+        error_type: 'GOCARDLESS_NOT_CONFIGURED',
+        error_code: 'GOCARDLESS_NOT_CONFIGURED',
+        reason: 'GoCardless credentials are missing',
+      },
+    });
+    return;
+  }
+  next();
+};
 
 app.post(
   '/create-web-token',
@@ -210,6 +232,7 @@ app.post(
 
 app.post(
   '/transactions',
+  ensureConfigured,
   handleError(async (req, res) => {
     const {
       requisitionId: rawRequisitionId,
@@ -330,14 +353,16 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',

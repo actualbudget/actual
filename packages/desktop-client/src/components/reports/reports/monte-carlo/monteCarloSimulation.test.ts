@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ALLOCATION_PRESETS,
+  createMonteCarloInvestmentPhase,
   getHistoricalMixStats,
   getHistoricalPresetStats,
   getMonteCarloHorizonYears,
   getMonteCarloPotLabel,
   getPotAssetWeights,
+  getPotInvestmentAtAge,
   MAX_AMOUNT,
   MAX_HORIZON_YEARS,
   MIN_HORIZON_YEARS,
@@ -18,6 +21,7 @@ import {
 import type {
   MonteCarloContribution,
   MonteCarloIncomeStream,
+  MonteCarloInvestmentPhase,
   MonteCarloParams,
   MonteCarloPot,
 } from './monteCarloSimulation';
@@ -74,6 +78,7 @@ function makePot(overrides: Partial<MonteCarloPot> = {}): MonteCarloPot {
     feeAdjustsWithInflation: false,
     annualFeeRate: 0,
     isSurplus: false,
+    investmentPhases: [],
     ...overrides,
   };
 }
@@ -102,6 +107,7 @@ function makeParams(
     taxBands: [],
     horizonYears: 30,
     simulationCount: 1000,
+    historicalBlockLength: 10,
     seed: 42,
     ...rest,
   };
@@ -145,6 +151,27 @@ describe('surplus pot defaults', () => {
       annualFeeRate: 0,
       annualFeeFixed: 0,
     });
+  });
+
+  it('drops saved investment phases that have no start age', () => {
+    const config = monteCarloConfigFromMeta({
+      pots: [
+        {
+          id: 'saved-pot',
+          allocationPreset: 'equity-100',
+          investmentPhases: [
+            { id: 'no-age', allocationPreset: 'cash' },
+            { id: 'at-70', fromAge: 70, allocationPreset: 'cash' },
+          ],
+        },
+      ],
+    });
+    const [pot] = config.pots;
+    expect(pot.investmentPhases.map(phase => phase.id)).toEqual(['at-70']);
+    // The pot's own allocation still applies before the first phase
+    expect(getPotInvestmentAtAge(pot, 52, 60).weights).toEqual(
+      getPotAssetWeights(pot),
+    );
   });
 
   it('keeps saved plans without a surplus pot unchanged', () => {
@@ -495,6 +522,165 @@ describe('runMonteCarloSimulation', () => {
       ),
     );
     expect(historical.percentileBands).toEqual(deterministic.percentileBands);
+  });
+
+  describe('block bootstrap model', () => {
+    // A 20-year history whose stock return and inflation both encode the
+    // year's position, so a captured run reveals which historical year
+    // each simulated year replayed
+    const encodedHistory = Array.from({ length: 20 }, (_, yearIndex) => ({
+      year: 2000 + yearIndex,
+      stocks: yearIndex * 0.001,
+      bonds: 0,
+      cash: 0,
+      inflation: (yearIndex + 1) * 0.0005,
+    }));
+
+    function captureHistoryIndices(
+      historicalBlockLength: number,
+      captureRunDetail: number,
+    ) {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-block-bootstrap',
+            historicalReturns: encodedHistory,
+            historicalBlockLength,
+            inflationMean: 0.02,
+            annualWithdrawal: 0,
+            horizonYears: 100,
+            captureRunDetail,
+          },
+          { startingBalance: 1_000_000, allocationPreset: 'equity-100' },
+        ),
+      );
+      return result.runDetail!.map(row => ({
+        historyIndex: Math.round((row.potReturns[0] ?? 0) / 0.001),
+        inflation: row.inflation,
+      }));
+    }
+
+    // The share of year-to-year steps that carried on to the next
+    // historical year (wrapping), pooled over a few captured runs
+    function getContinuationShare(historicalBlockLength: number) {
+      let continued = 0;
+      let steps = 0;
+      for (let runIndex = 0; runIndex < 5; runIndex++) {
+        const years = captureHistoryIndices(historicalBlockLength, runIndex);
+        for (let position = 1; position < years.length; position++) {
+          steps++;
+          if (
+            years[position].historyIndex ===
+            (years[position - 1].historyIndex + 1) % encodedHistory.length
+          ) {
+            continued++;
+          }
+        }
+      }
+      return continued / steps;
+    }
+
+    it('continues to the next year about as often as the block length implies', () => {
+      // Length 10 continues 90% of the time (plus the odd random jump that
+      // happens to land on the next year); length 1 never continues on
+      // purpose; length 30 almost always does
+      const typical = getContinuationShare(10);
+      expect(typical).toBeGreaterThan(0.85);
+      expect(typical).toBeLessThan(0.95);
+      expect(getContinuationShare(1)).toBeLessThan(0.12);
+      expect(getContinuationShare(30)).toBeGreaterThan(0.94);
+    });
+
+    it('wraps from the last historical year back to the first', () => {
+      const years = captureHistoryIndices(30, 0);
+      const hasWrapped = years.some(
+        (year, position) =>
+          position > 0 &&
+          years[position - 1].historyIndex === encodedHistory.length - 1 &&
+          year.historyIndex === 0,
+      );
+      expect(hasWrapped).toBe(true);
+    });
+
+    it("pairs each year with its own historical year's inflation", () => {
+      for (const year of captureHistoryIndices(10, 0)) {
+        expect(year.inflation).toBeCloseTo(
+          (year.historyIndex + 1) * 0.0005,
+          10,
+        );
+      }
+    });
+
+    it('runs the requested number of scenarios, not one per start year', () => {
+      const result = runMonteCarloSimulation(
+        makeParams({
+          returnModel: 'historical-block-bootstrap',
+          historicalReturns: encodedHistory,
+          simulationCount: 1_500,
+        }),
+      );
+      expect(result.simulationCount).toBe(1_500);
+    });
+
+    it('matches deterministic growth on a one-year history', () => {
+      // With a single historical year, continuing and jumping both land on
+      // it, so the run must match a zero-volatility 5% projection
+      const blocks = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-block-bootstrap',
+            historicalReturns: [
+              {
+                year: 2000,
+                stocks: 0.05,
+                bonds: 0.02,
+                cash: 0.01,
+                inflation: 0,
+              },
+            ],
+            annualWithdrawal: 3_000,
+            horizonYears: 30,
+          },
+          { startingBalance: 100_000, allocationPreset: 'equity-100' },
+        ),
+      );
+      const deterministic = runMonteCarloSimulation(
+        makeParams(
+          { annualWithdrawal: 3_000, horizonYears: 30 },
+          {
+            startingBalance: 100_000,
+            expectedReturnMean: 0.05,
+            returnStdDev: 0,
+          },
+        ),
+      );
+      expect(blocks.percentileBands).toEqual(deterministic.percentileBands);
+    });
+
+    it('is seeded, and a captured run replays the same scenario', () => {
+      const params = makeParams(
+        {
+          returnModel: 'historical-block-bootstrap',
+          annualWithdrawal: 40_000,
+          horizonYears: 30,
+        },
+        { startingBalance: 1_000_000, allocationPreset: 'equity-60' },
+      );
+      const first = runMonteCarloSimulation(params);
+      const second = runMonteCarloSimulation(params);
+      expect(second.endingBalances).toEqual(first.endingBalances);
+
+      // Variable draws per year must not desynchronise the capture re-run
+      const captured = runMonteCarloSimulation({
+        ...params,
+        captureRunDetail: 7,
+      });
+      expect(captured.endingBalances).toEqual(first.endingBalances);
+      const fundedRows = captured.runDetail!.filter(row => !row.afterDepletion);
+      expect(fundedRows.at(-1)!.endBalance).toBe(
+        Math.round(first.endingBalances[7]),
+      );
+    });
   });
 
   it('runs one scenario per start year in sequence mode', () => {
@@ -1132,6 +1318,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'boundaries',
       factor: 1,
+      previousFactor: 1,
       planned: 40_000,
       adjusted: 40_000,
       action: 'none',
@@ -1176,6 +1363,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'ratcheting',
       factor: 1,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 10_000,
       action: 'none',
@@ -1185,6 +1373,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'ratcheting',
       factor: 1.05,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 10_500,
       action: 'raise',
@@ -1345,6 +1534,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'guardrails',
       factor: 0.5,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 5_000,
       action: 'cut',
@@ -3347,6 +3537,284 @@ describe('runMonteCarloSimulation', () => {
         expect(Math.abs(value)).toBeLessThanOrEqual(maxFormattable);
       }
     }
+  });
+});
+
+describe('investment phases', () => {
+  // makePot keeps its own 6% mean whatever the preset; these tests want
+  // the preset's illustrative numbers so the glide arithmetic is readable
+  const stocksPot = makePot({
+    allocationPreset: 'equity-100',
+    expectedReturnMean: ALLOCATION_PRESETS['equity-100'].mean,
+    returnStdDev: ALLOCATION_PRESETS['equity-100'].stdDev,
+  });
+  const flatHistory = [
+    { year: 2000, stocks: 0.1, bonds: 0, cash: 0, inflation: 0 },
+  ];
+
+  function phase(
+    overrides: Partial<MonteCarloInvestmentPhase> & { fromAge: number },
+  ): MonteCarloInvestmentPhase {
+    return {
+      ...createMonteCarloInvestmentPhase('phase', stocksPot, overrides.fromAge),
+      ...overrides,
+    };
+  }
+
+  describe('getPotInvestmentAtAge', () => {
+    it('is the pot itself when it has no phases', () => {
+      const investment = getPotInvestmentAtAge(stocksPot, 60, 75);
+      expect(investment.weights).toEqual({ stocks: 1, bonds: 0, cash: 0 });
+      expect(investment.mean).toBe(ALLOCATION_PRESETS['equity-100'].mean);
+      expect(investment.feeRate).toBe(0);
+    });
+
+    it('switches at once on the phase birthday', () => {
+      const pot = makePot({
+        allocationPreset: 'equity-100',
+        investmentPhases: [
+          phase({ fromAge: 65, allocationPreset: 'cash', annualFeeRate: 0.01 }),
+        ],
+      });
+      expect(getPotInvestmentAtAge(pot, 60, 64).weights).toEqual({
+        stocks: 1,
+        bonds: 0,
+        cash: 0,
+      });
+      expect(getPotInvestmentAtAge(pot, 60, 64).feeRate).toBe(0);
+      expect(getPotInvestmentAtAge(pot, 60, 65).weights).toEqual({
+        stocks: 0,
+        bonds: 0,
+        cash: 1,
+      });
+      expect(getPotInvestmentAtAge(pot, 60, 65).feeRate).toBe(0.01);
+    });
+
+    it('glides in a straight line from the previous start age to the phase age', () => {
+      // 100% stocks now, 60/40 by 70: a 4% shift a year from age 60
+      const pot = makePot({
+        allocationPreset: 'equity-100',
+        expectedReturnMean: 0.07,
+        investmentPhases: [
+          phase({
+            fromAge: 70,
+            transition: 'gradual',
+            allocationPreset: 'equity-60',
+            expectedReturnMean: ALLOCATION_PRESETS['equity-60'].mean,
+          }),
+        ],
+      });
+      expect(getPotInvestmentAtAge(pot, 60, 60).weights).toEqual({
+        stocks: 1,
+        bonds: 0,
+        cash: 0,
+      });
+      const halfway = getPotInvestmentAtAge(pot, 60, 65);
+      expect(halfway.weights!.stocks).toBeCloseTo(0.8, 10);
+      expect(halfway.weights!.bonds).toBeCloseTo(0.2, 10);
+      expect(halfway.mean).toBeCloseTo(0.065, 10);
+      expect(getPotInvestmentAtAge(pot, 60, 70).weights!.stocks).toBeCloseTo(
+        0.6,
+        10,
+      );
+      expect(getPotInvestmentAtAge(pot, 60, 80).weights!.stocks).toBeCloseTo(
+        0.6,
+        10,
+      );
+    });
+
+    it('glides return and volatility, without a mix, to or from a hand-typed phase', () => {
+      const pot = makePot({
+        allocationPreset: 'equity-100',
+        expectedReturnMean: 0.07,
+        returnStdDev: 0.15,
+        investmentPhases: [
+          phase({
+            fromAge: 70,
+            transition: 'gradual',
+            allocationPreset: 'custom',
+            expectedReturnMean: 0.03,
+            returnStdDev: 0.05,
+          }),
+        ],
+      });
+      const halfway = getPotInvestmentAtAge(pot, 60, 65);
+      expect(halfway.weights).toBeNull();
+      expect(halfway.mean).toBeCloseTo(0.05, 10);
+      expect(halfway.stdDev).toBeCloseTo(0.1, 10);
+    });
+
+    it('treats phases already reached as the starting point', () => {
+      const pot = makePot({
+        allocationPreset: 'equity-100',
+        investmentPhases: [
+          phase({ fromAge: 55, allocationPreset: 'cash' }),
+          phase({ fromAge: 60, allocationPreset: 'equity-40' }),
+        ],
+      });
+      // Both phases lie at or before the current age of 60; the latest wins
+      expect(getPotInvestmentAtAge(pot, 60, 60).weights).toEqual(
+        getPotAssetWeights(makePot({ allocationPreset: 'equity-40' })),
+      );
+      expect(getPotInvestmentAtAge(pot, 60, 90).weights).toEqual(
+        getPotAssetWeights(makePot({ allocationPreset: 'equity-40' })),
+      );
+    });
+
+    it('orders phases by age however they were entered', () => {
+      const pot = makePot({
+        allocationPreset: 'equity-100',
+        investmentPhases: [
+          phase({ fromAge: 80, allocationPreset: 'cash' }),
+          phase({ fromAge: 70, allocationPreset: 'equity-40' }),
+        ],
+      });
+      expect(getPotInvestmentAtAge(pot, 60, 75).weights).toEqual(
+        getPotAssetWeights(makePot({ allocationPreset: 'equity-40' })),
+      );
+      expect(getPotInvestmentAtAge(pot, 60, 85).weights).toEqual(
+        getPotAssetWeights(makePot({ allocationPreset: 'cash' })),
+      );
+    });
+
+    it('glides fees and keeps the earlier inflation setting until the switch', () => {
+      const pot = makePot({
+        annualFeeRate: 0,
+        annualFeeFixed: 0,
+        feeAdjustsWithInflation: false,
+        investmentPhases: [
+          phase({
+            fromAge: 70,
+            transition: 'gradual',
+            annualFeeRate: 0.01,
+            annualFeeFixed: 1_000,
+            feeAdjustsWithInflation: true,
+          }),
+        ],
+      });
+      const halfway = getPotInvestmentAtAge(pot, 60, 65);
+      expect(halfway.feeRate).toBeCloseTo(0.005, 10);
+      expect(halfway.feeFixed).toBe(500);
+      expect(halfway.feeAdjusts).toBe(false);
+      expect(getPotInvestmentAtAge(pot, 60, 70).feeAdjusts).toBe(true);
+    });
+  });
+
+  describe('in the engine', () => {
+    it('applies an at-once switch from the phase year under a historical model', () => {
+      // Stocks return 10% every year, cash 0%: growth stops at the switch
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-sequence',
+            historicalReturns: flatHistory,
+            inflationMean: null,
+            currentAge: 60,
+            annualWithdrawal: 0,
+            horizonYears: 4,
+          },
+          {
+            startingBalance: 100_000,
+            allocationPreset: 'equity-100',
+            investmentPhases: [
+              phase({ fromAge: 62, allocationPreset: 'cash' }),
+            ],
+          },
+        ),
+      );
+      expect(result.percentileBands.map(band => band.p50)).toEqual([
+        100_000, 110_000, 121_000, 121_000, 121_000,
+      ]);
+    });
+
+    it('glides the blended return under a historical model', () => {
+      // Halfway to cash at 61 the pot is half stocks: 5% that year
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            returnModel: 'historical-sequence',
+            historicalReturns: flatHistory,
+            inflationMean: null,
+            currentAge: 60,
+            annualWithdrawal: 0,
+            horizonYears: 3,
+          },
+          {
+            startingBalance: 100_000,
+            allocationPreset: 'equity-100',
+            investmentPhases: [
+              phase({
+                fromAge: 62,
+                transition: 'gradual',
+                allocationPreset: 'cash',
+              }),
+            ],
+          },
+        ),
+      );
+      expect(result.percentileBands.map(band => band.p50)).toEqual([
+        100_000, 110_000, 115_500, 115_500,
+      ]);
+    });
+
+    it('switches the expected return under the random model', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            inflationMean: null,
+            currentAge: 60,
+            annualWithdrawal: 0,
+            horizonYears: 4,
+          },
+          {
+            startingBalance: 100_000,
+            expectedReturnMean: 0.05,
+            returnStdDev: 0,
+            investmentPhases: [
+              phase({
+                fromAge: 62,
+                allocationPreset: 'custom',
+                expectedReturnMean: 0.02,
+                returnStdDev: 0,
+              }),
+            ],
+          },
+        ),
+      );
+      expect(result.percentileBands.map(band => band.p50)).toEqual([
+        100_000, 105_000, 110_250, 112_455, 114_704,
+      ]);
+    });
+
+    it('charges the phase fee from its year', () => {
+      const result = runMonteCarloSimulation(
+        makeParams(
+          {
+            inflationMean: null,
+            currentAge: 60,
+            annualWithdrawal: 0,
+            horizonYears: 4,
+          },
+          {
+            startingBalance: 100_000,
+            expectedReturnMean: 0,
+            returnStdDev: 0,
+            investmentPhases: [
+              phase({
+                fromAge: 62,
+                allocationPreset: 'custom',
+                expectedReturnMean: 0,
+                returnStdDev: 0,
+                annualFeeRate: 0.1,
+              }),
+            ],
+          },
+        ),
+      );
+      expect(result.percentileBands.map(band => band.p50)).toEqual([
+        100_000, 100_000, 100_000, 90_000, 81_000,
+      ]);
+    });
   });
 });
 
