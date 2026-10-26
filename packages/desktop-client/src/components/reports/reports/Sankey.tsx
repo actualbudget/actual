@@ -727,38 +727,61 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     setTimeFrameMode(mode);
   }
 
+  // An aggregated "Other" bucket's drilldown lists every original node it
+  // absorbed (see SankeyNodeDrilldown.ids) instead of a single id.
+  function drilldownIds(drilldown: SankeyNodeDrilldown): string[] {
+    return drilldown.ids && drilldown.ids.length > 0
+      ? drilldown.ids
+      : [drilldown.id];
+  }
+
+  // Turns a single drilldown into an id filter condition, "is" for a real
+  // entity or "oneOf" for an aggregated "Other" bucket.
+  function buildSingleIdCondition(
+    drilldown: SankeyNodeDrilldown,
+  ): RuleConditionEntity {
+    const resolvedField =
+      drilldown.field === 'group' ? 'category_group' : drilldown.field;
+    const ids = drilldownIds(drilldown);
+    return ids.length > 1
+      ? ({
+          field: resolvedField,
+          op: 'oneOf',
+          value: ids,
+          type: 'id',
+        } satisfies RuleConditionEntity)
+      : ({
+          field: resolvedField,
+          op: 'is',
+          value: ids[0],
+          type: 'id',
+        } satisfies RuleConditionEntity);
+  }
+
   // Turns one or two drilldowns (a node has one; a link has one per
   // endpoint) into id filter conditions. Two drilldowns on different
   // fields (e.g. a category -> account link) go together with "and". Two
-  // on the *same* field (an account -> account transfer link) become a
-  // single "oneOf", since the transaction's account is either leg of the
-  // transfer, not both at once - plus a payee "oneOf" restricting to the
-  // two accounts' transfer payees, so the drilldown is just the transfer
-  // transactions between them rather than every transaction on either
-  // account.
+  // on the *same* "account" field (an account -> account transfer link)
+  // match only the source account's own ledger row for the transfer -
+  // a transfer is stored as one linked row per account, so showing both
+  // would just be the same transfer's two mirrored entries rather than
+  // two different transactions.
   function buildIdConditions(
     drilldowns: SankeyNodeDrilldown[],
   ): RuleConditionEntity[] {
     if (
       drilldowns.length === 2 &&
-      drilldowns[0].field === drilldowns[1].field
+      drilldowns[0].field === drilldowns[1].field &&
+      drilldowns[0].field === 'account'
     ) {
-      const { field } = drilldowns[0];
-      const idCondition = {
-        field: field === 'group' ? 'category_group' : field,
-        op: 'oneOf',
-        value: drilldowns.map(d => d.id),
-        type: 'id',
-      } satisfies RuleConditionEntity;
-
-      if (field !== 'account') {
-        return [idCondition];
-      }
-
-      const transferPayeeIds = drilldowns.flatMap(
-        d => transferPayeeIdsByAccount.get(d.id) ?? [],
+      const [source, target] = drilldowns;
+      const targetPayeeIds = drilldownIds(target).flatMap(
+        id => transferPayeeIdsByAccount.get(id) ?? [],
       );
-      if (transferPayeeIds.length === 0) {
+
+      const idCondition = buildSingleIdCondition(source);
+
+      if (targetPayeeIds.length === 0) {
         return [idCondition];
       }
 
@@ -767,55 +790,28 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         {
           field: 'payee',
           op: 'oneOf',
-          value: transferPayeeIds,
+          value: targetPayeeIds,
           type: 'id',
         } satisfies RuleConditionEntity,
       ];
     }
 
-    return drilldowns.map(
-      ({ field, id }) =>
-        ({
+    if (
+      drilldowns.length === 2 &&
+      drilldowns[0].field === drilldowns[1].field
+    ) {
+      const { field } = drilldowns[0];
+      return [
+        {
           field: field === 'group' ? 'category_group' : field,
-          op: 'is',
-          value: id,
+          op: 'oneOf',
+          value: drilldowns.flatMap(drilldownIds),
           type: 'id',
-        }) satisfies RuleConditionEntity,
-    );
-  }
-
-  // Adds the matching inflow/outflow filter when every drilldown agrees on
-  // a direction (e.g. a category node/link is always expense-side, so its
-  // filtered total will equal the amount shown on the chart). Account
-  // nodes carry no direction - they can be both at once - so a node/link
-  // touching one adds no amount filter and the accounts page shows
-  // everything for that account in the period, matching the in/out/net
-  // breakdown shown on hover instead of a single number.
-  function buildAmountCondition(
-    drilldowns: SankeyNodeDrilldown[],
-  ): RuleConditionEntity[] {
-    const directions = new Set(
-      drilldowns
-        .map(d => d.direction)
-        .filter((d): d is 'inflow' | 'outflow' => Boolean(d)),
-    );
-    if (directions.size !== 1) {
-      return [];
+        } satisfies RuleConditionEntity,
+      ];
     }
-    const [direction] = directions;
 
-    return [
-      {
-        field: 'amount',
-        op: 'gte',
-        value: 0,
-        type: 'number',
-        options: {
-          inflow: direction === 'inflow',
-          outflow: direction === 'outflow',
-        },
-      } satisfies RuleConditionEntity,
-    ];
+    return drilldowns.map(buildSingleIdCondition);
   }
 
   // Filters the accounts page down to the transactions behind a clicked
@@ -830,7 +826,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
     const drilldownConditions = [
       ...buildIdConditions(drilldowns),
-      ...buildAmountCondition(drilldowns),
       {
         field: 'date',
         op: 'gte',
@@ -842,6 +837,15 @@ function SankeyInner({ widget }: SankeyInnerProps) {
         op: 'lte',
         value: monthUtils.lastDayOfMonth(boundedEnd),
         type: 'date',
+      } satisfies RuleConditionEntity,
+      // The chart's own totals only count on-budget accounts (see
+      // fetchCategoryData/fetchTransferData), so every drilldown needs the
+      // same restriction or it'll show more than the node/link it came from.
+      {
+        field: 'account',
+        op: 'onBudget',
+        value: '',
+        type: 'id',
       } satisfies RuleConditionEntity,
     ];
 

@@ -55,6 +55,10 @@ export type SankeyNodeDrilldownField =
 export type SankeyNodeDrilldown = {
   field: SankeyNodeDrilldownField;
   id: string;
+  // Set on an aggregated "Other" bucket node, listing every original
+  // node's id it absorbed - the bucket itself isn't a real entity, so its
+  // drilldown has to match all of them instead of a single id.
+  ids?: string[];
   // Which side of the ledger this node's value is drawn from - unset for
   // Account nodes, which can be both (see SankeyNode.inflow/outflow below).
   direction?: 'inflow' | 'outflow';
@@ -127,6 +131,9 @@ export type NodeData = {
   labelKey?: string;
   labelParams?: Record<string, string>;
   isNegative?: boolean;
+  // Original node keys folded into this node by groupOtherCategories, when
+  // this is an aggregated "Other" bucket - see getNodeDrilldown.
+  otherMembers?: NodeKey[];
   tooltipInfo?: Array<{ name: string; value: number }>;
   percentageLabel?: string;
   color?: string;
@@ -564,7 +571,7 @@ async function fetchCategoryData(
                   { date: { $lte: monthUtils.lastDayOfMonth(end) } },
                 ],
               })
-              .filter({ category: category.id })
+              .filter({ category: category.id, 'account.offbudget': false })
               .groupBy(
                 categoryGroup.is_income
                   ? [
@@ -1307,6 +1314,14 @@ function moveToOther(
 
   // Make sure the Other node exists
   addNode(graph, otherKey, nodeData.type, 'Other');
+  const otherNodeData = graph.get(otherKey);
+  // Some `__NEGATIVE`-suffixed placeholder nodes (the refund-dominant
+  // expense case in createTransactionsGraph) don't set `isNegative` and so
+  // aren't excluded by isGroupableNode above - but their key isn't a real
+  // category id, so it can't go into a drilldown filter.
+  if (otherNodeData && !key.endsWith(SpecialNodeKeys.NegativeSuffix)) {
+    otherNodeData.otherMembers = [...(otherNodeData.otherMembers ?? []), key];
+  }
 
   fromNodes.forEach(([fromKey, fromData]) => {
     const linkValue = fromData.to.get(key);
@@ -1990,12 +2005,11 @@ const DRILLDOWN_BY_LAYER: Partial<
 
 function getNodeDrilldown(
   key: NodeKey,
-  type: GraphLayer,
-  isNegative?: boolean,
+  data: NodeData,
 ): SankeyNodeDrilldown | undefined {
+  const { type, isNegative, otherMembers } = data;
   if (
     NON_DRILLDOWN_NODE_KEYS.has(key) ||
-    key.endsWith(SpecialNodeKeys.OtherSuffix) ||
     key.endsWith(SpecialNodeKeys.HiddenSuffix) ||
     key.endsWith(SpecialNodeKeys.NegativeSuffix) ||
     // `isNegative` nodes are budget-mode accounting placeholders (e.g. the
@@ -2007,9 +2021,25 @@ function getNodeDrilldown(
   }
 
   const mapping = DRILLDOWN_BY_LAYER[type];
-  return mapping
-    ? { field: mapping.field, id: key, direction: mapping.direction }
-    : undefined;
+  if (!mapping) {
+    return undefined;
+  }
+
+  if (key.endsWith(SpecialNodeKeys.OtherSuffix)) {
+    // The bucket itself isn't a real entity - drill down into everything
+    // it absorbed instead.
+    if (!otherMembers || otherMembers.length === 0) {
+      return undefined;
+    }
+    return {
+      field: mapping.field,
+      id: otherMembers[0],
+      ids: otherMembers,
+      direction: mapping.direction,
+    };
+  }
+
+  return { field: mapping.field, id: key, direction: mapping.direction };
 }
 
 export function convertToSankeyData(
@@ -2018,7 +2048,7 @@ export function convertToSankeyData(
   totalsGraph: Graph = graph,
 ): SankeyData {
   const nodes = Array.from(graph, ([key, data]) => {
-    const drilldown = getNodeDrilldown(key, data.type, data.isNegative);
+    const drilldown = getNodeDrilldown(key, data);
     // Some synthetic placeholder nodes (e.g. AvailableIncome, the
     // budget-mode overspend node) are typed as Account too, but aren't
     // real accounts - getNodeDrilldown already excludes them from

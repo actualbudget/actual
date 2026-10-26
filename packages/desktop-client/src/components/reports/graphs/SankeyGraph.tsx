@@ -29,6 +29,11 @@ const fadeIn = keyframes({
 // kept invisible until the card scrolls into view
 const hiddenClass = css({ opacity: 0 });
 
+// A link's hit area is its stroke, not its fill (the path itself has
+// `fill="none"`) - below this width a small-value link becomes both
+// invisible and effectively unclickable, so floor it.
+const MIN_LINK_WIDTH = 2;
+
 // stagger the load fade-in left-to-right, keyed off horizontal position
 function fadeInClass(fraction: number) {
   const delay = Math.max(0, Math.min(1, fraction)) * 0.3;
@@ -99,7 +104,7 @@ function SankeyLink({
     return null;
   }
   const linkColor = payload.color ?? theme.reportsGray;
-  const strokeWidth = linkWidth;
+  const strokeWidth = Math.max(linkWidth, MIN_LINK_WIDTH);
   const strokeOpacity = isHovered ? 1 : 0.6;
   // use the link's midpoint so it eases in with the columns it spans
   const fraction = (sourceX + targetX) / 2 / containerWidth;
