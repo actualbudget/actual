@@ -63,10 +63,19 @@ import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
-// On narrow screens a value editor needs most of the row. When the field and
-// operator selects leave less room than this, it wraps onto its own line
-// instead of squeezing long values (e.g. payee names) next to them.
-const narrowValueEditorStyle = { minWidth: '70%' };
+// Below the small breakpoint a row cannot fit a readable value next to the
+// field and operator selects, so the value drops to its own full-width line
+// and the -/+ buttons stay on the first line, pushed to the right.
+const narrowValueStyle: CSSProperties = { order: 1, flexBasis: '100%' };
+const narrowButtonsStyle: CSSProperties = { marginLeft: 'auto' };
+
+// Width the transactions table needs on narrow screens so every flexible
+// column stays readable; the table then scrolls sideways. Mirrors the fixed
+// select, date and amount cell widths in SimpleTransactionsTable.
+function getNarrowTableMinWidth(fields: string[]) {
+  const flexCount = fields.filter(f => f !== 'date' && f !== 'amount').length;
+  return 20 + 100 + 75 + flexCount * 200;
+}
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -355,13 +364,17 @@ function ConditionEditor({
         style={{
           flex: 1,
           minWidth: 80,
-          ...(isNarrowWidth && narrowValueEditorStyle),
+          ...(isNarrowWidth && narrowValueStyle),
         }}
       >
         {valueEditor}
       </View>
 
-      <SpaceBetween direction="horizontal" gap={0}>
+      <SpaceBetween
+        direction="horizontal"
+        gap={0}
+        style={isNarrowWidth ? narrowButtonsStyle : undefined}
+      >
         <EditorButtons
           onAdd={onAdd}
           onDelete={isSchedule && field === 'date' ? null : onDelete}
@@ -545,9 +558,7 @@ function ActionEditor({
             onChange={value => onChange('field', value)}
           />
 
-          <View
-            style={{ flex: 1, ...(isNarrowWidth && narrowValueEditorStyle) }}
-          >
+          <View style={{ flex: 1, ...(isNarrowWidth && narrowValueStyle) }}>
             <View style={{ flex: 1 }}>
               {hasFormula ? (
                 <FormulaActionEditor
@@ -731,9 +742,7 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View
-            style={{ flex: 1, ...(isNarrowWidth && narrowValueEditorStyle) }}
-          >
+          <View style={{ flex: 1, ...(isNarrowWidth && narrowValueStyle) }}>
             <GenericInput
               key={inputKey}
               // @ts-expect-error fix this
@@ -754,7 +763,13 @@ function ActionEditor({
       ) : null}
 
       {op !== 'delete-transaction' && (
-        <SpaceBetween gap={0} style={{ flexShrink: 0 }}>
+        <SpaceBetween
+          gap={0}
+          style={{
+            flexShrink: 0,
+            ...(isNarrowWidth && narrowButtonsStyle),
+          }}
+        >
           <EditorButtons
             onAdd={onAdd}
             onDelete={
@@ -1084,6 +1099,10 @@ export function RuleEditor({
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
+  );
+  const transactionFields = getTransactionFields(
+    conditions,
+    getActions(actionSplits),
   );
 
   useEffect(() => {
@@ -1587,17 +1606,13 @@ export function RuleEditor({
             {/* @ts-expect-error fix this */}
             <SimpleTransactionsTable
               transactions={transactions}
-              fields={getTransactionFields(
-                conditions,
-                getActions(actionSplits),
-              )}
+              fields={transactionFields}
               style={{
                 border: '1px solid ' + theme.tableBorder,
                 borderRadius: '6px 6px 0 0',
-                // On narrow screens the fixed date and amount columns leave the
-                // payee columns only a few characters wide, so keep the table
-                // wide enough to read them and let it scroll sideways instead.
-                ...(isNarrowWidth && { minWidth: 600 }),
+                ...(isNarrowWidth && {
+                  minWidth: getNarrowTableMinWidth(transactionFields),
+                }),
               }}
             />
           </View>
