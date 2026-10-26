@@ -7,7 +7,6 @@ export default defineConfig({
     setupFiles: ['./src/mocks/setup.ts'],
     exclude: [
       'src/platform/server/sqlite/index.test.ts',
-      'src/platform/server/sqlite/engine.wasm.test.ts',
       'src/platform/server/fs/index.test.ts',
       'node_modules',
     ],

@@ -1,3 +1,7 @@
+// @ts-strict-ignore
+// We have to bundle in JS migrations manually to avoid having to `eval`
+// them which doesn't play well with CSP. There isn't great, and eventually
+// we can remove this migration.
 import m1632571489012 from '#migrations/1632571489012_remove_cache';
 import m1722717601000 from '#migrations/1722717601000_reports_move_selected_categories';
 import m1722804019000 from '#migrations/1722804019000_create_dashboard_table';
@@ -6,10 +10,6 @@ import m1765518577215 from '#migrations/1765518577215_multiple_dashboards';
 import m1788468782000 from '#migrations/1788468782000_add_messages_pending';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
-// @ts-strict-ignore
-// We have to bundle in JS migrations manually to avoid having to `eval`
-// them which doesn't play well with CSP. There isn't great, and eventually
-// we can remove this migration.
 import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 import * as prefs from '#server/prefs';

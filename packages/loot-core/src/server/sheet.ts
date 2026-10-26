@@ -1,6 +1,6 @@
+// @ts-strict-ignore
 import { captureBreadcrumb } from '#platform/exceptions';
 import { logger } from '#platform/server/log';
-// @ts-strict-ignore
 import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 import { sheetForMonth } from '#shared/months';

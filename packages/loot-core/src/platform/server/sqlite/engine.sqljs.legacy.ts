@@ -6,13 +6,14 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type { SqlParam, TransactionOptions } from './types';
+import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
 export type { SqlParam } from './types';
 
-// Legacy web engine: sql.js over absurd-sql. Kept verbatim behind the
-// facade in `index.ts` until the sqlite-wasm engine becomes the default.
+// Legacy web engine: sql.js over absurd-sql. Today's code moved behind the
+// facade in `index.ts` (which owns the transaction helpers) until the
+// sqlite-wasm engine becomes the default.
 
 // Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here
 type FSStream = (typeof FS)['FSStream'] & {
@@ -149,67 +150,6 @@ export function runQuery<T>(
 
 export function execQuery(db: Database, sql: string) {
   db.exec(sql);
-}
-
-let transactionDepth = 0;
-
-export function transaction(
-  db: Database,
-  fn: () => void,
-  { immediate = false }: TransactionOptions = {},
-) {
-  let before, after, undo;
-  if (transactionDepth > 0) {
-    before = 'SAVEPOINT __actual_sp';
-    after = 'RELEASE __actual_sp';
-    undo = 'ROLLBACK TO __actual_sp';
-  } else {
-    before = immediate ? 'BEGIN IMMEDIATE' : 'BEGIN';
-    after = 'COMMIT';
-    undo = 'ROLLBACK';
-  }
-
-  execQuery(db, before);
-  transactionDepth++;
-
-  try {
-    fn();
-    execQuery(db, after);
-  } catch (ex) {
-    execQuery(db, undo);
-
-    if (undo !== 'ROLLBACK') {
-      execQuery(db, after);
-    }
-
-    throw ex;
-  } finally {
-    transactionDepth--;
-  }
-}
-
-// See the comment about this function in index.electron.js. You
-// shouldn't normally use this. I'd like to get rid of it.
-export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
-  // Support nested transactions by "coalescing" them into the parent
-  // one if one is already started
-  if (transactionDepth === 0) {
-    db.exec('BEGIN TRANSACTION');
-  }
-  transactionDepth++;
-
-  try {
-    await fn();
-  } finally {
-    transactionDepth--;
-    // We always commit because rollback is more dangerous - any
-    // queries that ran *in-between* this async function would be
-    // lost. Right now we are only using transactions for speed
-    // purposes unfortunately
-    if (transactionDepth === 0) {
-      db.exec('COMMIT');
-    }
-  }
 }
 
 export async function openDatabase(pathOrBuffer?: string | Uint8Array) {

@@ -7,25 +7,15 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type {
-  Database,
-  SqlParam,
-  Statement,
-  TransactionOptions,
-} from './types';
+import type { SqlParam, TransactionOptions } from './types';
 import { unicodeLike } from './unicodeLike';
 
 export type {
   Database,
   SqlParam,
   Statement,
-  StorageBackend,
   TransactionOptions,
 } from './types';
-
-function asNative(db: Database): SQL.Database {
-  return db as unknown as SQL.Database;
-}
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -47,17 +37,17 @@ export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
   // no-op on native sqlite
 }
 
-export function prepare(db: Database, sql: string): Statement {
-  return asNative(db).prepare(sql) as unknown as Statement;
+export function prepare(db, sql) {
+  return db.prepare(sql);
 }
 
-export function finalizeStatement(_statement: Statement) {
+export function finalizeStatement(_statement: SQL.Statement) {
   // better-sqlite3 statements are garbage collected; nothing to free.
 }
 
 export function runQuery(
-  db: Database,
-  sql: string | Statement,
+  db: SQL.Database,
+  sql: string | SQL.Statement,
   params: SqlParam[] = [],
   fetchAll = false,
 ) {
@@ -67,10 +57,7 @@ export function runQuery(
 
   let stmt: SQL.Statement;
   try {
-    stmt =
-      typeof sql === 'string'
-        ? asNative(db).prepare(sql)
-        : (sql as unknown as SQL.Statement);
+    stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
   } catch (e) {
     logger.log('error', sql);
     throw e;
@@ -90,16 +77,16 @@ export function runQuery(
   }
 }
 
-export function execQuery(db: Database, sql: string) {
-  asNative(db).exec(sql);
+export function execQuery(db: SQL.Database, sql: string) {
+  db.exec(sql);
 }
 
 export function transaction(
-  db: Database,
+  db: SQL.Database,
   fn: () => void,
   { immediate = false }: TransactionOptions = {},
 ) {
-  const run = asNative(db).transaction(fn);
+  const run = db.transaction(fn);
   if (immediate) {
     run.immediate();
   } else {
@@ -113,11 +100,14 @@ export function transaction(
 // it. This is rarely used, and only needed for specific cases (like
 // batch importing a bunch of data). Don't use this.
 let transactionDepth = 0;
-export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
+export async function asyncTransaction(
+  db: SQL.Database,
+  fn: () => Promise<void>,
+) {
   // Support nested transactions by "coalescing" them into the parent
   // one if one is already started
   if (transactionDepth === 0) {
-    asNative(db).exec('BEGIN TRANSACTION');
+    db.exec('BEGIN TRANSACTION');
   }
   transactionDepth++;
 
@@ -130,12 +120,12 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
     // lost. Right now we are only using transactions for speed
     // purposes unfortunately
     if (transactionDepth === 0) {
-      asNative(db).exec('COMMIT');
+      db.exec('COMMIT');
     }
   }
 }
 
-export function openDatabase(pathOrBuffer: string | Buffer): Database {
+export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.
@@ -148,19 +138,19 @@ export function openDatabase(pathOrBuffer: string | Buffer): Database {
   db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
   db.function('REGEXP', { deterministic: true }, regexp);
   db.function('NORMALISE', { deterministic: true }, normalise);
-  return db as unknown as Database;
+  return db;
 }
 
-export function closeDatabase(db: Database) {
-  asNative(db).close();
+export function closeDatabase(db: SQL.Database) {
+  db.close();
 }
 
-export async function exportDatabase(db: Database) {
+export async function exportDatabase(db: SQL.Database) {
   // electron does not support better-sqlite serialize since v21
   // save to file and read in the raw data.
   const name = `${getDataDir()}/backup-for-export-${uuidv4()}.db`;
 
-  await asNative(db).backup(name);
+  await db.backup(name);
 
   const data = await readFile(name, 'binary');
   await removeFile(name);

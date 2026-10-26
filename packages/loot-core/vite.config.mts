@@ -13,27 +13,29 @@ const sqliteWasmPath = require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm');
 
 // Library builds inline every imported asset, so the sqlite wasm is
 // emitted as a sibling of the worker bundle instead. It is served from the
-// same `kcab/` directory and precached with it; the engine locates it via
-// `WASM_FILE_PATH` in src/platform/server/sqlite/wasm.ts.
+// same `kcab/` directory and precached with it; the engine fetches it from
+// `kcab/sqlite3.wasm` (see src/platform/server/sqlite/engine.wasm.ts).
 //
 // The glue also spawns a worker for its deprecated "Worker1" API, which
 // Vite bundles into a 1.3 MB `assets/sqlite3-worker1-*.js`. Nothing calls
 // that API, so drop the chunk rather than ship and precache it.
-const sqliteWasmAssets = (): Plugin => ({
-  name: 'sqlite-wasm-assets',
-  generateBundle(_options, bundle) {
-    for (const fileName of Object.keys(bundle)) {
-      if (/(^|\/)sqlite3-worker1[^/]*\.js(\.map)?$/.test(fileName)) {
-        delete bundle[fileName];
+function sqliteWasmAssets(): Plugin {
+  return {
+    name: 'sqlite-wasm-assets',
+    generateBundle(_options, bundle) {
+      for (const fileName of Object.keys(bundle)) {
+        if (/(^|\/)sqlite3-worker1[^/]*\.js(\.map)?$/.test(fileName)) {
+          delete bundle[fileName];
+        }
       }
-    }
-    this.emitFile({
-      type: 'asset',
-      fileName: 'sqlite3.wasm',
-      source: readFileSync(sqliteWasmPath),
-    });
-  },
-});
+      this.emitFile({
+        type: 'asset',
+        fileName: 'sqlite3.wasm',
+        source: readFileSync(sqliteWasmPath),
+      });
+    },
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
