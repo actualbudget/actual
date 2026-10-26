@@ -5,6 +5,8 @@ import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 
 import {
+  copyGroupPreviousMonth,
+  copyGroupUntilYearEnd,
   copyUntilYearEnd,
   coverOverbudgeted,
   getCategoryWeeklyAverage,
@@ -12,6 +14,7 @@ import {
   set3MonthAvg,
   setBudget,
   setCategoryCarryover,
+  setGroupNMonthAvg,
   setNMonthAvg,
   transferAvailable,
 } from './actions';
@@ -131,6 +134,20 @@ describe('copyUntilYearEnd', () => {
     expect(await getSheetValue('budget202412', 'budget-cat1')).toBe(5000);
     expect(await getSheetValue('budget202501', 'budget-cat1')).toBe(2000); // unchanged
   });
+
+  it('copies every category in a group to future months', async () => {
+    await setupDatabase();
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 5000 });
+    await setBudget({ category: 'cat1', month: '2024-03', amount: 2000 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyGroupUntilYearEnd({ month: '2024-01', group: 'group1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(5000);
+    expect(await getSheetValue('budget202403', 'budget-cat1')).toBe(5000);
+  });
 });
 
 describe('set budget average', () => {
@@ -193,6 +210,95 @@ describe('set budget average', () => {
     await sheet.waitOnSpreadsheet();
 
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+
+  it('sets a group 3 month average from complete months', async () => {
+    await setGroupNMonthAvg({ month: '2024-04', N: 3, group: 'group1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+});
+
+describe('copyGroupPreviousMonth', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  it('copies last month budgets for visible categories in the group only', async () => {
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategoryGroup({ id: 'group2', name: 'group2' });
+    await db.insertCategory({ id: 'cat1', name: 'cat1', cat_group: 'group1' });
+    await db.insertCategory({
+      id: 'hidden-cat',
+      name: 'hidden-cat',
+      cat_group: 'group1',
+      hidden: 1,
+    });
+    await db.insertCategory({ id: 'cat2', name: 'cat2', cat_group: 'group2' });
+    await sheet.loadSpreadsheet(db);
+    await budget.createBudget(['2024-01', '2024-02']);
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 100 });
+    await setBudget({ category: 'hidden-cat', month: '2024-01', amount: 200 });
+    await setBudget({ category: 'cat2', month: '2024-01', amount: 300 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyGroupPreviousMonth({ month: '2024-02', group: 'group1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(100);
+    expect(await getSheetValue('budget202402', 'budget-hidden-cat')).toBe(0);
+    expect(await getSheetValue('budget202402', 'budget-cat2')).toBe(0);
+  });
+
+  it('overwrites amounts already budgeted in the month', async () => {
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategory({ id: 'cat1', name: 'cat1', cat_group: 'group1' });
+    await db.insertCategory({ id: 'cat2', name: 'cat2', cat_group: 'group1' });
+    await sheet.loadSpreadsheet(db);
+    await budget.createBudget(['2024-01', '2024-02']);
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 100 });
+    await setBudget({ category: 'cat1', month: '2024-02', amount: 999 });
+    await setBudget({ category: 'cat2', month: '2024-02', amount: 500 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyGroupPreviousMonth({ month: '2024-02', group: 'group1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(100);
+    expect(await getSheetValue('budget202402', 'budget-cat2')).toBe(0);
+  });
+
+  it('does nothing for a hidden group', async () => {
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1', hidden: 1 });
+    await db.insertCategory({ id: 'cat1', name: 'cat1', cat_group: 'group1' });
+    await sheet.loadSpreadsheet(db);
+    await budget.createBudget(['2024-01', '2024-02']);
+
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 100 });
+    await setBudget({ category: 'cat1', month: '2024-02', amount: 999 });
+    await sheet.waitOnSpreadsheet();
+
+    await copyGroupPreviousMonth({ month: '2024-02', group: 'group1' });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(999);
   });
 });
 
