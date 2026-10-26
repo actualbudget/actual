@@ -13,8 +13,7 @@ import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
-import { GoalProgressRing } from './GoalProgressRing';
-import { getGoalDifference, getGoalProgress } from './util';
+import { getGoalDifference } from './util';
 
 type GoalStatusProps = {
   balance: Binding<
@@ -47,29 +46,19 @@ export function GoalStatus({
   }
 
   const have = longGoalValue === 1 ? balanceValue : budgetedValue;
-  // Compare as displayed, like the progress ring beside the balance
+  // Compare as displayed, like the balance colour
   const diff = getGoalDifference(
     have,
     goalValue,
     format.currency.decimalPlaces,
   );
-  const progress = getGoalProgress(
-    have,
-    goalValue,
-    format.currency.decimalPlaces,
-  );
+  // Round down while underfunded so the bar only reads 100% once the goal is met
+  const progress =
+    diff < 0 ? Math.floor(Math.max(0, have / goalValue) * 100) : 100;
 
   return (
     <View style={{ minWidth: 160, ...style }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 6,
-          fontWeight: 'bold',
-        }}
-      >
-        {diff < 0 && <GoalProgressRing progress={progress} size={12} />}
+      <span style={{ fontWeight: 'bold' }}>
         {diff === 0 ? (
           <span style={{ color: theme.templateNumberFunded }}>
             <Trans>Fully funded</Trans>
@@ -95,7 +84,7 @@ export function GoalStatus({
             </Trans>
           </span>
         )}
-      </View>
+      </span>
       {goalValue > 0 && (
         <ProgressBar
           value={progress}
