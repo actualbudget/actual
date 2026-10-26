@@ -1,8 +1,8 @@
 name: Publish Mac App Store
 
-# Uploads the sandboxed Electron app to App Store Connect. Every master push
-# produces a TestFlight build; a published release produces the build that
-# a human then submits for App Store review from App Store Connect.
+# Uploads the sandboxed Electron app to App Store Connect. The nightly run
+# produces a TestFlight build from master; a published release uploads the
+# release build and submits it for App Store review.
 #
 # Secrets (all in the `release` environment) and how to regenerate them:
 #
@@ -25,19 +25,9 @@ name: Publish Mac App Store
 #   with the iOS workflow.
 
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      # Packages that are not part of the desktop app bundle.
-      - 'packages/api/**'
-      - 'packages/ci-actions/**'
-      - 'packages/cli/**'
-      - 'packages/docs/**'
-      - 'packages/eslint-plugin-actual/**'
-      - 'packages/mobile-client/**'
-      - 'upcoming-release-notes/**'
-      - '**.md'
+  # Nightly TestFlight build from master.
+  schedule:
+    - cron: '0 1 * * *'
   release:
     types: [published]
   # Pick the branch or tag to build from the "Use workflow from" selector.
@@ -46,7 +36,7 @@ on:
 concurrency:
   group: publish-mac-app-store
   # Queue every run instead of replacing a pending one, so a release build is
-  # never dropped because a master push arrived right after it.
+  # never dropped because a nightly run arrived right after it.
   queue: max
   cancel-in-progress: false
 
@@ -57,7 +47,8 @@ jobs:
   publish-mac-app-store:
     runs-on: depot-macos-latest
     environment: release
-    timeout-minutes: 60
+    # Includes up to 45 minutes waiting for Apple to process a release build.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -103,11 +94,14 @@ jobs:
           API_PRIVATE_KEYS_DIR: ${{ runner.temp }}/private_keys
         run: yarn workspace desktop-electron release:mas
 
-      - name: Summarize uploaded build
+      - name: Record uploaded build
+        id: build_info
         run: |
           PLIST=packages/desktop-electron/dist/mas-arm64/Actual.app/Contents/Info.plist
           VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
           BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
             echo "## Mac App Store build uploaded to App Store Connect"
             echo
@@ -115,6 +109,19 @@ jobs:
             echo "| --- | --- |"
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Submit for App Store review
+        if: github.event_name == 'release'
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          ASC_KEY_PATH: ${{ runner.temp }}/private_keys/AuthKey_${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}.p8
+          BUNDLE_ID: com.actualbudget.actual
+          PLATFORM: MAC_OS
+          VERSION: ${{ steps.build_info.outputs.version }}
+          BUILD_NUMBER: ${{ steps.build_info.outputs.build }}
+          WHATS_NEW: ${{ github.event.release.body }}
+        run: node .github/scripts/app-store-submit.mjs
 
       - name: Clean up signing material
         if: always()

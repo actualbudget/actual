@@ -1,8 +1,8 @@
 name: Publish iOS
 
-# Uploads the Capacitor iOS app to App Store Connect. Every master push
-# produces a TestFlight build; a published release produces the build that
-# a human then submits for App Store review from App Store Connect.
+# Uploads the Capacitor iOS app to App Store Connect. The nightly run
+# produces a TestFlight build from master; a published release uploads the
+# release build and submits it for App Store review.
 #
 # Secrets (all in the `release` environment) and how to regenerate them:
 #
@@ -24,20 +24,9 @@ name: Publish iOS
 #   (downloadable only once) is the P8 secret's full contents.
 
 on:
-  push:
-    branches:
-      - master
-    paths-ignore:
-      # Packages that are not part of the mobile app bundle.
-      - 'packages/api/**'
-      - 'packages/ci-actions/**'
-      - 'packages/cli/**'
-      - 'packages/desktop-electron/**'
-      - 'packages/docs/**'
-      - 'packages/eslint-plugin-actual/**'
-      - 'packages/sync-server/**'
-      - 'upcoming-release-notes/**'
-      - '**.md'
+  # Nightly TestFlight build from master.
+  schedule:
+    - cron: '0 1 * * *'
   release:
     types: [published]
   # Pick the branch or tag to build from the "Use workflow from" selector.
@@ -46,7 +35,7 @@ on:
 concurrency:
   group: publish-ios
   # Queue every run instead of replacing a pending one, so a release build is
-  # never dropped because a master push arrived right after it.
+  # never dropped because a nightly run arrived right after it.
   queue: max
   cancel-in-progress: false
 
@@ -57,7 +46,8 @@ jobs:
   publish-ios:
     runs-on: depot-macos-latest
     environment: release
-    timeout-minutes: 60
+    # Includes up to 45 minutes waiting for Apple to process a release build.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -110,11 +100,14 @@ jobs:
           export XCODEBUILD_AUTH_ARGS="-authenticationKeyPath $RUNNER_TEMP/AuthKey.p8 -authenticationKeyID $API_KEY_ID -authenticationKeyIssuerID $API_ISSUER_ID"
           yarn workspace mobile-client release:ios
 
-      - name: Summarize uploaded build
+      - name: Record uploaded build
+        id: build_info
         run: |
           PLIST=packages/mobile-client/build/App.xcarchive/Products/Applications/App.app/Info.plist
           VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
           BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "build=$BUILD" >> "$GITHUB_OUTPUT"
           {
             echo "## iOS build uploaded to App Store Connect"
             echo
@@ -122,6 +115,19 @@ jobs:
             echo "| --- | --- |"
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Submit for App Store review
+        if: github.event_name == 'release'
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          ASC_KEY_PATH: ${{ runner.temp }}/AuthKey.p8
+          BUNDLE_ID: com.actualbudget.actual
+          PLATFORM: IOS
+          VERSION: ${{ steps.build_info.outputs.version }}
+          BUILD_NUMBER: ${{ steps.build_info.outputs.build }}
+          WHATS_NEW: ${{ github.event.release.body }}
+        run: node .github/scripts/app-store-submit.mjs
 
       - name: Clean up signing material
         if: always()
