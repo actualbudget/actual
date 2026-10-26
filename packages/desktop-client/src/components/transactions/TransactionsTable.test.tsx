@@ -596,42 +596,27 @@ describe('Transactions', () => {
     });
   });
 
-  describe('Pointing out a transaction', () => {
-    function renderFocused() {
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
       const onFocusedTransactionShown = vi.fn();
-      const result = renderTransactions({ onFocusedTransactionShown });
-      const focusedId = result.getTransactions()[2].id;
-      result.updateProps({ focusedTransactionId: focusedId });
-      return { ...result, onFocusedTransactionShown };
-    }
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
 
-    function getPulsingRows(container: HTMLElement) {
-      return [...container.querySelectorAll<HTMLElement>('[data-pulse]')];
-    }
-
-    test('pulses the focused transaction only', () => {
-      const { container } = renderFocused();
-
-      const rows = getPulsingRows(container);
-      expect(rows).toHaveLength(1);
-      expect(rows[0]).toBe(
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
         queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
       );
-    });
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
 
-    test('reports once the transaction has been pointed out for a while', () => {
-      vi.useFakeTimers();
-      try {
-        const { onFocusedTransactionShown } = renderFocused();
-
-        expect(onFocusedTransactionShown).not.toHaveBeenCalled();
-
-        vi.runOnlyPendingTimers();
-        expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
-      } finally {
-        vi.useRealTimers();
-      }
-    });
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test('transactions table shows the correct data', () => {
