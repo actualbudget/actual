@@ -11,6 +11,7 @@ import * as encoder from './encoder';
 import { isError } from './utils';
 
 import {
+  addSyncListener,
   applyMessages,
   fullSync,
   receiveMessages,
@@ -246,6 +247,22 @@ describe('receiveMessages', () => {
 
     await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
     expect(Timestamp.send().toString() > issued.toString()).toBe(true);
+  });
+
+  it('keeps the received clock when a step after the commit fails', async () => {
+    const [message] = conflictingMessages();
+    const removeListener = addSyncListener(() => {
+      throw new Error('listener failed');
+    });
+
+    try {
+      await expect(receiveMessages([message])).rejects.toThrow(
+        'listener failed',
+      );
+    } finally {
+      removeListener();
+    }
+    expect(getClock().timestamp.millis()).toBe(message.timestamp.millis());
   });
 });
 
