@@ -193,17 +193,20 @@ describe('API key lifecycle', () => {
     },
   );
 
-  it('does not accept an API key as an account or sync session', async () => {
+  it('rejects API keys on session-only account and sync routes', async () => {
     const created = await createKey();
     const token = created.body.data.key;
     expect(
-      (await request(accountApp).get('/validate').set('X-ACTUAL-TOKEN', token))
-        .status,
+      (
+        await request(accountApp)
+          .post('/server-prefs')
+          .set('X-ACTUAL-TOKEN', token)
+      ).status,
     ).toBe(401);
     expect(
       (
         await request(syncApp)
-          .get('/list-user-files')
+          .post('/upload-user-file')
           .set('X-ACTUAL-TOKEN', token)
       ).status,
     ).toBe(401);
