@@ -293,6 +293,11 @@ function handleBudgetChange(budget) {
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+  // Both budget tables share the same cells, and `loadUserBudgets` only loads
+  // the one the budget type preference selects. Ignore writes to the other.
+  const budgetTable = budgetActions.isTrackingBudget()
+    ? 'reflect_budgets'
+    : 'zero_budgets';
   sheet.startTransaction();
 
   try {
@@ -304,7 +309,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
 
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
-        } else if (table === 'zero_budgets' || table === 'reflect_budgets') {
+        } else if (table === budgetTable) {
           handleBudgetChange(newValue);
         } else if (table === 'transactions') {
           const changed = new Set(

@@ -183,17 +183,37 @@ app.method(
   mutator(undoable(cleanupGroupActions.createCleanupGroup)),
 );
 
+function openFile(): string | null {
+  const current = prefs.getPrefs();
+  return current && db.getDatabase()
+    ? `${current.id}/${current.groupId}`
+    : null;
+}
+
+let syncStartedFor: string | null = null;
+
 // With a sync server, seed only after a full sync has pulled in every other
-// device's rows. An offline sync also reports success but fetched nothing.
+// device's rows. Some syncs report success without fetching the open file's
+// rows: an offline sync, and one whose file or group changed mid-request.
 app.events.on('sync', ({ type }) => {
+  if (type === 'start') {
+    syncStartedFor = openFile();
+    return;
+  }
+
+  const file = openFile();
   if (
     type === 'success' &&
+    file != null &&
+    file === syncStartedFor &&
     checkSyncingMode('enabled') &&
-    !checkSyncingMode('offline') &&
-    prefs.getPrefs() &&
-    db.getDatabase()
+    !checkSyncingMode('offline')
   ) {
-    void runMutator(seedCarryoverChain);
+    void runMutator(async () => {
+      if (openFile() === file) {
+        await seedCarryoverChain();
+      }
+    });
   }
 });
 

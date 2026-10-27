@@ -1,7 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as db from '#server/db';
+// Registers the budget app's sync listener on the events `fullSync` emits
+import '#server/main';
+import { runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
+import { fullSync, setSyncingMode } from '#server/sync';
+import * as mockSyncServer from '#server/tests/mockSyncServer';
 import { undo, withUndo } from '#server/undo';
 import * as monthUtils from '#shared/months';
 
@@ -14,6 +20,8 @@ import {
 import { createAllBudgets } from './base';
 import { seedCarryoverChain } from './carryover-seed';
 import { cleanupTemplate } from './cleanup-template';
+
+vi.mock('#server/post');
 
 const MONTHS_2027 = [
   '2027-01',
@@ -93,6 +101,8 @@ describe('carryover', () => {
   beforeEach(global.emptyDatabase());
   afterEach(() => {
     global.currentMonth = null;
+    setSyncingMode('disabled');
+    mockSyncServer.reset();
   });
 
   it('keeps rolling over past the months that have rows', async () => {
@@ -184,36 +194,11 @@ describe('carryover', () => {
   });
 
   it('seeds an off flag after windows that ended before this month', async () => {
-    await db.insertAccount({ id: 'account', name: 'Account' });
-    await db.insertCategoryGroup({
-      id: 'income-group',
-      name: 'Income',
-      is_income: 1,
-    });
-    await db.insertCategoryGroup({ id: 'group', name: 'Group' });
-    for (const id of ['a', 'b', 'c']) {
-      await db.insertCategory({ id, name: id, cat_group: 'group' });
-    }
-    await db.insertTransaction({
-      date: '2026-01-15',
-      amount: -100000,
-      account: 'account',
-      category: 'a',
-    });
-
+    await createSeedCategories();
     // A and C carry through Mar, B through Sep. C has an Apr row with 0.
-    const windows = { a: '2026-03', b: '2026-09', c: '2026-03' };
-    for (const [category, end] of Object.entries(windows)) {
-      for (const month of monthUtils.rangeInclusive('2026-01', end)) {
-        const dbMonth = parseInt(month.replace('-', ''));
-        await db.insert('zero_budgets', {
-          id: `${dbMonth}-${category}`,
-          month: dbMonth,
-          category,
-          carryover: 1,
-        });
-      }
-    }
+    await insertCarryoverWindow('zero_budgets', 'a', '2026-03');
+    await insertCarryoverWindow('zero_budgets', 'b', '2026-09');
+    await insertCarryoverWindow('zero_budgets', 'c', '2026-03');
     await db.insert('zero_budgets', {
       id: '202604-c',
       month: 202604,
@@ -221,10 +206,8 @@ describe('carryover', () => {
       amount: 5000,
       carryover: 0,
     });
+    await loadInOctober();
 
-    global.currentMonth = '2026-10';
-    await sheet.loadSpreadsheet(db);
-    await createAllBudgets();
     await seedCarryoverChain();
     await sheet.waitOnSpreadsheet();
 
@@ -247,4 +230,100 @@ describe('carryover', () => {
     await seedCarryoverChain();
     expect(budgetRow('zero_budgets', '2026-04', 'a')).toBeNull();
   });
+
+  it('seeding the inactive budget table leaves the spreadsheet alone', async () => {
+    await createSeedCategories();
+    await db.insert('zero_budgets', {
+      id: '202604-a',
+      month: 202604,
+      category: 'a',
+      amount: 5000,
+      carryover: 1,
+    });
+    await insertCarryoverWindow('reflect_budgets', 'a', '2026-03');
+    await loadInOctober();
+
+    await seedCarryoverChain();
+    await sheet.waitOnSpreadsheet();
+
+    expect(budgetRow('reflect_budgets', '2026-04', 'a')?.carryover).toBe(0);
+    expect(await getSheetValue('budget202604', 'budget-a')).toBe(5000);
+    expect(carryover('2026-04', 'a')).toBe(true);
+  });
+
+  it('seeds after a full sync, but not one whose group changed mid-request', async () => {
+    await createSeedCategories();
+    await insertCarryoverWindow('zero_budgets', 'a', '2026-03');
+    await loadInOctober();
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+    setSyncingMode('enabled');
+
+    // A sync reset swaps the group while the request is in flight, so the
+    // response is discarded but the sync still reports success
+    const handlers: Record<string, (data: Uint8Array) => Promise<Uint8Array>> =
+      mockSyncServer.handlers;
+    const handleSync = handlers['/sync/sync'];
+    handlers['/sync/sync'] = async data => {
+      await prefs.savePrefs({ groupId: 'other-group' });
+      return handleSync(data);
+    };
+    try {
+      expect(await fullSync()).toEqual({ messages: [] });
+    } finally {
+      handlers['/sync/sync'] = handleSync;
+    }
+    await waitForQueuedSeed();
+    expect(budgetRow('zero_budgets', '2026-04', 'a')).toBeNull();
+
+    await fullSync();
+    await waitForQueuedSeed();
+    expect(budgetRow('zero_budgets', '2026-04', 'a')?.carryover).toBe(0);
+  });
 });
+
+async function createSeedCategories() {
+  await db.insertAccount({ id: 'account', name: 'Account' });
+  await db.insertCategoryGroup({
+    id: 'income-group',
+    name: 'Income',
+    is_income: 1,
+  });
+  await db.insertCategoryGroup({ id: 'group', name: 'Group' });
+  for (const id of ['a', 'b', 'c']) {
+    await db.insertCategory({ id, name: id, cat_group: 'group' });
+  }
+  await db.insertTransaction({
+    date: '2026-01-15',
+    amount: -100000,
+    account: 'account',
+    category: 'a',
+  });
+}
+
+async function insertCarryoverWindow(
+  table: 'zero_budgets' | 'reflect_budgets',
+  category: string,
+  end: string,
+) {
+  for (const month of monthUtils.rangeInclusive('2026-01', end)) {
+    const dbMonth = parseInt(month.replace('-', ''));
+    await db.insert(table, {
+      id: `${dbMonth}-${category}`,
+      month: dbMonth,
+      category,
+      carryover: 1,
+    });
+  }
+}
+
+// The sync listener queues the seed behind any running mutator
+function waitForQueuedSeed() {
+  return runMutator(() => Promise.resolve());
+}
+
+async function loadInOctober() {
+  global.currentMonth = '2026-10';
+  await sheet.loadSpreadsheet(db);
+  await createAllBudgets();
+}

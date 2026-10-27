@@ -724,7 +724,13 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   // A synced file seeds after its first full sync instead (see budget/app.ts)
   if (checkSyncingMode('disabled')) {
-    await seedCarryoverChain();
+    try {
+      await seedCarryoverChain();
+    } catch (e) {
+      // Failing to seed shouldn't block loading the budget; it's retried
+      // on the next load
+      captureException(e);
+    }
   }
 
   app.events.emit('load-budget', { id });
