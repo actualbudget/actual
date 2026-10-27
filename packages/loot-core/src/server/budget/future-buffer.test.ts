@@ -6,19 +6,29 @@ import { Timestamp } from '@actual-app/crdt';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as db from '#server/db';
+// Registers the budget app's sync listener on the events `fullSync` emits
+import '#server/main';
+import { runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
-import { applyMessages, setSyncingMode } from '#server/sync';
+import { applyMessages, fullSync, setSyncingMode } from '#server/sync';
+import * as mockSyncServer from '#server/tests/mockSyncServer';
+import { undo, withUndo } from '#server/undo';
 import * as monthUtils from '#shared/months';
 
 import {
   copyUntilYearEnd,
   getSheetValue,
+  holdForNextMonth,
+  resetHold,
   set3MonthAvg,
   setBudget,
   setBuffer,
   setCategoryCarryover,
 } from './actions';
-import { createBudget, loadFutureBufferStart } from './base';
+import { app } from './app';
+import { createAllBudgets, createBudget, loadFutureBufferStart } from './base';
+import { freezeClosedMonths } from './freeze';
 
 vi.mock('#server/post');
 
@@ -38,6 +48,18 @@ function sendTimestamp(): Timestamp {
     throw new Error('Timestamp.send() returned null');
   }
   return timestamp;
+}
+
+function monthRow(month: string) {
+  return db.firstSync<db.DbZeroBudgetMonth>(
+    'SELECT * FROM zero_budget_months WHERE id = ?',
+    [month],
+  );
+}
+
+// Queued freezes run behind any running mutator
+function waitForQueuedFreeze() {
+  return runMutator(() => Promise.resolve());
 }
 
 async function setMode(value: string | null) {
@@ -89,11 +111,20 @@ async function setup() {
   await setMode('2026-10');
 }
 
+// The clock moves to 1 Nov and the budget loads
+async function closeOctober() {
+  global.currentMonth = '2026-11';
+  await createAllBudgets();
+  await runMutator(freezeClosedMonths);
+  await sheet.waitOnSpreadsheet();
+}
+
 describe('future buffer', () => {
   beforeEach(global.emptyDatabase());
   afterEach(() => {
     global.currentMonth = null;
     setSyncingMode('disabled');
+    mockSyncServer.reset();
     vi.unstubAllEnvs();
   });
 
@@ -342,5 +373,158 @@ describe('future buffer', () => {
       sheet.unloadSpreadsheet();
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+
+  it('freezes a month when it closes, and later months no longer move it', async () => {
+    await setup();
+    await closeOctober();
+
+    expect(monthRow('2026-10')).toEqual({
+      id: '2026-10',
+      buffered: 200000,
+      frozen: 1,
+    });
+    expect(await toBudget('2026-10')).toBe(20000);
+    expect(await buffer('2026-10')).toBe(200000);
+
+    await setBudget({ category: 'bills', month: '2026-11', amount: 250000 });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-11')).toBe(-80000);
+
+    await db.insertTransaction({
+      date: '2026-11-15',
+      amount: 520000,
+      account: 'account',
+      category: 'income',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-11')).toBe(440000);
+
+    // Groceries carries 400 from Oct, so this overspends Nov by 300
+    await db.insertTransaction({
+      date: '2026-11-20',
+      amount: -70000,
+      account: 'account',
+      category: 'groceries',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(await buffer('2026-11')).toBe(80000);
+    expect(await toBudget('2026-11')).toBe(410000);
+
+    expect(await toBudget('2026-10')).toBe(20000);
+    expect(await buffer('2026-10')).toBe(200000);
+  });
+
+  it('keeps manual controls and late edits on a frozen month', async () => {
+    await setup();
+    await closeOctober();
+    const novToBudget = await toBudget('2026-11');
+
+    await resetHold({ month: '2026-10' });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-10')).toBe(220000);
+    expect(await buffer('2026-10')).toBe(0);
+    expect(monthRow('2026-10')?.frozen).toBe(1);
+    expect(await toBudget('2026-11')).toBe(novToBudget);
+
+    await holdForNextMonth({ month: '2026-10', amount: 50000 });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-10')).toBe(170000);
+    expect(await buffer('2026-10')).toBe(50000);
+
+    // Income added to a frozen month goes to its To Budget, not its buffer
+    await db.insertTransaction({
+      date: '2026-10-25',
+      amount: 10000,
+      account: 'account',
+      category: 'income',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-10')).toBe(180000);
+    expect(await buffer('2026-10')).toBe(50000);
+    expect(await getSheetValue('budget202611', 'from-last-month')).toBe(230000);
+  });
+
+  it('freezes each month once, whichever device does it', async () => {
+    await setup();
+    // Messages are only recorded while syncing
+    setSyncingMode('enabled');
+    await closeOctober();
+
+    const messages = await db.all('SELECT * FROM messages_crdt');
+    await runMutator(freezeClosedMonths);
+    expect(await db.all('SELECT * FROM messages_crdt')).toEqual(messages);
+
+    // Another device froze Oct from the same rows at the same time
+    await applyMessages([
+      {
+        dataset: 'zero_budget_months',
+        row: '2026-10',
+        column: 'frozen',
+        value: 1,
+        timestamp: sendTimestamp(),
+      },
+      {
+        dataset: 'zero_budget_months',
+        row: '2026-10',
+        column: 'buffered',
+        value: 200000,
+        timestamp: sendTimestamp(),
+      },
+    ]);
+    await sheet.waitOnSpreadsheet();
+    expect(monthRow('2026-10')).toEqual({
+      id: '2026-10',
+      buffered: 200000,
+      frozen: 1,
+    });
+    expect(await getSheetValue('budget202611', 'from-last-month')).toBe(220000);
+  });
+
+  it("doesn't undo a freeze", async () => {
+    await setup();
+    global.currentMonth = '2026-11';
+    await createAllBudgets();
+
+    await withUndo(() =>
+      setBudget({ category: 'bills', month: '2026-11', amount: 160000 }),
+    );
+    await runMutator(freezeClosedMonths);
+    await undo();
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202611', 'budget-bills')).toBe(150000);
+    expect(monthRow('2026-10')).toEqual({
+      id: '2026-10',
+      buffered: 210000,
+      frozen: 1,
+    });
+  });
+
+  it('freezes from budget bounds, but with a server only after a full sync', async () => {
+    await setup();
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+    global.currentMonth = '2026-11';
+
+    setSyncingMode('enabled');
+    await app.handlers['get-budget-bounds']();
+    await waitForQueuedFreeze();
+    expect(monthRow('2026-10')).toBeNull();
+
+    await fullSync();
+    await waitForQueuedFreeze();
+    expect(monthRow('2026-10')?.frozen).toBe(1);
+
+    // Without a server, the next bounds request after the month ends freezes it
+    setSyncingMode('disabled');
+    global.currentMonth = '2026-12';
+    await app.handlers['get-budget-bounds']();
+    await waitForQueuedFreeze();
+    expect(monthRow('2026-11')).toEqual({
+      id: '2026-11',
+      buffered: 50000,
+      frozen: 1,
+    });
   });
 });
