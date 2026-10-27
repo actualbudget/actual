@@ -37,7 +37,10 @@ export function FutureBufferModeModal() {
   const hasManualHold =
     (useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0) !== 0;
 
-  const [selectedMode, setSelectedMode] = useState<FutureBufferMode>(mode);
+  // The sheet answers after the first render, so the current mode can't seed
+  // the state: until the user picks one, the selection follows the sheet.
+  const [choice, setChoice] = useState<FutureBufferMode | null>(null);
+  const selectedMode = choice ?? mode;
   const [isSaving, setIsSaving] = useState(false);
 
   const onSave = async (close: () => void) => {
@@ -64,7 +67,7 @@ export function FutureBufferModeModal() {
             <ModeChoice
               isSelected={selectedMode === 'manual'}
               label={t('Manual')}
-              onPress={() => setSelectedMode('manual')}
+              onPress={() => setChoice('manual')}
             >
               <Trans>
                 You hold money for next month yourself, from the To Budget menu.
@@ -73,7 +76,7 @@ export function FutureBufferModeModal() {
             <ModeChoice
               isSelected={selectedMode === 'automatic'}
               label={t('Automatic')}
-              onPress={() => setSelectedMode('automatic')}
+              onPress={() => setChoice('automatic')}
             >
               {mode === 'automatic' ? (
                 <Trans>Held for what your future months need.</Trans>
