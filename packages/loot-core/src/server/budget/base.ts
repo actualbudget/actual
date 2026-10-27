@@ -593,7 +593,13 @@ export async function createAllBudgets() {
 
   // Get the range based off of the earliest transaction (or persistent
   // rollover) and the current month. If no transactions currently exist the
-  // current month is also used as the starting month
+  // current month is also used as the starting month. It also reaches back to
+  // automatic "For next month"'s start month, so every month it freezes
+  // has a sheet.
+  const futureBufferStart = await getFutureBufferStart();
+  if (futureBufferStart && futureBufferStart < startMonth) {
+    startMonth = futureBufferStart;
+  }
   const { start, end, range } = getBudgetRange(
     startMonth,
     currentMonth,
