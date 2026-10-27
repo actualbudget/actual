@@ -207,9 +207,16 @@ export function createSummary(groups, categories, month) {
     },
   });
 
-  // Automatic mode manages the months from the start month on, until they're
-  // frozen. A frozen month keeps its stored buffer and ignores income
-  // auto-hold.
+  // Automatic mode manages the months from its start month on, until
+  // they're frozen. The UI and the server guards read this cell too.
+  sheet.get().createDynamic(sheetName, 'buffered-managed', {
+    initialValue: false,
+    dependencies: [`${sheetName}!frozen`, '__global!future-buffer-start'],
+    run: (frozen, startMonth) =>
+      !frozen && Boolean(startMonth) && month >= startMonth,
+  });
+
+  // A frozen month keeps its stored buffer and ignores income auto-hold
   sheet.get().createDynamic(sheetName, 'buffered-selected', {
     initialValue: 0,
     dependencies: [
@@ -217,14 +224,14 @@ export function createSummary(groups, categories, month) {
       `${sheetName}!buffered-auto`,
       `${sheetName}!frozen`,
       `${sheetName}!buffered-computed`,
-      '__global!future-buffer-start',
+      `${sheetName}!buffered-managed`,
     ],
-    run: (man, auto, frozen, computed, startMonth) => {
+    run: (man, auto, frozen, computed, managed) => {
+      if (managed) {
+        return computed;
+      }
       if (frozen) {
         return number(man);
-      }
-      if (startMonth && month >= startMonth) {
-        return computed;
       }
       if (man !== 0) {
         return man;

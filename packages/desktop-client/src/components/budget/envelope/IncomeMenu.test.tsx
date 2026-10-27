@@ -10,7 +10,7 @@ vi.mock(
   () => import('#mocks/connection'),
 );
 
-let sheetValues: Record<string, number | string | null> = {};
+let sheetValues: Record<string, number | boolean | null> = {};
 
 vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: (binding: string | { name: string }) => {
@@ -19,18 +19,18 @@ vi.mock('#hooks/useSheetValue', () => ({
   },
 }));
 
-function renderMenu(month: string, { frozen = 0 } = {}) {
+function renderMenu({ managed = false, frozen = false } = {}) {
   sheetValues = {
-    '__global!future-buffer-start': '2026-10',
+    'buffered-managed': managed,
     frozen,
     'carryover-salary': 0,
   };
   render(
     <TestProviders>
-      <SheetNameProvider name={`budget${month.replace('-', '')}`}>
+      <SheetNameProvider name="budget202611">
         <IncomeMenu
           categoryId="salary"
-          month={month}
+          month="2026-11"
           onBudgetAction={vi.fn()}
           onShowActivity={vi.fn()}
           onClose={vi.fn()}
@@ -42,11 +42,11 @@ function renderMenu(month: string, { frozen = 0 } = {}) {
 
 describe('IncomeMenu in automatic mode', () => {
   it.each([
-    ['managed', '2026-11', 0, false],
-    ['frozen', '2026-10', 1, false],
-    ['before the start', '2026-09', 0, true],
-  ])('auto hold toggle in a %s month', (_, month, frozen, shown) => {
-    renderMenu(month, { frozen });
+    ['managed', { managed: true }, false],
+    ['frozen', { frozen: true }, false],
+    ['before the start', {}, true],
+  ])('auto hold toggle in a %s month', (_, state, shown) => {
+    renderMenu(state);
 
     expect(screen.queryByText('Enable auto hold') !== null).toBe(shown);
   });

@@ -10,14 +10,13 @@ import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
-type EnvelopeIncomeBalanceMenuModalProps = Extract<
-  ModalType,
-  { name: 'envelope-income-balance-menu' }
->['options'];
+type EnvelopeIncomeBalanceMenuModalProps = Omit<
+  Extract<ModalType, { name: 'envelope-income-balance-menu' }>['options'],
+  'month'
+>;
 
 export function EnvelopeIncomeBalanceMenuModal({
   categoryId,
-  month,
   onCarryover,
   onShowActivity,
 }: EnvelopeIncomeBalanceMenuModalProps) {
@@ -27,7 +26,7 @@ export function EnvelopeIncomeBalanceMenuModal({
     envelopeBudget.catCarryover(categoryId),
   );
   // Managed and frozen months ignore the income auto-hold
-  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode(month);
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode();
   const canToggleAutoHold = !isManagedMonth && !isFrozenMonth;
 
   if (!category) {

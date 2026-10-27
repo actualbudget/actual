@@ -588,7 +588,7 @@ export function IncomeCategoryMonth({
   const incomeMenuTriggerRef = useRef(null);
   const [incomeMenuOpen, setIncomeMenuOpen] = useState(false);
   // Managed and frozen months ignore the income auto-hold
-  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode(month);
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode();
   const [incomePosition, setIncomePosition] = useState({
     crossOffset: 0,
     offset: 0,

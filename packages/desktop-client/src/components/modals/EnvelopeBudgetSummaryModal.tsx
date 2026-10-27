@@ -137,12 +137,10 @@ export function EnvelopeBudgetSummaryModal({
             }}
           >
             <TotalsList
-              month={month}
               prevMonthName={prevMonthName}
               style={styles.mediumText}
             />
             <ToBudgetAmount
-              month={month}
               prevMonthName={prevMonthName}
               style={{ ...styles.mediumText, marginTop: spacing.lg }}
               isTotalsListTooltipDisabled

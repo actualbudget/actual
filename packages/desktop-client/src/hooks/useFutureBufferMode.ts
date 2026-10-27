@@ -1,25 +1,10 @@
 import { send } from '@actual-app/core/platform/client/connection';
-import * as monthUtils from '@actual-app/core/shared/months';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 export type FutureBufferMode = 'manual' | 'automatic';
-
-// Automatic mode sets the buffer of a managed month: one from the start month
-// on that isn't frozen. Same rule as the server guard and `buffered-selected`.
-export function isManagedMonth(
-  startMonth: string | null | undefined,
-  month: string | null | undefined,
-  frozen: number | null | undefined,
-): boolean {
-  if (!startMonth || !month || month < startMonth) {
-    return false;
-  }
-  return frozen !== 1;
-}
 
 type UseFutureBufferModeResult = {
   mode: FutureBufferMode;
@@ -34,28 +19,28 @@ type UseFutureBufferModeResult = {
   setFutureBufferMode: (mode: FutureBufferMode) => Promise<unknown>;
 };
 
-// Reads the mode from the sheet rather than the synced prefs: a preference
-// written on another device doesn't reach redux, but the cells do.
-export function useFutureBufferMode(month?: string): UseFutureBufferModeResult {
+// Reads the mode and the current sheet's month state from the spreadsheet
+// rather than the synced prefs: a preference written on another device
+// doesn't reach redux, but the cells do.
+export function useFutureBufferMode(): UseFutureBufferModeResult {
   const isFlagEnabled = useFeatureFlag('futureBufferMode');
-  const { sheetName } = useSheetName<'envelope-budget', 'frozen'>(
-    envelopeBudget.frozen,
-  );
-  const startMonth =
-    useSheetValue<'envelope-budget', '__global!future-buffer-start'>(
-      envelopeBudget.futureBufferStart,
-    ) || '';
-  const frozen = useSheetValue<'envelope-budget', 'frozen'>(
-    envelopeBudget.frozen,
-  );
+  const startMonth = useSheetValue<
+    'envelope-budget',
+    '__global!future-buffer-start'
+  >(envelopeBudget.futureBufferStart);
+  const isManagedMonth =
+    useSheetValue<'envelope-budget', 'buffered-managed'>(
+      envelopeBudget.managed,
+    ) === true;
+  const isFrozenMonth =
+    useSheetValue<'envelope-budget', 'frozen'>(envelopeBudget.frozen) === true;
 
   const mode: FutureBufferMode = startMonth ? 'automatic' : 'manual';
-  const contextMonth = month ?? monthUtils.monthFromSheet(sheetName);
 
   return {
     mode,
-    isManagedMonth: isManagedMonth(startMonth, contextMonth, frozen),
-    isFrozenMonth: frozen === 1,
+    isManagedMonth,
+    isFrozenMonth,
     canChangeMode: mode === 'automatic' || isFlagEnabled,
     setFutureBufferMode: mode =>
       send('budget/set-future-buffer-mode', { mode }),
