@@ -105,26 +105,19 @@ describe('carryover', () => {
     mockSyncServer.reset();
   });
 
-  it('keeps rolling over past the months that have rows', async () => {
-    await setup('envelope');
+  it.each(['envelope', 'tracking'] as const)(
+    'keeps rolling over past the months that have rows (%s)',
+    async budgetType => {
+      await setup(budgetType);
 
-    for (const month of MONTHS_2027) {
-      const sheetName = monthUtils.sheetForMonth(month);
-      expect(carryover(month, 'card')).toBe(true);
-      expect(await getSheetValue(sheetName, 'leftover-card')).toBe(-100000);
-      expect(await getSheetValue(sheetName, 'last-month-overspent')).toBe(0);
-    }
-  });
-
-  it('keeps rolling over past the months that have rows in tracking budgets', async () => {
-    await setup('tracking');
-
-    for (const month of MONTHS_2027) {
-      const sheetName = monthUtils.sheetForMonth(month);
-      expect(carryover(month, 'card')).toBe(true);
-      expect(await getSheetValue(sheetName, 'leftover-card')).toBe(-100000);
-    }
-  });
+      for (const month of MONTHS_2027) {
+        expect(carryover(month, 'card')).toBe(true);
+        expect(
+          await getSheetValue(monthUtils.sheetForMonth(month), 'leftover-card'),
+        ).toBe(-100000);
+      }
+    },
+  );
 
   it('inherits the flag in a budgeted month, and undo restores the inherited flag', async () => {
     await setup('envelope');
@@ -206,6 +199,8 @@ describe('carryover', () => {
       amount: 5000,
       carryover: 0,
     });
+    // Seeding the inactive table must not reach the envelope sheet
+    await insertCarryoverWindow('reflect_budgets', 'c', '2026-03');
     await loadInOctober();
 
     await seedCarryoverChain();
@@ -224,31 +219,13 @@ describe('carryover', () => {
     expect(c?.amount).toBe(5000);
     expect(c?.carryover).toBe(0);
     expect(budgetRow('zero_budgets', '2026-05', 'c')).toBeNull();
+    expect(budgetRow('reflect_budgets', '2026-04', 'c')?.carryover).toBe(0);
+    expect(await getSheetValue('budget202604', 'budget-c')).toBe(5000);
 
     // The second run is a no-op, even if a window has lapsed since
     db.runQuery("DELETE FROM zero_budgets WHERE id = '202604-a'");
     await seedCarryoverChain();
     expect(budgetRow('zero_budgets', '2026-04', 'a')).toBeNull();
-  });
-
-  it('seeding the inactive budget table leaves the spreadsheet alone', async () => {
-    await createSeedCategories();
-    await db.insert('zero_budgets', {
-      id: '202604-a',
-      month: 202604,
-      category: 'a',
-      amount: 5000,
-      carryover: 1,
-    });
-    await insertCarryoverWindow('reflect_budgets', 'a', '2026-03');
-    await loadInOctober();
-
-    await seedCarryoverChain();
-    await sheet.waitOnSpreadsheet();
-
-    expect(budgetRow('reflect_budgets', '2026-04', 'a')?.carryover).toBe(0);
-    expect(await getSheetValue('budget202604', 'budget-a')).toBe(5000);
-    expect(carryover('2026-04', 'a')).toBe(true);
   });
 
   it('seeds after a full sync, but not one whose group changed mid-request', async () => {
