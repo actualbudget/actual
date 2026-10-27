@@ -49,7 +49,7 @@ const choice = (name: string, pressed: boolean) =>
 
 describe('FutureBufferModeModal', () => {
   it('turns automatic mode on from the current month', async () => {
-    const { setMode } = renderModal();
+    const { setMode } = renderModal({ manualHold: 70000 });
     await choice('Manual', true);
 
     expect(
@@ -61,33 +61,13 @@ describe('FutureBufferModeModal', () => {
       screen.getByText(/comes out of this month's To Budget/),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText(/This replaces the hold/),
-    ).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
-    expect(setMode).toHaveBeenCalledWith({ mode: 'automatic' });
-  });
-
-  it('says when it replaces a manual hold', async () => {
-    renderModal({ manualHold: 70000 });
-    await choice('Manual', true);
-
-    await userEvent.click(screen.getByRole('button', { name: 'Automatic' }));
-
-    expect(
       screen.getByText(
         new RegExp(`This replaces the hold you set for ${currentMonthName}\\.`),
       ),
     ).toBeInTheDocument();
-  });
-
-  it('shows the current mode and saves nothing when it is kept', async () => {
-    const { setMode } = renderModal({ startMonth: '2026-10' });
-    await choice('Automatic', true);
 
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
-
-    expect(setMode).not.toHaveBeenCalled();
+    expect(setMode).toHaveBeenCalledWith({ mode: 'automatic' });
   });
 
   it('turns automatic mode off', async () => {

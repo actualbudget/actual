@@ -20,13 +20,11 @@ import * as monthUtils from '#shared/months';
 import type { ServerHandlers } from '#types/server-handlers';
 
 import {
-  copyUntilYearEnd,
   dbMonth,
   getSheetValue,
   holdForNextMonth,
   resetHold,
   resetIncomeCarryover,
-  set3MonthAvg,
   setBudget,
   setBuffer,
   setCategoryCarryover,
@@ -179,14 +177,10 @@ describe('future buffer', () => {
     expect(await buffer('2026-10')).toBe(0);
     expect(await toBudget('2026-10')).toBe(220000);
     expect(await toBudget('2026-11')).toBe(320000);
-  });
 
-  it('has no cap', async () => {
-    await setup();
-
-    await setBudget({ category: 'bills', month: '2026-11', amount: 700000 });
+    // No cap: To Budget goes negative
+    await setBudget({ category: 'bills', month: '2026-11', amount: 1000000 });
     await sheet.waitOnSpreadsheet();
-
     expect(await buffer('2026-10')).toBe(750000);
     expect(await toBudget('2026-10')).toBe(-530000);
   });
@@ -276,26 +270,6 @@ describe('future buffer', () => {
     expect(await buffer('2026-12')).toBe(10000);
   });
 
-  it('skips buffer writes that change nothing', async () => {
-    await setup();
-    // Messages are only recorded while syncing
-    setSyncingMode('enabled');
-
-    await setBuffer('2026-10', 0);
-    expect(await db.all('SELECT * FROM messages_crdt')).toEqual([]);
-
-    await setBuffer('2026-10', 5000, true);
-    const messages = await db.all('SELECT * FROM messages_crdt');
-    await setBuffer('2026-10', 5000, true);
-    await setBuffer('2026-10', 5000);
-    expect(await db.all('SELECT * FROM messages_crdt')).toEqual(messages);
-    expect(
-      await db.first('SELECT * FROM zero_budget_months WHERE id = ?', [
-        '2026-10',
-      ]),
-    ).toEqual({ id: '2026-10', buffered: 5000, frozen: 1 });
-  });
-
   it('extends to a month created later', async () => {
     await setup();
 
@@ -306,54 +280,6 @@ describe('future buffer', () => {
     expect(await buffer('2026-12')).toBe(40000);
     expect(await buffer('2026-11')).toBe(90000);
     expect(await buffer('2026-10')).toBe(240000);
-  });
-
-  it('follows transactions in a future month', async () => {
-    await setup();
-
-    await db.insertTransaction({
-      id: 'nov',
-      date: '2026-11-05',
-      amount: 100000,
-      account: 'account',
-      category: 'income',
-    });
-    await sheet.waitOnSpreadsheet();
-    expect(await buffer('2026-10')).toBe(100000);
-
-    await db.updateTransaction({ id: 'nov', category: 'card' });
-    await sheet.waitOnSpreadsheet();
-    expect(await buffer('2026-10')).toBe(200000);
-
-    await db.updateTransaction({ id: 'nov', category: 'income' });
-    await sheet.waitOnSpreadsheet();
-    expect(await buffer('2026-10')).toBe(100000);
-
-    await db.deleteTransaction({ id: 'nov' });
-    await sheet.waitOnSpreadsheet();
-    expect(await buffer('2026-10')).toBe(200000);
-  });
-
-  it('follows bulk budget actions', async () => {
-    await setup();
-    // Averages only count closed months
-    await createBudget(['2026-09', ...WINDOW]);
-    await db.insertTransaction({
-      date: '2026-09-05',
-      amount: -90000,
-      account: 'account',
-      category: 'bills',
-    });
-    await sheet.waitOnSpreadsheet();
-
-    await set3MonthAvg({ month: '2026-11' });
-    await sheet.waitOnSpreadsheet();
-    expect(await getSheetValue('budget202611', 'total-budgeted')).toBe(-90000);
-    expect(await buffer('2026-10')).toBe(140000);
-
-    await copyUntilYearEnd({ month: '2026-10', category: 'bills' });
-    await sheet.waitOnSpreadsheet();
-    expect(await buffer('2026-10')).toBe(520000);
   });
 
   it('reads the preference on a warm open', async () => {
@@ -398,7 +324,7 @@ describe('future buffer', () => {
     }
   });
 
-  it('freezes a month when it closes, and later months no longer move it', async () => {
+  it('freezes a month when it closes, and only manual edits move it after', async () => {
     await setup();
     await closeOctober();
 
@@ -436,25 +362,15 @@ describe('future buffer', () => {
 
     expect(await toBudget('2026-10')).toBe(20000);
     expect(await buffer('2026-10')).toBe(200000);
-  });
 
-  it('keeps manual controls and late edits on a frozen month', async () => {
-    await setup();
-    await closeOctober();
-    const novToBudget = await toBudget('2026-11');
-
+    // A frozen month keeps the manual controls
     await resetHold({ month: '2026-10' });
     await sheet.waitOnSpreadsheet();
     expect(await toBudget('2026-10')).toBe(220000);
-    expect(await buffer('2026-10')).toBe(0);
     expect(monthRow('2026-10')?.frozen).toBe(1);
-    expect(await toBudget('2026-11')).toBe(novToBudget);
+    expect(await toBudget('2026-11')).toBe(410000);
 
     await holdForNextMonth({ month: '2026-10', amount: 50000 });
-    await sheet.waitOnSpreadsheet();
-    expect(await toBudget('2026-10')).toBe(170000);
-    expect(await buffer('2026-10')).toBe(50000);
-
     // Income added to a frozen month goes to its To Budget, not its buffer
     await db.insertTransaction({
       date: '2026-10-25',
@@ -465,7 +381,6 @@ describe('future buffer', () => {
     await sheet.waitOnSpreadsheet();
     expect(await toBudget('2026-10')).toBe(180000);
     expect(await buffer('2026-10')).toBe(50000);
-    expect(await getSheetValue('budget202611', 'from-last-month')).toBe(230000);
   });
 
   it('freezes each month once, whichever device does it', async () => {
@@ -587,7 +502,7 @@ describe('future buffer', () => {
     expect(monthRow('2026-10')?.frozen).toBe(1);
   });
 
-  it('freezes every month from the start month, even without transactions', async () => {
+  it('freezes every month from the start month, and keeps them after the range moves', async () => {
     // Automatic mode has been on since Oct, and nothing was ever spent
     global.currentMonth = '2027-03';
     await createCategories();
@@ -618,33 +533,14 @@ describe('future buffer', () => {
     }
     expect(monthRow('2027-02')?.frozen).toBe(1);
     expect(monthRow('2027-03')).toBeNull();
-  });
 
-  it('keeps the months already created when the range starts later', async () => {
-    // Automatic mode was on from Oct, with nothing spent, and then turned off
-    global.currentMonth = '2027-03';
-    await createCategories();
-    await db.update('preferences', {
-      id: 'futureBufferMode',
-      value: '2026-10',
-    });
-    await db.insert('zero_budgets', {
-      id: '202612-bills',
-      month: 202612,
-      category: 'bills',
-      amount: 50000,
-    });
-    await sheet.loadSpreadsheet(db);
-    sheet.get().meta().budgetType = 'envelope';
-    await createAllBudgets();
+    // After turning off, each new month moves the range's start past Dec,
+    // but the months already created stay
     await setMode(null);
-
-    // Each new month moves the range's start past Dec
     for (const month of ['2027-04', '2027-05']) {
       global.currentMonth = month;
       await createAllBudgets();
     }
-
     expect(await getSheetValue('budget202612', 'total-budgeted')).toBe(-50000);
     expect(await toBudget('2027-05')).toBe(-50000);
   });

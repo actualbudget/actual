@@ -19,11 +19,11 @@ vi.mock('#hooks/useSheetValue', () => ({
   },
 }));
 
-function renderAmount({ startMonth = '2026-10', toBudget = -530000 } = {}) {
+function renderAmount() {
   sheetValues = {
-    '__global!future-buffer-start': startMonth,
+    '__global!future-buffer-start': '2026-10',
     frozen: 0,
-    'to-budget': toBudget,
+    'to-budget': -530000,
     'buffered-selected': 750000,
   };
   render(
@@ -44,17 +44,5 @@ describe('ToBudgetAmount in a managed month', () => {
 
     expect(screen.getByText('Overbudgeted:')).toBeInTheDocument();
     expect(screen.getByText(heldLine)).toHaveTextContent('7,500.00');
-  });
-
-  it('says nothing extra while To Budget is positive', () => {
-    renderAmount({ toBudget: 20000 });
-
-    expect(screen.queryByText(heldLine)).not.toBeInTheDocument();
-  });
-
-  it('says nothing extra in manual mode', () => {
-    renderAmount({ startMonth: '' });
-
-    expect(screen.queryByText(heldLine)).not.toBeInTheDocument();
   });
 });

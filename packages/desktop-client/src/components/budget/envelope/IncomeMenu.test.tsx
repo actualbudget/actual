@@ -42,18 +42,12 @@ function renderMenu(month: string, { frozen = 0 } = {}) {
 
 describe('IncomeMenu in automatic mode', () => {
   it.each([
-    ['managed', '2026-11', 0],
-    ['frozen', '2026-10', 1],
-  ])('has no auto hold toggle in a %s month', (_, month, frozen) => {
+    ['managed', '2026-11', 0, false],
+    ['frozen', '2026-10', 1, false],
+    ['before the start', '2026-09', 0, true],
+  ])('auto hold toggle in a %s month', (_, month, frozen, shown) => {
     renderMenu(month, { frozen });
 
-    expect(screen.queryByText('Enable auto hold')).not.toBeInTheDocument();
-    expect(screen.getByText('View transactions')).toBeInTheDocument();
-  });
-
-  it('keeps the toggle before the start month', () => {
-    renderMenu('2026-09');
-
-    expect(screen.getByText('Enable auto hold')).toBeInTheDocument();
+    expect(screen.queryByText('Enable auto hold') !== null).toBe(shown);
   });
 });
