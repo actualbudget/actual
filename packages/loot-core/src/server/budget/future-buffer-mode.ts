@@ -41,7 +41,9 @@ export async function setFutureBufferMode({
 
 // Turns automatic mode off without moving any month's To Budget: closed
 // months are frozen, and every other managed month keeps its computed buffer
-// as a manual hold. Returns false if the mode was already off.
+// as a manual hold. Returns false if the mode was already off, and throws if
+// the file was closed or reopened before the buffers could be read, so a
+// switch to Tracking doesn't go ahead with the mode still on.
 export async function turnOffFutureBuffer(): Promise<boolean> {
   const spreadsheet = sheet.get();
   const startMonth = await getFutureBufferStart();
@@ -56,7 +58,7 @@ export async function turnOffFutureBuffer(): Promise<boolean> {
       ? await readUnfrozenBuffers(spreadsheet, startMonth)
       : [];
   if (buffers == null) {
-    return false;
+    throw new Error('Budget changed while turning off automatic mode');
   }
 
   // Income auto-hold flags are ignored in managed months but would apply
