@@ -109,6 +109,19 @@ function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
   return rows.length === 0;
 }
 
+function hasCarryoverWithoutStored(rows: Array<{ key: string }>): boolean {
+  let hasCarryover = false;
+  for (const { key } of rows) {
+    if (key.includes('!carryover-stored-')) {
+      return false;
+    }
+    if (key.includes('!carryover-')) {
+      hasCarryover = true;
+    }
+  }
+  return hasCarryover;
+}
+
 export async function loadSpreadsheet(
   db,
   onSheetChange?,
@@ -162,13 +175,26 @@ export async function loadSpreadsheet(
     sheet.addEventListener('change', onSheetChange);
   }
 
+  let cachedRows: Array<{ key: string; value: string }> = null;
   if (cacheEnabled && !isCacheDirty(mainDb, cacheDb)) {
-    const cachedRows = sqlite.runQuery<{ key?: number; value: string }>(
+    cachedRows = sqlite.runQuery<{ key: string; value: string }>(
       cacheDb,
       'SELECT * FROM kvcache',
       [],
       true,
     );
+
+    if (hasCarryoverWithoutStored(cachedRows)) {
+      // The cache predates `carryover-stored-*`, so its stored flags only
+      // exist in the database. Rebuild it from there.
+      logger.log('Spreadsheet cache is outdated, rebuilding');
+      setCacheStatus(mainDb, cacheDb, { clean: false });
+      sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
+      cachedRows = null;
+    }
+  }
+
+  if (cachedRows) {
     logger.log(`Loaded spreadsheet from cache (${cachedRows.length} items)`);
 
     for (const row of cachedRows) {
@@ -243,8 +269,8 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
         const sheetName = `budget${budget.month}`;
         sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
         sheet.set(
-          `${sheetName}!carryover-${budget.category}`,
-          budget.carryover === 1 ? true : false,
+          `${sheetName}!carryover-stored-${budget.category}`,
+          budget.carryover == null ? null : budget.carryover === 1,
         );
         sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
         sheet.set(

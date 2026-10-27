@@ -143,11 +143,14 @@ export function setBudget({
   if (existing) {
     return db.update(table, { id: existing.id, amount });
   }
+  // A NULL carryover inherits the previous month's flag. Writing the
+  // resolved value instead would lose a toggle made on another device.
   return db.insert(table, {
     id: `${dbMonth(month)}-${category}`,
     month: dbMonth(month),
     category,
     amount,
+    carryover: null,
   });
 }
 
@@ -172,6 +175,7 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
     category,
     goal,
     long_goal,
+    carryover: null,
   });
 }
 
@@ -785,9 +789,27 @@ export async function resetIncomeCarryover({
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE is_income = 1 AND tombstone = 0',
   );
+  const sheetName = monthUtils.sheetForMonth(month);
+  const nextMonth = dbMonth(monthUtils.nextMonth(month)).toString();
 
   await batchMessages(async () => {
     for (const category of categories) {
+      // The reset only covers this month. If next month inherits its flag
+      // from this one, pin it to the value it had before the reset.
+      const next = db.firstSync<
+        Pick<db.DbZeroBudget | db.DbReflectBudget, 'carryover'>
+      >(`SELECT carryover FROM ${table} WHERE month = ? AND category = ?`, [
+        nextMonth,
+        category.id,
+      ]);
+      if (next == null || next.carryover == null) {
+        const flag = await getSheetBoolean(
+          sheetName,
+          `carryover-${category.id}`,
+        );
+        await setCarryover(table, category.id, nextMonth, flag);
+      }
+
       await setCarryover(table, category.id, dbMonth(month).toString(), false);
     }
   });
