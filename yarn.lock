@@ -84,6 +84,7 @@ __metadata:
   dependencies:
     "@chromatic-com/storybook": "npm:^5.5.1"
     "@emotion/css": "npm:^11.13.5"
+    "@emotion/serialize": "npm:^1.3.3"
     "@internationalized/date": "npm:^3.12.4"
     "@rolldown/plugin-babel": "npm:~0.2.4"
     "@storybook/addon-a11y": "npm:^10.6.2"
