@@ -94,14 +94,6 @@ export function AccountMenuModal({
 
   const canReconcile = !!onReconcile;
 
-  const buttonStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-    color: theme.formLabelText,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: canReconcile ? '48%' : '100%',
-  };
-
   if (!account) {
     return null;
   }
@@ -183,7 +175,14 @@ export function AccountMenuModal({
                 paddingTop: 10,
               }}
             >
-              <Button style={buttonStyle} onPress={_onEditNotes}>
+              <Button
+                size="extra-large"
+                style={{
+                  color: theme.formLabelText,
+                  flexBasis: canReconcile ? '48%' : '100%',
+                }}
+                onPress={_onEditNotes}
+              >
                 <SvgNotesPaper
                   width={20}
                   height={20}
@@ -192,7 +191,14 @@ export function AccountMenuModal({
                 <Trans>Edit notes</Trans>
               </Button>
               {canReconcile && (
-                <Button style={buttonStyle} onPress={() => onReconcile?.()}>
+                <Button
+                  size="extra-large"
+                  style={{
+                    color: theme.formLabelText,
+                    flexBasis: canReconcile ? '48%' : '100%',
+                  }}
+                  onPress={() => onReconcile?.()}
+                >
                   <SvgLockClosed
                     width={20}
                     height={20}

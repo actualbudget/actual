@@ -55,7 +55,12 @@ export const radius: Record<RadiusSize, number> = {
 // Standard component size vocabulary shared by Button, Text and Input.
 // Values are looked up per breakpoint group so components can render
 // denser on desktop and more comfortable on mobile without hooks.
-export type ComponentSize = 'small' | 'medium' | 'large' | 'extra-large';
+export type ComponentSize =
+  | 'small'
+  | 'medium'
+  | 'large'
+  | 'extra-large'
+  | 'touch';
 
 // Breakpoint groups mirror the view modes in useResponsive:
 // narrow <512, small 512-729, medium 730-1099, wide >=1100.
@@ -117,6 +122,12 @@ export const componentSizeText: Record<
     medium: { fontSize: 16, lineHeight: '22px' },
     wide: { fontSize: 16, lineHeight: '22px' },
   },
+  touch: {
+    narrow: { fontSize: 13, lineHeight: '18px' },
+    small: { fontSize: 13, lineHeight: '18px' },
+    medium: { fontSize: 13, lineHeight: '18px' },
+    wide: { fontSize: 13, lineHeight: '18px' },
+  },
 };
 
 // Padding and min-height for controls (Button, Input). The `medium` row
@@ -149,6 +160,47 @@ export const componentSizeControl: Record<
     small: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
     medium: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
     wide: { paddingY: spacing.sm, paddingX: spacing.md, minHeight: 36 },
+  },
+  touch: {
+    narrow: { paddingY: 10, paddingX: 14, minHeight: 40 },
+    small: { paddingY: 5, paddingX: 10 },
+    medium: { paddingY: 5, paddingX: 10 },
+    wide: { paddingY: 5, paddingX: 10 },
+  },
+};
+
+// Icon-button hit boxes (square: minWidth = minHeight). `small` is the
+// desktop-density choice, flat across breakpoints; `medium` is the
+// default toolbar icon button (28px desktop, steps to 36px at narrow);
+// `large` is the touch-primary choice (40px at narrow).
+export type IconButtonSize = 'small' | 'medium' | 'large';
+
+type ComponentSizeIconValues = {
+  minWidth: number;
+  minHeight: number;
+};
+
+export const componentSizeIcon: Record<
+  IconButtonSize,
+  Record<BreakpointGroup, ComponentSizeIconValues>
+> = {
+  small: {
+    narrow: { minWidth: 24, minHeight: 24 },
+    small: { minWidth: 24, minHeight: 24 },
+    medium: { minWidth: 24, minHeight: 24 },
+    wide: { minWidth: 24, minHeight: 24 },
+  },
+  medium: {
+    narrow: { minWidth: 36, minHeight: 36 },
+    small: { minWidth: 36, minHeight: 36 },
+    medium: { minWidth: 28, minHeight: 28 },
+    wide: { minWidth: 28, minHeight: 28 },
+  },
+  large: {
+    narrow: { minWidth: 40, minHeight: 40 },
+    small: { minWidth: 40, minHeight: 40 },
+    medium: { minWidth: 36, minHeight: 36 },
+    wide: { minWidth: 36, minHeight: 36 },
   },
 };
 

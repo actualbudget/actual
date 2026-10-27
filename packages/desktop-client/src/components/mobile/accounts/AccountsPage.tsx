@@ -158,9 +158,9 @@ function AccountListItem({
       {itemProps => (
         <Button
           {...itemProps}
+          block
           style={{
             height: ROW_HEIGHT,
-            width: '100%',
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,

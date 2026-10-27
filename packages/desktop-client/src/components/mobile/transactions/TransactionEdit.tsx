@@ -12,6 +12,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { Chip } from '@actual-app/components/chip';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
@@ -1287,71 +1288,32 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               rightContent={
                 shouldShowSaveLocation ? (
-                  <Button
-                    variant="bare"
-                    onPress={onSaveLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onSaveLocation}>
                     <Trans>Save</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : nearestPayee && !transaction.payee ? (
-                  <Button
-                    variant="bare"
-                    onPress={onSelectNearestPayee}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onSelectNearestPayee}>
                     <Trans>Nearby</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : onRequestLocation && !transaction.payee ? (
-                  <Button
-                    variant="bare"
-                    onPress={onRequestLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onRequestLocation}>
                     <Trans>Request Location</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : (
                   dropdownChevron
                 )
