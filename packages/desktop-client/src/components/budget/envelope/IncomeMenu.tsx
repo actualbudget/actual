@@ -28,7 +28,7 @@ export function IncomeMenu({
     envelopeBudget.catCarryover(categoryId),
   );
   // Managed and frozen months ignore the income auto-hold
-  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode(month);
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode();
   const canToggleAutoHold = !isManagedMonth && !isFrozenMonth;
 
   return (

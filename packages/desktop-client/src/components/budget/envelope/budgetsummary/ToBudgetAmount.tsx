@@ -24,7 +24,6 @@ import { envelopeBudget } from '#spreadsheet/bindings';
 import { TotalsList } from './TotalsList';
 
 type ToBudgetAmountProps = {
-  month: string;
   prevMonthName: string;
   style?: CSSProperties;
   amountStyle?: CSSProperties;
@@ -34,7 +33,6 @@ type ToBudgetAmountProps = {
 };
 
 export function ToBudgetAmount({
-  month,
   prevMonthName,
   style,
   amountStyle,
@@ -49,7 +47,7 @@ export function ToBudgetAmount({
     value: 0,
   });
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
-  const { isManagedMonth } = useFutureBufferMode(month);
+  const { isManagedMonth } = useFutureBufferMode();
   const format = useFormat();
   const availableValue = sheetValue;
   if (typeof availableValue !== 'number' && availableValue !== null) {
@@ -73,7 +71,6 @@ export function ToBudgetAmount({
         <Tooltip
           content={
             <TotalsList
-              month={month}
               prevMonthName={prevMonthName}
               style={{
                 padding: 7,

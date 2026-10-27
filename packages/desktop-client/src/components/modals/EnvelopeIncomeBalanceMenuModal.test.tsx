@@ -19,7 +19,7 @@ vi.mock('@actual-app/components/hooks/useResponsive', () => ({
   useResponsive: () => ({ isNarrowWidth: true }),
 }));
 
-let sheetValues: Record<string, number | string | null> = {};
+let sheetValues: Record<string, number | boolean | null> = {};
 
 vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: (binding: string | { name: string }) => {
@@ -35,10 +35,10 @@ const category: CategoryEntity = {
   is_income: true,
 };
 
-function renderModal(month: string, { startMonth = '2026-10' } = {}) {
+function renderModal({ managed = true } = {}) {
   sheetValues = {
-    '__global!future-buffer-start': startMonth,
-    frozen: 0,
+    'buffered-managed': managed,
+    frozen: false,
     'carryover-salary': 1,
     'sum-amount-salary': 520000,
   };
@@ -50,10 +50,9 @@ function renderModal(month: string, { startMonth = '2026-10' } = {}) {
   });
   render(
     <TestProviders queryClient={client} store={store}>
-      <SheetNameProvider name={`budget${month.replace('-', '')}`}>
+      <SheetNameProvider name="budget202611">
         <EnvelopeIncomeBalanceMenuModal
           categoryId={category.id}
-          month={month}
           onCarryover={vi.fn()}
           onShowActivity={vi.fn()}
         />
@@ -69,7 +68,7 @@ function rolloverArrow() {
 
 describe('EnvelopeIncomeBalanceMenuModal', () => {
   it('hides the auto hold toggle and the rollover arrow in a managed month', async () => {
-    renderModal('2026-11');
+    renderModal();
 
     expect(await screen.findByText('View transactions')).toBeInTheDocument();
     expect(screen.queryByText('Disable auto hold')).not.toBeInTheDocument();
@@ -77,7 +76,7 @@ describe('EnvelopeIncomeBalanceMenuModal', () => {
   });
 
   it('shows both in manual mode', async () => {
-    renderModal('2026-11', { startMonth: '' });
+    renderModal({ managed: false });
 
     expect(await screen.findByText('Disable auto hold')).toBeInTheDocument();
     expect(rolloverArrow()).not.toBeNull();

@@ -4,34 +4,27 @@ import { batchMessages } from '#server/sync';
 import * as monthUtils from '#shared/months';
 
 import { getFutureBufferStart, setBuffer } from './actions';
-import { createAllBudgets, getBudgetType } from './base';
+import { getBudgetType } from './base';
 
 type MonthBuffer = { month: string; amount: number };
 
-// Each month from the start month to the last created month that isn't
-// frozen, with its computed buffer. Returns null if the file was closed or
-// reopened while it waited: a closed budget unloads its spreadsheet and every
-// load creates a new one.
+// Each created month from the start month on that isn't frozen, with its
+// computed buffer. A month with no sheet can't be shown, so it waits until
+// it has one. Returns null if the file was closed or reopened while it
+// waited: a closed budget unloads its spreadsheet and every load creates a
+// new one.
 export async function readUnfrozenBuffers(
   spreadsheet: ReturnType<typeof sheet.get>,
   startMonth: string,
 ): Promise<MonthBuffer[] | null> {
-  // The start month can come from another device through sync and be
-  // older than this load's months, so create any that are missing
-  await createAllBudgets();
-
-  const { createdMonths } = sheet.get().meta();
-  const lastCreated = [...(createdMonths as Set<string>)].sort().pop();
-  if (lastCreated == null || lastCreated < startMonth) {
-    return [];
-  }
   const frozenRows = await db.all<Pick<db.DbZeroBudgetMonth, 'id'>>(
     'SELECT id FROM zero_budget_months WHERE frozen = 1',
   );
   const frozen = new Set(frozenRows.map(row => row.id));
-  const months = monthUtils
-    .rangeInclusive(startMonth, lastCreated)
-    .filter(month => !frozen.has(month));
+  const { createdMonths = new Set<string>() } = spreadsheet.meta();
+  const months = [...createdMonths]
+    .filter(month => month >= startMonth && !frozen.has(month))
+    .sort();
   if (months.length === 0) {
     return [];
   }

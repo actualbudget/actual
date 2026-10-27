@@ -10,7 +10,7 @@ vi.mock(
   () => import('#mocks/connection'),
 );
 
-let sheetValues: Record<string, number | string | null> = {};
+let sheetValues: Record<string, number | boolean | null> = {};
 
 vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: (binding: string | { name: string }) => {
@@ -21,15 +21,14 @@ vi.mock('#hooks/useSheetValue', () => ({
 
 function renderAmount() {
   sheetValues = {
-    '__global!future-buffer-start': '2026-10',
-    frozen: 0,
+    'buffered-managed': true,
     'to-budget': -530000,
     'buffered-selected': 750000,
   };
   render(
     <TestProviders>
       <SheetNameProvider name="budget202610">
-        <ToBudgetAmount month="2026-10" prevMonthName="Sep" />
+        <ToBudgetAmount prevMonthName="Sep" />
       </SheetNameProvider>
     </TestProviders>,
   );

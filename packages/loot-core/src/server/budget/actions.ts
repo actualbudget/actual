@@ -57,35 +57,21 @@ export function isTrackingBudget(): boolean {
 export const FUTURE_BUFFER_PREF = 'futureBufferMode';
 
 // The month automatic mode was turned on, or empty in manual mode
-export function parseFutureBufferStart(
-  value: string | null | undefined,
-): string {
-  return value && /^\d{4}-\d{2}$/.test(value) ? value : '';
-}
-
 export async function getFutureBufferStart(): Promise<string> {
   const row = await db.first<Pick<db.DbPreference, 'value'>>(
     'SELECT value FROM preferences WHERE id = ?',
     [FUTURE_BUFFER_PREF],
   );
-  return parseFutureBufferStart(row?.value);
+  return row?.value ?? '';
 }
 
-// Automatic mode sets the buffer of a managed month: one from the start
-// month on that isn't frozen. Manual hold controls write nothing there.
-async function isManagedMonth(month: string): Promise<boolean> {
-  if (isTrackingBudget()) {
-    return false;
-  }
-  const startMonth = await getFutureBufferStart();
-  if (!startMonth || month < startMonth) {
-    return false;
-  }
-  const row = await db.first<Pick<db.DbZeroBudgetMonth, 'frozen'>>(
-    'SELECT frozen FROM zero_budget_months WHERE id = ?',
-    [month],
-  );
-  return row?.frozen !== 1;
+// Automatic mode sets a managed month's buffer, so the manual hold controls
+// write nothing there
+function isManagedMonth(month: string): boolean {
+  const managed = sheet
+    .get()
+    .getCellValueLoose(monthUtils.sheetForMonth(month), 'buffered-managed');
+  return managed === true;
 }
 
 export function dbMonth(month: string): number {
@@ -542,7 +528,7 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
-  if (await isManagedMonth(month)) {
+  if (isManagedMonth(month)) {
     return false;
   }
 
@@ -572,7 +558,7 @@ export async function resetHold({
 }: {
   month: string;
 }): Promise<boolean> {
-  if (await isManagedMonth(month)) {
+  if (isManagedMonth(month)) {
     return false;
   }
 
@@ -847,7 +833,7 @@ export async function resetIncomeCarryover({
 }: {
   month: string;
 }): Promise<boolean> {
-  if (await isManagedMonth(month)) {
+  if (isManagedMonth(month)) {
     return false;
   }
 

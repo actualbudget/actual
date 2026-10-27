@@ -9,11 +9,7 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
-import {
-  FUTURE_BUFFER_PREF,
-  getFutureBufferStart,
-  parseFutureBufferStart,
-} from './actions';
+import { FUTURE_BUFFER_PREF, getFutureBufferStart } from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
 
@@ -279,7 +275,7 @@ function handleBudgetMonthChange(budget) {
 
 // Sets `__global!future-buffer-start` from the `futureBufferMode` preference
 function setFutureBufferStart(value: string | null | undefined) {
-  const startMonth = parseFutureBufferStart(value);
+  const startMonth = value ?? '';
   if (
     sheet.get().getCellValueLoose('__global', 'future-buffer-start') !==
     startMonth
@@ -514,15 +510,9 @@ export async function createAllBudgets() {
 
   // Get the range based off of the earliest transaction and the
   // current month. If no transactions currently exist the current
-  // month is also used as the starting month. It also reaches back to
-  // automatic "For next month"'s start month, so every month it freezes
-  // has a sheet.
-  const earliestMonth = monthUtils.getMonth(earliestDate || currentMonth);
-  const futureBufferStart = await getFutureBufferStart();
+  // month is also used as the starting month
   const { start, end, range } = getBudgetRange(
-    futureBufferStart && futureBufferStart < earliestMonth
-      ? futureBufferStart
-      : earliestMonth,
+    earliestDate || currentMonth,
     currentMonth,
     await getLatestAllocatedMonth(),
   );
@@ -532,16 +522,7 @@ export async function createAllBudgets() {
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
-    // The range can start after months already created, when the start
-    // month or the earliest transaction moves later. Keep those months in
-    // the range: the month before its first month becomes the blank sheet,
-    // and a real month there would lose its cells.
-    const firstCreated = [...createdMonths].sort()[0];
-    await createBudget(
-      firstCreated && firstCreated < start
-        ? monthUtils.rangeInclusive(firstCreated, end)
-        : range,
-    );
+    await createBudget(range);
   }
 
   // The range only grows while the budget is open, so every created month

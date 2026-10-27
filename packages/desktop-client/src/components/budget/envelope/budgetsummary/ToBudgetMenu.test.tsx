@@ -12,7 +12,7 @@ vi.mock(
   () => import('#mocks/connection'),
 );
 
-let sheetValues: Record<string, number | string | null> = {};
+let sheetValues: Record<string, number | string | boolean | null> = {};
 
 vi.mock('#hooks/useSheetValue', () => ({
   useSheetValue: (binding: string | { name: string }) => {
@@ -25,17 +25,18 @@ const START_MONTH = '2026-10';
 
 function setSheetValues({
   startMonth = START_MONTH,
-  frozen = 0,
+  frozen = false,
   manualHold = 0,
   autoHold = 0,
 }: {
   startMonth?: string;
-  frozen?: number;
+  frozen?: boolean;
   manualHold?: number;
   autoHold?: number;
 } = {}) {
   sheetValues = {
     '__global!future-buffer-start': startMonth,
+    'buffered-managed': Boolean(startMonth) && !frozen,
     frozen,
     'to-budget': 10000,
     'buffered-selected': manualHold || autoHold,
@@ -87,13 +88,13 @@ describe('ToBudgetMenu', () => {
   });
 
   it('offers hold and reset in a frozen month, but not the auto hold', () => {
-    setSheetValues({ frozen: 1, autoHold: 5000 });
+    setSheetValues({ frozen: true, autoHold: 5000 });
     const { rerender } = renderMenu(START_MONTH);
 
     expect(screen.getByText(hold)).toBeInTheDocument();
     expect(screen.queryByText(disableAutoHold)).not.toBeInTheDocument();
 
-    setSheetValues({ frozen: 1, manualHold: 5000 });
+    setSheetValues({ frozen: true, manualHold: 5000 });
     rerender();
     expect(screen.getByText(reset)).toBeInTheDocument();
   });
