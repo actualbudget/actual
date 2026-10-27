@@ -135,7 +135,7 @@ export function ToBudgetAmount({
                 {{ amount: heldForFutureMonths } as TransObjectLiteral}
               </PrivacyFilter>
             </FinancialText>{' '}
-            is held for future months. Budget less ahead, or add income.
+            is held for future months.
           </Trans>
         </Text>
       )}
