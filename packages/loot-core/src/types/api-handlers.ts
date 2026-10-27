@@ -99,7 +99,7 @@ export type ApiHandlers = {
     amount: number;
   }) => Promise<boolean>;
 
-  'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
+  'api/budget-reset-hold': (arg: { month: string }) => Promise<boolean>;
 
   'api/transactions-export': (arg: {
     transactions: TransactionEntity[];

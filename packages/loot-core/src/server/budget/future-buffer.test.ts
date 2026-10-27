@@ -5,22 +5,27 @@ import { join } from 'node:path';
 import { Timestamp } from '@actual-app/crdt';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { installAPI } from '#server/api';
 import * as db from '#server/db';
 // Registers the budget app's sync listener on the events `fullSync` emits
 import '#server/main';
 import { runMutator } from '#server/mutators';
+import { app as preferencesApp } from '#server/preferences/app';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import { applyMessages, fullSync, setSyncingMode } from '#server/sync';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
 import { undo, withUndo } from '#server/undo';
 import * as monthUtils from '#shared/months';
+import type { ServerHandlers } from '#types/server-handlers';
 
 import {
   copyUntilYearEnd,
+  dbMonth,
   getSheetValue,
   holdForNextMonth,
   resetHold,
+  resetIncomeCarryover,
   set3MonthAvg,
   setBudget,
   setBuffer,
@@ -29,6 +34,7 @@ import {
 import { app } from './app';
 import { createAllBudgets, createBudget, loadFutureBufferStart } from './base';
 import { freezeClosedMonths } from './freeze';
+import { setFutureBufferMode } from './future-buffer-mode';
 
 vi.mock('#server/post');
 
@@ -117,6 +123,23 @@ async function closeOctober() {
   await createAllBudgets();
   await runMutator(freezeClosedMonths);
   await sheet.waitOnSpreadsheet();
+}
+
+function modePref() {
+  return db.firstSync<db.DbPreference>(
+    'SELECT * FROM preferences WHERE id = ?',
+    ['futureBufferMode'],
+  )?.value;
+}
+
+function incomeCarryover(table = 'zero_budgets') {
+  return db.all<Pick<db.DbZeroBudget, 'month' | 'carryover'>>(
+    `SELECT month, carryover FROM ${table} WHERE category = 'income' ORDER BY month`,
+  );
+}
+
+function setModeFromMenu(mode: 'manual' | 'automatic') {
+  return runMutator(() => setFutureBufferMode({ mode }));
 }
 
 describe('future buffer', () => {
@@ -624,5 +647,139 @@ describe('future buffer', () => {
 
     expect(await getSheetValue('budget202612', 'total-budgeted')).toBe(-50000);
     expect(await toBudget('2027-05')).toBe(-50000);
+  });
+
+  it('turns on over a manual hold without deleting it', async () => {
+    await setup();
+    await setMode(null);
+    await holdForNextMonth({ month: '2026-10', amount: 70000 });
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-10')).toBe(150000);
+
+    await setModeFromMenu('automatic');
+    await sheet.waitOnSpreadsheet();
+
+    expect(modePref()).toBe('2026-10');
+    expect(await toBudget('2026-10')).toBe(20000);
+    expect(monthRow('2026-10')?.buffered).toBe(70000);
+  });
+
+  it('turns off and on again without moving any To Budget', async () => {
+    await setup();
+    await closeOctober();
+    // 20 Nov: Nov budgeted +1,000, a paycheck, and groceries overspent by 300
+    await setBudget({ category: 'bills', month: '2026-11', amount: 250000 });
+    await db.insertTransaction({
+      date: '2026-11-15',
+      amount: 520000,
+      account: 'account',
+      category: 'income',
+    });
+    await db.insertTransaction({
+      date: '2026-11-20',
+      amount: -70000,
+      account: 'account',
+      category: 'groceries',
+    });
+    // An older client turned income auto-hold on in managed months
+    await setCategoryCarryover({
+      startMonth: '2026-11',
+      category: 'income',
+      flag: true,
+    });
+    await withUndo(() =>
+      setBudget({ category: 'bills', month: '2026-10', amount: 250000 }),
+    );
+    await sheet.waitOnSpreadsheet();
+    expect(await buffer('2026-11')).toBe(80000);
+
+    const months = [...sheet.get().meta().createdMonths].sort();
+    const before = await Promise.all(months.map(toBudget));
+
+    await setModeFromMenu('manual');
+    await sheet.waitOnSpreadsheet();
+
+    expect(monthRow('2026-11')).toEqual({
+      id: '2026-11',
+      buffered: 80000,
+      frozen: 0,
+    });
+    // Dec's buffer was already 0
+    expect(monthRow('2026-12')).toBeNull();
+    expect(await Promise.all(months.map(toBudget))).toEqual(before);
+    expect(await incomeCarryover()).toEqual([
+      { month: 202610, carryover: 0 },
+      ...months
+        .filter(month => month >= '2026-11')
+        .map(month => ({ month: dbMonth(month), carryover: 0 })),
+    ]);
+    expect(modePref()).toBeNull();
+
+    await undo();
+    await sheet.waitOnSpreadsheet();
+    expect(await getSheetValue('budget202610', 'budget-bills')).toBe(250000);
+
+    global.currentMonth = '2026-12';
+    await setModeFromMenu('automatic');
+    await sheet.waitOnSpreadsheet();
+
+    expect(modePref()).toBe('2026-12');
+    expect(monthRow('2026-10')?.frozen).toBe(1);
+    expect(await buffer('2026-11')).toBe(80000);
+  });
+
+  it('turns the mode off before switching to Tracking', async () => {
+    await setup();
+    await setCategoryCarryover({
+      startMonth: '2026-10',
+      category: 'income',
+      flag: true,
+    });
+
+    await runMutator(() =>
+      preferencesApp.handlers['preferences/save']({
+        id: 'budgetType',
+        value: 'tracking',
+      }),
+    );
+    await sheet.waitOnSpreadsheet();
+
+    expect(modePref()).toBeNull();
+    expect(monthRow('2026-10')).toEqual({
+      id: '2026-10',
+      buffered: 200000,
+      frozen: 0,
+    });
+    expect((await incomeCarryover()).every(row => row.carryover === 0)).toBe(
+      true,
+    );
+    expect(await incomeCarryover('reflect_budgets')).toEqual([]);
+  });
+
+  it('ignores manual hold controls in managed months', async () => {
+    await setup();
+    // The experimental flag only gates turning the mode on
+    await db.update('preferences', {
+      id: 'flags.futureBufferMode',
+      value: 'false',
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(await buffer('2026-10')).toBe(200000);
+
+    expect(await holdForNextMonth({ month: '2026-10', amount: 10000 })).toBe(
+      false,
+    );
+    expect(await resetHold({ month: '2026-10' })).toBe(false);
+    expect(await resetIncomeCarryover({ month: '2026-10' })).toBe(false);
+    expect(monthRow('2026-10')).toBeNull();
+    expect(await incomeCarryover()).toEqual([]);
+
+    await prefs.loadPrefs();
+    const handlers = installAPI({
+      'get-budget-bounds': () =>
+        Promise.resolve({ start: '2026-10', end: '2026-12' }),
+    } as unknown as ServerHandlers);
+    const result = await handlers['api/budget-month']({ month: '2026-10' });
+    expect(result.forNextMonth).toBe(200000);
   });
 });
