@@ -23,11 +23,11 @@ app.use((_req, res, next) => {
 });
 
 app.post('/', (req, res) => {
-  const { name, fileId } = req.body ?? {};
+  const { name: rawName, fileId } = req.body ?? {};
+  const name = typeof rawName === 'string' ? rawName.trim() : '';
   if (
-    typeof name !== 'string' ||
-    name.trim().length === 0 ||
-    name.trim().length > 100 ||
+    !name ||
+    name.length > 100 ||
     typeof fileId !== 'string' ||
     !isValidFileId(fileId)
   ) {
@@ -49,12 +49,12 @@ app.post('/', (req, res) => {
   getAccountDb().mutate(
     `INSERT INTO api_keys (id, user_id, file_id, name, key_hash, created_at)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [id, userId, fileId, name.trim(), keyHash, createdAt],
+    [id, userId, fileId, name, keyHash, createdAt],
   );
 
   res.status(201).send({
     status: 'ok',
-    data: { id, name: name.trim(), fileId, createdAt, key },
+    data: { id, name, fileId, createdAt, key },
   });
 });
 
