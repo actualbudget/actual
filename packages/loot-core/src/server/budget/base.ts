@@ -542,7 +542,16 @@ export async function createAllBudgets() {
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
-    await createBudget(range);
+    // The range can start after months already created, when the start
+    // month or the earliest transaction moves later. Keep those months in
+    // the range: the month before its first month becomes the blank sheet,
+    // and a real month there would lose its cells.
+    const firstCreated = [...createdMonths].sort()[0];
+    await createBudget(
+      firstCreated && firstCreated < start
+        ? monthUtils.rangeInclusive(firstCreated, end)
+        : range,
+    );
   }
 
   // The range only grows while the budget is open, so every created month

@@ -44,6 +44,8 @@ export async function freezeClosedMonths(): Promise<void> {
     return;
   }
 
+  // This is the last wait a close or a load can run during. After it,
+  // setBuffer only collects messages, and applying them doesn't wait on I/O.
   await sheet.waitOnSpreadsheet();
   if (sheet.get() !== spreadsheet) {
     return;
