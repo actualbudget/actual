@@ -724,16 +724,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
 
   // A synced file seeds after its first full sync instead (see budget/app.ts).
   // A file that was never uploaded has no sync group, so it never gets one.
+  // A failed seed leaves the preference unset, so the next load retries it.
   if (checkSyncingMode('disabled') || !prefs.getPrefs().groupId) {
-    try {
-      await seedCarryoverChain();
-    } catch (e) {
-      // Without the seed, closed months would show different figures, so
-      // don't open the file. It's retried on the next load.
-      captureException(e);
-      await closeBudget();
-      return { error: 'loading-budget' };
-    }
+    await seedCarryoverChain().catch(captureException);
   }
 
   app.events.emit('load-budget', { id });

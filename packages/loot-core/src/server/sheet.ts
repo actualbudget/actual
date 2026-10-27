@@ -109,19 +109,6 @@ function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
   return rows.length === 0;
 }
 
-function hasCarryoverWithoutStored(rows: Array<{ key: string }>): boolean {
-  let hasCarryover = false;
-  for (const { key } of rows) {
-    if (key.includes('!carryover-stored-')) {
-      return false;
-    }
-    if (key.includes('!carryover-')) {
-      hasCarryover = true;
-    }
-  }
-  return hasCarryover;
-}
-
 export async function loadSpreadsheet(
   db,
   onSheetChange?,
@@ -184,9 +171,13 @@ export async function loadSpreadsheet(
       true,
     );
 
-    if (hasCarryoverWithoutStored(cachedRows)) {
-      // The cache predates `carryover-stored-*`, so its stored flags only
-      // exist in the database. Rebuild it from there.
+    // A cache with carryover cells but no `carryover-stored-*` predates the
+    // inherited flag, so its stored flags only exist in the database.
+    // Rebuild it from there.
+    const isOutdated =
+      cachedRows.some(row => row.key.includes('!carryover-')) &&
+      !cachedRows.some(row => row.key.includes('!carryover-stored-'));
+    if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
       setCacheStatus(mainDb, cacheDb, { clean: false });
       sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
