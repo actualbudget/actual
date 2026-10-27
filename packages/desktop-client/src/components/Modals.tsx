@@ -18,6 +18,7 @@ import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
+import { ApiKeyModal } from './modals/ApiKeyModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -422,6 +423,8 @@ export function Modals() {
         case 'transfer-ownership':
           return <TransferOwnership key={key} {...modal.options} />;
 
+        case 'api-key':
+          return <ApiKeyModal key={key} {...modal.options} />;
         case 'enable-openid':
           return <OpenIDEnableModal key={key} {...modal.options} />;
 

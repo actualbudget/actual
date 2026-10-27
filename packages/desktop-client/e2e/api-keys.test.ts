@@ -12,6 +12,8 @@ for (const width of [1280, 375]) {
       fileId: 'budget',
       createdAt: 1,
     };
+    let failLoad = true;
+    let failRevoke = true;
     let keys: (typeof key)[] = [];
     await page.context().route('https://sync.example.test/**', async route => {
       const request = route.request();
@@ -35,6 +37,11 @@ for (const width of [1280, 375]) {
         return;
       }
       if (path === '/api-keys') {
+        if (request.method() === 'GET' && failLoad) {
+          failLoad = false;
+          await route.fulfill({ status: 503 });
+          return;
+        }
         expect(request.headers()['x-actual-token']).toBe('test-session');
         if (request.method() === 'POST') {
           expect(request.postDataJSON()).toEqual({
@@ -49,6 +56,11 @@ for (const width of [1280, 375]) {
         }
       }
       if (path === '/api-keys/key-id' && request.method() === 'DELETE') {
+        if (failRevoke) {
+          failRevoke = false;
+          await route.fulfill({ status: 503 });
+          return;
+        }
         keys = [];
       }
       await route.fulfill({ status, json: { status: 'ok', data } });
@@ -68,22 +80,55 @@ for (const width of [1280, 375]) {
       width < 512 ? new MobileNavigation(page) : new Navigation(page);
     const settings = await navigation.goToSettingsPage();
     if (width < 512) await settings.goToSection('General');
-    await page.getByRole('button', { name: 'Manage keys' }).click();
-    await page.getByRole('textbox', { name: 'Key name' }).fill(key.name);
-    await page.getByRole('button', { name: 'Create key' }).click();
-    const secret = page.locator('#new-api-key');
-    await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
+    await expect(page.getByRole('alert')).toContainText(
+      'Could not load API keys',
+    );
+    await page.getByRole('button', { name: 'Retry', exact: true }).click();
+    await expect(
+      page.getByText('You have no API keys for this budget.'),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Retry', exact: true }),
+    ).toHaveCount(0);
     const section = page
       .getByRole('heading', { name: 'Security', exact: true })
       .locator('../..');
-    await expect(section).toMatchThemeScreenshots();
     await section.screenshot({
-      path: test.info().outputPath(`api-keys-${width}.png`),
+      path: test.info().outputPath(`api-keys-list-${width}.png`),
     });
-    await page.getByRole('button', { name: 'Done', exact: true }).click();
-    await expect(secret).toHaveCount(0);
+    await page.getByRole('button', { name: 'Add key', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toHaveAccessibleName('Add API key');
+    await dialog.getByRole('textbox', { name: 'Key name' }).fill(key.name);
+    await dialog.getByRole('button', { name: 'Create key' }).click();
+    const secret = dialog.locator('#new-api-key');
+    await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
+    await expect(dialog).toMatchThemeScreenshots();
+    await dialog.screenshot({
+      path: test.info().outputPath(`api-keys-create-${width}.png`),
+    });
+    await secret.press('Enter');
+    await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
+    await dialog.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+    await expect(section.getByText(key.name, { exact: true })).toBeVisible();
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
-    await page.getByRole('button', { name: 'Revoke key', exact: true }).click();
+    await expect(dialog).toHaveAccessibleName('Revoke API key');
+    await dialog.screenshot({
+      path: test.info().outputPath(`api-keys-revoke-${width}.png`),
+    });
+    await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+    expect(keys).toEqual([key]);
+    await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
+    await dialog
+      .getByRole('button', { name: 'Revoke key', exact: true })
+      .click();
+    await expect(dialog.getByRole('alert')).toContainText('Could not revoke');
+    expect(keys).toEqual([key]);
+    await dialog
+      .getByRole('button', { name: 'Revoke key', exact: true })
+      .click();
+    await expect(dialog).toHaveCount(0);
     await expect(
       page.getByText('You have no API keys for this budget.'),
     ).toBeVisible();
