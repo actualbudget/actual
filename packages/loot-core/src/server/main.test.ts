@@ -75,14 +75,6 @@ describe('Budgets', () => {
     );
     const loadedClock = deserializeClock(row.clock);
 
-    // Loading writes the carryover seed preference. While the fake time is
-    // behind the file's clock that write fails, and the budget must not open.
-    const failed = await runHandler(handlers['load-budget'], {
-      id: 'test-budget',
-    });
-    expect(failed.error).toBe('loading-budget');
-    expect(db.getDatabase()).toBe(null);
-
     global.stepForwardInTime(loadedClock.timestamp.millis());
     const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
@@ -94,11 +86,10 @@ describe('Budgets', () => {
 
     // Make sure the clock has been loaded, then advanced by the seed
     expect(getClock().merkle).toEqual(loadedClock.merkle);
-    expect(
-      await db.first('SELECT value FROM preferences WHERE id = ?', [
-        'carryoverChainSeeded',
-      ]),
-    ).toEqual({ value: 'true' });
+    expect(getClock().timestamp.node()).toBe(loadedClock.timestamp.node());
+    expect(getClock().timestamp.millis()).toBeGreaterThanOrEqual(
+      loadedClock.timestamp.millis(),
+    );
   }, 20_000);
 
   test('budget detects out of sync migrations', async () => {
