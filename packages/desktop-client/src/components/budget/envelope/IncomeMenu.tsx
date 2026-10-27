@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Menu } from '@actual-app/components/menu';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
@@ -26,6 +27,9 @@ export function IncomeMenu({
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
+  // Managed and frozen months ignore the income auto-hold
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode(month);
+  const canToggleAutoHold = !isManagedMonth && !isFrozenMonth;
 
   return (
     <span>
@@ -48,10 +52,16 @@ export function IncomeMenu({
           }
         }}
         items={[
-          {
-            name: 'carryover',
-            text: carryover ? t('Disable auto hold') : t('Enable auto hold'),
-          },
+          ...(canToggleAutoHold
+            ? [
+                {
+                  name: 'carryover',
+                  text: carryover
+                    ? t('Disable auto hold')
+                    : t('Enable auto hold'),
+                },
+              ]
+            : []),
           {
             name: 'view',
             text: t('View transactions'),

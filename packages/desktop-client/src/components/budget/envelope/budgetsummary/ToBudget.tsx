@@ -76,6 +76,7 @@ export function ToBudget({
     <>
       <View ref={triggerRef}>
         <ToBudgetAmount
+          month={month}
           onClick={() => {
             resetPosition();
             setMenuOpen(true);

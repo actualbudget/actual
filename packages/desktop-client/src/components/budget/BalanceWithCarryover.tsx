@@ -73,6 +73,8 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
+  // Leaves the arrow out even while the flag is on, for months that ignore it
+  isCarryoverHidden?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
@@ -84,6 +86,7 @@ export function BalanceWithCarryover({
   budgeted,
   longGoal,
   isDisabled,
+  isCarryoverHidden = false,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
@@ -149,7 +152,7 @@ export function BalanceWithCarryover({
             )}
           </View>
 
-          {carryoverValue && (
+          {carryoverValue && !isCarryoverHidden && (
             <CarryoverIndicatorComponent
               style={getBalanceAmountStyle(balanceValue)}
             />

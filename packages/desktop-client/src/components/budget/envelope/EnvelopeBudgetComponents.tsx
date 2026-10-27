@@ -24,6 +24,7 @@ import { Field, Row, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useFormat } from '#hooks/useFormat';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetName } from '#hooks/useSheetName';
 import { useSheetValue } from '#hooks/useSheetValue';
@@ -586,6 +587,8 @@ export function IncomeCategoryMonth({
 }: CategoryMonthProps) {
   const incomeMenuTriggerRef = useRef(null);
   const [incomeMenuOpen, setIncomeMenuOpen] = useState(false);
+  // Managed and frozen months ignore the income auto-hold
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode(month);
   const [incomePosition, setIncomePosition] = useState({
     crossOffset: 0,
     offset: 0,
@@ -651,6 +654,7 @@ export function IncomeCategoryMonth({
           >
             <BalanceWithCarryover
               carryover={envelopeBudget.catCarryover(category.id)}
+              isCarryoverHidden={isManagedMonth || isFrozenMonth}
               balance={envelopeBudget.catSumAmount(category.id)}
               goal={envelopeBudget.catGoal(category.id)}
               budgeted={envelopeBudget.catBudgeted(category.id)}
