@@ -57,7 +57,11 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
   }
 
   return (
-    <Modal name="api-key" ariaLabelledBy="api-key-modal-title">
+    <Modal
+      name="api-key"
+      ariaLabelledBy="api-key-modal-title"
+      containerProps={{ style: { width: apiKey ? 500 : undefined } }}
+    >
       {({ state }) => (
         <>
           <ModalHeader
@@ -98,9 +102,9 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
               ) : apiKey ? (
                 <Text style={{ overflowWrap: 'anywhere' }}>
                   <Trans>
-                    Revoke "{{ name: apiKey.name }}"? Integrations using it will
-                    lose server access. Previously downloaded data will remain
-                    on their devices.
+                    Revoke "{{ name: apiKey.name }}"? Any integrations using it
+                    will stop working, but previously downloaded data will not
+                    be deleted.
                   </Trans>
                 </Text>
               ) : (
@@ -149,6 +153,11 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                     <Button
                       size={size}
                       variant="primary"
+                      style={
+                        apiKey
+                          ? { border: 0, backgroundColor: theme.errorText }
+                          : undefined
+                      }
                       type="submit"
                       isDisabled={busy || (!apiKey && !name.trim())}
                     >
