@@ -200,7 +200,15 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
 export async function setBuffer(
   month: string,
   amount: unknown,
-  frozen?: boolean,
+  {
+    frozen,
+    overwrite = false,
+  }: {
+    frozen?: boolean;
+    // Write the amount even when it matches, so it also replaces an older
+    // hold from another device that hasn't synced here yet
+    overwrite?: boolean;
+  } = {},
 ): Promise<void> {
   const existing = db.firstSync<
     Pick<db.DbZeroBudgetMonth, 'id' | 'buffered' | 'frozen'>
@@ -212,7 +220,7 @@ export async function setBuffer(
   // Only write the columns that change, so this doesn't send a message that
   // could overwrite another device's edit to the other column
   const changes: Partial<db.DbZeroBudgetMonth> = {};
-  if (amount !== buffered) {
+  if (overwrite || amount !== buffered) {
     changes.buffered = amount as number;
   }
   if (frozen !== undefined && (frozen ? 1 : 0) !== storedFrozen) {
