@@ -54,7 +54,41 @@ export function isTrackingBudget(): boolean {
   return val === 'tracking';
 }
 
-function dbMonth(month: string): number {
+export const FUTURE_BUFFER_PREF = 'futureBufferMode';
+
+// The month automatic mode was turned on, or empty in manual mode
+export function parseFutureBufferStart(
+  value: string | null | undefined,
+): string {
+  return value && /^\d{4}-\d{2}$/.test(value) ? value : '';
+}
+
+export async function getFutureBufferStart(): Promise<string> {
+  const row = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value FROM preferences WHERE id = ?',
+    [FUTURE_BUFFER_PREF],
+  );
+  return parseFutureBufferStart(row?.value);
+}
+
+// Automatic mode sets the buffer of a managed month: one from the start
+// month on that isn't frozen. Manual hold controls write nothing there.
+async function isManagedMonth(month: string): Promise<boolean> {
+  if (isTrackingBudget()) {
+    return false;
+  }
+  const startMonth = await getFutureBufferStart();
+  if (!startMonth || month < startMonth) {
+    return false;
+  }
+  const row = await db.first<Pick<db.DbZeroBudgetMonth, 'frozen'>>(
+    'SELECT frozen FROM zero_budget_months WHERE id = ?',
+    [month],
+  );
+  return row?.frozen !== 1;
+}
+
+export function dbMonth(month: string): number {
   return parseInt(month.replace('-', ''));
 }
 
@@ -208,7 +242,7 @@ export async function setBuffer(
   return db.insert('zero_budget_months', { id: month, ...changes });
 }
 
-function setCarryover(
+export function setCarryover(
   table: string,
   category: string,
   month: string,
@@ -508,6 +542,10 @@ export async function holdForNextMonth({
   month: string;
   amount: number;
 }): Promise<boolean> {
+  if (await isManagedMonth(month)) {
+    return false;
+  }
+
   const row = await db.first<Pick<db.DbZeroBudgetMonth, 'buffered'>>(
     'SELECT buffered FROM zero_budget_months WHERE id = ?',
     [month],
@@ -529,8 +567,17 @@ export async function holdForNextMonth({
   return false;
 }
 
-export async function resetHold({ month }: { month: string }): Promise<void> {
+export async function resetHold({
+  month,
+}: {
+  month: string;
+}): Promise<boolean> {
+  if (await isManagedMonth(month)) {
+    return false;
+  }
+
   await setBuffer(month, 0);
+  return true;
 }
 
 export async function coverOverspending({
@@ -799,7 +846,11 @@ export async function resetIncomeCarryover({
   month,
 }: {
   month: string;
-}): Promise<void> {
+}): Promise<boolean> {
+  if (await isManagedMonth(month)) {
+    return false;
+  }
+
   const table = getBudgetTable();
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE is_income = 1 AND tombstone = 0',
@@ -828,4 +879,5 @@ export async function resetIncomeCarryover({
       await setCarryover(table, category.id, dbMonth(month).toString(), false);
     }
   });
+  return true;
 }

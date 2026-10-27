@@ -21,6 +21,7 @@ import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import { freezeClosedMonths } from './freeze';
+import { setFutureBufferMode } from './future-buffer-mode';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -49,6 +50,7 @@ export type BudgetHandlers = {
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
+  'budget/set-future-buffer-mode': typeof setFutureBufferMode;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
   'envelope-budget-month': typeof envelopeBudgetMonth;
@@ -146,6 +148,8 @@ app.method(
   'budget/reset-income-carryover',
   mutator(undoable(actions.resetIncomeCarryover)),
 );
+// Not undoable: see setFutureBufferMode
+app.method('budget/set-future-buffer-mode', mutator(setFutureBufferMode));
 app.method('get-categories', getCategories);
 app.method('get-budget-bounds', getBudgetBounds);
 app.method('envelope-budget-month', envelopeBudgetMonth);

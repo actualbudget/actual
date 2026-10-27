@@ -9,6 +9,11 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import {
+  FUTURE_BUFFER_PREF,
+  getFutureBufferStart,
+  parseFutureBufferStart,
+} from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
 
@@ -270,21 +275,6 @@ function handleBudgetMonthChange(budget) {
   const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
   sheet.get().set(`${sheetName}!frozen`, budget.frozen === 1);
-}
-
-const FUTURE_BUFFER_PREF = 'futureBufferMode';
-
-// The month automatic mode was turned on, or empty in manual mode
-function parseFutureBufferStart(value: string | null | undefined): string {
-  return value && /^\d{4}-\d{2}$/.test(value) ? value : '';
-}
-
-export async function getFutureBufferStart(): Promise<string> {
-  const row = await db.first<Pick<db.DbPreference, 'value'>>(
-    'SELECT value FROM preferences WHERE id = ?',
-    [FUTURE_BUFFER_PREF],
-  );
-  return parseFutureBufferStart(row?.value);
 }
 
 // Sets `__global!future-buffer-start` from the `futureBufferMode` preference
