@@ -13,6 +13,7 @@ import { css } from '@emotion/css';
 
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
@@ -93,14 +94,22 @@ export function BalanceWithCarryover({
   const budgetedValue = useSheetValue(budgeted);
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const { decimalPlaces } = useFormat().currency;
   const getBalanceAmountStyle = useCallback(
     (balanceValue: number) =>
       makeBalanceAmountStyle(
         balanceValue,
         isGoalTemplatesEnabled ? goalValue : null,
         longGoalValue === 1 ? balanceValue : budgetedValue,
+        decimalPlaces,
       ),
-    [budgetedValue, goalValue, isGoalTemplatesEnabled, longGoalValue],
+    [
+      budgetedValue,
+      decimalPlaces,
+      goalValue,
+      isGoalTemplatesEnabled,
+      longGoalValue,
+    ],
   );
 
   const getDefaultClassName = useCallback(
