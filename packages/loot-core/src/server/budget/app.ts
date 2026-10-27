@@ -1,3 +1,4 @@
+import { captureException } from '#platform/exceptions';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
@@ -209,11 +210,12 @@ app.events.on('sync', ({ type }) => {
     checkSyncingMode('enabled') &&
     !checkSyncingMode('offline')
   ) {
-    void runMutator(async () => {
+    // A failed seed leaves the preference unset, so the next sync retries it
+    runMutator(async () => {
       if (openFile() === file) {
         await seedCarryoverChain();
       }
-    });
+    }).catch(captureException);
   }
 });
 

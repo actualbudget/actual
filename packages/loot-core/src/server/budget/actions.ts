@@ -143,8 +143,9 @@ export function setBudget({
   if (existing) {
     return db.update(table, { id: existing.id, amount });
   }
-  // A NULL carryover inherits the previous month's flag. Writing the
-  // resolved value instead would lose a toggle made on another device.
+  // A NULL carryover inherits the previous month's flag; the column default
+  // of 0 would turn it off. Like any synced write, it beats an older flag
+  // that another device set on this month before this row reached it.
   return db.insert(table, {
     id: `${dbMonth(month)}-${category}`,
     month: dbMonth(month),

@@ -722,8 +722,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
     setSyncingMode('disabled');
   }
 
-  // A synced file seeds after its first full sync instead (see budget/app.ts)
-  if (checkSyncingMode('disabled')) {
+  // A synced file seeds after its first full sync instead (see budget/app.ts).
+  // A file that was never uploaded has no sync group, so it never gets one.
+  if (checkSyncingMode('disabled') || !prefs.getPrefs().groupId) {
     try {
       await seedCarryoverChain();
     } catch (e) {
