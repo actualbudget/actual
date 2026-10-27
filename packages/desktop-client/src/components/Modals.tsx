@@ -49,6 +49,7 @@ import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuMo
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { FutureBufferModeModal } from './modals/FutureBufferModeModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -353,6 +354,17 @@ export function Modals() {
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
               <HoldBufferModal {...modal.options} />
+            </SheetNameProvider>
+          );
+
+        case 'future-buffer-mode':
+          // Automatic mode starts from the current month
+          return (
+            <SheetNameProvider
+              key={key}
+              name={monthUtils.sheetForMonth(monthUtils.currentMonth())}
+            >
+              <FutureBufferModeModal />
             </SheetNameProvider>
           );
 

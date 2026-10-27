@@ -18,6 +18,7 @@ import {
 } from '#components/budget/GoalProgressRing';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import type { Binding } from '#spreadsheet';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
@@ -73,6 +74,13 @@ export function BalanceCell({
 
   const format = useFormat();
 
+  // Income auto-hold is ignored in managed and frozen envelope months
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode();
+  const isCarryoverHidden =
+    budgetType === 'envelope' &&
+    Boolean(category.is_income) &&
+    (isManagedMonth || isFrozenMonth);
+
   return (
     <BalanceWithCarryover
       aria-label={t('Balance for {{categoryName}} category', {
@@ -80,6 +88,7 @@ export function BalanceCell({
       })} // Translated aria-label
       type="financial"
       carryover={carryover}
+      isCarryoverHidden={isCarryoverHidden}
       balance={binding}
       goal={goal}
       budgeted={budgeted}

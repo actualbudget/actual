@@ -38,6 +38,11 @@ export type Spreadsheets = {
     buffered: number;
     'buffered-auto': number;
     'buffered-selected': number;
+    // 1 once the month's buffer is fixed by the freeze
+    frozen: number;
+    // The month automatic "For next month" started, or '' in manual mode.
+    // It lives on the global sheet, so the name carries its own prefix.
+    '__global!future-buffer-start': string;
     'to-budget': number | null;
     'from-last-month': number;
     'total-budgeted': number;
