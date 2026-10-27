@@ -42,9 +42,27 @@ import {
   isValidGroupId,
 } from './util/paths';
 import type { GroupId } from './util/paths';
+import { validateBudgetSession } from './util/validate-budget-session';
 
 const app = express();
-app.use(validateSessionMiddleware);
+app.use((req, res, next) => {
+  const supportsApiKey =
+    (req.method === 'GET' &&
+      [
+        '/list-user-files',
+        '/get-user-file-info',
+        '/download-user-file',
+      ].includes(req.path)) ||
+    (req.method === 'POST' && ['/sync', '/user-get-key'].includes(req.path));
+  if (!supportsApiKey) {
+    return validateSessionMiddleware(req, res, next);
+  }
+  const session = validateBudgetSession(req, res);
+  if (session) {
+    res.locals = session;
+    next();
+  }
+});
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(
@@ -99,6 +117,10 @@ const verifyFileExists = (
   res: Response,
   errorObject: string | Record<string, unknown>,
 ) => {
+  if (res.locals.apiKeyFileId && fileId !== res.locals.apiKeyFileId) {
+    res.status(403).send('file-access-not-allowed');
+    return;
+  }
   if (typeof fileId !== 'string' || !isValidFileId(fileId)) {
     res.status(400).send('invalid fileId');
     return;
@@ -483,7 +505,11 @@ app.post('/update-user-filename', (req, res) => {
 
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
-  const rows = fileService.find({ userId: res.locals.user_id });
+  const rows = fileService
+    .find({ userId: res.locals.user_id })
+    .filter(
+      row => !res.locals.apiKeyFileId || row.id === res.locals.apiKeyFileId,
+    );
   res.send({
     status: 'ok',
     data: rows.map(row => ({
