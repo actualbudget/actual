@@ -6,11 +6,11 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  BaselineBreakdown,
   DataEntity,
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   Area,
   AreaChart,
@@ -33,8 +33,10 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { BaselineTooltip } from './BaselineTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
+import { TooltipCard } from './TooltipCard';
 
 type PayloadItem = {
   payload: {
@@ -45,6 +47,7 @@ type PayloadItem = {
     netDebts: number;
     totalTotals: number;
     totalBudgeted: number;
+    baseline?: BaselineBreakdown;
   };
 };
 
@@ -63,88 +66,83 @@ const CustomTooltip = ({
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
+  const interval = payload?.[0]?.payload;
+  if (active && interval?.baseline) {
+    return (
+      <BaselineTooltip
+        title={interval.date}
+        breakdown={interval.baseline}
+        balanceTypeOp={balanceTypeOp}
+        format={format}
+      />
+    );
+  }
+
   if (active && payload && payload.length) {
     return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload.date}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netAssets'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netDebts'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={
-                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
-                }
-                right={
-                  <FinancialText as="strong">
-                    {format(
-                      balanceTypeOp === 'totalBudgeted'
-                        ? payload[0].payload.totalBudgeted
-                        : payload[0].payload.totalTotals,
-                      'financial',
-                    )}
-                  </FinancialText>
-                }
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      <TooltipCard title={payload[0].payload.date}>
+        {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netAssets'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netDebts'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={
+              balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+            }
+            right={
+              <FinancialText as="strong">
+                {format(
+                  balanceTypeOp === 'totalBudgeted'
+                    ? payload[0].payload.totalBudgeted
+                    : payload[0].payload.totalTotals,
+                  'financial',
+                )}
+              </FinancialText>
+            }
+          />
+        )}
+      </TooltipCard>
     );
   }
 
@@ -198,6 +196,7 @@ type AreaGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
+  showAmounts?: boolean;
 };
 
 export function AreaGraph({
@@ -210,6 +209,7 @@ export function AreaGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTooltip = true,
+  showAmounts = false,
 }: AreaGraphProps) {
   const format = useFormat();
   const navigate = useNavigate();
@@ -219,8 +219,26 @@ export function AreaGraph({
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const privacyMode = usePrivacyMode();
-  const dataMax = Math.max(...data.intervalData.map(i => i[balanceTypeOp]));
-  const dataMin = Math.min(...data.intervalData.map(i => i[balanceTypeOp]));
+  // Amounts against a baseline draw the amount with a faint baseline line.
+  // The spreadsheet flips spending to point up, but area graphs draw it below
+  // zero, so it's flipped back.
+  const isAmounts = showAmounts && !!data.baseline;
+  const amountSign =
+    balanceTypeOp === 'totalDebts' || balanceTypeOp === 'netDebts' ? -1 : 1;
+  const toAreaValue = (value: number | null | undefined) =>
+    value == null ? null : amountSign * value;
+  const getValue = (interval: IntervalEntity) =>
+    isAmounts ? toAreaValue(interval.amount) : interval[balanceTypeOp];
+  const getBaselineValue = (interval: IntervalEntity) =>
+    toAreaValue(interval.baselineAmount);
+
+  const values = data.intervalData.flatMap(i =>
+    isAmounts
+      ? [getValue(i), getBaselineValue(i)].filter(value => value != null)
+      : [i[balanceTypeOp]],
+  );
+  const dataMax = Math.max(...values);
+  const dataMin = Math.min(...values);
 
   const labelsMargin = viewLabels ? 30 : 0;
   const dataDiff = dataMax - dataMin;
@@ -295,10 +313,11 @@ export function AreaGraph({
               )}
               {compact ? null : (
                 <YAxis
-                  dataKey={balanceTypeOp}
+                  // Amounts span both their own and the baseline's values
+                  dataKey={isAmounts ? undefined : balanceTypeOp}
                   domain={[
-                    viewLabels ? labelsMin : 'auto',
-                    viewLabels ? labelsMax : 'auto',
+                    viewLabels || isAmounts ? labelsMin : 'auto',
+                    viewLabels || isAmounts ? labelsMax : 'auto',
                   ]}
                   tickFormatter={tickFormatter}
                   tick={{ fill: theme.pageText }}
@@ -356,6 +375,21 @@ export function AreaGraph({
                 </linearGradient>
               </defs>
 
+              {isAmounts && (
+                <Area
+                  type="linear"
+                  dataKey={getBaselineValue}
+                  stroke={theme.pageTextLight}
+                  strokeOpacity={0.5}
+                  strokeWidth={2}
+                  fill="none"
+                  dot={false}
+                  activeDot={false}
+                  tooltipType="none"
+                  legendType="none"
+                  {...animationProps}
+                />
+              )}
               <Area
                 type="linear"
                 dot={false}
@@ -387,14 +421,14 @@ export function AreaGraph({
                   },
                 }}
                 {...animationProps}
-                dataKey={balanceTypeOp}
+                dataKey={getValue}
                 stroke={`url(#stroke${balanceTypeOp})`}
                 fill={`url(#fill${balanceTypeOp})`}
                 fillOpacity={1}
               >
                 {viewLabels && !compact && (
                   <LabelList
-                    dataKey={balanceTypeOp}
+                    dataKey={getValue}
                     content={props =>
                       customLabel({
                         props,

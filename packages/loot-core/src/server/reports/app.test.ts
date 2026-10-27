@@ -9,7 +9,11 @@ import { app as dashboardApp } from '#server/dashboard/app';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { runMutator } from '#server/mutators';
-import type { CustomReportEntity, CustomReportTagScope } from '#types/models';
+import type {
+  CustomReportBaseline,
+  CustomReportEntity,
+  CustomReportTagScope,
+} from '#types/models';
 
 import { app as reportApp, reportModel } from './app';
 
@@ -177,4 +181,64 @@ describe('custom report tag scope mapping', () => {
       expect(importedReport.tagScope).toEqual(tagScope);
     },
   );
+});
+
+describe('custom report baseline', () => {
+  const baseline = {
+    enabled: true,
+    dateRange: 'Last 6 months',
+    isDateStatic: false,
+    startDate: '2026-04-01',
+    endDate: '2026-09-30',
+    includeCurrentInterval: false,
+    projectToFullPeriod: true,
+    showChanges: true,
+    changeFromBaseline: false,
+  } satisfies CustomReportBaseline;
+
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+  });
+
+  afterEach(async () => {
+    if (await fs.exists(dashboardImportPath)) {
+      await fs.removeFile(dashboardImportPath);
+    }
+  });
+
+  it('stores the baseline alongside other metadata', async () => {
+    await db.insertWithSchema(
+      'custom_reports',
+      reportModel.fromJS({
+        ...report,
+        baseline,
+        metadata: { presentation: 'compact' },
+      }),
+    );
+
+    const [loadedReport] = await reportApp.handlers['report/get']();
+    expect(loadedReport.baseline).toEqual(baseline);
+    expect(loadedReport.metadata).toEqual({ presentation: 'compact' });
+  });
+
+  it.each([
+    { baseline: null },
+    { baseline: { ...baseline, dateRange: 3 } },
+    { baseline: { ...baseline, enabled: 'yes' } },
+    { baseline: { ...baseline, showChanges: 'yes' } },
+    { baseline: { ...baseline, changeFromBaseline: 'yes' } },
+  ])('rejects invalid imported baselines: %j', async invalid => {
+    await writeDashboardReport({ ...report, ...invalid });
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-import']({
+          filePath: dashboardImportPath,
+          dashboardPageId: 'dashboard-page-id',
+        }),
+      ),
+    ).rejects.toMatchObject({ cause: 'validation-error' });
+    expect(await reportApp.handlers['report/get']()).toEqual([]);
+  });
 });

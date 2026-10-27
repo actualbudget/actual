@@ -6,8 +6,26 @@ export type CustomReportTagScope =
 
 export type CustomReportMetadata = Record<string, unknown>;
 
+// A date range the report's data is offset against, by its daily average
+export type CustomReportBaseline = {
+  enabled: boolean;
+  dateRange: string;
+  isDateStatic: boolean;
+  startDate: string;
+  endDate: string;
+  includeCurrentInterval: boolean;
+  // Project amounts so far over the report's whole range, by days elapsed
+  projectToFullPeriod: boolean;
+  // Draw graphs as changes from the baseline, rather than as amounts with the
+  // baseline drawn in. Optional since older reports don't store it.
+  showChanges?: boolean;
+  // With amounts on bar graphs, draw only the change, from the baseline's end
+  changeFromBaseline?: boolean;
+};
+
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
+  baseline?: CustomReportBaseline;
 };
 
 export type CustomReportEntity = {
@@ -30,6 +48,7 @@ export type CustomReportEntity = {
   showUncategorized: boolean;
   trimIntervals: boolean;
   showTrendLines: boolean;
+  baseline?: CustomReportBaseline;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -46,6 +65,26 @@ export type balanceTypeOpType =
   | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
+
+export type ReportValues = Record<balanceTypeOpType, number>;
+
+// What an amount offset against a baseline was built from
+export type BaselineBreakdown = {
+  // The baseline's daily average over the same number of days
+  expected: ReportValues;
+  actual: ReportValues;
+  // A row's or total's actual amount projected over the whole range from its
+  // pace so far. Single intervals aren't projected.
+  projected?: ReportValues;
+  // The baseline over an average-length interval, for tables and summaries
+  perInterval?: ReportValues;
+  // The baseline over an interval that hasn't started, which compares
+  // nothing yet but lets charts draw the baseline ahead
+  upcoming?: ReportValues;
+  // The actual amount at its pace so far over an average-length interval, to
+  // compare against perInterval
+  pacePerInterval?: ReportValues;
+};
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -100,6 +139,9 @@ export type DataEntity = {
   totalTotals: number;
   totalBudgeted: number;
   scopeTagNames?: string[];
+  baseline?: BaselineBreakdown;
+  baselineStartDate?: string;
+  baselineEndDate?: string;
 };
 
 export type LegendEntity = {
@@ -122,6 +164,11 @@ export type IntervalEntity = {
   netDebts: number;
   totalTotals: number;
   totalBudgeted: number;
+  baseline?: BaselineBreakdown;
+  // When graphs draw amounts against a baseline: the interval's amount, which
+  // is null before it starts, and its baseline
+  amount?: number | null;
+  baselineAmount?: number | null;
 };
 
 export type GroupedEntity = {
@@ -138,6 +185,7 @@ export type GroupedEntity = {
   totalBudgeted: number;
   categories?: GroupedEntity[];
   bucketTagNames?: string[];
+  baseline?: BaselineBreakdown;
 };
 
 export type Interval = {

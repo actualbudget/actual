@@ -17,14 +17,24 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
+import {
+  canShowBaselineChanges,
+  defaultBaseline,
+  getBaselineRange,
+} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportOptions } from '#components/reports/ReportOptions';
+import {
+  createBaselineGroupedSpreadsheet,
+  createBaselineSpreadsheet,
+} from '#components/reports/spreadsheets/baseline-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 function ErrorFallback() {
@@ -106,6 +116,21 @@ export function GetCardData({
     endDate = dateEnd || report.endDate;
   }
 
+  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
+  const baseline = report.baseline ?? defaultBaseline;
+  const [baselineStartDate, baselineEndDate] = getBaselineRange(
+    baseline,
+    earliestTransaction,
+    latestTransaction,
+    firstDayOfWeekIdx,
+  );
+  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  const projectToFullPeriod = baseline.projectToFullPeriod;
+  // Amounts are drawn with the baseline unless changes are asked for
+  const showAmounts = !(
+    baseline.showChanges && canShowBaselineChanges(report.graphType)
+  );
+
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
 
@@ -127,7 +152,7 @@ export function GetCardData({
   }
 
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -143,10 +168,30 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-    });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx, budgetType]);
+    };
+    return isBaselineEnabled
+      ? createBaselineGroupedSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+          showAmounts,
+        })
+      : createGroupedSpreadsheet(props);
+  }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
+    showAmounts,
+    report,
+    categories,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+    budgetType,
+  ]);
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -169,8 +214,21 @@ export function GetCardData({
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
       dateFormat,
-    });
+    };
+    return isBaselineEnabled
+      ? createBaselineSpreadsheet(props, {
+          startDate: baselineStartDate,
+          endDate: baselineEndDate,
+          projectToFullPeriod,
+          showAmounts,
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isBaselineEnabled,
+    baselineStartDate,
+    baselineEndDate,
+    projectToFullPeriod,
+    showAmounts,
     report,
     categories,
     payees,
@@ -203,6 +261,8 @@ export function GetCardData({
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
+        showAmounts={showAmounts}
+        changeFromBaseline={baseline.changeFromBaseline}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>
