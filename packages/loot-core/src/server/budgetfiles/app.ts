@@ -727,9 +727,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
     try {
       await seedCarryoverChain();
     } catch (e) {
-      // Failing to seed shouldn't block loading the budget; it's retried
-      // on the next load
+      // Without the seed, closed months would show different figures, so
+      // don't open the file. It's retried on the next load.
       captureException(e);
+      await closeBudget();
+      return { error: 'loading-budget' };
     }
   }
 

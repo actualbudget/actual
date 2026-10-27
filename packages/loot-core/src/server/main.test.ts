@@ -99,6 +99,35 @@ describe('Budgets', () => {
     ).toEqual({ value: 'true' });
   }, 20_000);
 
+  test('budget does not open when the carryover seed fails', async () => {
+    await createTestBudget('default-budget-template');
+
+    await db.openDatabase('test-budget');
+    const row = await db.first<db.DbClockMessage>(
+      'SELECT * FROM messages_clock',
+    );
+
+    // The fake time is behind the file's clock, so the seed's write fails
+    // with a clock drift error
+    const failed = await runHandler(handlers['load-budget'], {
+      id: 'test-budget',
+    });
+    expect(failed.error).toBe('loading-budget');
+    expect(db.getDatabase()).toBe(null);
+    expect(prefs.getPrefs()).toBe(null);
+
+    global.stepForwardInTime(deserializeClock(row.clock).timestamp.millis());
+    const retried = await runHandler(handlers['load-budget'], {
+      id: 'test-budget',
+    });
+    expect(retried.error).toBe(undefined);
+    expect(
+      await db.first('SELECT value FROM preferences WHERE id = ?', [
+        'carryoverChainSeeded',
+      ]),
+    ).toEqual({ value: 'true' });
+  }, 30_000);
+
   test('budget detects out of sync migrations', async () => {
     await createTestBudget('default-budget-template');
 
