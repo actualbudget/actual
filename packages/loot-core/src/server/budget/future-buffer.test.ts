@@ -596,4 +596,33 @@ describe('future buffer', () => {
     expect(monthRow('2027-02')?.frozen).toBe(1);
     expect(monthRow('2027-03')).toBeNull();
   });
+
+  it('keeps the months already created when the range starts later', async () => {
+    // Automatic mode was on from Oct, with nothing spent, and then turned off
+    global.currentMonth = '2027-03';
+    await createCategories();
+    await db.update('preferences', {
+      id: 'futureBufferMode',
+      value: '2026-10',
+    });
+    await db.insert('zero_budgets', {
+      id: '202612-bills',
+      month: 202612,
+      category: 'bills',
+      amount: 50000,
+    });
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+    await createAllBudgets();
+    await setMode(null);
+
+    // Each new month moves the range's start past Dec
+    for (const month of ['2027-04', '2027-05']) {
+      global.currentMonth = month;
+      await createAllBudgets();
+    }
+
+    expect(await getSheetValue('budget202612', 'total-budgeted')).toBe(-50000);
+    expect(await toBudget('2027-05')).toBe(-50000);
+  });
 });
