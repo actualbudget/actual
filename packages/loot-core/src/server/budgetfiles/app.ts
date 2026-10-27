@@ -16,6 +16,7 @@ import {
 } from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
+import { seedCarryoverChain } from '#server/budget/carryover-seed';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
@@ -28,6 +29,7 @@ import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import {
+  checkSyncingMode,
   clearFullSyncTimeout,
   initialFullSync,
   resumeFullSync,
@@ -783,6 +785,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
   } else {
     // we're in a test - disable the sync
     setSyncingMode('disabled');
+  }
+
+  // A synced file seeds after its first full sync instead (see budget/app.ts)
+  if (checkSyncingMode('disabled')) {
+    await seedCarryoverChain();
   }
 
   app.events.emit('load-budget', { id });
