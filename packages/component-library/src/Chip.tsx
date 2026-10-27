@@ -3,7 +3,6 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import { Button } from './Button';
 import { SvgClose } from './icons/v1';
-import { spacing } from './tokens';
 
 type ChipProps = Omit<
   ComponentPropsWithoutRef<typeof Button>,
@@ -15,15 +14,9 @@ type ChipProps = Omit<
 };
 
 const chipStyle = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: spacing.xs,
   padding: '4px 8px',
   fontSize: 11,
-  lineHeight: '14px',
   borderRadius: 3,
-  minHeight: 'auto',
 } as const;
 
 export function Chip({
