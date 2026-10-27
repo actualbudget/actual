@@ -230,7 +230,7 @@ app.events.on('sync', ({ type }) => {
     syncedSpreadsheet = spreadsheet;
     // A failed seed leaves the preference unset, so the next sync retries it
     runMutator(async () => {
-      if (openFile() === file) {
+      if (openFile() === file && sheet.get() === spreadsheet) {
         await seedCarryoverChain();
       }
       if (openFile() === file && sheet.get() === spreadsheet) {
