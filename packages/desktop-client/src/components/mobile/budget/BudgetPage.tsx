@@ -636,11 +636,11 @@ function Banners({ month, onBudgetAction }) {
   );
 }
 
-function Banner({ type = 'info', children }) {
+function Banner({ type = 'info', style = undefined, children }) {
   return (
     <Card
       style={{
-        minHeight: 50,
+        height: 50,
         marginTop: 10,
         marginBottom: 10,
         padding: 10,
@@ -651,6 +651,7 @@ function Banner({ type = 'info', children }) {
             : type === 'warning'
               ? theme.warningBackground
               : theme.noticeBackground,
+        ...style,
       }}
     >
       {children}
@@ -734,6 +735,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
       envelopeBudget.forNextMonth,
     ) ?? 0;
   const { isManagedMonth } = useFutureBufferMode();
+  const isHoldShown = isManagedMonth && forNextMonth > 0;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { data: { list: categories } = { list: [] } } = useCategories();
@@ -782,7 +784,11 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
 
   return (
     <GridListItem textValue="Overbudgeted banner" {...props}>
-      <Banner type="critical">
+      <Banner
+        type="critical"
+        // The held line needs a second row
+        style={isHoldShown ? { height: 'auto', minHeight: 50 } : undefined}
+      >
         <View
           style={{
             flexDirection: 'row',
@@ -790,7 +796,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
             justifyContent: 'space-between',
           }}
         >
-          <View style={{ flex: 1, marginRight: 10 }}>
+          <View>
             <View
               style={{
                 flexDirection: 'row',
@@ -803,7 +809,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
                 <Trans>You have budgeted more than your available funds</Trans>
               </Text>
             </View>
-            {isManagedMonth && forNextMonth > 0 && (
+            {isHoldShown && (
               <Text style={{ ...styles.smallText, marginTop: 4 }}>
                 <Trans>
                   <FinancialText>
