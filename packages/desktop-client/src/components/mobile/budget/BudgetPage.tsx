@@ -815,7 +815,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
                       }
                     </PrivacyFilter>
                   </FinancialText>{' '}
-                  is held for future months. Budget less ahead, or add income.
+                  is held for future months.
                 </Trans>
               </Text>
             )}
