@@ -13,7 +13,7 @@ import type { Browser, Locator, Page } from '@playwright/test';
  * using the test-scoped `page` fixture — a `page`-fixture override would
  * be a no-op.
  */
-const disableAnimationsInitScript = () => {
+export const disableAnimationsInitScript = () => {
   const css = `*, *::before, *::after {
     transition-duration: 0s !important;
     transition-delay: 0s !important;

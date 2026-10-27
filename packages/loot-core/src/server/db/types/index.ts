@@ -33,6 +33,7 @@ export type DbAccount = {
     | 'attention-required'
     | 'rate-limit-exceeded'
     | 'timed-out'
+    | 'server-down'
     | 'account-missing'
     | 'not-configured'
     | null;
