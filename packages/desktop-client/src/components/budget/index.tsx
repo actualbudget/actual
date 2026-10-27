@@ -4,14 +4,15 @@ import type { ComponentType } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
 import {
+  budgetBoundsQueries,
   useBudgetActions,
   useDeleteCategoryGroupMutation,
   useDeleteCategoryMutation,
@@ -32,6 +33,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { AutoSizingBudgetTable } from './DynamicBudgetTable';
 import * as envelopeBudget from './envelope/EnvelopeBudgetComponents';
 import { EnvelopeBudgetProvider } from './envelope/EnvelopeBudgetContext';
+import { clampMonth } from './MonthsContext';
 import * as trackingBudget from './tracking/TrackingBudgetComponents';
 import { TrackingBudgetProvider } from './tracking/TrackingBudgetContext';
 import { prewarmAllMonths, prewarmMonth } from './util';
@@ -45,10 +47,11 @@ export function Budget() {
   );
   const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
-  const [bounds, setBounds] = useState({
+  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
+  const bounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
-  });
+  };
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
@@ -56,33 +59,28 @@ export function Budget() {
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
 
-  const init = useEffectEvent(() => {
-    async function run() {
-      const { start, end } = await send('get-budget-bounds');
-      setBounds({ start, end });
+  // Re-runs whenever the bounds change so newly available months get warmed.
+  const init = useEffectEvent(
+    (type: typeof budgetType, monthBounds: typeof loadedBounds) => {
+      async function run() {
+        if (!monthBounds) {
+          return;
+        }
 
-      await prewarmAllMonths(
-        budgetType,
-        spreadsheet,
-        { start, end },
-        startMonth,
-      );
+        await prewarmAllMonths(
+          type,
+          spreadsheet,
+          monthBounds,
+          clampMonth(startMonth, monthBounds),
+        );
 
-      setInitialized(true);
-    }
-
-    void run();
-  });
-  useEffect(() => init(), []);
-
-  const loadBoundBudgets = useEffectEvent(() => {
-    void send('get-budget-bounds').then(({ start, end }) => {
-      if (bounds.start !== start || bounds.end !== end) {
-        setBounds({ start, end });
+        setInitialized(true);
       }
-    });
-  });
-  useEffect(() => loadBoundBudgets(), []);
+
+      void run();
+    },
+  );
+  useEffect(() => init(budgetType, loadedBounds), [budgetType, loadedBounds]);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);
