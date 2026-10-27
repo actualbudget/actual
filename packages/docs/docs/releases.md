@@ -105,6 +105,7 @@ This release includes automatic bank syncing, reports grouped by tags, and more 
 - [#9191](https://github.com/actualbudget/actual/pull/9191) Fix new and edited schedules skipping a weekend date that moves to the next weekday — thanks @agigante80
 - [#8824](https://github.com/actualbudget/actual/pull/8824) Fix `#template schedule` underfunding a category when the schedule repeats every N days or weeks and N spans more than a month — thanks @arbelonson-source
 - [#9219](https://github.com/actualbudget/actual/pull/9219) Fix renaming an account or group in the redesigned sidebar closing when pressing the arrow keys — thanks @junyuanz1
+- [#9351](https://github.com/actualbudget/actual/pull/9351) Fix SimpleFIN connection failures on recent nightly builds — thanks @jfdoming
 - [#9318](https://github.com/actualbudget/actual/pull/9318) Exclude income from the budgeted spending total in Spending Analysis when using Tracking Budget. — thanks @emadleo13
 - [#8968](https://github.com/actualbudget/actual/pull/8968) Fix the desktop app getting stuck on "Loading global preferences" when installed from the Microsoft Store — thanks @MikesGlitch
 - [#8963](https://github.com/actualbudget/actual/pull/8963) Show a clear error message and configuration prompt when GoCardless credentials are missing instead of an internal error — thanks @Marshmellow31
