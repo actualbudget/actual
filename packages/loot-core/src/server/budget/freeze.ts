@@ -4,19 +4,24 @@ import { batchMessages } from '#server/sync';
 import * as monthUtils from '#shared/months';
 
 import { getFutureBufferStart, setBuffer } from './actions';
-import { getBudgetType } from './base';
+import { createAllBudgets, getBudgetType } from './base';
 
 type MonthBuffer = { month: string; amount: number };
 
-// Each created month from the start month on that isn't frozen, with its
-// computed buffer. A month with no sheet can't be shown, so it waits until
-// it has one. Returns null if the file was closed or reopened while it
-// waited: a closed budget unloads its spreadsheet and every load creates a
-// new one.
+// Each month from the start month on that isn't frozen, with its computed
+// buffer. Returns null if the file was closed or reopened while it waited:
+// a closed budget unloads its spreadsheet and every load creates a new one.
 export async function readUnfrozenBuffers(
   spreadsheet: ReturnType<typeof sheet.get>,
   startMonth: string,
 ): Promise<MonthBuffer[] | null> {
+  // The start month can come from another device through sync and be
+  // older than this load's months, so create any that are missing
+  await createAllBudgets();
+  if (sheet.get() !== spreadsheet) {
+    return null;
+  }
+
   const frozenRows = await db.all<Pick<db.DbZeroBudgetMonth, 'id'>>(
     'SELECT id FROM zero_budget_months WHERE frozen = 1',
   );
