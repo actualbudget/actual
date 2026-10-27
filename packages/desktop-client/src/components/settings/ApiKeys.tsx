@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
@@ -18,8 +17,6 @@ import { SettingsRow } from './SettingsRow';
 export function ApiKeys({ fileId }: { fileId: string }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { isNarrowWidth } = useResponsive();
-  const controlSize = isNarrowWidth ? 'extra-large' : 'medium';
   const [keys, setKeys] = useState<ApiKey[] | null>(null);
   const [reload, setReload] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -53,11 +50,7 @@ export function ApiKeys({ fileId }: { fileId: string }) {
   }
 
   const addButton = (
-    <Button
-      size={controlSize}
-      isDisabled={!keys || failed}
-      onPress={() => openModal()}
-    >
+    <Button isDisabled={!keys || failed} onPress={() => openModal()}>
       <Trans>Add key</Trans>
     </Button>
   );
@@ -68,9 +61,8 @@ export function ApiKeys({ fileId }: { fileId: string }) {
       description={t(
         'Give an integration read and write access to this budget without sharing your login. Bank sync and server administration are not available through API keys.',
       )}
-      control={!isNarrowWidth && addButton}
+      control={addButton}
     >
-      {isNarrowWidth && addButton}
       {failed ? (
         <View style={{ gap: spacing.sm }}>
           <Text role="alert" style={{ color: theme.errorText }}>
@@ -79,16 +71,13 @@ export function ApiKeys({ fileId }: { fileId: string }) {
               server supports API keys, then try again.
             </Trans>
           </Text>
-          <Button
-            size={controlSize}
-            onPress={() => setReload(value => value + 1)}
-          >
+          <Button onPress={() => setReload(value => value + 1)}>
             <Trans>Retry</Trans>
           </Button>
         </View>
       ) : (
         keys && (
-          <View style={{ gap: spacing.md }}>
+          <View style={{ gap: spacing.xs }}>
             {keys.length === 0 && (
               <Text>
                 <Trans>You have no API keys for this budget.</Trans>
@@ -100,16 +89,24 @@ export function ApiKeys({ fileId }: { fileId: string }) {
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: spacing.sm,
+                  gap: 10,
+                  padding: '8px 10px',
+                  borderRadius: 6,
+                  border: `1px solid ${theme.tableBorder}`,
+                  backgroundColor: theme.tableBackground,
                 }}
               >
                 <Text
-                  style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    overflowWrap: 'anywhere',
+                    color: theme.tableText,
+                  }}
                 >
                   {key.name}
                 </Text>
                 <Button
-                  size={controlSize}
                   aria-label={t('Revoke {{name}}', { name: key.name })}
                   onPress={() => openModal(key)}
                 >
