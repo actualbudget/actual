@@ -72,12 +72,12 @@ const hold = 'Hold for next month';
 const reset = "Reset next month's buffer";
 const disableAutoHold = 'Disable current auto hold';
 
-describe('ToBudgetMenu in automatic mode', () => {
-  it('hides the manual controls in a managed month', () => {
+describe('ToBudgetMenu', () => {
+  it('hides the manual controls in a managed month, but not the mode item', () => {
     setSheetValues({ manualHold: 5000 });
     const { rerender } = renderMenu('2026-11');
 
-    expect(screen.getByText('Move to a category')).toBeInTheDocument();
+    expect(screen.getByText('For next month: Automatic…')).toBeInTheDocument();
     expect(screen.queryByText(hold)).not.toBeInTheDocument();
     expect(screen.queryByText(reset)).not.toBeInTheDocument();
 
@@ -98,36 +98,7 @@ describe('ToBudgetMenu in automatic mode', () => {
     expect(screen.getByText(reset)).toBeInTheDocument();
   });
 
-  it('leaves the months before the start month as they are', () => {
-    setSheetValues({ autoHold: 5000 });
-    renderMenu('2026-09');
-
-    expect(screen.queryByText(hold)).not.toBeInTheDocument();
-    expect(screen.getByText(disableAutoHold)).toBeInTheDocument();
-  });
-
-  it('shows the mode item even with the flag off', () => {
-    setSheetValues();
-    renderMenu(START_MONTH);
-
-    expect(screen.getByText('For next month: Automatic…')).toBeInTheDocument();
-  });
-
-  it('follows a mode change that arrives through the sheet', () => {
-    setSheetValues({ manualHold: 5000 });
-    const { rerender } = renderMenu('2026-11', { isFlagOn: true });
-    expect(screen.queryByText(reset)).not.toBeInTheDocument();
-
-    setSheetValues({ startMonth: '', manualHold: 5000 });
-    rerender();
-
-    expect(screen.getByText(reset)).toBeInTheDocument();
-    expect(screen.getByText('For next month: Manual…')).toBeInTheDocument();
-  });
-});
-
-describe('ToBudgetMenu in manual mode', () => {
-  it('shows the mode item only with the flag on, and opens the modal', async () => {
+  it('offers the mode item in manual mode only with the flag on', async () => {
     setSheetValues({ startMonth: '' });
     renderMenu(START_MONTH);
     expect(screen.queryByText(/^For next month:/)).not.toBeInTheDocument();

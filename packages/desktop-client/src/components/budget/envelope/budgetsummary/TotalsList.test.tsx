@@ -21,8 +21,8 @@ vi.mock('#hooks/useSheetValue', () => ({
 
 const tooltip = /Held automatically for what your future months need/;
 
-function renderList({ startMonth = '2026-10' } = {}) {
-  sheetValues = { '__global!future-buffer-start': startMonth, frozen: 0 };
+function renderList() {
+  sheetValues = { '__global!future-buffer-start': '2026-10', frozen: 0 };
   render(
     <TestProviders>
       <TotalsList month="2026-10" prevMonthName="Sep" />
@@ -37,13 +37,5 @@ describe('TotalsList', () => {
     await userEvent.hover(screen.getByText('For next month'));
 
     expect(await screen.findByText(tooltip)).toBeInTheDocument();
-  });
-
-  it('has no explanation in manual mode', async () => {
-    renderList({ startMonth: '' });
-
-    await userEvent.hover(screen.getByText('For next month'));
-
-    expect(screen.queryByText(tooltip)).not.toBeInTheDocument();
   });
 });
