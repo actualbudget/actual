@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 
 import { Button } from './Button';
 import { SvgClose } from './icons/v1';
@@ -19,7 +19,7 @@ const chipStyle = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: spacing.xs,
-  padding: '3px 7px',
+  padding: '4px 8px',
   fontSize: 11,
   lineHeight: '14px',
   borderRadius: 3,

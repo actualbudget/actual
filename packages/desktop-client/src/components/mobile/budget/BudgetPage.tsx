@@ -11,7 +11,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { Card } from '@actual-app/components/card';
-import { IconButton } from '@actual-app/components/icon-button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import {
@@ -971,6 +970,10 @@ function MonthSelector({
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
   const nextEnabled = month < monthBounds.end;
+  const arrowButtonStyle = {
+    padding: 10,
+    margin: 2,
+  };
 
   return (
     <View
@@ -981,15 +984,15 @@ function MonthSelector({
         flexDirection: 'row',
       }}
     >
-      <IconButton
+      <Button
         aria-label={t('Previous month')}
-        size="large"
+        variant="bare"
         isDisabled={!prevEnabled}
         onPress={onPrevMonth}
-        style={{ margin: 2, opacity: prevEnabled ? 1 : 0.6 }}
+        style={{ ...arrowButtonStyle, opacity: prevEnabled ? 1 : 0.6 }}
       >
-        <SvgArrowThinLeft width={15} height={15} />
-      </IconButton>
+        <SvgArrowThinLeft width="15" height="15" />
+      </Button>
       <Button
         variant="bare"
         style={{
@@ -1006,15 +1009,15 @@ function MonthSelector({
           {monthUtils.format(month, "MMMM ''yy", locale)}
         </Text>
       </Button>
-      <IconButton
+      <Button
         aria-label={t('Next month')}
-        size="large"
+        variant="bare"
         isDisabled={!nextEnabled}
         onPress={onNextMonth}
-        style={{ margin: 2, opacity: nextEnabled ? 1 : 0.6 }}
+        style={{ ...arrowButtonStyle, opacity: nextEnabled ? 1 : 0.6 }}
       >
-        <SvgArrowThinRight width={15} height={15} />
-      </IconButton>
+        <SvgArrowThinRight width="15" height="15" />
+      </Button>
     </View>
   );
 }

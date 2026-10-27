@@ -14,9 +14,8 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeysContext } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
-import type { Button } from '@actual-app/components/button';
+import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { IconButton } from '@actual-app/components/icon-button';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
 import { SvgLogo } from '@actual-app/components/icons/logo';
 import { SvgDelete } from '@actual-app/components/icons/v0';
@@ -597,8 +596,13 @@ type ModalCloseButtonProps = {
 export function ModalCloseButton({ onPress, style }: ModalCloseButtonProps) {
   const { t } = useTranslation();
   return (
-    <IconButton size="medium" onPress={onPress} aria-label={t('Close')}>
+    <Button
+      variant="bare"
+      onPress={onPress}
+      style={{ padding: '10px 10px' }}
+      aria-label={t('Close')}
+    >
       <SvgDelete width={10} style={style} />
-    </IconButton>
+    </Button>
   );
 }
