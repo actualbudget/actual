@@ -7,6 +7,8 @@ import {
   calculateTimeRange,
   getFullFutureRange,
   getLatestRange,
+  validateEnd,
+  validateStart,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -238,5 +240,31 @@ describe('boundMonthRange', () => {
     expect(boundMonthRange('2026-08', '2026-09', '2026-09', '2026-07')).toEqual(
       ['2026-09', '2026-09'],
     );
+  });
+});
+
+describe('Quarterly range validation', () => {
+  it('starts a range on the first day of the chosen quarter', () => {
+    expect(
+      validateStart(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-04',
+        '2016-12-31',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-04-01', '2016-12-31', 'static']);
+  });
+
+  it('ends a range on the last day of the chosen quarter', () => {
+    expect(
+      validateEnd(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-01-01',
+        '2016-04',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-01-01', '2016-06-30', 'static']);
   });
 });

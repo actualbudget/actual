@@ -17,6 +17,10 @@ export function validateStart(
       dateStart = start + '-01';
       addDays = 180;
       break;
+    case 'Quarterly':
+      dateStart = start + '-01';
+      addDays = 365;
+      break;
     case 'Yearly':
       dateStart = start + '-01-01';
       addDays = 1095;
@@ -58,6 +62,10 @@ export function validateEnd(
     case 'Monthly':
       dateEnd = monthUtils.getMonthEnd(end + '-01');
       subDays = 180;
+      break;
+    case 'Quarterly':
+      dateEnd = monthUtils.getMonthEnd(monthUtils.getQuarterEnd(end) + '-01');
+      subDays = 365;
       break;
     case 'Yearly':
       dateEnd = end + '-12-31';
@@ -158,6 +166,7 @@ function boundedRange(
       latest = monthUtils.currentDay();
       break;
     case 'Monthly':
+    case 'Quarterly':
       latest = monthUtils.getMonthEnd(monthUtils.currentDay());
       break;
     case 'Yearly':
