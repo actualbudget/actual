@@ -1,4 +1,3 @@
-// @ts-strict-ignore
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
@@ -125,7 +124,7 @@ describe('carryover', () => {
     );
     await sheet.waitOnSpreadsheet();
 
-    expect(budgetRow('zero_budgets', '2027-03', 'card').carryover).toBeNull();
+    expect(budgetRow('zero_budgets', '2027-03', 'card')?.carryover).toBeNull();
     expect(carryover('2027-03', 'card')).toBe(true);
     expect(carryover('2027-04', 'card')).toBe(true);
 
@@ -133,8 +132,8 @@ describe('carryover', () => {
     await sheet.waitOnSpreadsheet();
 
     const undone = budgetRow('zero_budgets', '2027-05', 'card');
-    expect(undone.amount).toBe(0);
-    expect(undone.carryover).toBeNull();
+    expect(undone?.amount).toBe(0);
+    expect(undone?.carryover).toBeNull();
     expect(carryover('2027-05', 'card')).toBe(true);
   });
 
@@ -163,7 +162,7 @@ describe('carryover', () => {
     await sheet.waitOnSpreadsheet();
 
     expect(carryover('2027-02', 'income')).toBe(false);
-    expect(budgetRow('zero_budgets', '2027-03', 'income').carryover).toBe(1);
+    expect(budgetRow('zero_budgets', '2027-03', 'income')?.carryover).toBe(1);
     expect(carryover('2027-04', 'income')).toBe(true);
   });
 
