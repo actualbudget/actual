@@ -399,7 +399,7 @@ export type Message = {
   value: string | number | null | UnknownFormatValue;
 };
 
-async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
+async function _applyMessages(messages: Message[], isReceived = false) {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
@@ -484,7 +484,9 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
         const applied = apply(
           msg,
           getIn(oldData, [dataset, row]) || added.has(dataset + row),
-          deferUnknownSchema,
+          // Inbound messages may come from a newer version of the app, so
+          // unknown-schema errors defer instead of failing the batch
+          isReceived,
         );
 
         if (applied) {
@@ -543,7 +545,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
     newData = fetchData(idsPerTable);
   };
-  db.transaction(applyInTransaction, { immediate: true });
+  if (isReceived) {
+    receiveInTransaction(messages, applyInTransaction);
+  } else {
+    db.transaction(applyInTransaction, { immediate: true });
+  }
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
@@ -634,34 +640,54 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
 export const applyMessages = sequential(_applyMessages);
 
-export function receiveMessages(messages: Message[]): Promise<Message[]> {
+// Receiving the batch's latest timestamp inside the transaction advances
+// the clock once per batch and includes it in the saved `messages_clock`
+// row. If the transaction fails, the clock is restored along with it.
+function receiveInTransaction(
+  messages: Message[],
+  applyInTransaction: () => void,
+) {
+  let latest: Timestamp | null = null;
+  for (const { timestamp } of messages) {
+    if (
+      latest === null ||
+      timestamp.millis() > latest.millis() ||
+      (timestamp.millis() === latest.millis() &&
+        timestamp.counter() > latest.counter())
+    ) {
+      latest = timestamp;
+    }
+  }
+
+  const clock = getClock();
+  const savedMillis = clock.timestamp.millis();
+  const savedCounter = clock.timestamp.counter();
   try {
-    // Receiving the latest timestamp preserves the clock and drift check while
-    // advancing the counter once per batch.
-    let latest = null;
-    for (const { timestamp } of messages) {
-      if (
-        latest === null ||
-        timestamp.millis() > latest.millis() ||
-        (timestamp.millis() === latest.millis() &&
-          timestamp.counter() > latest.counter())
-      ) {
-        latest = timestamp;
-      }
-    }
-    if (latest !== null) {
-      Timestamp.recv(latest);
-    }
+    db.transaction(
+      () => {
+        if (latest !== null) {
+          Timestamp.recv(latest);
+        }
+        applyInTransaction();
+      },
+      { immediate: true },
+    );
+  } catch (e) {
+    clock.timestamp.setMillis(savedMillis);
+    clock.timestamp.setCounter(savedCounter);
+    throw e;
+  }
+}
+
+export async function receiveMessages(messages: Message[]): Promise<Message[]> {
+  try {
+    return await runMutator(() => applyMessages(messages, true));
   } catch (e) {
     if (e instanceof Timestamp.ClockDriftError) {
       throw new SyncError('clock-drift');
     }
     throw e;
   }
-
-  // Inbound messages may come from a newer version of the app, so
-  // unknown-schema errors defer instead of failing the batch
-  return runMutator(() => applyMessages(messages, true));
 }
 
 async function errorHandler(e: Error) {
