@@ -94,18 +94,23 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       // Also fetch the total count
       void this.fetchCount();
 
-      // If data is null, we haven't fetched anything yet so just
-      // fetch the first page
-      return aqlQuery(
-        this.query.limit(
-          this.data == null
-            ? this._pageCount
-            : Math.max(this.data.length, this._pageCount),
-        ),
-      );
+      return this.fetchLoaded();
     });
 
     return this._fetchDataPromise;
+  };
+
+  // Fetches as many rows as are loaded again
+  private fetchLoaded = () => {
+    // If data is null, we haven't fetched anything yet so just
+    // fetch the first page
+    return aqlQuery(
+      this.query.limit(
+        this.data == null
+          ? this._pageCount
+          : Math.max(this.data.length, this._pageCount),
+      ),
+    );
   };
 
   static runPagedQuery = <TResponse>(
@@ -158,8 +163,8 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       if (result.data.length === 0) {
         // This row is not part of this set anymore, we can't do
         // this. We stop early to avoid possibly pulling in a ton of
-        // data that we don't need, and keep the data as it is
-        return { data: this.data, dependencies: result.dependencies };
+        // data that we don't need, and refetch what's loaded instead
+        return this.fetchLoaded();
       }
       const fullRow = result.data[0];
 

@@ -43,7 +43,7 @@ function runPagedQuery(query, data) {
   if (query.filterExpressions.length > 0) {
     const filter = query.filterExpressions[0];
     if (filter.id != null) {
-      return [data.find(row => row.id === filter.id)];
+      return data.filter(row => row.id === filter.id);
     }
 
     if (filter.date != null) {
@@ -649,6 +649,36 @@ describe('pagedQuery', () => {
       expect(paged.data.some(row => row.id === 300)).toBe(true);
     },
   );
+
+  it('pagedQuery drops a row deleted while fetching up to it', async () => {
+    const data = [];
+    for (let i = 0; i < 500; i++) {
+      data.push({ id: i, date: subDays('2020-05-01', Math.floor(i / 5)) });
+    }
+    mockServer({
+      send: async (name, query) => {
+        const result = runPagedQuery(query, data);
+        // A sync deletes it while the extra page after it loads
+        if (query.filterExpressions[0]?.date?.$lt && data[300].id === 300) {
+          data.splice(300, 1);
+          mockPublishEvent('sync-event', {
+            type: 'success',
+            tables: ['transactions'],
+          });
+        }
+        return { data: result, dependencies: ['transactions'] };
+      },
+    });
+    const query = q('transactions').select(['id', 'date']);
+    const paged = pagedQuery<{ id: number }>(query, {
+      options: { pageCount: 20 },
+    });
+    await paged.run();
+
+    await paged.refetchUpToRow(300, { field: 'date', order: 'desc' });
+
+    expect(paged.data.some(row => row.id === 300)).toBe(false);
+  });
 
   it('does not spin forever when unsubscribed during a refetch', async () => {
     // Regression test: unsubscribing while a refetch was in flight (e.g.

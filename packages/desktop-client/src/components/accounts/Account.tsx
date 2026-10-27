@@ -211,20 +211,13 @@ function getField(field?: string) {
   }
 }
 
-type PendingFocus = {
-  id: TransactionEntity['id'];
-  // The query it's looked for in: the account's first one, not e.g. one
-  // after the user sorts
-  paged?: PagedQuery<TransactionEntity>;
-};
-
 // The transaction a link to an account asks to bring into view, e.g. the
 // other side of a transfer opened from its arrow
-function getPendingFocus(
+function getFocusTransactionId(
   location: ReturnType<typeof useLocation>,
-): PendingFocus | null {
+): TransactionEntity['id'] | null {
   const id: unknown = location.state?.focusTransactionId;
-  return typeof id === 'string' ? { id } : null;
+  return typeof id === 'string' ? id : null;
 }
 
 type AccountInternalProps = {
@@ -328,8 +321,8 @@ class AccountInternal extends PureComponent<
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
-  // A transaction to bring into view once it is loaded
-  pendingFocus: PendingFocus | null = null;
+  // A transaction to bring into view once the account is loaded
+  pendingFocusId: TransactionEntity['id'] | null = null;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -414,7 +407,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
-    this.pendingFocus = getPendingFocus(this.props.location);
+    this.pendingFocusId = getFocusTransactionId(this.props.location);
     this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
@@ -572,12 +565,8 @@ class AccountInternal extends PureComponent<
             if (firstLoad) {
               this.table.current?.scrollToTop();
             }
-            if (
-              firstLoad &&
-              this.pendingFocus?.paged === paged &&
-              paged === this.paged
-            ) {
-              void this.showPendingFocus(this.pendingFocus.id, paged);
+            if (firstLoad && paged === this.paged) {
+              void this.showPendingFocus(paged);
             }
 
             setTimeout(() => {
@@ -592,15 +581,12 @@ class AccountInternal extends PureComponent<
       },
     });
     this.paged = paged;
-    if (this.pendingFocus) {
-      this.pendingFocus.paged ??= paged;
-    }
   }
 
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
-      this.pendingFocus = getPendingFocus(nextProps.location);
+      this.pendingFocusId = getFocusTransactionId(nextProps.location);
       this.setState(
         {
           loading: true,
@@ -623,13 +609,15 @@ class AccountInternal extends PureComponent<
   // when the first page doesn't have it, then opens its split. Leaves the
   // account at the top when the current view doesn't contain it, e.g. while
   // reconciled transactions are hidden.
-  showPendingFocus = async (
-    id: TransactionEntity['id'],
-    paged: PagedQuery<TransactionEntity>,
-  ) => {
-    this.pendingFocus = null;
+  showPendingFocus = async (paged: PagedQuery<TransactionEntity>) => {
+    const id = this.pendingFocusId;
+    this.pendingFocusId = null;
+    // Only looked for in the default order, by date, not e.g. once the user
+    // sorted the account
+    if (id == null || this.state.sort != null) {
+      return;
+    }
     if (!this.state.transactions.some(t => t.id === id)) {
-      // The query is in the default order, so by date
       await paged.refetchUpToRow(id, { field: 'date', order: 'desc' });
     }
 
