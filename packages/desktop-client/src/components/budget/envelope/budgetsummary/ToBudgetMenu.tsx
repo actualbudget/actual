@@ -31,7 +31,7 @@ export function useToBudgetMenu({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { mode, isManagedMonth, isFrozenMonth, canChangeMode } =
-    useFutureBufferMode(month);
+    useFutureBufferMode();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;

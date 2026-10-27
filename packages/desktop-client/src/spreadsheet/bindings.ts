@@ -178,6 +178,7 @@ export const envelopeBudget = {
   manualBuffered: 'buffered',
   autoBuffered: 'buffered-auto',
   frozen: 'frozen',
+  managed: 'buffered-managed',
   futureBufferStart: '__global!future-buffer-start',
   totalIncome: 'total-income',
   totalSpent: 'total-spent',
