@@ -79,6 +79,7 @@ export class CategoryTemplateContext {
     }
 
     // run all checks
+    CategoryTemplateContext.checkPeriodicInterval(templates);
     await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
     await CategoryTemplateContext.checkPercentage(templates);
 
@@ -468,6 +469,19 @@ export class CategoryTemplateContext {
 
   //-----------------------------------------------------------------------------
   //  Template Validation
+  private static checkPeriodicInterval(templates: Template[]) {
+    templates
+      .filter(template => template.type === 'periodic')
+      .forEach(template => {
+        const interval = template.period?.amount;
+        if (!Number.isSafeInteger(interval) || interval < 1) {
+          throw new Error(
+            'Template repeat interval must be a whole number greater than 0',
+          );
+        }
+      });
+  }
+
   static async checkByAndScheduleAndSpend(
     templates: Template[],
     month: string,
@@ -713,7 +727,7 @@ export class CategoryTemplateContext {
         ? template.starting
         : monthUtils.firstDayOfMonth(templateContext.month);
 
-    let dateShiftFunction;
+    let dateShiftFunction: (date: string, numPeriods: number) => string;
     switch (period) {
       case 'day':
         dateShiftFunction = monthUtils.addDays;
@@ -733,9 +747,21 @@ export class CategoryTemplateContext {
         throw new Error(`Unrecognized periodic period: ${String(period)}`);
     }
 
+    // Both loops below only end once the date moves past a bound, so stop
+    // instead of hanging if a shift ever fails to advance the date.
+    function advanceDate(current: string): string {
+      const next = dateShiftFunction(current, numPeriods);
+      if (!monthUtils.isAfter(next, current)) {
+        throw new Error(
+          'Infinite loop detected in repeating template, check the repeat interval',
+        );
+      }
+      return next;
+    }
+
     //shift the starting date until its in our month or in the future
     while (templateContext.month > date) {
-      date = dateShiftFunction(date, numPeriods);
+      date = advanceDate(date);
     }
 
     if (
@@ -747,7 +773,7 @@ export class CategoryTemplateContext {
     const nextMonth = monthUtils.addMonths(templateContext.month, 1);
     while (date < nextMonth) {
       toBudget += amount;
-      date = dateShiftFunction(date, numPeriods);
+      date = advanceDate(date);
     }
 
     return toBudget;

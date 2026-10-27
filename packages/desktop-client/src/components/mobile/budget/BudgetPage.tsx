@@ -31,9 +31,11 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { groupById } from '@actual-app/core/shared/util';
 import type { TransObjectLiteral } from '@actual-app/core/types/util';
+import { useQuery } from '@tanstack/react-query';
 
 import { sync } from '#app/appSlice';
 import {
+  budgetBoundsQueries,
   useBudgetActions,
   useCreateCategoryGroupMutation,
   useCreateCategoryMutation,
@@ -44,6 +46,7 @@ import {
   useSortCategoriesMutation,
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
@@ -90,10 +93,11 @@ export function BudgetPage() {
   const currMonth = monthUtils.currentMonth();
   const [startMonth = currMonth, setStartMonthPref] =
     useLocalPref('budget.startMonth');
-  const [monthBounds, setMonthBounds] = useState({
+  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
+  const monthBounds = loadedBounds ?? {
     start: startMonth,
     end: startMonth,
-  });
+  };
   // const [editMode, setEditMode] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [_numberFormat] = useSyncedPref('numberFormat');
@@ -111,16 +115,23 @@ export function BudgetPage() {
 
   useEffect(() => {
     async function init() {
-      const { start, end } = await send('get-budget-bounds');
-      setMonthBounds({ start, end });
+      if (!loadedBounds) {
+        return;
+      }
+      // Reopening the budget or switching budget type can leave the selected
+      // month out of range.
+      const validMonth = clampMonth(startMonth, loadedBounds);
+      if (validMonth !== startMonth) {
+        setStartMonthPref(validMonth);
+      }
 
-      await prewarmMonth(budgetType, spreadsheet, startMonth);
+      await prewarmMonth(budgetType, spreadsheet, validMonth);
 
       setInitialized(true);
     }
 
     void init();
-  }, [budgetType, startMonth, dispatch, spreadsheet]);
+  }, [budgetType, startMonth, spreadsheet, loadedBounds, setStartMonthPref]);
 
   const onBudgetAction = useCallback(
     async (month, type, args) => {
@@ -237,23 +248,11 @@ export function BudgetPage() {
   );
 
   const onDeleteGroup = useCallback(
-    groupId => {
+    (groupId, transferId) => {
       dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-      deleteCategoryGroup.mutate({ id: groupId });
+      deleteCategoryGroup.mutate({ id: groupId, transferId });
     },
     [deleteCategoryGroup, dispatch],
-  );
-
-  const onToggleGroupVisibility = useCallback(
-    groupId => {
-      const group = categoryGroups.find(g => g.id === groupId);
-      onSaveGroup({
-        ...group,
-        hidden: group.hidden ? false : true,
-      });
-      dispatch(collapseModals({ rootModalName: 'category-group-menu' }));
-    },
-    [categoryGroups, dispatch, onSaveGroup],
   );
 
   const onSaveCategory = useCallback(
@@ -264,23 +263,11 @@ export function BudgetPage() {
   );
 
   const onDeleteCategory = useCallback(
-    categoryId => {
+    (categoryId, transferId) => {
       dispatch(collapseModals({ rootModalName: 'category-menu' }));
-      deleteCategory.mutate({ id: categoryId });
+      deleteCategory.mutate({ id: categoryId, transferId });
     },
     [deleteCategory, dispatch],
-  );
-
-  const onToggleCategoryVisibility = useCallback(
-    categoryId => {
-      const category = categories.find(c => c.id === categoryId);
-      onSaveCategory({
-        ...category,
-        hidden: category.hidden ? false : true,
-      });
-      dispatch(collapseModals({ rootModalName: 'category-menu' }));
-    },
-    [categories, dispatch, onSaveCategory],
   );
 
   const onPrevMonth = useCallback(async () => {
@@ -397,7 +384,6 @@ export function BudgetPage() {
               onAddCategory: onOpenNewCategoryModal,
               onEditNotes: onOpenCategoryGroupNotesModal,
               onDelete: onDeleteGroup,
-              onToggleVisibility: onToggleGroupVisibility,
               onApplyBudgetTemplatesInGroup,
               onSortCategories: (groupId, direction) => {
                 sortCategories.mutate({ groupId, direction });
@@ -414,7 +400,6 @@ export function BudgetPage() {
       onOpenCategoryGroupNotesModal,
       onOpenNewCategoryModal,
       onSaveGroup,
-      onToggleGroupVisibility,
       onApplyBudgetTemplatesInGroup,
       sortCategories,
     ],
@@ -436,7 +421,6 @@ export function BudgetPage() {
               onSave: onSaveCategory,
               onEditNotes: onOpenCategoryNotesModal,
               onDelete: onDeleteCategory,
-              onToggleVisibility: onToggleCategoryVisibility,
               ...(canEditAutomations && {
                 onEditAutomations: (categoryId: string) => {
                   dispatch(collapseModals({ rootModalName: 'category-menu' }));
@@ -464,7 +448,6 @@ export function BudgetPage() {
       onDeleteCategory,
       onOpenCategoryNotesModal,
       onSaveCategory,
-      onToggleCategoryVisibility,
       startMonth,
     ],
   );
@@ -475,8 +458,7 @@ export function BudgetPage() {
 
   const onToggleHiddenCategories = useCallback(() => {
     setShowHiddenCategoriesPref(!showHiddenCategories);
-    dispatch(collapseModals({ rootModalName: 'budget-page-menu' }));
-  }, [dispatch, setShowHiddenCategoriesPref, showHiddenCategories]);
+  }, [setShowHiddenCategoriesPref, showHiddenCategories]);
 
   const onOpenBudgetMonthNotesModal = useCallback(
     month => {
@@ -988,7 +970,7 @@ function MonthSelector({
   const locale = useLocale();
   const { t } = useTranslation();
   const prevEnabled = month > monthBounds.start;
-  const nextEnabled = month < monthUtils.subMonths(monthBounds.end, 1);
+  const nextEnabled = month < monthBounds.end;
 
   return (
     <View
