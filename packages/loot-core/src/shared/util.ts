@@ -413,6 +413,7 @@ export type CurrencyAmount = string;
 /**
  * The amount with the decimal point removed.
  * For example, 123.45 would be 12345.
+ * Always two implied decimals, whatever the currency: ¥1,500 is 150000.
  */
 export type IntegerAmount = number;
 
@@ -447,12 +448,8 @@ export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
 export function integerToCurrency(
   integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
-  decimalPlaces: number = 2,
 ) {
-  const divisor = Math.pow(10, decimalPlaces);
-  const amount = safeNumber(integerAmount) / divisor;
-
-  return formatter.format(amount);
+  return formatter.format(integerToAmount(safeNumber(integerAmount)));
 }
 
 export function integerToCurrencyWithDecimal(
@@ -464,7 +461,6 @@ export function integerToCurrencyWithDecimal(
     return integerToCurrency(
       integerAmount,
       getNumberFormat({ ...numberFormatConfig, decimalPlaces: dp }).formatter,
-      dp,
     );
   }
 
@@ -480,10 +476,6 @@ export function integerToCurrencyWithDecimal(
   }
 
   return integerToCurrency(integerAmount);
-}
-
-export function amountToCurrencyInteger(amount: number, code: string): number {
-  return amountToInteger(amount, getDecimalPlaces(code));
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
