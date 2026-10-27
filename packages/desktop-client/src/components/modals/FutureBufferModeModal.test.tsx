@@ -3,6 +3,8 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { SheetNameProvider } from '#hooks/useSheetName';
+import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
 import { TestProviders } from '#mocks';
 
 import { FutureBufferModeModal } from './FutureBufferModeModal';
@@ -12,38 +14,43 @@ vi.mock(
   () => import('#mocks/connection'),
 );
 
-let sheetValues: Record<string, number | string | null> = {};
+const currentMonth = monthUtils.currentMonth();
+const currentMonthName = monthUtils.format(currentMonth, 'MMMM yyyy');
 
-vi.mock('#hooks/useSheetValue', () => ({
-  useSheetValue: (binding: string | { name: string }) => {
-    const name = typeof binding === 'string' ? binding : binding.name;
-    return sheetValues[name] ?? null;
-  },
-}));
-
-const currentMonthName = monthUtils.format(
-  monthUtils.currentMonth(),
-  'MMMM yyyy',
-);
-
+// The real sheet hooks, answered by a fake server: the cells arrive after
+// the first render, as they do in the app.
 function renderModal({ startMonth = '', manualHold = 0 } = {}) {
-  sheetValues = {
+  const cells: Record<string, string | number> = {
     '__global!future-buffer-start': startMonth,
-    buffered: manualHold,
+    [`${monthUtils.sheetForMonth(currentMonth)}!buffered`]: manualHold,
   };
   const setMode = vi.fn();
-  initServer({ 'budget/set-future-buffer-mode': setMode });
+  initServer({
+    'get-cell': async ({ sheetName, name }) => {
+      const fullName = `${sheetName}!${name}`;
+      return { name: fullName, value: cells[fullName] ?? null };
+    },
+    'budget/set-future-buffer-mode': setMode,
+  });
   render(
     <TestProviders>
-      <FutureBufferModeModal />
+      <SpreadsheetProvider>
+        <SheetNameProvider name={monthUtils.sheetForMonth(currentMonth)}>
+          <FutureBufferModeModal />
+        </SheetNameProvider>
+      </SpreadsheetProvider>
     </TestProviders>,
   );
   return { setMode };
 }
 
+const choice = (name: string, pressed: boolean) =>
+  screen.findByRole('button', { name, pressed });
+
 describe('FutureBufferModeModal', () => {
   it('turns automatic mode on from the current month', async () => {
     const { setMode } = renderModal();
+    await choice('Manual', true);
 
     expect(
       screen.getByText(`Starts from ${currentMonthName}`),
@@ -63,6 +70,7 @@ describe('FutureBufferModeModal', () => {
 
   it('says when it replaces a manual hold', async () => {
     renderModal({ manualHold: 70000 });
+    await choice('Manual', true);
 
     await userEvent.click(screen.getByRole('button', { name: 'Automatic' }));
 
@@ -73,8 +81,18 @@ describe('FutureBufferModeModal', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows the current mode and saves nothing when it is kept', async () => {
+    const { setMode } = renderModal({ startMonth: '2026-10' });
+    await choice('Automatic', true);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(setMode).not.toHaveBeenCalled();
+  });
+
   it('turns automatic mode off', async () => {
     const { setMode } = renderModal({ startMonth: '2026-10' });
+    await choice('Automatic', true);
 
     await userEvent.click(screen.getByRole('button', { name: 'Manual' }));
     expect(
