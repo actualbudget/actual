@@ -79,7 +79,7 @@ Heads up! You probably don't want to hard-code the passwords like that, especial
 For scripts and integrations, you can create a key with read and write access to one existing budget. A key remains valid until you revoke it, your account is disabled or deleted, or you lose access to the budget.
 
 1. Open the budget in Actual and make sure it has synced to your server.
-2. Go to **Settings → General → Security → API keys** and select **Manage keys**.
+2. Go to **Settings → General → Security → API keys** and select **Add key**.
 3. Enter a name that identifies the integration, then select **Create key**.
 4. Copy the key to your integration's secret storage before selecting **Done**. You cannot view it again.
 
@@ -99,7 +99,7 @@ The [CLI](cli.md) accepts the key through its existing session-token options. Fo
 
 Keys support downloading a budget and syncing data changes. They do not support bank sync, server administration, full budget uploads or replacement, server budget deletion, or changes to encryption settings. Periodic full-file snapshot uploads are also unavailable; ordinary data synchronisation still works.
 
-To stop an integration's server access, return to **Manage keys**, select **Revoke** beside its name, and confirm. Revocation does not erase previously downloaded data. Use a separate local data directory for each integration if you do not want it to access other cached budgets.
+To stop an integration's server access, return to **API keys**, select **Revoke** beside its name, and confirm. Revocation does not erase previously downloaded data. Use a separate local data directory for each integration if you do not want it to access other cached budgets.
 
 ### Self-Signed Https Certificates
 
