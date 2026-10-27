@@ -1,7 +1,10 @@
+import { Timestamp } from '@actual-app/crdt';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
+import { receiveMessages, setSyncingMode } from '#server/sync';
+import type { Message } from '#server/sync';
 import { undo, withUndo } from '#server/undo';
 import * as monthUtils from '#shared/months';
 
@@ -70,6 +73,7 @@ describe('carryover', () => {
   beforeEach(global.emptyDatabase());
   afterEach(() => {
     global.currentMonth = null;
+    setSyncingMode('disabled');
   });
 
   it.each(['envelope', 'tracking'] as const)(
@@ -105,6 +109,60 @@ describe('carryover', () => {
       expect(carryover('2027-06')).toBe(false);
     },
   );
+
+  it('keeps a flag set on another device when the row is created later, in any delivery order', async () => {
+    await setup();
+    setSyncingMode('enabled');
+    // Another device's messages, from before this device's clock
+    let millis = Date.now() - 60_000;
+    const send =
+      (node: string, table: string, month: number) =>
+      (column: string, value: number | string): Message => ({
+        dataset: table,
+        row: `${month}-card`,
+        column,
+        value,
+        timestamp: new Timestamp(millis++, 0, node),
+      });
+
+    for (const table of ['zero_budgets', 'reflect_budgets']) {
+      const orders = [
+        (b: Message[], a: Message[]) => [b, a],
+        (b: Message[], a: Message[]) => [a, b],
+        (b: Message[], a: Message[]) => [[...b, ...a]],
+        (b: Message[], a: Message[]) => [[...a, ...b]],
+      ];
+      for (const [i, order] of orders.entries()) {
+        const month = 202701 + i;
+        // B turns the flag off, then A budgets the same month before seeing it
+        const b = send('000000000000000b', table, month);
+        const fromB = [
+          b('month', month),
+          b('category', 'card'),
+          b('carryover', 0),
+        ];
+        const a = send('000000000000000a', table, month);
+        const fromA = [
+          a('month', month),
+          a('category', 'card'),
+          a('amount', 5000),
+        ];
+        for (const batch of order(fromB, fromA)) {
+          await receiveMessages(batch);
+        }
+        expect(budgetRow(table, month, 'card')?.carryover).toBe(0);
+      }
+
+      // A row nobody set a flag on inherits
+      const a = send('000000000000000a', table, 202705);
+      await receiveMessages([
+        a('month', 202705),
+        a('category', 'card'),
+        a('amount', 5000),
+      ]);
+      expect(budgetRow(table, 202705, 'card')?.carryover).toBeNull();
+    }
+  });
 
   it('resets income auto-hold for one month only', async () => {
     await setup();
