@@ -219,7 +219,7 @@ export type DbReflectBudget = {
   month: number;
   category: string;
   amount: number;
-  carryover: number;
+  carryover: number | null;
   goal: number;
   long_goal: number;
 };
@@ -234,7 +234,7 @@ export type DbZeroBudget = {
   month: number;
   category: string;
   amount: number;
-  carryover: number;
+  carryover: number | null;
   goal: number;
   long_goal: number;
 };
