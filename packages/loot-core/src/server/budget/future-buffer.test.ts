@@ -502,9 +502,8 @@ describe('future buffer', () => {
     expect(monthRow('2026-10')?.frozen).toBe(1);
   });
 
-  it('freezes every closed month that has a sheet', async () => {
-    // Automatic mode has been on since Oct, and nothing was ever spent, so
-    // the sheets only go back three months from the current one
+  it('freezes every month from the start month, and keeps them after the range moves', async () => {
+    // Automatic mode has been on since Oct, and nothing was ever spent
     global.currentMonth = '2027-03';
     await createCategories();
     await db.update('preferences', {
@@ -512,8 +511,8 @@ describe('future buffer', () => {
       value: '2026-10',
     });
     await db.insert('zero_budgets', {
-      id: '202701-bills',
-      month: 202701,
+      id: '202612-bills',
+      month: 202612,
       category: 'bills',
       amount: 50000,
     });
@@ -524,15 +523,26 @@ describe('future buffer', () => {
     const { start } = await app.handlers['get-budget-bounds']();
     await waitForQueuedFreeze();
 
-    expect(start).toBe('2026-12');
-    expect(monthRow('2026-11')).toBeNull();
-    expect(monthRow('2026-12')).toEqual({
-      id: '2026-12',
-      buffered: 50000,
-      frozen: 1,
-    });
+    expect(start).toBe('2026-07');
+    for (const month of ['2026-10', '2026-11']) {
+      expect(monthRow(month)).toEqual({
+        id: month,
+        buffered: 50000,
+        frozen: 1,
+      });
+    }
     expect(monthRow('2027-02')?.frozen).toBe(1);
     expect(monthRow('2027-03')).toBeNull();
+
+    // After turning off, each new month moves the range's start past Dec,
+    // but the months already created stay
+    await setMode(null);
+    for (const month of ['2027-04', '2027-05']) {
+      global.currentMonth = month;
+      await createAllBudgets();
+    }
+    expect(await getSheetValue('budget202612', 'total-budgeted')).toBe(-50000);
+    expect(await toBudget('2027-05')).toBe(-50000);
   });
 
   it('turns on over a manual hold without deleting it', async () => {

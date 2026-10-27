@@ -196,10 +196,14 @@ function openFile(): string | null {
     : null;
 }
 
+type Spreadsheet = ReturnType<typeof sheet.get>;
+
+// Every load creates a new spreadsheet, so with the file it identifies the
+// load a sync started for. A reopened file waits for its own sync.
 let syncStartedFor: string | null = null;
-// The spreadsheet whose full sync has completed. Every load creates a new
-// one, so a reopened file waits for its own sync.
-let syncedSpreadsheet: ReturnType<typeof sheet.get> | null = null;
+let syncStartedSpreadsheet: Spreadsheet | null = null;
+// The spreadsheet whose full sync has completed
+let syncedSpreadsheet: Spreadsheet | null = null;
 
 // With a sync server, seed and freeze only after a full sync has pulled in
 // every other device's rows. Some syncs report success without fetching the
@@ -208,18 +212,21 @@ let syncedSpreadsheet: ReturnType<typeof sheet.get> | null = null;
 app.events.on('sync', ({ type }) => {
   if (type === 'start') {
     syncStartedFor = openFile();
+    syncStartedSpreadsheet = sheet.get() ?? null;
     return;
   }
 
   const file = openFile();
+  const spreadsheet = syncStartedSpreadsheet;
   if (
     type === 'success' &&
     file != null &&
     file === syncStartedFor &&
+    spreadsheet != null &&
+    spreadsheet === sheet.get() &&
     checkSyncingMode('enabled') &&
     !checkSyncingMode('offline')
   ) {
-    const spreadsheet = sheet.get();
     syncedSpreadsheet = spreadsheet;
     // A failed seed leaves the preference unset, so the next sync retries it
     runMutator(async () => {
