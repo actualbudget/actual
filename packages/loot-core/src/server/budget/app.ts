@@ -20,6 +20,7 @@ import { seedCarryoverChain } from './carryover-seed';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
+import { freezeClosedMonths } from './freeze';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -192,10 +193,13 @@ function openFile(): string | null {
 }
 
 let syncStartedFor: string | null = null;
+// The open file, once a full sync of it has completed this load
+let syncedFile: string | null = null;
 
-// With a sync server, seed only after a full sync has pulled in every other
-// device's rows. Some syncs report success without fetching the open file's
-// rows: an offline sync, and one whose file or group changed mid-request.
+// With a sync server, seed and freeze only after a full sync has pulled in
+// every other device's rows. Some syncs report success without fetching the
+// open file's rows: an offline sync, and one whose file or group changed
+// mid-request.
 app.events.on('sync', ({ type }) => {
   if (type === 'start') {
     syncStartedFor = openFile();
@@ -210,14 +214,35 @@ app.events.on('sync', ({ type }) => {
     checkSyncingMode('enabled') &&
     !checkSyncingMode('offline')
   ) {
+    syncedFile = file;
     // A failed seed leaves the preference unset, so the next sync retries it
     runMutator(async () => {
       if (openFile() === file) {
         await seedCarryoverChain();
+        await freezeClosedMonths();
       }
     }).catch(captureException);
   }
 });
+
+app.events.on('load-budget', () => {
+  syncedFile = null;
+  queueFreeze();
+});
+
+// Queued behind any running mutator rather than awaited, because
+// `get-budget-bounds` is also called from inside API mutators
+function queueFreeze() {
+  const file = openFile();
+  if (file == null || !(checkSyncingMode('disabled') || syncedFile === file)) {
+    return;
+  }
+  void runMutator(async () => {
+    if (openFile() === file) {
+      await freezeClosedMonths();
+    }
+  }).catch(captureException);
+}
 
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {
@@ -241,7 +266,9 @@ async function getCategories({ hidden }: { hidden?: boolean } = {}) {
 }
 
 async function getBudgetBounds() {
-  return await budget.createAllBudgets();
+  const bounds = await budget.createAllBudgets();
+  queueFreeze();
+  return bounds;
 }
 
 async function envelopeBudgetMonth({ month }: { month: string }) {

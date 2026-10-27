@@ -274,10 +274,22 @@ function handleBudgetMonthChange(budget) {
 
 const FUTURE_BUFFER_PREF = 'futureBufferMode';
 
-// Sets `__global!future-buffer-start` from the `futureBufferMode` preference:
-// the month automatic mode was turned on, or empty in manual mode.
+// The month automatic mode was turned on, or empty in manual mode
+function parseFutureBufferStart(value: string | null | undefined): string {
+  return value && /^\d{4}-\d{2}$/.test(value) ? value : '';
+}
+
+export async function getFutureBufferStart(): Promise<string> {
+  const row = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value FROM preferences WHERE id = ?',
+    [FUTURE_BUFFER_PREF],
+  );
+  return parseFutureBufferStart(row?.value);
+}
+
+// Sets `__global!future-buffer-start` from the `futureBufferMode` preference
 function setFutureBufferStart(value: string | null | undefined) {
-  const startMonth = value && /^\d{4}-\d{2}$/.test(value) ? value : '';
+  const startMonth = parseFutureBufferStart(value);
   if (
     sheet.get().getCellValueLoose('__global', 'future-buffer-start') !==
     startMonth
@@ -291,11 +303,7 @@ function setFutureBufferStart(value: string | null | undefined) {
 // after the months are created: setting the cell only recomputes the cells
 // that already depend on it.
 export async function loadFutureBufferStart() {
-  const row = await db.first<Pick<db.DbPreference, 'value'>>(
-    'SELECT value FROM preferences WHERE id = ?',
-    [FUTURE_BUFFER_PREF],
-  );
-  setFutureBufferStart(row?.value);
+  setFutureBufferStart(await getFutureBufferStart());
 }
 
 function handleBudgetChange(budget) {
