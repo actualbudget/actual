@@ -78,7 +78,7 @@ export async function freezeClosedMonths(): Promise<void> {
 
   await batchMessages(async () => {
     for (const { month, amount } of closed) {
-      await setBuffer(month, amount, true);
+      await setBuffer(month, amount, { frozen: true });
     }
   });
 }

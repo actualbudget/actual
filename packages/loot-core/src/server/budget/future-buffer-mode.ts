@@ -76,9 +76,13 @@ export async function turnOffFutureBuffer(): Promise<boolean> {
 
   await batchMessages(async () => {
     // The months before the current month are frozen, as the freeze would.
-    // setBuffer skips those whose stored value already matches.
+    // Every amount is written, so a hold another device set in a managed
+    // month before the switch can't land afterwards and move To Budget.
     for (const { month, amount } of buffers) {
-      await setBuffer(month, amount, month < currentMonth ? true : undefined);
+      await setBuffer(month, amount, {
+        frozen: month < currentMonth ? true : undefined,
+        overwrite: true,
+      });
     }
 
     for (const { id } of autoHolds) {
