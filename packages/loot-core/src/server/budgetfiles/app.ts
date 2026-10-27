@@ -693,6 +693,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
     )) ?? {};
   sheet.get().meta().budgetType = budgetType as prefs.BudgetType;
   await budget.createAllBudgets();
+  await budget.loadFutureBufferStart();
 
   // Load all the in-memory state
   await mappings.loadMappings();

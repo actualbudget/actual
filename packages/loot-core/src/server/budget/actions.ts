@@ -177,18 +177,35 @@ export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   });
 }
 
-export function setBuffer(month: string, amount: unknown): Promise<void> {
-  const existing = db.firstSync<Pick<db.DbZeroBudget, 'id'>>(
-    `SELECT id FROM zero_budget_months WHERE id = ?`,
-    [month],
-  );
-  if (existing) {
-    return db.update('zero_budget_months', {
-      id: existing.id,
-      buffered: amount,
-    });
+export async function setBuffer(
+  month: string,
+  amount: unknown,
+  frozen?: boolean,
+): Promise<void> {
+  const existing = db.firstSync<
+    Pick<db.DbZeroBudgetMonth, 'id' | 'buffered' | 'frozen'>
+  >(`SELECT id, buffered, frozen FROM zero_budget_months WHERE id = ?`, [
+    month,
+  ]);
+  const { buffered = 0, frozen: storedFrozen = 0 } = existing ?? {};
+
+  // Only write the columns that change, so this doesn't send a message that
+  // could overwrite another device's edit to the other column
+  const changes: Partial<db.DbZeroBudgetMonth> = {};
+  if (amount !== buffered) {
+    changes.buffered = amount as number;
   }
-  return db.insert('zero_budget_months', { id: month, buffered: amount });
+  if (frozen !== undefined && (frozen ? 1 : 0) !== storedFrozen) {
+    changes.frozen = frozen ? 1 : 0;
+  }
+  if (Object.keys(changes).length === 0) {
+    return;
+  }
+
+  if (existing) {
+    return db.update('zero_budget_months', { id: existing.id, ...changes });
+  }
+  return db.insert('zero_budget_months', { id: month, ...changes });
 }
 
 function setCarryover(

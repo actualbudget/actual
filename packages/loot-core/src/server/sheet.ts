@@ -271,7 +271,7 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
       }
     }
 
-    // For zero-based budgets, load the buffered amounts
+    // For zero-based budgets, load the buffered amounts and frozen flags
     if (budgetType !== 'tracking') {
       const budgetMonths = await db.all<DbZeroBudgetMonth>(
         'SELECT * FROM zero_budget_months',
@@ -279,6 +279,7 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
       for (const budgetMonth of budgetMonths) {
         const sheetName = sheetForMonth(budgetMonth.id);
         sheet.set(`${sheetName}!buffered`, budgetMonth.buffered);
+        sheet.set(`${sheetName}!frozen`, budgetMonth.frozen === 1);
       }
     }
   } finally {

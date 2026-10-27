@@ -22,6 +22,9 @@ export type SyncedPrefs = Partial<
     | 'budgetType'
     // 'true' once expired carryover windows have been pinned off
     | 'carryoverChainSeeded'
+    // The month automatic "For next month" was turned on ('YYYY-MM').
+    // Missing or empty means manual mode.
+    | 'futureBufferMode'
     | 'upcomingScheduledTransactionLength'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'

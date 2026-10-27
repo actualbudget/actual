@@ -269,6 +269,33 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 function handleBudgetMonthChange(budget) {
   const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
+  sheet.get().set(`${sheetName}!frozen`, budget.frozen === 1);
+}
+
+const FUTURE_BUFFER_PREF = 'futureBufferMode';
+
+// Sets `__global!future-buffer-start` from the `futureBufferMode` preference:
+// the month automatic mode was turned on, or empty in manual mode.
+function setFutureBufferStart(value: string | null | undefined) {
+  const startMonth = value && /^\d{4}-\d{2}$/.test(value) ? value : '';
+  if (
+    sheet.get().getCellValueLoose('__global', 'future-buffer-start') !==
+    startMonth
+  ) {
+    sheet.get().set(resolveName('__global', 'future-buffer-start'), startMonth);
+  }
+}
+
+// Runs on every budget open. A warm open restores the spreadsheet from its
+// cache and skips `loadUserBudgets`, so the preference is read here. Call it
+// after the months are created: setting the cell only recomputes the cells
+// that already depend on it.
+export async function loadFutureBufferStart() {
+  const row = await db.first<Pick<db.DbPreference, 'value'>>(
+    'SELECT value FROM preferences WHERE id = ?',
+    [FUTURE_BUFFER_PREF],
+  );
+  setFutureBufferStart(row?.value);
 }
 
 function handleBudgetChange(budget) {
@@ -352,6 +379,13 @@ export function triggerBudgetChanges(oldValues, newValues) {
           }
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
+        } else if (
+          table === 'preferences' &&
+          newValue.id === FUTURE_BUFFER_PREF
+        ) {
+          // Local and synced changes both arrive here, so another device
+          // turning the mode on or off applies without a reload
+          setFutureBufferStart(newValue.value);
         }
       });
     });
@@ -447,12 +481,7 @@ export async function createBudget(months) {
     });
 
     if (budgetType === 'envelope') {
-      envelopeBudget.createSummary(
-        groups,
-        categories,
-        prevSheetName,
-        sheetName,
-      );
+      envelopeBudget.createSummary(groups, categories, month);
     } else {
       trackingBudget.createSummary(groups, sheetName);
     }
