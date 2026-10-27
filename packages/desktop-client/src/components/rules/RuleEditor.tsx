@@ -63,23 +63,23 @@ import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
 
-// Below the small breakpoint a row cannot fit a readable value next to the
-// field and operator selects, so the value drops to its own full-width line
-// and the -/+ buttons stay on the first line, pushed to the right.
+// On narrow screens the value editor drops to its own full-width line and the
+// -/+ buttons stay on the first line, pushed to the right.
 const narrowValueStyle: CSSProperties = { order: 1, flexBasis: '100%' };
 const narrowButtonsStyle: CSSProperties = { marginLeft: 'auto' };
 
-// Lets the split-amount method select share the first line with the
-// "allocate" label and the -/+ buttons, truncating its label when the row is
-// too narrow instead of wrapping and leaving the buttons on a line of their own.
+// Keeps the split method select on the first line, truncating its label
+// instead of wrapping.
 const narrowMethodSelectStyle: CSSProperties = {
   flex: '1 1 0',
   minWidth: 0,
   maxWidth: 'max-content',
 };
 
-// Columns SimpleTransactionsTable renders with a flexible width. Other fields
-// that end up in the list (for example `cleared`) are not rendered at all.
+// Minimum width of the transactions table on narrow screens, mirroring the
+// select, date and amount cell widths in SimpleTransactionsTable plus 200px per
+// flexible column. Fields the table does not render (e.g. `cleared`) are
+// ignored.
 const flexibleTableFields = [
   'imported_payee',
   'payee',
@@ -88,9 +88,6 @@ const flexibleTableFields = [
   'notes',
 ];
 
-// Width the transactions table needs on narrow screens so every flexible
-// column stays readable; the table then scrolls sideways. Mirrors the fixed
-// select, date and amount cell widths in SimpleTransactionsTable.
 function getNarrowTableMinWidth(fields: string[]) {
   const flexCount = fields.filter(f => flexibleTableFields.includes(f)).length;
   return 20 + 100 + 75 + flexCount * 200;
@@ -689,33 +686,39 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View
-            style={{
-              flex: 1,
-              minWidth: options.method === 'fixed-percent' ? 45 : 70,
-              ...(isNarrowWidth && narrowValueStyle),
-            }}
-          >
-            {options.method === 'formula' ? (
-              <FormulaActionEditor
-                value={options?.formula || '='}
-                onChange={v => onChange('formula', v, { formula: true })}
-              />
-            ) : options.method !== 'remainder' ? (
-              <GenericInput
-                key={inputKey}
-                // @ts-expect-error fix this
-                field={field}
-                op={op}
-                type="number"
-                numberFormatType={
-                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
-                }
-                value={value ?? ''}
-                onChange={v => onChange('value', v)}
-              />
-            ) : null}
-          </View>
+          {/* On wide screens the empty remainder wrapper spaces the buttons to
+              the right; on narrow screens it would only add a blank line. */}
+          {(options.method !== 'remainder' || !isNarrowWidth) && (
+            <View
+              style={{
+                flex: 1,
+                minWidth: options.method === 'fixed-percent' ? 45 : 70,
+                ...(isNarrowWidth && narrowValueStyle),
+              }}
+            >
+              {options.method === 'formula' ? (
+                <FormulaActionEditor
+                  value={options?.formula || '='}
+                  onChange={v => onChange('formula', v, { formula: true })}
+                />
+              ) : options.method !== 'remainder' ? (
+                <GenericInput
+                  key={inputKey}
+                  // @ts-expect-error fix this
+                  field={field}
+                  op={op}
+                  type="number"
+                  numberFormatType={
+                    options.method === 'fixed-percent'
+                      ? 'percentage'
+                      : 'currency'
+                  }
+                  value={value ?? ''}
+                  onChange={v => onChange('value', v)}
+                />
+              ) : null}
+            </View>
+          )}
           {options.method === 'formula' && (
             <View
               style={{
