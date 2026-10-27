@@ -192,9 +192,28 @@ function openFile(): string | null {
     : null;
 }
 
-let syncStartedFor: string | null = null;
-// The open file, once a full sync of it has completed this load
-let syncedFile: string | null = null;
+// One load of the open file. Every load creates a new spreadsheet, so work
+// queued for an earlier load of the same file can tell it's stale.
+type Load = { spreadsheet: ReturnType<typeof sheet.get>; file: string };
+
+function currentLoad(): Load | null {
+  const spreadsheet = sheet.get();
+  const file = openFile();
+  return spreadsheet && file != null ? { spreadsheet, file } : null;
+}
+
+function isSameLoad(a: Load | null, b: Load | null): boolean {
+  return (
+    a != null &&
+    b != null &&
+    a.spreadsheet === b.spreadsheet &&
+    a.file === b.file
+  );
+}
+
+let syncStartedFor: Load | null = null;
+// The load whose full sync has completed
+let syncedLoad: Load | null = null;
 
 // With a sync server, seed and freeze only after a full sync has pulled in
 // every other device's rows. Some syncs report success without fetching the
@@ -202,23 +221,24 @@ let syncedFile: string | null = null;
 // mid-request.
 app.events.on('sync', ({ type }) => {
   if (type === 'start') {
-    syncStartedFor = openFile();
+    syncStartedFor = currentLoad();
     return;
   }
 
-  const file = openFile();
+  const load = syncStartedFor;
   if (
     type === 'success' &&
-    file != null &&
-    file === syncStartedFor &&
+    isSameLoad(load, currentLoad()) &&
     checkSyncingMode('enabled') &&
     !checkSyncingMode('offline')
   ) {
-    syncedFile = file;
+    syncedLoad = load;
     // A failed seed leaves the preference unset, so the next sync retries it
     runMutator(async () => {
-      if (openFile() === file) {
+      if (isSameLoad(load, currentLoad())) {
         await seedCarryoverChain();
+      }
+      if (isSameLoad(load, currentLoad())) {
         await freezeClosedMonths();
       }
     }).catch(captureException);
@@ -226,19 +246,23 @@ app.events.on('sync', ({ type }) => {
 });
 
 app.events.on('load-budget', () => {
-  syncedFile = null;
   queueFreeze();
 });
 
+function canFreeze(load: Load): boolean {
+  return checkSyncingMode('disabled') || isSameLoad(load, syncedLoad);
+}
+
 // Queued behind any running mutator rather than awaited, because
-// `get-budget-bounds` is also called from inside API mutators
+// `get-budget-bounds` is also called from inside API mutators. The checks
+// run again when it starts, in case the file was reopened in between.
 function queueFreeze() {
-  const file = openFile();
-  if (file == null || !(checkSyncingMode('disabled') || syncedFile === file)) {
+  const load = currentLoad();
+  if (load == null || !canFreeze(load)) {
     return;
   }
   void runMutator(async () => {
-    if (openFile() === file) {
+    if (isSameLoad(load, currentLoad()) && canFreeze(load)) {
       await freezeClosedMonths();
     }
   }).catch(captureException);
