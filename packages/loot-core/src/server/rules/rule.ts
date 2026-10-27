@@ -115,8 +115,11 @@ export function execActions(actions: Action[], transaction) {
     return nonSplitResult;
   }
 
-  if (nonSplitResult.is_child) {
-    // Rules with splits can't be applied to child transactions.
+  if (nonSplitResult.is_child || nonSplitResult.is_parent) {
+    // Split rules only apply to regular (non-split) transactions. A child
+    // can't be split, and an already-split parent must not be re-split:
+    // re-running the split rebuild on it dereferences a slot that no longer
+    // exists and crashes (#9189).
     return nonSplitResult;
   }
 

@@ -116,4 +116,43 @@ describe('split parent formula context', () => {
       splitRule('=IF(parent_notes="", -1, -2)').exec({ amount: -300 }),
     ).toMatchObject({ subtransactions: [{ amount: -100 }, { amount: -200 }] });
   });
+
+  test('re-running a split rule on an already-split transaction does not crash (#9189)', () => {
+    // A 50/50 split rule, matching the scenario from the bug report.
+    const rule = new Rule({
+      conditionsOp: 'and',
+      conditions: [{ field: 'amount', op: 'lt', value: 0 }],
+      actions: [
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 50,
+          options: { splitIndex: 1, method: 'fixed-percent' },
+        },
+        {
+          op: 'set-split-amount',
+          field: 'amount',
+          value: 50,
+          options: { splitIndex: 2, method: 'fixed-percent' },
+        },
+      ],
+    });
+
+    // Sanity check: on a plain transaction the rule splits it in two.
+    expect(rule.apply(parent)).toMatchObject({
+      is_parent: true,
+      subtransactions: [{ amount: -1500 }, { amount: -1500 }],
+    });
+
+    // Editing the parent's own fields (notes, account, …) re-runs rules
+    // against the already-split transaction. This used to throw:
+    //   TypeError: undefined is not an object (evaluating
+    //   'newTransactions[splitTransactionIndex].parent_amount = ...')
+    const alreadySplit = { ...parent, is_parent: true };
+    expect(() => rule.apply(alreadySplit)).not.toThrow();
+
+    // A split rule must leave an already-split transaction untouched rather
+    // than attempting to re-split it.
+    expect(rule.apply(alreadySplit)).not.toHaveProperty('subtransactions');
+  });
 });
