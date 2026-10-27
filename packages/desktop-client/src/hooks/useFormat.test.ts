@@ -17,5 +17,6 @@ describe('useFormat', () => {
     expect(format(150000, 'financial')).toBe('‪¥‬1,500');
     expect(format.forEdit(150000)).toBe('1,500');
     expect(format.fromEdit('1500')).toBe(150000);
+    expect(format.fromEdit(format.forEdit(150050))).toBe(150050);
   });
 });
