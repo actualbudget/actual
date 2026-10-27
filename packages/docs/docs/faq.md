@@ -2,7 +2,7 @@
 
 - **Q.** _Can I use the mobile apps with my self hosted version of Actual?_
 
-  **A.** The official mobile applications are deprecated. However, Actual's web version is a responsive Progressive Web App that you can install to your home screen and use like a native app. Additionally, the community also maintains unofficial native clients. See [Community Projects](community-repos.md) for available options.
+  **A.** Yes. An official iOS app is in beta testing and connects to your own server. You can [join the beta on TestFlight](https://testflight.apple.com/join/Sk6BEyBQ) to try it; beta testers get a new build every night with the latest changes from the development branch, so expect the occasional rough edge. There is no official Android app yet. On any device, Actual's web version is a responsive Progressive Web App that you can install to your home screen and use like a native app. Additionally, the community also maintains unofficial native clients. See [Community Projects](community-repos.md) for available options.
 
 - **Q.** _Can I sync my bank to Actual automatically?_
 

@@ -6,7 +6,6 @@ import {
   updateSchedule,
 } from '#server/schedules/app';
 import { loadRules } from '#server/transactions/transaction-rules';
-import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import type { CategoryEntity } from '#types/models';
 
@@ -21,15 +20,6 @@ vi.mock('#shared/months', async () => {
     await vi.importActual<typeof monthUtils>('#shared/months');
   return { ...actualModule, currentDay: vi.fn(actualModule.currentDay) };
 });
-
-const currency: Currency = {
-  code: '',
-  symbol: '',
-  name: '',
-  decimalPlaces: 2,
-  numberFormat: 'comma-dot',
-  symbolFirst: false,
-};
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -164,7 +154,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -182,7 +171,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -204,7 +192,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(5000);
@@ -224,7 +211,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(5000);
@@ -243,7 +229,6 @@ describe('runScheduleForecast against a real database', () => {
       15334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -265,7 +250,6 @@ describe('runScheduleForecast against a real database', () => {
       5334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -286,7 +270,6 @@ describe('runScheduleForecast against a real database', () => {
       15334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -310,7 +293,6 @@ describe('runScheduleForecast against a real database', () => {
       7500,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(2500);
@@ -332,7 +314,6 @@ describe('runScheduleForecast against a real database', () => {
       7500,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(2500);
@@ -356,7 +337,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(4750);
@@ -379,7 +359,6 @@ describe('runScheduleForecast against a real database', () => {
       7500,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(2500);
@@ -404,7 +383,6 @@ describe('runScheduleForecast against a real database', () => {
       15334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -427,7 +405,6 @@ describe('runScheduleForecast against a real database', () => {
       5334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -450,7 +427,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(0);
@@ -470,7 +446,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     // $100 for Bill A in full, plus $90 for Bill B spread over Oct and Nov.
@@ -504,7 +479,6 @@ describe('runScheduleForecast against a real database', () => {
       0,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -527,7 +501,6 @@ describe('runScheduleForecast against a real database', () => {
       5334,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(3666);
@@ -543,7 +516,6 @@ describe('runScheduleForecast against a real database', () => {
       5000,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(5000);
@@ -567,7 +539,6 @@ describe('runScheduleForecast against a real database', () => {
       10000,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -586,7 +557,6 @@ describe('runScheduleForecast against a real database', () => {
       10000,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(0);
@@ -604,7 +574,6 @@ describe('runScheduleForecast against a real database', () => {
       10000,
       0,
       category,
-      currency,
     );
 
     expect(result.to_budget).toBe(10000);

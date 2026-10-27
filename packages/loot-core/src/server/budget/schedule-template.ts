@@ -6,7 +6,6 @@ import { fromDateRepr } from '#server/models';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
-import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -25,18 +24,8 @@ type ScheduleTemplateTarget = {
   template: ScheduleTemplate;
   name: string;
   target: number;
-  // The un-aggregated amount of a single occurrence of this schedule,
-  // computed before `target` is summed across every occurrence landing
-  // in the month of the schedule's next occurrence below. Unlike `target`
-  // (the full-flag path budgets that whole month's total), this is the
-  // right value to multiply by an occurrence count (e.g. in
-  // `buildMonthlyOutflow`, which buckets one entry per occurrence date).
   perOccurrenceAmount: number;
   next_date_string: string;
-  // The schedule's own stored next_date: the first occurrence not yet
-  // paid, weekend-adjusted. Unlike `next_date_string` (computed from
-  // `current_month`), this reflects what has actually posted. Null when
-  // the schedule has no next-date row.
   storedNextDate: string | null;
   scheduleId: string;
   target_interval: number;
@@ -46,8 +35,6 @@ type ScheduleTemplateTarget = {
   full: boolean;
   repeat: boolean;
   dateConditions: ReturnType<typeof extractScheduleConds>['date'];
-  // Its last occurrence falls before current_month. It may still be
-  // unpaid, and money carried into current_month has to cover it.
   isPastDue: boolean;
 };
 
@@ -55,7 +42,6 @@ export async function createScheduleList(
   templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
-  currency: Currency,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const accounts = (await db.getAccounts()) ?? [];
@@ -109,8 +95,7 @@ export async function createScheduleList(
         }
         case 'fixed': {
           const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount +=
-            sign * amountToInteger(template.adjustment, currency.decimalPlaces);
+          scheduleAmount += sign * amountToInteger(template.adjustment);
           break;
         }
 
@@ -755,7 +740,6 @@ export async function runScheduleForecast(
   balance: number,
   to_budget: number,
   category: CategoryEntity,
-  currency: Currency,
 ): Promise<{
   to_budget: number;
   perScheduleMonthly: Map<ScheduleTemplate, number>;
@@ -765,7 +749,6 @@ export async function runScheduleForecast(
     scheduleTemplates,
     current_month,
     category,
-    currency,
   );
 
   // A tracking budget doesn't carry a category's leftover into the next

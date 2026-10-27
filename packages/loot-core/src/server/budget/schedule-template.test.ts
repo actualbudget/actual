@@ -2,7 +2,6 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
-import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import type { q } from '#shared/query';
 import type { CategoryEntity } from '#types/models';
@@ -33,15 +32,6 @@ vi.mock('#server/schedules/app', async () => {
     getRuleForSchedule: vi.fn(),
   };
 });
-
-const defaultCurrency: Currency = {
-  code: '',
-  symbol: '',
-  name: '',
-  decimalPlaces: 2,
-  numberFormat: 'comma-dot',
-  symbolFirst: false,
-};
 
 const defaultCategory = { id: '1', name: 'Test Category' } as CategoryEntity;
 
@@ -139,7 +129,6 @@ describe('createScheduleList', () => {
       [template],
       '2024-08-01',
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(t[0].dateConditions).toBeDefined();
@@ -169,7 +158,6 @@ describe('buildMonthlyOutflow', () => {
       [template],
       '2024-01-01',
       defaultCategory,
-      defaultCurrency,
     );
 
     vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
@@ -198,7 +186,6 @@ describe('buildMonthlyOutflow', () => {
       [template],
       '2024-01-01',
       defaultCategory,
-      defaultCurrency,
     );
 
     vi.mocked(aqlQuery).mockResolvedValue({
@@ -240,7 +227,6 @@ describe('buildMonthlyOutflow', () => {
       [template],
       '2024-01-01',
       defaultCategory,
-      defaultCurrency,
     );
 
     // Sanity check on the fixture itself: target is the aggregated
@@ -367,7 +353,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
     expect(t[0].storedNextDate).toBe('2024-10-25');
   });
@@ -379,7 +364,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-06',
       defaultCategory,
-      defaultCurrency,
     );
 
     await buildMonthlyOutflow(t, '2024-06', defaultCategory);
@@ -403,7 +387,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(dateFilter('posted')).toEqual({
@@ -431,7 +414,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -449,7 +431,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-09',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-09', defaultCategory);
@@ -469,7 +450,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-09',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-09', defaultCategory);
@@ -494,7 +474,6 @@ describe('buildMonthlyOutflow relative to today', () => {
         [rentTemplate],
         '2024-06',
         defaultCategory,
-        defaultCurrency,
       );
 
       const outflow = await buildMonthlyOutflow(t, '2024-06', defaultCategory);
@@ -515,7 +494,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -535,7 +513,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -557,7 +534,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -577,7 +553,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -597,7 +572,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -612,7 +586,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -629,7 +602,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -660,7 +632,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-07',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-07', defaultCategory);
@@ -692,7 +663,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       [rentTemplate],
       '2024-11',
       defaultCategory,
-      defaultCurrency,
     );
 
     const outflow = await buildMonthlyOutflow(t, '2024-11', defaultCategory);
@@ -713,7 +683,6 @@ describe('buildMonthlyOutflow relative to today', () => {
       10000,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -748,7 +717,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(10000);
@@ -784,7 +752,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // Re-derive the projection with the returned candidate to check the
@@ -793,7 +760,6 @@ describe('runScheduleForecast', () => {
       template_lines as ScheduleTemplate[],
       '2024-01-01',
       defaultCategory,
-      defaultCurrency,
     );
     const outflow = await buildMonthlyOutflow(t, '2024-01-01', defaultCategory);
     let runningBalance = 0;
@@ -835,7 +801,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.to_budget).toBe(60000);
@@ -872,7 +837,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // Full schedule isn't due this month, so its on-top contribution is 0;
@@ -912,7 +876,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // $600 in full for the bill due this month, plus $100 for the monthly
@@ -950,7 +913,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // No full-flag entries and a starting balance of 0, so the whole
@@ -1008,7 +970,6 @@ describe('runScheduleForecast', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     expect(result.perScheduleMonthly.size).toBe(2);
@@ -1052,14 +1013,12 @@ describe('runScheduleForecast', () => {
       8000,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     const { t } = await createScheduleList(
       template_lines as ScheduleTemplate[],
       '2025-01-01',
       defaultCategory,
-      defaultCurrency,
     );
     const outflow = await buildMonthlyOutflow(t, '2025-01-01', defaultCategory);
     let runningBalance = 8000;
@@ -1099,7 +1058,6 @@ describe('runScheduleForecast budgeting rules', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(11000); // $100 × 1.10
   });
@@ -1117,7 +1075,6 @@ describe('runScheduleForecast budgeting rules', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(10500); // $100 + $5
   });
@@ -1134,7 +1091,6 @@ describe('runScheduleForecast budgeting rules', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
@@ -1156,7 +1112,6 @@ describe('runScheduleForecast budgeting rules', () => {
       10000,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(10000);
   });
@@ -1176,7 +1131,6 @@ describe('runScheduleForecast budgeting rules', () => {
       500000,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
@@ -1194,7 +1148,6 @@ describe('runScheduleForecast budgeting rules', () => {
       10000000,
       0,
       defaultCategory,
-      defaultCurrency,
     );
     expect(result.to_budget).toBe(0);
   });
@@ -1214,7 +1167,6 @@ describe('runScheduleForecast budgeting rules', () => {
         0,
         0,
         defaultCategory,
-        defaultCurrency,
       );
       expect(result.to_budget).toBe(0);
     });
@@ -1233,7 +1185,6 @@ describe('runScheduleForecast budgeting rules', () => {
         0,
         0,
         defaultCategory,
-        defaultCurrency,
       );
       expect(result.to_budget).toBe(12000);
     });
@@ -1305,7 +1256,6 @@ describe('runScheduleForecast (real AQL query path)', () => {
         0,
         0,
         defaultCategory,
-        defaultCurrency,
       );
       // Re-derive the projection independently to confirm the query result
       // (the unlinked $5 transaction on 2024-01-20) and the weekly
@@ -1315,7 +1265,6 @@ describe('runScheduleForecast (real AQL query path)', () => {
         template_lines as ScheduleTemplate[],
         '2024-01',
         defaultCategory,
-        defaultCurrency,
       );
       const outflow = await scheduleTemplateMod.buildMonthlyOutflow(
         t,
@@ -1494,7 +1443,6 @@ describe('runScheduleForecast on reviewer budgets', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // $190 due in October, saved over August, September and October.
@@ -1525,7 +1473,6 @@ describe('runScheduleForecast on reviewer budgets', () => {
       0,
       0,
       defaultCategory,
-      defaultCurrency,
     );
 
     // $17,000 due October through April, over those seven months.
