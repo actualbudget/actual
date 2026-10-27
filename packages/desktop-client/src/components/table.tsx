@@ -770,11 +770,20 @@ export function SheetCell<
       data-cellname={sheetValue}
     >
       {() => {
+        const editValue = formatExpr
+          ? formatExpr(sheetValue)
+          : sheetValue.toString();
         return (
           <InputValue
-            value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
+            value={editValue}
             onUpdate={value => {
-              onSave(unformatExpr ? unformatExpr(value) : value);
+              if (!unformatExpr) {
+                onSave(value);
+              } else {
+                // Unedited text can be rounded (hidden decimals); keep the
+                // exact value
+                onSave(value === editValue ? sheetValue : unformatExpr(value));
+              }
             }}
             {...inputProps}
             style={{ textAlign, ...(inputProps?.style || {}) }}

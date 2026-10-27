@@ -99,9 +99,15 @@ export function FinancialInput({
     onMouseUp?.(e);
   };
 
+  // Unedited text can be rounded (hidden decimals); keep the exact amount
+  const parseEdit = (stringValue: string) =>
+    stringValue === format.forEdit(integerValue)
+      ? integerValue
+      : (format.fromEdit(stringValue, 0) ?? 0);
+
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    const finalInteger = format.fromEdit(internalValue, 0) ?? 0;
+    const finalInteger = parseEdit(internalValue);
     // Only report a real change: tabbing through an untouched field is
     // not an update, and callers may do expensive work on one
     if (finalInteger !== integerValue) {
@@ -112,7 +118,7 @@ export function FinancialInput({
   };
 
   const handleEnter = (stringValue: string) => {
-    const finalInteger = format.fromEdit(stringValue, 0) ?? 0;
+    const finalInteger = parseEdit(stringValue);
     if (finalInteger !== integerValue) {
       onUpdate?.(finalInteger);
     }

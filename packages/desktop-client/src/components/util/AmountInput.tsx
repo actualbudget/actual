@@ -103,9 +103,14 @@ export function AmountInput({
   }, [sign]);
 
   const getAmount = useCallback(() => {
+    // Unedited text can be rounded (hidden decimals); keep the exact amount
+    const absValue = Math.abs(initialValue ?? 0);
+    if (value === format.forEdit(absValue)) {
+      return symbol === '-' ? -absValue : absValue;
+    }
     const signedValued = symbol === '-' ? symbol + value : value;
     return format.fromEdit(signedValued, 0);
-  }, [symbol, value, format]);
+  }, [initialValue, symbol, value, format]);
 
   useEffect(() => {
     if (innerRef.current) {
