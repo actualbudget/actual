@@ -103,6 +103,14 @@ for (const width of [1280, 375]) {
     await dialog.getByRole('button', { name: 'Create key' }).click();
     const secret = dialog.locator('#new-api-key');
     await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
+    await expect(secret).toBeFocused();
+    await expect
+      .poll(() =>
+        secret.evaluate((input: HTMLInputElement) =>
+          input.value.slice(input.selectionStart ?? 0, input.selectionEnd ?? 0),
+        ),
+      )
+      .toBe('actual_example-only-not-a-real-key');
     await expect(dialog).toMatchThemeScreenshots();
     await dialog.screenshot({
       path: test.info().outputPath(`api-keys-create-${width}.png`),
@@ -112,6 +120,10 @@ for (const width of [1280, 375]) {
     await dialog.getByRole('button', { name: 'Done', exact: true }).click();
     await expect(dialog).toHaveCount(0);
     await expect(section.getByText(key.name, { exact: true })).toBeVisible();
+    await expect(section).toMatchThemeScreenshots();
+    await section.screenshot({
+      path: test.info().outputPath(`api-keys-populated-${width}.png`),
+    });
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
     await expect(dialog).toHaveAccessibleName('Revoke API key');
     await dialog.screenshot({

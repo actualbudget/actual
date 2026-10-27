@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
@@ -17,8 +16,6 @@ type ApiKeyModalProps = Extract<ModalType, { name: 'api-key' }>['options'];
 
 export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
   const { t } = useTranslation();
-  const { isNarrowWidth } = useResponsive();
-  const size = isNarrowWidth ? 'extra-large' : 'medium';
   const [name, setName] = useState('');
   const [secret, setSecret] = useState('');
   const [busy, setBusy] = useState(false);
@@ -60,7 +57,7 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
     <Modal
       name="api-key"
       ariaLabelledBy="api-key-modal-title"
-      containerProps={{ style: { width: apiKey ? 500 : undefined } }}
+      containerProps={{ style: { width: apiKey ? 600 : undefined } }}
     >
       {({ state }) => (
         <>
@@ -85,12 +82,12 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                 <>
                   <label htmlFor="new-api-key">
                     <Trans>
-                      Copy this key now. You cannot view it again after closing
-                      this message.
+                      Make sure to copy this token now. You won't be able to see
+                      it again.
                     </Trans>
                   </label>
                   <Input
-                    size={size}
+                    key="secret"
                     id="new-api-key"
                     autoFocus
                     value={secret}
@@ -102,9 +99,9 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
               ) : apiKey ? (
                 <Text style={{ overflowWrap: 'anywhere' }}>
                   <Trans>
-                    Revoke "{{ name: apiKey.name }}"? Any integrations using it
-                    will stop working, but previously downloaded data will not
-                    be deleted.
+                    Are you sure you want to revoke "{{ name: apiKey.name }}"?
+                    Any integrations using it will stop working, but previously
+                    downloaded data will not be deleted.
                   </Trans>
                 </Text>
               ) : (
@@ -113,7 +110,6 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                     <Trans>Key name</Trans>
                   </label>
                   <Input
-                    size={size}
                     id="api-key-name"
                     autoFocus
                     value={name}
@@ -137,13 +133,12 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                 }}
               >
                 {secret ? (
-                  <Button size={size} onPress={() => state.close()}>
+                  <Button onPress={() => state.close()}>
                     <Trans>Done</Trans>
                   </Button>
                 ) : (
                   <>
                     <Button
-                      size={size}
                       autoFocus={!!apiKey}
                       isDisabled={busy}
                       onPress={() => state.close()}
@@ -151,7 +146,6 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                       <Trans>Cancel</Trans>
                     </Button>
                     <Button
-                      size={size}
                       variant="primary"
                       style={
                         apiKey
