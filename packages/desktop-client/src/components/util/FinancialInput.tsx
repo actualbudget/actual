@@ -55,6 +55,7 @@ export function FinancialInput({
     format(integerValue, 'financial'),
   );
   const [isFocused, setIsFocused] = useState(false);
+  const isEdited = useRef(false);
 
   useEffect(() => {
     if (!isFocused) {
@@ -76,6 +77,7 @@ export function FinancialInput({
 
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
+    isEdited.current = false;
     setInternalValue(format.forEdit(integerValue));
     // The selection itself is made in the layout effect above
     shouldKeepSelection.current = isPointerDown.current;
@@ -99,11 +101,9 @@ export function FinancialInput({
     onMouseUp?.(e);
   };
 
-  // Unedited text can be rounded (hidden decimals); keep the exact amount
+  // Untouched text can be rounded (hidden decimals); keep the exact amount
   const parseEdit = (stringValue: string) =>
-    stringValue === format.forEdit(integerValue)
-      ? integerValue
-      : (format.fromEdit(stringValue, 0) ?? 0);
+    isEdited.current ? (format.fromEdit(stringValue, 0) ?? 0) : integerValue;
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
@@ -127,6 +127,7 @@ export function FinancialInput({
 
   const handleChange = (stringValue: string) => {
     setInternalValue(stringValue);
+    isEdited.current = true;
 
     if (onChangeValue) {
       const newInteger = format.fromEdit(stringValue, 0) ?? 0;

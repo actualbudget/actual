@@ -81,10 +81,13 @@ export function AmountInput({
   );
 
   const [value, setValue] = useState(getDisplayValue(initialValue, false));
-  useEffect(
-    () => setValue(getDisplayValue(initialValue, isFocused)),
-    [initialValue, isFocused, getDisplayValue],
-  );
+  // The exact amount the text shows until the user types. The text can be
+  // rounded (hidden decimals), so parsing it would lose a stored fraction
+  const exactAmount = useRef<IntegerAmount | null>(initialValue);
+  useEffect(() => {
+    setValue(getDisplayValue(initialValue, isFocused));
+    exactAmount.current = initialValue;
+  }, [initialValue, isFocused, getDisplayValue]);
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
@@ -103,14 +106,13 @@ export function AmountInput({
   }, [sign]);
 
   const getAmount = useCallback(() => {
-    // Unedited text can be rounded (hidden decimals); keep the exact amount
-    const absValue = Math.abs(initialValue ?? 0);
-    if (value === format.forEdit(absValue)) {
+    if (exactAmount.current != null) {
+      const absValue = Math.abs(exactAmount.current);
       return symbol === '-' ? -absValue : absValue;
     }
     const signedValued = symbol === '-' ? symbol + value : value;
     return format.fromEdit(signedValued, 0);
-  }, [initialValue, symbol, value, format]);
+  }, [symbol, value, format]);
 
   useEffect(() => {
     if (innerRef.current) {
@@ -150,12 +152,14 @@ export function AmountInput({
       }
     }
 
+    exactAmount.current = null;
     setValue(newText || '');
     onChangeValue?.(newText);
   }
 
   function fireUpdate(amount) {
     onUpdate?.(amount);
+    exactAmount.current = amount;
 
     if (sign) {
       setSymbol(sign);
