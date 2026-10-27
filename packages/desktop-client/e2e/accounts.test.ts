@@ -241,7 +241,6 @@ test.describe('Accounts', () => {
       debit: '12.34',
     });
 
-    // Scheduled transactions are listed above it
     await accountPage.transactionTableRow
       .filter({ hasText: 'Transfer to point out' })
       .getByTestId('transfer-icon')

@@ -338,8 +338,7 @@ export class FixedSizeList extends PureComponent<
       case 'end':
         return minOffset;
       case 'center': {
-        // The offset that puts the item in the middle, kept within the list:
-        // items near either end can't be centered
+        // Items near either end can't be centered, so clamp to the list
         const centeredOffset = Math.round(
           index * this.props.itemSize - (size - this.props.itemSize) / 2,
         );

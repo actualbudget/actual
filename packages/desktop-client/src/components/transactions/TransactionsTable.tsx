@@ -623,7 +623,7 @@ function HeaderCell({
   );
 }
 
-// Opens the other account of a transfer, pointing out its other side
+// Opens the account, bringing the transaction into view if given
 type NavigateToTransferAccount = (
   accountId: AccountEntity['id'],
   transactionId?: TransactionEntity['id'],
@@ -893,10 +893,8 @@ function PayeeCell({
   );
 }
 
-// How long a row is pointed out, e.g. as the other side of a transfer
 const ROW_PULSE_DURATION_MS = 2000;
 
-// Brings the background of a row to the highlight color and back
 const rowPulse = keyframes({
   '50%': { backgroundColor: theme.tableRowBackgroundHighlight },
 });
@@ -1008,8 +1006,7 @@ type TransactionProps = {
   highlighted?: boolean;
   added?: boolean;
   matched?: boolean;
-  // Pulses the row briefly to point it out, e.g. as the other side of a
-  // transfer the user came from
+  // Highlights the row briefly to point it out
   pulse?: boolean;
   expanded?: boolean;
   focusedField?: string;
@@ -2162,7 +2159,6 @@ const Transaction = memo(function Transaction({
             : { color: theme.tableText }),
           ...(pulse && {
             animation: `${rowPulse} ${ROW_PULSE_DURATION_MS / 2}ms ease-in-out 2`,
-            // A steady highlight instead of a pulse
             '@media (prefers-reduced-motion: reduce)': {
               animation: 'none',
               backgroundColor: theme.tableRowBackgroundHighlight,
@@ -2653,7 +2649,6 @@ type TransactionTableInnerProps = {
   balances: Record<TransactionEntity['id'], IntegerAmount> | null;
   columns: TransactionTableColumnId[];
   showReconciled: boolean;
-  // The transaction to bring into view and point out, until it's shown
   focusedTransactionId?: TransactionEntity['id'] | null;
   onFocusedTransactionShown?: () => void;
   currentAccountId: AccountEntity['id'];
@@ -3281,26 +3276,23 @@ export const TransactionTable = forwardRef(
       );
     }, [transactionsWithExpandedSplits]);
 
-    // Brings the transaction asked for into view once it's among the rows,
-    // e.g. after its split was opened, and keeps it there while rows are
-    // added above it, e.g. upcoming scheduled transactions
-    const { focusedTransactionId } = props;
+    // Scrolls to the focused transaction once it's listed, and again when
+    // rows are added above it, e.g. upcoming scheduled transactions
+    const { focusedTransactionId, onFocusedTransactionShown } = props;
     const focusedTransactionIndex =
       focusedTransactionId == null
         ? -1
         : transactionsWithExpandedSplits.findIndex(
             t => t.id === focusedTransactionId,
           );
+    const isFocusedTransactionListed = focusedTransactionIndex !== -1;
     useEffect(() => {
       if (focusedTransactionId != null && focusedTransactionIndex !== -1) {
         tableRef.current?.scrollTo(focusedTransactionId, 'center');
       }
     }, [focusedTransactionId, focusedTransactionIndex]);
 
-    // Points the transaction out for a while once it's among the rows, even
-    // if its row is scrolled away and unmounted meanwhile
-    const isFocusedTransactionListed = focusedTransactionIndex !== -1;
-    const { onFocusedTransactionShown } = props;
+    // Timed here rather than on the row, which unmounts when scrolled away
     useEffect(() => {
       if (!isFocusedTransactionListed) {
         return;

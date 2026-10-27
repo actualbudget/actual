@@ -211,8 +211,8 @@ function getField(field?: string) {
   }
 }
 
-// The transaction a link to an account asks to bring into view, e.g. the
-// other side of a transfer opened from its arrow
+// The transaction a link to the account asks to bring into view, e.g. the
+// other side of a transfer
 function getFocusTransactionId(
   location: ReturnType<typeof useLocation>,
 ): TransactionEntity['id'] | null {
@@ -564,9 +564,9 @@ class AccountInternal extends PureComponent<
           () => {
             if (firstLoad) {
               this.table.current?.scrollToTop();
-            }
-            if (firstLoad && paged === this.paged) {
-              void this.showPendingFocus(paged);
+              if (paged === this.paged) {
+                void this.showPendingFocus(paged);
+              }
             }
 
             setTimeout(() => {
@@ -606,14 +606,12 @@ class AccountInternal extends PureComponent<
   }
 
   // Brings the pending transaction into view, loading the account up to it
-  // when the first page doesn't have it, then opens its split. Leaves the
-  // account at the top when the current view doesn't contain it, e.g. while
-  // reconciled transactions are hidden.
+  // if needed. Leaves the account at the top when the query doesn't have it,
+  // e.g. while reconciled transactions are hidden.
   showPendingFocus = async (paged: PagedQuery<TransactionEntity>) => {
     const id = this.pendingFocusId;
     this.pendingFocusId = null;
-    // Only looked for in the default order, by date, not e.g. once the user
-    // sorted the account
+    // Only in the default date order; the lookup relies on it
     if (id == null || this.state.sort != null) {
       return;
     }
@@ -625,7 +623,7 @@ class AccountInternal extends PureComponent<
     if (
       transaction == null ||
       (transaction.reconciled && !this.state.showReconciled) ||
-      // Another account or e.g. a sort replaced the query meanwhile
+      // The query was replaced meanwhile, e.g. by a sort or another account
       !paged.isRunning
     ) {
       return;

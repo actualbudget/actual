@@ -100,7 +100,7 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     return this._fetchDataPromise;
   };
 
-  // Fetches as many rows as are loaded again
+  // Refetches the rows loaded so far
   private fetchLoaded = () => {
     // If data is null, we haven't fetched anything yet so just
     // fetch the first page
@@ -133,13 +133,13 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
 
   // Resolves once the rows up to it, as of the latest refresh, are loaded
   refetchUpToRow = async (id, defaultOrderBy) => {
-    const upToRow = { isStale: true };
+    const upToRow = { isStale: false };
     this._upToRow = upToRow;
-    while (upToRow.isStale && this._upToRow === upToRow) {
+    do {
       upToRow.isStale = false;
       this._fetchDataPromise = this.fetchUpToRow(id, defaultOrderBy);
       await this._fetchDataPromise;
-    }
+    } while (upToRow.isStale && this._upToRow === upToRow);
     if (this._upToRow === upToRow) {
       this._upToRow = null;
     }
