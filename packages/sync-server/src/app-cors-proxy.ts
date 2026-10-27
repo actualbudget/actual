@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import express from 'express';
+import type { Request } from 'express';
 import rateLimit from 'express-rate-limit';
 
 import { config } from './load-config';
@@ -23,7 +24,7 @@ app.use(
 );
 
 // Cache for the allowlist to avoid fetching it on every request
-let allowlistedRepos = [];
+let allowlistedRepos: string[] = [];
 let lastAllowlistFetch = 0;
 const ALLOWLIST_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
@@ -33,7 +34,7 @@ export const clearAllowlistCache = () => {
   lastAllowlistFetch = 0;
 };
 
-async function fetchAllowlist() {
+async function fetchAllowlist(): Promise<string[]> {
   const now = Date.now();
   if (
     now - lastAllowlistFetch < ALLOWLIST_CACHE_TTL &&
@@ -50,7 +51,21 @@ async function fetchAllowlist() {
       throw new Error(`Failed to fetch allowlist: ${response.status}`);
     }
     const plugins = await response.json();
-    allowlistedRepos = plugins.map(plugin => plugin.url);
+    if (!Array.isArray(plugins)) {
+      throw new Error('Invalid plugin allowlist');
+    }
+    allowlistedRepos = plugins.map((plugin: unknown) => {
+      // Validate untrusted allowlist JSON before using repository URLs.
+      if (
+        typeof plugin !== 'object' ||
+        plugin === null ||
+        !('url' in plugin) ||
+        typeof plugin.url !== 'string'
+      ) {
+        throw new Error('Invalid plugin repository URL');
+      }
+      return plugin.url;
+    });
     lastAllowlistFetch = now;
     console.log('Updated plugin allowlist:', allowlistedRepos);
     return allowlistedRepos;
@@ -65,7 +80,7 @@ async function fetchAllowlist() {
 /**
  * Return true only if the URL is on an allowlist and not a local/private address.
  */
-function isUrlAllowed(targetUrl) {
+function isUrlAllowed(targetUrl: string): boolean {
   try {
     const url = new URL(targetUrl);
     const hostname = url.hostname;
@@ -107,7 +122,7 @@ function isUrlAllowed(targetUrl) {
         console.warn(
           'Invalid repository URL in allowlist:',
           repoUrl,
-          e.message,
+          e instanceof Error ? e.message : String(e),
         );
       }
     }
@@ -120,7 +135,17 @@ function isUrlAllowed(targetUrl) {
   }
 }
 
-app.use('/', async (req, res) => {
+type ProxyRequestBody = {
+  method?: unknown; // Untrusted JSON input must be narrowed before use.
+  headers?: Record<string, string>;
+};
+type ProxyRequest = Request<
+  Record<string, string>,
+  object | string,
+  ProxyRequestBody
+>;
+
+app.use('/', async (req: ProxyRequest, res) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
     res.set('Access-Control-Allow-Origin', '*');
@@ -142,7 +167,11 @@ app.use('/', async (req, res) => {
     return; // validateSession already sent the response
   }
 
-  let url;
+  if (typeof targetUrlString !== 'string') {
+    return res.status(400).json({ error: 'Invalid url parameter' });
+  }
+
+  let url: URL;
   try {
     url = new URL(targetUrlString);
   } catch {
@@ -182,7 +211,7 @@ app.use('/', async (req, res) => {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const requestHeaders = {
+    const requestHeaders: Record<string, string | string[] | undefined> = {
       ...req.headers,
       ...customHeaders,
       host: url.host,
@@ -211,7 +240,13 @@ app.use('/', async (req, res) => {
 
     const response = await fetch(url.href, {
       method: methodNormalized,
-      headers: requestHeaders,
+      // Fetch coerces header values to strings, including incoming arrays.
+      headers: Object.fromEntries(
+        Object.entries(requestHeaders).map(([name, value]) => [
+          name,
+          String(value),
+        ]),
+      ),
     });
 
     const contentType =
@@ -257,9 +292,10 @@ app.use('/', async (req, res) => {
       res.json(binaryData);
     }
   } catch (err) {
-    res
-      .status(500)
-      .json({ error: 'Error proxying request', details: err.message });
+    res.status(500).json({
+      error: 'Error proxying request',
+      details: err instanceof Error ? err.message : String(err),
+    });
   }
 });
 

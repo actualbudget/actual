@@ -207,6 +207,24 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('Invalid url parameter');
     });
+
+    it('should reject repeated URL parameters', async () => {
+      validateSession.mockReturnValue({ userId: 'test-user' });
+      global.fetch.mockClear();
+
+      const res = await request(app)
+        .get('/')
+        .query({
+          url: [
+            'https://github.com/user/repo1',
+            'https://github.com/user/repo2',
+          ],
+        });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.error).toBe('Invalid url parameter');
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
   });
 
   describe('Session validation', () => {
@@ -392,6 +410,31 @@ describe('app-cors-proxy', () => {
         proxyResponses: comprehensiveProxyResponses,
       });
     });
+
+    it.each([
+      { plugins: null },
+      { plugins: {} },
+      { plugins: [null] },
+      { plugins: [{}] },
+      { plugins: [{ url: 123 }] },
+    ])(
+      'should fail closed for malformed allowlist data ($plugins)',
+      async ({ plugins }) => {
+        global.fetch.mockClear();
+        global.fetch.mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(plugins),
+        });
+
+        const res = await request(app)
+          .get('/')
+          .query({ url: 'https://github.com/user/repo1' });
+
+        expect(res.statusCode).toBe(403);
+        expect(res.body.error).toBe('URL not allowed');
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+      },
+    );
   });
 
   describe('HTTP method validation', () => {
@@ -546,6 +589,46 @@ describe('app-cors-proxy', () => {
     });
   });
 
+  describe('Request headers', () => {
+    it('should merge custom headers and remove credentials before forwarding', async () => {
+      validateSession.mockReturnValue({ userId: 'test-user' });
+
+      await request(app)
+        .get('/')
+        .query({ url: 'https://github.com/user/repo1' })
+        .set('X-Actual-Token', 'session-token')
+        .set('Cookie', 'session=secret')
+        .send({
+          headers: {
+            accept: 'application/json',
+            host: 'untrusted.example',
+            'x-actual-token': 'custom-session-token',
+            cookie: 'custom=secret',
+            cookie2: 'other=secret',
+            'content-length': '123',
+          },
+        });
+
+      const [, options] = global.fetch.mock.calls.find(
+        ([url]) => url === 'https://github.com/user/repo1',
+      );
+      expect(options.headers).toEqual(
+        expect.objectContaining({
+          accept: 'application/json',
+          host: 'github.com',
+        }),
+      );
+      for (const header of [
+        'x-actual-token',
+        'cookie',
+        'cookie2',
+        'content-length',
+      ]) {
+        expect(options.headers).not.toHaveProperty(header);
+      }
+    });
+  });
+
   describe('Response handling', () => {
     beforeEach(() => {
       validateSession.mockReturnValue({ userId: 'test-user' });
@@ -624,6 +707,27 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(500);
       expect(res.body.error).toBe('Error proxying request');
       expect(res.body.details).toBe('Network error');
+    });
+
+    it('should handle non-Error fetch rejections', async () => {
+      global.fetch = createFetchMock({
+        proxyResponses: {
+          ...comprehensiveProxyResponses,
+          'https://github.com/user/repo1/network-error': {
+            error: 'Network unavailable',
+          },
+        },
+      });
+
+      const res = await request(app)
+        .get('/')
+        .query({ url: 'https://github.com/user/repo1/network-error' });
+
+      expect(res.statusCode).toBe(500);
+      expect(res.body).toEqual({
+        error: 'Error proxying request',
+        details: 'Network unavailable',
+      });
     });
 
     it('should handle invalid repository URLs in allowlist', async () => {
