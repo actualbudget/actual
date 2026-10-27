@@ -244,11 +244,14 @@ app.events.on('load-budget', () => {
   queueFreeze();
 });
 
+// A file that was never uploaded has no sync group, so it never fully syncs
 function canFreeze(): boolean {
   const spreadsheet = sheet.get();
   return (
     spreadsheet != null &&
-    (checkSyncingMode('disabled') || spreadsheet === syncedSpreadsheet)
+    (checkSyncingMode('disabled') ||
+      !prefs.getPrefs()?.groupId ||
+      spreadsheet === syncedSpreadsheet)
   );
 }
 
