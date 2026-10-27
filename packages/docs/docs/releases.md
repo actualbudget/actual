@@ -4,7 +4,21 @@
 
 Release date: 2026-11-01
 
-- TODO: Add release highlights
+This release includes automatic bank syncing, reports grouped by tags, and more customisable navigation, as well as numerous other fixes.
+
+- Sync linked bank accounts automatically at a chosen interval while Actual is open
+- Group custom reports by tags and choose which tags to include
+- Show, hide, and reorder sidebar pages, and choose your start page
+- Support for per-budget SimpleFIN credentials
+- Optimizations for performance and memory usage on large budget
+- Experimental: Add investment phases and a pot balances chart to the [Monte Carlo analysis report](./experimental/monte-carlo-analysis.md)
+
+:::warning Breaking changes
+
+- If you're running your own custom SimpleFIN bridge on a private network address, you must now configure the [server allowlist](./config/index.md#actual_simplefin_allowed_networks-configjson-simplefinallowednetworks) to prevent SSRF attacks. (If you don't know what this means, it probably doesn't apply to you.)
+- As of this release we are no longer publishing standalone `.flatpak` downloads on the release page. You can still use Flathub or the AppImage on Linux.
+
+:::
 
 **Docker Tag: 26.11.0**
 
