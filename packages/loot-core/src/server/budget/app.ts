@@ -3,10 +3,11 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { APIError } from '#server/errors';
 import { categoryGroupModel, categoryModel } from '#server/models';
-import { mutator } from '#server/mutators';
+import { mutator, runMutator } from '#server/mutators';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
-import { batchMessages } from '#server/sync';
+import { batchMessages, checkSyncingMode } from '#server/sync';
 import { undoable } from '#server/undo';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -14,6 +15,7 @@ import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import { seedCarryoverChain } from './carryover-seed';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
@@ -180,6 +182,20 @@ app.method(
   'budget/create-cleanup-group',
   mutator(undoable(cleanupGroupActions.createCleanupGroup)),
 );
+
+// With a sync server, seed only after a full sync has pulled in every other
+// device's rows. An offline sync also reports success but fetched nothing.
+app.events.on('sync', ({ type }) => {
+  if (
+    type === 'success' &&
+    checkSyncingMode('enabled') &&
+    !checkSyncingMode('offline') &&
+    prefs.getPrefs() &&
+    db.getDatabase()
+  ) {
+    void runMutator(seedCarryoverChain);
+  }
+});
 
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {

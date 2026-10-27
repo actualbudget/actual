@@ -12,6 +12,7 @@ import {
   setCategoryCarryover,
 } from './actions';
 import { createAllBudgets } from './base';
+import { seedCarryoverChain } from './carryover-seed';
 import { cleanupTemplate } from './cleanup-template';
 
 const MONTHS_2027 = [
@@ -180,5 +181,70 @@ describe('carryover', () => {
     await sheet.waitOnSpreadsheet();
 
     expect(await getSheetValue('budget202703', 'budget-card')).toBe(0);
+  });
+
+  it('seeds an off flag after windows that ended before this month', async () => {
+    await db.insertAccount({ id: 'account', name: 'Account' });
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({ id: 'group', name: 'Group' });
+    for (const id of ['a', 'b', 'c']) {
+      await db.insertCategory({ id, name: id, cat_group: 'group' });
+    }
+    await db.insertTransaction({
+      date: '2026-01-15',
+      amount: -100000,
+      account: 'account',
+      category: 'a',
+    });
+
+    // A and C carry through Mar, B through Sep. C has an Apr row with 0.
+    const windows = { a: '2026-03', b: '2026-09', c: '2026-03' };
+    for (const [category, end] of Object.entries(windows)) {
+      for (const month of monthUtils.rangeInclusive('2026-01', end)) {
+        const dbMonth = parseInt(month.replace('-', ''));
+        await db.insert('zero_budgets', {
+          id: `${dbMonth}-${category}`,
+          month: dbMonth,
+          category,
+          carryover: 1,
+        });
+      }
+    }
+    await db.insert('zero_budgets', {
+      id: '202604-c',
+      month: 202604,
+      category: 'c',
+      amount: 5000,
+      carryover: 0,
+    });
+
+    global.currentMonth = '2026-10';
+    await sheet.loadSpreadsheet(db);
+    await createAllBudgets();
+    await seedCarryoverChain();
+    await sheet.waitOnSpreadsheet();
+
+    expect(budgetRow('zero_budgets', '2026-04', 'a')?.carryover).toBe(0);
+    for (const month of monthUtils.rangeInclusive('2026-04', '2026-10')) {
+      expect(carryover(month, 'a')).toBe(false);
+    }
+
+    expect(budgetRow('zero_budgets', '2026-10', 'b')).toBeNull();
+    expect(carryover('2026-10', 'b')).toBe(true);
+    expect(carryover('2026-11', 'b')).toBe(true);
+
+    const c = budgetRow('zero_budgets', '2026-04', 'c');
+    expect(c?.amount).toBe(5000);
+    expect(c?.carryover).toBe(0);
+    expect(budgetRow('zero_budgets', '2026-05', 'c')).toBeNull();
+
+    // The second run is a no-op, even if a window has lapsed since
+    db.runQuery("DELETE FROM zero_budgets WHERE id = '202604-a'");
+    await seedCarryoverChain();
+    expect(budgetRow('zero_budgets', '2026-04', 'a')).toBeNull();
   });
 });
