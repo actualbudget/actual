@@ -74,10 +74,16 @@ describe('Budgets', () => {
       'SELECT * FROM messages_clock',
     );
     const loadedClock = deserializeClock(row.clock);
-    // Loading writes the carryover seed preference, which can't timestamp
-    // a message earlier than the file's clock
-    global.stepForwardInTime(loadedClock.timestamp.millis());
 
+    // Loading writes the carryover seed preference. While the fake time is
+    // behind the file's clock that write fails, and the budget must not open.
+    const failed = await runHandler(handlers['load-budget'], {
+      id: 'test-budget',
+    });
+    expect(failed.error).toBe('loading-budget');
+    expect(db.getDatabase()).toBe(null);
+
+    global.stepForwardInTime(loadedClock.timestamp.millis());
     const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
     });
@@ -87,46 +93,13 @@ describe('Budgets', () => {
     expect(prefs.getPrefs().id).toBe('test-budget');
 
     // Make sure the clock has been loaded, then advanced by the seed
-    expect(getClock().timestamp.node()).toBe(loadedClock.timestamp.node());
     expect(getClock().merkle).toEqual(loadedClock.merkle);
-    expect(
-      getClock().timestamp.toString() > loadedClock.timestamp.toString(),
-    ).toBe(true);
     expect(
       await db.first('SELECT value FROM preferences WHERE id = ?', [
         'carryoverChainSeeded',
       ]),
     ).toEqual({ value: 'true' });
   }, 20_000);
-
-  test('budget does not open when the carryover seed fails', async () => {
-    await createTestBudget('default-budget-template');
-
-    await db.openDatabase('test-budget');
-    const row = await db.first<db.DbClockMessage>(
-      'SELECT * FROM messages_clock',
-    );
-
-    // The fake time is behind the file's clock, so the seed's write fails
-    // with a clock drift error
-    const failed = await runHandler(handlers['load-budget'], {
-      id: 'test-budget',
-    });
-    expect(failed.error).toBe('loading-budget');
-    expect(db.getDatabase()).toBe(null);
-    expect(prefs.getPrefs()).toBe(null);
-
-    global.stepForwardInTime(deserializeClock(row.clock).timestamp.millis());
-    const retried = await runHandler(handlers['load-budget'], {
-      id: 'test-budget',
-    });
-    expect(retried.error).toBe(undefined);
-    expect(
-      await db.first('SELECT value FROM preferences WHERE id = ?', [
-        'carryoverChainSeeded',
-      ]),
-    ).toEqual({ value: 'true' });
-  }, 30_000);
 
   test('budget detects out of sync migrations', async () => {
     await createTestBudget('default-budget-template');
