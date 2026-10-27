@@ -203,7 +203,7 @@ __metadata:
     express: "npm:^5.3.0"
     express-rate-limit: "npm:^8.7.1"
     express-winston: "npm:^4.2.0"
-    http-proxy-middleware: "npm:^4.2.0"
+    http-proxy-middleware: "npm:^4.2.1"
     ipaddr.js: "npm:^2.5.0"
     jws: "npm:^4.0.1"
     migrate: "npm:^2.1.0"
@@ -212,7 +212,7 @@ __metadata:
     pluggy-sdk: "npm:^0.92.0"
     supertest: "npm:^7.3.1"
     typescript-strict-plugin: "npm:^2.4.4"
-    undici: "npm:^7.25.0"
+    undici: "npm:^8.12.3"
     uuid: "npm:^14.0.3"
     vite: "npm:^8.3.4"
     vitest: "npm:^5.0.4"
@@ -10872,8 +10872,8 @@ __metadata:
   linkType: hard
 
 "body-parser@npm:~1.20.5":
-  version: 1.20.8
-  resolution: "body-parser@npm:1.20.8"
+  version: 1.20.9
+  resolution: "body-parser@npm:1.20.9"
   dependencies:
     bytes: "npm:~3.1.2"
     content-type: "npm:~1.0.5"
@@ -10887,7 +10887,7 @@ __metadata:
     raw-body: "npm:~2.5.3"
     type-is: "npm:~1.6.18"
     unpipe: "npm:~1.0.0"
-  checksum: 10/e5a13ff68066a49823403f93ffe056611d9696182e6de194cd1a3c5b2159457494d4133b4666bad591d7a5a6eb924dd34dd15c83aa2d11c63800ed4d2395b5eb
+  checksum: 10/e9ccf7a920205d674a83cdfae0e83ed3cfe32af668706034e9832a8bf3b80f06fbc18a7c26759611f72d334311683a4b1ff73661690038a352e8c3b4a424b709
   languageName: node
   linkType: hard
 
@@ -13581,7 +13581,7 @@ __metadata:
     better-sqlite3: "npm:^13.0.3"
     copyfiles: "npm:^2.4.1"
     cross-env: "npm:^10.1.0"
-    electron: "npm:43.8.0"
+    electron: "npm:43.8.1"
     electron-builder: "npm:26.8.1"
     typescript-strict-plugin: "npm:^2.4.4"
     vitest: "npm:^5.0.4"
@@ -13853,14 +13853,14 @@ __metadata:
   linkType: hard
 
 "dompurify@npm:^3.3.3":
-  version: 3.4.16
-  resolution: "dompurify@npm:3.4.16"
+  version: 3.4.17
+  resolution: "dompurify@npm:3.4.17"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10/a571d0e2bede4f739666afd640398a86854abd27c71ce0724910249e2fd2ca7ddb8098a9ab579d3a5b39058419af694421f8fe859a81fd6d8acda16019a8ab9d
+  checksum: 10/ae03c068bd351d1201a24a9667cb302c65939f45a0c357edec8b84133108e19ac74f355c2d8b0f30baadadd7f0be2db300d269aa80d3ee15872712ca9ff4e1a8
   languageName: node
   linkType: hard
 
@@ -14032,9 +14032,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:43.8.0":
-  version: 43.8.0
-  resolution: "electron@npm:43.8.0"
+"electron@npm:43.8.1":
+  version: 43.8.1
+  resolution: "electron@npm:43.8.1"
   dependencies:
     "@electron-internal/extract-zip": "npm:^1.0.1"
     "@electron/get": "npm:^5.0.0"
@@ -14042,7 +14042,7 @@ __metadata:
   bin:
     electron: cli.js
     install-electron: install.js
-  checksum: 10/cd5c2d0f79e2d26366551864a595a05d7c76a657c5b833b7c15f69df40bc481f444de4f3761976990632134f09be236ed533dd45571437e8afad5116be9a8905
+  checksum: 10/8f3692572d4e6c208ce09372b553e7d502cf7a82d398503eb71fbfa58d6110739ad08f81e2e8b10759bbdcf1d3e11691853833171a887fd22dbd20d8b96d5a75
   languageName: node
   linkType: hard
 
@@ -15245,9 +15245,9 @@ __metadata:
   linkType: hard
 
 "fast-uri@npm:^3.0.1":
-  version: 3.1.8
-  resolution: "fast-uri@npm:3.1.8"
-  checksum: 10/d3dfa29fd2e5fa2371833699f3f78c975b79f65e52e0ce37604db10dffb85b5b448b5075e93453272cb95fb1c6a759495164e60649ffd69e59ec43f20d44f791
+  version: 3.1.9
+  resolution: "fast-uri@npm:3.1.9"
+  checksum: 10/4276cf58661e68b4fefcbc3308a2c8429e5664d2a77b393a79c1cdbe9e5ba80617d27c7ce6685194ae40e4816df73dbd72a0324e5012d94a7e9cf85ee711f658
   languageName: node
   linkType: hard
 
@@ -16846,16 +16846,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-proxy-middleware@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "http-proxy-middleware@npm:4.2.0"
+"http-proxy-middleware@npm:^4.2.1":
+  version: 4.2.1
+  resolution: "http-proxy-middleware@npm:4.2.1"
   dependencies:
     debug: "npm:^4.4.3"
     httpxy: "npm:^0.5.4"
     is-glob: "npm:^4.0.3"
     is-plain-obj: "npm:^4.1.0"
     micromatch: "npm:^4.0.8"
-  checksum: 10/ea3f08f527e120f0616418896ec2fefdaed67b437a0a301dbccdf0db9b5327a75349245566dafbc489eb6703a204bb7503fc67478b73738732819681ea69022b
+  checksum: 10/c924486ffebcf47fab25a52a75359379b6283b4b7fd5eb5db3f6499ab3848715f3dfd2c17639db39c6c7b46330b2b83c163526beb5b0d78809abbb451c49e12d
   languageName: node
   linkType: hard
 
@@ -17262,9 +17262,9 @@ __metadata:
   linkType: hard
 
 "ip-address@npm:^10.0.1, ip-address@npm:^10.2.0":
-  version: 10.7.2
-  resolution: "ip-address@npm:10.7.2"
-  checksum: 10/3a051cb5234cff142bb527e8b40bf0f9dd895b0334161b1ffe0256700a50a49f4d3b94ef72a809f086b2bd6489d4f7a4a52025b03db9c2e9e83a5f9e4d4bdb60
+  version: 10.7.4
+  resolution: "ip-address@npm:10.7.4"
+  checksum: 10/89375f1fa00e5bb4e724498886e06d870c1cc0abbfa9df8cb5ce80f3f179ee49feb0ca96ec54a1512c2303302719975a2ad96e3a8fcc13b4fd836d7f461d3d95
   languageName: node
   linkType: hard
 
@@ -22749,12 +22749,12 @@ __metadata:
   linkType: hard
 
 "postcss-selector-parser@npm:^6.0.11, postcss-selector-parser@npm:^6.0.16":
-  version: 6.1.4
-  resolution: "postcss-selector-parser@npm:6.1.4"
+  version: 6.1.5
+  resolution: "postcss-selector-parser@npm:6.1.5"
   dependencies:
     cssesc: "npm:^3.0.0"
     util-deprecate: "npm:^1.0.2"
-  checksum: 10/68d122d44ea248f570252a08f4967758168b110a7a5349b1d5605d2a10b2ca4bbb257e36b0925053abf35b406955e730febe5a4aa3cf6997ce222d46ec0ab840
+  checksum: 10/bd6c1eddafffa224274a8120e245fa611a92917973f2a6da64a092e60e1192802475a720caa731b71f384be5b39a16baedbd9bf6523136f95249da61884fe8ce
   languageName: node
   linkType: hard
 
@@ -27088,17 +27088,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^7.25.0":
-  version: 7.30.1
-  resolution: "undici@npm:7.30.1"
-  checksum: 10/306a28e4c715652a0e2cd59bcc98cf8b6083b989151054fafaac27bdab6f2bc7e0f33f5847f72f5ba257971226372d04705e0e984b26b42a03271d5a35eb99b1
-  languageName: node
-  linkType: hard
-
 "undici@npm:^8.11.2":
   version: 8.11.2
   resolution: "undici@npm:8.11.2"
   checksum: 10/a6d851b0a41a94ee11d351457a818f86094ab009af59d82c1e3c38a89cfbb3910f9dbccdef442b156b9d500490f05e9ef9acf312f1a4690a41fac4941a440b8e
+  languageName: node
+  linkType: hard
+
+"undici@npm:^8.12.3":
+  version: 8.12.3
+  resolution: "undici@npm:8.12.3"
+  checksum: 10/8a238fd928ec1791b76b6b1df512eb6b77bdf51eb609d5b2248c3d8545100e2bdeb4d1695cf1594456dd9d085a6a51069ed42be231e56b270f3ee2191bc6517a
   languageName: node
   linkType: hard
 
