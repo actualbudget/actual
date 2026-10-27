@@ -544,6 +544,9 @@ export type Modal =
       };
     }
   | {
+      name: 'future-buffer-mode';
+    }
+  | {
       name: 'scheduled-transaction-menu';
       options: {
         transactionId: TransactionEntity['id'];

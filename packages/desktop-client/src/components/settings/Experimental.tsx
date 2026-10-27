@@ -249,6 +249,9 @@ export function ExperimentalFeatures() {
       >
         <Trans>Redesigned sidebar</Trans>
       </FeatureToggle>
+      <FeatureToggle flag="futureBufferMode">
+        <Trans>Automatic "For next month"</Trans>
+      </FeatureToggle>
       <FeatureToggle
         flag="sankeyReport"
         feedbackLink="https://github.com/actualbudget/actual/issues/1919"

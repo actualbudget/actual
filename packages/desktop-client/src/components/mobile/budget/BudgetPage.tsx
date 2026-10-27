@@ -49,10 +49,12 @@ import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
+import { PrivacyFilter } from '#components/PrivacyFilter';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -638,7 +640,7 @@ function Banner({ type = 'info', children }) {
   return (
     <Card
       style={{
-        height: 50,
+        minHeight: 50,
         marginTop: 10,
         marginBottom: 10,
         padding: 10,
@@ -727,6 +729,11 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     'envelope-budget',
     typeof envelopeBudget.toBudget
   >(envelopeBudget.toBudget);
+  const forNextMonth =
+    useSheetValue<'envelope-budget', typeof envelopeBudget.forNextMonth>(
+      envelopeBudget.forNextMonth,
+    ) ?? 0;
+  const { isManagedMonth } = useFutureBufferMode(month);
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { data: { list: categories } = { list: [] } } = useCategories();
@@ -783,7 +790,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
             justifyContent: 'space-between',
           }}
         >
-          <View>
+          <View style={{ flex: 1, marginRight: 10 }}>
             <View
               style={{
                 flexDirection: 'row',
@@ -796,6 +803,22 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
                 <Trans>You have budgeted more than your available funds</Trans>
               </Text>
             </View>
+            {isManagedMonth && forNextMonth > 0 && (
+              <Text style={{ ...styles.smallText, marginTop: 4 }}>
+                <Trans>
+                  <FinancialText>
+                    <PrivacyFilter>
+                      {
+                        {
+                          amount: format(forNextMonth, 'financial'),
+                        } as TransObjectLiteral
+                      }
+                    </PrivacyFilter>
+                  </FinancialText>{' '}
+                  is held for future months. Budget less ahead, or add income.
+                </Trans>
+              </Text>
+            )}
           </View>
           <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
             <Trans>Cover</Trans>
