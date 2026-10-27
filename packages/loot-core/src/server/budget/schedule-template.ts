@@ -4,7 +4,6 @@ import * as db from '#server/db';
 import { collectFormulasFromActions } from '#server/rules/balanceOfFormula';
 import { getRuleForSchedule } from '#server/schedules/app';
 import { prefetchBalanceOfForTransaction } from '#server/transactions/transaction-rules';
-import type { Currency } from '#shared/currencies';
 import * as monthUtils from '#shared/months';
 import {
   extractScheduleConds,
@@ -34,7 +33,6 @@ async function createScheduleList(
   templates: ScheduleTemplate[],
   current_month: string,
   category: CategoryEntity,
-  currency: Currency,
 ) {
   const t: Array<ScheduleTemplateTarget> = [];
   const errors: string[] = [];
@@ -74,8 +72,7 @@ async function createScheduleList(
         }
         case 'fixed': {
           const sign = scheduleAmount < 0 ? -1 : 1;
-          scheduleAmount +=
-            sign * amountToInteger(template.adjustment, currency.decimalPlaces);
+          scheduleAmount += sign * amountToInteger(template.adjustment);
           break;
         }
 
@@ -321,7 +318,6 @@ export async function runSchedule(
   to_budget: number,
   errors: string[],
   category: CategoryEntity,
-  currency: Currency,
 ) {
   const scheduleTemplates = template_lines.filter(t => t.type === 'schedule');
 
@@ -329,7 +325,6 @@ export async function runSchedule(
     scheduleTemplates,
     current_month,
     category,
-    currency,
   );
   errors = errors.concat(t.errors);
 
