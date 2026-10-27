@@ -527,4 +527,73 @@ describe('future buffer', () => {
       frozen: 1,
     });
   });
+
+  it('drops a queued freeze when the file is reopened before it syncs', async () => {
+    await setup();
+    // A seed write would start another sync
+    await db.update('preferences', {
+      id: 'carryoverChainSeeded',
+      value: 'true',
+    });
+    await prefs.loadPrefs();
+    await prefs.savePrefs({ groupId: 'group' });
+    setSyncingMode('enabled');
+    await fullSync();
+    await waitForQueuedFreeze();
+    global.currentMonth = '2026-11';
+
+    // Hold the mutator queue, so the freezes below wait behind it
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>(resolve => (release = resolve));
+    const held = runMutator(() => gate);
+    await app.handlers['get-budget-bounds']();
+
+    // Reopen the same file
+    sheet.unloadSpreadsheet();
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+    await createAllBudgets();
+
+    release();
+    await held;
+    await waitForQueuedFreeze();
+    expect(monthRow('2026-10')).toBeNull();
+
+    await fullSync();
+    await waitForQueuedFreeze();
+    expect(monthRow('2026-10')?.frozen).toBe(1);
+  });
+
+  it('freezes every month from the start month, even without transactions', async () => {
+    // Automatic mode has been on since Oct, and nothing was ever spent
+    global.currentMonth = '2027-03';
+    await createCategories();
+    await db.update('preferences', {
+      id: 'futureBufferMode',
+      value: '2026-10',
+    });
+    await db.insert('zero_budgets', {
+      id: '202612-bills',
+      month: 202612,
+      category: 'bills',
+      amount: 50000,
+    });
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+    await prefs.loadPrefs();
+
+    const { start } = await app.handlers['get-budget-bounds']();
+    await waitForQueuedFreeze();
+
+    expect(start).toBe('2026-07');
+    for (const month of ['2026-10', '2026-11']) {
+      expect(monthRow(month)).toEqual({
+        id: month,
+        buffered: 50000,
+        frozen: 1,
+      });
+    }
+    expect(monthRow('2027-02')?.frozen).toBe(1);
+    expect(monthRow('2027-03')).toBeNull();
+  });
 });
