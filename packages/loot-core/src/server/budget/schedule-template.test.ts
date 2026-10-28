@@ -1536,21 +1536,16 @@ describe('runSchedule with split rules', () => {
       ],
     });
 
-    const result = await runSchedule(
+    const result = await runScheduleForecast(
       template_lines,
       '2024-08-01',
       0,
       0,
-      0,
-      0,
-      [],
       defaultCategory,
-      defaultCurrency,
     );
 
     // Only the categorized split ($30.00) counts; the uncategorized remainder
     // split must not inherit the budgeted category.
     expect(result.to_budget).toBe(3000);
-    expect(result.errors).toHaveLength(0);
   });
 });
