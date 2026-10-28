@@ -7,6 +7,7 @@ import { getAccountDb } from './account-db';
 import { handlers as accountApp } from './app-account';
 import { handlers as app } from './app-api-keys';
 import { handlers as syncApp } from './app-sync';
+import { deleteUser } from './services/user-service';
 
 describe('API key lifecycle', () => {
   const db = getAccountDb();
@@ -130,6 +131,20 @@ describe('API key lifecycle', () => {
       .delete(`/${created.body.data.id}`)
       .set('X-ACTUAL-TOKEN', session);
     expect(repeated.status).toBe(404);
+  });
+
+  it('removes keys and their budget grants when their creator is deleted', async () => {
+    const created = await createKey();
+    expect(created.status).toBe(201);
+    expect(deleteUser(userId)).toBe(1);
+    expect(
+      db.first('SELECT id FROM api_keys WHERE id = ?', [created.body.data.id]),
+    ).toBeNull();
+    expect(
+      db.all('SELECT file_id FROM api_key_budgets WHERE key_id = ?', [
+        created.body.data.id,
+      ]),
+    ).toEqual([]);
   });
 
   it('rejects inaccessible, missing, and deleted budgets', async () => {
