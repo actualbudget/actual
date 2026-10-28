@@ -1,14 +1,12 @@
 import React from 'react';
 import type { CSSProperties, MouseEventHandler } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { css } from '@emotion/css';
 
 import {
@@ -18,7 +16,6 @@ import {
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
-import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { TotalsList } from './TotalsList';
@@ -46,8 +43,6 @@ export function ToBudgetAmount({
     name: envelopeBudget.toBudget,
     value: 0,
   });
-  const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
-  const { isManagedMonth } = useFutureBufferMode();
   const format = useFormat();
   const availableValue = sheetValue;
   if (typeof availableValue !== 'number' && availableValue !== null) {
@@ -58,11 +53,6 @@ export function ToBudgetAmount({
   const num = availableValue ?? 0;
   const isNegative = num < 0;
   const isPositive = num > 0;
-  // Overbudgeted because of what later months need, not this one
-  const heldForFutureMonths =
-    isNegative && isManagedMonth && forNextMonth > 0
-      ? format(forNextMonth, 'financial')
-      : null;
 
   return (
     <View style={{ alignItems: 'center', ...style }}>
@@ -119,26 +109,6 @@ export function ToBudgetAmount({
           </PrivacyFilter>
         </Tooltip>
       </View>
-      {heldForFutureMonths && (
-        <Text
-          style={{
-            ...styles.smallText,
-            color: theme.pageTextLight,
-            textAlign: 'center',
-            maxWidth: 240,
-            marginTop: 4,
-          }}
-        >
-          <Trans>
-            <FinancialText>
-              <PrivacyFilter>
-                {{ amount: heldForFutureMonths } as TransObjectLiteral}
-              </PrivacyFilter>
-            </FinancialText>{' '}
-            is held for future months.
-          </Trans>
-        </Text>
-      )}
     </View>
   );
 }
