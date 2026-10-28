@@ -1,4 +1,14 @@
+import type { RuleConditionEntity } from './rule';
+
 export type ForecastSource = 'schedules' | 'tracking-budget';
+
+export type ForecastSeries = {
+  id: string;
+  name: string;
+  accounts?: string[];
+  conditions: RuleConditionEntity[];
+  conditionsOp: 'and' | 'or';
+};
 
 export type ForecastDataPoint = {
   date: string;
