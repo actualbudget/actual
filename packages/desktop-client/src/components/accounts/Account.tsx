@@ -959,19 +959,17 @@ class AccountInternal extends PureComponent<
         });
         break;
       }
-      case 'toggle-reconciled':
-        if (this.state.showReconciled) {
-          this.props.setShowReconciled(false);
-          this.setState({ showReconciled: false }, () =>
-            this.fetchTransactions(this.state.filterConditions),
-          );
-        } else {
-          this.props.setShowReconciled(true);
-          this.setState({ showReconciled: true }, () =>
-            this.fetchTransactions(this.state.filterConditions),
-          );
-        }
+      case 'toggle-reconciled': {
+        const showReconciled = !this.state.showReconciled;
+        this.props.setShowReconciled(showReconciled);
+        this.setState({ showReconciled }, () => {
+          this.fetchTransactions(this.state.filterConditions);
+          if (this.state.search !== '') {
+            this.onSearch(this.state.search);
+          }
+        });
         break;
+      }
       case 'toggle-net-worth-chart':
         if (this.props.showNetWorthChart) {
           this.props.setShowNetWorthChart(false);
