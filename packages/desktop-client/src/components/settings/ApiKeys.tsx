@@ -27,7 +27,7 @@ export function ApiKeys({ fileId }: { fileId: string }) {
     void sendCatch('api-keys-list').then(result => {
       if (!active) return;
       if (result.error) setFailed(true);
-      else setKeys(result.data.filter(key => key.fileId === fileId));
+      else setKeys(result.data.filter(key => key.fileIds.includes(fileId)));
     });
     return () => {
       active = false;

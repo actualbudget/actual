@@ -31,7 +31,7 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
         close();
       } else {
         const result = await sendCatch('api-keys-create', {
-          fileId,
+          fileIds: [fileId],
           name: name.trim(),
         });
         if (result.error) throw result.error;
