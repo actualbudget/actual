@@ -5,15 +5,19 @@ export async function up() {
     CREATE TABLE api_keys (
       id TEXT PRIMARY KEY NOT NULL,
       user_id TEXT NOT NULL,
-      file_id TEXT NOT NULL,
       name TEXT NOT NULL,
       key_hash TEXT NOT NULL UNIQUE,
       created_at INTEGER NOT NULL
     );
     CREATE INDEX api_keys_user_id ON api_keys (user_id);
+    CREATE TABLE api_key_budgets (
+      key_id TEXT NOT NULL REFERENCES api_keys(id) ON DELETE CASCADE,
+      file_id TEXT NOT NULL,
+      PRIMARY KEY (key_id, file_id)
+    );
   `);
 }
 
 export async function down() {
-  getAccountDb().exec('DROP TABLE api_keys');
+  getAccountDb().exec('DROP TABLE api_key_budgets; DROP TABLE api_keys');
 }

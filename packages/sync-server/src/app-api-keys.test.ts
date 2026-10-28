@@ -54,13 +54,16 @@ describe('API key lifecycle', () => {
 
   function createKey(
     token = session,
-    body: Record<string, unknown> = { name: 'Import', fileId },
+    body: Record<string, unknown> = { name: 'Import', fileIds: [fileId] },
   ) {
     return request(app).post('/').set('X-ACTUAL-TOKEN', token).send(body);
   }
 
   it('returns the secret only at creation and stores its digest', async () => {
-    const created = await createKey(session, { name: ' Import ', fileId });
+    const created = await createKey(session, {
+      name: ' Import ',
+      fileIds: [fileId],
+    });
     expect(created.status).toBe(201);
     expect(created.headers['cache-control']).toBe('no-store');
     const { key, ...metadata } = created.body.data;
@@ -68,7 +71,7 @@ describe('API key lifecycle', () => {
     expect(metadata).toEqual({
       id: expect.any(String),
       name: 'Import',
-      fileId,
+      fileIds: [fileId],
       createdAt: expect.any(Number),
     });
     const row = db.first('SELECT * FROM api_keys WHERE id = ?', [metadata.id]);
@@ -118,6 +121,11 @@ describe('API key lifecycle', () => {
     expect(
       db.first('SELECT id FROM api_keys WHERE id = ?', [created.body.data.id]),
     ).toBeNull();
+    expect(
+      db.all('SELECT file_id FROM api_key_budgets WHERE key_id = ?', [
+        created.body.data.id,
+      ]),
+    ).toEqual([]);
     const repeated = await request(app)
       .delete(`/${created.body.data.id}`)
       .set('X-ACTUAL-TOKEN', session);
@@ -127,7 +135,7 @@ describe('API key lifecycle', () => {
   it('rejects inaccessible, missing, and deleted budgets', async () => {
     expect((await createKey(otherSession)).status).toBe(403);
     expect(
-      (await createKey(session, { name: 'Import', fileId: randomUUID() }))
+      (await createKey(session, { name: 'Import', fileIds: [randomUUID()] }))
         .status,
     ).toBe(403);
     db.mutate('UPDATE files SET deleted = 1 WHERE id = ?', [fileId]);
@@ -137,19 +145,46 @@ describe('API key lifecycle', () => {
     ).toEqual([]);
   });
 
+  it('rejects duplicate scopes and does not partially create a key for an inaccessible budget', async () => {
+    expect(
+      (
+        await createKey(session, {
+          name: 'Import',
+          fileIds: [fileId, fileId],
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await createKey(session, {
+          name: 'Import',
+          fileIds: [fileId, randomUUID()],
+        })
+      ).status,
+    ).toBe(403);
+    expect(
+      db.all('SELECT id FROM api_keys WHERE user_id = ?', [userId]),
+    ).toEqual([]);
+    expect(
+      db.all('SELECT key_id FROM api_key_budgets WHERE file_id = ?', [fileId]),
+    ).toEqual([]);
+  });
+
   it.each([
-    { fileId: undefined },
+    { fileIds: undefined },
     { name: undefined },
     { name: '' },
     { name: '   ' },
     { name: 'x'.repeat(101) },
     { name: 123 },
-    { fileId: ['budget'] },
-    { fileId: '../budget' },
+    { fileIds: [] },
+    { fileIds: [123] },
+    { fileIds: ['../budget'] },
+    { fileIds: '../budget' },
   ])('rejects invalid creation input: %j', async invalid => {
     const response = await createKey(session, {
       name: 'Import',
-      fileId,
+      fileIds: [fileId],
       ...invalid,
     });
     expect(response.status).toBe(400);
