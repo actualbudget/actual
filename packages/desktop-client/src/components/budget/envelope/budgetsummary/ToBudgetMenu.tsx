@@ -30,7 +30,7 @@ export function useToBudgetMenu({
 }: ToBudgetMenuActions) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { mode, isManagedMonth, isFrozenMonth, canChangeMode } =
+  const { isManagedMonth, isFrozenMonth, canChangeMode } =
     useFutureBufferMode();
 
   const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
@@ -91,10 +91,7 @@ export function useToBudgetMenu({
       ? [
           {
             name: 'future-buffer-mode',
-            text:
-              mode === 'automatic'
-                ? t('For next month: Automatic…')
-                : t('For next month: Manual…'),
+            text: t('Change "For next month" mode…'),
           },
         ]
       : []),
