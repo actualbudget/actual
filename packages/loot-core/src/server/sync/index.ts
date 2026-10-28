@@ -825,6 +825,16 @@ function getTablesFromMessages(messages: Message[]): string[] {
 // spreadsheet to finish any processing. This is useful if we want to
 // perform a full sync and wait for everything to finish, usually if
 // you're doing an initial sync before working with a file.
+// A sync's success event queues work behind the mutator queue (the carryover
+// seed), and the messages a sync applies leave cells to recompute. Wait for
+// both, so a caller that reads right after a sync sees the synced figures.
+// Only call this outside a mutator: a mutator waiting on the queue it holds
+// would never finish.
+export async function waitForPostSyncWork(): Promise<void> {
+  await runMutator(() => Promise.resolve());
+  await sheet.waitOnSpreadsheet();
+}
+
 export async function initialFullSync(): Promise<{
   error?: { message: string; reason: string; meta: unknown };
 }> {
@@ -834,6 +844,7 @@ export async function initialFullSync(): Promise<{
     await sheet.waitOnSpreadsheet();
     return result;
   }
+  await waitForPostSyncWork();
   return {};
 }
 
