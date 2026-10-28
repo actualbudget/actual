@@ -76,12 +76,14 @@ Heads up! You probably don't want to hard-code the passwords like that, especial
 
 ### API Keys
 
-For scripts and integrations, you can create a key with read and write access to one existing budget. A key remains valid until you revoke it, your account is disabled or deleted, or you lose access to the budget.
+For scripts and integrations, you can create a key with read and write access to selected existing budgets. A key remains valid until you revoke it or your account is disabled or deleted. If you lose access to a budget, the key also loses access to that budget.
 
 1. Open the budget in Actual and make sure it has synced to your server.
 2. Go to **Settings → General → Security → API keys** and select **Add key**.
 3. Enter a name that identifies the integration, then select **Create key**.
 4. Copy the key to your integration's secret storage before selecting **Done**. You cannot view it again.
+
+Keys created in Settings grant access to the current budget. To create a key for multiple budgets, use a normal user session to send `POST /api-keys` with `{ "name": "My integration", "fileIds": ["file-id-1", "file-id-2"] }`. Use the server file IDs returned by `/sync/list-user-files`, not the Sync IDs. Revoking a key removes its access to all selected budgets.
 
 Pass the key through `sessionToken` instead of `password`:
 

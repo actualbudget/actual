@@ -9,7 +9,7 @@ for (const width of [1280, 375]) {
     const key = {
       id: 'key-id',
       name: 'Transaction importer',
-      fileId: 'budget',
+      fileIds: ['budget'],
       createdAt: 1,
     };
     let failLoad = true;
@@ -45,7 +45,7 @@ for (const width of [1280, 375]) {
         expect(request.headers()['x-actual-token']).toBe('test-session');
         if (request.method() === 'POST') {
           expect(request.postDataJSON()).toEqual({
-            fileId: 'budget',
+            fileIds: ['budget'],
             name: key.name,
           });
           keys = [key];

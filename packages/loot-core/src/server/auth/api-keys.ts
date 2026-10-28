@@ -5,7 +5,7 @@ import { getServer } from '#server/server-config';
 export type ApiKey = {
   id: string;
   name: string;
-  fileId: string;
+  fileIds: string[];
   createdAt: number;
 };
 
@@ -39,7 +39,7 @@ export function listApiKeys(): Promise<ApiKey[]> {
 
 export function createApiKey(data: {
   name: string;
-  fileId: string;
+  fileIds: string[];
 }): Promise<ApiKey & { key: string }> {
   return request('POST', '', data);
 }
