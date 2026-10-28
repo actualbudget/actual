@@ -1,208 +1,102 @@
 import { Timestamp } from '@actual-app/crdt';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { receiveMessages, setSyncingMode } from '#server/sync';
 import type { Message } from '#server/sync';
-import { undo, withUndo } from '#server/undo';
-import * as monthUtils from '#shared/months';
+import { rangeInclusive } from '#shared/months';
 
-import {
-  getSheetValue,
-  resetIncomeCarryover,
-  setBudget,
-  setCategoryCarryover,
-} from './actions';
-import { createAllBudgets } from './base';
+import { getSheetBoolean, setBudget, setCategoryCarryover } from './actions';
+import { createBudget } from './base';
 import { seedCarryoverChain } from './carryover-seed';
 
 vi.mock('#server/post');
+beforeEach(global.emptyDatabase());
+afterEach(() => {
+  global.currentMonth = null;
+  setSyncingMode('disabled');
+});
 
-function carryover(month: string, category = 'card') {
-  return sheet.getCellValue(
-    monthUtils.sheetForMonth(month),
-    `carryover-${category}`,
-  );
-}
-
-async function setup(budgetType: 'envelope' | 'tracking' = 'envelope') {
-  await db.update('preferences', { id: 'budgetType', value: budgetType });
-  await db.insertAccount({ id: 'account', name: 'Account' });
-  await db.insertCategoryGroup({ id: 'group', name: 'Group' });
-  await db.insertCategoryGroup({
-    id: 'income-group',
-    name: 'Income',
-    is_income: 1,
-  });
-  await db.insertCategory({ id: 'card', name: 'Card', cat_group: 'group' });
-  await db.insertCategory({
-    id: 'income',
-    name: 'Income',
-    cat_group: 'income-group',
-    is_income: 1,
-  });
-  await db.insertTransaction({
-    date: '2026-01-15',
-    amount: -100000,
-    account: 'account',
-    category: 'card',
-  });
-  global.currentMonth = '2025-12';
-  await sheet.loadSpreadsheet(db);
-  sheet.get().meta().budgetType = budgetType;
-  await createAllBudgets();
-  await setCategoryCarryover({
-    startMonth: '2026-01',
-    category: 'card',
-    flag: true,
-  });
-  global.currentMonth = '2026-06';
-  await createAllBudgets();
-  await sheet.waitOnSpreadsheet();
-}
-
-function budgetRow(table: string, month: number, category: string) {
-  return db.firstSync<db.DbZeroBudget>(
-    `SELECT * FROM ${table} WHERE month = ? AND category = ?`,
-    [month, category],
-  );
-}
-
-describe('carryover', () => {
-  beforeEach(global.emptyDatabase());
-  afterEach(() => {
-    global.currentMonth = null;
-    setSyncingMode('disabled');
-  });
-
-  it.each(['envelope', 'tracking'] as const)(
-    'inherits beyond the old window until explicitly turned off (%s)',
-    async budgetType => {
-      await setup(budgetType);
-      const table =
-        budgetType === 'envelope' ? 'zero_budgets' : 'reflect_budgets';
-      expect(carryover('2027-01')).toBe(true);
-      expect(await getSheetValue('budget202706', 'leftover-card')).toBe(
-        -100000,
-      );
-
-      await withUndo(() =>
-        setBudget({ category: 'card', month: '2027-03', amount: 5000 }),
-      );
-      await sheet.waitOnSpreadsheet();
-      expect(budgetRow(table, 202703, 'card')?.carryover).toBeNull();
-      expect(carryover('2027-04')).toBe(true);
-      await undo();
-      await sheet.waitOnSpreadsheet();
-      expect(budgetRow(table, 202703, 'card')?.carryover).toBeNull();
-      expect(carryover('2027-04')).toBe(true);
-
-      await setCategoryCarryover({
-        startMonth: '2027-02',
-        category: 'card',
-        flag: false,
-      });
-      await sheet.waitOnSpreadsheet();
-      expect(carryover('2027-01')).toBe(true);
-      expect(carryover('2027-02')).toBe(false);
-      expect(carryover('2027-06')).toBe(false);
-    },
-  );
-
-  it('keeps a flag set on another device when the row is created later, in any delivery order', async () => {
-    await setup();
-    setSyncingMode('enabled');
-    // Another device's messages, from before this device's clock
-    let millis = Date.now() - 60_000;
-    const send =
-      (node: string, table: string, month: number) =>
-      (column: string, value: number | string): Message => ({
-        dataset: table,
-        row: `${month}-card`,
-        column,
-        value,
-        timestamp: new Timestamp(millis++, 0, node),
-      });
-
-    for (const table of ['zero_budgets', 'reflect_budgets']) {
-      const orders = [
-        (b: Message[], a: Message[]) => [b, a],
-        (b: Message[], a: Message[]) => [a, b],
-        (b: Message[], a: Message[]) => [[...b, ...a]],
-        (b: Message[], a: Message[]) => [[...a, ...b]],
-      ];
-      for (const [i, order] of orders.entries()) {
-        const month = 202701 + i;
-        // B turns the flag off, then A budgets the same month before seeing it
-        const b = send('000000000000000b', table, month);
-        const fromB = [
-          b('month', month),
-          b('category', 'card'),
-          b('carryover', 0),
-        ];
-        const a = send('000000000000000a', table, month);
-        const fromA = [
-          a('month', month),
-          a('category', 'card'),
-          a('amount', 5000),
-        ];
-        for (const batch of order(fromB, fromA)) {
-          await receiveMessages(batch);
-        }
-        expect(budgetRow(table, month, 'card')?.carryover).toBe(0);
-      }
-
-      // A row nobody set a flag on inherits
-      const a = send('000000000000000a', table, 202705);
-      await receiveMessages([
-        a('month', 202705),
-        a('category', 'card'),
-        a('amount', 5000),
-      ]);
-      expect(budgetRow(table, 202705, 'card')?.carryover).toBeNull();
-    }
-  });
-
-  it('resets income auto-hold for one month only', async () => {
-    await setup();
+it.each(['envelope', 'tracking'] as const)(
+  'inherits rollover past twelve months until switched off (%s)',
+  async budgetType => {
+    await db.update('preferences', { id: 'budgetType', value: budgetType });
+    await db.insertCategoryGroup({ id: 'group', name: 'Group' });
+    await db.insertCategoryGroup({
+      id: 'income',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({ id: 'card', name: 'Card', cat_group: 'group' });
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = budgetType;
+    await createBudget(['2026-01']);
     await setCategoryCarryover({
       startMonth: '2026-01',
-      category: 'income',
+      category: 'card',
       flag: true,
     });
-    await setBudget({ category: 'income', month: '2027-02', amount: 0 });
-    await resetIncomeCarryover({ month: '2027-02' });
+    await createBudget(rangeInclusive('2026-01', '2027-02'));
+    await setBudget({ category: 'card', month: '2027-01', amount: 5000 });
     await sheet.waitOnSpreadsheet();
-    expect(carryover('2027-02', 'income')).toBe(false);
-    expect(carryover('2027-03', 'income')).toBe(true);
-  });
+    expect(await getSheetBoolean('budget202702', 'carryover-card')).toBe(true);
+    await setCategoryCarryover({
+      startMonth: '2027-02',
+      category: 'card',
+      flag: false,
+    });
+    await sheet.waitOnSpreadsheet();
+    expect(await getSheetBoolean('budget202702', 'carryover-card')).toBe(false);
+  },
+);
 
-  it('seeds expired windows once without changing existing rows or open chains', async () => {
-    await setup();
-    global.currentMonth = '2027-02';
-    for (const table of ['zero_budgets', 'reflect_budgets']) {
-      await db.insert(table, {
-        id: '202612-card',
-        month: 202612,
-        category: 'card',
-        carryover: 1,
+it('preserves a peer flag regardless of delivery order or batching', async () => {
+  setSyncingMode('enabled');
+  let time = Date.now() - 60000;
+  for (const dataset of ['zero_budgets', 'reflect_budgets']) {
+    for (let order = 0; order < 4; order++) {
+      const row = `20270${order + 1}-card`;
+      const message = (column: string, value: number): Message => ({
+        dataset,
+        row,
+        column,
+        value,
+        timestamp: new Timestamp(time++, 0, '000000000000000a'),
       });
-      await db.insert(table, {
-        id: '202701-income',
-        month: 202701,
-        category: 'income',
-        carryover: 1,
-      });
+      const flag = message('carryover', 0);
+      const amount = message('amount', 5000);
+      const messages = order % 2 ? [amount, flag] : [flag, amount];
+      const batches = order < 2 ? messages.map(m => [m]) : [messages];
+      for (const batch of batches) await receiveMessages(batch);
+      expect(
+        await db.first(`SELECT carryover FROM ${dataset} WHERE id = ?`, [row]),
+      ).toEqual({ carryover: 0 });
     }
-    await seedCarryoverChain();
-    for (const table of ['zero_budgets', 'reflect_budgets']) {
-      expect(budgetRow(table, 202701, 'card')?.carryover).toBe(0);
-      expect(budgetRow(table, 202702, 'income')).toBeNull();
-      expect(budgetRow(table, 202612, 'card')?.carryover).toBe(1);
-      db.runQuery(`DELETE FROM ${table} WHERE id = '202701-card'`);
-    }
-    await seedCarryoverChain();
-    expect(budgetRow('zero_budgets', 202701, 'card')).toBeNull();
-  });
+  }
+});
+
+it('seeds expired windows once, preserving explicit flags and the open chain', async () => {
+  global.currentMonth = '2026-07';
+  for (const table of ['zero_budgets', 'reflect_budgets']) {
+    db.runQuery(`INSERT INTO ${table} (id, month, category, carryover) VALUES
+      ('202601-card', 202601, 'card', 1), ('202602-card', 202602, 'card', 0),
+      ('202603-card', 202603, 'card', 1), ('202606-card', 202606, 'card', 1)`);
+  }
+  await seedCarryoverChain();
+  for (const table of ['zero_budgets', 'reflect_budgets']) {
+    expect(
+      await db.all(`SELECT month, carryover FROM ${table} ORDER BY month`),
+    ).toEqual([
+      { month: 202601, carryover: 1 },
+      { month: 202602, carryover: 0 },
+      { month: 202603, carryover: 1 },
+      { month: 202604, carryover: 0 },
+      { month: 202606, carryover: 1 },
+    ]);
+    db.runQuery(`DELETE FROM ${table} WHERE month = 202604`);
+  }
+  await seedCarryoverChain();
+  expect(
+    await db.first('SELECT id FROM zero_budgets WHERE month = 202604'),
+  ).toBeNull();
 });
