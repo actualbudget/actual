@@ -55,6 +55,15 @@ export class SettingsPage {
     await this.exportDataButton.click();
   }
 
+  async setMobileStartPage(pageName: 'Budget' | 'Accounts' | 'Reports') {
+    await this.goToSection('General');
+    await this.settings.locator('#settings-mobileStartPage').click();
+    await this.page
+      .locator('[data-popover]')
+      .getByRole('button', { name: pageName, exact: true })
+      .click();
+  }
+
   async useBudgetType(budgetType: 'Envelope' | 'Tracking') {
     await this.goToSection('General');
     await this.switchBudgetTypeButton.waitFor();

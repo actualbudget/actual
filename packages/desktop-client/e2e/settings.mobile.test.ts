@@ -39,4 +39,32 @@ test.describe('Mobile Settings', () => {
     expect(download.suggestedFilename()).toMatch(/^\d{4}-\d{2}-\d{2}-.*.zip$/);
     await expect(page).toMatchThemeScreenshots();
   });
+
+  test('opens the budget by default', async () => {
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/budget$/);
+
+    await page.goto('/does-not-exist');
+    await expect(page).toHaveURL(/\/budget$/);
+  });
+
+  test('opens the chosen start page', async () => {
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.setMobileStartPage('Accounts');
+    await expect(
+      settingsPage.settings.locator('#settings-mobileStartPage'),
+    ).toHaveText('Accounts');
+
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/accounts$/);
+    await expect(navigation.navbar).toBeVisible();
+
+    // The redirect replaces `/` in the history, so Back returns to Settings
+    // instead of bouncing through the start page or /budget
+    await page.goBack();
+    await expect(page).toHaveURL(/\/settings\/general$/);
+
+    await page.goto('/does-not-exist');
+    await expect(page).toHaveURL(/\/accounts$/);
+  });
 });

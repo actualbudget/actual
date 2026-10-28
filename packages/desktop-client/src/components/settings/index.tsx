@@ -36,6 +36,7 @@ import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
+import { MobileStartPageSettings } from './MobileStartPageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
@@ -276,7 +277,7 @@ export function GeneralSettings() {
     <SettingsSections title={t('General')}>
       <About />
       <ThemeSettings />
-      {!isNarrowWidth && <SidebarSettings />}
+      {isNarrowWidth ? <MobileStartPageSettings /> : <SidebarSettings />}
       <FormatSettings />
       {isCurrencyExperimentalEnabled && <CurrencySettings />}
       <LanguageSettings />
