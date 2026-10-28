@@ -173,6 +173,11 @@ export async function loadSpreadsheet(
     // Older caches either have no stored flags or store them as booleans.
     // Persistent rollover reads numeric flags, so rebuild those caches from
     // the database rather than interpreting a cached false as a nonzero flag.
+    // An envelope cache (`buffered`) with no `frozen` cells predates the frozen
+    // month flag. An older client builds such a cache when it opens a
+    // transferred database that already holds the newer columns.
+    const has = (suffix: string) =>
+      cachedRows.some(row => row.key.endsWith(suffix));
     const isOutdated =
       (cachedRows.some(row => row.key.includes('!carryover-')) &&
         !cachedRows.some(row => row.key.includes('!carryover-stored-'))) ||
@@ -180,7 +185,8 @@ export async function loadSpreadsheet(
         row =>
           row.key.includes('!carryover-stored-') &&
           (row.value === 'true' || row.value === 'false'),
-      );
+      ) ||
+      (has('!buffered') && !has('!frozen'));
     if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
       cachedRows = null;
