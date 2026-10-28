@@ -134,6 +134,39 @@ export function useTransactionRowContextActions({
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
+  // Only a single, categorized, non-split, non-transfer transaction can be
+  // spread across months
+  const deferrableTransaction = useMemo(() => {
+    if (selectedIds.length !== 1 || types.preview) {
+      return undefined;
+    }
+    const tx = getTransaction(selectedIds[0]);
+    if (
+      !tx ||
+      tx.is_parent ||
+      tx.is_child ||
+      tx.transfer_id ||
+      !tx.category ||
+      !tx.amount
+    ) {
+      return undefined;
+    }
+    return tx;
+  }, [selectedIds, types, getTransaction]);
+
+  function onDefer() {
+    if (deferrableTransaction) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'defer-transaction',
+            options: { transaction: deferrableTransaction },
+          },
+        }),
+      );
+    }
+  }
+
   function onViewSchedule() {
     const firstId = selectedIds[0];
     let scheduleId;
@@ -220,6 +253,12 @@ export function useTransactionRowContextActions({
       text: t('Create rule'),
       onClick: () => onCreateRule(selectedIds),
       hidden: linked,
+    },
+    {
+      name: 'defer',
+      text: t('Defer…'),
+      onClick: onDefer,
+      hidden: !deferrableTransaction,
     },
     {
       name: 'unsplit-transactions',

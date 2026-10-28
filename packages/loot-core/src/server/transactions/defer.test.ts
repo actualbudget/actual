@@ -1,0 +1,139 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import * as db from '#server/db';
+
+import { deferTransaction, splitAmount } from './defer';
+
+beforeEach(global.emptyDatabase());
+
+async function prepareDatabase() {
+  await db.insertCategoryGroup({ id: 'group1', name: 'group1', is_income: 0 });
+  await db.insertCategory({
+    id: 'cat1',
+    name: 'cat1',
+    cat_group: 'group1',
+    is_income: 0,
+  });
+  await db.insertAccount({ id: 'checking', name: 'Checking' });
+  await db.insertPayee({ name: '', transfer_acct: 'checking' });
+  const payee = await db.insertPayee({ name: 'Insurance Co' });
+  await db.insertTransaction({
+    id: 'prepaid',
+    account: 'checking',
+    amount: -120001,
+    payee,
+    category: 'cat1',
+    notes: 'Annual premium',
+    date: '2024-01-31',
+  });
+  return payee;
+}
+
+function getTransactions() {
+  return db.all<db.DbViewTransaction>(
+    'SELECT * FROM v_transactions WHERE tombstone = 0 ORDER BY date, account, amount DESC',
+  );
+}
+
+describe('splitAmount', () => {
+  it('spreads leftover cents over the first parts', () => {
+    expect(splitAmount(-1000, 3)).toEqual([-334, -333, -333]);
+    expect(splitAmount(1200, 12)).toEqual(Array(12).fill(100));
+  });
+});
+
+describe('deferTransaction', () => {
+  it('turns the transaction into a transfer and adds monthly payments', async () => {
+    const payee = await prepareDatabase();
+
+    const { prepaidAccountId } = await deferTransaction({
+      id: 'prepaid',
+      months: 3,
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+
+    const account = await db.getAccount(prepaidAccountId);
+    expect(account).toMatchObject({ name: 'Prepaid Expenses', offbudget: 0 });
+
+    const transactions = await getTransactions();
+    const original = transactions.find(t => t.id === 'prepaid');
+    expect(original).toMatchObject({
+      account: 'checking',
+      amount: -120001,
+      category: null,
+    });
+    expect(original?.transfer_id).toBeTruthy();
+
+    const prepaid = transactions.filter(t => t.account === prepaidAccountId);
+    expect(
+      prepaid.map(({ date, amount, payee, category, notes }) => ({
+        date,
+        amount,
+        payee,
+        category,
+        notes,
+      })),
+    ).toEqual([
+      {
+        date: 20240131,
+        amount: 120001,
+        payee: expect.any(String),
+        category: null,
+        notes: 'Annual premium',
+      },
+      {
+        date: 20240131,
+        amount: -40001,
+        payee,
+        category: 'cat1',
+        notes: 'Annual premium (1/3)',
+      },
+      {
+        date: 20240229,
+        amount: -40000,
+        payee,
+        category: 'cat1',
+        notes: 'Annual premium (2/3)',
+      },
+      {
+        date: 20240331,
+        amount: -40000,
+        payee,
+        category: 'cat1',
+        notes: 'Annual premium (3/3)',
+      },
+    ]);
+  });
+
+  it('reuses an existing prepaid account and honors the start month', async () => {
+    await prepareDatabase();
+    await db.insertAccount({ id: 'existing', name: 'Prepaid Expenses' });
+    await db.insertPayee({ name: '', transfer_acct: 'existing' });
+
+    const { prepaidAccountId } = await deferTransaction({
+      id: 'prepaid',
+      months: 2,
+      startMonth: '2024-03',
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+
+    expect(prepaidAccountId).toBe('existing');
+    const dates = (await getTransactions())
+      .filter(t => t.account === 'existing' && t.category === 'cat1')
+      .map(t => t.date);
+    expect(dates).toEqual([20240331, 20240430]);
+  });
+
+  it('rejects uncategorized transactions', async () => {
+    await prepareDatabase();
+    await db.updateTransaction({ id: 'prepaid', category: null });
+
+    await expect(
+      deferTransaction({
+        id: 'prepaid',
+        months: 12,
+        prepaidAccountName: 'Prepaid Expenses',
+      }),
+    ).rejects.toThrow('categorized');
+  });
+});
