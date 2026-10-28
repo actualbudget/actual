@@ -2,6 +2,7 @@ import { format } from 'node:util';
 
 import createDebug from 'debug';
 import request from 'supertest';
+import * as undici from 'undici';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getAccountDb } from '#account-db';
@@ -9,6 +10,11 @@ import { SecretName, secretsService } from '#services/secrets-service';
 import { assertUrlAllowed } from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
+
+vi.mock('undici', async importOriginal => ({
+  ...(await importOriginal()),
+  fetch: vi.fn(),
+}));
 
 vi.mock('#util/ssrf', async importOriginal => ({
   ...(await importOriginal()),
@@ -33,11 +39,9 @@ const okResponse = body => statusResponse(200, body);
 // The claim is a POST to the bridge; listing accounts is a GET. Route the mock
 // by method so a test can stub one or both.
 function mockFetch({ claim, accounts }) {
-  global.fetch = vi
-    .fn()
-    .mockImplementation((url, options) =>
-      Promise.resolve(options?.method === 'POST' ? claim : accounts),
-    );
+  vi.mocked(undici.fetch).mockImplementation((url, options) =>
+    Promise.resolve(options?.method === 'POST' ? claim : accounts),
+  );
 }
 
 const post = path =>
@@ -210,12 +214,12 @@ describe('app-simplefin', () => {
         SecretName.simplefin_token,
         Buffer.from('not a claim url').toString('base64'),
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/accounts');
 
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
     });
 
     it('treats a 403 Forbidden claim as an invalid token and does not persist it', async () => {
@@ -254,7 +258,7 @@ describe('app-simplefin', () => {
 
     it('reports SERVER_DOWN when the claim request fails at the network level', async () => {
       secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
-      global.fetch = vi.fn().mockRejectedValue(new TypeError('fetch failed'));
+      vi.mocked(undici.fetch).mockRejectedValue(new TypeError('fetch failed'));
 
       const res = await post('/accounts');
 
@@ -267,12 +271,12 @@ describe('app-simplefin', () => {
       assertUrlAllowed.mockRejectedValueOnce(
         new Error('Unable to resolve host: bridge.example.com'),
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/accounts');
 
       expect(res.body.data.error_code).toBe('SERVER_DOWN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
       expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
     });
   });
@@ -283,7 +287,7 @@ describe('app-simplefin', () => {
         SecretName.simplefin_accessKey,
         '<html>Bad Gateway</html>',
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/transactions').send({
         accountId: 'account-1',
@@ -291,7 +295,7 @@ describe('app-simplefin', () => {
       });
 
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
     });
   });
 });
@@ -338,11 +342,11 @@ describe('per-budget credentials', () => {
 
     await post('/accounts').set('X-Actual-File-Id', fileA).expect(200);
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(undici.fetch).toHaveBeenCalledWith(
       'https://bridge.example.com/claim/abc',
       expect.objectContaining({ method: 'POST' }),
     );
-    expect(global.fetch).toHaveBeenLastCalledWith(
+    expect(undici.fetch).toHaveBeenLastCalledWith(
       expect.any(String),
       expect.objectContaining({
         headers: {
@@ -393,7 +397,7 @@ describe('per-budget credentials', () => {
             startDate: batch ? ['2024-01-01'] : '2024-01-01',
           });
         expect(res.body.data).not.toHaveProperty('error_code');
-        expect(global.fetch).toHaveBeenLastCalledWith(
+        expect(undici.fetch).toHaveBeenLastCalledWith(
           expect.any(String),
           expect.objectContaining({
             headers: {
@@ -407,7 +411,7 @@ describe('per-budget credentials', () => {
 
   it('does not fall back to global credentials when a budget token is invalid', async () => {
     secretsService.set(SecretName.simplefin_token, 'Forbidden', fileA);
-    const fetch = vi.spyOn(global, 'fetch');
+    const fetch = vi.spyOn(undici, 'fetch');
     const status = await post('/status').set('X-Actual-File-Id', fileA);
     expect(status.body.data).toEqual({
       configured: false,
@@ -443,7 +447,7 @@ describe('per-budget credentials', () => {
       getAccountDb().mutate('UPDATE files SET deleted = 1 WHERE id = ?', [
         fileA,
       ]);
-      const fetch = vi.spyOn(global, 'fetch');
+      const fetch = vi.spyOn(undici, 'fetch');
       for (const token of ['valid-token', 'valid-token-user']) {
         for (const fileId of [fileA, 'missing-budget']) {
           await request(app)
@@ -460,7 +464,7 @@ describe('per-budget credentials', () => {
   it.each(['/status', '/accounts', '/transactions'])(
     'checks budget access before %s',
     async path => {
-      const fetch = vi.spyOn(global, 'fetch');
+      const fetch = vi.spyOn(undici, 'fetch');
       await post(path).set('X-Actual-File-Id', '../invalid').expect(400);
       await request(app)
         .post(path)
