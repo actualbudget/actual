@@ -51,16 +51,22 @@ export async function deferTransaction({
   if (!transaction.category) {
     throw new Error('Only categorized transactions can be deferred');
   }
-  // Validate before creating the prepaid account so a bad request doesn't
-  // leave it behind
+  const sourceAccount = await db.getAccount(transaction.account);
+  if (sourceAccount?.offbudget) {
+    throw new Error('Transactions in off-budget accounts cannot be deferred');
+  }
   if (startMonth !== undefined && !monthUtils.isValidYearMonth(startMonth)) {
     throw new Error('Invalid start month');
   }
 
-  const prepaidAccountId = await getOrCreatePrepaidAccount(prepaidAccountName);
-  if (prepaidAccountId === transaction.account) {
+  // Nothing is written until every check has passed, so a rejected request
+  // doesn't leave a new account or a remembered pref behind
+  const found = await findPrepaidAccount(prepaidAccountName);
+  if (found?.id === transaction.account) {
     throw new Error('Cannot defer a transaction within the prepaid account');
   }
+  const prepaidAccountId =
+    found?.id ?? (await createPrepaidAccount(prepaidAccountName));
 
   const transferPayee = await db.first<Pick<db.DbPayee, 'id'>>(
     'SELECT id FROM payees WHERE transfer_acct = ? AND tombstone = 0',
@@ -97,6 +103,13 @@ export async function deferTransaction({
     added,
   });
 
+  if (!found?.isRemembered) {
+    await db.update('preferences', {
+      id: 'prepaid-account',
+      value: prepaidAccountId,
+    });
+  }
+
   return { prepaidAccountId };
 }
 
@@ -114,7 +127,12 @@ export function splitAmount(amount: number, parts: number): number[] {
   );
 }
 
-async function getOrCreatePrepaidAccount(name: string) {
+// Finds the prepaid account without writing anything: the account remembered
+// in the `prepaid-account` pref if it's still open and on budget, otherwise an
+// open on-budget account with the default name
+async function findPrepaidAccount(
+  name: string,
+): Promise<{ id: AccountEntity['id']; isRemembered: boolean } | null> {
   const pref = await db.first<Pick<db.DbPreference, 'value'>>(
     "SELECT value FROM preferences WHERE id = 'prepaid-account'",
   );
@@ -124,24 +142,23 @@ async function getOrCreatePrepaidAccount(name: string) {
       [pref.value],
     );
     if (remembered) {
-      return remembered.id;
+      return { id: remembered.id, isRemembered: true };
     }
   }
 
-  // The remembered account is missing, closed or off budget. Adopt an
-  // existing account with the default name, or create one.
   const existing = await db.first<Pick<db.DbAccount, 'id'>>(
     'SELECT id FROM accounts WHERE name = ? AND offbudget = 0 AND closed = 0 AND tombstone = 0',
     [name],
   );
-  let accountId: AccountEntity['id'];
-  if (existing) {
-    accountId = existing.id;
-  } else {
-    accountId = await db.insertAccount({ name, offbudget: 0, closed: 0 });
-    await db.insertPayee({ name: '', transfer_acct: accountId });
-  }
+  return existing ? { id: existing.id, isRemembered: false } : null;
+}
 
-  await db.update('preferences', { id: 'prepaid-account', value: accountId });
+async function createPrepaidAccount(name: string) {
+  const accountId: AccountEntity['id'] = await db.insertAccount({
+    name,
+    offbudget: 0,
+    closed: 0,
+  });
+  await db.insertPayee({ name: '', transfer_acct: accountId });
   return accountId;
 }

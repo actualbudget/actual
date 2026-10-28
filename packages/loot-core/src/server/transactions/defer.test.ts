@@ -187,6 +187,50 @@ describe('deferTransaction', () => {
     expect(pref?.value).toBe(second.prepaidAccountId);
   });
 
+  it('does not remember an account when deferring within it fails', async () => {
+    await prepareDatabase();
+    await db.insertAccount({ id: 'manual', name: 'Prepaid Expenses' });
+    await db.insertPayee({ name: '', transfer_acct: 'manual' });
+    await db.insertTransaction({
+      id: 'inside',
+      account: 'manual',
+      amount: -2400,
+      category: 'cat1',
+      date: '2024-02-15',
+    });
+
+    await expect(
+      deferTransaction({
+        id: 'inside',
+        months: 2,
+        prepaidAccountName: 'Prepaid Expenses',
+      }),
+    ).rejects.toThrow('within the prepaid account');
+
+    const pref = await db.first<Pick<db.DbPreference, 'value'>>(
+      "SELECT value FROM preferences WHERE id = 'prepaid-account'",
+    );
+    expect(pref).toBeNull();
+  });
+
+  it('rejects transactions in off-budget accounts', async () => {
+    await prepareDatabase();
+    await db.updateAccount({ id: 'checking', offbudget: 1 });
+
+    await expect(
+      deferTransaction({
+        id: 'prepaid',
+        months: 12,
+        prepaidAccountName: 'Prepaid Expenses',
+      }),
+    ).rejects.toThrow('off-budget');
+
+    const accounts = await db.all<db.DbAccount>(
+      "SELECT * FROM accounts WHERE name = 'Prepaid Expenses'",
+    );
+    expect(accounts).toEqual([]);
+  });
+
   it('rejects reconciled transactions', async () => {
     await prepareDatabase();
     await db.updateTransaction({ id: 'prepaid', reconciled: true });
