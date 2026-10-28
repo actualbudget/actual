@@ -207,11 +207,17 @@ export async function loadSpreadsheet(
       // clean after each computation pass, so a cell from before the
       // rebuild that it hasn't rewritten yet would be trusted by the next
       // open if this one stopped early. Cells the rebuild hasn't reached
-      // are recomputed on the next open instead.
-      setCacheStatus(mainDb, cacheDb, { clean: false });
+      // are recomputed on the next open instead. The barrier keeps the
+      // cache dirty until every input is loaded: a load that fails
+      // part-way has set some cells, and the pass that saves them would
+      // otherwise mark the cache clean without the rest.
+      sheet.startCacheBarrier();
       sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
     }
     await loadUserBudgets(db);
+    if (cacheEnabled) {
+      sheet.endCacheBarrier();
+    }
   }
 
   captureBreadcrumb({
