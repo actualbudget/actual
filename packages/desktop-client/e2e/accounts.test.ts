@@ -267,6 +267,40 @@ test.describe('Accounts', () => {
     ).not.toBeVisible();
   });
 
+  test('keeps the filter applied after toggling reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Filter Toggle',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    for (const note of ['filter-match', 'filter-other']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: note,
+        debit: '10.00',
+      });
+    }
+
+    await accountPage.filterByNote('filter-match');
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: /(Hide|Show) reconciled transactions/ })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-match' }),
+    ).toBeVisible();
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+  });
+
   test('opens the other side of a transfer from its arrow', async () => {
     accountPage = await navigation.goToAccountPage('Bank of America');
     await accountPage.createSingleTransaction({

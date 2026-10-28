@@ -646,7 +646,9 @@ class AccountInternal extends PureComponent<
     this.setState({ search: value }, this.onSearchDone);
   };
 
-  onSearchDone = debounce(() => {
+  onSearchDone = debounce(() => this.applySearch(), 150);
+
+  applySearch = () => {
     if (this.state.search === '') {
       this.updateQuery(
         this.currentQuery,
@@ -662,7 +664,7 @@ class AccountInternal extends PureComponent<
         true,
       );
     }
-  }, 150);
+  };
 
   onSync = async () => {
     const accountId = this.props.accountId;
@@ -962,12 +964,7 @@ class AccountInternal extends PureComponent<
       case 'toggle-reconciled': {
         const showReconciled = !this.state.showReconciled;
         this.props.setShowReconciled(showReconciled);
-        this.setState({ showReconciled }, () => {
-          this.fetchTransactions(this.state.filterConditions);
-          if (this.state.search !== '') {
-            this.onSearch(this.state.search);
-          }
-        });
+        this.setState({ showReconciled }, this.applySearch);
         break;
       }
       case 'toggle-net-worth-chart':
