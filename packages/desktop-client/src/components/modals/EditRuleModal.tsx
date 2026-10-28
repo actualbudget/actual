@@ -25,14 +25,21 @@ export function EditRuleModal({
     // Restore rather than clear on cleanup: `openModal` is global, so a modal
     // opened underneath this one would otherwise lose its own tag.
     const previousOpenModal = undo.getUndoState('openModal');
-
-    undo.setUndoState('openModal', {
+    const openModal = {
       name: 'edit-rule',
       options: { rule: defaultRule },
-    });
+    };
+
+    undo.setUndoState('openModal', openModal);
 
     return () => {
-      undo.setUndoState('openModal', previousOpenModal);
+      // Only hand the tag back if we still own it. When this modal and the one
+      // underneath it are removed together, that one cleans up first, and
+      // restoring our captured value here would resurrect a tag for a modal
+      // that is already gone.
+      if (undo.getUndoState('openModal') === openModal) {
+        undo.setUndoState('openModal', previousOpenModal);
+      }
     };
   }, [defaultRule]);
 

@@ -69,4 +69,20 @@ describe('EditRuleModal', () => {
     unmount();
     expect(undo.getUndoState('openModal')).toEqual(underlying);
   });
+
+  test('leaves the tag alone if something else has taken it over', () => {
+    undo.setUndoState('openModal', {
+      name: 'schedule-edit',
+      options: { id: 'sched-1' },
+    });
+
+    const { unmount } = renderModal();
+
+    // Stand in for the modal underneath cleaning up first when both are
+    // removed together: it hands the tag back before we do.
+    undo.setUndoState('openModal', null);
+    unmount();
+
+    expect(undo.getUndoState('openModal')).toBeNull();
+  });
 });
