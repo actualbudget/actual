@@ -49,12 +49,10 @@ import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
-import { PrivacyFilter } from '#components/PrivacyFilter';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
-import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -636,7 +634,7 @@ function Banners({ month, onBudgetAction }) {
   );
 }
 
-function Banner({ type = 'info', style = undefined, children }) {
+function Banner({ type = 'info', children }) {
   return (
     <Card
       style={{
@@ -651,7 +649,6 @@ function Banner({ type = 'info', style = undefined, children }) {
             : type === 'warning'
               ? theme.warningBackground
               : theme.noticeBackground,
-        ...style,
       }}
     >
       {children}
@@ -730,12 +727,6 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
     'envelope-budget',
     typeof envelopeBudget.toBudget
   >(envelopeBudget.toBudget);
-  const forNextMonth =
-    useSheetValue<'envelope-budget', typeof envelopeBudget.forNextMonth>(
-      envelopeBudget.forNextMonth,
-    ) ?? 0;
-  const { isManagedMonth } = useFutureBufferMode();
-  const isHoldShown = isManagedMonth && forNextMonth > 0;
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { data: { list: categories } = { list: [] } } = useCategories();
@@ -784,11 +775,7 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
 
   return (
     <GridListItem textValue="Overbudgeted banner" {...props}>
-      <Banner
-        type="critical"
-        // The held line needs a second row
-        style={isHoldShown ? { height: 'auto', minHeight: 50 } : undefined}
-      >
+      <Banner type="critical">
         <View
           style={{
             flexDirection: 'row',
@@ -809,22 +796,6 @@ function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
                 <Trans>You have budgeted more than your available funds</Trans>
               </Text>
             </View>
-            {isHoldShown && (
-              <Text style={{ ...styles.smallText, marginTop: 4 }}>
-                <Trans>
-                  <FinancialText>
-                    <PrivacyFilter>
-                      {
-                        {
-                          amount: format(forNextMonth, 'financial'),
-                        } as TransObjectLiteral
-                      }
-                    </PrivacyFilter>
-                  </FinancialText>{' '}
-                  is held for future months.
-                </Trans>
-              </Text>
-            )}
           </View>
           <Button onPress={openCoverOverbudgetedModal} style={PILL_STYLE}>
             <Trans>Cover</Trans>
