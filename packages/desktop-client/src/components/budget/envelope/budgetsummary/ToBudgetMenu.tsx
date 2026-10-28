@@ -91,7 +91,7 @@ export function useToBudgetMenu({
       ? [
           {
             name: 'future-buffer-mode',
-            text: t('Change "For next month" mode…'),
+            text: t('Change "For next month" mode'),
           },
         ]
       : []),
