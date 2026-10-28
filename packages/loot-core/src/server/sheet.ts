@@ -51,6 +51,14 @@ async function updateSpreadsheetCache(rawDb, names: string[]) {
   });
 }
 
+// A cache last saved by an older runtime is stale: that runtime keeps the
+// cells it doesn't know about but never updates them, while it still applies
+// their database columns. Each runtime generation writes the cache key to its
+// own row as well as row 1, so a cache an older runtime marked clean has a
+// mismatch and is rebuilt. Bump this when a release adds cells that
+// `loadUserBudgets` fills from the database.
+const CACHE_GENERATION_ROW = 2;
+
 function setCacheStatus(
   mainDb: Database,
   cacheDb: Database,
@@ -61,8 +69,8 @@ function setCacheStatus(
     const num = Math.random() * 10000000;
     sqlite.runQuery(
       cacheDb,
-      'INSERT OR REPLACE INTO kvcache_key (id, key) VALUES (1, ?)',
-      [num],
+      'INSERT OR REPLACE INTO kvcache_key (id, key) VALUES (1, ?), (?, ?)',
+      [num, CACHE_GENERATION_ROW, num],
     );
 
     if (mainDb) {
@@ -78,15 +86,17 @@ function setCacheStatus(
 }
 
 function isCacheDirty(mainDb: Database, cacheDb: Database): boolean {
-  let rows = sqlite.runQuery<{ key?: number }>(
+  let rows = sqlite.runQuery<{ id: number; key?: number }>(
     cacheDb,
-    'SELECT key FROM kvcache_key WHERE id = 1',
-    [],
+    'SELECT id, key FROM kvcache_key WHERE id IN (1, ?)',
+    [CACHE_GENERATION_ROW],
     true,
   );
-  const num = rows.length === 0 ? null : rows[0].key;
+  const num = rows.find(row => row.id === 1)?.key ?? null;
+  const generationNum =
+    rows.find(row => row.id === CACHE_GENERATION_ROW)?.key ?? null;
 
-  if (num == null) {
+  if (num == null || generationNum !== num) {
     return true;
   }
 
@@ -173,11 +183,6 @@ export async function loadSpreadsheet(
     // Older caches either have no stored flags or store them as booleans.
     // Persistent rollover reads numeric flags, so rebuild those caches from
     // the database rather than interpreting a cached false as a nonzero flag.
-    // An envelope cache (`buffered`) with no `frozen` cells predates the frozen
-    // month flag. An older client builds such a cache when it opens a
-    // transferred database that already holds the newer columns.
-    const has = (suffix: string) =>
-      cachedRows.some(row => row.key.endsWith(suffix));
     const isOutdated =
       (cachedRows.some(row => row.key.includes('!carryover-')) &&
         !cachedRows.some(row => row.key.includes('!carryover-stored-'))) ||
@@ -185,8 +190,7 @@ export async function loadSpreadsheet(
         row =>
           row.key.includes('!carryover-stored-') &&
           (row.value === 'true' || row.value === 'false'),
-      ) ||
-      (has('!buffered') && !has('!frozen'));
+      );
     if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
       cachedRows = null;
