@@ -4,7 +4,7 @@ export async function up() {
   getAccountDb().exec(`
     CREATE TABLE api_keys (
       id TEXT PRIMARY KEY NOT NULL,
-      user_id TEXT NOT NULL,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       name TEXT NOT NULL,
       key_hash TEXT NOT NULL UNIQUE,
       created_at INTEGER NOT NULL
