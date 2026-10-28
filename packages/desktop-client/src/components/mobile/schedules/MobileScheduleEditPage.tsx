@@ -247,7 +247,7 @@ export function MobileScheduleEditPage() {
         >
           <Button
             variant="primary"
-            size="extra-large"
+            size="touch"
             onPress={onSave}
             style={{ height: styles.mobileMinHeight }}
           >
