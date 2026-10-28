@@ -155,4 +155,43 @@ describe('split parent formula context', () => {
     // than attempting to re-split it.
     expect(rule.apply(alreadySplit)).not.toHaveProperty('subtransactions');
   });
+
+  test('a second split rule in the same run keeps the first rule split intact', () => {
+    // Two split rules matching the same transaction. runRules applies each
+    // rule's result in sequence, so the second rule sees the already-split
+    // parent produced by the first. It must not re-split it (which would both
+    // crash and zero out the amounts) — the first rule's split stands.
+    function fiftyFiftySplitRule() {
+      return new Rule({
+        conditionsOp: 'and',
+        conditions: [{ field: 'amount', op: 'lt', value: 0 }],
+        actions: [
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 50,
+            options: { splitIndex: 1, method: 'fixed-percent' },
+          },
+          {
+            op: 'set-split-amount',
+            field: 'amount',
+            value: 50,
+            options: { splitIndex: 2, method: 'fixed-percent' },
+          },
+        ],
+      });
+    }
+
+    const afterFirst = fiftyFiftySplitRule().apply(parent);
+    expect(afterFirst).toMatchObject({
+      is_parent: true,
+      subtransactions: [{ amount: -1500 }, { amount: -1500 }],
+    });
+
+    const afterSecond = fiftyFiftySplitRule().apply(afterFirst);
+    expect(afterSecond).toMatchObject({
+      is_parent: true,
+      subtransactions: [{ amount: -1500 }, { amount: -1500 }],
+    });
+  });
 });
