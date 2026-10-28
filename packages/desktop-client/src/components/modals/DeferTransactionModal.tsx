@@ -57,6 +57,9 @@ export function DeferTransactionModal({
   });
 
   async function onSubmit(close: () => void) {
+    if (isLoading) {
+      return;
+    }
     if (!isValidMonths) {
       setError(
         t('Enter a number of months between {{min}} and {{max}}.', {
@@ -150,6 +153,7 @@ export function DeferTransactionModal({
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
+              isDisabled={isLoading}
               onPress={() => void onSubmit(() => state.close())}
             >
               <Trans>Defer</Trans>

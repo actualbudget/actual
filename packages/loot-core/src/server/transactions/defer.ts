@@ -44,6 +44,9 @@ export async function deferTransaction({
   if (transaction.transfer_id) {
     throw new Error('Transfers cannot be deferred');
   }
+  if (transaction.reconciled) {
+    throw new Error('Reconciled transactions cannot be deferred');
+  }
   if (!transaction.category) {
     throw new Error('Only categorized transactions can be deferred');
   }

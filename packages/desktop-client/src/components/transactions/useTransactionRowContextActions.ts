@@ -134,8 +134,8 @@ export function useTransactionRowContextActions({
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
-  // Only a single, categorized, non-split, non-transfer transaction can be
-  // spread across months
+  // Only a single, categorized, non-split, non-transfer, unreconciled
+  // transaction can be spread across months
   const deferrableTransaction = useMemo(() => {
     if (selectedIds.length !== 1 || types.preview) {
       return undefined;
@@ -146,6 +146,7 @@ export function useTransactionRowContextActions({
       tx.is_parent ||
       tx.is_child ||
       tx.transfer_id ||
+      tx.reconciled ||
       !tx.category ||
       !tx.amount
     ) {

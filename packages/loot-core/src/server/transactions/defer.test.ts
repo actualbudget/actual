@@ -124,6 +124,19 @@ describe('deferTransaction', () => {
     expect(dates).toEqual([20240331, 20240430]);
   });
 
+  it('rejects reconciled transactions', async () => {
+    await prepareDatabase();
+    await db.updateTransaction({ id: 'prepaid', reconciled: true });
+
+    await expect(
+      deferTransaction({
+        id: 'prepaid',
+        months: 12,
+        prepaidAccountName: 'Prepaid Expenses',
+      }),
+    ).rejects.toThrow('Reconciled');
+  });
+
   it('rejects uncategorized transactions', async () => {
     await prepareDatabase();
     await db.updateTransaction({ id: 'prepaid', category: null });
