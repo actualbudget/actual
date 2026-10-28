@@ -33,6 +33,7 @@ import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
+import { HomeScreenWidgets } from './mobile/widgets/HomeScreenWidgets';
 import { NotificationsPage } from './news/NotificationsPage';
 import { Notifications } from './Notifications';
 import { MobilePageHeaderProvider, MobilePageHeaderSlot } from './Page';
@@ -211,6 +212,7 @@ export function FinancesApp() {
     <TourProvider>
       <View style={{ height: '100%' }}>
         <RouterBehaviors />
+        <HomeScreenWidgets />
         <GlobalKeys />
         <CommandBar />
         <ContextMenu />
