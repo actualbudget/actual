@@ -1,5 +1,6 @@
 import createDebug from 'debug';
 import express from 'express';
+import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { config } from '#load-config';
