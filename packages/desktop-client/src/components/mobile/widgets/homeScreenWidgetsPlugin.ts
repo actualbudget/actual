@@ -1,55 +1,14 @@
 // Bridge to the `HomeScreenWidgets` Capacitor plugin that ships with the iOS
-// app (packages/mobile-client/ios/App/App/WidgetsPlugin.swift). The app
-// writes a snapshot of the data its home screen widgets show, and the widgets
-// open the app with `actualbudget://` links that are mapped to routes here.
+// app (packages/mobile-client/ios/App/App/WidgetsPlugin.swift). The home
+// screen widgets open the app with `actualbudget://` links, which the plugin
+// forwards here to be mapped to routes.
 //
 // The web build has no dependency on @capacitor/core: the native runtime
 // injects `window.Capacitor`, and everything is a no-op without it.
 
-export type WidgetAmount = {
-  /** Integer amount (in the minor currency unit), only used for colouring. */
-  amount: number;
-  /** Formatted with the user's number format; masked in privacy mode. */
-  formatted: string;
-};
-
-/**
- * Keep in sync with `WidgetSnapshot` in
- * packages/mobile-client/ios/App/ActualWidgets/WidgetSnapshot.swift.
- */
-export type WidgetSnapshot = {
-  version: 1;
-  updatedAt: number;
-  budgetName: string;
-  monthName: string;
-  isPrivacyEnabled: boolean;
-  /** Translated by the app so the widgets follow its language. */
-  labels: {
-    budget: string;
-    accounts: string;
-    /** "To budget" for envelope budgets, "Saved" for tracking budgets. */
-    summary: string;
-    addTransaction: string;
-  };
-  summary: WidgetAmount;
-  accountsTotal: WidgetAmount;
-  accounts: Array<{ id: string; name: string; balance: WidgetAmount }>;
-  categories: Array<{
-    id: string;
-    name: string;
-    balance: WidgetAmount;
-    budgeted: number;
-    /** Activity this month, negative for spending. */
-    spent: number;
-  }>;
-};
-
 type PluginListenerHandle = { remove: () => Promise<void> };
 
 export type HomeScreenWidgetsPlugin = {
-  /** `snapshot` is a `WidgetSnapshot` serialized as JSON. */
-  updateSnapshot: (options: { snapshot: string }) => Promise<void>;
-  clearSnapshot: () => Promise<void>;
   /** Fired with every URL the app is opened with, widget taps included. */
   addListener: (
     eventName: 'urlOpen',
@@ -92,9 +51,10 @@ export function getHomeScreenWidgetsPlugin(): HomeScreenWidgetsPlugin | null {
 const WIDGET_URL_SCHEME = 'actualbudget:';
 
 /**
- * Maps a deep link opened by a widget (see `WidgetLink` in
- * packages/mobile-client/ios/App/ActualWidgets/WidgetStyle.swift) to an
- * in-app route. Returns null for anything that is not a known widget link.
+ * Maps a deep link opened by a widget (see `link` in
+ * packages/mobile-client/ios/App/ActualWidgets/AddTransactionWidget.swift)
+ * to an in-app route. Returns null for anything that is not a known widget
+ * link.
  */
 export function routeForWidgetUrl(url: string): string | null {
   let parsed: URL;
@@ -107,14 +67,7 @@ export function routeForWidgetUrl(url: string): string | null {
     return null;
   }
 
-  // `actualbudget://accounts/<id>` parses with "accounts" as the host.
+  // `actualbudget://transactions/new` parses with "transactions" as the host.
   const path = `/${parsed.host}${parsed.pathname}`.replace(/\/+$/, '');
-  switch (path) {
-    case '/budget':
-    case '/accounts':
-    case '/transactions/new':
-      return path;
-    default:
-      return /^\/accounts\/[\w-]+$/.test(path) ? path : null;
-  }
+  return path === '/transactions/new' ? path : null;
 }
