@@ -213,7 +213,7 @@ app.post('/server-prefs', (req, res) => {
 
 app.get('/validate', (req, res) => {
   const session = validateBudgetSession(req, res);
-  if (session?.apiKeyFileId) {
+  if (session?.apiKeyFileIds) {
     res.send({
       status: 'ok',
       data: { validated: true, loginMethod: 'api-key' },
