@@ -18,6 +18,11 @@ const intervalOptions = [
     defaultRange: 'Last 6 months',
   },
   {
+    description: t('Quarterly'),
+    key: 'Quarterly',
+    defaultRange: 'Last 12 months',
+  },
+  {
     description: t('Yearly'),
     key: 'Yearly',
     defaultRange: 'Year to date',
