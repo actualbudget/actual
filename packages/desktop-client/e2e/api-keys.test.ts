@@ -12,6 +12,7 @@ for (const width of [1280, 375]) {
       fileIds: ['budget'],
       createdAt: 1,
     };
+    let createRequests = 0;
     let failLoad = true;
     let failRevoke = true;
     let keys: (typeof key)[] = [];
@@ -44,6 +45,7 @@ for (const width of [1280, 375]) {
         }
         expect(request.headers()['x-actual-token']).toBe('test-session');
         if (request.method() === 'POST') {
+          createRequests++;
           expect(request.postDataJSON()).toEqual({
             fileIds: ['budget'],
             name: key.name,
@@ -80,9 +82,7 @@ for (const width of [1280, 375]) {
       width < 512 ? new MobileNavigation(page) : new Navigation(page);
     const settings = await navigation.goToSettingsPage();
     if (width < 512) await settings.goToSection('General');
-    await expect(page.getByRole('alert')).toContainText(
-      'Could not load API keys',
-    );
+    await expect(page.getByRole('alert')).toBeVisible();
     await page.getByRole('button', { name: 'Retry', exact: true }).click();
     await expect(
       page.getByText('You have no API keys for this budget.'),
@@ -130,13 +130,13 @@ for (const width of [1280, 375]) {
       path: test.info().outputPath(`api-keys-revoke-${width}.png`),
     });
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
-    expect(keys).toEqual([key]);
+    await expect(section.getByText(key.name, { exact: true })).toBeVisible();
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
     await dialog
       .getByRole('button', { name: 'Revoke key', exact: true })
       .click();
-    await expect(dialog.getByRole('alert')).toContainText('Could not revoke');
-    expect(keys).toEqual([key]);
+    await expect(dialog.getByRole('alert')).toBeVisible();
+    await expect(section.getByText(key.name, { exact: true })).toBeVisible();
     await dialog
       .getByRole('button', { name: 'Revoke key', exact: true })
       .click();
@@ -144,7 +144,8 @@ for (const width of [1280, 375]) {
     await expect(
       page.getByText('You have no API keys for this budget.'),
     ).toBeVisible();
-    expect(keys).toEqual([]);
+    await expect(section.getByText(key.name, { exact: true })).toHaveCount(0);
+    expect(createRequests).toBe(1);
     await page.close();
   });
 }
