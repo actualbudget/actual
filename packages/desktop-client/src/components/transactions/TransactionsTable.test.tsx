@@ -174,6 +174,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -592,6 +594,29 @@ describe('Transactions', () => {
         'Alice',
       );
     });
+  });
+
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
+      const onFocusedTransactionShown = vi.fn();
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
+
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   test('transactions table shows the correct data', () => {

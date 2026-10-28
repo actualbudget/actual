@@ -431,6 +431,29 @@ export function getQuarterEnd(month: string): string {
   return getYear(month) + '-' + String(endMonth).padStart(2, '0');
 }
 
+// Quarters are keyed by their first month, e.g. Q2 2024 is '2024-04'.
+export function quarterFromDate(date: DateLike): string {
+  return getQuarterStart(monthFromDate(date));
+}
+
+export function currentQuarter(): string {
+  return getQuarterStart(currentMonth());
+}
+
+export function quarterRangeInclusive(
+  start: DateLike,
+  end: DateLike,
+): string[] {
+  const quarters: string[] = [];
+  let quarter = quarterFromDate(start);
+  const endQuarter = quarterFromDate(end);
+  while (quarter <= endQuarter) {
+    quarters.push(quarter);
+    quarter = addMonths(quarter, 3);
+  }
+  return quarters;
+}
+
 export function sheetForMonth(month: string): string {
   return 'budget' + month.replace('-', '');
 }

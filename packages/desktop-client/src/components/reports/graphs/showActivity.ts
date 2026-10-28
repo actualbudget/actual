@@ -58,8 +58,15 @@ export function showActivity({
     interval === 'Weekly'
       ? 'dayFromDate'
       : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
-          'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
-  const isDateOp = interval === 'Weekly' || type !== 'time';
+          'FromDate') as
+          | 'dayFromDate'
+          | 'monthFromDate'
+          | 'quarterFromDate'
+          | 'yearFromDate');
+  // Weeks and quarters have no single date value to match, so they are
+  // filtered as a start-to-end date range instead.
+  const isDateOp =
+    interval === 'Weekly' || interval === 'Quarterly' || type !== 'time';
   const drilldownFilter =
     field === 'tag' && bucketTagNames
       ? {

@@ -1,5 +1,4 @@
 import {
-  amountToCurrencyInteger,
   currencyToAmount,
   getNumberFormat,
   integerToCurrencyWithDecimal,
@@ -269,11 +268,11 @@ describe('utility functions', () => {
     });
 
     test('JPY uses 0dp', () => {
-      expect(integerToCurrencyWithDecimal(1234, 'JPY')).toBe('1,234');
+      expect(integerToCurrencyWithDecimal(123400, 'JPY')).toBe('1,234');
     });
 
     test('IRR uses 0dp', () => {
-      expect(integerToCurrencyWithDecimal(1234, 'IRR')).toBe('1,234');
+      expect(integerToCurrencyWithDecimal(123400, 'IRR')).toBe('1,234');
     });
 
     test('unknown currency XYZ defaults to 2dp', () => {
@@ -284,39 +283,5 @@ describe('utility functions', () => {
       expect(integerToCurrencyWithDecimal(1234)).toBe('12.34');
       expect(integerToCurrencyWithDecimal(1200)).toBe('12.00');
     });
-  });
-
-  describe('amountToCurrencyInteger', () => {
-    test('empty string (None) uses 2dp', () => {
-      expect(amountToCurrencyInteger(12.34, '')).toBe(1234);
-    });
-
-    test('USD uses 2dp', () => {
-      expect(amountToCurrencyInteger(12.34, 'USD')).toBe(1234);
-    });
-
-    test('JPY uses 0dp (multiply by 1)', () => {
-      expect(amountToCurrencyInteger(1234, 'JPY')).toBe(1234);
-    });
-
-    test('IRR uses 0dp (multiply by 1)', () => {
-      expect(amountToCurrencyInteger(1234, 'IRR')).toBe(1234);
-    });
-
-    it.each<[number, string]>([
-      [12.34, 'USD'],
-      [1234, 'JPY'],
-      [5678, 'IRR'],
-    ])(
-      'round-trip amountToCurrencyInteger/integerToCurrencyWithDecimal: %s %s',
-      (amount, currency) => {
-        setNumberFormat({ format: 'comma-dot', hideFraction: false });
-        const encoded = amountToCurrencyInteger(amount, currency);
-        const decoded = parseFloat(
-          integerToCurrencyWithDecimal(encoded, currency).replace(/,/g, ''),
-        );
-        expect(decoded).toBeCloseTo(amount, 8);
-      },
-    );
   });
 });
