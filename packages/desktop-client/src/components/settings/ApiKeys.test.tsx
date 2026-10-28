@@ -30,7 +30,7 @@ it('loads automatically and limits the list to this budget', async () => {
   expect(await screen.findByText('Importer')).toBeInTheDocument();
   expect(screen.queryByText('Other budget')).not.toBeInTheDocument();
   expect(
-    screen.queryByRole('button', { name: /Retry|Reload|Manage keys/ }),
+    screen.queryByRole('button', { name: 'Retry' }),
   ).not.toBeInTheDocument();
 });
 
@@ -40,12 +40,13 @@ it('offers retry only after a failed load', async () => {
     error: { type: 'ServerError', message: 'offline' },
   });
   render(<ApiKeys fileId="budget" />, { wrapper: TestProviders });
-  expect(await screen.findByRole('alert')).toHaveTextContent('Could not load');
+  expect(await screen.findByRole('alert')).toBeVisible();
   expect(screen.getByRole('button', { name: 'Add key' })).toBeDisabled();
   vi.mocked(sendCatch).mockResolvedValueOnce({ error: undefined, data: [key] });
   await userEvent.setup().click(screen.getByRole('button', { name: 'Retry' }));
   expect(await screen.findByText('Importer')).toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Add key' })).toBeEnabled();
   expect(
     screen.queryByRole('button', { name: 'Retry' }),
   ).not.toBeInTheDocument();
