@@ -117,7 +117,7 @@ const verifyFileExists = (
   res: Response,
   errorObject: string | Record<string, unknown>,
 ) => {
-  if (res.locals.apiKeyFileId && fileId !== res.locals.apiKeyFileId) {
+  if (res.locals.apiKeyFileIds && !res.locals.apiKeyFileIds.includes(fileId)) {
     res.status(403).send('file-access-not-allowed');
     return;
   }
@@ -508,7 +508,8 @@ app.get('/list-user-files', (req, res) => {
   const rows = fileService
     .find({ userId: res.locals.user_id })
     .filter(
-      row => !res.locals.apiKeyFileId || row.id === res.locals.apiKeyFileId,
+      row =>
+        !res.locals.apiKeyFileIds || res.locals.apiKeyFileIds.includes(row.id),
     );
   res.send({
     status: 'ok',
