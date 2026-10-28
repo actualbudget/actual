@@ -361,8 +361,12 @@ export async function buildMonthlyOutflow(
   category: CategoryEntity,
   // Schedules budgeted in full outside the forecast. Their payments come
   // out of that separate amount, so they aren't this month's spending.
-  fullScheduleIds: string[] = [],
+  // Budgeting ahead, their unpaid occurrences before the window are still
+  // reserved below like the smooth ones': that money sits in the balance.
+  fullEntries: ScheduleTemplateTarget[] = [],
 ): Promise<number[]> {
+  const fullScheduleIds = fullEntries.map(entry => entry.scheduleId);
+  const reservedEntries = [...smoothEntries, ...fullEntries];
   const monthlyOutflow = new Array(FORECAST_MONTHS).fill(0);
   const windowStart = monthUtils.firstDayOfMonth(current_month);
   const windowEnd = `${monthUtils.addMonths(current_month, FORECAST_MONTHS)}-01`;
@@ -427,7 +431,7 @@ export async function buildMonthlyOutflow(
   const { data: linkedAnywhereBeforeWindow } = await aqlQuery(
     q('transactions')
       .filter({
-        schedule: { $oneof: smoothEntries.map(entry => entry.scheduleId) },
+        schedule: { $oneof: reservedEntries.map(entry => entry.scheduleId) },
         'account.offbudget': false,
         date: [
           {
@@ -482,7 +486,7 @@ export async function buildMonthlyOutflow(
     ),
   );
   const lookups = new Map<ScheduleTemplateTarget, OccurrencesBetween>();
-  for (const entry of smoothEntries) {
+  for (const entry of reservedEntries) {
     const ranges: Array<[string, string]> = [[windowStart, windowEnd]];
     if (isBudgetingAhead) {
       ranges.push([currentMonthStart, windowStart]);
@@ -512,7 +516,7 @@ export async function buildMonthlyOutflow(
   // past with no payment at all was skipped. Occurrences missed before the
   // real current month are ignored, so a long-stale next_date can't pile up.
   if (isBudgetingAhead) {
-    for (const entry of smoothEntries) {
+    for (const entry of reservedEntries) {
       const occurrencesBetween = lookups.get(entry);
       const paidAnywhere = settledOccurrences(
         entry,
@@ -792,7 +796,7 @@ export async function runScheduleForecast(
     smoothEntries,
     current_month,
     category,
-    fullEntries.map(c => c.scheduleId),
+    fullEntries,
   );
   const steadyRate = Math.max(
     0,

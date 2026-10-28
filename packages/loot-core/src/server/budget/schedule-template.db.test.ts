@@ -78,7 +78,7 @@ async function setUpRent(start = '2024-01-25') {
     priority: 0,
     directive: 'template',
   } as const;
-  return { category, payRent, template, scheduleId };
+  return { account, category, payRent, template, scheduleId };
 }
 
 async function setUpOneTimeBills() {
@@ -577,5 +577,78 @@ describe('runScheduleForecast against a real database', () => {
     );
 
     expect(result.to_budget).toBe(10000);
+  });
+
+  describe('with an unpaid full-flag bill when budgeting ahead', () => {
+    // Oct 20, budgeting November. Rent ($100 on the 25th) is budgeted in
+    // full; October's was funded and hasn't posted. Insurance ($1,200 a
+    // year, first due Oct 1, 2027) is smoothed and has nothing saved yet,
+    // so it needs $100 a month.
+    async function setUp() {
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-20');
+      const { account, category, payRent, template } =
+        await setUpRent('2026-01-25');
+      const insuranceId = await createSchedule({
+        schedule: { name: 'Insurance' },
+        conditions: [
+          { op: 'is', field: 'account', value: account },
+          { op: 'is', field: 'amount', value: -120000 },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2027-10-01',
+              frequency: 'yearly',
+              interval: 1,
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'after',
+              endMode: 'never',
+            },
+          },
+        ],
+      });
+      const templates = [
+        { ...template, full: true },
+        {
+          type: 'schedule',
+          name: 'Insurance',
+          scheduleId: insuranceId,
+          priority: 0,
+          directive: 'template',
+        } as const,
+      ];
+      return { category, payRent, templates };
+    }
+
+    it("does not treat the full-flag bill's funding as surplus", async () => {
+      const { category, templates } = await setUp();
+
+      const result = await runScheduleForecast(
+        templates,
+        '2026-11',
+        10000,
+        0,
+        category,
+      );
+
+      // $100 for November's rent in full, plus $100 toward insurance.
+      expect(result.to_budget).toBe(20000);
+    });
+
+    it('asks the same once the full-flag bill has posted', async () => {
+      const { category, payRent, templates } = await setUp();
+      await payRent('2026-10-20');
+
+      const result = await runScheduleForecast(
+        templates,
+        '2026-11',
+        0,
+        0,
+        category,
+      );
+
+      expect(result.to_budget).toBe(20000);
+    });
   });
 });
