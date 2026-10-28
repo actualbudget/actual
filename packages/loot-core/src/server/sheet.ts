@@ -171,12 +171,18 @@ export async function loadSpreadsheet(
       true,
     );
 
-    // A cache with carryover cells but no `carryover-stored-*` predates the
-    // inherited flag, so its stored flags only exist in the database.
-    // Rebuild it from there.
+    // A cache from an older version lacks cells that only `loadUserBudgets`
+    // fills from the database, so rebuild it from there: one with carryover
+    // cells but no `carryover-stored-*` predates the inherited flag, and an
+    // envelope cache (`buffered`) with no `frozen` cells predates the frozen
+    // month flag. An older client builds such a cache when it opens a
+    // transferred database that already holds the newer columns.
+    const has = (suffix: string) =>
+      cachedRows.some(row => row.key.endsWith(suffix));
     const isOutdated =
-      cachedRows.some(row => row.key.includes('!carryover-')) &&
-      !cachedRows.some(row => row.key.includes('!carryover-stored-'));
+      (cachedRows.some(row => row.key.includes('!carryover-')) &&
+        !cachedRows.some(row => row.key.includes('!carryover-stored-'))) ||
+      (has('!buffered') && !has('!frozen'));
     if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
       setCacheStatus(mainDb, cacheDb, { clean: false });
