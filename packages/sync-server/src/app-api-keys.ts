@@ -23,20 +23,22 @@ app.use((_req, res, next) => {
 });
 
 app.post('/', (req, res) => {
-  const { name: rawName, fileId } = req.body ?? {};
+  const { name: rawName, fileIds } = req.body ?? {};
   const name = typeof rawName === 'string' ? rawName.trim() : '';
   if (
     !name ||
     name.length > 100 ||
-    typeof fileId !== 'string' ||
-    !isValidFileId(fileId)
+    !Array.isArray(fileIds) ||
+    fileIds.length === 0 ||
+    !fileIds.every(id => typeof id === 'string' && isValidFileId(id)) ||
+    new Set(fileIds).size !== fileIds.length
   ) {
     res.status(400).send({ status: 'error', reason: 'invalid-api-key' });
     return;
   }
 
   const userId: string = res.locals.user_id;
-  if (!canAccessActiveFile(fileId, userId)) {
+  if (!fileIds.every(id => canAccessActiveFile(id, userId))) {
     res.status(403).send({ status: 'error', reason: 'file-access-denied' });
     return;
   }
@@ -46,25 +48,46 @@ app.post('/', (req, res) => {
   // Store only a digest of the randomly generated secret.
   const keyHash = createHash('sha256').update(key).digest('hex');
   const createdAt = Math.floor(Date.now() / 1000);
-  getAccountDb().mutate(
-    `INSERT INTO api_keys (id, user_id, file_id, name, key_hash, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [id, userId, fileId, name, keyHash, createdAt],
-  );
+  const db = getAccountDb();
+  db.transaction(() => {
+    db.mutate(
+      `INSERT INTO api_keys (id, user_id, name, key_hash, created_at)
+       VALUES (?, ?, ?, ?, ?)`,
+      [id, userId, name, keyHash, createdAt],
+    );
+    for (const fileId of fileIds) {
+      db.mutate('INSERT INTO api_key_budgets (key_id, file_id) VALUES (?, ?)', [
+        id,
+        fileId,
+      ]);
+    }
+  });
 
   res.status(201).send({
     status: 'ok',
-    data: { id, name, fileId, createdAt, key },
+    data: { id, name, fileIds, createdAt, key },
   });
 });
 
 app.get('/', (_req, res) => {
-  const keys = getAccountDb().all(
-    `SELECT id, name, file_id AS fileId, created_at AS createdAt
+  const keys: {
+    id: string;
+    name: string;
+    createdAt: number;
+    fileIds: string;
+  }[] = getAccountDb().all(
+    `SELECT id, name, created_at AS createdAt,
+       (SELECT json_group_array(file_id) FROM api_key_budgets WHERE key_id = api_keys.id) AS fileIds
      FROM api_keys WHERE user_id = ? ORDER BY created_at DESC, id`,
     [res.locals.user_id],
   );
-  res.send({ status: 'ok', data: keys });
+  res.send({
+    status: 'ok',
+    data: keys.map(({ fileIds, ...key }) => ({
+      ...key,
+      fileIds: JSON.parse(fileIds),
+    })),
+  });
 });
 
 app.delete('/:id', (req, res) => {
