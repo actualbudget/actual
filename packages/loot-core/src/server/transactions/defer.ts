@@ -50,6 +50,11 @@ export async function deferTransaction({
   if (!transaction.category) {
     throw new Error('Only categorized transactions can be deferred');
   }
+  // Validate before creating the prepaid account so a bad request doesn't
+  // leave it behind
+  if (startMonth !== undefined && !monthUtils.isValidYearMonth(startMonth)) {
+    throw new Error('Invalid start month');
+  }
 
   const prepaidAccountId = await getOrCreatePrepaidAccount(prepaidAccountName);
   if (prepaidAccountId === transaction.account) {

@@ -11,6 +11,7 @@ import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { ContextMenuItem } from '#contextmenu/types';
+import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
@@ -134,8 +135,10 @@ export function useTransactionRowContextActions({
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
+  const { data: accounts = [] } = useAccounts();
+
   // Only a single, categorized, non-split, non-transfer, unreconciled
-  // transaction can be spread across months
+  // transaction outside the prepaid account can be spread across months
   const deferrableTransaction = useMemo(() => {
     if (selectedIds.length !== 1 || types.preview) {
       return undefined;
@@ -152,8 +155,19 @@ export function useTransactionRowContextActions({
     ) {
       return undefined;
     }
+    const account = accounts.find(acct => acct.id === tx.account);
+    // The server defers into the open on-budget account with this name, so a
+    // transaction already in it can't be deferred again
+    if (
+      account &&
+      account.name === t('Prepaid Expenses') &&
+      !account.offbudget &&
+      !account.closed
+    ) {
+      return undefined;
+    }
     return tx;
-  }, [selectedIds, types, getTransaction]);
+  }, [selectedIds, types, getTransaction, accounts, t]);
 
   function onDefer() {
     if (deferrableTransaction) {

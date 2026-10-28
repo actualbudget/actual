@@ -137,6 +137,24 @@ describe('deferTransaction', () => {
     ).rejects.toThrow('Reconciled');
   });
 
+  it('rejects an invalid start month without creating the prepaid account', async () => {
+    await prepareDatabase();
+
+    await expect(
+      deferTransaction({
+        id: 'prepaid',
+        months: 12,
+        startMonth: 'invalid',
+        prepaidAccountName: 'Prepaid Expenses',
+      }),
+    ).rejects.toThrow('Invalid start month');
+
+    const accounts = await db.all<db.DbAccount>(
+      "SELECT * FROM accounts WHERE name = 'Prepaid Expenses'",
+    );
+    expect(accounts).toEqual([]);
+  });
+
   it('rejects uncategorized transactions', async () => {
     await prepareDatabase();
     await db.updateTransaction({ id: 'prepaid', category: null });
