@@ -12,8 +12,9 @@ export type DeferTransactionOptions = {
   // Month (YYYY-MM) of the first virtual payment. Defaults to the month of
   // the original transaction.
   startMonth?: string;
-  // Name of the on-budget account that holds the prepaid balance. It is
-  // created if no open on-budget account with this name exists.
+  // Name used when the on-budget account that holds the prepaid balance has
+  // to be found or created. Once chosen, the account is remembered by id in
+  // the `prepaid-account` synced pref, so renaming it later is fine.
   prepaidAccountName: string;
 };
 
@@ -114,19 +115,33 @@ export function splitAmount(amount: number, parts: number): number[] {
 }
 
 async function getOrCreatePrepaidAccount(name: string) {
+  const pref = await db.first<Pick<db.DbPreference, 'value'>>(
+    "SELECT value FROM preferences WHERE id = 'prepaid-account'",
+  );
+  if (pref?.value) {
+    const remembered = await db.first<Pick<db.DbAccount, 'id'>>(
+      'SELECT id FROM accounts WHERE id = ? AND offbudget = 0 AND closed = 0 AND tombstone = 0',
+      [pref.value],
+    );
+    if (remembered) {
+      return remembered.id;
+    }
+  }
+
+  // The remembered account is missing, closed or off budget. Adopt an
+  // existing account with the default name, or create one.
   const existing = await db.first<Pick<db.DbAccount, 'id'>>(
     'SELECT id FROM accounts WHERE name = ? AND offbudget = 0 AND closed = 0 AND tombstone = 0',
     [name],
   );
+  let accountId: AccountEntity['id'];
   if (existing) {
-    return existing.id;
+    accountId = existing.id;
+  } else {
+    accountId = await db.insertAccount({ name, offbudget: 0, closed: 0 });
+    await db.insertPayee({ name: '', transfer_acct: accountId });
   }
 
-  const accountId: AccountEntity['id'] = await db.insertAccount({
-    name,
-    offbudget: 0,
-    closed: 0,
-  });
-  await db.insertPayee({ name: '', transfer_acct: accountId });
+  await db.update('preferences', { id: 'prepaid-account', value: accountId });
   return accountId;
 }

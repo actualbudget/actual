@@ -124,6 +124,69 @@ describe('deferTransaction', () => {
     expect(dates).toEqual([20240331, 20240430]);
   });
 
+  it('remembers the prepaid account by id so it can be renamed', async () => {
+    await prepareDatabase();
+    await db.insertTransaction({
+      id: 'second',
+      account: 'checking',
+      amount: -2400,
+      category: 'cat1',
+      date: '2024-02-15',
+    });
+
+    const { prepaidAccountId } = await deferTransaction({
+      id: 'prepaid',
+      months: 2,
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+    const pref = await db.first<Pick<db.DbPreference, 'value'>>(
+      "SELECT value FROM preferences WHERE id = 'prepaid-account'",
+    );
+    expect(pref?.value).toBe(prepaidAccountId);
+
+    await db.updateAccount({ id: prepaidAccountId, name: 'Annual bills' });
+    const second = await deferTransaction({
+      id: 'second',
+      months: 2,
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+
+    expect(second.prepaidAccountId).toBe(prepaidAccountId);
+    const accounts = await db.all<db.DbAccount>(
+      'SELECT * FROM accounts WHERE tombstone = 0',
+    );
+    expect(accounts).toHaveLength(2);
+  });
+
+  it('creates a new prepaid account when the remembered one is closed', async () => {
+    await prepareDatabase();
+    const { prepaidAccountId } = await deferTransaction({
+      id: 'prepaid',
+      months: 2,
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+    await db.updateAccount({ id: prepaidAccountId, closed: 1 });
+    await db.insertTransaction({
+      id: 'second',
+      account: 'checking',
+      amount: -2400,
+      category: 'cat1',
+      date: '2024-02-15',
+    });
+
+    const second = await deferTransaction({
+      id: 'second',
+      months: 2,
+      prepaidAccountName: 'Prepaid Expenses',
+    });
+
+    expect(second.prepaidAccountId).not.toBe(prepaidAccountId);
+    const pref = await db.first<Pick<db.DbPreference, 'value'>>(
+      "SELECT value FROM preferences WHERE id = 'prepaid-account'",
+    );
+    expect(pref?.value).toBe(second.prepaidAccountId);
+  });
+
   it('rejects reconciled transactions', async () => {
     await prepareDatabase();
     await db.updateTransaction({ id: 'prepaid', reconciled: true });

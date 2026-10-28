@@ -22,6 +22,8 @@ import { FormField, FormLabel } from '#components/forms';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
+import { useDispatch } from '#redux';
 
 type DeferTransactionModalProps = Extract<
   ModalType,
@@ -37,6 +39,7 @@ export function DeferTransactionModal({
   const { t } = useTranslation();
   const locale = useLocale();
   const format = useFormat();
+  const dispatch = useDispatch();
   const transactionMonth = monthUtils.monthFromDate(transaction.date);
   const [monthsText, setMonthsText] = useState('12');
   const [startMonth, setStartMonth] = useState(transactionMonth);
@@ -72,12 +75,15 @@ export function DeferTransactionModal({
 
     setIsLoading(true);
     try {
-      await send('transaction-defer', {
+      const { prepaidAccountId } = await send('transaction-defer', {
         id: transaction.id,
         months,
         startMonth,
         prepaidAccountName: t('Prepaid Expenses'),
       });
+      // The server remembers the account in a synced pref; mirror it so the
+      // context menu knows which account holds the installments
+      dispatch(mergeSyncedPrefs({ 'prepaid-account': prepaidAccountId }));
       close();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
