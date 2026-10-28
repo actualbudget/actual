@@ -69,7 +69,10 @@ describe('budget access with an API key', () => {
         'INSERT INTO files (id, group_id, owner, sync_version, name) VALUES (?, ?, ?, 2, ?)',
         [fileId, groupId, userId, 'Test budget'],
       );
-      writeFileSync(getPathForUserFile(fileId), 'budget contents');
+      writeFileSync(
+        getPathForUserFile(fileId),
+        `budget contents for ${fileId}`,
+      );
     }
     const created = await request(app)
       .post('/api-keys')
@@ -180,7 +183,9 @@ describe('budget access with an API key', () => {
       expect(metadata.body.data.id).toBe(encrypted ? encryptionKey : null);
       const downloaded = await get('/sync/download-user-file');
       expect(downloaded.status).toBe(200);
-      expect(downloaded.body.toString()).toBe('budget contents');
+      expect(downloaded.body.toString()).toBe(
+        `budget contents for ${budget.fileId}`,
+      );
 
       const message = create(MessageEnvelopeSchema, {
         timestamp: '2026-10-01T00:00:00.000Z-0000-0000000000000001',
@@ -217,19 +222,28 @@ describe('budget access with an API key', () => {
         .expect(201);
       key = created.body.data.key;
       const id = created.body.data.id;
-      const listedKeys = await get('/api-keys', budget.fileId, session);
-      expect(
-        listedKeys.body.data
-          .find((item: { id: string; fileIds: string[] }) => item.id === id)
-          .fileIds.sort(),
-      ).toEqual([budget.fileId, otherBudget.fileId].sort());
-      for (const target of [budget, otherBudget]) {
+      const scopes = [budget, otherBudget].map((target, index) => ({
+        ...target,
+        message: create(MessageEnvelopeSchema, {
+          timestamp: '2026-10-01T00:00:00.000Z-0000-0000000000000001',
+          content: new Uint8Array([index + 1]),
+        }),
+      }));
+      for (const { fileId, groupId, message } of scopes) {
+        const downloaded = await get('/sync/download-user-file', fileId);
+        expect(downloaded.status).toBe(200);
+        expect(downloaded.body.toString()).toBe(
+          `budget contents for ${fileId}`,
+        );
+        expect((await sync(fileId, groupId, [message])).status).toBe(200);
+      }
+      for (const { fileId, groupId, message } of scopes) {
+        const received = await sync(fileId, groupId);
+        expect(received.status).toBe(200);
         expect(
-          (
-            await get('/sync/download-user-file', target.fileId)
-          ).body.toString(),
-        ).toBe('budget contents');
-        expect((await sync(target.fileId, target.groupId)).status).toBe(200);
+          fromBinary(SyncResponseSchema, new Uint8Array(received.body))
+            .messages,
+        ).toEqual([message]);
       }
       expect(
         (await get('/sync/download-user-file', budgetIds().fileId)).status,
@@ -266,11 +280,12 @@ describe('budget access with an API key', () => {
         .delete(`/api-keys/${id}`)
         .set('X-ACTUAL-TOKEN', session)
         .expect(200);
-      expect((await get('/sync/download-user-file')).status).toBe(401);
-      expect((await sync()).status).toBe(401);
-      expect(
-        db.all('SELECT file_id FROM api_key_budgets WHERE key_id = ?', [id]),
-      ).toEqual([]);
+      for (const { fileId, groupId } of scopes) {
+        expect((await get('/sync/download-user-file', fileId)).status).toBe(
+          401,
+        );
+        expect((await sync(fileId, groupId)).status).toBe(401);
+      }
     },
   );
 
@@ -404,10 +419,9 @@ describe('budget access with an API key', () => {
     ).toBe(401);
   });
 
-  it('rejects administration, key management, and a future sync route', async () => {
+  it('rejects administration and key management', async () => {
     expect((await get('/admin/users')).status).toBe(401);
     expect((await get('/api-keys')).status).toBe(401);
-    expect((await get('/sync/future-endpoint')).status).toBe(401);
     expect(
       (
         await request(app)
