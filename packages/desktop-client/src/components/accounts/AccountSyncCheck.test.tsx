@@ -150,6 +150,31 @@ describe('AccountSyncCheck', () => {
     ).toBeInTheDocument();
   });
 
+  it('explains that SimpleFIN is unreachable instead of a generic internal error', async () => {
+    vi.mocked(useFailedAccounts).mockReturnValue(
+      new Map([['acc-1', { type: 'SERVER_DOWN', code: 'SERVER_DOWN' }]]),
+    );
+
+    render(
+      <TestProviders>
+        <AccountSyncCheck />
+      </TestProviders>,
+    );
+
+    await userEvent.click(
+      screen.getByText(
+        "This account is experiencing connection problems. Let's fix it.",
+      ),
+    );
+
+    expect(
+      screen.getByText(
+        'SimpleFIN could not be reached or is down for maintenance. Please try again later.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/An internal error occurred/)).toBeNull();
+  });
+
   it('hides Configure button and only shows Unlink account for non-admin users', async () => {
     vi.mocked(useCurrentAccess).mockReturnValue({
       isAdmin: false,
