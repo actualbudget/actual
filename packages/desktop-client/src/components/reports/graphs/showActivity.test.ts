@@ -3,7 +3,6 @@ import type {
   AccountEntity,
   CategoryEntity,
   CategoryGroupEntity,
-  RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -27,6 +26,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -58,6 +58,7 @@ describe('showActivity', () => {
       filters: [{ field: 'account', op: 'is', value: 'acct-1', type: 'id' }],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -95,6 +96,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -124,6 +126,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -152,6 +155,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -189,6 +193,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type,
         startDate: '2026-05-01',
         endDate: '2026-05-31',
@@ -230,6 +235,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type: 'totals',
         startDate,
         endDate: '2026-06-30',
@@ -289,6 +295,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type: 'totals',
         startDate: '2026-05-01',
         endDate: '2026-05-31',
@@ -303,25 +310,20 @@ describe('showActivity', () => {
   );
 
   describe('category "one of" filter from the report checkboxes', () => {
-    const categoryList: CategoryEntity[] = ['food', 'rent', 'fun'].map(id => ({
-      id,
-      name: id,
-      group: 'group',
-    }));
-
-    function drillDownFilters(
-      list: CategoryEntity[],
-      filters: RuleConditionEntity[],
-    ) {
+    function drillDownFilters(showUncategorized: boolean) {
       const navigate = vi.fn();
       showActivity({
         navigate,
-        categories: { grouped: [], list },
+        categories,
         accounts,
         balanceTypeOp: 'totalTotals',
-        filters,
+        filters: [
+          { field: 'category', op: 'oneOf', value: ['food'], type: 'id' },
+          { field: 'account', op: 'is', value: 'acct-1', type: 'id' },
+        ],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized,
         type: 'totals',
         startDate: '2026-05-24',
         endDate: '2026-05-30',
@@ -329,53 +331,46 @@ describe('showActivity', () => {
       return navigate.mock.calls[0][1].state.filterConditions;
     }
 
-    it('becomes "not one of" the unchecked categories', () => {
-      const filterConditions = drillDownFilters(categoryList, [
-        { field: 'category', op: 'oneOf', value: ['food', 'fun'], type: 'id' },
-        { field: 'account', op: 'is', value: 'acct-1', type: 'id' },
-      ]);
+    it('also keeps transactions without a category, but not split parents', () => {
+      const filterConditions = drillDownFilters(true);
 
-      expect(filterConditions).toContainEqual({
-        field: 'category',
-        op: 'notOneOf',
-        value: ['rent'],
-        type: 'id',
-      });
+      expect(filterConditions).toContainEqual(
+        expect.objectContaining({
+          field: 'category',
+          queryFilter: {
+            $or: [
+              { category: { $oneof: ['food'] } },
+              { $and: [{ category: null }, { is_parent: false }] },
+            ],
+          },
+        }),
+      );
       expect(filterConditions).toContainEqual({
         field: 'account',
         op: 'is',
         value: 'acct-1',
         type: 'id',
       });
-      expect(filterConditions).not.toContainEqual(
-        expect.objectContaining({ field: 'category', op: 'oneOf' }),
-      );
     });
 
-    it('is dropped when every category is checked', () => {
-      const filterConditions = drillDownFilters(categoryList, [
-        {
+    it('keeps only off budget transactions without a category when uncategorized is hidden', () => {
+      expect(drillDownFilters(false)).toContainEqual(
+        expect.objectContaining({
           field: 'category',
-          op: 'oneOf',
-          value: ['food', 'rent', 'fun'],
-          type: 'id',
-        },
-      ]);
-
-      expect(filterConditions).not.toContainEqual(
-        expect.objectContaining({ field: 'category' }),
+          queryFilter: {
+            $or: [
+              { category: { $oneof: ['food'] } },
+              {
+                $and: [
+                  { category: null },
+                  { is_parent: false },
+                  { 'account.offbudget': true },
+                ],
+              },
+            ],
+          },
+        }),
       );
-    });
-
-    it('is kept when the category list is not loaded', () => {
-      const filter: RuleConditionEntity = {
-        field: 'category',
-        op: 'oneOf',
-        value: ['food'],
-        type: 'id',
-      };
-
-      expect(drillDownFilters([], [filter])).toContainEqual(filter);
     });
   });
 });

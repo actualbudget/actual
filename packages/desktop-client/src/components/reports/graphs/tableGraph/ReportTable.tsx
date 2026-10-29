@@ -34,6 +34,7 @@ type ReportTableProps = {
   compactStyle?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
 };
 
 export type renderTotalsProps = {
@@ -68,6 +69,7 @@ export function ReportTable({
   compactStyle,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -93,6 +95,7 @@ export function ReportTable({
         compactStyle={compactStyle}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         interval={interval}
         scopeTagNames={data.scopeTagNames}
       />
@@ -121,6 +124,7 @@ export function ReportTable({
         compactStyle={compactStyle}
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
+        showUncategorized={showUncategorized}
         totalStyle={testStyle}
         totalScrollRef={totalScrollRef}
         handleScroll={handleScroll}
