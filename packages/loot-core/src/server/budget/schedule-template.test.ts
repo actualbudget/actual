@@ -1485,10 +1485,11 @@ describe('runScheduleForecast on reviewer budgets', () => {
   });
 });
 
-describe('runSchedule with split rules', () => {
+describe('runScheduleForecast with split rules', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
   });
 
   // A paycheck-style schedule: a -$100.00 transaction split into a $30.00
