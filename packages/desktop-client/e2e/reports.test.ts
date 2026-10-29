@@ -657,6 +657,9 @@ test.describe('Reports', () => {
     // The split has only unchecked parts, so the report does not count it.
     let report = await openReport();
     await drillDownRow(report).getByText('-8.00', { exact: true }).click();
+    await expect(
+      page.getByText('Report categories: all except Food', { exact: true }),
+    ).toBeVisible();
     await expect(transactions.getByText('5.00', { exact: true })).toBeVisible();
     await expect(transactions.getByText('3.00', { exact: true })).toBeVisible();
     await expect(transactions.getByText('20.00', { exact: true })).toHaveCount(

@@ -373,5 +373,46 @@ describe('showActivity', () => {
         }),
       );
     });
+
+    function drillDownName(checkedIds: string[]) {
+      const navigate = vi.fn();
+      showActivity({
+        navigate,
+        categories: {
+          grouped: [],
+          list: ['Food', 'Rent', 'Fun'].map(name => ({
+            id: name.toLowerCase(),
+            name,
+            group: 'group',
+          })),
+        },
+        accounts,
+        balanceTypeOp: 'totalTotals',
+        filters: [
+          { field: 'category', op: 'oneOf', value: checkedIds, type: 'id' },
+        ],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        showUncategorized: true,
+        type: 'totals',
+        startDate: '2026-05-24',
+        endDate: '2026-05-30',
+      });
+      return navigate.mock.calls[0][1].state.filterConditions[0].customName;
+    }
+
+    it('names the checked categories when they are fewer', () => {
+      expect(drillDownName(['rent'])).toBe('Report categories: Rent');
+    });
+
+    it('names the unchecked categories when they are fewer', () => {
+      expect(drillDownName(['food', 'fun'])).toBe(
+        'Report categories: all except Rent',
+      );
+    });
+
+    it('says none when every category is unchecked', () => {
+      expect(drillDownName([])).toBe('Report categories: none');
+    });
   });
 });
