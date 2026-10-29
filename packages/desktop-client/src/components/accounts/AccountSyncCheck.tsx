@@ -57,6 +57,11 @@ function useErrorMessage() {
       case 'TIMED_OUT':
         return t('The request timed out. Please try again later.');
 
+      case 'SERVER_DOWN':
+        return t(
+          'SimpleFIN could not be reached or is down for maintenance. Please try again later.',
+        );
+
       case 'INVALID_ACCESS_TOKEN':
         return t(
           'Your SimpleFIN Access Token is no longer valid. Please reset and generate a new token.',

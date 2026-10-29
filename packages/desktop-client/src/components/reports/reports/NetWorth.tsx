@@ -120,6 +120,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     [widget?.meta?.interval, getDefaultIntervalForMode],
   );
 
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -285,8 +286,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       },
     });
   };
-
-  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   if (!allMonths || !data) {
     return null;

@@ -77,7 +77,7 @@ export class MobileAccountPage {
     await this.accountMenuButton.click();
     await this.page
       .getByTestId('account-menu-modal')
-      .getByRole('button', { name: 'Reconcile' })
+      .getByRole('button', { name: 'Reconcile', exact: true })
       .click();
     const reconcileModal = this.page.getByTestId('account-reconcile-modal');
     const amountInput = reconcileModal.getByTestId('amount-input');

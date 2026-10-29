@@ -646,6 +646,8 @@ export function MonteCarloConfiguration({
                     // The surplus pot is managed by the Manage surplus toggle
                     canRemove={ordinaryPotCount > 1 && !pot.isSurplus}
                     usesHistoricalReturns={config.returnModel !== 'normal'}
+                    currentAge={config.currentAge}
+                    targetAge={config.targetAge}
                     usesTaxBands={config.taxModel === 'bands'}
                     onPotChange={changes => onPotChange(pot.id, changes)}
                     onRemove={() =>

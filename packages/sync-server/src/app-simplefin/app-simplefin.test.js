@@ -2,15 +2,24 @@ import { format } from 'node:util';
 
 import createDebug from 'debug';
 import request from 'supertest';
+import * as undici from 'undici';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { getAccountDb } from '#account-db';
 import { SecretName, secretsService } from '#services/secrets-service';
 import { assertUrlAllowed } from '#util/ssrf';
 
 import { handlers as app } from './app-simplefin';
 
-vi.mock('#util/ssrf', () => ({
+vi.mock('undici', async importOriginal => ({
+  ...(await importOriginal()),
+  fetch: vi.fn(),
+}));
+
+vi.mock('#util/ssrf', async importOriginal => ({
+  ...(await importOriginal()),
   assertUrlAllowed: vi.fn().mockResolvedValue(undefined),
+  createSsrfDispatcher: vi.fn(),
 }));
 
 const VALID_ACCESS_KEY = 'https://user:pass@bridge.example.com/simplefin';
@@ -30,11 +39,9 @@ const okResponse = body => statusResponse(200, body);
 // The claim is a POST to the bridge; listing accounts is a GET. Route the mock
 // by method so a test can stub one or both.
 function mockFetch({ claim, accounts }) {
-  global.fetch = vi
-    .fn()
-    .mockImplementation((url, options) =>
-      Promise.resolve(options?.method === 'POST' ? claim : accounts),
-    );
+  vi.mocked(undici.fetch).mockImplementation((url, options) =>
+    Promise.resolve(options?.method === 'POST' ? claim : accounts),
+  );
 }
 
 const post = path =>
@@ -207,12 +214,12 @@ describe('app-simplefin', () => {
         SecretName.simplefin_token,
         Buffer.from('not a claim url').toString('base64'),
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/accounts');
 
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
     });
 
     it('treats a 403 Forbidden claim as an invalid token and does not persist it', async () => {
@@ -251,7 +258,7 @@ describe('app-simplefin', () => {
 
     it('reports SERVER_DOWN when the claim request fails at the network level', async () => {
       secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
-      global.fetch = vi.fn().mockRejectedValue(new TypeError('fetch failed'));
+      vi.mocked(undici.fetch).mockRejectedValue(new TypeError('fetch failed'));
 
       const res = await post('/accounts');
 
@@ -264,12 +271,12 @@ describe('app-simplefin', () => {
       assertUrlAllowed.mockRejectedValueOnce(
         new Error('Unable to resolve host: bridge.example.com'),
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/accounts');
 
       expect(res.body.data.error_code).toBe('SERVER_DOWN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
       expect(secretsService.get(SecretName.simplefin_accessKey)).toBeNull();
     });
   });
@@ -280,7 +287,7 @@ describe('app-simplefin', () => {
         SecretName.simplefin_accessKey,
         '<html>Bad Gateway</html>',
       );
-      global.fetch = vi.fn();
+      vi.mocked(undici.fetch).mockReset();
 
       const res = await post('/transactions').send({
         accountId: 'account-1',
@@ -288,7 +295,199 @@ describe('app-simplefin', () => {
       });
 
       expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(undici.fetch).not.toHaveBeenCalled();
     });
   });
+});
+
+describe('per-budget credentials', () => {
+  const fileA = 'simplefin-budget-a';
+  const fileB = 'simplefin-budget-b';
+  const keyB = 'https://other:password@bridge.example.com/simplefin';
+  const keyC = 'https://third:secret@bridge.example.com/simplefin';
+
+  beforeEach(() => {
+    for (const fileId of [fileA, fileB]) {
+      getAccountDb().mutate(
+        'INSERT INTO files (id, deleted, owner) VALUES (?, FALSE, ?)',
+        [fileId, 'genericAdmin'],
+      );
+    }
+    for (const fileId of [null, fileA, fileB]) {
+      secretsService.reset(SecretName.simplefin_token, fileId);
+      secretsService.reset(SecretName.simplefin_accessKey, fileId);
+    }
+    secretsService.set(SecretName.simplefin_token, SETUP_TOKEN);
+    secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY);
+  });
+
+  afterEach(() => {
+    for (const fileId of [fileA, fileB]) {
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+    }
+    for (const fileId of [null, fileA, fileB]) {
+      secretsService.reset(SecretName.simplefin_token, fileId);
+      secretsService.reset(SecretName.simplefin_accessKey, fileId);
+    }
+    vi.restoreAllMocks();
+  });
+
+  it('claims and stores the budget key without using or replacing global credentials', async () => {
+    secretsService.set(SecretName.simplefin_token, SETUP_TOKEN, fileA);
+    secretsService.set(SecretName.simplefin_accessKey, keyC, fileB);
+    mockFetch({
+      claim: okResponse(keyB),
+      accounts: okResponse(JSON.stringify({ accounts: [], errors: [] })),
+    });
+
+    await post('/accounts').set('X-Actual-File-Id', fileA).expect(200);
+
+    expect(undici.fetch).toHaveBeenCalledWith(
+      'https://bridge.example.com/claim/abc',
+      expect.objectContaining({ method: 'POST' }),
+    );
+    expect(undici.fetch).toHaveBeenLastCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: {
+          Authorization: `Basic ${Buffer.from('other:password').toString('base64')}`,
+        },
+      }),
+    );
+    expect(secretsService.get(SecretName.simplefin_accessKey, fileA)).toBe(
+      keyB,
+    );
+    expect(secretsService.get(SecretName.simplefin_accessKey, fileB)).toBe(
+      keyC,
+    );
+    expect(secretsService.get(SecretName.simplefin_accessKey)).toBe(
+      VALID_ACCESS_KEY,
+    );
+  });
+
+  it('uses the selected budget key for individual and batch transactions', async () => {
+    secretsService.set(SecretName.simplefin_accessKey, VALID_ACCESS_KEY, fileA);
+    secretsService.set(SecretName.simplefin_accessKey, keyB, fileB);
+    mockFetch({
+      accounts: okResponse(
+        JSON.stringify({
+          accounts: [
+            {
+              id: 'account',
+              org: { name: 'Bank' },
+              balance: '0.00',
+              'balance-date': 1704067200,
+              transactions: [],
+            },
+          ],
+          errors: [],
+        }),
+      ),
+    });
+
+    for (const [fileId, credentials] of [
+      [fileA, 'user:pass'],
+      [fileB, 'other:password'],
+    ]) {
+      for (const batch of [false, true]) {
+        const res = await post('/transactions')
+          .set('X-Actual-File-Id', fileId)
+          .send({
+            accountId: batch ? ['account'] : 'account',
+            startDate: batch ? ['2024-01-01'] : '2024-01-01',
+          });
+        expect(res.body.data).not.toHaveProperty('error_code');
+        expect(undici.fetch).toHaveBeenLastCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            headers: {
+              Authorization: `Basic ${Buffer.from(credentials).toString('base64')}`,
+            },
+          }),
+        );
+      }
+    }
+  });
+
+  it('does not fall back to global credentials when a budget token is invalid', async () => {
+    secretsService.set(SecretName.simplefin_token, 'Forbidden', fileA);
+    const fetch = vi.spyOn(undici, 'fetch');
+    const status = await post('/status').set('X-Actual-File-Id', fileA);
+    expect(status.body.data).toEqual({
+      configured: false,
+      source: 'per-budget-file',
+    });
+    for (const path of ['/accounts', '/transactions']) {
+      const res = await post(path).set('X-Actual-File-Id', fileA);
+      expect(res.body.data.error_code).toBe('INVALID_ACCESS_TOKEN');
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('falls back to global credentials after clearing only the budget credentials', async () => {
+    secretsService.set(SecretName.simplefin_token, SETUP_TOKEN, fileA);
+    expect(
+      (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
+    ).toBe('per-budget-file');
+    secretsService.set(SecretName.simplefin_token, null, fileA);
+    expect(
+      (await post('/status').set('X-Actual-File-Id', fileA)).body.data.source,
+    ).toBe('global');
+    expect((await post('/status')).body.data.source).toBe('global');
+  });
+
+  it.each(['/status', '/accounts', '/transactions'])(
+    'rejects deleted budgets before %s even with retained credentials',
+    async path => {
+      secretsService.set(
+        SecretName.simplefin_accessKey,
+        VALID_ACCESS_KEY,
+        fileA,
+      );
+      getAccountDb().mutate('UPDATE files SET deleted = 1 WHERE id = ?', [
+        fileA,
+      ]);
+      const fetch = vi.spyOn(undici, 'fetch');
+      for (const token of ['valid-token', 'valid-token-user']) {
+        for (const fileId of [fileA, 'missing-budget']) {
+          await request(app)
+            .post(path)
+            .set('x-actual-token', token)
+            .set('X-Actual-File-Id', fileId)
+            .expect(403);
+        }
+      }
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['/status', '/accounts', '/transactions'])(
+    'checks budget access before %s',
+    async path => {
+      const fetch = vi.spyOn(undici, 'fetch');
+      await post(path).set('X-Actual-File-Id', '../invalid').expect(400);
+      await request(app)
+        .post(path)
+        .set('x-actual-token', 'valid-token-user')
+        .set('X-Actual-File-Id', fileA)
+        .expect(403);
+      expect(fetch).not.toHaveBeenCalled();
+
+      getAccountDb().mutate(
+        'INSERT INTO user_access (file_id, user_id) VALUES (?, ?)',
+        [fileA, 'genericUser'],
+      );
+      try {
+        await request(app)
+          .post('/status')
+          .set('x-actual-token', 'valid-token-user')
+          .set('X-Actual-File-Id', fileA)
+          .expect(200);
+      } finally {
+        getAccountDb().mutate('DELETE FROM user_access WHERE file_id = ?', [
+          fileA,
+        ]);
+      }
+    },
+  );
 });
