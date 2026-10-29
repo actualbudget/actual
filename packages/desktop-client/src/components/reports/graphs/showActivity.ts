@@ -119,7 +119,10 @@ export function showActivity({
     filter.field === 'category' && filter.op === 'oneOf'
       ? {
           ...filter,
-          customName: t('Categories in the report'),
+          customName: reportCategoriesName(
+            [filter.value].flat(),
+            categories.list,
+          ),
           queryFilter: {
             $or: [
               { category: { $oneof: filter.value } },
@@ -191,4 +194,21 @@ export function showActivity({
         ? { goBack: true }
         : { goBack: true, filterConditions },
   });
+}
+
+// Name the shorter list, so the filter chip stays short.
+function reportCategoriesName(checkedIds: string[], list: CategoryEntity[]) {
+  const checked = list.filter(({ id }) => checkedIds.includes(id));
+  const unchecked = list.filter(({ id }) => !checkedIds.includes(id));
+  const names = (categories: CategoryEntity[]) =>
+    categories.map(({ name }) => name).join(', ');
+
+  if (checked.length === 0) {
+    return t('Report categories: none');
+  }
+  return checked.length <= unchecked.length
+    ? t('Report categories: {{categories}}', { categories: names(checked) })
+    : t('Report categories: all except {{categories}}', {
+        categories: names(unchecked),
+      });
 }
