@@ -42,7 +42,12 @@ export function BankSyncAccountsListItem({
         width: '100%',
         cursor: 'pointer',
       }}
-      onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
+      onClick={() => {
+        // Bank sync for accounts in other currencies arrives later.
+        if (isLinked || !account.currency) {
+          onAction(account, isLinked ? 'edit' : 'link');
+        }
+      }}
     >
       <SpaceBetween gap={spacing.lg}>
         <SpaceBetween
@@ -94,7 +99,13 @@ export function BankSyncAccountsListItem({
             flexShrink: 0,
           }}
         >
-          {isLinked ? <Trans>Edit</Trans> : <Trans>Link account</Trans>}
+          {isLinked ? (
+            <Trans>Edit</Trans>
+          ) : account.currency ? (
+            <Trans>Not available in other currencies</Trans>
+          ) : (
+            <Trans>Link account</Trans>
+          )}
         </span>
       </SpaceBetween>
     </View>

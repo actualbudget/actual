@@ -164,33 +164,35 @@ export function DiscoverSchedules() {
   async function onCreate() {
     const selected = schedules.filter(s => selectedInst.items.has(s.id));
     setCreating(true);
-
-    for (const schedule of selected) {
-      const scheduleId = await send('schedule/create', {
-        conditions: schedule._conditions,
-        schedule: {},
-      });
-
-      // Now query for matching transactions and link them automatically
-      const { filters } = await send('make-filters-from-conditions', {
-        conditions: schedule._conditions,
-      });
-
-      if (filters.length > 0) {
-        const { data: transactions } = await aqlQuery(
-          q('transactions').filter({ $and: filters }).select('id'),
-        );
-
-        await send('transactions-batch-update', {
-          updated: transactions.map(t => ({
-            id: t.id,
-            schedule: scheduleId,
-          })),
+    try {
+      for (const schedule of selected) {
+        const scheduleId = await send('schedule/create', {
+          conditions: schedule._conditions,
+          schedule: {},
         });
-      }
-    }
 
-    setCreating(false);
+        // Now query for matching transactions and link them automatically
+        const { filters } = await send('make-filters-from-conditions', {
+          conditions: schedule._conditions,
+        });
+
+        if (filters.length > 0) {
+          const { data: transactions } = await aqlQuery(
+            q('transactions').filter({ $and: filters }).select('id'),
+          );
+
+          await send('transactions-batch-update', {
+            updated: transactions.map(t => ({
+              id: t.id,
+              schedule: scheduleId,
+            })),
+          });
+        }
+      }
+    } finally {
+      // A rejected schedule must not leave the dialog busy.
+      setCreating(false);
+    }
   }
 
   return (

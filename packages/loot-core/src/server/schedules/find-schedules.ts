@@ -327,8 +327,9 @@ export async function findSchedules() {
   // Search for them approx (+- 2 days) but track which transactions
   // and find the best one...
 
+  // Schedules for accounts in other currencies arrive later (MC-3.5).
   const { data: accounts } = await aqlQuery(
-    q('accounts').filter({ closed: false }).select('*'),
+    q('accounts').filter({ closed: false, currency: null }).select('*'),
   );
 
   let allSchedules = [];
