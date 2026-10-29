@@ -1,6 +1,10 @@
 // @ts-strict-ignore
-import React, { useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
+import type {
+  CSSProperties,
+  PointerEvent,
+  MouseEvent as ReactMouseEvent,
+} from 'react';
 
 import { theme } from '@actual-app/components/theme';
 import type {
@@ -10,7 +14,8 @@ import type {
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { Pie, PieChart, Sector } from 'recharts';
+import { css } from '@emotion/css';
+import { Pie, PieChart, Tooltip } from 'recharts';
 import type { PieSectorDataItem, PieSectorShapeProps } from 'recharts';
 
 import { useRechartsAnimation } from '#components/reports/chart-theme';
@@ -18,17 +23,19 @@ import { Container } from '#components/reports/Container';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useNavigate } from '#hooks/useNavigate';
-import { isTouchDevice } from '#util/isTouchDevice';
 
 import { adjustTextSize } from './adjustTextSize';
 import { DonutActiveShapeDesktop } from './DonutActiveShapeDesktop';
 import { DonutActiveShapeMobile } from './DonutActiveShapeMobile';
 import type { DonutActiveShapeProps } from './donutActiveShapeProps';
 import { buildColorMap } from './donutColors';
+import { DonutSector } from './DonutSector';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 
 const RADIAN = Math.PI / 180;
+
+const sectorCursor = css({ '& .recharts-pie-sector': { cursor: 'pointer' } });
 
 type ClickablePieItem = PieSectorDataItem &
   Partial<Pick<GroupedEntity, 'id' | 'uncategorizedId' | 'bucketTagNames'>> &
@@ -123,21 +130,64 @@ export function DonutGraph({
   const navigate = useNavigate();
   const { data: categories = { grouped: [], list: [] } } = useCategories();
   const { data: accounts = [] } = useAccounts();
-  const [pointer, setPointer] = useState('');
 
-  const getVal = (obj: GroupedEntity | IntervalEntity) => {
-    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
-      return -1 * obj[balanceTypeOp];
-    }
-    return obj[balanceTypeOp];
-  };
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [activeGroupIndex, setActiveGroupIndex] = useState(0);
-  const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
-  const [activeRing, setActiveRing] = useState<'group' | 'category'>(
-    'category',
+  // Also each Pie's dataKey. Recharts compares the hovered Pie's dataKey
+  // with ===, so a new function on each render would clear the highlight.
+  const getVal = useCallback(
+    (obj: GroupedEntity | IntervalEntity) => {
+      if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+        return -1 * obj[balanceTypeOp];
+      }
+      return obj[balanceTypeOp];
+    },
+    [balanceTypeOp],
   );
+
+  // The hovered slice is kept in Recharts' own state, read through each
+  // sector's isActive. Keeping it in this component's state would re-render
+  // the Pie, which remounts every sector and loses slow pointer moves.
+  //
+  // A tap on the selected slice opens it; a tap on any other slice only
+  // selects it. Most browsers move the selection with mouse events before
+  // the tap's click arrives, so the selected slice is noted when the finger
+  // goes down.
+  const pressRef = useRef<{ isTouch: boolean; selectedKey?: string }>(null);
+  const onPointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
+    const selected = event.currentTarget.querySelector<SVGElement>(
+      '[data-donut-selected]',
+    );
+    pressRef.current = {
+      isTouch: event.pointerType !== 'mouse',
+      selectedKey: selected?.dataset.donutSelected,
+    };
+  };
+  const hasOpenedRef = useRef(false);
+  // Without a highlight there's nothing to select, so every tap opens
+  const isOpeningClick = (
+    key: string,
+    event: ReactMouseEvent<Element>,
+    canSelect: boolean,
+  ) => {
+    const press = pressRef.current;
+    pressRef.current = null;
+    // Only the first opening click of a double-click opens, so going back
+    // takes one press
+    if (event.detail <= 1) {
+      hasOpenedRef.current = false;
+    } else if (hasOpenedRef.current) {
+      return false;
+    }
+    if (!press?.isTouch || !canSelect || press.selectedKey === key) {
+      hasOpenedRef.current = true;
+      return true;
+    }
+    // Some browsers send no mouse events after a tap (Firefox's touch
+    // simulation), so hover the tapped sector to select it
+    event.currentTarget.dispatchEvent(
+      new MouseEvent('mouseover', { bubbles: true }),
+    );
+    return false;
+  };
 
   const isCategoryGroup =
     groupBy === 'CategoryGroup' && !!data.groupedData?.length;
@@ -171,6 +221,12 @@ export function DonutGraph({
     };
   }, [isCategoryGroup, data.groupedData, balanceTypeOp]);
 
+  // Selected before the first hover, as the single ring's defaultIndex does.
+  // Empty categories have no sector to label.
+  const defaultCategoryIndex = flatCategories.findIndex(
+    category => getVal(category) !== 0,
+  );
+
   const colorMap = useMemo(
     () =>
       isCategoryGroup
@@ -193,17 +249,24 @@ export function DonutGraph({
         if (isCategoryGroup) {
           return (
             data.groupedData && (
-              <div>
+              <div onPointerDownCapture={onPointerDownCapture}>
                 {!compact && <div style={{ marginTop: '15px' }} />}
                 <PieChart
                   responsive
                   width={width}
                   height={height}
-                  style={{ cursor: pointer }}
+                  className={sectorCursor}
+                  // Recharts' keyboard support marks the same sector active in every
+                  // ring, so all of them would be highlighted at once
+                  accessibilityLayer={false}
                 >
+                  {/* Drives each sector's isActive; the label is the tooltip.
+                      No defaultIndex, which would select it in both rings:
+                      DonutSector's isDefault selects the first category. */}
+                  <Tooltip content={() => null} active />
                   {/* Inner ring — Category Groups */}
                   <Pie
-                    dataKey={val => getVal(val)}
+                    dataKey={getVal}
                     nameKey="name"
                     {...animationProps}
                     animationBegin={100}
@@ -218,45 +281,44 @@ export function DonutGraph({
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
                         props.fill;
-                      const isActive =
-                        activeRing === 'group' && index === activeGroupIndex;
-                      if (isActive && showActiveShape) {
-                        return compact ? (
-                          <DonutActiveShapeMobile
-                            {...(props as unknown as DonutActiveShapeProps)}
-                            fill={fill}
-                            expandInward
-                            chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
-                            chartOuterRadius={chartOuterRadius}
-                          />
-                        ) : (
-                          <DonutActiveShapeDesktop
-                            {...(props as unknown as DonutActiveShapeProps)}
-                            fill={fill}
-                            expandInward
-                            chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
-                            chartOuterRadius={chartOuterRadius}
-                          />
-                        );
-                      }
-                      return <Sector {...props} fill={fill} />;
+                      const renderHighlight = showActiveShape
+                        ? () =>
+                            compact ? (
+                              <DonutActiveShapeMobile
+                                {...(props as unknown as DonutActiveShapeProps)}
+                                fill={fill}
+                                expandInward
+                                chartInnerRadius={chartInnerRadius}
+                                chartMidRadius={chartMidRadius}
+                                chartOuterRadius={chartOuterRadius}
+                              />
+                            ) : (
+                              <DonutActiveShapeDesktop
+                                {...(props as unknown as DonutActiveShapeProps)}
+                                fill={fill}
+                                expandInward
+                                chartInnerRadius={chartInnerRadius}
+                                chartMidRadius={chartMidRadius}
+                                chartOuterRadius={chartOuterRadius}
+                              />
+                            )
+                        : undefined;
+                      return (
+                        <DonutSector
+                          selectionKey={`group-${index}`}
+                          sector={props}
+                          fill={fill}
+                          renderHighlight={renderHighlight}
+                        />
+                      );
                     }}
-                    onMouseLeave={() => setPointer('')}
-                    onMouseEnter={(_, index) => {
-                      if (!isTouchDevice()) {
-                        setActiveGroupIndex(index);
-                        setActiveRing('group');
-                      }
-                    }}
-                    onClick={(item: ClickablePieItem, index) => {
-                      if (isTouchDevice()) {
-                        setActiveGroupIndex(index);
-                        setActiveRing('group');
-                      }
+                    onClick={(item: ClickablePieItem, index, event) => {
                       if (
-                        (!isTouchDevice() || activeGroupIndex === index) &&
+                        isOpeningClick(
+                          `group-${index}`,
+                          event,
+                          showActiveShape,
+                        ) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -280,7 +342,7 @@ export function DonutGraph({
 
                   {/* Outer ring — Categories */}
                   <Pie
-                    dataKey={val => getVal(val)}
+                    dataKey={getVal}
                     nameKey="name"
                     {...animationProps}
                     animationBegin={100}
@@ -299,47 +361,45 @@ export function DonutGraph({
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
                         props.fill;
-                      const isActive =
-                        activeRing === 'category' &&
-                        index === activeCategoryIndex;
-                      if (isActive && showActiveShape) {
-                        return compact ? (
-                          <DonutActiveShapeMobile
-                            {...(props as unknown as DonutActiveShapeProps)}
-                            fill={fill}
-                            expandInward={false}
-                            chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
-                            chartOuterRadius={chartOuterRadius}
-                          />
-                        ) : (
-                          <DonutActiveShapeDesktop
-                            {...(props as unknown as DonutActiveShapeProps)}
-                            fill={fill}
-                            expandInward={false}
-                            chartInnerRadius={chartInnerRadius}
-                            chartMidRadius={chartMidRadius}
-                            chartOuterRadius={chartOuterRadius}
-                          />
-                        );
-                      }
-                      return <Sector {...props} fill={fill} />;
+                      const renderHighlight = showActiveShape
+                        ? () =>
+                            compact ? (
+                              <DonutActiveShapeMobile
+                                {...(props as unknown as DonutActiveShapeProps)}
+                                fill={fill}
+                                expandInward={false}
+                                chartInnerRadius={chartInnerRadius}
+                                chartMidRadius={chartMidRadius}
+                                chartOuterRadius={chartOuterRadius}
+                              />
+                            ) : (
+                              <DonutActiveShapeDesktop
+                                {...(props as unknown as DonutActiveShapeProps)}
+                                fill={fill}
+                                expandInward={false}
+                                chartInnerRadius={chartInnerRadius}
+                                chartMidRadius={chartMidRadius}
+                                chartOuterRadius={chartOuterRadius}
+                              />
+                            )
+                        : undefined;
+                      return (
+                        <DonutSector
+                          selectionKey={`category-${index}`}
+                          isDefault={index === defaultCategoryIndex}
+                          sector={props}
+                          fill={fill}
+                          renderHighlight={renderHighlight}
+                        />
+                      );
                     }}
-                    onMouseLeave={() => setPointer('')}
-                    onMouseEnter={(_, index) => {
-                      if (!isTouchDevice()) {
-                        setActiveCategoryIndex(index);
-                        setActiveRing('category');
-                        setPointer('pointer');
-                      }
-                    }}
-                    onClick={(item: ClickablePieItem, index) => {
-                      if (isTouchDevice()) {
-                        setActiveCategoryIndex(index);
-                        setActiveRing('category');
-                      }
+                    onClick={(item: ClickablePieItem, index, event) => {
                       if (
-                        (!isTouchDevice() || activeCategoryIndex === index) &&
+                        isOpeningClick(
+                          `category-${index}`,
+                          event,
+                          showActiveShape,
+                        ) &&
                         ((compact && showTooltip) || !compact)
                       ) {
                         showActivity({
@@ -371,16 +431,18 @@ export function DonutGraph({
         // ---------------------------------------------------------------
         return (
           data[splitData] && (
-            <div>
+            <div onPointerDownCapture={onPointerDownCapture}>
               {!compact && <div style={{ marginTop: '15px' }} />}
               <PieChart
                 responsive
                 width={width}
                 height={height}
-                style={{ cursor: pointer }}
+                className={sectorCursor}
               >
+                {/* Drives each sector's isActive; the label is the tooltip */}
+                <Tooltip content={() => null} active defaultIndex={0} />
                 <Pie
-                  dataKey={val => getVal(val)}
+                  dataKey={getVal}
                   nameKey={yAxis}
                   {...animationProps}
                   animationBegin={100}
@@ -396,43 +458,44 @@ export function DonutGraph({
                     const { index } = props;
                     // Fix 3: optional chain data.legend to guard against undefined
                     const fill = data.legend?.[index]?.color ?? props.fill;
-                    const isActive = index === activeIndex;
-                    if (isActive && showActiveShape) {
-                      return compact ? (
-                        <DonutActiveShapeMobile
-                          {...(props as unknown as DonutActiveShapeProps)}
-                          fill={fill}
-                          expandInward
-                          chartInnerRadius={chartInnerRadius}
-                          chartMidRadius={chartMidRadius}
-                          chartOuterRadius={chartOuterRadius}
-                        />
-                      ) : (
-                        <DonutActiveShapeDesktop
-                          {...(props as unknown as DonutActiveShapeProps)}
-                          fill={fill}
-                          expandInward={false}
-                          chartInnerRadius={chartInnerRadius}
-                          chartMidRadius={chartMidRadius}
-                          chartOuterRadius={chartOuterRadius}
-                        />
-                      );
-                    }
-                    return <Sector {...props} fill={fill} />;
+                    const renderHighlight = showActiveShape
+                      ? () =>
+                          compact ? (
+                            <DonutActiveShapeMobile
+                              {...(props as unknown as DonutActiveShapeProps)}
+                              fill={fill}
+                              expandInward
+                              chartInnerRadius={chartInnerRadius}
+                              chartMidRadius={chartMidRadius}
+                              chartOuterRadius={chartOuterRadius}
+                            />
+                          ) : (
+                            <DonutActiveShapeDesktop
+                              {...(props as unknown as DonutActiveShapeProps)}
+                              fill={fill}
+                              expandInward={false}
+                              chartInnerRadius={chartInnerRadius}
+                              chartMidRadius={chartMidRadius}
+                              chartOuterRadius={chartOuterRadius}
+                            />
+                          )
+                      : undefined;
+                    return (
+                      <DonutSector
+                        selectionKey={`slice-${index}`}
+                        sector={props}
+                        fill={fill}
+                        renderHighlight={renderHighlight}
+                      />
+                    );
                   }}
-                  onMouseLeave={() => setPointer('')}
-                  onMouseEnter={(_, index) => {
-                    if (!isTouchDevice()) {
-                      setActiveIndex(index);
-                      setPointer('pointer');
-                    }
-                  }}
-                  onClick={(item: ClickablePieItem, index) => {
-                    if (isTouchDevice()) {
-                      setActiveIndex(index);
-                    }
+                  onClick={(item: ClickablePieItem, index, event) => {
                     if (
-                      (!isTouchDevice() || activeIndex === index) &&
+                      isOpeningClick(
+                        `slice-${index}`,
+                        event,
+                        showActiveShape,
+                      ) &&
                       ((compact && showTooltip) || !compact)
                     ) {
                       // Interval slices drill down by their own date range instead of a field

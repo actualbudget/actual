@@ -17,7 +17,6 @@ const RADIAN = Math.PI / 180;
 export function DonutActiveShapeMobile({
   cx,
   cy,
-  innerRadius,
   outerRadius,
   startAngle,
   endAngle,
@@ -66,15 +65,6 @@ export function DonutActiveShapeMobile({
           {`${(percent * 100).toFixed(2)}%`}
         </text>
       </PrivacyFilter>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
       <Sector
         cx={cx}
         cy={cy}

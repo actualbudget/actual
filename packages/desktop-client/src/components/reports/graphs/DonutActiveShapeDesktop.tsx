@@ -18,7 +18,6 @@ export function DonutActiveShapeDesktop({
   cx,
   cy,
   midAngle,
-  innerRadius,
   outerRadius,
   startAngle,
   endAngle,
@@ -53,15 +52,6 @@ export function DonutActiveShapeDesktop({
 
   return (
     <g>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
       <Sector
         cx={cx}
         cy={cy}
