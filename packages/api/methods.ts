@@ -290,7 +290,8 @@ export function getTransactions(
 
 /**
  * `amount` is a budget-base integer or Money in the budget currency;
- * `transaction_amount` is account-native. Foreign pairs change together.
+ * `transaction_amount` is account-native. Amounts of transactions in
+ * foreign-currency accounts cannot change yet; other fields can.
  * Raw integers are accepted during dual support; raw-integer support will
  * be removed 12 months after Money support ships.
  */

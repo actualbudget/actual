@@ -86,9 +86,11 @@ export function getSelectableAccountOptions({
 
     // Keep the current row's selection visible. Otherwise, offer only accounts
     // that are unselected and either manual or linked to this provider.
+    // Accounts in other currencies cannot be linked yet.
     return (
       isCurrentSelection ||
       (!selectedLocalAccountIds.has(account.id) &&
+        !account.currency &&
         (account.account_sync_source == null ||
           account.account_sync_source === syncSource))
     );
