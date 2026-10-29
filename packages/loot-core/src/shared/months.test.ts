@@ -22,6 +22,29 @@ test('getQuarterStart and getQuarterEnd return the bounding months of the quarte
   expect(monthUtils.getQuarterEnd('2024-11')).toBe('2024-12');
 });
 
+test('quarterFromDate keys a date by the first month of its quarter', () => {
+  expect(monthUtils.quarterFromDate('2024-01-01')).toBe('2024-01');
+  expect(monthUtils.quarterFromDate('2024-03-31')).toBe('2024-01');
+  expect(monthUtils.quarterFromDate('2024-05')).toBe('2024-04');
+  expect(monthUtils.quarterFromDate('2024-12-15')).toBe('2024-10');
+});
+
+test('quarterRangeInclusive lists every quarter touched by the range', () => {
+  expect(monthUtils.quarterRangeInclusive('2023-11-15', '2024-05-01')).toEqual([
+    '2023-10',
+    '2024-01',
+    '2024-04',
+  ]);
+  expect(monthUtils.quarterRangeInclusive('2024-02', '2024-03')).toEqual([
+    '2024-01',
+  ]);
+});
+
+test('currentQuarter returns the first month of the current quarter', () => {
+  // In test mode, currentMonth() returns '2017-01'
+  expect(monthUtils.currentQuarter()).toBe('2017-01');
+});
+
 test('prevQuarter subtracts three months, landing in the previous quarter', () => {
   expect(monthUtils.prevQuarter('2024-02')).toBe('2023-11');
   expect(monthUtils.prevQuarter('2024-01')).toBe('2023-10');
