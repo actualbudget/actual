@@ -2,7 +2,14 @@ import type { DateRangePreset } from '@actual-app/components/date-range-picker';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { BalanceForecastWidget } from '@actual-app/core/types/models';
 import type { ForecastSource } from '@actual-app/core/types/models/forecast';
-import { addMonths, format, parseISO, subDays } from 'date-fns';
+import {
+  addDays,
+  addMonths,
+  differenceInMonths,
+  format,
+  parseISO,
+  subDays,
+} from 'date-fns';
 
 import { calculateTimeRange } from '#components/reports/reportRanges';
 
@@ -13,6 +20,16 @@ export function getForecastRangeFromToday(
   // The anniversary is exclusive; date-fns clamps it for shorter months.
   const end = subDays(addMonths(parseISO(today), months), 1);
   return [today, format(end, 'yyyy-MM-dd')];
+}
+
+export function getForecastRangeMonths(start: string, end: string): number {
+  // Count complete months through the inclusive end, not touched calendar months.
+  const months =
+    !monthUtils.isValidYearMonth(start) && !monthUtils.isValidYearMonth(end)
+      ? differenceInMonths(addDays(parseISO(end), 1), parseISO(start))
+      : monthUtils.differenceInCalendarMonths(end, start) + 1;
+
+  return Math.max(1, months);
 }
 
 export function resolveBalanceForecastRange(

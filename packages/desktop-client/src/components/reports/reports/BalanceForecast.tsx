@@ -61,6 +61,7 @@ import {
 } from './balanceForecastChartData';
 import {
   buildFromTodayForecastPresets,
+  getForecastRangeMonths,
   resolveBalanceForecastRange,
 } from './balanceForecastRange';
 import { buildForecastSeriesChart } from './balanceForecastSeries';
@@ -351,9 +352,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         'static',
       );
     } else {
-      setMonthsFromToday(
-        Math.max(1, monthUtils.differenceInCalendarMonths(end, start) + 1),
-      );
+      setMonthsFromToday(getForecastRangeMonths(start, end));
     }
   }
 
@@ -411,9 +410,21 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     granularity === 'Daily'
       ? monthUtils.currentDay()
       : monthUtils.currentMonth();
-  const showsTodayReferenceLine = visibleChartData.some(
+  const todayReferenceIndex = visibleChartData.findIndex(
     dataPoint => dataPoint.date === todayReferenceDate,
   );
+  const showsTodayReferenceLine = todayReferenceIndex !== -1;
+  const todayReferenceLabel =
+    granularity === 'Monthly'
+      ? t('Current month')
+      : t('Today · {{date}}', {
+          date: d.format(monthUtils.parseDate(todayReferenceDate), 'MMM d', {
+            locale,
+          }),
+        });
+  const dateRangePresets = startsToday
+    ? buildFromTodayForecastPresets(t, setMonthsFromToday)
+    : undefined;
   const headerInlineContent = (
     <>
       {!isTrackingBudgetForecast && (
@@ -512,6 +523,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           granularities={
             isTrackingBudgetForecast ? undefined : ['month', 'day']
           }
+          dateRangePresets={dateRangePresets}
           hideModeToggle
           inlineContent={headerInlineContent}
         >
@@ -529,11 +541,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
           granularities={['month', 'day']}
-          dateRangePresets={
-            startsToday
-              ? buildFromTodayForecastPresets(t, setMonthsFromToday)
-              : undefined
-          }
+          dateRangePresets={dateRangePresets}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}
@@ -635,7 +643,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       height={height}
                       data={visibleChartData}
                       margin={{
-                        top: 10,
+                        top: showsTodayReferenceLine ? 32 : 10,
                         right: 10,
                         left: 5 + yAxisLeftPadding,
                         bottom: 10,
@@ -752,10 +760,15 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                           stroke={theme.reportsBlue}
                           strokeDasharray="4 4"
                           label={{
-                            value: t('Today'),
-                            fill: theme.reportsBlue,
+                            value: todayReferenceLabel,
+                            fill: theme.reportsLabel,
                             fontSize: 12,
-                            position: 'insideTop',
+                            position: 'top',
+                            textAnchor:
+                              todayReferenceIndex >
+                              (visibleChartData.length - 1) / 2
+                                ? 'end'
+                                : 'start',
                             offset: 8,
                           }}
                         />

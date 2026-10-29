@@ -3,4 +3,4 @@ category: Enhancements
 authors: [samaluk]
 ---
 
-Add an option to start balance forecasts today and keep saved widgets moving forward with the date.
+Add balance forecasts that start today, keep saved ranges moving forward, and label today or the current month on the chart.
