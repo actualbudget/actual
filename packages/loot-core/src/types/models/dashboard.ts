@@ -1,4 +1,10 @@
-import type { ForecastSeries, ForecastSource } from './forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
+  ForecastSeries,
+  ForecastSource,
+} from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
@@ -494,5 +500,8 @@ export type BalanceForecastWidget = AbstractWidget<
     yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
     series?: ForecastSeries[];
+    missedSchedules?: ForecastMissedSchedules;
+    missedOccurrences?: ForecastMissedOccurrences;
+    occurrenceMatching?: ForecastOccurrenceMatching;
   } | null
 >;

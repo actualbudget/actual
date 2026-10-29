@@ -23,6 +23,22 @@ vi.mock(
 );
 
 describe('buildBalanceForecastRequest', () => {
+  it('forwards missed-schedule and occurrence matching settings', () => {
+    expect(
+      buildBalanceForecastRequest({
+        startDate: '2024-03-01',
+        endDate: '2024-03-31',
+        missedSchedules: 'payments',
+        missedOccurrences: 'all',
+        occurrenceMatching: 'inferred',
+      }),
+    ).toMatchObject({
+      missedSchedules: 'payments',
+      missedOccurrences: 'all',
+      occurrenceMatching: 'inferred',
+    });
+  });
+
   it('keeps schedule forecast filters and account selection', () => {
     expect(
       buildBalanceForecastRequest({

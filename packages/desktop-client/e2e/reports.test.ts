@@ -100,10 +100,20 @@ test.describe('Reports', () => {
 
   test.describe('balance forecast', () => {
     test.beforeEach(async () => {
-      const settingsPage = await navigation.goToSettingsPage();
-      await settingsPage.enableExperimentalFeature('Balance Forecast Report');
-
-      reportsPage = await navigation.goToReportsPage();
+      // Persist the flag before reloading so the report and widget menu see
+      // the same setting, including when the settings UI is saving slowly.
+      await page.evaluate(async () => {
+        const $send = (
+          window as unknown as {
+            $send: (type: string, args: unknown) => Promise<unknown>;
+          }
+        ).$send;
+        await $send('preferences/save', {
+          id: 'flags.balanceForecastReport',
+          value: 'true',
+        });
+      });
+      await page.reload();
       await reportsPage.waitToLoad();
       await reportsPage.addWidget('Balance forecast');
       await reportsPage.goToBalanceForecastPage();
@@ -111,6 +121,7 @@ test.describe('Reports', () => {
 
     test('loads balance forecast report with monthly granularity', async () => {
       // monthly granularity, auto y axis
+      await page.mouse.move(0, 0);
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -249,6 +260,154 @@ test.describe('Reports', () => {
       await expect(
         page.getByRole('textbox', { name: 'Line 2 name', exact: true }),
       ).toHaveValue('Card');
+    });
+
+    test('compares occurrence matching and records a payment after a skipped occurrence', async () => {
+      test.setTimeout(90_000);
+      const scheduleId = await page.evaluate(async () => {
+        const $send = (
+          window as unknown as {
+            $send: <T>(type: string, args?: unknown) => Promise<T>;
+          }
+        ).$send;
+        const {
+          data: [account],
+        } = await $send<{ data: Array<{ id: string }> }>('query', {
+          table: 'accounts',
+          tableOptions: {},
+          filterExpressions: [{ name: 'Capital One Checking' }],
+          selectExpressions: ['id'],
+          groupExpressions: [],
+          orderExpressions: [],
+          calculation: false,
+          rawMode: false,
+          withDead: false,
+          validateRefs: true,
+          limit: null,
+          offset: null,
+        });
+        const id = await $send<string>('schedule/create', {
+          schedule: { name: 'Daily test bill' },
+          conditions: [
+            { op: 'is', field: 'account', value: account.id },
+            { op: 'is', field: 'amount', value: -30_000 },
+            {
+              op: 'isapprox',
+              field: 'date',
+              value: { frequency: 'daily', start: '2016-12-31' },
+            },
+          ],
+        });
+        await $send('schedule/skip-next-date', { id });
+        await $send('schedule/post-transaction', { id, today: true });
+        return id;
+      });
+      await page.getByLabel('Include missed schedules').click();
+      await page
+        .getByRole('button', { name: 'Payments and transfers', exact: true })
+        .click();
+      await page.getByLabel('Payment matching (experimental)').click();
+      await page
+        .getByRole('button', { name: 'Infer from dates', exact: true })
+        .click();
+      await page
+        .getByRole('button', { name: 'Save widget', exact: true })
+        .click();
+      await expect(
+        page.getByText('Dashboard widget successfully saved.', { exact: true }),
+      ).toBeVisible();
+      await page.reload();
+      await expect(
+        page.getByLabel('Payment matching (experimental)'),
+      ).toHaveText('Infer from dates');
+      await page.getByLabel('Payment matching (experimental)').click();
+      await page
+        .getByRole('button', { name: 'Use recorded occurrences', exact: true })
+        .click();
+      await page
+        .getByRole('button', { name: 'Review occurrences', exact: true })
+        .click();
+      const editor = page.getByRole('group', {
+        name: 'Occurrence records',
+        exact: true,
+      });
+      await editor.getByLabel('Schedule to review').click();
+      await page
+        .getByRole('button', { name: 'Daily test bill', exact: true })
+        .click();
+      await expect(
+        editor.getByText(
+          'Recorded as paid. The payment must remain linked to count.',
+        ),
+      ).toBeVisible();
+      await editor.getByLabel('Occurrence due date').fill('2017-01-01');
+      await expect(
+        editor.getByText('Recorded as skipped.', { exact: true }),
+      ).toBeVisible();
+      await editor.getByLabel('Occurrence due date').fill('2017-01-02');
+      await editor
+        .getByRole('button', { name: 'Clear record', exact: true })
+        .click();
+      await expect(
+        editor.getByText('No record for this date. Matching will be inferred.'),
+      ).toBeVisible();
+      await editor.getByLabel('Linked payment').click();
+      await page
+        .getByRole('button', { name: '2017-01-01 · -300.00', exact: true })
+        .click();
+      await editor
+        .getByRole('button', { name: 'Record payment', exact: true })
+        .click();
+      await expect(
+        editor.getByText('Occurrence saved.', { exact: true }),
+      ).toBeVisible();
+      await expect(
+        editor.getByText(
+          'Recorded as paid. The payment must remain linked to count.',
+        ),
+      ).toBeVisible();
+      const records = await page.evaluate(async id => {
+        const $send = (
+          window as unknown as {
+            $send: <T>(type: string, args?: unknown) => Promise<T>;
+          }
+        ).$send;
+        return $send<{ records: Array<{ dueDate: string; status: string }> }>(
+          'schedule/get-occurrence-options',
+          { scheduleId: id },
+        );
+      }, scheduleId);
+      expect(
+        records.records.map(record => [record.dueDate, record.status]),
+      ).toEqual([
+        ['2017-01-01', 'skipped'],
+        ['2017-01-02', 'paid'],
+      ]);
+      await page.evaluate(async () => {
+        const $send = (
+          window as unknown as { $send: (type: string) => Promise<unknown> }
+        ).$send;
+        await $send('undo');
+      });
+      await expect(
+        editor.getByText('No record for this date. Matching will be inferred.'),
+      ).toBeVisible();
+      await expect(
+        editor.getByText('Occurrence saved.', { exact: true }),
+      ).not.toBeVisible();
+      await page.evaluate(async () => {
+        const $send = (
+          window as unknown as { $send: (type: string) => Promise<unknown> }
+        ).$send;
+        await $send('redo');
+      });
+      await expect(
+        editor.getByText(
+          'Recorded as paid. The payment must remain linked to count.',
+        ),
+      ).toBeVisible();
+      await page.mouse.move(0, 0);
+      await expect(editor).toMatchThemeScreenshots();
     });
 
     test('loads tracking budget forecast report', async () => {

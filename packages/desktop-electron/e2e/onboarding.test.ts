@@ -12,6 +12,11 @@ test.describe('Onboarding', () => {
   });
 
   test('checks the page visuals', async ({ electronPage }) => {
+    // The baseline shows Start hovered; set it explicitly so the desktop's
+    // existing pointer position cannot change the captured button style.
+    await electronPage
+      .getByRole('button', { name: 'Start', exact: true })
+      .hover();
     await expect(electronPage).toHaveScreenshot();
     await configurationPage.clickOnNoServer();
     await expect(electronPage).toHaveScreenshot();

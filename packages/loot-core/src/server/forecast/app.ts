@@ -1,7 +1,14 @@
 import { createApp } from '#server/app';
 import * as db from '#server/db';
+import { getScheduleOccurrences } from '#server/schedules/occurrence-records';
 import type { RuleConditionEntity } from '#types/models';
-import type { ForecastResult, ForecastSource } from '#types/models/forecast';
+import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
+  ForecastResult,
+  ForecastSource,
+} from '#types/models/forecast';
 
 import { resolveForecastAccounts } from './forecast-accounts';
 import type {
@@ -9,6 +16,7 @@ import type {
   DbAccountForRules,
 } from './forecast-accounts';
 import { buildFilterInfo, getTransactions } from './forecast-filters';
+import { selectMissedScheduleOccurrences } from './forecast-missed-schedules';
 import {
   buildForecastDateContext,
   createEmptyForecastResult,
@@ -18,6 +26,7 @@ import {
   buildFutureScheduleOccurrences,
   FORECAST_UNASSIGNED_ACCOUNT_ID,
   getNormalizedSchedules,
+  getPostedScheduleTransactions,
 } from './forecast-schedules';
 import { projectTrackingBudgetForecast } from './forecast-tracking-budget';
 
@@ -29,6 +38,9 @@ export type ForecastRequestParams = {
   endDate?: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  missedSchedules?: ForecastMissedSchedules;
+  missedOccurrences?: ForecastMissedOccurrences;
+  occurrenceMatching?: ForecastOccurrenceMatching;
 };
 
 function createUnassignedForecastAccount(): AccountWithComputedBalance {
@@ -62,9 +74,15 @@ export async function generateForecast({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  missedSchedules = 'exclude',
+  missedOccurrences = 'one',
+  occurrenceMatching = 'recorded',
 }: ForecastRequestParams): Promise<ForecastResult> {
   const includeUnassigned = includeAccountlessSchedules ?? false;
   const dateContext = buildForecastDateContext(startDate, endDate);
+  const today = dateContext.today;
+  const includeMissed =
+    missedSchedules !== 'exclude' && dateContext.forecastEndDate >= today;
 
   if (source === 'tracking-budget') {
     const { value: budgetType = 'envelope' } =
@@ -146,13 +164,29 @@ export async function generateForecast({
     );
   }
 
-  const futureOccurrences = await buildFutureScheduleOccurrences(
+  const postedScheduleTransactions = includeMissed
+    ? await getPostedScheduleTransactions(
+        schedules.map(schedule => schedule.id),
+      )
+    : transactions;
+  const occurrences = await buildFutureScheduleOccurrences(
     schedules,
     dateContext.endDateObj,
     accountsById,
     ruleAccountsById,
-    transactions,
+    postedScheduleTransactions,
+    includeMissed ? today : undefined,
+    includeMissed && occurrenceMatching === 'recorded'
+      ? await getScheduleOccurrences()
+      : [],
+    occurrenceMatching,
   );
+  const futureOccurrences = selectMissedScheduleOccurrences({
+    occurrences,
+    missedSchedules: includeMissed ? missedSchedules : 'exclude',
+    missedOccurrences,
+    today,
+  });
   const { dataPoints, lowestBalance } = projectForecastData({
     accounts,
     transactions,
@@ -178,6 +212,9 @@ export type ForecastHandlers = {
     endDate?: string;
     includeAccountlessSchedules?: boolean;
     source?: ForecastSource;
+    missedSchedules?: ForecastMissedSchedules;
+    missedOccurrences?: ForecastMissedOccurrences;
+    occurrenceMatching?: ForecastOccurrenceMatching;
   }) => Promise<ForecastResult>;
 };
 

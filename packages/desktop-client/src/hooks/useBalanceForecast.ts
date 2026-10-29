@@ -1,9 +1,15 @@
-import { send } from '@actual-app/core/platform/client/connection';
+import { useEffect, useEffectEvent, useRef } from 'react';
+
+import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
+  ForecastMissedOccurrences,
+  ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
+import type { ServerEvents } from '@actual-app/core/types/server-events';
 import { useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
@@ -14,6 +20,9 @@ type UseBalanceForecastParams = {
   endDate: string;
   includeAccountlessSchedules?: boolean;
   source?: ForecastSource;
+  missedSchedules?: ForecastMissedSchedules;
+  missedOccurrences?: ForecastMissedOccurrences;
+  occurrenceMatching?: ForecastOccurrenceMatching;
   enabled?: boolean;
 };
 
@@ -25,6 +34,9 @@ export function buildBalanceForecastRequest({
   endDate,
   includeAccountlessSchedules,
   source = 'schedules',
+  missedSchedules,
+  missedOccurrences,
+  occurrenceMatching,
 }: UseBalanceForecastParams) {
   return Object.fromEntries(
     Object.entries({
@@ -35,6 +47,9 @@ export function buildBalanceForecastRequest({
       endDate,
       includeAccountlessSchedules,
       source,
+      missedSchedules,
+      missedOccurrences,
+      occurrenceMatching,
     }).filter(([, value]) => value !== undefined),
   );
 }
@@ -46,7 +61,7 @@ export function useBalanceForecastSeries({
 }: UseBalanceForecastParams & { series?: ForecastSeries[] }) {
   const requests = buildBalanceForecastSeriesRequests(series, params);
 
-  return useQuery({
+  const result = useQuery({
     queryKey: ['balance-forecast-series', requests],
     queryFn: () =>
       Promise.all(
@@ -69,6 +84,64 @@ export function useBalanceForecastSeries({
     },
     enabled,
   });
+
+  // A received batch emits both applied and success for the same tables.
+  const appliedTables = useRef(new Set<string>());
+  const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
+    if (event.type === 'start' || event.type === 'error') {
+      appliedTables.current.clear();
+      return;
+    }
+    if (event.type !== 'applied' && event.type !== 'success') {
+      return;
+    }
+    const affectedTables = event.tables.filter(table =>
+      [
+        'transactions',
+        'schedules',
+        'schedules_next_date',
+        'schedule_occurrences',
+        'rules',
+        'accounts',
+        'payees',
+        'payee_mapping',
+        'categories',
+        'category_mapping',
+      ].includes(table),
+    );
+    const shouldRefresh =
+      event.type === 'applied' ||
+      affectedTables.some(table => !appliedTables.current.has(table));
+    if (event.type === 'applied') {
+      for (const table of affectedTables) {
+        appliedTables.current.add(table);
+      }
+    } else {
+      appliedTables.current.clear();
+    }
+    if (enabled && affectedTables.length > 0 && shouldRefresh) {
+      void result.refetch();
+    }
+  });
+  useEffect(() => listen('sync-event', onSyncEvent), []);
+  const onUndo = useEffectEvent((event: ServerEvents['undo-event']) => {
+    if (
+      enabled &&
+      event.tables.some(table =>
+        [
+          'transactions',
+          'schedule_occurrences',
+          'schedules',
+          'schedules_next_date',
+        ].includes(table),
+      )
+    ) {
+      void result.refetch();
+    }
+  });
+  useEffect(() => listen('undo-event', onUndo), []);
+
+  return result;
 }
 
 export function buildBalanceForecastSeriesRequests(

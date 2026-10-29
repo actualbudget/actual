@@ -50,3 +50,12 @@ export type DiscoverScheduleEntity = {
   amount: ScheduleEntity['_amount'];
   _conditions: ScheduleEntity['_conditions'];
 };
+
+// Experimental occurrence identity for the missed-schedule forecast PoC.
+export type ScheduleOccurrence = {
+  scheduleId: string;
+  dueDate: string;
+} & (
+  | { status: 'skipped'; transactionId?: never }
+  | { status: 'paid'; transactionId: string }
+);

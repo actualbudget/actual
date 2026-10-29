@@ -161,6 +161,15 @@ export type DbSchedule = {
   sort_order: number;
 };
 
+export type DbScheduleOccurrence = {
+  id: string;
+  schedule_id: string;
+  due_date: string;
+  status: 'paid' | 'skipped';
+  transaction_id: string | null;
+  tombstone: 0 | 1;
+};
+
 // type DbScheduleJsonPath = {
 //   schedule_id: DbSchedule['id'];
 //   payee: string;
