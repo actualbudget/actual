@@ -334,4 +334,30 @@ describe('Weekly range validation', () => {
       ),
     ).toEqual(['2016-12-04', '2016-12-17', 'static']);
   });
+
+  it('keeps From when To moves before it on whole-week bounds', () => {
+    expect(
+      validateStart(
+        '2015-01-01',
+        '2016-12-31',
+        '2016-01-04',
+        '2015-12-27',
+        'Weekly',
+        '1',
+      ),
+    ).toEqual(['2016-01-04', '2016-07-03', 'static']);
+  });
+
+  it('keeps To when From moves after it on whole-week bounds', () => {
+    expect(
+      validateEnd(
+        '2015-01-01',
+        '2016-12-31',
+        '2016-07-04',
+        '2016-06-27',
+        'Weekly',
+        '1',
+      ),
+    ).toEqual(['2016-01-04', '2016-07-03', 'static']);
+  });
 });

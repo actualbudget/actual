@@ -28,6 +28,13 @@ export function validateStart(
       dateStart = start + '-01-01';
       fallbackEnd = monthUtils.addDays(dateStart, 1095);
       break;
+    case 'Weekly':
+      dateStart = start;
+      fallbackEnd = monthUtils.getWeekEnd(
+        monthUtils.addDays(dateStart, 180),
+        firstDayOfWeekIdx,
+      );
+      break;
     case 'Daily':
       dateStart = start;
       fallbackEnd = monthUtils.addDays(dateStart, 6);
@@ -80,7 +87,10 @@ export function validateEnd(
     case 'Weekly':
       // The picked value is the first day of the week; include the whole week.
       dateEnd = monthUtils.getWeekEnd(end, firstDayOfWeekIdx);
-      fallbackStart = monthUtils.subDays(dateEnd, 180);
+      fallbackStart = monthUtils.weekFromDate(
+        monthUtils.subDays(dateEnd, 180),
+        firstDayOfWeekIdx,
+      );
       break;
     case 'Daily':
       dateEnd = end;
