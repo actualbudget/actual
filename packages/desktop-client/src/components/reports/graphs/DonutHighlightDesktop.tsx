@@ -6,7 +6,7 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 
-import type { DonutActiveShapeProps } from './donutActiveShapeProps';
+import type { DonutHighlightProps } from './donutHighlightProps';
 
 const RADIAN = Math.PI / 180;
 
@@ -14,7 +14,7 @@ const RADIAN = Math.PI / 180;
  * The highlight drawn over a donut's hovered sector, with a line out to its
  * label.
  */
-export function DonutActiveShapeDesktop({
+export function DonutHighlightDesktop({
   cx,
   cy,
   midAngle,
@@ -27,7 +27,7 @@ export function DonutActiveShapeDesktop({
   value,
   expandInward,
   chartInnerRadius,
-}: DonutActiveShapeProps) {
+}: DonutHighlightProps) {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name  and payload.date
   const yAxis = payload.name ?? payload.date ?? '';
