@@ -8,7 +8,23 @@ set -e
 # those images are handed over to that user first.
 #####################################################
 
-data_dirs="${ACTUAL_DATA_DIR:-/data} ${ACTUAL_SERVER_FILES:-} ${ACTUAL_USER_FILES:-}"
+# Succeeds if every entry under $1 that isn't owned by uid $2 can still be used
+# by that user: readable and writable, and searchable for directories. The
+# entries already owned by $2 are skipped. The rest of the arguments are a
+# command prefix to run the check as another user (none to run it as is). This
+# catches data that stays out of reach after a failed ownership handover (e.g. a
+# root-squashed mount), which the write probe on the data folder itself misses.
+tree_accessible() {
+  dir=$1
+  uid=$2
+  shift 2
+  "$@" find "$dir" \! -type l \! -user "$uid" -exec sh -c '
+    for entry; do
+      [ -r "$entry" ] && [ -w "$entry" ] || exit 1
+      if [ -d "$entry" ] && [ ! -x "$entry" ]; then exit 1; fi
+    done
+  ' sh {} + >/dev/null 2>&1
+}
 
 # Started as a non-root user (e.g. `docker run --user`), so nothing can be
 # handed over. Fail early if the data is still root-owned: otherwise the server
@@ -17,9 +33,9 @@ data_dirs="${ACTUAL_DATA_DIR:-/data} ${ACTUAL_SERVER_FILES:-} ${ACTUAL_USER_FILE
 # `test -w` only checks permission bits, so it misses read-only and
 # root-squashed mounts.
 if [ "$(id -u)" != "0" ]; then
-  for dir in $data_dirs; do
-    if [ -d "$dir" ] && ! (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null; then
-      echo "Error: uid $(id -u) can't write to $dir." >&2
+  for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
+    if [ -d "$dir" ] && ! { (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null && tree_accessible "$dir" "$(id -u)"; }; then
+      echo "Error: uid $(id -u) can't write to $dir or something in it." >&2
       echo "Data from older images is owned by root. Start the container without --user once" >&2
       echo "to hand it over automatically, or run: chown -R $(id -u):$(id -g) <your data folder>" >&2
       exit 1
@@ -49,7 +65,7 @@ if ! run_as true 2>/dev/null; then
   exec "$@"
 fi
 
-for dir in $data_dirs; do
+for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
   if [ -d "$dir" ]; then
     # Only touch files the run user doesn't already own, so restarts are cheap.
     # -h changes symlinks themselves, never what they point to outside the data dir.
@@ -68,9 +84,9 @@ can_read() {
   run_as sh -c 'cat "$1" > /dev/null' sh "$1" 2>/dev/null
 }
 
-for dir in $data_dirs; do
-  if [ -d "$dir" ] && ! can_write "$dir"; then
-    warn_staying_root "uid $run_uid can't write to $dir" \
+for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
+  if [ -d "$dir" ] && ! { can_write "$dir" && tree_accessible "$dir" "$run_uid" run_as; }; then
+    warn_staying_root "uid $run_uid can't write to $dir or something in it" \
       "Give uid $run_uid write access to $dir"
     exec "$@"
   fi
@@ -78,19 +94,25 @@ done
 
 # Files the server reads from outside the data dirs, such as mounted TLS
 # certificates or secrets, may only be readable by root.
-read_files="${ACTUAL_CONFIG_PATH:-}"
-for value in "${ACTUAL_HTTPS_KEY:-}" "${ACTUAL_HTTPS_CERT:-}"; do
-  case "$value" in
-    '' | -----BEGIN*) ;;
-    *) read_files="$read_files $value" ;;
+# Checked one path at a time: a joined string would split paths with spaces.
+unreadable_file() {
+  [ -f "$1" ] && ! can_read "$1"
+}
+
+for file in "${ACTUAL_CONFIG_PATH:-}" "${ACTUAL_HTTPS_KEY:-}" "${ACTUAL_HTTPS_CERT:-}"; do
+  case "$file" in
+    '' | -----BEGIN*) continue ;;
   esac
-done
-for name in $(env | sed -n 's/^\(ACTUAL_[A-Z0-9_]*_FILE\)=.*/\1/p'); do
-  read_files="$read_files $(printenv "$name")"
+  if unreadable_file "$file"; then
+    warn_staying_root "uid $run_uid can't read $file" \
+      "Give uid $run_uid read access to $file"
+    exec "$@"
+  fi
 done
 
-for file in $read_files; do
-  if [ -f "$file" ] && ! can_read "$file"; then
+for name in $(env | sed -n 's/^\(ACTUAL_[A-Z0-9_]*_FILE\)=.*/\1/p'); do
+  file="$(printenv "$name")"
+  if unreadable_file "$file"; then
     warn_staying_root "uid $run_uid can't read $file" \
       "Give uid $run_uid read access to $file"
     exec "$@"
