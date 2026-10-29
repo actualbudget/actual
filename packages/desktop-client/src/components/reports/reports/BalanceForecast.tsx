@@ -790,7 +790,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                     included in this date range
                   </Trans>
                 )}
-                {missedOccurrenceCount > 0 && (
+                {!activeSeries && missedOccurrenceCount > 0 && (
                   <>
                     {' '}
                     <Trans>({{ count: missedOccurrenceCount }} missed)</Trans>
