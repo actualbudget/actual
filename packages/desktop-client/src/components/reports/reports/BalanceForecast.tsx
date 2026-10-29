@@ -17,8 +17,8 @@ import type {
   TimeFrame,
 } from '@actual-app/core/types/models';
 import type {
-  ForecastSeries,
   ForecastAssumptions,
+  ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
 import * as d from 'date-fns';

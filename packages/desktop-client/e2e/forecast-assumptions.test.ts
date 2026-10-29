@@ -19,11 +19,11 @@ test('compares forecast assumptions and persists them in a widget', async ({
     await reports.waitToLoad();
     await reports.addWidget('Balance forecast');
     await reports.goToBalanceForecastPage();
-    await page.evaluate(async () => {
+    const demo = await page.evaluate(async () => {
       const accounts = await window.$send('accounts-get');
       const account = accounts.find(item => item.name === 'Bank of America');
       if (!account) throw new Error('Demo account missing');
-      await window.$send('schedule/create', {
+      const scheduleId = await window.$send('schedule/create', {
         schedule: { name: 'Demo salary', posts_transaction: false },
         conditions: [
           { op: 'is', field: 'account', value: account.id },
@@ -46,6 +46,7 @@ test('compares forecast assumptions and persists them in a widget', async ({
           source: 'schedules',
         },
       });
+      return { accountId: account.id, scheduleId, widgetId: id };
     });
     await page.reload();
     await page
@@ -118,51 +119,44 @@ test('compares forecast assumptions and persists them in a widget', async ({
     ).toBeVisible();
     await page.reload();
     await expect(summary).not.toBeVisible();
-    // Named lines retain their independent filters and use the widget’s saved assumptions.
-    await page.evaluate(async () => {
-      const accounts = await window.$send('accounts-get');
-      const account = accounts.find(item => item.name === 'Bank of America');
-      const { data: widgets } = await window.$query(
-        window.$q('dashboard').select('*'),
-      );
-      const widget = widgets.find(
-        item => item.id === window.location.pathname.split('/').at(-1),
-      );
-      const { data: schedules } = await window.$query(
-        window.$q('schedules').select('*'),
-      );
-      const salary = schedules.find(item => item.name === 'Demo salary');
-      if (!account || !widget || !salary)
-        throw new Error('Demo forecast missing');
+    // A missing summary also matches while the reloaded budget is still starting.
+    await expect(
+      page.getByRole('button', { name: 'Assumptions', exact: true }),
+    ).toBeVisible();
+    // Named lines retain their independent filters and use the widget's saved assumptions.
+    await page.evaluate(async ({ accountId, scheduleId, widgetId }) => {
       await window.$send('dashboard-update-widget', {
-        id: widget.id,
+        id: widgetId,
         meta: {
-          ...widget.meta,
+          accounts: [accountId],
+          timeFrame: { start: '2017-01', end: '2018-12', mode: 'static' },
+          granularity: 'Monthly',
+          source: 'schedules',
           assumptions: {
             anchorDate: '2017-01-01',
             inflationRate: 0.03,
             salaryGrowthRate: 0.05,
-            incomeScheduleIds: [salary.id],
+            incomeScheduleIds: [scheduleId],
           },
           series: [
             {
               id: 'all',
               name: 'All commitments',
-              accounts: [account.id],
+              accounts: [accountId],
               conditions: [],
               conditionsOp: 'and',
             },
             {
               id: 'expenses',
               name: 'Expenses only',
-              accounts: [account.id],
+              accounts: [accountId],
               conditions: [{ field: 'amount', op: 'lt', value: 0 }],
               conditionsOp: 'and',
             },
           ],
         },
       });
-    });
+    }, demo);
     await page.reload();
     await expect(summary).toContainText('Inflation 3% per year');
     await expect(
