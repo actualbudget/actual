@@ -111,6 +111,7 @@ test.describe('Reports', () => {
 
     test('loads balance forecast report with monthly granularity', async () => {
       // monthly granularity, auto y axis
+      await page.mouse.move(0, 0);
       await expect(page).toMatchThemeScreenshots();
     });
 

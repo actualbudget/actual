@@ -5,6 +5,7 @@ import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
   ForecastResult,
+  ForecastSeries,
 } from '@actual-app/core/types/models/forecast';
 import type { ServerEvents } from '@actual-app/core/types/server-events';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -60,6 +61,57 @@ beforeEach(() => {
 const range = { startDate: '2024-03-01', endDate: '2024-03-31' };
 
 describe('Balance Forecast query', () => {
+  it('applies policy changes and linked-payment refreshes to every comparison line', async () => {
+    const series: ForecastSeries[] = ['checking', 'savings'].map(id => ({
+      id,
+      name: id,
+      accounts: [id],
+      conditions: [],
+      conditionsOp: 'and',
+    }));
+    const { result, rerender } = renderHook(
+      ({
+        missedOccurrences,
+      }: {
+        missedOccurrences: ForecastMissedOccurrences;
+      }) => {
+        const { isSuccess, isFetching } = useBalanceForecastSeries({
+          ...range,
+          series,
+          missedSchedules: 'payments',
+          missedOccurrences,
+        });
+        return { isSuccess, isFetching };
+      },
+      {
+        wrapper: createWrapper(),
+        initialProps: { missedOccurrences: 'one' },
+      },
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(send).toHaveBeenCalledTimes(2);
+
+    rerender({ missedOccurrences: 'all' });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(4));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    act(() => {
+      for (const listener of listeners) {
+        listener({ type: 'applied', tables: ['transactions'] });
+      }
+    });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(6));
+    for (const accountId of ['checking', 'savings']) {
+      expect(send).toHaveBeenCalledWith(
+        'forecast/generate',
+        expect.objectContaining({
+          accountIds: [accountId],
+          missedSchedules: 'payments',
+          missedOccurrences: 'all',
+        }),
+      );
+    }
+  });
+
   it('fetches separately for both policy settings', async () => {
     const { rerender } = renderHook(
       ({
@@ -69,7 +121,11 @@ describe('Balance Forecast query', () => {
         missedSchedules: ForecastMissedSchedules;
         missedOccurrences: ForecastMissedOccurrences;
       }) =>
-        useBalanceForecastSeries({ ...range, missedSchedules, missedOccurrences }),
+        useBalanceForecastSeries({
+          ...range,
+          missedSchedules,
+          missedOccurrences,
+        }),
       {
         wrapper: createWrapper(),
         initialProps: { missedSchedules: 'payments', missedOccurrences: 'one' },
