@@ -104,7 +104,7 @@ describe('buildForecastSeriesChart', () => {
     ]);
   });
 
-  it('keeps baseline and salary-growth amounts alongside each line’s purchasing power', () => {
+  it('keeps baseline and salary-growth amounts alongside each line purchasing power', () => {
     const assumptions = {
       anchorDate: '2026-10-01',
       inflationRate: 0.1,
