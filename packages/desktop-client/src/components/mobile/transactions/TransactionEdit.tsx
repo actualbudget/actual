@@ -670,8 +670,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const noteRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
+      // Opened with no earlier history (e.g. the "Add transaction" shortcut):
+      // add the budget behind the form so Back has somewhere to go. Not `/`:
+      // when Transaction is the mobile start page, `/` redirects straight
+      // back to this form.
       if (window.history.length === 1) {
-        window.history.replaceState(null, 'Actual Budget', '/');
+        window.history.replaceState(null, 'Actual Budget', '/budget');
         window.history.pushState(null, 'Add Transaction', '/transactions/new');
       }
     }, []);

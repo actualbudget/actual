@@ -101,6 +101,42 @@ test.describe('Mobile Settings', () => {
     await expect(page).toHaveURL(/\/budget$/);
   });
 
+  test('browser Back from a fresh transaction start page tab does not loop', async ({
+    browser,
+  }) => {
+    // The installed app's "Add transaction" shortcut and a new tab both open
+    // with no earlier history. This needs a context that can hold a second
+    // tab with the same budget open.
+    const context = await browser.newContext({
+      viewport: { width: 350, height: 600 },
+    });
+    const setupTab = await context.newPage();
+    await setupTab.goto('/');
+    await new ConfigurationPage(setupTab).createTestFile();
+    const settingsPage = await new MobileNavigation(
+      setupTab,
+    ).goToSettingsPage();
+    await settingsPage.setMobileStartPage('Transaction');
+
+    // `window.open` gives a tab whose only history entry is the app, unlike
+    // `context.newPage()`, which keeps an about:blank entry
+    const [freshTab] = await Promise.all([
+      context.waitForEvent('page'),
+      setupTab.evaluate(() => {
+        window.open('/', '_blank', 'noopener');
+      }),
+    ]);
+    await expect(freshTab).toHaveURL(/\/transactions\/new$/);
+    await expect(new MobileTransactionEntryPage(freshTab).header).toHaveText(
+      'New Transaction',
+    );
+
+    await freshTab.goBack();
+    await expect(freshTab).toHaveURL(/\/budget$/);
+    await expect(new MobileNavigation(freshTab).navbar).toBeVisible();
+    await context.close();
+  });
+
   test('keeps the start page per budget', async () => {
     const settingsPage = await navigation.goToSettingsPage();
     await settingsPage.setMobileStartPage('Accounts');
