@@ -61,6 +61,37 @@ beforeEach(() => {
 const range = { startDate: '2024-03-01', endDate: '2024-03-31' };
 
 describe('Balance Forecast query', () => {
+  it('refreshes once for an applied/success pair and still handles success-only events', async () => {
+    const { result } = renderHook(
+      () => {
+        const { isSuccess, isFetching } = useBalanceForecastSeries(range);
+        return { isSuccess, isFetching };
+      },
+      { wrapper: createWrapper() },
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    act(() => {
+      for (const listener of listeners) {
+        listener({ type: 'applied', tables: ['transactions'] });
+      }
+    });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    await act(async () => {
+      for (const listener of listeners) {
+        listener({ type: 'success', tables: ['transactions'] });
+      }
+    });
+    expect(send).toHaveBeenCalledTimes(2);
+
+    act(() => {
+      for (const listener of listeners) {
+        listener({ type: 'success', tables: ['transactions'] });
+      }
+    });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(3));
+  });
+
   it('applies policy changes and linked-payment refreshes to every comparison line', async () => {
     const series: ForecastSeries[] = ['checking', 'savings'].map(id => ({
       id,

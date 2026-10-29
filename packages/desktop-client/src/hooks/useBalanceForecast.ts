@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
@@ -81,24 +81,40 @@ export function useBalanceForecastSeries({
     enabled,
   });
 
+  // A received batch emits both applied and success for the same tables.
+  const appliedTables = useRef(new Set<string>());
   const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
-    if (
-      enabled &&
-      (event.type === 'applied' || event.type === 'success') &&
-      event.tables.some(table =>
-        [
-          'transactions',
-          'schedules',
-          'schedules_next_date',
-          'rules',
-          'accounts',
-          'payees',
-          'payee_mapping',
-          'categories',
-          'category_mapping',
-        ].includes(table),
-      )
-    ) {
+    if (event.type === 'start' || event.type === 'error') {
+      appliedTables.current.clear();
+      return;
+    }
+    if (event.type !== 'applied' && event.type !== 'success') {
+      return;
+    }
+    const affectedTables = event.tables.filter(table =>
+      [
+        'transactions',
+        'schedules',
+        'schedules_next_date',
+        'rules',
+        'accounts',
+        'payees',
+        'payee_mapping',
+        'categories',
+        'category_mapping',
+      ].includes(table),
+    );
+    const shouldRefresh =
+      event.type === 'applied' ||
+      affectedTables.some(table => !appliedTables.current.has(table));
+    if (event.type === 'applied') {
+      for (const table of affectedTables) {
+        appliedTables.current.add(table);
+      }
+    } else {
+      appliedTables.current.clear();
+    }
+    if (enabled && affectedTables.length > 0 && shouldRefresh) {
       void result.refetch();
     }
   });
