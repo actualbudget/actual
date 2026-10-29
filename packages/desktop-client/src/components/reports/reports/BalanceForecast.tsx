@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -58,6 +59,11 @@ import {
   getLowestChartDataPoint,
   getZeroCrossingGradientOffset,
 } from './balanceForecastChartData';
+import {
+  buildFromTodayForecastPresets,
+  getForecastRangeMonths,
+  resolveBalanceForecastRange,
+} from './balanceForecastRange';
 import { buildForecastSeriesChart } from './balanceForecastSeries';
 import { ForecastSeriesEditor } from './ForecastSeriesEditor';
 import { getForecastSeriesStyle } from './ForecastSeriesKey';
@@ -86,6 +92,7 @@ type BalanceForecastInnerProps = {
 
 function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const format = useFormat();
   const privacyMode = usePrivacyMode();
   const locale = useLocale();
@@ -112,10 +119,10 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   }> | null>(null);
 
   const currentMonth = monthUtils.currentMonth();
-  const [start, setStart] = useState(
+  const [selectedStart, setStart] = useState(
     widget?.meta?.timeFrame?.start ?? widget?.meta?.startDate ?? currentMonth,
   );
-  const [end, setEnd] = useState(
+  const [selectedEnd, setEnd] = useState(
     widget?.meta?.timeFrame?.end ??
       widget?.meta?.endDate ??
       monthUtils.addMonths(currentMonth, 11),
@@ -140,6 +147,18 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const [isEditingSeries, setIsEditingSeries] = useState(false);
   const activeSeries = isTrackingBudgetForecast ? undefined : series;
+  const [monthsFromToday, setMonthsFromToday] = useState(
+    resolveBalanceForecastRange(widget?.meta, source).monthsFromToday,
+  );
+  const { start, end, startDate, endDate } = resolveBalanceForecastRange(
+    {
+      timeFrame: { start: selectedStart, end: selectedEnd, mode },
+      monthsFromToday,
+    },
+    source,
+  );
+  const startsToday =
+    monthsFromToday !== undefined && !isTrackingBudgetForecast;
 
   useEffect(() => {
     if (budgetType !== 'tracking' && source === 'tracking-budget') {
@@ -152,9 +171,6 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     [accounts, widget?.meta?.accounts],
   );
   const hasMonthOptions = allMonths != null;
-  // `start` may be `yyyy-MM` or `yyyy-MM-dd`; `firstDayOfMonth` handles both.
-  const startDate = monthUtils.firstDayOfMonth(start);
-  const endDate = monthUtils.lastDayOfMonth(end);
   const {
     data: forecasts,
     error,
@@ -218,6 +234,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               conditionsOp: series[0].conditionsOp,
             }
           : {}),
+        monthsFromToday: startsToday ? monthsFromToday : undefined,
         timeFrame: {
           start,
           end,
@@ -306,6 +323,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     newEnd: string,
     newMode?: TimeFrame['mode'],
   ) => {
+    setMonthsFromToday(undefined);
     setStart(newStart);
     setEnd(newEnd);
     if (newMode) {
@@ -317,6 +335,24 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     setSource(newSource);
     if (newSource === 'tracking-budget') {
       setGranularity('Monthly');
+      if (monthsFromToday !== undefined) {
+        setStart(currentMonth);
+        setEnd(monthUtils.addMonths(currentMonth, monthsFromToday - 1));
+        setMode('static');
+        setMonthsFromToday(undefined);
+      }
+    }
+  }
+
+  function onToggleStartToday() {
+    if (monthsFromToday !== undefined) {
+      onChangeDates(
+        currentMonth,
+        monthUtils.addMonths(currentMonth, monthsFromToday - 1),
+        'static',
+      );
+    } else {
+      setMonthsFromToday(getForecastRangeMonths(start, end));
     }
   }
 
@@ -374,11 +410,33 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     granularity === 'Daily'
       ? monthUtils.currentDay()
       : monthUtils.currentMonth();
-  const showsTodayReferenceLine = visibleChartData.some(
+  const todayReferenceIndex = visibleChartData.findIndex(
     dataPoint => dataPoint.date === todayReferenceDate,
   );
+  const showsTodayReferenceLine = todayReferenceIndex !== -1;
+  const todayReferenceLabel =
+    granularity === 'Monthly'
+      ? t('Current month')
+      : t('Today · {{date}}', {
+          date: d.format(monthUtils.parseDate(todayReferenceDate), 'MMM d', {
+            locale,
+          }),
+        });
+  const dateRangePresets = startsToday
+    ? buildFromTodayForecastPresets(t, setMonthsFromToday)
+    : undefined;
   const headerInlineContent = (
     <>
+      {!isTrackingBudgetForecast && (
+        <Button
+          variant={startsToday ? 'primary' : 'normal'}
+          size={isNarrowWidth ? 'extra-large' : undefined}
+          aria-pressed={startsToday}
+          onPress={onToggleStartToday}
+        >
+          <Trans>Start today</Trans>
+        </Button>
+      )}
       {budgetType === 'tracking' && (
         <Select
           value={source}
@@ -465,6 +523,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           granularities={
             isTrackingBudgetForecast ? undefined : ['month', 'day']
           }
+          dateRangePresets={dateRangePresets}
           hideModeToggle
           inlineContent={headerInlineContent}
         >
@@ -482,6 +541,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               : (allMonths[0]?.name ?? monthUtils.addMonths(currentMonth, 24))
           }
           granularities={['month', 'day']}
+          dateRangePresets={dateRangePresets}
           mode={mode}
           onChangeDates={onChangeDates}
           filters={conditions}
@@ -509,6 +569,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
       >
         {activeSeries && isEditingSeries && (
           <ForecastSeriesEditor series={activeSeries} onChange={setSeries} />
+        )}
+        {startsToday && (
+          <Text style={{ color: theme.pageTextLight, paddingTop: 12 }}>
+            <Trans>
+              This range moves forward from today. Monthly points show the
+              balance on the last included day of each month.
+            </Trans>
+          </Text>
         )}
         {errorMessage ? (
           <div style={{ color: theme.errorText, marginBottom: 20 }}>
@@ -541,7 +609,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               </PrivacyFilter>
             </FinancialText>
             <View style={{ color: theme.pageTextLight }}>
-              <Trans>Ending Balance</Trans>: {endingPoint.date}
+              <Trans>Ending Balance</Trans>:{' '}
+              {startsToday ? chartRange.end : endingPoint.date}
             </View>
             {lowestPoint && lowestPoint.date !== endingPoint.date ? (
               <Text
@@ -574,7 +643,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                       height={height}
                       data={visibleChartData}
                       margin={{
-                        top: 10,
+                        top: showsTodayReferenceLine ? 32 : 10,
                         right: 10,
                         left: 5 + yAxisLeftPadding,
                         bottom: 10,
@@ -691,10 +760,15 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                           stroke={theme.reportsBlue}
                           strokeDasharray="4 4"
                           label={{
-                            value: t('Today'),
-                            fill: theme.reportsBlue,
+                            value: todayReferenceLabel,
+                            fill: theme.reportsLabel,
                             fontSize: 12,
-                            position: 'insideTop',
+                            position: 'top',
+                            textAnchor:
+                              todayReferenceIndex >
+                              (visibleChartData.length - 1) / 2
+                                ? 'end'
+                                : 'start',
                             offset: 8,
                           }}
                         />
