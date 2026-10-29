@@ -263,6 +263,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'time',
       startDate: '2026-04',
       endDate: '2026-06-30',
