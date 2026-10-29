@@ -388,7 +388,9 @@ export function useScheduleEdit({
         if (current) {
           const live = liveQuery<TransactionEntity>(
             q('transactions')
-              .filter({ $and: filters })
+              // Transactions in other currencies cannot link to schedules
+              // until MC-3.5, so they are never offered as matches.
+              .filter({ $and: [...filters, { 'account.currency': null }] })
               .select('*')
               .options({ splits: 'all' }),
             {

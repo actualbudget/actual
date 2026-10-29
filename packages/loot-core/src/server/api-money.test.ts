@@ -340,7 +340,6 @@ describe('API Money amounts', () => {
 describe('API foreign pairs', () => {
   beforeEach(async () => {
     await setBudgetCurrency('USD', 2);
-    // Handlers refuse foreign currencies until foreign posting ships.
     await db.insertAccount({ id: 'jpy', name: 'Yen', currency: 'JPY' });
   });
 
@@ -436,7 +435,7 @@ describe('API foreign pairs', () => {
     ).rejects.toThrow('amount-pair-internal');
   });
 
-  it('keeps the unchanged pair side when updating one value', async () => {
+  it('rejects foreign amount edits until foreign edits, keeping metadata edits', async () => {
     await db.insertTransaction({
       id: 'f',
       account: 'jpy',
@@ -444,18 +443,25 @@ describe('API foreign pairs', () => {
       amount: -1000,
       transaction_amount: -1500,
     });
+    await expect(
+      handlers['api/transaction-update']({
+        id: 'f',
+        fields: { amount: -1100, transaction_amount: -1500 },
+      }),
+    ).rejects.toThrow('foreign-edit-unavailable');
     await handlers['api/transaction-update']({
       id: 'f',
-      fields: { amount: -1100, transaction_amount: -1500 },
+      fields: { notes: 'lunch' },
     });
     expect(
       db.firstSync(
-        "SELECT amount, transaction_amount, amount_pair FROM transactions WHERE id = 'f'",
+        "SELECT amount, transaction_amount, amount_pair, notes FROM transactions WHERE id = 'f'",
       ),
     ).toEqual({
-      amount: -1100,
+      amount: -1000,
       transaction_amount: -1500,
-      amount_pair: '-1100:-1500',
+      amount_pair: '-1000:-1500',
+      notes: 'lunch',
     });
   });
 

@@ -120,7 +120,7 @@ async function liveManualRate(
   return existing && !existing.tombstone ? existing : null;
 }
 
-async function writeManualRate({
+export async function writeManualRate({
   baseCurrency,
   quoteCurrency,
   rate,
@@ -357,7 +357,11 @@ async function resolveRateHandler({
   });
 }
 
-async function captureEntry({
+/**
+ * Computes a foreign entry's final pair without writing anything. Supplied
+ * rates that should be saved come back as `pendingRates`.
+ */
+export async function computeEntryPair({
   quoteCurrency,
   nativePrecision,
   date,
@@ -381,6 +385,7 @@ async function captureEntry({
       baseAmount: number;
       nativeAmount: number;
       rate?: Extract<RateResolution, { status: 'resolved' }>;
+      pendingRates?: Array<Parameters<typeof writeManualRate>[0]>;
     }
   | { status: 'rate-confirmation-required'; existing: ExchangeRateEntity }
   | { status: 'rate-unavailable' }
@@ -404,7 +409,7 @@ async function captureEntry({
   const suppliedRate = rate !== undefined ? parseRate(rate) : undefined;
   const timestamp = utcMidnight(date);
 
-  const pending: Array<'dated' | 'standing'> = [];
+  const pendingRates: Array<Parameters<typeof writeManualRate>[0]> = [];
   if (suppliedRate !== undefined) {
     const day = await liveManualRate(
       baseCurrency,
@@ -415,7 +420,13 @@ async function captureEntry({
     // The first typed rate for this UTC day is kept. A later different rate
     // converts this operation only, unless the caller is replacing that day.
     if (!day || (day.rate !== suppliedRate && replaceRate)) {
-      pending.push('dated');
+      pendingRates.push({
+        baseCurrency,
+        quoteCurrency,
+        rate: suppliedRate,
+        kind: 'dated',
+        timestamp,
+      });
     }
     if (saveStanding) {
       const standing = await liveManualRate(
@@ -428,7 +439,13 @@ async function captureEntry({
         return { status: 'rate-confirmation-required', existing: standing };
       }
       if (!standing || standing.rate !== suppliedRate) {
-        pending.push('standing');
+        pendingRates.push({
+          baseCurrency,
+          quoteCurrency,
+          rate: suppliedRate,
+          kind: 'standing',
+          timestamp,
+        });
       }
     }
   }
@@ -479,23 +496,33 @@ async function captureEntry({
     );
   }
 
-  if (suppliedRate !== undefined && pending.length > 0) {
-    await withUndo(async () => {
-      for (const kind of pending) {
-        await writeManualRate({
-          baseCurrency,
-          quoteCurrency,
-          rate: suppliedRate,
-          kind,
-          timestamp,
-        });
-      }
-    });
-  }
   return {
     status: 'ok',
     baseAmount: finalBase,
     nativeAmount,
     ...(resolution && { rate: resolution }),
+    ...(pendingRates.length > 0 && { pendingRates }),
   };
+}
+
+async function captureEntry(
+  args: Parameters<typeof computeEntryPair>[0],
+): Promise<
+  | Exclude<Awaited<ReturnType<typeof computeEntryPair>>, { status: 'ok' }>
+  | Omit<
+      Extract<Awaited<ReturnType<typeof computeEntryPair>>, { status: 'ok' }>,
+      'pendingRates'
+    >
+> {
+  const result = await computeEntryPair(args);
+  if (result.status !== 'ok') return result;
+  const { pendingRates, ...pair } = result;
+  if (pendingRates?.length) {
+    await withUndo(async () => {
+      for (const pending of pendingRates) {
+        await writeManualRate(pending);
+      }
+    });
+  }
+  return pair;
 }

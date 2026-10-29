@@ -164,17 +164,64 @@ export async function resolveAccountCurrencyInput(
       'SELECT 1 FROM transactions WHERE acct = ? LIMIT 1',
       [accountId],
     );
-    if ((account.currency ?? null) !== value && hasTransactions) {
-      throw new Error('account-currency-immutable');
+    if ((account.currency ?? null) !== value) {
+      if (hasTransactions) {
+        throw new Error('account-currency-immutable');
+      }
+      // Schedule amounts and incoming transfers are recorded in the
+      // account's encoding; correcting them waits for MC-7.
+      // Account references may be a single id or a oneOf list, in
+      // conditions or in account-setting actions.
+      const accountReference = `(
+        (json_type(x.value, '$.value') = 'array' AND EXISTS (
+          SELECT 1 FROM json_each(x.value, '$.value') v WHERE v.value = ?))
+        OR json_extract(x.value, '$.value') = ?
+      )`;
+      const hasSchedules = await db.first(
+        `SELECT 1 FROM schedules s
+           JOIN rules r ON r.id = s.rule, json_each(r.conditions) x
+           WHERE s.tombstone = 0
+             AND json_extract(x.value, '$.field') = 'acct'
+             AND ${accountReference}
+           LIMIT 1`,
+        [accountId, accountId],
+      );
+      // Ordinary rules can link schedules too.
+      const hasScheduleRules = await db.first(
+        `SELECT 1 FROM rules r, json_each(r.actions) a
+           WHERE r.tombstone = 0
+             AND json_extract(a.value, '$.op') = 'link-schedule'
+             AND EXISTS (
+               SELECT 1 FROM (
+                 SELECT value FROM json_each(r.conditions)
+                 UNION ALL SELECT value FROM json_each(r.actions)
+               ) x
+               WHERE json_extract(x.value, '$.field') IN ('acct', 'account')
+                 AND ${accountReference})
+           LIMIT 1`,
+        [accountId, accountId],
+      );
+      if (hasSchedules || hasScheduleRules) {
+        throw new Error('account-currency-has-schedules');
+      }
+      // Tombstoned and merged (mapped) payee references count too.
+      const hasTransfers = await db.first(
+        `SELECT 1 FROM transactions t
+           JOIN payees p ON p.id = COALESCE(
+             (SELECT targetId FROM payee_mapping WHERE id = t.description),
+             t.description)
+           WHERE p.transfer_acct = ?
+           LIMIT 1`,
+        [accountId],
+      );
+      if (hasTransfers) {
+        throw new Error('account-currency-has-transfers');
+      }
     }
   }
 
-  if (value !== null) {
-    throw new Error(
-      (await isMulticurrencyAvailable())
-        ? 'account-currency-foreign-unavailable'
-        : 'multicurrency-unavailable',
-    );
+  if (value !== null && !(await isMulticurrencyAvailable())) {
+    throw new Error('multicurrency-unavailable');
   }
   return value;
 }

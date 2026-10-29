@@ -30,6 +30,7 @@ import { SelectedItemsButton } from '#components/table';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
 import { AmountInput, BetweenAmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
+import { useAccounts } from '#hooks/useAccounts';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 import { SelectedProvider } from '#hooks/useSelected';
@@ -121,6 +122,7 @@ export function ScheduleEditForm({
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { isNarrowWidth } = useResponsive();
+  const { data: accounts = [] } = useAccounts();
 
   return (
     <>
@@ -172,6 +174,10 @@ export function ScheduleEditForm({
             <GenericInput
               type="id"
               field="account"
+              // Schedules for accounts in other currencies arrive later.
+              hiddenAccounts={accounts
+                .filter(account => account.currency)
+                .map(account => account.id)}
               value={fields.account || ''}
               onChange={id =>
                 dispatch({ type: 'set-field', field: 'account', value: id })

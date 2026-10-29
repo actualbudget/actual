@@ -176,15 +176,23 @@ describe('write guard', () => {
       db.updateTransaction({ id: 't', transaction_amount: -1400 }),
     ).rejects.toThrow('foreign-pair-required');
     await db.updateTransaction({ id: 't', notes: 'lunch' });
+    // Stored pairs are frozen until foreign edits; resending them is fine.
+    await expect(
+      db.updateTransaction({
+        id: 't',
+        amount: -900,
+        transaction_amount: -1400,
+      }),
+    ).rejects.toThrow('foreign-edit-unavailable');
     await db.updateTransaction({
       id: 't',
-      amount: -900,
-      transaction_amount: -1400,
+      amount: -1000,
+      transaction_amount: -1500,
     });
     expect(tx('t')).toMatchObject({
-      amount: -900,
-      transaction_amount: -1400,
-      amount_pair: '-900:-1400',
+      amount: -1000,
+      transaction_amount: -1500,
+      amount_pair: '-1000:-1500',
       notes: 'lunch',
     });
   });
@@ -470,27 +478,22 @@ describe('workflows awaiting later stages', () => {
   });
 
   it('applies notes-only rules to full base and foreign rows, including splits', async () => {
+    // Foreign split families cannot be created locally before MC-5, but
+    // may arrive through sync; seed one directly.
+    for (const [id, parent, child, parentId] of [
+      ['p', 1, 0, null],
+      ['c', 0, 1, 'p'],
+    ] as const) {
+      db.runQuery(
+        `INSERT INTO transactions
+           (id, acct, date, amount, transaction_amount, amount_pair,
+            isParent, isChild, parent_id, tombstone, sort_order)
+           VALUES (?, 'jpy', 20260301, -1000, -1500, '-1000:-1500', ?, ?, ?, 0, 0)`,
+        [id, parent, child, parentId],
+      );
+    }
     await batchUpdateTransactions({
-      added: [
-        {
-          id: 'p',
-          account: 'jpy',
-          date: '2026-03-01',
-          amount: -1000,
-          transaction_amount: -1500,
-          is_parent: true,
-        },
-        {
-          id: 'c',
-          account: 'jpy',
-          date: '2026-03-01',
-          amount: -1000,
-          transaction_amount: -1500,
-          is_child: true,
-          parent_id: 'p',
-        },
-        { id: 'b', account: 'base', date: '2026-03-01', amount: -500 },
-      ],
+      added: [{ id: 'b', account: 'base', date: '2026-03-01', amount: -500 }],
     });
     const full: Array<Record<string, unknown>> = await fullRows([
       'p',
@@ -1187,5 +1190,145 @@ describe('inspection round 2 regressions', () => {
         actions: [{ op: 'link-schedule', value: 'sched' }],
       } as never),
     ).rejects.toThrow('multicurrency-schedule-unavailable');
+  });
+});
+
+describe('foreign workflows awaiting later stages', () => {
+  const pair = { amount: -1000, transaction_amount: -1500 };
+
+  it('rejects creating or restructuring foreign split families', async () => {
+    await expect(
+      db.insertTransaction({
+        id: 'p',
+        account: 'jpy',
+        date: '2026-03-01',
+        ...pair,
+        is_parent: true,
+      }),
+    ).rejects.toThrow('foreign-split-unavailable');
+    await expect(
+      batchUpdateTransactions({
+        added: [
+          {
+            id: 'p',
+            account: 'jpy',
+            date: '2026-03-01',
+            ...pair,
+            is_parent: true,
+          },
+          {
+            id: 'c',
+            account: 'jpy',
+            date: '2026-03-01',
+            ...pair,
+            is_child: true,
+            parent_id: 'p',
+          },
+        ],
+      }),
+    ).rejects.toThrow('foreign-split-unavailable');
+    await db.insertTransaction({
+      id: 'f',
+      account: 'jpy',
+      date: '2026-03-01',
+      ...pair,
+    });
+    await expect(
+      db.updateTransaction({ id: 'f', is_parent: true }),
+    ).rejects.toThrow('foreign-split-unavailable');
+    expect(
+      db.runQuery(
+        "SELECT id FROM transactions WHERE id IN ('p', 'c')",
+        [],
+        true,
+      ),
+    ).toEqual([]);
+  });
+
+  it('keeps metadata edits of an existing foreign family', async () => {
+    db.runQuery(
+      `INSERT INTO transactions
+         (id, acct, date, amount, transaction_amount, amount_pair,
+          isParent, isChild, parent_id, tombstone, sort_order)
+         VALUES ('p', 'jpy', 20260301, -1000, -1500, '-1000:-1500', 1, 0, NULL, 0, 0)`,
+    );
+    await db.updateTransaction({ id: 'p', notes: 'synced', is_parent: true });
+    expect(
+      db.firstSync("SELECT notes FROM transactions WHERE id = 'p'"),
+    ).toEqual({
+      notes: 'synced',
+    });
+  });
+
+  it('rejects linking foreign transactions to schedules', async () => {
+    await db.insertTransaction({
+      id: 'f',
+      account: 'jpy',
+      date: '2026-03-01',
+      ...pair,
+    });
+    await expect(
+      db.updateTransaction({ id: 'f', schedule: 'sched' }),
+    ).rejects.toThrow('multicurrency-schedule-unavailable');
+    await expect(
+      db.insertTransaction({
+        id: 'g',
+        account: 'jpy',
+        date: '2026-03-01',
+        ...pair,
+        schedule: 'sched',
+      }),
+    ).rejects.toThrow('multicurrency-schedule-unavailable');
+    await db.updateTransaction({ id: 'f', schedule: null });
+  });
+});
+
+describe('deleting within foreign split families', () => {
+  it('rejects deleting part of a family and allows deleting all of it', async () => {
+    for (const [id, parent, child, parentId] of [
+      ['p', 1, 0, null],
+      ['c1', 0, 1, 'p'],
+      ['c2', 0, 1, 'p'],
+    ] as const) {
+      db.runQuery(
+        `INSERT INTO transactions
+           (id, acct, date, amount, transaction_amount, amount_pair,
+            isParent, isChild, parent_id, tombstone, sort_order)
+           VALUES (?, 'jpy', 20260301, -500, -750, '-500:-750', ?, ?, ?, 0, 0)`,
+        [id, parent, child, parentId],
+      );
+    }
+    await expect(
+      batchUpdateTransactions({ deleted: [{ id: 'c1' }] }),
+    ).rejects.toThrow('foreign-split-unavailable');
+    await batchUpdateTransactions({ deleted: [{ id: 'p' }] });
+    expect(
+      db.runQuery(
+        "SELECT id FROM transactions WHERE tombstone = 0 AND id IN ('p', 'c1', 'c2')",
+        [],
+        true,
+      ),
+    ).toEqual([]);
+  });
+});
+
+describe('tombstoning within foreign split families', () => {
+  it('rejects tombstoning one child through an update', async () => {
+    for (const [id, parent, child, parentId] of [
+      ['p', 1, 0, null],
+      ['c1', 0, 1, 'p'],
+      ['c2', 0, 1, 'p'],
+    ] as const) {
+      db.runQuery(
+        `INSERT INTO transactions
+           (id, acct, date, amount, transaction_amount, amount_pair,
+            isParent, isChild, parent_id, tombstone, sort_order)
+           VALUES (?, 'jpy', 20260301, -500, -750, '-500:-750', ?, ?, ?, 0, 0)`,
+        [id, parent, child, parentId],
+      );
+    }
+    await expect(
+      batchUpdateTransactions({ updated: [{ id: 'c1', tombstone: true }] }),
+    ).rejects.toThrow('foreign-split-unavailable');
   });
 });
