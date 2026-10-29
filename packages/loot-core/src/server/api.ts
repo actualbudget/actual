@@ -42,6 +42,7 @@ import {
 import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import { getCategoriesWithTemplates } from './budget/template-notes';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
@@ -122,15 +123,22 @@ async function validateExpenseCategory(debug, id) {
   }
 }
 
-// A `#template` line that fails to parse is stored as an error template,
-// which the template runner skips, so it is rejected here instead.
+// A `#template` line that fails to parse becomes an error template, which the
+// template runner skips, so it is rejected here instead.
 async function getCategoryTemplates(debug, categoryId) {
-  // Note templates reach `goal_def` only once stored, as applying does first.
-  await handlers['budget/store-note-templates']([categoryId]);
+  // A note's templates are parsed in memory rather than stored in `goal_def`,
+  // so reading them writes nothing. Applying stores them itself.
+  const { source } = await db.first<{ source: string }>(
+    `SELECT COALESCE(JSON_EXTRACT(template_settings, '$.source'), 'notes') AS source
+       FROM categories WHERE id = ?`,
+    [categoryId],
+  );
   const templates =
-    (await handlers['budget/get-category-automations'](categoryId))[
-      categoryId
-    ] ?? [];
+    source === 'ui'
+      ? ((await handlers['budget/get-category-automations'](categoryId))[
+          categoryId
+        ] ?? [])
+      : ((await getCategoriesWithTemplates([categoryId]))[0]?.templates ?? []);
   if (templates.length === 0) {
     throw APIError(`${debug}: category "${categoryId}" has no template`);
   }
@@ -598,33 +606,34 @@ handlers['api/budget-apply-category-template'] = withMutation(async function ({
   }
 });
 
-handlers['api/budget-get-category-template-amount'] = withMutation(
-  async function ({ month, categoryId }) {
-    checkFileOpen();
-    await validateMonth(month);
-    await validateExpenseCategory(
-      'budget-get-category-template-amount',
-      categoryId,
+handlers['api/budget-get-category-template-amount'] = async function ({
+  month,
+  categoryId,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  await validateExpenseCategory(
+    'budget-get-category-template-amount',
+    categoryId,
+  );
+  const templates = await getCategoryTemplates(
+    'budget-get-category-template-amount',
+    categoryId,
+  );
+  const { budgeted, errors } = await handlers[
+    'budget/dry-run-category-template'
+  ]({
+    month,
+    categoryId,
+    templates,
+  });
+  if (errors.length > 0) {
+    throw APIError(
+      `budget-get-category-template-amount: ${errors.join('\n\n')}`,
     );
-    const templates = await getCategoryTemplates(
-      'budget-get-category-template-amount',
-      categoryId,
-    );
-    const { budgeted, errors } = await handlers[
-      'budget/dry-run-category-template'
-    ]({
-      month,
-      categoryId,
-      templates,
-    });
-    if (errors.length > 0) {
-      throw APIError(
-        `budget-get-category-template-amount: ${errors.join('\n\n')}`,
-      );
-    }
-    return budgeted;
-  },
-);
+  }
+  return budgeted;
+};
 
 handlers['api/transactions-export'] = async function ({
   transactions,

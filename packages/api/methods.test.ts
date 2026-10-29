@@ -386,6 +386,11 @@ describe('API CRUD operations', () => {
     await api.updateNote(categoryId, '#template 50');
 
     expect(await api.getCategoryTemplateAmount(month, categoryId)).toBe(5000);
+    // The preview parses the note without storing its templates.
+    const { data: previewed } = await api.aqlQuery(
+      api.q('categories').filter({ id: categoryId }).select(['goal_def']),
+    );
+    expect(previewed).toEqual([expect.objectContaining({ goal_def: null })]);
 
     await api.setBudgetAmount(month, categoryId, 100);
     await api.applyCategoryTemplate(month, categoryId);
