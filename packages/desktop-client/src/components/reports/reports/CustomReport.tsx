@@ -1077,6 +1077,7 @@ function CustomReportInner({
                     compact={false}
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
+                    showUncategorized={showUncategorized}
                     showTrendLines={showTrendLines}
                     intervalsCount={averageIntervalsCount}
                   />
