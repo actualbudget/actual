@@ -2,8 +2,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 
-import { parseMobileStartPage } from '#components/mobile/mobileStartPage';
-import type { MobileStartPageId } from '#components/mobile/mobileStartPage';
+import {
+  MOBILE_TAB_PAGES,
+  parseMobileStartPage,
+} from '#components/mobile/mobileStartPage';
+import { useMobileTabPageDetails } from '#components/mobile/useMobileTabPageDetails';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { SettingsGroup } from './SettingsGroup';
@@ -12,14 +15,7 @@ import { SettingsRow } from './SettingsRow';
 export function MobileStartPageSettings() {
   const { t } = useTranslation();
   const [startPagePref, setStartPagePref] = useSyncedPref('mobile-start-page');
-
-  const options: Array<[MobileStartPageId, string]> = [
-    ['budget', t('Budget')],
-    ['transaction', t('Transaction')],
-    ['accounts', t('Accounts')],
-    ['reports', t('Reports')],
-    ['schedules', t('Schedules')],
-  ];
+  const tabPageDetails = useMobileTabPageDetails();
 
   return (
     <SettingsGroup title={t('Navigation')}>
@@ -32,7 +28,10 @@ export function MobileStartPageSettings() {
             id="settings-mobileStartPage"
             value={parseMobileStartPage(startPagePref)}
             onChange={setStartPagePref}
-            options={options}
+            options={MOBILE_TAB_PAGES.map(({ id }) => [
+              id,
+              tabPageDetails[id].title,
+            ])}
           />
         }
       />

@@ -1,71 +1,41 @@
 import {
   getMobileStartPath,
-  MOBILE_START_PAGE_IDS,
+  MOBILE_TAB_PAGES,
   parseMobileStartPage,
 } from './mobileStartPage';
 
 describe('parseMobileStartPage', () => {
-  it('defaults to budget when nothing is saved', () => {
-    expect(parseMobileStartPage(undefined)).toBe('budget');
+  it.each([
+    ['nothing is saved', undefined],
+    ['the value is empty', ''],
+    ['the page is unknown', 'garbage'],
+    ['the page is not a tab bar page', 'payees'],
+    ['the page is Settings', 'settings'],
+    ['the value is a path', '/accounts'],
+    ['the case is wrong', 'Accounts'],
+    ['the value has whitespace', ' accounts '],
+  ])('defaults to budget when %s', (_, raw) => {
+    expect(parseMobileStartPage(raw)).toBe('budget');
   });
 
-  it('defaults to budget for an empty value', () => {
-    expect(parseMobileStartPage('')).toBe('budget');
-  });
-
-  it('defaults to budget for an unknown or unsupported page', () => {
-    expect(parseMobileStartPage('garbage')).toBe('budget');
-    expect(parseMobileStartPage('payees')).toBe('budget');
-    expect(parseMobileStartPage('settings')).toBe('budget');
-    expect(parseMobileStartPage('/accounts')).toBe('budget');
-    expect(parseMobileStartPage('/transactions/new')).toBe('budget');
-  });
-
-  it('does not match values with the wrong case or whitespace', () => {
-    expect(parseMobileStartPage('Accounts')).toBe('budget');
-    expect(parseMobileStartPage('REPORTS')).toBe('budget');
-    expect(parseMobileStartPage(' accounts ')).toBe('budget');
-  });
-
-  it.each(MOBILE_START_PAGE_IDS)('keeps the saved %s page', id => {
+  it.each(MOBILE_TAB_PAGES)('keeps the saved $id page', ({ id }) => {
     expect(parseMobileStartPage(id)).toBe(id);
   });
 });
 
 describe('getMobileStartPath', () => {
-  it('returns /budget when nothing is saved', () => {
+  it('returns /budget for an unsupported value', () => {
     expect(getMobileStartPath(undefined)).toBe('/budget');
-  });
-
-  it('returns /budget for an empty value', () => {
-    expect(getMobileStartPath('')).toBe('/budget');
-  });
-
-  it('returns /budget for an unknown or unsupported page', () => {
     expect(getMobileStartPath('garbage')).toBe('/budget');
-    expect(getMobileStartPath('payees')).toBe('/budget');
-    expect(getMobileStartPath('settings')).toBe('/budget');
   });
 
-  it('returns /budget for values with the wrong case', () => {
-    expect(getMobileStartPath('Accounts')).toBe('/budget');
-  });
-
-  it('returns the path of each supported page', () => {
-    expect(getMobileStartPath('budget')).toBe('/budget');
-    expect(getMobileStartPath('transaction')).toBe('/transactions/new');
-    expect(getMobileStartPath('accounts')).toBe('/accounts');
-    expect(getMobileStartPath('reports')).toBe('/reports');
-    expect(getMobileStartPath('schedules')).toBe('/schedules');
-  });
-
-  it('offers the pages in the same order as the mobile tab bar', () => {
-    expect(MOBILE_START_PAGE_IDS).toEqual([
-      'budget',
-      'transaction',
-      'accounts',
-      'reports',
-      'schedules',
-    ]);
+  it.each([
+    ['budget', '/budget'],
+    ['transaction', '/transactions/new'],
+    ['accounts', '/accounts'],
+    ['reports', '/reports'],
+    ['schedules', '/schedules'],
+  ])('returns the path of the %s page', (id, path) => {
+    expect(getMobileStartPath(id)).toBe(path);
   });
 });

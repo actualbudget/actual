@@ -41,15 +41,12 @@ test.describe('Mobile Settings', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('opens the budget by default', async () => {
+  test('opens the chosen start page', async () => {
     await page.goto('/');
     await expect(page).toHaveURL(/\/budget$/);
-
     await page.goto('/does-not-exist');
     await expect(page).toHaveURL(/\/budget$/);
-  });
 
-  test('opens the chosen start page', async () => {
     const settingsPage = await navigation.goToSettingsPage();
     await settingsPage.setMobileStartPage('Accounts');
 
@@ -64,55 +61,44 @@ test.describe('Mobile Settings', () => {
 
     await page.goto('/does-not-exist');
     await expect(page).toHaveURL(/\/accounts$/);
-  });
 
-  test('opens the schedules page', async () => {
-    const settingsPage = await navigation.goToSettingsPage();
+    await page.goto('/settings/general');
     await settingsPage.setMobileStartPage('Schedules');
-
     await page.goto('/');
     await expect(page).toHaveURL(/\/schedules$/);
     await expect(navigation.navbar).toBeVisible();
   });
 
-  test.describe('with the transaction page as start page', () => {
-    let transactionEntryPage: MobileTransactionEntryPage;
+  test('leaves the transaction start page for the budget', async () => {
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.setMobileStartPage('Transaction');
 
-    test.beforeEach(async () => {
-      const settingsPage = await navigation.goToSettingsPage();
-      await settingsPage.setMobileStartPage('Transaction');
+    const transactionEntryPage = new MobileTransactionEntryPage(page);
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/transactions\/new$/);
+    await expect(transactionEntryPage.header).toHaveText('New Transaction');
 
-      await page.goto('/');
-      await expect(page).toHaveURL(/\/transactions\/new$/);
-      transactionEntryPage = new MobileTransactionEntryPage(page);
-      await expect(transactionEntryPage.header).toHaveText('New Transaction');
-    });
+    await page.getByRole('button', { name: 'Back' }).click();
+    await expect(page).toHaveURL(/\/budget$/);
 
-    test('goes to the budget after adding a transaction', async () => {
-      await transactionEntryPage.fillAmount('12.34');
-      await transactionEntryPage.header.click();
-      await transactionEntryPage.fillField(
-        page.getByTestId('payee-field'),
-        'Kroger',
-      );
-      await transactionEntryPage.fillField(
-        page.getByTestId('category-field'),
-        'Clothing',
-      );
-      await transactionEntryPage.fillField(
-        page.getByTestId('account-field'),
-        'Ally Savings',
-      );
-      await transactionEntryPage.createTransaction();
-
-      await expect(page).toHaveURL(/\/budget$/);
-    });
-
-    test('goes to the budget when pressing Back', async () => {
-      await page.getByRole('button', { name: 'Back' }).click();
-
-      await expect(page).toHaveURL(/\/budget$/);
-    });
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/transactions\/new$/);
+    await transactionEntryPage.fillAmount('12.34');
+    await transactionEntryPage.header.click();
+    await transactionEntryPage.fillField(
+      page.getByTestId('payee-field'),
+      'Kroger',
+    );
+    await transactionEntryPage.fillField(
+      page.getByTestId('category-field'),
+      'Clothing',
+    );
+    await transactionEntryPage.fillField(
+      page.getByTestId('account-field'),
+      'Ally Savings',
+    );
+    await transactionEntryPage.createTransaction();
+    await expect(page).toHaveURL(/\/budget$/);
   });
 
   test('keeps the start page per budget', async () => {

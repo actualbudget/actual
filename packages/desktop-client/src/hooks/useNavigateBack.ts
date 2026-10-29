@@ -3,7 +3,9 @@ import { useCallback } from 'react';
 import { useNavigate } from './useNavigate';
 
 // React Router stores the position of each entry in `history.state.idx`;
-// 0 means this is the first page the app opened in this tab
+// 0 means this is the first page the app opened in this tab. Checking
+// `location.key === 'default'` is not enough: a `<Navigate replace>` (such
+// as the start page redirect) gives the first entry a new key.
 export function hasPreviousHistoryEntry(state: unknown): boolean {
   return (
     state != null &&
@@ -15,17 +17,18 @@ export function hasPreviousHistoryEntry(state: unknown): boolean {
 }
 
 /**
- * Go back a page, or to `fallbackPath` when there is no earlier page to go
- * back to (e.g. the page was opened directly as the mobile start page).
+ * Go back a page, or to the budget when there is no earlier page to go back
+ * to (e.g. the page was opened directly as the mobile start page). Not `/`:
+ * that could redirect straight back to the page we are leaving.
  */
-export function useNavigateBack(fallbackPath = '/budget') {
+export function useNavigateBack() {
   const navigate = useNavigate();
 
   return useCallback(() => {
     if (hasPreviousHistoryEntry(window.history.state)) {
       void navigate(-1);
     } else {
-      void navigate(fallbackPath, { replace: true });
+      void navigate('/budget', { replace: true });
     }
-  }, [navigate, fallbackPath]);
+  }, [navigate]);
 }
