@@ -97,6 +97,7 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
+import { useNavigateBack } from '#hooks/useNavigateBack';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
 import { usePayees } from '#hooks/usePayees';
 import {
@@ -651,7 +652,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     nearestPayee,
   }) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
+    const navigateBack = useNavigateBack();
     const dispatch = useDispatch();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
@@ -746,7 +747,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
         }
 
         onSave(transactionsToSave);
-        void navigate(-1);
+        navigateBack();
       };
 
       if (unserializedTransactions.some(t => t.reconciled)) {
@@ -798,7 +799,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           onConfirmSave();
         }
       }
-    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
+    }, [isAdding, dispatch, navigateBack, onSave, unserializedTransactions]);
 
     const onSchedule = useCallback(async () => {
       const [unserializedTransaction] = unserializedTransactions;
@@ -865,7 +866,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               },
             }),
           );
-          void navigate(-1);
+          navigateBack();
           return;
         }
 
@@ -877,7 +878,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             },
           }),
         );
-        void navigate(-1);
+        navigateBack();
       };
 
       const { isBeyondWindow, daysUntilTransaction, upcomingDays } =
@@ -902,7 +903,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     }, [
       isAdding,
       dispatch,
-      navigate,
+      navigateBack,
       unserializedTransactions,
       upcomingLength,
       t,
@@ -1108,7 +1109,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                       return;
                     }
 
-                    void navigate(-1);
+                    navigateBack();
                   },
                 },
               },
@@ -1158,7 +1159,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       },
       [
         dispatch,
-        navigate,
+        navigateBack,
         onClearActiveEdit,
         onDelete,
         unserializedTransactions,
@@ -1214,7 +1215,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   : t('Transaction')
                 : title
             }
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         footer={
@@ -1612,6 +1613,7 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
+  const navigateBack = useNavigateBack();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -2017,7 +2019,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         padding={0}
@@ -2068,7 +2070,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton />}
+            leftContent={<MobileBackButton onPress={navigateBack} />}
           />
         }
         padding={0}

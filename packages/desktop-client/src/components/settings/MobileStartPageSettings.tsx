@@ -15,8 +15,10 @@ export function MobileStartPageSettings() {
 
   const options: Array<[MobileStartPageId, string]> = [
     ['budget', t('Budget')],
+    ['transaction', t('Transaction')],
     ['accounts', t('Accounts')],
     ['reports', t('Reports')],
+    ['schedules', t('Schedules')],
   ];
 
   return (

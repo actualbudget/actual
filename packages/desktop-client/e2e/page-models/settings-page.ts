@@ -55,7 +55,9 @@ export class SettingsPage {
     await this.exportDataButton.click();
   }
 
-  async setMobileStartPage(pageName: 'Budget' | 'Accounts' | 'Reports') {
+  async setMobileStartPage(
+    pageName: 'Budget' | 'Transaction' | 'Accounts' | 'Reports' | 'Schedules',
+  ) {
     await this.goToSection('General');
     await this.settings.locator('#settings-mobileStartPage').click();
     await this.page
