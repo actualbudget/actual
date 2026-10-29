@@ -42,6 +42,12 @@ import type {
 } from '#types/models';
 
 import { findSchedules } from './find-schedules';
+import {
+  getOccurrenceOptions,
+  isOccurrenceTrackingEnabled,
+  recordScheduleOccurrence,
+  setOccurrence,
+} from './occurrence-records';
 
 // Utilities
 
@@ -503,6 +509,20 @@ export async function deleteSchedule({ id }) {
 }
 
 export async function skipNextDate({ id }) {
+  if (await isOccurrenceTrackingEnabled()) {
+    const schedule = await getSchedule(id);
+    if (schedule?.next_date) {
+      await batchMessages(async () => {
+        await recordScheduleOccurrence({
+          scheduleId: id,
+          dueDate: schedule.next_date,
+          status: 'skipped',
+        });
+        await setNextDate({ id, advance: true });
+      });
+      return;
+    }
+  }
   return setNextDate({ id, advance: true });
 }
 
@@ -609,7 +629,24 @@ async function postTransactionForSchedule({
   };
 
   if (transaction.account) {
-    await addTransactions(transaction.account, [transaction]);
+    const ids = await addTransactions(transaction.account, [transaction]);
+    if (await isOccurrenceTrackingEnabled()) {
+      const transactions = await Promise.all(
+        ids.map(id => db.getTransaction(id)),
+      );
+      const posted = transactions.find(
+        transaction =>
+          transaction?.schedule === schedule.id && !transaction.tombstone,
+      );
+      if (posted) {
+        await recordScheduleOccurrence({
+          scheduleId: schedule.id,
+          dueDate: schedule.next_date,
+          status: 'paid',
+          transactionId: posted.id,
+        });
+      }
+    }
   }
 }
 
@@ -825,6 +862,8 @@ export async function advanceSchedulesService(syncSuccess) {
 }
 
 export type SchedulesHandlers = {
+  'schedule/get-occurrence-options': typeof getOccurrenceOptions;
+  'schedule/set-occurrence': typeof setOccurrence;
   'schedule/create': typeof createSchedule;
   'schedule/update': typeof updateSchedule;
   'schedule/delete': typeof deleteSchedule;
@@ -844,6 +883,8 @@ app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));
 app.method('schedule/move', mutator(undoable(moveSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
+app.method('schedule/get-occurrence-options', getOccurrenceOptions);
+app.method('schedule/set-occurrence', mutator(undoable(setOccurrence)));
 app.method(
   'schedule/post-transaction',
   mutator(undoable(postTransactionForSchedule)),
