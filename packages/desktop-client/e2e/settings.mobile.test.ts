@@ -67,4 +67,20 @@ test.describe('Mobile Settings', () => {
     await page.goto('/does-not-exist');
     await expect(page).toHaveURL(/\/accounts$/);
   });
+
+  test('keeps the start page per budget', async () => {
+    const settingsPage = await navigation.goToSettingsPage();
+    await settingsPage.setMobileStartPage('Accounts');
+    await expect(
+      settingsPage.settings.locator('#settings-mobileStartPage'),
+    ).toHaveText('Accounts');
+
+    await page.goto('/settings');
+    await page.getByRole('button', { name: 'Switch file' }).click();
+    await page.getByRole('button', { name: 'Create test file' }).click();
+    await expect(page).toHaveURL(/\/budget$/);
+
+    await page.goto('/');
+    await expect(page).toHaveURL(/\/budget$/);
+  });
 });

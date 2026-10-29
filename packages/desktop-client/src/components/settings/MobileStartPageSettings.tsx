@@ -23,9 +23,7 @@ export function MobileStartPageSettings() {
     <SettingsGroup title={t('Navigation')}>
       <SettingsRow
         title={t('Start page')}
-        description={t(
-          'The page Actual opens on narrow screens such as phones.',
-        )}
+        description={t("Actual's home page.")}
         htmlFor="settings-mobileStartPage"
         control={
           <Select
