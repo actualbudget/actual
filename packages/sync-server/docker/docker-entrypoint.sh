@@ -8,17 +8,57 @@ set -e
 # those images are handed over to that user first.
 #####################################################
 
-# Succeeds if every entry under $1 that isn't owned by uid $2 can still be used
-# by that user: readable and writable, and searchable for directories. The
-# entries already owned by $2 are skipped. The rest of the arguments are a
-# command prefix to run the check as another user (none to run it as is). This
-# catches data that stays out of reach after a failed ownership handover (e.g. a
-# root-squashed mount), which the write probe on the data folder itself misses.
+# Prints the data directories the server will use, one per line (so paths with
+# spaces stay intact): the ones set through the environment, plus any set in
+# config.json, which the server reads after this script has dropped privileges.
+configured_dirs() {
+  echo "${ACTUAL_DATA_DIR:-/data}"
+  echo "${ACTUAL_SERVER_FILES:-}"
+  echo "${ACTUAL_USER_FILES:-}"
+  config="${ACTUAL_CONFIG_PATH:-}"
+  if [ -z "$config" ]; then
+    for candidate in /app/config.json "${ACTUAL_DATA_DIR:-/data}/config.json"; do
+      if [ -f "$candidate" ]; then
+        config="$candidate"
+        break
+      fi
+    done
+  fi
+  # The environment beats config.json, as in the server. A config the server
+  # can't parse is left for the server to report.
+  if [ -f "$config" ]; then
+    node -e '
+      const env = {
+        dataDir: "ACTUAL_DATA_DIR",
+        serverFiles: "ACTUAL_SERVER_FILES",
+        userFiles: "ACTUAL_USER_FILES",
+      };
+      try {
+        const config = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+        for (const key of Object.keys(env)) {
+          if (typeof config[key] === "string" && !process.env[env[key]]) {
+            console.log(config[key]);
+          }
+        }
+      } catch {}
+    ' "$config" 2>/dev/null || true
+  fi
+}
+
+data_dirs="$(configured_dirs)"
+
+# Succeeds if every file and directory under $1 is usable: readable and
+# writable, and searchable for directories. Symlinks are followed, so a link to
+# a directory elsewhere is checked too. The rest of the arguments are a command
+# prefix to run the check as another user (none to run it as is). This catches
+# data that stays out of reach after a failed ownership handover (e.g. a
+# root-squashed mount, or a link to a root-only folder) and files the user owns
+# but can't write, none of which the write probe on the data folder itself
+# detects.
 tree_accessible() {
   dir=$1
-  uid=$2
-  shift 2
-  "$@" find "$dir" \! -type l \! -user "$uid" -exec sh -c '
+  shift
+  "$@" find -L "$dir" \! -type l -exec sh -c '
     for entry; do
       [ -r "$entry" ] && [ -w "$entry" ] || exit 1
       if [ -d "$entry" ] && [ ! -x "$entry" ]; then exit 1; fi
@@ -33,14 +73,16 @@ tree_accessible() {
 # `test -w` only checks permission bits, so it misses read-only and
 # root-squashed mounts.
 if [ "$(id -u)" != "0" ]; then
-  for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
-    if [ -d "$dir" ] && ! { (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null && tree_accessible "$dir" "$(id -u)"; }; then
+  while IFS= read -r dir; do
+    if [ -d "$dir" ] && ! { (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null && tree_accessible "$dir"; }; then
       echo "Error: uid $(id -u) can't write to $dir or something in it." >&2
       echo "Data from older images is owned by root. Start the container without --user once" >&2
       echo "to hand it over automatically, or run: chown -R $(id -u):$(id -g) <your data folder>" >&2
       exit 1
     fi
-  done
+  done <<DIRS
+$data_dirs
+DIRS
   exec "$@"
 fi
 
@@ -65,7 +107,7 @@ if ! run_as true 2>/dev/null; then
   exec "$@"
 fi
 
-for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
+while IFS= read -r dir; do
   if [ -d "$dir" ]; then
     # Only touch files the run user doesn't already own, so restarts are cheap.
     # -h changes symlinks themselves, never what they point to outside the data dir.
@@ -73,7 +115,9 @@ for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER
       -exec chown -h "$run_uid:$run_gid" {} + 2>/dev/null ||
       echo "Warning: could not change the owner of every file in $dir" >&2
   fi
-done
+done <<DIRS
+$data_dirs
+DIRS
 
 # Same real-file probe as above, run as the target user.
 can_write() {
@@ -84,13 +128,15 @@ can_read() {
   run_as sh -c 'cat "$1" > /dev/null' sh "$1" 2>/dev/null
 }
 
-for dir in "${ACTUAL_DATA_DIR:-/data}" "${ACTUAL_SERVER_FILES:-}" "${ACTUAL_USER_FILES:-}"; do
-  if [ -d "$dir" ] && ! { can_write "$dir" && tree_accessible "$dir" "$run_uid" run_as; }; then
+while IFS= read -r dir; do
+  if [ -d "$dir" ] && ! { can_write "$dir" && tree_accessible "$dir" run_as; }; then
     warn_staying_root "uid $run_uid can't write to $dir or something in it" \
       "Give uid $run_uid write access to $dir"
     exec "$@"
   fi
-done
+done <<DIRS
+$data_dirs
+DIRS
 
 # Files the server reads from outside the data dirs, such as mounted TLS
 # certificates or secrets, may only be readable by root.
