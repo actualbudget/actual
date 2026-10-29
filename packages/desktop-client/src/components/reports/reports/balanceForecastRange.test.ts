@@ -9,6 +9,7 @@ import {
 import {
   buildFromTodayForecastPresets,
   getForecastRangeFromToday,
+  getForecastRangeMonths,
   resolveBalanceForecastRange,
 } from './balanceForecastRange';
 
@@ -24,6 +25,19 @@ describe('forecast ranges from today', () => {
     ['2026-12-31', 3, '2027-03-30'],
   ])('starts on %s and includes %i months through %s', (today, months, end) => {
     expect(getForecastRangeFromToday(months, today)).toEqual([today, end]);
+    expect(getForecastRangeMonths(today, end)).toBe(months);
+  });
+
+  it.each([
+    ['2026-10-21', '2027-04-20', 6],
+    ['2026-10-13', '2027-04-12', 6],
+    ['2026-10', '2027-03', 6],
+    ['2026-12', '2027-02', 3],
+    ['2026-10-21', '2026-10-21', 1],
+    ['2026-10-21', '2026-11-19', 1],
+    ['2026-10-21', '2026-11-21', 1],
+  ])('keeps %s through %s to %i rolling months', (start, end, months) => {
+    expect(getForecastRangeMonths(start, end)).toBe(months);
   });
 
   it('reopens the same saved widget with a new current date', () => {

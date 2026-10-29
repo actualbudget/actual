@@ -345,9 +345,16 @@ test.describe('Reports', () => {
           exact: false,
         }),
       ).toBeVisible();
+      await expect(
+        page.getByText('Current month', { exact: true }),
+      ).toBeVisible();
       await expect(page.getByRole('main')).toMatchThemeScreenshots();
 
       await reportsPage.selectForecastGranularity('Daily');
+      await expect(
+        page.getByText('Today · Jan 1', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole('main')).toMatchThemeScreenshots();
       await page.getByRole('button', { name: 'Save widget' }).click();
       const reportUrl = page.url();
       reportsPage = await navigation.goToReportsPage();
@@ -359,6 +366,15 @@ test.describe('Reports', () => {
       const card = page.getByRole('button', { name: /^Balance Forecast/ });
       await expect(card).toContainText('From today: 2017-01-01 – 2017-06-30');
       await expect(card).toContainText('2017-06-30');
+      const todayMarker = card.locator(
+        '.recharts-reference-line-line[stroke-dasharray="4 4"]',
+      );
+      await expect(todayMarker).toHaveAttribute('x', '2017-01-01');
+      await expect
+        .poll(() =>
+          todayMarker.evaluate(marker => marker.getBoundingClientRect().height),
+        )
+        .toBeGreaterThan(0);
       await card.click();
       await expect(page).toHaveURL(reportUrl);
       await expect(startToday).toHaveAttribute('aria-pressed', 'true');
@@ -372,6 +388,40 @@ test.describe('Reports', () => {
       await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
         '03/31/2017',
       );
+      await page
+        .getByRole('button', { name: 'Compare lines', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      await page.getByTestId('date-range-picker-trigger').click();
+      await page
+        .getByRole('button', { name: 'Next 6 months', exact: true })
+        .click();
+      await page.keyboard.press('Escape');
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '06/30/2017',
+      );
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(2);
+      const savedNotification = page.getByText(
+        'Dashboard widget successfully saved.',
+        { exact: true },
+      );
+      if (await savedNotification.isVisible()) {
+        await page.getByRole('button', { name: 'Close', exact: true }).click();
+      }
+      await page
+        .getByRole('button', { name: 'Save widget', exact: true })
+        .click();
+      await expect(savedNotification).toBeVisible();
+      await page.reload();
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '06/30/2017',
+      );
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(2);
       await startToday.click();
       await expect(startToday).toHaveAttribute('aria-pressed', 'false');
       await expect(page.getByTestId('date-range-picker-trigger')).toContainText(

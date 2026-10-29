@@ -17,6 +17,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
+  XAxis,
   YAxis,
 } from 'recharts';
 
@@ -147,7 +148,10 @@ export function BalanceForecastCard({
   const zeroCrossingGradientOffset = getZeroCrossingGradientOffset(chartData);
   const gradientId = `balance-forecast-card-line-gradient-${widgetId}`;
   const isUpdatingForecast = isFetching && isPlaceholderData;
-  const todayReferenceDate = monthUtils.currentMonth();
+  const todayReferenceDate =
+    granularity === 'Daily'
+      ? monthUtils.currentDay()
+      : monthUtils.currentMonth();
   const showsTodayReferenceLine = visibleChartData.some(
     dataPoint => dataPoint.date === todayReferenceDate,
   );
@@ -281,6 +285,7 @@ export function BalanceForecastCard({
                     data={visibleChartData}
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                   >
+                    <XAxis dataKey="date" hide />
                     <YAxis
                       hide // do not show the axis labels (balance)
                       domain={[yAxisBase === 'Zero-Based' ? 0 : 'auto', 'auto']}
