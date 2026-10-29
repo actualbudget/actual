@@ -51,7 +51,7 @@ export async function batchUpdateTransactions({
   runTransfers?: boolean;
 }) {
   // Reject the whole batch before any write or side effect.
-  await preflightTransactionWrites({ added, updated });
+  await preflightTransactionWrites({ added, updated, deleted });
 
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];

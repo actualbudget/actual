@@ -17,6 +17,11 @@ type ExistingRow = {
   acct: string;
   description: string | null;
   transferred_id: string | null;
+  amount: number;
+  transaction_amount: number | null;
+  isParent: number;
+  isChild: number;
+  parent_id: string | null;
 };
 
 type TransactionWrite = {
@@ -27,6 +32,11 @@ type TransactionWrite = {
   payee?: string | null;
   transfer_id?: string | null;
   amount_pair?: unknown;
+  schedule?: string | null;
+  tombstone?: boolean | number;
+  is_parent?: boolean;
+  is_child?: boolean;
+  parent_id?: string | null;
 };
 
 // ponytail: per-row account lookup, add a per-batch cache if large imports
@@ -77,7 +87,9 @@ export async function validateTransactionWrite(
   }
   const existing = row.id
     ? await db.first<ExistingRow>(
-        'SELECT acct, description, transferred_id FROM transactions WHERE id = ?',
+        `SELECT acct, description, transferred_id, amount, transaction_amount,
+           isParent, isChild, parent_id
+           FROM transactions WHERE id = ?`,
         [row.id],
       )
     : null;
@@ -139,14 +151,42 @@ export async function validateTransactionWrite(
     return {};
   }
 
+  // Foreign splits arrive with foreign edits (MC-5): no family may be
+  // created or restructured, while metadata edits of a family stay allowed.
+  const changesFamily = existing
+    ? (row.is_parent !== undefined &&
+        !!row.is_parent !== !!existing.isParent) ||
+      (row.is_child !== undefined && !!row.is_child !== !!existing.isChild) ||
+      (row.parent_id !== undefined &&
+        (row.parent_id ?? null) !== (existing.parent_id ?? null))
+    : !!row.is_parent || !!row.is_child || !!row.parent_id;
+  if (changesFamily) {
+    throw new Error('foreign-split-unavailable');
+  }
+  // Foreign schedules arrive in MC-3.5; an occurrence must not be marked
+  // paid by a transaction in another currency.
+  if (row.schedule != null) {
+    throw new Error('multicurrency-schedule-unavailable');
+  }
+
   const setsAmount =
     row.amount !== undefined || row.transaction_amount !== undefined;
   if (isUpdate && !setsAmount) return {};
+
   if (
     !Number.isSafeInteger(row.amount) ||
     !Number.isSafeInteger(row.transaction_amount)
   ) {
     throw new Error('foreign-pair-required');
+  }
+  // Stored foreign pairs are frozen until foreign edits (MC-5).
+  if (
+    existing &&
+    ((row.amount !== undefined && row.amount !== existing.amount) ||
+      (row.transaction_amount !== undefined &&
+        row.transaction_amount !== existing.transaction_amount))
+  ) {
+    throw new Error('foreign-edit-unavailable');
   }
   return {
     pair: amountPair(row.amount as number, row.transaction_amount as number),
@@ -157,10 +197,37 @@ export async function validateTransactionWrite(
 export async function preflightTransactionWrites({
   added = [],
   updated = [],
+  deleted = [],
 }: {
   added?: TransactionWrite[];
   updated?: TransactionWrite[];
+  deleted?: Array<{ id: string }>;
 }) {
+  // Deleting part of a foreign split family restructures it (MC-5); a whole
+  // family (its parent, which removes the children) may be deleted.
+  // Tombstoning through an update (API, rule actions) deletes too.
+  const removed = [
+    ...deleted,
+    ...updated.filter(
+      (row): row is TransactionWrite & { id: string } =>
+        row.id !== undefined && (row.tombstone === true || row.tombstone === 1),
+    ),
+  ];
+  const deletedIds = new Set(removed.map(row => row.id));
+  for (const { id } of removed) {
+    const child = await db.first<{ acct: string; parent_id: string | null }>(
+      'SELECT acct, parent_id FROM transactions WHERE id = ? AND isChild = 1',
+      [id],
+    );
+    if (
+      child?.parent_id &&
+      !deletedIds.has(child.parent_id) &&
+      (await isForeignAccount(child.acct))
+    ) {
+      throw new Error('foreign-split-unavailable');
+    }
+  }
+
   const addedIds = added.map(row => row.id).filter(Boolean);
   const updatedIds = updated.map(row => row.id).filter(Boolean);
   if (

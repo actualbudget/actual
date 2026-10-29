@@ -12,6 +12,7 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
+import { computeEntryPair } from '#server/exchange-rates/app';
 import { app as mainApp } from '#server/main-app';
 import { mutator } from '#server/mutators';
 import { del, get, post } from '#server/post';
@@ -25,6 +26,7 @@ import {
   getRecordedAmountPrecision,
   resolveAccountCurrencyInput,
 } from '#server/util/currency';
+import { reviewedAmountEncoding } from '#shared/amount-encoding';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
@@ -601,29 +603,60 @@ async function createAccount({
   offBudget = false,
   closed = false,
   currency,
+  startingBalanceBase,
 }: {
   name: string;
-  /** Major units, parsed by the UI at the recorded precision. */
+  /**
+   * Major units, parsed by the UI at the account's precision (the recorded
+   * budget precision, or the currency's for a foreign account).
+   */
   balance?: number | null | undefined;
   /** Already-encoded minor units; persisted without a floating-point trip. */
   balanceInteger?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
   currency?: string | null | undefined;
+  /** Base amount for a foreign starting balance when no rate applies. */
+  startingBalanceBase?: number | undefined;
 }) {
   if (balanceInteger !== undefined && balance != null) {
     throw new Error('Supply either balance or balanceInteger');
   }
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency);
+  const nativePrecision = resolvedCurrency
+    ? reviewedAmountEncoding(resolvedCurrency).precision
+    : null;
   const amount =
     balanceInteger !== undefined
       ? balanceInteger
       : balance != null && balance !== 0
-        ? amountToInteger(balance, getRecordedAmountPrecision())
+        ? amountToInteger(
+            balance,
+            nativePrecision ?? getRecordedAmountPrecision(),
+          )
         : 0;
   if (!Number.isSafeInteger(amount)) {
     throw new Error('Invalid starting balance');
   }
-  const resolvedCurrency = await resolveAccountCurrencyInput(currency);
+  // A foreign starting balance needs its base before anything is created.
+  let startingPair: { amount: number; transaction_amount: number } | null =
+    null;
+  if (resolvedCurrency && nativePrecision !== null && amount !== 0) {
+    const pair = await computeEntryPair({
+      quoteCurrency: resolvedCurrency,
+      nativePrecision,
+      date: monthUtils.currentDay(),
+      nativeAmount: amount,
+      baseAmount: startingBalanceBase,
+    });
+    if (pair.status !== 'ok') {
+      throw new Error(pair.status);
+    }
+    startingPair = {
+      amount: pair.baseAmount,
+      transaction_amount: pair.nativeAmount,
+    };
+  }
 
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
@@ -641,7 +674,7 @@ async function createAccount({
     const payee = await getStartingBalancePayee();
     await db.insertTransaction({
       account: id,
-      amount,
+      ...(startingPair ?? { amount }),
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),

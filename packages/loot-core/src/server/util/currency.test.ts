@@ -1,5 +1,7 @@
 import * as db from '#server/db';
 import * as prefs from '#server/prefs';
+import { createSchedule } from '#server/schedules/app';
+import { insertRule } from '#server/transactions/transaction-rules';
 
 import {
   getAccountCurrency,
@@ -134,11 +136,72 @@ describe('account currency', () => {
       'multicurrency-unavailable',
     );
     await enableMulticurrency();
-    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
-      'account-currency-foreign-unavailable',
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).resolves.toBe(
+      'JPY',
     );
-    await expect(resolveAccountCurrencyInput('JPY')).rejects.toThrow(
-      'account-currency-foreign-unavailable',
+    await expect(resolveAccountCurrencyInput('JPY')).resolves.toBe('JPY');
+  });
+
+  it('keeps the currency of an account that schedules reference', async () => {
+    await setBudgetCurrency('USD', 2);
+    await enableMulticurrency();
+    await db.insertAccount({ id: 'empty', name: 'Empty' });
+    await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: 'empty' },
+        {
+          op: 'isapprox',
+          field: 'date',
+          value: {
+            start: '2026-03-01',
+            frequency: 'monthly',
+            patterns: [],
+            skipWeekend: false,
+            weekendSolveMode: 'after',
+            endMode: 'never',
+            endOccurrences: 1,
+            endDate: '2026-03-01',
+          },
+        },
+        { op: 'is', field: 'amount', value: -100 },
+      ] as never,
+    });
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
+      'account-currency-has-schedules',
+    );
+  });
+
+  it('keeps the currency of an account that a schedule-linking rule references', async () => {
+    await setBudgetCurrency('USD', 2);
+    await enableMulticurrency();
+    await db.insertAccount({ id: 'empty', name: 'Empty' });
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'oneOf', field: 'account', value: ['other', 'empty'] },
+      ],
+      actions: [{ op: 'link-schedule', value: 'sched' }],
+    } as never);
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
+      'account-currency-has-schedules',
+    );
+  });
+
+  it('keeps the currency of an account that incoming transfers reference', async () => {
+    await setBudgetCurrency('USD', 2);
+    await enableMulticurrency();
+    await db.insertAccount({ id: 'empty', name: 'Empty' });
+    await db.insertAccount({ id: 'used', name: 'Used' });
+    await db.insertPayee({ id: 'to-empty', name: '', transfer_acct: 'empty' });
+    await db.insertTransaction({
+      account: 'used',
+      date: '2026-03-01',
+      amount: -100,
+      payee: 'to-empty',
+    });
+    await expect(resolveAccountCurrencyInput('JPY', 'empty')).rejects.toThrow(
+      'account-currency-has-transfers',
     );
   });
 

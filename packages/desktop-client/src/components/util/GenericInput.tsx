@@ -45,6 +45,8 @@ type GenericInputProps = {
           type: 'id';
           field: 'account';
           op?: RuleConditionOp;
+          /** Accounts that cannot be chosen here. */
+          hiddenAccounts?: string[];
         }
     ) &
       (
@@ -200,6 +202,7 @@ export const GenericInput = ({
               content = (
                 <AccountAutocomplete
                   {...multiProps}
+                  hiddenAccounts={props.hiddenAccounts}
                   openOnFocus={!isNarrowWidth}
                   updateOnValueChange={isNarrowWidth}
                   inputProps={{
@@ -222,8 +225,10 @@ export const GenericInput = ({
                                 }
                                 props.onChange(newValue);
                               },
-                              hiddenAccounts:
-                                props.multi === true ? props.value : undefined,
+                              hiddenAccounts: [
+                                ...(props.multi === true ? props.value : []),
+                                ...(props.hiddenAccounts ?? []),
+                              ],
                             },
                           },
                         }),

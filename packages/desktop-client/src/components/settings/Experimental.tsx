@@ -232,10 +232,7 @@ export function ExperimentalFeatures() {
                 </Trans>
               }
               note={
-                <Trans>
-                  Experimental preview. Requires a budget currency. Accounts in
-                  other currencies are not available yet.
-                </Trans>
+                <Trans>Experimental preview. Requires a budget currency.</Trans>
               }
               isSubFeature
             >

@@ -807,7 +807,8 @@ function AccountMenu({
                   text: t('Unlink account'),
                 } as const,
               ]
-            : syncServerStatus === 'online'
+            : // Bank sync for accounts in other currencies arrives later.
+              syncServerStatus === 'online' && !account.currency
               ? [
                   {
                     name: 'link',

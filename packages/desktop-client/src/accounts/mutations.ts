@@ -61,6 +61,8 @@ type CreateAccountPayload = {
   balance: number;
   offBudget: boolean;
   currency?: string | null;
+  /** Base amount for a foreign starting balance when no rate applies. */
+  startingBalanceBase?: number;
 };
 
 export function useCreateAccountMutation() {
@@ -74,12 +76,14 @@ export function useCreateAccountMutation() {
       balance,
       offBudget,
       currency,
+      startingBalanceBase,
     }: CreateAccountPayload) => {
       const id = await send('account-create', {
         name,
         balance,
         offBudget,
         currency,
+        startingBalanceBase,
       });
       return id;
     },
