@@ -172,6 +172,7 @@ export function useBudgetAutomationsEditor({
           },
         ],
         source: 'ui',
+        month,
       });
       onClose();
     } finally {
