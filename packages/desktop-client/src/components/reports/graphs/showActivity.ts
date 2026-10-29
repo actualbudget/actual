@@ -58,8 +58,15 @@ export function showActivity({
     interval === 'Weekly'
       ? 'dayFromDate'
       : (((ReportOptions.intervalMap.get(interval) || 'Day').toLowerCase() +
-          'FromDate') as 'dayFromDate' | 'monthFromDate' | 'yearFromDate');
-  const isDateOp = interval === 'Weekly' || type !== 'time';
+          'FromDate') as
+          | 'dayFromDate'
+          | 'monthFromDate'
+          | 'quarterFromDate'
+          | 'yearFromDate');
+  // Weeks and quarters have no single date value to match, so they are
+  // filtered as a start-to-end date range instead.
+  const isDateOp =
+    interval === 'Weekly' || interval === 'Quarterly' || type !== 'time';
   const drilldownFilter =
     field === 'tag' && bucketTagNames
       ? {
@@ -107,7 +114,11 @@ export function showActivity({
     {
       field: 'date',
       op: isDateOp ? 'gte' : 'is',
-      value: isDateOp ? startDate : monthUtils[fromDate](startDate),
+      // Interval start dates may be month or year keys (e.g. '2026-06'),
+      // so normalise them to a full day for range filters
+      value: isDateOp
+        ? monthUtils.dayFromDate(startDate)
+        : monthUtils[fromDate](startDate),
       type: 'date',
     },
     isDateOp && {

@@ -12,6 +12,7 @@ import {
   setBudget,
   setCategoryCarryover,
   setNMonthAvg,
+  transferAvailable,
 } from './actions';
 import * as budget from './base';
 
@@ -228,6 +229,108 @@ describe('coverOverbudgeted', () => {
     const sheetName = 'budget202402';
     expect(await getSheetValue(sheetName, 'to-budget')).toBe(-80);
     expect(await getSheetValue(sheetName, 'leftover-cat3')).toBe(0);
+  });
+});
+
+describe('transferAvailable', () => {
+  beforeEach(global.emptyDatabase());
+  afterEach(global.emptyDatabase());
+
+  // Setup: 2024-01 with 100.00 income, cat1 budgeted 10.00, so 90.00 to budget
+  async function setupFundedDatabase() {
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+    await db.insertCategoryGroup({
+      id: 'income-group',
+      name: 'Income',
+      is_income: 1,
+    });
+    await db.insertCategory({
+      id: 'income-cat',
+      name: 'Income',
+      cat_group: 'income-group',
+      is_income: 1,
+    });
+    await db.insertCategoryGroup({
+      id: 'group1',
+      name: 'group1',
+      is_income: 0,
+    });
+    await db.insertCategory({
+      id: 'cat1',
+      name: 'cat1',
+      cat_group: 'group1',
+      is_income: 0,
+    });
+
+    await sheet.loadSpreadsheet(db);
+    await budget.createBudget(['2024-01']);
+
+    await db.insertTransaction({
+      date: '2024-01-15',
+      amount: 10000,
+      account: 'account1',
+      category: 'income-cat',
+    });
+    await setBudget({ category: 'cat1', month: '2024-01', amount: 1000 });
+    await sheet.waitOnSpreadsheet();
+  }
+
+  it('adds the full amount when it is within To Budget', async () => {
+    await setupFundedDatabase();
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(9000);
+
+    await transferAvailable({
+      month: '2024-01',
+      amount: 3000,
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202401', 'budget-cat1')).toBe(4000);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(6000);
+  });
+
+  it('caps the amount at To Budget so it never goes negative', async () => {
+    await setupFundedDatabase();
+
+    await transferAvailable({
+      month: '2024-01',
+      amount: 20000,
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202401', 'budget-cat1')).toBe(10000);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(0);
+  });
+
+  it('does not change the budget when To Budget is not positive', async () => {
+    // Setup: 2024-02 is 90 overbudgeted
+    await prepareDatabase();
+
+    await transferAvailable({
+      month: '2024-02',
+      amount: 50,
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202402', 'budget-cat1')).toBe(0);
+    expect(await getSheetValue('budget202402', 'to-budget')).toBe(-90);
+  });
+
+  it('never lowers the budget for a negative amount', async () => {
+    await setupFundedDatabase();
+
+    await transferAvailable({
+      month: '2024-01',
+      amount: -500,
+      category: 'cat1',
+    });
+    await sheet.waitOnSpreadsheet();
+
+    expect(await getSheetValue('budget202401', 'budget-cat1')).toBe(1000);
+    expect(await getSheetValue('budget202401', 'to-budget')).toBe(9000);
   });
 });
 

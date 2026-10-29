@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import { v4 as uuidv4 } from 'uuid';
 
 import { BankFactory } from '#app-gocardless/bank-factory';
@@ -40,6 +41,8 @@ import { SecretName, secretsService } from '#services/secrets-service';
 
 import type { AccountDetailsResponse, TokenResponse } from './gocardless-api';
 import { GoCardlessApi, GoCardlessApiError } from './gocardless-api';
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const clients = new Map<string, GoCardlessApi>();
 
@@ -339,8 +342,7 @@ export const goCardlessService = {
     });
 
     const response = await client.initSession(body).catch(async () => {
-      console.log('Failed to link using:');
-      console.log(body);
+      debugSensitive('Failed to link using: %O', body);
       console.log(
         'Falling back to accessValidForDays = 90 ' +
           'and maxHistoricalDays = 89',

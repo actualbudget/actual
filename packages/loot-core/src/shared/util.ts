@@ -413,6 +413,7 @@ export type CurrencyAmount = string;
 /**
  * The amount with the decimal point removed.
  * For example, 123.45 would be 12345.
+ * Always two implied decimals, whatever the currency: ¥1,500 is 150000.
  */
 export type IntegerAmount = number;
 
@@ -447,12 +448,8 @@ export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
 export function integerToCurrency(
   integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
-  decimalPlaces: number = 2,
 ) {
-  const divisor = Math.pow(10, decimalPlaces);
-  const amount = safeNumber(integerAmount) / divisor;
-
-  return formatter.format(amount);
+  return formatter.format(integerToAmount(safeNumber(integerAmount)));
 }
 
 export function integerToCurrencyWithDecimal(
@@ -464,7 +461,6 @@ export function integerToCurrencyWithDecimal(
     return integerToCurrency(
       integerAmount,
       getNumberFormat({ ...numberFormatConfig, decimalPlaces: dp }).formatter,
-      dp,
     );
   }
 
@@ -480,10 +476,6 @@ export function integerToCurrencyWithDecimal(
   }
 
   return integerToCurrency(integerAmount);
-}
-
-export function amountToCurrencyInteger(amount: number, code: string): number {
-  return amountToInteger(amount, getDecimalPlaces(code));
 }
 
 export function amountToCurrency(amount: Amount): CurrencyAmount {
@@ -588,8 +580,10 @@ export function looselyParseAmount(amount: string) {
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
-  // This avoids matching against 3 places which may not actually be decimal
-  const m = amount.match(/[.,]([^.,]{4,9}|[^.,]{1,2})$/);
+  // This avoids matching against 3 places which may not actually be decimal.
+  // Only digits count as places, so a currency symbol or code after the
+  // number does not change how many there are.
+  const m = amount.match(/[.,](\d{4,9}|\d{1,2})[^\d.,]*$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }

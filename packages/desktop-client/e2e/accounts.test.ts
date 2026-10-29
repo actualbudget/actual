@@ -233,6 +233,154 @@ test.describe('Accounts', () => {
     await expect(accountPage.selectButton).toHaveText('2 transactions');
   });
 
+  test('keeps the search applied after toggling reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Search Toggle',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    for (const note of ['search-match', 'search-other']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: note,
+        debit: '10.00',
+      });
+    }
+
+    await page.getByPlaceholder('Search').fill('search-match');
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-other' }),
+    ).not.toBeVisible();
+
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: /(Hide|Show) reconciled transactions/ })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-match' }),
+    ).toBeVisible();
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'search-other' }),
+    ).not.toBeVisible();
+  });
+
+  test('keeps the filter applied after toggling reconciled transactions', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Filter Toggle',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    for (const note of ['filter-match', 'filter-other']) {
+      await accountPage.createSingleTransaction({
+        payee: '',
+        notes: note,
+        debit: '10.00',
+      });
+    }
+
+    await accountPage.filterByNote('filter-match');
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: /(Hide|Show) reconciled transactions/ })
+      .click();
+
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-match' }),
+    ).toBeVisible();
+    await expect(
+      accountPage.transactionTableRow.filter({ hasText: 'filter-other' }),
+    ).not.toBeVisible();
+  });
+
+  test('opens the other side of a transfer from its arrow', async () => {
+    accountPage = await navigation.goToAccountPage('Bank of America');
+    await accountPage.createSingleTransaction({
+      payee: 'Ally Savings',
+      notes: 'Transfer to point out',
+      debit: '12.34',
+    });
+
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'Transfer to point out' })
+      .getByTestId('transfer-icon')
+      .click();
+
+    await expect(accountPage.accountName).toHaveText('Ally Savings');
+    const otherSide = accountPage.transactionTableRow.filter({
+      hasText: 'Transfer to point out',
+    });
+    await expect(otherSide).toHaveAttribute('data-pulse', 'true');
+    await expect(otherSide).toBeInViewport();
+    // The row is pointed out for a while only
+    await expect(otherSide).not.toHaveAttribute('data-pulse');
+  });
+
+  test('opens the other side of a transfer older than the first loaded page', async () => {
+    await page.evaluate(async () => {
+      const $send = (
+        window as unknown as {
+          $send: <T>(type: string, args?: unknown) => Promise<T>;
+        }
+      ).$send;
+      const accounts =
+        await $send<{ id: string; name: string }[]>('accounts-get');
+      const payees =
+        await $send<{ id: string; transfer_acct: string | null }[]>(
+          'payees-get',
+        );
+      const bankOfAmerica = accounts.find(a => a.name === 'Bank of America');
+      const allySavings = accounts.find(a => a.name === 'Ally Savings');
+      const allySavingsPayee = payees.find(
+        p => p.transfer_acct === allySavings?.id,
+      );
+      if (!bankOfAmerica || !allySavings || !allySavingsPayee) {
+        throw new Error('Missing test accounts');
+      }
+
+      // More newer transactions in Ally Savings than an account loads at
+      // first, so the other side of the transfer is only on a later page
+      await $send('transactions-batch-update', {
+        added: Array.from({ length: 200 }, () => ({
+          id: crypto.randomUUID(),
+          account: allySavings.id,
+          date: '2001-01-01',
+          amount: -100,
+        })),
+      });
+      await $send('transaction-add', {
+        id: crypto.randomUUID(),
+        account: bankOfAmerica.id,
+        date: '2000-01-01',
+        amount: -1234,
+        payee: allySavingsPayee.id,
+        notes: 'Old transfer to point out',
+      });
+    });
+
+    accountPage = await navigation.goToAccountPage('Bank of America');
+    await page.getByPlaceholder('Search').fill('Old transfer to point out');
+    await accountPage.transactionTableRow
+      .filter({ hasText: 'Old transfer to point out' })
+      .getByTestId('transfer-icon')
+      .click();
+
+    await expect(accountPage.accountName).toHaveText('Ally Savings');
+    const otherSide = accountPage.transactionTableRow.filter({
+      hasText: 'Old transfer to point out',
+    });
+    await expect(otherSide).toHaveAttribute('data-pulse', 'true');
+    await expect(otherSide).toBeInViewport();
+  });
+
   test.describe('On Budget Accounts', () => {
     // Reset filters
     test.afterEach(async () => {
@@ -372,6 +520,55 @@ test.describe('Accounts', () => {
       await accountPage.page.getByRole('button', { name: 'Close' }).click();
 
       await expect(importButton).not.toBeVisible();
+    });
+
+    test('imports a new transaction when an unchecked match has the same amount', async () => {
+      async function openCsv(content: string) {
+        const fileChooserPromise = page.waitForEvent('filechooser');
+        await accountPage.page.getByRole('button', { name: 'Import' }).click();
+        const fileChooser = await fileChooserPromise;
+        await fileChooser.setFiles({
+          name: 'same-amount.csv',
+          mimeType: 'text/csv',
+          buffer: Buffer.from(content),
+        });
+        return page.getByRole('dialog');
+      }
+
+      let dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n2024-08-02,Netflix,,-8.99\n',
+      );
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      // Netflix matches the existing transaction; Corner Coffee is new.
+      dialog = await openCsv(
+        'Date,Payee,Notes,Amount\n' +
+          '2024-08-02,Netflix,Subscription,-8.99\n' +
+          '2024-07-31,Corner Coffee,Latte,-8.99\n',
+      );
+      await expect(dialog.getByText('Corner Coffee')).toBeVisible();
+
+      // Uncheck the Netflix row: merge -> import as new -> skip
+      const netflixCheckbox = dialog
+        .getByTestId('row')
+        .filter({ hasText: 'Netflix' })
+        .getByRole('checkbox');
+      await netflixCheckbox.click();
+      await netflixCheckbox.click();
+      await dialog
+        .getByRole('button', { name: 'Import 1 transactions' })
+        .click();
+      await expect(dialog).not.toBeVisible();
+
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Corner Coffee' }),
+      ).toBeVisible();
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Subscription' }),
+      ).toHaveCount(0);
     });
 
     test('import notes checkbox is not shown for CSV files', async () => {

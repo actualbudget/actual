@@ -6,19 +6,19 @@ We have all been there. We purchased something that looked great at the time, bu
 
 You can see from this view, I've bought a pair of sandals from Amazon that I was really excited about...Until they didn't fit.
 
-![](/img/returns-reimbursements/returns-2.webp)
+<img width="860" alt="The Amazon purchase of sandals in the Clothing category in the account register" src="/img/budgeting/returns-and-reimbursements-purchase@2x.webp" />
 
 From the Budget screen, you can see I've spent every last dollar of my **clothing** category for the month.
 
-![](/img/returns-reimbursements/returns-1.webp)
+<img width="724" alt="The budget with a Clothing balance of 0.00" src="/img/budgeting/returns-and-reimbursements-budget-spent@2x.webp" />
 
 I didn't like those sandals as much as I thought I did. They made my feet look big. So I decided to return them a few days later. To enter the return, I fill out a nearly identical transaction in the account that will be credited. In my case, I had Amazon put the money back on my Debit card. Instead of putting the return amount in the **payment** column, I've entered the amount in the **Deposit** column. I also made sure that I chose **Clothing** as my category.
 
-![](/img/returns-reimbursements/returns-3.webp)
+<img width="860" alt="The return entered as a 32.00 deposit from Amazon in the Clothing category" src="/img/budgeting/returns-and-reimbursements-deposit@2x.webp" />
 
 Now when I check my budget, I have 32 dollars available to spend on clothing for the month.
 
-![](/img/returns-reimbursements/returns-4.webp)
+<img width="724" alt="The budget with 32.00 available in Clothing again" src="/img/budgeting/returns-and-reimbursements-budget-available@2x.webp" />
 
 ## Reimbursements
 
@@ -44,13 +44,13 @@ You don't have a zero based budget. This is essentially debt spending since you 
 
 ### Cover the spending by end-of-month or rollover
 
-Ultimately this is a personal decision. If you are capable, there is less short term risk if the category is pre-funded. If you choose to let the category remain negative and fill it up when you are reimbursed, don't forget to toggle the "Rollover Spending" option on the category just in case you aren't reimbursed in the same month. If you already carry a credit card balance month-to-month, cover the reimbursable overspending by the credit card category so when you pay the credit card bill it's a little easier to manage.
+Ultimately this is a personal decision. If you are capable, there is less short term risk if the category is pre-funded. If you choose to let the category remain negative and fill it up when you are reimbursed, don't forget to toggle the "Rollover overspending" option on the category just in case you aren't reimbursed in the same month. If you already carry a credit card balance month-to-month, cover the reimbursable overspending by the credit card category so when you pay the credit card bill it's a little easier to manage.
 
-![](/img/returns-reimbursements/reimbursement-1.webp)
+<img width="724" alt="The balance menu for the overspent Business category with Rollover overspending highlighted" src="/img/budgeting/returns-and-reimbursements-rollover-menu@2x.webp" />
 
 Once enabled, a little arrow will be shown next to each row's 'Balance' sum in the Budget view. It signals that over spending will be carried over from month to month. Check out the [overspending](./index.md#overspending) section in "How Budgeting Works" for an explanation of this feature.
 
-![](/img/returns-reimbursements/reimbursement-2.webp)
+<img width="724" alt="The rollover arrow next to the negative Business balance" src="/img/budgeting/returns-and-reimbursements-rollover-arrow@2x.webp" />
 
 ### Adding the reimbursement transaction
 

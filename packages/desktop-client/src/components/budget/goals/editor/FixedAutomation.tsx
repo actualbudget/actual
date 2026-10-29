@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -13,7 +13,6 @@ import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
-import { useFormat } from '#hooks/useFormat';
 
 type FixedAutomationProps = {
   template: PeriodicTemplate;
@@ -33,20 +32,18 @@ export const FixedAutomation = ({
     ['month', t('months')],
     ['year', t('years')],
   ];
-  const format = useFormat();
 
-  const amount = amountToInteger(
-    template.amount,
-    format.currency.decimalPlaces,
-  );
+  const amount = amountToInteger(template.amount);
   const periodUnit = template.period?.period ?? 'month';
   const periodAmount = template.period?.amount ?? 1;
   const [rawPeriodAmount, setRawPeriodAmount] = useState(String(periodAmount));
   // Resync when a different automation row is selected (the component
   // instance is reused across rows).
-  useEffect(() => {
+  const [prevPeriodAmount, setPrevPeriodAmount] = useState(periodAmount);
+  if (periodAmount !== prevPeriodAmount) {
+    setPrevPeriodAmount(periodAmount);
     setRawPeriodAmount(String(periodAmount));
-  }, [periodAmount]);
+  }
 
   const onPeriodAmountChange = (value: string) => {
     setRawPeriodAmount(value);
@@ -86,7 +83,7 @@ export const FixedAutomation = ({
             dispatch(
               updateTemplate({
                 type: 'periodic',
-                amount: integerToAmount(value, format.currency.decimalPlaces),
+                amount: integerToAmount(value),
               }),
             )
           }

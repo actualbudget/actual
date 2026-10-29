@@ -7,6 +7,8 @@ import {
   calculateTimeRange,
   getFullFutureRange,
   getLatestRange,
+  validateEnd,
+  validateStart,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -96,29 +98,29 @@ describe('getLatestRange', () => {
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
 describe('calculateSpendingReportTimeRange', () => {
-  it('preserves the saved compare month for live average reports', () => {
+  it('slides live average reports to the current month', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',
       isLive: true,
       mode: 'average',
     });
 
-    expect(compare).toBe('2016-12');
-    expect(compareTo).toBe('2016-12');
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2017-01');
   });
 
-  it('preserves the saved compare month for live budget reports', () => {
+  it('slides live budget reports to the current month', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',
       isLive: true,
       mode: 'budget',
     });
 
-    expect(compare).toBe('2016-12');
-    expect(compareTo).toBe('2016-12');
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2017-01');
   });
 
-  it('preserves the saved compare months for live single month reports', () => {
+  it('slides live single month reports to the current month, preserving the gap', () => {
     const [compare, compareTo] = calculateSpendingReportTimeRange({
       compare: '2016-12',
       compareTo: '2016-11',
@@ -126,8 +128,65 @@ describe('calculateSpendingReportTimeRange', () => {
       mode: 'single-month',
     });
 
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2016-12');
+  });
+
+  it('preserves a wider gap when sliding live single month reports', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-12',
+      compareTo: '2016-09',
+      isLive: true,
+      mode: 'single-month',
+    });
+
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2016-10'); // gap of 3 preserved
+  });
+
+  it('defaults a missing compareTo to the month before compare', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-01',
+      isLive: true,
+      mode: 'single-month',
+    });
+
+    expect(compare).toBe('2017-01');
+    expect(compareTo).toBe('2016-12');
+  });
+
+  it('defaults a missing compareTo for static single month reports', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-01',
+      isLive: false,
+      mode: 'single-month',
+    });
+
+    expect(compare).toBe('2016-01');
+    expect(compareTo).toBe('2015-12');
+  });
+
+  it('preserves the saved compare months for static single month reports', () => {
+    const [compare, compareTo] = calculateSpendingReportTimeRange({
+      compare: '2016-12',
+      compareTo: '2016-11',
+      isLive: false,
+      mode: 'single-month',
+    });
+
     expect(compare).toBe('2016-12');
     expect(compareTo).toBe('2016-11');
+  });
+
+  it('preserves the saved compare month for static budget reports', () => {
+    const [compare] = calculateSpendingReportTimeRange({
+      compare: '2016-12',
+      compareTo: '2016-12',
+      isLive: false,
+      mode: 'budget',
+    });
+
+    expect(compare).toBe('2016-12');
   });
 
   it('defaults live average reports to the current month without a saved compare month', () => {
@@ -182,4 +241,69 @@ describe('boundMonthRange', () => {
       ['2026-09', '2026-09'],
     );
   });
+});
+
+describe('Quarterly range validation', () => {
+  it('starts a range on the first day of the chosen quarter', () => {
+    expect(
+      validateStart(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-04',
+        '2016-12-31',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-04-01', '2016-12-31', 'static']);
+  });
+
+  it('ends a range on the last day of the chosen quarter', () => {
+    expect(
+      validateEnd(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-01-01',
+        '2016-04',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-01-01', '2016-06-30', 'static']);
+  });
+
+  it('keeps From when To moves before it on whole-quarter bounds', () => {
+    expect(
+      validateStart(
+        '2010-01-01',
+        '2016-12-31',
+        '2014-07',
+        '2014-06-30',
+        'Quarterly',
+      ),
+    ).toEqual(['2014-07-01', '2015-06-30', 'static']);
+  });
+
+  it('keeps To when From moves after it on whole-quarter bounds', () => {
+    expect(
+      validateEnd(
+        '2010-01-01',
+        '2016-12-31',
+        '2014-07-01',
+        '2014-04',
+        'Quarterly',
+      ),
+    ).toEqual(['2013-07-01', '2014-06-30', 'static']);
+  });
+});
+
+describe('same-period range validation', () => {
+  it.each([
+    ['Monthly', '2016-04-01', '2016-04', '2016-04-30'],
+    ['Quarterly', '2016-04-01', '2016-04', '2016-06-30'],
+    ['Yearly', '2016-01-01', '2016', '2016-12-31'],
+  ])(
+    'keeps From when %s To is the same period',
+    (interval, start, end, expectedEnd) => {
+      expect(
+        validateEnd('2015-01-01', '2016-12-31', start, end, interval),
+      ).toEqual([start, expectedEnd, 'static']);
+    },
+  );
 });

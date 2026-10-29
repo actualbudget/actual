@@ -48,8 +48,8 @@ vi.mock('../../app-gocardless/util/handle-error', () => ({
     },
 }));
 
-// Mock fetch globally (the service is stubbed below, this just guards stray calls)
-vi.stubGlobal('fetch', vi.fn());
+// Mock provider requests (the service is stubbed below, this just guards stray calls)
+vi.mock('undici', () => ({ fetch: vi.fn() }));
 
 const { handlers } = await import('../app-enablebanking');
 const { enableBankingService } =

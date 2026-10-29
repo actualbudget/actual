@@ -41,6 +41,13 @@ export function startBrowserBackend(
     forceDirectWorker,
   } = opts;
 
+  // Capacitor serves the app from a custom URL scheme, which WebKit never
+  // treats as cross-origin isolated, so SharedArrayBuffer is unavailable in
+  // the native mobile app. Always run it in the fallback mode there.
+  if ('Capacitor' in window) {
+    localStorage.setItem('SharedArrayBufferOverride', 'true');
+  }
+
   // Use SharedWorker as a coordinator for multi-tab, multi-budget support.
   // Each budget gets its own leader tab running a dedicated Worker. All other
   // tabs on the same budget are followers — their messages are routed through

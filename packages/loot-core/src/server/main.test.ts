@@ -281,6 +281,77 @@ describe('Budget', () => {
       changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
     ).toMatchSnapshot();
   });
+
+  test('resetting the budget cache computes each cell at most once', async () => {
+    const spreadsheet = await sheet.loadSpreadsheet(db);
+
+    let catId;
+    await runMutator(async () => {
+      await db.insertCategoryGroup({
+        id: 'incomeGroup',
+        name: 'incomeGroup',
+        is_income: 1,
+      });
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      catId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
+      await db.insertCategory({ name: 'bar', cat_group: 'group1' });
+    });
+
+    // Creates the budget months, which is what populates `createdMonths`
+    await runHandler(handlers['get-budget-bounds']);
+
+    db.runQuery("INSERT INTO accounts (id, name) VALUES ('one', 'boa')");
+    await runHandler(handlers['transaction-add'], {
+      id: uuidv4(),
+      date: '2017-01-05',
+      amount: -3400,
+      account: 'one',
+      category: catId,
+    });
+    await runHandler(handlers['budget/budget-amount'], {
+      month: '2017-01',
+      category: catId,
+      amount: 5000,
+    });
+
+    await sheet.waitOnSpreadsheet();
+
+    const sheetName = monthUtils.sheetForMonth('2017-01');
+    const valuesOf = () =>
+      new Map(
+        [...spreadsheet.getNodes()].map(([name, node]) => [name, node.value]),
+      );
+    const before = valuesOf();
+    expect(before.get(`${sheetName}!sum-amount-${catId}`)).toBe(-3400);
+
+    let computed = [];
+    const remove = spreadsheet.addEventListener('change', ({ names }) => {
+      computed = computed.concat(names);
+    });
+    await runHandler(handlers['reset-budget-cache']);
+    remove();
+
+    // Resetting the cache recomputes values, it doesn't change them
+    expect(valuesOf()).toEqual(before);
+
+    // Spend totals are seeded from a single grouped query rather than each
+    // running its own `SELECT SUM(amount)`
+    expect(computed.filter(name => name.includes('!sum-amount-'))).toEqual([]);
+
+    // Everything downstream of the budget inputs used to be computed twice:
+    // once when `loadUserBudgets` closed its own transaction, and again for
+    // `recomputeAll`
+    const seen = new Set();
+    const computedTwice = computed.filter(name => {
+      const duplicate = seen.has(name);
+      seen.add(name);
+      return duplicate;
+    });
+    expect(computedTwice).toEqual([]);
+
+    // Everything else really was recomputed
+    expect(computed).toContain(`${sheetName}!to-budget`);
+  });
 });
 
 describe('Categories', () => {

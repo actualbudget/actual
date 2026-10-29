@@ -6,7 +6,7 @@ import { t } from 'i18next';
 import { accountGroupQueries } from './account-groups';
 import { accountQueries } from './accounts';
 import { resetSync, sync } from './app/appSlice';
-import { categoryQueries } from './budget';
+import { budgetBoundsQueries, categoryQueries } from './budget';
 import {
   closeAndDownloadBudget,
   uploadBudget,
@@ -17,7 +17,18 @@ import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
+import { dashboardQueries, reportQueries } from './reports';
 import { signOut } from './users/usersSlice';
+
+// Tables whose changes can move the budget's month bounds. `preferences`
+// holds the synced budget type.
+const BUDGET_BOUNDS_TABLES = [
+  'zero_budgets',
+  'reflect_budgets',
+  'transactions',
+  'categories',
+  'preferences',
+];
 
 // Notifications for sync events that can fire during budget load
 const syncNotifications: Partial<
@@ -107,6 +118,15 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         void store.dispatch(loadPrefs());
       }
 
+      // Budget amounts, transactions, deleted categories and the budget type
+      // all change which months are available. Covers local edits, undo and
+      // incoming sync.
+      if (tables.some(table => BUDGET_BOUNDS_TABLES.includes(table))) {
+        void queryClient.invalidateQueries({
+          queryKey: budgetBoundsQueries.all(),
+        });
+      }
+
       if (
         tables.includes('categories') ||
         tables.includes('category_groups') ||
@@ -137,6 +157,18 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
       if (tables.includes('account_groups')) {
         void queryClient.invalidateQueries({
           queryKey: accountGroupQueries.lists(),
+        });
+      }
+
+      if (tables.includes('dashboard') || tables.includes('dashboard_pages')) {
+        void queryClient.invalidateQueries({
+          queryKey: dashboardQueries.lists(),
+        });
+      }
+
+      if (tables.includes('custom_reports')) {
+        void queryClient.invalidateQueries({
+          queryKey: reportQueries.lists(),
         });
       }
     } else if (event.type === 'error') {
@@ -301,7 +333,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           // the server does not match the local one. This can mean a
           // few things depending on the state, and we try to show an
           // appropriate message and call to action to fix it.
-          const { cloudFileId } = store.getState().prefs.local;
+          const { cloudFileId, id: localId } = store.getState().prefs.local;
           if (!cloudFileId) {
             console.error(
               'Received file-has-reset or file-has-new-key error but no cloudFileId in prefs',
@@ -325,7 +357,9 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
             button: {
               title: t('Revert'),
               action: () => {
-                void store.dispatch(closeAndDownloadBudget({ cloudFileId }));
+                void store.dispatch(
+                  closeAndDownloadBudget({ cloudFileId, localId }),
+                );
               },
             },
           };
