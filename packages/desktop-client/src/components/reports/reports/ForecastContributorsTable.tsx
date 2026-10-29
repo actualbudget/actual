@@ -79,7 +79,9 @@ export function ForecastContributorsTable({
                 <Button
                   variant="bare"
                   style={{
-                    color: theme.pageTextLink,
+                    fontWeight: 500,
+                    textDecoration: 'underline',
+                    textUnderlineOffset: 2,
                     textAlign: 'left',
                     whiteSpace: 'normal',
                     minHeight: isNarrowWidth ? 40 : undefined,

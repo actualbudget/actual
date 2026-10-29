@@ -768,15 +768,17 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
                   </>
                 ) : null}
               </div>
-              {!isTrackingBudgetForecast && normalizedForecastData && (
-                <BalanceForecastContributors
-                  forecast={normalizedForecastData}
-                  start={chartRange.start}
-                  end={chartRange.end}
-                  granularity={granularity}
-                  isUpdating={isUpdatingForecast}
-                />
-              )}
+              {!isTrackingBudgetForecast &&
+                !activeSeries &&
+                normalizedForecastData && (
+                  <BalanceForecastContributors
+                    forecast={normalizedForecastData}
+                    start={chartRange.start}
+                    end={chartRange.end}
+                    granularity={granularity}
+                    isUpdating={isUpdatingForecast}
+                  />
+                )}
             </>
           ) : (
             <div

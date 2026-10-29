@@ -177,6 +177,7 @@ test.describe('Reports', () => {
         ).toBeVisible();
       }
 
+      await expect(page.getByTestId('forecast-contributors')).toHaveCount(0);
       await selectAccounts(1, ['Capital One Checking']);
       await page.getByRole('button', { name: 'Add line', exact: true }).click();
       await page
