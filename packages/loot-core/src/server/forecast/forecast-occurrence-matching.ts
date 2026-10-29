@@ -1,4 +1,7 @@
-import { getScheduleOccurrenceMatchStartDate } from '#shared/schedules';
+import {
+  getOccurrencesBetween,
+  getScheduleOccurrenceMatchStartDate,
+} from '#shared/schedules';
 import type { ScheduleOccurrenceMatchInput } from '#shared/schedules';
 import type { TransactionEntity } from '#types/models';
 
@@ -67,14 +70,30 @@ export function matchForecastOccurrences({
   today: string;
 }): Set<string> {
   const dates = [...new Set(occurrenceDates)].sort();
+  const firstDate = dates[0];
+  const dateCondition = schedule._conditions?.find(
+    condition => condition.field === 'date',
+  );
+  // A nearby earlier occurrence may already have consumed an early payment
+  // before the cursor advanced. Reserve it before matching the forecast dates.
+  const previousDates =
+    firstDate && dateCondition
+      ? getOccurrencesBetween(
+          dateCondition,
+          getScheduleOccurrenceMatchStartDate(schedule, firstDate),
+          firstDate,
+        )
+      : [];
+  const matchingDates = [...new Set([...previousDates, ...dates])].sort();
   const payments = getLogicalPayments(postedTransactions, scheduleId);
   const matchedDates = new Set<string>();
   const usedPayments = new Set<number>();
 
   function matchDates(
     matches: (paymentDate: string, dueDate: string) => boolean,
+    candidates = dates,
   ) {
-    for (const dueDate of dates) {
+    for (const dueDate of candidates) {
       if (matchedDates.has(dueDate)) {
         continue;
       }
@@ -91,14 +110,19 @@ export function matchForecastOccurrences({
 
   // Reserve exact matches, including future occurrences, before considering
   // overlapping early windows or allocating a payment to an older occurrence.
-  matchDates((paymentDate, dueDate) => paymentDate === dueDate);
+  matchDates((paymentDate, dueDate) => paymentDate === dueDate, matchingDates);
   matchDates(
     (paymentDate, dueDate) =>
       paymentDate < dueDate &&
       paymentDate >= getScheduleOccurrenceMatchStartDate(schedule, dueDate),
+    matchingDates,
   );
   matchDates(
-    (paymentDate, dueDate) => dueDate < today && paymentDate > dueDate,
+    (paymentDate, dueDate) =>
+      dueDate < today && paymentDate > dueDate && paymentDate <= today,
   );
+  for (const previousDate of previousDates) {
+    matchedDates.delete(previousDate);
+  }
   return matchedDates;
 }

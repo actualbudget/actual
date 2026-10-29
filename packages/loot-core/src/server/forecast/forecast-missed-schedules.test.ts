@@ -5,6 +5,7 @@ import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import {
   createSchedule,
+  setNextDate,
   skipNextDate,
   updateSchedule,
 } from '#server/schedules/app';
@@ -16,6 +17,7 @@ import type {
 } from '#types/models/forecast';
 
 import { generateForecast } from './app';
+import { getNormalizedSchedules } from './forecast-schedules';
 
 const { emptyDatabase } = global as typeof globalThis & {
   emptyDatabase: () => () => Promise<void>;
@@ -79,6 +81,54 @@ beforeEach(async () => {
 afterEach(() => MockDate.reset());
 
 describe('missed schedule forecast policies', () => {
+  it('keeps an unpaid daily occurrence after an early payment advances the cursor', async () => {
+    const schedule = await createSchedule({
+      conditions: [
+        { op: 'is', field: 'account', value: 'checking' },
+        { op: 'is', field: 'amount', value: -30_000 },
+        {
+          op: 'isapprox',
+          field: 'date',
+          value: { frequency: 'daily', start: '2024-03-09' },
+        },
+      ],
+    });
+    const cursor = await db.first<Pick<db.DbScheduleNextDate, 'id'>>(
+      'SELECT id FROM schedules_next_date WHERE schedule_id = ?',
+      [schedule],
+    );
+    if (!cursor) {
+      throw new Error('Missing schedule cursor');
+    }
+    await db.update('schedules_next_date', {
+      id: cursor.id,
+      base_next_date: 20240309,
+      local_next_date: 20240309,
+    });
+    await db.insertTransaction({
+      id: 'early-daily-payment',
+      account: 'checking',
+      amount: -30_000,
+      date: '2024-03-08',
+      schedule,
+    });
+    await setNextDate({ id: schedule });
+    expect(
+      (await getNormalizedSchedules()).find(item => item.id === schedule)
+        ?.next_date,
+    ).toBe('2024-03-10');
+
+    const result = await generateForecast({
+      startDate: '2024-03-10',
+      endDate: '2024-03-10',
+      missedSchedules: 'payments',
+    });
+    expect(result.dataPoints.at(-1)?.transactions).toMatchObject([
+      { scheduleId: schedule, originalDueDate: '2024-03-10' },
+    ]);
+    expect(result.dataPoints.at(-1)?.balance).toBe(40_000);
+  });
+
   const policies: Array<
     [ForecastMissedSchedules, ForecastMissedOccurrences, number, number]
   > = [

@@ -10,6 +10,42 @@ const defaults = {
 };
 
 describe('forecast occurrence matching', () => {
+  it('does not reuse an early payment consumed before the schedule cursor advanced', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        schedule: {
+          posts_transaction: false,
+          _conditions: [
+            {
+              op: 'isapprox',
+              field: 'date',
+              value: { frequency: 'daily', start: '2024-01-02' },
+            },
+          ],
+        },
+        occurrenceDates: ['2024-01-03', '2024-01-04'],
+        today: '2024-01-03',
+        postedTransactions: [
+          { id: 'early', date: '2024-01-01', schedule: 'rent' },
+        ],
+      }),
+    ]).toEqual([]);
+  });
+
+  it('keeps future exact matches without using future payments for overdue occurrences', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        occurrenceDates: ['2024-01-05', '2024-03-15'],
+        postedTransactions: [
+          { id: 'future-exact', date: '2024-03-15', schedule: 'rent' },
+          { id: 'future-late', date: '2024-03-12', schedule: 'rent' },
+        ],
+      }),
+    ]).toEqual(['2024-03-15']);
+  });
+
   it('reserves exact matches before applying late payments oldest-first', () => {
     const matched = matchForecastOccurrences({
       ...defaults,
