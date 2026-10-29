@@ -19,6 +19,7 @@ import type {
 import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
@@ -151,6 +152,10 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     useState<ForecastMissedOccurrences>(
       widget?.meta?.missedOccurrences ?? 'one',
     );
+  const [occurrenceMatching, setOccurrenceMatching] =
+    useState<ForecastOccurrenceMatching>(
+      widget?.meta?.occurrenceMatching ?? 'recorded',
+    );
 
   useEffect(() => {
     if (budgetType !== 'tracking' && source === 'tracking-budget') {
@@ -189,6 +194,9 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
     source,
     missedSchedules: isTrackingBudgetForecast ? undefined : missedSchedules,
     missedOccurrences: isTrackingBudgetForecast ? undefined : missedOccurrences,
+    occurrenceMatching: isTrackingBudgetForecast
+      ? undefined
+      : occurrenceMatching,
     enabled: hasMonthOptions,
   });
   const forecastData = forecasts?.[0]?.forecast;
@@ -220,6 +228,7 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         source,
         missedSchedules,
         missedOccurrences,
+        occurrenceMatching,
         ...(series
           ? {
               series: series.map((line, index) => ({
@@ -536,8 +545,10 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
           <BalanceForecastMissedSchedules
             missedSchedules={missedSchedules}
             missedOccurrences={missedOccurrences}
+            occurrenceMatching={occurrenceMatching}
             onSchedulesChange={setMissedSchedules}
             onOccurrencesChange={setMissedOccurrences}
+            onMatchingChange={setOccurrenceMatching}
           />
         )}
         {errorMessage ? (

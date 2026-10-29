@@ -5,6 +5,7 @@ import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
@@ -21,6 +22,7 @@ type UseBalanceForecastParams = {
   source?: ForecastSource;
   missedSchedules?: ForecastMissedSchedules;
   missedOccurrences?: ForecastMissedOccurrences;
+  occurrenceMatching?: ForecastOccurrenceMatching;
   enabled?: boolean;
 };
 
@@ -34,6 +36,7 @@ export function buildBalanceForecastRequest({
   source = 'schedules',
   missedSchedules,
   missedOccurrences,
+  occurrenceMatching,
 }: UseBalanceForecastParams) {
   return Object.fromEntries(
     Object.entries({
@@ -46,6 +49,7 @@ export function buildBalanceForecastRequest({
       source,
       missedSchedules,
       missedOccurrences,
+      occurrenceMatching,
     }).filter(([, value]) => value !== undefined),
   );
 }
@@ -96,6 +100,7 @@ export function useBalanceForecastSeries({
         'transactions',
         'schedules',
         'schedules_next_date',
+        'schedule_occurrences',
         'rules',
         'accounts',
         'payees',
@@ -119,6 +124,22 @@ export function useBalanceForecastSeries({
     }
   });
   useEffect(() => listen('sync-event', onSyncEvent), []);
+  const onUndo = useEffectEvent((event: ServerEvents['undo-event']) => {
+    if (
+      enabled &&
+      event.tables.some(table =>
+        [
+          'transactions',
+          'schedule_occurrences',
+          'schedules',
+          'schedules_next_date',
+        ].includes(table),
+      )
+    ) {
+      void result.refetch();
+    }
+  });
+  useEffect(() => listen('undo-event', onUndo), []);
 
   return result;
 }

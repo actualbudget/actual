@@ -4,6 +4,7 @@ import { send } from '@actual-app/core/platform/client/connection';
 import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastResult,
   ForecastSeries,
 } from '@actual-app/core/types/models/forecast';
@@ -103,26 +104,32 @@ describe('Balance Forecast query', () => {
     const { result, rerender } = renderHook(
       ({
         missedOccurrences,
+        occurrenceMatching,
       }: {
         missedOccurrences: ForecastMissedOccurrences;
+        occurrenceMatching: ForecastOccurrenceMatching;
       }) => {
         const { isSuccess, isFetching } = useBalanceForecastSeries({
           ...range,
           series,
           missedSchedules: 'payments',
           missedOccurrences,
+          occurrenceMatching,
         });
         return { isSuccess, isFetching };
       },
       {
         wrapper: createWrapper(),
-        initialProps: { missedOccurrences: 'one' },
+        initialProps: {
+          missedOccurrences: 'one',
+          occurrenceMatching: 'recorded',
+        },
       },
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(send).toHaveBeenCalledTimes(2);
 
-    rerender({ missedOccurrences: 'all' });
+    rerender({ missedOccurrences: 'all', occurrenceMatching: 'recorded' });
     await waitFor(() => expect(send).toHaveBeenCalledTimes(4));
     await waitFor(() => expect(result.current.isFetching).toBe(false));
     act(() => {
@@ -131,6 +138,16 @@ describe('Balance Forecast query', () => {
       }
     });
     await waitFor(() => expect(send).toHaveBeenCalledTimes(6));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    act(() => {
+      for (const listener of listeners) {
+        listener({ type: 'applied', tables: ['schedule_occurrences'] });
+      }
+    });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(8));
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    rerender({ missedOccurrences: 'all', occurrenceMatching: 'inferred' });
+    await waitFor(() => expect(send).toHaveBeenCalledTimes(10));
     for (const accountId of ['checking', 'savings']) {
       expect(send).toHaveBeenCalledWith(
         'forecast/generate',
@@ -138,6 +155,7 @@ describe('Balance Forecast query', () => {
           accountIds: [accountId],
           missedSchedules: 'payments',
           missedOccurrences: 'all',
+          occurrenceMatching: 'inferred',
         }),
       );
     }

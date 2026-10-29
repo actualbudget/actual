@@ -115,6 +115,9 @@ export function BalanceForecastCard({
     missedOccurrences: isTrackingBudgetForecast
       ? undefined
       : meta?.missedOccurrences,
+    occurrenceMatching: isTrackingBudgetForecast
+      ? undefined
+      : meta?.occurrenceMatching,
   });
   const forecastData = forecasts?.[0]?.forecast;
   const errorMessage =

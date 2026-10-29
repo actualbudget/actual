@@ -1,6 +1,7 @@
 import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastSeries,
   ForecastSource,
 } from './forecast';
@@ -501,5 +502,6 @@ export type BalanceForecastWidget = AbstractWidget<
     series?: ForecastSeries[];
     missedSchedules?: ForecastMissedSchedules;
     missedOccurrences?: ForecastMissedOccurrences;
+    occurrenceMatching?: ForecastOccurrenceMatching;
   } | null
 >;

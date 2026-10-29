@@ -3,4 +3,4 @@ category: Enhancements
 authors: [samaluk]
 ---
 
-Add options to include missed payments and income in the experimental Balance Forecast report.
+Add options to compare missed schedules and recorded payment occurrences in the experimental Balance Forecast report.
