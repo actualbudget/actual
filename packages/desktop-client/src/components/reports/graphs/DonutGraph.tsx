@@ -25,10 +25,10 @@ import { useCategories } from '#hooks/useCategories';
 import { useNavigate } from '#hooks/useNavigate';
 
 import { adjustTextSize } from './adjustTextSize';
-import { DonutActiveShapeDesktop } from './DonutActiveShapeDesktop';
-import { DonutActiveShapeMobile } from './DonutActiveShapeMobile';
-import type { DonutActiveShapeProps } from './donutActiveShapeProps';
 import { buildColorMap } from './donutColors';
+import { DonutHighlightDesktop } from './DonutHighlightDesktop';
+import { DonutHighlightMobile } from './DonutHighlightMobile';
+import type { DonutHighlightProps } from './donutHighlightProps';
 import { DonutSector } from './DonutSector';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
@@ -241,7 +241,30 @@ export function DonutGraph({
         const { chartInnerRadius, chartMidRadius, chartOuterRadius, compact } =
           getDonutDimensions(width, height, isCategoryGroup);
 
-        const showActiveShape = width >= 220 && height >= 130;
+        const showHighlight = width >= 220 && height >= 130;
+        // Draws the selected sector's highlight, if the chart has room for one
+        const highlightFor = (
+          sector: PieSectorShapeProps,
+          fill: string,
+          expandInward: boolean,
+        ) => {
+          if (!showHighlight) {
+            return undefined;
+          }
+          const Highlight = compact
+            ? DonutHighlightMobile
+            : DonutHighlightDesktop;
+          return () => (
+            <Highlight
+              {...(sector as unknown as DonutHighlightProps)}
+              fill={fill}
+              expandInward={expandInward}
+              chartInnerRadius={chartInnerRadius}
+              chartMidRadius={chartMidRadius}
+              chartOuterRadius={chartOuterRadius}
+            />
+          );
+        };
 
         // ---------------------------------------------------------------
         // Two-ring concentric donut (CategoryGroup mode)
@@ -281,34 +304,12 @@ export function DonutGraph({
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
                         props.fill;
-                      const renderHighlight = showActiveShape
-                        ? () =>
-                            compact ? (
-                              <DonutActiveShapeMobile
-                                {...(props as unknown as DonutActiveShapeProps)}
-                                fill={fill}
-                                expandInward
-                                chartInnerRadius={chartInnerRadius}
-                                chartMidRadius={chartMidRadius}
-                                chartOuterRadius={chartOuterRadius}
-                              />
-                            ) : (
-                              <DonutActiveShapeDesktop
-                                {...(props as unknown as DonutActiveShapeProps)}
-                                fill={fill}
-                                expandInward
-                                chartInnerRadius={chartInnerRadius}
-                                chartMidRadius={chartMidRadius}
-                                chartOuterRadius={chartOuterRadius}
-                              />
-                            )
-                        : undefined;
                       return (
                         <DonutSector
                           selectionKey={`group-${index}`}
                           sector={props}
                           fill={fill}
-                          renderHighlight={renderHighlight}
+                          renderHighlight={highlightFor(props, fill, true)}
                         />
                       );
                     }}
@@ -317,7 +318,7 @@ export function DonutGraph({
                         isOpeningClick(
                           `group-${index}`,
                           event,
-                          showActiveShape,
+                          showHighlight,
                         ) &&
                         ((compact && showTooltip) || !compact)
                       ) {
@@ -361,35 +362,13 @@ export function DonutGraph({
                       const fill =
                         colorMap.get(item?.id ?? item?.name ?? '') ??
                         props.fill;
-                      const renderHighlight = showActiveShape
-                        ? () =>
-                            compact ? (
-                              <DonutActiveShapeMobile
-                                {...(props as unknown as DonutActiveShapeProps)}
-                                fill={fill}
-                                expandInward={false}
-                                chartInnerRadius={chartInnerRadius}
-                                chartMidRadius={chartMidRadius}
-                                chartOuterRadius={chartOuterRadius}
-                              />
-                            ) : (
-                              <DonutActiveShapeDesktop
-                                {...(props as unknown as DonutActiveShapeProps)}
-                                fill={fill}
-                                expandInward={false}
-                                chartInnerRadius={chartInnerRadius}
-                                chartMidRadius={chartMidRadius}
-                                chartOuterRadius={chartOuterRadius}
-                              />
-                            )
-                        : undefined;
                       return (
                         <DonutSector
                           selectionKey={`category-${index}`}
                           isDefault={index === defaultCategoryIndex}
                           sector={props}
                           fill={fill}
-                          renderHighlight={renderHighlight}
+                          renderHighlight={highlightFor(props, fill, false)}
                         />
                       );
                     }}
@@ -398,7 +377,7 @@ export function DonutGraph({
                         isOpeningClick(
                           `category-${index}`,
                           event,
-                          showActiveShape,
+                          showHighlight,
                         ) &&
                         ((compact && showTooltip) || !compact)
                       ) {
@@ -458,44 +437,19 @@ export function DonutGraph({
                     const { index } = props;
                     // Fix 3: optional chain data.legend to guard against undefined
                     const fill = data.legend?.[index]?.color ?? props.fill;
-                    const renderHighlight = showActiveShape
-                      ? () =>
-                          compact ? (
-                            <DonutActiveShapeMobile
-                              {...(props as unknown as DonutActiveShapeProps)}
-                              fill={fill}
-                              expandInward
-                              chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
-                              chartOuterRadius={chartOuterRadius}
-                            />
-                          ) : (
-                            <DonutActiveShapeDesktop
-                              {...(props as unknown as DonutActiveShapeProps)}
-                              fill={fill}
-                              expandInward={false}
-                              chartInnerRadius={chartInnerRadius}
-                              chartMidRadius={chartMidRadius}
-                              chartOuterRadius={chartOuterRadius}
-                            />
-                          )
-                      : undefined;
                     return (
                       <DonutSector
                         selectionKey={`slice-${index}`}
                         sector={props}
                         fill={fill}
-                        renderHighlight={renderHighlight}
+                        // Only the mobile highlight expands inward here
+                        renderHighlight={highlightFor(props, fill, compact)}
                       />
                     );
                   }}
                   onClick={(item: ClickablePieItem, index, event) => {
                     if (
-                      isOpeningClick(
-                        `slice-${index}`,
-                        event,
-                        showActiveShape,
-                      ) &&
+                      isOpeningClick(`slice-${index}`, event, showHighlight) &&
                       ((compact && showTooltip) || !compact)
                     ) {
                       // Interval slices drill down by their own date range instead of a field
