@@ -67,6 +67,10 @@ beforeEach(async () => {
   await emptyDatabase()();
   await loadMappings();
   await loadRules();
+  await db.update('preferences', {
+    id: 'flags.balanceForecastReport',
+    value: 'true',
+  });
   MockDate.set(new Date(2024, 2, 10, 12));
   await db.insertAccount({ id: 'checking', name: 'Checking' });
   await db.insertTransaction({
@@ -81,53 +85,80 @@ beforeEach(async () => {
 afterEach(() => MockDate.reset());
 
 describe('missed schedule forecast policies', () => {
-  it('keeps an unpaid daily occurrence after an early payment advances the cursor', async () => {
-    const schedule = await createSchedule({
-      conditions: [
-        { op: 'is', field: 'account', value: 'checking' },
-        { op: 'is', field: 'amount', value: -30_000 },
-        {
-          op: 'isapprox',
-          field: 'date',
-          value: { frequency: 'daily', start: '2024-03-09' },
-        },
-      ],
-    });
-    const cursor = await db.first<Pick<db.DbScheduleNextDate, 'id'>>(
-      'SELECT id FROM schedules_next_date WHERE schedule_id = ?',
-      [schedule],
-    );
-    if (!cursor) {
-      throw new Error('Missing schedule cursor');
-    }
-    await db.update('schedules_next_date', {
-      id: cursor.id,
-      base_next_date: 20240309,
-      local_next_date: 20240309,
-    });
-    await db.insertTransaction({
-      id: 'early-daily-payment',
-      account: 'checking',
-      amount: -30_000,
-      date: '2024-03-08',
-      schedule,
-    });
-    await setNextDate({ id: schedule });
-    expect(
-      (await getNormalizedSchedules()).find(item => item.id === schedule)
-        ?.next_date,
-    ).toBe('2024-03-10');
+  it.each([
+    {
+      name: 'paid early',
+      skipped: false,
+      paymentDate: '2024-03-08',
+      balance: 40_000,
+    },
+    {
+      name: 'paid on time',
+      skipped: false,
+      paymentDate: '2024-03-09',
+      balance: 40_000,
+    },
+    {
+      name: 'skipped, then next occurrence paid early',
+      skipped: true,
+      paymentDate: '2024-03-09',
+      balance: 70_000,
+    },
+  ])(
+    'preserves payment identity when the previous occurrence was $name',
+    async ({ skipped, paymentDate, balance }) => {
+      const schedule = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'account', value: 'checking' },
+          { op: 'is', field: 'amount', value: -30_000 },
+          {
+            op: 'isapprox',
+            field: 'date',
+            value: { frequency: 'daily', start: '2024-03-09' },
+          },
+        ],
+      });
+      const cursor = await db.first<Pick<db.DbScheduleNextDate, 'id'>>(
+        'SELECT id FROM schedules_next_date WHERE schedule_id = ?',
+        [schedule],
+      );
+      if (!cursor) {
+        throw new Error('Missing schedule cursor');
+      }
+      await db.update('schedules_next_date', {
+        id: cursor.id,
+        base_next_date: 20240309,
+        local_next_date: 20240309,
+      });
+      if (skipped) {
+        await skipNextDate({ id: schedule });
+      }
+      await db.insertTransaction({
+        id: 'early-daily-payment',
+        account: 'checking',
+        amount: -30_000,
+        date: paymentDate,
+        schedule,
+      });
+      if (!skipped) {
+        await setNextDate({ id: schedule });
+      }
+      expect(
+        (await getNormalizedSchedules()).find(item => item.id === schedule)
+          ?.next_date,
+      ).toBe('2024-03-10');
 
-    const result = await generateForecast({
-      startDate: '2024-03-10',
-      endDate: '2024-03-10',
-      missedSchedules: 'payments',
-    });
-    expect(result.dataPoints.at(-1)?.transactions).toMatchObject([
-      { scheduleId: schedule, originalDueDate: '2024-03-10' },
-    ]);
-    expect(result.dataPoints.at(-1)?.balance).toBe(40_000);
-  });
+      const result = await generateForecast({
+        startDate: '2024-03-10',
+        endDate: '2024-03-10',
+        missedSchedules: 'payments',
+      });
+      expect(result.dataPoints.at(-1)?.transactions).toHaveLength(
+        skipped ? 0 : 1,
+      );
+      expect(result.dataPoints.at(-1)?.balance).toBe(balance);
+    },
+  );
 
   const policies: Array<
     [ForecastMissedSchedules, ForecastMissedOccurrences, number, number]

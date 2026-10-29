@@ -1,58 +1,16 @@
+import { getSchedulePayments } from '#shared/schedule-payments';
+import type { SchedulePaymentInput } from '#shared/schedule-payments';
 import {
   getOccurrencesBetween,
   getScheduleOccurrenceMatchStartDate,
 } from '#shared/schedules';
 import type { ScheduleOccurrenceMatchInput } from '#shared/schedules';
-import type { TransactionEntity } from '#types/models';
-
-type Payment = Pick<
-  TransactionEntity,
-  'id' | 'date' | 'schedule' | 'parent_id' | 'transfer_id' | 'tombstone'
->;
-
-function getLogicalPayments(transactions: Payment[], scheduleId: string) {
-  const linked = transactions.filter(
-    transaction =>
-      transaction.schedule === scheduleId && !transaction.tombstone,
-  );
-  const parents = new Map<string, string>();
-
-  function root(id: string): string {
-    const parent = parents.get(id);
-    if (parent == null || parent === id) {
-      return id;
-    }
-    const result = root(parent);
-    parents.set(id, result);
-    return result;
-  }
-
-  // A split's parent/children and a transfer's two legs represent one payment.
-  for (const transaction of linked) {
-    for (const relatedId of [transaction.parent_id, transaction.transfer_id]) {
-      if (relatedId) {
-        const left = root(transaction.id);
-        const right = root(relatedId);
-        if (left !== right) {
-          parents.set(left, right);
-        }
-      }
-    }
-  }
-
-  const payments = new Map<string, string>();
-  for (const transaction of linked) {
-    const id = root(transaction.id);
-    const date = payments.get(id);
-    if (date == null || transaction.date < date) {
-      payments.set(id, transaction.date);
-    }
-  }
-  return [...payments.values()].sort();
-}
+import type { ScheduleOccurrence } from '#types/models';
+import type { ForecastOccurrenceMatching } from '#types/models/forecast';
 
 /**
- * Forecast-only PoC assumption: preserve exact and recognized early matches,
+ * Forecast-only PoC: honor recorded identities first when selected, then use
+ * an explicitly inferred fallback: preserve exact and recognized early matches,
  * then allocate remaining late linked payments to the oldest missed date.
  * A logical payment can satisfy only one occurrence, regardless of amount.
  */
@@ -62,11 +20,15 @@ export function matchForecastOccurrences({
   occurrenceDates,
   postedTransactions,
   today,
+  records = [],
+  matching = 'recorded',
 }: {
   schedule: ScheduleOccurrenceMatchInput;
   scheduleId: string;
   occurrenceDates: string[];
-  postedTransactions: Payment[];
+  postedTransactions: SchedulePaymentInput[];
+  records?: ScheduleOccurrence[];
+  matching?: ForecastOccurrenceMatching;
   today: string;
 }): Set<string> {
   const dates = [...new Set(occurrenceDates)].sort();
@@ -76,18 +38,47 @@ export function matchForecastOccurrences({
   );
   // A nearby earlier occurrence may already have consumed an early payment
   // before the cursor advanced. Reserve it before matching the forecast dates.
+  const explicitRecords =
+    matching === 'recorded'
+      ? records.filter(record => record.scheduleId === scheduleId)
+      : [];
+  const skippedDates = new Set(
+    explicitRecords
+      .filter(record => record.status === 'skipped')
+      .map(record => record.dueDate),
+  );
   const previousDates =
     firstDate && dateCondition
       ? getOccurrencesBetween(
           dateCondition,
           getScheduleOccurrenceMatchStartDate(schedule, firstDate),
           firstDate,
-        )
+        ).filter(date => !skippedDates.has(date))
       : [];
   const matchingDates = [...new Set([...previousDates, ...dates])].sort();
-  const payments = getLogicalPayments(postedTransactions, scheduleId);
+  const payments = getSchedulePayments(postedTransactions, scheduleId);
   const matchedDates = new Set<string>();
   const usedPayments = new Set<number>();
+
+  // Explicitly skipped occurrences never consume a payment. Paid records
+  // reserve their logical payment even when their due date is before the cursor.
+  for (const record of explicitRecords) {
+    if (record.status === 'skipped') {
+      if (dates.includes(record.dueDate)) matchedDates.add(record.dueDate);
+      continue;
+    }
+    const index = payments.findIndex(payment =>
+      payment.transactionIds.includes(record.transactionId),
+    );
+    // Deleted/unlinked payments no longer establish fulfillment. Undo restores
+    // their identity naturally because the record and transaction are synced.
+    if (index !== -1 && !usedPayments.has(index)) {
+      usedPayments.add(index);
+      if (record.dueDate >= today || payments[index].date <= today) {
+        matchedDates.add(record.dueDate);
+      }
+    }
+  }
 
   function matchDates(
     matches: (paymentDate: string, dueDate: string) => boolean,
@@ -98,8 +89,8 @@ export function matchForecastOccurrences({
         continue;
       }
       const paymentIndex = payments.findIndex(
-        (paymentDate, index) =>
-          !usedPayments.has(index) && matches(paymentDate, dueDate),
+        (payment, index) =>
+          !usedPayments.has(index) && matches(payment.date, dueDate),
       );
       if (paymentIndex !== -1) {
         matchedDates.add(dueDate);
@@ -124,5 +115,5 @@ export function matchForecastOccurrences({
   for (const previousDate of previousDates) {
     matchedDates.delete(previousDate);
   }
-  return matchedDates;
+  return new Set(dates.filter(date => matchedDates.has(date)));
 }

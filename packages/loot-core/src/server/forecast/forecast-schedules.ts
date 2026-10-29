@@ -12,7 +12,12 @@ import {
   indexPostedScheduleTransactions,
   isScheduleOccurrencePosted,
 } from '#shared/schedules';
-import type { RuleConditionEntity, TransactionEntity } from '#types/models';
+import type {
+  RuleConditionEntity,
+  ScheduleOccurrence,
+  TransactionEntity,
+} from '#types/models';
+import type { ForecastOccurrenceMatching } from '#types/models/forecast';
 import type { RecurConfig } from '#types/models/schedule';
 
 import type {
@@ -211,6 +216,8 @@ export async function buildFutureScheduleOccurrences(
   ruleAccountsById: Map<string, DbAccountForRules>,
   postedTransactions: TransactionEntity[],
   reconcileMissedAsOf?: string,
+  occurrenceRecords: ScheduleOccurrence[] = [],
+  occurrenceMatching: ForecastOccurrenceMatching = 'recorded',
 ) {
   const postedByScheduleId =
     indexPostedScheduleTransactions(postedTransactions);
@@ -243,6 +250,8 @@ export async function buildFutureScheduleOccurrences(
           occurrenceDates: dates,
           postedTransactions,
           today: reconcileMissedAsOf,
+          records: occurrenceRecords,
+          matching: occurrenceMatching,
         })
       : null;
 

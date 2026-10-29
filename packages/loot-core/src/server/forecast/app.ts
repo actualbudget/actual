@@ -1,9 +1,11 @@
 import { createApp } from '#server/app';
 import * as db from '#server/db';
+import { getScheduleOccurrences } from '#server/schedules/occurrence-records';
 import type { RuleConditionEntity } from '#types/models';
 import type {
   ForecastMissedOccurrences,
   ForecastMissedSchedules,
+  ForecastOccurrenceMatching,
   ForecastResult,
   ForecastSource,
 } from '#types/models/forecast';
@@ -38,6 +40,7 @@ export type ForecastRequestParams = {
   source?: ForecastSource;
   missedSchedules?: ForecastMissedSchedules;
   missedOccurrences?: ForecastMissedOccurrences;
+  occurrenceMatching?: ForecastOccurrenceMatching;
 };
 
 function createUnassignedForecastAccount(): AccountWithComputedBalance {
@@ -73,6 +76,7 @@ export async function generateForecast({
   source = 'schedules',
   missedSchedules = 'exclude',
   missedOccurrences = 'one',
+  occurrenceMatching = 'recorded',
 }: ForecastRequestParams): Promise<ForecastResult> {
   const includeUnassigned = includeAccountlessSchedules ?? false;
   const dateContext = buildForecastDateContext(startDate, endDate);
@@ -172,6 +176,10 @@ export async function generateForecast({
     ruleAccountsById,
     postedScheduleTransactions,
     includeMissed ? today : undefined,
+    includeMissed && occurrenceMatching === 'recorded'
+      ? await getScheduleOccurrences()
+      : [],
+    occurrenceMatching,
   );
   const futureOccurrences = selectMissedScheduleOccurrences({
     occurrences,
@@ -206,6 +214,7 @@ export type ForecastHandlers = {
     source?: ForecastSource;
     missedSchedules?: ForecastMissedSchedules;
     missedOccurrences?: ForecastMissedOccurrences;
+    occurrenceMatching?: ForecastOccurrenceMatching;
   }) => Promise<ForecastResult>;
 };
 

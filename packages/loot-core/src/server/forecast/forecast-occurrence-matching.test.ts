@@ -10,6 +10,142 @@ const defaults = {
 };
 
 describe('forecast occurrence matching', () => {
+  it('does not consider a future-dated recorded payment settled today', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        postedTransactions: [
+          { id: 'future', date: '2024-03-12', schedule: 'rent' },
+        ],
+        records: [
+          {
+            scheduleId: 'rent',
+            dueDate: '2024-01-05',
+            status: 'paid',
+            transactionId: 'future',
+          },
+        ],
+      }),
+    ]).toEqual([]);
+  });
+  it('does not reserve a skipped date before matching an early payment', () => {
+    const params = {
+      ...defaults,
+      schedule: {
+        posts_transaction: false,
+        _conditions: [
+          {
+            op: 'isapprox' as const,
+            field: 'date' as const,
+            value: { frequency: 'daily' as const, start: '2024-03-09' },
+          },
+        ],
+      },
+      occurrenceDates: ['2024-03-10'],
+      postedTransactions: [
+        { id: 'early', date: '2024-03-09', schedule: 'rent' },
+      ],
+      records: [
+        {
+          scheduleId: 'rent',
+          dueDate: '2024-03-09',
+          status: 'skipped' as const,
+        },
+      ],
+    };
+    expect([...matchForecastOccurrences(params)]).toEqual(['2024-03-10']);
+    // The comparison mode deliberately retains the old date-only assumption.
+    expect([
+      ...matchForecastOccurrences({ ...params, matching: 'inferred' }),
+    ]).toEqual([]);
+  });
+
+  it('reserves a recorded early payment for its actual occurrence before the cursor', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        occurrenceDates: ['2024-03-10'],
+        postedTransactions: [
+          { id: 'early', date: '2024-03-09', schedule: 'rent' },
+        ],
+        records: [
+          {
+            scheduleId: 'rent',
+            dueDate: '2024-03-09',
+            status: 'paid',
+            transactionId: 'early',
+          },
+        ],
+      }),
+    ]).toEqual([]);
+  });
+
+  it('lets recorded identity override an exact date and consumes a logical payment only once', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        postedTransactions: [
+          {
+            id: 'source',
+            date: '2024-01-05',
+            schedule: 'rent',
+            transfer_id: 'transfer',
+          },
+          {
+            id: 'transfer',
+            date: '2024-01-05',
+            schedule: 'rent',
+            transfer_id: 'source',
+          },
+        ],
+        records: [
+          {
+            scheduleId: 'rent',
+            dueDate: '2024-02-05',
+            status: 'paid',
+            transactionId: 'transfer',
+          },
+        ],
+      }),
+    ]).toEqual(['2024-02-05']);
+  });
+
+  it('reopens a recorded paid occurrence if its transaction was deleted or unlinked', () => {
+    for (const payment of [
+      { id: 'payment', date: '2024-01-05', schedule: 'rent', tombstone: true },
+      { id: 'payment', date: '2024-01-05', schedule: undefined },
+    ]) {
+      expect([
+        ...matchForecastOccurrences({
+          ...defaults,
+          postedTransactions: [payment],
+          records: [
+            {
+              scheduleId: 'rent',
+              dueDate: '2024-01-05',
+              status: 'paid',
+              transactionId: 'payment',
+            },
+          ],
+        }),
+      ]).toEqual([]);
+    }
+  });
+
+  it('excludes skipped occurrences without consuming another occurrence payment', () => {
+    expect([
+      ...matchForecastOccurrences({
+        ...defaults,
+        postedTransactions: [
+          { id: 'late', date: '2024-03-07', schedule: 'rent' },
+        ],
+        records: [
+          { scheduleId: 'rent', dueDate: '2024-01-05', status: 'skipped' },
+        ],
+      }),
+    ]).toEqual(['2024-01-05', '2024-02-05']);
+  });
+
   it('does not reuse an early payment consumed before the schedule cursor advanced', () => {
     expect([
       ...matchForecastOccurrences({

@@ -3,6 +3,7 @@ import type { RuleConditionEntity } from './rule';
 export type ForecastSource = 'schedules' | 'tracking-budget';
 export type ForecastMissedSchedules = 'exclude' | 'payments' | 'all';
 export type ForecastMissedOccurrences = 'one' | 'all';
+export type ForecastOccurrenceMatching = 'recorded' | 'inferred';
 
 export type ForecastSeries = {
   id: string;
