@@ -131,7 +131,7 @@ describe('BalanceWithCarryover goal progress ring', () => {
     ['61', { longGoal: 1, budget: 90000 }],
     ['99', { longGoal: 1, budget: 0, leftover: 64999 }],
   ] as const)(
-    'draws the ring at %s%% beside the plain balance when underfunded',
+    'draws the ring at %s%% beside the yellow balance when underfunded',
     (progress, values) => {
       setSheetValues(values);
       renderBalance();
@@ -141,9 +141,9 @@ describe('BalanceWithCarryover goal progress ring', () => {
       expect(ring.querySelector('title')).toHaveTextContent(
         `Underfunded, ${progress}% of goal`,
       );
-      expect(
-        screen.getByTestId('budget202401!leftover-groceries'),
-      ).toHaveTextContent(/^[\d,.]+$/);
+      const amount = screen.getByTestId('budget202401!leftover-groceries');
+      expect(amount).toHaveTextContent(/^[\d,.]+$/);
+      expect(amount).toHaveStyle({ color: theme.templateNumberUnderFunded });
     },
   );
 
@@ -158,18 +158,15 @@ describe('BalanceWithCarryover goal progress ring', () => {
     ['overspent', { budget: 65000, leftover: -2500 }, true],
     ['without a goal', { goal: null }, true],
     ['with the feature flag off', {}, false],
-  ])(
-    'renders the plain balance when %s',
-    (_, values, isGoalTemplatesEnabled) => {
-      setSheetValues(values);
-      const container = renderBalance({ isGoalTemplatesEnabled });
-      expect(screen.queryByRole('img')).toBeNull();
-      expect(container.querySelector('svg')).toBeNull();
-      expect(
-        screen.getByTestId('budget202401!leftover-groceries'),
-      ).toHaveTextContent(/^-?[\d,.]+$/);
-    },
-  );
+  ])('draws no ring when %s', (_, values, isGoalTemplatesEnabled) => {
+    setSheetValues(values);
+    const container = renderBalance({ isGoalTemplatesEnabled });
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(container.querySelector('svg')).toBeNull();
+    expect(
+      screen.getByTestId('budget202401!leftover-groceries'),
+    ).toHaveTextContent(/^-?[\d,.]+$/);
+  });
 
   it.each([
     ['funded', { budget: 65000, leftover: 65000 }],
@@ -183,7 +180,6 @@ describe('BalanceWithCarryover goal progress ring', () => {
   });
 
   it.each([
-    ['underfunded', {}, true],
     ['without a goal', { goal: null, budget: 65000, leftover: 65000 }, true],
     ['with the feature flag off', { budget: 65000, leftover: 65000 }, false],
   ])(
@@ -226,6 +222,9 @@ describe('BalanceCell goal progress ring', () => {
     });
     expect(button.querySelector('svg')).not.toBeNull();
     expect(button).toHaveTextContent('400.00');
+    expect(within(button).getByText('400.00')).toHaveStyle({
+      color: theme.templateNumberUnderFunded,
+    });
   });
 
   it.each([
@@ -235,7 +234,7 @@ describe('BalanceCell goal progress ring', () => {
       { budget: 65000, leftover: 65000 },
       theme.templateNumberFunded,
     ],
-  ])('keeps the plain balance %s', (_, values, color) => {
+  ])('draws no ring %s', (_, values, color) => {
     setSheetValues(values);
     renderBalance({ isMobile: true });
     const button = screen.getByRole('button', {
@@ -245,7 +244,7 @@ describe('BalanceCell goal progress ring', () => {
     expect(within(button).getByText(/^[\d,.]+$/)).toHaveStyle({ color });
   });
 
-  it('keeps the plain balance for income categories', () => {
+  it('draws no ring for income categories', () => {
     sheetValues = {
       'goal-groceries': 500000,
       'budget-groceries': 0,

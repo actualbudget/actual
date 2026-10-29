@@ -20,8 +20,7 @@ export function getGoalRingLabel(progress: number, t: TFunction) {
 /**
  * A small ring beside the balance of a category whose goal is not met yet.
  * It fills like a pie as the goal is funded and is not drawn once it is, so
- * only rows that still need money carry a mark and the amount keeps its
- * usual colour.
+ * only rows that still need money carry a mark.
  */
 export function GoalProgressRing({
   progress,

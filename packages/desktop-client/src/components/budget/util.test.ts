@@ -92,15 +92,15 @@ describe('makeBalanceAmountStyle', () => {
     });
   });
 
-  it('leaves an unmet goal to the ring and keeps the sign colour', () => {
+  it('turns yellow while the goal is unmet', () => {
     expect(makeBalanceAmountStyle(40000, 65000, 40000)).toEqual({
-      color: theme.budgetNumberPositive,
+      color: theme.templateNumberUnderFunded,
     });
     expect(makeBalanceAmountStyle(0, 65000, 0)).toEqual({
-      color: theme.budgetNumberZero,
+      color: theme.templateNumberUnderFunded,
     });
     expect(makeBalanceAmountStyle(0, 65000, null)).toEqual({
-      color: theme.budgetNumberZero,
+      color: theme.templateNumberUnderFunded,
     });
   });
 
@@ -146,7 +146,7 @@ describe('getGoalDifference', () => {
     expect(getGoalDifference(40049, 40049, 0)).toBe(0);
     expect(getGoalRingProgress(39950, 40049, 39950, 0)).toBe(99);
     expect(makeBalanceAmountStyle(39950, 40049, 39950, 0)).toEqual({
-      color: theme.budgetNumberPositive,
+      color: theme.templateNumberUnderFunded,
     });
     expect(makeBalanceAmountStyle(40049, 40049, 40049, 0)).toEqual({
       color: theme.templateNumberFunded,
