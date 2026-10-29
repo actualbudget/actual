@@ -257,6 +257,13 @@ export function ReportSidebar({
         ?.disableSort ??
         false));
 
+  // A weekly end date is the last day of its week, but the options list the
+  // first day of each week.
+  const endIntervalValue =
+    customReportItems.interval === 'Weekly'
+      ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
+      : customReportItems.endDate;
+
   return (
     <View
       style={{
@@ -696,9 +703,9 @@ export function ReportSidebar({
                     ),
                   )
                 }
-                value={customReportItems.endDate}
+                value={endIntervalValue}
                 defaultLabel={monthUtils.format(
-                  customReportItems.endDate,
+                  endIntervalValue,
                   getIntervalFormat(customReportItems.interval, dateFormat),
                   locale,
                 )}

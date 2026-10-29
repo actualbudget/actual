@@ -307,3 +307,31 @@ describe('same-period range validation', () => {
     },
   );
 });
+
+describe('Weekly range validation', () => {
+  it('ends a range on the last day of the chosen week', () => {
+    expect(
+      validateEnd(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-12-05',
+        '2016-12-12',
+        'Weekly',
+        '1',
+      ),
+    ).toEqual(['2016-12-05', '2016-12-18', 'static']);
+  });
+
+  it('uses the first day of the week preference', () => {
+    expect(
+      validateEnd(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-12-04',
+        '2016-12-11',
+        'Weekly',
+        '0',
+      ),
+    ).toEqual(['2016-12-04', '2016-12-17', 'static']);
+  });
+});

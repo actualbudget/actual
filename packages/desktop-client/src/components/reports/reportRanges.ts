@@ -77,6 +77,11 @@ export function validateEnd(
       dateEnd = end + '-12-31';
       fallbackStart = monthUtils.subDays(dateEnd, 1095);
       break;
+    case 'Weekly':
+      // The picked value is the first day of the week; include the whole week.
+      dateEnd = monthUtils.getWeekEnd(end, firstDayOfWeekIdx);
+      fallbackStart = monthUtils.subDays(dateEnd, 180);
+      break;
     case 'Daily':
       dateEnd = end;
       fallbackStart = monthUtils.subDays(dateEnd, 6);
