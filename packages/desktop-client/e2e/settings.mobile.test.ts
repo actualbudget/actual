@@ -52,9 +52,6 @@ test.describe('Mobile Settings', () => {
   test('opens the chosen start page', async () => {
     const settingsPage = await navigation.goToSettingsPage();
     await settingsPage.setMobileStartPage('Accounts');
-    await expect(
-      settingsPage.settings.locator('#settings-mobileStartPage'),
-    ).toHaveText('Accounts');
 
     await page.goto('/');
     await expect(page).toHaveURL(/\/accounts$/);
@@ -121,9 +118,6 @@ test.describe('Mobile Settings', () => {
   test('keeps the start page per budget', async () => {
     const settingsPage = await navigation.goToSettingsPage();
     await settingsPage.setMobileStartPage('Accounts');
-    await expect(
-      settingsPage.settings.locator('#settings-mobileStartPage'),
-    ).toHaveText('Accounts');
 
     await settingsPage.backButton.click();
     await page.getByRole('button', { name: 'Switch file' }).click();

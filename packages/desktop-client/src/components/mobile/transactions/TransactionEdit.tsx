@@ -1215,7 +1215,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   : t('Transaction')
                 : title
             }
-            leftContent={<MobileBackButton onPress={navigateBack} />}
+            leftContent={<MobileBackButton />}
           />
         }
         footer={
@@ -1613,7 +1613,6 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
-  const navigateBack = useNavigateBack();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -2019,7 +2018,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton onPress={navigateBack} />}
+            leftContent={<MobileBackButton />}
           />
         }
         padding={0}
@@ -2070,7 +2069,7 @@ function TransactionEditUnconnected({
         header={
           <MobilePageHeader
             title={t('New Transaction')}
-            leftContent={<MobileBackButton onPress={navigateBack} />}
+            leftContent={<MobileBackButton />}
           />
         }
         padding={0}

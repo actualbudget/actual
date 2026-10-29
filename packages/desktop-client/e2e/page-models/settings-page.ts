@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 type SettingsSection =
@@ -64,6 +65,9 @@ export class SettingsPage {
       .locator('[data-popover]')
       .getByRole('button', { name: pageName, exact: true })
       .click();
+    await expect(this.settings.locator('#settings-mobileStartPage')).toHaveText(
+      pageName,
+    );
   }
 
   async useBudgetType(budgetType: 'Envelope' | 'Tracking') {
