@@ -28,7 +28,7 @@ describe('transactionsSearch', () => {
   it.each([
     ['35', '', 3500],
     ['$12.50', '$', 1250],
-    ['120 kr', 'kr', 12000],
+    ['12,50 kr', 'kr', 1250],
     ['chf 12.50', 'CHF', 1250],
   ])('still matches the amount for %s', (search, currencySymbol, amount) => {
     const query = transactionsSearch(

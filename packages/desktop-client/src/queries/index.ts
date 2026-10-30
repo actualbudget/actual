@@ -102,7 +102,7 @@ export function transactionsSearch(
     : search;
   const amount = /\p{L}/u.test(amountSearch)
     ? null
-    : currencyToAmount(amountSearch);
+    : currencyToAmount(amountSearch.trim());
   const escapedSearch = search.replace(/[\\%?]/g, '\\$&');
 
   // Support various date formats
