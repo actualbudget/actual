@@ -22,9 +22,10 @@ import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
-  drainFullSync,
   initialFullSync,
+  resumeFullSync,
   setSyncingMode,
+  stopFullSync,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
 import { replayPendingMessages } from '#server/sync/replay';
@@ -258,8 +259,16 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  await stopFullSync();
+  try {
+    return await unloadBudget();
+  } finally {
+    resumeFullSync();
+  }
+}
+
+async function unloadBudget() {
   captureBreadcrumb({ message: 'Closing budget' });
-  await drainFullSync();
   resetFormulaPreferencesCache();
 
   // The spreadsheet may be running, wait for it to complete

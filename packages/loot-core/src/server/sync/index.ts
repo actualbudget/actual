@@ -804,22 +804,28 @@ type FullSyncResult =
   | { error: { message: string; reason: string; meta: unknown } };
 
 let runningFullSync: Promise<FullSyncResult> | null = null;
+let isFullSyncStopped = false;
 export function fullSync(): Promise<FullSyncResult> {
+  if (isFullSyncStopped) {
+    return Promise.resolve({ messages: [] });
+  }
   runningFullSync ??= runFullSync().finally(() => {
     runningFullSync = null;
   });
   return runningFullSync;
 }
 
-// Cancels the pending sync and waits for the running one, including the
-// mutators it queues. Those mutators can schedule another sync, so repeat
-// until both are idle.
-export async function drainFullSync(): Promise<void> {
-  do {
-    clearFullSyncTimeout();
-    await Promise.allSettled([runningFullSync]);
-    await flushRunningMutators();
-  } while (runningFullSync || syncTimeout);
+// Stops new syncs and waits for the running one, including the mutators it
+// queues, so the budget can be closed.
+export async function stopFullSync(): Promise<void> {
+  isFullSyncStopped = true;
+  clearFullSyncTimeout();
+  await Promise.allSettled([runningFullSync]);
+  await flushRunningMutators();
+}
+
+export function resumeFullSync(): void {
+  isFullSyncStopped = false;
 }
 
 async function runFullSync(): Promise<FullSyncResult> {

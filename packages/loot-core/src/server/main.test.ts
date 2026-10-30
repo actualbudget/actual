@@ -525,7 +525,7 @@ describe('Budget shutdown', () => {
     }
   });
 
-  test('cancels the sync timer before waiting for the spreadsheet', async () => {
+  test('stops new syncs while waiting for the spreadsheet', async () => {
     vi.useFakeTimers();
     await prefs.loadPrefs();
     await prefs.savePrefs({ groupId: 'group' });
@@ -545,6 +545,7 @@ describe('Budget shutdown', () => {
     try {
       await vi.advanceTimersByTimeAsync(500);
       await sheetStarted.promise;
+      await lib.send('app-focused');
       await vi.advanceTimersByTimeAsync(1000);
       expect(postSpy).not.toHaveBeenCalled();
       expect(db.getDatabase()).not.toBeNull();
@@ -566,8 +567,6 @@ describe('Budget shutdown', () => {
       await gate.promise;
       throw new Error('mutator failed');
     });
-    const rejection =
-      expect(rejectingPromise).rejects.toThrow('mutator failed');
     const queuedPromise = runMutator(() => db.first('SELECT 1 AS value'));
     const closePromise = lib.send('close-budget');
 
@@ -576,7 +575,7 @@ describe('Budget shutdown', () => {
       expect(db.getDatabase()).not.toBeNull();
 
       gate.resolve();
-      await rejection;
+      await expect(rejectingPromise).rejects.toThrow('mutator failed');
       await expect(queuedPromise).resolves.toEqual({ value: 1 });
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
