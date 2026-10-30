@@ -85,7 +85,7 @@
         "ios/App/App/public/**",
         "ios/DerivedData/**"
       ],
-      "ignoreDependencies": ["@capacitor/splash-screen"]
+      "ignoreDependencies": ["@capacitor/haptics", "@capacitor/splash-screen"]
     },
     "packages/plugins-service": {
       "entry": ["src/plugin-service-worker.ts"]
