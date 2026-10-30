@@ -150,6 +150,15 @@ describe('useOnVisible', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
+    it('ignores visibilitychange so a resume only runs the callback once', () => {
+      const callback = vi.fn();
+      renderHook(() => useOnVisible(callback));
+
+      dispatchVisibilityChange();
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+
     it('removes the app state listener on unmount', async () => {
       const { unmount } = renderHook(() => useOnVisible(vi.fn()));
 

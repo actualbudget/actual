@@ -10,8 +10,8 @@ type UseOnVisibleOptions = {
 
 /**
  * Runs the given callback when the document becomes visible (e.g. user
- * switches back to the tab). Inside the iOS and Android apps it also runs
- * when the app returns to the foreground. Uses a guard so the callback is
+ * switches back to the tab). Inside the iOS and Android apps it runs when
+ * the app returns to the foreground instead. Uses a guard so the callback is
  * not invoked again until the previous invocation has finished (handles
  * async callbacks).
  */
@@ -38,6 +38,23 @@ export function useOnVisible(
     if (!isEnabled) {
       return;
     }
+
+    if (Platform.isNativeMobileApp) {
+      // One event source per platform: the web view also fires
+      // `visibilitychange` on resume, which would run the callback twice.
+      const listener = CapacitorApp.addListener(
+        'appStateChange',
+        ({ isActive }) => {
+          if (isActive) {
+            void runCallback();
+          }
+        },
+      );
+      return () => {
+        void listener.then(handle => handle.remove());
+      };
+    }
+
     function onVisibilityChange() {
       if (document.visibilityState !== 'visible') {
         return;
@@ -46,20 +63,7 @@ export function useOnVisible(
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange);
-
-    // The web view does not reliably fire `visibilitychange` when the app is
-    // backgrounded and resumed, so listen to the native app state as well.
-    const appStateListener = Platform.isNativeMobileApp
-      ? CapacitorApp.addListener('appStateChange', ({ isActive }) => {
-          if (isActive) {
-            void runCallback();
-          }
-        })
-      : null;
-
-    return () => {
+    return () =>
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      void appStateListener?.then(handle => handle.remove());
-    };
   }, [isEnabled]);
 }
