@@ -86,7 +86,11 @@ Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount**
 
 A transfer between two euro accounts uses this dialog too. It adds: "The other account of this transfer changes to match."
 
-Changing the amount of a transfer to Checking or BBVA México opens **Edit transfer**. That dialog shows the amount in this account, the date, the notes, and the other account's amount, rate, and fee.
+Click the 1,000.00 deposit from Checking and change the amount. The transfer fields open directly below the transaction being edited. **Received in BNP Paribas** is 1,000.00. Use the row's usual Date and Notes cells to edit those fields. **Sent from Checking** is 1,100.00 USD, and the rate field shows 1.10 USD per 1 EUR. Change the amounts here and click **Save**.
+
+<img width="860" alt="Transfer fields above the BNP Paribas register, with 1,000.00 euros received and 1,100.00 dollars sent from Checking" src="/img/budgeting/multi-currency-exchange-edit@2x.png" />
+
+On a phone, edit Date and Notes on the transaction screen. **Edit amount** opens **Edit transfer** for the amounts, rate and fee.
 
 ## Split a payment
 
@@ -108,7 +112,7 @@ The rent is then a 1,000.00 payment in Checking. Checking is $1,500.00. BNP Pari
 
 A payment that came from a schedule is unlinked when the new account uses another currency. The dialog says: "This transaction will no longer be linked to its schedule."
 
-**Edit foreign amount**, **Split transaction**, and **Edit transfer** show the same budget warning when a dollar amount changes a month that already has money budgeted. On a phone, changing the account opens **Move to Checking**.
+**Edit foreign amount**, **Split transaction**, and the transfer fields show the same budget warning when a dollar amount changes a month that already has money budgeted. On a phone, changing the account opens **Move to Checking**.
 
 ## Schedule a payment
 
