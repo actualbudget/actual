@@ -867,14 +867,7 @@ app.events.on('sync', ({ type }) => {
         // Only mark the day as done when sync succeeded, so that
         // schedule auto-posting is retried on subsequent successful syncs
         if (type === 'success') {
-          try {
-            await prefs.savePrefs({ lastScheduleRun: runDay });
-          } catch (error) {
-            // savePrefs updates the loaded prefs before writing, so undo that
-            // to keep today's run retryable
-            prefs.getPrefs().lastScheduleRun = lastScheduleRun;
-            throw error;
-          }
+          await prefs.savePrefs({ lastScheduleRun: runDay });
         }
       }).catch(error => {
         logger.error('Failed to run schedule service after sync', error);
