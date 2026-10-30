@@ -80,9 +80,12 @@ export function ActionableGridListItem<T extends object>({
         to: { x: shouldReveal ? -actionsWidth : 0 },
         onRest: () => {
           dragStartedRef.current = false;
-          setIsRevealed(shouldReveal);
         },
       });
+      // Set now rather than in onRest: when the drag already clamped x at
+      // the target, react-spring treats this start as a no-op and never
+      // calls onRest, leaving the state stale.
+      setIsRevealed(shouldReveal);
     },
     {
       axis: 'x',
