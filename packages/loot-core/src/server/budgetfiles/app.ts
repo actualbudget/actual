@@ -23,7 +23,9 @@ import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
   initialFullSync,
+  resumeFullSync,
   setSyncingMode,
+  stopFullSync,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
 import { replayPendingMessages } from '#server/sync/replay';
@@ -298,6 +300,15 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  await stopFullSync();
+  try {
+    return await unloadBudget();
+  } finally {
+    resumeFullSync();
+  }
+}
+
+async function unloadBudget() {
   captureBreadcrumb({ message: 'Closing budget' });
   resetFormulaPreferencesCache();
 

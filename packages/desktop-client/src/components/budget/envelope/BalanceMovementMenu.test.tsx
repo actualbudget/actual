@@ -1,4 +1,5 @@
 import { initServer } from '@actual-app/core/platform/client/connection';
+import { setNumberFormat } from '@actual-app/core/shared/util';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -31,13 +32,15 @@ vi.mock('#hooks/useSheetValue', async () => {
   };
 });
 
-function renderMenu() {
+function renderMenu(prefs: Record<string, string> = {}) {
   const onBudgetAction =
     vi.fn<(month: string, action: string, arg?: unknown) => void>();
   const onClose = vi.fn<() => void>();
   const client = createTestQueryClient();
   const store = configureTestAppStore({ queryClient: client });
-  store.dispatch(mergeSyncedPrefs({ 'flags.goalTemplatesEnabled': 'true' }));
+  store.dispatch(
+    mergeSyncedPrefs({ 'flags.goalTemplatesEnabled': 'true', ...prefs }),
+  );
   initServer({
     'get-categories': async () => ({ grouped: [], list: [] }),
     query: async () => ({ data: [], dependencies: [] }),
@@ -82,6 +85,35 @@ describe('BalanceMovementMenu', () => {
       { amount: 25000, category: 'groceries' },
     );
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('counts a shortfall that rounds away as funded when decimals are hidden', async () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    sheetValues['budget202401!goal-groceries'] = 40040;
+    try {
+      renderMenu({ hideFraction: 'true' });
+
+      expect(await screen.findByText('Fully funded')).toBeInTheDocument();
+      expect(
+        screen.queryByText('Fund goal from To Budget'),
+      ).not.toBeInTheDocument();
+    } finally {
+      setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    }
+  });
+
+  it('shows the shortfall between the displayed amounts when decimals are hidden', async () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    sheetValues['budget202401!goal-groceries'] = 40051;
+    sheetValues['budget202401!budget-groceries'] = 40049;
+    try {
+      renderMenu({ hideFraction: 'true' });
+
+      expect(await screen.findByText('Underfunded (-1)')).toBeInTheDocument();
+      expect(screen.getByText('Fund goal from To Budget')).toBeInTheDocument();
+    } finally {
+      setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    }
   });
 
   it('does not offer funding when To Budget is empty', async () => {
