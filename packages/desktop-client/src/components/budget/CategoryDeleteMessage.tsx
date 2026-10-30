@@ -15,31 +15,14 @@ export function CategoryDeleteMessage({
   category,
   group,
 }: CategoryDeleteMessageProps) {
-  const isIncome = Boolean((category ?? group)?.is_income);
-
   return (
     <>
       {group ? (
-        isIncome ? (
-          <Trans>
-            Categories in the group{' '}
-            <strong>{{ group: group.name } as TransObjectLiteral}</strong> are
-            used by existing transactions or it has a positive leftover balance
-            currently.
-          </Trans>
-        ) : (
-          <Trans>
-            Categories in the group{' '}
-            <strong>{{ group: group.name } as TransObjectLiteral}</strong> are
-            used by existing transactions or have a budgeted amount in at least
-            one month.
-          </Trans>
-        )
-      ) : isIncome ? (
         <Trans>
-          <strong>{{ category: category?.name } as TransObjectLiteral}</strong>{' '}
-          is used by existing transactions or it has a positive leftover balance
-          currently.
+          Categories in the group{' '}
+          <strong>{{ group: group.name } as TransObjectLiteral}</strong> are
+          used by existing transactions or have a budgeted amount in at least
+          one month.
         </Trans>
       ) : (
         <Trans>
