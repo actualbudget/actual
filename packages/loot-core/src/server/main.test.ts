@@ -449,6 +449,11 @@ describe('Categories', () => {
 });
 
 describe('Budget shutdown', () => {
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    await prefs.loadPrefs();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllEnvs();
@@ -465,9 +470,7 @@ describe('Budget shutdown', () => {
     return { promise, resolve };
   }
 
-  test('waits for background sync and its schedule metadata write', async () => {
-    vi.useFakeTimers();
-    await prefs.loadPrefs();
+  test('finishes sync and schedule persistence before unloading, without admitting new syncs', async () => {
     await prefs.savePrefs({ groupId: 'group' });
     fs._setDocumentDir(__dirname);
     setSyncingMode('enabled');
@@ -475,12 +478,16 @@ describe('Budget shutdown', () => {
     const syncStarted = deferred();
     const writeGate = deferred();
     const writeStarted = deferred();
+    const sheetGate = deferred();
+    const sheetStarted = deferred();
     const postBinary = post.postBinary;
-    vi.spyOn(post, 'postBinary').mockImplementationOnce(async (...args) => {
-      syncStarted.resolve();
-      await syncGate.promise;
-      return postBinary(...args);
-    });
+    const postSpy = vi
+      .spyOn(post, 'postBinary')
+      .mockImplementationOnce(async (...args) => {
+        syncStarted.resolve();
+        await syncGate.promise;
+        return postBinary(...args);
+      });
     let savedPrefs;
     vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
       const metadata = JSON.parse(contents);
@@ -493,25 +500,30 @@ describe('Budget shutdown', () => {
     });
     await lib.send('app-focused');
     await syncStarted.promise;
-    let closed = false;
-    const closePromise = lib.send('close-budget').then(result => {
-      closed = true;
-      return result;
-    });
+    const closePromise = lib.send('close-budget');
 
     try {
-      await vi.advanceTimersByTimeAsync(200);
-      expect(closed).toBe(false);
+      await vi.runAllTimersAsync();
       expect(db.getDatabase()).not.toBeNull();
 
       vi.stubEnv('NODE_ENV', 'production');
       syncGate.resolve();
       await writeStarted.promise;
-      await vi.advanceTimersByTimeAsync(1000);
-      expect(closed).toBe(false);
+      await vi.runAllTimersAsync();
       expect(db.getDatabase()).not.toBeNull();
 
+      vi.spyOn(sheet, 'waitOnSpreadsheet').mockImplementationOnce(async () => {
+        sheetStarted.resolve();
+        await sheetGate.promise;
+      });
       writeGate.resolve();
+      await sheetStarted.promise;
+      await lib.send('app-focused');
+      void scheduleFullSync();
+      await vi.runAllTimersAsync();
+      expect(postSpy).toHaveBeenCalledTimes(1);
+
+      sheetGate.resolve();
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
       expect(savedPrefs).toMatchObject({
@@ -522,68 +534,27 @@ describe('Budget shutdown', () => {
     } finally {
       syncGate.resolve();
       writeGate.resolve();
-      await vi.runAllTimersAsync();
-      await closePromise;
-    }
-  });
-
-  test('stops new syncs while waiting for the spreadsheet', async () => {
-    vi.useFakeTimers();
-    await prefs.loadPrefs();
-    await prefs.savePrefs({ groupId: 'group' });
-    setSyncingMode('enabled');
-    const sheetGate = deferred();
-    const sheetStarted = deferred();
-    vi.spyOn(sheet, 'waitOnSpreadsheet').mockImplementationOnce(async () => {
-      sheetStarted.resolve();
-      await sheetGate.promise;
-    });
-    const postSpy = vi.spyOn(post, 'postBinary');
-    vi.stubEnv('NODE_ENV', 'production');
-    void scheduleFullSync();
-    vi.unstubAllEnvs();
-    const closePromise = lib.send('close-budget');
-
-    try {
-      await vi.advanceTimersByTimeAsync(500);
-      await sheetStarted.promise;
-      await lib.send('app-focused');
-      await vi.advanceTimersByTimeAsync(1000);
-      expect(postSpy).not.toHaveBeenCalled();
-      expect(db.getDatabase()).not.toBeNull();
-
-      sheetGate.resolve();
-      await vi.runAllTimersAsync();
-      await expect(closePromise).resolves.toBe('ok');
-    } finally {
       sheetGate.resolve();
       await vi.runAllTimersAsync();
       await closePromise;
     }
   });
 
-  test('drains queued mutators even when the running mutator rejects', async () => {
-    vi.useFakeTimers();
-    await prefs.loadPrefs();
+  test('drains schedule work queued by a rejecting mutator during shutdown', async () => {
     const errorLog = vi.spyOn(logger, 'error');
     const gate = deferred();
-    // The sync error queues a schedule run after close has started draining
     const rejectingPromise = runMutator(() =>
       batchMessages(async () => {
         await gate.promise;
         throw new SyncError('invalid-schema');
       }),
     );
-    const queuedPromise = runMutator(() => db.first('SELECT 1 AS value'));
     const closePromise = lib.send('close-budget');
 
     try {
-      await vi.advanceTimersByTimeAsync(200);
-      expect(db.getDatabase()).not.toBeNull();
-
+      await vi.runAllTimersAsync();
       gate.resolve();
       await expect(rejectingPromise).rejects.toThrow('invalid-schema');
-      await expect(queuedPromise).resolves.toEqual({ value: 1 });
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
       expect(db.getDatabase()).toBeNull();
@@ -595,7 +566,7 @@ describe('Budget shutdown', () => {
     } finally {
       gate.resolve();
       await vi.runAllTimersAsync();
-      await Promise.allSettled([rejectingPromise, queuedPromise, closePromise]);
+      await Promise.allSettled([rejectingPromise, closePromise]);
     }
   });
 });

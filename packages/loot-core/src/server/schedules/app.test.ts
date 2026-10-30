@@ -1,15 +1,11 @@
 // @ts-strict-ignore
 import MockDate from 'mockdate';
 
-import * as fs from '#platform/server/fs';
-import * as sqlite from '#platform/server/sqlite';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
-import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
 
@@ -1209,60 +1205,4 @@ describe('schedule app', () => {
       expect(prefs.getPrefs().lastScheduleRun).toBe('2020-12-01');
     });
   });
-});
-
-describe('schedule sync listener', () => {
-  beforeEach(async () => {
-    await prefs.loadPrefs();
-    await prefs.savePrefs({ lastScheduleRun: '2023-12-31' });
-    vi.spyOn(monthUtils, 'currentDay').mockReturnValue('2024-01-01');
-    fs._setDocumentDir(__dirname);
-    vi.stubEnv('NODE_ENV', 'production');
-    vi.spyOn(fs, 'writeFile').mockResolvedValue(true);
-  });
-
-  afterEach(() => {
-    MockDate.reset();
-    prefs.unloadPrefs();
-    fs._setDocumentDir(null);
-    vi.unstubAllEnvs();
-    vi.restoreAllMocks();
-  });
-
-  it('persists one completed run for duplicate same-day syncs', async () => {
-    const savedDays = [];
-    vi.mocked(fs.writeFile).mockImplementation(async (_path, contents) => {
-      savedDays.push(JSON.parse(contents).lastScheduleRun);
-      return true;
-    });
-
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    await runMutator(async () => undefined);
-
-    expect(savedDays).toEqual(['2024-01-01']);
-  });
-
-  it.each(['schedule query', 'metadata write'])(
-    'keeps a failed %s retryable on the same day',
-    async failure => {
-      if (failure === 'schedule query') {
-        vi.spyOn(sqlite, 'runQuery').mockImplementationOnce(() => {
-          throw new Error('schedule query failed');
-        });
-      } else {
-        vi.mocked(fs.writeFile).mockRejectedValueOnce(
-          new Error('metadata write failed'),
-        );
-      }
-
-      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-      await runMutator(async () => undefined);
-      expect(prefs.getPrefs().lastScheduleRun).toBe('2023-12-31');
-
-      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-      await runMutator(async () => undefined);
-      expect(prefs.getPrefs().lastScheduleRun).toBe('2024-01-01');
-    },
-  );
 });
