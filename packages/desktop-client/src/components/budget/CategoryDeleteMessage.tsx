@@ -31,7 +31,8 @@ export function CategoryDeleteMessage({
           <Trans>
             Categories in the group{' '}
             <strong>{{ group: group.name } as TransObjectLiteral}</strong> are
-            used by existing transactions.
+            used by existing transactions or have a budgeted amount in at least
+            one month.
           </Trans>
         )
       ) : isIncome ? (
@@ -43,7 +44,8 @@ export function CategoryDeleteMessage({
       ) : (
         <Trans>
           <strong>{{ category: category?.name } as TransObjectLiteral}</strong>{' '}
-          is used by existing transactions.
+          is used by existing transactions or has a budgeted amount in at least
+          one month.
         </Trans>
       )}{' '}
       <Trans>
