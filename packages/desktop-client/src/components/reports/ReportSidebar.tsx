@@ -397,6 +397,20 @@ export function ReportSidebar({
                   .includes(customReportItems.dateRange)
               ) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
+              } else if (e === 'Weekly' && customReportItems.isDateStatic) {
+                // Widen static dates to whole weeks so the range matches the
+                // weeks shown in From and To.
+                onChangeDates(
+                  monthUtils.weekFromDate(
+                    customReportItems.startDate,
+                    firstDayOfWeekIdx,
+                  ),
+                  monthUtils.getWeekEnd(
+                    customReportItems.endDate,
+                    firstDayOfWeekIdx,
+                  ),
+                  'static',
+                );
               }
             }}
             options={ReportOptions.interval.map(option => [
