@@ -11,6 +11,7 @@ import {
   foreignEditErrorMessage,
   isExchangeRow,
   openForeignEditDialog,
+  setInlineExchangeEdit,
 } from './foreign-edit';
 
 vi.mock('#queries/aqlQuery', () => ({ aqlQuery: vi.fn() }));
@@ -194,6 +195,40 @@ describe('opening the edit dialog', () => {
       accounts,
       onSaved,
     });
+    expect(opened()).toEqual({
+      name: 'exchange-transfer',
+      options: { edit: { id: 'usd-leg', onSaved } },
+    });
+  });
+
+  it('edits exchange rows inline while a register offers it', async () => {
+    const leg = row({
+      id: 'usd-leg',
+      account: 'usd',
+      transaction_amount: null,
+      payee: 'to-yen',
+      transfer_id: 'yen-leg',
+    });
+    const inline = vi.fn();
+    const remove = setInlineExchangeEdit(inline);
+    vi.mocked(modalsSlice.pushModal).mockClear();
+    const open = () =>
+      openForeignEditDialog(dispatch, {
+        row: leg,
+        rows: [leg],
+        payees,
+        accounts,
+        onSaved,
+      });
+
+    expect(await open()).toBe(true);
+    expect(inline).toHaveBeenCalledWith('usd-leg', onSaved);
+    expect(opened()).toBeUndefined();
+
+    // Without the register, the dialog edits it.
+    remove();
+    await open();
+    expect(inline).toHaveBeenCalledTimes(1);
     expect(opened()).toEqual({
       name: 'exchange-transfer',
       options: { edit: { id: 'usd-leg', onSaved } },

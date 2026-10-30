@@ -52,6 +52,7 @@ import {
   isExchangeRow,
   openForeignEditDialog,
   pushEditModal,
+  setInlineExchangeEdit,
   setInlineForeignSplitEdit,
 } from '#util/foreign-edit';
 import { postForeignEntry } from '#util/post-foreign-entry';
@@ -244,6 +245,28 @@ export function TransactionList({
       onRefetch();
     },
     [account, dispatch, isLearnCategoriesEnabled, onRefetch],
+  );
+
+  // Exchange transfers are edited above the rows, in the panel that enters
+  // them, while this register is shown.
+  const [exchangeEdit, setExchangeEdit] = useState<{
+    id: TransactionEntity['id'];
+    onSaved: () => void;
+  } | null>(null);
+  useEffect(
+    () =>
+      setInlineExchangeEdit((id, onSaved) =>
+        setExchangeEdit({
+          id,
+          // The register reloads its rows too: a caller outside it, such as
+          // Amount details, refreshes only its own queries.
+          onSaved: () => {
+            onSaved();
+            onRefetch();
+          },
+        }),
+      ),
+    [onRefetch],
   );
 
   // Exchange transfers post atomically from the register's inline panel.
@@ -773,6 +796,8 @@ export function TransactionList({
             }
           : undefined
       }
+      exchangeEdit={exchangeEdit}
+      onCloseExchangeEdit={() => setExchangeEdit(null)}
       onAddSplit={onAddSplit}
       onManagePayees={onManagePayees}
       onCreatePayee={onCreatePayee}
