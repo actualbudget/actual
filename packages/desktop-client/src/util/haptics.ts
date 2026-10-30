@@ -6,13 +6,13 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 // web app stays silent there.
 const isNativeApp = Capacitor.isNativePlatform();
 
-function vibrate(durationMs: number) {
+function vibrateUsingBrowserAPI(durationMs: number) {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
     navigator.vibrate(durationMs);
   }
 }
 
-function runNative(action: () => Promise<void>) {
+function runIgnoringErrors(action: () => Promise<void>) {
   // Haptics are a nicety: a device without a haptics engine (or a plugin
   // that failed to load) must never surface an error to the user.
   action().catch(() => undefined);
@@ -21,10 +21,10 @@ function runNative(action: () => Promise<void>) {
 /** A key on an on-screen keypad was pressed. */
 export function hapticKeyPress() {
   if (isNativeApp) {
-    runNative(() => Haptics.impact({ style: ImpactStyle.Light }));
+    runIgnoringErrors(() => Haptics.impact({ style: ImpactStyle.Light }));
     return;
   }
-  vibrate(3);
+  vibrateUsingBrowserAPI(3);
 }
 
 /**
@@ -33,8 +33,8 @@ export function hapticKeyPress() {
  */
 export function hapticThresholdCrossed() {
   if (isNativeApp) {
-    runNative(() => Haptics.impact({ style: ImpactStyle.Medium }));
+    runIgnoringErrors(() => Haptics.impact({ style: ImpactStyle.Medium }));
     return;
   }
-  vibrate(10);
+  vibrateUsingBrowserAPI(10);
 }
