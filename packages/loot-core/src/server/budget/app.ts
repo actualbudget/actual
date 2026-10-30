@@ -334,6 +334,9 @@ async function updateCategory(category: CategoryEntity): Promise<void> {
     // The API types `fields` as a Partial, and db.update() only writes the
     // keys it is given, so a partial that omits `name` must stay omitted
     // rather than being trimmed into a TypeError (#8857).
+    if (category.group !== undefined && !category.group) {
+      throw APIError('Updating a category: groupId is required');
+    }
     const payload = {
       ...category,
       ...(category.name !== undefined && { name: category.name.trim() }),

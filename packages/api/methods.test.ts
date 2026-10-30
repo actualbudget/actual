@@ -333,6 +333,75 @@ describe('API CRUD operations', () => {
     );
   });
 
+  test.each([
+    { invalidGroupId: null, label: 'null' },
+    { invalidGroupId: '', label: 'empty string' },
+  ])(
+    'Categories: reject invalid group_id ($label)',
+    async ({ invalidGroupId }) => {
+      const groupId = await api.createCategoryGroup({
+        name: 'test-valid-group',
+      });
+
+      const categoryId = await api.createCategory({
+        name: 'test-category',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.updateCategory(categoryId, {
+          // @ts-expect-error - Testing invalid runtime input
+          group_id: invalidGroupId,
+        }),
+      ).rejects.toThrow();
+
+      const categories = await api.getCategories();
+
+      expect(categories).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: categoryId,
+            group_id: groupId,
+          }),
+        ]),
+      );
+    },
+  );
+
+  test('Categories: partial update preserves existing group', async () => {
+    const groupId = await api.createCategoryGroup({
+      name: 'partial-update-group',
+    });
+
+    const categoryId = await api.createCategory({
+      name: 'original-category',
+      group_id: groupId,
+    });
+
+    // Update the name without providing group_id
+    await api.updateCategory(categoryId, {
+      name: 'renamed-category',
+    });
+
+    // Update another field without providing group_id
+    await api.updateCategory(categoryId, {
+      hidden: true,
+    });
+
+    const categories = await api.getCategories();
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          name: 'renamed-category',
+          group_id: groupId,
+          hidden: true,
+        }),
+      ]),
+    );
+  });
+
   // apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
   test('Budgets: successfully update budgets', async () => {
     const month = '2023-10';
