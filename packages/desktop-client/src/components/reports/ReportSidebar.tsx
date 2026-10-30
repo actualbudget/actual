@@ -229,6 +229,42 @@ export function ReportSidebar({
     }
   };
 
+  const onChangeInterval = (cond: string) => {
+    setSessionReport('interval', cond);
+    setInterval(cond);
+    onReportChange({ type: 'modify' });
+    const isRangeUnsupported = ReportOptions.dateRange
+      .filter(d => !d[cond as keyof dateRangeProps])
+      .map(int => int.key)
+      .includes(customReportItems.dateRange);
+
+    if (cond === 'Weekly' && customReportItems.isDateStatic) {
+      if (isRangeUnsupported) {
+        // Keep the live range valid without replacing the static dates.
+        const range = defaultsList.intervalRange.get(cond) || '';
+        setSessionReport('dateRange', range);
+        setDateRange(range);
+      }
+      // Widen static dates to whole weeks so the range matches the weeks
+      // shown in From and To, bounded the same way as picking a To week.
+      onChangeDates(
+        ...validateEnd(
+          earliestTransaction,
+          latestTransaction,
+          monthUtils.weekFromDate(
+            customReportItems.startDate,
+            firstDayOfWeekIdx,
+          ),
+          customReportItems.endDate,
+          cond,
+          firstDayOfWeekIdx,
+        ),
+      );
+    } else if (isRangeUnsupported) {
+      onSelectRange(defaultsList.intervalRange.get(cond) || '');
+    }
+  };
+
   const onChangeSortBy = (cond?: sortByOpType) => {
     cond ??= 'desc';
     setSessionReport('sortBy', cond);
@@ -386,33 +422,7 @@ export function ReportSidebar({
           </Text>
           <Select
             value={customReportItems.interval}
-            onChange={e => {
-              setSessionReport('interval', e);
-              setInterval(e);
-              onReportChange({ type: 'modify' });
-              if (
-                ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.key)
-                  .includes(customReportItems.dateRange)
-              ) {
-                onSelectRange(defaultsList.intervalRange.get(e) || '');
-              } else if (e === 'Weekly' && customReportItems.isDateStatic) {
-                // Widen static dates to whole weeks so the range matches the
-                // weeks shown in From and To.
-                onChangeDates(
-                  monthUtils.weekFromDate(
-                    customReportItems.startDate,
-                    firstDayOfWeekIdx,
-                  ),
-                  monthUtils.getWeekEnd(
-                    customReportItems.endDate,
-                    firstDayOfWeekIdx,
-                  ),
-                  'static',
-                );
-              }
-            }}
+            onChange={onChangeInterval}
             options={ReportOptions.interval.map(option => [
               option.key,
               option.description,
