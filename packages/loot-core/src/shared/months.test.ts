@@ -39,41 +39,25 @@ test('isValidYearMonthDay validates the day against the month and year', () => {
   expect(monthUtils.isValidYearMonthDay('2024-02')).toBe(false);
 });
 
-test('isCurrentMonth accepts dates and Date objects', () => {
-  const currentMonth = monthUtils.currentMonth();
-  const previousMonth = monthUtils.prevMonth(currentMonth);
-
-  expect(monthUtils.isCurrentMonth(currentMonth)).toBe(true);
-  expect(monthUtils.isCurrentMonth(`${currentMonth}-15`)).toBe(true);
-  expect(monthUtils.isCurrentMonth(monthUtils.parseDate(currentMonth))).toBe(
-    true,
-  );
-  const [year, month] = currentMonth.split('-').map(Number);
-  const overflowMonth = `${year - 1}-${String(month + 12).padStart(2, '0')}`;
-
-  expect(monthUtils.isCurrentMonth(previousMonth)).toBe(false);
-  expect(monthUtils.isCurrentMonth(`${previousMonth}-15`)).toBe(false);
-  expect(monthUtils.isCurrentMonth(overflowMonth)).toBe(false);
+test('isCurrentMonth matches valid local dates in the current month', () => {
+  expect(monthUtils.isCurrentMonth('2017-01')).toBe(true);
+  expect(monthUtils.isCurrentMonth('2017-01-15')).toBe(true);
+  expect(monthUtils.isCurrentMonth(new Date(2017, 0, 15, 12))).toBe(true);
+  expect(monthUtils.isCurrentMonth('2016-12')).toBe(false);
+  expect(monthUtils.isCurrentMonth(new Date(2016, 11, 31, 12))).toBe(false);
+  expect(monthUtils.isCurrentMonth('2016-13')).toBe(false);
+  expect(monthUtils.isCurrentMonth('2016-12-32')).toBe(false);
   expect(monthUtils.isCurrentMonth('invalid')).toBe(false);
   expect(monthUtils.isCurrentMonth(new Date(Number.NaN))).toBe(false);
 });
 
-test('isCurrentDay accepts Date objects', () => {
-  const currentDay = monthUtils.currentDay();
-  const previousDay = monthUtils.subDays(currentDay, 1);
-  const previousMonth = monthUtils.prevMonth(currentDay);
-  const overflowDay = `${previousMonth}-${String(
-    Number(monthUtils.lastDayOfMonth(previousMonth).slice(-2)) +
-      Number(currentDay.slice(-2)),
-  ).padStart(2, '0')}`;
-
-  expect(monthUtils.isCurrentDay(currentDay)).toBe(true);
-  expect(monthUtils.isCurrentDay(monthUtils.parseDate(currentDay))).toBe(true);
-  expect(monthUtils.isCurrentDay(previousDay)).toBe(false);
-  expect(monthUtils.isCurrentDay(overflowDay)).toBe(false);
-  expect(monthUtils.isCurrentDay(monthUtils.parseDate(previousDay))).toBe(
-    false,
-  );
+test('isCurrentDay matches valid local dates on the current day', () => {
+  expect(monthUtils.isCurrentDay('2017-01-01')).toBe(true);
+  expect(monthUtils.isCurrentDay(new Date(2017, 0, 1, 12))).toBe(true);
+  expect(monthUtils.isCurrentDay('2016-12-31')).toBe(false);
+  expect(monthUtils.isCurrentDay(new Date(2016, 11, 31, 12))).toBe(false);
+  expect(monthUtils.isCurrentDay('2017-01')).toBe(false);
+  expect(monthUtils.isCurrentDay('2016-12-32')).toBe(false);
   expect(monthUtils.isCurrentDay('invalid')).toBe(false);
   expect(monthUtils.isCurrentDay(new Date(Number.NaN))).toBe(false);
 });
