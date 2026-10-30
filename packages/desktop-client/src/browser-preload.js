@@ -100,6 +100,14 @@ const updateSW =
         onNeedRefresh: markUpdateReadyForDownload,
       });
 
+// Earlier native builds registered a SW before this skip existed. Left alone it
+// keeps serving the old precached bundle after a store update, so drop it.
+if (Platform.isNativeMobileApp && window.navigator.serviceWorker != null) {
+  void window.navigator.serviceWorker.getRegistrations().then(registrations => {
+    registrations.forEach(registration => void registration.unregister());
+  });
+}
+
 global.Actual = {
   IS_DEV,
   ACTUAL_VERSION,
