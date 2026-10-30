@@ -20,6 +20,7 @@ import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
+import { listen } from './util/server-listen';
 
 const debugSensitive = createDebug('actual-sensitive:server');
 
@@ -188,16 +189,12 @@ function parseHTTPSConfig(value: string) {
   return fs.readFileSync(value);
 }
 
-function sendServerStartedMessage(
-  activeHostname: string = config.get('hostname'),
-) {
+function sendServerStartedMessage(hostname: string) {
   // Signify to any parent process that the server has started. Used in electron desktop app
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
-  console.log(
-    'Listening on ' + activeHostname + ':' + config.get('port') + '...',
-  );
+  console.log('Listening on ' + hostname + ':' + config.get('port') + '...');
 }
 
 export async function run() {
@@ -222,8 +219,6 @@ export async function run() {
     }
   }
 
-  const { listenWithFallback } = await import('./util/server-listen');
-
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
@@ -231,31 +226,14 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    const server = https.createServer(httpsOptions, app);
-    listenWithFallback(
-      server,
+    listen(
+      https.createServer(httpsOptions, app),
       port,
       hostname,
-      actualHost => {
-        sendServerStartedMessage(actualHost);
-      },
-      () => {
-        process.exit(1);
-      },
+      sendServerStartedMessage,
     );
   } else {
     const http = await import('node:http');
-    const server = http.createServer(app);
-    listenWithFallback(
-      server,
-      port,
-      hostname,
-      actualHost => {
-        sendServerStartedMessage(actualHost);
-      },
-      () => {
-        process.exit(1);
-      },
-    );
+    listen(http.createServer(app), port, hostname, sendServerStartedMessage);
   }
 }
