@@ -61,3 +61,26 @@ test('isValidYearMonthDay validates the day against the month and year', () => {
   expect(monthUtils.isValidYearMonthDay('2024-02-00')).toBe(false);
   expect(monthUtils.isValidYearMonthDay('2024-02')).toBe(false);
 });
+
+test('isCurrentMonth matches valid local dates in the current month', () => {
+  expect(monthUtils.isCurrentMonth('2017-01')).toBe(true);
+  expect(monthUtils.isCurrentMonth('2017-01-15')).toBe(true);
+  expect(monthUtils.isCurrentMonth(new Date(2017, 0, 15, 12))).toBe(true);
+  expect(monthUtils.isCurrentMonth('2016-12')).toBe(false);
+  expect(monthUtils.isCurrentMonth(new Date(2016, 11, 31, 12))).toBe(false);
+  expect(monthUtils.isCurrentMonth('2016-13')).toBe(false);
+  expect(monthUtils.isCurrentMonth('2016-12-32')).toBe(false);
+  expect(monthUtils.isCurrentMonth('invalid')).toBe(false);
+  expect(monthUtils.isCurrentMonth(new Date(Number.NaN))).toBe(false);
+});
+
+test('isCurrentDay matches valid local dates on the current day', () => {
+  expect(monthUtils.isCurrentDay('2017-01-01')).toBe(true);
+  expect(monthUtils.isCurrentDay(new Date(2017, 0, 1, 12))).toBe(true);
+  expect(monthUtils.isCurrentDay('2016-12-31')).toBe(false);
+  expect(monthUtils.isCurrentDay(new Date(2016, 11, 31, 12))).toBe(false);
+  expect(monthUtils.isCurrentDay('2017-01')).toBe(false);
+  expect(monthUtils.isCurrentDay('2016-12-32')).toBe(false);
+  expect(monthUtils.isCurrentDay('invalid')).toBe(false);
+  expect(monthUtils.isCurrentDay(new Date(Number.NaN))).toBe(false);
+});
