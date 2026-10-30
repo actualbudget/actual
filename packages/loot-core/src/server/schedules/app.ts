@@ -240,8 +240,8 @@ export async function setNextDate({
   if (conditions == null) {
     const rule = await getRuleForSchedule(id);
     if (rule == null) {
-      // Invalid rules are excluded when loading the rule cache. Treat only
-      // this known missing-rule case as expected, not arbitrary I/O failures.
+      // Corrupt rules are dropped when the rule cache loads, so this also
+      // covers them. A RuleError marks a rule problem, not an I/O failure.
       throw new RuleError(
         'schedule-rule-not-found',
         'No rule found for schedule',
@@ -807,10 +807,8 @@ export async function advanceSchedulesService(syncSuccess) {
         }
       }
     } catch (error) {
-      if (
-        error instanceof RuleError &&
-        error.type === 'schedule-rule-not-found'
-      ) {
+      // A missing or corrupt rule is expected and should not block retries.
+      if (error instanceof RuleError) {
         continue;
       }
 
@@ -876,11 +874,31 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
+// Failed schedule writes emit sync errors too. While a run is active, ignore
+// them so the retry waits for a later external sync instead of this run.
 let advancingAfterSync = false;
 
+async function advanceSchedulesAfterSync(syncSuccess: boolean) {
+  const runDay = currentDay();
+  // An earlier queued sync may have completed today's work already.
+  if (prefs.getPrefs().lastScheduleRun === runDay) {
+    return;
+  }
+
+  advancingAfterSync = true;
+  try {
+    await advanceSchedulesService(syncSuccess);
+
+    // Rejected or offline runs must remain retryable on a later sync.
+    if (syncSuccess) {
+      await prefs.savePrefs({ lastScheduleRun: runDay });
+    }
+  } finally {
+    advancingAfterSync = false;
+  }
+}
+
 app.events.on('sync', ({ type }) => {
-  // Failed schedule writes emit sync errors too. Wait for a later external
-  // sync rather than letting an active run enqueue its own retry.
   if (advancingAfterSync) {
     return;
   }
@@ -895,27 +913,11 @@ app.events.on('sync', ({ type }) => {
     }
 
     if (prefs.getPrefs().lastScheduleRun !== currentDay()) {
-      void runMutator(async () => {
-        const runDay = currentDay();
-        // An earlier queued sync may have completed today's work already.
-        if (prefs.getPrefs().lastScheduleRun === runDay) {
-          return;
-        }
-
-        advancingAfterSync = true;
-        try {
-          await advanceSchedulesService(type === 'success');
-
-          // Rejected or offline runs must remain retryable on a later sync.
-          if (type === 'success') {
-            await prefs.savePrefs({ lastScheduleRun: runDay });
-          }
-        } finally {
-          advancingAfterSync = false;
-        }
-      }).catch(error => {
-        logger.error('Failed to run schedule service after sync', error);
-      });
+      runMutator(() => advanceSchedulesAfterSync(type === 'success')).catch(
+        error => {
+          logger.error('Failed to run schedule service after sync', error);
+        },
+      );
     }
   }
 });

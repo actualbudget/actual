@@ -1349,10 +1349,12 @@ describe('schedule app', () => {
       );
     }
 
-    async function createRecurringSchedule(
+    // Schedules are processed in next_date order, so a later nextDate puts a
+    // healthy schedule after a broken one.
+    async function createRecurringSchedule({
       postsTransaction = true,
       nextDate = 20161218,
-    ) {
+    } = {}) {
       const id = await createSchedule({
         schedule: { posts_transaction: postsTransaction },
         conditions: [
@@ -1411,9 +1413,8 @@ describe('schedule app', () => {
     it.each([true, false])(
       'reports unexpected advancement errors, processes later schedules, and retries without reposting (auto-post: %s)',
       async postsTransaction => {
-        const failedId = await createRecurringSchedule(postsTransaction);
-        // Its later next_date puts it after the broken schedule in service order.
-        const healthyId = await createRecurringSchedule(true, 20161225);
+        const failedId = await createRecurringSchedule({ postsTransaction });
+        const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
         failAdvancement(failedId);
 
         // Both auto-post catch-up and paid manual schedules must reject
@@ -1439,9 +1440,10 @@ describe('schedule app', () => {
     it.each(['missing', 'corrupt'])(
       'isolates a %s rule and still completes healthy schedule work',
       async ruleState => {
-        const brokenId = await createRecurringSchedule(false);
-        // Its later next_date puts it after the broken schedule in service order.
-        const healthyId = await createRecurringSchedule(true, 20161225);
+        const brokenId = await createRecurringSchedule({
+          postsTransaction: false,
+        });
+        const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
         const { data: ruleId } = await aqlQuery(
           q('schedules').filter({ id: brokenId }).calculate('rule'),
         );
@@ -1466,8 +1468,7 @@ describe('schedule app', () => {
 
     it('retries incomplete work on a later sync, then protects a successful day from duplicate runs', async () => {
       const failedId = await createRecurringSchedule();
-      // Its later next_date puts it after the broken schedule in service order.
-      const healthyId = await createRecurringSchedule(true, 20161225);
+      const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
       failAdvancement(failedId);
 
       let applyFailures = 0;
