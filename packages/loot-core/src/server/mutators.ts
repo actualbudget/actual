@@ -4,7 +4,6 @@ import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
 const runningMethods = new Set();
-const runningMutators = new Set<Promise<unknown>>();
 
 let currentContext = null;
 const mutatingMethods = new WeakMap();
@@ -96,23 +95,12 @@ function _runMutator<T extends () => Promise<unknown>>(
   }) as Promise<Awaited<ReturnType<T>>>;
 }
 // Type cast needed as TS looses types over nested generic returns
-const runMutatorSequential = sequential(_runMutator) as typeof _runMutator;
+export const runMutator = sequential(_runMutator) as typeof _runMutator;
 
-export function runMutator<T extends () => Promise<unknown>>(
-  func: T,
-  initialContext = {},
-): Promise<Awaited<ReturnType<T>>> {
-  const promise = runMutatorSequential(func, initialContext);
-  runningMutators.add(promise);
-  const remove = () => runningMutators.delete(promise);
-  void promise.then(remove, remove);
-  return promise;
-}
-
-export async function flushRunningMutators(): Promise<void> {
-  while (runningMutators.size > 0) {
-    await Promise.allSettled([...runningMutators]);
-  }
+// Mutators run one at a time in order, so a queued no-op only finishes once
+// every mutator queued before it has settled.
+export function flushRunningMutators(): Promise<void> {
+  return runMutator(async () => undefined);
 }
 
 export function withMutatorContext<T>(
