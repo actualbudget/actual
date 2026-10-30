@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
 
+import { initServer } from '@actual-app/core/platform/client/connection';
 import type {
   AccountEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { createTestAppStore, TestProviders } from '#mocks';
 import { mergeSyncedPrefs } from '#prefs/prefsSlice';
@@ -14,6 +16,11 @@ import {
   ExchangeCounterpartsProvider,
   useExchangeCounterparts,
 } from './useExchangeCounterparts';
+
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('#mocks/connection'),
+);
 
 const rows = vi.hoisted(() => ({
   value: [] as Array<Record<string, unknown>>,
@@ -206,4 +213,77 @@ it('finds the fee parent child behind an ordinary split with many transfers', as
   await waitFor(() =>
     expect(screen.getByTestId('row-parent').textContent).toMatch(/14,000/),
   );
+});
+
+describe('rate details on hover', () => {
+  beforeEach(() => {
+    rows.value = [
+      {
+        id: 'usd-leg',
+        account: 'usd',
+        amount: -10000,
+        date: '2026-03-10',
+        transfer_id: 'jpy-leg',
+      },
+      {
+        id: 'jpy-leg',
+        account: 'jpy',
+        amount: 10000,
+        transaction_amount: 15000,
+        date: '2026-03-10',
+        transfer_id: 'usd-leg',
+      },
+    ];
+  });
+
+  async function hover() {
+    renderLabels(
+      [
+        { id: 'usd-leg', account: 'usd', transfer_id: 'jpy-leg' },
+      ] as TransactionEntity[],
+      ['usd-leg'],
+    );
+    await userEvent.hover(await screen.findByTestId('exchange-counterpart'));
+    return screen.findByTestId('exchange-rate-details');
+  }
+
+  it('compares the transfer rate with the saved rate on its date', async () => {
+    const resolve = vi.fn(async () => ({
+      status: 'resolved' as const,
+      rate: '149',
+      kind: 'standing' as const,
+      source: 'manual',
+      timestamp: null,
+      fallback: false,
+    }));
+    initServer({ 'exchange-rates/resolve': resolve });
+    const details = await hover();
+    expect(details).toHaveTextContent('15,000 JPY arrived in jpy');
+    expect(details).toHaveTextContent(
+      'Rate of this transfer: 1 JPY = 0.00666667 USD',
+    );
+    await waitFor(() =>
+      expect(details).toHaveTextContent(
+        'Exchange rate on 03/10/2026: 1 JPY = 0.00671141 USD',
+      ),
+    );
+    expect(resolve).toHaveBeenCalledWith({
+      quoteCurrency: 'JPY',
+      date: '2026-03-10',
+    });
+  });
+
+  it('says when no rate is saved for the date', async () => {
+    initServer({
+      'exchange-rates/resolve': async () => ({
+        status: 'unavailable' as const,
+      }),
+    });
+    const details = await hover();
+    await waitFor(() =>
+      expect(details).toHaveTextContent(
+        'No exchange rate saved for 03/10/2026',
+      ),
+    );
+  });
 });
