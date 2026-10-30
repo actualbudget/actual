@@ -4,11 +4,7 @@
 <dict>
 	<key>method</key>
 	<string>app-store-connect</string>
-	<key>destination</key>
-	<string>upload</string>
 	<key>signingStyle</key>
 	<string>automatic</string>
-	<key>uploadSymbols</key>
-	<true/>
 </dict>
 </plist>
