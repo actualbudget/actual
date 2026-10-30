@@ -189,12 +189,12 @@ function parseHTTPSConfig(value: string) {
   return fs.readFileSync(value);
 }
 
-function sendServerStartedMessage(hostname: string) {
+function sendServerStartedMessage(address: string) {
   // Signify to any parent process that the server has started. Used in electron desktop app
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
-  console.log('Listening on ' + hostname + ':' + config.get('port') + '...');
+  console.log('Listening on ' + address + ':' + config.get('port') + '...');
 }
 
 export async function run() {
