@@ -162,6 +162,7 @@ import {
   isFutureTransaction,
 } from '#util/schedule-actions';
 
+import { ExchangeEdit } from './ExchangeEdit';
 import { ExchangePanel } from './ExchangePanel';
 import type { ExchangePostResult } from './ExchangePanel';
 import {
@@ -2789,6 +2790,11 @@ function NewTransaction({
   );
 }
 
+type ExchangeEditState = {
+  id: TransactionEntity['id'];
+  onSaved: () => void;
+} | null;
+
 type TransactionTableInnerProps = {
   tableRef: Ref<TableHandleRef<TransactionEntity>>;
   listContainerRef: RefObject<HTMLDivElement>;
@@ -2864,6 +2870,8 @@ type TransactionTableInnerProps = {
     request: ExchangeRequest,
   ) => Promise<ExchangePostResult>;
   exchangeFocusToken?: number;
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -3186,7 +3194,35 @@ function TransactionTableInner({
           ref={tableRef}
           listContainerRef={listContainerRef}
           items={transactionsToRender}
-          rowDetails={props.rowDetails}
+          rowDetails={
+            props.exchangeEdit && props.onCloseExchangeEdit
+              ? {
+                  id: props.exchangeEdit.id,
+                  content: (
+                    <View
+                      data-testid="exchange-edit"
+                      style={{
+                        borderBottom: '1px solid ' + theme.tableBorderHover,
+                        paddingBottom: 6,
+                        backgroundColor: theme.tableBackground,
+                      }}
+                    >
+                      <ExchangeEdit
+                        key={props.exchangeEdit.id}
+                        id={props.exchangeEdit.id}
+                        metadataKey={JSON.stringify([
+                          props.transactionMap.get(props.exchangeEdit.id)?.date,
+                          props.transactionMap.get(props.exchangeEdit.id)
+                            ?.notes,
+                        ])}
+                        onSaved={props.exchangeEdit.onSaved}
+                        onDone={props.onCloseExchangeEdit}
+                      />
+                    </View>
+                  ),
+                }
+              : props.rowDetails
+          }
           renderItem={renderRow}
           renderEmpty={renderEmpty}
           loadMore={props.loadMoreTransactions}
@@ -3262,6 +3298,9 @@ export type TransactionTableProps = {
   onAdd: (transactions: TransactionEntity[]) => void;
   /** Posts an exchange transfer; given only in single-account registers. */
   onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** The exchange transfer edited directly below its register row. */
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
   onNavigateToTransferAccount: NavigateToTransferAccount;
