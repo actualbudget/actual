@@ -4,6 +4,38 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOnVisible } from './useOnVisible';
 
+const capacitorMocks = vi.hoisted(() => ({
+  isNativePlatform: vi.fn(() => false),
+  appStateListeners: [] as Array<(state: { isActive: boolean }) => void>,
+}));
+
+vi.mock('@capacitor/core', () => ({
+  Capacitor: { isNativePlatform: capacitorMocks.isNativePlatform },
+}));
+
+vi.mock('@capacitor/app', () => ({
+  App: {
+    addListener: vi.fn(
+      async (
+        _event: string,
+        listener: (state: { isActive: boolean }) => void,
+      ) => {
+        capacitorMocks.appStateListeners.push(listener);
+        return {
+          remove: async () => {
+            capacitorMocks.appStateListeners =
+              capacitorMocks.appStateListeners.filter(l => l !== listener);
+          },
+        };
+      },
+    ),
+  },
+}));
+
+function dispatchAppStateChange(isActive: boolean) {
+  capacitorMocks.appStateListeners.forEach(listener => listener({ isActive }));
+}
+
 function setVisibilityState(value: DocumentVisibilityState) {
   Object.defineProperty(document, 'visibilityState', {
     value,
@@ -105,5 +137,40 @@ describe('useOnVisible', () => {
     dispatchVisibilityChange();
 
     expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  describe('in the native app', () => {
+    beforeEach(() => {
+      capacitorMocks.isNativePlatform.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      capacitorMocks.isNativePlatform.mockReturnValue(false);
+      capacitorMocks.appStateListeners = [];
+    });
+
+    it('invokes callback when the app becomes active', async () => {
+      const callback = vi.fn();
+      renderHook(() => useOnVisible(callback));
+      await Promise.resolve();
+
+      dispatchAppStateChange(false);
+      expect(callback).not.toHaveBeenCalled();
+
+      dispatchAppStateChange(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the app state listener on unmount', async () => {
+      const callback = vi.fn();
+      const { unmount } = renderHook(() => useOnVisible(callback));
+      await Promise.resolve();
+
+      unmount();
+      await Promise.resolve();
+      dispatchAppStateChange(true);
+
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 });
