@@ -567,8 +567,7 @@ describe('Budget shutdown', () => {
     await prefs.loadPrefs();
     const errorLog = vi.spyOn(logger, 'error');
     const gate = deferred();
-    // A sync error inside a mutator emits a sync event that queues a
-    // schedule run behind everything already waiting
+    // The sync error queues a schedule run after close has started draining
     const rejectingPromise = runMutator(() =>
       batchMessages(async () => {
         await gate.promise;

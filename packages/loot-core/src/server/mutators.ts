@@ -110,6 +110,8 @@ export function runMutator<T extends () => Promise<unknown>>(
 }
 
 export async function flushRunningMutators(): Promise<void> {
+  // A settling mutator can queue another, e.g. a sync error queues a
+  // schedule run, so wait until none are left
   while (runningMutators.size > 0) {
     await Promise.allSettled([...runningMutators]);
   }

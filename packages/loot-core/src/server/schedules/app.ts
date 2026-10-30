@@ -870,7 +870,8 @@ app.events.on('sync', ({ type }) => {
           try {
             await prefs.savePrefs({ lastScheduleRun: runDay });
           } catch (error) {
-            // savePrefs updates the loaded prefs before writing them
+            // savePrefs updates the loaded prefs before writing, so undo that
+            // to keep today's run retryable
             prefs.getPrefs().lastScheduleRun = lastScheduleRun;
             throw error;
           }

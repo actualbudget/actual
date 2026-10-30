@@ -815,8 +815,8 @@ export function fullSync(): Promise<FullSyncResult> {
   return runningFullSync;
 }
 
-// Stops new syncs and waits for the running one, including the mutators it
-// queues, so the budget can be closed.
+// Stops new syncs, then waits for the running sync and all queued mutators so
+// the budget can be closed.
 export async function stopFullSync(): Promise<void> {
   isFullSyncStopped = true;
   clearFullSyncTimeout();
