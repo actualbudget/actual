@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import type { ReactNode } from 'react';
 import { GridListItem } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
@@ -31,7 +31,7 @@ export function ActionableGridListItem<T extends object>({
 }: ActionableGridListItemProps<T>) {
   const dragStartedRef = useRef(false);
   const isPastThresholdRef = useRef(false);
-  const [isRevealed, setIsRevealed] = useState(false);
+  const dragStartXRef = useRef(0);
 
   const hasActions = !!actions;
 
@@ -47,8 +47,12 @@ export function ActionableGridListItem<T extends object>({
   // Handle drag gestures
   const bind = useDrag(
     ({ active, first, movement: [mx], velocity: [vx] }) => {
-      const startPos = isRevealed ? -actionsWidth : 0;
-      const currentX = startPos + mx;
+      // Start from where the item actually is, so a swipe that interrupts a
+      // snap animation continues from the current position.
+      if (first) {
+        dragStartXRef.current = x.get();
+      }
+      const currentX = dragStartXRef.current + mx;
 
       // Tick when the drag crosses the point where letting go flips between
       // revealed and closed, like native swipe actions do.
@@ -82,14 +86,9 @@ export function ActionableGridListItem<T extends object>({
           dragStartedRef.current = false;
         },
       });
-      // Set now rather than in onRest: when the drag already clamped x at
-      // the target, react-spring treats this start as a no-op and never
-      // calls onRest, leaving the state stale.
-      setIsRevealed(shouldReveal);
     },
     {
       axis: 'x',
-      from: () => [isRevealed ? -actionsWidth : 0, 0],
       enabled: hasActions,
     },
   );
@@ -159,12 +158,7 @@ export function ActionableGridListItem<T extends object>({
             {typeof actions === 'function'
               ? actions({
                   close: () => {
-                    void api.start({
-                      to: { x: 0 },
-                      onRest: () => {
-                        setIsRevealed(false);
-                      },
-                    });
+                    void api.start({ to: { x: 0 } });
                   },
                 })
               : actions}
