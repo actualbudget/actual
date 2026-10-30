@@ -6,7 +6,7 @@ export function listen(
   hostname: string,
   onListening: (address: string) => void,
 ): void {
-  // Without a host, Node binds to `::` and falls back to `0.0.0.0` when IPv6 is unavailable
+  // Omitting the host lets Node fall back to `0.0.0.0` when IPv6 is unavailable
   server.listen(port, hostname === '::' ? undefined : hostname, () => {
     const address = server.address();
     onListening(
