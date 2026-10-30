@@ -101,23 +101,30 @@ describe('useOnVisible', () => {
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
-  it('does not invoke callback again until previous async callback completes', async () => {
-    let resolve: () => void;
+  it('coalesces events during an async callback into one follow-up run', async () => {
+    const resolvers: Array<() => void> = [];
     const callback = vi.fn().mockImplementation(
       () =>
-        new Promise<void>(r => {
-          resolve = r;
+        new Promise<void>(resolve => {
+          resolvers.push(resolve);
         }),
     );
     renderHook(() => useOnVisible(callback));
 
     dispatchVisibilityChange();
     dispatchVisibilityChange();
+    dispatchVisibilityChange();
     expect(callback).toHaveBeenCalledTimes(1);
 
-    resolve();
+    // Finishing the first run starts exactly one more, not one per event
+    resolvers[0]();
     await Promise.resolve();
-    dispatchVisibilityChange();
+    await Promise.resolve();
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    resolvers[1]();
+    await Promise.resolve();
+    await Promise.resolve();
     expect(callback).toHaveBeenCalledTimes(2);
   });
 

@@ -11,9 +11,9 @@ type UseOnVisibleOptions = {
 /**
  * Runs the given callback when the document becomes visible (e.g. user
  * switches back to the tab). Inside the iOS and Android apps it runs when
- * the app returns to the foreground instead. Uses a guard so the callback is
- * not invoked again until the previous invocation has finished (handles
- * async callbacks).
+ * the app returns to the foreground instead. Only one invocation runs at a
+ * time: events arriving while the callback is still running are coalesced
+ * into a single follow-up run once it finishes.
  */
 export function useOnVisible(
   callback: () => void | Promise<void>,
@@ -21,9 +21,11 @@ export function useOnVisible(
 ) {
   const { isEnabled = true } = options;
   const inProgress = useRef(false);
+  const isPending = useRef(false);
 
   const runCallback = useEffectEvent(async () => {
     if (inProgress.current) {
+      isPending.current = true;
       return;
     }
     inProgress.current = true;
@@ -31,6 +33,10 @@ export function useOnVisible(
       await callback();
     } finally {
       inProgress.current = false;
+      if (isPending.current) {
+        isPending.current = false;
+        void runCallback();
+      }
     }
   });
 
