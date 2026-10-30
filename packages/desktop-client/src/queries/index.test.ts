@@ -8,6 +8,7 @@ describe('transactionsSearch', () => {
       q('transactions'),
       'XF 35mm',
       'yyyy-MM-dd',
+      'kr',
     );
 
     expect(query.serialize().filterExpressions).toMatchObject([
@@ -22,10 +23,16 @@ describe('transactionsSearch', () => {
   });
 
   it.each([
-    ['35', 3500],
-    ['$12.50', 1250],
-  ])('still matches the amount for %s', (search, amount) => {
-    const query = transactionsSearch(q('transactions'), search, 'yyyy-MM-dd');
+    ['35', '', 3500],
+    ['$12.50', '$', 1250],
+    ['120 kr', 'kr', 12000],
+  ])('still matches the amount for %s', (search, currencySymbol, amount) => {
+    const query = transactionsSearch(
+      q('transactions'),
+      search,
+      'yyyy-MM-dd',
+      currencySymbol,
+    );
 
     expect(query.serialize().filterExpressions).toMatchObject([
       {
