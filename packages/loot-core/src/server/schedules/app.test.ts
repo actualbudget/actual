@@ -1318,22 +1318,31 @@ describe('schedule app', () => {
 
   describe('schedule advancement failures', () => {
     let accountId: string;
+    let applyFailures: number;
     const catchUpDates = ['2016-12-18', '2016-12-25', '2017-01-01'];
     const healthyDates = ['2016-12-25', '2017-01-01'];
 
+    function forwardSync(event: ServerEvents['sync-event']) {
+      if (event.type === 'error' && event.subtype === 'apply-failure') {
+        applyFailures++;
+      }
+      schedulesApp.events.emit('sync', event);
+    }
+
     beforeEach(async () => {
-      // currentDay() is fixed at 2017-01-01 by the test environment.
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
       await prefs.loadPrefs();
-      accountId = await db.insertAccount({
-        name: 'Checking',
-        offbudget: 0,
-        closed: 0,
-      });
+      accountId = await db.insertAccount({ name: 'Checking', closed: 0 });
+      applyFailures = 0;
+      // Production also registers the schedule listener on the main app.
+      mainApp.events.on('sync', forwardSync);
     });
 
     afterEach(async () => {
+      // Detach before draining so a self-retry regression cannot leak work.
+      mainApp.events.off('sync', forwardSync);
+      await runMutator(() => Promise.resolve());
       db.runQuery('DROP TRIGGER IF EXISTS fail_schedule_advancement');
       prefs.unloadPrefs();
       MockDate.reset();
@@ -1342,15 +1351,11 @@ describe('schedule app', () => {
 
     function rewindSchedule(id: string, nextDate = 20161218) {
       db.runQuery(
-        `UPDATE schedules_next_date
-         SET local_next_date = ?, base_next_date = ?
-         WHERE schedule_id = ?`,
+        'UPDATE schedules_next_date SET local_next_date = ?, base_next_date = ? WHERE schedule_id = ?',
         [nextDate, nextDate, id],
       );
     }
 
-    // Schedules are processed in next_date order, so a later nextDate puts a
-    // healthy schedule after a broken one.
     async function createRecurringSchedule({
       postsTransaction = true,
       nextDate = 20161218,
@@ -1359,15 +1364,10 @@ describe('schedule app', () => {
         schedule: { posts_transaction: postsTransaction },
         conditions: [
           { op: 'is', field: 'account', value: accountId },
-          { op: 'is', field: 'amount', value: -10000 },
           {
             op: 'is',
             field: 'date',
-            value: {
-              start: '2016-12-18',
-              frequency: 'weekly',
-              patterns: [],
-            },
+            value: { start: '2016-12-18', frequency: 'weekly', patterns: [] },
           },
         ],
       });
@@ -1375,23 +1375,12 @@ describe('schedule app', () => {
       if (!postsTransaction) {
         await db.insertTransaction({
           account: accountId,
-          amount: -10000,
+          amount: 0,
           date: '2016-12-18',
           schedule: id,
         });
       }
       return id;
-    }
-
-    function failAdvancement(id: string) {
-      // Fail at the SQLite boundary, not by mocking setNextDate. Posting
-      // transactions and reading the schedule still work.
-      db.runQuery(`
-        CREATE TEMP TRIGGER fail_schedule_advancement
-        BEFORE UPDATE OF local_next_date ON schedules_next_date
-        WHEN OLD.schedule_id = '${id}'
-        BEGIN SELECT RAISE(FAIL, 'schedule advancement write failed'); END
-      `);
     }
 
     async function postedDates(id: string) {
@@ -1404,28 +1393,53 @@ describe('schedule app', () => {
       return data.map(row => row.date);
     }
 
-    async function syncSuccessfully(events = schedulesApp.events) {
-      events.emit('sync', { type: 'success', tables: [] });
-      // Drain the queued service work without timers or mocked mutators.
+    async function syncSuccessfully() {
+      mainApp.events.emit('sync', { type: 'success', tables: [] });
+      await runMutator(() => Promise.resolve());
+      // Also drain a retry incorrectly enqueued by this run's own error.
       await runMutator(() => Promise.resolve());
     }
 
-    it.each([true, false])(
-      'reports unexpected advancement errors, processes later schedules, and retries without reposting (auto-post: %s)',
-      async postsTransaction => {
+    it.each([
+      { postsTransaction: true, ruleState: 'missing' },
+      { postsTransaction: false, ruleState: 'corrupt' },
+    ])(
+      'isolates a $ruleState rule and retries unexpected errors without duplicates (auto-post: $postsTransaction)',
+      async ({ postsTransaction, ruleState }) => {
         const failedId = await createRecurringSchedule({ postsTransaction });
+        const brokenId = await createRecurringSchedule({
+          postsTransaction: false,
+        });
+        // The healthy schedule must sort after the failing ones.
         const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
-        failAdvancement(failedId);
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id: brokenId }).calculate('rule'),
+        );
+        if (ruleState === 'missing') {
+          db.runQuery('DELETE FROM rules WHERE id = ?', [ruleId]);
+        } else {
+          db.runQuery('UPDATE rules SET actions = ? WHERE id = ?', [
+            JSON.stringify([{ op: 'invalid-action' }]),
+            ruleId,
+          ]);
+        }
+        await loadRules();
+        // Exercise the real setNextDate write through each advancement path.
+        db.runQuery(`
+          CREATE TEMP TRIGGER fail_schedule_advancement
+          BEFORE UPDATE OF local_next_date ON schedules_next_date
+          WHEN OLD.schedule_id = '${failedId}'
+          BEGIN SELECT RAISE(FAIL, 'schedule advancement write failed'); END
+        `);
 
-        // Both auto-post catch-up and paid manual schedules must reject
-        // incomplete runs, but only after processing the healthy schedule.
-        await expect.soft(advanceSchedulesService(true)).rejects.toThrow();
+        await syncSuccessfully();
+        expect.soft(applyFailures).toBe(1);
+        expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
         expect(await postedDates(failedId)).toEqual(['2016-12-18']);
         expect(await postedDates(healthyId)).toEqual(healthyDates);
 
         db.runQuery('DROP TRIGGER fail_schedule_advancement');
-        await advanceSchedulesService(true);
-
+        await syncSuccessfully();
         expect(await postedDates(failedId)).toEqual(
           postsTransaction ? catchUpDates : ['2016-12-18'],
         );
@@ -1434,85 +1448,17 @@ describe('schedule app', () => {
           q('schedules').filter({ id: failedId }).calculate('next_date'),
         );
         expect(nextDate).toBe('2017-01-01');
-      },
-    );
-
-    it.each(['missing', 'corrupt'])(
-      'isolates a %s rule and still completes healthy schedule work',
-      async ruleState => {
-        const brokenId = await createRecurringSchedule({
-          postsTransaction: false,
-        });
-        const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
-        const { data: ruleId } = await aqlQuery(
-          q('schedules').filter({ id: brokenId }).calculate('rule'),
-        );
-        if (ruleState === 'missing') {
-          db.runQuery('DELETE FROM rules WHERE id = ?', [ruleId]);
-        } else {
-          // Valid JSON with an invalid action leaves the schedule's date
-          // and account readable, but loadRules excludes its corrupt rule.
-          db.runQuery('UPDATE rules SET actions = ? WHERE id = ?', [
-            JSON.stringify([{ op: 'invalid-action' }]),
-            ruleId,
-          ]);
-        }
-        await loadRules();
-
-        await syncSuccessfully();
-
-        expect(await postedDates(healthyId)).toEqual(healthyDates);
-        expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
-      },
-    );
-
-    it('retries incomplete work on a later sync, then protects a successful day from duplicate runs', async () => {
-      const failedId = await createRecurringSchedule();
-      const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
-      failAdvancement(failedId);
-
-      let applyFailures = 0;
-      function forwardSync(event: ServerEvents['sync-event']) {
-        if (event.type === 'error' && event.subtype === 'apply-failure') {
-          applyFailures++;
-        }
-        // Production registers the schedule listener on this same event bus.
-        schedulesApp.events.emit('sync', event);
-      }
-      mainApp.events.on('sync', forwardSync);
-
-      try {
-        await syncSuccessfully(mainApp.events);
-
-        // Drain any retry enqueued by the first run's own apply-failure event.
-        await runMutator(() => Promise.resolve());
-        expect.soft(applyFailures).toBe(1);
-        expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
-        expect(await postedDates(failedId)).toEqual(['2016-12-18']);
-        expect(await postedDates(healthyId)).toEqual(healthyDates);
-
-        db.runQuery('DROP TRIGGER fail_schedule_advancement');
-        await syncSuccessfully(mainApp.events);
-
-        expect.soft(await postedDates(failedId)).toEqual(catchUpDates);
-        expect(await postedDates(healthyId)).toEqual(healthyDates);
         expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
 
-        // Simulate older next-date data arriving from another client without
-        // using updateSchedule, which deliberately clears the daily marker.
+        // Incoming old next-date data must not bypass the successful daily marker.
         rewindSchedule(healthyId);
-        await syncSuccessfully(mainApp.events);
-        const { data: nextDate } = await aqlQuery(
+        await syncSuccessfully();
+        const { data: unchangedDate } = await aqlQuery(
           q('schedules').filter({ id: healthyId }).calculate('next_date'),
         );
-        expect(nextDate).toBe('2016-12-18');
-      } finally {
-        mainApp.events.off('sync', forwardSync);
-        // Stop feedback before draining so a regression cannot leak a retry
-        // loop into the next test, even if an assertion above fails.
-        await runMutator(() => Promise.resolve());
-      }
-    });
+        expect(unchangedDate).toBe('2016-12-18');
+      },
+    );
   });
 
   describe('auto-post service throttling', () => {
