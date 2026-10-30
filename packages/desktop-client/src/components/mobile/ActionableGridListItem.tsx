@@ -10,6 +10,8 @@ import { theme } from '@actual-app/components/theme';
 import type { WithRequired } from '@actual-app/core/types/util';
 import { useDrag } from '@use-gesture/react';
 
+import { hapticThresholdCrossed } from '#util/haptics';
+
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);
   actionsBackgroundColor?: string;
@@ -28,6 +30,7 @@ export function ActionableGridListItem<T extends object>({
   ...props
 }: ActionableGridListItemProps<T>) {
   const dragStartedRef = useRef(false);
+  const isPastThresholdRef = useRef(false);
   const [isRevealed, setIsRevealed] = useState(false);
 
   const hasActions = !!actions;
@@ -43,9 +46,19 @@ export function ActionableGridListItem<T extends object>({
 
   // Handle drag gestures
   const bind = useDrag(
-    ({ active, movement: [mx], velocity: [vx] }) => {
+    ({ active, first, movement: [mx], velocity: [vx] }) => {
       const startPos = isRevealed ? -actionsWidth : 0;
       const currentX = startPos + mx;
+
+      // Tick when the drag crosses the point where letting go flips between
+      // revealed and closed, like native swipe actions do.
+      const isPastThreshold = currentX < -actionsWidth / 2;
+      if (first) {
+        isPastThresholdRef.current = isPastThreshold;
+      } else if (active && isPastThreshold !== isPastThresholdRef.current) {
+        isPastThresholdRef.current = isPastThreshold;
+        hapticThresholdCrossed();
+      }
 
       if (active) {
         dragStartedRef.current = true;
