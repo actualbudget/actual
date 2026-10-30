@@ -8,7 +8,6 @@ import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as undo from '@actual-app/core/platform/client/undo';
-import * as Platform from '@actual-app/core/shared/platform';
 
 import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
@@ -161,13 +160,7 @@ export function FinancesApp() {
   }, [dispatch]);
 
   useEffect(() => {
-    // The native mobile apps update through the app stores, so a newer
-    // GitHub release is nothing the user can act on from inside the app.
-    if (
-      notifyWhenUpdateIsAvailable &&
-      versionInfo &&
-      !Platform.isNativeMobileApp
-    ) {
+    if (notifyWhenUpdateIsAvailable && versionInfo) {
       if (
         versionInfo.isOutdated &&
         lastUsedVersion !== versionInfo.latestVersion

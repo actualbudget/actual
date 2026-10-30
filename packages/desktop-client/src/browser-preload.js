@@ -88,12 +88,10 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
   };
 });
 // Skip SW registration in dev so stale cached assets don't override edits
-// between page loads. Plugin code that needs a SW can register one itself.
-// The native mobile apps ship their assets inside the app bundle and update
-// through the app stores, so they have nothing for a SW to cache or update.
-// Without a SW, applyAppUpdate() can't rely on the SW lifecycle to swap the
-// page — fall back to a plain reload so callers don't hang on the
-// never-resolving promise inside applyAppUpdate.
+// between page loads, and in the native mobile apps, whose assets ship in the
+// app bundle and update via the app stores. Plugin code that needs a SW can
+// register one itself. Without a SW, applyAppUpdate() falls back to a plain
+// reload so callers don't hang on its never-resolving promise.
 const updateSW =
   IS_DEV || Platform.isNativeMobileApp
     ? () => window.location.reload()
