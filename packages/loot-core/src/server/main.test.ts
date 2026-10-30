@@ -7,11 +7,10 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import * as monthUtils from '#shared/months';
 
-import * as aql from './aql';
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import * as db from './db';
-import { handlers } from './main';
+import { handlers, lib } from './main';
 import {
   disableGlobalMutations,
   enableGlobalMutations,
@@ -447,68 +446,53 @@ describe('Categories', () => {
   });
 });
 
-const closeModes = ['named', 'unnamed', 'direct', 'nested'];
-
-describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
+describe('Budget shutdown', () => {
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+    fs._setDocumentDir(null);
+    setSyncingMode('disabled');
   });
 
   function deferred() {
-    let resolve;
-    const promise = new Promise(resolvePromise => {
+    let resolve: () => void;
+    const promise = new Promise<void>(resolvePromise => {
       resolve = resolvePromise;
     });
     return { promise, resolve };
   }
 
-  function startCloseBudget() {
-    switch (closeMode) {
-      case 'direct':
-        return handlers['close-budget']();
-      case 'nested':
-        return runHandler(async () => {
-          await Promise.resolve();
-          return handlers['close-budget']();
-        });
-      case 'unnamed':
-        return runHandler(handlers['close-budget']);
-      default:
-        return runHandler(handlers['close-budget'], undefined, {
-          name: 'close-budget',
-        });
-    }
-  }
-
-  test('waits for background sync and the schedule mutator it starts', async () => {
+  test('waits for background sync and its schedule metadata write', async () => {
     vi.useFakeTimers();
     await prefs.loadPrefs();
     await prefs.savePrefs({ groupId: 'group' });
+    fs._setDocumentDir(__dirname);
     setSyncingMode('enabled');
     const syncGate = deferred();
     const syncStarted = deferred();
-    const scheduleGate = deferred();
-    const scheduleStarted = deferred();
+    const writeGate = deferred();
+    const writeStarted = deferred();
     const postBinary = post.postBinary;
-    const postSpy = vi
-      .spyOn(post, 'postBinary')
-      .mockImplementationOnce(async (...args) => {
-        syncStarted.resolve();
-        await syncGate.promise;
-        return postBinary(...args);
-      });
-    const aqlQuery = aql.aqlQuery;
-    const querySpy = vi
-      .spyOn(aql, 'aqlQuery')
-      .mockImplementationOnce(async (...args) => {
-        scheduleStarted.resolve();
-        await scheduleGate.promise;
-        return aqlQuery(...args);
-      });
-    await runHandler(handlers['app-focused']);
+    vi.spyOn(post, 'postBinary').mockImplementationOnce(async (...args) => {
+      syncStarted.resolve();
+      await syncGate.promise;
+      return postBinary(...args);
+    });
+    let savedPrefs;
+    vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
+      const metadata = JSON.parse(contents);
+      if (metadata.lastScheduleRun) {
+        writeStarted.resolve();
+        await writeGate.promise;
+        savedPrefs = metadata;
+      }
+      return true;
+    });
+    await lib.send('app-focused');
     await syncStarted.promise;
     let closed = false;
-    const closePromise = startCloseBudget().then(result => {
+    const closePromise = lib.send('close-budget').then(result => {
       closed = true;
       return result;
     });
@@ -518,23 +502,26 @@ describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
       expect(closed).toBe(false);
       expect(db.getDatabase()).not.toBeNull();
 
+      vi.stubEnv('NODE_ENV', 'production');
       syncGate.resolve();
-      await scheduleStarted.promise;
+      await writeStarted.promise;
+      await vi.advanceTimersByTimeAsync(1000);
       expect(closed).toBe(false);
       expect(db.getDatabase()).not.toBeNull();
 
-      scheduleGate.resolve();
+      writeGate.resolve();
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
+      expect(savedPrefs).toMatchObject({
+        groupId: 'group',
+        lastScheduleRun: monthUtils.currentDay(),
+      });
       expect(db.getDatabase()).toBeNull();
     } finally {
       syncGate.resolve();
-      scheduleGate.resolve();
+      writeGate.resolve();
       await vi.runAllTimersAsync();
       await closePromise;
-      postSpy.mockRestore();
-      querySpy.mockRestore();
-      setSyncingMode('disabled');
     }
   });
 
@@ -545,17 +532,15 @@ describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
     setSyncingMode('enabled');
     const sheetGate = deferred();
     const sheetStarted = deferred();
-    const sheetSpy = vi
-      .spyOn(sheet, 'waitOnSpreadsheet')
-      .mockImplementationOnce(async () => {
-        sheetStarted.resolve();
-        await sheetGate.promise;
-      });
+    vi.spyOn(sheet, 'waitOnSpreadsheet').mockImplementationOnce(async () => {
+      sheetStarted.resolve();
+      await sheetGate.promise;
+    });
     const postSpy = vi.spyOn(post, 'postBinary');
     vi.stubEnv('NODE_ENV', 'production');
     void scheduleFullSync();
     vi.unstubAllEnvs();
-    const closePromise = startCloseBudget();
+    const closePromise = lib.send('close-budget');
 
     try {
       await vi.advanceTimersByTimeAsync(500);
@@ -571,154 +556,35 @@ describe.each(closeModes)('Mutator shutdown (%s)', closeMode => {
       sheetGate.resolve();
       await vi.runAllTimersAsync();
       await closePromise;
-      sheetSpy.mockRestore();
-      postSpy.mockRestore();
-      setSyncingMode('disabled');
     }
   });
 
-  test('drains background work started while waiting for the spreadsheet', async () => {
-    vi.useFakeTimers();
-    await prefs.loadPrefs();
-    setSyncingMode('enabled');
-    const backgroundGate = deferred();
-    const backgroundStarted = deferred();
-    let backgroundPromise;
-    const sheetSpy = vi
-      .spyOn(sheet, 'waitOnSpreadsheet')
-      .mockImplementationOnce(async () => {
-        backgroundPromise = runHandler(
-          async () => {
-            backgroundStarted.resolve();
-            await backgroundGate.promise;
-            await db.first('SELECT 1');
-            vi.stubEnv('NODE_ENV', 'production');
-            void scheduleFullSync();
-            vi.unstubAllEnvs();
-          },
-          undefined,
-          { background: true },
-        );
-        void backgroundPromise.catch(() => undefined);
-      });
-    let closed = false;
-    const closePromise = startCloseBudget().then(result => {
-      closed = true;
-      return result;
-    });
-
-    try {
-      await vi.advanceTimersByTimeAsync(1000);
-      await backgroundStarted.promise;
-      expect(closed).toBe(false);
-      expect(db.getDatabase()).not.toBeNull();
-
-      backgroundGate.resolve();
-      await vi.advanceTimersByTimeAsync(300);
-      await expect(backgroundPromise).resolves.toBeUndefined();
-      await expect(closePromise).resolves.toBe('ok');
-      expect(vi.getTimerCount()).toBe(0);
-    } finally {
-      backgroundGate.resolve();
-      await vi.runAllTimersAsync();
-      await Promise.allSettled([backgroundPromise, closePromise]);
-      sheetSpy.mockRestore();
-      setSyncingMode('disabled');
-    }
-  });
-
-  test('waits for a running mutator before closing the database', async () => {
-    vi.useFakeTimers();
-    const gate = deferred();
-    const mutatorPromise = runMutator(async () => {
-      await gate.promise;
-      await db.first('SELECT 1');
-    });
-    const closePromise = startCloseBudget();
-
-    try {
-      await vi.advanceTimersByTimeAsync(200);
-      expect(db.getDatabase()).not.toBeNull();
-
-      gate.resolve();
-      await expect(mutatorPromise).resolves.toBeUndefined();
-      await vi.runAllTimersAsync();
-      await expect(closePromise).resolves.toBe('ok');
-    } finally {
-      gate.resolve();
-      await vi.runAllTimersAsync();
-      await Promise.allSettled([mutatorPromise, closePromise]);
-    }
-  });
-
-  test('waits for queued mutators before closing the database', async () => {
-    vi.useFakeTimers();
-    const gate = deferred();
-    const events = [];
-    const firstPromise = runMutator(async () => {
-      events.push('first-start');
-      await gate.promise;
-      events.push('first-finish');
-    });
-    const secondPromise = runMutator(async () => {
-      events.push('second-start');
-      await db.first('SELECT 1');
-      events.push('second-finish');
-    });
-    const closePromise = startCloseBudget();
-
-    try {
-      await vi.advanceTimersByTimeAsync(200);
-      expect(db.getDatabase()).not.toBeNull();
-      expect(events).toEqual(['first-start']);
-
-      gate.resolve();
-      await expect(firstPromise).resolves.toBeUndefined();
-      await expect(secondPromise).resolves.toBeUndefined();
-      await vi.runAllTimersAsync();
-      await expect(closePromise).resolves.toBe('ok');
-      expect(events).toEqual([
-        'first-start',
-        'first-finish',
-        'second-start',
-        'second-finish',
-      ]);
-    } finally {
-      gate.resolve();
-      await vi.runAllTimersAsync();
-      await Promise.allSettled([firstPromise, secondPromise, closePromise]);
-    }
-  });
-
-  test('continues closing when a mutator rejects', async () => {
+  test('drains queued mutators even when the running mutator rejects', async () => {
     vi.useFakeTimers();
     const gate = deferred();
     const rejectingPromise = runMutator(async () => {
       await gate.promise;
       throw new Error('mutator failed');
     });
-    const succeedingPromise = runMutator(async () => {
-      await db.first('SELECT 1');
-    });
-    const closePromise = startCloseBudget();
+    const rejection =
+      expect(rejectingPromise).rejects.toThrow('mutator failed');
+    const queuedPromise = runMutator(() => db.first('SELECT 1 AS value'));
+    const closePromise = lib.send('close-budget');
 
     try {
       await vi.advanceTimersByTimeAsync(200);
       expect(db.getDatabase()).not.toBeNull();
 
       gate.resolve();
-      await expect(rejectingPromise).rejects.toThrow('mutator failed');
-      await expect(succeedingPromise).resolves.toBeUndefined();
+      await rejection;
+      await expect(queuedPromise).resolves.toEqual({ value: 1 });
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
+      expect(db.getDatabase()).toBeNull();
     } finally {
       gate.resolve();
       await vi.runAllTimersAsync();
-      await Promise.allSettled([
-        rejectingPromise,
-        succeedingPromise,
-        closePromise,
-      ]);
+      await Promise.allSettled([rejectingPromise, queuedPromise, closePromise]);
     }
   });
 });

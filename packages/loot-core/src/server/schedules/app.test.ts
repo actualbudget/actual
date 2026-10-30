@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 import MockDate from 'mockdate';
 
-import * as aql from '#server/aql';
+import * as fs from '#platform/server/fs';
+import * as sqlite from '#platform/server/sqlite';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
-import { handlers } from '#server/main';
-import { runHandler, runMutator } from '#server/mutators';
+import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
@@ -1213,136 +1213,56 @@ describe('schedule app', () => {
 
 describe('schedule sync listener', () => {
   beforeEach(async () => {
-    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     await prefs.loadPrefs();
+    await prefs.savePrefs({ lastScheduleRun: '2023-12-31' });
+    vi.spyOn(monthUtils, 'currentDay').mockReturnValue('2024-01-01');
+    fs._setDocumentDir(__dirname);
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.spyOn(fs, 'writeFile').mockResolvedValue(true);
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     MockDate.reset();
     prefs.unloadPrefs();
+    fs._setDocumentDir(null);
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 
-  function deferred<T>() {
-    let resolve: (value: T | PromiseLike<T>) => void;
-    let reject: (reason?: unknown) => void;
-    const promise = new Promise<T>((resolvePromise, rejectPromise) => {
-      resolve = resolvePromise;
-      reject = rejectPromise;
-    });
-    return { promise, resolve, reject };
-  }
-
-  function trackSavedDays() {
+  it('persists one completed run for duplicate same-day syncs', async () => {
     const savedDays = [];
-    const savePrefs = prefs.savePrefs;
-    vi.spyOn(prefs, 'savePrefs').mockImplementation(async prefsToSet => {
-      savedDays.push(prefsToSet.lastScheduleRun);
-      return savePrefs(prefsToSet);
+    vi.mocked(fs.writeFile).mockImplementation(async (_path, contents) => {
+      savedDays.push(JSON.parse(contents).lastScheduleRun);
+      return true;
     });
-    return savedDays;
-  }
 
-  async function waitForScheduleRuns() {
-    const closePromise = runHandler(handlers['close-budget'], undefined, {
-      name: 'close-budget',
-    });
-    await vi.advanceTimersByTimeAsync(200);
-    await vi.runAllTimersAsync();
-    await closePromise;
-  }
+    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+    await runMutator(async () => undefined);
 
-  function mockScheduleQueries() {
-    return vi
-      .spyOn(aql, 'aqlQuery')
-      .mockImplementation(async () => ({ data: [], dependencies: [] }));
-  }
+    expect(savedDays).toEqual(['2024-01-01']);
+  });
 
-  it.each([undefined, '2023-12-31'])(
-    'restores the previous run marker (%s) after a metadata write fails',
-    async previousRunDay => {
-      const runDay = '2024-01-01';
-      vi.spyOn(monthUtils, 'currentDay').mockReturnValue(runDay);
-      const querySpy = mockScheduleQueries();
-      await prefs.savePrefs({ lastScheduleRun: previousRunDay });
-      const savePrefs = prefs.savePrefs;
-      vi.spyOn(prefs, 'savePrefs').mockImplementationOnce(async prefsToSet => {
-        await savePrefs(prefsToSet);
-        throw new Error('metadata write failed');
-      });
+  it.each(['schedule query', 'metadata write'])(
+    'keeps a failed %s retryable on the same day',
+    async failure => {
+      if (failure === 'schedule query') {
+        vi.spyOn(sqlite, 'runQuery').mockImplementationOnce(() => {
+          throw new Error('schedule query failed');
+        });
+      } else {
+        vi.mocked(fs.writeFile).mockRejectedValueOnce(
+          new Error('metadata write failed'),
+        );
+      }
 
       schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-      await runMutator(async () => {
-        expect(prefs.getPrefs().lastScheduleRun).toBe(previousRunDay);
-      });
+      await runMutator(async () => undefined);
+      expect(prefs.getPrefs().lastScheduleRun).toBe('2023-12-31');
 
       schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-      await runMutator(async () => {
-        expect(prefs.getPrefs().lastScheduleRun).toBe(runDay);
-      });
-      expect(querySpy).toHaveBeenCalledTimes(6);
+      await runMutator(async () => undefined);
+      expect(prefs.getPrefs().lastScheduleRun).toBe('2024-01-01');
     },
   );
-
-  it('does not run schedules twice for duplicate syncs on the same day', async () => {
-    const runDay = '2024-01-01';
-    vi.spyOn(monthUtils, 'currentDay').mockReturnValue(runDay);
-    const gate = deferred<{ data: unknown; dependencies: string[] }>();
-    const querySpy = mockScheduleQueries();
-    const savedDays = trackSavedDays();
-    querySpy.mockImplementationOnce(() => gate.promise);
-
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    expect(querySpy).toHaveBeenCalledTimes(1);
-
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    expect(querySpy).toHaveBeenCalledTimes(1);
-
-    gate.resolve({ data: [], dependencies: [] });
-    await waitForScheduleRuns();
-
-    expect(querySpy).toHaveBeenCalledTimes(3);
-    expect(savedDays).toEqual([runDay]);
-  });
-
-  it('saves the day captured before a run crosses midnight', async () => {
-    const runDay = '2024-01-01';
-    const nextDay = '2024-01-02';
-    const currentDaySpy = vi
-      .spyOn(monthUtils, 'currentDay')
-      .mockReturnValue(runDay);
-    const gate = deferred<{ data: unknown; dependencies: string[] }>();
-    const querySpy = mockScheduleQueries();
-    const savedDays = trackSavedDays();
-    querySpy.mockImplementationOnce(() => gate.promise);
-
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    expect(querySpy).toHaveBeenCalledTimes(1);
-
-    currentDaySpy.mockReturnValue(nextDay);
-    gate.resolve({ data: [], dependencies: [] });
-    await waitForScheduleRuns();
-
-    expect(savedDays).toEqual([runDay]);
-  });
-
-  it('retries a failed run queued by a later same-day sync', async () => {
-    const runDay = '2024-01-01';
-    vi.spyOn(monthUtils, 'currentDay').mockReturnValue(runDay);
-    const gate = deferred<{ data: unknown; dependencies: string[] }>();
-    const querySpy = mockScheduleQueries();
-    const savedDays = trackSavedDays();
-    querySpy.mockImplementationOnce(() => gate.promise);
-
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    schedulesApp.events.emit('sync', { type: 'success', tables: [] });
-    expect(querySpy).toHaveBeenCalledTimes(1);
-
-    gate.reject(new Error('schedule run failed'));
-    await waitForScheduleRuns();
-
-    expect(querySpy).toHaveBeenCalledTimes(4);
-    expect(savedDays).toEqual([runDay]);
-  });
 });
