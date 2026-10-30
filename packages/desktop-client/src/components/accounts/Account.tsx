@@ -1800,36 +1800,46 @@ class AccountInternal extends PureComponent<
   onSort = (headerClicked: string, ascDesc: 'asc' | 'desc') => {
     let prevField: string | undefined;
     let prevAscDesc: 'asc' | 'desc' | undefined;
+    // Query once the new sort is in state: whether running balances can be
+    // shown, and so whether hidden reconciled transactions are loaded,
+    // depends on it.
+    const sortAndSearch = () => {
+      this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+      if (this.state.search !== '') {
+        this.onSearch(this.state.search);
+      }
+    };
     //if staying on same column but switching asc/desc
     //then keep prev the same
     if (headerClicked === this.state.sort?.field) {
       prevField = this.state.sort.prevField;
       prevAscDesc = this.state.sort.prevAscDesc;
-      this.setState(state => ({
-        sort: {
-          ...state.sort,
-          field: headerClicked,
-          ascDesc,
-        },
-      }));
+      this.setState(
+        state => ({
+          sort: {
+            ...state.sort,
+            field: headerClicked,
+            ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     } else {
       //if switching to new column then capture state
       //of current sort column as prev
       prevField = this.state.sort?.field;
       prevAscDesc = this.state.sort?.ascDesc;
-      this.setState(state => ({
-        sort: {
-          field: headerClicked,
-          ascDesc,
-          prevField: state.sort?.field,
-          prevAscDesc: state.sort?.ascDesc,
-        },
-      }));
-    }
-
-    this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
-    if (this.state.search !== '') {
-      this.onSearch(this.state.search);
+      this.setState(
+        state => ({
+          sort: {
+            field: headerClicked,
+            ascDesc,
+            prevField: state.sort?.field,
+            prevAscDesc: state.sort?.ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     }
   };
 

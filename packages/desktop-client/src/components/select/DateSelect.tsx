@@ -493,6 +493,7 @@ function DateSelectDesktop({
             e.relatedTarget instanceof Element &&
             e.relatedTarget.closest('[data-date-picker]')
           ) {
+            e.stopPropagation();
             innerRef.current?.focus();
             return;
           }

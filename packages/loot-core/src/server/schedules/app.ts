@@ -98,8 +98,10 @@ function areScheduleConditionsEqual(
     return left === right;
   }
 
-  const { type: _leftType, ...leftCondition } = left;
-  const { type: _rightType, ...rightCondition } = right;
+  // `type` is not always present, and `field` may use the public or internal
+  // name (`account` vs `acct`), so compare the remaining properties
+  const { type: _leftType, field: _leftField, ...leftCondition } = left;
+  const { type: _rightType, field: _rightField, ...rightCondition } = right;
 
   return areConditionValuesEqual(leftCondition, rightCondition);
 }
@@ -458,12 +460,11 @@ export async function updateSchedule({
       // or date changed. We check account because we don't update
       // schedules automatically for closed account, and the user
       // might switch accounts from a closed one
+      const { account: oldAccountCond } = extractScheduleConds(oldConditions);
+      const { account: newAccountCond } = extractScheduleConds(newConditions);
       if (
         resetNextDate ||
-        !areScheduleConditionsEqual(
-          oldConditions.find(c => c.field === 'account'),
-          newConditions.find(c => c.field === 'account'),
-        ) ||
+        !areScheduleConditionsEqual(oldAccountCond, newAccountCond) ||
         !areConditionValuesEqual(
           stripType(oldConditions.find(c => c.field === 'date') || {}),
           stripType(newConditions.find(c => c.field === 'date') || {}),
