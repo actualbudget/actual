@@ -84,6 +84,17 @@ export function createGroupedSpreadsheet({
       });
     }
 
+    if (interval === 'Quarterly' && balanceTypeOp !== 'totalBudgeted') {
+      debts = debts.map(d => ({
+        ...d,
+        date: monthUtils.quarterFromDate(d.date),
+      }));
+      assets = assets.map(d => ({
+        ...d,
+        date: monthUtils.quarterFromDate(d.date),
+      }));
+    }
+
     const intervals =
       interval === 'Weekly'
         ? monthUtils.weekRangeInclusive(startDate, endDate, firstDayOfWeekIdx)

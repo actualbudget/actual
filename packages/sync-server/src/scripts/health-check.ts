@@ -1,3 +1,5 @@
+import { fetch } from 'undici';
+
 import { config } from '#load-config';
 
 const protocol =

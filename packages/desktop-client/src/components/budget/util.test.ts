@@ -141,14 +141,15 @@ describe('getGoalDifference', () => {
   });
 
   it('measures whole units for currencies without decimals', () => {
-    setNumberFormat({ format: 'comma-dot', hideFraction: true });
-    expect(getGoalDifference(39950, 40049, 0)).toBe(-99);
-    expect(getGoalDifference(40049, 40049, 0)).toBe(0);
-    expect(getGoalRingProgress(39950, 40049, 39950, 0)).toBe(99);
-    expect(makeBalanceAmountStyle(39950, 40049, 39950, 0)).toEqual({
+    expect(getGoalDifference(3995000, 4004900, 0)).toBe(-9900);
+    // ¥39,950.50 shows as ¥39,951, even with decimals shown
+    expect(getGoalDifference(3995050, 3995100, 0)).toBe(0);
+    expect(getGoalRingProgress(3995000, 4004900, 3995000, 0)).toBe(99);
+    expect(getGoalRingProgress(3995050, 3995100, 3995050, 0)).toBeNull();
+    expect(makeBalanceAmountStyle(3995000, 4004900, 3995000, 0)).toEqual({
       color: theme.templateNumberUnderFunded,
     });
-    expect(makeBalanceAmountStyle(40049, 40049, 40049, 0)).toEqual({
+    expect(makeBalanceAmountStyle(4004900, 4004900, 4004900, 0)).toEqual({
       color: theme.templateNumberFunded,
     });
   });

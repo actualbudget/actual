@@ -174,6 +174,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -594,6 +596,29 @@ describe('Transactions', () => {
     });
   });
 
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
+      const onFocusedTransactionShown = vi.fn();
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
+
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -748,6 +773,34 @@ describe('Transactions', () => {
     await userEvent.type(input, '[Escape]');
     expect(input.value).toEqual(oldValue);
   });
+
+  test.each(['debit', 'credit'] as const)(
+    'invalid arithmetic in %s preserves the amount and allows correction',
+    async field => {
+      const onTransactionsChange = vi.fn();
+      const { container } = renderTransactions({ onTransactionsChange });
+      const input = await editField(container, field, 0);
+      await userEvent.clear(input);
+      await userEvent.type(input, '1/0[Tab]');
+
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([expect.objectContaining({ amount: -2777 })]),
+      );
+      expect(queryField(container, 'debit', 'div', 0).textContent).toBe(
+        '27.77',
+      );
+      expect(queryField(container, 'credit', '', 0).textContent).toBe('');
+
+      const correctedInput = await editField(container, field, 0);
+      await userEvent.clear(correctedInput);
+      await userEvent.type(correctedInput, '12/2[Tab]');
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ amount: field === 'debit' ? -600 : 600 }),
+        ]),
+      );
+    },
+  );
 
   test('text fields save when moved away from', async () => {
     const { container, getTransactions } = renderTransactions();

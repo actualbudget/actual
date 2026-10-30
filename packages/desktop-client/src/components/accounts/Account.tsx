@@ -60,6 +60,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -211,6 +212,15 @@ function getField(field?: string) {
   }
 }
 
+// The transaction a link to the account asks to bring into view, e.g. the
+// other side of a transfer
+function getFocusTransactionId(
+  location: ReturnType<typeof useLocation>,
+): TransactionEntity['id'] | null {
+  const id: unknown = location.state?.focusTransactionId;
+  return typeof id === 'string' ? id : null;
+}
+
 type AccountInternalProps = {
   accountId?:
     | AccountEntity['id']
@@ -252,6 +262,7 @@ type AccountInternalProps = {
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
   dateFormat: ReturnType<typeof useDateFormat>;
+  currencySymbol: string;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
@@ -290,6 +301,7 @@ type AccountInternalState = {
     prevAscDesc?: 'asc' | 'desc' | undefined;
   } | null;
   filteredAmount: null | number;
+  focusedTransactionId: TransactionEntity['id'] | null;
 };
 
 export type TableRef = RefObject<{
@@ -311,6 +323,8 @@ class AccountInternal extends PureComponent<
   unlisten?: () => void;
   dispatchSelected?: (action: Actions) => void;
   _isOptimisticUpdate: boolean = false;
+  // A transaction to bring into view once the account is loaded
+  pendingFocusId: TransactionEntity['id'] | null = null;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -334,6 +348,7 @@ class AccountInternal extends PureComponent<
       isAdding: false,
       sort: null,
       filteredAmount: null,
+      focusedTransactionId: null,
     };
   }
 
@@ -394,6 +409,7 @@ class AccountInternal extends PureComponent<
 
     // Important that any async work happens last so that the
     // listeners are set up synchronously
+    this.pendingFocusId = getFocusTransactionId(this.props.location);
     this.fetchTransactions(this.state.filterConditions);
 
     // If there is a pending undo, apply it immediately (this happens
@@ -487,7 +503,7 @@ class AccountInternal extends PureComponent<
       query = query.filter({ reconciled: { $eq: false } });
     }
 
-    this.paged = pagedQuery(query.select('*'), {
+    const paged = pagedQuery<TransactionEntity>(query.select('*'), {
       onData: async (groupedData, prevData) => {
         const data = ungroupTransactions([...groupedData]);
         const firstLoad = prevData == null;
@@ -550,6 +566,9 @@ class AccountInternal extends PureComponent<
           () => {
             if (firstLoad) {
               this.table.current?.scrollToTop();
+              if (paged === this.paged) {
+                void this.showPendingFocus(paged);
+              }
             }
 
             setTimeout(() => {
@@ -563,14 +582,17 @@ class AccountInternal extends PureComponent<
         onlySync: true,
       },
     });
+    this.paged = paged;
   }
 
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
+      this.pendingFocusId = getFocusTransactionId(nextProps.location);
       this.setState(
         {
           loading: true,
+          focusedTransactionId: null,
           search: '',
           showBalances: nextProps.showBalances,
           balances: null,
@@ -585,12 +607,50 @@ class AccountInternal extends PureComponent<
     }
   }
 
+  // Brings the pending transaction into view, loading the account up to it
+  // if needed. Leaves the account at the top when the query doesn't have it,
+  // e.g. while reconciled transactions are hidden.
+  showPendingFocus = async (paged: PagedQuery<TransactionEntity>) => {
+    const id = this.pendingFocusId;
+    this.pendingFocusId = null;
+    // Only in the default date order; the lookup relies on it
+    if (id == null || this.state.sort != null) {
+      return;
+    }
+    if (!this.state.transactions.some(t => t.id === id)) {
+      await paged.refetchUpToRow(id, { field: 'date', order: 'desc' });
+    }
+
+    const transaction = ungroupTransactions(paged.data).find(t => t.id === id);
+    if (
+      transaction == null ||
+      (transaction.reconciled && !this.state.showReconciled) ||
+      // The query was replaced meanwhile, e.g. by a sort or another account
+      !paged.isRunning
+    ) {
+      return;
+    }
+    if (transaction.parent_id) {
+      this.props.splitsExpandedDispatch({
+        type: 'open-split',
+        id: transaction.parent_id,
+      });
+    }
+    this.setState({ focusedTransactionId: id });
+  };
+
+  onFocusedTransactionShown = () => {
+    this.setState({ focusedTransactionId: null });
+  };
+
   onSearch = (value: string) => {
     this.paged?.unsubscribe();
     this.setState({ search: value }, this.onSearchDone);
   };
 
-  onSearchDone = debounce(() => {
+  onSearchDone = debounce(() => this.applySearch(), 150);
+
+  applySearch = () => {
     if (this.state.search === '') {
       this.updateQuery(
         this.currentQuery,
@@ -602,11 +662,12 @@ class AccountInternal extends PureComponent<
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
+          this.props.currencySymbol,
         ),
         true,
       );
     }
-  }, 150);
+  };
 
   onSync = async () => {
     const accountId = this.props.accountId;
@@ -903,19 +964,12 @@ class AccountInternal extends PureComponent<
         });
         break;
       }
-      case 'toggle-reconciled':
-        if (this.state.showReconciled) {
-          this.props.setShowReconciled(false);
-          this.setState({ showReconciled: false }, () =>
-            this.fetchTransactions(this.state.filterConditions),
-          );
-        } else {
-          this.props.setShowReconciled(true);
-          this.setState({ showReconciled: true }, () =>
-            this.fetchTransactions(this.state.filterConditions),
-          );
-        }
+      case 'toggle-reconciled': {
+        const showReconciled = !this.state.showReconciled;
+        this.props.setShowReconciled(showReconciled);
+        this.setState({ showReconciled }, this.applySearch);
         break;
+      }
       case 'toggle-net-worth-chart':
         if (this.props.showNetWorthChart) {
           this.props.setShowNetWorthChart(false);
@@ -1749,36 +1803,46 @@ class AccountInternal extends PureComponent<
   onSort = (headerClicked: string, ascDesc: 'asc' | 'desc') => {
     let prevField: string | undefined;
     let prevAscDesc: 'asc' | 'desc' | undefined;
+    // Query once the new sort is in state: whether running balances can be
+    // shown, and so whether hidden reconciled transactions are loaded,
+    // depends on it.
+    const sortAndSearch = () => {
+      this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+      if (this.state.search !== '') {
+        this.onSearch(this.state.search);
+      }
+    };
     //if staying on same column but switching asc/desc
     //then keep prev the same
     if (headerClicked === this.state.sort?.field) {
       prevField = this.state.sort.prevField;
       prevAscDesc = this.state.sort.prevAscDesc;
-      this.setState(state => ({
-        sort: {
-          ...state.sort,
-          field: headerClicked,
-          ascDesc,
-        },
-      }));
+      this.setState(
+        state => ({
+          sort: {
+            ...state.sort,
+            field: headerClicked,
+            ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     } else {
       //if switching to new column then capture state
       //of current sort column as prev
       prevField = this.state.sort?.field;
       prevAscDesc = this.state.sort?.ascDesc;
-      this.setState(state => ({
-        sort: {
-          field: headerClicked,
-          ascDesc,
-          prevField: state.sort?.field,
-          prevAscDesc: state.sort?.ascDesc,
-        },
-      }));
-    }
-
-    this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
-    if (this.state.search !== '') {
-      this.onSearch(this.state.search);
+      this.setState(
+        state => ({
+          sort: {
+            field: headerClicked,
+            ascDesc,
+            prevField: state.sort?.field,
+            prevAscDesc: state.sort?.ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     }
   };
 
@@ -1995,6 +2059,8 @@ class AccountInternal extends PureComponent<
                     this.onMakeAsNonSplitTransactions
                   }
                   onRefetch={this.refetchTransactions}
+                  focusedTransactionId={this.state.focusedTransactionId}
+                  onFocusedTransactionShown={this.onFocusedTransactionShown}
                   onCloseAddTransaction={() =>
                     this.setState({ isAdding: false })
                   }
@@ -2064,6 +2130,7 @@ export function Account() {
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const currencySymbol = useFormat().currency.symbol;
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
@@ -2124,6 +2191,7 @@ export function Account() {
             matchedTransactions={matchedTransactions}
             accounts={accounts}
             dateFormat={dateFormat}
+            currencySymbol={currencySymbol}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
             showBalances={showBalances}
