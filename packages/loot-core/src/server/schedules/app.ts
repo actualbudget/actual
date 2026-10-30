@@ -853,11 +853,12 @@ app.events.on('sync', ({ type }) => {
       return;
     }
 
-    const runDay = currentDay();
-    const { lastScheduleRun } = prefs.getPrefs();
-    if (lastScheduleRun !== runDay) {
+    if (prefs.getPrefs().lastScheduleRun !== currentDay()) {
       void runMutator(async () => {
-        if (prefs.getPrefs()?.lastScheduleRun === runDay) {
+        const runDay = currentDay();
+        const { lastScheduleRun } = prefs.getPrefs();
+        // A run queued by an earlier sync may have already finished today
+        if (lastScheduleRun === runDay) {
           return;
         }
 
@@ -866,14 +867,11 @@ app.events.on('sync', ({ type }) => {
         // Only mark the day as done when sync succeeded, so that
         // schedule auto-posting is retried on subsequent successful syncs
         if (type === 'success') {
-          const runPrefs = prefs.getPrefs();
-          const previousLastScheduleRun = runPrefs?.lastScheduleRun;
           try {
             await prefs.savePrefs({ lastScheduleRun: runDay });
           } catch (error) {
-            if (runPrefs) {
-              runPrefs.lastScheduleRun = previousLastScheduleRun;
-            }
+            // savePrefs updates the loaded prefs before writing them
+            prefs.getPrefs().lastScheduleRun = lastScheduleRun;
             throw error;
           }
         }

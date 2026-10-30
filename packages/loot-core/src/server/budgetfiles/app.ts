@@ -16,12 +16,13 @@ import { resetFormulaPreferencesCache } from '#server/formulas/bootstrap';
 import { handleBudgetImport } from '#server/importers';
 import type { ImportableBudgetType } from '#server/importers';
 import { app as mainApp } from '#server/main-app';
-import { flushRunningBackgroundMethods, mutator } from '#server/mutators';
+import { mutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
+  drainFullSync,
   initialFullSync,
   setSyncingMode,
 } from '#server/sync';
@@ -257,18 +258,16 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
-  clearFullSyncTimeout();
-  await flushRunningBackgroundMethods();
   captureBreadcrumb({ message: 'Closing budget' });
+  await drainFullSync();
   resetFormulaPreferencesCache();
 
   // The spreadsheet may be running, wait for it to complete
   await sheet.waitOnSpreadsheet();
   sheet.unloadSpreadsheet();
 
-  await mainApp.stopServices();
-  await flushRunningBackgroundMethods();
   clearFullSyncTimeout();
+  await mainApp.stopServices();
 
   db.closeDatabase();
 

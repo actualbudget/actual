@@ -18,14 +18,14 @@ import {
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
 import { app } from '#server/main-app';
-import { runHandler, runMutator } from '#server/mutators';
+import { flushRunningMutators, runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
-import { once, sequential } from '#shared/async';
+import { sequential } from '#shared/async';
 import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
@@ -799,15 +799,30 @@ export async function initialFullSync(): Promise<{
   return {};
 }
 
-// Track background syncs so budget shutdown drains their resulting mutators.
-export const fullSync = once(() =>
-  runHandler(runFullSync, undefined, { background: true }),
-);
-
-async function runFullSync(): Promise<
+type FullSyncResult =
   | { messages: Message[] }
-  | { error: { message: string; reason: string; meta: unknown } }
-> {
+  | { error: { message: string; reason: string; meta: unknown } };
+
+let runningFullSync: Promise<FullSyncResult> | null = null;
+export function fullSync(): Promise<FullSyncResult> {
+  runningFullSync ??= runFullSync().finally(() => {
+    runningFullSync = null;
+  });
+  return runningFullSync;
+}
+
+// Cancels the pending sync and waits for the running one, including the
+// mutators it queues. Those mutators can schedule another sync, so repeat
+// until both are idle.
+export async function drainFullSync(): Promise<void> {
+  do {
+    clearFullSyncTimeout();
+    await Promise.allSettled([runningFullSync]);
+    await flushRunningMutators();
+  } while (runningFullSync || syncTimeout);
+}
+
+async function runFullSync(): Promise<FullSyncResult> {
   app.events.emit('sync', { type: 'start' });
   let messages;
 
