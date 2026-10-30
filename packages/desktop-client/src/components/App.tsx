@@ -32,7 +32,7 @@ import {
   ThemeStyle,
   useTheme,
 } from '#style';
-import { getUserData, signOut } from '#users/usersSlice';
+import { signOut } from '#users/usersSlice';
 import { ExposeNavigate } from '#util/router-tools';
 
 import { AppBackground } from './AppBackground';
@@ -190,8 +190,6 @@ export function App() {
 
   useOnVisible(async () => {
     console.debug('triggering sync because of visibility change');
-    // Re-check whether the server is reachable before syncing.
-    await dispatch(getUserData());
     await dispatch(sync());
   });
 

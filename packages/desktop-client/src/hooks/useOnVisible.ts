@@ -46,26 +46,20 @@ export function useOnVisible(
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange);
-    return () =>
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [isEnabled]);
 
-  useEffect(() => {
-    if (!isEnabled || !Capacitor.isNativePlatform()) {
-      return;
-    }
     // The web view does not reliably fire `visibilitychange` when the app is
     // backgrounded and resumed, so listen to the native app state as well.
-    const listener = CapacitorApp.addListener(
-      'appStateChange',
-      ({ isActive }) => {
-        if (isActive) {
-          void runCallback();
-        }
-      },
-    );
+    const appStateListener = Capacitor.isNativePlatform()
+      ? CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) {
+            void runCallback();
+          }
+        })
+      : null;
+
     return () => {
-      void listener.then(handle => handle.remove());
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      void appStateListener?.then(handle => handle.remove());
     };
   }, [isEnabled]);
 }

@@ -7,6 +7,7 @@ import { budgetBoundsQueries } from './budget';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
+import type * as UsersSlice from './users/usersSlice';
 
 const eventListeners = new Map<string, Array<(args: unknown) => void>>();
 
@@ -27,7 +28,7 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
   (eventListeners.get('sync-event') ?? []).forEach(listener => listener(event));
 }
 
-function setup() {
+function setup({ isOffline }: { isOffline?: boolean } = {}) {
   vi.spyOn(connection, 'listen').mockImplementation(
     // The real `listen` is overloaded per event name; the mock only needs
     // to record the handler
@@ -37,19 +38,28 @@ function setup() {
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
+  const dispatch = vi.fn();
   // A budget must be loaded for the table -> invalidate mapping to run
   const store = {
     getState: () => ({
       prefs: { local: { id: 'budget-id' } },
       app: { loadingText: null },
+      user: { data: isOffline === undefined ? null : { offline: isOffline } },
     }),
-    dispatch: vi.fn(),
+    dispatch,
   } as unknown as AppStore;
 
   listenForSyncEvent(store, queryClient);
 
-  return { invalidateQueries };
+  return { invalidateQueries, dispatch };
 }
+
+vi.mock('./users/usersSlice', async importOriginal => ({
+  ...(await importOriginal<typeof UsersSlice>()),
+  getUserData: () => getUserDataAction,
+}));
+
+const getUserDataAction = { type: 'user/getUserData' };
 
 function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
   return { type: 'applied', tables } as ServerEvents['sync-event'];
@@ -125,4 +135,33 @@ describe('listenForSyncEvent', () => {
       queryKey: reportQueries.lists(),
     });
   });
+
+  it.each([
+    { type: 'success', isOffline: true },
+    { type: 'error', isOffline: false },
+  ] as const)(
+    'refreshes the user data on $type when the status says offline=$isOffline',
+    ({ type, isOffline }) => {
+      const { dispatch } = setup({ isOffline });
+
+      publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
+
+      expect(dispatch).toHaveBeenCalledWith(getUserDataAction);
+    },
+  );
+
+  it.each([
+    { type: 'success', isOffline: false },
+    { type: 'error', isOffline: true },
+    { type: 'success', isOffline: undefined },
+  ] as const)(
+    'leaves the user data alone on $type when the status says offline=$isOffline',
+    ({ type, isOffline }) => {
+      const { dispatch } = setup({ isOffline });
+
+      publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
+
+      expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
+    },
+  );
 });
