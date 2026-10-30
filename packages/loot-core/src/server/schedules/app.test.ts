@@ -4,6 +4,7 @@ import MockDate from 'mockdate';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
@@ -1310,6 +1311,184 @@ describe('schedule app', () => {
         MockDate.reset();
         await schedulesApp.stopServices();
       }
+    });
+  });
+
+  describe('schedule advancement failures', () => {
+    let accountId: string;
+    const catchUpDates = ['2016-12-18', '2016-12-25', '2017-01-01'];
+    const healthyDates = ['2016-12-25', '2017-01-01'];
+
+    beforeEach(async () => {
+      // currentDay() is fixed at 2017-01-01 by the test environment.
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+      await prefs.loadPrefs();
+      accountId = await db.insertAccount({
+        name: 'Checking',
+        offbudget: 0,
+        closed: 0,
+      });
+    });
+
+    afterEach(async () => {
+      db.runQuery('DROP TRIGGER IF EXISTS fail_schedule_advancement');
+      prefs.unloadPrefs();
+      MockDate.reset();
+      await schedulesApp.stopServices();
+    });
+
+    function rewindSchedule(id: string, nextDate = 20161218) {
+      db.runQuery(
+        `UPDATE schedules_next_date
+         SET local_next_date = ?, base_next_date = ?
+         WHERE schedule_id = ?`,
+        [nextDate, nextDate, id],
+      );
+    }
+
+    async function createRecurringSchedule(
+      postsTransaction = true,
+      nextDate = 20161218,
+    ) {
+      const id = await createSchedule({
+        schedule: { posts_transaction: postsTransaction },
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          { op: 'is', field: 'amount', value: -10000 },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2016-12-18',
+              frequency: 'weekly',
+              patterns: [],
+            },
+          },
+        ],
+      });
+      rewindSchedule(id, nextDate);
+      if (!postsTransaction) {
+        await db.insertTransaction({
+          account: accountId,
+          amount: -10000,
+          date: '2016-12-18',
+          schedule: id,
+        });
+      }
+      return id;
+    }
+
+    function failAdvancement(id: string) {
+      // Fail at the SQLite boundary, not by mocking setNextDate. Posting
+      // transactions and reading the schedule still work.
+      db.runQuery(`
+        CREATE TEMP TRIGGER fail_schedule_advancement
+        BEFORE UPDATE OF local_next_date ON schedules_next_date
+        WHEN OLD.schedule_id = '${id}'
+        BEGIN SELECT RAISE(FAIL, 'schedule advancement write failed'); END
+      `);
+    }
+
+    async function postedDates(id: string) {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ schedule: id })
+          .select('date')
+          .orderBy({ date: 'asc' }),
+      );
+      return data.map(row => row.date);
+    }
+
+    async function syncSuccessfully() {
+      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+      // Drain the queued service work without timers or mocked mutators.
+      await runMutator(() => Promise.resolve());
+    }
+
+    it.each([true, false])(
+      'reports unexpected advancement errors, processes later schedules, and retries without reposting (auto-post: %s)',
+      async postsTransaction => {
+        const failedId = await createRecurringSchedule(postsTransaction);
+        // Its later next_date puts it after the broken schedule in service order.
+        const healthyId = await createRecurringSchedule(true, 20161225);
+        failAdvancement(failedId);
+
+        // Both auto-post catch-up and paid manual schedules must reject
+        // incomplete runs, but only after processing the healthy schedule.
+        await expect.soft(advanceSchedulesService(true)).rejects.toThrow();
+        expect(await postedDates(failedId)).toEqual(['2016-12-18']);
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+
+        db.runQuery('DROP TRIGGER fail_schedule_advancement');
+        await advanceSchedulesService(true);
+
+        expect(await postedDates(failedId)).toEqual(
+          postsTransaction ? catchUpDates : ['2016-12-18'],
+        );
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+        const { data: nextDate } = await aqlQuery(
+          q('schedules').filter({ id: failedId }).calculate('next_date'),
+        );
+        expect(nextDate).toBe('2017-01-01');
+      },
+    );
+
+    it.each(['missing', 'corrupt'])(
+      'isolates a %s rule and still completes healthy schedule work',
+      async ruleState => {
+        const brokenId = await createRecurringSchedule(false);
+        // Its later next_date puts it after the broken schedule in service order.
+        const healthyId = await createRecurringSchedule(true, 20161225);
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id: brokenId }).calculate('rule'),
+        );
+        if (ruleState === 'missing') {
+          db.runQuery('DELETE FROM rules WHERE id = ?', [ruleId]);
+        } else {
+          // Valid JSON with an invalid action leaves the schedule's date
+          // and account readable, but loadRules excludes its corrupt rule.
+          db.runQuery('UPDATE rules SET actions = ? WHERE id = ?', [
+            JSON.stringify([{ op: 'invalid-action' }]),
+            ruleId,
+          ]);
+        }
+        await loadRules();
+
+        await syncSuccessfully();
+
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+        expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
+      },
+    );
+
+    it('retries incomplete work on a later sync, then protects a successful day from duplicate runs', async () => {
+      const failedId = await createRecurringSchedule();
+      // Its later next_date puts it after the broken schedule in service order.
+      const healthyId = await createRecurringSchedule(true, 20161225);
+      failAdvancement(failedId);
+
+      await syncSuccessfully();
+
+      expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
+      expect(await postedDates(failedId)).toEqual(['2016-12-18']);
+      expect(await postedDates(healthyId)).toEqual(healthyDates);
+
+      db.runQuery('DROP TRIGGER fail_schedule_advancement');
+      await syncSuccessfully();
+
+      expect.soft(await postedDates(failedId)).toEqual(catchUpDates);
+      expect(await postedDates(healthyId)).toEqual(healthyDates);
+      expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
+
+      // Simulate older next-date data arriving from another client without
+      // using updateSchedule, which deliberately clears the daily marker.
+      rewindSchedule(healthyId);
+      await syncSuccessfully();
+      const { data: nextDate } = await aqlQuery(
+        q('schedules').filter({ id: healthyId }).calculate('next_date'),
+      );
+      expect(nextDate).toBe('2016-12-18');
     });
   });
 
