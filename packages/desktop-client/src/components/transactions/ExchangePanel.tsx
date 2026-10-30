@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -42,10 +42,14 @@ type ExchangePanelProps = {
   onRequestChange?: (request: ExchangeRequest | null) => void;
   /** Holds Save, for example while a budget notice loads. */
   submitDisabled?: boolean;
+  /** Fields shown before the other account's side, such as an edit's own. */
+  leading?: ReactNode;
+  /** Shows a Cancel button. */
+  onCancel?: () => void;
 };
 
 // A label and its inputs stay on one line when the panel wraps.
-const fieldGroup = {
+export const fieldGroup = {
   flexDirection: 'row',
   alignItems: 'center',
   gap: 8,
@@ -77,6 +81,8 @@ function ExchangePanelInner({
   submitLabel,
   onRequestChange,
   submitDisabled = false,
+  leading,
+  onCancel,
 }: ExchangePanelProps) {
   const { t } = useTranslation();
   const firstInput = useRef<HTMLInputElement>(null);
@@ -155,9 +161,13 @@ function ExchangePanelInner({
         } else if (e.key === 'Enter') {
           e.stopPropagation();
           void post();
+        } else if (e.key === 'Escape' && onCancel) {
+          e.stopPropagation();
+          onCancel();
         }
       }}
     >
+      {leading}
       <View style={fieldGroup}>
         <Text>
           {payment ? (
@@ -257,6 +267,11 @@ function ExchangePanelInner({
         </View>
       )}
       <View style={{ flex: 1 }} />
+      {onCancel && (
+        <Button style={{ padding: '4px 10px' }} onPress={onCancel}>
+          <Trans>Cancel</Trans>
+        </Button>
+      )}
       <Button
         variant="primary"
         style={{ padding: '4px 10px' }}

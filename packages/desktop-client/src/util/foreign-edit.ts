@@ -169,10 +169,26 @@ export function isExchangeRow(
   return !!parentId && rows.some(r => r.parent_id === parentId && isLeg(r));
 }
 
+type InlineExchangeEdit = (id: string, onSaved: () => void) => void;
+
+let inlineExchangeEdit: InlineExchangeEdit | null = null;
+
 /**
- * Opens the dialog that edits a stored row's amounts: the exchange dialog
- * for any exchange row, the split dialog for a foreign split, or the foreign
- * amount dialog for a single foreign row or same-encoding transfer leg.
+ * Lets the desktop register edit exchange transfers inline, in place of the
+ * exchange dialog, while it is shown. Returns the function that removes it.
+ */
+export function setInlineExchangeEdit(handler: InlineExchangeEdit) {
+  inlineExchangeEdit = handler;
+  return () => {
+    if (inlineExchangeEdit === handler) inlineExchangeEdit = null;
+  };
+}
+
+/**
+ * Opens the editor for a stored row's amounts: the register's inline
+ * exchange editor (or the exchange dialog without one) for any exchange row,
+ * the split dialog for a foreign split, or the foreign amount dialog for a
+ * single foreign row or same-encoding transfer leg.
  * `native` is a typed native amount; `baseAmount` a typed base value (a
  * valuation edit). Returns false when the row needs no dialog.
  */
@@ -199,6 +215,10 @@ export async function openForeignEditDialog(
   },
 ): Promise<boolean> {
   if (isExchangeRow(row, rows, payees, accounts)) {
+    if (inlineExchangeEdit) {
+      inlineExchangeEdit(row.id, onSaved);
+      return true;
+    }
     pushEditModal(dispatch, {
       name: 'exchange-transfer',
       options: { edit: { id: row.id, onSaved } },

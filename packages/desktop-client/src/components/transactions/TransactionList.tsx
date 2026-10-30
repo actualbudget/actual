@@ -1,6 +1,12 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -38,7 +44,11 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { encodingKey } from '#util/account-encoding';
 import type { ExchangeRequest } from '#util/exchange-entry';
-import { openForeignEditDialog, pushEditModal } from '#util/foreign-edit';
+import {
+  openForeignEditDialog,
+  pushEditModal,
+  setInlineExchangeEdit,
+} from '#util/foreign-edit';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
 import type { ExchangePostResult } from './ExchangePanel';
@@ -241,6 +251,28 @@ export function TransactionList({
       onRefetch();
     },
     [account, dispatch, isLearnCategoriesEnabled, onRefetch],
+  );
+
+  // Exchange transfers are edited above the rows, in the panel that enters
+  // them, while this register is shown.
+  const [exchangeEdit, setExchangeEdit] = useState<{
+    id: TransactionEntity['id'];
+    onSaved: () => void;
+  } | null>(null);
+  useEffect(
+    () =>
+      setInlineExchangeEdit((id, onSaved) =>
+        setExchangeEdit({
+          id,
+          // The register reloads its rows too: a caller outside it, such as
+          // Amount details, refreshes only its own queries.
+          onSaved: () => {
+            onSaved();
+            onRefetch();
+          },
+        }),
+      ),
+    [onRefetch],
   );
 
   // Exchange transfers post atomically from the register's inline panel.
@@ -653,6 +685,8 @@ export function TransactionList({
         onCloseAddTransaction={onCloseAddTransaction}
         onAdd={onAdd}
         onAddExchange={account ? onAddExchange : undefined}
+        exchangeEdit={exchangeEdit}
+        onCloseExchangeEdit={() => setExchangeEdit(null)}
         onAddSplit={onAddSplit}
         onManagePayees={onManagePayees}
         onCreatePayee={onCreatePayee}

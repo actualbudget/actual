@@ -162,6 +162,7 @@ import {
   isFutureTransaction,
 } from '#util/schedule-actions';
 
+import { ExchangeEdit } from './ExchangeEdit';
 import { ExchangePanel } from './ExchangePanel';
 import type { ExchangePostResult } from './ExchangePanel';
 import {
@@ -2785,6 +2786,11 @@ function NewTransaction({
   );
 }
 
+type ExchangeEditState = {
+  id: TransactionEntity['id'];
+  onSaved: () => void;
+} | null;
+
 type TransactionTableInnerProps = {
   tableRef: Ref<TableHandleRef<TransactionEntity>>;
   listContainerRef: RefObject<HTMLDivElement>;
@@ -2859,6 +2865,8 @@ type TransactionTableInnerProps = {
     request: ExchangeRequest,
   ) => Promise<ExchangePostResult>;
   exchangeFocusToken?: number;
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -3168,6 +3176,23 @@ function TransactionTableInner({
             />
           </View>
         )}
+        {props.exchangeEdit && props.onCloseExchangeEdit && (
+          <View
+            data-testid="exchange-edit"
+            style={{
+              borderBottom: '1px solid ' + theme.tableBorderHover,
+              paddingBottom: 6,
+              backgroundColor: theme.tableBackground,
+            }}
+          >
+            <ExchangeEdit
+              key={props.exchangeEdit.id}
+              id={props.exchangeEdit.id}
+              onSaved={props.exchangeEdit.onSaved}
+              onDone={props.onCloseExchangeEdit}
+            />
+          </View>
+        )}
       </View>
       {/*// * On Windows, makes the scrollbar always appear
          //   the full height of the container ??? */}
@@ -3255,6 +3280,9 @@ export type TransactionTableProps = {
   onAdd: (transactions: TransactionEntity[]) => void;
   /** Posts an exchange transfer; given only in single-account registers. */
   onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** The exchange transfer edited inline, above the rows. */
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
   onNavigateToTransferAccount: NavigateToTransferAccount;
