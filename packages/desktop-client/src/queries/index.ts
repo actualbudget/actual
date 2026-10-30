@@ -15,6 +15,7 @@ import type { AccountEntity } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 // @ts-strict-ignore
 import { isValid as isDateValid, parse as parseDate } from 'date-fns';
+import { escapeRegExp } from 'es-toolkit';
 
 export function accountFilter(
   accountId?:
@@ -87,8 +88,18 @@ export function transactionsSearch(
   currencySymbol: string,
 ) {
   // currencyToAmount ignores letters, so "35mm" would match the amount 35.
-  // Searches with letters are text, apart from the currency symbol ("120 kr").
-  const amountSearch = search.replace(currencySymbol, '');
+  // Searches with letters are text, apart from a leading or trailing currency
+  // symbol ("120 kr", "-CHF 12").
+  const symbol = escapeRegExp(currencySymbol);
+  const amountSearch = currencySymbol
+    ? search.replace(
+        new RegExp(
+          `^([^\\p{L}\\d]*)${symbol}|${symbol}(?=[^\\p{L}\\d]*$)`,
+          'iu',
+        ),
+        '$1',
+      )
+    : search;
   const amount = /\p{L}/u.test(amountSearch)
     ? null
     : currencyToAmount(amountSearch);

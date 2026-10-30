@@ -3,29 +3,33 @@ import { q } from '@actual-app/core/shared/query';
 import { transactionsSearch } from './index';
 
 describe('transactionsSearch', () => {
-  it('searches text containing digits without matching amounts', () => {
-    const query = transactionsSearch(
-      q('transactions'),
-      'XF 35mm',
-      'yyyy-MM-dd',
-      'kr',
-    );
+  it.each(['XF 35mm', '12kr34'])(
+    'searches %s as text without matching amounts',
+    search => {
+      const query = transactionsSearch(
+        q('transactions'),
+        search,
+        'yyyy-MM-dd',
+        'kr',
+      );
 
-    expect(query.serialize().filterExpressions).toMatchObject([
-      {
-        $or: {
-          notes: { $like: '%XF 35mm%' },
-          'payee.name': { $like: '%XF 35mm%' },
-          $or: [],
+      expect(query.serialize().filterExpressions).toMatchObject([
+        {
+          $or: {
+            notes: { $like: `%${search}%` },
+            'payee.name': { $like: `%${search}%` },
+            $or: [],
+          },
         },
-      },
-    ]);
-  });
+      ]);
+    },
+  );
 
   it.each([
     ['35', '', 3500],
     ['$12.50', '$', 1250],
     ['120 kr', 'kr', 12000],
+    ['chf 12.50', 'CHF', 1250],
   ])('still matches the amount for %s', (search, currencySymbol, amount) => {
     const query = transactionsSearch(
       q('transactions'),
