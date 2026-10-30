@@ -352,6 +352,56 @@ describe('schedule app', () => {
       expect(row.next_date).toBe('2020-12-30');
     });
 
+    it('preserves skipped dates on rename but resets them when the account changes', async () => {
+      MockDate.set(new Date(2021, 4, 17));
+
+      const accountId = await db.insertAccount({ name: 'Checking' });
+      const otherAccountId = await db.insertAccount({ name: 'Savings' });
+      const id = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2021-05-17',
+              frequency: 'monthly',
+              patterns: [{ type: 'day', value: 17 }],
+            },
+          },
+        ],
+      });
+
+      await skipNextDate({ id });
+      const {
+        data: [schedule],
+      } = await aqlQuery(q('schedules').filter({ id }).select(['_conditions']));
+      // Advance the clock so a reset stamps a newer `base_next_date_ts` than the skip
+      MockDate.set(new Date(2021, 4, 17, 0, 1));
+
+      await updateSchedule({
+        schedule: { id, name: 'Broadband' },
+        conditions: schedule._conditions,
+      });
+      let result = await aqlQuery(
+        q('schedules').filter({ id }).calculate('next_date'),
+      );
+      expect(result.data).toBe('2021-06-17');
+
+      await updateSchedule({
+        schedule: { id },
+        conditions: schedule._conditions.map(condition =>
+          condition.value === accountId
+            ? { ...condition, value: otherAccountId }
+            : condition,
+        ),
+      });
+      result = await aqlQuery(
+        q('schedules').filter({ id }).calculate('next_date'),
+      );
+      expect(result.data).toBe('2021-05-17');
+    });
+
     it('updateSchedule ignores the condition `type` field when date value is unchanged', async () => {
       const id = await createSchedule({
         conditions: [
