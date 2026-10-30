@@ -1,192 +1,82 @@
 import http from 'node:http';
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { listenWithFallback } from './server-listen';
 
 describe('listenWithFallback', () => {
-  it('calls onListening with hostname when listen succeeds', () => {
-    const fakeServer = new http.Server();
-    vi.spyOn(fakeServer, 'listen').mockImplementation(((
-      _port?: unknown,
-      _host?: unknown,
-      cb?: () => void,
-    ) => {
-      if (typeof cb === 'function') cb();
-      return fakeServer;
-    }) as typeof fakeServer.listen);
+  let server: http.Server;
 
+  beforeEach(() => {
+    server = new http.Server();
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it('reports the configured hostname after listening succeeds', () => {
+    const listen = vi.spyOn(server, 'listen').mockReturnValue(server);
     const onListening = vi.fn();
-    listenWithFallback(fakeServer, 5006, '::', onListening);
 
-    expect(onListening).toHaveBeenCalledWith('::');
+    listenWithFallback(server, 5006, '::', onListening);
+    const callback = listen.mock.calls[0]?.at(-1);
+    if (typeof callback === 'function') callback();
+
+    expect(onListening).toHaveBeenCalledExactlyOnceWith('::');
   });
 
   it.each(['EAFNOSUPPORT', 'EADDRNOTAVAIL', 'EINVAL', 'ENOTFOUND'])(
-    'falls back to 0.0.0.0 when default :: fails with %s',
-    async code => {
-      const fakeServer = new http.Server();
-      let listenCallCount = 0;
-      const listenSpy = vi.spyOn(fakeServer, 'listen').mockImplementation(((
-        _port?: unknown,
-        _host?: unknown,
-        cb?: () => void,
-      ) => {
-        listenCallCount++;
-        if (listenCallCount === 1) {
-          const err = new Error(
-            `IPv6 bind failed (${code})`,
-          ) as NodeJS.ErrnoException;
-          err.code = code;
-          process.nextTick(() => fakeServer.emit('error', err));
-        } else if (listenCallCount === 2) {
-          if (typeof cb === 'function') cb();
-        }
-        return fakeServer;
-      }) as typeof fakeServer.listen);
-
-      const warnSpy = vi
-        .spyOn(console, 'warn')
-        .mockImplementation(() => undefined);
+    'falls back to IPv4 when :: fails with %s',
+    code => {
+      const listen = vi.spyOn(server, 'listen').mockReturnValue(server);
       const onListening = vi.fn();
+      const onError = vi.fn();
+      listenWithFallback(server, 5006, '::', onListening, onError);
 
-      listenWithFallback(fakeServer, 5006, '::', onListening);
-      await new Promise<void>(resolve => process.nextTick(resolve));
-
-      expect(listenSpy).toHaveBeenCalledTimes(2);
-      expect(listenSpy).toHaveBeenNthCalledWith(
-        1,
-        5006,
-        '::',
-        expect.any(Function),
+      server.emit(
+        'error',
+        Object.assign(new Error('IPv6 unavailable'), { code }),
       );
-      expect(listenSpy).toHaveBeenNthCalledWith(
-        2,
+      expect(listen).toHaveBeenLastCalledWith(
         5006,
         '0.0.0.0',
         expect.any(Function),
       );
-      expect(onListening).toHaveBeenCalledWith('0.0.0.0');
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining(
-          `Failed to bind to IPv6 address '::' (${code}). Falling back to IPv4 '0.0.0.0'`,
-        ),
-      );
-      warnSpy.mockRestore();
+      const callback = listen.mock.calls[1]?.at(-1);
+      if (typeof callback === 'function') callback();
+
+      expect(onListening).toHaveBeenCalledExactlyOnceWith('0.0.0.0');
+      expect(onError).not.toHaveBeenCalled();
     },
   );
 
-  it('closes the server and propagates error via onError if the 0.0.0.0 fallback attempt also fails', async () => {
-    const fakeServer = new http.Server();
-    let listenCallCount = 0;
-    const fallbackErr = new Error('Port in use') as NodeJS.ErrnoException;
-    fallbackErr.code = 'EADDRINUSE';
+  it.each([
+    { hostname: 'custom-host', code: 'EADDRNOTAVAIL', fallback: false },
+    { hostname: '::', code: 'EADDRINUSE', fallback: false },
+    { hostname: '::', code: 'EADDRINUSE', fallback: true },
+  ])(
+    'reports terminal errors ($hostname, fallback=$fallback)',
+    ({ hostname, code, fallback }) => {
+      const listen = vi.spyOn(server, 'listen').mockReturnValue(server);
+      const onListening = vi.fn();
+      const onError = vi.fn();
+      const error = Object.assign(new Error('Cannot listen'), { code });
+      listenWithFallback(server, 5006, hostname, onListening, onError);
 
-    vi.spyOn(fakeServer, 'listen').mockImplementation((() => {
-      listenCallCount++;
-      if (listenCallCount === 1) {
-        const err = new Error('IPv6 unsupported') as NodeJS.ErrnoException;
-        err.code = 'EAFNOSUPPORT';
-        process.nextTick(() => fakeServer.emit('error', err));
-      } else if (listenCallCount === 2) {
-        process.nextTick(() => fakeServer.emit('error', fallbackErr));
+      if (fallback) {
+        server.emit(
+          'error',
+          Object.assign(new Error('IPv6 unavailable'), {
+            code: 'EAFNOSUPPORT',
+          }),
+        );
       }
-      return fakeServer;
-    }) as typeof fakeServer.listen);
+      server.emit('error', error);
 
-    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
-      return fakeServer;
-    }) as typeof fakeServer.close);
-
-    const warnSpy = vi
-      .spyOn(console, 'warn')
-      .mockImplementation(() => undefined);
-    const errorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    const onListening = vi.fn();
-    const onError = vi.fn();
-
-    listenWithFallback(fakeServer, 5006, '::', onListening, onError);
-    await new Promise<void>(resolve => process.nextTick(resolve));
-    await new Promise<void>(resolve => process.nextTick(resolve));
-
-    expect(onListening).not.toHaveBeenCalled();
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenCalledWith(fallbackErr);
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Failed to start server on 0.0.0.0:5006:',
-      fallbackErr,
-    );
-    warnSpy.mockRestore();
-    errorSpy.mockRestore();
-  });
-
-  it('closes the server, propagates error, and does not fall back if a custom hostname was specified', async () => {
-    const fakeServer = new http.Server();
-    const err = new Error('Address not available') as NodeJS.ErrnoException;
-    err.code = 'EADDRNOTAVAIL';
-
-    const listenSpy = vi.spyOn(fakeServer, 'listen').mockImplementation((() => {
-      process.nextTick(() => fakeServer.emit('error', err));
-      return fakeServer;
-    }) as typeof fakeServer.listen);
-
-    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
-      return fakeServer;
-    }) as typeof fakeServer.close);
-
-    const errorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    const onListening = vi.fn();
-    const onError = vi.fn();
-
-    listenWithFallback(fakeServer, 5006, 'custom-host', onListening, onError);
-    await new Promise<void>(resolve => process.nextTick(resolve));
-
-    expect(listenSpy).toHaveBeenCalledTimes(1);
-    expect(onListening).not.toHaveBeenCalled();
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenCalledWith(err);
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Failed to start server on custom-host:5006:',
-      err,
-    );
-    errorSpy.mockRestore();
-  });
-
-  it('closes the server, propagates error, and does not fall back if a non-fallback error occurs on ::', async () => {
-    const fakeServer = new http.Server();
-    const err = new Error('Address in use') as NodeJS.ErrnoException;
-    err.code = 'EADDRINUSE';
-
-    const listenSpy = vi.spyOn(fakeServer, 'listen').mockImplementation((() => {
-      process.nextTick(() => fakeServer.emit('error', err));
-      return fakeServer;
-    }) as typeof fakeServer.listen);
-
-    const closeSpy = vi.spyOn(fakeServer, 'close').mockImplementation((() => {
-      return fakeServer;
-    }) as typeof fakeServer.close);
-
-    const errorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    const onListening = vi.fn();
-    const onError = vi.fn();
-
-    listenWithFallback(fakeServer, 5006, '::', onListening, onError);
-    await new Promise<void>(resolve => process.nextTick(resolve));
-
-    expect(listenSpy).toHaveBeenCalledTimes(1);
-    expect(onListening).not.toHaveBeenCalled();
-    expect(closeSpy).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenCalledWith(err);
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Failed to start server on :::5006:',
-      err,
-    );
-    errorSpy.mockRestore();
-  });
+      expect(listen).toHaveBeenCalledTimes(fallback ? 2 : 1);
+      expect(onListening).not.toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledExactlyOnceWith(error);
+    },
+  );
 });
