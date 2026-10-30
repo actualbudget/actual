@@ -20,6 +20,13 @@ export const OS: 'windows' | 'mac' | 'linux' | 'unknown' = isWindows
 export const env: 'web' | 'mobile' | 'unknown' = 'web';
 export const isBrowser: boolean = true;
 
+// True inside the Capacitor (App Store / Play Store) builds. The native shell
+// injects window.Capacitor before any page script runs; on the plain web the
+// global may also exist once @capacitor/core is loaded, but reports false.
+type CapacitorGlobal = { Capacitor?: { isNativePlatform?: () => boolean } };
+export const isNativeMobileApp: boolean =
+  (globalThis as CapacitorGlobal).Capacitor?.isNativePlatform?.() === true;
+
 const userAgent = navigator.userAgent;
 
 // True for all browsers on iOS (iPhone/iPad/iPod) — not macOS.

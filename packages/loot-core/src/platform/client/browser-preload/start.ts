@@ -1,6 +1,7 @@
 import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
 
 import { logger } from '#platform/server/log';
+import * as Platform from '#shared/platform';
 
 import { WorkerBridge } from './worker-bridge';
 
@@ -44,7 +45,7 @@ export function startBrowserBackend(
   // Capacitor serves the app from a custom URL scheme, which WebKit never
   // treats as cross-origin isolated, so SharedArrayBuffer is unavailable in
   // the native mobile app. Always run it in the fallback mode there.
-  if ('Capacitor' in window) {
+  if (Platform.isNativeMobileApp) {
     localStorage.setItem('SharedArrayBufferOverride', 'true');
   }
 
