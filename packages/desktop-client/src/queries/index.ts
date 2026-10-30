@@ -88,7 +88,7 @@ export function transactionsSearch(
   currencySymbol: string,
 ) {
   // currencyToAmount ignores letters, so "35mm" would match the amount 35.
-  // Searches with letters are text, apart from a leading or trailing currency
+  // Letters make a search text-only, except a leading or trailing currency
   // symbol ("120 kr", "-CHF 12").
   const symbol = escapeRegExp(currencySymbol);
   const amountSearch = currencySymbol
