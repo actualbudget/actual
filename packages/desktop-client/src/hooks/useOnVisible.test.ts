@@ -1,16 +1,22 @@
-import { App as CapacitorApp } from '@capacitor/app';
 // @ts-strict-ignore
+import type * as Platform from '@actual-app/core/shared/platform';
+import { App as CapacitorApp } from '@capacitor/app';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOnVisible } from './useOnVisible';
 
-const { isNativePlatform, removeListener } = vi.hoisted(() => ({
-  isNativePlatform: vi.fn(() => false),
+const { platform, removeListener } = vi.hoisted(() => ({
+  platform: { isNativeMobileApp: false },
   removeListener: vi.fn(),
 }));
 
-vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform } }));
+vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
+  ...(await importOriginal<typeof Platform>()),
+  get isNativeMobileApp() {
+    return platform.isNativeMobileApp;
+  },
+}));
 vi.mock('@capacitor/app', () => ({
   App: { addListener: vi.fn(async () => ({ remove: removeListener })) },
 }));
@@ -126,11 +132,11 @@ describe('useOnVisible', () => {
 
   describe('in the native app', () => {
     beforeEach(() => {
-      isNativePlatform.mockReturnValue(true);
+      platform.isNativeMobileApp = true;
     });
 
     afterEach(() => {
-      isNativePlatform.mockReturnValue(false);
+      platform.isNativeMobileApp = false;
     });
 
     it('invokes callback when the app becomes active', () => {

@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
 
+import * as Platform from '@actual-app/core/shared/platform';
 import { App as CapacitorApp } from '@capacitor/app';
-import { Capacitor } from '@capacitor/core';
 
 type UseOnVisibleOptions = {
   /** When false, the visibility listener is not attached. Default true. */
@@ -49,7 +49,7 @@ export function useOnVisible(
 
     // The web view does not reliably fire `visibilitychange` when the app is
     // backgrounded and resumed, so listen to the native app state as well.
-    const appStateListener = Capacitor.isNativePlatform()
+    const appStateListener = Platform.isNativeMobileApp
       ? CapacitorApp.addListener('appStateChange', ({ isActive }) => {
           if (isActive) {
             void runCallback();
