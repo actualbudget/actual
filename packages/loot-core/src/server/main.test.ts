@@ -5,11 +5,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { expectSnapshotWithDiffer } from '#mocks/util';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
+import { logger } from '#platform/server/log';
 import * as monthUtils from '#shared/months';
 
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import * as db from './db';
+import { SyncError } from './errors';
 import { handlers, lib } from './main';
 import {
   disableGlobalMutations,
@@ -20,7 +22,7 @@ import {
 import * as post from './post';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
-import { scheduleFullSync, setSyncingMode } from './sync';
+import { batchMessages, scheduleFullSync, setSyncingMode } from './sync';
 
 vi.mock('./post');
 
@@ -562,11 +564,17 @@ describe('Budget shutdown', () => {
 
   test('drains queued mutators even when the running mutator rejects', async () => {
     vi.useFakeTimers();
+    await prefs.loadPrefs();
+    const errorLog = vi.spyOn(logger, 'error');
     const gate = deferred();
-    const rejectingPromise = runMutator(async () => {
-      await gate.promise;
-      throw new Error('mutator failed');
-    });
+    // A sync error inside a mutator emits a sync event that queues a
+    // schedule run behind everything already waiting
+    const rejectingPromise = runMutator(() =>
+      batchMessages(async () => {
+        await gate.promise;
+        throw new SyncError('invalid-schema');
+      }),
+    );
     const queuedPromise = runMutator(() => db.first('SELECT 1 AS value'));
     const closePromise = lib.send('close-budget');
 
@@ -575,11 +583,16 @@ describe('Budget shutdown', () => {
       expect(db.getDatabase()).not.toBeNull();
 
       gate.resolve();
-      await expect(rejectingPromise).rejects.toThrow('mutator failed');
+      await expect(rejectingPromise).rejects.toThrow('invalid-schema');
       await expect(queuedPromise).resolves.toEqual({ value: 1 });
       await vi.runAllTimersAsync();
       await expect(closePromise).resolves.toBe('ok');
       expect(db.getDatabase()).toBeNull();
+      await runMutator(async () => undefined);
+      expect(errorLog).not.toHaveBeenCalledWith(
+        'Failed to run schedule service after sync',
+        expect.anything(),
+      );
     } finally {
       gate.resolve();
       await vi.runAllTimersAsync();
