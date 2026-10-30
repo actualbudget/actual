@@ -4,11 +4,13 @@ import MockDate from 'mockdate';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { app as mainApp } from '#server/main-app';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { loadRules, updateRule } from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
+import type { ServerEvents } from '#types/server-events';
 
 import {
   advanceSchedulesService,
@@ -1400,8 +1402,8 @@ describe('schedule app', () => {
       return data.map(row => row.date);
     }
 
-    async function syncSuccessfully() {
-      schedulesApp.events.emit('sync', { type: 'success', tables: [] });
+    async function syncSuccessfully(events = schedulesApp.events) {
+      events.emit('sync', { type: 'success', tables: [] });
       // Drain the queued service work without timers or mocked mutators.
       await runMutator(() => Promise.resolve());
     }
@@ -1468,27 +1470,47 @@ describe('schedule app', () => {
       const healthyId = await createRecurringSchedule(true, 20161225);
       failAdvancement(failedId);
 
-      await syncSuccessfully();
+      let applyFailures = 0;
+      function forwardSync(event: ServerEvents['sync-event']) {
+        if (event.type === 'error' && event.subtype === 'apply-failure') {
+          applyFailures++;
+        }
+        // Production registers the schedule listener on this same event bus.
+        schedulesApp.events.emit('sync', event);
+      }
+      mainApp.events.on('sync', forwardSync);
 
-      expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
-      expect(await postedDates(failedId)).toEqual(['2016-12-18']);
-      expect(await postedDates(healthyId)).toEqual(healthyDates);
+      try {
+        await syncSuccessfully(mainApp.events);
 
-      db.runQuery('DROP TRIGGER fail_schedule_advancement');
-      await syncSuccessfully();
+        // Drain any retry enqueued by the first run's own apply-failure event.
+        await runMutator(() => Promise.resolve());
+        expect.soft(applyFailures).toBe(1);
+        expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
+        expect(await postedDates(failedId)).toEqual(['2016-12-18']);
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
 
-      expect.soft(await postedDates(failedId)).toEqual(catchUpDates);
-      expect(await postedDates(healthyId)).toEqual(healthyDates);
-      expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
+        db.runQuery('DROP TRIGGER fail_schedule_advancement');
+        await syncSuccessfully(mainApp.events);
 
-      // Simulate older next-date data arriving from another client without
-      // using updateSchedule, which deliberately clears the daily marker.
-      rewindSchedule(healthyId);
-      await syncSuccessfully();
-      const { data: nextDate } = await aqlQuery(
-        q('schedules').filter({ id: healthyId }).calculate('next_date'),
-      );
-      expect(nextDate).toBe('2016-12-18');
+        expect.soft(await postedDates(failedId)).toEqual(catchUpDates);
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+        expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
+
+        // Simulate older next-date data arriving from another client without
+        // using updateSchedule, which deliberately clears the daily marker.
+        rewindSchedule(healthyId);
+        await syncSuccessfully(mainApp.events);
+        const { data: nextDate } = await aqlQuery(
+          q('schedules').filter({ id: healthyId }).calculate('next_date'),
+        );
+        expect(nextDate).toBe('2016-12-18');
+      } finally {
+        mainApp.events.off('sync', forwardSync);
+        // Stop feedback before draining so a regression cannot leak a retry
+        // loop into the next test, even if an assertion above fails.
+        await runMutator(() => Promise.resolve());
+      }
     });
   });
 

@@ -876,7 +876,15 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
+let advancingAfterSync = false;
+
 app.events.on('sync', ({ type }) => {
+  // Failed schedule writes emit sync errors too. Wait for a later external
+  // sync rather than letting an active run enqueue its own retry.
+  if (advancingAfterSync) {
+    return;
+  }
+
   const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 
@@ -894,11 +902,16 @@ app.events.on('sync', ({ type }) => {
           return;
         }
 
-        await advanceSchedulesService(type === 'success');
+        advancingAfterSync = true;
+        try {
+          await advanceSchedulesService(type === 'success');
 
-        // Rejected or offline runs must remain retryable on a later sync.
-        if (type === 'success') {
-          await prefs.savePrefs({ lastScheduleRun: runDay });
+          // Rejected or offline runs must remain retryable on a later sync.
+          if (type === 'success') {
+            await prefs.savePrefs({ lastScheduleRun: runDay });
+          }
+        } finally {
+          advancingAfterSync = false;
         }
       }).catch(error => {
         logger.error('Failed to run schedule service after sync', error);
