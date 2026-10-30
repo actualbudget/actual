@@ -327,15 +327,25 @@ export function AccountHeader({
             <CurrentEstimateLines account={account} accountId={accountId} />
           </View>
 
-          {/* The history graph charts stored base amounts. */}
+          {/* The history graph charts stored base amounts, and a foreign
+              account's native amounts beside them. */}
           <BudgetCurrencyFormat>
             <BalanceHistoryGraph
               ref={graphRef}
               accountId={accountId}
+              native={
+                account?.currency && account.currency_precision != null
+                  ? {
+                      currency: account.currency,
+                      precision: account.currency_precision,
+                    }
+                  : undefined
+              }
               aria-label={
                 account?.currency
-                  ? t('Balance history in {{currency}} (base)', {
-                      currency: budgetCurrency,
+                  ? t('Balance history in {{currency}} and {{base}} (base)', {
+                      currency: account.currency,
+                      base: budgetCurrency,
                     })
                   : undefined
               }

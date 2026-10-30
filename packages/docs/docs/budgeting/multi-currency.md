@@ -164,6 +164,10 @@ The row shows the other side under the transaction. **Sent from Checking** is 1,
 
 BNP Paribas is then €3,000.00. The deposit row shows Checking, then $1,100.00. Checking is $1,400.00. **All accounts** stays $4,950.00.
 
+Hold the pointer over $1,100.00. It says: "1,100.00 USD left Checking." The next line is the rate this transfer used: "Rate of this transfer: 1 USD = 0.909091 EUR." Under that is the rate saved for the date: "Exchange rate on 10/31/2026: 1 USD = 0.909091 EUR." When that date has no saved rate, the last line says: "No exchange rate saved for 10/31/2026."
+
+<img width="361" alt="Hover on the 1,100.00 dollar side of the BNP Paribas transfer: 1,100.00 USD left Checking, at 1 USD = 0.909091 EUR" src="/img/budgeting/multi-currency-rate-hover@2x.png" />
+
 A fee is optional. Choose EUR or USD next to **Fee**. The fee has to be smaller than the amount transferred, or Actual says: "The fee must be smaller than the amount transferred."
 
 A payment of 100.00 from BNP Paribas to BBVA México uses the same row. Both accounts are in currencies other than the dollar, so saved endpoint rates supply the dollar valuation. There is no editable budget-value field; saving requires a valid saved valuation. The estimate is 2,200.00 pesos received and 110.00 dollars. The rate field shows 1 EUR = 21.9999978 MXN. Actual says: "The amount received is estimated from the saved rate 22."
