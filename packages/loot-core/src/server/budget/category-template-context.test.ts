@@ -3,6 +3,8 @@ import { vi } from 'vitest';
 import * as aql from '#server/aql';
 import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
+import { Rule } from '#server/rules';
+import { getRuleForSchedule } from '#server/schedules/app';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
@@ -11,6 +13,7 @@ import type { ByTemplate, Template } from '#types/models/templates';
 import * as actions from './actions';
 import { CategoryTemplateContext } from './category-template-context';
 import { distributeRemainder } from './goal-template';
+import { runScheduleForecast } from './schedule-template';
 import * as statements from './statements';
 
 // Mock getSheetValue and getCategories
@@ -23,7 +26,14 @@ vi.mock('./actions', () => ({
 
 vi.mock('#server/db', () => ({
   getCategories: vi.fn(),
+  first: vi.fn(),
+  getAccounts: vi.fn(),
 }));
+
+vi.mock('#server/schedules/app', async () => {
+  const actualModule = await vi.importActual('#server/schedules/app');
+  return { ...actualModule, getRuleForSchedule: vi.fn() };
+});
 
 vi.mock('#server/aql', () => ({
   aqlQuery: vi.fn(),
@@ -1216,6 +1226,131 @@ describe('CategoryTemplateContext', () => {
       );
       const result = instance.runRemainder(99, 100);
       expect(result).toBe(99);
+    });
+  });
+
+  describe('schedule templates', () => {
+    const category: CategoryEntity = {
+      id: 'gate-cat',
+      name: 'Gate Category',
+      group: 'g',
+      is_income: false,
+    };
+    const templates: Template[] = [
+      {
+        type: 'schedule',
+        name: 'Internet',
+        directive: 'template',
+        priority: 1,
+      },
+      {
+        type: 'schedule',
+        name: 'Insurance',
+        directive: 'template',
+        priority: 1,
+      },
+    ];
+
+    function mockTwoSchedules() {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Internet', id: 's1' },
+        { name: 'Insurance', id: 's2' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      vi.mocked(db.getAccounts).mockResolvedValue([]);
+      vi.mocked(db.first).mockImplementation(async (_q, params?: unknown[]) => {
+        const name = (params as string[] | undefined)?.[0] ?? '';
+        return { id: name === 'Internet' ? 1 : 2, completed: 0 };
+      });
+      vi.mocked(getRuleForSchedule).mockImplementation(async id => {
+        const isInternet = Number(id) === 1;
+        return new Rule({
+          id: String(id),
+          stage: 'pre',
+          conditionsOp: 'and',
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: isInternet
+                ? {
+                    start: '2024-03-15',
+                    interval: 1,
+                    frequency: 'yearly',
+                    patterns: [],
+                    skipWeekend: false,
+                    weekendSolveMode: 'before',
+                    endMode: 'never',
+                    endOccurrences: 1,
+                    endDate: '2099-01-01',
+                  }
+                : {
+                    start: '2024-12-15',
+                    interval: 1,
+                    frequency: 'yearly',
+                    patterns: [],
+                    skipWeekend: false,
+                    weekendSolveMode: 'before',
+                    endMode: 'never',
+                    endOccurrences: 1,
+                    endDate: '2099-01-01',
+                  },
+              type: 'date',
+            },
+            {
+              op: 'is',
+              field: 'amount',
+              value: isInternet ? -10000 : -60000,
+              type: 'number',
+            },
+          ],
+          actions: [],
+        });
+      });
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+    }
+
+    beforeEach(() => {
+      mockPreferences();
+      vi.mocked(actions.getSheetValue).mockResolvedValue(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
+      mockTwoSchedules();
+    });
+
+    it('budgets the forecast contribution for an empty category', async () => {
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      const expected = await runScheduleForecast(
+        templates,
+        '2024-01',
+        0,
+        0,
+        category,
+      );
+      expect(expected.to_budget).toBeGreaterThan(0);
+      expect(result).toBe(expected.to_budget);
+    });
+
+    it('budgets nothing when last month left more than the bills need', async () => {
+      // $100 due each March and $600 each December: $5,000 left over
+      // covers years of both.
+      vi.mocked(actions.getSheetValue).mockResolvedValue(500000);
+
+      const instance = await CategoryTemplateContext.init(
+        templates,
+        category,
+        '2024-01',
+        0,
+      );
+      const result = await instance.runTemplatesForPriority(1, 100000, 100000);
+
+      expect(result).toBe(0);
     });
   });
 
