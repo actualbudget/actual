@@ -36,6 +36,10 @@ export function useOnVisible(
       } while (isPending.current);
     } finally {
       inProgress.current = false;
+      // A rejected callback exits the loop before it can see a queued run
+      if (isPending.current) {
+        void runCallback();
+      }
     }
   });
 

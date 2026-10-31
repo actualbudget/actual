@@ -134,6 +134,37 @@ describe('useOnVisible', () => {
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
+  it('still runs a queued event after the callback rejects', async () => {
+    // The rejection is unhandled by design; keep it out of the test output
+    const errorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    let reject: (error: Error) => void;
+    const callback = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((_, r) => {
+            reject = r;
+          }),
+      )
+      .mockResolvedValue(undefined);
+    renderHook(() => useOnVisible(callback));
+
+    dispatchVisibilityChange();
+    dispatchVisibilityChange();
+    expect(callback).toHaveBeenCalledTimes(1);
+
+    reject(new Error('worker error'));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(callback).toHaveBeenCalledTimes(2);
+
+    // The unhandled-rejection report lands on a later tick
+    await new Promise(resolve => setTimeout(resolve, 0));
+    errorSpy.mockRestore();
+  });
+
   it('drops a queued run when unmounted before the callback settles', async () => {
     let resolve: () => void;
     const callback = vi.fn().mockImplementation(

@@ -76,20 +76,15 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
   });
 
   // Keep the online/offline status in step with whether syncing actually
-  // reaches the server. One refresh at a time: a failing sync can emit several
-  // errors before the first refresh has settled.
-  let isRefreshingUserData = false;
+  // reaches the server.
   const unlistenReachability = listen('sync-event', ({ type }) => {
     const userData = store.getState().user.data;
     const isReachabilityOutdated =
       userData &&
       ((type === 'success' && userData.offline) ||
         (type === 'error' && !userData.offline));
-    if (isReachabilityOutdated && !isRefreshingUserData) {
-      isRefreshingUserData = true;
-      void store.dispatch(getUserData()).finally(() => {
-        isRefreshingUserData = false;
-      });
+    if (isReachabilityOutdated) {
+      void store.dispatch(getUserData());
     }
   });
 

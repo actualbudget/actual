@@ -40,8 +40,7 @@ function setup({ userData = null }: { userData?: UserData } = {}) {
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
-  // Thunks return a promise that settles later; nothing here awaits it
-  const dispatch = vi.fn((_action: unknown) => new Promise(vi.fn()));
+  const dispatch = vi.fn();
   // A budget must be loaded for the table -> invalidate mapping to run
   const store = {
     getState: () => ({
@@ -167,15 +166,4 @@ describe('listenForSyncEvent', () => {
       expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
     },
   );
-
-  it('refreshes the user data once while a refresh is still pending', () => {
-    const { dispatch } = setup({ userData: { offline: false } });
-
-    publishSyncEvent({ type: 'error' } as ServerEvents['sync-event']);
-    publishSyncEvent({ type: 'error' } as ServerEvents['sync-event']);
-
-    expect(
-      dispatch.mock.calls.filter(([action]) => action === getUserDataAction),
-    ).toHaveLength(1);
-  });
 });
