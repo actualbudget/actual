@@ -1,6 +1,10 @@
 import { q } from '@actual-app/core/shared/query';
 
-import { transactionsSearch } from './index';
+import {
+  accountFilter,
+  transactionsSearch,
+  uncategorizedTransactions,
+} from './index';
 
 describe('transactionsSearch', () => {
   it.each(['XF 35mm', '12kr34'])(
@@ -45,6 +49,52 @@ describe('transactionsSearch', () => {
             { amount: { $transform: '$abs', $eq: amount } },
           ]),
         },
+      },
+    ]);
+  });
+});
+
+describe('uncategorized filters', () => {
+  const offBudgetTransfer = {
+    'payee.transfer_acct.offbudget': true,
+    'payee.transfer_acct': null,
+  };
+
+  it.each([undefined, 'envelope'] as const)(
+    'counts transfers to off-budget accounts in a %s budget',
+    budgetType => {
+      expect(accountFilter('uncategorized', 'account', budgetType)).toEqual({
+        'account.offbudget': false,
+        category: null,
+        is_parent: false,
+        $or: [offBudgetTransfer],
+      });
+      expect(
+        uncategorizedTransactions(budgetType).serialize().filterExpressions,
+      ).toEqual([
+        {
+          'account.offbudget': false,
+          category: null,
+          $or: [offBudgetTransfer],
+        },
+      ]);
+    },
+  );
+
+  it('leaves transfers to off-budget accounts out in a tracking budget', () => {
+    expect(accountFilter('uncategorized', 'account', 'tracking')).toEqual({
+      'account.offbudget': false,
+      category: null,
+      is_parent: false,
+      'payee.transfer_acct': null,
+    });
+    expect(
+      uncategorizedTransactions('tracking').serialize().filterExpressions,
+    ).toEqual([
+      {
+        'account.offbudget': false,
+        category: null,
+        'payee.transfer_acct': null,
       },
     ]);
   });
