@@ -24,6 +24,7 @@ import {
 import type { ExchangeRateEntity, ExchangeRateKind } from '#types/models';
 
 import { startFxContext } from './context';
+import { startTodayFetch } from './fetch-on-open';
 import {
   backfillCancel,
   backfillPlan,
@@ -60,6 +61,7 @@ export type ExchangeRatesHandlers = {
 
 export const app = createApp<ExchangeRatesHandlers>();
 app.service(startFxContext);
+app.service(startTodayFetch);
 // Undo history is recorded only around actual rate writes, so validation
 // failures and no-op captures keep the redo stack intact.
 app.method('exchange-rates/save', mutator(saveRate));
