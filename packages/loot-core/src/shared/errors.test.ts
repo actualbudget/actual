@@ -60,4 +60,16 @@ describe('getSyncError', () => {
       SCHEMA_MISMATCH_MESSAGE,
     );
   });
+
+  it('explains how to recover from an out-of-sync local budget', () => {
+    expect(getSyncError('out-of-sync', 'budget-id')).toBe(
+      'The local copy of budget "budget-id" is out of sync with the server. Delete the "budget-id" folder from your data directory and download the budget again.',
+    );
+  });
+
+  it('falls back to the generic message for unknown errors', () => {
+    expect(getSyncError('something-else', 'budget-id')).toBe(
+      'We had an unknown problem opening "budget-id".',
+    );
+  });
 });
