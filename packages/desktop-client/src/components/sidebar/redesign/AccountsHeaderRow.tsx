@@ -11,6 +11,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { Link } from '#components/common/Link';
+import { useAccounts } from '#hooks/useAccounts';
 import { replaceModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
@@ -35,6 +36,7 @@ export function AccountsHeaderRow({
 }: AccountsHeaderRowProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { data: accounts = [] } = useAccounts();
 
   const onAddAccount = () => {
     dispatch(replaceModal({ modal: { name: 'add-account', options: {} } }));
@@ -91,6 +93,7 @@ export function AccountsHeaderRow({
       >
         <SidebarBalance
           binding={bindings.allAccountBalance()}
+          totalAccounts={accounts.filter(account => !account.closed)}
           testId="sidebar-all-accounts-balance"
           style={{ fontSize: 12, fontWeight: 600 }}
         />

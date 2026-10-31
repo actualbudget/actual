@@ -5,6 +5,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
+  | 'multiCurrency'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
@@ -29,6 +30,19 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    // How amounts of accounts in a non-default currency are shown:
+    // 'original' | 'converted' | 'both'. The per-account key overrides
+    // the budget-wide one.
+    | 'currency-display-mode'
+    | `currency-display-mode-${string}`
+    // How amounts in the default currency are marked: 'none' (default),
+    // 'symbol' ($) or 'code' (CAD$)
+    | 'currency-default-symbol'
+    // Which exchange rate past amounts are converted with: 'latest' values
+    // everything at the most recent rate, 'historical' at the rate of the
+    // date of each amount
+    | 'currency-conversion-rate'
+    | 'multi-currency-nudge-dismissed'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     // @deprecated: superseded by `transaction-table-columns-${string}`; only

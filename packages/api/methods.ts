@@ -4,6 +4,7 @@ import type {
   APIAccountGroupEntity,
   APICategoryEntity,
   APICategoryGroupEntity,
+  APIExchangeRateEntity,
   APIFileEntity,
   APIPayeeEntity,
   APIRuleEntity,
@@ -284,6 +285,27 @@ export function updateAccountGroup(
 
 export function deleteAccountGroup(id: APIAccountGroupEntity['id']) {
   return send('api/account-group-delete', { id });
+}
+
+export function getExchangeRates() {
+  return send('api/exchange-rates-get');
+}
+
+export function createExchangeRate(
+  exchangeRate: Omit<APIExchangeRateEntity, 'id' | 'source'>,
+) {
+  return send('api/exchange-rate-create', { exchangeRate });
+}
+
+export function updateExchangeRate(
+  id: APIExchangeRateEntity['id'],
+  fields: Partial<Omit<APIExchangeRateEntity, 'id' | 'source'>>,
+) {
+  return send('api/exchange-rate-update', { id, fields });
+}
+
+export function deleteExchangeRate(id: APIExchangeRateEntity['id']) {
+  return send('api/exchange-rate-delete', { id });
 }
 
 export function getCategoryGroups(options: { hidden?: boolean } = {}) {

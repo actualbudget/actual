@@ -213,6 +213,7 @@ const sidebars = {
             'experimental/monthly-cleanup',
             'experimental/rule-templating',
             'experimental/formulas',
+            'experimental/multi-currency',
             'experimental/balance-forecast-report',
             'experimental/budget-analysis-report',
             'experimental/monte-carlo-analysis',

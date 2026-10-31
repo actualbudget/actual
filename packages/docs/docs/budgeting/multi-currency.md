@@ -1,8 +1,8 @@
 # Multi-Currency
 
-The Actual Budget software is currency agnostic and does not support multi-currency. People are working on implementing currency support, but it will take time.
-For the current status visit:
-https://github.com/tlesicka/actual-budget-multicurrency-todo
+Accounts in different currencies are supported as an experimental feature. See [Multiple Currencies](../experimental/multi-currency.md) to turn it on.
+
+If your version of Actual doesn't have that feature yet, you can use the method below.
 
 ## Method to Implement Multi-Currency Using Rule Templates
 

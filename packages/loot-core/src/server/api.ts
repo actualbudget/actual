@@ -34,6 +34,7 @@ import {
   budgetModel,
   categoryGroupModel,
   categoryModel,
+  exchangeRateModel,
   payeeModel,
   remoteFileModel,
   ruleModel,
@@ -47,6 +48,10 @@ import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError, withErrorCode } from './errors';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+} from './fx/accountCurrency';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
@@ -161,6 +166,18 @@ function validateScheduleDate(date: RecurConfig | string) {
 function checkFileOpen() {
   if (!(prefs.getPrefs() || {}).id) {
     throw APIError('No budget file is open');
+  }
+}
+
+// Account currencies and exchange rates can only be set while multiple
+// currencies are on, which also needs a default currency they support
+function checkMultiCurrencyEnabled() {
+  try {
+    checkMultipleCurrenciesEnabled();
+  } catch {
+    throw APIError(
+      'Multiple currencies are not enabled: turn on the currency and multiCurrency feature flags and set a default currency',
+    );
   }
 }
 
@@ -693,10 +710,15 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (account.currency != null) {
+    accountModel.validateCurrency(account.currency);
+    checkMultiCurrencyEnabled();
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
+    currency: account.currency ?? null,
     // Current the API expects an amount but it really should expect
     // an integer
     balance: initialBalance != null ? integerToAmount(initialBalance) : null,
@@ -706,7 +728,19 @@ handlers['api/account-create'] = withMutation(async function ({
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   // @ts-expect-error - fix me
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  const { currency, ...otherFields } = accountModel.fromExternal(fields);
+  // Scripts can write back an account as they read it, so a currency it
+  // already has is left as it is
+  const isCurrencyChanged =
+    currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultiCurrencyEnabled();
+  }
+  return db.updateAccount({
+    id,
+    ...otherFields,
+    ...(isCurrencyChanged && { currency }),
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -766,6 +800,57 @@ handlers['api/account-group-update'] = withMutation(async function ({
 handlers['api/account-group-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   await handlers['account-group-delete']({ id });
+});
+
+handlers['api/exchange-rates-get'] = async function () {
+  checkFileOpen();
+  const exchangeRates = await handlers['exchange-rates-get']();
+  return exchangeRates.map(exchangeRate =>
+    exchangeRateModel.toExternal(exchangeRate),
+  );
+};
+
+handlers['api/exchange-rate-create'] = withMutation(async function ({
+  exchangeRate,
+}) {
+  checkFileOpen();
+  checkMultiCurrencyEnabled();
+  if (exchangeRate == null || typeof exchangeRate !== 'object') {
+    throw APIError('exchangeRate is required');
+  }
+  return handlers['exchange-rate-create']({
+    from_currency: exchangeRate.from_currency,
+    to_currency: exchangeRate.to_currency,
+    rate: exchangeRate.rate,
+    date: exchangeRate.date,
+  });
+});
+
+handlers['api/exchange-rate-update'] = withMutation(async function ({
+  id,
+  fields,
+}) {
+  checkFileOpen();
+  checkMultiCurrencyEnabled();
+  if (fields == null || typeof fields !== 'object') {
+    throw APIError('fields is required');
+  }
+  await handlers['exchange-rate-update']({
+    id,
+    ...(fields.from_currency !== undefined && {
+      from_currency: fields.from_currency,
+    }),
+    ...(fields.to_currency !== undefined && {
+      to_currency: fields.to_currency,
+    }),
+    ...(fields.rate !== undefined && { rate: fields.rate }),
+    ...(fields.date !== undefined && { date: fields.date }),
+  });
+});
+
+handlers['api/exchange-rate-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  await handlers['exchange-rate-delete']({ id });
 });
 
 handlers['api/categories-get'] = async function ({
