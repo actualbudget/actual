@@ -1932,6 +1932,36 @@ describe('CategoryTemplateContext', () => {
       ).rejects.toThrow(/Schedule Internet does not exist/);
     });
 
+    it('throws when a schedule has no amount condition', async () => {
+      vi.mocked(statements.getActiveSchedules).mockResolvedValue([
+        { name: 'Power', id: 's1' },
+      ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      vi.mocked(getRuleForSchedule).mockResolvedValue(
+        new Rule({
+          id: 'r1',
+          stage: 'pre',
+          conditionsOp: 'and',
+          conditions: [
+            { op: 'is', field: 'date', value: '2024-01-07', type: 'date' },
+          ],
+          actions: [],
+        }),
+      );
+      const templates: Template[] = [
+        {
+          type: 'schedule',
+          name: 'Power',
+          scheduleId: 's1',
+          directive: 'template',
+          priority: 1,
+        },
+      ];
+      await expect(
+        CategoryTemplateContext.init(templates, category, '2024-01', 0),
+      ).rejects.toThrow(/Schedule Power has no amount/);
+      expect(getRuleForSchedule).toHaveBeenCalledWith('s1');
+    });
+
     it('throws when schedule and by templates have mismatched priorities', async () => {
       vi.mocked(statements.getActiveSchedules).mockResolvedValue([
         { name: 'Rent', id: 's1' },
