@@ -7,6 +7,7 @@ import { TransactionListWithBalances } from '#components/mobile/transactions/Tra
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useTransactions } from '#hooks/useTransactions';
 import { useTransactionsSearch } from '#hooks/useTransactionsSearch';
 import { uncategorizedTransactions } from '#queries';
@@ -14,9 +15,13 @@ import * as bindings from '#spreadsheet/bindings';
 
 export function UncategorizedTransactions() {
   const navigate = useNavigate();
+  const [budgetType] = useSyncedPref('budgetType');
   const baseTransactionsQuery = useCallback(
-    () => uncategorizedTransactions().options({ splits: 'inline' }).select('*'),
-    [],
+    () =>
+      uncategorizedTransactions(budgetType)
+        .options({ splits: 'inline' })
+        .select('*'),
+    [budgetType],
   );
 
   const [transactionsQuery, setTransactionsQuery] = useState(
@@ -49,7 +54,7 @@ export function UncategorizedTransactions() {
     [navigate],
   );
 
-  const balance = bindings.uncategorizedBalance();
+  const balance = bindings.uncategorizedBalance(budgetType);
 
   return (
     <SchedulesProvider>

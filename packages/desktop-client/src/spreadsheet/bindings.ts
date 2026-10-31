@@ -4,6 +4,7 @@ import type {
   AccountGroupEntity,
   CategoryEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { uncategorizedTransactions } from '#queries';
 
@@ -153,17 +154,21 @@ export function categoryBalanceUncleared(
   } satisfies Binding<'category', 'balanceUncleared'>;
 }
 
-export function uncategorizedBalance<SheetName extends SheetNames>() {
+export function uncategorizedBalance<SheetName extends SheetNames>(
+  budgetType?: SyncedPrefs['budgetType'],
+) {
   return {
     name: 'uncategorized-balance',
-    query: uncategorizedTransactions().calculate({ $sum: '$amount' }),
+    query: uncategorizedTransactions(budgetType).calculate({ $sum: '$amount' }),
   } satisfies Binding<SheetName, 'uncategorized-balance'>;
 }
 
-export function uncategorizedCount<SheetName extends SheetNames>() {
+export function uncategorizedCount<SheetName extends SheetNames>(
+  budgetType?: SyncedPrefs['budgetType'],
+) {
   return {
     name: 'uncategorized-amount',
-    query: uncategorizedTransactions().calculate({ $count: '$id' }),
+    query: uncategorizedTransactions(budgetType).calculate({ $count: '$id' }),
   } satisfies Binding<SheetName, 'uncategorized-amount'>;
 }
 

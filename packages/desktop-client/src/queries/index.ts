@@ -17,6 +17,24 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { isValid as isDateValid, parse as parseDate } from 'date-fns';
 import { escapeRegExp } from 'es-toolkit';
 
+// A transfer to an off-budget account needs a category in an envelope budget,
+// because the money leaves the budget. In a tracking budget it has no effect on
+// the budget, and giving it a category would count it as spending, so it is
+// not uncategorized there.
+function uncategorizedPayeeFilter(budgetType?: SyncedPrefs['budgetType']) {
+  if (budgetType === 'tracking') {
+    return { 'payee.transfer_acct': null };
+  }
+  return {
+    $or: [
+      {
+        'payee.transfer_acct.offbudget': true,
+        'payee.transfer_acct': null,
+      },
+    ],
+  };
+}
+
 export function accountFilter(
   accountId?:
     | AccountEntity['id']
@@ -25,6 +43,7 @@ export function accountFilter(
     | 'closed'
     | 'uncategorized',
   field = 'account',
+  budgetType?: SyncedPrefs['budgetType'],
 ) {
   if (accountId) {
     if (accountId === 'onbudget') {
@@ -48,12 +67,7 @@ export function accountFilter(
         [`${field}.offbudget`]: false,
         category: null,
         is_parent: false,
-        $or: [
-          {
-            'payee.transfer_acct.offbudget': true,
-            'payee.transfer_acct': null,
-          },
-        ],
+        ...uncategorizedPayeeFilter(budgetType),
       };
     } else {
       return { [field]: accountId };
@@ -70,10 +84,11 @@ export function transactions(
     | 'offbudget'
     | 'closed'
     | 'uncategorized',
+  budgetType?: SyncedPrefs['budgetType'],
 ) {
   let query = q('transactions').options({ splits: 'grouped' });
 
-  const filter = accountFilter(accountId);
+  const filter = accountFilter(accountId, 'account', budgetType);
   if (filter) {
     query = query.filter(filter);
   }
@@ -139,15 +154,12 @@ export function transactionsSearch(
   });
 }
 
-export function uncategorizedTransactions() {
+export function uncategorizedTransactions(
+  budgetType?: SyncedPrefs['budgetType'],
+) {
   return q('transactions').filter({
     'account.offbudget': false,
     category: null,
-    $or: [
-      {
-        'payee.transfer_acct.offbudget': true,
-        'payee.transfer_acct': null,
-      },
-    ],
+    ...uncategorizedPayeeFilter(budgetType),
   });
 }

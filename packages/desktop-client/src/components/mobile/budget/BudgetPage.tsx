@@ -660,9 +660,10 @@ function UncategorizedTransactionsBanner(props) {
   const navigate = useNavigate();
   const format = useFormat();
 
+  const [budgetType] = useSyncedPref('budgetType');
   const transactionsQuery = useMemo(
-    () => uncategorizedTransactions().select('*'),
-    [],
+    () => uncategorizedTransactions(budgetType).select('*'),
+    [budgetType],
   );
 
   const { transactions, isPending: isTransactionsLoading } = useTransactions({

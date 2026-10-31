@@ -35,6 +35,7 @@ import type {
   TransactionEntity,
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
+import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { debounce, isEqual } from 'es-toolkit/compat';
 import { t } from 'i18next';
 import { v4 as uuidv4 } from 'uuid';
@@ -229,6 +230,7 @@ type AccountInternalProps = {
     | 'uncategorized'
     | undefined;
   filterConditions: RuleConditionEntity[];
+  budgetType?: SyncedPrefs['budgetType'];
   showBalances?: boolean;
   showNetWorthChart: boolean;
   setShowNetWorthChart: (newValue: boolean) => void;
@@ -486,7 +488,7 @@ class AccountInternal extends PureComponent<
   makeRootTransactionsQuery = () => {
     const accountId = this.props.accountId;
 
-    return queries.transactions(accountId);
+    return queries.transactions(accountId, this.props.budgetType);
   };
 
   updateQuery(query: Query, isFiltered: boolean = false) {
@@ -2132,6 +2134,7 @@ export function Account() {
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const currencySymbol = useFormat().currency.symbol;
   const [hideFraction] = useSyncedPref('hideFraction');
+  const [budgetType] = useSyncedPref('budgetType');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
     `show-account-${params.id}-net-worth-chart`,
@@ -2192,6 +2195,7 @@ export function Account() {
             accounts={accounts}
             dateFormat={dateFormat}
             currencySymbol={currencySymbol}
+            budgetType={budgetType}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
             showBalances={showBalances}

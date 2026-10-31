@@ -1387,6 +1387,11 @@ const Transaction = memo(function Transaction({
       : transferAccountsByTransaction[id];
   const isBudgetTransfer = transferAcct && transferAcct.offbudget === 0;
   const isOffBudget = account && account.offbudget === 1;
+  // In a tracking budget a transfer to an off-budget account has no budget
+  // effect, so an empty category is expected rather than a missing one.
+  const [budgetType] = useSyncedPref('budgetType');
+  const isTrackedOffBudgetTransfer =
+    budgetType === 'tracking' && !!transferAcct && transferAcct.offbudget === 1;
 
   const valueStyle = added
     ? { fontWeight: 600, color: theme.tableTextItemAdded }
@@ -1944,21 +1949,30 @@ const Transaction = memo(function Transaction({
             formatter={value =>
               value
                 ? (getCategoriesById(categoryGroups)[value]?.name ?? '')
-                : transaction.id
-                  ? t('Categorize')
-                  : ''
+                : isTrackedOffBudgetTransfer
+                  ? t('Transfer')
+                  : transaction.id
+                    ? t('Categorize')
+                    : ''
             }
             exposed={focusedField === 'category'}
             onExpose={name => !isPreview && onEdit(id, name)}
             valueStyle={
-              !categoryId
+              !categoryId && isTrackedOffBudgetTransfer
                 ? {
-                    // uncategorized transaction
+                    // transfer out of the budget: nothing to categorize
                     fontStyle: 'italic',
                     fontWeight: 300,
-                    color: theme.formInputTextHighlight,
+                    color: theme.pageTextSubdued,
                   }
-                : valueStyle
+                : !categoryId
+                  ? {
+                      // uncategorized transaction
+                      fontStyle: 'italic',
+                      fontWeight: 300,
+                      color: theme.formInputTextHighlight,
+                    }
+                  : valueStyle
             }
             onUpdate={async value => {
               if (value === 'split') {
