@@ -26,6 +26,31 @@ test.describe('Rules', () => {
     await page?.close();
   });
 
+  test('deletes the selected rules', async () => {
+    const editRuleModal = await rulesPage.createNewRule();
+    await editRuleModal.fill({
+      conditions: [{ field: 'payee', op: 'is', value: 'Kroger' }],
+      actions: [{ field: 'category', value: 'General' }],
+    });
+    await editRuleModal.save();
+
+    const rows = page.getByTestId('table').getByTestId('row');
+    const rule = rulesPage.getNthRule(0);
+    await expect(rule.conditions).toHaveText(['payee is Kroger']);
+    const count = await rows.count();
+
+    const selectButton = page.getByTestId('selected-rules-select-button');
+    await expect(async () => {
+      await rows.nth(0).getByTestId('select').click();
+      await expect(selectButton).toBeVisible({ timeout: 1000 });
+    }).toPass();
+    await selectButton.click();
+    await page.getByRole('button', { name: 'Delete', exact: true }).click();
+
+    await expect(rows).toHaveCount(count - 1);
+    await expect(page.getByText('payee is Kroger')).toHaveCount(0);
+  });
+
   test('checks the page visuals', async () => {
     await rulesPage.searchFor('Dominion');
     await expect(page).toMatchThemeScreenshots();
