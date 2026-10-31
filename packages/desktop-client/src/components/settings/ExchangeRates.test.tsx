@@ -93,6 +93,53 @@ function rowText(text: RegExp) {
 }
 
 describe('ExchangeRateSettings', () => {
+  it('preserves the exact stored rate through an unedited reciprocal and flip', async () => {
+    const { server, wrapper } = setup();
+    server.on('exchange-rates/history-page', () => page([historyRow()]));
+    server.on('exchange-rates/save', () => ({
+      status: 'saved' as const,
+      id: 'r1',
+    }));
+    render(<ExchangeRateSettings />, { wrapper });
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    expect(
+      screen.getByRole('textbox', { name: 'Rate in USD per 1 JPY' }),
+    ).toHaveValue('0.006666666666667');
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Swap rate direction' }),
+    );
+    expect(
+      screen.getByRole('textbox', { name: 'Rate in JPY per 1 USD' }),
+    ).toHaveValue('150');
+    await userEvent.click(screen.getByRole('button', { name: 'Save rate' }));
+    await waitFor(() =>
+      expect(server.sent('exchange-rates/save')).toContainEqual(
+        expect.objectContaining({ rate: '150' }),
+      ),
+    );
+  });
+
+  it('converts a typed foreign-first settings rate to quote-per-base storage', async () => {
+    const { server, wrapper } = setup();
+    server.on('exchange-rates/history-page', () => page([historyRow()]));
+    server.on('exchange-rates/save', () => ({
+      status: 'saved' as const,
+      id: 'r1',
+    }));
+    render(<ExchangeRateSettings />, { wrapper });
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    const input = screen.getByRole('textbox', {
+      name: 'Rate in USD per 1 JPY',
+    });
+    await userEvent.clear(input);
+    await userEvent.type(input, '0.008');
+    await userEvent.click(screen.getByRole('button', { name: 'Save rate' }));
+    await waitFor(() =>
+      expect(server.sent('exchange-rates/save')).toContainEqual(
+        expect.objectContaining({ rate: '125' }),
+      ),
+    );
+  });
   it('gates itself without multicurrency', async () => {
     const { server, wrapper } = setup({
       ...fxPrefs,
@@ -159,7 +206,7 @@ describe('ExchangeRateSettings', () => {
     server.hold('exchange-rates/history-page');
     render(<ExchangeRateSettings />, { wrapper });
     (await server.next('exchange-rates/history-page'))(page([]));
-    await chooseOption('exchange-rate-filter-quote', 'Euro');
+    await chooseOption('exchange-rate-add-pair', 'Euro');
     (await server.next('exchange-rates/history-page'))(
       page([historyRow({ id: 'e1', quote_currency: 'EUR', rate: '0.92' })], {
         nextCursor: 'e1',
@@ -168,7 +215,7 @@ describe('ExchangeRateSettings', () => {
     await screen.findByText(/EUR \(Euro\): 0.92/);
     await userEvent.click(screen.getByRole('button', { name: 'Load more' }));
     const eurPage2 = await server.next('exchange-rates/history-page');
-    await chooseOption('exchange-rate-filter-quote', 'Japanese Yen');
+    await chooseOption('exchange-rate-add-pair', 'Japanese Yen');
     (await server.next('exchange-rates/history-page'))(
       page([historyRow({ id: 'j1' })], { nextCursor: 'j1' }),
     );
@@ -200,7 +247,11 @@ describe('ExchangeRateSettings', () => {
     deliver(page([historyRow()]));
     await new Promise(resolve => setTimeout(resolve, 20));
     expect(errors).not.toHaveBeenCalled();
-    expect(server.names()).toEqual(['exchange-rates/history-page']);
+    errors.mockRestore();
+    expect(server.names()).toEqual([
+      'exchange-rates/history-page',
+      'exchange-rates/pairs',
+    ]);
   });
 
   it('drops a Load more page that arrives after the list unmounts', async () => {
@@ -407,8 +458,9 @@ describe('ExchangeRateSettings', () => {
         tombstone: 0,
       },
     });
+    // The JPY pair belonged to the old budget currency, so its form is gone.
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Save rate' })).toBeEnabled(),
+      expect(screen.queryByRole('button', { name: 'Save rate' })).toBeNull(),
     );
     expect(
       screen.queryByRole('button', { name: 'Replace saved rate' }),
@@ -416,51 +468,56 @@ describe('ExchangeRateSettings', () => {
     expect(server.sent('exchange-rates/save')).toHaveLength(1);
   });
 
-  it('preserves an unedited stored rate through a reciprocal display and flip', async () => {
+  it('opens a tab per account currency, then saved currencies, scoped to that pair', async () => {
     const { server, wrapper } = setup();
-    server.on('exchange-rates/history-page', () => page([historyRow()]));
-    server.on('exchange-rates/save', () => ({
-      status: 'saved' as const,
-      id: 'r1',
-    }));
+    server.on(
+      'exchange-rates/pairs',
+      () =>
+        ({
+          accounts: ['JPY'],
+          saved: ['EUR'],
+        }) satisfies Reply<'exchange-rates/pairs'>,
+    );
     render(<ExchangeRateSettings />, { wrapper });
-    await userEvent.click(await screen.findByRole('button', { name: 'Edit' }));
-    expect(
-      screen.getByRole('textbox', { name: 'Rate in USD per 1 JPY' }),
-    ).toHaveValue('0.006666666666667');
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Swap rate direction' }),
-    );
-    expect(
-      screen.getByRole('textbox', { name: 'Rate in JPY per 1 USD' }),
-    ).toHaveValue('150');
-    await userEvent.click(screen.getByRole('button', { name: 'Save rate' }));
+    const tabs = await screen.findAllByRole('tab');
+    expect(tabs.map(tab => tab.textContent)).toEqual([
+      'JPY to USD',
+      'EUR to USD',
+    ]);
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true');
     await waitFor(() =>
-      expect(server.sent('exchange-rates/save')).toContainEqual(
-        expect.objectContaining({ rate: '150' }),
-      ),
+      expect(server.sent('exchange-rates/history-page')).toContainEqual({
+        quoteCurrency: 'JPY',
+      }),
     );
+    expect(screen.getByText('Rate:')).toBeInTheDocument();
+
+    await userEvent.click(tabs[1]);
+    await waitFor(() =>
+      expect(server.sent('exchange-rates/history-page')).toContainEqual({
+        quoteCurrency: 'EUR',
+      }),
+    );
+    expect(screen.getByText('Rate:')).toBeInTheDocument();
   });
-  it('converts a typed foreign-first settings rate before saving', async () => {
+
+  it('adds a tab for a currency without an account or rates', async () => {
     const { server, wrapper } = setup();
-    server.on('exchange-rates/history-page', () => page([historyRow()]));
-    server.on('exchange-rates/save', () => ({
-      status: 'saved' as const,
-      id: 'r1',
-    }));
     render(<ExchangeRateSettings />, { wrapper });
-    await userEvent.click(await screen.findByRole('button', { name: 'Edit' }));
-    const input = screen.getByRole('textbox', {
-      name: 'Rate in USD per 1 JPY',
+    expect(
+      await screen.findByText(/Accounts in other currencies get a tab here/),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save rate' })).toBeNull();
+    await chooseOption('exchange-rate-add-pair', 'Euro');
+    expect(
+      await screen.findByRole('tab', { name: 'EUR to USD' }),
+    ).toHaveAttribute('aria-selected', 'true');
+    expect(
+      screen.getByRole('button', { name: 'Save rate' }),
+    ).toBeInTheDocument();
+    expect(server.sent('exchange-rates/history-page')).toContainEqual({
+      quoteCurrency: 'EUR',
     });
-    await userEvent.clear(input);
-    await userEvent.type(input, '0.008');
-    await userEvent.click(screen.getByRole('button', { name: 'Save rate' }));
-    await waitFor(() =>
-      expect(server.sent('exchange-rates/save')).toContainEqual(
-        expect.objectContaining({ rate: '125' }),
-      ),
-    );
   });
 });
 

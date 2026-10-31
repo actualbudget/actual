@@ -6,6 +6,7 @@ type SettingsSection =
   | 'Rules'
   | 'Bank Sync'
   | 'Tags'
+  | 'Exchange rates'
   | 'Advanced'
   | 'Experimental';
 
