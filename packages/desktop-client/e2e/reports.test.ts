@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';
@@ -622,5 +622,133 @@ test.describe('Reports without transactions', () => {
       }),
     ).toBeVisible();
     expect(pageErrors).toEqual([]);
+  });
+});
+
+test.describe('Donut graph interactions', () => {
+  let page: Page;
+  let customReportPage: CustomReportPage;
+
+  async function openDonut(
+    browser: Browser,
+    {
+      hasTouch = false,
+      blockMouseEvents = false,
+      split,
+    }: { hasTouch?: boolean; blockMouseEvents?: boolean; split?: string } = {},
+  ) {
+    // Without animation the sectors are in place as soon as they render
+    page = await browser.newPage({ hasTouch, reducedMotion: 'reduce' });
+    if (blockMouseEvents) {
+      // Some browsers send only a click after a tap, with no mouse events
+      // before it (Firefox's touch simulation)
+      await page.addInitScript(() => {
+        for (const type of [
+          'mouseover',
+          'mouseout',
+          'mousemove',
+          'mousedown',
+          'mouseup',
+        ]) {
+          window.addEventListener(
+            type,
+            event => {
+              if (event.isTrusted) {
+                event.stopImmediatePropagation();
+              }
+            },
+            true,
+          );
+        }
+      });
+    }
+
+    await page.goto('/');
+    await new ConfigurationPage(page).createTestFile();
+    const reportsPage = await new Navigation(page).goToReportsPage();
+    await reportsPage.waitToLoad();
+    customReportPage = await reportsPage.goToCustomReportPage();
+    await customReportPage.selectMode('total');
+    await customReportPage.selectViz('Donut Graph');
+    if (split) {
+      await customReportPage.selectSplit(split);
+    }
+  }
+
+  test.afterEach(async () => {
+    await page?.close();
+  });
+
+  test('clicking a slice opens its transactions', async ({ browser }) => {
+    await openDonut(browser);
+
+    const { x, y } = await customReportPage.pointInDonutSector(1);
+    await page.mouse.click(x, y);
+    await expect(page).toHaveURL(/\/accounts/);
+  });
+
+  test('double-clicking a slice opens its transactions once', async ({
+    browser,
+  }) => {
+    await openDonut(browser);
+
+    const { x, y } = await customReportPage.pointInDonutSector(1);
+    await page.mouse.dblclick(x, y);
+    await expect(page).toHaveURL(/\/accounts/);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/reports\/custom/);
+  });
+
+  for (const blockMouseEvents of [false, true]) {
+    test(`tapping selects a slice and tapping it again opens it${
+      blockMouseEvents ? ', without mouse events' : ''
+    }`, async ({ browser }) => {
+      await openDonut(browser, { hasTouch: true, blockMouseEvents });
+
+      const { x, y } = await customReportPage.pointInDonutSector(2);
+      await page.touchscreen.tap(x, y);
+      await expect(customReportPage.donutSectorSelection(2)).toHaveCount(1);
+      await expect(page).toHaveURL(/\/reports\/custom/);
+
+      await page.touchscreen.tap(x, y);
+      await expect(page).toHaveURL(/\/accounts/);
+    });
+  }
+
+  test('tapping moves the selection between the rings of a two-ring donut', async ({
+    browser,
+  }) => {
+    await openDonut(browser, { hasTouch: true, split: 'Category+Group' });
+    await expect(
+      customReportPage.pageContent.locator('.recharts-pie'),
+    ).toHaveCount(2);
+
+    // Before any tap, one category is selected and no group
+    const rings = customReportPage.pageContent.locator('.recharts-pie');
+    await expect(rings.nth(0).locator('[data-donut-selected]')).toHaveCount(0);
+    await expect(rings.nth(1).locator('[data-donut-selected]')).toHaveCount(1);
+
+    // The group ring is drawn first, so its sectors come first
+    const groupIndex = 0;
+    const categoryIndex =
+      (await customReportPage.pageContent
+        .locator('.recharts-pie-sector')
+        .count()) - 1;
+
+    const group = await customReportPage.pointInDonutSector(groupIndex);
+    await page.touchscreen.tap(group.x, group.y);
+    await expect(customReportPage.donutSectorSelection(groupIndex)).toHaveCount(
+      1,
+    );
+
+    const category = await customReportPage.pointInDonutSector(categoryIndex);
+    await page.touchscreen.tap(category.x, category.y);
+    await expect(
+      customReportPage.donutSectorSelection(categoryIndex),
+    ).toHaveCount(1);
+    await expect(customReportPage.donutSectorSelection(groupIndex)).toHaveCount(
+      0,
+    );
+    await expect(page).toHaveURL(/\/reports\/custom/);
   });
 });
