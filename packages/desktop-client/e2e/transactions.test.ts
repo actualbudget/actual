@@ -205,6 +205,23 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('tabs from a date picked with the mouse to the payee', async () => {
+    await accountPage.addNewTransactionButton.click();
+
+    await page
+      .getByTestId('date-select-tooltip')
+      .getByText('15', { exact: true })
+      .click();
+    await expect(
+      accountPage.newTransactionRow.getByTestId('date').locator('input'),
+    ).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(
+      accountPage.newTransactionRow.getByTestId('payee').locator('input'),
+    ).toBeFocused();
+  });
+
   test('creates a split test transaction', async () => {
     await accountPage.createSplitTransaction([
       {

@@ -60,6 +60,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -261,6 +262,7 @@ type AccountInternalProps = {
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
   dateFormat: ReturnType<typeof useDateFormat>;
+  currencySymbol: string;
   payees: PayeeEntity[];
   categoryGroups: CategoryGroupEntity[];
   hideFraction: boolean;
@@ -660,6 +662,7 @@ class AccountInternal extends PureComponent<
           this.currentQuery,
           this.state.search,
           this.props.dateFormat,
+          this.props.currencySymbol,
         ),
         true,
       );
@@ -1800,36 +1803,46 @@ class AccountInternal extends PureComponent<
   onSort = (headerClicked: string, ascDesc: 'asc' | 'desc') => {
     let prevField: string | undefined;
     let prevAscDesc: 'asc' | 'desc' | undefined;
+    // Query once the new sort is in state: whether running balances can be
+    // shown, and so whether hidden reconciled transactions are loaded,
+    // depends on it.
+    const sortAndSearch = () => {
+      this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
+      if (this.state.search !== '') {
+        this.onSearch(this.state.search);
+      }
+    };
     //if staying on same column but switching asc/desc
     //then keep prev the same
     if (headerClicked === this.state.sort?.field) {
       prevField = this.state.sort.prevField;
       prevAscDesc = this.state.sort.prevAscDesc;
-      this.setState(state => ({
-        sort: {
-          ...state.sort,
-          field: headerClicked,
-          ascDesc,
-        },
-      }));
+      this.setState(
+        state => ({
+          sort: {
+            ...state.sort,
+            field: headerClicked,
+            ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     } else {
       //if switching to new column then capture state
       //of current sort column as prev
       prevField = this.state.sort?.field;
       prevAscDesc = this.state.sort?.ascDesc;
-      this.setState(state => ({
-        sort: {
-          field: headerClicked,
-          ascDesc,
-          prevField: state.sort?.field,
-          prevAscDesc: state.sort?.ascDesc,
-        },
-      }));
-    }
-
-    this.applySort(headerClicked, ascDesc, prevField, prevAscDesc);
-    if (this.state.search !== '') {
-      this.onSearch(this.state.search);
+      this.setState(
+        state => ({
+          sort: {
+            field: headerClicked,
+            ascDesc,
+            prevField: state.sort?.field,
+            prevAscDesc: state.sort?.ascDesc,
+          },
+        }),
+        sortAndSearch,
+      );
     }
   };
 
@@ -2117,6 +2130,7 @@ export function Account() {
   const { data: accounts = [] } = useAccounts();
   const { data: payees = [] } = usePayees();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const currencySymbol = useFormat().currency.symbol;
   const [hideFraction] = useSyncedPref('hideFraction');
   const [expandSplits] = useLocalPref('expand-splits');
   const [showNetWorthChart, setShowNetWorthChart] = useSyncedPref(
@@ -2177,6 +2191,7 @@ export function Account() {
             matchedTransactions={matchedTransactions}
             accounts={accounts}
             dateFormat={dateFormat}
+            currencySymbol={currencySymbol}
             hideFraction={String(hideFraction) === 'true'}
             expandSplits={expandSplits}
             showBalances={showBalances}

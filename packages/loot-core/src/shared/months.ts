@@ -249,11 +249,17 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  return month === currentMonth();
+  const isValid =
+    typeof month === 'string'
+      ? isValidYearMonth(month) || isValidYearMonthDay(month)
+      : d.isValid(month);
+  return isValid && monthFromDate(month) === currentMonth();
 }
 
 export function isCurrentDay(day: DateLike): boolean {
-  return day === currentDay();
+  const isValid =
+    typeof day === 'string' ? isValidYearMonthDay(day) : d.isValid(day);
+  return isValid && dayFromDate(day) === currentDay();
 }
 
 // TODO: This doesn't really fit in this module anymore, should
