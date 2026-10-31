@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Tab, TabList, Tabs } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -120,7 +121,13 @@ export function ExchangeRateSettings() {
   const [rows, setRows] = useState<HistoryRow[]>([]);
   const [version, setVersion] = useState(0);
   const [chosenQuote, setQuote] = useState('');
-  const [quoteFilter, setQuoteFilter] = useState('');
+  // Each pair with the budget currency is a tab: account currencies, then
+  // currencies with saved rates, then ones added here this visit.
+  const [pairs, setPairs] = useState<{
+    accounts: string[];
+    saved: string[];
+  } | null>(null);
+  const [added, setAdded] = useState<string[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [unpageableCount, setUnpageableCount] = useState(0);
   const [invalidCount, setInvalidCount] = useState(0);
@@ -154,7 +161,8 @@ export function ExchangeRateSettings() {
     setRowsBase(baseCurrency);
     setRows([]);
     setQuote('');
-    setQuoteFilter('');
+    setAdded([]);
+    setPairs(null);
     setDate(monthUtils.currentDay());
     setRate('');
     setError(null);
@@ -165,12 +173,18 @@ export function ExchangeRateSettings() {
     ([code]) =>
       code !== '' && code !== baseCurrency && isReviewedCurrency(code),
   );
-  // A choice that became the budget currency (or unreviewed) is cleared.
-  const quote = quoteOptions.some(([code]) => code === chosenQuote)
-    ? chosenQuote
-    : '';
+  const reviewed = (code: string) =>
+    quoteOptions.some(([option]) => option === code);
+  const tabs = [
+    ...new Set([...(pairs?.accounts ?? []), ...(pairs?.saved ?? []), ...added]),
+  ].filter(reviewed);
+  // The chosen tab, or the first one; a choice that became the budget
+  // currency (or unreviewed) falls back the same way.
+  const quote = reviewed(chosenQuote) ? chosenQuote : (tabs[0] ?? '');
+  // The saved rates and history tools follow the selected pair.
+  const quoteFilter = quote;
 
-  // Today follows the local day while the screen stays open.
+  // The rate in use follows the local day while the screen stays open.
   useEffect(() => {
     const timer = setInterval(() => setToday(monthUtils.currentDay()), 60_000);
     return () => clearInterval(timer);
@@ -213,6 +227,22 @@ export function ExchangeRateSettings() {
       pageRequest.current = null;
     };
   }, [available, baseCurrency, quoteFilter, version, fx.epoch]);
+
+  useEffect(() => {
+    if (!available || !baseCurrency) return;
+    let cancelled = false;
+    void send('exchange-rates/pairs').then(
+      result => {
+        if (!cancelled) setPairs(result);
+      },
+      () => {
+        if (!cancelled) setPairs({ accounts: [], saved: [] });
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [available, baseCurrency, version]);
 
   useEffect(() => {
     listMounted.current = true;
@@ -360,7 +390,6 @@ export function ExchangeRateSettings() {
         }
         return;
       }
-      if (row.kind !== 'dated') return;
       await send('exchange-rates/remove', {
         quoteCurrency: row.quote_currency,
         date: utcDay(row.timestamp),
@@ -377,6 +406,237 @@ export function ExchangeRateSettings() {
     currencies.map(currency => [currency.code, currency.name]),
   );
 
+  /** Selects a pair, adding a tab for it when it has none yet. */
+  function addTab(code: string) {
+    setAdded(current =>
+      current.includes(code) ? current : [...current, code],
+    );
+    setQuote(code);
+    clearStatus();
+  }
+
+  // A currency without an account gets a tab for saving its rates.
+  const addPair = (
+    <Select
+      id="exchange-rate-add-pair"
+      aria-label={t('Add a currency pair')}
+      disabled={busy}
+      value=""
+      defaultLabel={t('Add currency…')}
+      onChange={code => {
+        if (code) addTab(code);
+      }}
+      options={quoteOptions.filter(([code]) => !tabs.includes(code))}
+    />
+  );
+
+  // The selected pair's rate entry, saved rates and history tools.
+  const panel = (
+    <View style={{ gap: spacing.md }}>
+      {quote && (
+        <>
+          <SettingsRow
+            title={t('Date')}
+            htmlFor="exchange-rate-date"
+            control={
+              <Input
+                id="exchange-rate-date"
+                type="date"
+                disabled={busy}
+                value={date}
+                onChangeValue={value => {
+                  setDate(value);
+                  clearStatus();
+                }}
+              />
+            }
+          />
+          <SettingsRow
+            title={t('Rate:')}
+            htmlFor="exchange-rate-value"
+            control={
+              <RateField
+                id="exchange-rate-value"
+                name="exchange-rate-value"
+                currencyCode={quote}
+                value={rate}
+                disabled={busy}
+                direction={direction}
+                resolvedRate={originalRate}
+                onChange={(value, nextDirection, edited) => {
+                  setRate(value);
+                  setDirection(nextDirection);
+                  if (edited !== false) setOriginalRate(undefined);
+                  clearStatus();
+                }}
+              />
+            }
+          />
+          <SettingsRow
+            title={t('Rate in use today')}
+            description={
+              quote
+                ? undefined
+                : t('Choose a currency to see the rate it uses.')
+            }
+            control={
+              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                {duplicate && (
+                  <Button
+                    isDisabled={busy}
+                    onPress={() => {
+                      void save(true);
+                    }}
+                  >
+                    <Trans>Replace saved rate</Trans>
+                  </Button>
+                )}
+                <Button
+                  variant="primary"
+                  isDisabled={busy}
+                  onPress={() => {
+                    void save(false);
+                  }}
+                >
+                  <Trans>Save fallback</Trans>
+                </Button>
+              </View>
+            }
+          >
+            {quote && (
+              <Text
+                data-testid="exchange-rate-preview"
+                style={styles.smallText}
+              >
+                <Trans>New transactions and valuations today use:</Trans>{' '}
+                {describeResolution(resolution, direction, t)}
+              </Text>
+            )}
+            {duplicate && (
+              <Text style={{ ...styles.smallText, color: theme.warningText }}>
+                {t(
+                  'A fallback of {{rate}} {{base}} per 1 {{foreign}} is already saved for this date.',
+                  {
+                    rate: Number((1 / Number(duplicate.rate)).toPrecision(15)),
+                    base: baseCurrency,
+                    foreign: quote,
+                  },
+                )}
+              </Text>
+            )}
+            {error && (
+              <Text style={{ ...styles.smallText, color: theme.errorText }}>
+                {error}
+              </Text>
+            )}
+          </SettingsRow>
+        </>
+      )}
+      <SettingsRow
+        title={t('Saved rates')}
+        description={
+          listLoaded && rows.length === 0
+            ? t('No exchange rates saved yet.')
+            : undefined
+        }
+      >
+        {unpageableCount > 0 && (
+          <Text style={styles.smallText}>
+            {t(
+              'Saved rates that cannot be listed because their stored values cannot be read: {{count}}.',
+              { count: unpageableCount },
+            )}
+          </Text>
+        )}
+        {invalidCount > 0 && (
+          <Text style={styles.smallText}>
+            {t('Invalid saved rates left out of the list: {{count}}.', {
+              count: invalidCount,
+            })}
+          </Text>
+        )}
+        {listError && (
+          <Text style={{ ...styles.smallText, color: theme.errorText }}>
+            {listError}
+          </Text>
+        )}
+        {rows.length > 0 && (
+          <View style={{ gap: spacing.sm }}>
+            {rows.map(row => (
+              <View
+                key={row.id}
+                style={{
+                  flexDirection: 'row',
+                  gap: spacing.sm,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <Text style={{ ...styles.smallText, flex: 1 }}>
+                  {row.quote_currency}
+                  {currencyName.get(row.quote_currency)
+                    ? ` (${currencyName.get(row.quote_currency)})`
+                    : ''}
+                  {': '}
+                  {row.rate}{' '}
+                  {row.kind === 'dated' ? t('fallback') : t('fetched')}{' '}
+                  {utcDay(row.timestamp)}
+                  {row.source !== 'manual'
+                    ? ` (${rateSourceName(row.source)})`
+                    : ''}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+                  <Button
+                    isDisabled={busy}
+                    onPress={() => {
+                      // A fetched row only seeds the form; saving makes a
+                      // separate fallback and leaves the fetched row as is.
+                      addTab(row.quote_currency);
+                      setDate(utcDay(row.timestamp));
+                      setRate(rateInDirection(row.rate, direction) ?? '');
+                      setOriginalRate(row.rate);
+                      clearStatus();
+                    }}
+                  >
+                    {row.kind === 'dated' ? (
+                      <Trans>Edit</Trans>
+                    ) : (
+                      <Trans>Save fallback</Trans>
+                    )}
+                  </Button>
+                  <Button
+                    isDisabled={busy}
+                    onPress={() => {
+                      void remove(row);
+                    }}
+                  >
+                    <Trans>Remove</Trans>
+                  </Button>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+        {nextCursor && (
+          <Button
+            onPress={() => {
+              void loadMore();
+            }}
+          >
+            <Trans>Load more</Trans>
+          </Button>
+        )}
+      </SettingsRow>
+      <ExchangeRateHistory
+        fx={fx}
+        filter={historyFilter(quoteFilter)}
+        onRatesChanged={() => {
+          setVersion(value => value + 1);
+        }}
+      />
+    </View>
+  );
+
   return (
     <View data-testid="exchange-rates">
       <SettingsGroup
@@ -385,223 +645,75 @@ export function ExchangeRateSettings() {
           'A fallback rate applies to its day only. A fetched rate for that day comes first; a fallback comes before an earlier fetched rate.',
         )}
       >
-        <SettingsRow
-          title={t('Currency')}
-          htmlFor="exchange-rate-quote"
-          control={
-            <Select
-              id="exchange-rate-quote"
-              disabled={busy}
-              value={quote}
-              onChange={value => {
-                setQuote(value);
-                clearStatus();
-              }}
-              options={[['', t('Choose a currency')], ...quoteOptions]}
-              style={{ maxWidth: '100%' }}
-            />
-          }
-        />
-        <SettingsRow
-          title={t('Date')}
-          htmlFor="exchange-rate-date"
-          control={
-            <Input
-              id="exchange-rate-date"
-              type="date"
-              disabled={busy}
-              value={date}
-              onChangeValue={value => {
-                setDate(value);
-                clearStatus();
-              }}
-            />
-          }
-        />
-        <SettingsRow
-          title={t('Rate:')}
-          htmlFor="exchange-rate-value"
-          control={
-            <RateField
-              id="exchange-rate-value"
-              name="exchange-rate-value"
-              currencyCode={quote}
-              value={rate}
-              disabled={busy}
-              direction={direction}
-              resolvedRate={originalRate}
-              onChange={(value, nextDirection, edited) => {
-                setRate(value);
-                setDirection(nextDirection);
-                if (edited !== false) setOriginalRate(undefined);
-                clearStatus();
-              }}
-            />
-          }
-        />
-        <SettingsRow
-          title={t('Rate in use today')}
-          description={
-            quote ? undefined : t('Choose a currency to see the rate it uses.')
-          }
-          control={
-            <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-              {duplicate && (
-                <Button
-                  isDisabled={busy}
-                  onPress={() => {
-                    void save(true);
-                  }}
-                >
-                  <Trans>Replace saved rate</Trans>
-                </Button>
-              )}
-              <Button
-                variant="primary"
-                isDisabled={busy}
-                onPress={() => {
-                  void save(false);
-                }}
-              >
-                <Trans>Save fallback</Trans>
-              </Button>
-            </View>
-          }
+        <Tabs
+          selectedKey={quote}
+          onSelectionChange={key => {
+            setQuote(String(key));
+            clearStatus();
+          }}
+          isDisabled={busy}
         >
-          {quote && (
-            <Text data-testid="exchange-rate-preview" style={styles.smallText}>
-              <Trans>New transactions and valuations today use:</Trans>{' '}
-              {describeResolution(resolution, direction, t)}
-            </Text>
-          )}
-          {duplicate && (
-            <Text style={{ ...styles.smallText, color: theme.warningText }}>
-              {t(
-                'A fallback of {{rate}} {{base}} per 1 {{foreign}} is already saved for this date.',
-                {
-                  rate: Number((1 / Number(duplicate.rate)).toPrecision(15)),
-                  base: baseCurrency,
-                  foreign: quote,
-                },
-              )}
-            </Text>
-          )}
-          {error && (
-            <Text style={{ ...styles.smallText, color: theme.errorText }}>
-              {error}
-            </Text>
-          )}
-        </SettingsRow>
-        <SettingsRow
-          title={t('Saved rates')}
-          htmlFor="exchange-rate-filter-quote"
-          description={
-            listLoaded && rows.length === 0
-              ? t('No exchange rates saved yet.')
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: spacing.xs,
+              borderBottom: `1px solid ${theme.tableBorder}`,
+              paddingBottom: spacing.xs,
+            }}
+          >
+            {tabs.length > 0 && (
+              <TabList
+                aria-label={t('Currency pairs')}
+                style={{ display: 'flex', flexWrap: 'wrap', gap: spacing.xs }}
+              >
+                {tabs.map(code => (
+                  <Tab
+                    key={code}
+                    id={code}
+                    style={({ isSelected, isFocusVisible }) => ({
+                      padding: '4px 10px',
+                      cursor: 'pointer',
+                      color: theme.pageText,
+                      fontWeight: isSelected ? 600 : 400,
+                      borderBottom: `2px solid ${isSelected ? theme.pageTextPositive : 'transparent'}`,
+                      outline: isFocusVisible
+                        ? `2px solid ${theme.buttonPrimaryBackground}`
+                        : 'none',
+                    })}
+                  >
+                    {t('{{quote}} to {{base}}', {
+                      base: baseCurrency,
+                      quote: code,
+                    })}
+                  </Tab>
+                ))}
+              </TabList>
+            )}
+            {addPair}
+          </View>
+        </Tabs>
+        {pairs && tabs.length === 0 && (
+          <Text style={styles.smallText}>
+            <Trans>
+              Accounts in other currencies get a tab here. To save rates for
+              another currency, add it.
+            </Trans>
+          </Text>
+        )}
+        {/* One panel follows the selected tab, so adding the first tab (for
+            example by an import) keeps the history tools and their results. */}
+        <View
+          role={quote ? 'tabpanel' : undefined}
+          aria-label={
+            quote
+              ? t('{{base}} to {{quote}}', { base: baseCurrency, quote })
               : undefined
           }
-          control={
-            <Select
-              id="exchange-rate-filter-quote"
-              value={quoteFilter}
-              onChange={value => {
-                setQuoteFilter(value);
-              }}
-              options={[['', t('All currencies')], ...quoteOptions]}
-              style={{ maxWidth: '100%' }}
-            />
-          }
         >
-          {unpageableCount > 0 && (
-            <Text style={styles.smallText}>
-              {t(
-                'Saved rates that cannot be listed because their stored values cannot be read: {{count}}.',
-                { count: unpageableCount },
-              )}
-            </Text>
-          )}
-          {invalidCount > 0 && (
-            <Text style={styles.smallText}>
-              {t('Invalid saved rates left out of the list: {{count}}.', {
-                count: invalidCount,
-              })}
-            </Text>
-          )}
-          {listError && (
-            <Text style={{ ...styles.smallText, color: theme.errorText }}>
-              {listError}
-            </Text>
-          )}
-          {rows.length > 0 && (
-            <View style={{ gap: spacing.sm }}>
-              {rows.map(row => (
-                <View
-                  key={row.id}
-                  style={{
-                    flexDirection: 'row',
-                    gap: spacing.sm,
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <Text style={{ ...styles.smallText, flex: 1 }}>
-                    {row.quote_currency}
-                    {currencyName.get(row.quote_currency)
-                      ? ` (${currencyName.get(row.quote_currency)})`
-                      : ''}
-                    {': '}
-                    {row.rate}{' '}
-                    {row.kind === 'dated' ? t('fallback') : t('fetched')}{' '}
-                    {utcDay(row.timestamp)}
-                    {row.source !== 'manual'
-                      ? ` (${rateSourceName(row.source)})`
-                      : ''}
-                  </Text>
-                  <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                    {row.kind === 'dated' && (
-                      <Button
-                        isDisabled={busy}
-                        onPress={() => {
-                          setQuote(row.quote_currency);
-                          setDate(utcDay(row.timestamp));
-                          setRate(rateInDirection(row.rate, direction) ?? '');
-                          setOriginalRate(row.rate);
-                          clearStatus();
-                        }}
-                      >
-                        <Trans>Edit</Trans>
-                      </Button>
-                    )}
-                    <Button
-                      isDisabled={busy}
-                      onPress={() => {
-                        void remove(row);
-                      }}
-                    >
-                      <Trans>Remove</Trans>
-                    </Button>
-                  </View>
-                </View>
-              ))}
-            </View>
-          )}
-          {nextCursor && (
-            <Button
-              onPress={() => {
-                void loadMore();
-              }}
-            >
-              <Trans>Load more</Trans>
-            </Button>
-          )}
-        </SettingsRow>
-        <ExchangeRateHistory
-          fx={fx}
-          filter={historyFilter(quoteFilter)}
-          onRatesChanged={() => {
-            setVersion(value => value + 1);
-          }}
-        />
+          {panel}
+        </View>
       </SettingsGroup>
     </View>
   );

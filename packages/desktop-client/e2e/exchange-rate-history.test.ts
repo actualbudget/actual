@@ -47,7 +47,7 @@ async function openRateSettings(page: Page): Promise<SettingsPage> {
   await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await settings.enableExperimentalFeature('Multiple currencies');
-  await settings.goToSection('General');
+  await settings.goToSection('Exchange rates');
   await expect(page.getByTestId('exchange-rates')).toBeVisible();
   await expect(page.getByText('No exchange rates saved yet.')).toBeVisible();
   return settings;
@@ -59,7 +59,16 @@ async function saveFallback(
   date: string,
   rate: string,
 ) {
-  await chooseMenu(page, '#exchange-rate-quote', currency);
+  // A pair with a tab is selected there; another is added first.
+  const tab = page.getByRole('tab', {
+    name: `${currency.slice(0, 3)} to USD`,
+    exact: true,
+  });
+  if (await tab.isVisible()) {
+    await tab.click();
+  } else {
+    await chooseMenu(page, '#exchange-rate-add-pair', currency);
+  }
   await setInput(page.locator('#exchange-rate-date'), date);
   // Rates here are quote per 1 USD, but entry starts as USD per 1 quote.
   const value = page.locator('#exchange-rate-value');
@@ -305,7 +314,7 @@ test.describe('Exchange rate history', () => {
       document.documentElement.dataset.fx22Stay = '1';
     });
     const settings = await navigation.goToSettingsPage();
-    await settings.goToSection('General');
+    await settings.goToSection('Exchange rates');
     await chooseCsv(page, join(dataDir, 'exchange-rates-v2.csv'));
     await expect(
       page.getByText('Different from a saved rate: 1'),

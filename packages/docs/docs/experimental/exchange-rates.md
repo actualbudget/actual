@@ -2,15 +2,17 @@
 
 This page uses the example family budget from [Multi-currency](../budgeting/multi-currency.md): a Paris apartment subleased to a brother-in-law and visits to parents in Mexico.
 
-<ExperimentalFeatureWarning issueId="9381" />
+<ExperimentalFeatureWarning />
 
-When Multiple currencies is on, **General** shows **Exchange rates** under the currency block. This budget uses US dollars. Its saved rates are manual fallbacks for 2026-10-31: 1.10 dollars per euro and 0.05 dollars per peso.
+When Multiple currencies is on, Settings has an **Exchange rates** page. The page is hidden when Multiple currencies is off. This budget uses US dollars. The BNP Paribas account is in euros and the BBVA México account is in pesos, so the page has tabs **EUR to USD** and **MXN to USD**.
 
-The rate input takes dollars per 1 unit of the chosen currency. Use the swap button to enter the reverse. **Save fallback** saves a manual fallback for that date only. Saving another rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
+Each tab is one currency paired with the budget currency. An account in another currency gets a tab, and so does any other currency with saved rates. To save rates for a currency that has no account yet, choose it from **Add currency…**. The tab holds that pair's rate form, its saved rates, and the import and export tools.
 
-**Saved rates** lists each rate as stored, in units per 1 dollar, and can be limited with **All currencies**. **Edit** loads a fallback back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
+The rate input takes dollars per 1 unit of the tab's currency. Use the swap button to enter the reverse. **Save fallback** saves a manual fallback for that date only. Saving another rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
 
-<img width="672" alt="Exchange rates with fallbacks of 1.10 dollars per euro and 0.05 dollars per peso for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+On **EUR to USD**, the date is 10/31/2026 and **Rate** reads `1 EUR = [rate] USD`. Entering 1.10 and clicking **Save fallback** saves the euro fallback. **Rate in use today** then reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** lists that euro row as stored, 0.909090909090909 euros per dollar. **Edit** loads it back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
+
+<img width="672" alt="Exchange rates on the EUR to USD tab, with MXN to USD beside it and a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
 ## Which rate Actual uses
 
@@ -29,7 +31,7 @@ Changing a saved rate does not change the recorded budget-currency amounts of tr
 
 ## Export
 
-**Export rates** downloads the rates in the current list filter. With both rates showing, it saved `exchange-rates-USD-2026-10-31.csv` and said: "Rates exported: 2. Invalid rates left out: 0."
+**Export rates** downloads the selected tab's rates. On **EUR to USD** it saved `exchange-rates-USD-2026-10-31.csv` and said: "Rates exported: 1. Invalid rates left out: 0."
 
 The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kind`, `date`, `source`, and `timestamp`. Each rate is in units per 1 dollar, and a manual fallback has the kind `dated`. Rates that cannot be exported are counted and left out.
 
@@ -37,10 +39,10 @@ The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kin
 
 **Choose file** reads a CSV of manual fallbacks. The header needs `quote_currency`, `rate`, `kind`, and `date`. A `base_currency` column is accepted when every value is the budget currency. Any other column is ignored. A row whose kind is `fetched` is skipped.
 
-A file with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved showed **New: 1** and **Unchanged: 1**. The other counts were 0. The preview listed "Line 3: already saved. MXN 20 dated 2026-10-31". New rows are counted and are not listed. **Keep existing** is the selected choice. **Import** was not clicked.
+The preview covers every currency in the file, including rates for other tabs. A file with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved showed **New: 1** and **Unchanged: 1**. The other counts were 0. The preview listed "Line 3: already saved. MXN 20 dated 2026-10-31". New rows are counted and are not listed. **Keep existing** is the selected choice. **Import** was not clicked.
 
-<img width="672" alt="Export of two rates and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+<img width="672" alt="Export of one euro rate and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
 
 **Keep existing** leaves a saved fallback in place. **Replace existing** asks you to confirm how many saved rates differ, then overwrites those rates. The confirmation says you can undo the import. If the saved rates change after the preview, or the preview is no longer available, choose the file again.
 
-A fetched rate has no **Edit**. **Remove** deletes that day's fetched rate.
+On a fetched rate, **Save fallback** loads it into the form, and saving makes a separate fallback for that day. **Remove** deletes that day's fetched rate.

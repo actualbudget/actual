@@ -38,19 +38,19 @@ The workflow examples below use separate checkpoints so each calculation can be 
 
 ## Save exchange rates
 
-With Multiple currencies on, **General** shows **Exchange rates** under the currency block.
+With Multiple currencies on, Settings has an **Exchange rates** page. The page is hidden when Multiple currencies is off.
 
-The rate field takes dollars per 1 unit of the chosen currency, and the swap button turns it around. In this example, 1 euro is 1.10 dollars, and 1 peso is 0.05 dollars.
+The rate field takes dollars per 1 unit of the chosen currency, and the swap button turns it around. The page has a tab for each currency paired with the dollar. The BNP Paribas account and the BBVA México account open tabs **EUR to USD** and **MXN to USD**. **Add currency…** adds a tab for a currency that has no account yet.
 
-Choose the currency, set the date, enter the rate, and click **Save fallback**. A fallback applies to its own day only. The examples on this page treat 2026-10-31 as today, and both fallbacks are saved for that day. Saving a second rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
+On **EUR to USD**, set the date, enter 1.10, and click **Save fallback**. On **MXN to USD**, enter 0.05. A fallback applies to its own day only. The examples on this page treat 2026-10-31 as today, and both fallbacks are saved for that day. Saving a second rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
 
-**Rate in use today** names the rate that applies today. For pesos it reads "New transactions and valuations today use: manual fallback 0.05 for 2026-10-31." **Saved rates** lists each fallback as stored, in units per 1 dollar: 0.909090909090909 euros and 20 pesos. **All currencies** can limit that list. **Edit** loads a saved row back into the form. **Remove** deletes it.
+**Rate in use today** names the rate that applies today. On the euro tab it reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** on that tab lists the euro fallback as stored, 0.909090909090909 euros per dollar. **Edit** loads a saved row back into the form. **Remove** deletes it.
 
-<img width="672" alt="Exchange rates with fallbacks of 1.10 dollars per euro and 0.05 dollars per peso for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="672" alt="Exchange rates on the EUR to USD tab, with MXN to USD beside it and a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
-**Export rates** wrote that list to a file and said: "Rates exported: 2. Invalid rates left out: 0." **Choose file** read a CSV with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 dated 2026-10-31". **Keep existing** stayed selected. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
+**Export rates** on the euro tab wrote that currency's rates to a file and said: "Rates exported: 1. Invalid rates left out: 0." **Choose file** read a CSV with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 dated 2026-10-31". **Keep existing** stayed selected. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
 
-<img width="672" alt="Export of two rates and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+<img width="672" alt="Export of one euro rate and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
 
 ## Create the accounts
 

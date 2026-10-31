@@ -49,6 +49,7 @@ export type ExchangeRatesHandlers = {
   'exchange-rates/history-page': typeof historyPage;
   'exchange-rates/history-export': typeof historyExport;
   'exchange-rates/remove-fetched': typeof removeFetched;
+  'exchange-rates/pairs': typeof ratePairs;
 };
 
 export const app = createApp<ExchangeRatesHandlers>();
@@ -65,6 +66,7 @@ app.method('exchange-rates/import-cancel', importCancel);
 app.method('exchange-rates/history-page', historyPage);
 app.method('exchange-rates/history-export', historyExport);
 app.method('exchange-rates/remove-fetched', removeFetched);
+app.method('exchange-rates/pairs', ratePairs);
 
 // Rate ids derive from the logical key so offline saves of the same key on
 // different devices write one row instead of creating duplicates. Kind is
@@ -102,6 +104,42 @@ async function requireBaseCurrency(): Promise<string> {
     throw new Error('multicurrency-unavailable');
   }
   return getDefaultCurrencyCode();
+}
+
+/** The reviewed currencies of open accounts other than the budget currency. */
+export async function openAccountCurrencies(
+  baseCurrency: string,
+): Promise<string[]> {
+  const rows = await db.all<{ currency: string }>(
+    `SELECT DISTINCT currency FROM accounts
+     WHERE tombstone = 0 AND closed = 0 AND currency IS NOT NULL
+       AND currency != ?`,
+    [baseCurrency],
+  );
+  return rows
+    .map(row => row.currency)
+    .filter(isReviewedCurrency)
+    .sort();
+}
+
+/**
+ * The currencies paired with the budget currency on the rates page: those of
+ * open accounts, then any other currency with saved rates.
+ */
+async function ratePairs(): Promise<{ accounts: string[]; saved: string[] }> {
+  const baseCurrency = await requireBaseCurrency();
+  const accounts = await openAccountCurrencies(baseCurrency);
+  const saved = (
+    await db.all<{ quote_currency: string }>(
+      `SELECT DISTINCT quote_currency FROM exchange_rates
+       WHERE tombstone = 0 AND base_currency = ?`,
+      [baseCurrency],
+    )
+  )
+    .map(row => row.quote_currency)
+    .filter(code => isReviewedCurrency(code) && !accounts.includes(code))
+    .sort();
+  return { accounts, saved };
 }
 
 function validateQuote(quoteCurrency: unknown, baseCurrency: string): string {

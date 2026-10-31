@@ -163,7 +163,7 @@ describe('export', () => {
           omittedCount: 1,
         }) satisfies Reply<'exchange-rates/history-export'>,
     );
-    await chooseOption('exchange-rate-filter-quote', 'Euro');
+    await chooseOption('exchange-rate-add-pair', 'Euro');
     await userEvent.click(screen.getByRole('button', { name: 'Export rates' }));
     await screen.findByText('Rates exported: 2. Invalid rates left out: 1.');
     expect(server.sent('exchange-rates/history-export')).toEqual([

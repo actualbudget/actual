@@ -164,6 +164,7 @@ export function ExchangeRateHistory({
   onRatesChanged,
 }: {
   fx: FxProviderContext;
+  /** The selected pair; export uses its currency. */
   filter: HistoryFilter;
   onRatesChanged: () => void;
 }) {
