@@ -333,6 +333,140 @@ describe('API CRUD operations', () => {
     );
   });
 
+  test.each([
+    { invalidGroupId: null, label: 'null' },
+    { invalidGroupId: '', label: 'empty string' },
+  ])(
+    'Categories: reject invalid group_id ($label)',
+    async ({ invalidGroupId }) => {
+      const groupId = await api.createCategoryGroup({
+        name: 'test-valid-group',
+      });
+
+      const categoryId = await api.createCategory({
+        name: 'test-category',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.updateCategory(categoryId, {
+          // @ts-expect-error - Testing invalid runtime input
+          group_id: invalidGroupId,
+        }),
+      ).rejects.toThrow();
+
+      const categories = await api.getCategories();
+
+      expect(categories).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: categoryId,
+            group_id: groupId,
+          }),
+        ]),
+      );
+    },
+  );
+
+  test.each(['nope', '00000000-0000-4000-8000-000000000123'])(
+    'Categories: reject non-existent group_id (%s)',
+    async invalidGroupId => {
+      const groupId = await api.createCategoryGroup({
+        name: 'valid-group-for-invalid-id-test',
+      });
+
+      const categoryId = await api.createCategory({
+        name: 'category-with-valid-group',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.updateCategory(categoryId, {
+          group_id: invalidGroupId,
+        }),
+      ).rejects.toThrow('category group does not exist');
+
+      const categories = await api.getCategories();
+
+      expect(categories).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: categoryId,
+            group_id: groupId,
+          }),
+        ]),
+      );
+    },
+  );
+
+  test('Categories: reject deleted category group', async () => {
+    const validGroupId = await api.createCategoryGroup({
+      name: 'valid-group-for-deleted-group-test',
+    });
+
+    const deletedGroupId = await api.createCategoryGroup({
+      name: 'group-to-be-deleted',
+    });
+
+    const categoryId = await api.createCategory({
+      name: 'category-to-preserve',
+      group_id: validGroupId,
+    });
+
+    await api.deleteCategoryGroup(deletedGroupId);
+
+    await expect(
+      api.updateCategory(categoryId, {
+        group_id: deletedGroupId,
+      }),
+    ).rejects.toThrow('category group does not exist');
+
+    const categories = await api.getCategories();
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          group_id: validGroupId,
+        }),
+      ]),
+    );
+  });
+
+  test('Categories: partial update preserves existing group', async () => {
+    const groupId = await api.createCategoryGroup({
+      name: 'partial-update-group',
+    });
+
+    const categoryId = await api.createCategory({
+      name: 'original-category',
+      group_id: groupId,
+    });
+
+    // Update the name without providing group_id
+    await api.updateCategory(categoryId, {
+      name: 'renamed-category',
+    });
+
+    // Update another field without providing group_id
+    await api.updateCategory(categoryId, {
+      hidden: true,
+    });
+
+    const categories = await api.getCategories();
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          name: 'renamed-category',
+          group_id: groupId,
+          hidden: true,
+        }),
+      ]),
+    );
+  });
+
   // apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
   test('Budgets: successfully update budgets', async () => {
     const month = '2023-10';
