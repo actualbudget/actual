@@ -73,6 +73,7 @@ import { OutOfSyncMigrationsModal } from './modals/OutOfSyncMigrationsModal';
 import { PasswordEnableModal } from './modals/PasswordEnableModal';
 import { PayeeAutocompleteModal } from './modals/PayeeAutocompleteModal';
 import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
+import { QuickAddTransactionModal } from './modals/QuickAddTransactionModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
@@ -225,6 +226,9 @@ export function Modals() {
 
         case 'fix-encryption-key':
           return <FixEncryptionKeyModal key={key} {...modal.options} />;
+
+        case 'quick-add-transaction':
+          return <QuickAddTransactionModal key={key} {...modal.options} />;
 
         case 'edit-field':
           return <EditFieldModal key={key} {...modal.options} />;
