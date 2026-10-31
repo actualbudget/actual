@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { getDaysInMonth, parse } from 'date-fns';
 
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
@@ -83,6 +84,49 @@ test.describe('Schedules', () => {
       'Show completed schedules',
     );
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('clamps day 31 to the last day of shorter months', async () => {
+    const scheduleEditModal = await schedulesPage.addNewSchedule();
+    await scheduleEditModal.fill({
+      payee: 'Home Depot',
+      account: 'HSBC',
+      amount: 25,
+    });
+
+    const popover = await scheduleEditModal.openRecurringPicker();
+    await scheduleEditModal.addSpecificDays(popover);
+
+    const daySelect = popover.getByRole('button', { name: '1', exact: true });
+    await daySelect.click();
+    await page
+      .getByRole('menu')
+      .getByRole('button', { name: '31', exact: true })
+      .click();
+
+    await expect(
+      popover.getByText(
+        'Months without this day will use the last day of that month.',
+      ),
+    ).toBeVisible();
+
+    await expect
+      .poll(async () => {
+        const previewDates =
+          (await popover.innerText()).match(/\d{1,2}\/\d{1,2}\/\d{4}/g) ?? [];
+
+        return (
+          previewDates.length === 4 &&
+          previewDates.every(value => {
+            const date = parse(value, 'M/d/yyyy', new Date());
+
+            return date.getDate() === getDaysInMonth(date);
+          })
+        );
+      })
+      .toBe(true);
+
+    await expect(popover).toMatchThemeScreenshots();
   });
 
   test('shows a scheduled split transfer in its destination account', async () => {
