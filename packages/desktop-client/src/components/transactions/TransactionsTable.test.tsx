@@ -840,6 +840,52 @@ describe('Transactions', () => {
     expect(getTransactions()[2].notes).toBe('another happy note');
   });
 
+  test('a note with line breaks is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI\r\nFrom 2. Savings';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    // The input shows the line breaks as spaces, like the cell does
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('To 1. Main EndToEndID: FRI From 2. Savings');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('editing a note with line breaks saves them as spaces', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    const input = await editField(container, 'notes', 2);
+    await userEvent.type(input, ' paid');
+    await userEvent.tab();
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: transactions[2].id,
+          notes: 'To 1. Main EndToEndID: FRI paid',
+        }),
+      ]),
+    );
+  });
+
   test('dropdown automatically opens and can be filtered', async () => {
     const { container } = renderTransactions();
 
