@@ -189,6 +189,19 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
+  // `carryover-stored` holds the budget row's flag, where null means the
+  // month inherits the previous month's flag. `carryover` is the resolved
+  // flag that every other cell reads. Before the first month it's off.
+  sheet.get().createStatic(sheetName, `carryover-stored-${cat.id}`, null);
+  sheet.get().createDynamic(sheetName, `carryover-${cat.id}`, {
+    initialValue: false,
+    dependencies: [
+      `carryover-stored-${cat.id}`,
+      `${prevSheetName}!carryover-${cat.id}`,
+    ],
+    run: (stored, prevCarryover) => stored ?? prevCarryover === true,
+  });
+
   if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
@@ -267,8 +280,8 @@ function handleBudgetChange(budget) {
     sheet
       .get()
       .set(
-        `${sheetName}!carryover-${budget.category}`,
-        budget.carryover === 1 ? true : false,
+        `${sheetName}!carryover-stored-${budget.category}`,
+        budget.carryover == null ? null : budget.carryover === 1,
       );
     sheet.get().set(`${sheetName}!goal-${budget.category}`, budget.goal);
     sheet
@@ -280,6 +293,11 @@ function handleBudgetChange(budget) {
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+  // Both budget tables share the same cells, and `loadUserBudgets` only loads
+  // the one the budget type preference selects. Ignore writes to the other.
+  const budgetTable = budgetActions.isTrackingBudget()
+    ? 'reflect_budgets'
+    : 'zero_budgets';
   sheet.startTransaction();
 
   try {
@@ -291,7 +309,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
 
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
-        } else if (table === 'zero_budgets' || table === 'reflect_budgets') {
+        } else if (table === budgetTable) {
           handleBudgetChange(newValue);
         } else if (table === 'transactions') {
           const changed = new Set(

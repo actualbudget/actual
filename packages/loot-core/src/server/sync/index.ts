@@ -151,6 +151,18 @@ function apply(
           sql: `UPDATE ${quoteSqlId(dataset)} SET ${quoteSqlId(column)} = ? WHERE id = ?`,
           params: [value, row],
         };
+      } else if (
+        (dataset === 'zero_budgets' || dataset === 'reflect_budgets') &&
+        column !== 'carryover'
+      ) {
+        // A budget row's carryover flag inherits the previous month's until
+        // a message sets it. The column default of 0 means off, so set it
+        // here, where every row is created, rather than sending a NULL that
+        // would overwrite a flag another device set on the same row.
+        query = {
+          sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}, carryover) VALUES (?, ?, NULL)`,
+          params: [row, value],
+        };
       } else {
         query = {
           sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}) VALUES (?, ?)`,
@@ -813,6 +825,16 @@ function getTablesFromMessages(messages: Message[]): string[] {
 // spreadsheet to finish any processing. This is useful if we want to
 // perform a full sync and wait for everything to finish, usually if
 // you're doing an initial sync before working with a file.
+// A sync's success event queues work behind the mutator queue (the carryover
+// seed), and the messages a sync applies leave cells to recompute. Wait for
+// both, so a caller that reads right after a sync sees the synced figures.
+// Only call this outside a mutator: a mutator waiting on the queue it holds
+// would never finish.
+export async function waitForPostSyncWork(): Promise<void> {
+  await runMutator(() => Promise.resolve());
+  await sheet.waitOnSpreadsheet();
+}
+
 export async function initialFullSync(): Promise<{
   error?: { message: string; reason: string; meta: unknown };
 }> {
@@ -822,6 +844,7 @@ export async function initialFullSync(): Promise<{
     await sheet.waitOnSpreadsheet();
     return result;
   }
+  await waitForPostSyncWork();
   return {};
 }
 

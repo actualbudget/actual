@@ -20,6 +20,8 @@ export type FeatureFlag =
 export type SyncedPrefs = Partial<
   Record<
     | 'budgetType'
+    // 'true' once expired carryover windows have been pinned off
+    | 'carryoverChainSeeded'
     | 'upcomingScheduledTransactionLength'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'

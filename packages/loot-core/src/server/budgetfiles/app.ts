@@ -9,6 +9,7 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
+import { seedCarryoverChain } from '#server/budget/carryover-seed';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
 import * as mappings from '#server/db/mappings';
@@ -21,6 +22,7 @@ import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import {
+  checkSyncingMode,
   clearFullSyncTimeout,
   initialFullSync,
   resumeFullSync,
@@ -729,6 +731,20 @@ async function _loadBudget(id: Budget['id']): Promise<{
   } else {
     // we're in a test - disable the sync
     setSyncingMode('disabled');
+  }
+
+  // A synced file seeds after its first full sync instead (see budget/app.ts).
+  // A file that was never uploaded has no sync group, so it never gets one.
+  if (checkSyncingMode('disabled') || !prefs.getPrefs().groupId) {
+    try {
+      await seedCarryoverChain();
+    } catch (e) {
+      // Without the seed, closed months would show different figures, so
+      // don't open the file. It's retried on the next load.
+      captureException(e);
+      await closeBudget();
+      return { error: 'loading-budget' };
+    }
   }
 
   app.events.emit('load-budget', { id });
