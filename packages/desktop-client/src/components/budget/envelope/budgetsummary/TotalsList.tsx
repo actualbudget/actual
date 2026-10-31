@@ -7,11 +7,14 @@ import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { SheetNameProvider } from '#hooks/useSheetName';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 /**
@@ -42,12 +45,14 @@ function makeSignedFormatter(
 }
 
 type TotalsListProps = {
+  month: string;
   prevMonthName: string;
   style?: CSSProperties;
 };
 
-export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+export function TotalsList({ month, prevMonthName, style }: TotalsListProps) {
   const format = useFormat();
+  const { includesFutureAssignments } = useToBudgetMode(month);
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
@@ -60,86 +65,119 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
         ...style,
       }}
     >
-      <View
-        style={{
-          textAlign: 'right',
-          marginRight: 10,
-          minWidth: 50,
-        }}
-      >
-        <Tooltip
-          style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
-          content={
-            <>
-              <AlignedText
-                left="Income:"
-                right={
-                  <EnvelopeCellValue
-                    binding={envelopeBudget.totalIncome}
-                    type="financial"
-                  />
-                }
-              />
-              <AlignedText
-                left="From Last Month:"
-                right={
-                  <EnvelopeCellValue
-                    binding={envelopeBudget.fromLastMonth}
-                    type="financial"
-                  />
-                }
-              />
-            </>
-          }
-          placement="bottom end"
+      <SheetNameProvider name={monthUtils.sheetForMonth(month)}>
+        <View
+          style={{
+            textAlign: 'right',
+            marginRight: 10,
+            minWidth: 50,
+          }}
         >
+          <Tooltip
+            style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+            content={
+              <>
+                <AlignedText
+                  left="Income:"
+                  right={
+                    <EnvelopeCellValue
+                      binding={
+                        includesFutureAssignments
+                          ? envelopeBudget.totalIncomeWithFuture
+                          : envelopeBudget.totalIncome
+                      }
+                      type="financial"
+                    />
+                  }
+                />
+                <AlignedText
+                  left="From Last Month:"
+                  right={
+                    <EnvelopeCellValue
+                      binding={
+                        includesFutureAssignments
+                          ? envelopeBudget.fromLastMonthWithFuture
+                          : envelopeBudget.fromLastMonth
+                      }
+                      type="financial"
+                    />
+                  }
+                />
+              </>
+            }
+            placement="bottom end"
+          >
+            <EnvelopeCellValue
+              binding={
+                includesFutureAssignments
+                  ? envelopeBudget.incomeAvailableWithFuture
+                  : envelopeBudget.incomeAvailable
+              }
+              type="financial"
+            >
+              {props => (
+                <CellValueText {...props} style={{ fontWeight: 600 }} />
+              )}
+            </EnvelopeCellValue>
+          </Tooltip>
+
           <EnvelopeCellValue
-            binding={envelopeBudget.incomeAvailable}
+            binding={envelopeBudget.lastMonthOverspent}
             type="financial"
           >
-            {props => <CellValueText {...props} style={{ fontWeight: 600 }} />}
+            {props => (
+              <CellValueText
+                {...props}
+                style={{ fontWeight: 600 }}
+                formatter={signedFormatter}
+              />
+            )}
           </EnvelopeCellValue>
-        </Tooltip>
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.lastMonthOverspent}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={signedFormatter}
-            />
-          )}
-        </EnvelopeCellValue>
+          <EnvelopeCellValue
+            binding={envelopeBudget.totalBudgeted}
+            type="financial"
+          >
+            {props => (
+              <CellValueText
+                {...props}
+                style={{ fontWeight: 600 }}
+                formatter={signedFormatter}
+              />
+            )}
+          </EnvelopeCellValue>
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBudgeted}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={signedFormatter}
-            />
+          {!includesFutureAssignments && (
+            <EnvelopeCellValue
+              binding={envelopeBudget.forNextMonth}
+              type="financial"
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  style={{ fontWeight: 600 }}
+                  formatter={invertedSignedFormatter}
+                />
+              )}
+            </EnvelopeCellValue>
           )}
-        </EnvelopeCellValue>
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.forNextMonth}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={invertedSignedFormatter}
-            />
+          {includesFutureAssignments && (
+            <EnvelopeCellValue
+              binding={envelopeBudget.budgetedInFuture}
+              type="financial"
+            >
+              {props => (
+                <CellValueText
+                  {...props}
+                  style={{ fontWeight: 600 }}
+                  formatter={invertedSignedFormatter}
+                />
+              )}
+            </EnvelopeCellValue>
           )}
-        </EnvelopeCellValue>
-      </View>
+        </View>
+      </SheetNameProvider>
 
       <View>
         <Block>
@@ -154,9 +192,17 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           <Trans>Budgeted</Trans>
         </Block>
 
-        <Block>
-          <Trans>For next month</Trans>
-        </Block>
+        {!includesFutureAssignments && (
+          <Block>
+            <Trans>For next month</Trans>
+          </Block>
+        )}
+
+        {includesFutureAssignments && (
+          <Block>
+            <Trans>Budgeted in future months</Trans>
+          </Block>
+        )}
       </View>
     </View>
   );
