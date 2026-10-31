@@ -27,6 +27,7 @@ import { useMetadataPref } from '#hooks/useMetadataPref';
 import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
+import { ApiKeys } from './ApiKeys';
 import { AuthSettings } from './AuthSettings';
 import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
@@ -269,6 +270,7 @@ export function SettingsIndex() {
 export function GeneralSettings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  const [fileId] = useMetadataPref('cloudFileId');
   const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
 
@@ -287,6 +289,7 @@ export function GeneralSettings() {
         <SettingsGroup title={t('Security')}>
           <AuthSettings />
           <EncryptionSettings />
+          {fileId && <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />}
         </SettingsGroup>
       )}
       <SettingsGroup title={t('Data')}>
