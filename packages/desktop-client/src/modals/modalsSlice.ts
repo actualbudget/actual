@@ -262,9 +262,15 @@ export type Modal =
   | {
       name: 'edit-field';
       options: {
-        name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>;
+        name: keyof Pick<
+          TransactionEntity,
+          'date' | 'amount' | 'notes' | 'number'
+        >;
         onSubmit: (
-          name: keyof Pick<TransactionEntity, 'date' | 'amount' | 'notes'>,
+          name: keyof Pick<
+            TransactionEntity,
+            'date' | 'amount' | 'notes' | 'number'
+          >,
           value:
             | string
             | number

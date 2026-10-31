@@ -101,6 +101,12 @@ export const objects = {
     { name: 'category', type: types.id },
     { name: 'notes', type: 'string' },
     {
+      name: 'number',
+      type: 'string',
+      description:
+        'A check or reference number for the transaction, shown in the "Number" column.',
+    },
+    {
       name: 'imported_id',
       type: 'string',
       description:

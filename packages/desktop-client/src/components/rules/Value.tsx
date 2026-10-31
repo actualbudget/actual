@@ -114,6 +114,7 @@ export function Value<T>({
         case 'year':
           return value ? formatDate(parseISO(value), 'yyyy') : null;
         case 'notes':
+        case 'number':
         case 'imported_payee':
         case 'payee_name':
           return value;

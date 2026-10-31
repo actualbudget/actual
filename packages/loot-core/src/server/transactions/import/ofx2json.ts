@@ -10,6 +10,7 @@ type OFXTransaction = {
   date: string;
   memo: string;
   type: string;
+  checkNum: string;
 };
 
 type OFXParseResult = {
@@ -120,6 +121,7 @@ function mapOfxTransaction(stmtTrn): OFXTransaction {
     date: dayFromDate(transactionDate),
     name: html2Plain(stmtTrn['NAME']),
     memo: html2Plain(stmtTrn['MEMO']),
+    checkNum: stmtTrn['CHECKNUM'],
   };
 }
 
