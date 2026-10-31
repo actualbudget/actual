@@ -68,6 +68,15 @@ for (const viewport of [
       await expectLastMonth('2018-01');
 
       await setBudgetAmount(page, '2018-01', 200);
+      // The client refetches the range after the edit; a click before that
+      // is clamped to the old last month
+      if (budgetPage instanceof BudgetPage) {
+        await expect(
+          selected.locator('xpath=following-sibling::*[1]'),
+        ).not.toHaveCSS('text-decoration-line', 'line-through');
+      } else {
+        await expect(budgetPage.nextMonthButton).toBeEnabled();
+      }
       for (let index = 0; index < 3; index++) {
         await budgetPage.goToNextMonth();
       }
