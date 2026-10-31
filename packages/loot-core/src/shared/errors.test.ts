@@ -63,7 +63,7 @@ describe('getSyncError', () => {
 
   it('explains how to recover from an out-of-sync local budget', () => {
     expect(getSyncError('out-of-sync', 'budget-id')).toBe(
-      'The local copy of budget "budget-id" is out of sync with the server. Delete the "budget-id" folder from your data directory and download the budget again.',
+      'The local copy of budget "budget-id" is out of sync with the server. Delete the "budget-id" folder from your data directory and download the budget again (any changes not yet synced to the server will be lost).',
     );
   });
 
