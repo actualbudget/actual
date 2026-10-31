@@ -287,7 +287,6 @@ export function GeneralSettings() {
       {!isNarrowWidth && <SidebarSettings />}
       <FormatSettings />
       <CurrencySettings />
-      <ExchangeRateSettings />
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
@@ -304,6 +303,17 @@ export function GeneralSettings() {
           <ExportBudget />
         </View>
       </SettingsGroup>
+    </SettingsSections>
+  );
+}
+
+export function ExchangeRatesSettings() {
+  const { t } = useTranslation();
+
+  // The section hides itself without multicurrency.
+  return (
+    <SettingsSections title={t('Exchange rates')}>
+      <ExchangeRateSettings />
     </SettingsSections>
   );
 }

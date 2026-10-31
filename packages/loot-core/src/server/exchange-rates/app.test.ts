@@ -996,3 +996,36 @@ describe('exchangeRateModel', () => {
     ).toThrow();
   });
 });
+
+describe('rate pairs', () => {
+  const pairs = app.handlers['exchange-rates/pairs'];
+
+  it('lists open account currencies, then other currencies with saved rates', async () => {
+    const account = (id: string, currency: string | null, closed = 0) =>
+      db.insert('accounts', { id, name: id, currency, closed, tombstone: 0 });
+    await account('usd', null);
+    await account('usd-2', 'USD');
+    await account('jpy', 'JPY');
+    await account('eur', 'EUR');
+    await account('gbp-closed', 'GBP', 1);
+    await insertRate({
+      quote: 'JPY',
+      rate: '150',
+      kind: 'standing',
+      timestamp: '2026-01-01T00:00:00.000Z',
+    });
+    await insertRate({
+      quote: 'CHF',
+      rate: '0.9',
+      kind: 'standing',
+      timestamp: '2026-01-01T00:00:00.000Z',
+    });
+
+    expect(await pairs()).toEqual({ accounts: ['EUR', 'JPY'], saved: ['CHF'] });
+  });
+
+  it('needs multicurrency', async () => {
+    await setBudget('USD', 2, { flags: false });
+    await expect(pairs()).rejects.toThrow('multicurrency-unavailable');
+  });
+});

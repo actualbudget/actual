@@ -294,12 +294,11 @@ function progressText(progress: BackfillProgress, t: Copy): string {
 export function ExchangeRateHistory({
   fx,
   filter,
-  quoteOptions,
   onRatesChanged,
 }: {
   fx: FxProviderContext;
+  /** The selected pair; export and backfill use its currency. */
   filter: HistoryFilter;
-  quoteOptions: ReadonlyArray<readonly [string, string]>;
   onRatesChanged: () => void;
 }) {
   const { t } = useTranslation();
@@ -318,7 +317,7 @@ export function ExchangeRateHistory({
   const [importState, setImportState] = useState<ImportState>({
     phase: 'idle',
   });
-  const [quote, setQuote] = useState('');
+  const quote = filter.quoteCurrency ?? '';
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [policy, setPolicy] = useState<Policy>('keep');
@@ -357,6 +356,11 @@ export function ExchangeRateHistory({
     setConfirming(false);
     setPlanError(null);
   }
+
+  // A summary checked for another pair no longer applies.
+  useEffect(() => {
+    clearPlan();
+  }, [quote]);
 
   useEffect(() => {
     mounted.current = true;
@@ -859,17 +863,10 @@ export function ExchangeRateHistory({
         description={t(
           'Ask the sync server for fetched rates over a date range. Rates you save or import do not need it.',
         )}
-        htmlFor="exchange-rate-backfill-quote"
         control={
-          <Select
-            id="exchange-rate-backfill-quote"
-            value={quote}
-            onChange={value => {
-              setQuote(value);
-              clearPlan();
-            }}
-            options={[['', t('Choose a currency')], ...quoteOptions]}
-          />
+          <Text data-testid="exchange-rate-backfill-quote">
+            {quote || t('Choose a currency tab first.')}
+          </Text>
         }
       >
         <SettingsRow

@@ -68,7 +68,7 @@ async function openRateSettings(page: Page): Promise<SettingsPage> {
   await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await settings.enableExperimentalFeature('Multiple currencies');
-  await settings.goToSection('General');
+  await settings.goToSection('Exchange rates');
   await expect(page.getByTestId('exchange-rates')).toBeVisible();
   await expect(page.getByText('No exchange rates saved yet.')).toBeVisible();
   return settings;
@@ -80,7 +80,16 @@ async function saveStanding(
   date: string,
   rate: string,
 ) {
-  await chooseMenu(page, '#exchange-rate-quote', currency);
+  // A pair with a tab is selected there; another is added first.
+  const tab = page.getByRole('tab', {
+    name: `${currency.slice(0, 3)} to USD`,
+    exact: true,
+  });
+  if (await tab.isVisible()) {
+    await tab.click();
+  } else {
+    await chooseMenu(page, '#exchange-rate-add-pair', currency);
+  }
   await chooseMenu(page, '#exchange-rate-kind', 'Standing rate');
   await setInput(page.locator('#exchange-rate-date'), date);
   // Rates here are quote per 1 USD, but entry starts as USD per 1 quote.
@@ -113,7 +122,13 @@ async function fillBackfill(
   from = '2016-12-26',
   to = '2017-01-01',
 ) {
-  await chooseMenu(page, '#exchange-rate-backfill-quote', 'EUR - Euro (€)');
+  // The backfill uses the selected tab's currency.
+  const tab = page.getByRole('tab', { name: 'EUR to USD', exact: true });
+  if (await tab.isVisible()) {
+    await tab.click();
+  } else {
+    await chooseMenu(page, '#exchange-rate-add-pair', 'EUR - Euro (€)');
+  }
   await setInput(page.locator('#exchange-rate-backfill-from'), from);
   await setInput(page.locator('#exchange-rate-backfill-to'), to);
 }
@@ -337,7 +352,7 @@ test.describe('Exchange rate history', () => {
       document.documentElement.dataset.fx22Stay = '1';
     });
     const settings = await navigation.goToSettingsPage();
-    await settings.goToSection('General');
+    await settings.goToSection('Exchange rates');
     await chooseCsv(page, join(dataDir, 'exchange-rates-v2.csv'));
     await expect(page.getByText('New: 1')).toBeVisible();
     await page.getByRole('button', { name: 'Import', exact: true }).click();

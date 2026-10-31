@@ -2,15 +2,17 @@
 
 This page uses the example family budget from [Multi-currency](../budgeting/multi-currency.md): a Paris apartment subleased to a brother-in-law and visits to parents in Mexico.
 
-<ExperimentalFeatureWarning issueId="9381" />
+<ExperimentalFeatureWarning />
 
-When Multiple currencies is on, **General** shows **Exchange rates** under the currency block. This budget uses US dollars. The saved rates are a standing 0.909091 euro rate and a standing 20 peso rate, both dated 2026-10-31.
+When Multiple currencies is on, Settings has an **Exchange rates** page. The page is hidden when Multiple currencies is off. This budget uses US dollars. The BNP Paribas account is in euros and the BBVA México account is in pesos, so the page has tabs **EUR to USD** and **MXN to USD**.
 
-The rate input defaults to dollars per 1 unit of the account currency. Use the swap button to enter the reciprocal direction. **Kind** is **Standing rate** or **One-day rate**. A one-day rate is for that UTC day. A standing rate applies from its date when no fetched rate is available. Both can be saved on the same date. Saving the same currency, kind, and date again asks you to replace the saved rate.
+Each tab is one currency paired with the budget currency. An account in another currency gets a tab, and so does any other currency with saved rates. To save rates for a currency that has no account yet, choose it from **Add currency…**. The tab holds that pair's rate form, its saved rates, and the import, export, and backfill tools.
 
-**Saved rates** can be limited with **All currencies**. **Edit** loads a manual row back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
+The rate input defaults to dollars per 1 unit of the account currency. Use the swap button to enter the reciprocal direction. **Kind** is **Standing rate** or **One-day rate**. A one-day rate is for that UTC day. A standing rate applies from its date when no fetched rate is available. Both can be saved on the same date. Saving the same currency, kind, and date again asks you to replace the saved rate. A fetched rate comes from the sync server. A file import never creates one.
 
-<img width="616" alt="Exchange rates with a standing 0.909091 euro rate and a standing 20 peso rate per 1 dollar" src="/img/budgeting/multi-currency-rates@2x.png" />
+On **EUR to USD**, **Kind** is **Standing rate**, the date is 10/31/2026, and **Rate** defaults to `1 EUR = [rate] USD`. Swap to **EUR per 1 USD** to enter 0.909091. **Rate in use today** reads `standing rate 0.909091 from 2026-10-31` on both lines: the rate a new transaction today would use, and the rate Estimates and To Budget would use. **Saved rates** lists that euro row. **Edit** loads it back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
+
+<img width="616" alt="Exchange rates on the USD to EUR tab, with USD to MXN beside it and a standing 0.909091 euro rate per 1 dollar" src="/img/budgeting/multi-currency-rates@2x.png" />
 
 ## Which rate Actual uses
 
@@ -32,7 +34,7 @@ Rate selection uses saved rates. Backfilling history is described below. Changin
 
 ## Export
 
-**Export rates** downloads the rates in the current list filter. With both rates showing, it saved `exchange-rates-USD-2026-10-31.csv` and said: "Rates exported: 2. Invalid rates left out: 0."
+**Export rates** downloads the rates for the selected tab's currency. On **EUR to USD** it saved `exchange-rates-USD-2026-10-31.csv` and said: "Rates exported: 1. Invalid rates left out: 0."
 
 The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kind`, `date`, `source`, and `timestamp`. Rates that cannot be exported are counted and left out.
 
@@ -40,17 +42,17 @@ The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kin
 
 **Choose file** reads a CSV of manual rates. The header needs `quote_currency`, `rate`, `kind`, and `date`. A `base_currency` column is accepted when every value is the budget currency. Any other column is ignored. A row whose kind is `fetched` is skipped.
 
-A file with a standing 0.85 euro rate on 2026-10-15 and the peso rate already saved showed **New: 1** and **Unchanged: 1**. The other counts were 0. The preview listed "Line 3: already saved. MXN 20 standing 2026-10-31". New rows are counted and are not listed. **Keep existing** is the selected choice. **Import** was not clicked.
+The preview covers every currency in the file, including rates for other tabs. A file with a standing 0.85 euro rate on 2026-10-15 and the peso rate already saved showed **New: 1** and **Unchanged: 1**. The other counts were 0. The preview listed "Line 3: already saved. MXN 20 standing 2026-10-31". New rows are counted and are not listed. **Keep existing** is the selected choice. **Import** was not clicked.
 
 **Keep existing** leaves a saved manual rate in place. **Replace existing** asks you to confirm how many saved rates differ, then overwrites those rates. The confirmation says you can undo the import. If the saved rates change after the preview, or the preview is no longer available, choose the file again.
 
 ## Backfill
 
-**Backfill** asks a sync server for fetched rates for one currency. The form was set to **EUR - Euro (€)**, from 10/01/2026 to 10/31/2026, with **Keep existing**. **Check dates** said: "Backfill needs a sync server. Rates you save or import work without one." **Start backfill** stayed off. Saving a rate and importing a file work without a sync server.
+**Backfill** asks a sync server for fetched rates for the selected tab's currency. On **EUR to USD** the currency is EUR. The form was set from 10/01/2026 to 10/31/2026, with **Keep existing**. **Check dates** said: "Backfill needs a sync server. Rates you save or import work without one." **Start backfill** stayed off. Saving a rate and importing a file work without a sync server.
 
-<img width="616" alt="Export of two rates, an import preview with one new row and one unchanged peso rate, and a backfill that needs a sync server" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+<img width="616" alt="Export of one euro rate, an import preview with one new row and one unchanged peso rate, and a euro backfill that needs a sync server" src="/img/budgeting/multi-currency-rate-history@2x.png" />
 
-The range is inclusive, at most 366 days, and cannot end after today. **Check dates** reports how many dates are in the range, how many are already saved, and how many would be fetched. **Start backfill** stays off until that summary matches the currency, the dates, and the Keep or Replace choice on the form. Changing any of those clears the summary.
+The range is inclusive, at most 366 days, and cannot end after today. **Check dates** reports how many dates are in the range, how many are already saved, and how many would be fetched. **Start backfill** stays off until that summary matches the tab, the dates, and the Keep or Replace choice on the form. Changing any of those, including switching tabs, clears the summary.
 
 For a backfill, **Keep existing** treats a date as already saved when a fetched rate for that day exists, and it does not fetch that date. **Replace existing** fetches every date in the range and asks you to confirm, because those changes cannot be undone. **Cancel backfill** stops a run. Rates already written stay saved.
 
