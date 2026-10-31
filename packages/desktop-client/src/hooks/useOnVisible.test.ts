@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import type * as Platform from '@actual-app/core/shared/platform';
+import { App as CapacitorApp } from '@capacitor/app';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOnVisible } from './useOnVisible';
 
-const { platform, removeListener, appState } = vi.hoisted(() => ({
+const { platform, removeListener } = vi.hoisted(() => ({
   platform: { isNativeMobileApp: false },
   removeListener: vi.fn(),
-  appState: { listener: vi.fn() as (state: { isActive: boolean }) => void },
 }));
 
 vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
@@ -18,19 +18,13 @@ vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
   },
 }));
 vi.mock('@capacitor/app', () => ({
-  App: {
-    addListener: async (
-      _event: string,
-      listener: (state: { isActive: boolean }) => void,
-    ) => {
-      appState.listener = listener;
-      return { remove: removeListener };
-    },
-  },
+  App: { addListener: vi.fn(async () => ({ remove: removeListener })) },
 }));
 
 function dispatchAppStateChange(isActive: boolean) {
-  appState.listener({ isActive });
+  const [, listener] = vi.mocked(CapacitorApp.addListener).mock
+    .calls[0] as unknown as [string, (state: { isActive: boolean }) => void];
+  listener({ isActive });
 }
 
 function setVisibilityState(value: DocumentVisibilityState) {
@@ -107,65 +101,7 @@ describe('useOnVisible', () => {
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
-  it('coalesces events during an async callback into one follow-up run', async () => {
-    const resolvers: Array<() => void> = [];
-    const callback = vi.fn().mockImplementation(
-      () =>
-        new Promise<void>(resolve => {
-          resolvers.push(resolve);
-        }),
-    );
-    renderHook(() => useOnVisible(callback));
-
-    dispatchVisibilityChange();
-    dispatchVisibilityChange();
-    dispatchVisibilityChange();
-    expect(callback).toHaveBeenCalledTimes(1);
-
-    // Finishing the first run starts exactly one more, not one per event
-    resolvers[0]();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(callback).toHaveBeenCalledTimes(2);
-
-    resolvers[1]();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(callback).toHaveBeenCalledTimes(2);
-  });
-
-  it('still runs a queued event after the callback rejects', async () => {
-    // The rejection is unhandled by design; keep it out of the test output
-    const errorSpy = vi
-      .spyOn(console, 'error')
-      .mockImplementation(() => undefined);
-    let reject: (error: Error) => void;
-    const callback = vi
-      .fn()
-      .mockImplementationOnce(
-        () =>
-          new Promise<void>((_, r) => {
-            reject = r;
-          }),
-      )
-      .mockResolvedValue(undefined);
-    renderHook(() => useOnVisible(callback));
-
-    dispatchVisibilityChange();
-    dispatchVisibilityChange();
-    expect(callback).toHaveBeenCalledTimes(1);
-
-    reject(new Error('worker error'));
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(callback).toHaveBeenCalledTimes(2);
-
-    // The unhandled-rejection report lands on a later tick
-    await new Promise(resolve => setTimeout(resolve, 0));
-    errorSpy.mockRestore();
-  });
-
-  it('drops a queued run when unmounted before the callback settles', async () => {
+  it('does not invoke callback again until previous async callback completes', async () => {
     let resolve: () => void;
     const callback = vi.fn().mockImplementation(
       () =>
@@ -173,16 +109,16 @@ describe('useOnVisible', () => {
           resolve = r;
         }),
     );
-    const { unmount } = renderHook(() => useOnVisible(callback));
+    renderHook(() => useOnVisible(callback));
 
     dispatchVisibilityChange();
     dispatchVisibilityChange();
-    unmount();
+    expect(callback).toHaveBeenCalledTimes(1);
 
     resolve();
     await Promise.resolve();
-    await Promise.resolve();
-    expect(callback).toHaveBeenCalledTimes(1);
+    dispatchVisibilityChange();
+    expect(callback).toHaveBeenCalledTimes(2);
   });
 
   it('invokes callback when isEnabled is true by default', () => {
@@ -214,15 +150,6 @@ describe('useOnVisible', () => {
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
-    it('ignores visibilitychange so a resume only runs the callback once', () => {
-      const callback = vi.fn();
-      renderHook(() => useOnVisible(callback));
-
-      dispatchVisibilityChange();
-
-      expect(callback).not.toHaveBeenCalled();
-    });
-
     it('removes the app state listener on unmount', async () => {
       const { unmount } = renderHook(() => useOnVisible(vi.fn()));
 
@@ -230,16 +157,6 @@ describe('useOnVisible', () => {
       await Promise.resolve();
 
       expect(removeListener).toHaveBeenCalledTimes(1);
-    });
-
-    it('ignores an event that arrives after unmount but before removal', () => {
-      const callback = vi.fn();
-      const { unmount } = renderHook(() => useOnVisible(callback));
-
-      unmount();
-      dispatchAppStateChange(true);
-
-      expect(callback).not.toHaveBeenCalled();
     });
   });
 });

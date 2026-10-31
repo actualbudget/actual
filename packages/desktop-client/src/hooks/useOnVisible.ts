@@ -10,10 +10,10 @@ type UseOnVisibleOptions = {
 
 /**
  * Runs the given callback when the document becomes visible (e.g. user
- * switches back to the tab). Inside the iOS and Android apps it runs when
- * the app returns to the foreground instead. Only one invocation runs at a
- * time: events arriving while the callback is still running are coalesced
- * into a single follow-up run once it finishes.
+ * switches back to the tab). Inside the iOS and Android apps it also runs
+ * when the app returns to the foreground. Uses a guard so the callback is
+ * not invoked again until the previous invocation has finished (handles
+ * async callbacks).
  */
 export function useOnVisible(
   callback: () => void | Promise<void>,
@@ -21,25 +21,16 @@ export function useOnVisible(
 ) {
   const { isEnabled = true } = options;
   const inProgress = useRef(false);
-  const isPending = useRef(false);
 
   const runCallback = useEffectEvent(async () => {
     if (inProgress.current) {
-      isPending.current = true;
       return;
     }
     inProgress.current = true;
     try {
-      do {
-        isPending.current = false;
-        await callback();
-      } while (isPending.current);
+      await callback();
     } finally {
       inProgress.current = false;
-      // A rejected callback exits the loop before it can see a queued run
-      if (isPending.current) {
-        void runCallback();
-      }
     }
   });
 
@@ -47,51 +38,28 @@ export function useOnVisible(
     if (!isEnabled) {
       return;
     }
-
-    // Cleanup can race a late event: Capacitor removes its listener
-    // asynchronously, and a run still in flight may have a follow-up queued.
-    let isActive = true;
-    function onVisible() {
-      if (isActive) {
-        void runCallback();
+    function onVisibilityChange() {
+      if (document.visibilityState !== 'visible') {
+        return;
       }
+      void runCallback();
     }
 
-    // One event source per platform: the web view also fires
-    // `visibilitychange` on resume, which would run the callback twice.
-    const unsubscribe = Platform.isNativeMobileApp
-      ? subscribeToAppResume(onVisible)
-      : subscribeToDocumentVisible(onVisible);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    // The web view does not reliably fire `visibilitychange` when the app is
+    // backgrounded and resumed, so listen to the native app state as well.
+    const appStateListener = Platform.isNativeMobileApp
+      ? CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+          if (isActive) {
+            void runCallback();
+          }
+        })
+      : null;
 
     return () => {
-      isActive = false;
-      isPending.current = false;
-      unsubscribe();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      void appStateListener?.then(handle => handle.remove());
     };
   }, [isEnabled]);
-}
-
-function subscribeToAppResume(onResume: () => void) {
-  const listener = CapacitorApp.addListener(
-    'appStateChange',
-    ({ isActive }) => {
-      if (isActive) {
-        onResume();
-      }
-    },
-  );
-  return () => {
-    void listener.then(handle => handle.remove());
-  };
-}
-
-function subscribeToDocumentVisible(onVisible: () => void) {
-  function onVisibilityChange() {
-    if (document.visibilityState === 'visible') {
-      onVisible();
-    }
-  }
-  document.addEventListener('visibilitychange', onVisibilityChange);
-  return () =>
-    document.removeEventListener('visibilitychange', onVisibilityChange);
 }
