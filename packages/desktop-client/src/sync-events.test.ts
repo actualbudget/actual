@@ -28,7 +28,9 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
   (eventListeners.get('sync-event') ?? []).forEach(listener => listener(event));
 }
 
-function setup({ isOffline }: { isOffline?: boolean } = {}) {
+type UserData = { offline: boolean } | null;
+
+function setup({ userData = null }: { userData?: UserData } = {}) {
   vi.spyOn(connection, 'listen').mockImplementation(
     // The real `listen` is overloaded per event name; the mock only needs
     // to record the handler
@@ -38,13 +40,14 @@ function setup({ isOffline }: { isOffline?: boolean } = {}) {
   const invalidateQueries = vi.fn();
   const queryClient = { invalidateQueries } as unknown as QueryClient;
 
-  const dispatch = vi.fn();
+  // Thunks return a promise that settles later; nothing here awaits it
+  const dispatch = vi.fn((_action: unknown) => new Promise(vi.fn()));
   // A budget must be loaded for the table -> invalidate mapping to run
   const store = {
     getState: () => ({
       prefs: { local: { id: 'budget-id' } },
       app: { loadingText: null },
-      user: { data: isOffline === undefined ? null : { offline: isOffline } },
+      user: { data: userData },
     }),
     dispatch,
   } as unknown as AppStore;
@@ -54,12 +57,12 @@ function setup({ isOffline }: { isOffline?: boolean } = {}) {
   return { invalidateQueries, dispatch };
 }
 
+const getUserDataAction = { type: 'user/getUserData' };
+
 vi.mock('./users/usersSlice', async importOriginal => ({
   ...(await importOriginal<typeof UsersSlice>()),
   getUserData: () => getUserDataAction,
 }));
-
-const getUserDataAction = { type: 'user/getUserData' };
 
 function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
   return { type: 'applied', tables } as ServerEvents['sync-event'];
@@ -137,12 +140,12 @@ describe('listenForSyncEvent', () => {
   });
 
   it.each([
-    { type: 'success', isOffline: true },
-    { type: 'error', isOffline: false },
+    { type: 'success', userData: { offline: true } },
+    { type: 'error', userData: { offline: false } },
   ] as const)(
-    'refreshes the user data on $type when the status says offline=$isOffline',
-    ({ type, isOffline }) => {
-      const { dispatch } = setup({ isOffline });
+    'refreshes the user data on $type when the status says $userData',
+    ({ type, userData }) => {
+      const { dispatch } = setup({ userData });
 
       publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
 
@@ -151,17 +154,28 @@ describe('listenForSyncEvent', () => {
   );
 
   it.each([
-    { type: 'success', isOffline: false },
-    { type: 'error', isOffline: true },
-    { type: 'success', isOffline: undefined },
+    { type: 'success', userData: { offline: false } },
+    { type: 'error', userData: { offline: true } },
+    { type: 'success', userData: null },
   ] as const)(
-    'leaves the user data alone on $type when the status says offline=$isOffline',
-    ({ type, isOffline }) => {
-      const { dispatch } = setup({ isOffline });
+    'leaves the user data alone on $type when the status says $userData',
+    ({ type, userData }) => {
+      const { dispatch } = setup({ userData });
 
       publishSyncEvent({ type, tables: [] } as ServerEvents['sync-event']);
 
       expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
     },
   );
+
+  it('refreshes the user data once while a refresh is still pending', () => {
+    const { dispatch } = setup({ userData: { offline: false } });
+
+    publishSyncEvent({ type: 'error' } as ServerEvents['sync-event']);
+    publishSyncEvent({ type: 'error' } as ServerEvents['sync-event']);
+
+    expect(
+      dispatch.mock.calls.filter(([action]) => action === getUserDataAction),
+    ).toHaveLength(1);
+  });
 });

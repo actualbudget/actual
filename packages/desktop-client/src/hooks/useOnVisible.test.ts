@@ -1,14 +1,14 @@
 // @ts-strict-ignore
 import type * as Platform from '@actual-app/core/shared/platform';
-import { App as CapacitorApp } from '@capacitor/app';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOnVisible } from './useOnVisible';
 
-const { platform, removeListener } = vi.hoisted(() => ({
+const { platform, removeListener, appState } = vi.hoisted(() => ({
   platform: { isNativeMobileApp: false },
   removeListener: vi.fn(),
+  appState: { listener: vi.fn() as (state: { isActive: boolean }) => void },
 }));
 
 vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
@@ -18,13 +18,19 @@ vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
   },
 }));
 vi.mock('@capacitor/app', () => ({
-  App: { addListener: vi.fn(async () => ({ remove: removeListener })) },
+  App: {
+    addListener: async (
+      _event: string,
+      listener: (state: { isActive: boolean }) => void,
+    ) => {
+      appState.listener = listener;
+      return { remove: removeListener };
+    },
+  },
 }));
 
 function dispatchAppStateChange(isActive: boolean) {
-  const [, listener] = vi.mocked(CapacitorApp.addListener).mock
-    .calls[0] as unknown as [string, (state: { isActive: boolean }) => void];
-  listener({ isActive });
+  appState.listener({ isActive });
 }
 
 function setVisibilityState(value: DocumentVisibilityState) {

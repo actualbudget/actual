@@ -30,13 +30,12 @@ export function useOnVisible(
     }
     inProgress.current = true;
     try {
-      await callback();
+      do {
+        isPending.current = false;
+        await callback();
+      } while (isPending.current);
     } finally {
       inProgress.current = false;
-      if (isPending.current) {
-        isPending.current = false;
-        void runCallback();
-      }
     }
   });
 
@@ -45,37 +44,50 @@ export function useOnVisible(
       return;
     }
 
-    if (Platform.isNativeMobileApp) {
-      // One event source per platform: the web view also fires
-      // `visibilitychange` on resume, which would run the callback twice.
-      // Removal is async, so an event can still arrive after cleanup.
-      let isRemoved = false;
-      const listener = CapacitorApp.addListener(
-        'appStateChange',
-        ({ isActive }) => {
-          if (isActive && !isRemoved) {
-            void runCallback();
-          }
-        },
-      );
-      return () => {
-        isRemoved = true;
-        isPending.current = false;
-        void listener.then(handle => handle.remove());
-      };
-    }
-
-    function onVisibilityChange() {
-      if (document.visibilityState !== 'visible') {
-        return;
+    // Cleanup can race a late event: Capacitor removes its listener
+    // asynchronously, and a run still in flight may have a follow-up queued.
+    let isActive = true;
+    function onVisible() {
+      if (isActive) {
+        void runCallback();
       }
-      void runCallback();
     }
 
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    // One event source per platform: the web view also fires
+    // `visibilitychange` on resume, which would run the callback twice.
+    const unsubscribe = Platform.isNativeMobileApp
+      ? subscribeToAppResume(onVisible)
+      : subscribeToDocumentVisible(onVisible);
+
     return () => {
+      isActive = false;
       isPending.current = false;
-      document.removeEventListener('visibilitychange', onVisibilityChange);
+      unsubscribe();
     };
   }, [isEnabled]);
+}
+
+function subscribeToAppResume(onResume: () => void) {
+  const listener = CapacitorApp.addListener(
+    'appStateChange',
+    ({ isActive }) => {
+      if (isActive) {
+        onResume();
+      }
+    },
+  );
+  return () => {
+    void listener.then(handle => handle.remove());
+  };
+}
+
+function subscribeToDocumentVisible(onVisible: () => void) {
+  function onVisibilityChange() {
+    if (document.visibilityState === 'visible') {
+      onVisible();
+    }
+  }
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  return () =>
+    document.removeEventListener('visibilitychange', onVisibilityChange);
 }
