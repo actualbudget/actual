@@ -63,3 +63,9 @@ Removing a fetched rate deletes that saved day. It stays deleted until a backfil
 The sync server includes the fawazahmed0 exchange-api provider. Its rates are market data, and they are not official rates. A fetched row in **Saved rates** shows its source as exchange-api.
 
 **Check dates** asks your sync server which provider is available. It does not download rates. **Start backfill** asks that server for rates. The server reads each snapshot from jsDelivr (`cdn.jsdelivr.net`), then from `currency-api.pages.dev` when jsDelivr does not have the file. Those hosts can see the currency code, the snapshot date, and the sync server's IP address. The server requests a quote-currency file only when the direct rate is below 1. The saved date is the snapshot's day, not a verified capture time.
+
+## Fetching today's rates
+
+Opening a budget checks each open account in another currency. Closed accounts are left out. If that currency has no fetched rate saved for today, Actual asks the sync server for today's rate and saves it. This happens once each time the budget opens, and it uses the same hosts as a backfill. Actual still asks when a standing rate or a one-day rate is already saved. A fetched rate for today is used before the standing rate.
+
+This budget is a file with no sync server, so opening it fetches nothing. The euro and peso standing rates stay the rates in use. Without a provider, nothing is fetched either. Closing the budget stops a fetch that is still running. If the request fails, that day stays without a fetched rate.
