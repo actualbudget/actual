@@ -45,6 +45,9 @@ export type SyncedPrefs = Partial<
     | 'sidebar-menu-items'
     | 'sidebar-start-page'
     | 'sync-transfer-date'
+    // Id of the on-budget account that deferred (prepaid) expenses are
+    // transferred into
+    | 'prepaid-account'
     // Number of minutes between automatic bank syncs. '0' (or unset) disables
     // automatic syncing.
     | 'bank-sync-interval'
