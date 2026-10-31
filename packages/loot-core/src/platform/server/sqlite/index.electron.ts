@@ -7,10 +7,15 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type { SqlParam } from './types';
+import type { SqlParam, TransactionOptions } from './types';
 import { unicodeLike } from './unicodeLike';
 
-export type { SqlParam } from './types';
+export type {
+  Database,
+  SqlParam,
+  Statement,
+  TransactionOptions,
+} from './types';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
@@ -34,6 +39,10 @@ export function setWasmBinary(_binary: ArrayBuffer | Uint8Array) {
 
 export function prepare(db, sql) {
   return db.prepare(sql);
+}
+
+export function finalizeStatement(_statement: SQL.Statement) {
+  // better-sqlite3 statements are garbage collected; nothing to free.
 }
 
 export function runQuery(
@@ -71,12 +80,6 @@ export function runQuery(
 export function execQuery(db: SQL.Database, sql: string) {
   db.exec(sql);
 }
-
-export type TransactionOptions = {
-  // Take the write lock up front (`BEGIN IMMEDIATE`). Only matters on
-  // the web backend, but keep the signature the same on every platform.
-  immediate?: boolean;
-};
 
 export function transaction(
   db: SQL.Database,
