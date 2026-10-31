@@ -142,17 +142,54 @@ export type ImportTransaction = {
 type ImportCategory = {
   id: string;
   name: string;
+  group?: string;
 };
+
+type ImportCategoryGroup = {
+  id: string;
+  name: string;
+};
+
+function normalizeCategoryName(name: string) {
+  return name.trim().toLowerCase();
+}
 
 export function parseCategoryFields(
   trans: Pick<ImportTransaction, 'category'>,
   categories: ImportCategory[],
+  categoryGroups: ImportCategoryGroup[] = [],
 ) {
   const match = categories.find(
     category =>
       category.id !== trans.category && category.name === trans.category,
   );
-  return match?.id ?? null;
+  if (match) {
+    return match.id;
+  }
+
+  // Also accept "Group:Category", matching both parts case-insensitively
+  const separatorIndex = trans.category?.indexOf(':') ?? -1;
+  if (!trans.category || separatorIndex === -1) {
+    return null;
+  }
+
+  const groupName = normalizeCategoryName(
+    trans.category.slice(0, separatorIndex),
+  );
+  const categoryName = normalizeCategoryName(
+    trans.category.slice(separatorIndex + 1),
+  );
+  const groupIds = categoryGroups
+    .filter(group => normalizeCategoryName(group.name) === groupName)
+    .map(group => group.id);
+
+  const groupMatch = categories.find(
+    category =>
+      category.group != null &&
+      groupIds.includes(category.group) &&
+      normalizeCategoryName(category.name) === categoryName,
+  );
+  return groupMatch?.id ?? null;
 }
 
 export type FieldMapping = {
