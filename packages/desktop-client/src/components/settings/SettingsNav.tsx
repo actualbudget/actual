@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import { SvgCog, SvgPylon } from '@actual-app/components/icons/v1';
+import { SvgCog, SvgPylon, SvgSwap } from '@actual-app/components/icons/v1';
 import { SvgSettingsSliderAlternate } from '@actual-app/components/icons/v2';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
@@ -14,6 +14,7 @@ import {
   isSettingsSection,
 } from '#components/sidebar/sidebarMenu';
 import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 
 import { SettingsNavLink } from './SettingsNavLink';
@@ -23,6 +24,7 @@ export function SettingsNav() {
   const { isNarrowWidth } = useResponsive();
   const { settingsItems, isItemAvailable } = useSidebarMenu();
   const itemDetails = useSidebarMenuItemDetails();
+  const multicurrency = useMulticurrencyAvailable();
 
   const menuItems = isNarrowWidth
     ? getDefaultSidebarMenuItems().filter(
@@ -61,6 +63,13 @@ export function SettingsNav() {
           to={getSidebarMenuItemPath(item.id, false)}
         />
       ))}
+      {multicurrency && (
+        <SettingsNavLink
+          title={t('Exchange rates')}
+          Icon={SvgSwap}
+          to="/settings/exchange-rates"
+        />
+      )}
       <SettingsNavLink
         title={t('Advanced')}
         Icon={SvgSettingsSliderAlternate}

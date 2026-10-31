@@ -187,7 +187,13 @@ async function setup() {
 }
 
 async function fillBackfill(from = '2026-03-09', to = '2026-03-15') {
-  await chooseOption('exchange-rate-backfill-quote', 'Euro');
+  // The backfill uses the selected tab's currency.
+  const tab = screen.queryByRole('tab', { name: 'USD to EUR' });
+  if (tab) {
+    await userEvent.click(tab);
+  } else {
+    await chooseOption('exchange-rate-add-pair', 'Euro');
+  }
   fireEvent.change(screen.getByLabelText('Backfill from'), {
     target: { value: from },
   });
@@ -221,7 +227,7 @@ describe('export', () => {
           omittedCount: 1,
         }) satisfies Reply<'exchange-rates/history-export'>,
     );
-    await chooseOption('exchange-rate-filter-quote', 'Euro');
+    await chooseOption('exchange-rate-add-pair', 'Euro');
     await userEvent.click(screen.getByRole('button', { name: 'Export rates' }));
     await screen.findByText('Rates exported: 2. Invalid rates left out: 1.');
     expect(server.sent('exchange-rates/history-export')).toEqual([
@@ -561,6 +567,32 @@ describe('import', () => {
 });
 
 describe('backfill', () => {
+  it("uses the selected tab's currency and clears a checked summary on another tab", async () => {
+    const { server } = await setup();
+    server.on('exchange-rates/backfill-plan', () => plan(7, 0));
+    expect(
+      await screen.findByTestId('exchange-rate-backfill-quote'),
+    ).toHaveTextContent('Choose a currency tab first.');
+    await fillBackfill();
+    expect(
+      screen.getByTestId('exchange-rate-backfill-quote'),
+    ).toHaveTextContent('EUR');
+    await userEvent.click(screen.getByRole('button', { name: 'Check dates' }));
+    await screen.findByText('Dates: 7. Already saved: 0. To fetch: 7.');
+    expect(server.sent('exchange-rates/backfill-plan')).toEqual([
+      expect.objectContaining({ quoteCurrency: 'EUR' }),
+    ]);
+
+    await chooseOption('exchange-rate-add-pair', 'Japanese Yen');
+    expect(
+      screen.getByTestId('exchange-rate-backfill-quote'),
+    ).toHaveTextContent('JPY');
+    expect(
+      screen.queryByText('Dates: 7. Already saved: 0. To fetch: 7.'),
+    ).toBeNull();
+    expect(startButton()).toBeDisabled();
+  });
+
   it('reaches the network only from Check dates and Start', async () => {
     const { server } = await setup();
     server.on('exchange-rates/backfill-plan', () => plan(7, 0));

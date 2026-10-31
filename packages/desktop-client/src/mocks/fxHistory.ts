@@ -94,6 +94,7 @@ export function fxServer() {
     'exchange-rates/resolve',
     'exchange-rates/save',
     'exchange-rates/remove',
+    'exchange-rates/pairs',
   ] satisfies Name[];
   for (const name of names) {
     handlers[name] = args => {
@@ -109,6 +110,7 @@ export function fxServer() {
       if (reply) return reply(args);
       if (name === 'exchange-rates/resolve') return { status: 'unavailable' };
       if (name === 'exchange-rates/history-page') return page([]);
+      if (name === 'exchange-rates/pairs') return { accounts: [], saved: [] };
       if (name === 'exchange-rates/import-cancel') return undefined;
       if (name === 'exchange-rates/backfill-cancel') return undefined;
       throw new Error(`unexpected ${name}`);
