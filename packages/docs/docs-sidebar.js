@@ -387,7 +387,6 @@ const sidebars = {
       ],
     },
     'releases',
-    'upcoming-release-notes',
     {
       type: 'link',
       label: 'Chat with us on Discord',

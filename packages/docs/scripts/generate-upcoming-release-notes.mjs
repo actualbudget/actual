@@ -1,10 +1,7 @@
-// Generates `docs/upcoming-release-notes.md` from the repo-root
+// Generates `docs/_upcoming-release-notes.md` from the repo-root
 // `upcoming-release-notes/` directory. These per-PR notes are the changes that
 // have been merged but not yet published in a stable release — i.e. what ships
-// in the nightly builds. The page is regenerated on every docs build, so
-// it always reflects the current set of unreleased changes.
-//
-// This runs before `docusaurus start` / `docusaurus build` (see package.json).
+// in the nightly builds. It is imported as a partial into `docs/releases.md`.
 
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
@@ -20,7 +17,7 @@ const repoRoot = fileURLToPath(new URL('../../..', import.meta.url));
 const notesDir = join(repoRoot, 'upcoming-release-notes');
 const outputPath = join(
   repoRoot,
-  'packages/docs/docs/upcoming-release-notes.md',
+  'packages/docs/docs/_upcoming-release-notes.md',
 );
 
 const intro = `:::info
@@ -28,35 +25,34 @@ const intro = `:::info
 These changes have been merged but are **not yet part of a stable release**. They
 ship in the nightly builds — try them via the \`nightly\` Docker image tag, or the
 hosted demo at [nightly.actualbudget.org](https://nightly.actualbudget.org).
-For changes in stable releases, see the [Release Notes](./releases.md).
+For changes in stable releases, see below.
 
 :::`;
 
-const header = `---
-title: Upcoming Release
-description: Release notes for changes that are merged but not yet released, available in the nightly builds.
-sidebar_label: Upcoming Release
----
+export async function generateUpcomingReleaseNotes() {
+  let content = '{/* No unreleased changes */}';
 
-<!-- This page is auto-generated from the upcoming-release-notes/ directory. Do not edit it by hand. -->
+  // A release tag still contains the notes it shipped with, so they are not
+  // upcoming there.
+  if (process.env.GITHUB_REF_TYPE === 'tag') {
+    console.log('Building a release tag. Generated empty partial.');
+  } else {
+    const { notesByCategory, files } = await parseReleaseNotes(
+      notesDir,
+      'actualbudget',
+      'actual',
+    );
 
-# Upcoming Release
+    if (files.length > 0) {
+      const body = formatNotes(notesByCategory);
+      content = `## Next\n\n${intro}\n\n${body}\n`;
+      console.log(
+        `Generated ${outputPath} with ${files.length} upcoming release note(s).`,
+      );
+    } else {
+      console.log(`No upcoming release notes found. Generated empty partial.`);
+    }
+  }
 
-${intro}`;
-
-const { notesByCategory, files } = await parseReleaseNotes(
-  notesDir,
-  'actualbudget',
-  'actual',
-);
-
-const body =
-  files.length === 0
-    ? `There are no unreleased changes right now — everything has shipped in a stable [release](./releases.md).`
-    : formatNotes(notesByCategory);
-
-await fs.writeFile(outputPath, `${header}\n\n${body}\n`);
-
-console.log(
-  `Generated ${outputPath} from ${files.length} upcoming release note(s).`,
-);
+  await fs.writeFile(outputPath, content + '\n');
+}

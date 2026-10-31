@@ -3,7 +3,11 @@ import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { inspect, promisify } from 'node:util';
 
-import { formatNotes, parseReleaseNotes } from '../src/release-notes/util.mjs';
+import {
+  formatNotes,
+  insertReleaseSection,
+  parseReleaseNotes,
+} from '../src/release-notes/util.mjs';
 
 const exec = promisify(childProcess.exec);
 
@@ -249,10 +253,7 @@ ${highlights}
 ${AUTOGEN_MARKER}
 
 ${categorizedNotes}`;
-    updated = existing.replace(
-      '# Release Notes\n',
-      `# Release Notes\n\n${newSection}\n`,
-    );
+    updated = insertReleaseSection(existing, newSection);
   }
 
   await fs.writeFile(releasesPath, updated);
