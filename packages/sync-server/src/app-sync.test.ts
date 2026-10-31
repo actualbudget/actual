@@ -532,6 +532,8 @@ describe('/upload-user-file', () => {
       .set('x-actual-name', fileName)
       .set('x-actual-file-id', fileId)
       .set('x-actual-format', syncVersion.toString())
+      .set('x-actual-amount-encoding', '1')
+      .set('x-actual-target-encoding', '1')
       .set('x-actual-encrypt-meta', encryptMeta)
       .send(fileContentBuffer);
 
@@ -549,11 +551,23 @@ describe('/upload-user-file', () => {
     expect(rowsAfter[0].sync_version).toEqual(syncVersion);
     expect(rowsAfter[0].name).toEqual(fileName);
     expect(rowsAfter[0].encrypt_meta).toEqual(encryptMeta);
+    expect(rowsAfter[0].amount_encoding).toEqual(1);
 
     // Verify that the file was written to the file system
     const filePath = getPathForUserFile(fileId);
     const writtenContent = await fs.promises.readFile(filePath, 'utf8');
     expect(writtenContent).toEqual(fileContent);
+
+    const oldClient = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', fileName)
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-group-id', receivedGroupid)
+      .send(Buffer.from('old client replacement'));
+    expect(oldClient.statusCode).toEqual(400);
+    expect(oldClient.text).toEqual('amount-encoding-unsupported');
   });
 
   it('uploads and updates an existing file successfully', async () => {
@@ -812,6 +826,110 @@ describe('/upload-user-file', () => {
 
     expect(res.statusCode).toEqual(500);
     expect(fs.readFileSync(filePath, 'utf8')).toEqual(originalContent);
+  });
+});
+
+describe('/amount-encoding-transition', () => {
+  it('publishes with CAS, blocks old clients, retries idempotently and reverses', async () => {
+    const fileId = generateFileId();
+    const transitionId = crypto.randomBytes(16).toString('hex');
+    const reverseId = crypto.randomBytes(16).toString('hex');
+    const upload = await request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-name', 'encoding-test')
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-format', '2')
+      .send(Buffer.from('legacy'));
+    const sourceGroup = upload.body.groupId;
+
+    async function publish(
+      id: string,
+      groupId: string,
+      target: '0' | '1',
+      body: string,
+    ) {
+      return request(app)
+        .post('/amount-encoding-transition')
+        .set('Content-Type', 'application/encrypted-file')
+        .set('x-actual-token', 'valid-token')
+        .set('x-actual-name', 'encoding-test')
+        .set('x-actual-file-id', fileId)
+        .set('x-actual-group-id', groupId)
+        .set('x-actual-format', '2')
+        .set('x-actual-amount-encoding', '1')
+        .set('x-actual-target-encoding', target)
+        .set('x-actual-transition-id', id)
+        .send(Buffer.from(body));
+    }
+
+    const forward = await publish(transitionId, sourceGroup, '1', 'protected');
+    expect(forward.statusCode).toBe(200);
+    const protectedGroup = forward.body.groupId;
+    expect(protectedGroup).not.toBe(sourceGroup);
+
+    const oldDownload = await request(app)
+      .get('/download-user-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId);
+    expect(oldDownload.statusCode).toBe(400);
+    expect(oldDownload.text).toBe('amount-encoding-unsupported');
+
+    const compatibleDownload = await request(app)
+      .get('/download-user-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-amount-encoding', '1');
+    expect(compatibleDownload.statusCode).toBe(200);
+    expect(compatibleDownload.body.toString()).toBe('protected');
+
+    const retry = await publish(transitionId, sourceGroup, '1', 'ignored');
+    expect(retry.body.groupId).toBe(protectedGroup);
+    const competing = await publish(
+      crypto.randomBytes(16).toString('hex'),
+      sourceGroup,
+      '1',
+      'bad',
+    );
+    expect(competing.statusCode).toBe(400);
+    expect(competing.text).toBe('file-has-reset');
+
+    const reverse = await publish(
+      reverseId,
+      protectedGroup,
+      '0',
+      'legacy-again',
+    );
+    expect(reverse.statusCode).toBe(200);
+    const legacyDownload = await request(app)
+      .get('/download-user-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId);
+    expect(legacyDownload.statusCode).toBe(200);
+    expect(legacyDownload.body.toString()).toBe('legacy-again');
+
+    const paths = getAccountDb().all(
+      'SELECT file_path FROM files WHERE id = ?',
+      [fileId],
+    );
+    onTestFinished(() => {
+      getAccountDb().mutate(
+        'DELETE FROM amount_encoding_transitions WHERE file_id = ?',
+        [fileId],
+      );
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+      for (const path of [
+        getPathForUserFile(fileId),
+        ...paths.map(row => row.file_path),
+      ]) {
+        if (path) {
+          try {
+            fs.unlinkSync(path);
+          } catch {}
+        }
+      }
+    });
   });
 });
 
@@ -1667,3 +1785,219 @@ async function sendSyncRequest(syncRequest, token = 'valid-token') {
     .send(bufferRequest);
   return res;
 }
+
+describe('encoded file recovery', () => {
+  it('allows owner reset after another device reset, followed by encryption key creation', async () => {
+    const fileId = generateFileId();
+    addMockFile(fileId, 'server-group', 'old-key', '{}', 2);
+    getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+      fileId,
+    ]);
+    const reset = await request(app)
+      .post('/reset-user-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-amount-encoding', '1')
+      .set('x-actual-group-id', 'old-local-group')
+      .send({ fileId });
+    expect(reset.statusCode).toBe(200);
+    expect(
+      getAccountDb().first('SELECT group_id FROM files WHERE id = ?', [fileId])
+        .group_id,
+    ).toBeNull();
+    const key = await request(app)
+      .post('/user-create-key')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-amount-encoding', '1')
+      .set('x-actual-group-id', 'old-local-group')
+      .send({ fileId, keyId: 'new-key', keySalt: 'salt', testContent: 'test' });
+    expect(key.statusCode).toBe(200);
+    expect(
+      getAccountDb().first('SELECT encrypt_keyid FROM files WHERE id = ?', [
+        fileId,
+      ]).encrypt_keyid,
+    ).toBe('new-key');
+  });
+
+  it('still rejects key replacement against another live group', async () => {
+    const fileId = generateFileId();
+    addMockFile(fileId, 'server-group', 'old-key', '{}', 2);
+    getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+      fileId,
+    ]);
+    const key = await request(app)
+      .post('/user-create-key')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-amount-encoding', '1')
+      .set('x-actual-group-id', 'old-local-group')
+      .send({ fileId, keyId: 'new-key', keySalt: 'salt', testContent: 'test' });
+    expect(key.statusCode).toBe(400);
+    expect(key.text).toBe('file-has-reset');
+  });
+});
+
+describe('overlapping file operations', () => {
+  it('waits for an upload before syncing and downloading the same file', async () => {
+    const fileId = generateFileId();
+    const groupId = crypto.randomUUID();
+    addMockFile(fileId, groupId, 'overlap-key', '{"keyId":"overlap-key"}', 2);
+    const previousPath = getPathForUserFile(fileId);
+    fs.writeFileSync(previousPath, 'previous');
+    getAccountDb().mutate('UPDATE files SET file_path = ? WHERE id = ?', [
+      previousPath,
+      fileId,
+    ]);
+    onTestFinished(() => {
+      const file = getAccountDb().first(
+        'SELECT file_path FROM files WHERE id = ?',
+        [fileId],
+      );
+      fs.rmSync(file.file_path, { force: true });
+      getAccountDb().mutate('DELETE FROM files WHERE id = ?', [fileId]);
+    });
+    let enteredResolve: () => void = () => undefined;
+    let gateResolve: () => void = () => undefined;
+    const entered = new Promise<void>(resolve => {
+      enteredResolve = resolve;
+    });
+    const gate = new Promise<void>(resolve => {
+      gateResolve = resolve;
+    });
+    const realOpen = fsPromises.open;
+    const opening = vi
+      .spyOn(fsPromises, 'open')
+      .mockImplementationOnce(async (...args) => {
+        enteredResolve();
+        await gate;
+        return realOpen(...args);
+      });
+    onTestFinished(() => {
+      gateResolve();
+      opening.mockRestore();
+    });
+    const upload = request(app)
+      .post('/upload-user-file')
+      .set('Content-Type', 'application/encrypted-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId)
+      .set('x-actual-group-id', groupId)
+      .set('x-actual-encrypt-meta', '{"keyId":"overlap-key"}')
+      .set('x-actual-name', 'overlap')
+      .set('x-actual-format', '2')
+      .send(Buffer.from('replacement'))
+      .then(response => response);
+    await entered;
+    const sync = sendSyncRequest(
+      createMinimalSyncRequest(fileId, groupId, 'overlap-key'),
+    );
+    const download = request(app)
+      .get('/download-user-file')
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId)
+      .then(response => response);
+    // Keep the upload pending while both requests reach the server.
+    await new Promise(resolve => setTimeout(resolve, 50));
+    gateResolve();
+    const [uploaded, synced, downloaded] = await Promise.all([
+      upload,
+      sync,
+      download,
+    ]);
+    expect(uploaded.statusCode).toBe(200);
+    expect(synced.statusCode).toBe(200);
+    expect(downloaded.statusCode).toBe(200);
+    expect(downloaded.body.toString()).toBe('replacement');
+  });
+});
+
+it('guards the body file a key request actually changes, regardless of a conflicting header', async () => {
+  const protectedId = generateFileId();
+  const otherId = generateFileId();
+  addMockFile(protectedId, 'protected-group', 'old-key', '{}', 2);
+  addMockFile(otherId, 'other-group', 'other-key', '{}', 2);
+  getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+    protectedId,
+  ]);
+  const key = await request(app)
+    .post('/user-create-key')
+    .set('x-actual-token', 'valid-token')
+    .set('x-actual-file-id', otherId)
+    .send({
+      fileId: protectedId,
+      keyId: 'new-key',
+      keySalt: 'salt',
+      testContent: 'test',
+    });
+  expect(key.statusCode).toBe(400);
+  expect(key.text).toBe('amount-encoding-unsupported');
+  expect(
+    getAccountDb().first('SELECT encrypt_keyid FROM files WHERE id = ?', [
+      protectedId,
+    ]).encrypt_keyid,
+  ).toBe('old-key');
+});
+
+it.each(['/sync/', '/SYNC'])(
+  'guards the matched sync route %s',
+  async endpoint => {
+    const fileId = generateFileId();
+    addMockFile(fileId, 'encoded-group', 'key', '{}', 2);
+    getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+      fileId,
+    ]);
+    const response = await request(app)
+      .post(endpoint)
+      .set('x-actual-token', 'valid-token')
+      .set('Content-Type', 'application/actual-sync')
+      .send(
+        Buffer.from(
+          toBinary(
+            SyncRequestSchema,
+            createMinimalSyncRequest(fileId, 'encoded-group', 'key'),
+          ),
+        ),
+      );
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toBe('amount-encoding-unsupported');
+  },
+);
+
+it.each(['/download-user-file/', '/DOWNLOAD-USER-FILE'])(
+  'guards the matched download route %s',
+  async endpoint => {
+    const fileId = generateFileId();
+    addMockFile(fileId, 'encoded-group', 'key', '{}', 2);
+    getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+      fileId,
+    ]);
+    const filePath = getPathForUserFile(fileId);
+    fs.writeFileSync(filePath, 'protected contents');
+    onTestFinished(() => {
+      fs.rmSync(filePath, { force: true });
+    });
+    const response = await request(app)
+      .get(endpoint)
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-file-id', fileId);
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toBe('amount-encoding-unsupported');
+  },
+);
+
+it.each(['/user-create-key/', '/USER-CREATE-KEY'])(
+  'guards the matched key route %s',
+  async endpoint => {
+    const fileId = generateFileId();
+    addMockFile(fileId, 'encoded-group', 'old-key', '{}', 2);
+    getAccountDb().mutate('UPDATE files SET amount_encoding = 1 WHERE id = ?', [
+      fileId,
+    ]);
+    const response = await request(app)
+      .post(endpoint)
+      .set('x-actual-token', 'valid-token')
+      .set('x-actual-amount-encoding', '1')
+      .set('x-actual-group-id', 'stale-group')
+      .send({ fileId, keyId: 'new-key', keySalt: 'salt', testContent: 'test' });
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toBe('file-has-reset');
+  },
+);

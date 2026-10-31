@@ -1,5 +1,78 @@
-import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
+import {
+  filterByStartDate,
+  parseCategoryFields,
+  parseDate,
+  parseImportAmount,
+} from './utils';
 import type { ImportTransaction } from './utils';
+
+describe('parseImportAmount', () => {
+  it.each([
+    [2, '12.34', 1234],
+    [0, '1234', 1234],
+    [3, '12.34', 12340],
+    [3, '12.345', 12345],
+    [3, '1234', 1234000],
+    [3, '-12.34', -12340],
+  ])('encodes %i dp input %s as %i', (precision, amount, expected) => {
+    expect(
+      parseImportAmount({ amount }, false, false, '', false, '', precision),
+    ).toBe(expected);
+  });
+
+  it('rejects malformed and overflowing input', () => {
+    expect(
+      parseImportAmount({ amount: 'bad' }, false, false, '', false, '', 3),
+    ).toBeNull();
+    expect(
+      parseImportAmount(
+        { amount: '9007199254741' },
+        false,
+        false,
+        '',
+        false,
+        '',
+        3,
+      ),
+    ).toBeNull();
+  });
+
+  it('uses mapped outflow, inflow and sign options before encoding', () => {
+    expect(
+      parseImportAmount(
+        { outflow: '12.345', inflow: '' },
+        true,
+        false,
+        '',
+        false,
+        '',
+        3,
+      ),
+    ).toBe(-12345);
+    expect(
+      parseImportAmount(
+        { outflow: '', inflow: '12.345' },
+        true,
+        false,
+        '',
+        false,
+        '',
+        3,
+      ),
+    ).toBe(12345);
+    expect(
+      parseImportAmount(
+        { amount: '12.345', inOut: 'out' },
+        false,
+        true,
+        'out',
+        false,
+        '',
+        3,
+      ),
+    ).toBe(-12345);
+  });
+});
 
 describe('Import transactions', () => {
   describe('date parsing', () => {

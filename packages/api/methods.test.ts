@@ -66,6 +66,16 @@ async function createTestBudget(templateName: string, name: string) {
   );
 }
 
+describe('API imports', () => {
+  test('imports without a source currency at legacy precision', async () => {
+    await api.runImport('api-import-test', async () => {
+      await api.createAccount({ name: 'Imported' }, 12345);
+    });
+    const [account] = await api.getAccounts();
+    await expect(api.getAccountBalance(account.id)).resolves.toBe(12345);
+  });
+});
+
 describe('API setup and teardown', () => {
   // apis: loadBudget, getBudgetMonths
   test('successfully loads budget', async () => {

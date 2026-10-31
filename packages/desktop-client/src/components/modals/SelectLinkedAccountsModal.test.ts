@@ -8,6 +8,7 @@ import {
   computeInitialLinkState,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
+  previewBalance,
   resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
@@ -203,5 +204,14 @@ describe('resolveStartingSettings', () => {
 describe('getDefaultStartingSettings', () => {
   it('does not include a starting balance', () => {
     expect(getDefaultStartingSettings().amount).toBeUndefined();
+  });
+});
+
+describe('previewBalance', () => {
+  it('encodes decimal balances and hides values the budget cannot store', () => {
+    expect(previewBalance('12.345', 3)).toBe(12345);
+    expect(previewBalance('12.34', 0)).toBe(12);
+    expect(previewBalance(1234, 2)).toBe(1234);
+    expect(previewBalance('9'.repeat(30), 2)).toBeNull();
   });
 });

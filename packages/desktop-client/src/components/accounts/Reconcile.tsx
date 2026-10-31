@@ -18,6 +18,7 @@ import type { TransObjectLiteral } from '@actual-app/core/types/util';
 import { format as formatDate } from 'date-fns';
 import { t } from 'i18next';
 
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -44,7 +45,7 @@ export function ReconcilingMessage({
       value: 0,
       query: balanceQuery.query.filter({ cleared: true }),
     }) ?? 0;
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
   const targetDiff = targetBalance - cleared;
 
   const clearedBalance = format(cleared, 'financial');
@@ -139,7 +140,7 @@ export function ReconcileMenu({
     query: balanceQuery.query.filter({ cleared: true }),
   });
   const lastSyncedBalance = account.balance_current;
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
@@ -148,7 +149,7 @@ export function ReconcileMenu({
   // to use a button to update inputValue we can't use defaultValue in the input form below
   useEffect(() => {
     if (clearedBalance != null) {
-      setInputValue(format(clearedBalance, 'financial'));
+      setInputValue(format.forEdit(clearedBalance));
     }
   }, [clearedBalance, format]);
 
@@ -160,9 +161,11 @@ export function ReconcileMenu({
     }
 
     const amount =
-      inputValue != null
-        ? format.fromEdit(inputValue, clearedBalance)
-        : clearedBalance;
+      inputValue != null ? format.fromEdit(inputValue) : clearedBalance;
+
+    if (inputValue != null && amount == null) {
+      return;
+    }
 
     onReconcile(amount);
     onClose();
@@ -193,9 +196,7 @@ export function ReconcileMenu({
               {format(lastSyncedBalance, 'financial')}
             </Text>
             <Button
-              onPress={() =>
-                setInputValue(format(lastSyncedBalance, 'financial'))
-              }
+              onPress={() => setInputValue(format.forEdit(lastSyncedBalance))}
               style={{ marginBottom: 7 }}
             >
               <Trans>Use last synced total</Trans>

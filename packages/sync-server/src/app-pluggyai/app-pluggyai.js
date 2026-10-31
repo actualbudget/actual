@@ -164,12 +164,15 @@ app.post(
 
       const account = await pluggyaiService.getAccountById(accountId, fileId);
 
-      let startingBalance = parseInt(
-        Math.round(account.balance * 100).toString(),
-      );
-      if (account.type === 'CREDIT') {
-        startingBalance = -startingBalance;
+      if (
+        typeof account.balance !== 'number' ||
+        !Number.isFinite(account.balance)
+      ) {
+        throw new Error('Invalid Pluggy balance');
       }
+      const startingBalance = String(
+        account.type === 'CREDIT' ? -account.balance : account.balance,
+      );
       const date = getDate(account.updatedAt);
 
       const balances = [
@@ -214,11 +217,16 @@ app.post(
           trans.amount *= -1;
         }
 
-        let amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
-        amountInCurrency = Math.round(amountInCurrency * 100) / 100;
+        const amountInCurrency = trans.amountInAccountCurrency ?? trans.amount;
+        if (
+          typeof amountInCurrency !== 'number' ||
+          !Number.isFinite(amountInCurrency)
+        ) {
+          throw new Error('Invalid Pluggy transaction amount');
+        }
 
         newTrans.transactionAmount = {
-          amount: amountInCurrency,
+          amount: String(amountInCurrency),
           currency: trans.currencyCode,
         };
 

@@ -24,7 +24,6 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { ParseFileOptions } from '@actual-app/core/server/transactions/import/parse-file';
-import { amountToInteger } from '@actual-app/core/shared/util';
 import { useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -35,6 +34,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { TableHeader, TableWithNavigator } from '#components/table';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useSyncedPrefs } from '#hooks/useSyncedPrefs';
@@ -51,9 +51,9 @@ import {
   dateFormats,
   filterByStartDate,
   isDateFormat,
-  parseAmountFields,
   parseCategoryFields,
   parseDate,
+  parseImportAmount,
   stripCsvImportTransaction,
 } from './utils';
 
@@ -210,6 +210,7 @@ export function ImportTransactionsModal({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
+  const precision = useAmountPrecision();
   const [prefs, savePrefs] = useSyncedPrefs();
   const { data: { list: categories } = { list: [] } } = useCategories();
 
@@ -336,13 +337,14 @@ export function ImportTransactionsModal({
           break;
         }
 
-        const { amount } = parseAmountFields(
+        const amount = parseImportAmount(
           trans,
           splitMode,
           inOutModeEnabled,
           outValue,
           flipAmount,
           multiplierAmount,
+          precision,
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
@@ -366,14 +368,14 @@ export function ImportTransactionsModal({
           ...finalTransaction,
           category: category_id,
           date,
-          amount: amountToInteger(amount),
+          amount,
           cleared: clearOnImport,
         });
       }
 
       return previewTransactions;
     },
-    [categories, clearOnImport],
+    [categories, clearOnImport, precision],
   );
 
   const parse = useCallback(
@@ -665,13 +667,14 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const { amount } = parseAmountFields(
+      const amount = parseImportAmount(
         trans,
         splitMode,
         isOfxFile(filetype) ? false : inOutMode,
         outValue,
         flipAmount,
         multiplierAmount,
+        precision,
       );
       if (amount == null) {
         errorMessage = t('Transaction on {{date}} has no amount', {
@@ -715,7 +718,7 @@ export function ImportTransactionsModal({
         ...finalTransaction,
         category: category_id,
         date,
-        amount: amountToInteger(amount),
+        amount,
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
       });
@@ -1008,6 +1011,7 @@ export function ImportTransactionsModal({
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
+                      precision={precision}
                       categories={categories}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}

@@ -12,7 +12,7 @@ import {
 } from '#shared/formulas/customFunctions';
 import { currentDay, format, parseDate } from '#shared/months';
 import { FIELD_TYPES } from '#shared/rules';
-import { amountToInteger, integerToAmount } from '#shared/util';
+import { integerToAmount } from '#shared/util';
 
 import { assert } from './rule-utils';
 
@@ -96,7 +96,7 @@ export class Action {
     this.options = options;
   }
 
-  exec(object) {
+  exec(object, amountPrecision = 2) {
     switch (this.op) {
       case 'set':
         if (this.options?.formula) {
@@ -108,6 +108,7 @@ export class Action {
             const result = this.executeFormulaSync(
               this.options.formula,
               object,
+              amountPrecision,
             );
 
             switch (this.type) {
@@ -121,7 +122,10 @@ export class Action {
                   const error = `Formula for "${this.field}" must produce a numeric value. Got: ${JSON.stringify(result)}`;
                   object._ruleErrors.push(error);
                 } else {
-                  object[this.field] = amountToInteger(numValue);
+                  object[this.field] = encodeFormulaAmount(
+                    numValue,
+                    amountPrecision,
+                  );
                 }
                 break;
               }
@@ -217,6 +221,7 @@ export class Action {
               const result = this.executeFormulaSync(
                 this.options.formula,
                 object,
+                amountPrecision,
               );
               const numValue =
                 typeof result === 'number'
@@ -228,7 +233,7 @@ export class Action {
                   `Formula for split amount must produce a numeric value. Got: ${JSON.stringify(result)}`,
                 );
               } else {
-                object.amount = amountToInteger(numValue);
+                object.amount = encodeFormulaAmount(numValue, amountPrecision);
               }
             } catch (err) {
               object._ruleErrors.push(
@@ -303,11 +308,13 @@ export class Action {
    * Evaluate a formula against a transaction. Monetary values are converted on
    * the way in, so the formula both reads and returns the amounts a user sees
    * in the app rather than the integers the transaction stores. Callers writing
-   * the result back to an amount field convert it with `amountToInteger`.
+   * the result back to an amount field encode it with `encodeFormulaAmount` at
+   * the recorded precision.
    */
   executeFormulaSync(
     formula: string,
     transaction: Partial<TransactionForRules>,
+    amountPrecision = 2,
   ): unknown {
     let hfInstance: ReturnType<typeof HyperFormula.buildEmpty> | null = null;
 
@@ -320,14 +327,17 @@ export class Action {
       const balanceOfPrefetch = new Map<string, number>();
       for (const [key, integerAmount] of transaction['_balanceOfPrefetched'] ??
         []) {
-        balanceOfPrefetch.set(key, integerToAmount(integerAmount));
+        balanceOfPrefetch.set(
+          key,
+          integerToAmount(integerAmount, amountPrecision),
+        );
       }
 
       hfInstance = HyperFormula.buildEmpty({
         licenseKey: 'gpl-v3',
         language: 'enUS',
         dateFormats: ['DD/MM/YYYY', 'YYYY-MM-DD', 'YYYY/MM/DD'],
-        context: { balanceOfPrefetch },
+        context: { amountPrecision, balanceOfPrefetch },
       });
 
       const sheetName = hfInstance.addSheet('Sheet1');
@@ -365,7 +375,7 @@ export class Action {
           typeof rawValue === 'number'
         ) {
           // Formulas work in amounts; the transaction stores integers.
-          cellValue = integerToAmount(rawValue);
+          cellValue = integerToAmount(rawValue, amountPrecision);
         } else {
           cellValue = rawValue;
         }
@@ -409,4 +419,25 @@ export class Action {
       ...(this.options ? { options: this.options } : {}),
     };
   }
+}
+
+export function encodeFormulaAmount(value: number, precision: number): number {
+  if (!Number.isInteger(precision) || precision < 0 || precision > 15) {
+    throw new Error('Invalid formula amount precision');
+  }
+  const scaled = value * 10 ** precision;
+  if (!Number.isFinite(scaled) || !Number.isSafeInteger(Math.trunc(scaled))) {
+    throw new Error('Invalid formula amount');
+  }
+  const lower = Math.floor(scaled);
+  const fraction = scaled - lower;
+  const tolerance = Number.EPSILON * Math.max(1, Math.abs(scaled)) * 2;
+  const rounded =
+    Math.abs(fraction - 0.5) <= tolerance
+      ? lower % 2 === 0
+        ? lower
+        : lower + 1
+      : Math.round(scaled);
+  if (!Number.isSafeInteger(rounded)) throw new Error('Invalid formula amount');
+  return rounded;
 }

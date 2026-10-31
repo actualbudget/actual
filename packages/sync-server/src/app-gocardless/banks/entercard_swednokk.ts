@@ -1,4 +1,4 @@
-import { amountToInteger } from '#app-gocardless/utils';
+import { startingBalanceFromTransactions } from '#app-gocardless/utils';
 
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
@@ -30,11 +30,9 @@ export default {
   },
 
   calculateStartingBalance(sortedTransactions = [], balances = []) {
-    return sortedTransactions.reduce(
-      (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      },
-      amountToInteger(balances[0]?.balanceAmount.amount || 0),
+    return startingBalanceFromTransactions(
+      balances[0]?.balanceAmount.amount ?? '0',
+      sortedTransactions,
     );
   },
 } satisfies IBank;

@@ -5,6 +5,7 @@ import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
 import { Rule } from '#server/rules';
 import { getRuleForSchedule } from '#server/schedules/app';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { amountToInteger } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
@@ -39,12 +40,22 @@ vi.mock('#server/aql', () => ({
   aqlQuery: vi.fn(),
 }));
 
+vi.mock('#server/util/currency', () => ({
+  getRecordedAmountPrecision: vi.fn(() => 2),
+}));
+
 vi.mock('./statements', () => ({
   getActiveSchedules: vi.fn(),
 }));
 
 // Helper function to mock preferences (hideFraction and defaultCurrencyCode)
-function mockPreferences(hideFraction: boolean = false) {
+function mockPreferences(
+  hideFraction: boolean = false,
+  currencyCode: string = 'USD',
+) {
+  vi.mocked(getRecordedAmountPrecision).mockReturnValue(
+    currencyCode === 'JPY' ? 0 : 2,
+  );
   vi.mocked(aql.aqlQuery).mockImplementation(async (query: unknown) => {
     const queryStr = JSON.stringify(query);
     if (queryStr.includes('hideFraction')) {
@@ -53,9 +64,19 @@ function mockPreferences(hideFraction: boolean = false) {
         dependencies: [],
       };
     }
+    if (queryStr.includes('defaultCurrencyCode')) {
+      return {
+        data: currencyCode ? [{ value: currencyCode }] : [],
+        dependencies: [],
+      };
+    }
     return { data: [], dependencies: [] };
   });
 }
+
+beforeEach(() => {
+  vi.mocked(getRecordedAmountPrecision).mockReturnValue(2);
+});
 
 // Test helper class to access constructor and methods
 class TestCategoryTemplateContext extends CategoryTemplateContext {
@@ -65,6 +86,7 @@ class TestCategoryTemplateContext extends CategoryTemplateContext {
     month: string,
     fromLastMonth: number,
     budgeted: number,
+    _currencyCode: string = 'USD',
     hideDecimal: boolean = false,
   ) {
     super(templates, category, month, fromLastMonth, budgeted, hideDecimal);
@@ -96,7 +118,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runSimple(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
 
     it('should return limit when monthly is not provided', () => {
@@ -122,7 +144,7 @@ describe('CategoryTemplateContext', () => {
       );
 
       const result = CategoryTemplateContext.runSimple(template, instance);
-      expect(result).toBe(amountToInteger(500));
+      expect(result).toBe(amountToInteger(500, 2));
     });
 
     it('should handle weekly limit', async () => {
@@ -390,7 +412,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(500));
+      expect(result).toBe(amountToInteger(500, 2));
     });
 
     it('should calculate weekly amount for multiple weeks', () => {
@@ -407,7 +429,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(300));
+      expect(result).toBe(amountToInteger(300, 2));
     });
 
     it('should handle weeks spanning multiple months', () => {
@@ -424,7 +446,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
 
     it('should handle periodic days', () => {
@@ -441,7 +463,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(400)); // for the 1st, 11th, 21st, 31st
+      expect(result).toBe(amountToInteger(400, 2)); // for the 1st, 11th, 21st, 31st
     });
 
     it('should handle periodic years', () => {
@@ -458,7 +480,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
 
     it('should handle periodic months', () => {
@@ -475,7 +497,7 @@ describe('CategoryTemplateContext', () => {
       };
 
       const result = CategoryTemplateContext.runPeriodic(template, instance);
-      expect(result).toBe(amountToInteger(100));
+      expect(result).toBe(amountToInteger(100, 2));
     });
   });
 
@@ -1387,7 +1409,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1452,7 +1474,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1507,7 +1529,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1567,7 +1589,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1610,7 +1632,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(10000); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1655,7 +1677,7 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0); // lastMonthBalance
       vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false); // carryover
       vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
-      mockPreferences(true);
+      mockPreferences(true, 'USD');
 
       // Initialize the template
       const instance = await CategoryTemplateContext.init(
@@ -1677,6 +1699,246 @@ describe('CategoryTemplateContext', () => {
       expect(values.goal).toBe(100000); // Should be the goal amount
       expect(values.longGoal).toBe(true); // Should have a long goal
       expect(instance.isGoalOnly()).toBe(false); // Should not be goal only
+    });
+  });
+
+  describe('JPY currency', () => {
+    it('keeps legacy JPY budgets at their recorded 2dp scale', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 100,
+        directive: 'template',
+        priority: 1,
+      };
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
+      mockPreferences(true, 'JPY');
+      vi.mocked(getRecordedAmountPrecision).mockReturnValue(2);
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      expect(instance.getValues().budgeted).toBe(10000);
+    });
+
+    it('should handle simple template with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 50,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(50);
+    });
+
+    it('should handle small amounts with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 5,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      vi.mocked(actions.isTrackingBudget).mockReturnValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(5);
+    });
+
+    it('should handle larger amounts with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 250,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBe(250);
+    });
+
+    it('should handle weekly limit with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        limit: {
+          amount: 100,
+          hold: false,
+          period: 'weekly',
+          start: '2024-01-01',
+        },
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+
+      const result = CategoryTemplateContext.runSimple(template, instance);
+
+      expect(result).toBeGreaterThanOrEqual(400);
+      expect(result).toBeLessThanOrEqual(500);
+    });
+
+    it('should handle periodic template with JPY correctly', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'periodic',
+        amount: 1000,
+        period: { period: 'week', amount: 1 },
+        starting: '2024-01-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instance = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+
+      await instance.runTemplatesForPriority(1, 100000, 100000);
+      const values = instance.getValues();
+
+      expect(values.budgeted).toBeGreaterThan(3500);
+      expect(values.budgeted).toBeLessThan(5500);
+    });
+
+    it('should compare JPY vs USD for same template', async () => {
+      const category: CategoryEntity = {
+        id: 'test',
+        name: 'Test Category',
+        group: 'test-group',
+        is_income: false,
+      };
+      const template: Template = {
+        type: 'simple',
+        monthly: 100,
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      mockPreferences(true, 'JPY');
+
+      const instanceJPY = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+      await instanceJPY.runTemplatesForPriority(1, 100000, 100000);
+      const valuesJPY = instanceJPY.getValues();
+
+      vi.mocked(actions.getSheetValue).mockResolvedValueOnce(0);
+      vi.mocked(actions.getSheetBoolean).mockResolvedValueOnce(false);
+      mockPreferences(false, 'USD');
+
+      const instanceUSD = await CategoryTemplateContext.init(
+        [template],
+        category,
+        '2024-01',
+        0,
+      );
+      await instanceUSD.runTemplatesForPriority(1, 100000, 100000);
+      const valuesUSD = instanceUSD.getValues();
+
+      expect(valuesJPY.budgeted).toBe(100);
+      expect(valuesUSD.budgeted).toBe(10000);
     });
   });
 
@@ -1884,7 +2146,7 @@ describe('CategoryTemplateContext', () => {
     };
 
     beforeEach(() => {
-      mockPreferences(false);
+      mockPreferences(false, 'USD');
       vi.mocked(actions.getSheetValue).mockResolvedValue(0);
       vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
       vi.mocked(actions.isTrackingBudget).mockReturnValue(false);
@@ -2300,6 +2562,7 @@ describe('CategoryTemplateContext', () => {
         '2024-01',
         0,
         0,
+        'USD',
         true,
       );
       const result = instance.runRemainder(20000, 12345);
@@ -2526,4 +2789,43 @@ describe('CategoryTemplateContext', () => {
       expect(result).toBe(29000);
     });
   });
+});
+
+describe('recorded precision of hidden-decimal remainders', () => {
+  it.each([
+    [0, 100, 2, 2],
+    [0, 3, 2, 3],
+    [0, 4, 2, 2],
+    [2, 2100, 2000, 2100],
+    [2, 2101, 2000, 2000],
+    [3, 21000, 20000, 21000],
+    [3, 21001, 20000, 20000],
+  ])(
+    'uses one whole unit as the leftover threshold at %idp (%i available)',
+    (precision, available, share, expected) => {
+      vi.mocked(getRecordedAmountPrecision).mockReturnValue(precision);
+      const context = new TestCategoryTemplateContext(
+        [
+          {
+            type: 'remainder',
+            weight: 1,
+            directive: 'template',
+            priority: null,
+          },
+        ],
+        {
+          id: 'test',
+          name: 'Test Category',
+          group: 'test-group',
+          is_income: false,
+        },
+        '2024-01',
+        0,
+        0,
+        'USD',
+        true,
+      );
+      expect(context.runRemainder(available, share)).toBe(expected);
+    },
+  );
 });

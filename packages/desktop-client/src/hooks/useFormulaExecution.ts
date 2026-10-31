@@ -27,8 +27,10 @@ import {
 } from '#components/reports/reportRanges';
 import { bootstrapHyperFormula } from '#util/bootstrapHyperFormula';
 
+import { useAmountPrecision } from './useAmountPrecision';
 import { useGlobalPref } from './useGlobalPref';
 import { useLocale } from './useLocale';
+import { useSyncedPref } from './useSyncedPref';
 
 bootstrapHyperFormula();
 
@@ -70,6 +72,10 @@ function isHyperFormulaError(
   return Boolean(
     cellValue && typeof cellValue === 'object' && 'type' in cellValue,
   );
+}
+
+function decodeStoredAmount(value: number, precision: number): number {
+  return Number.isSafeInteger(value) ? integerToAmount(value, precision) : 0;
 }
 
 function evaluateFormulaWithContext({
@@ -143,6 +149,9 @@ export function useFormulaExecution(
   accounts?: SimpleAccount[],
 ) {
   const locale = useLocale();
+  const precision = useAmountPrecision();
+  // FORMATCURRENCY reads the currency when the formula runs.
+  const [currencyCode] = useSyncedPref('defaultCurrencyCode');
   const [language] = useGlobalPref('language');
   const [result, setResult] = useState<number | string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -209,10 +218,15 @@ export function useFormulaExecution(
           throwOnCellError: false,
         });
 
-        await prefetchFormulaQueries(formulaQueryContext, currentQueries);
+        await prefetchFormulaQueries(
+          formulaQueryContext,
+          currentQueries,
+          precision,
+        );
         await prefetchAccountBalances(
           formulaQueryContext,
           currentAccounts ?? [],
+          precision,
         );
 
         formulaQueryContext.budgetQueryRequests.clear();
@@ -224,7 +238,7 @@ export function useFormulaExecution(
           throwOnCellError: false,
         });
 
-        await prefetchBudgetQueries(formulaQueryContext);
+        await prefetchBudgetQueries(formulaQueryContext, precision);
 
         const cellValue = evaluateFormulaWithContext({
           formula,
@@ -262,6 +276,8 @@ export function useFormulaExecution(
     queriesKey,
     namedExpressionsKey,
     accountsKey,
+    precision,
+    currencyCode,
   ]);
 
   return { result, isLoading, error };
@@ -270,6 +286,7 @@ export function useFormulaExecution(
 async function prefetchFormulaQueries(
   formulaQueryContext: Required<FormulaQueryContext>,
   queries: QueriesMap,
+  precision: number,
 ) {
   for (const queryName of formulaQueryContext.queryNames) {
     const queryConfig = queries[queryName];
@@ -283,7 +300,7 @@ async function prefetchFormulaQueries(
     const data = await fetchQuerySum(queryConfig);
     formulaQueryContext.querySumPrefetch.set(
       queryName,
-      integerToAmount(data, 2),
+      decodeStoredAmount(data, precision),
     );
   }
 
@@ -327,6 +344,7 @@ async function prefetchFormulaQueries(
 async function prefetchAccountBalances(
   formulaQueryContext: Required<FormulaQueryContext>,
   accounts: SimpleAccount[],
+  precision: number,
 ) {
   for (const literal of formulaQueryContext.balanceOfNames) {
     const account =
@@ -340,18 +358,21 @@ async function prefetchAccountBalances(
 
     formulaQueryContext.balanceOfPrefetch.set(
       literal,
-      await fetchAccountBalance(account.id),
+      await fetchAccountBalance(account.id, precision),
     );
   }
 }
 
-async function fetchAccountBalance(accountId: string): Promise<number> {
+async function fetchAccountBalance(
+  accountId: string,
+  precision: number,
+): Promise<number> {
   try {
     const balanceQuery = q('transactions')
       .filter({ account: accountId })
       .calculate({ $sum: '$amount' });
     const { data } = await send('query', balanceQuery.serialize());
-    return integerToAmount(data || 0, 2);
+    return decodeStoredAmount(data || 0, precision);
   } catch (err) {
     console.error('Error fetching account balance:', err);
     return 0;
@@ -360,6 +381,7 @@ async function fetchAccountBalance(accountId: string): Promise<number> {
 
 async function prefetchBudgetQueries(
   formulaQueryContext: Required<FormulaQueryContext>,
+  precision: number,
 ) {
   for (const request of formulaQueryContext.budgetQueryRequests.values()) {
     const key = createBudgetQueryPrefetchKey(request);
@@ -372,6 +394,7 @@ async function prefetchBudgetQueries(
           request.categoryIds,
           request.startMonth,
           request.endMonth,
+          precision,
         ),
       );
       formulaQueryContext.budgetQueryErrors.delete(key);
@@ -429,7 +452,7 @@ async function fetchQuerySum(config: QueryConfig): Promise<number> {
     const transQuery = await buildFilteredTransactionsQuery(config);
     const summedQuery = transQuery.calculate({ $sum: '$amount' });
     const { data } = await send('query', summedQuery.serialize());
-    return data || 0;
+    return Number.isSafeInteger(data) ? data : 0;
   } catch (err) {
     console.error('Error fetching query sum:', err);
     return 0;
@@ -633,6 +656,7 @@ async function fetchBudgetDimensionValueDirect(
   categoryIds: string[],
   startMonth: string,
   endMonth: string,
+  precision: number,
 ): Promise<number> {
   const allowed = new Set([
     'budgeted',
@@ -654,22 +678,27 @@ async function fetchBudgetDimensionValueDirect(
     for (const month of intervals) {
       const monthData = await getMonthBudgetData(month);
       for (const catId of categoryIds) {
-        total += getMonthDataValue(monthData, fieldPattern, catId) as number;
+        const value = getMonthDataValue(monthData, fieldPattern, catId);
+        total +=
+          typeof value === 'number' && Number.isSafeInteger(value) ? value : 0;
       }
     }
     return total;
   };
 
   if (dim === 'budgeted') {
-    return integerToAmount(await sumDimension('budget-{catId}'), 2);
+    return decodeStoredAmount(await sumDimension('budget-{catId}'), precision);
   }
 
   if (dim === 'spent') {
-    return integerToAmount(await sumDimension('sum-amount-{catId}'), 2);
+    return decodeStoredAmount(
+      await sumDimension('sum-amount-{catId}'),
+      precision,
+    );
   }
 
   if (dim === 'goal') {
-    return integerToAmount(await sumDimension('goal-{catId}'), 2);
+    return decodeStoredAmount(await sumDimension('goal-{catId}'), precision);
   }
 
   // Handle balance dimensions: chain month-by-month with carryover logic
@@ -679,11 +708,16 @@ async function fetchBudgetDimensionValueDirect(
     const prevMonthData = await getMonthBudgetData(monthBeforeStart);
 
     for (const catId of categoryIds) {
-      const catBalance = getMonthDataValue(
+      const catBalanceValue = getMonthDataValue(
         prevMonthData,
         'leftover-{catId}',
         catId,
-      ) as number;
+      );
+      const catBalance =
+        typeof catBalanceValue === 'number' &&
+        Number.isSafeInteger(catBalanceValue)
+          ? catBalanceValue
+          : 0;
       const hasCarryover = Boolean(
         getMonthDataValue(prevMonthData, 'carryover-{catId}', catId),
       );
@@ -728,11 +762,11 @@ async function fetchBudgetDimensionValueDirect(
     }
 
     if (dim === 'balance_start') {
-      return integerToAmount(balances[intervals[0]]?.start || 0, 2);
+      return decodeStoredAmount(balances[intervals[0]]?.start || 0, precision);
     }
-    return integerToAmount(
+    return decodeStoredAmount(
       balances[intervals[intervals.length - 1]]?.end || 0,
-      2,
+      precision,
     );
   }
 

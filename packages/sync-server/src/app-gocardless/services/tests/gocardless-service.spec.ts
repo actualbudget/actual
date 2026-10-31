@@ -179,7 +179,7 @@ describe('goCardlessService', () => {
         expect.objectContaining({
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
-          startingBalance: expect.any(Number),
+          startingBalance: expect.any(String),
           transactions: {
             all: expect.arrayContaining([
               expect.objectContaining({

@@ -291,7 +291,7 @@ describe('IngIngddeff', () => {
         balances,
       );
 
-      expect(startingBalance).toEqual(75236);
+      expect(startingBalance).toEqual('752.36');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -299,7 +299,7 @@ describe('IngIngddeff', () => {
 
       expect(
         IngIngddeff.calculateStartingBalance(transactions, balances),
-      ).toEqual(359687);
+      ).toEqual('3596.87');
     });
   });
 });
