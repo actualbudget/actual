@@ -5,6 +5,7 @@ import type { RuleConditionEntity } from './rule';
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: boolean;
 };
 
