@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { serverPush } from '@actual-app/core/platform/client/connection';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type * as FxContextModule from '#hooks/useFxProviderContext';
@@ -514,5 +514,54 @@ describe('missing rates', () => {
         { reason: 'manual' },
       ]),
     );
+  });
+
+  it('shows one status line with Stop for the current context only', async () => {
+    const { server } = await setup();
+    const status = screen.getByTestId('exchange-rates-update-status');
+    // The status read on open has answered before any event arrives.
+    await waitFor(() =>
+      expect(server.names()).toContain('exchange-rates/missing-status'),
+    );
+    const update = {
+      runId: 'run-a',
+      state: 'running' as const,
+      added: 0,
+      missing: 0,
+      errors: 0,
+    };
+    act(() =>
+      serverPush('exchange-rates-update', { ...update, context: contextB }),
+    );
+    expect(status).toBeEmptyDOMElement();
+    act(() =>
+      serverPush('exchange-rates-update', { ...update, context: contextA }),
+    );
+    await waitFor(() =>
+      expect(status).toHaveTextContent('Updating exchange rates…'),
+    );
+    await userEvent.click(within(status).getByRole('button', { name: 'Stop' }));
+    await waitFor(() =>
+      expect(server.sent('exchange-rates/missing-stop')).toEqual([
+        { runId: 'run-a' },
+      ]),
+    );
+    act(() =>
+      serverPush('exchange-rates-update', {
+        ...update,
+        context: contextA,
+        state: 'done',
+        added: 3,
+        missing: 1,
+      }),
+    );
+    await waitFor(() =>
+      expect(status).toHaveTextContent(
+        'Exchange rates updated: 3 added, 1 not published, 0 failed.',
+      ),
+    );
+    expect(
+      within(status).queryByRole('button', { name: 'Stop' }),
+    ).not.toBeInTheDocument();
   });
 });

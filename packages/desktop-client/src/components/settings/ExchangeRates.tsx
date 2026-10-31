@@ -653,7 +653,7 @@ export function ExchangeRateSettings() {
           'A fallback rate applies to its day only. A fetched rate for that day comes first; a fallback comes before an earlier fetched rate.',
         )}
       >
-        <MissingRatesStatus />
+        <MissingRatesStatus fx={fx} />
         <Tabs
           selectedKey={quote}
           onSelectionChange={key => {

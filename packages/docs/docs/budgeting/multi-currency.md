@@ -12,11 +12,19 @@ Open **Settings**, then **Experimental**. Turn on **Currency support**.
 
 With Currency support on, open **Settings**, then **General**. Under Currency, set **Default currency** to **USD - US Dollar ($)**. The Currency settings appear only while Currency support is on.
 
-Actual recommends a backup before it changes the currency. Backup confirmation is optional. Choose **Continue**.
+Actual recommends a backup before it changes the currency. Backup confirmation is optional. Choose **Continue** when precision stays the same. If precision changes, review the conversion and choose **Confirm precision change**.
 
-That setting also updates the number format. You can change the symbol position and whether decimal places are shown on the same screen. If Currency support is turned off later, amounts keep the currency's decimal places but show no currency symbol.
+That setting also updates the number format. You can change the symbol position and whether decimal places are shown on the same screen. If Currency support is turned off later, the Currency settings disappear. The saved currency and recorded precision stay intact, but amounts show no currency symbol. `FORMATCURRENCY` also omits the saved currency symbol; an explicit symbol argument in a formula still overrides its default.
 
 <img width="656" alt="Currency settings with the default currency set to USD - US Dollar ($)" src="/img/budgeting/multi-currency-currency@2x.png" />
+
+With Currency support on, the currency picker and symbols appear:
+
+<img width="860" alt="Currency support on: USD settings and dollar account balances" src="/img/budgeting/currency-support-on.png" />
+
+With Currency support off, the picker disappears and the same balances keep cents without dollar symbols:
+
+<img width="860" alt="Currency support off: no Currency settings or dollar symbols, with cents preserved" src="/img/budgeting/currency-support-off.png" />
 
 ## Turn on multiple currencies
 
@@ -42,31 +50,33 @@ With Multiple currencies on, Settings has an **Exchange rates** page. The page i
 
 The rate field takes dollars per 1 unit of the chosen currency, and the swap button turns it around. The page has a tab for each currency paired with the dollar. The BNP Paribas account and the BBVA México account open tabs **EUR to USD** and **MXN to USD**. **Add currency…** adds a tab for a currency that has no account yet.
 
-On **EUR to USD**, set the date, enter 1.10, and click **Save fallback**. On **MXN to USD**, enter 0.05. A fallback applies to its own day only. The examples on this page treat 2026-10-31 as today, and both fallbacks are saved for that day. Saving a second rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
+The examples on this page treat 2026-10-31 as today. **Fetch missing daily rates automatically** is on, so once the accounts below exist, Actual fetches each day's market rate for euros and pesos. **Get missing rates** asks for any that are still missing. A day without a fetched rate can still use a manual fallback: set the date, enter the rate, and click **Save fallback**. A fallback applies to its own day only, and a fetched rate for the same day comes first. Saving a second fallback for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
 
-**Rate in use today** names the rate that applies today. On the euro tab it reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** on that tab lists the euro fallback as stored, 0.909090909090909 euros per dollar. **Edit** loads a saved row back into the form. **Remove** deletes it.
+**Rate in use today** names the rate that applies today. On the euro tab it reads "New transactions and valuations today use: fetched rate 1.11619968 from 2026-10-31 (exchange-api)." **Saved rates** on that tab lists the fetched euro rate as stored, 0.895897049531496 euros per dollar. **Save fallback** on that row loads it into the form, and **Remove** deletes it. The status line under **Get missing rates** reads "Exchange rates updated: 0 added, 0 not published, 0 failed." because **Add account** already fetched today's rates.
 
-<img width="672" alt="Exchange rates with Fetched rates and Get missing rates above the EUR to USD tab, which has a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="672" alt="Exchange rates with Get missing rates, automatic updates and the last update above the EUR to USD tab, which uses a fetched rate of 1.11619968 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
-**Export rates** on the euro tab wrote that currency's rates to a file and said: "Rates exported: 1. Invalid rates left out: 0." **Choose file** read a CSV with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 dated 2026-10-31". **Keep existing** stayed selected. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
+**Export rates** on the euro tab wrote that currency's rates to a file and said: "Rates exported: 1. Invalid rates left out: 0." **Choose file** read a CSV with a euro fallback of 0.85 euros per dollar for 2026-10-15 and a peso fallback of 20 pesos per dollar for 2026-10-31. The preview showed **New: 2**. **Keep existing** stayed selected. An import never creates a fetched rate. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
 
-<img width="672" alt="Export of one euro rate and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+<img width="672" alt="Export of one euro rate and an import preview with two new fallbacks" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+
+Opening the budget fetches any missing daily rates for its accounts in other currencies, and so do new accounts and transactions. No sync server is needed. The setting, the hosts and the status line are described on the [Exchange rates](../experimental/exchange-rates.md#automatic-updates) page.
 
 ## Create the accounts
 
-**Add account** takes the starting balance in the account's own currency. When a rate is saved for today, the dialog shows the dollar amount.
+**Add account** takes the starting balance in the account's own currency. It fetches today's rate when none is saved, then shows the dollar amount.
 
 Create three accounts:
 
 1. **Checking**, currency USD, starting balance 2500. This is everyday spending in dollars.
-2. **BNP Paribas**, currency **EUR - Euro (€)**, balance 2000. The dialog says "$2,200.00 in the budget currency, at 1 EUR = 1.1 USD".
-3. **BBVA México**, currency **MXN - Mexican Peso ($)**, balance 5000. At 1 MXN = 0.05 USD, that starting balance is $250.00.
+2. **BNP Paribas**, currency **EUR - Euro (€)**, balance 2000. The dialog says "$2,232.40 in the budget currency, at 1 EUR = 1.11619968 USD".
+3. **BBVA México**, currency **MXN - Mexican Peso ($)**, balance 5000. At 1 MXN = 0.0532273 USD, that starting balance is $266.14.
 
-<img width="550" alt="Add account for BNP Paribas in euros, with a 2000 euro balance shown as $2,200.00" src="/img/budgeting/multi-currency-add-account@2x.png" />
+<img width="550" alt="Add account for BNP Paribas in euros, with a 2000 euro balance shown as $2,232.40" src="/img/budgeting/multi-currency-add-account@2x.png" />
 
-If no rate is saved for today, the dialog first fetches today's rate from exchange-api. If none can be fetched, it adds **Base amount** and says: "No exchange rate is saved for today. Enter the starting balance in the budget currency."
+If no rate can be fetched for today, the dialog adds **Base amount** and says: "No exchange rate is saved for today. Enter the starting balance in the budget currency."
 
-The BNP Paribas account then shows €2,000.00. Its register lists the starting balance as a 2,000.00 deposit. **All accounts** in the sidebar counts the $2,200.00 dollar amount. The peso account uses $, so its 5,000.00 peso balance looks like $5,000.00. That row is pesos. **All accounts** is dollars.
+The BNP Paribas account then shows €2,000.00. Its register lists the starting balance as a 2,000.00 deposit. **All accounts** in the sidebar counts the $2,232.40 dollar amount. The peso account uses $, so its 5,000.00 peso balance looks like $5,000.00. That row is pesos. **All accounts** is dollars.
 
 ## Change the account's currency
 
@@ -82,31 +92,31 @@ If another device added transactions in an earlier currency, the account shows h
 
 ## Enter a payment
 
-Open the BNP Paribas account and click **Add New**. Enter the payee **Résidences Saint-Martin SARL** and a payment of 950.00. That amount is euros. **Add** opens **Convert to budget currency**.
-
-The dialog shows -€950.00, then "-$1,045.00 at 1 EUR = 1.1 USD (fallback, manual, 2026-10-31)". The rate field starts with that day's fallback, 1.1. Leave **Base amount** empty and the rate as it is, then click **Save**.
+Open the BNP Paribas account and click **Add New**. Enter the payee **Résidences Saint-Martin SARL** and a payment of 950.00. That amount is euros. **Add** saves it at today's fetched rate, -$1,060.39.
 
 The new row stays open after the payment is saved. Click **Cancel** to close it.
 
-<img width="512" alt="Convert to budget currency for a 950 euro rent payment, shown as -$1,045.00 at 1 EUR = 1.1 USD" src="/img/budgeting/multi-currency-convert@2x.png" />
+**Convert to budget currency** opens when no rate applies to the date, such as a payment dated 11/15/2026, after today. It says "Rate unavailable. Enter a base amount or rate." Enter one of them, then click **Save**. It also opens with a manual fallback, so you can check that rate before saving.
+
+<img width="512" alt="Convert to budget currency for a 950 euro rent payment on a day with no rate, asking for a base amount or rate" src="/img/budgeting/multi-currency-convert@2x.png" />
 
 The account balance is then €1,050.00: the 2,000.00 starting balance minus the 950.00 rent. The register shows the payment as 950.00.
 
 <img width="860" alt="BNP Paribas with a balance of €1,050.00, a 950.00 rent payment to Résidences Saint-Martin SARL, and a 2,000.00 starting balance" src="/img/budgeting/multi-currency-eur-register@2x.png" />
 
-Hold the pointer over the 950.00 payment. It says: "Base: -1,045.00 USD. Effective rate: 1 EUR = 1.1 USD."
+Hold the pointer over the 950.00 payment. It says: "Base: -1,060.39 USD. Effective rate: 1 EUR = 1.1162 USD."
 
-On **All accounts** the same payment is shown in dollars. Hold the pointer over 1,045.00 and it says: "-950.00 EUR in BNP Paribas. Effective rate: 1 EUR = 1.1 USD."
+On **All accounts** the same payment is shown in dollars. Hold the pointer over 1,060.39 and it says: "-950.00 EUR in BNP Paribas. Effective rate: 1 EUR = 1.1162 USD."
 
 The row menu includes **Amount details**. For this rent, that opens **Edit foreign amount**.
 
 ## Current worth
 
-Under the €1,050.00 balance, Actual shows what that balance is worth at the current rate, and the base amount it has recorded: "≈ $1,155.00 at the current rate (1 EUR = 1.1 USD, manual fallback for 2026-10-31)." The next line is "Recorded base: $1,155.00."
+Under the €1,050.00 balance, Actual shows what that balance is worth at the current rate, and the base amount it has recorded: "≈ $1,172.01 at the current rate (1 EUR = 1.1162 USD, exchange-api rate from 2026-10-31)." The next line is "Recorded base: $1,172.01."
 
-<img width="860" alt="BNP Paribas at €1,050.00, with a current-rate estimate of $1,155.00 and a recorded base of $1,155.00" src="/img/budgeting/multi-currency-estimate@2x.png" />
+<img width="860" alt="BNP Paribas at €1,050.00, with a current-rate estimate of $1,172.01 and a recorded base of $1,172.01" src="/img/budgeting/multi-currency-estimate@2x.png" />
 
-**All accounts** adds a line under the total: "≈ $3,905.00 at current rates." Hold the pointer over the BNP Paribas balance in the sidebar and it shows the same two lines. On a phone, the account list shows only the first line. **On budget** says "≈ $3,905.00 at current rates." Under BNP Paribas the line is the euro estimate above. Under BBVA México it says "≈ $250.00 at the current rate (1 MXN = 0.05 USD, manual fallback for 2026-10-31)."
+**All accounts** adds a line under the total: "≈ $3,938.15 at current rates." Hold the pointer over the BNP Paribas balance in the sidebar and it shows the same two lines. On a phone, the account list shows only the first line. **On budget** says "≈ $3,938.15 at current rates." Under BNP Paribas the line is the euro estimate above. Under BBVA México it says "≈ $266.14 at the current rate (1 MXN = 0.0532273 USD, exchange-api rate from 2026-10-31)."
 
 ## Balance chart
 
@@ -116,15 +126,15 @@ Open the BBVA México account menu and choose **Show balance chart**. This uses 
 
 ## Change a saved amount
 
-Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount** opens with -1,000.00. The line under it is "-$1,100.00 at 1 EUR = 1.1 USD (fallback, manual, 2026-10-31)", and the rate field starts at 1.1. Leave **Base amount** empty and the rate as it is, then click **Save**. The payment is 1,000.00. BNP Paribas is €1,000.00. **All accounts** is $3,850.00.
+Click the 950.00 rent payment and change it to 1,000.00. **Edit foreign amount** opens with -1,000.00. The line under it is "-$1,116.20 at 1 EUR = 1.11619968 USD (fetched, exchange-api, 2026-10-31)". Leave **Base amount** and the rate empty to use that amount, then click **Save**. The payment is 1,000.00. BNP Paribas is €1,000.00. **All accounts** is $3,882.34.
 
-<img width="512" alt="Edit foreign amount for a 1,000.00 euro rent payment, shown as -$1,100.00 at 1 EUR = 1.1 USD" src="/img/budgeting/multi-currency-edit@2x.png" />
+<img width="512" alt="Edit foreign amount for a 1,000.00 euro rent payment, shown as -$1,116.20 at 1 EUR = 1.11619968 USD" src="/img/budgeting/multi-currency-edit@2x.png" />
 
 A transfer between two euro accounts uses this dialog too. It adds: "The other account of this transfer changes to match."
 
-Click the 1,000.00 deposit from Checking and change the amount. The transfer fields open directly below the transaction being edited. **Received in BNP Paribas** is 1,000.00. Use the row's usual Date and Notes cells to edit those fields. **Sent from Checking** is 1,100.00 USD, and the rate field shows 1 EUR = 1.1 USD. Change the amounts here and click **Save**.
+Click the 1,000.00 deposit from Checking and change the amount. The transfer fields open directly below the transaction being edited. **Received in BNP Paribas** is 1,000.00. Use the row's usual Date and Notes cells to edit those fields. **Sent from Checking** is 1,116.20 USD, and the rate field shows 1 EUR = 1.1162 USD. Change the amounts here and click **Save**.
 
-<img width="860" alt="Transfer fields above the BNP Paribas register, with 1,000.00 euros received and 1,100.00 dollars sent from Checking" src="/img/budgeting/multi-currency-exchange-edit@2x.png" />
+<img width="860" alt="Transfer fields below the deposit in the BNP Paribas register, with 1,000.00 euros received and 1,116.20 dollars sent from Checking" src="/img/budgeting/multi-currency-exchange-edit@2x.png" />
 
 On a phone, edit Date and Notes on the transaction screen. **Edit amount** opens **Edit transfer** for the amounts, rate and fee.
 
@@ -138,13 +148,13 @@ On the rent row, open the category menu and choose **Split Transaction**. On des
 
 Open **All accounts**. On the rent row, change the account to **Checking**. Accounts in another currency are listed under **Other currencies**.
 
-**Move to Checking** says: "Now -950.00 EUR in BNP Paribas (-$1,045.00)." **Amount (USD)** is empty, and its placeholder is 1,045.00. Leave it empty to keep the dollar amount. The line under the field is: "Base amount after the move: -$1,045.00."
+**Move to Checking** says: "Now -950.00 EUR in BNP Paribas (-$1,060.39)." **Amount (USD)** is empty. Leave it empty to keep the dollar amount. The line under the field is: "Base amount after the move: -$1,060.39."
 
-Type 1000 to record the amount Checking shows. The line changes to -$1,000.00. October already has money budgeted, so the dialog says: "This changes the budget for October 2026: uncategorized $45.00." Click **Move**.
+Type 1000 to record the amount Checking shows. The line changes to -$1,000.00. October already has money budgeted, so the dialog says: "This changes the budget for October 2026: Paris rent spending $60.39." Click **Move**.
 
 <img width="512" alt="Move to Checking for the 950.00 euro rent, recorded as 1000 dollars, with a budget warning for October 2026" src="/img/budgeting/multi-currency-move@2x.png" />
 
-The rent is then a 1,000.00 payment in Checking. Checking is $1,500.00. BNP Paribas is €2,000.00 again. **All accounts** is $3,950.00.
+The rent is then a 1,000.00 payment in Checking. Checking is $1,500.00. BNP Paribas is €2,000.00 again. **All accounts** is $3,998.54.
 
 A payment that came from a schedule is unlinked when the new account uses another currency. The dialog says: "This transaction will no longer be linked to its schedule."
 
@@ -156,11 +166,11 @@ Open **Schedules** and click **Add new schedule**. Name it **Paris rent**. Choos
 
 <img width="694" alt="Schedule for Résidences Saint-Martin SARL in BNP Paribas, with an amount of -€950.00 repeating every month on the 31st" src="/img/budgeting/multi-currency-schedule@2x.png" />
 
-On the scheduled date, Actual posts the payment and converts it with the rate for that date, here the fallback saved for 2026-10-31. 950.00 euros becomes $1,045.00 at 1 EUR = 1.1 USD.
+On the scheduled date, Actual posts the payment and converts it with the rate for that date, here the rate fetched for 2026-10-31. 950.00 euros becomes $1,060.39 at 1 EUR = 1.1162 USD.
 
 If that date has no rate, the payment stays unposted. Actual says that some scheduled transactions were not posted, then gives the schedule name, the date, and that no rate exists for that currency. Post the schedule from the Schedules page to enter a rate or the amounts. For this rent, that opens **Convert to budget currency**. Enter a rate or a base amount, then save. Nothing is posted until then.
 
-A remittance from BBVA México works the same way. 8000.00 pesos posts as $400.00 at 1 MXN = 0.05 USD.
+A remittance from BBVA México works the same way. 8000.00 pesos posts as $425.82 at 1 MXN = 0.0532273 USD.
 
 A schedule stays in the currency of the account it was created for. To use an account in another currency, create a new schedule. The form says: "To use an account in another currency, create a new schedule."
 
@@ -170,9 +180,7 @@ In **All accounts**, select the payment and deposit, then choose **Make transfer
 
 ## Move euros between accounts
 
-Create **Crédit Agricole** with a starting balance of 3,000.00. That is $3,300.00 at the day's fallback. Open Crédit Agricole and click **Add New**. In the payee field, choose **Make transfer**, then **BNP Paribas**. Enter a payment of 500.00. **Add** opens **Convert to budget currency**.
-
-The dialog shows -€500.00, then "-$550.00 at 1 EUR = 1.1 USD (fallback, manual, 2026-10-31)". Leave **Base amount** empty and the rate as it is, then click **Save**.
+Create **Crédit Agricole** with a starting balance of 3,000.00. That is $3,348.60 at the day's fetched rate. Open Crédit Agricole and click **Add New**. In the payee field, choose **Make transfer**, then **BNP Paribas**. Enter a payment of 500.00. **Add** saves it at the same rate, -$558.10.
 
 Crédit Agricole is then €2,500.00. BNP Paribas receives a 500.00 deposit from Crédit Agricole. With the 2,000.00 starting balance and no other payments, the BNP Paribas balance is €2,500.00. **All accounts** does not change, because the dollars move with the euros.
 
@@ -184,19 +192,19 @@ Choosing Checking or BBVA México from a euro account uses the exchange fields b
 
 Open **BNP Paribas** and click **Add New**. In the payee field, choose **Make transfer**, then **Checking**. Enter a deposit of 1,000.00.
 
-The row shows the other side under the transaction. **Sent from Checking** is 1,100.00 USD. **Rate** shows 1 EUR = 1.1 USD, the day's fallback. **Fee** is empty. The gray amount and rate are estimates until you type over them. Click **Add transfer**.
+The row shows the other side under the transaction. **Sent from Checking** is 1,116.20 USD. **Rate** shows 1 EUR = 1.1162 USD, the day's fetched rate. **Fee** is empty. The gray amount and rate are estimates until you type over them. Click **Add transfer**.
 
-<img width="860" alt="A 1,000.00 euro deposit into BNP Paribas from Checking, estimated as 1,100.00 dollars at 1 EUR = 1.1 USD" src="/img/budgeting/multi-currency-exchange@2x.png" />
+<img width="860" alt="A 1,000.00 euro deposit into BNP Paribas from Checking, estimated as 1,116.20 dollars at 1 EUR = 1.1162 USD" src="/img/budgeting/multi-currency-exchange@2x.png" />
 
-BNP Paribas is then €3,000.00. The deposit row shows Checking, then $1,100.00. Checking is $1,400.00. **All accounts** stays $4,950.00.
+BNP Paribas is then €3,000.00. The deposit row shows Checking, then $1,116.20. Checking is $1,383.80. **All accounts** stays $4,998.54.
 
-Hold the pointer over $1,100.00. It says: "1,100.00 USD left Checking." The next line is the rate this transfer used: "Rate of this transfer: 1 EUR = 1.1 USD." Under that is the exchange rate for the date: "Exchange rate on 10/31/2026: 1 EUR = 1.1 USD." When that date has no rate, the last line says: "No exchange rate saved for 10/31/2026."
+Hold the pointer over $1,116.20. It says: "1,116.20 USD left Checking." The next line is the rate this transfer used: "Rate of this transfer: 1 EUR = 1.1162 USD." Under that is the exchange rate for the date: "Exchange rate on 10/31/2026: 1 EUR = 1.1162 USD." When that date has no rate, the last line says: "No exchange rate saved for 10/31/2026."
 
-<img width="319" alt="Hover on the 1,100.00 dollar side of the BNP Paribas transfer: 1,100.00 USD left Checking, at 1 EUR = 1.1 USD" src="/img/budgeting/multi-currency-rate-hover@2x.png" />
+<img width="340" alt="Hover on the 1,116.20 dollar side of the BNP Paribas transfer: 1,116.20 USD left Checking, at 1 EUR = 1.1162 USD" src="/img/budgeting/multi-currency-rate-hover@2x.png" />
 
 A fee is optional. Choose EUR or USD next to **Fee**. The fee has to be smaller than the amount transferred, or Actual says: "The fee must be smaller than the amount transferred."
 
-A payment of 100.00 from BNP Paribas to BBVA México uses the same row. Both accounts are in currencies other than the dollar, so saved endpoint rates supply the dollar valuation. There is no editable budget-value field; saving requires a valid saved valuation. The estimate is 2,200.00 pesos received and 110.00 dollars. The rate field shows 1 EUR = 22 MXN.
+A payment of 100.00 from BNP Paribas to BBVA México uses the same row. Both accounts are in currencies other than the dollar, so saved endpoint rates supply the dollar valuation. There is no editable budget-value field; saving requires a valid saved valuation. The estimate is 2,097.04 pesos received and 111.62 dollars. The rate field shows 1 EUR = 20.9704204516 MXN.
 
 ## Schedule a transfer
 
@@ -204,7 +212,7 @@ The payee list on a new schedule includes transfers. Open **Schedules** and clic
 
 <img width="694" alt="Schedule Fund BNP Paribas, a monthly deposit of +€1,000.00 from Checking into BNP Paribas" src="/img/budgeting/multi-currency-schedule-exchange@2x.png" />
 
-On 10/31/2026, Actual posts both sides at that day's fallback. BNP Paribas receives €1,000.00 and is €3,000.00. Checking sends $1,100.00 and is $1,400.00. **All accounts** stays $4,950.00.
+On 10/31/2026, Actual posts both sides at that day's fetched rate. BNP Paribas receives €1,000.00 and is €3,000.00. Checking sends $1,116.20 and is $1,383.80. **All accounts** stays $4,998.54.
 
 If that date has no rate, the transfer stays unposted. Post it from the Schedules page. The dialog is **Post scheduled transfer**, with the same amount, rate, and fee fields as a transfer in the register. Nothing is posted until you click **Add transfer**. If you enter a fee there, type the other amount as well. Actual asks for the amount received or the amount sent, and it does not estimate that side once a fee is set.
 
@@ -216,7 +224,7 @@ The preview shows €980.00 from the file and the existing €1,000.00 under it.
 
 <img width="800" alt="Import preview matching a 980.00 euro file row to the existing 1,000.00 euro transfer from Checking" src="/img/budgeting/multi-currency-import-exchange@2x.png" />
 
-**Import** replaces the estimate. The deposit is then 980.00, and the row still shows $1,100.00 from Checking. BNP Paribas is €2,980.00. Checking stays $1,400.00. **All accounts** stays $4,950.00.
+**Import** replaces the estimate. The deposit is then 980.00, and the row still shows $1,116.20 from Checking. BNP Paribas is €2,980.00. Checking stays $1,383.80. **All accounts** stays $4,998.54.
 
 A transfer posted with a fee is left as entered. A reconciled transfer is left alone. A bank download that matches the transfer updates it the same way.
 
@@ -226,13 +234,13 @@ A narrow window uses the phone layout. The BBVA México account below uses the s
 
 <img width="390" alt="Phone view of BBVA México with a 250 peso balance and remittances and gifts grouped by month from June through October" src="/img/budgeting/family-bbva-mobile-history.png" />
 
-The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,045.00 under it. **Edit amount** opens **Edit foreign amount**. **Split** opens the **Split transaction** page. If the screen has other unsaved changes, save them first. Actual says: "Save your other changes before editing the amount."
+The payment detail below returns to the separate BNP Paribas rent-entry checkpoint. Open the rent payment. The amount is -€950.00, with -$1,060.39 under it and "Effective rate: 1 EUR = 1.1162 USD." **Edit amount** opens **Edit foreign amount**. **Split** opens the **Split transaction** page. If the screen has other unsaved changes, save them first. Actual says: "Save your other changes before editing the amount."
 
-<img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00, -$1,045.00, and Edit amount" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
+<img width="390" alt="Phone transaction for Résidences Saint-Martin SARL showing -€950.00, -$1,060.39, and Edit amount" src="/img/budgeting/multi-currency-mobile-payment@2x.png" />
 
 ## Export the euro amount
 
-Export the transactions to CSV. The file adds **Currency** and **Native amount**. The rent row has Currency EUR, Native amount -950, and Amount -1045. Rows in Checking leave Currency and Native amount empty. A split writes 0 as the parent's Native amount and puts the euro total in **Split_Native_Amount**. Each part keeps its own Native amount.
+Export the transactions to CSV. The file adds **Currency** and **Native amount**. The rent row has Currency EUR, Native amount -950, and Amount -1060.39. Rows in Checking leave Currency and Native amount empty. A split writes 0 as the parent's Native amount and puts the euro total in **Split_Native_Amount**. Each part keeps its own Native amount.
 
 To import that file into BNP Paribas, set the amount column to **Native amount**. Actual reads those values as euros and converts each one at the rate for its date.
 
@@ -240,15 +248,15 @@ To import that file into BNP Paribas, set the amount column to **Native amount**
 
 Open the BNP Paribas account and click **Import**. Choose a CSV, QIF, OFX, QFX, or CAMT file whose amounts are already in euros. Leave **Multiply amount** off. That option scales the numbers in the file, and this account reads them as euros.
 
-The preview shows -€950.00 for the October 31 rent, with -$1,045.00 under it, converted at the fallback for that date. Press **Import**.
+The preview shows -€950.00 for the October 31 rent, with -$1,060.39 under it, converted at the rate fetched for that date. Press **Import**.
 
-<img width="860" alt="Import preview of a 950 euro rent payment to Résidences Saint-Martin SARL, with -$1,045.00 under the euro amount" src="/img/budgeting/multi-currency-import@2x.png" />
+<img width="860" alt="Import preview of a 950 euro rent payment to Résidences Saint-Martin SARL, with -$1,060.39 under the euro amount" src="/img/budgeting/multi-currency-import@2x.png" />
 
-A CSV can also name the currency of each row. Set **Currency** to that column. Rows marked EUR stay in the preview, and a blank currency is read as euros. A file with the October 31 rent, a €5.00 cafe payment with no currency, and a 1,500.00 peso row keeps the first two. The rent is -€950.00, with -$1,045.00 under it. The cafe payment is -€5.00, with -$5.50 under it. The peso row is listed under "Rows left out because of their currency:" as "10/31/2026 · Elena García · -1500.00 Currency MXN does not match this account's EUR." **Import** offers **Import 2 transactions**.
+A CSV can also name the currency of each row. Set **Currency** to that column. Rows marked EUR stay in the preview, and a blank currency is read as euros. A file with the October 31 rent, a €5.00 cafe payment with no currency, and a 1,500.00 peso row keeps the first two. The rent is -€950.00, with -$1,060.39 under it. The cafe payment is -€5.00, with -$5.58 under it. The peso row is listed under "Rows left out because of their currency:" as "10/31/2026 · Elena García · -1500.00 Currency MXN does not match this account's EUR." **Import** offers **Import 2 transactions**.
 
 <img width="860" alt="CSV import into BNP Paribas with the Currency column set, keeping the euro rows and leaving out a peso row" src="/img/budgeting/multi-currency-csv-currency@2x.png" />
 
-If a date in the file has no rate, the dialog says: "No exchange rate is available for 2026-10-30. Enter a rate to use for these days in this operation only." The rate field takes dollars per 1 euro, with a swap button for the reverse. **Use rate** converts those rows for this import. Actual does not save it as a fallback, so a later import on that day asks again.
+Automatic updates cover the days of each account's history. A file row dated before the account's first transaction has none, so the dialog asks. If a date in the file has no rate, the dialog says: "No exchange rate is available for 2026-10-30. Enter a rate to use for these days in this operation only." The rate field takes dollars per 1 euro, with a swap button for the reverse. **Use rate** converts those rows for this import. Actual does not save it as a fallback, so a later import on that day asks again.
 
 <img width="860" alt="Import dialog asking for a euro rate for 2026-10-30 in this import only, with two 950 euro rent rows" src="/img/budgeting/multi-currency-import-rate@2x.png" />
 
@@ -272,21 +280,21 @@ If a download needs a rate that is not saved, Actual says: "An exchange rate is 
 
 ## FX changes in To Budget
 
-The figures in this section are for the two starting balances only, before the rent, gifts, remittances, and transfers above. Those payments stay booked at the rate in use when you enter them, and they change the FX total.
+This section uses a separate checkpoint: Checking, BNP Paribas and BBVA México opened on September 30 with the same starting balances, and nothing else. Payments stay booked at the rate in use when you enter them, and they change the FX total.
 
-On the rate screen, replace the euro fallback for October 31 with 1.25 dollars per euro. The register keeps the booked amounts: BNP Paribas stays $2,200.00, and BBVA México stays $250.00. The account list then estimates BNP Paribas at about $2,500.00, "1 EUR = 1.25 USD, manual fallback for 2026-10-31", and the recorded base stays $2,200.00. **All accounts** stays $4,950.00 and adds "≈ $5,250.00 at current rates."
+The starting balances are booked at the rates fetched for September 30: $2,266.46 for the euros at 1 EUR = 1.1332297 USD, and $276.66 for the pesos at 1 MXN = 0.0553323599703537 USD. By October 31 both currencies are worth less. The register keeps the booked amounts. The account list estimates BNP Paribas at $2,232.40 and BBVA México at $266.14, at the rates fetched for October 31.
 
-On the **Budget** page for October, **FX changes (included)** is $300.00. **To Budget** is $5,250.00. That is the booked $4,950.00 plus the $300.00. November lists FX changes of $0.00, and its To Budget stays $5,250.00.
+On the **Budget** page for October, **FX changes (included)** is -$44.58. **To Budget** is $4,998.54. That is the booked $5,043.12 plus the -$44.58. November lists FX changes of $0.00, and its To Budget stays $4,998.54.
 
-**FX details** opens **FX valuation details for October 2026**. The monthly FX change is $300.00. The dialog says: "FX changes are already included in To Budget." A separate included total appears only when it differs from the monthly figure.
+**FX details** opens **FX valuation details for October 2026**. The monthly FX change is -$44.58. The dialog says: "FX changes are already included in To Budget." A separate included total appears only when it differs from the monthly figure.
 
-The calculated valuation is opening valuation $0.00, transaction activity $2,450.00, monthly FX changes $300.00, brought-forward FX $0.00, and closing valuation $2,750.00.
+The calculated valuation is opening valuation $2,543.12, transaction activity $0.00, monthly FX changes -$44.58, brought-forward FX $0.00, and closing valuation $2,498.54.
 
 **Reserved in other currencies** is $0.00. Assigned this month is $0.00, and spending, resets and revaluation are $0.00. Nothing is set aside in euros or pesos, so To Budget does not change. The Budget summary adds **Reserved in other currencies** only when that amount is not zero, or when the reservation is incomplete.
 
-BNP Paribas books $2,200.00 and closes at $2,500.00. Its monthly FX change is $300.00. The closing formula for 10/31/2026 is 1 EUR = 1.25 USD. BBVA México books $250.00 and closes at $250.00, so its FX change is $0.00. Its closing formula is 1 MXN = 0.05 USD.
+BNP Paribas opens at $2,266.46 and closes at $2,232.40. Its monthly FX change is -$34.06. The closing formula for 10/31/2026 is 1 EUR = 1.11619968 USD. BBVA México opens at $276.66 and closes at $266.14, so its FX change is -$10.52. Its closing formula is 1 MXN = 0.0532273390787558 USD.
 
-<img width="620" alt="FX valuation details for October 2026, with $300.00 included in To Budget and $0.00 reserved in other currencies" src="/img/budgeting/multi-currency-fx-details@2x.png" />
+<img width="620" alt="FX valuation details for October 2026, with -$44.58 included in To Budget and $0.00 reserved in other currencies" src="/img/budgeting/multi-currency-fx-details@2x.png" />
 
 ## FX impact report
 
@@ -294,13 +302,13 @@ Hover over or focus a rate formula to see its kind, source, effective timestamp 
 
 Open **Reports** and choose **FX impact**. Select June through October 2026. Leave **Accounts** and **Currencies** on all accounts and currencies for this example.
 
-This extends the same example budget for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. It uses Checking, BNP Paribas and BBVA México, with the same landlord and family payees as above. It is a separate checkpoint from the manual-rate examples.
+This extends the same example budget for a family that has a Paris apartment they sublease to a brother-in-law and parents they visit in Mexico. It uses Checking, BNP Paribas and BBVA México, with the same landlord and family payees as above. It is a separate checkpoint from the examples above.
 
 The history starts on May 31 with $2,500 in Checking, €2,000 in BNP Paribas and MX$5,000 in BBVA México. At each month-end from June through October, BNP Paribas pays €950 to Résidences Saint-Martin SARL and receives €950 from Thomas Martin as sublease income. BBVA México pays MX$800 to Elena García as a remittance and MX$150 to José García as a gift. October ends with €2,000 and MX$250 in the foreign accounts.
 
 ### Fetch historical market rates
 
-Create the accounts with their May 31 opening balances, then open **Settings → Exchange rates** and click **Get missing rates**. It fetches every day of euro and peso history from May 31 through today from the built-in **exchange-api** provider. Do this before entering the transactions. See [Fetched rates](../experimental/exchange-rates.md#fetched-rates) for the hosts and what they see. These screenshots use real fetched rates, rather than the manual fallbacks from the earlier examples. Each payment is booked using its transaction-date rate.
+Create the accounts with their May 31 opening balances. Automatic updates then fetch every day of euro and peso history from May 31 through today from the built-in **exchange-api** provider, and **Get missing rates** in **Settings → Exchange rates** asks for any that are still missing. Let that finish before entering the transactions. See [Fetched rates](../experimental/exchange-rates.md#fetched-rates) for the hosts and what they see. These screenshots use real fetched rates, like the rest of this page. Each payment is booked using its transaction-date rate.
 
 The provider's dates identify its daily snapshots. These market rates may differ from a bank's executed exchange rate. Fetching rates does not rewrite the base amounts of posted payments.
 
@@ -314,13 +322,13 @@ The **Selected total** combines the selected accounts and currencies. All figure
 
 | Month     | Realized | Unrealized change | Total change | Closing unrealized |
 | --------- | -------: | ----------------: | -----------: | -----------------: |
-| June      |  -$17.24 |           -$37.29 |      -$54.53 |            -$37.29 |
-| July      |   -$6.30 |           +$30.35 |      +$24.05 |             -$6.94 |
-| August    |   +$5.48 |           +$14.17 |      +$19.65 |             +$7.23 |
-| September |  -$17.28 |           -$41.78 |      -$59.06 |            -$34.55 |
-| October   |  -$35.48 |            -$1.11 |      -$36.59 |            -$35.66 |
+| June      |  -$25.21 |           -$29.32 |      -$54.53 |            -$29.32 |
+| July      |   -$1.70 |           +$25.75 |      +$24.05 |             -$3.57 |
+| August    |   +$5.13 |           +$14.52 |      +$19.65 |            +$10.95 |
+| September |  -$16.09 |           -$42.97 |      -$59.06 |            -$32.02 |
+| October   |  -$24.60 |           -$11.99 |      -$36.59 |            -$44.01 |
 
-For October, euros contribute -$34.06 and pesos -$2.53, making the selected total -$36.59. Expand **Accounts** beneath a month to see BNP Paribas or BBVA México and the closing rate used. The October 31 rates are 1 USD = 0.895897049531496 EUR and 1 USD = 18.78733781 MXN.
+For October, euros contribute -$34.06 and pesos -$2.53, making the selected total -$36.59. Expand **Accounts** beneath a month to see BNP Paribas or BBVA México and the closing rate used. The October 31 rates are 1 EUR = 1.11619968 USD and 1 MXN = 0.0532273390787558 USD.
 
 ### Reconcile with the budget and export
 
@@ -336,17 +344,17 @@ On the **Budget** page, right-click **Food** and choose **Add currency…**. Cho
 
 <img width="540" alt="Add currency to Food, with EUR - Euro (€) selected" src="/img/budgeting/multi-currency-add-currency@2x.png" />
 
-**Add currency** puts a **EUR** row under Food. Click its **Budgeted** cell and enter 100. Food and **Usual Expenses** then show $125.00 budgeted and $125.00 balance. The euro budgeted cell shows 100, spent is €0.00, and the balance is €100.00.
+**Add currency** puts a **EUR** row under Food. Click its **Budgeted** cell and enter 100. Food and **Usual Expenses** then show $111.62 budgeted and $111.62 balance. The euro budgeted cell shows 100, spent is €0.00, and the balance is €100.00.
 
-<img width="840" alt="Food budgeted at $125.00, with the EUR row budgeted at 100 and a balance of €100.00" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
+<img width="700" alt="Food budgeted at $111.62, with the EUR row budgeted at 100 and a balance of €100.00" src="/img/budgeting/multi-currency-pocket-rows@2x.png" />
 
-October lists **Reserved in other currencies** as -$125.00. **To Budget** is $5,125.00. Available funds stays $5,250.00, and **FX changes (included)** stays $300.00. November's **To Budget** is $5,125.00.
+October lists **Reserved in other currencies** as -$111.62. **To Budget** is $4,886.92. Available funds stays $4,998.54, and **FX changes (included)** stays -$44.58.
 
-The euro balance opens **Food: EUR**. Budgeted is €100.00, spent is €0.00, and the balance is €100.00. Value is $125.00. Assigned in the budget currency is $125.00, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 1 EUR = 1.25 USD". Reserved is €100.00. Held is €2,000.00, the balance of BNP Paribas.
+The euro balance opens **Food: EUR**. Budgeted is €100.00, spent is €0.00, and the balance is €100.00. Value is $111.62. Assigned in the budget currency is $111.62, and the FX contribution is $0.00. It says **Market rate** and "Rate on 2026-10-31: 1 EUR = 1.11619968 USD". Reserved is €100.00. Held is €2,000.00, the balance of BNP Paribas.
 
 **Edit EUR budget** shows **Budgeted (EUR)** and **Save budget**. **Turn rollover on** is beside it. **Transfer EUR** takes an **Amount (EUR)** and **To**. The first choice is **To Budget**.
 
-<img width="512" alt="Food: EUR with €100.00 budgeted, $125.00 value, rollover, and a transfer back to To Budget" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
+<img width="512" alt="Food: EUR with €100.00 budgeted, $111.62 value, rollover, and a transfer back to To Budget" src="/img/budgeting/multi-currency-pocket-details@2x.png" />
 
 **Delete EUR** shows **Move its history to**, set to **No category**. The list is No category, General, Bills, Bills (Flexible), and Savings. The button is **Delete currency**. **Delete base budget** shows the same list, and its button is **Delete base budget**. **Hide currency** is below those forms.
 

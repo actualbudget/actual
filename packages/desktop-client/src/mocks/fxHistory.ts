@@ -88,6 +88,8 @@ export function fxServer() {
     'exchange-rates/import-cancel',
     'exchange-rates/remove-fetched',
     'exchange-rates/missing-start',
+    'exchange-rates/missing-stop',
+    'exchange-rates/missing-status',
     'exchange-rates/resolve',
     'exchange-rates/save',
     'exchange-rates/remove',
@@ -109,6 +111,8 @@ export function fxServer() {
       if (name === 'exchange-rates/history-page') return page([]);
       if (name === 'exchange-rates/pairs') return { accounts: [], saved: [] };
       if (name === 'exchange-rates/import-cancel') return undefined;
+      if (name === 'exchange-rates/missing-stop') return undefined;
+      if (name === 'exchange-rates/missing-status') return null;
       throw new Error(`unexpected ${name}`);
     };
   }

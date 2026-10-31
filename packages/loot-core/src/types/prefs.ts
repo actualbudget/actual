@@ -30,6 +30,7 @@ export type SyncedPrefs = Partial<
     | 'defaultCurrencyCode'
     | 'amountEncoding'
     | 'multicurrencyBaseCurrency'
+    | 'exchange-rates-auto-update'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     // @deprecated: superseded by `transaction-table-columns-${string}`; only

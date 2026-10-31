@@ -249,6 +249,7 @@ describe('ExchangeRateSettings', () => {
     expect(errors).not.toHaveBeenCalled();
     errors.mockRestore();
     expect(server.names()).toEqual([
+      'exchange-rates/missing-status',
       'exchange-rates/history-page',
       'exchange-rates/pairs',
     ]);

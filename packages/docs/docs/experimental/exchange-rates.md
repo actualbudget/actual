@@ -8,13 +8,13 @@ When Multiple currencies is on, Settings has an **Exchange rates** page. The pag
 
 Each tab is one currency paired with the budget currency. An account in another currency gets a tab, and so does any other currency with saved rates. To save rates for a currency that has no account yet, choose it from **Add currency…**. The tab holds that pair's rate form, its saved rates, and the import and export tools.
 
-Above the tabs, **Fetched rates** says where fetched rates come from and offers **Get missing rates**. See [Fetched rates](#fetched-rates).
+Above the tabs, **Fetched rates** says where fetched rates come from, offers **Get missing rates**, holds the automatic updates setting and shows the last update. See [Fetched rates](#fetched-rates) and [Automatic updates](#automatic-updates).
 
 The rate input takes dollars per 1 unit of the tab's currency. Use the swap button to enter the reverse. **Save fallback** saves a manual fallback for that date only. Saving another rate for the same currency and date says a fallback is already saved for that date and offers **Replace saved rate**.
 
-On **EUR to USD**, the date is 10/31/2026 and **Rate** reads `1 EUR = [rate] USD`. Entering 1.10 and clicking **Save fallback** saves the euro fallback. **Rate in use today** then reads "New transactions and valuations today use: manual fallback 1.1 for 2026-10-31." **Saved rates** lists that euro row as stored, 0.909090909090909 euros per dollar. **Edit** loads it back into the form. **Remove** deletes it. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
+On **EUR to USD**, the date is 10/31/2026 and **Rate** reads `1 EUR = [rate] USD`. Automatic updates have already fetched the euro rate for that day, so **Rate in use today** reads "New transactions and valuations today use: fetched rate 1.11619968 from 2026-10-31 (exchange-api)." **Saved rates** lists that fetched row as stored, 0.895897049531496 euros per dollar. On a manual fallback, **Edit** loads it back into the form. **Remove** deletes a row. When the list has another page, **Load more** appears. A page can be empty and still have more rates after it.
 
-<img width="672" alt="Exchange rates with Fetched rates and Get missing rates above the EUR to USD tab, which has a fallback of 1.10 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
+<img width="672" alt="Exchange rates with Get missing rates, automatic updates and the last update above the EUR to USD tab, which uses a fetched rate of 1.11619968 dollars per euro for 2026-10-31" src="/img/budgeting/multi-currency-rates@2x.png" />
 
 ## Which rate Actual uses
 
@@ -35,15 +35,15 @@ Changing a saved rate does not change the recorded budget-currency amounts of tr
 
 **Export rates** downloads the selected tab's rates. On **EUR to USD** it saved `exchange-rates-USD-2026-10-31.csv` and said: "Rates exported: 1. Invalid rates left out: 0."
 
-The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kind`, `date`, `source`, and `timestamp`. Each rate is in units per 1 dollar, and a manual fallback has the kind `dated`. Rates that cannot be exported are counted and left out.
+The file is UTF-8. The header is `base_currency`, `quote_currency`, `rate`, `kind`, `date`, `source`, and `timestamp`. Each rate is in units per 1 dollar. A manual fallback has the kind `dated`, and a fetched rate has the kind `fetched`. Rates that cannot be exported are counted and left out.
 
 ## Import
 
 **Choose file** reads a CSV of manual fallbacks. The header needs `quote_currency`, `rate`, `kind`, and `date`. A `base_currency` column is accepted when every value is the budget currency. Any other column is ignored. A row whose kind is `fetched` is skipped.
 
-The preview covers every currency in the file, including rates for other tabs. A file with a euro fallback of 0.85 euros per dollar for 2026-10-15 and the peso fallback already saved showed **New: 1** and **Unchanged: 1**. The other counts were 0. The preview listed "Line 3: already saved. MXN 20 dated 2026-10-31". New rows are counted and are not listed. **Keep existing** is the selected choice. **Import** was not clicked.
+The preview covers every currency in the file, including rates for other tabs. A file with a euro fallback of 0.85 euros per dollar for 2026-10-15 and a peso fallback of 20 pesos per dollar for 2026-10-31 showed **New: 2**. The other counts were 0. New rows are counted and are not listed. A fallback that matches a saved one counts as **Unchanged**, and the preview lists it by line. **Keep existing** is the selected choice. **Import** was not clicked.
 
-<img width="672" alt="Export of one euro rate and an import preview with one new euro fallback and one unchanged peso fallback" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+<img width="672" alt="Export of one euro rate and an import preview with two new fallbacks" src="/img/budgeting/multi-currency-rate-history@2x.png" />
 
 **Keep existing** leaves a saved fallback in place. **Replace existing** asks you to confirm how many saved rates differ, then overwrites those rates. The confirmation says you can undo the import. If the saved rates change after the preview, or the preview is no longer available, choose the file again.
 
@@ -58,3 +58,11 @@ Actual reads each daily snapshot from jsDelivr (`cdn.jsdelivr.net`), then from C
 **Get missing rates** fills the daily history that accounts in other currencies need. An open account needs every day from its first transaction through today. A closed account needs its days through its last transaction, or through today while it still holds a balance. Today, month ends and transaction dates are fetched first.
 
 **Add account** fetches today's rate when none is saved for an account in another currency. Posting a schedule by hand first tries the saved rates. When a rate is missing, Actual fetches the rate for that date and retries before it opens the conversion dialog.
+
+## Automatic Updates
+
+**Fetch missing daily rates automatically** is on by default. While a budget is open, Actual runs the same update as **Get missing rates** when the budget opens, about two seconds after accounts, transactions, rates or settings change on this or another device, and when the local day changes. A run that failed or left recent days missing is tried again an hour later. Automatic runs skip days the provider did not publish; **Get missing rates** asks for them again.
+
+The line under **Get missing rates** shows the current run, such as "Updating exchange rates…" and then "Exchange rates updated: 3 added, 1 not published, 0 failed." When the provider limits requests, it says when Actual will ask again. After five failed lookups in a row, the run stops and automatic runs wait an hour.
+
+**Stop** ends the current run. Automatic runs then wait until the budget opens again, the day changes, or the setting is turned back on. **Get missing rates** still works. Turning the setting off stops an automatic run in progress, and rates are then fetched only when you click **Get missing rates**.

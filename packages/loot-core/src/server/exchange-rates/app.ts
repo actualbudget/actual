@@ -28,6 +28,7 @@ import type {
 } from '#types/models';
 
 import { startFxContext } from './context';
+import { startMissingRateUpdates } from './fetch-on-open';
 import {
   historyExport,
   historyPage,
@@ -64,6 +65,7 @@ export type ExchangeRatesHandlers = {
 
 export const app = createApp<ExchangeRatesHandlers>();
 app.service(startFxContext);
+app.service(startMissingRateUpdates);
 // Undo history is recorded only around actual rate writes, so validation
 // failures and no-op captures keep the redo stack intact.
 app.method('exchange-rates/save', mutator(saveRate));
