@@ -151,6 +151,8 @@
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
     "@babel/core": "^8.0.7",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.4.2",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/language": "^6.13.1",
     "@codemirror/state": "^6.7.6",
