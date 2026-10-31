@@ -1,17 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SvgFilter } from '@actual-app/components/icons/v1';
 import { Label } from '@actual-app/components/label';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { Search } from '#components/common/Search';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
@@ -20,45 +18,7 @@ import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 
 import { TransactionList } from './TransactionList';
-
-type TransactionSearchInputProps = {
-  placeholder: string;
-  onSearch: TransactionListWithBalancesProps['onSearch'];
-};
-
-function TransactionSearchInput({
-  placeholder,
-  onSearch,
-}: TransactionSearchInputProps) {
-  const [text, setText] = useState('');
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: theme.mobilePageBackground,
-        padding: 10,
-        width: '100%',
-      }}
-    >
-      <Search
-        value={text}
-        onChange={text => {
-          setText(text);
-          onSearch(text);
-        }}
-        placeholder={placeholder}
-        width="100%"
-        height={styles.mobileMinHeight}
-        style={{
-          backgroundColor: theme.tableBackground,
-          borderColor: theme.formInputBorder,
-        }}
-      />
-    </View>
-  );
-}
+import { TransactionSearchInput } from './TransactionSearchInput';
 
 type TransactionListWithBalancesProps = {
   isLoading: boolean;
