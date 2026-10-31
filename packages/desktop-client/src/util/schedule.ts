@@ -27,6 +27,35 @@ export function getStatusLabel(status: string) {
   }
 }
 
+export function getSkipScheduleText(
+  nextDate?: string | null | Array<string | null | undefined>,
+) {
+  if (Array.isArray(nextDate)) {
+    const dates = nextDate.filter((d): d is string => Boolean(d));
+    if (dates.length === 0) {
+      return t('Skip next scheduled date');
+    }
+    const today = monthUtils.currentDay();
+    const hasUpcoming = dates.some(d => monthUtils.isAfter(d, today));
+    const hasCurrentOrPast = dates.some(d => !monthUtils.isAfter(d, today));
+    if (hasUpcoming && hasCurrentOrPast) {
+      return t('Skip scheduled date');
+    }
+    return hasUpcoming
+      ? t('Skip next scheduled date')
+      : t('Skip this scheduled date');
+  }
+
+  if (!nextDate) {
+    return t('Skip next scheduled date');
+  }
+
+  const today = monthUtils.currentDay();
+  return monthUtils.isAfter(nextDate, today)
+    ? t('Skip next scheduled date')
+    : t('Skip this scheduled date');
+}
+
 function makeNumberSuffix(num: number, locale: Locale) {
   // Slight abuse of date-fns to turn a number like "1" into the full
   // form "1st" but formatting a date with that number
