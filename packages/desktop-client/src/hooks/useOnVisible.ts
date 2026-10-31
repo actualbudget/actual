@@ -57,6 +57,7 @@ export function useOnVisible(
         },
       );
       return () => {
+        isPending.current = false;
         void listener.then(handle => handle.remove());
       };
     }
@@ -69,7 +70,9 @@ export function useOnVisible(
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange);
-    return () =>
+    return () => {
+      isPending.current = false;
       document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [isEnabled]);
 }

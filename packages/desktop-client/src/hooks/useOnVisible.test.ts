@@ -128,6 +128,26 @@ describe('useOnVisible', () => {
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
+  it('drops a queued run when unmounted before the callback settles', async () => {
+    let resolve: () => void;
+    const callback = vi.fn().mockImplementation(
+      () =>
+        new Promise<void>(r => {
+          resolve = r;
+        }),
+    );
+    const { unmount } = renderHook(() => useOnVisible(callback));
+
+    dispatchVisibilityChange();
+    dispatchVisibilityChange();
+    unmount();
+
+    resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
   it('invokes callback when isEnabled is true by default', () => {
     const callback = vi.fn();
     renderHook(() => useOnVisible(callback));
