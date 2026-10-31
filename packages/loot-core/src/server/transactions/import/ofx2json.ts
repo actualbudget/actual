@@ -3,6 +3,9 @@ import { parseStringPromise } from 'xml2js';
 
 import { dayFromDate } from '#shared/months';
 
+import { createAccountHint } from './account-hint';
+import type { ImportAccountHint } from './account-hint';
+
 type OFXTransaction = {
   amount: string;
   fitId: string;
@@ -15,6 +18,7 @@ type OFXTransaction = {
 type OFXParseResult = {
   headers: Record<string, unknown>;
   transactions: OFXTransaction[];
+  account: ImportAccountHint | null;
 };
 
 function sgml2Xml(sgml) {
@@ -96,6 +100,36 @@ function getInvStmtTrn(ofx) {
     return getAsArray(stmtTrn);
   });
   return result;
+}
+
+// Only the first statement's account is used; files that contain several
+// statements are not matched against more than one account.
+function getAccountHint(data): ImportAccountHint | null {
+  const ofx = data?.['OFX'];
+  const first = value => getAsArray(value)[0];
+
+  const bankAcct = first(ofx?.['BANKMSGSRSV1']?.['STMTTRNRS'])?.['STMTRS']?.[
+    'BANKACCTFROM'
+  ];
+  if (bankAcct) {
+    return createAccountHint('ofx', bankAcct['BANKID'], bankAcct['ACCTID']);
+  }
+
+  const ccAcct = first(ofx?.['CREDITCARDMSGSRSV1']?.['CCSTMTTRNRS'])?.[
+    'CCSTMTRS'
+  ]?.['CCACCTFROM'];
+  if (ccAcct) {
+    return createAccountHint('ofx', '', ccAcct['ACCTID']);
+  }
+
+  const invAcct = first(ofx?.['INVSTMTMSGSRSV1']?.['INVSTMTTRNRS'])?.[
+    'INVSTMTRS'
+  ]?.['INVACCTFROM'];
+  if (invAcct) {
+    return createAccountHint('ofx', invAcct['BROKERID'], invAcct['ACCTID']);
+  }
+
+  return null;
 }
 
 function getAsArray(value) {
@@ -186,5 +220,6 @@ export async function ofx2json(
   return {
     headers,
     transactions: getStmtTrn(dataParsed).map(mapOfxTransaction),
+    account: getAccountHint(dataParsed),
   };
 }
