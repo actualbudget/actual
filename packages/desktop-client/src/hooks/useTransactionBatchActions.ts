@@ -300,6 +300,8 @@ export function useTransactionBatchActions() {
             return newTransactions.concat(
               realizeTempTransactions(ungroupTransaction(trans)).map(t => ({
                 ...t,
+                imported_id: undefined,
+                schedule: undefined,
                 cleared: false,
                 reconciled: false,
               })),
