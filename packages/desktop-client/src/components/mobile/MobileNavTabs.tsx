@@ -5,19 +5,14 @@ import { NavLink } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
-import {
-  SvgAdd,
-  SvgCog,
-  SvgPiggyBank,
-  SvgReports,
-  SvgWallet,
-} from '@actual-app/components/icons/v1';
-import { SvgCalendar3 } from '@actual-app/components/icons/v2';
+import { SvgCog } from '@actual-app/components/icons/v1';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import { MOBILE_TAB_PAGES } from '#components/mobile/mobileStartPage';
+import { useMobileTabPageDetails } from '#components/mobile/useMobileTabPageDetails';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useScrollListener } from '#hooks/useScrollListener';
 
@@ -36,6 +31,7 @@ export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isTestEnv = useIsTestEnv();
+  const tabPageDetails = useMobileTabPageDetails();
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -88,36 +84,12 @@ export function MobileNavTabs() {
   );
 
   const navTabs = [
-    {
-      name: t('Budget'),
-      path: '/budget',
+    ...MOBILE_TAB_PAGES.map(({ id, path }) => ({
+      name: tabPageDetails[id].title,
+      path,
       style: navTabStyle,
-      Icon: SvgWallet,
-    },
-    {
-      name: t('Transaction'),
-      path: '/transactions/new',
-      style: navTabStyle,
-      Icon: SvgAdd,
-    },
-    {
-      name: t('Accounts'),
-      path: '/accounts',
-      style: navTabStyle,
-      Icon: SvgPiggyBank,
-    },
-    {
-      name: t('Reports'),
-      path: '/reports',
-      style: navTabStyle,
-      Icon: SvgReports,
-    },
-    {
-      name: t('Schedules'),
-      path: '/schedules',
-      style: navTabStyle,
-      Icon: SvgCalendar3,
-    },
+      Icon: tabPageDetails[id].Icon,
+    })),
     {
       name: t('Settings'),
       path: '/settings',
