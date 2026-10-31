@@ -12,11 +12,19 @@ Open **Settings**, then **Experimental**. Turn on **Currency support**.
 
 With Currency support on, open **Settings**, then **General**. Under Currency, set **Default currency** to **USD - US Dollar ($)**. The Currency settings appear only while Currency support is on.
 
-Actual recommends a backup before it changes the currency. Backup confirmation is optional. Choose **Continue**.
+Actual recommends a backup before it changes the currency. Backup confirmation is optional. Choose **Continue** when precision stays the same. If precision changes, review the conversion and choose **Confirm precision change**.
 
-That setting also updates the number format. You can change the symbol position and whether decimal places are shown on the same screen. If Currency support is turned off later, amounts keep the currency's decimal places but show no currency symbol.
+That setting also updates the number format. You can change the symbol position and whether decimal places are shown on the same screen. If Currency support is turned off later, the Currency settings disappear. The saved currency and recorded precision stay intact, but amounts show no currency symbol. `FORMATCURRENCY` also omits the saved currency symbol; an explicit symbol argument in a formula still overrides its default.
 
 <img width="656" alt="Currency settings with the default currency set to USD - US Dollar ($)" src="/img/budgeting/multi-currency-currency@2x.png" />
+
+With Currency support on, the currency picker and symbols appear:
+
+<img width="860" alt="Currency support on: USD settings and dollar account balances" src="/img/budgeting/currency-support-on.png" />
+
+With Currency support off, the picker disappears and the same balances keep cents without dollar symbols:
+
+<img width="860" alt="Currency support off: no Currency settings or dollar symbols, with cents preserved" src="/img/budgeting/currency-support-off.png" />
 
 ## Turn on multiple currencies
 
@@ -51,6 +59,8 @@ On **EUR to USD**, set **Kind** to **Standing rate**, set the date, swap to euro
 **Export rates** on the euro tab wrote that currency's rates to a file and said: "Rates exported: 1. Invalid rates left out: 0." **Choose file** read a CSV with a standing 0.85 euro rate on 2026-10-15 and the peso rate already saved. The preview showed **New: 1**, **Unchanged: 1**, and "Line 3: already saved. MXN 20 standing 2026-10-31". **Keep existing** stayed selected. **Backfill** on the euro tab was set from 10/01/2026 to 10/31/2026, with **Keep existing**. **Check dates** said: "Backfill needs a sync server. Rates you save or import work without one." **Start backfill** stayed off. The file columns are on the [Exchange rates](../experimental/exchange-rates.md) page.
 
 <img width="616" alt="Export of one euro rate, an import preview with one new row and one unchanged peso rate, and a euro backfill that needs a sync server" src="/img/budgeting/multi-currency-rate-history@2x.png" />
+
+Opening this file budget fetches nothing, because there is no sync server. With a sync server, opening the budget asks for today's rate for each open account in another currency that has no fetched rate saved for today. Actual still asks when a standing rate or a one-day rate is already saved. A fetched rate for today is used before the standing rate. The hosts are on the [Exchange rates](../experimental/exchange-rates.md) page.
 
 ## Create the accounts
 
