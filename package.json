@@ -117,6 +117,8 @@
   },
   "resolutions": {
     "minimatch@3.1.2": "3.1.5",
+    "react-aria@npm:3.53.1": "patch:react-aria@npm%3A3.53.1#~/.yarn/patches/react-aria-npm-3.53.1-15eaf73353.patch",
+    "react-aria@npm:^3.48.0": "patch:react-aria@npm%3A3.53.1#~/.yarn/patches/react-aria-npm-3.53.1-15eaf73353.patch",
     "serialize-javascript": "^7.0.5",
     "socks": ">=2.8.3",
     "vite-plugin-node-polyfills": "patch:vite-plugin-node-polyfills@npm%3A0.28.0#~/.yarn/patches/vite-plugin-node-polyfills-npm-0.28.0-bac39616ee.patch",
