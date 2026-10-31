@@ -194,5 +194,15 @@ describe('useOnVisible', () => {
 
       expect(removeListener).toHaveBeenCalledTimes(1);
     });
+
+    it('ignores an event that arrives after unmount but before removal', () => {
+      const callback = vi.fn();
+      const { unmount } = renderHook(() => useOnVisible(callback));
+
+      unmount();
+      dispatchAppStateChange(true);
+
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 });

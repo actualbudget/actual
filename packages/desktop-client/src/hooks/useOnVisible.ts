@@ -48,15 +48,18 @@ export function useOnVisible(
     if (Platform.isNativeMobileApp) {
       // One event source per platform: the web view also fires
       // `visibilitychange` on resume, which would run the callback twice.
+      // Removal is async, so an event can still arrive after cleanup.
+      let isRemoved = false;
       const listener = CapacitorApp.addListener(
         'appStateChange',
         ({ isActive }) => {
-          if (isActive) {
+          if (isActive && !isRemoved) {
             void runCallback();
           }
         },
       );
       return () => {
+        isRemoved = true;
         isPending.current = false;
         void listener.then(handle => handle.remove());
       };
