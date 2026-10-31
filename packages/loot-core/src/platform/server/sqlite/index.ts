@@ -76,7 +76,16 @@ export function _getModule() {
 
 function verifyParamTypes(sql: string | Statement, arr: SqlParam[] = []) {
   arr.forEach(val => {
-    if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
+    // Byte arrays can come from another realm, including TextEncoder output.
+    if (
+      typeof val !== 'string' &&
+      typeof val !== 'number' &&
+      !(
+        ArrayBuffer.isView(val) &&
+        Object.prototype.toString.call(val) === '[object Uint8Array]'
+      ) &&
+      val !== null
+    ) {
       throw new Error('Invalid field type ' + val + ' for sql ' + sql);
     }
   });

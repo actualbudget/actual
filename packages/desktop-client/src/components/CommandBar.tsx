@@ -17,6 +17,7 @@ import { Command } from 'cmdk';
 
 import { getSidebarMenuItemPath } from '#components/sidebar/sidebarMenu';
 import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useDashboardPages } from '#hooks/useDashboardPages';
 import { useMetadataPref } from '#hooks/useMetadataPref';
@@ -26,7 +27,7 @@ import { useReports } from '#hooks/useReports';
 import { useSidebarMenu } from '#hooks/useSidebarMenu';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
 import {
-  accountBalance,
+  accountDisplayBalance,
   allAccountBalance,
   offBudgetAccountBalance,
   onBudgetAccountBalance,
@@ -201,10 +202,12 @@ export function CommandBar() {
         ...accounts.map(account => ({
           ...account,
           content: (
-            <BalanceRow<'account', 'balance'>
-              label={account.name}
-              binding={accountBalance(account.id)}
-            />
+            <AccountCurrencyFormat account={account}>
+              <BalanceRow<'account', 'balance' | 'nativeBalance'>
+                label={account.name}
+                binding={accountDisplayBalance(account)}
+              />
+            </AccountCurrencyFormat>
           ),
           Icon: SvgPiggyBank,
         })),

@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { Select } from '@actual-app/components/select';
 import { theme } from '@actual-app/components/theme';
 import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
@@ -8,13 +9,14 @@ import { css } from '@emotion/css';
 
 import { Checkbox } from '#components/forms';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsRow } from './SettingsRow';
 
-export function CurrencySettings() {
+export function useCurrencyOptions() {
   const { t } = useTranslation();
-
   const currencyTranslations = useMemo(
     () =>
       new Map<string, string>([
@@ -23,6 +25,7 @@ export function CurrencySettings() {
         ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
         ['BDT', t('Bangladeshi Taka')],
+        ['BHD', t('Bahraini Dinar')],
         ['BRL', t('Brazilian Real')],
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
@@ -43,16 +46,22 @@ export function CurrencySettings() {
         ['IDR', t('Indonesian Rupiah')],
         ['ILS', t('Israeli New Shekel')],
         ['INR', t('Indian Rupee')],
+        ['IQD', t('Iraqi Dinar')],
         ['IRR', t('Iranian Rial')],
         ['JMD', t('Jamaican Dollar')],
+        ['JOD', t('Jordanian Dinar')],
         ['JPY', t('Japanese Yen')],
         ['KRW', t('South Korean Won')],
+        ['KWD', t('Kuwaiti Dinar')],
         ['LKR', t('Sri Lankan Rupee')],
+        ['LYD', t('Libyan Dinar')],
         ['MDL', t('Moldovan Leu')],
         ['MKD', t('Macedonian Denar')],
         ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
         ['NOK', t('Norwegian Krone')],
+        ['NZD', t('New Zealand Dollar')],
+        ['OMR', t('Omani Rial')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
@@ -65,6 +74,7 @@ export function CurrencySettings() {
         ['SEK', t('Swedish Krona')],
         ['SGD', t('Singapore Dollar')],
         ['THB', t('Thai Baht')],
+        ['TND', t('Tunisian Dinar')],
         ['TRY', t('Turkish Lira')],
         ['TWD', t('New Taiwan Dollar')],
         ['TZS', t('Tanzanian Shilling')],
@@ -72,14 +82,32 @@ export function CurrencySettings() {
         ['USD', t('US Dollar')],
         ['UYU', t('Uruguayan Peso')],
         ['UZS', t('Uzbek Soum')],
+        ['XOF', t('West African CFA Franc')],
         ['ZAR', t('South African Rand')],
       ]),
     [t],
   );
 
-  const [defaultCurrencyCode, setDefaultCurrencyCodePref] = useSyncedPref(
-    'defaultCurrencyCode',
-  );
+  return currencies.map(currency => {
+    const translatedName =
+      currencyTranslations.get(currency.code) ?? currency.name;
+    if (currency.code === '') {
+      return [currency.code, translatedName] as const;
+    }
+    return [
+      currency.code,
+      `${currency.code} - ${translatedName} (${currency.symbol})`,
+    ] as const;
+  });
+}
+
+export function CurrencySettings() {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const currencyOptions = useCurrencyOptions();
+
+  const [defaultCurrencyCode] = useSyncedPref('defaultCurrencyCode');
+  const [amountEncoding] = useSyncedPref('amountEncoding');
   const selectedCurrencyCode = defaultCurrencyCode || '';
 
   const [symbolPosition, setSymbolPositionPref] = useSyncedPref(
@@ -88,8 +116,6 @@ export function CurrencySettings() {
   const [spaceEnabled, setSpaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
-  const [, setNumberFormatPref] = useSyncedPref('numberFormat');
-  const [, setHideFractionPref] = useSyncedPref('hideFraction');
 
   const selectButtonClassName = css({
     '&[data-hovered]': {
@@ -97,29 +123,12 @@ export function CurrencySettings() {
     },
   });
 
-  const currencyOptions: [string, string][] = currencies.map(currency => {
-    const translatedName =
-      currencyTranslations.get(currency.code) ?? currency.name;
-    if (currency.code === '') {
-      return [currency.code, translatedName];
-    }
-    return [
-      currency.code,
-      `${currency.code} - ${translatedName} (${currency.symbol})`,
-    ];
-  });
-
   const handleCurrencyChange = (code: string) => {
-    setDefaultCurrencyCodePref(code);
-    if (code !== '') {
-      const cur = getCurrency(code);
-      setNumberFormatPref(cur.numberFormat);
-      setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
-      // A currency code used as the symbol (e.g. "CHF 100") needs a space
-      const isSpaceEnabled = !cur.symbolFirst || cur.symbol === cur.code;
-      setSpaceEnabledPref(isSpaceEnabled ? 'true' : 'false');
-      setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
-    }
+    dispatch(
+      pushModal({
+        modal: { name: 'amount-encoding', options: { currencyCode: code } },
+      }),
+    );
   };
 
   const symbolPositionOptions = useMemo(() => {
@@ -150,6 +159,7 @@ export function CurrencySettings() {
         title={t('Default currency')}
         control={
           <Select
+            id="default-currency-select"
             value={selectedCurrencyCode}
             onChange={handleCurrencyChange}
             options={currencyOptions}
@@ -157,7 +167,16 @@ export function CurrencySettings() {
             style={{ maxWidth: '100%' }}
           />
         }
-      />
+      >
+        {!amountEncoding && selectedCurrencyCode && (
+          <Button
+            onPress={() => handleCurrencyChange(selectedCurrencyCode)}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            <Trans>Finish currency setup</Trans>
+          </Button>
+        )}
+      </SettingsRow>
       {selectedCurrencyCode !== '' && (
         <SettingsRow
           title={t('Symbol position')}

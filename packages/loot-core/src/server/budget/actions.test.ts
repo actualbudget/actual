@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import * as db from '#server/db';
+import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 
 import {
@@ -13,6 +14,7 @@ import {
   setCategoryCarryover,
   setNMonthAvg,
   transferAvailable,
+  transferCategory,
 } from './actions';
 import * as budget from './base';
 
@@ -274,6 +276,35 @@ describe('transferAvailable', () => {
     await setBudget({ category: 'cat1', month: '2024-01', amount: 1000 });
     await sheet.waitOnSpreadsheet();
   }
+
+  it.each([
+    [0, 'JPY', '1,234'],
+    [3, 'KWD', '1.234'],
+  ] as const)(
+    'writes movement notes at recorded precision %i',
+    async (precision, currencyCode, displayed) => {
+      await setupFundedDatabase();
+      await prefs.loadPrefs();
+      onTestFinished(() => prefs.unloadPrefs());
+      await prefs.savePrefs({
+        amountEncoding: JSON.stringify({ version: 1, currencyCode, precision }),
+      });
+      await setBudget({ category: 'cat1', month: '2024-01', amount: 5000 });
+      await sheet.waitOnSpreadsheet();
+      await transferCategory({
+        month: '2024-01',
+        from: 'cat1',
+        to: 'to-budget',
+        amount: 1234,
+        currencyCode,
+      });
+      expect(
+        db.firstSync<{ note: string }>(
+          "SELECT note FROM notes WHERE id = 'budget-2024-01'",
+        )?.note,
+      ).toContain(`Reassigned ${displayed} from cat1`);
+    },
+  );
 
   it('adds the full amount when it is within To Budget', async () => {
     await setupFundedDatabase();

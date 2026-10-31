@@ -11,11 +11,14 @@ import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { ContextMenuItem } from '#contextmenu/types';
+import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useOpenAmountDetails } from '#hooks/useOpenAmountDetails';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { amountDetailsTarget } from '#util/foreign-details';
 
 type TransactionRowContextMenuProps = {
   rowRef: RefObject<HTMLElement | null>;
@@ -47,6 +50,8 @@ export function useTransactionRowContextActions({
 }: TransactionRowContextMenuProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const openAmountDetails = useOpenAmountDetails();
+  const { data: accounts = [] } = useAccounts();
   const selectedItems = useSelectedItems();
 
   const selectedIds = useMemo(() => {
@@ -131,8 +136,16 @@ export function useTransactionRowContextActions({
     const areAllSplitTransactions = transactions.every(
       tx => tx && (tx.is_parent || tx.is_child),
     );
-    return areNoReconciledTransactions && areAllSplitTransactions;
-  }, [selectedIds, types, getTransaction]);
+    // Foreign splits arrive with foreign edits.
+    const areNoForeignTransactions = transactions.every(
+      tx => !accounts.find(account => account.id === tx?.account)?.currency,
+    );
+    return (
+      areNoReconciledTransactions &&
+      areAllSplitTransactions &&
+      areNoForeignTransactions
+    );
+  }, [selectedIds, types, getTransaction, accounts]);
 
   function onViewSchedule() {
     const firstId = selectedIds[0];
@@ -185,7 +198,17 @@ export function useTransactionRowContextActions({
     },
   ];
 
+  const detailsId = amountDetailsTarget(selectedIds, getTransaction, accounts);
+
   const transactionActions: ContextMenuItem[] = [
+    {
+      name: 'amount-details',
+      text: t('Amount details'),
+      onClick: () => {
+        if (detailsId) void openAmountDetails(detailsId);
+      },
+      hidden: !detailsId,
+    },
     {
       name: 'duplicate',
       text: t('Duplicate'),

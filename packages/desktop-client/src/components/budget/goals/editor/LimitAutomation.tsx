@@ -42,7 +42,7 @@ export const LimitAutomation = ({
   const daysOfWeek = useDaysOfWeek();
 
   const period = template.period;
-  const amount = amountToInteger(template.amount);
+  const amount = amountToInteger(template.amount, format.precision);
   const [currentMonthStart] = useState(() =>
     dayFromDate(firstDayOfMonth(new Date())),
   );
@@ -88,7 +88,7 @@ export const LimitAutomation = ({
           dispatch(
             updateTemplate({
               type: 'limit',
-              amount: integerToAmount(value),
+              amount: integerToAmount(value, format.precision),
             }),
           )
         }
@@ -140,15 +140,24 @@ export const LimitAutomation = ({
           the month, so the effective monthly cap changes with each month. For
           example, a{' '}
           {{
-            weekly: format(amountToInteger(50), 'financial-no-decimals'),
+            weekly: format(
+              amountToInteger(50, format.precision),
+              'financial-no-decimals',
+            ),
           }}
           /week cap caps the balance at{' '}
           {{
-            fourWeeks: format(amountToInteger(200), 'financial-no-decimals'),
+            fourWeeks: format(
+              amountToInteger(200, format.precision),
+              'financial-no-decimals',
+            ),
           }}{' '}
           in months with 4 weeks and{' '}
           {{
-            fiveWeeks: format(amountToInteger(250), 'financial-no-decimals'),
+            fiveWeeks: format(
+              amountToInteger(250, format.precision),
+              'financial-no-decimals',
+            ),
           }}{' '}
           in months with 5.
         </Trans>

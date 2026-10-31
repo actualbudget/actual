@@ -8,13 +8,15 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
-import { integerToCurrency } from '@actual-app/core/shared/util';
 import { eachMonthOfInterval, format, subMonths } from 'date-fns';
 import { Area, AreaChart, Tooltip as RechartsTooltip, YAxis } from 'recharts';
 
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
+import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
+import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import * as query from '#queries';
 import { liveQuery } from '#queries/liveQuery';
@@ -25,28 +27,33 @@ type BalanceHistoryGraphProps = {
   accountId?: string;
   style?: CSSProperties;
   ref?: Ref<HTMLDivElement>;
+  'aria-label'?: string;
+  /** A foreign account's currency, charted natively beside the base. */
+  native?: { currency: string; precision: number };
 };
+
+type BalancePoint = { date: string; balance: number; native?: number };
 
 export function BalanceHistoryGraph({
   accountId,
   style,
   ref,
+  'aria-label': ariaLabel,
+  native,
 }: BalanceHistoryGraphProps) {
+  const charted = !!native;
   const locale = useLocale();
+  const formatAmount = useFormat(useAmountPrecision());
   const animationProps = useRechartsAnimation({ isAnimationActive: false });
-  const [balanceData, setBalanceData] = useState<
-    Array<{ date: string; balance: number }>
-  >([]);
+  const [balanceData, setBalanceData] = useState<BalancePoint[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hoveredValue, setHoveredValue] = useState<{
-    date: string;
-    balance: number;
-  } | null>(null);
+  const [hoveredValue, setHoveredValue] = useState<BalancePoint | null>(null);
   const [startingBalance, setStartingBalance] = useState<number | null>(null);
-  const [monthlyTotals, setMonthlyTotals] = useState<Array<{
-    date: string;
-    balance: number;
-  }> | null>(null);
+  // Zero when no native line is charted.
+  const [startingNative, setStartingNative] = useState<number | null>(null);
+  const [monthlyTotals, setMonthlyTotals] = useState<BalancePoint[] | null>(
+    null,
+  );
 
   const percentageChange = useMemo(() => {
     if (balanceData.length < 2) return 0;
@@ -63,6 +70,7 @@ export function BalanceHistoryGraph({
   useEffect(() => {
     // Reset state when accountId changes
     setStartingBalance(null);
+    setStartingNative(charted ? null : 0);
     setMonthlyTotals(null);
     setLoading(true);
 
@@ -84,7 +92,27 @@ export function BalanceHistoryGraph({
         ],
       })
       .groupBy({ $month: '$date' })
-      .select([{ date: { $month: '$date' } }, { amount: { $sum: '$amount' } }]);
+      .select([
+        { date: { $month: '$date' } },
+        { amount: { $sum: '$amount' } },
+        { native: { $sum: '$transaction_amount' } },
+      ]);
+    // A foreign account's rows hold their native amounts beside the base.
+    const startingNativeLive = charted
+      ? liveQuery<number>(
+          query
+            .transactions(accountId)
+            .filter({ date: { $lt: monthUtils.firstDayOfMonth(startDate) } })
+            .calculate({ $sum: '$transaction_amount' }),
+          {
+            onData: (data: number[]) => setStartingNative(data[0] || 0),
+            onError: error => {
+              console.error('Error fetching starting native balance:', error);
+              setLoading(false);
+            },
+          },
+        )
+      : null;
 
     const startingBalanceLive: ReturnType<typeof liveQuery<number>> = liveQuery(
       startingBalanceQuery,
@@ -100,13 +128,20 @@ export function BalanceHistoryGraph({
     );
 
     const monthlyTotalsLive: ReturnType<
-      typeof liveQuery<{ date: string; amount: number }>
+      typeof liveQuery<{
+        date: string;
+        amount: number;
+        native: number | null;
+      }>
     > = liveQuery(monthlyTotalsQuery, {
-      onData: (data: Array<{ date: string; amount: number }>) => {
+      onData: (
+        data: Array<{ date: string; amount: number; native: number | null }>,
+      ) => {
         setMonthlyTotals(
           data.map(d => ({
             date: d.date,
             balance: d.amount,
+            native: d.native ?? 0,
           })),
         );
       },
@@ -119,12 +154,17 @@ export function BalanceHistoryGraph({
     return () => {
       startingBalanceLive?.unsubscribe();
       monthlyTotalsLive?.unsubscribe();
+      startingNativeLive?.unsubscribe();
     };
-  }, [accountId, locale]);
+  }, [accountId, locale, charted]);
 
   // Process data when both startingBalance and monthlyTotals are available
   useEffect(() => {
-    if (startingBalance !== null && monthlyTotals !== null) {
+    if (
+      startingBalance !== null &&
+      startingNative !== null &&
+      monthlyTotals !== null
+    ) {
       const endDate = new Date();
       const startDate = subMonths(endDate, 12);
       const months = eachMonthOfInterval({
@@ -134,13 +174,17 @@ export function BalanceHistoryGraph({
 
       function processData(
         startingBalanceValue: number,
-        monthlyTotalsValue: Array<{ date: string; balance: number }>,
+        startingNativeValue: number,
+        monthlyTotalsValue: BalancePoint[],
       ) {
         let currentBalance = startingBalanceValue;
-        const totals = [...monthlyTotalsValue];
+        let currentNative = startingNativeValue;
+        const totals = monthlyTotalsValue.map(month => ({ ...month }));
         totals.reverse().forEach(month => {
           currentBalance = currentBalance + month.balance;
           month.balance = currentBalance;
+          currentNative = currentNative + (month.native ?? 0);
+          month.native = currentNative;
         });
 
         // if the account doesn't have recent transactions
@@ -152,28 +196,33 @@ export function BalanceHistoryGraph({
             totals.push({
               date: expectedMonth,
               balance: startingBalanceValue,
+              native: startingNativeValue,
             }),
           );
         } else if (totals.length < months.length) {
           // iterate through each array together and add in missing data
           let totalsIndex = 0;
           let mostRecent = startingBalanceValue;
+          let mostRecentNative = startingNativeValue;
           months.forEach(expectedMonth => {
             if (totalsIndex > totals.length - 1) {
               // fill in the data at the end of the window
               totals.push({
                 date: expectedMonth,
                 balance: mostRecent,
+                native: mostRecentNative,
               });
             } else if (totals[totalsIndex].date === expectedMonth) {
               // a matched month
               mostRecent = totals[totalsIndex].balance;
+              mostRecentNative = totals[totalsIndex].native ?? 0;
               totalsIndex += 1;
             } else {
               // a missing month in the middle
               totals.push({
                 date: expectedMonth,
                 balance: mostRecent,
+                native: mostRecentNative,
               });
             }
           });
@@ -184,6 +233,7 @@ export function BalanceHistoryGraph({
           .map(t => {
             return {
               balance: t.balance,
+              ...(charted && { native: t.native }),
               date: monthUtils.format(t.date, 'MMM yyyy', locale),
             };
           });
@@ -193,15 +243,21 @@ export function BalanceHistoryGraph({
         setLoading(false);
       }
 
-      processData(startingBalance, monthlyTotals);
+      processData(startingBalance, startingNative, monthlyTotals);
     }
-  }, [startingBalance, monthlyTotals, locale]);
+  }, [startingBalance, startingNative, monthlyTotals, locale, charted]);
 
   // State to track if the chart is hovered (used to conditionally render PrivacyFilter)
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <View ref={ref} style={{ margin: 10, ...style }}>
+    <View
+      ref={ref}
+      // A labeled graph names its amounts for screen readers.
+      role={ariaLabel ? 'group' : undefined}
+      aria-label={ariaLabel}
+      style={{ margin: 10, ...style }}
+    >
       <AutoSizer
         renderProp={({ width = 0, height = 0 }) => {
           if (width === 0 || height === 0) {
@@ -263,6 +319,14 @@ export function BalanceHistoryGraph({
                     </linearGradient>
                   </defs>
                   <YAxis domain={['dataMin', 'dataMax']} hide />
+                  {native && (
+                    // The native line has its own scale: the currencies differ.
+                    <YAxis
+                      yAxisId="native"
+                      domain={['dataMin', 'dataMax']}
+                      hide
+                    />
+                  )}
                   <RechartsTooltip
                     contentStyle={{
                       display: 'none',
@@ -288,6 +352,17 @@ export function BalanceHistoryGraph({
                         : 'url(#fillError)'
                     }
                   />
+                  {native && (
+                    <Area
+                      type="monotone"
+                      dataKey="native"
+                      yAxisId="native"
+                      stroke={theme.reportsBlue}
+                      strokeWidth={2}
+                      fill="none"
+                      {...animationProps}
+                    />
+                  )}
                 </AreaChart>
 
                 <SpaceBetween
@@ -315,7 +390,17 @@ export function BalanceHistoryGraph({
                         {hoveredValue.date}
                       </Text>
                       <PrivacyFilter activationFilters={[() => !isHovered]}>
-                        <Text>{integerToCurrency(hoveredValue.balance)}</Text>
+                        <Text>
+                          {formatAmount(hoveredValue.balance, 'financial')}
+                        </Text>
+                        {native && hoveredValue.native !== undefined && (
+                          <CurrencyFormatProvider
+                            currencyCode={native.currency}
+                            precision={native.precision}
+                          >
+                            <NativeBalance amount={hoveredValue.native} />
+                          </CurrencyFormatProvider>
+                        )}
                       </PrivacyFilter>
                     </View>
                   )}
@@ -326,5 +411,15 @@ export function BalanceHistoryGraph({
         }}
       />
     </View>
+  );
+}
+
+/** A native balance in its account's own currency format. */
+function NativeBalance({ amount }: { amount: number }) {
+  const format = useFormat();
+  return (
+    <Text style={{ color: theme.reportsBlue }}>
+      {format(amount, 'financial')}
+    </Text>
   );
 }

@@ -13,6 +13,7 @@ import * as adminApp from './app-admin';
 import * as akahuApp from './app-akahu/app-akahu.js';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
+import * as exchangeRatesApp from './app-exchange-rates';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
 import * as openidApp from './app-openid';
 import * as pluggai from './app-pluggyai/app-pluggyai';
@@ -45,6 +46,8 @@ if (process.env.NODE_ENV !== 'development') {
   );
 }
 
+// FX owns its JSON boundary so parser exceptions cannot expose request text.
+app.use('/exchange-rates', exchangeRatesApp.handlers);
 app.use(express.json({ limit: `${config.get('upload.fileSizeLimitMB')}mb` }));
 
 app.use(

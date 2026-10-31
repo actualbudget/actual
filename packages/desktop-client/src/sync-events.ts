@@ -15,7 +15,7 @@ import { pushModal } from './modals/modalsSlice';
 import { addNotification } from './notifications/notificationsSlice';
 import type { Notification } from './notifications/notificationsSlice';
 import { payeeQueries } from './payees';
-import { loadPrefs } from './prefs/prefsSlice';
+import { loadPrefs, mergeSyncedPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { signOut } from './users/usersSlice';
@@ -127,6 +127,14 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
         });
       }
 
+      // Synced preferences (feature flags, currency settings) changed on
+      // another device; displays gated on them read the store.
+      if (tables.includes('preferences')) {
+        void send('preferences/get').then(prefs =>
+          store.dispatch(mergeSyncedPrefs(prefs)),
+        );
+      }
+
       if (
         tables.includes('categories') ||
         tables.includes('category_groups') ||
@@ -171,13 +179,21 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           queryKey: reportQueries.lists(),
         });
       }
+    } else if (event.type === 'pending-transition') {
+      void store.dispatch(loadPrefs());
     } else if (event.type === 'error') {
       let notif: Notification | null = null;
       const learnMore = `[${t('Learn more')}](https://actualbudget.org/docs/getting-started/sync/#debugging-sync-issues)`;
       const githubIssueLink =
         'https://github.com/actualbudget/actual/issues/new?assignees=&labels=bug&template=bug-report.yml&title=%5BBug%5D%3A+';
 
-      switch (event.subtype) {
+      // Unregistered local files have no cloud id to send to the sync server.
+      const subtype =
+        event.subtype === 'invalid fileId' &&
+        !store.getState().prefs.local.cloudFileId
+          ? 'file-not-found'
+          : event.subtype;
+      switch (subtype) {
         case 'out-of-sync':
           if (attemptedSyncRepair) {
             notif = {

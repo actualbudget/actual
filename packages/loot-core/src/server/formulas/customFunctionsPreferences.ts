@@ -1,5 +1,6 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
 import { aqlQuery } from '#server/aql';
+import { parseAmountEncoding } from '#shared/amount-encoding';
 import { getCurrency } from '#shared/currencies';
 import type { Currency } from '#shared/currencies';
 import type { UserPreferences } from '#shared/formulas/customFunctions';
@@ -17,16 +18,16 @@ type CurrencySymbolPosition = 'before' | 'after';
 const DEFAULT_CURRENCY = getCurrency('USD');
 const LOCALE_NUMBER_FORMAT_SAMPLE = 1_000_000.23;
 type FormulaPreferenceId =
-  | 'flags.currency'
   | 'defaultCurrencyCode'
+  | 'amountEncoding'
   | 'numberFormat'
   | 'hideFraction'
   | 'currencySymbolPosition'
   | 'currencySpaceBetweenAmountAndSymbol';
 
 const FORMULA_PREFERENCE_IDS: FormulaPreferenceId[] = [
-  'flags.currency',
   'defaultCurrencyCode',
+  'amountEncoding',
   'numberFormat',
   'hideFraction',
   'currencySymbolPosition',
@@ -119,15 +120,15 @@ export async function loadUserPreferencesForFormulas({
       preferences[preference.id as FormulaPreferenceId] = preference.value;
     }
 
-    const isCurrencyFeatureEnabled = preferences['flags.currency'] === 'true';
     const currencyCode = preferences.defaultCurrencyCode ?? null;
-    const currencyFromPreference = isCurrencyFeatureEnabled
-      ? getCurrencyFromPreference(currencyCode)
-      : null;
+    const currencyFromPreference = getCurrencyFromPreference(currencyCode);
 
     const numberFormatValue =
       (preferences.numberFormat as NumberFormats | undefined) ?? null;
     const hideFraction = preferences.hideFraction === 'true';
+    const recordedPrecision =
+      parseAmountEncoding(preferences.amountEncoding ?? undefined)?.precision ??
+      2;
 
     const locale =
       normalizeLocale(selectedLocale) ??
@@ -157,7 +158,7 @@ export async function loadUserPreferencesForFormulas({
     return {
       currency,
       numberFormat,
-      decimalPlaces: hideFraction ? 0 : currency.decimalPlaces,
+      decimalPlaces: hideFraction ? 0 : recordedPrecision,
       thousandsSeparator:
         numberFormatSettings.thousandsSeparator ||
         localeDefaults.thousandsSeparator,

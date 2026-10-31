@@ -15,6 +15,8 @@ import { css } from '@emotion/css';
 
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
+import { useCurrentEstimateLines } from '#components/accounts/CurrentEstimateLines';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
 import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
@@ -42,6 +44,7 @@ export function AccountRow({
   showSyncDot,
 }: AccountRowProps) {
   const { t } = useTranslation();
+  const estimateLines = useCurrentEstimateLines({ account });
   const dispatch = useDispatch();
   const location = useLocation();
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
@@ -197,14 +200,22 @@ export function AccountRow({
                 </Text>
               )}
               <Text style={styles.visuallyHidden}>{statusLabel}</Text>
-              <SidebarBalance
-                binding={bindings.accountBalance(account.id)}
-                style={{
-                  fontSize: 12,
-                  color: 'inherit',
-                  marginLeft: spacing.xs,
-                }}
-              />
+              {estimateLines.length > 0 && (
+                <Text style={styles.visuallyHidden}>
+                  {estimateLines.join('. ')}
+                </Text>
+              )}
+              <AccountCurrencyFormat account={account}>
+                <SidebarBalance
+                  binding={bindings.accountDisplayBalance(account)}
+                  title={estimateLines.join('\n')}
+                  style={{
+                    fontSize: 12,
+                    color: 'inherit',
+                    marginLeft: spacing.xs,
+                  }}
+                />
+              </AccountCurrencyFormat>
               <DragHandle />
             </View>
           </AccountHoverCard>

@@ -9,7 +9,14 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import { syncBaseSlots } from './base-slots';
 import * as envelopeBudget from './envelope';
+import {
+  refreshFxChanges,
+  scheduleFxRefresh,
+  startFxDayWatch,
+} from './fx-valuation';
+import { rebuildSlotResolution } from './pockets';
 import * as trackingBudget from './tracking';
 
 // How far ahead budget months are available. Planning past the minimum
@@ -99,6 +106,17 @@ function getMonthSpanBounds(months: string[]) {
   };
 }
 
+// Envelope budgets leave rows of foreign currency pockets out of category
+// spending: they reach To Budget through reservation-changes (MC-10).
+// Tracking budgets count every lane by effective category.
+function envelopeLaneFilter() {
+  return getBudgetType() === 'envelope'
+    ? `AND NOT EXISTS (SELECT 1 FROM v_transaction_lanes l
+         JOIN category_pockets p ON p.id = l.lane AND p.kind = 'foreign'
+         WHERE l.id = t.id)`
+    : '';
+}
+
 // Computes the spend total for every category in every month within the
 // given day range using a single grouped query. This is used to seed the
 // `sum-amount` cells on a cold build so we avoid running one
@@ -119,6 +137,7 @@ function getSumAmountsByMonth(
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
         AND t.category IS NOT NULL
         AND a.offbudget = 0
+        ${envelopeLaneFilter()}
       GROUP BY t.category, t.date / 100`,
     [],
     true,
@@ -179,7 +198,8 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
-           AND category = '${cat.id}' AND a.offbudget = 0`,
+           AND category = '${cat.id}' AND a.offbudget = 0
+           ${envelopeLaneFilter()}`,
         [],
         true,
       );
@@ -196,16 +216,45 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   }
 }
 
+// Account columns that decide a row's eligibility or the stamp its lane
+// judges (MC-10).
+const ATTRIBUTION_COLUMNS = [
+  'offbudget',
+  'tombstone',
+  'encoding',
+  'currency',
+  'currency_precision',
+];
+
 function handleAccountChange(months, oldValue, newValue) {
-  if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
-    const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
-      `
-        SELECT DISTINCT(category) as category FROM transactions
-        WHERE acct = ?
+  if (
+    !oldValue ||
+    ATTRIBUTION_COLUMNS.some(column => oldValue[column] !== newValue[column])
+  ) {
+    // Every category a row could show before or after: the effective
+    // category of its pointer's lane, its raw category's lane and its mapped
+    // category's lane, and the mapped category itself.
+    const rows = db
+      .runQuery<Pick<db.DbTransaction, 'category'>>(
+        `
+        SELECT r.effective_category AS category FROM transactions t
+          JOIN slot_resolution r ON r.lane = t.pocket
+          WHERE t.acct = ?
+        UNION SELECT r.effective_category FROM transactions t
+          JOIN slot_resolution r ON r.lane = t.category
+          WHERE t.acct = ?
+        UNION SELECT r.effective_category FROM transactions t
+          JOIN category_mapping m ON m.id = t.category
+          JOIN slot_resolution r ON r.lane = m.transferId
+          WHERE t.acct = ?
+        UNION SELECT m.transferId FROM transactions t
+          JOIN category_mapping m ON m.id = t.category
+          WHERE t.acct = ?
       `,
-      [newValue.id],
-      true,
-    );
+        [newValue.id, newValue.id, newValue.id, newValue.id],
+        true,
+      )
+      .filter(row => row.category != null);
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
@@ -225,6 +274,8 @@ function handleTransactionChange(transaction, changedFields) {
       changedFields.has('acct') ||
       changedFields.has('amount') ||
       changedFields.has('category') ||
+      changedFields.has('pocket') ||
+      changedFields.has('pair_encoding') ||
       changedFields.has('tombstone') ||
       changedFields.has('isParent')) &&
     transaction.date &&
@@ -277,12 +328,78 @@ function handleBudgetChange(budget) {
   }
 }
 
+// Tables whose changes can move a currency pocket reservation (MC-10).
+const RESERVATION_TABLES = [
+  'exchange_rates',
+  'category_pockets',
+  'pocket_budgets',
+  'slot_retirements',
+  'categories',
+  'category_mapping',
+];
+
+/**
+ * Whether a change can move the valuation of holdings in other currencies
+ * or a currency pocket reservation.
+ */
+function affectsFxValuation(oldValues, newValues) {
+  if (RESERVATION_TABLES.some(table => newValues.has(table))) return true;
+  for (const [id, account] of newValues.get('accounts') ?? new Map()) {
+    const old = oldValues.get('accounts')?.get(id);
+    if (
+      ['currency', 'encoding', 'offbudget', 'closed', 'tombstone'].some(
+        field => !old || old[field] !== account[field],
+      )
+    ) {
+      return true;
+    }
+  }
+  const transactions = newValues.get('transactions');
+  if (!transactions) return false;
+  const accounts = new Set<string>();
+  for (const [id, row] of transactions) {
+    if (row.acct) accounts.add(row.acct);
+    // A row moved off an account in another currency changes its holdings.
+    const old = oldValues.get('transactions')?.get(id);
+    if (old?.acct) accounts.add(old.acct);
+  }
+  return accounts.size > 0
+    ? db.runQuery(
+        `SELECT 1 FROM accounts WHERE offbudget = 0 AND currency IS NOT NULL
+           AND id IN (${[...accounts].map(() => '?').join(', ')}) LIMIT 1`,
+        [...accounts],
+        true,
+      ).length > 0
+    : false;
+}
+
+/**
+ * Spend totals of categories whose lanes now resolve elsewhere, in every
+ * created month: a retirement, owner or deletion message moves every row of
+ * its lanes without touching them.
+ */
+function handleResolutionChange(months, categories: Set<string>) {
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    for (const category of categories) {
+      sheet.get().recompute(resolveName(sheetName, 'sum-amount-' + category));
+    }
+  }
+}
+
 export function triggerBudgetChanges(oldValues, newValues) {
+  // Lane owners and status depend on every synced table and on activity,
+  // so they are rebuilt first, whatever the batch touched.
+  const resolutionChanged = rebuildSlotResolution();
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+  if (budgetType === 'envelope' && affectsFxValuation(oldValues, newValues)) {
+    scheduleFxRefresh();
+  }
   sheet.startTransaction();
 
   try {
+    handleResolutionChange(createdMonths, resolutionChanged);
     newValues.forEach((items, table) => {
       const old = oldValues.get(table);
 
@@ -337,6 +454,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
         }
       });
     });
+    // Base slots with retired or later-generation lanes, after the budget
+    // handlers wrote their category cells.
+    syncBaseSlots();
   } finally {
     sheet.endTransaction();
   }
@@ -483,6 +603,12 @@ export async function createAllBudgets() {
   if (newMonths.length > 0) {
     await createBudget(range);
   }
+  // Budget cells were loaded from zero_budgets; base slots with retired or
+  // later-generation lanes show their own (MC-10).
+  syncBaseSlots();
+  // Holdings in other currencies are valued for the months now created.
+  await refreshFxChanges();
+  startFxDayWatch();
 
   // The range only grows while the budget is open, so every created month
   // stays reachable. Clearing allocations shrinks it on the next load.

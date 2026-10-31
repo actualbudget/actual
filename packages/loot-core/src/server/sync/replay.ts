@@ -3,6 +3,7 @@ import { logger } from '#platform/server/log';
 import * as db from '#server/db';
 import { isMissingSchemaError } from '#shared/errors';
 
+import { deriveAllCoupledCells } from './coupled-cells';
 import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { deserializeValue } from './serialization';
 import {
@@ -165,6 +166,8 @@ export function replayPendingMessages(): void {
     }
 
     if (appliedCount > 0) {
+      // Replayed cells bypass the apply transaction's coupled-cell pass.
+      deriveAllCoupledCells();
       // The values were written outside the normal sync pipeline, so
       // force the spreadsheet cache to recompute
       db.runQuery('DELETE FROM kvcache_key');

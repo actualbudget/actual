@@ -14,10 +14,14 @@ import { validForTransfer } from '@actual-app/core/shared/transfer';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
+import { useAccounts } from '#hooks/useAccounts';
+import { useOpenAmountDetails } from '#hooks/useOpenAmountDetails';
+import { useRouteToPockets } from '#hooks/useRouteToPockets';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { amountDetailsTarget } from '#util/foreign-details';
 
 type SelectedTransactionsButtonProps = {
   getTransaction: (id: string) => TransactionEntity | undefined;
@@ -69,8 +73,20 @@ export function SelectedTransactionsButton({
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const openAmountDetails = useOpenAmountDetails();
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
+  const { data: accounts = [] } = useAccounts();
+  const routeToPockets = useRouteToPockets();
+  // Foreign amounts are frozen until foreign edits and splits are supported.
+  const hasForeign = selectedIds.some(id => {
+    const trans = getTransaction(id);
+    return (
+      trans && accounts.find(account => account.id === trans.account)?.currency
+    );
+  });
+
+  const detailsId = amountDetailsTarget(selectedIds, getTransaction, accounts);
 
   const scheduleIds = useMemo(() => {
     return selectedIds
@@ -183,9 +199,10 @@ export function SelectedTransactionsButton({
     return (
       areAllSameDateAndAccount &&
       areNoSplitTransactions &&
-      areNoReconciledTransactions
+      areNoReconciledTransactions &&
+      !hasForeign
     );
-  }, [selectedIds, types, getTransaction]);
+  }, [selectedIds, types, getTransaction, hasForeign]);
 
   const canUnsplitTransactions = useMemo(() => {
     if (selectedIds.length === 0 || types.preview) {
@@ -200,8 +217,10 @@ export function SelectedTransactionsButton({
     const areAllSplitTransactions = transactions.every(
       tx => tx && (tx.is_parent || tx.is_child),
     );
-    return areNoReconciledTransactions && areAllSplitTransactions;
-  }, [selectedIds, types, getTransaction]);
+    return (
+      areNoReconciledTransactions && areAllSplitTransactions && !hasForeign
+    );
+  }, [selectedIds, types, getTransaction, hasForeign]);
 
   function onViewSchedule() {
     const firstId = selectedIds[0];
@@ -275,9 +294,9 @@ export function SelectedTransactionsButton({
   // edit amount (only if we're not in a merge context)
   useHotkeys(
     'm',
-    () => !canMerge && onEdit('amount', selectedIds),
+    () => !canMerge && !hasForeign && onEdit('amount', selectedIds),
     hotKeyOptions,
-    [onEdit, selectedIds],
+    [onEdit, selectedIds, hasForeign],
   );
   // merge
   useHotkeys(
@@ -325,6 +344,14 @@ export function SelectedTransactionsButton({
             ]
           : [
               { name: 'show', text: t('Show'), key: 'F' } as const,
+              ...(detailsId
+                ? [
+                    {
+                      name: 'amount-details',
+                      text: t('Amount details'),
+                    } as const,
+                  ]
+                : []),
               {
                 name: 'duplicate',
                 text: t('Duplicate'),
@@ -398,6 +425,7 @@ export function SelectedTransactionsButton({
                     } as const,
                   ]
                 : []),
+              ...(routeToPockets?.items ?? []),
               Menu.line,
               { type: Menu.label, name: t('Edit field'), text: '' } as const,
               { name: 'date', text: t('Date'), key: 'E' } as const,
@@ -405,14 +433,20 @@ export function SelectedTransactionsButton({
               { name: 'payee', text: t('Payee'), key: 'P' } as const,
               { name: 'notes', text: t('Notes'), key: 'N' } as const,
               { name: 'category', text: t('Category'), key: 'C' } as const,
-              { name: 'amount', text: t('Amount'), key: 'M' } as const,
+              ...(hasForeign
+                ? []
+                : [{ name: 'amount', text: t('Amount'), key: 'M' } as const]),
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
             ]),
       ]}
       onSelect={name => {
+        if (routeToPockets?.select(name, selectedIds)) return;
         switch (name) {
           case 'show':
             onShow(selectedIds);
+            break;
+          case 'amount-details':
+            if (detailsId) void openAmountDetails(detailsId);
             break;
           case 'duplicate':
             onDuplicate(selectedIds);

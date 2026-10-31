@@ -17,6 +17,7 @@ import {
 } from '#server/budget/base';
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { app } from '#server/main-app';
 import { flushRunningMutators, runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
@@ -30,6 +31,7 @@ import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
 
+import { deriveCoupledCells, withTransferCounterparts } from './coupled-cells';
 import * as encoder from './encoder';
 import { PENDING_MESSAGES_TABLE_SQL } from './messages-pending';
 import { rebuildMerkleHash } from './repair';
@@ -189,11 +191,15 @@ function fetchAll(table: string, ids: string[]) {
     // which trigger budget changes based on data changes assumes data has been
     // mapped. The only mapped data that the budget is concerned about is
     // categories. This is kind of annoying, but we manually map it here
+    // Transactions also carry the category of their budget lane, which
+    // every reader shows, and the raw category undo restores.
     if (table === 'transactions') {
       sql = `
-        SELECT t.*, c.transferId AS category
+        SELECT t.*, COALESCE(l.category, c.transferId) AS category,
+          t.category AS raw_category
         FROM transactions t
         LEFT JOIN category_mapping c ON c.id = t.category
+        LEFT JOIN v_transaction_lanes l ON l.id = t.id
       `;
       column = 't.id';
     } else {
@@ -371,6 +377,10 @@ function compareMessages(messages: Message[]): Message[] {
 // depend on having both old and new data which we don't quere here
 function applyMessagesForImport(messages: Message[]): void {
   db.transaction(() => {
+    const idsPerTable: Record<string, string[]> = {};
+    for (const msg of messages) {
+      (idsPerTable[msg.dataset] ??= []).push(msg.row);
+    }
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
       const { dataset } = msg;
@@ -387,6 +397,7 @@ function applyMessagesForImport(messages: Message[]): void {
         }
       }
     }
+    deriveCoupledCells(idsPerTable);
   });
 }
 
@@ -471,6 +482,21 @@ async function _applyMessages(messages: Message[], isReceived = false) {
       idsPerTable[msg.dataset].push(msg.row);
     });
 
+    // A transfer counterpart's derived values can change with its leg, so
+    // it is tracked with the batch (coupled-cells).
+    if (idsPerTable.transactions) {
+      idsPerTable.transactions = withTransferCounterparts(
+        idsPerTable.transactions,
+        messages.flatMap(msg =>
+          msg.dataset === 'transactions' &&
+          msg.column === 'transferred_id' &&
+          typeof msg.value === 'string'
+            ? [msg.value]
+            : [],
+        ),
+      );
+    }
+
     oldData = fetchData(idsPerTable);
 
     // Now that we have all of the data, go through and apply the
@@ -543,6 +569,8 @@ async function _applyMessages(messages: Message[], isReceived = false) {
       );
     }
 
+    // Coupled columns must be coherent before anything observes newData.
+    deriveCoupledCells(idsPerTable);
     newData = fetchData(idsPerTable);
   };
   if (isReceived) {
@@ -563,9 +591,22 @@ async function _applyMessages(messages: Message[], isReceived = false) {
     clock.merkle = currentMerkle;
   }
 
-  // Save any synced prefs
-  if (Object.keys(prefsToSet).length > 0) {
+  // Publish the in-memory metadata before capturing the new FX context.
+  const hasSyncedPrefs = Object.keys(prefsToSet).length > 0;
+  if (hasSyncedPrefs) {
     void prefs.savePrefs(prefsToSet, { avoidSync: true });
+  }
+  const changedPreferences = newData.get('preferences');
+  if (
+    (changedPreferences instanceof Map &&
+      (changedPreferences.has('defaultCurrencyCode') ||
+        changedPreferences.has('amountEncoding'))) ||
+    Object.hasOwn(prefsToSet, 'amountEncoding')
+  ) {
+    await notifyFxContextChanged('budget');
+  }
+
+  if (hasSyncedPrefs) {
     connection.send('prefs-updated');
   }
 
@@ -754,6 +795,40 @@ export async function batchMessages(func: () => Promise<void>): Promise<void> {
   }
 }
 
+/** Latest value queued in the current batch for a cell, if any. */
+export function getBatchedValue(
+  dataset: string,
+  row: string,
+  column: string,
+): { value: Message['value'] } | null {
+  for (let i = _BATCHED.length - 1; i >= 0; i--) {
+    const msg = _BATCHED[i];
+    if (msg.dataset === dataset && msg.row === row && msg.column === column) {
+      return { value: msg.value };
+    }
+  }
+  return null;
+}
+
+/** The row a queued message gave this column value, latest first. */
+export function findBatchedRow(
+  dataset: string,
+  column: string,
+  value: Message['value'],
+): string | null {
+  for (let i = _BATCHED.length - 1; i >= 0; i--) {
+    const msg = _BATCHED[i];
+    if (
+      msg.dataset === dataset &&
+      msg.column === column &&
+      msg.value === value
+    ) {
+      return msg.row;
+    }
+  }
+  return null;
+}
+
 export async function sendMessages(messages: Message[]) {
   if (IS_BATCHING) {
     _BATCHED = _BATCHED.concat(messages);
@@ -826,7 +901,7 @@ export async function initialFullSync(): Promise<{
 }
 
 type FullSyncResult =
-  | { messages: Message[] }
+  | { messages: Message[]; pendingTransition?: true }
   | { error: { message: string; reason: string; meta: unknown } };
 
 let runningFullSync: Promise<FullSyncResult> | null = null;
@@ -917,6 +992,11 @@ async function runFullSync(): Promise<FullSyncResult> {
     return { error: { message: e.message, reason: e.reason, meta: e.meta } };
   }
 
+  if (messages === null) {
+    app.events.emit('sync', { type: 'pending-transition' });
+    return { messages: [], pendingTransition: true };
+  }
+
   const tables = getTablesFromMessages(messages);
 
   app.events.emit('sync', {
@@ -931,7 +1011,7 @@ async function _fullSync(
   sinceTimestamp: string,
   count: number,
   prevDiffTime: number,
-): Promise<Message[]> {
+): Promise<Message[] | null> {
   const {
     id: currentId,
     cloudFileId,
@@ -947,6 +1027,10 @@ async function _fullSync(
     !currentId
   ) {
     return [];
+  }
+
+  if (prefs.getPrefs()?.amountEncodingTransition) {
+    return null;
   }
 
   // Snapshot the point at which we are currently syncing
@@ -980,6 +1064,7 @@ async function _fullSync(
     buffer,
     {
       'X-ACTUAL-TOKEN': userToken,
+      'X-ACTUAL-AMOUNT-ENCODING': '1',
     },
   );
 
@@ -1073,18 +1158,14 @@ async function _fullSync(
       throw new SyncError('out-of-sync');
     }
 
-    receivedMessages = receivedMessages.concat(
-      await _fullSync(
-        new Timestamp(diffTime, 0, '0').toString(),
-        // If something local changed while we were syncing, always
-        // reset, token the counter. We never want to think syncing failed
-        // because we tried to syncing many times and couldn't sync,
-        // but it was because the user kept changing stuff in the
-        // middle of syncing.
-        localTimeChanged ? 0 : count + 1,
-        diffTime,
-      ),
+    const nextMessages = await _fullSync(
+      new Timestamp(diffTime, 0, '0').toString(),
+      // Local changes restart the retry count rather than exhausting it.
+      localTimeChanged ? 0 : count + 1,
+      diffTime,
     );
+    if (nextMessages === null) return null;
+    receivedMessages = receivedMessages.concat(nextMessages);
   } else {
     // All synced up, store the current time as a simple optimization for the next sync
     const requiresUpdate =

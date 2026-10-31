@@ -16,14 +16,19 @@ import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
+import { AddCurrencyModal } from './modals/AddCurrencyModal';
+import { AddExchangeRateModal } from './modals/AddExchangeRateModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
+import { AmountEncodingModal } from './modals/AmountEncodingModal';
+import { BaseSlotModal } from './modals/BaseSlotModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
 import { CategoryGroupAutocompleteModal } from './modals/CategoryGroupAutocompleteModal';
 import { CategoryGroupMenuModal } from './modals/CategoryGroupMenuModal';
 import { CategoryMenuModal } from './modals/CategoryMenuModal';
+import { CategoryPocketModal } from './modals/CategoryPocketModal';
 import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
@@ -36,6 +41,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { CurrencyCorrectionModal } from './modals/CurrencyCorrectionModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
@@ -47,7 +53,12 @@ import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
+import { ExchangeTransferModal } from './modals/ExchangeTransferModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
+import { ForeignAmountModal } from './modals/ForeignAmountModal';
+import { ForeignMoveModal } from './modals/ForeignMoveModal';
+import { ForeignSplitModal } from './modals/ForeignSplitModal';
+import { FxValuationModal } from './modals/FxValuationModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
 import { GoCardlessInitialiseModal } from './modals/GoCardlessInitialiseModal';
@@ -76,6 +87,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StaleEncodingRepairModal } from './modals/StaleEncodingRepairModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -110,8 +122,14 @@ export function Modals() {
   const modals = modalStack
     .map((modal, idx) => {
       const { name } = modal;
-      const key = `${name}-${idx}`;
+      // A stable id keeps a dialog mounted when one below it closes.
+      const key = modal.id ?? `${name}-${idx}`;
       switch (name) {
+        case 'fx-valuation':
+          return budgetId ? (
+            <FxValuationModal key={key} {...modal.options} />
+          ) : null;
+
         case 'goal-templates':
           return budgetId ? <GoalTemplateModal key={key} /> : null;
 
@@ -156,6 +174,27 @@ export function Modals() {
         case 'confirm-unlink-account':
           return <ConfirmUnlinkAccountModal key={key} {...modal.options} />;
 
+        case 'foreign-amount':
+          return <ForeignAmountModal key={key} {...modal.options} />;
+
+        case 'foreign-move':
+          return <ForeignMoveModal key={key} {...modal.options} />;
+
+        case 'currency-correction':
+          return <CurrencyCorrectionModal key={key} {...modal.options} />;
+
+        case 'stale-encoding-repair':
+          return <StaleEncodingRepairModal key={key} {...modal.options} />;
+
+        case 'foreign-split':
+          return <ForeignSplitModal key={key} {...modal.options} />;
+
+        case 'exchange-transfer':
+          return <ExchangeTransferModal key={key} {...modal.options} />;
+
+        case 'add-exchange-rate':
+          return <AddExchangeRateModal key={key} {...modal.options} />;
+
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
 
@@ -167,6 +206,9 @@ export function Modals() {
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
+
+        case 'amount-encoding':
+          return <AmountEncodingModal key={key} {...modal.options} />;
 
         case 'copy-widget-to-dashboard':
           return <CopyWidgetToDashboardModal key={key} {...modal.options} />;
@@ -294,6 +336,15 @@ export function Modals() {
 
         case 'category-menu':
           return <CategoryMenuModal key={key} {...modal.options} />;
+
+        case 'category-pocket':
+          return <CategoryPocketModal key={key} {...modal.options} />;
+
+        case 'add-currency':
+          return <AddCurrencyModal key={key} {...modal.options} />;
+
+        case 'base-slot':
+          return <BaseSlotModal key={key} {...modal.options} />;
 
         case 'envelope-budget-menu':
           return (
@@ -433,7 +484,9 @@ export function Modals() {
       }
     })
     .map((modal, idx) => (
-      <Fragment key={`${modalStack[idx].name}-${idx}`}>{modal}</Fragment>
+      <Fragment key={modalStack[idx].id ?? `${modalStack[idx].name}-${idx}`}>
+        {modal}
+      </Fragment>
     ));
 
   // fragment needed per TS types

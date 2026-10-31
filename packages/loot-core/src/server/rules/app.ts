@@ -1,8 +1,11 @@
 // @ts-strict-ignore
+import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '#platform/server/log';
 import { createApp } from '#server/app';
 import { RuleError } from '#server/errors';
 import { mutator } from '#server/mutators';
+import { exchangeTarget } from '#server/schedules/exchange-schedule';
 import { batchMessages } from '#server/sync';
 import * as rules from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
@@ -186,8 +189,45 @@ async function getRules() {
 
 async function runRules({
   transaction,
+  amountIsNative = false,
+  preview = false,
 }: {
   transaction: TransactionEntity;
+  /**
+   * The amount is a foreign account's native amount with no base yet (a
+   * schedule preview): rules see it only as `transaction_amount`, so base
+   * amount conditions do not match it.
+   */
+  amountIsNative?: boolean;
+  /** The transaction is an upcoming schedule occurrence, not a stored row. */
+  preview?: boolean;
 }): Promise<TransactionEntity> {
-  return rules.runRules(transaction);
+  // An exchange schedule's occurrence previews as it posts: its endpoints,
+  // amount and date are fixed, rules add notes, cleared and category, and
+  // payees they name are never created.
+  if (
+    preview &&
+    transaction.schedule &&
+    (await exchangeTarget(transaction.account, transaction.payee ?? null))
+  ) {
+    const { amount, ...rest } = transaction;
+    const ruled = await rules.runRules(
+      amountIsNative ? { ...rest, transaction_amount: amount } : transaction,
+      null,
+      undefined,
+      async () => uuidv4(),
+    );
+    return {
+      ...transaction,
+      notes: ruled.notes ?? null,
+      cleared: !!ruled.cleared,
+      category: ruled.category ?? null,
+    };
+  }
+  if (!amountIsNative) {
+    return rules.runRules(transaction);
+  }
+  const { amount, ...rest } = transaction;
+  const ruled = await rules.runRules({ ...rest, transaction_amount: amount });
+  return { ...ruled, amount: ruled.transaction_amount ?? amount };
 }

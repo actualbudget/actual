@@ -3,12 +3,14 @@ import { getClock } from '@actual-app/crdt';
 
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
+import { initializeImportedAmountEncoding } from '#server/util/currency';
 import {
   getBankSyncError,
   getDownloadError,
   getSyncError,
   getTestKeyError,
 } from '#shared/errors';
+import { fromAmountInput, toMoney } from '#shared/money';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -16,7 +18,6 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from '#shared/transactions';
-import { integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
@@ -27,6 +28,7 @@ import type {
 import type { ServerHandlers } from '#types/server-handlers';
 
 import type { SyncResponse } from './accounts/app';
+import { assertClosureAllowed } from './accounts/app';
 import { addTransactions } from './accounts/sync';
 import {
   accountGroupModel,
@@ -40,9 +42,16 @@ import {
   scheduleModel,
   tagModel,
 } from './api-models';
-import type { AmountOPType, APIScheduleEntity } from './api-models';
+import type {
+  AmountFormat,
+  AmountInput,
+  AmountOPType,
+  APIScheduleEntity,
+} from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import { readCategoryPockets } from './budget/pocket-readers';
+import type { CategoryPocketsMonth } from './budget/pocket-readers';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
@@ -52,6 +61,12 @@ import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import { completePairPatch } from './transactions/foreign-guard';
+import {
+  getAccountCurrency,
+  getDefaultCurrencyCode,
+  resolveAccountCurrencyInput,
+} from './util/currency';
 
 let IMPORT_MODE = false;
 
@@ -385,12 +400,14 @@ handlers['api/bank-sync'] = async function (args) {
   return { newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['api/start-import'] = async function ({ budgetName }) {
+handlers['api/start-import'] = async function ({ budgetName, currencyCode }) {
   // Notify UI to close budget
   await handlers['close-budget']();
 
   // Create the budget
   await handlers['create-budget']({ budgetName, avoidUpload: true });
+
+  await initializeImportedAmountEncoding(currencyCode ?? '');
 
   // Clear out the default expense categories
   db.runQuery('DELETE FROM categories WHERE is_income = 0');
@@ -451,81 +468,228 @@ handlers['api/budget-months'] = async function () {
   return monthUtils.range(start, end);
 };
 
-handlers['api/budget-month'] = async function ({ month }) {
-  checkFileOpen();
-  await validateMonth(month);
-
-  const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
-    q('category_groups').select('*'),
-  );
-  const sheetName = monthUtils.sheetForMonth(month);
-
-  function value(name) {
-    const v = sheet.get().getCellValue(sheetName, name);
-    return v === '' ? 0 : v;
+function amountFormatIsMoney(format: AmountFormat | undefined): boolean {
+  if (format === undefined || format === 'raw') {
+    return false;
   }
+  if (format === 'money') {
+    return true;
+  }
+  throw APIError(`Invalid amountFormat: ${String(format)}`);
+}
 
-  // This is duplicated from main.js because the return format is
-  // different (for now)
+type AmountCurrencies = { base: string; native: string };
+
+/** `amount` is budget-base; `transaction_amount` is account-native. */
+async function amountCurrencies(accountId: string): Promise<AmountCurrencies> {
   return {
-    month,
-    incomeAvailable: value('available-funds') as number,
-    lastMonthOverspent: value('last-month-overspent') as number,
-    forNextMonth: value('buffered') as number,
-    totalBudgeted: value('total-budgeted') as number,
-    toBudget: value('to-budget') as number,
+    base: await getDefaultCurrencyCode(),
+    native: (await getAccountCurrency(accountId)).currencyCode,
+  };
+}
 
-    fromLastMonth: value('from-last-month') as number,
-    totalIncome: value('total-income') as number,
-    totalSpent: value('total-spent') as number,
-    totalBalance: value('total-leftover') as number,
+type AmountFields = {
+  amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
+};
 
-    categoryGroups: groups.map(group => {
-      if (group.is_income) {
-        if (isTrackingBudget()) {
+function decodeAmountFields<T extends AmountFields>(
+  row: T,
+  currencies: AmountCurrencies,
+) {
+  if ('amount_pair' in row) {
+    throw APIError('amount-pair-internal');
+  }
+  return {
+    ...row,
+    ...(row.amount !== undefined && {
+      amount: fromAmountInput(row.amount, currencies.base),
+    }),
+    ...(row.transaction_amount != null && {
+      transaction_amount: fromAmountInput(
+        row.transaction_amount,
+        currencies.native,
+      ),
+    }),
+  };
+}
+
+function decodeAmountInputs<
+  T extends AmountFields & { subtransactions?: AmountFields[] },
+>(transaction: T, currencies: AmountCurrencies) {
+  return {
+    ...decodeAmountFields(transaction, currencies),
+    ...(transaction.subtransactions && {
+      subtransactions: transaction.subtransactions.map(sub =>
+        decodeAmountFields(sub, currencies),
+      ),
+    }),
+  };
+}
+
+function encodeTransactionMoney(transaction, currencies: AmountCurrencies) {
+  return {
+    ...transaction,
+    amount: toMoney(transaction.amount, currencies.base),
+    ...(transaction.transaction_amount != null && {
+      transaction_amount: toMoney(
+        transaction.transaction_amount,
+        currencies.native,
+      ),
+    }),
+    ...(transaction.subtransactions && {
+      subtransactions: transaction.subtransactions.map(sub =>
+        encodeTransactionMoney(sub, currencies),
+      ),
+    }),
+  };
+}
+
+handlers['api/budget-month'] = async function ({ month, options }) {
+  checkFileOpen();
+  const asMoney = amountFormatIsMoney(options?.amountFormat);
+  return asMoney
+    ? runMutator(() => readBudgetMonth(true))
+    : readBudgetMonth(false);
+
+  async function readBudgetMonth(asMoney: boolean) {
+    // Month validation creates budget cells, so a queued Money read must
+    // run it after any encoding transition has reloaded the spreadsheet.
+    await validateMonth(month);
+    // Queued Money reads cannot interleave with an encoding transition.
+    if (asMoney) await sheet.waitOnSpreadsheet();
+    const budgetCurrencyCode = await getDefaultCurrencyCode();
+
+    const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
+      q('category_groups').select('*'),
+    );
+    const sheetName = monthUtils.sheetForMonth(month);
+
+    function value(name) {
+      const v = sheet.get().getCellValue(sheetName, name);
+      return v === '' ? 0 : v;
+    }
+
+    function amount(name: string) {
+      const v = value(name) as number | null;
+      if (!asMoney) return v;
+      // Tracking budgets have no cells for envelope-only metrics.
+      return toMoney(v ?? 0, budgetCurrencyCode);
+    }
+
+    const pockets = await readCategoryPockets(month);
+    /** A pocket category's amounts; null stays null, with its reason. */
+    function pocketFields(category: CategoryPocketsMonth) {
+      const base = (v: number | null) =>
+        v === null || !asMoney ? v : toMoney(v, budgetCurrencyCode);
+      const native = (v: number | null, code: string) =>
+        v === null || !asMoney ? v : toMoney(v, code);
+      return {
+        budgeted: base(category.budgeted),
+        spent: base(category.spent),
+        balance: base(category.balance),
+        carryIn: base(category.carryIn),
+        reset: base(category.reset),
+        fxContribution: base(category.fxContribution),
+        base: {
+          ...category.base,
+          budgeted: base(category.base.budgeted),
+          spent: base(category.base.spent),
+          balance: base(category.base.balance),
+          carryIn: base(category.base.carryIn),
+          reset: base(category.base.reset),
+        },
+        pockets: category.pockets.map(pocket => ({
+          ...pocket,
+          budgeted: native(pocket.budgeted, pocket.currency),
+          budgetedBase: base(pocket.budgetedBase),
+          spent: native(pocket.spent, pocket.currency),
+          spentBase: base(pocket.spentBase),
+          balance: native(pocket.balance, pocket.currency),
+          balanceBase: base(pocket.balanceBase),
+          fxContribution: base(pocket.fxContribution),
+          carryIn: base(pocket.carryIn),
+          reset: base(pocket.reset),
+          lanes: pocket.lanes.map(lane => ({
+            ...lane,
+            budgeted: native(lane.budgeted, pocket.currency),
+            budgetedBase: base(lane.budgetedBase),
+            spent: native(lane.spent, pocket.currency),
+            spentBase: base(lane.spentBase),
+            balance: native(lane.balance, pocket.currency),
+            balanceBase: base(lane.balanceBase),
+          })),
+        })),
+        incomplete: category.incomplete,
+      };
+    }
+
+    // This is duplicated from main.js because the return format is
+    // different (for now)
+    return {
+      month,
+      incomeAvailable: amount('available-funds'),
+      lastMonthOverspent: amount('last-month-overspent'),
+      forNextMonth: amount('buffered'),
+      totalBudgeted: amount('total-budgeted'),
+      toBudget: amount('to-budget'),
+
+      fromLastMonth: amount('from-last-month'),
+      totalIncome: amount('total-income'),
+      totalSpent: amount('total-spent'),
+      totalBalance: amount('total-leftover'),
+
+      categoryGroups: groups.map(group => {
+        if (group.is_income) {
+          if (isTrackingBudget()) {
+            return {
+              ...categoryGroupModel.toExternal(group),
+              budgeted: amount(`group-budget-${group.id}`),
+              received: amount(`group-sum-amount-${group.id}`),
+              balance: amount(`group-leftover-${group.id}`),
+
+              categories: group.categories.map(cat => ({
+                ...categoryModel.toExternal(cat),
+                budgeted: amount(`budget-${cat.id}`),
+                received: amount(`sum-amount-${cat.id}`),
+                balance: amount(`leftover-${cat.id}`),
+                carryover: value(`carryover-${cat.id}`),
+              })),
+            };
+          }
+
           return {
             ...categoryGroupModel.toExternal(group),
-            budgeted: value(`group-budget-${group.id}`),
-            received: value(`group-sum-amount-${group.id}`),
-            balance: value(`group-leftover-${group.id}`),
+            received: amount('total-income'),
 
             categories: group.categories.map(cat => ({
               ...categoryModel.toExternal(cat),
-              budgeted: value(`budget-${cat.id}`),
-              received: value(`sum-amount-${cat.id}`),
-              balance: value(`leftover-${cat.id}`),
-              carryover: value(`carryover-${cat.id}`),
+              received: amount(`sum-amount-${cat.id}`),
             })),
           };
         }
 
         return {
           ...categoryGroupModel.toExternal(group),
-          received: value('total-income'),
+          budgeted: amount(`group-budget-${group.id}`),
+          spent: amount(`group-sum-amount-${group.id}`),
+          balance: amount(`group-leftover-${group.id}`),
 
-          categories: group.categories.map(cat => ({
-            ...categoryModel.toExternal(cat),
-            received: value(`sum-amount-${cat.id}`),
-          })),
+          categories: group.categories.map(cat => {
+            const category = pockets.get(cat.id);
+            return {
+              ...categoryModel.toExternal(cat),
+              budgeted: amount(`budget-${cat.id}`),
+              spent: amount(`sum-amount-${cat.id}`),
+              balance: amount(`leftover-${cat.id}`),
+              carryover: value(`carryover-${cat.id}`),
+              ...(category && pocketFields(category)),
+            };
+          }),
         };
-      }
-
-      return {
-        ...categoryGroupModel.toExternal(group),
-        budgeted: value(`group-budget-${group.id}`),
-        spent: value(`group-sum-amount-${group.id}`),
-        balance: value(`group-leftover-${group.id}`),
-
-        categories: group.categories.map(cat => ({
-          ...categoryModel.toExternal(cat),
-          budgeted: value(`budget-${cat.id}`),
-          spent: value(`sum-amount-${cat.id}`),
-          balance: value(`leftover-${cat.id}`),
-          carryover: value(`carryover-${cat.id}`),
-        })),
-      };
-    }),
-  };
+      }),
+    };
+  }
 };
 
 handlers['api/budget-set-amount'] = withMutation(async function ({
@@ -537,7 +701,7 @@ handlers['api/budget-set-amount'] = withMutation(async function ({
   return handlers['budget/budget-amount']({
     month,
     category: categoryId,
-    amount,
+    amount: fromAmountInput(amount, await getDefaultCurrencyCode()),
   });
 });
 
@@ -553,6 +717,84 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
     startMonth: month,
     category: categoryId,
     flag,
+  });
+});
+
+handlers['api/pocket-create'] = withMutation(async function ({
+  categoryId,
+  currency,
+}) {
+  checkFileOpen();
+  return handlers['budget/pocket-create']({ category: categoryId, currency });
+});
+
+handlers['api/pocket-update'] = withMutation(async function ({
+  id,
+  hidden,
+  sortOrder,
+}) {
+  checkFileOpen();
+  return handlers['budget/slot-meta-set']({
+    id,
+    hidden,
+    ...(sortOrder !== undefined && { sort_order: sortOrder }),
+  });
+});
+
+handlers['api/pocket-budget-set'] = withMutation(async function ({
+  month,
+  pocketId,
+  amount,
+  encoding,
+  baseAmount,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  return handlers['budget/pocket-budget-set']({
+    month,
+    pocketId,
+    amount,
+    encoding,
+    baseAmount,
+  });
+});
+
+handlers['api/pockets-finalize'] = withMutation(async function ({ cells }) {
+  checkFileOpen();
+  for (const { month } of cells) await validateMonth(month);
+  return handlers['budget/pockets-finalize']({ cells });
+});
+
+handlers['api/pocket-delete'] = withMutation(async function ({
+  id,
+  transferCategoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/pocket-delete']({
+    id,
+    transferId: transferCategoryId,
+  });
+});
+
+handlers['api/base-child-delete'] = withMutation(async function ({
+  categoryId,
+  transferCategoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/base-child-delete']({
+    category: categoryId,
+    transferId: transferCategoryId,
+  });
+});
+
+handlers['api/route-to-pockets'] = withMutation(async function ({
+  transactionIds,
+  categoryId,
+}) {
+  checkFileOpen();
+  return handlers['budget/route-to-pockets']({
+    ids: transactionIds,
+    ...(categoryId !== undefined && { category: categoryId }),
   });
 });
 
@@ -599,9 +841,10 @@ handlers['api/transactions-import'] = withMutation(async function ({
   opts,
 }) {
   checkFileOpen();
+  const currencies = await amountCurrencies(accountId);
   return handlers['transactions-import']({
     accountId,
-    transactions,
+    transactions: transactions.map(t => decodeAmountInputs(t, currencies)),
     isPreview,
     opts,
   });
@@ -614,10 +857,15 @@ handlers['api/transactions-add'] = withMutation(async function ({
   learnCategories = false,
 }) {
   checkFileOpen();
-  await addTransactions(accountId, transactions, {
-    runTransfers,
-    learnCategories,
-  });
+  const currencies = await amountCurrencies(accountId);
+  await addTransactions(
+    accountId,
+    transactions.map(t => decodeAmountInputs(t, currencies)),
+    {
+      runTransfers,
+      learnCategories,
+    },
+  );
   return 'ok' as const;
 });
 
@@ -625,21 +873,37 @@ handlers['api/transactions-get'] = async function ({
   accountId,
   startDate,
   endDate,
+  options,
 }) {
   checkFileOpen();
-  const { data } = await aqlQuery(
-    q('transactions')
-      .filter({
-        $and: [
-          accountId && { account: accountId },
-          startDate && { date: { $gte: startDate } },
-          endDate && { date: { $lte: endDate } },
-        ].filter(Boolean),
-      })
-      .select('*')
-      .options({ splits: 'grouped' }),
-  );
-  return data;
+  if (!amountFormatIsMoney(options?.amountFormat)) {
+    return readTransactions();
+  }
+  // Queued Money reads cannot interleave with an encoding transition.
+  return runMutator(async () => {
+    const data = await readTransactions();
+    const currencies = new Map<string, AmountCurrencies>();
+    for (const id of new Set<string>(data.map(t => t.account))) {
+      currencies.set(id, await amountCurrencies(id));
+    }
+    return data.map(t => encodeTransactionMoney(t, currencies.get(t.account)));
+  });
+
+  async function readTransactions() {
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({
+          $and: [
+            accountId && { account: accountId },
+            startDate && { date: { $gte: startDate } },
+            endDate && { date: { $lte: endDate } },
+          ].filter(Boolean),
+        })
+        .select('*')
+        .options({ splits: 'grouped' }),
+    );
+    return data;
+  }
 };
 
 handlers['api/transaction-update'] = withMutation(async function ({
@@ -657,9 +921,23 @@ handlers['api/transaction-update'] = withMutation(async function ({
     return [];
   }
 
-  // `fields` is partial; updateTransaction replaces a split child wholesale
-  const { diff } = updateTransaction(transactions, { ...existing, ...fields });
-  return (await handlers['transactions-batch-update'](diff))['updated'];
+  const decoded = decodeAmountInputs(
+    fields,
+    await amountCurrencies(fields.account ?? existing.account),
+  );
+  // `fields` is partial; updateTransaction replaces a split child wholesale.
+  // @ts-expect-error decodeAmountInputs retains Money in its generic split type.
+  const { data: edited, diff } = updateTransaction(transactions, {
+    ...existing,
+    ...decoded,
+  });
+  // Diffing drops an unchanged pair companion; keep both sides together.
+  const editedById = new Map(edited.map(t => [t.id, t]));
+  diff.updated = diff.updated.map(patch =>
+    completePairPatch(patch, editedById.get(patch.id)),
+  );
+  // Await so guard rejections reach the caller and writes finish first.
+  return (await handlers['transactions-batch-update'](diff)).updated;
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
@@ -674,7 +952,7 @@ handlers['api/transaction-delete'] = withMutation(async function ({ id }) {
   }
 
   const { diff } = deleteTransaction(transactions, id);
-  return handlers['transactions-batch-update'](diff)['deleted'];
+  return (await handlers['transactions-batch-update'](diff)).deleted;
 });
 
 handlers['api/transactions-merge'] = withMutation(async function ({ ids }) {
@@ -685,7 +963,10 @@ handlers['api/transactions-merge'] = withMutation(async function ({ ids }) {
 handlers['api/accounts-get'] = async function () {
   checkFileOpen();
   const accounts: AccountEntity[] = await handlers['accounts-get']();
-  return accounts.map(account => accountModel.toExternal(account));
+  const budgetCurrencyCode = await getDefaultCurrencyCode();
+  return accounts.map(account =>
+    accountModel.toExternal(account, budgetCurrencyCode),
+  );
 };
 
 handlers['api/account-create'] = withMutation(async function ({
@@ -693,20 +974,55 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (
+    typeof initialBalance === 'number' &&
+    !Number.isSafeInteger(initialBalance)
+  ) {
+    throw new Error('Invalid initial balance');
+  }
+  const balanceInteger =
+    initialBalance != null
+      ? fromAmountInput(
+          initialBalance,
+          account.currency || (await getDefaultCurrencyCode()),
+        )
+      : undefined;
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
-    // Current the API expects an amount but it really should expect
-    // an integer
-    balance: initialBalance != null ? integerToAmount(initialBalance) : null,
+    currency: account.currency,
+    balanceInteger,
   });
 });
 
+const API_ACCOUNT_UPDATE_FIELDS = new Set([
+  'name',
+  'offbudget',
+  'closed',
+  'balance_current',
+  'account_group_id',
+  'currency',
+]);
+
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
-  // @ts-expect-error - fix me
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  for (const key of Object.keys(fields)) {
+    if (!API_ACCOUNT_UPDATE_FIELDS.has(key)) {
+      throw APIError(`account-update-unsupported-field: ${key}`);
+    }
+  }
+  const { currency, ...rest } = fields;
+  if (fields.closed === true) {
+    // Closing through the generic update keeps the closure preflight.
+    await assertClosureAllowed(id);
+  }
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency, id);
+  return db.updateAccount({
+    id,
+    ...accountModel.fromExternal(rest),
+    ...(resolvedCurrency !== undefined && { currency: resolvedCurrency }),
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -735,9 +1051,14 @@ handlers['api/account-delete'] = withMutation(async function ({ id }) {
 handlers['api/account-balance'] = withMutation(async function ({
   id,
   cutoff = new Date(),
+  options,
 }) {
   checkFileOpen();
-  return handlers['account-balance']({ id, cutoff });
+  const balance = await handlers['account-balance']({ id, cutoff });
+  if (!amountFormatIsMoney(options?.amountFormat)) {
+    return balance;
+  }
+  return toMoney(balance, (await getAccountCurrency(id)).currencyCode);
 });
 
 handlers['api/account-groups-get'] = async function () {

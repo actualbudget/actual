@@ -4,7 +4,13 @@ import { listen } from '@actual-app/core/platform/client/connection';
 
 import { useMetadataPref } from '#hooks/useMetadataPref';
 
-export type SyncState = null | 'offline' | 'local' | 'disabled' | 'error';
+export type SyncState =
+  | null
+  | 'offline'
+  | 'local'
+  | 'disabled'
+  | 'error'
+  | 'pending-transition';
 
 type UseSyncStatusOpts = {
   syncingEndDelayMs?: number;
@@ -17,8 +23,31 @@ export function useSyncStatus({
   syncState: SyncState;
 } {
   const [cloudFileId] = useMetadataPref('cloudFileId');
+  const [transition] = useMetadataPref('amountEncodingTransition');
+  const pendingTransition = Boolean(transition);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncState, setSyncState] = useState<SyncState>(null);
+  const [trackedPending, setTrackedPending] = useState(pendingTransition);
+
+  // Drop a leftover pending outcome when the saved transition is cleared.
+  // Specific failures stay put. A saved transition still covers the idle state.
+  if (pendingTransition !== trackedPending) {
+    setTrackedPending(pendingTransition);
+    if (!pendingTransition) {
+      setSyncState(current =>
+        current === 'pending-transition' ? null : current,
+      );
+    }
+  }
+
+  const visibleSyncState: SyncState =
+    pendingTransition &&
+    syncState !== 'disabled' &&
+    syncState !== 'offline' &&
+    syncState !== 'error' &&
+    syncState !== 'local'
+      ? 'pending-transition'
+      : syncState;
 
   useEffect(() => {
     let endTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -40,7 +69,9 @@ export function useSyncStatus({
         setIsSyncing(false);
       }
 
-      if (event.type === 'error') {
+      if (event.type === 'pending-transition') {
+        setSyncState('pending-transition');
+      } else if (event.type === 'error') {
         if (event.subtype === 'network') {
           setSyncState('offline');
         } else if (!cloudFileId) {
@@ -61,5 +92,5 @@ export function useSyncStatus({
     };
   }, [cloudFileId, syncingEndDelayMs]);
 
-  return { isSyncing, syncState };
+  return { isSyncing, syncState: visibleSyncState };
 }

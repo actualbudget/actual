@@ -5,17 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { SvgDownAndRightArrow } from '@actual-app/components/icons/v2';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { amountToCurrency } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 import { Field, Row } from '#components/table';
+import { BudgetCurrencyFormat } from '#hooks/currencyFormatContext';
+import { useFormat } from '#hooks/useFormat';
 
 import { ParsedDate } from './ParsedDate';
-import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
+import { applyFieldMappings, formatDate, parseImportAmount } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
 type TransactionProps = {
@@ -29,6 +31,7 @@ type TransactionProps = {
   outValue: string;
   flipAmount: boolean;
   multiplierAmount: string;
+  precision: number;
   categories: CategoryEntity[];
   onCheckTransaction: (transactionId: string) => void;
   reconcile: boolean;
@@ -46,12 +49,14 @@ export function Transaction({
   outValue,
   flipAmount,
   multiplierAmount,
+  precision,
   categories,
   onCheckTransaction,
   reconcile,
   index,
 }: TransactionProps) {
   const { t } = useTranslation();
+  const format = useFormat(precision);
 
   const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
@@ -64,23 +69,32 @@ export function Transaction({
 
   const { amount, outflow, inflow } = useMemo(() => {
     if (rawTransaction.isMatchedTransaction) {
-      const amount = rawTransaction.amount;
+      const amount = Number.isSafeInteger(rawTransaction.amount)
+        ? rawTransaction.amount
+        : null;
 
       return {
         amount,
-        outflow: splitMode ? (amount < 0 ? -amount : 0) : null,
-        inflow: splitMode ? (amount > 0 ? amount : 0) : null,
+        outflow:
+          splitMode && amount != null ? (amount < 0 ? -amount : 0) : null,
+        inflow: splitMode && amount != null ? (amount > 0 ? amount : 0) : null,
       };
     }
 
-    return parseAmountFields(
+    const amount = parseImportAmount(
       transaction,
       splitMode,
       inOutMode,
       outValue,
       flipAmount,
       multiplierAmount,
+      precision,
     );
+    return {
+      amount,
+      outflow: splitMode && amount != null ? (amount < 0 ? -amount : 0) : null,
+      inflow: splitMode && amount != null ? (amount > 0 ? amount : 0) : null,
+    };
   }, [
     rawTransaction,
     transaction,
@@ -89,6 +103,7 @@ export function Transaction({
     outValue,
     flipAmount,
     multiplierAmount,
+    precision,
   ]);
 
   return (
@@ -255,10 +270,10 @@ export function Transaction({
             title={
               outflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToCurrency(outflow)
+                : format(outflow, 'financial')
             }
           >
-            {amountToCurrency(outflow || 0)}
+            {outflow == null ? '' : format(outflow, 'financial')}
           </Field>
           <Field
             width={90}
@@ -272,10 +287,10 @@ export function Transaction({
             title={
               inflow === null
                 ? t('Invalid: unable to parse the value')
-                : amountToCurrency(inflow)
+                : format(inflow, 'financial')
             }
           >
-            {amountToCurrency(inflow || 0)}
+            {inflow == null ? '' : format(inflow, 'financial')}
           </Field>
         </>
       ) : (
@@ -291,12 +306,29 @@ export function Transaction({
               ? t('Invalid: unable to parse the value ({{amount}})', {
                   amount: transaction.amount,
                 })
-              : amountToCurrency(amount)
+              : format(amount, 'financial')
           }
         >
-          {amountToCurrency(amount || 0)}
+          {amount == null ? '' : format(amount, 'financial')}
+          {rawTransaction.base_amount != null && (
+            // A foreign account's row also shows its converted base amount.
+            <BudgetCurrencyFormat>
+              <BaseAmount amount={rawTransaction.base_amount} />
+            </BudgetCurrencyFormat>
+          )}
         </Field>
       )}
     </Row>
+  );
+}
+
+function BaseAmount({ amount }: { amount: number }) {
+  const format = useFormat();
+  return (
+    <Text
+      style={{ display: 'block', fontSize: 11, color: theme.pageTextSubdued }}
+    >
+      {format(amount, 'financial')}
+    </Text>
   );
 }

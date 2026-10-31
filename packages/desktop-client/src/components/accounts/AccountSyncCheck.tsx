@@ -81,6 +81,11 @@ function useErrorMessage() {
           </Trans>
         );
 
+      case 'RATE_UNAVAILABLE':
+        return t(
+          'An exchange rate is needed before these transactions can be added.',
+        );
+
       case 'ACCOUNT_MISSING':
         return t(
           'This account was not found in SimpleFIN. Try unlinking and relinking the account.',
@@ -170,6 +175,7 @@ export function AccountSyncCheck() {
   const error = failedAccounts.get(id) ?? getFailedSyncError(account);
 
   const { type, code } = error;
+  const rate = failedAccounts.get(id)?.rate;
   const showAuth =
     (type === 'ITEM_ERROR' && code === 'ITEM_LOGIN_REQUIRED') ||
     (type === 'INVALID_INPUT' && code === 'INVALID_ACCESS_TOKEN');
@@ -211,10 +217,33 @@ export function AccountSyncCheck() {
 
         <div style={{ marginBottom: '1.25em', color: theme.errorText }}>
           {getErrorMessage(error.type, error.code)}
+          {rate && ` ${rate.dates.join(', ')}`}
         </div>
 
         <View style={{ justifyContent: 'flex-end', flexDirection: 'row' }}>
-          {showAuth ? (
+          {rate ? (
+            <Button
+              variant="primary"
+              autoFocus
+              onPress={() => {
+                setOpen(false);
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'add-exchange-rate',
+                      options: {
+                        accountId: account.id,
+                        currencyCode: rate.currencyCode,
+                        dates: rate.dates,
+                      },
+                    },
+                  }),
+                );
+              }}
+            >
+              <Trans>Add exchange rate</Trans>
+            </Button>
+          ) : showAuth ? (
             <>
               <Button onPress={() => unlink(account)}>
                 <Trans>Unlink</Trans>

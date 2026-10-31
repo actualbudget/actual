@@ -13,6 +13,10 @@ import {
 } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { undoable } from '#server/undo';
+import {
+  assertBaseCurrencyChangeAllowed,
+  BASE_CURRENCY_LOCK,
+} from '#server/util/currency';
 import { stringToInteger } from '#shared/util';
 import type { GlobalPrefs, MetadataPrefs, SyncedPrefs } from '#types/prefs';
 
@@ -32,6 +36,7 @@ const FORMULA_FORMAT_SYNCED_PREFS = new Set<keyof SyncedPrefs>([
   'numberFormat',
   'hideFraction',
   'defaultCurrencyCode',
+  'amountEncoding',
   'currencySymbolPosition',
   'currencySpaceBetweenAmountAndSymbol',
 ]);
@@ -53,6 +58,27 @@ async function saveSyncedPrefs({
 }) {
   if (!id) {
     return;
+  }
+  if (id === BASE_CURRENCY_LOCK) {
+    throw new Error('base-currency-lock-protected');
+  }
+  if (id === 'defaultCurrencyCode') {
+    await assertBaseCurrencyChangeAllowed(value ?? '');
+  }
+
+  const hasAmountEncoding = Boolean(_getMetadataPrefs()?.amountEncoding);
+  if (
+    (id === 'amountEncoding' ||
+      (id === 'defaultCurrencyCode' && hasAmountEncoding)) &&
+    value !==
+      (
+        await db.first<{ value: string }>(
+          'SELECT value FROM preferences WHERE id = ?',
+          [id],
+        )
+      )?.value
+  ) {
+    throw new Error('amount-encoding-transition-required');
   }
 
   await db.update('preferences', {
@@ -232,11 +258,15 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
       throw new Error('No sync server set');
     }
 
-    await post(syncServer + '/update-user-filename', {
-      token: userToken,
-      fileId: cloudFileId,
-      name: prefsToSet.budgetName,
-    });
+    await post(
+      syncServer + '/update-user-filename',
+      {
+        token: userToken,
+        fileId: cloudFileId,
+        name: prefsToSet.budgetName,
+      },
+      { 'X-ACTUAL-AMOUNT-ENCODING': '1' },
+    );
   }
 
   await _saveMetadataPrefs(prefsToSet);

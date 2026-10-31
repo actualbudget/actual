@@ -13,6 +13,7 @@ import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import { isValidYearMonth, isValidYearMonthDay } from '#shared/months';
 import { q } from '#shared/query';
 import type {
   DashboardWidgetEntity,
@@ -46,7 +47,54 @@ export function isWidgetType(
     'balance-forecast-card',
     'age-of-money-card',
     'monte-carlo-card',
+    'fx-impact-card',
   ].includes(type);
+}
+
+const TIME_FRAME_MODES = [
+  'sliding-window',
+  'static',
+  'full',
+  'lastMonth',
+  'lastYear',
+  'yearToDate',
+  'priorYearToDate',
+  'currentQuarter',
+  'previousQuarter',
+];
+// Report headers save month bounds, day bounds or one of each.
+const isTimeFrameBound = (value: unknown) =>
+  typeof value === 'string' &&
+  (isValidYearMonth(value) || isValidYearMonthDay(value));
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+const isStringArray = (value: unknown) =>
+  Array.isArray(value) && value.every(item => typeof item === 'string');
+
+/** The FX impact card reads its metadata directly, so a file must match its shape. */
+function validateFxImpactMeta(meta: unknown, idx: number) {
+  if (meta === null || meta === undefined) return;
+  const fail = (field: string) => {
+    throw new ValidationError(`Invalid widget.${idx}.meta${field} value.`);
+  };
+  if (!isRecord(meta)) return fail('');
+  const { name, accounts, currencies, timeFrame } = meta;
+  if (name != null && typeof name !== 'string') fail('.name');
+  if (accounts != null && !isStringArray(accounts)) fail('.accounts');
+  if (currencies != null && !isStringArray(currencies)) fail('.currencies');
+  if (
+    timeFrame != null &&
+    !(
+      isRecord(timeFrame) &&
+      isTimeFrameBound(timeFrame.start) &&
+      isTimeFrameBound(timeFrame.end) &&
+      typeof timeFrame.mode === 'string' &&
+      TIME_FRAME_MODES.includes(timeFrame.mode)
+    )
+  ) {
+    fail('.timeFrame');
+  }
 }
 
 const exportModel = {
@@ -101,6 +149,9 @@ const exportModel = {
 
       if (isExportedCustomReportWidget(widget)) {
         reportModel.validate(widget.meta);
+      }
+      if (widget.type === 'fx-impact-card') {
+        validateFxImpactMeta(widget.meta, idx);
       }
     });
   },

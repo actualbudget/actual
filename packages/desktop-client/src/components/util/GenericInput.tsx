@@ -24,6 +24,7 @@ import { DateSelect } from '#components/select/DateSelect';
 import { RecurringSchedulePicker } from '#components/select/RecurringSchedulePicker';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { usePayees } from '#hooks/usePayees';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -39,11 +40,15 @@ type GenericInputProps = {
       | {
           type: 'id';
           field: 'payee' | 'category' | 'category_group';
+          /** Hide transfer payees (a foreign schedule cannot pay one). */
+          hideTransferPayees?: boolean;
         }
       | {
           type: 'id';
           field: 'account';
           op?: RuleConditionOp;
+          /** Accounts that cannot be chosen here. */
+          hiddenAccounts?: string[];
         }
     ) &
       (
@@ -130,6 +135,7 @@ export const GenericInput = ({
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const { data: payees = [] } = usePayees();
 
   let content: JSX.Element | null = null;
   switch (props.type) {
@@ -153,6 +159,10 @@ export const GenericInput = ({
           content = (
             <PayeeAutocomplete
               {...multiProps}
+              {...('hideTransferPayees' in props &&
+                props.hideTransferPayees && {
+                  payees: payees.filter(payee => !payee.transfer_acct),
+                })}
               showMakeTransfer={false}
               openOnFocus={!isNarrowWidth}
               updateOnValueChange={isNarrowWidth}
@@ -169,6 +179,9 @@ export const GenericInput = ({
                       modal: {
                         name: 'payee-autocomplete',
                         options: {
+                          hideTransferPayees:
+                            'hideTransferPayees' in props &&
+                            !!props.hideTransferPayees,
                           onSelect: newValue => {
                             if (newValue === null) {
                               return;
@@ -199,6 +212,7 @@ export const GenericInput = ({
               content = (
                 <AccountAutocomplete
                   {...multiProps}
+                  hiddenAccounts={props.hiddenAccounts}
                   openOnFocus={!isNarrowWidth}
                   updateOnValueChange={isNarrowWidth}
                   inputProps={{
@@ -221,8 +235,10 @@ export const GenericInput = ({
                                 }
                                 props.onChange(newValue);
                               },
-                              hiddenAccounts:
-                                props.multi === true ? props.value : undefined,
+                              hiddenAccounts: [
+                                ...(props.multi === true ? props.value : []),
+                                ...(props.hiddenAccounts ?? []),
+                              ],
                             },
                           },
                         }),

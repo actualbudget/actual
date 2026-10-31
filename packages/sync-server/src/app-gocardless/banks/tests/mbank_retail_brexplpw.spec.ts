@@ -49,6 +49,7 @@ describe('MbankRetailBrexplpw', () => {
         .toMatchInlineSnapshot(`
         {
           "account_id": "d3eccc94-9536-48d3-98be-813f79199ee3",
+          "currency": "PLN",
           "iban": "PL00000000000000000987654321",
           "institution": {
             "bic": "BREXPLPW",
@@ -153,7 +154,7 @@ describe('MbankRetailBrexplpw', () => {
 
       expect(
         MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(100000);
+      ).toEqual('1000.00');
     });
 
     it('returns the balance minus the available transactions', () => {
@@ -168,7 +169,7 @@ describe('MbankRetailBrexplpw', () => {
 
       expect(
         MbankRetailBrexplpw.calculateStartingBalance(transactions, balances),
-      ).toEqual(49950);
+      ).toEqual('499.50');
     });
   });
 });

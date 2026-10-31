@@ -2,6 +2,7 @@
 import { stringify as csvStringify } from 'csv-stringify/sync';
 
 import { aqlQuery } from '#server/aql';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { integerToAmount } from '#shared/util';
 
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
@@ -20,10 +21,12 @@ export async function exportToCSV(
   categoryGroups,
   payees,
 ) {
+  const precision = getRecordedAmountPrecision();
   const accountNamesById = accounts.reduce((reduced, { id, name }) => {
     reduced[id] = name;
     return reduced;
   }, {});
+  const accountsById = new Map(accounts.map(account => [account.id, account]));
 
   const categoryNamesById = categoryGroups.reduce(
     (reduced, { name, categories: subCategories }) => {
@@ -49,6 +52,7 @@ export async function exportToCSV(
       notes,
       category,
       amount,
+      transaction_amount,
       cleared,
       reconciled,
     }) => ({
@@ -57,7 +61,8 @@ export async function exportToCSV(
       Payee: payeeNamesById[payee],
       Notes: notes,
       Category: categoryNamesById[category],
-      Amount: amount == null ? 0 : integerToAmount(amount),
+      Amount: amount == null ? 0 : integerToAmount(amount, precision),
+      ...nativeColumns(accountsById.get(account), transaction_amount),
       Cleared: cleared,
       Reconciled: reconciled,
     }),
@@ -66,7 +71,28 @@ export async function exportToCSV(
   return csvStringify(transactionsForExport, csvStringifyOptions);
 }
 
+/**
+ * A foreign row's native amount in its account's recorded encoding; empty
+ * for budget-currency rows.
+ */
+function nativeColumns(
+  account: { currency?: string | null; currency_precision?: number | null },
+  nativeAmount: number | null | undefined,
+) {
+  const isForeign =
+    nativeAmount != null &&
+    account?.currency != null &&
+    account.currency_precision != null;
+  return {
+    Currency: isForeign ? account.currency : '',
+    'Native amount': isForeign
+      ? integerToAmount(nativeAmount, account.currency_precision)
+      : '',
+  };
+}
+
 export async function exportQueryToCSV(query) {
+  const precision = getRecordedAmountPrecision();
   const { data: transactions } = await aqlQuery(
     query
       .select([
@@ -82,6 +108,9 @@ export async function exportQueryToCSV(query) {
         { CategoryGroup: 'category.group.name' },
         { Category: 'category.name' },
         { Amount: 'amount' },
+        { NativeAmount: 'transaction_amount' },
+        { Currency: 'account.currency' },
+        { NativePrecision: 'account.currency_precision' },
         { Cleared: 'cleared' },
         { Reconciled: 'reconciled' },
       ])
@@ -127,8 +156,13 @@ export async function exportQueryToCSV(query) {
         ? 0
         : trans.Amount == null
           ? 0
-          : integerToAmount(trans.Amount),
-      Split_Amount: trans.IsParent ? integerToAmount(trans.Amount) : 0,
+          : integerToAmount(trans.Amount, precision),
+      Split_Amount: trans.IsParent
+        ? integerToAmount(trans.Amount, precision)
+        : 0,
+      // Native columns follow Amount: a split parent's total moves to its
+      // own column so each column sums like the base ones.
+      ...splitNativeColumns(trans),
       Cleared:
         trans.Reconciled === true
           ? 'Reconciled'
@@ -139,4 +173,18 @@ export async function exportQueryToCSV(query) {
   });
 
   return csvStringify(transactionsForExport, csvStringifyOptions);
+}
+
+function splitNativeColumns(trans) {
+  const account = {
+    currency: trans.Currency,
+    currency_precision: trans.NativePrecision,
+  };
+  const columns = nativeColumns(account, trans.NativeAmount);
+  const isForeignParent = trans.IsParent && columns.Currency !== '';
+  return {
+    ...columns,
+    ...(isForeignParent && { 'Native amount': 0 }),
+    Split_Native_Amount: isForeignParent ? columns['Native amount'] : '',
+  };
 }

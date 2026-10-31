@@ -36,6 +36,7 @@ import {
 import { TagMultiAutocomplete } from '#components/autocomplete/TagMultiAutocomplete';
 import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
+import { useBaseAmountLabels } from '#hooks/currencyFormatContext';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -326,16 +327,24 @@ function ConfigureField<T extends RuleConditionEntity>({
     dispatch({ type: 'set-op', op: nextOp });
   };
 
+  // A foreign register's amount filters compare stored base amounts.
+  const isBase = useBaseAmountLabels();
   const subfieldSelectOptions = (
     field: 'amount' | 'date' | 'category',
   ): Array<readonly [string, string]> => {
     switch (field) {
       case 'amount':
-        return [
-          ['amount', t('Amount')],
-          ['amount-inflow', t('Amount (inflow)')],
-          ['amount-outflow', t('Amount (outflow)')],
-        ];
+        return isBase
+          ? [
+              ['amount', t('Base amount')],
+              ['amount-inflow', t('Base amount (inflow)')],
+              ['amount-outflow', t('Base amount (outflow)')],
+            ]
+          : [
+              ['amount', t('Amount')],
+              ['amount-inflow', t('Amount (inflow)')],
+              ['amount-outflow', t('Amount (outflow)')],
+            ];
 
       case 'date':
         return [
@@ -612,17 +621,12 @@ export function FilterButton<T extends RuleConditionEntity>({
   const triggerRef = useRef<HTMLDivElement>(null);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const translatedFilterFields = useMemo(() => {
-    const retValue = [...filterFields];
-
-    if (retValue && retValue.length > 0) {
-      retValue.forEach(field => {
-        field[1] = mapField(field[0]);
-      });
-    }
-
-    return retValue;
-  }, []);
+  const isBase = useBaseAmountLabels();
+  // Fresh tuples per button: buttons inside and outside a foreign register
+  // label the amount field differently.
+  const translatedFilterFields = filterFields.map(
+    ([field]) => [field, mapField(field, { base: isBase })] as const,
+  );
 
   const [state, dispatch] = useReducer(
     // @ts-expect-error - fix me

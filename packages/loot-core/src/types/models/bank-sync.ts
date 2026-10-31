@@ -15,7 +15,9 @@ export type BankSyncResponse = {
     pending: BankSyncTransaction[];
   };
   balances: BankSyncBalance[];
-  startingBalance: number;
+  startingBalance: string; // Decimal major units.
+  /** Currency of startingBalance, or null when unknown or mixed. */
+  startingBalanceCurrency?: string | null;
   error_type: string;
   error_code: string;
 };

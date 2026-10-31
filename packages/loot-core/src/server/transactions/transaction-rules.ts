@@ -1,5 +1,7 @@
 // @ts-strict-ignore
 
+import { v4 as uuidv4 } from 'uuid';
+
 import { logger } from '#platform/server/log';
 import { aqlQuery, schemaConfig } from '#server/aql';
 import * as db from '#server/db';
@@ -23,6 +25,7 @@ import {
   rankRules,
   Rule,
   RuleIndexer,
+  withoutAmountActions,
 } from '#server/rules';
 import {
   collectFormulasFromActions,
@@ -30,6 +33,7 @@ import {
   resolveAccountIdForBalanceOf,
 } from '#server/rules/balanceOfFormula';
 import { addSyncListener, batchMessages } from '#server/sync';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import {
   addDays,
   currentDay,
@@ -39,6 +43,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
+import { extractScheduleConds, getScheduledAmount } from '#shared/schedules';
 import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
@@ -47,6 +52,13 @@ import type {
   RuleEntity,
   TransactionEntity,
 } from '#types/models';
+
+import {
+  accountEncoding,
+  preflightTransactionWrites,
+  sameEncoding,
+  scheduleConditionAccount,
+} from './foreign-guard';
 
 import { batchUpdateTransactions } from '.';
 
@@ -221,15 +233,234 @@ export function getRules() {
   return [...allRules.values()];
 }
 
+/**
+ * A schedule's amounts are stored in its account's encoding (none: base).
+ * Callers send whole condition lists, so a retained amount cannot be told
+ * from a new one: a schedule's encoding never changes. Foreign schedules
+ * cannot create splits until foreign splits exist.
+ */
+type RuleWriteOptions = {
+  /**
+   * A currency correction re-encoding this schedule in the same batch as its
+   * account: rows whose links the batch clears are not yet cleared in SQL,
+   * and the corrected account already has its target encoding.
+   */
+  currencyCorrection?: {
+    unlinked: ReadonlySet<string>;
+    account: string;
+    encoding: { currency: string | null; precision: number };
+  };
+};
+
+export async function validateScheduleRule(
+  rule: {
+    id?: string;
+    conditions?: Array<{ op?: string; field?: string; value?: unknown }>;
+    actions?: Array<{
+      op?: string;
+      field?: string;
+      value?: unknown;
+      options?: { splitIndex?: number };
+    }>;
+  },
+  options: RuleWriteOptions = {},
+) {
+  const stored = rule.id
+    ? await db.first<{ conditions: string | null; actions: string | null }>(
+        'SELECT conditions, actions FROM rules WHERE id = ?',
+        [rule.id],
+      )
+    : null;
+  const ownsSchedule =
+    rule.id != null &&
+    (await db.first('SELECT id FROM schedules WHERE rule = ?', [rule.id])) !=
+      null;
+  const actions =
+    rule.actions ?? (stored?.actions ? JSON.parse(stored.actions) : []);
+  if (!ownsSchedule && !actions.some(action => action.op === 'link-schedule')) {
+    return;
+  }
+  const conditions =
+    rule.conditions ??
+    (stored?.conditions ? JSON.parse(stored.conditions) : []);
+  const correction = options.currencyCorrection;
+  // The override in accountEncoding's form: the budget currency has no
+  // recorded precision.
+  const encodingOf = async (account: string | null) =>
+    correction && account === correction.account
+      ? correction.encoding.currency === null
+        ? { currency: null, precision: null }
+        : correction.encoding
+      : accountEncoding(account);
+  const encoding = await encodingOf(scheduleConditionAccount(conditions));
+
+  if (ownsSchedule && rule.conditions && stored?.conditions) {
+    const previous = await encodingOf(
+      scheduleConditionAccount(JSON.parse(stored.conditions)),
+    );
+    if (!sameEncoding(previous, encoding)) {
+      throw new Error('schedule-account-encoding-change');
+    }
+    // A schedule gaining an account must not strand linked transactions in
+    // another encoding (an accountless schedule may link any).
+    const accountId = scheduleConditionAccount(conditions);
+    if (accountId) {
+      const linked = await db.all<{ id: string; acct: string }>(
+        `SELECT t.id, t.acct FROM transactions t
+           JOIN schedules s ON s.id = t.schedule
+           WHERE s.rule = ? AND t.tombstone = 0`,
+        [rule.id],
+      );
+      const unlinked = options.currencyCorrection?.unlinked;
+      for (const { id, acct } of linked) {
+        if (unlinked?.has(id)) continue;
+        if (!sameEncoding(await encodingOf(acct), encoding)) {
+          throw new Error('schedule-currency-mismatch');
+        }
+      }
+    }
+  }
+
+  // The posting amount condition, as posting finds it, must have the shape
+  // its operator needs.
+  const amount = extractScheduleConds(conditions).amount;
+  const value = amount?.value as
+    | number
+    | { num1?: unknown; num2?: unknown }
+    | null
+    | undefined;
+  if (
+    amount &&
+    (amount.op === 'isbetween'
+      ? typeof value !== 'object' ||
+        value === null ||
+        !Number.isSafeInteger(value.num1) ||
+        !Number.isSafeInteger(value.num2)
+      : (amount.op === 'is' || amount.op === 'isapprox') &&
+        !Number.isSafeInteger(value))
+  ) {
+    throw new Error('schedule-amount-invalid');
+  }
+
+  // A transfer to another encoding is an exchange: it must be the payee
+  // condition, so the schedule's endpoints are fixed, and its leg can be
+  // neither split nor given another payee.
+  const transferEncoding = async (id: unknown) => {
+    if (typeof id !== 'string') return null;
+    const payee = await db.first<{ transfer_acct: string | null }>(
+      'SELECT transfer_acct FROM payees WHERE id = ?',
+      [id],
+    );
+    return payee?.transfer_acct ? await encodingOf(payee.transfer_acct) : null;
+  };
+  const crossesEncoding = async (id: unknown) => {
+    const target = await transferEncoding(id);
+    return target !== null && !sameEncoding(target, encoding);
+  };
+  const payeeActions = actions.filter(
+    action =>
+      action.op === 'set' &&
+      (action.field === 'payee' || action.field === 'description'),
+  );
+  for (const action of payeeActions) {
+    if (await crossesEncoding(action.value)) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+  }
+  const payeeCondition = conditions.find(
+    cond =>
+      cond.op === 'is' &&
+      (cond.field === 'payee' || cond.field === 'description'),
+  );
+  const splits = actions.some(
+    action => action.op === 'set-split-amount' || !!action.options?.splitIndex,
+  );
+  // A payee list, or a further payee condition (reachable in an "or" rule),
+  // that can reach a cross-encoding transfer has no fixed endpoint, so it
+  // may neither split nor change the payee.
+  for (const cond of conditions) {
+    if (
+      cond !== payeeCondition &&
+      (cond.op === 'oneOf' || cond.op === 'is') &&
+      (cond.field === 'payee' || cond.field === 'description')
+    ) {
+      const ids = cond.op === 'is' ? [cond.value] : cond.value;
+      if (!Array.isArray(ids)) continue;
+      for (const id of ids) {
+        if (!(await crossesEncoding(id))) continue;
+        if (payeeActions.length > 0) {
+          throw new Error('multicurrency-transfer-unavailable');
+        }
+        if (splits) {
+          throw new Error('foreign-split-unavailable');
+        }
+      }
+    }
+  }
+  // An account an action moves the posting to must share the schedule's
+  // encoding, or posting refuses it.
+  for (const action of actions) {
+    if (
+      action.op === 'set' &&
+      (action.field === 'account' || action.field === 'acct') &&
+      typeof action.value === 'string' &&
+      !sameEncoding(await encodingOf(action.value), encoding)
+    ) {
+      throw new Error('rule-account-incompatible');
+    }
+  }
+  if (payeeCondition && (await crossesEncoding(payeeCondition.value))) {
+    if (payeeActions.length > 0) {
+      throw new Error('multicurrency-transfer-unavailable');
+    }
+    if (splits) {
+      throw new Error('foreign-split-unavailable');
+    }
+    // An exchange posts a nonzero amount, judged as posting computes it. Only
+    // the rule that owns or creates the schedule defines that amount; other
+    // rules linking it only match transactions.
+    const linked = actions
+      .filter(action => action.op === 'link-schedule')
+      .map(action => action.value);
+    const createsSchedule =
+      linked.length > 0 &&
+      (await db.first(
+        `SELECT id FROM schedules WHERE id IN (${linked.map(() => '?').join(', ')})`,
+        linked,
+      )) == null;
+    const scheduled =
+      typeof value === 'number'
+        ? value
+        : value
+          ? getScheduledAmount({
+              num1: Number(value.num1),
+              num2: Number(value.num2),
+            })
+          : 0;
+    if ((ownsSchedule || createsSchedule) && scheduled === 0) {
+      throw new Error('schedule-amount-invalid');
+    }
+  }
+  if (
+    encoding.currency !== null &&
+    // Actions with a split index create split children.
+    splits
+  ) {
+    throw new Error('foreign-split-unavailable');
+  }
+}
+
 export async function insertRule(
   rule: Omit<RuleEntity, 'id'> & { id?: string },
 ) {
   rule = ruleModel.validate(rule);
+  await validateScheduleRule(rule);
   return db.insertWithUUID('rules', ruleModel.fromJS(rule));
 }
 
-export async function updateRule(rule) {
+export async function updateRule(rule, options: RuleWriteOptions = {}) {
   rule = ruleModel.validate(rule, { update: true });
+  await validateScheduleRule(rule, options);
   return db.update('rules', ruleModel.fromJS(rule));
 }
 
@@ -301,6 +532,36 @@ export async function getRuleIdFromScheduleId(
   return row?.rule || null;
 }
 
+/**
+ * The transaction a schedule's own rule evaluates, or null when it must not
+ * run. A schedule with an account only matches transactions in that
+ * account's encoding, whatever its condition operators (`or` included); a
+ * foreign schedule's amount conditions compare native amounts. Ordinary
+ * rules and accountless schedules read the base amount.
+ */
+function scheduleConditionView(
+  rule: Rule,
+  trans,
+  accountsMap: Map<string, db.DbAccount>,
+  scheduleRuleIds: string[],
+) {
+  if (!scheduleRuleIds.includes(rule.id)) return trans;
+  const accountId = scheduleConditionAccount(rule.conditions);
+  const scheduleAccount = accountId ? accountsMap.get(accountId) : null;
+  if (!scheduleAccount) return trans;
+  const account = accountsMap.get(trans.account);
+  if (
+    (account?.currency ?? null) !== (scheduleAccount.currency ?? null) ||
+    (account?.currency_precision ?? null) !==
+      (scheduleAccount.currency_precision ?? null)
+  ) {
+    return null;
+  }
+  return scheduleAccount.currency == null
+    ? trans
+    : { ...trans, amount: trans.transaction_amount };
+}
+
 export async function getAllRuleIdsFromSchedules(
   excluding: string,
 ): Promise<string[]> {
@@ -323,6 +584,8 @@ const NULLABLE_RULE_FIELDS = ['payee', 'category'] as const;
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
+  amountPrecision = getRecordedAmountPrecision(),
+  stagePayee?: StagePayee,
 ) {
   await ensureFormulaPreferencesLoaded();
 
@@ -360,6 +623,7 @@ export async function runRules(
     accountsMap,
     { includeBalance: false },
   );
+  const isForeign = accountsMap.get(trans.account)?.currency != null;
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   // The running balance is a query over every earlier transaction in
@@ -404,9 +668,11 @@ export async function runRules(
       if (rules[i].id === scheduleRuleID) {
         // bypass condition checking to run the rule even if the transaction date falls outside of the schedule's date range.
         await ensureBalanceFor(rules[i]);
-        const changes = rules[i].execActions(finalTrans);
+        const changes = rules[i].execActions(finalTrans, amountPrecision, {
+          skipAmountActions: isForeign,
+        });
         finalTrans = Object.assign({}, finalTrans, changes);
-        await resolvePayeeNameForRules(finalTrans);
+        await resolvePayeeNameForRules(finalTrans, stagePayee);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
           finalTrans,
           lastCategoryIdForGroup,
@@ -421,10 +687,12 @@ export async function runRules(
           finalTrans = Object.assign(
             {},
             finalTrans,
-            rules[i].execActions(finalTrans),
+            rules[i].execActions(finalTrans, amountPrecision, {
+              skipAmountActions: isForeign,
+            }),
           );
         }
-        await resolvePayeeNameForRules(finalTrans);
+        await resolvePayeeNameForRules(finalTrans, stagePayee);
         lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
           finalTrans,
           lastCategoryIdForGroup,
@@ -432,15 +700,23 @@ export async function runRules(
       }
     } else {
       // if there is no scheduleRuleID then just run all rules.
-      if (rules[i].evalConditions(finalTrans)) {
+      const view = scheduleConditionView(
+        rules[i],
+        finalTrans,
+        accountsMap,
+        RuleIdsLinkedToSchedules,
+      );
+      if (view && rules[i].evalConditions(view)) {
         await ensureBalanceFor(rules[i]);
         finalTrans = Object.assign(
           {},
           finalTrans,
-          rules[i].execActions(finalTrans),
+          rules[i].execActions(finalTrans, amountPrecision, {
+            skipAmountActions: isForeign,
+          }),
         );
       }
-      await resolvePayeeNameForRules(finalTrans);
+      await resolvePayeeNameForRules(finalTrans, stagePayee);
       lastCategoryIdForGroup = await refreshCategoryGroupIfChanged(
         finalTrans,
         lastCategoryIdForGroup,
@@ -448,7 +724,7 @@ export async function runRules(
     }
   }
 
-  const result = await finalizeTransactionForRules(finalTrans);
+  const result = await finalizeTransactionForRules(finalTrans, stagePayee);
   for (const field of missingNullableFields) {
     if (result[field] === null) {
       delete result[field];
@@ -492,7 +768,16 @@ function conditionSpecialCases(cond: Condition | null): Condition | null {
 // This does the inverse: finds all the transactions matching a rule
 export function conditionsToAQL(
   conditions,
-  { recurDateBounds = 100, applySpecialCases = true } = {},
+  {
+    recurDateBounds = 100,
+    applySpecialCases = true,
+    // A foreign schedule's amount conditions compare native amounts.
+    amountField = 'amount',
+  }: {
+    recurDateBounds?: number;
+    applySpecialCases?: boolean;
+    amountField?: 'amount' | 'transaction_amount';
+  } = {},
 ) {
   const errors = [];
 
@@ -542,6 +827,8 @@ export function conditionsToAQL(
       }
     } else if (field === 'category_group') {
       field = 'category.group';
+    } else if (field === 'amount') {
+      field = amountField;
     }
 
     const apply = (field, aqlOp, value) => {
@@ -550,18 +837,21 @@ export function conditionsToAQL(
           if (options.outflow) {
             return {
               $and: [
-                { amount: { $lt: 0 } },
+                { [amountField]: { $lt: 0 } },
                 { [field]: { $transform: '$neg', [aqlOp]: value } },
               ],
             };
           } else if (options.inflow) {
             return {
-              $and: [{ amount: { $gt: 0 } }, { [field]: { [aqlOp]: value } }],
+              $and: [
+                { [amountField]: { $gt: 0 } },
+                { [field]: { [aqlOp]: value } },
+              ],
             };
           }
         }
 
-        return { amount: { [aqlOp]: value } };
+        return { [amountField]: { [aqlOp]: value } };
       } else if (type === 'string') {
         return {
           [field]: {
@@ -815,14 +1105,41 @@ export async function applyActions(
     trans._balanceOfPrefetched = balanceOfPrefetchResults[i];
   });
 
+  const amountPrecision = getRecordedAmountPrecision();
   const updated = transactionsForRules.flatMap(trans => {
-    return ungroupTransaction(execActions(parsedActions, trans));
+    const isForeign = accountsMap.get(trans.account)?.currency != null;
+    return ungroupTransaction(
+      execActions(
+        isForeign ? withoutAmountActions(parsedActions) : parsedActions,
+        trans,
+        amountPrecision,
+      ),
+    );
   });
 
+  // Payees named by actions are staged and created only after the whole
+  // request validates.
+  const stagedPayees = new Map<string, { id: string; name: string }>();
+  const stagePayee: StagePayee = async name => {
+    const key = name.toLowerCase();
+    const staged = stagedPayees.get(key) ?? { id: uuidv4(), name };
+    stagedPayees.set(key, staged);
+    return staged.id;
+  };
   const finalized: TransactionEntity[] = [];
   for (const trans of updated) {
-    finalized.push(await finalizeTransactionForRules(trans));
+    finalized.push(await finalizeTransactionForRules(trans, stagePayee));
   }
+
+  await preflightTransactionWrites({ updated: finalized });
+  const usedPayeeIds = new Set(finalized.map(trans => trans.payee));
+  await batchMessages(async () => {
+    for (const payee of stagedPayees.values()) {
+      if (usedPayeeIds.has(payee.id)) {
+        await insertPayee(payee);
+      }
+    }
+  });
 
   return batchUpdateTransactions({ updated: finalized });
 }
@@ -1207,8 +1524,12 @@ export async function prepareTransactionForRules(
   return r;
 }
 
+/** Lets importers defer payee creation until the whole request validates. */
+export type StagePayee = (name: string) => Promise<string>;
+
 async function resolvePayeeNameForRules(
   trans: TransactionEntity | TransactionForRules,
+  stagePayee?: StagePayee,
 ): Promise<void> {
   if (!('payee_name' in trans) || trans.payee !== 'new') {
     return;
@@ -1216,9 +1537,11 @@ async function resolvePayeeNameForRules(
 
   if (trans.payee_name) {
     let payee_id = (await getPayeeByName(trans.payee_name))?.id;
-    payee_id ??= await insertPayee({
-      name: trans.payee_name,
-    });
+    payee_id ??= stagePayee
+      ? await stagePayee(trans.payee_name)
+      : await insertPayee({
+          name: trans.payee_name,
+        });
 
     trans.payee = payee_id;
   } else {
@@ -1257,9 +1580,10 @@ async function refreshCategoryGroupIfChanged(
 
 export async function finalizeTransactionForRules(
   trans: TransactionEntity | TransactionForRules,
+  stagePayee?: StagePayee,
 ): Promise<TransactionEntity> {
   if ('payee_name' in trans) {
-    await resolvePayeeNameForRules(trans);
+    await resolvePayeeNameForRules(trans, stagePayee);
     delete trans.payee_name;
   }
 

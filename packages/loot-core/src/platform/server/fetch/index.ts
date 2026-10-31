@@ -18,3 +18,5 @@ export const fetch = async (
 
   return response;
 };
+
+export const fetchQuiet = fetch;

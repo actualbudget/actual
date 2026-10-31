@@ -23,12 +23,15 @@ import {
 } from '#accounts';
 import { markAccountRead } from '#accounts/accountsSlice';
 import * as reconciliation from '#accounts/reconciliation';
+import { toRegisterView } from '#accounts/registerView';
 import { ReconcilingBanner } from '#components/mobile/accounts/ReconcilingBanner';
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccountPreviewTransactions } from '#hooks/useAccountPreviewTransactions';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useNavigate } from '#hooks/useNavigate';
+import { postScheduleTransaction } from '#hooks/usePostScheduleTransaction';
 import { getSchedulesQuery } from '#hooks/useSchedules';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
@@ -40,6 +43,7 @@ import {
 import { useTransactionsSearch } from '#hooks/useTransactionsSearch';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
 import * as queries from '#queries';
+import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
 import * as bindings from '#spreadsheet/bindings';
 
@@ -55,7 +59,10 @@ export function AccountTransactions({
 
   return (
     <SchedulesProvider query={schedulesQuery}>
-      <TransactionListWithPreviews account={account} />
+      {/* A foreign account's page shows native amounts in its currency. */}
+      <AccountCurrencyFormat account={account}>
+        <TransactionListWithPreviews account={account} />
+      </AccountCurrencyFormat>
     </SchedulesProvider>
   );
 }
@@ -81,6 +88,7 @@ function TransactionListWithPreviews({
   const reconcileAmount = Number.isNaN(parsedReconcileAmount)
     ? null
     : parsedReconcileAmount;
+  const isForeign = !!account.currency && account.currency_precision != null;
   const isReconciling = reconcileAmount != null;
 
   const baseTransactionsQuery = useCallback(() => {
@@ -101,6 +109,7 @@ function TransactionListWithPreviews({
     updateQuery: setTransactionsQuery,
     resetQuery: () => setTransactionsQuery(baseTransactionsQuery()),
     dateFormat,
+    amountField: isForeign ? 'transaction_amount' : 'amount',
   });
 
   const searchTextRef = useRef('');
@@ -123,14 +132,11 @@ function TransactionListWithPreviews({
   const shouldCalculateRunningBalances =
     showRunningBalances === 'true' && !!account?.id && !isSearching;
 
+  // Running balances are in the account's own units.
   const accountBalanceValue = useSheetValue<
     'account',
-    'balance' | 'accounts-balance'
-  >(
-    account?.id
-      ? bindings.accountBalance(account?.id)
-      : bindings.allAccountBalance(),
-  );
+    'balance' | 'nativeBalance'
+  >(bindings.accountDisplayBalance(account));
 
   const {
     transactions,
@@ -142,10 +148,27 @@ function TransactionListWithPreviews({
     query: transactionsQuery,
     options: {
       calculateRunningBalances: shouldCalculateRunningBalances
-        ? calculateRunningBalancesTopDown
+        ? (rows, splits, start) =>
+            calculateRunningBalancesTopDown(
+              toRegisterView([...rows], isForeign),
+              splits,
+              start,
+            )
         : shouldCalculateRunningBalances,
       startingBalance: accountBalanceValue || 0,
     },
+  });
+
+  // Hidden reconciled rows still change history, so their balances are
+  // computed over the account's full sequence.
+  const fullSequenceBalances = useFullSequenceRunningBalances({
+    account,
+    isEnabled:
+      shouldCalculateRunningBalances &&
+      hideReconciled === 'true' &&
+      !isReconciling,
+    startingBalance: accountBalanceValue || 0,
+    transactions,
   });
 
   const {
@@ -167,9 +190,9 @@ function TransactionListWithPreviews({
     () =>
       new Map<TransactionEntity['id'], IntegerAmount>([
         ...previewRunningBalances,
-        ...runningBalances,
+        ...(fullSequenceBalances ?? runningBalances),
       ]),
-    [runningBalances, previewRunningBalances],
+    [runningBalances, previewRunningBalances, fullSequenceBalances],
   );
 
   useEffect(() => {
@@ -191,15 +214,14 @@ function TransactionListWithPreviews({
                 transactionId: transaction.id,
                 onPost: async (transactionId, today = false) => {
                   const parts = transactionId.split('/');
-                  await send('schedule/post-transaction', {
-                    id: parts[1],
-                    today,
-                  });
+                  // Close the menu first: posting may open the conversion
+                  // dialog for a foreign schedule without a rate.
                   dispatch(
                     collapseModals({
                       rootModalName: 'scheduled-transaction-menu',
                     }),
                   );
+                  await postScheduleTransaction(dispatch, parts[1], today);
                 },
                 onSkip: async transactionId => {
                   const parts = transactionId.split('/');
@@ -254,12 +276,31 @@ function TransactionListWithPreviews({
 
   const onCreateReconciliationTransaction = useCallback(
     async (targetDiff: number) => {
+      if (isForeign && account.currency && account.currency_precision != null) {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'foreign-amount',
+              options: {
+                transaction: reconciliation.foreignReconciliationDraft(
+                  account.id,
+                  targetDiff,
+                ),
+                currencyCode: account.currency,
+                nativePrecision: account.currency_precision,
+                onPosted: () => undefined,
+              },
+            },
+          }),
+        );
+        return;
+      }
       await reconciliation.createReconciliationTransaction(
         account.id,
         targetDiff,
       );
     },
-    [account.id],
+    [account, isForeign, dispatch],
   );
 
   const onToggleTransactionCleared = useCallback(
@@ -291,19 +332,28 @@ function TransactionListWithPreviews({
 
   const balanceBindings = useMemo(
     () => ({
-      balance: bindings.accountBalance(account.id),
-      cleared: bindings.accountBalanceCleared(account.id),
-      uncleared: bindings.accountBalanceUncleared(account.id),
+      balance: isForeign
+        ? bindings.accountNativeBalance(account.id)
+        : bindings.accountBalance(account.id),
+      cleared: isForeign
+        ? bindings.accountNativeBalanceCleared(account.id)
+        : bindings.accountBalanceCleared(account.id),
+      uncleared: isForeign
+        ? bindings.accountNativeBalanceUncleared(account.id)
+        : bindings.accountBalanceUncleared(account.id),
     }),
-    [account],
+    [account, isForeign],
   );
 
   const previewTransactionsToDisplay = isReconciling ? [] : previewTransactions;
 
+  const viewTransactions = toRegisterView(transactions, isForeign);
   const transactionsToDisplay = !isSearching
     ? // Do not render child transactions in the list, unless searching
-      previewTransactionsToDisplay.concat(transactions.filter(t => !t.is_child))
-    : transactions;
+      previewTransactionsToDisplay.concat(
+        viewTransactions.filter(t => !t.is_child),
+      )
+    : viewTransactions;
 
   return (
     <>
@@ -340,4 +390,57 @@ function TransactionListWithPreviews({
       />
     </>
   );
+}
+
+/**
+ * Running balances for every row of the account, computed over its full
+ * transaction sequence (hidden rows included) in display order.
+ * ponytail: loads id and amount for every row of the account; page the
+ * aggregate per anchor if very large accounts make this slow.
+ */
+function useFullSequenceRunningBalances({
+  account,
+  isEnabled,
+  startingBalance,
+  transactions,
+}: {
+  account: AccountEntity;
+  isEnabled: boolean;
+  startingBalance: IntegerAmount;
+  /** Loaded rows; any change (such as a date edit) recomputes balances. */
+  transactions: readonly TransactionEntity[];
+}) {
+  const isForeign = !!account.currency && account.currency_precision != null;
+  const [balances, setBalances] = useState<Map<
+    TransactionEntity['id'],
+    IntegerAmount
+  > | null>(null);
+
+  useEffect(() => {
+    if (!isEnabled) {
+      setBalances(null);
+      return;
+    }
+    let cancelled = false;
+    void aqlQuery(
+      queries
+        .transactions(account.id)
+        .options({ splits: 'all' })
+        .select(['id', 'parent_id', 'amount', 'transaction_amount']),
+    ).then(({ data }) => {
+      if (cancelled) return;
+      setBalances(
+        calculateRunningBalancesTopDown(
+          toRegisterView(data, isForeign),
+          'all',
+          startingBalance,
+        ),
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [account.id, isEnabled, isForeign, startingBalance, transactions]);
+
+  return balances;
 }

@@ -38,6 +38,12 @@ export type DbAccount = {
     | 'not-configured'
     | null;
   account_group_id?: DbAccountGroup['id'] | null;
+  currency?: string | null;
+  currency_precision?: number | null;
+  /** The encoding authority (MC-7.3): '' or CUR.P; internal, not in AQL. */
+  encoding?: string | null;
+  /** The bank balance authority (MC-7.3); internal, not in AQL. */
+  balance_spec?: string | null;
 };
 
 export type DbAccountGroup = {
@@ -194,6 +200,9 @@ export type DbTransaction = {
   date: number;
   acct: DbAccount['id'];
   amount: number;
+  transaction_amount?: number | null;
+  /** Internal pair authority cell; see server/sync/coupled-cells.ts. */
+  amount_pair?: string | null;
   sort_order: number;
   parent_id?: DbTransaction['id'] | null;
   category?: DbCategory['id'] | null;
@@ -303,6 +312,7 @@ export type DbViewTransactionInternal = {
   date: DbTransaction['date'];
   account: DbAccount['id'];
   amount: DbTransaction['amount'];
+  transaction_amount: DbTransaction['transaction_amount'] | null;
   parent_id: DbTransaction['parent_id'] | null;
   category: DbCategory['id'] | null;
   payee: DbPayee['id'] | null;
@@ -372,6 +382,18 @@ export type DbViewSchedule = {
   _conditions: JsonString;
   _actions: JsonString;
   _has_splits: 0 | 1;
+};
+
+export type DbExchangeRate = {
+  id: string;
+  base_currency: string;
+  quote_currency: string;
+  rate: string;
+  kind: 'dated' | 'standing' | 'fetched';
+  source: string;
+  timestamp: string;
+  spec?: string | null;
+  tombstone: 1 | 0;
 };
 
 export type DbTag = {

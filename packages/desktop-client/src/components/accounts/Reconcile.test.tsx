@@ -7,7 +7,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { useSheetValue } from '#hooks/useSheetValue';
-import { TestProviders } from '#mocks';
+import { createTestAppStore, TestProviders } from '#mocks';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
@@ -113,6 +114,38 @@ describe('ReconcilingMessage math & UI', () => {
     );
     expect(onCreateTransaction).toHaveBeenCalledWith(-2000);
   });
+
+  test('formats a recorded 3dp target and difference', async () => {
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'KWD',
+          precision: 3,
+        }),
+      }),
+    );
+    vi.mocked(useSheetValue).mockReturnValue(1234);
+    const onCreateTransaction = vi.fn();
+    render(
+      <TestProviders store={store}>
+        <ReconcilingMessage
+          balanceQuery={makeBalanceQuery()}
+          targetBalance={2234}
+          onDone={vi.fn()}
+          onCreateTransaction={onCreateTransaction}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByText('1.234')).toBeInTheDocument();
+    expect(screen.getByText('2.234')).toBeInTheDocument();
+    expect(screen.getByText('+1.000')).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByText('Create reconciliation transaction'),
+    );
+    expect(onCreateTransaction).toHaveBeenCalledWith(1000);
+  });
 });
 
 describe('ReconcileMenu arithmetic evaluation', () => {
@@ -154,7 +187,7 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  test('defaults input to cleared balance and submits evaluated invalid amount & use cleared balance', async () => {
+  test('invalid input does not reconcile', async () => {
     // clearedBalance = 1234.56
     vi.mocked(useSheetValue).mockReturnValue(123456);
     const onReconcile = vi.fn();
@@ -178,9 +211,66 @@ describe('ReconcileMenu arithmetic evaluation', () => {
     // Submit
     await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
 
-    // Input has no digits, so it should use cleared balance for reconciliation
-    expect(onReconcile).toHaveBeenCalledWith(123456);
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onReconcile).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  test('edits a 3dp balance in stored units', async () => {
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'KWD',
+          precision: 3,
+        }),
+      }),
+    );
+    vi.mocked(useSheetValue).mockReturnValue(1234);
+    const onReconcile = vi.fn();
+    render(
+      <TestProviders store={store}>
+        <ReconcileMenu
+          account={baseAccount}
+          onReconcile={onReconcile}
+          onClose={vi.fn()}
+        />
+      </TestProviders>,
+    );
+    const input = screen.getByRole('textbox');
+    expect(input).toHaveValue('1.234');
+    await userEvent.clear(input);
+    await userEvent.type(input, '2.345');
+    await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+    expect(onReconcile).toHaveBeenCalledWith(2345);
+  });
+
+  test('prefills the full balance when fractions are hidden', async () => {
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'KWD',
+          precision: 3,
+        }),
+        hideFraction: 'true',
+      }),
+    );
+    vi.mocked(useSheetValue).mockReturnValue(1234);
+    const onReconcile = vi.fn();
+    render(
+      <TestProviders store={store}>
+        <ReconcileMenu
+          account={baseAccount}
+          onReconcile={onReconcile}
+          onClose={vi.fn()}
+        />
+      </TestProviders>,
+    );
+    expect(screen.getByRole('textbox')).toHaveValue('1.234');
+    await userEvent.click(screen.getByRole('button', { name: 'Reconcile' }));
+    expect(onReconcile).toHaveBeenCalledWith(1234);
   });
 
   test('clicking "Use last synced total" fills and submits that amount', async () => {

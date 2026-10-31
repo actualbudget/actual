@@ -1,3 +1,4 @@
+import { isCanonicalTimestamp, parseRate } from '#shared/exchange-rate';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
@@ -16,6 +17,7 @@ import type {
   DbAccountGroup,
   DbCategory,
   DbCategoryGroup,
+  DbExchangeRate,
   DbPayee,
 } from './db';
 import { ValidationError } from './errors';
@@ -61,6 +63,29 @@ export function fromDateRepr(number: number) {
     dateString.slice(6)
   );
 }
+
+const RATE_KINDS = new Set(['dated', 'standing', 'fetched']);
+
+export const exchangeRateModel = {
+  /** Full-row validation for every rate writer; sync rows are re-checked on read. */
+  validate(rate: DbExchangeRate): DbExchangeRate {
+    const valid =
+      typeof rate.id === 'string' &&
+      /^[A-Z]{3}$/.test(rate.base_currency) &&
+      /^[A-Z]{3}$/.test(rate.quote_currency) &&
+      rate.base_currency !== rate.quote_currency &&
+      RATE_KINDS.has(rate.kind) &&
+      typeof rate.source === 'string' &&
+      rate.source !== '' &&
+      (rate.kind === 'fetched') === (rate.source !== 'manual') &&
+      isCanonicalTimestamp(rate.timestamp) &&
+      (rate.tombstone === 0 || rate.tombstone === 1);
+    if (!valid || parseRate(rate.rate) !== rate.rate) {
+      throw new ValidationError('exchange rate is invalid');
+    }
+    return rate;
+  },
+};
 
 export const accountModel = {
   validate(account: Partial<DbAccount>, { update }: { update?: boolean } = {}) {

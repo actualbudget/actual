@@ -68,12 +68,17 @@ export async function unlockTransaction(
   await send('transactions-batch-update', { updated: diff.updated });
 }
 
+/** Cleared balance in the account's own units (native for foreign accounts). */
 export async function getClearedBalance(accountId: AccountEntity['id']) {
+  const { data: accounts } = await aqlQuery(
+    q('accounts').filter({ id: accountId }).select('currency'),
+  );
+  const field = accounts?.[0]?.currency ? 'transaction_amount' : 'amount';
   const { data } = await aqlQuery(
     q('transactions')
       .filter({ cleared: true, account: accountId })
       .options({ splits: 'none' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: `$${field}` }),
   );
 
   return data ?? 0;
@@ -90,6 +95,28 @@ export async function finishReconciliation(
   if (targetDiff === 0) {
     await lock();
   }
+}
+
+/**
+ * A foreign account's adjustment is a new foreign entry: its native
+ * difference is posted through the conversion dialog.
+ */
+export function foreignReconciliationDraft(
+  accountId: AccountEntity['id'],
+  diff: number,
+) {
+  const [{ amount, ...draft }] = realizeTempTransactions([
+    {
+      id: 'temp',
+      account: accountId,
+      cleared: true,
+      reconciled: false,
+      amount: diff,
+      date: currentDay(),
+      notes: t('Reconciliation balance adjustment'),
+    },
+  ]);
+  return { ...draft, transaction_amount: amount };
 }
 
 export async function createReconciliationTransaction(

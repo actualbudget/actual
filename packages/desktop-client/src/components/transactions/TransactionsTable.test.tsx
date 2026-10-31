@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 
 import {
   generateAccount,
@@ -12,7 +13,10 @@ import {
   splitTransaction,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { integerToCurrency } from '@actual-app/core/shared/util';
+import {
+  getNumberFormat,
+  integerToCurrency,
+} from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -36,10 +40,12 @@ import { format as formatDate, parse as parseDate } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 
 import { AuthProvider } from '#auth/AuthProvider';
+import { CurrencyFormatProvider } from '#hooks/currencyFormatContext';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { SelectedProviderWithItems } from '#hooks/useSelected';
 import { SplitsExpandedProvider } from '#hooks/useSplitsExpanded';
 import { SpreadsheetProvider } from '#hooks/useSpreadsheet';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { createTestQueryClient, TestProviders } from '#mocks';
 import * as modalsSlice from '#modals/modalsSlice';
 import { payeeQueries } from '#payees';
@@ -52,13 +58,17 @@ import {
 } from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
+let testEncoding: string | undefined;
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
   () => import('#mocks/connection'),
 );
 vi.mock('../../hooks/useSyncedPref', () => ({
-  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+  useSyncedPref: vi.fn((name: string) => [
+    name === 'amountEncoding' ? testEncoding : undefined,
+    vi.fn(),
+  ]),
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: vi.fn(() => false),
@@ -66,7 +76,7 @@ vi.mock('../../hooks/useFeatureFlag', () => ({
 
 const accounts = [generateAccount('Bank of America')];
 vi.mock('../../hooks/useAccounts', () => ({
-  useAccounts: () => accounts,
+  useAccounts: () => ({ data: accounts }),
 }));
 
 const payees: PayeeEntity[] = [
@@ -155,6 +165,8 @@ function generateTransactions(
 }
 
 type LiveTransactionTableProps = {
+  /** Wraps the table, e.g. in a foreign account's currency format. */
+  wrap?: (table: ReactNode) => ReactNode;
   transactions: TransactionEntity[];
   payees: PayeeEntity[];
   accounts: AccountEntity[];
@@ -227,22 +239,24 @@ function LiveTransactionTable(props: LiveTransactionTableProps) {
               fetchAllIds={() => Promise.resolve(transactions.map(t => t.id))}
             >
               <SplitsExpandedProvider>
-                <TransactionTable
-                  {...props}
-                  transactions={transactions}
-                  loadMoreTransactions={vi.fn()}
-                  // @ts-expect-error TODO: fix me
-                  commonPayees={[]}
-                  payees={payees}
-                  addNotification={console.log}
-                  onSave={onSave}
-                  onSplit={onSplit}
-                  onAdd={onAdd}
-                  onAddSplit={onAddSplit}
-                  onCreatePayee={onCreatePayee}
-                  showSelection
-                  allowSplitTransaction
-                />
+                {(props.wrap ?? (table => table))(
+                  <TransactionTable
+                    {...props}
+                    transactions={transactions}
+                    loadMoreTransactions={vi.fn()}
+                    // @ts-expect-error TODO: fix me
+                    commonPayees={[]}
+                    payees={payees}
+                    addNotification={console.log}
+                    onSave={onSave}
+                    onSplit={onSplit}
+                    onAdd={onAdd}
+                    onAddSplit={onAddSplit}
+                    onCreatePayee={onCreatePayee}
+                    showSelection
+                    allowSplitTransaction
+                  />,
+                )}
               </SplitsExpandedProvider>
             </SelectedProviderWithItems>
           </SchedulesProvider>
@@ -289,6 +303,7 @@ function initBasicServer() {
 }
 
 beforeEach(() => {
+  testEncoding = undefined;
   schedules = [];
   createScheduleMock.mockClear();
   initBasicServer();
@@ -478,6 +493,24 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  test.each([
+    [0, 'JPY', '0', '1234', -1234, '1,234'],
+    [3, 'KWD', '0.000', '12.345', -12345, '12.345'],
+  ] as const)(
+    'saves and reopens a %sdp register amount',
+    async (precision, currencyCode, zero, typed, stored, display) => {
+      testEncoding = JSON.stringify({ version: 1, currencyCode, precision });
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+      const input = await editNewField(container, 'debit');
+      expect(input.value).toBe(zero);
+      await userEvent.clear(input);
+      await userEvent.type(input, `${typed}[Enter]`);
+      await waitFor(() => expect(getTransactions()[0].amount).toBe(stored));
+      updateProps({ isAdding: false, transactions: getTransactions() });
+      expect(queryField(container, 'debit', '', 0).textContent).toBe(display);
+    },
+  );
   test('preview transactions show schedule name in notes', async () => {
     const scheduleName = 'Monthly rent';
     schedules = [
@@ -643,7 +676,11 @@ describe('Transactions', () => {
       );
       if (transaction.amount < 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount),
+          integerToCurrency(
+            -transaction.amount,
+            getNumberFormat().formatter,
+            2,
+          ),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
           '',
@@ -651,7 +688,7 @@ describe('Transactions', () => {
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount),
+          integerToCurrency(transaction.amount, getNumberFormat().formatter, 2),
         );
       }
     });
@@ -2016,6 +2053,196 @@ describe('Transactions', () => {
       });
       expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('foreign-currency rows', () => {
+  const yen: AccountEntity = {
+    ...generateAccount('Yen wallet'),
+    currency: 'JPY',
+    currency_precision: 0,
+  };
+  const foreignTransaction = (): TransactionEntity => ({
+    id: 'foreign-1',
+    account: yen.id,
+    amount: -1500,
+    transaction_amount: -1500,
+    date: '2026-03-10',
+    payee: 'bob-id',
+    cleared: false,
+  });
+
+  beforeEach(() => {
+    initBasicServer();
+  });
+
+  // Saving an edited foreign amount routes to its dialog in TransactionList
+  // (openForeignEditDialog, tested in util/foreign-edit.test.ts).
+  it('lets existing foreign amounts be edited in mixed views', async () => {
+    const { container } = renderTransactions({
+      accounts: [...accounts, yen],
+      transactions: [foreignTransaction()],
+      currentAccountId: null,
+    });
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
+  });
+
+  it('edits existing amounts and offers split in the native register', async () => {
+    const { container } = renderTransactions({
+      accounts: [...accounts, yen],
+      transactions: [foreignTransaction()],
+      currentAccountId: yen.id,
+      wrap: table => (
+        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+          {table}
+        </CurrencyFormatProvider>
+      ),
+    });
+    const input = await editField(container, 'debit', 0);
+    expect(input).toBeInstanceOf(HTMLInputElement);
+
+    await editField(container, 'category', 0);
+    await waitForAutocomplete();
+    expect(screen.getByTestId('split-transaction-button')).toBeInTheDocument();
+  });
+
+  it('keeps a new payee typed last in the foreign draft without creating it', async () => {
+    const { container, getTransactions, updateProps } = renderTransactions({
+      accounts: [...accounts, yen],
+      currentAccountId: yen.id,
+      wrap: table => (
+        <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+          {table}
+        </CurrencyFormatProvider>
+      ),
+    });
+    updateProps({ isAdding: true });
+
+    const debit = await editNewField(container, 'debit');
+    await userEvent.clear(debit);
+    await userEvent.type(debit, '1500');
+    const payee = await editNewField(container, 'payee');
+    await userEvent.type(payee, 'Ramen Shop');
+    await waitForAutocomplete();
+    await userEvent.keyboard('{Enter}');
+
+    await userEvent.click(
+      container.querySelector('[data-testid="add-button"]')!,
+    );
+    expect(getTransactions()[0]).toMatchObject({
+      account: yen.id,
+      payee: 'new:Ramen Shop',
+    });
+  });
+
+  describe('amount details', () => {
+    beforeEach(() => {
+      vi.mocked(useSyncedPref).mockImplementation(((name: string) => [
+        name === 'defaultCurrencyCode' ? 'USD' : undefined,
+        vi.fn(),
+      ]) as never);
+      onTestFinished(() => {
+        vi.mocked(useSyncedPref).mockImplementation(((name: string) => [
+          name === 'amountEncoding' ? testEncoding : undefined,
+          vi.fn(),
+        ]) as never);
+      });
+    });
+
+    const pair = (overrides: Partial<TransactionEntity> = {}) => ({
+      ...foreignTransaction(),
+      amount: -1000,
+      transaction_amount: -1500,
+      ...overrides,
+    });
+
+    it('describes the native half in a mixed view', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [pair()],
+        currentAccountId: null,
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        '-1,500 JPY in Yen wallet. Effective rate: 1 JPY = 0.00666667 USD.',
+      );
+    });
+
+    it('describes the base half in the native register', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [
+          { ...pair(), amount: -1500, _baseAmount: -1000 } as TransactionEntity,
+        ],
+        currentAccountId: yen.id,
+        wrap: table => (
+          <CurrencyFormatProvider currencyCode="JPY" precision={0}>
+            {table}
+          </CurrencyFormatProvider>
+        ),
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        'Base: -10.00 USD. Effective rate: 1 JPY = 0.00666667 USD.',
+      );
+    });
+
+    it('has no rate when the base is zero', () => {
+      const { container } = renderTransactions({
+        accounts: [...accounts, yen],
+        transactions: [pair({ amount: 0, transaction_amount: -1 })],
+        currentAccountId: null,
+      });
+      expect(queryField(container, 'debit', '', 0)).toHaveAttribute(
+        'title',
+        '-1 JPY in Yen wallet. No effective rate (one amount is zero).',
+      );
+    });
+
+    it('keeps base rows untouched', () => {
+      const { container } = renderTransactions({
+        accounts,
+        transactions: generateTransaction({
+          account: accounts[0].id,
+          amount: -2500,
+        }),
+        currentAccountId: null,
+      });
+      expect(
+        queryField(container, 'debit', '', 0).getAttribute('title'),
+      ).not.toMatch(/Effective rate/);
+    });
+  });
+
+  it('lists accounts in other currencies last for a saved single row', async () => {
+    const otherYen: AccountEntity = {
+      ...generateAccount('Second yen'),
+      currency: 'JPY',
+      currency_precision: 0,
+    };
+    // The autocomplete lists accounts from the mocked useAccounts.
+    accounts.push(yen, otherYen);
+    onTestFinished(() => {
+      accounts.splice(accounts.indexOf(yen), 2);
+    });
+    const { container } = renderTransactions({
+      accounts: [...accounts],
+      transactions: [foreignTransaction()],
+      currentAccountId: null,
+    });
+    await editField(container, 'account', 0);
+    await waitForAutocomplete();
+    const options = [
+      ...document.querySelectorAll('[data-testid$="-account-item"]'),
+    ].map(item => item.textContent);
+    // Same-encoding accounts first; a saved single row may also move to an
+    // account in another currency, listed last under its own heading.
+    expect(options.indexOf('Second yen')).toBeGreaterThanOrEqual(0);
+    expect(options.indexOf('Bank of America')).toBeGreaterThan(
+      options.indexOf('Second yen'),
+    );
+    expect(screen.getByText('Other currencies')).toBeInTheDocument();
   });
 });
 

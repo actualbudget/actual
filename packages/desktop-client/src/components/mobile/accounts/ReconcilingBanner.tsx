@@ -28,8 +28,15 @@ export function ReconcilingBanner({
   onCreateTransaction,
 }: ReconcilingBannerProps) {
   const format = useFormat();
-  const cleared = useSheetValue<'account', 'balanceCleared'>(
-    bindings.accountBalanceCleared(account.id),
+  // Rendered inside the account's currency format; foreign accounts compare
+  // the native cleared balance.
+  const cleared = useSheetValue<
+    'account',
+    'balanceCleared' | 'nativeBalanceCleared'
+  >(
+    account.currency
+      ? bindings.accountNativeBalanceCleared(account.id)
+      : bindings.accountBalanceCleared(account.id),
   );
   const [isUpdating, setIsUpdating] = useState(false);
 

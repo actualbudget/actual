@@ -179,7 +179,7 @@ describe('goCardlessService', () => {
         expect.objectContaining({
           balances: mockedBalances.balances,
           institutionId: mockRequisition.institution_id,
-          startingBalance: expect.any(Number),
+          startingBalance: expect.any(String),
           transactions: {
             all: expect.arrayContaining([
               expect.objectContaining({
@@ -222,6 +222,66 @@ describe('goCardlessService', () => {
           },
         }),
       );
+    });
+
+    it('leaves transactions in another currency out of the starting balance', async () => {
+      vi.spyOn(goCardlessService, 'getLinkedRequisition').mockResolvedValue(
+        mockRequisition,
+      );
+      vi.spyOn(goCardlessService, 'getAccountMetadata').mockResolvedValue(
+        mockAccountMetaData,
+      );
+      vi.spyOn(goCardlessService, 'getTransactions').mockResolvedValue({
+        transactions: {
+          booked: [
+            {
+              transactionId: 'eur',
+              transactionAmount: { currency: 'EUR', amount: '-100.00' },
+              bookingDate: '2000-01-02',
+              valueDate: '2000-01-02',
+            },
+            {
+              transactionId: 'usd',
+              transactionAmount: { currency: 'USD', amount: '-50.00' },
+              bookingDate: '2000-01-01',
+              valueDate: '2000-01-01',
+            },
+          ],
+          pending: [],
+        },
+      });
+      vi.spyOn(goCardlessService, 'getBalances').mockResolvedValue({
+        balances: [
+          {
+            balanceAmount: { amount: '1000.00', currency: 'EUR' },
+            balanceType: 'interimAvailable',
+            referenceDate: '2000-01-03',
+          },
+        ],
+      });
+
+      const result = await goCardlessService.getTransactionsWithBalance(
+        requisitionId,
+        accountId,
+        undefined,
+        undefined,
+      );
+      expect(result.startingBalance).toBe('1100.00');
+      expect(result.startingBalanceCurrency).toBe('EUR');
+
+      // A bank-specific calculation may use other sources, so its result
+      // is not labelled with the listed balances' currency.
+      vi.spyOn(goCardlessService, 'getLinkedRequisition').mockResolvedValue({
+        ...mockRequisition,
+        institution_id: 'ING_PL_INGBPLPW' as GoCardlessInstitutionId,
+      });
+      const bankSpecific = await goCardlessService.getTransactionsWithBalance(
+        requisitionId,
+        accountId,
+        undefined,
+        undefined,
+      );
+      expect(bankSpecific.startingBalanceCurrency).toBeNull();
     });
 
     it('throws AccountNotLinkedToRequisition error if requisition accounts not includes requested account', async () => {

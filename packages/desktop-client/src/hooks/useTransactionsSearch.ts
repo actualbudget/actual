@@ -6,11 +6,15 @@ import { debounce } from 'es-toolkit/compat';
 import { useFormat } from '#hooks/useFormat';
 import * as queries from '#queries';
 
+import { useAmountPrecision } from './useAmountPrecision';
+
 type UseTransactionsSearchProps = {
   updateQuery: (updateFn: (searchQuery: Query) => Query) => void;
   resetQuery: () => void;
   dateFormat: string;
   delayMs?: number;
+  /** A foreign account's register searches native amounts at its precision. */
+  amountField?: 'amount' | 'transaction_amount';
 };
 type UseTransactionsSearchResult = {
   isSearching: boolean;
@@ -22,7 +26,9 @@ export function useTransactionsSearch({
   resetQuery,
   dateFormat,
   delayMs = 150,
+  amountField = 'amount',
 }: UseTransactionsSearchProps): UseTransactionsSearchResult {
+  const precision = useAmountPrecision();
   const [isSearching, setIsSearching] = useState(false);
   const currencySymbol = useFormat().currency.symbol;
 
@@ -46,12 +52,22 @@ export function useTransactionsSearch({
               searchText,
               dateFormat,
               currencySymbol,
+              precision,
+              amountField,
             ),
           );
           setIsSearching(true);
         }
       }, delayMs),
-    [currencySymbol, dateFormat, delayMs, resetQueryRef, updateQueryRef],
+    [
+      currencySymbol,
+      dateFormat,
+      delayMs,
+      precision,
+      amountField,
+      resetQueryRef,
+      updateQueryRef,
+    ],
   );
 
   useEffect(() => {

@@ -18,6 +18,7 @@ import type {
 import { Row, ROW_HEIGHT } from '#components/table';
 import { useDragRef } from '#hooks/useDragRef';
 
+import { CategoryGroupMonth } from './envelope/PocketRows';
 import { RenderMonths } from './RenderMonths';
 import { SidebarGroup } from './SidebarGroup';
 
@@ -144,7 +145,13 @@ export function ExpenseGroup({
           onShowNewCategory={onShowNewCategory}
         />
         <RenderMonths>
-          {({ month }) => <MonthComponent month={month} group={group} />}
+          {({ month }) => (
+            <CategoryGroupMonth
+              MonthComponent={MonthComponent}
+              month={month}
+              group={group}
+            />
+          )}
         </RenderMonths>
       </View>
     </Row>

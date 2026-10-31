@@ -11,6 +11,7 @@ import type { ScheduleEntity } from '@actual-app/core/types/models';
 
 import { Search } from '#components/common/Search';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
+import { usePostScheduleTransaction } from '#hooks/usePostScheduleTransaction';
 import { useSchedules } from '#hooks/useSchedules';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -22,6 +23,7 @@ export function Schedules() {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
+  const postSchedule = usePostScheduleTransaction();
   const [filter, setFilter] = useState('');
 
   const onEdit = useCallback(
@@ -49,10 +51,10 @@ export function Schedules() {
     async (name: ScheduleItemAction, id: ScheduleEntity['id']) => {
       switch (name) {
         case 'post-transaction':
-          await send('schedule/post-transaction', { id });
+          await postSchedule(id);
           break;
         case 'post-transaction-today':
-          await send('schedule/post-transaction', { id, today: true });
+          await postSchedule(id, true);
           break;
         case 'skip':
           await send('schedule/skip-next-date', { id });
@@ -75,7 +77,7 @@ export function Schedules() {
           throw new Error(`Unknown action: ${String(name)}`);
       }
     },
-    [],
+    [postSchedule],
   );
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
