@@ -805,6 +805,85 @@ export async function reconcileTransactions(
   };
 }
 
+// Greedily assigns each unmatched entry in `dataList` the closest
+// still-available candidate from its own `fuzzyDataset`, processing
+// entries in ascending order of that distance instead of relying solely
+// on `dataList`'s own order. (`dataList` order is still used as a
+// tie-breaker.) Then, for any entry left unmatched, tries to free up a
+// candidate by reshuffling this pass's own assignments (see
+// `tryAugment`), so a batch never ends up with a duplicate that a
+// different pairing could have avoided. `hasMatched` is shared across both
+// fuzzy-matching passes (and the id/imported_id pass before them), so a
+// candidate claimed here can't be claimed again later.
+function greedilyAssignCandidates(dataList, hasMatched, isEligible) {
+  const results = dataList.map(d => ({ ...d }));
+
+  const edges = [];
+  results.forEach((data, dataIndex) => {
+    if (data.match || !data.fuzzyDataset) return;
+    const transDate = dateFns.parseISO(data.trans.date);
+    data.fuzzyDataset.forEach((row, rowIndex) => {
+      if (hasMatched.has(row.id) || !isEligible(data, row)) return;
+      const distance = Math.abs(
+        dateFns.differenceInMilliseconds(
+          transDate,
+          dateFns.parseISO(db.fromDateRepr(row.date)),
+        ),
+      );
+      if (!Number.isFinite(distance)) return;
+      edges.push({ distance, dataIndex, rowIndex, data, row });
+    });
+  });
+
+  edges.sort(
+    (a, b) =>
+      a.distance - b.distance ||
+      a.dataIndex - b.dataIndex ||
+      a.rowIndex - b.rowIndex,
+  );
+
+  // Each entry's candidates, closest first, and which entry currently holds
+  // each candidate claimed in this pass.
+  const candidatesByData = new Map();
+  for (const { data, row } of edges) {
+    if (!candidatesByData.has(data)) candidatesByData.set(data, []);
+    candidatesByData.get(data).push(row);
+  }
+  const holderByRowId = new Map();
+
+  for (const { data, row } of edges) {
+    if (data.match || hasMatched.has(row.id)) continue;
+    hasMatched.add(row.id);
+    holderByRowId.set(row.id, data);
+    data.match = row;
+  }
+
+  // Looks for a free candidate for `data`, possibly by moving the current
+  // holder of one of its candidates onto another candidate (recursively).
+  // Only assignments made in this pass can move; `visited` stops cycles.
+  function tryAugment(data, visited) {
+    for (const row of candidatesByData.get(data)) {
+      if (visited.has(row.id)) continue;
+      visited.add(row.id);
+      const holder = holderByRowId.get(row.id);
+      if (holder ? !tryAugment(holder, visited) : hasMatched.has(row.id)) {
+        continue;
+      }
+      hasMatched.add(row.id);
+      holderByRowId.set(row.id, data);
+      data.match = row;
+      return true;
+    }
+    return false;
+  }
+
+  for (const data of candidatesByData.keys()) {
+    if (!data.match) tryAugment(data, new Set());
+  }
+
+  return results;
+}
+
 // Ranks fuzzy-match candidates by distance from transaction date, nearest first.
 // On a same-distance tie, a candidate that already carries its own imported_id
 // (from a previous, unrelated sync) ranks after one that doesn't. Without this
@@ -988,43 +1067,28 @@ export async function matchTransactions(
   // Next, do the fuzzy matching. This first pass matches based on the
   // payee id. We do this in multiple passes so that higher fidelity
   // matching always happens first, i.e. a transaction should match
-  // match with low fidelity if a later transaction is going to match
+  // with low fidelity if a later transaction is going to match
   // the same one with high fidelity.
-  const transactionsStep2 = transactionsStep1.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      // Try to find one where the payees match.
-      const match = data.fuzzyDataset.find(
-        row =>
-          !hasMatched.has(row.id) &&
-          !exactMatchedParentIds.has(row.parent_id) &&
-          data.trans.payee === row.payee,
-      );
-
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  //
+  // Transactions are assigned in order of how close their own best
+  // remaining candidate is, not in whatever order the bank returned them.
+  const transactionsStep2 = greedilyAssignCandidates(
+    transactionsStep1,
+    hasMatched,
+    (data, row) =>
+      !exactMatchedParentIds.has(row.parent_id) &&
+      data.trans.payee === row.payee,
+  );
 
   // The final fuzzy matching pass. This is the lowest fidelity
-  // matching: it just find the first transaction that hasn't been
+  // matching: it just finds the first transaction that hasn't been
   // matched yet. Remember the dataset only contains transactions
   // around the same date with the same amount.
-  const transactionsStep3 = transactionsStep2.map(data => {
-    if (!data.match && data.fuzzyDataset) {
-      const match = data.fuzzyDataset.find(
-        row =>
-          !hasMatched.has(row.id) && !exactMatchedParentIds.has(row.parent_id),
-      );
-      if (match) {
-        hasMatched.add(match.id);
-        return { ...data, match };
-      }
-    }
-    return data;
-  });
+  const transactionsStep3 = greedilyAssignCandidates(
+    transactionsStep2,
+    hasMatched,
+    (_data, row) => !exactMatchedParentIds.has(row.parent_id),
+  );
 
   return {
     payeesToCreate,
