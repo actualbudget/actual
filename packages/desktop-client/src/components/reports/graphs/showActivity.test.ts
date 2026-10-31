@@ -26,6 +26,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -57,6 +58,7 @@ describe('showActivity', () => {
       filters: [{ field: 'account', op: 'is', value: 'acct-1', type: 'id' }],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -94,6 +96,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -123,6 +126,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -151,6 +155,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'totals',
       startDate: '2026-05-24',
       endDate: '2026-05-30',
@@ -188,6 +193,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type,
         startDate: '2026-05-01',
         endDate: '2026-05-31',
@@ -229,6 +235,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type: 'totals',
         startDate,
         endDate: '2026-06-30',
@@ -256,6 +263,7 @@ describe('showActivity', () => {
       filters: [],
       showHiddenCategories: true,
       showOffBudget: true,
+      showUncategorized: true,
       type: 'time',
       startDate: '2026-04',
       endDate: '2026-06-30',
@@ -288,6 +296,7 @@ describe('showActivity', () => {
         filters: [],
         showHiddenCategories: true,
         showOffBudget: true,
+        showUncategorized: true,
         type: 'totals',
         startDate: '2026-05-01',
         endDate: '2026-05-31',
@@ -300,4 +309,110 @@ describe('showActivity', () => {
       ).toEqual(['date', 'date']);
     },
   );
+
+  describe('category "one of" filter from the report checkboxes', () => {
+    function drillDownFilters(showUncategorized: boolean) {
+      const navigate = vi.fn();
+      showActivity({
+        navigate,
+        categories,
+        accounts,
+        balanceTypeOp: 'totalTotals',
+        filters: [
+          { field: 'category', op: 'oneOf', value: ['food'], type: 'id' },
+          { field: 'account', op: 'is', value: 'acct-1', type: 'id' },
+        ],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        showUncategorized,
+        type: 'totals',
+        startDate: '2026-05-24',
+        endDate: '2026-05-30',
+      });
+      return navigate.mock.calls[0][1].state.filterConditions;
+    }
+
+    it('also keeps transactions without a category, but not split parents', () => {
+      const filterConditions = drillDownFilters(true);
+
+      expect(filterConditions).toContainEqual(
+        expect.objectContaining({
+          field: 'category',
+          queryFilter: {
+            $or: [
+              { category: { $oneof: ['food'] } },
+              { $and: [{ category: null }, { is_parent: false }] },
+            ],
+          },
+        }),
+      );
+      expect(filterConditions).toContainEqual({
+        field: 'account',
+        op: 'is',
+        value: 'acct-1',
+        type: 'id',
+      });
+    });
+
+    it('keeps only off budget transactions without a category when uncategorized is hidden', () => {
+      expect(drillDownFilters(false)).toContainEqual(
+        expect.objectContaining({
+          field: 'category',
+          queryFilter: {
+            $or: [
+              { category: { $oneof: ['food'] } },
+              {
+                $and: [
+                  { category: null },
+                  { is_parent: false },
+                  { 'account.offbudget': true },
+                ],
+              },
+            ],
+          },
+        }),
+      );
+    });
+
+    function drillDownName(checkedIds: string[]) {
+      const navigate = vi.fn();
+      showActivity({
+        navigate,
+        categories: {
+          grouped: [],
+          list: ['Food', 'Rent', 'Fun'].map(name => ({
+            id: name.toLowerCase(),
+            name,
+            group: 'group',
+          })),
+        },
+        accounts,
+        balanceTypeOp: 'totalTotals',
+        filters: [
+          { field: 'category', op: 'oneOf', value: checkedIds, type: 'id' },
+        ],
+        showHiddenCategories: true,
+        showOffBudget: true,
+        showUncategorized: true,
+        type: 'totals',
+        startDate: '2026-05-24',
+        endDate: '2026-05-30',
+      });
+      return navigate.mock.calls[0][1].state.filterConditions[0].customName;
+    }
+
+    it('names the checked categories when they are fewer', () => {
+      expect(drillDownName(['rent'])).toBe('Report categories: Rent');
+    });
+
+    it('names the unchecked categories when they are fewer', () => {
+      expect(drillDownName(['food', 'fun'])).toBe(
+        'Report categories: all except Rent',
+      );
+    });
+
+    it('says none when every category is unchecked', () => {
+      expect(drillDownName([])).toBe('Report categories: none');
+    });
+  });
 });
