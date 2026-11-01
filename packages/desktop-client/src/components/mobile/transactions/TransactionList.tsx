@@ -331,6 +331,7 @@ function SelectedTransactionsFloatingActionBar({
   const isMoreThanOne = selectedTransactions.size > 1;
 
   const { showUndoNotification } = useUndo();
+  const { data: accounts = [] } = useAccounts();
   const {
     onBatchEdit,
     onBatchDuplicate,
@@ -339,10 +340,9 @@ function SelectedTransactionsFloatingActionBar({
     onBatchUnlinkSchedule,
     onSetTransfer,
     onMerge,
-  } = useTransactionBatchActions();
+  } = useTransactionBatchActions(accounts);
 
   const navigate = useNavigate();
-  const { data: accounts = [] } = useAccounts();
   const accountsById = useMemo(() => groupById(accounts), [accounts]);
 
   const { data: payees = [] } = usePayees();

@@ -2021,7 +2021,7 @@ function AccountHack(props: AccountHackProps) {
     onBatchUnlinkSchedule,
     onBatchDelete,
     onSetTransfer,
-  } = useTransactionBatchActions();
+  } = useTransactionBatchActions(props.accounts);
 
   return (
     <AccountInternal

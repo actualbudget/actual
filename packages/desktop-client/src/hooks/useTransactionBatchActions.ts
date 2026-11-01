@@ -75,7 +75,7 @@ type BatchUnlinkScheduleProps = {
   onSuccess?: (ids: Array<TransactionEntity['id']>) => void;
 };
 
-export function useTransactionBatchActions() {
+export function useTransactionBatchActions(accounts?: AccountEntity[]) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -535,18 +535,28 @@ export function useTransactionBatchActions() {
           p => p.transfer_acct === fromTrans.account,
         );
         const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
+        const fromAccount = accounts?.find(
+          account => account.id === fromTrans.account,
+        );
+        const toAccount = accounts?.find(
+          account => account.id === toTrans.account,
+        );
+        const clearCategory =
+          fromAccount != null &&
+          toAccount != null &&
+          fromAccount.offbudget === toAccount.offbudget;
 
         const changes = {
           updated: [
             {
               ...fromTrans,
-              category: null,
+              ...(clearCategory ? { category: null } : {}),
               payee: toPayee?.id,
               transfer_id: toTrans.id,
             },
             {
               ...toTrans,
-              category: null,
+              ...(clearCategory ? { category: null } : {}),
               payee: fromPayee?.id,
               transfer_id: fromTrans.id,
             },
