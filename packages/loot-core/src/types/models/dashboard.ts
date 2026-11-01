@@ -494,5 +494,7 @@ export type BalanceForecastWidget = AbstractWidget<
     yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
     series?: ForecastSeries[];
+    // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
+    monthsFromToday?: number;
   } | null
 >;
