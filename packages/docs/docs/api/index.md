@@ -74,6 +74,35 @@ let api = require('@actual-app/api');
 
 Heads up! You probably don't want to hard-code the passwords like that, especially if you'll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
+### API Keys
+
+For scripts and integrations, you can create a key with read and write access to selected existing budgets. A key remains valid until you revoke it or your account is disabled or deleted. If you lose access to a budget, the key also loses access to that budget.
+
+1. Open the budget in Actual and make sure it has synced to your server.
+2. Go to **Settings → General → Security → API keys** and select **Add key**.
+3. Enter a name that identifies the integration, then select **Create key**.
+4. Copy the key to your integration's secret storage before selecting **Done**. You cannot view it again.
+
+Keys created in Settings grant access to the current budget. To create a key for multiple budgets, use a normal user session to send `POST /api-keys` with `{ "name": "My integration", "fileIds": ["file-id-1", "file-id-2"] }`. Use the server file IDs returned by `/sync/list-user-files`, not the Sync IDs. Revoking a key removes its access to all selected budgets.
+
+Pass the key through `sessionToken` instead of `password`:
+
+```js
+await api.init({
+  dataDir: '/some/path',
+  serverURL: 'https://actual.example.com',
+  sessionToken: process.env.ACTUAL_API_KEY,
+});
+```
+
+Then call `downloadBudget` with the budget's Sync ID as shown above. If you enabled end-to-end encryption, you still need the encryption password.
+
+The [CLI](cli.md) accepts the key through its existing session-token options. For example, set `ACTUAL_SESSION_TOKEN_FILE` to a file containing the key, alongside your server URL and Sync ID. There are no CLI commands for creating or revoking keys.
+
+Keys support downloading a budget and syncing data changes. They do not support bank sync, server administration, full budget uploads or replacement, server budget deletion, or changes to encryption settings. Periodic full-file snapshot uploads are also unavailable; ordinary data synchronisation still works.
+
+To stop an integration's server access, return to **API keys**, select **Revoke** beside its name, and confirm. Revocation does not erase previously downloaded data. Use a separate local data directory for each integration if you do not want it to access other cached budgets.
+
 ### Self-Signed Https Certificates
 
 If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration will be needed for the connections to succeed.
