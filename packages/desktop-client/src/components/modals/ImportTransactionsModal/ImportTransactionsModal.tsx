@@ -572,6 +572,14 @@ export function ImportTransactionsModal({
           hasHeaderRow,
           skipStartLines,
           skipEndLines,
+          fallbackMissingPayeeToMemo,
+          importNotes,
+          swapPayeeAndMemo: getSwapOption(
+            fileType,
+            ofxSwapPayeeAndMemo,
+            qifSwapPayeeAndMemo,
+            camtSwapPayeeAndMemo,
+          ),
         });
         void parse(nextFilename, options, {
           preserveImportSettings: false,

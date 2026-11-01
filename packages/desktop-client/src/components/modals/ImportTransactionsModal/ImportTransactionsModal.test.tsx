@@ -185,7 +185,60 @@ describe('ImportTransactionsModal', () => {
       expect(send).toHaveBeenCalledTimes(2);
       expect(send).toHaveBeenLastCalledWith(
         'transactions-parse-file',
-        expect.objectContaining({ filepath: 'initial.csv' }),
+        expect.objectContaining({
+          filepath: 'initial.csv',
+          options: expect.objectContaining({
+            delimiter: ',',
+            hasHeaderRow: true,
+          }),
+        }),
+      );
+    });
+  });
+
+  it('re-parses with non-CSV options when re-selecting the same QIF file after error', async () => {
+    vi.mocked(send).mockResolvedValueOnce({
+      errors: [{ parsed: true, message: 'Parse error' }],
+      transactions: [],
+    });
+
+    render(
+      <TestProviders>
+        <ImportTransactionsModal
+          filename="initial.qif"
+          accountId="acc1"
+          onImported={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    const selectNewButton = await screen.findByRole('button', {
+      name: /select new file/i,
+    });
+
+    await waitFor(() => {
+      expect(send).toHaveBeenCalledTimes(1);
+    });
+
+    vi.mocked(send).mockResolvedValueOnce({
+      errors: [],
+      transactions: [{ Date: '2026-01-01', Payee: 'Store', Amount: '10.00' }],
+    });
+
+    mockOpenFileDialog.mockResolvedValueOnce(['initial.qif']);
+    fireEvent.click(selectNewButton);
+
+    await waitFor(() => {
+      expect(send).toHaveBeenCalledTimes(2);
+      expect(send).toHaveBeenLastCalledWith(
+        'transactions-parse-file',
+        expect.objectContaining({
+          filepath: 'initial.qif',
+          options: {
+            importNotes: true,
+            swapPayeeAndMemo: false,
+          },
+        }),
       );
     });
   });
