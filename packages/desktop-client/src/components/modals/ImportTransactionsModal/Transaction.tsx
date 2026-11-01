@@ -9,13 +9,21 @@ import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { amountToCurrency } from '@actual-app/core/shared/util';
-import type { CategoryEntity } from '@actual-app/core/types/models';
+import type {
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '@actual-app/core/types/models';
 
 import { Checkbox } from '#components/forms';
 import { Field, Row } from '#components/table';
 
 import { ParsedDate } from './ParsedDate';
-import { applyFieldMappings, formatDate, parseAmountFields } from './utils';
+import {
+  applyFieldMappings,
+  formatDate,
+  parseAmountFields,
+  parseCategoryFields,
+} from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
 type TransactionProps = {
@@ -30,6 +38,7 @@ type TransactionProps = {
   flipAmount: boolean;
   multiplierAmount: string;
   categories: CategoryEntity[];
+  categoryGroups: CategoryGroupEntity[];
   onCheckTransaction: (transactionId: string) => void;
   reconcile: boolean;
   index: number;
@@ -47,13 +56,13 @@ export function Transaction({
   flipAmount,
   multiplierAmount,
   categories,
+  categoryGroups,
   onCheckTransaction,
   reconcile,
   index,
 }: TransactionProps) {
   const { t } = useTranslation();
 
-  const categoryList = categories.map(category => category.name);
   const transaction = useMemo(
     () =>
       fieldMappings && !rawTransaction.isMatchedTransaction
@@ -90,6 +99,15 @@ export function Transaction({
     flipAmount,
     multiplierAmount,
   ]);
+
+  const categoryId = parseCategoryFields(
+    transaction,
+    categories,
+    categoryGroups,
+  );
+  const categoryName = categories.find(
+    category => category.id === categoryId,
+  )?.name;
 
   return (
     <Row
@@ -216,17 +234,8 @@ export function Transaction({
       <Field width="flex" title={transaction.notes}>
         {transaction.notes}
       </Field>
-      <Field
-        width="flex"
-        title={
-          transaction.category && categoryList.includes(transaction.category)
-            ? transaction.category
-            : undefined
-        }
-      >
-        {transaction.category &&
-          categoryList.includes(transaction.category) &&
-          transaction.category}
+      <Field width="flex" title={categoryName}>
+        {categoryName}
       </Field>
       {inOutMode && (
         <Field

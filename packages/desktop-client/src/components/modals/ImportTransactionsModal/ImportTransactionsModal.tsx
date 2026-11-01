@@ -211,7 +211,12 @@ export function ImportTransactionsModal({
   const queryClient = useQueryClient();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
   const [prefs, savePrefs] = useSyncedPrefs();
-  const { data: { list: categories } = { list: [] } } = useCategories();
+  const {
+    data: { list: categories, grouped: categoryGroups } = {
+      list: [],
+      grouped: [],
+    },
+  } = useCategories();
 
   const [multiplierAmount, setMultiplierAmount] = useState('');
   const [loadingState, setLoadingState] = useState<
@@ -349,7 +354,11 @@ export function ImportTransactionsModal({
           break;
         }
 
-        const category_id = parseCategoryFields(trans, categories);
+        const category_id = parseCategoryFields(
+          trans,
+          categories,
+          categoryGroups,
+        );
 
         const {
           inflow: _inflow,
@@ -373,7 +382,7 @@ export function ImportTransactionsModal({
 
       return previewTransactions;
     },
-    [categories, clearOnImport],
+    [categories, categoryGroups, clearOnImport],
   );
 
   const parse = useCallback(
@@ -680,7 +689,11 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const category_id = parseCategoryFields(trans, categories);
+      const category_id = parseCategoryFields(
+        trans,
+        categories,
+        categoryGroups,
+      );
 
       const {
         inflow: _inflow,
@@ -1009,6 +1022,7 @@ export function ImportTransactionsModal({
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
                       categories={categories}
+                      categoryGroups={categoryGroups}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}
                     />
