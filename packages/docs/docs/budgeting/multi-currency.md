@@ -33,7 +33,7 @@ Until multi-currency is supported natively by Actual Budget, you can use the met
    **Rule 1:**
 
    <img width="920" alt="Rule 1 for the AUD account, with templated set notes and set amount actions" src="/img/budgeting/multi-currency-rule-1@2x.webp" />
-   - From the Rules page, click on the _Create new rule_ button in the bottom right.
+   - From the Rules page, click on the _Add new rule_ button above the list.
    - In the Rule Modal edit popup.
    - In _Stage of rule_ select **Post**.
    - _Conditions_ must be set to **if `All` of these conditions match**.
@@ -59,7 +59,7 @@ Until multi-currency is supported natively by Actual Budget, you can use the met
    **Rule 2:**
 
    <img width="920" alt="Rule 2 for the AUD account, for transactions without notes" src="/img/budgeting/multi-currency-rule-2@2x.webp" />
-   - From the Rules page, click on the _Create new rule_ button in the bottom right.
+   - From the Rules page, click on the _Add new rule_ button above the list.
    - In the Rule Modal edit popup.
    - In _Stage of rule_ select **Post**.
    - _Conditions_ must be set to **if `All` of these conditions match**.
