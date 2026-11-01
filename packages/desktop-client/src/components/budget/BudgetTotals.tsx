@@ -13,8 +13,10 @@ import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { CategoryBalanceFilter } from '@actual-app/core/types/prefs';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useLocalPref } from '#hooks/useLocalPref';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
@@ -36,6 +38,14 @@ export const BudgetTotals = memo(function BudgetTotals({
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
+  const [balanceFilter = 'all', setBalanceFilter] = useLocalPref(
+    'budget.categoryBalanceFilter',
+  );
+  const balanceFilterItems = [
+    { value: 'available', text: t('Balance available') },
+    { value: 'no-balance', text: t('No balance') },
+    { value: 'overspent', text: t('Overspent') },
+  ] satisfies Array<{ value: CategoryBalanceFilter; text: string }>;
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
 
@@ -153,7 +163,15 @@ export const BudgetTotals = memo(function BudgetTotals({
         >
           <Menu
             onMenuSelect={type => {
-              if (type === 'toggle-visibility') {
+              const filterItem = balanceFilterItems.find(
+                item => `filter:${item.value}` === type,
+              );
+              if (filterItem) {
+                // Selecting the active filter again clears it
+                setBalanceFilter(
+                  filterItem.value === balanceFilter ? 'all' : filterItem.value,
+                );
+              } else if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
@@ -167,6 +185,18 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'toggle-visibility',
                 text: t('Toggle hidden categories'),
               },
+              Menu.line,
+              {
+                name: t('Filter Categories'),
+                type: Menu.label,
+                text: t('Filter Categories'),
+              },
+              ...balanceFilterItems.map(item => ({
+                name: `filter:${item.value}`,
+                text: item.text,
+                toggle: balanceFilter === item.value,
+              })),
+              Menu.line,
               {
                 name: 'expandAllCategories',
                 text: t('Expand all'),

@@ -93,6 +93,12 @@ export type MetadataPrefs = Partial<{
   userId: string; // TODO: delete this (unused)
 }>;
 
+export type CategoryBalanceFilter =
+  | 'all'
+  | 'available'
+  | 'no-balance'
+  | 'overspent';
+
 /**
  * Local preferences applicable to a single device. Stored in local storage.
  */
@@ -103,6 +109,7 @@ export type LocalPrefs = Partial<{
   'budget.collapsed': string[];
   'budget.summaryCollapsed': boolean;
   'budget.showHiddenCategories': boolean;
+  'budget.categoryBalanceFilter': CategoryBalanceFilter;
   'budget.startMonth': string;
   'flags.updateNotificationShownForVersion': string;
   'tour.introSeen': boolean;
