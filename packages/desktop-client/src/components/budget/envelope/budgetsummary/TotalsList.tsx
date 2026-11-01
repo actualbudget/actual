@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
@@ -12,6 +12,7 @@ import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetCom
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 /**
@@ -47,7 +48,9 @@ type TotalsListProps = {
 };
 
 export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+  const { t } = useTranslation();
   const format = useFormat();
+  const { isManagedMonth } = useFutureBufferMode();
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
   return (
@@ -154,9 +157,23 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
           <Trans>Budgeted</Trans>
         </Block>
 
-        <Block>
-          <Trans>For next month</Trans>
-        </Block>
+        {isManagedMonth ? (
+          <Tooltip
+            style={{ ...styles.tooltip, lineHeight: 1.5, maxWidth: 280 }}
+            content={t(
+              'Held automatically for what your future months need. It updates as you budget ahead. Change this from the To Budget menu.',
+            )}
+            placement="bottom start"
+          >
+            <Block>
+              <Trans>For next month</Trans>
+            </Block>
+          </Tooltip>
+        ) : (
+          <Block>
+            <Trans>For next month</Trans>
+          </Block>
+        )}
       </View>
     </View>
   );

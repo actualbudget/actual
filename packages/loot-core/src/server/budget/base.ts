@@ -9,6 +9,7 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import { FUTURE_BUFFER_PREF, getFutureBufferStart } from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
 
@@ -269,6 +270,26 @@ function handleCategoryMappingChange(months, oldValue, newValue) {
 function handleBudgetMonthChange(budget) {
   const sheetName = monthUtils.sheetForMonth(budget.id);
   sheet.get().set(`${sheetName}!buffered`, budget.buffered);
+  sheet.get().set(`${sheetName}!frozen`, budget.frozen === 1);
+}
+
+// Sets `__global!future-buffer-start` from the `futureBufferMode` preference
+function setFutureBufferStart(value: string | null | undefined) {
+  const startMonth = value ?? '';
+  if (
+    sheet.get().getCellValueLoose('__global', 'future-buffer-start') !==
+    startMonth
+  ) {
+    sheet.get().set(resolveName('__global', 'future-buffer-start'), startMonth);
+  }
+}
+
+// Runs on every budget open. A warm open restores the spreadsheet from its
+// cache and skips `loadUserBudgets`, so the preference is read here. Call it
+// after the months are created: setting the cell only recomputes the cells
+// that already depend on it.
+export async function loadFutureBufferStart() {
+  setFutureBufferStart(await getFutureBufferStart());
 }
 
 function handleBudgetChange(budget) {
@@ -352,6 +373,13 @@ export function triggerBudgetChanges(oldValues, newValues) {
           }
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
+        } else if (
+          table === 'preferences' &&
+          newValue.id === FUTURE_BUFFER_PREF
+        ) {
+          // Local and synced changes both arrive here, so another device
+          // turning the mode on or off applies without a reload
+          setFutureBufferStart(newValue.value);
         }
       });
     });
@@ -447,12 +475,7 @@ export async function createBudget(months) {
     });
 
     if (budgetType === 'envelope') {
-      envelopeBudget.createSummary(
-        groups,
-        categories,
-        prevSheetName,
-        sheetName,
-      );
+      envelopeBudget.createSummary(groups, categories, month);
     } else {
       trackingBudget.createSummary(groups, sheetName);
     }
@@ -487,9 +510,15 @@ export async function createAllBudgets() {
 
   // Get the range based off of the earliest transaction and the
   // current month. If no transactions currently exist the current
-  // month is also used as the starting month
+  // month is also used as the starting month. It also reaches back to
+  // automatic "For next month"'s start month, so every month it freezes
+  // has a sheet.
+  const earliestMonth = monthUtils.getMonth(earliestDate || currentMonth);
+  const futureBufferStart = await getFutureBufferStart();
   const { start, end, range } = getBudgetRange(
-    earliestDate || currentMonth,
+    futureBufferStart && futureBufferStart < earliestMonth
+      ? futureBufferStart
+      : earliestMonth,
     currentMonth,
     await getLatestAllocatedMonth(),
   );
@@ -499,7 +528,16 @@ export async function createAllBudgets() {
   const newMonths = range.filter(m => !createdMonths.has(m));
 
   if (newMonths.length > 0) {
-    await createBudget(range);
+    // The range can start after months already created, when the start
+    // month or the earliest transaction moves later. Keep those months in
+    // the range: the month before its first month becomes the blank sheet,
+    // and a real month there would lose its cells.
+    const firstCreated = [...createdMonths].sort()[0];
+    await createBudget(
+      firstCreated && firstCreated < start
+        ? monthUtils.rangeInclusive(firstCreated, end)
+        : range,
+    );
   }
 
   // The range only grows while the budget is open, so every created month

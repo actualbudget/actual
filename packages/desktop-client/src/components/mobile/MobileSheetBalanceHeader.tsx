@@ -15,7 +15,12 @@ type MobileSheetBalanceHeaderProps = {
   label: ReactNode;
 } & Pick<
   ComponentPropsWithoutRef<typeof BalanceWithCarryover>,
-  'carryover' | 'balance' | 'goal' | 'budgeted' | 'longGoal'
+  | 'carryover'
+  | 'isCarryoverHidden'
+  | 'balance'
+  | 'goal'
+  | 'budgeted'
+  | 'longGoal'
 >;
 
 export function MobileSheetBalanceHeader({
