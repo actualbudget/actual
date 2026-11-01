@@ -19,3 +19,10 @@ export function isElectron() {
   }
   return false;
 }
+
+// The Capacitor native apps serve the web build from a custom URL scheme
+// (`capacitor://localhost`), which WebKit never treats as cross-origin
+// isolated, so SharedArrayBuffer is never available there by design.
+export function isCapacitor() {
+  return typeof window !== 'undefined' && 'Capacitor' in window;
+}
