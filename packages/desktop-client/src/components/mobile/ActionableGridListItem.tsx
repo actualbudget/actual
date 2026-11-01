@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import type { ReactNode } from 'react';
 import { GridListItem } from 'react-aria-components';
 import type { GridListItemProps } from 'react-aria-components';
@@ -9,6 +9,8 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import type { WithRequired } from '@actual-app/core/types/util';
 import { useDrag } from '@use-gesture/react';
+
+import { hapticThresholdCrossed } from '#util/haptics';
 
 type ActionableGridListItemProps<T> = {
   actions?: ReactNode | ((params: { close: () => void }) => ReactNode);
@@ -28,7 +30,8 @@ export function ActionableGridListItem<T extends object>({
   ...props
 }: ActionableGridListItemProps<T>) {
   const dragStartedRef = useRef(false);
-  const [isRevealed, setIsRevealed] = useState(false);
+  const isPastThresholdRef = useRef(false);
+  const dragStartXRef = useRef(0);
 
   const hasActions = !!actions;
 
@@ -43,9 +46,23 @@ export function ActionableGridListItem<T extends object>({
 
   // Handle drag gestures
   const bind = useDrag(
-    ({ active, movement: [mx], velocity: [vx] }) => {
-      const startPos = isRevealed ? -actionsWidth : 0;
-      const currentX = startPos + mx;
+    ({ active, first, movement: [mx], velocity: [vx] }) => {
+      // Start from where the item actually is, so a swipe that interrupts a
+      // snap animation continues from the current position.
+      if (first) {
+        dragStartXRef.current = x.get();
+      }
+      const currentX = dragStartXRef.current + mx;
+
+      // Tick when the drag crosses the point where letting go flips between
+      // revealed and closed, like native swipe actions do.
+      const isPastThreshold = currentX < -actionsWidth / 2;
+      if (first) {
+        isPastThresholdRef.current = isPastThreshold;
+      } else if (active && isPastThreshold !== isPastThresholdRef.current) {
+        isPastThresholdRef.current = isPastThreshold;
+        hapticThresholdCrossed();
+      }
 
       if (active) {
         dragStartedRef.current = true;
@@ -67,13 +84,11 @@ export function ActionableGridListItem<T extends object>({
         to: { x: shouldReveal ? -actionsWidth : 0 },
         onRest: () => {
           dragStartedRef.current = false;
-          setIsRevealed(shouldReveal);
         },
       });
     },
     {
       axis: 'x',
-      from: () => [isRevealed ? -actionsWidth : 0, 0],
       enabled: hasActions,
     },
   );
@@ -143,12 +158,7 @@ export function ActionableGridListItem<T extends object>({
             {typeof actions === 'function'
               ? actions({
                   close: () => {
-                    void api.start({
-                      to: { x: 0 },
-                      onRest: () => {
-                        setIsRevealed(false);
-                      },
-                    });
+                    void api.start({ to: { x: 0 } });
                   },
                 })
               : actions}
