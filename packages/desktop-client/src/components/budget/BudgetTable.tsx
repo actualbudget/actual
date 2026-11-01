@@ -17,6 +17,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 
 import { BudgetCategories } from './BudgetCategories';
+import { findNextBudgetCell } from './budgetNavigation';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
 import { MonthsProvider } from './MonthsContext';
@@ -89,7 +90,12 @@ export function BudgetTable(props: BudgetTableProps) {
   const [editing, setEditing] = useState<{ id: string; cell: string } | null>(
     null,
   );
+  const [focusedCell, setFocusedCell] = useState<{
+    id: string;
+    cell: string;
+  } | null>(null);
 
+  const tableRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -103,11 +109,18 @@ export function BudgetTable(props: BudgetTableProps) {
   }, []);
 
   const onEditMonth = (id: string, month: string) => {
+    setFocusedCell(null);
     setEditing(id ? { id, cell: month } : null);
   };
 
   const onEditName = (id: string) => {
+    setFocusedCell(null);
     setEditing(id ? { id, cell: 'name' } : null);
+  };
+
+  const onFocusMonth = (id: string, month: string) => {
+    setEditing(null);
+    setFocusedCell(id ? { id, cell: month } : null);
   };
 
   const _onReorderCategory = (
@@ -164,40 +177,18 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const moveVertically = (dir: 1 | -1) => {
-    const flattened = categoryGroups.reduce(
-      (all, group) => {
-        if (collapsedGroupIds.includes(group.id)) {
-          return all.concat({ id: group.id, isGroup: true });
-        }
-        return all.concat([
-          { id: group.id, isGroup: true },
-          ...(group?.categories || []),
-        ]);
-      },
-      [] as Array<
-        { id: CategoryGroupEntity['id']; isGroup: boolean } | CategoryEntity
-      >,
-    );
-
     if (editing) {
-      const idx = flattened.findIndex(item => item.id === editing.id);
-      let nextIdx = idx + dir;
+      const nextCell = findNextBudgetCell(
+        categoryGroups,
+        collapsedGroupIds,
+        showHiddenCategories ?? false,
+        editing,
+        type,
+        dir,
+      );
 
-      while (nextIdx >= 0 && nextIdx < flattened.length) {
-        const next = flattened[nextIdx];
-
-        if ('isGroup' in next && next.isGroup) {
-          nextIdx += dir;
-          continue;
-        } else if (
-          type === 'tracking' ||
-          ('is_income' in next && !next.is_income)
-        ) {
-          onEditMonth(next.id, editing.cell);
-          return;
-        } else {
-          break;
-        }
+      if (nextCell) {
+        onFocusMonth(nextCell.id, nextCell.cell);
       }
     }
   };
@@ -306,15 +297,29 @@ export function BudgetTable(props: BudgetTableProps) {
           }}
         >
           <View
+            ref={tableRef}
             style={{
               flexShrink: 0,
             }}
             onKeyDown={onKeyDown}
+            onBlur={e => {
+              if (!document.hasFocus()) {
+                return;
+              }
+
+              if (
+                e.relatedTarget == null ||
+                !tableRef.current?.contains(e.relatedTarget as Node)
+              ) {
+                setFocusedCell(null);
+              }
+            }}
           >
             <SchedulesProvider query={schedulesQuery}>
               <BudgetCategories
                 categoryGroups={categoryGroups}
                 editingCell={editing}
+                focusedCell={focusedCell}
                 onEditMonth={onEditMonth}
                 onEditName={onEditName}
                 onSaveCategory={onSaveCategory}
