@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -69,8 +75,12 @@ function TransactionListWithPreviews() {
   });
 
   const [searchText, setSearchText] = useState('');
+  // The ref lets the filter effect below re-run the current search without
+  // depending on (and re-running for) every keystroke.
+  const searchTextRef = useRef('');
   const onSearch = useCallback(
     (text: string) => {
+      searchTextRef.current = text;
       setSearchText(text);
       search(text);
     },
@@ -96,6 +106,10 @@ function TransactionListWithPreviews() {
     }
   }
 
+  // Keyed on the serialized conditions, not location.state: updating the URL
+  // (e.g. the search param) gives location.state a new identity each time.
+  const filterConditionsKey = JSON.stringify(filterConditions);
+
   useEffect(() => {
     let isStale = false;
 
@@ -109,18 +123,23 @@ function TransactionListWithPreviews() {
       if (!isStale) {
         setCurrentQuery(query);
         setTransactionsQuery(query);
+        // A search typed or restored before the filters loaded had no query
+        // to apply to; re-run it on top of the filtered query.
+        if (searchTextRef.current !== '') {
+          search(searchTextRef.current);
+        }
       }
     };
 
-    const conditions = location?.state?.filterConditions;
-    if (conditions?.length) {
+    const conditions: RuleConditionEntity[] = JSON.parse(filterConditionsKey);
+    if (conditions.length) {
       void applyFilters(conditions);
     }
 
     return () => {
       isStale = true;
     };
-  }, [location.state, makeRootTransactionsQuery]);
+  }, [filterConditionsKey, makeRootTransactionsQuery, search]);
 
   const {
     transactions,
