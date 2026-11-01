@@ -11,9 +11,11 @@ import { isPreviewId } from '@actual-app/core/shared/transactions';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { ContextMenuItem } from '#contextmenu/types';
+import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -134,6 +136,46 @@ export function useTransactionRowContextActions({
     return areNoReconciledTransactions && areAllSplitTransactions;
   }, [selectedIds, types, getTransaction]);
 
+  const [prepaidAccountId] = useSyncedPref('prepaid-account');
+  const { data: accounts = [] } = useAccounts();
+
+  // Only a single, categorized, non-split, non-transfer, unreconciled
+  // transaction in an on-budget account other than the prepaid account can
+  // be spread across months
+  const deferrableTransaction = useMemo(() => {
+    if (selectedIds.length !== 1 || types.preview) {
+      return undefined;
+    }
+    const tx = getTransaction(selectedIds[0]);
+    if (
+      !tx ||
+      tx.is_parent ||
+      tx.is_child ||
+      tx.transfer_id ||
+      tx.reconciled ||
+      !tx.category ||
+      !tx.amount ||
+      tx.account === prepaidAccountId ||
+      accounts.find(account => account.id === tx.account)?.offbudget
+    ) {
+      return undefined;
+    }
+    return tx;
+  }, [selectedIds, types, getTransaction, prepaidAccountId, accounts]);
+
+  function onDefer() {
+    if (deferrableTransaction) {
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'defer-transaction',
+            options: { transaction: deferrableTransaction },
+          },
+        }),
+      );
+    }
+  }
+
   function onViewSchedule() {
     const firstId = selectedIds[0];
     let scheduleId;
@@ -220,6 +262,12 @@ export function useTransactionRowContextActions({
       text: t('Create rule'),
       onClick: () => onCreateRule(selectedIds),
       hidden: linked,
+    },
+    {
+      name: 'defer',
+      text: t('Defer…'),
+      onClick: onDefer,
+      hidden: !deferrableTransaction,
     },
     {
       name: 'unsplit-transactions',

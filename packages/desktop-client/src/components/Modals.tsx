@@ -36,6 +36,7 @@ import { CoverModal } from './modals/CoverModal';
 import { CreateAccountModal } from './modals/CreateAccountModal';
 import { CreateEncryptionKeyModal } from './modals/CreateEncryptionKeyModal';
 import { CreateLocalAccountModal } from './modals/CreateLocalAccountModal';
+import { DeferTransactionModal } from './modals/DeferTransactionModal';
 import { EditUserAccess } from './modals/EditAccess';
 import { EditFieldModal } from './modals/EditFieldModal';
 import { EditRuleModal } from './modals/EditRuleModal';
@@ -164,6 +165,9 @@ export function Modals() {
 
         case 'convert-to-schedule':
           return <ConvertToScheduleModal key={key} {...modal.options} />;
+
+        case 'defer-transaction':
+          return <DeferTransactionModal key={key} {...modal.options} />;
 
         case 'confirm-delete':
           return <ConfirmDeleteModal key={key} {...modal.options} />;
