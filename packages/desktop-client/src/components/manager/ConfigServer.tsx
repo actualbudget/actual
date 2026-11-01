@@ -10,6 +10,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
@@ -431,7 +432,7 @@ export function ConfigServer() {
               </Trans>
             )}
           </Text>
-          {!currentUrl && (
+          {!currentUrl && !Platform.isNativeMobileApp && (
             <Text
               style={{
                 fontSize: 16,
@@ -534,7 +535,7 @@ export function ConfigServer() {
               </Button>
             ) : (
               <>
-                {!isElectron() && (
+                {!isElectron() && !Platform.isNativeMobileApp && (
                   <Button
                     variant="bare"
                     style={{ color: theme.pageTextLink }}
