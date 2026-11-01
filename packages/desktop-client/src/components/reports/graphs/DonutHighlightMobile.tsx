@@ -6,7 +6,7 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { useFormat } from '#hooks/useFormat';
 
-import type { DonutActiveShapeProps } from './donutActiveShapeProps';
+import type { DonutHighlightProps } from './donutHighlightProps';
 
 const RADIAN = Math.PI / 180;
 
@@ -14,10 +14,9 @@ const RADIAN = Math.PI / 180;
  * The highlight and labels drawn over a donut's hovered sector on small
  * charts, labelled above and below.
  */
-export function DonutActiveShapeMobile({
+export function DonutHighlightMobile({
   cx,
   cy,
-  innerRadius,
   outerRadius,
   startAngle,
   endAngle,
@@ -28,7 +27,7 @@ export function DonutActiveShapeMobile({
   expandInward,
   chartInnerRadius,
   chartOuterRadius,
-}: DonutActiveShapeProps) {
+}: DonutHighlightProps) {
   const format = useFormat();
   // Fix 2: guard against undefined payload.name and payload.date
   const yAxis = payload.name ?? payload.date ?? '';
@@ -66,15 +65,6 @@ export function DonutActiveShapeMobile({
           {`${(percent * 100).toFixed(2)}%`}
         </text>
       </PrivacyFilter>
-      <Sector
-        cx={cx}
-        cy={cy}
-        innerRadius={innerRadius}
-        outerRadius={outerRadius}
-        startAngle={startAngle}
-        endAngle={endAngle}
-        fill={fill}
-      />
       <Sector
         cx={cx}
         cy={cy}
