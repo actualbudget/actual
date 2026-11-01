@@ -3,7 +3,7 @@ import { createApp } from '#server/app';
 import { repairSync as _repairSync } from './repair';
 import { resetSync as _resetSync } from './reset';
 
-import { fullSync } from '.';
+import { fullSync, waitForPostSyncWork } from '.';
 
 export type SyncHandlers = {
   sync: typeof sync;
@@ -17,7 +17,9 @@ app.method('sync-reset', resetSync);
 app.method('sync-repair', repairSync);
 
 async function sync() {
-  return await fullSync();
+  const result = await fullSync();
+  await waitForPostSyncWork();
+  return result;
 }
 
 async function resetSync() {

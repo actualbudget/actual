@@ -162,13 +162,30 @@ export async function loadSpreadsheet(
     sheet.addEventListener('change', onSheetChange);
   }
 
+  let cachedRows: Array<{ key: string; value: string }> = null;
   if (cacheEnabled && !isCacheDirty(mainDb, cacheDb)) {
-    const cachedRows = sqlite.runQuery<{ key?: number; value: string }>(
+    cachedRows = sqlite.runQuery<{ key: string; value: string }>(
       cacheDb,
       'SELECT * FROM kvcache',
       [],
       true,
     );
+
+    // A cache with carryover cells but no `carryover-stored-*` predates the
+    // inherited flag, so its stored flags only exist in the database.
+    // Rebuild it from there.
+    const isOutdated =
+      cachedRows.some(row => row.key.includes('!carryover-')) &&
+      !cachedRows.some(row => row.key.includes('!carryover-stored-'));
+    if (isOutdated) {
+      logger.log('Spreadsheet cache is outdated, rebuilding');
+      setCacheStatus(mainDb, cacheDb, { clean: false });
+      sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
+      cachedRows = null;
+    }
+  }
+
+  if (cachedRows) {
     logger.log(`Loaded spreadsheet from cache (${cachedRows.length} items)`);
 
     for (const row of cachedRows) {
@@ -243,8 +260,8 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
         const sheetName = `budget${budget.month}`;
         sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
         sheet.set(
-          `${sheetName}!carryover-${budget.category}`,
-          budget.carryover === 1 ? true : false,
+          `${sheetName}!carryover-stored-${budget.category}`,
+          budget.carryover == null ? null : budget.carryover === 1,
         );
         sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
         sheet.set(
