@@ -254,11 +254,14 @@ export function AmountInput({
 
 type BetweenAmountInputProps = {
   defaultValue: { num1: number; num2: number };
+  /** Which way an untouched zero amount is signed. Defaults to an outflow. */
+  zeroSign?: '-' | '+';
   onChange: (newValue: { num1: number; num2: number }) => void;
 };
 
 export function BetweenAmountInput({
   defaultValue,
+  zeroSign,
   onChange,
 }: BetweenAmountInputProps) {
   const { t } = useTranslation();
@@ -269,6 +272,7 @@ export function BetweenAmountInput({
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
         value={num1}
+        zeroSign={zeroSign}
         onUpdate={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
@@ -278,6 +282,7 @@ export function BetweenAmountInput({
       <View style={{ margin: '0 5px' }}>{t('and')}</View>
       <AmountInput
         value={num2}
+        zeroSign={zeroSign}
         onUpdate={value => {
           setNum2(value);
           onChange({ num1, num2: value });
