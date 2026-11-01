@@ -11,6 +11,7 @@ import { View } from '@actual-app/components/view';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 
 import { Value } from '#components/rules/Value';
+import { useBaseAmountLabels } from '#hooks/currencyFormatContext';
 import { friendlyOp, mapField } from '#util/rule';
 
 import { FilterEditor } from './FiltersMenu';
@@ -44,6 +45,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
   const triggerRef = useRef(null);
 
   const field = subfieldFromFilter({ field: originalField, value });
+  const isBase = useBaseAmountLabels();
 
   return (
     <View
@@ -82,7 +84,7 @@ export function FilterExpression<T extends RuleConditionEntity>({
           ) : (
             <>
               <Text style={{ color: theme.pageTextPositive }}>
-                {mapField(field, options)}
+                {mapField(field, { ...options, base: isBase })}
               </Text>{' '}
               <Text>{friendlyOp(op, null)}</Text>{' '}
               {!['onbudget', 'offbudget'].includes(op?.toLocaleLowerCase()) && (

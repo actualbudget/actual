@@ -28,7 +28,13 @@ import {
   payeeModel,
   toDateRepr,
 } from '#server/models';
-import { batchMessages, sendMessages } from '#server/sync';
+import { batchMessages, getBatchedValue, sendMessages } from '#server/sync';
+import { balanceSpec, effectiveEncoding } from '#server/sync/coupled-cells';
+import { validateTransactionWrite } from '#server/transactions/foreign-guard';
+import type { TransactionWriteOptions } from '#server/transactions/foreign-guard';
+import { laneIntent } from '#server/transactions/lane-intent';
+import type { LaneReason } from '#server/transactions/lane-intent';
+import { accountCurrencyFields } from '#server/util/currency';
 import * as monthUtils from '#shared/months';
 import { groupById } from '#shared/util';
 import type { TransactionEntity } from '#types/models';
@@ -742,6 +748,20 @@ export function getAccounts() {
 }
 
 export async function insertAccount(account) {
+  if (account.currency !== undefined) {
+    // batchMessages resolves to void, so capture the generated id.
+    let id: DbAccount['id'];
+    await batchMessages(async () => {
+      const fields = await accountCurrencyFields(account.currency);
+      id = await insertAccountRow({ ...account, ...fields });
+    });
+    return id;
+  }
+  // An account inheriting the budget currency still records its encoding.
+  return insertAccountRow({ ...account, encoding: '' });
+}
+
+async function insertAccountRow(account) {
   const accounts = await all<DbAccount>(
     'SELECT * FROM accounts WHERE offbudget = ? ORDER BY sort_order, name',
     [account.offbudget ? 1 : 0],
@@ -754,8 +774,80 @@ export async function insertAccount(account) {
   return insertWithUUID('accounts', account);
 }
 
-export function updateAccount(account) {
-  account = accountModel.validate(account, { update: true });
+const BALANCE_COLUMNS = [
+  'balance_current',
+  'balance_available',
+  'balance_limit',
+] as const;
+
+/**
+ * The bank balance authority for an account update that writes any cached
+ * balance (MC-7.3): all three integers, the unchanged ones read from the
+ * row, stamped with the account's encoding (the update's own, when it also
+ * changes the currency).
+ */
+export async function balanceSpecFields(
+  id: string,
+  changes: Record<string, unknown>,
+): Promise<{ balance_spec?: string }> {
+  if (!BALANCE_COLUMNS.some(column => column in changes)) return {};
+  const row = await first<
+    Pick<
+      DbAccount,
+      | 'balance_current'
+      | 'balance_available'
+      | 'balance_limit'
+      | 'encoding'
+      | 'currency'
+      | 'currency_precision'
+    >
+  >(
+    `SELECT balance_current, balance_available, balance_limit, encoding,
+       currency, currency_precision FROM accounts WHERE id = ?`,
+    [id],
+  );
+  const value = (column: (typeof BALANCE_COLUMNS)[number]) =>
+    ((column in changes ? changes[column] : row?.[column]) ?? null) as
+      | number
+      | null;
+  const encoding =
+    typeof changes.encoding === 'string'
+      ? changes.encoding
+      : effectiveEncoding(
+          row?.encoding,
+          row?.currency ?? null,
+          row?.currency_precision ?? null,
+        );
+  return {
+    balance_spec: balanceSpec(
+      {
+        balance_current: value('balance_current'),
+        balance_available: value('balance_available'),
+        balance_limit: value('balance_limit'),
+      },
+      encoding,
+    ),
+  };
+}
+
+export async function updateAccount(account) {
+  if (account.currency !== undefined) {
+    return batchMessages(async () => {
+      const fields = await accountCurrencyFields(account.currency);
+      const merged = { ...account, ...fields };
+      await update(
+        'accounts',
+        accountModel.validate(
+          { ...merged, ...(await balanceSpecFields(account.id, merged)) },
+          { update: true },
+        ),
+      );
+    });
+  }
+  account = accountModel.validate(
+    { ...account, ...(await balanceSpecFields(account.id, account)) },
+    { update: true },
+  );
   return update('accounts', account);
 }
 
@@ -904,14 +996,76 @@ export async function getTransactions(accountId: DbTransaction['acct']) {
   );
 }
 
-export function insertTransaction(
+export async function insertTransaction(
   transaction,
+  options?: TransactionWriteOptions,
 ): Promise<TransactionEntity['id']> {
-  return insertWithSchema('transactions', transaction);
+  let id: TransactionEntity['id'];
+  // One batch: the row and its authority cell commit together.
+  await batchMessages(async () => {
+    const { pair } = await validateTransactionWrite(
+      transaction,
+      undefined,
+      options,
+    );
+    const lane = await laneIntent(transaction, pair);
+    id = await insertWithSchema('transactions', lane.row);
+    if (pair) {
+      // amount_pair is internal and not in the AQL schema.
+      await update('transactions', { id, amount_pair: pair });
+    }
+    if (lane.pocket !== undefined) {
+      await update('transactions', { id, pocket: lane.pocket });
+    }
+    await lockAccountCurrency(transaction.account);
+  });
+  return id;
 }
 
-export function updateTransaction(transaction) {
-  return updateWithSchema('transactions', transaction);
+/**
+ * Marks an account as having held a transaction, in the same batch: its
+ * currency then names the encoding of integers that can return to it, so it
+ * may not change until MC-7's corrections. Never cleared.
+ */
+async function lockAccountCurrency(accountId: string | undefined) {
+  if (!accountId) return;
+  const account = await first<{ currency_locked: number | null }>(
+    'SELECT currency_locked FROM accounts WHERE id = ?',
+    [accountId],
+  );
+  if (account?.currency_locked === 1) return;
+  // An account queued in this batch is locked with it; a missing one is not
+  // created by the lock.
+  if (!account && !getBatchedValue('accounts', accountId, 'name')) return;
+  await update('accounts', { id: accountId, currency_locked: 1 });
+}
+
+export async function updateTransaction(
+  transaction,
+  options?: TransactionWriteOptions,
+): Promise<{ reason?: LaneReason }> {
+  let reason: LaneReason | undefined;
+  await batchMessages(async () => {
+    const { pair } = await validateTransactionWrite(
+      transaction,
+      undefined,
+      options,
+    );
+    const lane = await laneIntent(transaction, pair);
+    reason = lane.reason;
+    await updateWithSchema('transactions', lane.row);
+    if (pair) {
+      await update('transactions', { id: transaction.id, amount_pair: pair });
+    }
+    if (lane.pocket !== undefined) {
+      await update('transactions', {
+        id: transaction.id,
+        pocket: lane.pocket,
+      });
+    }
+    await lockAccountCurrency(transaction.account);
+  });
+  return reason ? { reason } : {};
 }
 
 export async function deleteTransaction(transaction) {

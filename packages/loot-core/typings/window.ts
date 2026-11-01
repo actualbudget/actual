@@ -66,6 +66,7 @@ declare global {
   var IS_TESTING: boolean;
 
   var currentMonth: string | null;
+  var currentDay: string | null;
 
   var emptyDatabase: (avoidUpdate?: boolean) => () => Promise<void>;
 }

@@ -44,6 +44,7 @@ describe('IngIngddeff', () => {
 
     it('returns normalized account data returned to Frontend', () => {
       expect(IngIngddeff.normalizeAccount(accountRaw)).toEqual({
+        currency: 'EUR',
         account_id: 'a787ba27-02ee-4fd6-be86-73831adc5498',
         iban: 'DE02500105170137075030',
         institution: {
@@ -291,7 +292,7 @@ describe('IngIngddeff', () => {
         balances,
       );
 
-      expect(startingBalance).toEqual(75236);
+      expect(startingBalance).toEqual('752.36');
     });
 
     it('returns the same balance amount when no transactions', () => {
@@ -299,7 +300,7 @@ describe('IngIngddeff', () => {
 
       expect(
         IngIngddeff.calculateStartingBalance(transactions, balances),
-      ).toEqual(359687);
+      ).toEqual('3596.87');
     });
   });
 });

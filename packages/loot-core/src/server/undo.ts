@@ -5,6 +5,7 @@ import * as connection from '#platform/server/connection';
 import { getIn } from '#shared/util';
 import type { HandlerFunctions } from '#types/handlers';
 
+import * as db from './db';
 import { getMutatorContext, withMutatorContext } from './mutators';
 import { sendMessages } from './sync';
 import type { Message } from './sync';
@@ -43,8 +44,17 @@ function trimHistory() {
   }
 }
 
-export function appendMessages(messages, oldData) {
+// The permanent base-currency lock is never undone or redone.
+function isUndoable(message) {
+  return !(
+    message.dataset === 'preferences' &&
+    message.row === 'multicurrencyBaseCurrency'
+  );
+}
+
+export function appendMessages(allMessages, oldData) {
   const context = getMutatorContext();
+  const messages = allMessages.filter(isUndoable);
 
   if (context.undoListening && messages.length > 0) {
     trimHistory();
@@ -75,6 +85,8 @@ export function withUndo<T>(
     return func();
   }
 
+  const previousHistory = MESSAGE_HISTORY;
+  const previousCursor = CURSOR;
   MESSAGE_HISTORY = MESSAGE_HISTORY.slice(0, CURSOR + 1);
 
   const marker: MarkerMessage = { type: 'marker', meta };
@@ -85,10 +97,28 @@ export function withUndo<T>(
     MESSAGE_HISTORY.push(marker);
     CURSOR++;
   }
+  const markerCursor = CURSOR;
+  // A mutation that recorded nothing, failed or not, keeps undo and redo as
+  // they were, including after a storage failure.
+  const restoreIfUnchanged = () => {
+    if (CURSOR === markerCursor && MESSAGE_HISTORY[CURSOR] === marker) {
+      MESSAGE_HISTORY = previousHistory;
+      CURSOR = previousCursor;
+    }
+  };
 
   return withMutatorContext(
     { undoListening: true, undoTag: context.undoTag },
     func,
+  ).then(
+    result => {
+      restoreIfUnchanged();
+      return result;
+    },
+    err => {
+      restoreIfUnchanged();
+      throw err;
+    },
   );
 }
 
@@ -154,13 +184,76 @@ export async function undo() {
       }, [])
       .reverse();
 
+    if (changesLockedEncoding(toApply)) {
+      CURSOR = end;
+      throw new Error('account-currency-immutable');
+    }
     await applyUndoAction(toApply, meta, entries[0].undoTag);
   }
 }
 
+/**
+ * Undo and redo restore captured cells without the currency check, so an
+ * account whose currency is locked (it has held a transaction) must not get
+ * another currency or precision back that way.
+ */
+function changesLockedEncoding(messages: Message[]) {
+  return messages.some(message => {
+    if (
+      message.dataset !== 'accounts' ||
+      (message.column !== 'currency' &&
+        message.column !== 'currency_precision' &&
+        message.column !== 'encoding')
+    ) {
+      return false;
+    }
+    const account = db.firstSync<{
+      currency: string | null;
+      currency_precision: number | null;
+      encoding: string | null;
+      currency_locked: number | null;
+    }>(
+      'SELECT currency, currency_precision, encoding, currency_locked FROM accounts WHERE id = ?',
+      [message.row],
+    );
+    return (
+      account?.currency_locked === 1 &&
+      (account[message.column] ?? null) !== (message.value ?? null)
+    );
+  });
+}
+
 function undoMessage(message, oldData) {
+  // The encoding lock is never cleared, by undo either (MC-5.1).
+  if (message.dataset === 'accounts' && message.column === 'currency_locked') {
+    return null;
+  }
   const oldItem = getIn(oldData, [message.dataset, message.row]);
   if (oldItem) {
+    // A transaction's authority is restored whole: an account-bound cell
+    // exactly as captured (its encoding stamp included); the MC-3.1 form
+    // bound to its old account, unstamped.
+    if (
+      message.dataset === 'transactions' &&
+      message.column === 'amount_pair' &&
+      oldItem.amount_pair != null
+    ) {
+      return {
+        ...message,
+        value: String(oldItem.amount_pair).includes('@')
+          ? oldItem.amount_pair
+          : `${oldItem.amount}:${oldItem.transaction_amount ?? ''}@${oldItem.acct}`,
+      };
+    }
+    // A row's raw category is restored, not the category its lane shows,
+    // so its lane pointer keeps its owner (MC-10).
+    if (
+      message.dataset === 'transactions' &&
+      message.column === 'category' &&
+      'raw_category' in oldItem
+    ) {
+      return { ...message, value: oldItem.raw_category };
+    }
     let column = message.column;
     if (message.dataset === 'spreadsheet_cells') {
       // The spreadsheet messages use the `expr` column, but only as a
@@ -196,6 +289,18 @@ function undoMessage(message, oldData) {
           return { ...message, value: null };
         }
         return null;
+      } else if (message.dataset === 'pocket_budgets') {
+        // An absent cell returns to absence: no authority, no carry flag.
+        if (message.column === 'budget_pair') {
+          return { ...message, value: null };
+        }
+        if (message.column === 'carryover') return { ...message, value: 0 };
+        return null;
+      } else if (message.dataset === 'category_slot_meta') {
+        if (message.column === 'sort_order') {
+          return { ...message, value: null };
+        }
+        return { ...message, value: 0 };
       } else if (message.dataset === 'notes') {
         return { ...message, value: null };
       }
@@ -235,6 +340,10 @@ export async function redo() {
         .concat(redoResurrections(entry.messages, entry.oldData));
     }, []);
 
+    if (changesLockedEncoding(toApply)) {
+      CURSOR = start;
+      throw new Error('account-currency-immutable');
+    }
     await applyUndoAction(toApply, meta, entries[entries.length - 1].undoTag);
   }
 }
@@ -252,6 +361,8 @@ function redoResurrections(messages, oldData): Message[] {
         'zero_budget_months',
         'zero_budgets',
         'reflect_budgets',
+        'pocket_budgets',
+        'category_slot_meta',
         'notes',
         'category_mapping',
         'payee_mapping',

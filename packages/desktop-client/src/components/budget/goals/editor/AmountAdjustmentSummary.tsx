@@ -27,7 +27,10 @@ export function AmountAdjustmentSummary({
   const magnitude = Math.abs(template.adjustment);
 
   if (template.adjustmentType === 'fixed') {
-    const amount = format(amountToInteger(magnitude), 'financial');
+    const amount = format(
+      amountToInteger(magnitude, format.precision),
+      'financial',
+    );
     return increase ? (
       <Trans>(increased by {{ amount }})</Trans>
     ) : (

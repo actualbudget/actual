@@ -15,7 +15,7 @@ import type {
   DbZeroBudgetMonth,
 } from './db';
 import { Spreadsheet } from './spreadsheet/spreadsheet';
-import { resolveName } from './spreadsheet/util';
+import { resolveName, unresolveName } from './spreadsheet/util';
 
 let globalSheet: Spreadsheet;
 let globalOnChange;
@@ -210,8 +210,16 @@ export function clearCache(): void {
 
 export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
   if (globalSheet) {
+    // Open views registered their query cells once; keep them registered so
+    // they recompute against the reloaded data.
+    const queries = [...globalSheet.nodes.values()].filter(node => node.query);
     unloadSpreadsheet();
-    return loadSpreadsheet(db, globalOnChange);
+    const reloaded = await loadSpreadsheet(db, globalOnChange);
+    for (const node of queries) {
+      const { sheet: sheetName, name } = unresolveName(node.name);
+      reloaded.createQuery(sheetName, name, node.query);
+    }
+    return reloaded;
   }
 }
 

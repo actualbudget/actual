@@ -14,6 +14,9 @@ import { mutator, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { Rule } from '#server/rules';
 import { addSyncListener, batchMessages } from '#server/sync';
+import { postForeignEntry } from '#server/transactions/foreign-entry';
+import type { ForeignDraft } from '#server/transactions/foreign-entry';
+import { foreignAccountCurrency } from '#server/transactions/foreign-guard';
 import {
   getRules,
   insertRule,
@@ -40,7 +43,10 @@ import type {
   RuleConditionEntity,
   ScheduleEntity,
 } from '#types/models';
+import type { SchedulesRateUnavailableEvent } from '#types/server-events';
 
+import { exchangeTarget, postScheduledExchange } from './exchange-schedule';
+import type { ScheduledExchangeUnavailable } from './exchange-schedule';
 import { findSchedules } from './find-schedules';
 
 // Utilities
@@ -534,32 +540,51 @@ async function getUpcomingDates({ config, count }) {
 
 // Services
 
+function writeSchedulePaths(scheduleId: string, conditions) {
+  const conds = extractScheduleConds(conditions);
+  const path = cond => {
+    const index = conditions.findIndex(c => c === cond);
+    return index === -1 ? null : `$[${index}]`;
+  };
+  db.runQuery(
+    'INSERT OR REPLACE INTO schedules_json_paths (schedule_id, payee, account, amount, date) VALUES (?, ?, ?, ?, ?)',
+    [
+      scheduleId,
+      path(conds.payee),
+      path(conds.account),
+      path(conds.amount),
+      path(conds.date),
+    ],
+  );
+}
+
+/**
+ * Schedule condition paths come only from each schedule's owning rule
+ * (`schedules.rule`), whatever its actions. A rule linking a schedule whose
+ * row does not exist yet is the one being created with it.
+ */
 function onRuleUpdate(rule) {
-  const { actions, conditions } =
+  const { id, actions, conditions } =
     rule instanceof Rule ? rule.serialize() : ruleModel.toJS(rule);
+  if (!id || !conditions) return;
 
-  if (actions && actions.find(a => a.op === 'link-schedule')) {
-    const scheduleId = actions.find(a => a.op === 'link-schedule').value;
+  const owned = db.runQuery<Pick<db.DbSchedule, 'id'>>(
+    'SELECT id FROM schedules WHERE rule = ?',
+    [id],
+    true,
+  );
+  for (const { id: scheduleId } of owned) {
+    writeSchedulePaths(scheduleId, conditions);
+  }
+  if (owned.length > 0) return;
 
-    if (scheduleId) {
-      const conds = extractScheduleConds(conditions);
-
-      const payeeIdx = conditions.findIndex(c => c === conds.payee);
-      const accountIdx = conditions.findIndex(c => c === conds.account);
-      const amountIdx = conditions.findIndex(c => c === conds.amount);
-      const dateIdx = conditions.findIndex(c => c === conds.date);
-
-      db.runQuery(
-        'INSERT OR REPLACE INTO schedules_json_paths (schedule_id, payee, account, amount, date) VALUES (?, ?, ?, ?, ?)',
-        [
-          scheduleId,
-          payeeIdx === -1 ? null : `$[${payeeIdx}]`,
-          accountIdx === -1 ? null : `$[${accountIdx}]`,
-          amountIdx === -1 ? null : `$[${amountIdx}]`,
-          dateIdx === -1 ? null : `$[${dateIdx}]`,
-        ],
-      );
-    }
+  const linked = actions?.find(a => a.op === 'link-schedule')?.value;
+  if (
+    linked &&
+    db.runQuery('SELECT id FROM schedules WHERE id = ?', [linked], true)
+      .length === 0
+  ) {
+    writeSchedulePaths(linked, conditions);
   }
 }
 
@@ -580,6 +605,15 @@ function onApplySync(oldValues, newValues) {
       items.forEach(newValue => {
         onRuleUpdate(newValue);
       });
+    } else if (table === 'schedules') {
+      // A schedule's owning rule may have been applied before the schedule.
+      items.forEach(newValue => {
+        const rule =
+          newValue.rule && getRules().find(r => r.id === newValue.rule);
+        if (rule) {
+          onRuleUpdate(rule);
+        }
+      });
     }
   });
 }
@@ -587,31 +621,86 @@ function onApplySync(oldValues, newValues) {
 // This is the service that move schedules forward automatically and
 // posts transactions
 
+export type PostScheduleResult =
+  | { type: 'posted' }
+  | {
+      type: 'rate-unavailable';
+      /** The draft, with its rule results, to complete with a rate. */
+      transaction: ForeignDraft;
+      currency: string;
+      precision: number;
+    }
+  | ScheduledExchangeUnavailable;
+
 async function postTransactionForSchedule({
   id,
   today,
 }: {
   id: string;
   today?: boolean;
-}) {
+}): Promise<PostScheduleResult | undefined> {
   const { data } = await aqlQuery(q('schedules').filter({ id }).select('*'));
   const schedule = data[0];
   if (schedule == null || schedule._account == null) {
     return;
   }
 
-  const transaction = {
+  const date = today ? currentDay() : schedule.next_date;
+  const scheduledAmount = getScheduledAmount(schedule._amount);
+  const base = {
     payee: schedule._payee,
     account: schedule._account,
-    amount: getScheduledAmount(schedule._amount),
-    date: today ? currentDay() : schedule.next_date,
+    date,
     schedule: schedule.id,
-    cleared: false,
+    cleared: false as const,
   };
 
-  if (transaction.account) {
-    await addTransactions(transaction.account, [transaction]);
+  // A transfer to another encoding posts both legs with an estimate.
+  const other = await exchangeTarget(schedule._account, schedule._payee);
+  if (other) {
+    return postScheduledExchange({
+      schedule: schedule.id,
+      account: schedule._account,
+      other,
+      payee: schedule._payee,
+      date,
+      amount: scheduledAmount,
+    });
   }
+
+  // A foreign schedule's amount is native. Rules run on it as on imported
+  // rows, and the base comes from the saved rate for the final date; nothing
+  // is posted without one.
+  const foreign = await foreignAccountCurrency(schedule._account);
+  if (foreign) {
+    const draft = {
+      ...base,
+      id: uuidv4(),
+      transaction_amount: scheduledAmount,
+    };
+    const result = await postForeignEntry({
+      transaction: draft,
+      rulesBeforeBase: true,
+    });
+    if (result.status === 'ok') {
+      return { type: 'posted' };
+    }
+    if (result.status === 'rate-unavailable') {
+      return {
+        type: 'rate-unavailable',
+        // The ruled draft, at the date that needs a rate.
+        transaction: 'transaction' in result ? result.transaction : draft,
+        currency: foreign.currencyCode,
+        precision: foreign.precision,
+      };
+    }
+    throw new Error(`schedule-post-${result.status}`);
+  }
+
+  await addTransactions(schedule._account, [
+    { ...base, amount: scheduledAmount },
+  ]);
+  return { type: 'posted' };
 }
 
 async function getSchedule(id: string): Promise<ScheduleEntity | null> {
@@ -694,6 +783,7 @@ export async function advanceSchedulesService(syncSuccess) {
   );
 
   const failedToPost = [];
+  const rateUnavailable: SchedulesRateUnavailableEvent['schedules'] = [];
   let didPost = false;
 
   const { data: upcomingLength } = await aqlQuery(
@@ -754,7 +844,40 @@ export async function advanceSchedulesService(syncSuccess) {
 
         // Automatically create a transaction for due schedules.
         if (syncSuccess) {
-          await postTransactionForSchedule({ id: currentSchedule.id });
+          // One schedule that cannot post must not stop the others.
+          let posted: PostScheduleResult | undefined;
+          try {
+            posted = await postTransactionForSchedule({
+              id: currentSchedule.id,
+            });
+          } catch (err) {
+            logger.error(
+              `Failed to post schedule ${currentSchedule.id}:`,
+              err instanceof Error ? err.message : err,
+            );
+            break;
+          }
+          // An occurrence without a rate stays due or missed, and the
+          // schedule does not advance past it.
+          if (posted?.type === 'rate-unavailable') {
+            rateUnavailable.push({
+              name: currentSchedule.name ?? null,
+              date: posted.transaction.date,
+              currency: posted.currency,
+            });
+            break;
+          }
+          if (posted?.type === 'exchange-unavailable') {
+            rateUnavailable.push({
+              name: currentSchedule.name ?? null,
+              date: posted.date,
+              currency: posted.currencies.join(', '),
+              ...(posted.reason === 'estimate-unusable' && {
+                estimateUnusable: true,
+              }),
+            });
+            break;
+          }
 
           didPost = true;
         } else {
@@ -810,6 +933,11 @@ export async function advanceSchedulesService(syncSuccess) {
     }
   }
 
+  if (rateUnavailable.length > 0) {
+    connection.send('schedules-rate-unavailable', {
+      schedules: rateUnavailable,
+    });
+  }
   if (failedToPost.length > 0) {
     connection.send('schedules-offline');
   } else if (didPost) {

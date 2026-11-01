@@ -27,10 +27,16 @@ import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
 
 type ProviderAction = () => void | Promise<void>;
 
+/** A provider currency is known only when it is an ISO 4217 code. */
+function isoCurrency(value: unknown) {
+  return typeof value === 'string' && /^[A-Z]{3}$/.test(value) ? value : null;
+}
+
 type SimpleFinAccount = {
   id: string;
   name: string;
   balance: number;
+  currency?: string;
   org: {
     name: string;
     domain: string;
@@ -41,6 +47,7 @@ type SimpleFinAccount = {
 type PluggyAiAccount = {
   id: string;
   name: string;
+  currencyCode?: string;
   type: 'BANK' | string;
   taxNumber: string;
   owner: string;
@@ -444,6 +451,7 @@ export function useBuiltInBankSyncProviders({
         orgDomain: oldAccount.org.domain,
         orgId: oldAccount.org.id,
         balance: oldAccount.balance,
+        currency: isoCurrency(oldAccount.currency),
       }));
 
       dispatch(
@@ -539,6 +547,7 @@ export function useBuiltInBankSyncProviders({
               ? oldAccount.bankData.automaticallyInvestedBalance +
                 oldAccount.bankData.closingBalance
               : oldAccount.balance,
+          currency: isoCurrency(oldAccount.currencyCode),
         }),
       );
 
@@ -605,6 +614,7 @@ export function useBuiltInBankSyncProviders({
         orgDomain: string;
         orgId: string;
         balance: number;
+        currency: string | null;
       };
 
       for (const oldAccount of results.accounts ?? []) {
@@ -615,6 +625,7 @@ export function useBuiltInBankSyncProviders({
           orgDomain: oldAccount.connection.name,
           orgId: oldAccount.connection._id,
           balance: oldAccount.balance.current,
+          currency: isoCurrency(oldAccount.balance?.currency),
         };
 
         newAccounts.push(newAccount);

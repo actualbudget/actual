@@ -16,6 +16,7 @@ describe('getDashboardWidgetItems', () => {
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: false,
+      fxImpactReportAvailable: false,
     });
 
     const enabled = getDashboardWidgetItems({
@@ -25,10 +26,38 @@ describe('getDashboardWidgetItems', () => {
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: true,
+      fxImpactReportAvailable: false,
     });
 
     expect(getNames(disabled)).not.toContain('balance-forecast-card');
     expect(getNames(enabled)).toContain('balance-forecast-card');
+  });
+
+  it('offers the FX impact report only while multicurrency is available', () => {
+    const options = {
+      t: (value: string) => value,
+      customReports: [{ id: 'abc', name: 'Custom Budget Review' }],
+      formulaMode: false,
+      crossoverReportEnabled: false,
+      budgetAnalysisReportEnabled: false,
+      balanceForecastReportEnabled: false,
+    };
+    expect(
+      getNames(
+        getDashboardWidgetItems({ ...options, fxImpactReportAvailable: false }),
+      ),
+    ).not.toContain('fx-impact-card');
+    const items = getDashboardWidgetItems({
+      ...options,
+      fxImpactReportAvailable: true,
+    });
+    const names = getNames(items);
+    expect(names.indexOf('fx-impact-card')).toBe(
+      names.indexOf('markdown-card') - 1,
+    );
+    expect(
+      items.find(item => item !== Menu.line && item.name === 'fx-impact-card'),
+    ).toMatchObject({ text: 'FX impact' });
   });
 
   it('keeps custom report entries after a divider', () => {
@@ -39,6 +68,7 @@ describe('getDashboardWidgetItems', () => {
       crossoverReportEnabled: false,
       budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: false,
+      fxImpactReportAvailable: false,
     });
 
     expect(items).toContain(Menu.line);

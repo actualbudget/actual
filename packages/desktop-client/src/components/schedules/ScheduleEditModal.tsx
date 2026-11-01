@@ -57,7 +57,8 @@ export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
     const transFields = fromTrans
       ? ({
           _account: transaction.account,
-          _amount: transaction.amount,
+          // A foreign transaction's schedule is native.
+          _amount: transaction.transaction_amount ?? transaction.amount,
           _amountOp: 'is',
           name: transaction.payee ? payees[transaction.payee].name : '',
           _payee: transaction.payee ? transaction.payee : '',

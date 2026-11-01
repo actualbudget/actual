@@ -30,6 +30,7 @@ import {
   useDashboardPageWidgets,
 } from '#hooks/useDashboardPages';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
 import { useResizeObserver } from '#hooks/useResizeObserver';
@@ -62,6 +63,7 @@ import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
 import { FormulaCard } from './reports/FormulaCard';
+import { FxImpactCard } from './reports/FxImpactCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
 import { MonteCarloCard } from './reports/monte-carlo/MonteCarloCard';
@@ -109,6 +111,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
+  const isMulticurrencyAvailable = useMulticurrencyAvailable();
 
   const formulaMode = useFeatureFlag('formulaMode');
 
@@ -626,6 +629,14 @@ export function Overview({ dashboard }: OverviewProps) {
                                   },
                                 ]
                               : []),
+                            ...(isMulticurrencyAvailable
+                              ? [
+                                  {
+                                    name: 'fx-impact-card' as const,
+                                    text: t('FX impact'),
+                                  },
+                                ]
+                              : []),
                             {
                               name: 'markdown-card' as const,
                               text: t('Text widget'),
@@ -868,6 +879,15 @@ export function Overview({ dashboard }: OverviewProps) {
                             widgetId={item.i}
                             isEditing={isEditing}
                             accounts={accounts}
+                            meta={widget.meta}
+                            onMetaChange={newMeta =>
+                              onMetaChange(item, newMeta)
+                            }
+                          />
+                        ) : widget.type === 'fx-impact-card' ? (
+                          <FxImpactCard
+                            widgetId={item.i}
+                            isEditing={isEditing}
                             meta={widget.meta}
                             onMetaChange={newMeta =>
                               onMetaChange(item, newMeta)

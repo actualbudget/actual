@@ -14,7 +14,16 @@ export type { SqlParam } from './types';
 
 function verifyParamTypes(sql, arr) {
   arr.forEach(val => {
-    if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
+    // Byte arrays can come from another realm, including TextEncoder output.
+    if (
+      typeof val !== 'string' &&
+      typeof val !== 'number' &&
+      !(
+        ArrayBuffer.isView(val) &&
+        Object.prototype.toString.call(val) === '[object Uint8Array]'
+      ) &&
+      val !== null
+    ) {
       logger.log(sql, arr);
       throw new Error('Invalid field type ' + val + ' for sql ' + sql);
     }

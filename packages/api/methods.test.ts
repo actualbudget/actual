@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import type { AmountFormatOptions } from '@actual-app/core/server/api-models';
 import type { RuleEntity } from '@actual-app/core/types/models';
 import { vi } from 'vitest';
 
@@ -65,6 +66,16 @@ async function createTestBudget(templateName: string, name: string) {
     path.join(budgetPath, 'db.sqlite'),
   );
 }
+
+describe('API imports', () => {
+  test('imports without a source currency at legacy precision', async () => {
+    await api.runImport('api-import-test', async () => {
+      await api.createAccount({ name: 'Imported' }, 12345);
+    });
+    const [account] = await api.getAccounts();
+    await expect(api.getAccountBalance(account.id)).resolves.toBe(12345);
+  });
+});
 
 describe('API setup and teardown', () => {
   // apis: loadBudget, getBudgetMonths
@@ -524,6 +535,10 @@ describe('API CRUD operations', () => {
 
     expect(await api.getAccountBalance(accountId1)).toEqual(1000);
     expect(await api.getAccountBalance(accountId2)).toEqual(0);
+    const options: AmountFormatOptions = { amountFormat: 'money' };
+    expect(await api.getAccountBalance(accountId1, undefined, options)).toEqual(
+      { amount: 1000, currencyCode: '' },
+    );
 
     await api.updateAccount(accountId1, { offbudget: false });
     await api.closeAccount(accountId1, accountId2);

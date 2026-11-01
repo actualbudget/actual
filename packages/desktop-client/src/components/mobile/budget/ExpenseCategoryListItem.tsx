@@ -16,6 +16,7 @@ import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useCategoriesById } from '#hooks/useCategories';
+import { useCategoryPockets } from '#hooks/useCategoryPockets';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';
@@ -28,6 +29,7 @@ import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+import { PocketParentCells, PocketSlotRows } from './PocketRows';
 import { SpentCell } from './SpentCell';
 
 type ExpenseCategoryNameProps = {
@@ -435,6 +437,8 @@ export function ExpenseCategoryListItem({
     onFundGoal,
   ]);
 
+  const pockets = useCategoryPockets(month).get(category?.id ?? '');
+
   const navigate = useNavigate();
   const onShowActivity = useCallback(() => {
     if (!category) {
@@ -446,6 +450,21 @@ export function ExpenseCategoryListItem({
   if (!category) {
     return null;
   }
+
+  // With currency pockets these cells edit the base slot, shown below the
+  // category's read-only totals.
+  const cells = (
+    <ExpenseCategoryCells
+      key={`${category.id}-${show3Columns}-${showBudgetedColumn}`}
+      category={category}
+      month={month}
+      onBudgetAction={onBudgetAction}
+      show3Columns={show3Columns}
+      showBudgetedColumn={showBudgetedColumn}
+      onOpenBalanceMenu={onOpenBalanceMenu}
+      onShowActivity={onShowActivity}
+    />
+  );
 
   return (
     <GridListItem
@@ -474,17 +493,26 @@ export function ExpenseCategoryListItem({
           onEditCategory={onEditCategory}
           show3Columns={show3Columns}
         />
-        <ExpenseCategoryCells
-          key={`${category.id}-${show3Columns}-${showBudgetedColumn}`}
+        {pockets ? (
+          <PocketParentCells
+            entry={pockets}
+            show3Columns={show3Columns}
+            showBudgetedColumn={showBudgetedColumn}
+          />
+        ) : (
+          cells
+        )}
+      </View>
+      {pockets && (
+        <PocketSlotRows
           category={category}
           month={month}
-          onBudgetAction={onBudgetAction}
+          entry={pockets}
+          baseCells={cells}
           show3Columns={show3Columns}
           showBudgetedColumn={showBudgetedColumn}
-          onOpenBalanceMenu={onOpenBalanceMenu}
-          onShowActivity={onShowActivity}
         />
-      </View>
+      )}
     </GridListItem>
   );
 }

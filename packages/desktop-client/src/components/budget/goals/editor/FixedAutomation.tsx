@@ -13,6 +13,7 @@ import { TWO_UP_FIELD_FLEX } from '#components/budget/goals/editor/fieldLayout';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { GenericInput } from '#components/util/GenericInput';
+import { useFormat } from '#hooks/useFormat';
 
 type FixedAutomationProps = {
   template: PeriodicTemplate;
@@ -32,8 +33,9 @@ export const FixedAutomation = ({
     ['month', t('months')],
     ['year', t('years')],
   ];
+  const format = useFormat();
 
-  const amount = amountToInteger(template.amount);
+  const amount = amountToInteger(template.amount, format.precision);
   const periodUnit = template.period?.period ?? 'month';
   const periodAmount = template.period?.amount ?? 1;
   const [rawPeriodAmount, setRawPeriodAmount] = useState(String(periodAmount));
@@ -83,7 +85,7 @@ export const FixedAutomation = ({
             dispatch(
               updateTemplate({
                 type: 'periodic',
-                amount: integerToAmount(value),
+                amount: integerToAmount(value, format.precision),
               }),
             )
           }

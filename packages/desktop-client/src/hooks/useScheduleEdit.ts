@@ -16,6 +16,7 @@ import type {
 
 import { updateScheduleConditions } from '#components/schedules/schedule-edit-utils';
 import type { ScheduleFormFields } from '#components/schedules/ScheduleEditForm';
+import { useAccounts } from '#hooks/useAccounts';
 import { aqlQuery } from '#queries/aqlQuery';
 import { liveQuery } from '#queries/liveQuery';
 
@@ -249,6 +250,7 @@ export function useScheduleEdit({
   useGetScheduledAmount = false,
 }: UseScheduleEditOptions) {
   const reducer = createScheduleEditReducer(useGetScheduledAmount);
+  const { data: accounts = [] } = useAccounts();
 
   const [isLoading, setIsLoading] = useState(false);
   const [state, dispatch] = useReducer(reducer, {
@@ -382,8 +384,15 @@ export function useScheduleEdit({
         return typedCond;
       });
 
+      // A foreign schedule's amounts are native.
+      const amountField = accounts.find(
+        account => account.id === state.fields.account,
+      )?.currency
+        ? 'transaction_amount'
+        : 'amount';
       void send('make-filters-from-conditions', {
         conditions,
+        amountField,
       }).then(({ filters }) => {
         if (current) {
           const live = liveQuery<TransactionEntity>(
@@ -411,7 +420,13 @@ export function useScheduleEdit({
         unsubscribe();
       }
     };
-  }, [state.schedule, state.transactionsMode, state.fields, transactionId]);
+  }, [
+    state.schedule,
+    state.transactionsMode,
+    state.fields,
+    transactionId,
+    accounts,
+  ]);
 
   return {
     state,

@@ -172,7 +172,7 @@ export function currentDate(): Date {
 
 export function currentDay(): string {
   if (global.IS_TESTING || Platform.isPlaywright) {
-    return '2017-01-01';
+    return global.currentDay || '2017-01-01';
   } else {
     return d.format(new Date(), 'yyyy-MM-dd');
   }

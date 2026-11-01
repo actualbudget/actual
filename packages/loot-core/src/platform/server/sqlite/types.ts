@@ -1,2 +1,2 @@
 // Value types SQLite accepts as bound query parameters
-export type SqlParam = string | number | null;
+export type SqlParam = string | number | Uint8Array | null;

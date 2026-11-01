@@ -24,36 +24,50 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { ParseFileOptions } from '@actual-app/core/server/transactions/import/parse-file';
-import { amountToInteger } from '@actual-app/core/shared/util';
 import { useQueryClient } from '@tanstack/react-query';
 
 import {
   useImportPreviewTransactionsMutation,
   useImportTransactionsMutation,
 } from '#accounts';
+import type { ImportRow } from '#accounts/mutations';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { TableHeader, TableWithNavigator } from '#components/table';
+import {
+  AccountCurrencyFormat,
+  useCurrencyFormatOverride,
+} from '#hooks/currencyFormatContext';
+import { useAccount } from '#hooks/useAccount';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useSyncedPrefs } from '#hooks/useSyncedPrefs';
+import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
+import { useDispatch } from '#redux';
 
 import { DateFormatSelect } from './DateFormatSelect';
 import { FieldMappings } from './FieldMappings';
 import { InOutOption } from './InOutOption';
+import { MissingRateForm } from './MissingRateForm';
 import { MultiplierOption } from './MultiplierOption';
+import { SelectField } from './SelectField';
+import { SubLabel } from './SubLabel';
 import { Transaction } from './Transaction';
 import type { DateFormat, FieldMapping, ImportTransaction } from './utils';
 import {
   applyFieldMappings,
+  currencyColumnOf,
   dateFormats,
   filterByStartDate,
   isDateFormat,
-  parseAmountFields,
   parseCategoryFields,
   parseDate,
+  parseImportAmount,
+  splitByCurrency,
   stripCsvImportTransaction,
 } from './utils';
 
@@ -100,6 +114,23 @@ function getInitialDateFormat(transactions, mappings) {
       ? null
       : dateFormats.find(f => parseDate(date, f.format) != null);
   return found ? found.format : 'mm dd yyyy';
+}
+
+/**
+ * Field mappings with any field reading the currency column unmapped, so
+ * auto-detection never also imports the currency cell as notes or payee.
+ */
+function withoutColumn<T extends Record<string, string | null>>(
+  mappings: T,
+  column: string | null,
+): T {
+  if (column === null) return mappings;
+  return Object.fromEntries(
+    Object.entries(mappings).map(([field, value]) => [
+      field,
+      value === column ? null : value,
+    ]),
+  ) as T;
 }
 
 function getInitialMappings(transactions) {
@@ -202,14 +233,35 @@ function shouldPreserveImportSettingsForParse(
   );
 }
 
-export function ImportTransactionsModal({
+export function ImportTransactionsModal(props: {
+  filename: string;
+  accountId: string;
+  onImported?: (didChange: boolean) => void;
+}) {
+  const account = useAccount(props.accountId);
+  // An account in another currency imports and shows its own amounts.
+  return (
+    <AccountCurrencyFormat account={account ?? undefined}>
+      <ImportTransactionsModalBody {...props} isForeign={!!account?.currency} />
+    </AccountCurrencyFormat>
+  );
+}
+
+function ImportTransactionsModalBody({
   filename: originalFileName,
   accountId,
   onImported,
+  isForeign,
+}: {
+  filename: string;
+  accountId: string;
+  onImported?: (didChange: boolean) => void;
+  isForeign: boolean;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const dateFormat = useDateFormat() || ('MM/dd/yyyy' as const);
+  const precision = useAmountPrecision();
   const [prefs, savePrefs] = useSyncedPrefs();
   const { data: { list: categories } = { list: [] } } = useCategories();
 
@@ -217,6 +269,23 @@ export function ImportTransactionsModal({
   const [loadingState, setLoadingState] = useState<
     null | 'parsing' | 'importing'
   >('parsing');
+  // Rows needing a rate; a null row id (a rejected import) always blocks.
+  const [missingRates, setMissingRates] = useState<
+    Array<{ trxId: string | null; date: string }>
+  >([]);
+  // Saving a missing rate re-runs the preview.
+  const [rateVersion, setRateVersion] = useState(0);
+  const previewRequestId = useRef(0);
+  const currencyCode = useCurrencyFormatOverride()?.currencyCode;
+  const dispatch = useDispatch();
+  const multicurrencyAvailable = useMulticurrencyAvailable();
+  // A CSV currency column (MC-7.5): rows in another currency are left out.
+  const [currencyColumn, setCurrencyColumn] = useState<string | null>(null);
+  const [rejectedRows, setRejectedRows] = useState<
+    Array<{ row: ImportTransaction; value: string }>
+  >([]);
+  // The column and code the preview on screen was split with.
+  const [previewSplitKey, setPreviewSplitKey] = useState<string | null>(null);
   const [error, setError] = useState<{
     parsed: boolean;
     message: string;
@@ -284,6 +353,30 @@ export function ImportTransactionsModal({
   const [clearOnImport, setClearOnImport] = useState(true);
   const [startDate, setStartDate] = useState('');
   const lastParseRef = useRef<LastParse | null>(null);
+  // The account's code, the budget currency's for an inheriting account.
+  const accountCode = currencyCode ?? prefs.defaultCurrencyCode ?? '';
+  // Every column any row has: csv-parse leaves out a short row's missing
+  // trailing cells, so the first row alone can hide one.
+  const csvColumns = [
+    ...new Set(
+      parsedTransactions.flatMap(row =>
+        // base_amount is a preview annotation, never a file column.
+        Object.keys(stripCsvImportTransaction(row)).filter(
+          key => key !== 'base_amount',
+        ),
+      ),
+    ),
+  ];
+  // A saved column this file does not have is not mapped.
+  const splitKeyOf = (column: string | null) =>
+    `${column ?? ''}|${accountCode}`;
+  const effectiveCurrencyColumn =
+    filetype === 'csv' &&
+    multicurrencyAvailable &&
+    currencyColumn !== null &&
+    csvColumns.includes(currencyColumn)
+      ? currencyColumn
+      : null;
 
   const getImportPreview = useCallback(
     async (
@@ -299,8 +392,9 @@ export function ImportTransactionsModal({
     ) => {
       const previewTransactions = [];
       const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
+      // OFX and CAMT dates arrive already parsed, as in the import itself.
       const getTransDate: (trans: ImportTransaction) => string | null =
-        isOfxFile(filetype)
+        isOfxFile(filetype) || isCamtFile(filetype)
           ? trans => trans.date ?? null
           : trans => parseDate(trans.date, parseDateFormat);
 
@@ -336,13 +430,14 @@ export function ImportTransactionsModal({
           break;
         }
 
-        const { amount } = parseAmountFields(
+        const amount = parseImportAmount(
           trans,
           splitMode,
           inOutModeEnabled,
           outValue,
           flipAmount,
           multiplierAmount,
+          precision,
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
@@ -360,20 +455,21 @@ export function ImportTransactionsModal({
           selected: _selected,
           selected_merge: _selected_merge,
           tombstone: _tombstone,
+          base_amount: _baseAmount,
           ...finalTransaction
         } = trans;
         previewTransactions.push({
           ...finalTransaction,
           category: category_id,
           date,
-          amount: amountToInteger(amount),
+          amount,
           cleared: clearOnImport,
         });
       }
 
       return previewTransactions;
     },
-    [categories, clearOnImport],
+    [categories, clearOnImport, precision],
   );
 
   const parse = useCallback(
@@ -393,6 +489,8 @@ export function ImportTransactionsModal({
         {
           filepath: filename,
           options,
+          // Amounts are parsed at the account's own precision.
+          accountId,
         },
       );
 
@@ -432,17 +530,36 @@ export function ImportTransactionsModal({
               ? JSON.parse(mappings)
               : getInitialMappings(transactions);
 
+            const savedCurrencyColumn = currencyColumnOf(
+              prefs[`csv-currency-column-${accountId}`],
+            );
+            // The saved column applies only with multicurrency and when this
+            // file has it, as for the preview; otherwise the field mappings
+            // stay as saved.
+            const activeCurrencyColumn =
+              multicurrencyAvailable &&
+              savedCurrencyColumn !== null &&
+              transactions.some(row => savedCurrencyColumn in row)
+                ? savedCurrencyColumn
+                : null;
             // @ts-expect-error - mappings might not have outflow/inflow properties
-            setFieldMappings(mappings);
+            setFieldMappings(withoutColumn(mappings, activeCurrencyColumn));
+            setCurrencyColumn(savedCurrencyColumn);
 
             // Set initial split mode based on any saved mapping
             // @ts-expect-error - mappings might not have outflow/inflow properties
             const splitMode = !!(mappings.outflow || mappings.inflow);
             setSplitMode(splitMode);
 
+            // Inferred from rows the currency column keeps, so a left-out
+            // row's date never decides the format.
             const parseDateFormat =
               prefs[`parse-date-${accountId}-${filetype}`] ||
-              getInitialDateFormat(transactions, mappings);
+              getInitialDateFormat(
+                splitByCurrency(transactions, activeCurrencyColumn, accountCode)
+                  .kept,
+                mappings,
+              );
             setParseDateFormat(
               isDateFormat(parseDateFormat) ? parseDateFormat : null,
             );
@@ -467,7 +584,7 @@ export function ImportTransactionsModal({
       setLoadingState(null);
     },
     // We use some state variables from the component, but do not want to re-parse when they change
-    [accountId, prefs],
+    [accountId, prefs, multicurrencyAvailable, accountCode],
   );
 
   function onMultiplierChange(e) {
@@ -640,7 +757,15 @@ export function ImportTransactionsModal({
     const finalTransactions = [];
     let errorMessage;
 
-    for (let trans of transactions) {
+    // The current split again: a preview list from an older choice never
+    // carries a row in another currency.
+    const importSplit = splitByCurrency(
+      transactions,
+      effectiveCurrencyColumn,
+      accountCode,
+    );
+    const leftOut = rejectedRows.length + importSplit.rejected.length;
+    for (let trans of importSplit.kept) {
       if (
         trans.isMatchedTransaction ||
         (reconcile && !trans.selected && !trans.ignored && !trans.existing)
@@ -665,13 +790,14 @@ export function ImportTransactionsModal({
         break;
       }
 
-      const { amount } = parseAmountFields(
+      const amount = parseImportAmount(
         trans,
         splitMode,
         isOfxFile(filetype) ? false : inOutMode,
         outValue,
         flipAmount,
         multiplierAmount,
+        precision,
       );
       if (amount == null) {
         errorMessage = t('Transaction on {{date}} has no amount', {
@@ -691,6 +817,7 @@ export function ImportTransactionsModal({
         selected: _selected,
         selected_merge: _selected_merge,
         trx_id: _trx_id,
+        base_amount: _baseAmount,
         ...finalTransaction
       } = trans;
 
@@ -704,6 +831,11 @@ export function ImportTransactionsModal({
         // - transactions with existing (merged transactions) that are not selected_merge
         finalTransaction.forceAddTransaction = true;
       }
+      // Without merging, a foreign row is always added; the import path is
+      // still used because it converts the amounts.
+      if (!reconcile && isForeign) {
+        finalTransaction.forceAddTransaction = true;
+      }
 
       if (reconcile && trans.existing && !trans.selected) {
         // unselected transactions with existing are still sent, so they keep
@@ -715,7 +847,7 @@ export function ImportTransactionsModal({
         ...finalTransaction,
         category: category_id,
         date,
-        amount: amountToInteger(amount),
+        amount,
         cleared: clearOnImport,
         notes: importNotes ? finalTransaction.notes : null,
       });
@@ -745,6 +877,11 @@ export function ImportTransactionsModal({
       savePrefs({
         [`csv-mappings-${accountId}`]: JSON.stringify(fieldMappings),
       });
+      if (multicurrencyAvailable) {
+        savePrefs({
+          [`csv-currency-column-${accountId}`]: currencyColumn ?? '',
+        });
+      }
       savePrefs({ [`csv-delimiter-${accountId}`]: delimiter });
       savePrefs({ [`csv-encoding-${accountId}`]: csvEncoding });
       savePrefs({ [`csv-has-header-${accountId}`]: String(hasHeaderRow) });
@@ -782,18 +919,43 @@ export function ImportTransactionsModal({
     importTransactions.mutate(
       {
         accountId,
-        transactions: finalTransactions,
+        transactions: toImportRows(finalTransactions, isForeign),
         reconcile,
         reimportDeleted,
       },
       {
-        onSuccess: async didChange => {
+        // A thrown rejection (for example a guard error) also ends loading.
+        onError: () => setLoadingState(null),
+        onSuccess: async result => {
+          // A rejected import wrote nothing; keep the dialog and its
+          // settings so the user can supply what was missing.
+          if (typeof result === 'object') {
+            setLoadingState(null);
+            setMissingRates(
+              result.missingRateDates.map(date => ({ trxId: null, date })),
+            );
+            return;
+          }
+          const didChange = result;
           if (didChange) {
             void queryClient.invalidateQueries(payeeQueries.list());
           }
 
           if (onImported) {
             onImported(didChange);
+          }
+          if (leftOut > 0) {
+            dispatch(
+              addNotification({
+                notification: {
+                  type: 'message',
+                  message: t(
+                    'Rows left out because of their currency: {{count}}.',
+                    { count: leftOut },
+                  ),
+                },
+              }),
+            );
           }
 
           close();
@@ -805,19 +967,28 @@ export function ImportTransactionsModal({
   const importPreviewTransactions = useImportPreviewTransactionsMutation();
 
   const onImportPreview = useEffectEvent(async () => {
+    // Rows in another currency never reach the preview or the import, and
+    // every one is listed, whatever its date.
+    const { kept, rejected } = splitByCurrency(
+      parsedTransactions,
+      effectiveCurrencyColumn,
+      accountCode,
+    );
     // Filter by start date before preview and deduplication
     const isPreParsed = isOfxFile(filetype) || isCamtFile(filetype);
-    const filteredTransactions = filterByStartDate(
-      parsedTransactions,
+    const currencyKept = filterByStartDate(
+      kept,
       startDate,
       isPreParsed,
       fieldMappings,
       parseDateFormat,
     );
+    const splitKey = splitKeyOf(effectiveCurrencyColumn);
 
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
-    const previewTransactionsToImport = await getImportPreview(
-      filteredTransactions,
+    const requestId = ++previewRequestId.current;
+    const previewRows = await getImportPreview(
+      currencyKept,
       filetype,
       flipAmount,
       fieldMappings,
@@ -827,23 +998,53 @@ export function ImportTransactionsModal({
       outValue,
       multiplierAmount,
     );
+    // Without merging, foreign rows are added as new rows (see onImport).
+    const previewTransactionsToImport =
+      !reconcile && isForeign
+        ? previewRows.map(row => ({ ...row, forceAddTransaction: true }))
+        : previewRows;
 
     // Retreive the transactions that would be updated (along with the existing trx)
     importPreviewTransactions.mutate(
       {
         accountId,
-        transactions: previewTransactionsToImport,
+        transactions: toImportRows(previewTransactionsToImport, isForeign),
         reimportDeleted,
       },
       {
-        onSuccess: previewTrx => {
+        onSuccess: ({
+          updatedPreview: previewTrx,
+          previewBases,
+          missingRateDates: missingDates,
+          missingRates: rowRates,
+        }) => {
+          // A newer preview (after an option change) replaces this one.
+          if (requestId !== previewRequestId.current) {
+            return;
+          }
+          // The rows left out change together with the preview shown.
+          setRejectedRows(rejected);
+          setPreviewSplitKey(splitKey);
+          setMissingRates(
+            rowRates.length > 0
+              ? rowRates
+              : missingDates.map(date => ({ trxId: null, date })),
+          );
           const matchedUpdateMap = previewTrx.reduce((map, entry) => {
             // @ts-expect-error - entry.transaction might not have trx_id property
             map[entry.transaction.trx_id] = entry;
             return map;
           }, {});
+          // Base amounts resolved for new rows of a foreign account.
+          const baseByTrxId = new Map(
+            previewBases.map(entry => [
+              // @ts-expect-error - entry.transaction might not have trx_id property
+              entry.transaction.trx_id,
+              entry.baseAmount,
+            ]),
+          );
 
-          const previewTransactions = filteredTransactions
+          const previewTransactions = currencyKept
             .filter(trans => !trans.isMatchedTransaction)
             .reduce((previous, currentTrx) => {
               let next = previous;
@@ -860,6 +1061,13 @@ export function ImportTransactionsModal({
 
               currentTrx.selected = !currentTrx.ignored;
               currentTrx.selected_merge = currentTrx.existing;
+              // Display only; stripped before rows are sent to the server.
+              const baseAmount = baseByTrxId.get(currentTrx.trx_id);
+              if (baseAmount !== undefined) {
+                currentTrx.base_amount = baseAmount;
+              } else {
+                delete currentTrx.base_amount;
+              }
 
               next = next.concat({ ...currentTrx });
 
@@ -895,13 +1103,36 @@ export function ImportTransactionsModal({
 
     void onImportPreview();
   }, [
+    rateVersion,
     loadingState,
     parsedTransactions.length,
     startDate,
     fieldMappings,
     parseDateFormat,
     reimportDeleted,
+    // Amount interpretation changes the resolved base amounts.
+    flipAmount,
+    multiplierAmount,
+    inOutMode,
+    outValue,
+    reconcile,
+    effectiveCurrencyColumn,
+    accountCode,
   ]);
+
+  // Only rows selected for import need a rate.
+  const selectedIds = new Set(
+    transactions
+      .filter(trans => trans.selected && !trans.isMatchedTransaction)
+      .map(trans => trans.trx_id),
+  );
+  const blockingRateDates = [
+    ...new Set(
+      missingRates
+        .filter(({ trxId }) => trxId === null || selectedIds.has(trxId))
+        .map(({ date }) => date),
+    ),
+  ].sort();
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
     { name: t('Date'), width: 200 },
@@ -964,6 +1195,13 @@ export function ImportTransactionsModal({
               </Text>
             </View>
           )}
+          {isForeign && currencyCode && blockingRateDates.length > 0 && (
+            <MissingRateForm
+              dates={blockingRateDates}
+              currencyCode={currencyCode}
+              onSaved={() => setRateVersion(version => version + 1)}
+            />
+          )}
           {(!error || !error.parsed) && (
             <View
               style={{ ...styles.tableContainer, height: 300, flex: 'unset' }}
@@ -1008,6 +1246,7 @@ export function ImportTransactionsModal({
                       outValue={outValue}
                       flipAmount={flipAmount}
                       multiplierAmount={multiplierAmount}
+                      precision={precision}
                       categories={categories}
                       onCheckTransaction={onCheckTransaction}
                       reconcile={reconcile}
@@ -1079,6 +1318,78 @@ export function ImportTransactionsModal({
                 inOutMode={inOutMode}
                 hasHeaderRow={hasHeaderRow}
               />
+            </View>
+          )}
+
+          {/* Kept mounted from the parsed rows, even when every row is left out. */}
+          {filetype === 'csv' &&
+            multicurrencyAvailable &&
+            parsedTransactions.length > 0 && (
+              <View
+                role="group"
+                aria-label={t('Currency column')}
+                style={{ marginTop: 10, maxWidth: 240 }}
+              >
+                <SubLabel title={t('Currency')} />
+                <SelectField
+                  options={csvColumns}
+                  value={effectiveCurrencyColumn}
+                  onChange={name => {
+                    const column = currencyColumnOf(name);
+                    setCurrencyColumn(column);
+                    setFieldMappings(mappings =>
+                      mappings ? withoutColumn(mappings, column) : mappings,
+                    );
+                  }}
+                  hasHeaderRow={hasHeaderRow}
+                  firstTransaction={parsedTransactions[0]}
+                />
+              </View>
+            )}
+
+          {rejectedRows.length > 0 && (
+            <View style={{ marginTop: 10 }}>
+              <Text style={{ color: theme.warningText }}>
+                <Trans>Rows left out because of their currency:</Trans>
+              </Text>
+              <View style={{ maxHeight: 150, overflowY: 'auto' }}>
+                {rejectedRows.map(({ row, value }) => {
+                  const mapped = fieldMappings
+                    ? applyFieldMappings(row, fieldMappings)
+                    : row;
+                  return (
+                    <Text
+                      key={row.trx_id}
+                      style={{ color: theme.pageTextSubdued }}
+                    >
+                      {[
+                        mapped.date,
+                        mapped.payee_name || mapped.notes,
+                        // Separate columns show each cell the file fills.
+                        ...(splitMode
+                          ? [
+                              String(mapped.outflow ?? '').trim() &&
+                                t('Outflow {{value}}', {
+                                  value: mapped.outflow,
+                                }),
+                              String(mapped.inflow ?? '').trim() &&
+                                t('Inflow {{value}}', { value: mapped.inflow }),
+                            ]
+                          : [mapped.amount]),
+                      ]
+                        .filter(part => part != null && part !== '')
+                        .join(' · ')}{' '}
+                      {t(
+                        "Currency {{value}} does not match this account's {{code}}",
+                        {
+                          value,
+                          code: accountCode,
+                        },
+                      )}
+                    </Text>
+                  );
+                })}
+              </View>
             </View>
           )}
 
@@ -1377,7 +1688,15 @@ export function ImportTransactionsModal({
                   <ButtonWithLoading
                     variant="primary"
                     autoFocus
-                    isDisabled={count === 0}
+                    // A preview in flight may change which rows are left out.
+                    isDisabled={
+                      count === 0 ||
+                      blockingRateDates.length > 0 ||
+                      importPreviewTransactions.isPending ||
+                      // A preview from another column or code (for example
+                      // after a failed refresh) is not what Import sends.
+                      previewSplitKey !== splitKeyOf(effectiveCurrencyColumn)
+                    }
                     isLoading={loadingState === 'importing'}
                     onPress={() => {
                       void onImport(() => state.close());
@@ -1445,4 +1764,19 @@ function isOfxFile(fileType: string) {
 
 function isCamtFile(fileType: string) {
   return fileType === 'xml';
+}
+
+/**
+ * A foreign account's rows carry their parsed amount as the native
+ * `transaction_amount`; the server converts it at the saved rate.
+ */
+export function toImportRows(
+  rows: ImportRow[],
+  isForeign: boolean,
+): ImportRow[] {
+  if (!isForeign) return rows;
+  return rows.map(({ amount, ...rest }) => ({
+    ...rest,
+    transaction_amount: amount,
+  }));
 }

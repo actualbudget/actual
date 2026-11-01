@@ -17,7 +17,9 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FinancialText } from '#components/FinancialText';
 import { FieldLabel } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/mobile/transactions/AmountInput';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
 import { useAccount } from '#hooks/useAccount';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -31,17 +33,33 @@ type AccountReconcileModalProps = Extract<
   { name: 'account-reconcile' }
 >['options'];
 
-export function AccountReconcileModal({
+export function AccountReconcileModal(props: AccountReconcileModalProps) {
+  const account = useAccount(props.accountId);
+  // A foreign account reconciles in its own currency and precision.
+  return (
+    <AccountCurrencyFormat account={account ?? undefined}>
+      <AccountReconcileModalBody {...props} />
+    </AccountCurrencyFormat>
+  );
+}
+
+function AccountReconcileModalBody({
   accountId,
   onReconcile,
 }: AccountReconcileModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
-  const clearedBalance = useSheetValue<'account', 'balanceCleared'>(
-    bindings.accountBalanceCleared(accountId),
+  const clearedBalance = useSheetValue<
+    'account',
+    'balanceCleared' | 'nativeBalanceCleared'
+  >(
+    account?.currency
+      ? bindings.accountNativeBalanceCleared(accountId)
+      : bindings.accountBalanceCleared(accountId),
   );
-  const format = useFormat();
+  const precision = useAmountPrecision();
+  const format = useFormat(precision);
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const locale = useLocale();
 
@@ -61,7 +79,7 @@ export function AccountReconcileModal({
   }
 
   const onSubmit = (newAmount: number | null) => {
-    if (newAmount == null) {
+    if (newAmount == null || !Number.isSafeInteger(newAmount)) {
       return;
     }
     onReconcile(newAmount);
@@ -95,8 +113,13 @@ export function AccountReconcileModal({
               >
                 <AmountInput
                   key={amountInputKey}
-                  value={integerToAmount(amount)}
-                  onChange={newAmount => setAmount(amountToInteger(newAmount))}
+                  value={integerToAmount(amount, precision)}
+                  onChange={newAmount => {
+                    const encoded = amountToInteger(newAmount, precision);
+                    if (Number.isSafeInteger(encoded)) {
+                      setAmount(encoded);
+                    }
+                  }}
                   autoFocus
                   autoFocusDelay={150}
                   variant="large"

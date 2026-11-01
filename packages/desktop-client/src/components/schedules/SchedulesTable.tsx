@@ -20,6 +20,8 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Cell, Field, Row, Table, TableHeader } from '#components/table';
 import { DisplayId } from '#components/util/DisplayId';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
+import { useAccount } from '#hooks/useAccount';
 import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -164,6 +166,8 @@ function ScheduleRow({
 
   const rowRef = useRef(null);
   const buttonRef = useRef(null);
+  // A foreign schedule's amount is in its account's currency.
+  const scheduleAccount = useAccount(schedule._account ?? '');
 
   const status = statuses.get(schedule.id);
   useContextMenu({
@@ -246,7 +250,9 @@ function ScheduleRow({
       <Field width={120} name="status" style={{ alignItems: 'flex-start' }}>
         <StatusBadge status={statuses.get(schedule.id)} />
       </Field>
-      <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
+      <AccountCurrencyFormat account={scheduleAccount}>
+        <ScheduleAmountCell amount={schedule._amount} op={schedule._amountOp} />
+      </AccountCurrencyFormat>
       {!minimal && (
         <Field width={80} style={{ textAlign: 'center' }}>
           {schedule._date &&

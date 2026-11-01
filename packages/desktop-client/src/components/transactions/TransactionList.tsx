@@ -1,6 +1,12 @@
 // @ts-strict-ignore
 // TODO: remove strict
-import { useCallback, useLayoutEffect, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -26,6 +32,7 @@ import type {
   TransactionFilterEntity,
 } from '@actual-app/core/types/models';
 
+import { fromRegisterView, toForeignDraft } from '#accounts/registerView';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
@@ -35,8 +42,16 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import { encodingKey } from '#util/account-encoding';
+import type { ExchangeRequest } from '#util/exchange-entry';
+import {
+  openForeignEditDialog,
+  pushEditModal,
+  setInlineExchangeEdit,
+} from '#util/foreign-edit';
 
 import { applyRulesToTransaction } from './applyRulesToTransaction';
+import type { ExchangePostResult } from './ExchangePanel';
 import type { ClearedFieldsByTransaction } from './table/utils';
 import { TransactionTable } from './TransactionsTable';
 import type { TransactionTableProps } from './TransactionsTable';
@@ -194,77 +209,212 @@ export function TransactionList({
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
+      const [parent] = newTransactions;
+      // A foreign register's draft carries its native amount in `amount`;
+      // it is posted only through the atomic foreign entry handler.
+      if (
+        account?.currency &&
+        account.currency_precision != null &&
+        parent?.account === account.id
+      ) {
+        const draft = toForeignDraft(parent);
+        const amount = draft.transaction_amount;
+        if (amount === 0) {
+          // Zero converts to zero; anything else (such as a rule changing
+          // the date) is resolved in the conversion dialog.
+          const result = await send('transactions/post-foreign-entry', {
+            transaction: draft,
+          });
+          if (result.status === 'ok') {
+            onRefetch();
+            return;
+          }
+        }
+        // The table calls onAdd while rendering; open the modal after it.
+        await Promise.resolve();
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'foreign-amount',
+              options: {
+                transaction: draft,
+                currencyCode: account.currency,
+                nativePrecision: account.currency_precision,
+                onPosted: onRefetch,
+              },
+            },
+          }),
+        );
+        return;
+      }
       await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch],
+    [account, dispatch, isLearnCategoriesEnabled, onRefetch],
   );
 
-  const onSave = useCallback(
-    async (transaction: TransactionEntity) => {
-      const saveTransaction = async () => {
-        const changes = updateTransaction(
-          transactionsLatest.current,
-          transaction,
-        );
-        transactionsLatest.current = changes.data;
-
-        if (changes.diff.updated.length > 0) {
-          const dateChanged = !!changes.diff.updated[0].date;
-          if (dateChanged) {
-            changes.diff.updated[0].sort_order = Date.now();
-            await saveDiff(changes.diff, isLearnCategoriesEnabled);
+  // Exchange transfers are edited above the rows, in the panel that enters
+  // them, while this register is shown.
+  const [exchangeEdit, setExchangeEdit] = useState<{
+    id: TransactionEntity['id'];
+    onSaved: () => void;
+  } | null>(null);
+  useEffect(
+    () =>
+      setInlineExchangeEdit((id, onSaved) =>
+        setExchangeEdit({
+          id,
+          // The register reloads its rows too: a caller outside it, such as
+          // Amount details, refreshes only its own queries.
+          onSaved: () => {
+            onSaved();
             onRefetch();
-          } else {
-            onChange(changes.newTransaction, changes.data);
-            void saveDiffAndApply(
-              changes.diff,
-              changes,
-              onChange,
-              isLearnCategoriesEnabled,
-            );
-          }
-        }
+          },
+        }),
+      ),
+    [onRefetch],
+  );
+
+  // Exchange transfers post atomically from the register's inline panel.
+  const onAddExchange = async (
+    request: ExchangeRequest,
+  ): Promise<ExchangePostResult> => {
+    try {
+      const result = await send('transactions/post-exchange-transfer', request);
+      if (result.status === 'ok') {
+        onRefetch();
+        return { status: 'ok' };
+      }
+      return { status: 'rate-unavailable', currencies: result.currencies };
+    } catch (err) {
+      return {
+        status: 'error',
+        error: err instanceof Error ? err.message : String(err),
       };
+    }
+  };
 
-      await saveTransaction();
-    },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
-  );
+  /**
+   * Opens the edit dialog for a changed amount that only a foreign or
+   * exchange handler may save, returning true when it did. The register
+   * reloads the stored rows; the dialog saves the edit.
+   */
+  const openForeignEdit = async (transaction: TransactionEntity) => {
+    const rows = transactionsLatest.current;
+    // A dialog saves the edit; the row leaves editing so it shows its
+    // stored values until then (and after Cancel).
+    const leaveEditing = () => tableRef.current?.edit(null);
+    const stored = rows.find(row => row.id === transaction.id);
+    // An account in another currency is a move with confirmed amounts.
+    if (stored && transaction.account !== stored.account) {
+      const from = accounts.find(a => a.id === stored.account);
+      const to = accounts.find(a => a.id === transaction.account);
+      if (to && encodingKey(from) !== encodingKey(to)) {
+        leaveEditing();
+        pushEditModal(dispatch, {
+          name: 'foreign-move',
+          options: { id: stored.id, account: to.id, onSaved: onRefetch },
+        });
+        onRefetch();
+        return true;
+      }
+    }
+    if (!stored || transaction.amount === stored.amount) return false;
+    // A native register edits the native amount; a base register edits the
+    // base value and keeps the native amount.
+    const nativeView = stored._baseAmount !== undefined;
+    const opened = await openForeignEditDialog(dispatch, {
+      row: fromRegisterView([stored])[0],
+      rows: fromRegisterView([...rows]),
+      payees,
+      accounts,
+      ...(nativeView
+        ? { native: transaction.amount }
+        : { baseAmount: transaction.amount }),
+      onSaved: onRefetch,
+    });
+    if (opened) {
+      leaveEditing();
+      onRefetch();
+    }
+    return opened;
+  };
 
-  const onAddSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = addSplitTransaction(transactionsLatest.current, id);
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
-
-  const onSplit = useCallback(
-    (id: TransactionEntity['id']) => {
-      const changes = splitTransaction(
+  const onSave = async (transaction: TransactionEntity) => {
+    if (await openForeignEdit(transaction)) return;
+    const saveTransaction = async () => {
+      const changes = updateTransaction(
         transactionsLatest.current,
-        id,
-        makeEmptySplitSubtransactions,
+        transaction,
       );
-      onChange(changes.newTransaction, changes.data);
-      void saveDiffAndApply(
-        changes.diff,
-        changes,
-        onChange,
-        isLearnCategoriesEnabled,
-      );
-      return changes.diff.added[0].id;
-    },
-    [isLearnCategoriesEnabled, onChange],
-  );
+      transactionsLatest.current = changes.data;
+
+      if (changes.diff.updated.length > 0) {
+        const dateChanged = !!changes.diff.updated[0].date;
+        if (dateChanged) {
+          changes.diff.updated[0].sort_order = Date.now();
+          await saveDiff(changes.diff, isLearnCategoriesEnabled);
+          onRefetch();
+        } else {
+          onChange(changes.newTransaction, changes.data);
+          void saveDiffAndApply(
+            changes.diff,
+            changes,
+            onChange,
+            isLearnCategoriesEnabled,
+          );
+        }
+      }
+    };
+
+    await saveTransaction();
+  };
+
+  /** Foreign splits are edited in their dialog; returns true when opened. */
+  const openForeignSplit = (id: TransactionEntity['id']) => {
+    const row = transactionsLatest.current.find(t => t.id === id);
+    if (!row || !accounts.find(a => a.id === row.account)?.currency) {
+      return false;
+    }
+    pushEditModal(dispatch, {
+      name: 'foreign-split',
+      options: {
+        id: row.is_child && row.parent_id ? row.parent_id : row.id,
+        onSaved: onRefetch,
+      },
+    });
+    return true;
+  };
+
+  const onAddSplit = (id: TransactionEntity['id']) => {
+    if (openForeignSplit(id)) return null;
+    const changes = addSplitTransaction(transactionsLatest.current, id);
+    onChange(changes.newTransaction, changes.data);
+    void saveDiffAndApply(
+      changes.diff,
+      changes,
+      onChange,
+      isLearnCategoriesEnabled,
+    );
+    return changes.diff.added[0].id;
+  };
+
+  const onSplit = (id: TransactionEntity['id']) => {
+    if (openForeignSplit(id)) return null;
+    const changes = splitTransaction(
+      transactionsLatest.current,
+      id,
+      makeEmptySplitSubtransactions,
+    );
+    onChange(changes.newTransaction, changes.data);
+    void saveDiffAndApply(
+      changes.diff,
+      changes,
+      onChange,
+      isLearnCategoriesEnabled,
+    );
+    return changes.diff.added[0].id;
+  };
 
   const onApplyRules = useCallback(
     async (
@@ -534,6 +684,9 @@ export function TransactionList({
         onSplit={onSplit}
         onCloseAddTransaction={onCloseAddTransaction}
         onAdd={onAdd}
+        onAddExchange={account ? onAddExchange : undefined}
+        exchangeEdit={exchangeEdit}
+        onCloseExchangeEdit={() => setExchangeEdit(null)}
         onAddSplit={onAddSplit}
         onManagePayees={onManagePayees}
         onCreatePayee={onCreatePayee}

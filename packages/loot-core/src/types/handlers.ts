@@ -1,11 +1,13 @@
 import type { AccountGroupsHandlers } from '#server/account-groups/app';
 import type { AccountHandlers } from '#server/accounts/app';
 import type { AdminHandlers } from '#server/admin/app';
+import type { AmountEncodingHandlers } from '#server/amount-encoding/app';
 import type { AuthHandlers } from '#server/auth/app';
 import type { BudgetHandlers } from '#server/budget/app';
 import type { BudgetFileHandlers } from '#server/budgetfiles/app';
 import type { DashboardHandlers } from '#server/dashboard/app';
 import type { EncryptionHandlers } from '#server/encryption/app';
+import type { ExchangeRatesHandlers } from '#server/exchange-rates/app';
 import type { FiltersHandlers } from '#server/filters/app';
 import type { ForecastHandlers } from '#server/forecast/app';
 import type { FormulasHandlers } from '#server/formulas/app';
@@ -25,6 +27,8 @@ import type { ApiHandlers } from './api-handlers';
 import type { ServerHandlers } from './server-handlers';
 
 export type Handlers = {} & ServerHandlers &
+  AmountEncodingHandlers &
+  ExchangeRatesHandlers &
   ApiHandlers &
   BudgetHandlers &
   DashboardHandlers &

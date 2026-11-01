@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Navigate, Outlet } from 'react-router';
+import { Navigate, Outlet, useLocation } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -21,10 +21,9 @@ import { Checkbox, FormField, FormLabel } from '#components/forms';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 import { MobilePageHeader, Page } from '#components/Page';
 import { useServerURL, useServerVersion } from '#components/ServerContext';
-import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useMetadataPref } from '#hooks/useMetadataPref';
-import { loadPrefs, saveSyncedPrefs } from '#prefs/prefsSlice';
+import { loadPrefs } from '#prefs/prefsSlice';
 import { useDispatch, useSelector } from '#redux';
 
 import { AuthSettings } from './AuthSettings';
@@ -32,6 +31,7 @@ import { Backups } from './Backups';
 import { BudgetTypeSettings } from './BudgetTypeSettings';
 import { CurrencySettings } from './Currency';
 import { EncryptionSettings } from './Encryption';
+import { ExchangeRateSettings } from './ExchangeRates';
 import { ExperimentalFeatures } from './Experimental';
 import { ExportBudget } from './Export';
 import { FormatSettings } from './Format';
@@ -269,8 +269,16 @@ export function SettingsIndex() {
 export function GeneralSettings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
   const serverURL = useServerURL();
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (hash !== '#export-data') return;
+    const frame = requestAnimationFrame(() =>
+      document.getElementById('export-data')?.scrollIntoView(),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [hash]);
 
   return (
     <SettingsSections title={t('General')}>
@@ -278,7 +286,8 @@ export function GeneralSettings() {
       <ThemeSettings />
       {!isNarrowWidth && <SidebarSettings />}
       <FormatSettings />
-      {isCurrencyExperimentalEnabled && <CurrencySettings />}
+      <CurrencySettings />
+      <ExchangeRateSettings />
       <LanguageSettings />
       <SettingsGroup title={t('Budget')}>
         <BudgetTypeSettings />
@@ -291,7 +300,9 @@ export function GeneralSettings() {
       )}
       <SettingsGroup title={t('Data')}>
         {isElectron() && <Backups />}
-        <ExportBudget />
+        <View id="export-data">
+          <ExportBudget />
+        </View>
       </SettingsGroup>
     </SettingsSections>
   );
@@ -326,7 +337,6 @@ export function Settings() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const dispatch = useDispatch();
-  const isCurrencyExperimentalEnabled = useFeatureFlag('currency');
 
   useEffect(() => {
     const unlisten = listen('prefs-updated', () => {
@@ -336,12 +346,6 @@ export function Settings() {
     void dispatch(loadPrefs());
     return () => unlisten();
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!isCurrencyExperimentalEnabled) {
-      void dispatch(saveSyncedPrefs({ prefs: { defaultCurrencyCode: '' } }));
-    }
-  }, [dispatch, isCurrencyExperimentalEnabled]);
 
   if (isNarrowWidth) {
     return <Outlet />;

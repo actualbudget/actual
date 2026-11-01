@@ -64,8 +64,8 @@ import {
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
 import {
-  amountToCurrency,
   currencyToAmount,
+  getNumberFormat,
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
@@ -110,6 +110,15 @@ import type {
   TableProps,
 } from '#components/table';
 import {
+  BudgetCurrencyFormat,
+  useCurrencyFormatOverride,
+} from '#hooks/currencyFormatContext';
+import { useAccounts } from '#hooks/useAccounts';
+import {
+  useAmountPrecision,
+  useBudgetPrecision,
+} from '#hooks/useAmountPrecision';
+import {
   SchedulesProvider,
   useCachedSchedules,
 } from '#hooks/useCachedSchedules';
@@ -125,6 +134,11 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import {
+  ExchangeCounterpartLabel,
+  ExchangeCounterpartsProvider,
+  useExchangeCounterparts,
+} from '#hooks/useExchangeCounterparts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';
@@ -141,6 +155,10 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { getPayeesById } from '#payees';
 import { aqlQuery } from '#queries/aqlQuery';
 import { useDispatch } from '#redux';
+import { encodingKey, incompatibleAccountIds } from '#util/account-encoding';
+import { exchangeOtherAccount } from '#util/exchange-entry';
+import type { ExchangeRequest } from '#util/exchange-entry';
+import { amountDetailsText, storedPair } from '#util/foreign-details';
 import { getStatusLabel } from '#util/schedule';
 import {
   calculateFutureTransactionInfo,
@@ -148,6 +166,9 @@ import {
   isFutureTransaction,
 } from '#util/schedule-actions';
 
+import { ExchangeEdit } from './ExchangeEdit';
+import { ExchangePanel } from './ExchangePanel';
+import type { ExchangePostResult } from './ExchangePanel';
 import {
   isTransactionTableColumnAvailableInChildRows,
   isTransactionTableColumnDisplayOnly,
@@ -203,12 +224,19 @@ function measureAmountColumnWidth(values: string[], minWidth: number) {
 export function useAmountColumnWidths(
   transactions: TransactionEntity[],
   balances: Record<TransactionEntity['id'], IntegerAmount> | null,
+  hideFraction = false,
 ): AmountColumnWidths {
+  const precision = useAmountPrecision();
+  const formatter = getNumberFormat({
+    decimalPlaces: hideFraction ? 0 : precision,
+  }).formatter;
   const debitCreditValues = transactions.map(t =>
-    integerToCurrency(Math.abs(t.amount ?? 0)),
+    integerToCurrency(Math.abs(t.amount ?? 0), formatter, precision),
   );
   const balanceValues = balances
-    ? Object.values(balances).map(balance => integerToCurrency(balance))
+    ? Object.values(balances).map(balance =>
+        integerToCurrency(balance, formatter, precision),
+      )
     : [];
 
   return {
@@ -629,6 +657,19 @@ type NavigateToTransferAccount = (
   transactionId?: TransactionEntity['id'],
 ) => void;
 
+/**
+ * New foreign rows can only be entered in the account's own native register.
+ * Existing foreign amounts stay editable: their edits open a dialog that
+ * saves final amounts.
+ */
+function isForeignAmountFrozen(
+  id: TransactionEntity['id'],
+  account: AccountEntity | undefined,
+  isNativeRegister: boolean,
+) {
+  return !!account?.currency && isTemporaryId(id) && !isNativeRegister;
+}
+
 type PayeeCellProps = {
   id: TransactionEntity['id'];
   payee?: PayeeEntity;
@@ -675,7 +716,31 @@ function PayeeCell({
 
   const transferAccount = transferAccountsByTransaction[transaction.id];
 
-  const displayPayee = useDisplayPayee({ transaction });
+  // Only a new, unsplit transaction can become an exchange transfer (through
+  // the inline exchange panel); other rows offer transfers within their own
+  // currency.
+  // The accounts prop leaves out the row's own account, so encodings come
+  // from the full list.
+  const { data: allAccounts = [] } = useAccounts();
+  const rowAccount = allAccounts.find(acct => acct.id === transaction.account);
+  const selectablePayees =
+    isTemporaryId(id) && !transaction.is_child
+      ? payees
+      : payees.filter(p => {
+          const target = p.transfer_acct
+            ? allAccounts.find(acct => acct.id === p.transfer_acct)
+            : null;
+          return !target || encodingKey(target) === encodingKey(rowAccount);
+        });
+
+  // A new foreign entry keeps a new payee's name; the posting handler creates
+  // the payee only if the entry is saved.
+  const defersPayeeCreation =
+    useCurrencyFormatOverride() != null && isTemporaryId(id);
+  const resolvedPayee = useDisplayPayee({ transaction });
+  const displayPayee = transaction.payee?.startsWith('new:')
+    ? transaction.payee.slice('new:'.length)
+    : resolvedPayee;
 
   return transaction.is_parent ? (
     <Cell
@@ -778,6 +843,7 @@ function PayeeCell({
               displayPayee
             )}
           </Text>
+          <ExchangeCounterpartLabel transactionId={transaction.id} />
         </View>
       </CellButton>
     </Cell>
@@ -793,7 +859,12 @@ function PayeeCell({
       onUpdate={async value => {
         onUpdate('payee', value);
 
-        if (value && value.startsWith('new:') && !isCreatingPayee.current) {
+        if (
+          value &&
+          value.startsWith('new:') &&
+          !defersPayeeCreation &&
+          !isCreatingPayee.current
+        ) {
           isCreatingPayee.current = true;
           const id = await onCreatePayee(value.slice('new:'.length));
           onUpdate('payee', id ?? undefined);
@@ -858,6 +929,7 @@ function PayeeCell({
               ) : (
                 payeeName
               )}
+              <ExchangeCounterpartLabel transactionId={transaction.id} />
             </div>
           </>
         );
@@ -872,7 +944,7 @@ function PayeeCell({
         inputStyle,
       }) => (
         <PayeeAutocomplete
-          payees={payees}
+          payees={selectablePayees}
           accounts={accounts}
           value={payee?.id ?? null}
           shouldSaveFromKey={shouldSaveFromKey}
@@ -1122,6 +1194,14 @@ const Transaction = memo(function Transaction({
   amountColumnWidths,
 }: TransactionProps) {
   const { t } = useTranslation();
+  const precision = useAmountPrecision();
+  const amountFormatter = useMemo(
+    () =>
+      getNumberFormat({
+        decimalPlaces: hideFraction ? 0 : precision,
+      }).formatter,
+    [hideFraction, precision],
+  );
 
   const dispatch = useDispatch();
   const dispatchSelected = useSelectedDispatch();
@@ -1129,20 +1209,23 @@ const Transaction = memo(function Transaction({
 
   const [prevShowZero, setPrevShowZero] = useState(showZeroInDeposit);
   const [prevTransaction, setPrevTransaction] = useState(originalTransaction);
+  const [prevPrecision, setPrevPrecision] = useState(precision);
   const [transaction, setTransaction] = useState(() =>
-    serializeTransaction(originalTransaction, showZeroInDeposit),
+    serializeTransaction(originalTransaction, showZeroInDeposit, precision),
   );
   const isPreview = isPreviewId(transaction.id);
 
   if (
     originalTransaction !== prevTransaction ||
-    showZeroInDeposit !== prevShowZero
+    showZeroInDeposit !== prevShowZero ||
+    precision !== prevPrecision
   ) {
     setTransaction(
-      serializeTransaction(originalTransaction, showZeroInDeposit),
+      serializeTransaction(originalTransaction, showZeroInDeposit, precision),
     );
     setPrevTransaction(originalTransaction);
     setPrevShowZero(showZeroInDeposit);
+    setPrevPrecision(precision);
   }
 
   const [showReconciliationWarning, setShowReconciliationWarning] =
@@ -1280,22 +1363,27 @@ const Transaction = memo(function Transaction({
       newTransaction.reconciled = false;
     }
 
-    // Don't save a temporary value (a new payee) which will be
-    // filled in with a real id later
+    // Don't save a temporary value (a new payee) which will be filled in
+    // with a real id later. A new foreign entry keeps the name in its draft
+    // instead, and the posting handler creates the payee.
     if (
       name === 'payee' &&
       value &&
-      (value as TransactionEntity['payee'])?.startsWith('new:')
+      (value as TransactionEntity['payee'])?.startsWith('new:') &&
+      !(isNativeRegister && isTemporaryId(id))
     ) {
       setTransaction(newTransaction);
     } else {
       const deserialized = deserializeTransaction(
         newTransaction,
         originalTransaction,
+        precision,
       );
       // Run the transaction through the formatting so that we know
       // it's always showing the formatted result
-      setTransaction(serializeTransaction(deserialized, showZeroInDeposit));
+      setTransaction(
+        serializeTransaction(deserialized, showZeroInDeposit, precision),
+      );
 
       const deserializedName = ['credit', 'debit'].includes(name)
         ? 'amount'
@@ -1381,6 +1469,39 @@ const Transaction = memo(function Transaction({
   const account = accounts && accountId && getAccountsById(accounts)[accountId];
 
   const isChild = transaction.is_child;
+  const rowAccount = account || undefined;
+  const isForeignRow = !!rowAccount?.currency;
+  const isNativeRegister = useCurrencyFormatOverride() != null;
+  const amountFrozen = isForeignAmountFrozen(id, rowAccount, isNativeRegister);
+  const frozenAmountTitle = t('Edit this amount in its account');
+  const budgetPrecision = useBudgetPrecision();
+  const [budgetCurrency] = useSyncedPref('defaultCurrencyCode');
+  // A saved foreign row's cells describe the half this view does not show.
+  const pair =
+    isForeignRow && rowAccount && !isTemporaryId(id) && !isPreview
+      ? storedPair(transaction)
+      : null;
+  const amountDetails = pair
+    ? amountDetailsText(
+        t,
+        {
+          ...pair,
+          account: rowAccount!,
+          basePrecision: budgetPrecision,
+          baseCurrency: budgetCurrency ?? '',
+        },
+        pair.nativeView,
+      )
+    : null;
+  const hiddenAccountIds = incompatibleAccountIds(accounts, [rowAccount]);
+  // A saved single row may move to another currency through the move
+  // dialog; splits, transfers and drafts keep their encoding.
+  const canMoveAcrossCurrencies =
+    !isTemporaryId(id) &&
+    !isPreview &&
+    !transaction.is_parent &&
+    !transaction.is_child &&
+    !transaction.transfer_id;
   const transferAcct =
     isTemporaryId(id) && payee?.transfer_acct
       ? getAccountsById(accounts)[payee.transfer_acct]
@@ -1735,6 +1856,10 @@ const Transaction = memo(function Transaction({
             }) => (
               <AccountAutocomplete
                 includeClosedAccounts={false}
+                hiddenAccounts={canMoveAcrossCurrencies ? [] : hiddenAccountIds}
+                otherCurrencyAccounts={
+                  canMoveAcrossCurrencies ? hiddenAccountIds : undefined
+                }
                 value={accountId}
                 shouldSaveFromKey={shouldSaveFromKey}
                 clearOnBlur={false}
@@ -1981,20 +2106,28 @@ const Transaction = memo(function Transaction({
                   monthUtils.monthFromDate(transaction.date),
                 )}
               >
-                <CategoryAutocomplete
-                  categoryGroups={categoryGroups}
-                  value={categoryId ?? null}
-                  focused
-                  clearOnBlur={false}
-                  showSplitOption={
-                    !isChild && !isParent && allowSplitTransaction
-                  }
-                  shouldSaveFromKey={shouldSaveFromKey}
-                  inputProps={{ onBlur, onKeyDown, style: inputStyle }}
-                  onUpdate={onUpdate}
-                  onSelect={onSave}
-                  showHiddenCategories={showHiddenCategories}
-                />
+                {/* Category balances are budget amounts, even in a foreign register. */}
+                <BudgetCurrencyFormat>
+                  <CategoryAutocomplete
+                    categoryGroups={categoryGroups}
+                    value={categoryId ?? null}
+                    focused
+                    clearOnBlur={false}
+                    showSplitOption={
+                      !isChild &&
+                      !isParent &&
+                      allowSplitTransaction &&
+                      // An existing foreign row splits in the split dialog;
+                      // drafts and transfers do not split.
+                      (!isForeignRow || (!isTemporaryId(id) && !transferAcct))
+                    }
+                    shouldSaveFromKey={shouldSaveFromKey}
+                    inputProps={{ onBlur, onKeyDown, style: inputStyle }}
+                    onUpdate={onUpdate}
+                    onSelect={onSave}
+                    showHiddenCategories={showHiddenCategories}
+                  />
+                </BudgetCurrencyFormat>
               </SheetNameProvider>
             )}
           </CustomCell>
@@ -2007,17 +2140,26 @@ const Transaction = memo(function Transaction({
             type="input"
             width={amountColumnWidths.amount}
             name="debit"
-            exposed={focusedField === 'debit'}
+            exposed={focusedField === 'debit' && !amountFrozen}
             focused={focusedField === 'debit'}
-            value={debit === '' && credit === '' ? amountToCurrency(0) : debit}
+            value={
+              debit === '' && credit === '' ? amountFormatter.format(0) : debit
+            }
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value
+                ? amountFormatter.format(
+                    currencyToAmount(
+                      value,
+                      getNumberFormat().thousandsSeparator,
+                    ) || 0,
+                  )
+                : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={debit}
-            onExpose={name => !isPreview && onEdit(id, name)}
+            title={amountFrozen ? frozenAmountTitle : (amountDetails ?? debit)}
+            onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2025,8 +2167,11 @@ const Transaction = memo(function Transaction({
             }}
             inputProps={{
               value:
-                debit === '' && credit === '' ? amountToCurrency(0) : debit,
+                debit === '' && credit === ''
+                  ? amountFormatter.format(0)
+                  : debit,
               onUpdate: onUpdate.bind(null, 'debit'),
+              'aria-description': amountDetails ?? undefined,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
@@ -2042,17 +2187,24 @@ const Transaction = memo(function Transaction({
             type="input"
             width={amountColumnWidths.amount}
             name="credit"
-            exposed={focusedField === 'credit'}
+            exposed={focusedField === 'credit' && !amountFrozen}
             focused={focusedField === 'credit'}
             value={credit}
             formatter={value =>
               // reformat value so since we might have kept decimals
-              value ? amountToCurrency(currencyToAmount(value) || 0) : ''
+              value
+                ? amountFormatter.format(
+                    currencyToAmount(
+                      value,
+                      getNumberFormat().thousandsSeparator,
+                    ) || 0,
+                  )
+                : ''
             }
             valueStyle={valueStyle}
             textAlign="right"
-            title={credit}
-            onExpose={name => !isPreview && onEdit(id, name)}
+            title={amountFrozen ? frozenAmountTitle : (amountDetails ?? credit)}
+            onExpose={name => !isPreview && !amountFrozen && onEdit(id, name)}
             style={{
               ...(isParent && { fontStyle: 'italic' }),
               ...styles.tnum,
@@ -2061,6 +2213,7 @@ const Transaction = memo(function Transaction({
             inputProps={{
               value: credit,
               onUpdate: onUpdate.bind(null, 'credit'),
+              'aria-description': amountDetails ?? undefined,
               'data-1p-ignore': true,
             }}
             privacyFilter={{
@@ -2077,7 +2230,7 @@ const Transaction = memo(function Transaction({
             value={
               runningBalance == null || isChild || isTemporaryId(id)
                 ? ''
-                : integerToCurrency(runningBalance)
+                : integerToCurrency(runningBalance, amountFormatter, precision)
             }
             valueStyle={{
               color:
@@ -2258,7 +2411,7 @@ const Transaction = memo(function Transaction({
                 textAlign: 'right',
               }}
             >
-              {integerToCurrency(amount)}
+              {integerToCurrency(amount, amountFormatter, precision)}
             </Text>
           </View>
         )}
@@ -2372,6 +2525,7 @@ function NotesCell({
 type TransactionErrorProps = {
   error: NonNullable<TransactionEntity['error']>;
   isDeposit: boolean;
+  hideFraction?: boolean;
   onAddSplit: () => void;
   onDistributeRemainder: () => void;
   style?: CSSProperties;
@@ -2382,8 +2536,13 @@ function TransactionError({
   isDeposit,
   onAddSplit,
   onDistributeRemainder,
+  hideFraction = false,
   style,
 }: TransactionErrorProps) {
+  const precision = useAmountPrecision();
+  const formatter = getNumberFormat({
+    decimalPlaces: hideFraction ? 0 : precision,
+  }).formatter;
   switch (error.type) {
     case 'SplitTransactionError':
       if (error.version === 1) {
@@ -2403,6 +2562,8 @@ function TransactionError({
               <Text style={{ fontWeight: 500 }}>
                 {integerToCurrency(
                   isDeposit ? error.difference : -error.difference,
+                  formatter,
+                  precision,
                 )}
               </Text>
             </Text>
@@ -2441,6 +2602,10 @@ type NewTransactionProps = {
   onSchedule: () => void;
   onAdd: () => void;
   onAddAndClose: () => void;
+  /** Posts an exchange transfer entered in a single-account register. */
+  onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** Increments to move focus into the exchange panel. */
+  exchangeFocusToken?: number;
   onAddSplit: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onClose: () => void;
@@ -2489,6 +2654,8 @@ function NewTransaction({
   onSchedule,
   onAdd,
   onAddAndClose,
+  onAddExchange,
+  exchangeFocusToken,
   onAddSplit,
   onDistributeRemainder,
   onManagePayees,
@@ -2500,6 +2667,15 @@ function NewTransaction({
   showHiddenCategories,
 }: NewTransactionProps) {
   const error = transactions[0].error;
+  // A transfer to an account in another currency is entered with its other
+  // side in the inline exchange panel.
+  const exchangeOther =
+    onAddExchange && !transactions[0].is_parent
+      ? exchangeOtherAccount(transactions[0], payees, accounts)
+      : null;
+  const registerAccount = accounts.find(
+    acct => acct.id === transactions[0].account,
+  );
   const isDeposit = transactions[0].amount > 0;
   const isFuture = isFutureTransaction(transactions[0]);
 
@@ -2573,6 +2749,15 @@ function NewTransaction({
           showHiddenCategories={showHiddenCategories}
         />
       ))}
+      {exchangeOther && registerAccount && onAddExchange && (
+        <ExchangePanel
+          transaction={transactions[0]}
+          register={registerAccount}
+          other={exchangeOther}
+          onPost={onAddExchange}
+          focusToken={exchangeFocusToken}
+        />
+      )}
       <View
         style={{
           flexDirection: 'row',
@@ -2590,7 +2775,7 @@ function NewTransaction({
         >
           <Trans>Cancel</Trans>
         </Button>
-        {isFuture && (
+        {isFuture && !exchangeOther && (
           <Button
             style={{ marginRight: 10, padding: '4px 10px' }}
             onPress={onSchedule}
@@ -2600,10 +2785,11 @@ function NewTransaction({
             <Trans>Schedule</Trans>
           </Button>
         )}
-        {error ? (
+        {exchangeOther ? null : error ? (
           <TransactionError
             error={error}
             isDeposit={isDeposit}
+            hideFraction={hideFraction}
             onAddSplit={() => onAddSplit(transactions[0].id)}
             onDistributeRemainder={() =>
               onDistributeRemainder(transactions[0].id)
@@ -2624,6 +2810,11 @@ function NewTransaction({
     </View>
   );
 }
+
+type ExchangeEditState = {
+  id: TransactionEntity['id'];
+  onSaved: () => void;
+} | null;
 
 type TransactionTableInnerProps = {
   tableRef: Ref<TableHandleRef<TransactionEntity>>;
@@ -2695,6 +2886,12 @@ type TransactionTableInnerProps = {
   onScheduleTemporary: (id?: TransactionEntity['id']) => void;
   onAddTemporary: (id?: TransactionEntity['id']) => void;
   onAddAndCloseTemporary: () => void;
+  onAddExchangeTemporary?: (
+    request: ExchangeRequest,
+  ) => Promise<ExchangePostResult>;
+  exchangeFocusToken?: number;
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onToggleSplit: (id: TransactionEntity['id']) => void;
   onManagePayees: (id?: PayeeEntity['id']) => void;
@@ -2782,6 +2979,7 @@ function TransactionTableInner({
   const amountColumnWidths = useAmountColumnWidths(
     transactionsToRender,
     props.balances,
+    props.hideFraction,
   );
 
   const renderRow: TableProps<TransactionEntity>['renderItem'] = ({
@@ -2911,6 +3109,7 @@ function TransactionTableInner({
             <TransactionError
               error={error}
               isDeposit={!!isChildDeposit}
+              hideFraction={hideFraction}
               onAddSplit={() => props.onAddSplit(trans.id)}
               onDistributeRemainder={() =>
                 props.onDistributeRemainder(trans.id)
@@ -2984,6 +3183,8 @@ function TransactionTableInner({
               onSchedule={props.onScheduleTemporary}
               onAdd={props.onAddTemporary}
               onAddAndClose={props.onAddAndCloseTemporary}
+              onAddExchange={props.onAddExchangeTemporary}
+              exchangeFocusToken={props.exchangeFocusToken}
               onAddSplit={props.onAddSplit}
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
@@ -2997,6 +3198,23 @@ function TransactionTableInner({
               onNotesTagClick={onNotesTagClick}
               onDistributeRemainder={props.onDistributeRemainder}
               showHiddenCategories={showHiddenCategories}
+            />
+          </View>
+        )}
+        {props.exchangeEdit && props.onCloseExchangeEdit && (
+          <View
+            data-testid="exchange-edit"
+            style={{
+              borderBottom: '1px solid ' + theme.tableBorderHover,
+              paddingBottom: 6,
+              backgroundColor: theme.tableBackground,
+            }}
+          >
+            <ExchangeEdit
+              key={props.exchangeEdit.id}
+              id={props.exchangeEdit.id}
+              onSaved={props.exchangeEdit.onSaved}
+              onDone={props.onCloseExchangeEdit}
             />
           </View>
         )}
@@ -3080,10 +3298,16 @@ export type TransactionTableProps = {
     field: string | null,
     clearedFields?: ClearedFieldsByTransaction,
   ) => Promise<TransactionEntity>;
-  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
-  onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'];
+  /** Null when the split opened in a dialog instead. */
+  onSplit: (id: TransactionEntity['id']) => TransactionEntity['id'] | null;
+  onAddSplit: (id: TransactionEntity['id']) => TransactionEntity['id'] | null;
   onCloseAddTransaction: () => void;
   onAdd: (transactions: TransactionEntity[]) => void;
+  /** Posts an exchange transfer; given only in single-account registers. */
+  onAddExchange?: (request: ExchangeRequest) => Promise<ExchangePostResult>;
+  /** The exchange transfer edited inline, above the rows. */
+  exchangeEdit?: ExchangeEditState;
+  onCloseExchangeEdit?: () => void;
   onCreatePayee: (name: string) => Promise<null | PayeeEntity['id']>;
   style?: CSSProperties;
   onNavigateToTransferAccount: NavigateToTransferAccount;
@@ -3130,6 +3354,8 @@ export const TransactionTable = forwardRef(
     const [newTransactions, setNewTransactions] = useState<TransactionEntity[]>(
       [],
     );
+    // Enter on an exchange draft moves focus into its panel.
+    const [exchangeFocusToken, setExchangeFocusToken] = useState(0);
 
     // The ordered list of columns to render. The show* flags control which
     // of the account/category/balance/cleared columns are available in the
@@ -3353,6 +3579,7 @@ export const TransactionTable = forwardRef(
       }
     }, [hasPrevSplitsExpanded]);
 
+    const isNativeRegister = useCurrencyFormatOverride() != null;
     const newNavigator = useTableNavigator(
       newTransactions ?? [],
       getFieldsNewTransaction,
@@ -3421,6 +3648,14 @@ export const TransactionTable = forwardRef(
           }),
         );
         newNavigator.onEdit('temp', 'account');
+      } else if (
+        props.onAddExchange &&
+        newTransactions?.[0] &&
+        !newTransactions[0].is_parent &&
+        exchangeOtherAccount(newTransactions[0], props.payees, props.accounts)
+      ) {
+        // The exchange panel posts the transfer; the draft stays until then.
+        setExchangeFocusToken(token => token + 1);
       } else {
         const transactions = latestState.current.newTransactions;
 
@@ -3572,8 +3807,20 @@ export const TransactionTable = forwardRef(
         ...(hasSplitChildren ? [] : ['cancel', 'schedule', 'add']),
       ];
 
+      // Foreign-account drafts cannot become schedules.
+      const canSchedule = (row: TransactionEntity) =>
+        isFutureTransaction(row) &&
+        !props.accounts.find(account => account.id === row.account)?.currency;
+      // An exchange draft's own buttons live in its panel.
+      const isExchange =
+        !!props.onAddExchange &&
+        !!item &&
+        !item.is_parent &&
+        !!exchangeOtherAccount(item, props.payees, props.accounts);
       const resolved = getFields(item, fields).filter(
-        f => f !== 'schedule' || (item ? isFutureTransaction(item) : false),
+        f =>
+          !(isExchange && (f === 'add' || f === 'schedule')) &&
+          (f !== 'schedule' || (item ? canSchedule(item) : false)),
       );
 
       const isLastSplitChild =
@@ -3583,7 +3830,7 @@ export const TransactionTable = forwardRef(
       }
 
       const parent = rows.find(row => row.id === item.parent_id);
-      const showSchedule = isFutureTransaction(parent ?? item);
+      const showSchedule = canSchedule(parent ?? item);
       return [
         ...resolved,
         'cancel',
@@ -3619,6 +3866,16 @@ export const TransactionTable = forwardRef(
         // You can't focus the select/delete button of temporary
         // transactions
         fields = fields.slice(1);
+      }
+      if (
+        item &&
+        isForeignAmountFrozen(
+          item.id,
+          props.accounts.find(account => account.id === item.account),
+          isNativeRegister,
+        )
+      ) {
+        fields = fields.filter(f => f !== 'debit' && f !== 'credit');
       }
 
       return fields;
@@ -3740,6 +3997,23 @@ export const TransactionTable = forwardRef(
       });
     };
 
+    const onAddExchangeTemporary = props.onAddExchange
+      ? async (request: ExchangeRequest) => {
+          const result = await props.onAddExchange!(request);
+          if (result.status === 'ok') {
+            setNewTransactions(
+              makeTemporaryTransactions(
+                props.currentAccountId,
+                props.currentCategoryId,
+                request.date,
+              ),
+            );
+            newNavigator.onEdit('temp', 'date');
+          }
+          return result;
+        }
+      : undefined;
+
     const {
       onSave: onSaveProp,
       onApplyRules: onApplyRulesProp,
@@ -3766,7 +4040,9 @@ export const TransactionTable = forwardRef(
           : transaction;
 
         if (isTemporaryId(transaction.id)) {
-          if (onApplyRulesProp) {
+          // Native drafts never reach the base-oriented rule engine; the
+          // foreign entry handler runs rules on the completed pair.
+          if (onApplyRulesProp && !isNativeRegister) {
             // Remember fields the user explicitly emptied so later rule runs
             // (triggered by edits to other fields) can't re-fill them either.
             // `transaction` is the row that was actually edited (a split
@@ -3798,7 +4074,7 @@ export const TransactionTable = forwardRef(
           onSaveProp(groupedTransaction);
         }
       },
-      [latestState, onSaveProp, onApplyRulesProp],
+      [latestState, onSaveProp, onApplyRulesProp, isNativeRegister],
     );
 
     const onDelete = useCallback(
@@ -3896,7 +4172,7 @@ export const TransactionTable = forwardRef(
         } else {
           const trans = latestState.current.transactions.find(t => t.id === id);
           const newId = onSplitProp(id);
-          if (!trans) {
+          if (!trans || newId === null) {
             return;
           }
 
@@ -3931,10 +4207,12 @@ export const TransactionTable = forwardRef(
           );
         } else {
           const newId = onAddSplitProp(id);
-          tableNavigator.onEdit(
-            newId,
-            latestState.current.tableNavigator.focusedField,
-          );
+          if (newId !== null) {
+            tableNavigator.onEdit(
+              newId,
+              latestState.current.tableNavigator.focusedField,
+            );
+          }
         }
       },
       [latestState, onAddSplitProp],
@@ -4093,55 +4371,63 @@ export const TransactionTable = forwardRef(
     );
 
     const allSchedulesQuery = useMemo(() => q('schedules').select('*'), []);
+    const exchangeCounterparts = useExchangeCounterparts(
+      props.transactions,
+      props.accounts,
+    );
 
     return (
-      <DisplayPayeeProvider transactions={displayPayeeTransactions}>
-        <SchedulesProvider query={allSchedulesQuery}>
-          <TransactionTableInner
-            tableRef={mergedRef}
-            listContainerRef={listContainerRef}
-            {...props}
-            columns={visibleColumns}
-            transactions={transactionsWithExpandedSplits}
-            transactionMap={transactionMap}
-            transactionsByParent={transactionsByParent}
-            transferAccountsByTransaction={transferAccountsByTransaction}
-            selectedItems={selectedItems}
-            isExpanded={splitsExpanded.isExpanded}
-            onSave={onSave}
-            onDelete={onDelete}
-            onBatchDelete={onBatchDelete}
-            onBatchDuplicate={onBatchDuplicate}
-            onBatchLinkSchedule={onBatchLinkSchedule}
-            onBatchUnlinkSchedule={onBatchUnlinkSchedule}
-            onCreateRule={onCreateRule}
-            onScheduleAction={onScheduleAction}
-            onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
-            onSplit={onSplit}
-            onCheckNewEnter={onCheckNewEnter}
-            onCheckEnter={onCheckEnter}
-            onScheduleTemporary={onScheduleTemporary}
-            onAddTemporary={onAddTemporary}
-            onAddAndCloseTemporary={onAddAndCloseTemporary}
-            onAddSplit={onAddSplit}
-            onDistributeRemainder={onDistributeRemainder}
-            onCloseAddTransaction={onCloseAddTransaction}
-            onToggleSplit={onToggleSplit}
-            newTransactions={newTransactions ?? []}
-            tableNavigator={tableNavigator}
-            newNavigator={newNavigator}
-            showSelection={props.showSelection}
-            allowSplitTransaction={props.allowSplitTransaction}
-            showHiddenCategories={showHiddenCategories}
-            canDrag={canDrag}
-            draggedId={draggedId}
-            draggedParentId={draggedParentId}
-            draggedDate={draggedDate}
-            onDragChange={onDragChange}
-            onDrop={onDrop}
-          />
-        </SchedulesProvider>
-      </DisplayPayeeProvider>
+      <ExchangeCounterpartsProvider value={exchangeCounterparts}>
+        <DisplayPayeeProvider transactions={displayPayeeTransactions}>
+          <SchedulesProvider query={allSchedulesQuery}>
+            <TransactionTableInner
+              tableRef={mergedRef}
+              listContainerRef={listContainerRef}
+              {...props}
+              columns={visibleColumns}
+              transactions={transactionsWithExpandedSplits}
+              transactionMap={transactionMap}
+              transactionsByParent={transactionsByParent}
+              transferAccountsByTransaction={transferAccountsByTransaction}
+              selectedItems={selectedItems}
+              isExpanded={splitsExpanded.isExpanded}
+              onSave={onSave}
+              onDelete={onDelete}
+              onBatchDelete={onBatchDelete}
+              onBatchDuplicate={onBatchDuplicate}
+              onBatchLinkSchedule={onBatchLinkSchedule}
+              onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+              onCreateRule={onCreateRule}
+              onScheduleAction={onScheduleAction}
+              onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
+              onSplit={onSplit}
+              onCheckNewEnter={onCheckNewEnter}
+              onCheckEnter={onCheckEnter}
+              onScheduleTemporary={onScheduleTemporary}
+              onAddTemporary={onAddTemporary}
+              onAddAndCloseTemporary={onAddAndCloseTemporary}
+              onAddExchangeTemporary={onAddExchangeTemporary}
+              exchangeFocusToken={exchangeFocusToken}
+              onAddSplit={onAddSplit}
+              onDistributeRemainder={onDistributeRemainder}
+              onCloseAddTransaction={onCloseAddTransaction}
+              onToggleSplit={onToggleSplit}
+              newTransactions={newTransactions ?? []}
+              tableNavigator={tableNavigator}
+              newNavigator={newNavigator}
+              showSelection={props.showSelection}
+              allowSplitTransaction={props.allowSplitTransaction}
+              showHiddenCategories={showHiddenCategories}
+              canDrag={canDrag}
+              draggedId={draggedId}
+              draggedParentId={draggedParentId}
+              draggedDate={draggedDate}
+              onDragChange={onDragChange}
+              onDrop={onDrop}
+            />
+          </SchedulesProvider>
+        </DisplayPayeeProvider>
+      </ExchangeCounterpartsProvider>
     );
   },
 );

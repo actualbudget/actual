@@ -17,6 +17,7 @@ import { useHover } from 'usehooks-ts';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useFormat } from '#hooks/useFormat';
 import { useSelectedItems } from '#hooks/useSelected';
@@ -34,7 +35,7 @@ function DetailedBalance({
   balance,
   isExactBalance = true,
 }: DetailedBalanceProps) {
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
   return (
     <Text
       style={{
@@ -80,12 +81,15 @@ export function SelectedBalance({
   const ids = new Set((rows || []).map((r: { id: string }) => r.id));
 
   const finalIds = [...selectedItems].filter(id => !ids.has(id));
+  // A foreign account's register shows native amounts, so it sums them.
+  const isForeign = !!account?.currency;
   let balance = useSheetValue<'balance', `selected-balance-${string}`>({
-    name: (name + '-sum') as `selected-balance-${string}`,
+    name: (name +
+      (isForeign ? '-native-sum' : '-sum')) as `selected-balance-${string}`,
     query: q('transactions')
       .filter({ id: { $oneof: finalIds } })
       .options({ splits: 'all' })
-      .calculate({ $sum: '$amount' }),
+      .calculate({ $sum: isForeign ? '$transaction_amount' : '$amount' }),
   });
 
   let scheduleBalance = 0;

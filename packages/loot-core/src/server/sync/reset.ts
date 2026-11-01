@@ -4,6 +4,7 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as cloudStorage from '#server/cloud-storage';
 import * as db from '#server/db';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 
@@ -104,6 +105,7 @@ export async function resetSync(
     captureException(e);
     return { error: { reason: 'upload-failure' } };
   } finally {
+    await notifyFxContextChanged('budget');
     connection.send('prefs-updated');
   }
 

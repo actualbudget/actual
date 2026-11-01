@@ -5,24 +5,36 @@ import type {
 } from '#server/accounts/app';
 import type { PayeeNameNormalization } from '#server/accounts/sync';
 import type {
+  AmountFormatOptions,
+  AmountInput,
+  APIAccountCreateEntity,
   APIAccountEntity,
   APIAccountGroupEntity,
+  APIAccountUpdateFields,
+  APIBudgetMonth,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
+  APIImportTransactionInput,
+  APIMoneyTransactionEntity,
   APIPayeeEntity,
   APIRuleEntity,
   APIScheduleEntity,
   APITagEntity,
+  APITransactionUpdateFields,
 } from '#server/api-models';
+import type {
+  finalizePockets,
+  PocketWriteResult,
+} from '#server/budget/pocket-flows';
 import type { BudgetFileHandlers } from '#server/budgetfiles/app';
 import type { batchUpdateTransactions } from '#server/transactions';
+import type { Money } from '#shared/money';
 import type { QueryState } from '#shared/query';
 
 import type {
   AccountEntity,
   CategoryGroupEntity,
-  ImportTransactionEntity,
   NearbyPayeeEntity,
   NoteEntity,
   PayeeEntity,
@@ -55,7 +67,10 @@ export type ApiHandlers = {
 
   'api/get-budgets': () => Promise<APIFileEntity[]>;
 
-  'api/start-import': (arg: { budgetName: string }) => Promise<void>;
+  'api/start-import': (arg: {
+    budgetName: string;
+    currencyCode?: string;
+  }) => Promise<void>;
 
   'api/finish-import': () => Promise<void>;
 
@@ -65,27 +80,15 @@ export type ApiHandlers = {
 
   'api/budget-months': () => Promise<string[]>;
 
-  'api/budget-month': (arg: { month: string }) => Promise<{
+  'api/budget-month': (arg: {
     month: string;
-    incomeAvailable: number;
-    lastMonthOverspent: number;
-    forNextMonth: number;
-    totalBudgeted: number;
-    toBudget: number;
-
-    fromLastMonth: number;
-    totalIncome: number;
-    totalSpent: number;
-    totalBalance: number;
-    categoryGroups: Array<
-      Record<string, unknown> & { categories?: Record<string, unknown>[] }
-    >;
-  }>;
+    options?: AmountFormatOptions;
+  }) => Promise<APIBudgetMonth<number | Money>>;
 
   'api/budget-set-amount': (arg: {
     month: string;
     categoryId: string;
-    amount: number;
+    amount: AmountInput;
   }) => Promise<void>;
 
   'api/budget-set-carryover': (arg: {
@@ -93,6 +96,44 @@ export type ApiHandlers = {
     categoryId: string;
     flag: boolean;
   }) => Promise<void>;
+
+  'api/pocket-create': (arg: {
+    categoryId: string;
+    currency: string;
+  }) => Promise<{ id: string }>;
+
+  'api/pocket-update': (arg: {
+    id: string;
+    hidden?: boolean;
+    sortOrder?: number | null;
+  }) => Promise<void>;
+
+  'api/pocket-budget-set': (arg: {
+    month: string;
+    pocketId: string;
+    amount: number;
+    encoding: string;
+    baseAmount?: number;
+  }) => Promise<PocketWriteResult>;
+
+  'api/pockets-finalize': (arg: {
+    cells: Array<{ month: string; laneId: string; baseAmount?: number }>;
+  }) => ReturnType<typeof finalizePockets>;
+
+  'api/pocket-delete': (arg: {
+    id: string;
+    transferCategoryId?: string;
+  }) => Promise<void>;
+
+  'api/base-child-delete': (arg: {
+    categoryId: string;
+    transferCategoryId?: string;
+  }) => Promise<void>;
+
+  'api/route-to-pockets': (arg: {
+    transactionIds: string[];
+    categoryId?: string;
+  }) => Promise<{ routed: string[] }>;
 
   'api/budget-hold-for-next-month': (arg: {
     month: string;
@@ -110,14 +151,14 @@ export type ApiHandlers = {
 
   'api/transactions-import': (arg: {
     accountId: APIAccountEntity['id'];
-    transactions: ImportTransactionEntity[];
+    transactions: APIImportTransactionInput[];
     isPreview?: boolean;
     opts?: ImportTransactionsOpts;
   }) => Promise<ImportTransactionsResult>;
 
   'api/transactions-add': (arg: {
     accountId: APIAccountEntity['id'];
-    transactions: Omit<ImportTransactionEntity, 'account'>[];
+    transactions: Omit<APIImportTransactionInput, 'account'>[];
     runTransfers?: boolean;
     learnCategories?: boolean;
   }) => Promise<'ok'>;
@@ -126,11 +167,12 @@ export type ApiHandlers = {
     accountId?: APIAccountEntity['id'];
     startDate?: string;
     endDate?: string;
-  }) => Promise<TransactionEntity[]>;
+    options?: AmountFormatOptions;
+  }) => Promise<TransactionEntity[] | APIMoneyTransactionEntity[]>;
 
   'api/transaction-update': (arg: {
     id: TransactionEntity['id'];
-    fields: Partial<TransactionEntity>;
+    fields: APITransactionUpdateFields;
   }) => Promise<Awaited<ReturnType<typeof batchUpdateTransactions>>['updated']>;
 
   'api/transaction-delete': (arg: {
@@ -150,13 +192,13 @@ export type ApiHandlers = {
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
   'api/account-create': (arg: {
-    account: Omit<APIAccountEntity, 'id'>;
-    initialBalance?: number;
+    account: APIAccountCreateEntity;
+    initialBalance?: AmountInput;
   }) => Promise<string>;
 
   'api/account-update': (arg: {
     id: APIAccountEntity['id'];
-    fields: Partial<APIAccountEntity>;
+    fields: APIAccountUpdateFields;
   }) => Promise<void>;
 
   'api/account-close': (arg: {
@@ -172,7 +214,8 @@ export type ApiHandlers = {
   'api/account-balance': (arg: {
     id: APIAccountEntity['id'];
     cutoff?: Date;
-  }) => Promise<number>;
+    options?: AmountFormatOptions;
+  }) => Promise<number | Money>;
 
   'api/account-groups-get': () => Promise<APIAccountGroupEntity[]>;
 

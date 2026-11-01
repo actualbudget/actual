@@ -59,8 +59,11 @@ export type EnableBankingRawBalance = {
 
 // Normalized type for client-side account selection (matches SimpleFIN/PluggyAI pattern)
 export type SyncServerEnableBankingAccount = {
+  /** ISO 4217 currency of the provider account, or null when unknown. */
+  currency?: string | null;
   account_id: string;
   name: string;
   institution: string;
-  balance: number;
+  /** Null when no reported balance is in the account's currency. */
+  balance: string | null;
 };

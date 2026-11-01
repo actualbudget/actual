@@ -58,10 +58,14 @@ global.resetRandomId = () => {
   _id = 1;
 };
 
-vi.mock('uuid', () => ({
+vi.mock('uuid', async importOriginal => ({
   v4: () => {
     return 'id' + _id++;
   },
+  // Deterministic already; keep the real implementation.
+  v5: (
+    await importOriginal<{ v5: (name: string, namespace: string) => string }>()
+  ).v5,
 }));
 vi.mock('#server/migrate/migrations', async () => {
   const realMigrations = await vi.importActual<typeof MigrationsType>(

@@ -78,15 +78,19 @@ function normalizeIntegerValue(
   val: number | null | undefined,
   decimalPlaces = 2,
 ) {
-  if (typeof val !== 'number') {
-    return 0;
-  }
-  // Round to the currency's digits when it shows fewer than the stored two
-  const formatter =
-    decimalPlaces < 2
-      ? getNumberFormat({ decimalPlaces }).formatter
-      : undefined;
-  return currencyToAmount(integerToCurrency(val, formatter));
+  const numberFormat = getNumberFormat();
+  return typeof val === 'number'
+    ? currencyToAmount(
+        integerToCurrency(
+          val,
+          getNumberFormat({
+            decimalPlaces: numberFormat.hideFraction ? 0 : decimalPlaces,
+          }).formatter,
+          decimalPlaces,
+        ),
+        numberFormat.thousandsSeparator,
+      )
+    : 0;
 }
 
 /**
@@ -103,6 +107,7 @@ export function getGoalDifference(
   return amountToInteger(
     normalizeIntegerValue(have, decimalPlaces) -
       normalizeIntegerValue(goalValue, decimalPlaces),
+    decimalPlaces,
   );
 }
 
@@ -219,8 +224,10 @@ export async function prewarmMonth(
 
   const values = await send(method, { month });
 
-  for (const value of values) {
-    spreadsheet.prewarmCache(value.name, value);
+  for (const { name, value } of values) {
+    // A category's currency pocket month is a reader entry, not a cell.
+    if (typeof value === 'object') continue;
+    spreadsheet.prewarmCache(name, { name, value });
   }
 }
 

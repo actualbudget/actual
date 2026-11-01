@@ -10,6 +10,8 @@ import { undoable } from '#server/undo';
 import { q } from '#shared/query';
 import type { CustomReportData, CustomReportEntity } from '#types/models';
 
+import { getFxImpact } from './fx-impact';
+
 export const reportModel = {
   validate(
     report: Omit<CustomReportEntity, 'tombstone'>,
@@ -198,6 +200,7 @@ export type ReportsHandlers = {
   'report/create': typeof createReport;
   'report/update': typeof updateReport;
   'report/delete': typeof deleteReport;
+  'report/fx-impact': typeof getFxImpact;
 };
 
 // Expose functions to the client
@@ -207,3 +210,5 @@ app.method('report/get', getReports);
 app.method('report/create', mutator(undoable(createReport)));
 app.method('report/update', mutator(undoable(updateReport)));
 app.method('report/delete', mutator(undoable(deleteReport)));
+// Read-only: neither a mutator nor undoable.
+app.method('report/fx-impact', getFxImpact);

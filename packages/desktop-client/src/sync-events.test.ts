@@ -4,6 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { budgetBoundsQueries } from './budget';
+import { addNotification } from './notifications/notificationsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
@@ -27,7 +28,7 @@ function publishSyncEvent(event: ServerEvents['sync-event']) {
   (eventListeners.get('sync-event') ?? []).forEach(listener => listener(event));
 }
 
-function setup() {
+function setup(cloudFileId?: string) {
   vi.spyOn(connection, 'listen').mockImplementation(
     // The real `listen` is overloaded per event name; the mock only needs
     // to record the handler
@@ -40,7 +41,7 @@ function setup() {
   // A budget must be loaded for the table -> invalidate mapping to run
   const store = {
     getState: () => ({
-      prefs: { local: { id: 'budget-id' } },
+      prefs: { local: { id: 'budget-id', cloudFileId } },
       app: { loadingText: null },
     }),
     dispatch: vi.fn(),
@@ -48,8 +49,26 @@ function setup() {
 
   listenForSyncEvent(store, queryClient);
 
-  return { invalidateQueries };
+  return { invalidateQueries, store };
 }
+
+it.each([undefined, 'existing-cloud-file'])(
+  'offers registration for an invalid sync file id only when the budget is local (%s)',
+  cloudFileId => {
+    eventListeners.clear();
+    vi.clearAllMocks();
+    const { store } = setup(cloudFileId);
+    publishSyncEvent({ type: 'error', subtype: 'invalid fileId' });
+    const registration = vi
+      .mocked(store.dispatch)
+      .mock.calls.some(
+        ([action]) =>
+          addNotification.match(action) &&
+          action.payload.notification.id === 'register-file',
+      );
+    expect(registration).toBe(!cloudFileId);
+  },
+);
 
 function appliedEvent(tables: string[]): ServerEvents['sync-event'] {
   return { type: 'applied', tables } as ServerEvents['sync-event'];

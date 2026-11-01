@@ -14,15 +14,48 @@ import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import { baseSlotCategories, baseSlotLanes } from './base-slots';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
+import { editEffects } from './edit-effects';
+import type { FxMonth } from './fx-valuation';
 import * as goalActions from './goal-template';
+import {
+  chooseLaneOwner,
+  deleteAffectedCategories,
+  deleteAffectedCategory,
+  deleteBaseChild,
+  deletePocket,
+  isPocketAffected,
+  mergeLane,
+  moveInheritedBalance,
+  pocketHistoryRequiresTransfer,
+  reenterPocketAmount,
+  routeToPockets,
+} from './pocket-deletion';
+import {
+  finalizePockets,
+  setPocketBudget,
+  transferPocketAmount,
+} from './pocket-flows';
+import {
+  readCategoryPockets,
+  readPockets,
+  reservationsBridge,
+} from './pocket-readers';
+import type {
+  CategoryPocketsMonth,
+  ReservationsBridge,
+} from './pocket-readers';
+import { createPocket, setSlotMeta } from './pockets';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
 
 export type BudgetHandlers = {
   'budget/budget-amount': typeof actions.setBudget;
+  'budget/edit-effects': typeof editEffects;
+  'budget/fx-valuation': typeof monthFxValuation;
   'budget/copy-previous-month': typeof actions.copyPreviousMonth;
   'budget/copy-single-month': typeof actions.copySinglePreviousMonth;
   'budget/set-zero': typeof actions.setZero;
@@ -44,6 +77,20 @@ export type BudgetHandlers = {
   'budget/transfer-category': typeof actions.transferCategory;
   'budget/copy-until-year-end': typeof actions.copyUntilYearEnd;
   'budget/set-carryover': typeof actions.setCategoryCarryover;
+  'budget/pocket-create': typeof createPocket;
+  'budget/slot-meta-set': typeof setSlotMeta;
+  'budget/pocket-budget-set': typeof setPocketBudget;
+  'budget/pocket-transfer': typeof transferPocketAmount;
+  'budget/pockets-finalize': typeof finalizePockets;
+  'budget/pocket-delete': typeof deletePocket;
+  'budget/base-child-delete': typeof deleteBaseChild;
+  'budget/route-to-pockets': typeof routeToPockets;
+  'budget/pocket-merge': typeof mergeLane;
+  'budget/pocket-choose-owner': typeof chooseLaneOwner;
+  'budget/pocket-move-inherited': typeof moveInheritedBalance;
+  'budget/pocket-reenter': typeof reenterPocketAmount;
+  'budget/base-slot-lanes': typeof baseSlotLanes;
+  'budget/base-slot-categories': typeof baseSlotCategories;
   'budget/reset-income-carryover': typeof actions.resetIncomeCarryover;
   'get-categories': typeof getCategories;
   'get-budget-bounds': typeof getBudgetBounds;
@@ -72,6 +119,25 @@ export type BudgetHandlers = {
 export const app = createApp<BudgetHandlers>();
 
 app.method('budget/budget-amount', mutator(undoable(actions.setBudget)));
+app.method('budget/pocket-create', mutator(undoable(createPocket)));
+app.method('budget/slot-meta-set', mutator(undoable(setSlotMeta)));
+app.method('budget/pocket-budget-set', mutator(undoable(setPocketBudget)));
+app.method('budget/pocket-transfer', mutator(undoable(transferPocketAmount)));
+app.method('budget/pockets-finalize', mutator(undoable(finalizePockets)));
+app.method('budget/pocket-delete', mutator(undoable(deletePocket)));
+app.method('budget/base-child-delete', mutator(undoable(deleteBaseChild)));
+app.method('budget/route-to-pockets', mutator(undoable(routeToPockets)));
+app.method('budget/pocket-merge', mutator(undoable(mergeLane)));
+app.method('budget/pocket-choose-owner', mutator(undoable(chooseLaneOwner)));
+app.method(
+  'budget/pocket-move-inherited',
+  mutator(undoable(moveInheritedBalance)),
+);
+app.method('budget/pocket-reenter', mutator(undoable(reenterPocketAmount)));
+app.method('budget/base-slot-lanes', baseSlotLanes);
+app.method('budget/base-slot-categories', baseSlotCategories);
+app.method('budget/edit-effects', editEffects);
+app.method('budget/fx-valuation', monthFxValuation);
 app.method(
   'budget/copy-previous-month',
   mutator(undoable(actions.copyPreviousMonth)),
@@ -257,7 +323,16 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
     }
   }
 
-  return values;
+  // Each category with currency pockets also reports its slot totals, the
+  // valued balance and its pockets, under a name no sheet cell uses.
+  const pockets: Array<{ name: string; value: CategoryPocketsMonth }> = [];
+  for (const [id, entry] of await readCategoryPockets(month)) {
+    pockets.push({
+      name: resolveName(sheetName, `category-pockets-${id}`),
+      value: entry,
+    });
+  }
+  return [...values, ...pockets];
 }
 
 async function trackingBudgetMonth({ month }: { month: string }) {
@@ -428,6 +503,17 @@ async function deleteCategory({
       throw new Error('Cannot transfer between income and expense categories.');
     }
 
+    // A category with currency pockets, later base lanes or inherited
+    // lanes retires its lanes instead of transferring envelope budgets
+    // (MC-10). Tracking budgets still transfer their own assignments.
+    if (isPocketAffected(id)) {
+      if (row.is_income === 0 && transferId && isTracking()) {
+        await budget.doTransfer([id], transferId);
+      }
+      await deleteAffectedCategory(id, transferId);
+      return;
+    }
+
     // Update spreadsheet values if it's an expense category
     // TODO: We should do this for income too if it's a tracking budget
     if (row.is_income === 0) {
@@ -499,15 +585,33 @@ async function deleteCategoryGroup({
     [id],
   );
 
+  // Categories with currency pockets, later base lanes or inherited lanes
+  // retire their lanes; the others transfer their budgets (MC-10). Tracking
+  // budgets transfer every category's own assignment.
+  const affected = groupCategories.filter(c => isPocketAffected(c.id));
+  const transferred = isTracking()
+    ? groupCategories
+    : groupCategories.filter(c => !affected.includes(c));
+
   await batchMessages(async () => {
-    if (transferId) {
+    if (transferId && (affected.length === 0 || transferred.length > 0)) {
       await budget.doTransfer(
-        groupCategories.map(c => c.id),
+        transferred.map(c => c.id),
+        transferId,
+      );
+    }
+    if (affected.length > 0) {
+      await deleteAffectedCategories(
+        affected.map(c => c.id),
         transferId,
       );
     }
     await db.deleteCategoryGroup({ id }, transferId);
   });
+}
+
+function isTracking() {
+  return budget.getBudgetType() === 'tracking';
 }
 
 async function isCategoryTransferRequired({
@@ -529,6 +633,11 @@ async function isCategoryTransferRequired({
     return true;
   }
 
+  // History in any lane the category owns or shows (MC-10).
+  if (isPocketAffected(id) && pocketHistoryRequiresTransfer(id)) {
+    return true;
+  }
+
   // If there are any non-zero budget values, also force the user to
   // transfer the category.
   return [...(sheet.get().meta().createdMonths as Set<string>)].some(month => {
@@ -537,4 +646,36 @@ async function isCategoryTransferRequired({
 
     return value != null && value !== 0;
   });
+}
+
+/**
+ * One month's valuation bridge for its display (MC-8.2), with the currency
+ * pocket reservations explained, from one snapshot.
+ */
+async function monthFxValuation({
+  month,
+}: {
+  month: string;
+}): Promise<FxMonth & { reservations?: ReservationsBridge | null }> {
+  const { snapshot, valuation, reservations: walked } = await readPockets();
+  const reservations = reservationsBridge(snapshot, walked, month);
+  // The bridge needs the months before it for its latest resolved close.
+  const range = snapshot.createdMonths.filter(m => m <= month);
+  const bridge = valuation(range.length > 0 ? range : [month]).find(
+    entry => entry.month === month,
+  );
+  return {
+    ...(bridge ?? {
+      month,
+      opening: 0,
+      closing: 0,
+      flows: 0,
+      posted: 0,
+      broughtForward: 0,
+      incomplete: false,
+      unavailableReason: null,
+      accounts: [],
+    }),
+    reservations,
+  };
 }
