@@ -184,7 +184,7 @@ const parseOptionKeys = [
   'importNotes',
 ] satisfies Array<keyof ParseFileOptions>;
 
-function shouldPreserveImportSettingsForParse(
+export function shouldPreserveImportSettingsForParse(
   lastParse: LastParse | null,
   filename: string,
   fileType: string,
@@ -478,7 +478,7 @@ export function ImportTransactionsModal({
   }
 
   useEffect(() => {
-    const fileType = getFileType(originalFileName);
+    const fileType = getFileType(filename);
     const parseOptions = getParseOptions(fileType, {
       delimiter,
       encoding: csvEncoding,
@@ -497,22 +497,22 @@ export function ImportTransactionsModal({
     const lastParse = lastParseRef.current;
     const shouldPreserveImportSettings = shouldPreserveImportSettingsForParse(
       lastParse,
-      originalFileName,
+      filename,
       fileType,
       parseOptions,
     );
 
     lastParseRef.current = {
-      filename: originalFileName,
+      filename,
       fileType,
       options: parseOptions,
     };
 
-    void parse(originalFileName, parseOptions, {
+    void parse(filename, parseOptions, {
       preserveImportSettings: shouldPreserveImportSettings,
     });
   }, [
-    originalFileName,
+    filename,
     delimiter,
     csvEncoding,
     hasHeaderRow,
@@ -562,24 +562,9 @@ export function ImportTransactionsModal({
       ],
     });
 
-    const fileType = getFileType(res[0]);
-    const parseOptions = getParseOptions(fileType, {
-      delimiter,
-      encoding: csvEncoding,
-      hasHeaderRow,
-      skipStartLines,
-      skipEndLines,
-      fallbackMissingPayeeToMemo,
-      importNotes,
-      swapPayeeAndMemo: getSwapOption(
-        fileType,
-        ofxSwapPayeeAndMemo,
-        qifSwapPayeeAndMemo,
-        camtSwapPayeeAndMemo,
-      ),
-    });
-
-    void parse(res[0], parseOptions);
+    if (res?.[0]) {
+      setFilename(res[0]);
+    }
   }
 
   function onUpdateFields(field, name) {
