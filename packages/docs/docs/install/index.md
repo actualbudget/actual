@@ -74,6 +74,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Hostim](https://hostim.dev/docs/templates/actual) - one-click managed Docker hosting with a persistent volume and free SSL.
 - [MASH](https://github.com/mother-of-all-self-hosting/mash-playbook/blob/main/docs/services/actual.md) - Ansible playbook that deploys Actual (and 250+ other self-hosted services) as Docker containers.
 - [Pethost](https://pethost.dev/templates/actual-budget/) - one-click template on managed Docker hosting, with a persistent volume and nightly backups.
+- [podway](https://podway.io/start?app=actual-budget&ref=docs-actual-budget) - managed hosting with an AI admin you steer from your Claude plan. First app free, pods from $4/month.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
 - [Syncloud](https://syncloud.org/en/actual-budget)
 - Synology NAS
