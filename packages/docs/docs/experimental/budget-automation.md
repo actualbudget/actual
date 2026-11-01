@@ -300,11 +300,11 @@ There are 3 Fridays in July, but the Balance cap holds our grocery budget at 600
 
 ### Budget Indicator {#budget-indicator}
 
-After automations run, each category’s budget indicator appears as the color of its balance text. Click a balance to see its goal status at the top of the balance menu.
+After automations run, each category’s budget indicator appears as the color of its balance text. Categories whose projected budget is not yet met also show a small ring beside the balance, which fills as the category is funded. On desktop, hover over the ring to see how much of the goal is funded, or click a balance to see its goal status at the top of the balance menu.
 
-The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (orange), and negative balance (red).
+The example below shows these states: normal (no automation), empty (no automation), projected budget met (green), projected budget not met (yellow, with a partly filled ring), and negative balance (red).
 
-<img width="724" alt="Category balances in the normal, empty, green, orange and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
+<img width="724" alt="Category balances in the normal, empty, green, yellow with a partly filled ring, and red states" src="/img/experimental/budget-automation-indicators@2x.webp" />
 
 The goal status gives you more information about your budget and balance, including a progress bar:
 
@@ -314,9 +314,9 @@ The goal status gives you more information about your budget and balance, includ
 
 ### Long-term Goal {#long-term-goal}
 
-Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the balance coloring will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain orange.
+Long-term goals change how the budget indicator works. Instead of being based on the budgeted amount, the balance coloring and ring will indicate how much progress you have made toward a desired target. Importantly, if you have met your projected budget for the month but are shy of your long-term goal the balance will remain yellow.
 
-Once you hit your goal, the balance will turn green. Note that if you remove funds and fall short, it will turn orange again.
+Once you hit your goal, the balance will turn green and the ring disappears. Note that if you remove funds and fall short, it will turn yellow again.
 
 <img width="960" alt="The long-term goal form with a target of 1,500.00" src="/img/experimental/budget-automation-long-term@2x.webp" />
 

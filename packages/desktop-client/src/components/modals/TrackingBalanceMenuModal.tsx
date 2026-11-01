@@ -34,6 +34,7 @@ export function TrackingBalanceMenuModal({
         goal={trackingBudget.catGoal(categoryId)}
         budgeted={trackingBudget.catBudgeted(categoryId)}
         longGoal={trackingBudget.catLongGoal(categoryId)}
+        isIncome={category.is_income}
       />
       <MobileSheetSection>
         <MobileSheetMenuRows items={items} onSelect={onMenuSelect} />

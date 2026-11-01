@@ -1,5 +1,4 @@
 // @ts-strict-ignore
-import React, { useCallback } from 'react';
 import type {
   ComponentPropsWithoutRef,
   ComponentType,
@@ -17,8 +16,9 @@ import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding } from '#spreadsheet';
 
+import { GoalProgressRing } from './GoalProgressRing';
 import { GoalStatus } from './GoalStatus';
-import { makeBalanceAmountStyle } from './util';
+import { getGoalRingProgress, makeBalanceAmountStyle } from './util';
 
 type CarryoverIndicatorProps = {
   style?: CSSProperties;
@@ -53,6 +53,12 @@ type ChildrenWithClassName = (
   props: Parameters<CellValueChildren>[0] & {
     className: string;
   },
+  /**
+   * How much of the goal is funded, to draw the goal progress ring beside the
+   * balance, or null when the balance has no ring: no goal, overspent or
+   * already funded.
+   */
+  ringProgress: number | null,
 ) => ReturnType<CellValueChildren>;
 
 type BalanceWithCarryoverProps = Omit<
@@ -73,6 +79,8 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
+  /** Goals describe spending, so income categories never show goal progress */
+  isIncome?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
@@ -84,6 +92,7 @@ export function BalanceWithCarryover({
   budgeted,
   longGoal,
   isDisabled,
+  isIncome,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
@@ -95,86 +104,114 @@ export function BalanceWithCarryover({
   const longGoalValue = useSheetValue(longGoal);
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const { decimalPlaces } = useFormat().currency;
-  const getBalanceAmountStyle = useCallback(
-    (balanceValue: number) =>
-      makeBalanceAmountStyle(
-        balanceValue,
-        isGoalTemplatesEnabled ? goalValue : null,
-        longGoalValue === 1 ? balanceValue : budgetedValue,
-        decimalPlaces,
-      ),
-    [
-      budgetedValue,
-      decimalPlaces,
-      goalValue,
-      isGoalTemplatesEnabled,
-      longGoalValue,
-    ],
-  );
 
-  const getDefaultClassName = useCallback(
-    (balanceValue: number) =>
-      css({
-        ...getBalanceAmountStyle(balanceValue),
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        textAlign: 'right',
-        ...(!isDisabled && {
-          cursor: 'pointer',
-          ':hover': { textDecoration: 'underline' },
-        }),
+  const hasGoal = isGoalTemplatesEnabled && !isIncome;
+  // Long goals count the balance towards the goal, others the budgeted amount
+  const getHave = (balanceValue: number) =>
+    longGoalValue === 1 ? balanceValue : budgetedValue;
+
+  const getRingProgress = (balanceValue: number) =>
+    hasGoal
+      ? getGoalRingProgress(
+          balanceValue,
+          goalValue,
+          getHave(balanceValue),
+          decimalPlaces,
+        )
+      : null;
+
+  const getBalanceAmountStyle = (balanceValue: number) =>
+    makeBalanceAmountStyle(
+      balanceValue,
+      hasGoal ? goalValue : null,
+      getHave(balanceValue),
+      decimalPlaces,
+    );
+
+  const getDefaultClassName = (balanceValue: number) =>
+    css({
+      ...getBalanceAmountStyle(balanceValue),
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      textAlign: 'right',
+      ...(!isDisabled && {
+        cursor: 'pointer',
+        ':hover': { textDecoration: 'underline' },
       }),
-    [getBalanceAmountStyle, isDisabled],
-  );
+    });
 
   return (
     <CellValue binding={balance} type="financial" {...props}>
-      {({ type, name, value: balanceValue }) => (
-        <>
-          <View style={{ minHeight: 'auto', flexShrink: 0, maxWidth: '100%' }}>
-            {children ? (
-              children({
-                type,
-                name,
-                value: balanceValue,
-                className: getDefaultClassName(balanceValue),
-              })
-            ) : (
-              <CellValueText
-                type={type}
-                name={name}
-                value={balanceValue}
-                className={getDefaultClassName(balanceValue)}
+      {({ type, name, value: balanceValue }) => {
+        const ringProgress = getRingProgress(balanceValue);
+        return (
+          <>
+            <View
+              style={{
+                minHeight: 'auto',
+                maxWidth: '100%',
+                // Let a long amount give way to the ring rather than push it
+                // out of the column
+                ...(ringProgress != null && !children
+                  ? { flexShrink: 1, minWidth: 0 }
+                  : { flexShrink: 0 }),
+              }}
+            >
+              {children ? (
+                children(
+                  {
+                    type,
+                    name,
+                    value: balanceValue,
+                    className: getDefaultClassName(balanceValue),
+                  },
+                  ringProgress,
+                )
+              ) : (
+                <CellValueText
+                  type={type}
+                  name={name}
+                  value={balanceValue}
+                  className={getDefaultClassName(balanceValue)}
+                />
+              )}
+            </View>
+            {!children && ringProgress != null && (
+              // Drawn before the amount, after it in the DOM so the button
+              // reads as the amount followed by its status
+              <GoalProgressRing
+                progress={ringProgress}
+                style={{ order: -1, marginRight: 4 }}
               />
             )}
-          </View>
 
-          {carryoverValue && (
-            <CarryoverIndicatorComponent
-              style={getBalanceAmountStyle(balanceValue)}
-            />
-          )}
-          {shouldInlineGoalStatus &&
-            isGoalTemplatesEnabled &&
-            goalValue != null && (
-              <>
-                <View
-                  style={{
-                    borderTop: '1px solid ' + theme.tableBorderSeparator,
-                    width: '160px',
-                    margin: '3px 0px',
-                  }}
-                />
-                <GoalStatus
-                  balance={balance}
-                  goal={goal}
-                  budgeted={budgeted}
-                  longGoal={longGoal}
-                />
-              </>
+            {carryoverValue && (
+              <CarryoverIndicatorComponent
+                style={getBalanceAmountStyle(balanceValue)}
+              />
             )}
-        </>
-      )}
+            {shouldInlineGoalStatus &&
+              isGoalTemplatesEnabled &&
+              goalValue != null && (
+                <>
+                  <View
+                    style={{
+                      borderTop: '1px solid ' + theme.tableBorderSeparator,
+                      width: '160px',
+                      margin: '3px 0px',
+                    }}
+                  />
+                  <GoalStatus
+                    balance={balance}
+                    goal={goal}
+                    budgeted={budgeted}
+                    longGoal={longGoal}
+                  />
+                </>
+              )}
+          </>
+        );
+      }}
     </CellValue>
   );
 }
