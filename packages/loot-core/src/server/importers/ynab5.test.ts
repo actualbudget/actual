@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { send } from '#server/main-app';
 
 import {
+  amountFromYnab,
   getBudgetName,
+  getCurrencyCode,
   importPayees,
   importScheduledTransactions,
   importTransactions,
@@ -145,6 +147,7 @@ describe('importTransactions', () => {
       } as unknown as Parameters<typeof importTransactions>[0],
       entityIdMap,
       new Set(),
+      0,
     );
 
     const transactionsAddCalls = vi
@@ -167,6 +170,30 @@ describe('importTransactions', () => {
 
     expect(outImported.transfer_id).toBe(inImported.id);
     expect(inImported.transfer_id).toBe(outImported.id);
+    expect(outImported.amount).toBe(-10);
+    expect(inImported.amount).toBe(10);
+
+    vi.mocked(send).mockClear();
+    await importTransactions(
+      {
+        payees: [],
+        transactions: [transactionOut, transactionIn],
+        subtransactions: [],
+      } as unknown as Parameters<typeof importTransactions>[0],
+      entityIdMap,
+      new Set(),
+      3,
+    );
+    const threeDpTransactions = vi
+      .mocked(send)
+      .mock.calls.filter(([name]) => name === 'api/transactions-add')
+      .flatMap(([, args]) => args.transactions);
+    expect(
+      threeDpTransactions.find(t => t.id === entityIdMap.get('txn-out')).amount,
+    ).toBe(-10000);
+    expect(
+      threeDpTransactions.find(t => t.id === entityIdMap.get('txn-in')).amount,
+    ).toBe(10000);
   });
 });
 
@@ -224,6 +251,7 @@ describe('importScheduledTransactions', () => {
       } as unknown as Parameters<typeof importScheduledTransactions>[0],
       entityIdMap,
       new Set(),
+      2,
       tick,
     );
 
@@ -246,6 +274,7 @@ describe('importScheduledTransactions', () => {
         } as unknown as Parameters<typeof importScheduledTransactions>[0],
         entityIdMap,
         new Set(),
+        2,
         tick,
       ),
     ).rejects.toThrow('create failed');
@@ -277,5 +306,29 @@ describe('ynab5 parseFile', () => {
     const data = parseFile(toBuffer({ name: 'Bare', accounts: [] }));
 
     expect(data.name).toBe('Bare');
+  });
+
+  it('reads source currency metadata without guessing a missing value', () => {
+    expect(
+      getCurrencyCode({
+        currency_format: { iso_code: 'JPY' },
+      } as Parameters<typeof getCurrencyCode>[0]),
+    ).toBe('JPY');
+    expect(getCurrencyCode({} as Parameters<typeof getCurrencyCode>[0])).toBe(
+      '',
+    );
+  });
+});
+
+describe('YNAB5 milliunit amounts', () => {
+  it('encodes source milliunits at the recorded destination precision', () => {
+    expect(amountFromYnab(1_234_000, 0)).toBe(1234);
+    expect(amountFromYnab(12_340, 2)).toBe(1234);
+    expect(amountFromYnab(1_234, 3)).toBe(1234);
+  });
+
+  it('rejects nonfinite source amounts', () => {
+    expect(() => amountFromYnab(Number.NaN, 2)).toThrow();
+    expect(() => amountFromYnab(Number.POSITIVE_INFINITY, 2)).toThrow();
   });
 });

@@ -1,3 +1,6 @@
+import { createElement } from 'react';
+import type { ReactNode } from 'react';
+
 import {
   clearServer,
   initServer,
@@ -7,10 +10,11 @@ import type {
   RuleConditionEntity,
   TimeFrame,
 } from '@actual-app/core/types/models';
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { TestProviders } from '#mocks';
+import { createTestAppStore, TestProviders } from '#mocks';
+import { mergeSyncedPrefs } from '#prefs/prefsSlice';
 
 import {
   buildFilteredTransactionsQuery,
@@ -383,5 +387,271 @@ describe('formula execution stability', () => {
       expect(result.current.error).toBe('Formula must start with ='),
     );
     expect(result.current.isLoading).toBe(false);
+  });
+});
+
+describe('recorded formula amounts', () => {
+  afterEach(async () => {
+    await clearServer();
+  });
+
+  it.each([
+    [0, 1234],
+    [2, 12.34],
+    [3, 1.234],
+  ])(
+    'decodes QUERY, BALANCE_OF and BUDGET_QUERY at %idp',
+    async (precision, expected) => {
+      const store = createTestAppStore();
+      store.dispatch(
+        mergeSyncedPrefs({
+          amountEncoding: JSON.stringify({
+            version: 1,
+            currencyCode: 'KWD',
+            precision,
+          }),
+        }),
+      );
+      initServer({
+        'formula-load-user-preferences': async () => ({
+          currency: getCurrency('USD'),
+          numberFormat: 'comma-dot',
+          decimalPlaces: 2,
+          thousandsSeparator: ',',
+          decimalSeparator: '.',
+          locale: 'en-US',
+          currencySymbolPosition: 'before',
+          currencySpaceBetweenAmountAndSymbol: false,
+        }),
+        'make-filters-from-conditions': async () => ({ filters: [] }),
+        query: async () => ({ data: 1234, dependencies: [] }),
+        'envelope-budget-month': async () => [
+          { name: 'budget-cat-a', value: 1234 },
+        ],
+      });
+      const wrapper = ({ children }: { children: ReactNode }) =>
+        createElement(TestProviders, { store, children });
+      const cases = [
+        ['=QUERY("Income")', { Income: {} }, undefined],
+        ['=BALANCE_OF("account")', {}, [{ id: 'account', name: 'Checking' }]],
+        [
+          '=BUDGET_QUERY("budgeted", "cat-a", "2026-01", "2026-01")',
+          {},
+          undefined,
+        ],
+      ] as const;
+      for (const [formula, queries, accounts] of cases) {
+        const { result, unmount } = renderHook(
+          () =>
+            useFormulaExecution(
+              formula,
+              queries,
+              0,
+              undefined,
+              accounts ? [...accounts] : undefined,
+            ),
+          { wrapper },
+        );
+        await waitFor(() => expect(result.current.result).toBe(expected));
+        unmount();
+      }
+    },
+  );
+
+  it('refreshes query results when the recorded encoding changes', async () => {
+    const store = createTestAppStore();
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      'make-filters-from-conditions': async () => ({ filters: [] }),
+      query: async () => ({ data: 1234, dependencies: [] }),
+    });
+    const wrapper = ({ children }: { children: ReactNode }) =>
+      createElement(TestProviders, { store, children });
+    const { result } = renderHook(
+      () => useFormulaExecution('=QUERY("Income")', { Income: {} }),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.result).toBe(12.34));
+    act(() => {
+      store.dispatch(
+        mergeSyncedPrefs({
+          amountEncoding: JSON.stringify({
+            version: 1,
+            currencyCode: 'KWD',
+            precision: 3,
+          }),
+        }),
+      );
+    });
+    await waitFor(() => expect(result.current.result).toBe(1.234));
+  });
+
+  it('refreshes results when only the currency changes', async () => {
+    const store = createTestAppStore();
+    let currency = 'USD';
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency(currency),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+    });
+    const wrapper = ({ children }: { children: ReactNode }) =>
+      createElement(TestProviders, { store, children });
+    const { result } = renderHook(
+      () => useFormulaExecution('=FORMATCURRENCY(1)', {}),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.result).toContain('$'));
+    currency = 'EUR';
+    act(() => {
+      store.dispatch(mergeSyncedPrefs({ defaultCurrencyCode: 'EUR' }));
+    });
+    await waitFor(() => expect(result.current.result).toContain('€'));
+  });
+
+  it('keeps formula rounding arguments independent of storage precision', async () => {
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'KWD',
+          precision: 3,
+        }),
+      }),
+    );
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      'make-filters-from-conditions': async () => ({ filters: [] }),
+      query: async () => ({ data: 1234, dependencies: [] }),
+    });
+    const wrapper = ({ children }: { children: ReactNode }) =>
+      createElement(TestProviders, { store, children });
+    const { result } = renderHook(
+      () => useFormulaExecution('=ROUND(QUERY("Income"), 2)', { Income: {} }),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.result).toBe(1.23));
+  });
+
+  it.each([
+    ['spent', -0.234],
+    ['goal', 3.456],
+    ['balance_start', 1.234],
+    ['balance_end', 2.234],
+  ])('decodes the %s budget dimension at 3dp', async (dimension, expected) => {
+    const store = createTestAppStore();
+    store.dispatch(
+      mergeSyncedPrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'KWD',
+          precision: 3,
+        }),
+      }),
+    );
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      'envelope-budget-month': async ({ month }) =>
+        month === '2025-12'
+          ? [
+              { name: 'leftover-cat-a', value: 1234 },
+              { name: 'carryover-cat-a', value: true },
+            ]
+          : [
+              { name: 'budget-cat-a', value: 1234 },
+              { name: 'sum-amount-cat-a', value: -234 },
+              { name: 'goal-cat-a', value: 3456 },
+            ],
+    });
+    const wrapper = ({ children }: { children: ReactNode }) =>
+      createElement(TestProviders, { store, children });
+    const { result } = renderHook(
+      () =>
+        useFormulaExecution(
+          `=BUDGET_QUERY("${dimension}", "cat-a", "2026-01", "2026-01")`,
+          {},
+        ),
+      { wrapper },
+    );
+    await waitFor(() => expect(result.current.result).toBe(expected));
+    await clearServer();
+  });
+
+  it('treats invalid and empty prefetch amounts as zero', async () => {
+    initServer({
+      'formula-load-user-preferences': async () => ({
+        currency: getCurrency('USD'),
+        numberFormat: 'comma-dot',
+        decimalPlaces: 2,
+        thousandsSeparator: ',',
+        decimalSeparator: '.',
+        locale: 'en-US',
+        currencySymbolPosition: 'before',
+        currencySpaceBetweenAmountAndSymbol: false,
+      }),
+      'make-filters-from-conditions': async () => ({ filters: [] }),
+      query: async () => ({ data: Infinity, dependencies: [] }),
+      'envelope-budget-month': async () => [
+        { name: 'budget-cat-a', value: 'bad' },
+      ],
+    });
+    const formulas = [
+      ['=QUERY("Income")', { Income: {} }, undefined],
+      ['=BALANCE_OF("account")', {}, [{ id: 'account', name: 'Checking' }]],
+      [
+        '=BUDGET_QUERY("budgeted", "cat-a", "2026-01", "2026-01")',
+        {},
+        undefined,
+      ],
+    ] as const;
+    for (const [formula, queries, accounts] of formulas) {
+      const { result, unmount } = renderHook(
+        () =>
+          useFormulaExecution(
+            formula,
+            queries,
+            0,
+            undefined,
+            accounts ? [...accounts] : undefined,
+          ),
+        { wrapper: TestProviders },
+      );
+      await waitFor(() => expect(result.current.result).toBe(0));
+      unmount();
+    }
   });
 });

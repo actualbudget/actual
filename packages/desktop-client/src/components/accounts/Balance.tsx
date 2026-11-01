@@ -17,6 +17,7 @@ import { useHover } from 'usehooks-ts';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useFormat } from '#hooks/useFormat';
 import { useSelectedItems } from '#hooks/useSelected';
@@ -34,7 +35,7 @@ function DetailedBalance({
   balance,
   isExactBalance = true,
 }: DetailedBalanceProps) {
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
   return (
     <Text
       style={{

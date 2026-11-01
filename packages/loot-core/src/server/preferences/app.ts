@@ -32,6 +32,7 @@ const FORMULA_FORMAT_SYNCED_PREFS = new Set<keyof SyncedPrefs>([
   'numberFormat',
   'hideFraction',
   'defaultCurrencyCode',
+  'amountEncoding',
   'currencySymbolPosition',
   'currencySpaceBetweenAmountAndSymbol',
 ]);
@@ -53,6 +54,21 @@ async function saveSyncedPrefs({
 }) {
   if (!id) {
     return;
+  }
+
+  const hasAmountEncoding = Boolean(_getMetadataPrefs()?.amountEncoding);
+  if (
+    (id === 'amountEncoding' ||
+      (id === 'defaultCurrencyCode' && hasAmountEncoding)) &&
+    value !==
+      (
+        await db.first<{ value: string }>(
+          'SELECT value FROM preferences WHERE id = ?',
+          [id],
+        )
+      )?.value
+  ) {
+    throw new Error('amount-encoding-transition-required');
   }
 
   await db.update('preferences', {
@@ -232,11 +248,15 @@ async function saveMetadataPrefs(prefsToSet: MetadataPrefs) {
       throw new Error('No sync server set');
     }
 
-    await post(syncServer + '/update-user-filename', {
-      token: userToken,
-      fileId: cloudFileId,
-      name: prefsToSet.budgetName,
-    });
+    await post(
+      syncServer + '/update-user-filename',
+      {
+        token: userToken,
+        fileId: cloudFileId,
+        name: prefsToSet.budgetName,
+      },
+      { 'X-ACTUAL-AMOUNT-ENCODING': '1' },
+    );
   }
 
   await _saveMetadataPrefs(prefsToSet);

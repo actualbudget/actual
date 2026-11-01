@@ -30,6 +30,79 @@ test.describe('Settings', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('recommends a backup even when currency precision stays the same', async () => {
+    await settingsPage.goToSection('General');
+    const currencySelect = page.locator('#default-currency-select');
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'USD - US Dollar ($)' }).click();
+    const modal = page.getByRole('dialog');
+    await expect(modal.getByText('Back up your budget')).toBeVisible();
+    await expect(modal.getByText('Change decimal precision')).not.toBeVisible();
+    await expect(
+      modal.getByRole('link', { name: 'Go to backup and export settings' }),
+    ).toBeVisible();
+    await expect(
+      modal.getByRole('button', { name: 'Export data' }),
+    ).not.toBeVisible();
+    await expect(modal).toMatchThemeScreenshots();
+    await modal.getByRole('button', { name: 'Cancel' }).click();
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'USD - US Dollar ($)' }).click();
+    await modal
+      .getByRole('link', { name: 'Go to backup and export settings' })
+      .click();
+    await expect(modal).not.toBeVisible();
+    await expect(settingsPage.exportDataButton).toBeInViewport();
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'USD - US Dollar ($)' }).click();
+    await expect(
+      modal.getByRole('checkbox', { name: 'I have made a backup' }),
+    ).not.toBeChecked();
+    await modal.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(modal).not.toBeVisible();
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'EUR - Euro (€)' }).click();
+    await expect(modal.getByText('Back up your budget')).toBeVisible();
+    await expect(modal.getByText('Change decimal precision')).not.toBeVisible();
+    await modal.getByRole('button', { name: 'Continue', exact: true }).click();
+    await expect(modal).not.toBeVisible();
+  });
+
+  test('converts precision in place when the currency changes', async () => {
+    await settingsPage.goToSection('General');
+    const currencySelect = page.locator('#default-currency-select');
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'JPY - Japanese Yen (¥)' }).click();
+    const modal = page.getByRole('dialog');
+    await expect(modal.getByText('Change decimal precision')).toBeVisible();
+    await expect(
+      modal.getByText('Convert from 2 decimal places to 0 decimal places.', {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await expect(modal).toMatchThemeScreenshots();
+    await modal
+      .getByRole('button', { name: 'Confirm precision change' })
+      .click();
+    await expect(modal).not.toBeVisible();
+    await page.reload();
+    await settingsPage.waitFor();
+    await settingsPage.goToSection('General');
+    await expect(currencySelect).toContainText('JPY');
+    await currencySelect.click();
+    await page.getByRole('button', { name: 'USD - US Dollar ($)' }).click();
+    await expect(
+      modal.getByText('Convert from 0 decimal places to 2 decimal places.', {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await modal
+      .getByRole('button', { name: 'Confirm precision change' })
+      .click();
+    await expect(modal).not.toBeVisible();
+    await expect(currencySelect).toContainText('USD');
+  });
+
   test('downloads the export of the budget', async () => {
     const downloadPromise = page.waitForEvent('download');
 

@@ -9,8 +9,7 @@ export type Currency = {
   symbolFirst: boolean;
 };
 
-// When adding a new currency with a higher decimal precision, make sure to update
-// the MAX_SAFE_NUMBER in util.ts.
+// Encoded amount limits are checked at each destination's precision.
 // When adding a currency, also update the translation map in
 // packages/desktop-client/src/components/settings/Currency.tsx for the translation.
 // Number formats and symbol placement based on CLDR (Common Locale Data Repository) /
@@ -25,13 +24,14 @@ export const currencies: Currency[] = [
   { code: 'ARS', name: 'Argentinian Peso', symbol: 'Arg$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'BDT', name: 'Bangladeshi Taka', symbol: '৳', decimalPlaces: 2, numberFormat: 'comma-dot-in', symbolFirst: true },
+  { code: 'BHD', name: 'Bahraini Dinar', symbol: 'BHD', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'BYN', name: 'Belarusian Ruble', symbol: 'Br', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', decimalPlaces: 2, numberFormat: 'apostrophe-dot', symbolFirst: true },
-  { code: 'CLP', name: 'Chilean Peso', symbol: 'CLP$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'CLP', name: 'Chilean Peso', symbol: 'CLP$', decimalPlaces: 0, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'CNY', name: 'Yuan Renminbi', symbol: '¥', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'COP', name: 'Colombian Peso', symbol: 'Col$', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'COP', name: 'Colombian Peso', symbol: 'Col$', decimalPlaces: 0, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'CRC', name: 'Costa Rican Colón', symbol: '₡', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: true },
   { code: 'CZK', name: 'Czech Koruna', symbol: 'Kč', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'DKK', name: 'Danish Krone', symbol: 'kr', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
@@ -41,23 +41,29 @@ export const currencies: Currency[] = [
   { code: 'GBP', name: 'Pound Sterling', symbol: '£', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'GTQ', name: 'Guatemalan Quetzal', symbol: 'Q', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'HKD', name: 'Hong Kong Dollar', symbol: 'HK$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
-  { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
+  { code: 'HUF', name: 'Hungarian Forint', symbol: 'Ft', decimalPlaces: 0, numberFormat: 'space-comma', symbolFirst: false },
+  { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', decimalPlaces: 0, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'ILS', name: 'Israeli New Shekel', symbol: '₪', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'INR', name: 'Indian Rupee', symbol: '₹', decimalPlaces: 2, numberFormat: 'comma-dot-in', symbolFirst: true },
+  { code: 'IQD', name: 'Iraqi Dinar', symbol: 'IQD', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'IRR', name: 'Iranian Rial', symbol: '﷼', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'JMD', name: 'Jamaican Dollar', symbol: 'J$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'JOD', name: 'Jordanian Dinar', symbol: 'JOD', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'JPY', name: 'Japanese Yen', symbol: '¥', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'KRW', name: 'South Korean Won', symbol: '₩', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'KWD', name: 'Kuwaiti Dinar', symbol: 'KWD', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'LKR', name: 'Sri Lankan Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'LYD', name: 'Libyan Dinar', symbol: 'LYD', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MDL', name: 'Moldovan Leu', symbol: 'L', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'MKD', name: 'Macedonian Denar', symbol: 'ден', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'MXN', name: 'Mexican Peso', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'NOK', name: 'Norwegian Krone', symbol: 'kr', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
+  { code: 'NZD', name: 'New Zealand Dollar', symbol: 'NZ$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'OMR', name: 'Omani Rial', symbol: 'OMR', decimalPlaces: 3, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PEN', name: 'Peruvian Sol', symbol: 'S/', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
-  { code: 'PKR', name: 'Pakistani Rupee', symbol: 'Rs.', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'PKR', name: 'Pakistani Rupee', symbol: 'Rs.', decimalPlaces: 0, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'PLN', name: 'Polish Złoty', symbol: 'zł', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'QAR', name: 'Qatari Riyal', symbol: 'ر.ق', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: false },
   { code: 'RON', name: 'Romanian Leu', symbol: 'lei', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: false },
@@ -67,6 +73,7 @@ export const currencies: Currency[] = [
   { code: 'SEK', name: 'Swedish Krona', symbol: 'kr', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'THB', name: 'Thai Baht', symbol: '฿', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
+  { code: 'TND', name: 'Tunisian Dinar', symbol: 'TND', decimalPlaces: 3, numberFormat: 'dot-comma', symbolFirst: false },
   { code: 'TRY', name: 'Turkish Lira', symbol: '₺', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'TWD', name: 'New Taiwan Dollar', symbol: 'NT$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'TZS', name: 'Tanzanian Shilling', symbol: 'TSh', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
@@ -74,6 +81,7 @@ export const currencies: Currency[] = [
   { code: 'USD', name: 'US Dollar', symbol: '$', decimalPlaces: 2, numberFormat: 'comma-dot', symbolFirst: true },
   { code: 'UYU', name: 'Uruguayan Peso', symbol: '$U', decimalPlaces: 2, numberFormat: 'dot-comma', symbolFirst: true },
   { code: 'UZS', name: 'Uzbek Soum', symbol: 'UZS', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: false },
+  { code: 'XOF', name: 'West African CFA Franc', symbol: 'F CFA', decimalPlaces: 0, numberFormat: 'space-comma', symbolFirst: false },
   { code: 'ZAR', name: 'South African Rand', symbol: 'R', decimalPlaces: 2, numberFormat: 'space-comma', symbolFirst: true },
 ];
 

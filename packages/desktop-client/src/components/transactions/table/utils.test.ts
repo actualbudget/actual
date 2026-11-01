@@ -1,7 +1,11 @@
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { SerializedTransaction } from './utils';
-import { deserializeTransaction, shouldApplyRuleChange } from './utils';
+import {
+  deserializeTransaction,
+  serializeTransaction,
+  shouldApplyRuleChange,
+} from './utils';
 
 describe('shouldApplyRuleChange', () => {
   test('applies rule changes to empty fields', () => {
@@ -98,6 +102,21 @@ describe('deserializeTransaction', () => {
     amount: 0,
     cleared: false,
   };
+
+  test.each([
+    [0, '1234'],
+    [2, '12.34'],
+    [3, '1.234'],
+  ] as const)('round trips register precision %s', (precision, text) => {
+    const original = { ...originalTransaction, amount: -1234 };
+    const row = serializeTransaction(original, false, precision);
+    expect(row.debit.replaceAll(',', '')).toBe(text);
+    expect(deserializeTransaction(row, original, precision).amount).toBe(-1234);
+    expect(
+      deserializeTransaction({ ...row, debit: '1/0' }, original, precision)
+        .amount,
+    ).toBe(-1234);
+  });
 
   function serialized(
     overrides: Partial<SerializedTransaction>,

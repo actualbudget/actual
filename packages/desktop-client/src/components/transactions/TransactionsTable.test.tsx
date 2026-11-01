@@ -12,7 +12,10 @@ import {
   splitTransaction,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { integerToCurrency } from '@actual-app/core/shared/util';
+import {
+  getNumberFormat,
+  integerToCurrency,
+} from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -52,13 +55,17 @@ import {
 } from './TransactionsTable';
 
 const queryClient = createTestQueryClient();
+let testEncoding: string | undefined;
 
 vi.mock(
   '@actual-app/core/platform/client/connection',
   () => import('#mocks/connection'),
 );
 vi.mock('../../hooks/useSyncedPref', () => ({
-  useSyncedPref: vi.fn().mockReturnValue([undefined, vi.fn()]),
+  useSyncedPref: vi.fn((name: string) => [
+    name === 'amountEncoding' ? testEncoding : undefined,
+    vi.fn(),
+  ]),
 }));
 vi.mock('../../hooks/useFeatureFlag', () => ({
   useFeatureFlag: vi.fn(() => false),
@@ -289,6 +296,7 @@ function initBasicServer() {
 }
 
 beforeEach(() => {
+  testEncoding = undefined;
   schedules = [];
   createScheduleMock.mockClear();
   initBasicServer();
@@ -478,6 +486,24 @@ function expectToBeEditingField(
 }
 
 describe('Transactions', () => {
+  test.each([
+    [0, 'JPY', '0', '1234', -1234, '1,234'],
+    [3, 'KWD', '0.000', '12.345', -12345, '12.345'],
+  ] as const)(
+    'saves and reopens a %sdp register amount',
+    async (precision, currencyCode, zero, typed, stored, display) => {
+      testEncoding = JSON.stringify({ version: 1, currencyCode, precision });
+      const { container, getTransactions, updateProps } = renderTransactions();
+      updateProps({ isAdding: true });
+      const input = await editNewField(container, 'debit');
+      expect(input.value).toBe(zero);
+      await userEvent.clear(input);
+      await userEvent.type(input, `${typed}[Enter]`);
+      await waitFor(() => expect(getTransactions()[0].amount).toBe(stored));
+      updateProps({ isAdding: false, transactions: getTransactions() });
+      expect(queryField(container, 'debit', '', 0).textContent).toBe(display);
+    },
+  );
   test('preview transactions show schedule name in notes', async () => {
     const scheduleName = 'Monthly rent';
     schedules = [
@@ -643,7 +669,11 @@ describe('Transactions', () => {
       );
       if (transaction.amount < 0) {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe(
-          integerToCurrency(-transaction.amount),
+          integerToCurrency(
+            -transaction.amount,
+            getNumberFormat().formatter,
+            2,
+          ),
         );
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
           '',
@@ -651,7 +681,7 @@ describe('Transactions', () => {
       } else {
         expect(queryField(container, 'debit', 'div', idx).textContent).toBe('');
         expect(queryField(container, 'credit', 'div', idx).textContent).toBe(
-          integerToCurrency(transaction.amount),
+          integerToCurrency(transaction.amount, getNumberFormat().formatter, 2),
         );
       }
     });

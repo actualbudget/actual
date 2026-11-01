@@ -6,6 +6,9 @@ describe('getDecimalPlaces', () => {
   });
 
   it('returns 0 for zero-decimal currencies', () => {
+    for (const code of ['CLP', 'COP', 'HUF', 'IDR', 'PKR']) {
+      expect(getDecimalPlaces(code)).toBe(0);
+    }
     expect(getDecimalPlaces('JPY')).toBe(0);
     expect(getDecimalPlaces('KRW')).toBe(0);
     expect(getDecimalPlaces('IRR')).toBe(0);

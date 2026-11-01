@@ -138,7 +138,8 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
       ? theme.errorText
       : syncState === 'disabled' ||
           syncState === 'offline' ||
-          syncState === 'local'
+          syncState === 'local' ||
+          syncState === 'pending-transition'
         ? theme.mobileHeaderTextSubdued
         : theme.mobileHeaderText;
   const desktopColor =
@@ -146,7 +147,8 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
       ? theme.errorTextDark
       : syncState === 'disabled' ||
           syncState === 'offline' ||
-          syncState === 'local'
+          syncState === 'local' ||
+          syncState === 'pending-transition'
         ? theme.buttonBareDisabledText
         : theme.buttonBareText;
 
@@ -198,6 +200,10 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
       <Trans>Offline — will sync when reconnected</Trans>
     ) : syncState === 'local' ? (
       <Trans>Local file, not connected to a server</Trans>
+    ) : syncState === 'pending-transition' ? (
+      <Trans>
+        Currency change pending. Finish the currency update before syncing.
+      </Trans>
     ) : syncState === 'disabled' ? (
       <Trans>Syncing disabled for this file</Trans>
     ) : (
@@ -243,7 +249,11 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
           <AnimatedRefresh animating={syncing} />
         )}
         <Text style={isMobile ? { ...mobileTextStyle } : null}>
-          {syncState === 'disabled' ? ` ${t('Disabled')}` : null}
+          {syncState === 'disabled'
+            ? ` ${t('Disabled')}`
+            : syncState === 'pending-transition'
+              ? ` ${t('Pending')}`
+              : null}
         </Text>
       </Button>
     </Tooltip>

@@ -26,12 +26,44 @@ describe('getGoalDifference', () => {
     });
   });
 
+  it('greys a balance that displays as zero when fractions are hidden', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(makeBalanceAmountStyle(40)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+    expect(makeBalanceAmountStyle(-40)).toEqual({
+      color: theme.budgetNumberZero,
+    });
+  });
+
   it('measures whole units for currencies without decimals', () => {
-    expect(getGoalDifference(3995000, 4004900, 0)).toBe(-9900);
-    // ¥39,950.50 shows as ¥39,951, even with decimals shown
-    expect(getGoalDifference(3995050, 3995100, 0)).toBe(0);
-    expect(makeBalanceAmountStyle(3995000, 4004900, 3995000, 0)).toEqual({
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(getGoalDifference(39950, 40049, 0)).toBe(-99);
+    expect(getGoalDifference(40049, 40049, 0)).toBe(0);
+    expect(makeBalanceAmountStyle(39950, 40049, 39950, 0)).toEqual({
       color: theme.templateNumberUnderFunded,
     });
+  });
+});
+
+describe('three-decimal displayed goal amounts', () => {
+  afterEach(() =>
+    setNumberFormat({ format: 'comma-dot', hideFraction: false }),
+  );
+  it.each(['comma-dot', 'dot-comma', 'apostrophe-dot'] as const)(
+    'keeps sub-cent differences in %s format',
+    format => {
+      setNumberFormat({ format, hideFraction: false });
+      expect(getGoalDifference(1009, 1000, 3)).toBe(9);
+      expect(getGoalDifference(1000, 1001, 3)).toBe(-1);
+      expect(makeBalanceAmountStyle(-4, undefined, undefined, 3)).toEqual({
+        color: theme.budgetNumberNegative,
+      });
+    },
+  );
+  it('still compares rounded whole units when fractions are hidden', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    expect(getGoalDifference(1000, 1001, 3)).toBe(0);
+    expect(getGoalDifference(1000, 1600, 3)).toBe(-1000);
   });
 });

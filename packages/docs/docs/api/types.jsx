@@ -27,9 +27,11 @@ export const types = {
     type: 'integer',
     description: (
       <span>
-        A currency amount is an integer: the value multiplied by 100, whatever
-        the currency. For example, <code>$120.30</code> is <code>12030</code>{' '}
-        and <code>¥1,500</code> is <code>150000</code>.
+        A currency amount is an integer using the budget's recorded precision.
+        Legacy budgets use two implied decimals for every currency: for example,{' '}
+        <code>$120.30</code> is <code>12030</code> and <code>¥1,500</code> is{' '}
+        <code>150000</code>. After a precision change, use the recorded scale:
+        at zero decimals, <code>¥1,500</code> is <code>1500</code>.
       </span>
     ),
   },

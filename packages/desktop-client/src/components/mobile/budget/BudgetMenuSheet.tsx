@@ -7,7 +7,11 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
-import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  integerToAmount,
+  MAX_SAFE_NUMBER,
+} from '@actual-app/core/shared/util';
 import type { CategoryEntity, NoteEntity } from '@actual-app/core/types/models';
 
 import { MobileSheet } from '#components/mobile/MobileSheet';
@@ -17,6 +21,7 @@ import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
 import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { AmountInput } from '#components/mobile/transactions/AmountInput';
 import { CALCULATOR_KEYBOARD_HEIGHT } from '#components/mobile/transactions/CalculatorKeyboard';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategory } from '#hooks/useCategory';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNotes } from '#hooks/useNotes';
@@ -47,6 +52,7 @@ export function BudgetMenuSheet({
   onEditNotes,
 }: BudgetMenuSheetProps) {
   const { t } = useTranslation();
+  const precision = useAmountPrecision();
   const { data: category } = useCategory(categoryId);
   const isMobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
@@ -84,9 +90,17 @@ export function BudgetMenuSheet({
               <Trans>Budgeted</Trans>
             </Text>
             <AmountInput
-              value={integerToAmount(budgeted)}
+              value={integerToAmount(budgeted, precision)}
               onEnter={close}
-              onChange={amount => onUpdateBudget(amountToInteger(amount))}
+              onChange={amount => {
+                const stored = amountToInteger(amount, precision);
+                if (
+                  Number.isSafeInteger(stored) &&
+                  Math.abs(stored) <= MAX_SAFE_NUMBER
+                ) {
+                  onUpdateBudget(stored);
+                }
+              }}
               onFocus={() => setIsCalculatorOpen(isMobileCalculatorEnabled)}
               onBlur={() => setIsCalculatorOpen(false)}
               data-testid="budget-amount"

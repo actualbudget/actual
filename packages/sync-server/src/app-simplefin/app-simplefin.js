@@ -252,7 +252,10 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  if (typeof account.balance !== 'string') {
+    throw new Error('Invalid SimpleFIN balance');
+  }
+  const startingBalance = account.balance;
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
@@ -279,6 +282,9 @@ function getAccountResponse(results, accountId, startDate) {
   const pending = [];
 
   for (const trans of account.transactions) {
+    if (typeof trans.amount !== 'string') {
+      throw new Error('Invalid SimpleFIN transaction amount');
+    }
     const newTrans = {};
 
     let dateToUse = 0;
