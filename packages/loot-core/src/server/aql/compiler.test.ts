@@ -1,4 +1,6 @@
 // @ts-strict-ignore
+import { CONVERTED_AMOUNT } from '#shared/fx/aql';
+import { resetSqlConversionState, setSqlConversionState } from '#shared/fx/sql';
 import { q } from '#shared/query';
 
 import { generateSQLWithState } from './compiler';
@@ -977,5 +979,91 @@ describe('Type conversions', () => {
       schemaWithRefs,
     );
     expect(result.sql).toMatch('WHERE (payees1.id IS NOT NULL)');
+  });
+});
+
+describe('Currency conversion', () => {
+  const schemaWithCurrencies = {
+    transactions: {
+      id: { type: 'id' },
+      account: { type: 'id', ref: 'accounts' },
+      date: { type: 'date' },
+      amount: { type: 'integer' },
+    },
+    accounts: {
+      id: { type: 'id' },
+      currency: { type: 'string' },
+    },
+  };
+
+  function setConversion(enabled: boolean, defaultCurrencyCode = 'CAD') {
+    setSqlConversionState({
+      enabled,
+      defaultCurrencyCode,
+      rateMode: 'latest',
+      rates: [],
+    });
+  }
+
+  function compileSum(amount) {
+    return generateSQLWithState(
+      q('transactions').calculate({ $sum: amount }).serialize(),
+      schemaWithCurrencies,
+    );
+  }
+
+  afterEach(() => {
+    resetSqlConversionState();
+  });
+
+  it('`$fx` compiles to the plain amount while conversion is off', () => {
+    setConversion(false);
+
+    const plain = compileSum('$amount');
+    const converted = compileSum(CONVERTED_AMOUNT);
+    expect(converted.sql).toBe(plain.sql);
+    expect(converted.state.dependencies).toEqual(['transactions']);
+    expect(converted.state.paths.size).toBe(0);
+    expect(converted.state.outputTypes).toEqual(plain.state.outputTypes);
+  });
+
+  it('`$fx` converts amounts outside the default currency', () => {
+    setConversion(true);
+
+    const { sql, state } = compileSum(CONVERTED_AMOUNT);
+    expect(sqlLines(sql)).toEqual([
+      "SELECT SUM(CASE WHEN accounts1.currency IS NULL OR accounts1.currency = 'CAD' THEN transactions.amount ELSE FX_CONVERT(transactions.amount, accounts1.currency, transactions.date) END) AS result FROM transactions",
+      'LEFT JOIN accounts accounts1 ON accounts1.id = transactions.account',
+    ]);
+    expect(state.dependencies).toEqual([
+      'transactions',
+      'exchange_rates',
+      'preferences',
+      'accounts',
+    ]);
+    expect(state.outputTypes.get('result')).toBe('integer');
+  });
+
+  it('`$fx` quotes the default currency', () => {
+    setConversion(true, "C'D");
+    expect(compileSum(CONVERTED_AMOUNT).sql).toMatch(
+      "accounts1.currency = 'C''D' THEN",
+    );
+  });
+
+  it('`$min` selects the smallest value of a group', () => {
+    const { sql, state } = generateSQLWithState(
+      q('transactions')
+        .groupBy('account')
+        .select(['account', { date: { $min: '$date' } }])
+        .withoutValidatedRefs()
+        .serialize(),
+      schemaWithCurrencies,
+    );
+    expect(sqlLines(sql)).toEqual([
+      'SELECT transactions.account AS account, MIN(transactions.date) AS date FROM transactions',
+      'GROUP BY transactions.account',
+    ]);
+    expect(state.outputTypes.get('date')).toBe('date');
   });
 });

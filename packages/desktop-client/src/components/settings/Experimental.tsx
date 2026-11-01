@@ -184,6 +184,9 @@ export function ExperimentalFeatures() {
   const [, setGoalTemplatesUIPref] = useSyncedPref(
     'flags.goalTemplatesUIEnabled',
   );
+  const currencyEnabled = useFeatureFlag('currency');
+  const multiCurrencyEnabled = useFeatureFlag('multiCurrency');
+  const [, setMultiCurrencyPref] = useSyncedPref('flags.multiCurrency');
   const isUsingServer = useSyncServerStatus() !== 'no-server';
 
   const showServerPrefs =
@@ -234,6 +237,24 @@ export function ExperimentalFeatures() {
       <FeatureToggle
         flag="currency"
         feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+        onDisable={() => {
+          // Only saved when it was on, so the budget's preferences stay as
+          // they were for anyone who never used multiple currencies
+          if (multiCurrencyEnabled) {
+            setMultiCurrencyPref('false');
+          }
+        }}
+        subFeatures={
+          currencyEnabled && (
+            <FeatureToggle
+              flag="multiCurrency"
+              feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+              isSubFeature
+            >
+              <Trans>Multiple currencies</Trans>
+            </FeatureToggle>
+          )
+        }
       >
         <Trans>Currency support</Trans>
       </FeatureToggle>

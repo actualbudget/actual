@@ -4,6 +4,7 @@ import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
 
 import { logger } from '#platform/server/log';
 
+import { fxConvert, fxConvertOnDate } from './fx';
 import { normalise } from './normalise';
 import { regexp } from './regexp';
 import type { SqlParam } from './types';
@@ -264,6 +265,8 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
   db.create_function('UNICODE_LIKE', unicodeLike);
   db.create_function('REGEXP', regexp);
   db.create_function('NORMALISE', normalise);
+  db.create_function('FX_CONVERT', fxConvert);
+  db.create_function('FX_CONVERT_ON_DATE', fxConvertOnDate);
   return db;
 }
 

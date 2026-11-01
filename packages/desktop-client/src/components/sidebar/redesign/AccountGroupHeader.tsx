@@ -24,6 +24,7 @@ import {
   useDeleteAccountGroupMutation,
   useUpdateAccountGroupMutation,
 } from '#account-groups';
+import { useAccounts } from '#hooks/useAccounts';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
@@ -63,6 +64,8 @@ export function AccountGroupHeader({
   );
   const updateGroup = useUpdateAccountGroupMutation();
   const deleteGroup = useDeleteAccountGroupMutation();
+  // The tree may be filtered by a search; the total covers the whole group
+  const { data: allAccounts = [] } = useAccounts();
 
   const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   useContextMenu({
@@ -178,6 +181,12 @@ export function AccountGroupHeader({
                   binding={bindings.accountGroupBalance(
                     group.id,
                     side === 'off',
+                  )}
+                  totalAccounts={allAccounts.filter(
+                    account =>
+                      account.account_group_id === group.id &&
+                      !!account.offbudget === (side === 'off') &&
+                      !account.closed,
                   )}
                   style={{ fontSize: 11, color: groupLabelStyle.color }}
                 />
