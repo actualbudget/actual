@@ -115,4 +115,38 @@ describe('getLiveRange', () => {
       expect(end).toBe('2016-12-31');
     });
   });
+
+  describe('Last month', () => {
+    it('returns the full previous month', () => {
+      const [start, end] = getLiveRange('Last month', EARLIEST, LATEST, false);
+      // currentMonth() = '2017-01', so last month is December 2016
+      expect(start).toBe('2016-12-01');
+      expect(end).toBe('2016-12-31');
+    });
+
+    it('does not extend into the current month when includeCurrentInterval is set', () => {
+      const [start, end] = getLiveRange('Last month', EARLIEST, LATEST, true);
+      expect(start).toBe('2016-12-01');
+      expect(end).toBe('2016-12-31');
+    });
+  });
+
+  describe('Last 3 months', () => {
+    it('still honours includeCurrentInterval', () => {
+      const [, endExclude] = getLiveRange(
+        'Last 3 months',
+        EARLIEST,
+        LATEST,
+        false,
+      );
+      const [, endInclude] = getLiveRange(
+        'Last 3 months',
+        EARLIEST,
+        LATEST,
+        true,
+      );
+      expect(endExclude).toBe('2016-12-31');
+      expect(endInclude).toBe('2017-01-31');
+    });
+  });
 });
