@@ -1,7 +1,9 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { getRuleForSchedule } from '#server/schedules/app';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { extractScheduleConds } from '#shared/schedules';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type {
@@ -525,6 +527,24 @@ export class CategoryTemplateContext {
           );
         }
       });
+    // a schedule's rule can lose its amount condition when edited on the
+    // Rules page, and the forecast has no amount to work from without it
+    for (const t of templates) {
+      if (t.type !== 'schedule') continue;
+      const schedule = activeSchedules.find(s =>
+        t.scheduleId
+          ? s.id === t.scheduleId
+          : s.name?.trim() === t.name?.trim(),
+      );
+      // existence was checked above
+      if (!schedule) continue;
+      const rule = await getRuleForSchedule(schedule.id);
+      if (!extractScheduleConds(rule.serialize().conditions).amount) {
+        throw new Error(
+          `Schedule ${schedule.name} has no amount. Set an amount on the schedule to use it in a template`,
+        );
+      }
+    }
   }
 
   static async checkPercentage(templates: Template[]) {
