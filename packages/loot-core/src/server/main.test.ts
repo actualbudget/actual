@@ -379,6 +379,37 @@ describe('Categories', () => {
     expect(categories.find(cat => cat.name === 'bar')).not.toBeNull();
   });
 
+  test('requires a transfer when only a budgeted amount is left', async () => {
+    await sheet.loadSpreadsheet(db);
+
+    await runMutator(async () => {
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      await db.insertCategoryGroup({
+        id: 'group2',
+        name: 'group2',
+        is_income: 1,
+      });
+      await db.insertCategory({ id: 'foo', name: 'foo', cat_group: 'group1' });
+    });
+    await budget.createAllBudgets();
+
+    expect(
+      await runHandler(handlers['must-category-transfer'], { id: 'foo' }),
+    ).toBe(false);
+
+    // No transaction uses the category, yet a budgeted amount still makes
+    // the delete dialog ask for a transfer, so its message must mention
+    // budgeted amounts too (#9365).
+    await budgetActions.setBudget({
+      category: 'foo',
+      month: monthUtils.currentMonth(),
+      amount: 1000,
+    });
+    expect(
+      await runHandler(handlers['must-category-transfer'], { id: 'foo' }),
+    ).toBe(true);
+  });
+
   test('transfers properly when deleted', async () => {
     await sheet.loadSpreadsheet(db);
 
