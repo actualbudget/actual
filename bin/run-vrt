@@ -28,5 +28,8 @@ echo "Running VRT tests with the following parameters:"
 echo "E2E_START_URL: $E2E_START_URL"
 echo "VRT_ARGS: $VRT_ARGS"
 
-MSYS_NO_PATHCONV=1 docker run --rm --network host -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.61.1-jammy /bin/bash \
+# Run as the host user so files written to the bind mount (snapshots, test
+# results, node_modules) aren't owned by root. HOME points somewhere writable
+# because the host uid has no home directory inside the image.
+MSYS_NO_PATHCONV=1 docker run --rm --network host --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$(pwd)":/work/ -w /work/ -it mcr.microsoft.com/playwright:v1.61.1-jammy /bin/bash \
   -c "E2E_START_URL=$E2E_START_URL yarn vrt $VRT_ARGS"
