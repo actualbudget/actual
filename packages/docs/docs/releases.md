@@ -1,5 +1,9 @@
 # Release Notes
 
+import UpcomingReleaseNotes from './_upcoming-release-notes.md';
+
+<UpcomingReleaseNotes />
+
 ## 26.10.0
 
 Release date: 2026-10-02

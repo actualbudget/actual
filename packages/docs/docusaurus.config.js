@@ -1,6 +1,8 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+const path = require('path');
+
 const { themes } = require('prism-react-renderer');
 
 const defaultOptions = {
@@ -203,6 +205,19 @@ module.exports = {
       },
     }),
   plugins: [
+    function upcomingReleaseNotesPlugin() {
+      return {
+        name: 'upcoming-release-notes-plugin',
+        async loadContent() {
+          const { generateUpcomingReleaseNotes } =
+            await import('./scripts/generate-upcoming-release-notes.mjs');
+          await generateUpcomingReleaseNotes();
+        },
+        getPathsToWatch() {
+          return [path.resolve(__dirname, '../../upcoming-release-notes/*.md')];
+        },
+      };
+    },
     [
       '@docusaurus/plugin-client-redirects',
       {
@@ -214,6 +229,11 @@ module.exports = {
           {
             from: '/docs/actual-server-repo-move',
             to: '/docs/install/',
+          },
+          // Upcoming release notes consolidated into /docs/releases under Next (#9228)
+          {
+            from: '/docs/upcoming-release-notes',
+            to: '/docs/releases',
           },
         ],
       },

@@ -104,3 +104,21 @@ export function formatNotes(notes) {
     .map(([category, values]) => `#### ${category}\n\n${values.join('\n')}`)
     .join('\n\n');
 }
+
+// Insert a new version section above the latest release. Anything between the
+// page title and the first `## ` heading (e.g. the upcoming release notes
+// partial) stays above the new section.
+export function insertReleaseSection(releases, section) {
+  const firstSection = releases.search(/^## /m);
+  if (firstSection === -1) {
+    return releases.replace(
+      '# Release Notes\n',
+      `# Release Notes\n\n${section}\n`,
+    );
+  }
+  return (
+    releases.slice(0, firstSection) +
+    `${section}\n\n` +
+    releases.slice(firstSection)
+  );
+}
