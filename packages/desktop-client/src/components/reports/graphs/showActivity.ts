@@ -21,6 +21,7 @@ type showActivityProps = {
   filters: RuleConditionEntity[];
   showHiddenCategories: boolean;
   showOffBudget: boolean;
+  showUncategorized: boolean;
   type: string;
   startDate: string;
   endDate?: string;
@@ -40,6 +41,7 @@ export function showActivity({
   filters,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
   type,
   startDate,
   endDate,
@@ -108,8 +110,37 @@ export function showActivity({
               type: 'id',
             };
 
+  // Like the report, keep transactions without a category next to the checked
+  // categories. Split parents have no category, but the report counts only
+  // their parts. Without "show uncategorized", the report keeps only off
+  // budget transactions without a category. Keep the explicit `$and`: inside
+  // `$or`, an object with several keys matches when any one key matches.
+  const reportFilters = filters.map(filter =>
+    filter.field === 'category' && filter.op === 'oneOf'
+      ? {
+          ...filter,
+          customName: reportCategoriesName(
+            [filter.value].flat(),
+            categories.list,
+          ),
+          queryFilter: {
+            $or: [
+              { category: { $oneof: filter.value } },
+              {
+                $and: [
+                  { category: null },
+                  { is_parent: false },
+                  ...(showUncategorized ? [] : [{ 'account.offbudget': true }]),
+                ],
+              },
+            ],
+          },
+        }
+      : filter,
+  );
+
   const filterConditions = [
-    ...filters,
+    ...reportFilters,
     drilldownFilter,
     {
       field: 'date',
@@ -163,4 +194,21 @@ export function showActivity({
         ? { goBack: true }
         : { goBack: true, filterConditions },
   });
+}
+
+// Name the shorter list, so the filter chip stays short.
+function reportCategoriesName(checkedIds: string[], list: CategoryEntity[]) {
+  const checked = list.filter(({ id }) => checkedIds.includes(id));
+  const unchecked = list.filter(({ id }) => !checkedIds.includes(id));
+  const names = (categories: CategoryEntity[]) =>
+    categories.map(({ name }) => name).join(', ');
+
+  if (checked.length === 0) {
+    return t('Report categories: none');
+  }
+  return checked.length <= unchecked.length
+    ? t('Report categories: {{categories}}', { categories: names(checked) })
+    : t('Report categories: all except {{categories}}', {
+        categories: names(unchecked),
+      });
 }

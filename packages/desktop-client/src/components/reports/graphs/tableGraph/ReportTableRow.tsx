@@ -33,6 +33,7 @@ type ReportTableRowProps = {
   totalStyle?: CSSProperties;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   interval: string;
   totalScrollRef?: RefObject<HTMLDivElement | null>;
   handleScroll?: UIEventHandler<HTMLDivElement>;
@@ -62,6 +63,7 @@ export const ReportTableRow = memo(
     totalStyle,
     showHiddenCategories = false,
     showOffBudget = false,
+    showUncategorized = false,
     totalScrollRef,
     handleScroll,
     height,
@@ -185,6 +187,7 @@ export const ReportTableRow = memo(
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'time',
                         startDate: intervalItem.intervalStartDate || '',
                         endDate: intervalItem.intervalEndDate || '',
@@ -242,6 +245,7 @@ export const ReportTableRow = memo(
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'assets',
                         ...drilldown,
                         uncategorizedId: item.uncategorizedId,
@@ -289,6 +293,7 @@ export const ReportTableRow = memo(
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'debts',
                         ...drilldown,
                         uncategorizedId: item.uncategorizedId,
@@ -335,6 +340,7 @@ export const ReportTableRow = memo(
                 filters,
                 showHiddenCategories,
                 showOffBudget,
+                showUncategorized,
                 type: 'totals',
                 ...drilldown,
                 uncategorizedId: item.uncategorizedId,

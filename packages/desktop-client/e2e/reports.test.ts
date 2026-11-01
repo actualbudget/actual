@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
 import { AccountPage } from './page-models/account-page';
@@ -580,6 +580,107 @@ test.describe('Reports', () => {
 
       await customReportPage.showLabelsButton.click();
     });
+  });
+
+  test('keeps uncategorized transactions in a custom report when a category is unchecked', async () => {
+    const accountPage = await navigation.goToAccountPage('Bank of America');
+    await accountPage.createSingleTransaction({ payee: '', debit: '12.34' });
+
+    reportsPage = await navigation.goToReportsPage();
+    const customReportPage = await reportsPage.goToCustomReportPage();
+    await customReportPage.selectViz('Data Table');
+    const report = customReportPage.pageContent;
+    // "Food" shows once in the category selector and once as a table row.
+    await expect(report.getByText('Food', { exact: true })).toHaveCount(2);
+    await expect(
+      report.getByText('Uncategorized', { exact: true }),
+    ).toBeVisible();
+
+    await report.getByLabel('Food', { exact: true }).uncheck();
+
+    await expect(report.getByText('Food', { exact: true })).toHaveCount(1);
+    await expect(
+      report.getByText('Uncategorized', { exact: true }),
+    ).toBeVisible();
+    const uncategorizedAmount = report
+      .getByText('-12.34', { exact: true })
+      .first();
+    await expect(uncategorizedAmount).toBeVisible();
+
+    // The drill-down list also keeps the uncategorized transaction.
+    await uncategorizedAmount.click();
+    await expect(
+      page.getByTestId('transaction-table').getByText('12.34', { exact: true }),
+    ).toBeVisible();
+  });
+
+  test('drill-down lists what a custom report counts when a category is unchecked', async () => {
+    await navigation.goToBudgetPage();
+    const accountPage = await navigation.createAccount({
+      name: 'Drill-down',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.createSingleTransaction({
+      payee: '',
+      category: 'General',
+      debit: '5.00',
+    });
+    await accountPage.createSingleTransaction({ payee: '', debit: '3.00' });
+    await accountPage.createSplitTransaction([
+      { payee: 'Kroger', debit: '20.00' },
+      { category: 'Food', debit: '12.00' },
+      { category: 'Food', debit: '8.00' },
+    ]);
+
+    // Data table split by account, with "Food" unchecked.
+    async function openReport() {
+      reportsPage = await navigation.goToReportsPage();
+      const customReportPage = await reportsPage.goToCustomReportPage();
+      await customReportPage.selectViz('Data Table');
+      const report = customReportPage.pageContent;
+      const splitRow = report
+        .getByText('Split:', { exact: true })
+        .locator('..');
+      await splitRow
+        .getByRole('button', { name: 'Category', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Account', exact: true }).click();
+      await report.getByLabel('Food', { exact: true }).uncheck();
+      return report;
+    }
+    function drillDownRow(report: Locator) {
+      return report.getByTitle('Drill-down', { exact: true }).locator('..');
+    }
+    const transactions = page.getByTestId('transaction-table');
+
+    // The split has only unchecked parts, so the report does not count it.
+    let report = await openReport();
+    await drillDownRow(report).getByText('-8.00', { exact: true }).click();
+    await expect(
+      page.getByText('Report categories: all except Food', { exact: true }),
+    ).toBeVisible();
+    await expect(transactions.getByText('5.00', { exact: true })).toBeVisible();
+    await expect(transactions.getByText('3.00', { exact: true })).toBeVisible();
+    await expect(transactions.getByText('20.00', { exact: true })).toHaveCount(
+      0,
+    );
+
+    report = await openReport();
+    await report.getByRole('button', { name: 'Options', exact: true }).click();
+    await page
+      .getByRole('button', { name: 'Show uncategorized', exact: true })
+      .click();
+    await page.keyboard.press('Escape');
+
+    await drillDownRow(report).getByText('-5.00', { exact: true }).click();
+    await expect(transactions.getByText('5.00', { exact: true })).toBeVisible();
+    await expect(transactions.getByText('3.00', { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(transactions.getByText('20.00', { exact: true })).toHaveCount(
+      0,
+    );
   });
 });
 

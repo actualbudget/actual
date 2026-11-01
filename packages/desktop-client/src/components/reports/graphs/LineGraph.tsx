@@ -151,6 +151,7 @@ type LineGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTrendLines?: boolean;
   showTooltip?: boolean;
   interval?: string;
@@ -165,6 +166,7 @@ export function LineGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
   showTrendLines = false,
   showTooltip = true,
   interval,
@@ -198,6 +200,7 @@ export function LineGraph({
       filters,
       showHiddenCategories,
       showOffBudget,
+      showUncategorized,
       type: 'time',
       startDate: payload.payload.intervalStartDate,
       endDate: payload.payload.intervalEndDate,
