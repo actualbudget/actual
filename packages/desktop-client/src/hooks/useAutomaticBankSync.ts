@@ -132,8 +132,16 @@ export function useAutomaticBankSync() {
     syncAndDownload.mutate({});
   });
 
+  // The accounts query starts out with an empty placeholder and the server
+  // status is only known once the user data has loaded, so a check on mount
+  // alone finds nothing to do. Re-check when these become ready rather than
+  // waiting for the next timer tick: the mobile apps suspend the web view in
+  // the background, so that tick may never come.
+  const isReady =
+    intervalMs > 0 && serverStatus === 'online' && accounts.length > 0;
+
   useEffect(() => {
-    if (intervalMs <= 0) {
+    if (!isReady) {
       return;
     }
 
@@ -141,5 +149,5 @@ export function useAutomaticBankSync() {
 
     const timer = setInterval(maybeSync, CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [intervalMs]);
+  }, [isReady]);
 }
