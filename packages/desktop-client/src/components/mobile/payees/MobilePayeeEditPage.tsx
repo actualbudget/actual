@@ -141,6 +141,7 @@ export function MobilePayeeEditPage() {
         >
           <Button
             variant="primary"
+            size="touch"
             onPress={handleSave}
             isDisabled={!editedPayeeName.trim()}
             style={{ height: styles.mobileMinHeight }}

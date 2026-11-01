@@ -158,9 +158,9 @@ function AccountListItem({
       {itemProps => (
         <Button
           {...itemProps}
+          block
           style={{
             height: ROW_HEIGHT,
-            width: '100%',
             backgroundColor: theme.tableBackground,
             border: 'none',
             borderRadius: 0,
@@ -266,9 +266,8 @@ function EmptyMessage({ onAddAccount }: { onAddAccount: () => void }) {
       </Text>
       <Button
         variant="primary"
+        size="touch"
         style={{
-          padding: '12px 20px',
-          fontSize: 15,
           minHeight: styles.mobileMinHeight,
           marginTop: 10,
         }}
