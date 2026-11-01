@@ -149,6 +149,47 @@ describe('ImportTransactionsModal', () => {
     expect(send).toHaveBeenCalledTimes(5);
   });
 
+  it('re-parses when the user re-selects the same file path after a parse error', async () => {
+    vi.mocked(send).mockResolvedValueOnce({
+      errors: [{ parsed: true, message: 'Parse error' }],
+      transactions: [],
+    });
+
+    render(
+      <TestProviders>
+        <ImportTransactionsModal
+          filename="initial.csv"
+          accountId="acc1"
+          onImported={vi.fn()}
+        />
+      </TestProviders>,
+    );
+
+    const selectNewButton = await screen.findByRole('button', {
+      name: /select new file/i,
+    });
+
+    await waitFor(() => {
+      expect(send).toHaveBeenCalledTimes(1);
+    });
+
+    vi.mocked(send).mockResolvedValueOnce({
+      errors: [],
+      transactions: [{ Date: '2026-01-01', Payee: 'Store', Amount: '10.00' }],
+    });
+
+    mockOpenFileDialog.mockResolvedValueOnce(['initial.csv']);
+    fireEvent.click(selectNewButton);
+
+    await waitFor(() => {
+      expect(send).toHaveBeenCalledTimes(2);
+      expect(send).toHaveBeenLastCalledWith(
+        'transactions-parse-file',
+        expect.objectContaining({ filepath: 'initial.csv' }),
+      );
+    });
+  });
+
   describe('shouldPreserveImportSettingsForParse', () => {
     const baseOptions: ParseFileOptions = {
       delimiter: ',',

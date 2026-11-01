@@ -563,7 +563,22 @@ export function ImportTransactionsModal({
     });
 
     if (res?.[0]) {
-      setFilename(res[0]);
+      const nextFilename = res[0];
+      if (nextFilename === filename) {
+        const fileType = getFileType(nextFilename);
+        const options = getParseOptions(fileType, {
+          delimiter,
+          encoding: csvEncoding,
+          hasHeaderRow,
+          skipStartLines,
+          skipEndLines,
+        });
+        void parse(nextFilename, options, {
+          preserveImportSettings: false,
+        });
+      } else {
+        setFilename(nextFilename);
+      }
     }
   }
 
