@@ -1,5 +1,7 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
+import { getNormalisedString } from '@actual-app/core/shared/normalisation';
+import { unicodeLike } from '@actual-app/core/shared/unicodeLike';
 import type { Handlers } from '@actual-app/core/types/handlers';
 import type {
   CategoryEntity,
@@ -51,13 +53,13 @@ export function isSupportedCategoryCondition(
   }
 
   if (condition.op === 'is' || condition.op === 'isNot') {
-    return typeof condition.value === 'string';
+    return condition.value === null || typeof condition.value === 'string';
   }
 
   if (condition.op === 'oneOf' || condition.op === 'notOneOf') {
     return (
       Array.isArray(condition.value) &&
-      condition.value.every(id => typeof id === 'string')
+      condition.value.every(id => id === null || typeof id === 'string')
     );
   }
 
@@ -72,8 +74,10 @@ export function isSupportedCategoryCondition(
   return false;
 }
 
-export function filterCategoriesByConditions(
-  categories: CategoryEntity[],
+export function filterCategoriesByConditions<
+  TCategory extends { id: string | null; name: string; group: string | null },
+>(
+  categories: TCategory[],
   categoryGroups: CategoryGroupEntity[],
   conditions: RuleConditionEntity[] | undefined,
   conditionsOp: BudgetDataConditionsOp | undefined,
@@ -108,20 +112,20 @@ export function filterCategoriesByConditions(
   }
 
   const evaluateCondition = (
-    category: CategoryEntity,
+    category: TCategory,
     condition: Extract<
       RuleConditionEntity,
       { field: 'category' | 'category_group' }
     >,
   ): boolean => {
     const key =
-      condition.field === 'category_group'
-        ? (category.group ?? '')
-        : category.id;
+      condition.field === 'category_group' ? category.group : category.id;
     const textValue =
       condition.field === 'category_group'
-        ? (categoryGroupNameById.get(key) ?? key)
-        : category.name;
+        ? (categoryGroupNameById.get(key ?? '') ?? key)
+        : category.id === null
+          ? null
+          : category.name;
 
     if (condition.op === 'is') {
       return key === condition.value;
@@ -132,34 +136,35 @@ export function filterCategoriesByConditions(
     }
 
     if (condition.op === 'oneOf') {
-      return condition.value.includes(key);
-    }
-
-    if (condition.op === 'notOneOf') {
-      return !condition.value.includes(key);
-    }
-
-    if (condition.op === 'contains') {
       return (
-        typeof condition.value === 'string' &&
-        textValue.toLowerCase().includes(condition.value.toLowerCase())
+        Array.isArray(condition.value) && condition.value.some(id => id === key)
       );
     }
 
-    if (condition.op === 'doesNotContain') {
+    if (condition.op === 'notOneOf') {
       return (
-        typeof condition.value === 'string' &&
-        !textValue.toLowerCase().includes(condition.value.toLowerCase())
+        Array.isArray(condition.value) &&
+        condition.value.length > 0 &&
+        !condition.value.some(id => id === key)
       );
     }
 
     if (
-      condition.op === 'matches' &&
-      typeof condition.value === 'string' &&
-      condition.value.length <= 256
+      (condition.op === 'contains' || condition.op === 'doesNotContain') &&
+      typeof condition.value === 'string'
     ) {
+      const matches = unicodeLike(
+        '%' + getNormalisedString(condition.value) + '%',
+        textValue === null ? null : getNormalisedString(textValue),
+      );
+      return condition.op === 'contains'
+        ? !!matches
+        : textValue === null || !matches;
+    }
+
+    if (condition.op === 'matches' && typeof condition.value === 'string') {
       try {
-        return new RegExp(condition.value, 'i').test(textValue);
+        return new RegExp(condition.value).test(textValue ?? '');
       } catch {
         return false;
       }
