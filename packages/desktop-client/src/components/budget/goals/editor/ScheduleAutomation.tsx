@@ -15,16 +15,19 @@ import {
   MOBILE_FIELD_GAP,
   STACKED_FIELD_FLEX,
 } from '#components/budget/goals/editor/fieldLayout';
+import { ScheduleCategoryNotice } from '#components/budget/goals/editor/ScheduleCategoryNotice';
 import { Link } from '#components/common/Link';
 import { FormField, FormLabel } from '#components/forms';
 
 type ScheduleAutomationProps = {
+  categoryId: string;
   schedules: readonly ScheduleEntity[];
   template: ScheduleTemplate;
   dispatch: (action: Action) => void;
 };
 
 export const ScheduleAutomation = ({
+  categoryId,
   schedules,
   template,
   dispatch,
@@ -46,6 +49,11 @@ export const ScheduleAutomation = ({
         ignorePunctuation: true,
       }),
     );
+  const selectedSchedule = selectableSchedules.find(s =>
+    template.scheduleId
+      ? s.id === template.scheduleId
+      : s.name === template.name,
+  );
 
   return selectableSchedules.length ? (
     <>
@@ -97,6 +105,12 @@ export const ScheduleAutomation = ({
           />
         </FormField>
       </SpaceBetween>
+      {selectedSchedule && (
+        <ScheduleCategoryNotice
+          schedule={selectedSchedule}
+          categoryId={categoryId}
+        />
+      )}
       <AmountAdjustment template={template} dispatch={dispatch} />
     </>
   ) : (
