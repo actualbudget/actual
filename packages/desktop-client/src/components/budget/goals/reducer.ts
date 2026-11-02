@@ -16,7 +16,7 @@ import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
-const DEFAULT_WEEKLY_AVERAGE_WEEKS = 4;
+const DEFAULT_WEEKLY_AVERAGE_WEEKS = 12;
 const DEFAULT_WEEKLY_AVERAGE_WEEKDAY: Weekday = 'monday';
 
 export const getInitialState = (template: Template | null): ReducerState => {
