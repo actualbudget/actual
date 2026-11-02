@@ -545,6 +545,13 @@ function DateSelectDesktop({
               setValue(format(date, dateFormat));
               onSelect(format(date, 'yyyy-MM-dd'));
               setOpen(false);
+              if (!embedded) {
+                // react-aria leaves focus on the (now unmounting) calendar
+                // cell when a day is clicked; return it to the input so Tab
+                // continues from the date field instead of restarting from
+                // the top of the page (#9370).
+                innerRef.current?.focus();
+              }
             }}
           />
           {onTransferDateSyncChange && (
