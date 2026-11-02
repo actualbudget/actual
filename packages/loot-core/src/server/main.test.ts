@@ -69,7 +69,7 @@ describe('Budgets', () => {
   });
 
   // Loading the fixture file can take over 5s on a slow machine
-  test('budget is successfully loaded', async () => {
+  test('budget loads after correcting clock drift', async () => {
     await createTestBudget('default-budget-template');
 
     // Grab the clock to compare later
@@ -78,6 +78,13 @@ describe('Budgets', () => {
       'SELECT * FROM messages_clock',
     );
     const loadedClock = deserializeClock(row.clock);
+
+    global.stepForwardInTime(loadedClock.timestamp.millis() - 600_000);
+    expect(
+      await runHandler(handlers['load-budget'], { id: 'test-budget' }),
+    ).toEqual({ error: 'clock-drift' });
+    expect(prefs.getPrefs()).toBe(null);
+    expect(db.getDatabase()).toBe(null);
 
     global.stepForwardInTime(loadedClock.timestamp.millis());
     const { error } = await runHandler(handlers['load-budget'], {
