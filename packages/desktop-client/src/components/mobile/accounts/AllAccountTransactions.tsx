@@ -19,6 +19,7 @@ import type {
 import { TransactionListWithBalances } from '#components/mobile/transactions/TransactionListWithBalances';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { usePreviewTransactions } from '#hooks/usePreviewTransactions';
 import { getSchedulesQuery } from '#hooks/useSchedules';
@@ -49,6 +50,7 @@ function TransactionListWithPreviews() {
 
   const [hideReconciled] = useSyncedPref('hide-reconciled-all');
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const currencySymbol = useFormat().currency.symbol;
 
   const makeRootTransactionsQuery = useCallback(() => {
     let query = queries.transactions().options({ splits: 'all' }).select('*');
@@ -93,7 +95,12 @@ function TransactionListWithPreviews() {
       setCurrentQuery(query);
       setTransactionsQuery(
         searchText !== ''
-          ? queries.transactionsSearch(query, searchText, dateFormat)
+          ? queries.transactionsSearch(
+              query,
+              searchText,
+              dateFormat,
+              currencySymbol,
+            )
           : query,
       );
     }

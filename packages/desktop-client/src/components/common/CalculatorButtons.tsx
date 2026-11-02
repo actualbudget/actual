@@ -6,6 +6,8 @@ import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { hapticKeyPress } from '#util/haptics';
+
 export function CalculatorButtons({
   inputRef,
   style,
@@ -303,9 +305,7 @@ function CalculatorButton({
       onPointerDown={e => {
         e.preventDefault();
         onInteractionStart?.();
-        if ('vibrate' in navigator) {
-          navigator.vibrate(3);
-        }
+        hapticKeyPress();
       }}
       onPressStart={e => {
         stopRepeating();
