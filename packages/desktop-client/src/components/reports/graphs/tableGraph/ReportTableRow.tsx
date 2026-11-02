@@ -210,8 +210,17 @@ export const ReportTableRow = memo(
         scopeTagNames,
       });
 
-    // A single interval has no matching slice of the comparison, so interval
-    // rows open the whole comparison range
+    // Interval rows open their offset windows. A range comparison has no
+    // window for each interval, so those rows open the whole range
+    const comparisonDrilldown =
+      groupBy === 'Interval' &&
+      firstInterval?.comparisonStartDate &&
+      lastInterval?.comparisonEndDate
+        ? {
+            startDate: firstInterval.comparisonStartDate,
+            endDate: lastInterval.comparisonEndDate,
+          }
+        : { startDate: comparisonStartDate, endDate: comparisonEndDate };
     const onShowComparison = () =>
       canShowActivity &&
       showActivity({
@@ -224,8 +233,7 @@ export const ReportTableRow = memo(
         showOffBudget,
         type: 'totals',
         ...drilldown,
-        startDate: comparisonStartDate,
-        endDate: comparisonEndDate,
+        ...comparisonDrilldown,
         uncategorizedId: item.uncategorizedId,
         bucketTagNames: item.bucketTagNames,
         scopeTagNames,
