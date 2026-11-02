@@ -22,8 +22,8 @@ import {
   canShowComparisonChanges,
   defaultComparison,
   getComparisonRange,
+  getComparisonShift,
   getComparisonSortAmount,
-  getOffsetDays,
   isBudgetedComparison,
   isOffsetComparison,
 } from '#components/reports/comparisonRange';
@@ -135,12 +135,16 @@ export function GetCardData({
     earliestTransaction,
     latestTransaction,
     firstDayOfWeekIdx,
-    [startDate, endDate],
+    { range: [startDate, endDate], interval: report.interval },
   );
   const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
-  const offsetDays = isOffsetComparison(comparison)
-    ? getOffsetDays(comparison)
+  // Kept as plain values, so the spreadsheets only rebuild when they change
+  const comparisonShift = isOffsetComparison(comparison)
+    ? getComparisonShift(comparison, report.interval, [startDate, endDate])
     : undefined;
+  const offsetShiftUnit = comparisonShift?.unit;
+  const offsetShiftCount = comparisonShift?.count ?? 0;
+  const compareDailyAverage = !!comparison.compareDailyAverage;
   const projectToFullPeriod = comparison.projectToFullPeriod;
   const budgetedComparison = isBudgetedComparison(comparison, report.groupBy);
   // Amounts are drawn with the comparison unless changes are asked for
@@ -196,9 +200,13 @@ export function GetCardData({
           sortAmount,
           budgeted: budgetedComparison,
           offset:
-            offsetDays === undefined
+            offsetShiftUnit === undefined
               ? undefined
-              : { days: offsetDays, earliestTransaction },
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction,
+                  compareDailyAverage,
+                },
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -209,7 +217,9 @@ export function GetCardData({
     showAmounts,
     sortAmount,
     budgetedComparison,
-    offsetDays,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
     earliestTransaction,
     report,
     categories,
@@ -252,9 +262,13 @@ export function GetCardData({
           sortAmount,
           budgeted: budgetedComparison,
           offset:
-            offsetDays === undefined
+            offsetShiftUnit === undefined
               ? undefined
-              : { days: offsetDays, earliestTransaction },
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction,
+                  compareDailyAverage,
+                },
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -265,7 +279,9 @@ export function GetCardData({
     showAmounts,
     sortAmount,
     budgetedComparison,
-    offsetDays,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
     earliestTransaction,
     report,
     categories,

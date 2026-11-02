@@ -1,3 +1,5 @@
+import type { CustomReportComparisonOffsetUnit } from '@actual-app/core/types/models';
+
 import {
   canUseBudgetedComparison,
   countDays,
@@ -6,12 +8,13 @@ import {
   countMonths,
   defaultComparison,
   getComparisonRange,
+  getComparisonShift,
   getComparisonSortAmount,
   getFullIntervalDays,
-  getOffsetDays,
   isBudgetedComparison,
   isOffsetOverlapping,
   rangesOverlap,
+  shiftDate,
   shiftRange,
 } from './comparisonRange';
 import { disabledList } from './disabledList';
@@ -63,51 +66,112 @@ describe('budgeted comparisons', () => {
     expect(isBudgetedComparison(defaultComparison, 'Category')).toBe(false);
   });
 
-  it('do not apply to offset comparisons', () => {
+  it('apply to offset comparisons too', () => {
     const offset = {
       ...defaultComparison,
       source: 'budgeted' as const,
       mode: 'offset' as const,
     };
-    expect(isBudgetedComparison(offset, 'Category')).toBe(false);
+    expect(isBudgetedComparison(offset, 'Category')).toBe(true);
   });
 });
 
 describe('offset comparisons', () => {
-  it('convert weeks to days', () => {
-    expect(
-      getOffsetDays({
-        ...defaultComparison,
-        offsetCount: 3,
-        offsetUnit: 'days',
-      }),
-    ).toBe(3);
-    expect(
-      getOffsetDays({
-        ...defaultComparison,
-        offsetCount: 52,
-        offsetUnit: 'weeks',
-      }),
-    ).toBe(364);
+  const months = (count: number) => ({ unit: 'months' as const, count });
+  const days = (count: number) => ({ unit: 'days' as const, count });
+  const shiftOf = (
+    offsetUnit: CustomReportComparisonOffsetUnit,
+    offsetCount: number,
+    interval = 'Monthly',
+    range: [string, string] = ['2016-07-01', '2016-12-31'],
+  ) =>
+    getComparisonShift(
+      { ...defaultComparison, offsetUnit, offsetCount },
+      interval,
+      range,
+    );
+
+  it('converts days, weeks, months and years', () => {
+    expect(shiftOf('days', 3)).toEqual(days(3));
+    expect(shiftOf('weeks', 52)).toEqual(days(364));
+    expect(shiftOf('months', 2)).toEqual(months(2));
+    expect(shiftOf('years', 1)).toEqual(months(12));
   });
 
-  it('shift both ends of a range, accepting month strings', () => {
-    expect(shiftRange('2017-03', '2017-03-31', 364)).toEqual([
+  it('keeps the weekdays of weekly reports a year back', () => {
+    expect(shiftOf('years', 2, 'Weekly')).toEqual(days(728));
+  });
+
+  it('moves by the report interval', () => {
+    expect(shiftOf('intervals', 2, 'Daily')).toEqual(days(2));
+    expect(shiftOf('intervals', 2, 'Weekly')).toEqual(days(14));
+    expect(shiftOf('intervals', 2, 'Monthly')).toEqual(months(2));
+    expect(shiftOf('intervals', 2, 'Quarterly')).toEqual(months(6));
+    expect(shiftOf('intervals', 2, 'Yearly')).toEqual(months(24));
+  });
+
+  it('moves by whole-month ranges in months, and others in days', () => {
+    expect(shiftOf('ranges', 1)).toEqual(months(6));
+    expect(shiftOf('ranges', 2, 'Monthly', ['2016-07', '2016-12-31'])).toEqual(
+      months(12),
+    );
+    expect(
+      shiftOf('ranges', 1, 'Weekly', ['2016-12-04', '2016-12-31']),
+    ).toEqual(days(28));
+  });
+
+  it('shifts both ends of a range by days, accepting month strings', () => {
+    expect(shiftRange('2017-03', '2017-03-31', days(364))).toEqual([
       '2016-03-02',
       '2016-04-01',
     ]);
-    expect(shiftRange('2017-01-01', '2017-01-07', 7)).toEqual([
+    expect(shiftRange('2017-01-01', '2017-01-07', days(7))).toEqual([
       '2016-12-25',
       '2016-12-31',
     ]);
   });
 
-  it('warn when windows can overlap their intervals', () => {
-    expect(isOffsetOverlapping(7, 'Weekly')).toBe(false);
-    expect(isOffsetOverlapping(6, 'Weekly')).toBe(true);
-    expect(isOffsetOverlapping(28, 'Monthly')).toBe(true);
-    expect(isOffsetOverlapping(35, 'Monthly')).toBe(false);
-    expect(isOffsetOverlapping(1, 'Daily')).toBe(false);
+  it('shifts months to the same days, keeping month ends', () => {
+    expect(shiftRange('2017-03', '2017-03-31', months(1))).toEqual([
+      '2017-02-01',
+      '2017-02-28',
+    ]);
+    expect(shiftRange('2017-02-01', '2017-02-28', months(1))).toEqual([
+      '2017-01-01',
+      '2017-01-31',
+    ]);
+    expect(shiftRange('2016-11-15', '2016-12-14', months(1))).toEqual([
+      '2016-10-15',
+      '2016-11-14',
+    ]);
+  });
+
+  it('cuts days past the end of a shorter month', () => {
+    expect(shiftDate('2017-03-30', months(1), false)).toBe('2017-02-28');
+    expect(shiftDate('2017-03-30', months(1), true)).toBe('2017-02-28');
+  });
+
+  it('handles 29 February a year either side', () => {
+    expect(shiftRange('2016-02-01', '2016-02-29', months(12))).toEqual([
+      '2015-02-01',
+      '2015-02-28',
+    ]);
+    expect(shiftRange('2017-02-01', '2017-02-28', months(12))).toEqual([
+      '2016-02-01',
+      '2016-02-29',
+    ]);
+  });
+
+  it('warns when windows can overlap their intervals', () => {
+    expect(isOffsetOverlapping(days(7), 'Weekly')).toBe(false);
+    expect(isOffsetOverlapping(days(6), 'Weekly')).toBe(true);
+    expect(isOffsetOverlapping(days(28), 'Monthly')).toBe(true);
+    expect(isOffsetOverlapping(days(35), 'Monthly')).toBe(false);
+    expect(isOffsetOverlapping(days(1), 'Daily')).toBe(false);
+    expect(isOffsetOverlapping(months(1), 'Weekly')).toBe(false);
+    expect(isOffsetOverlapping(months(1), 'Monthly')).toBe(false);
+    expect(isOffsetOverlapping(months(1), 'Quarterly')).toBe(true);
+    expect(isOffsetOverlapping(months(6), 'Yearly')).toBe(true);
   });
 });
 

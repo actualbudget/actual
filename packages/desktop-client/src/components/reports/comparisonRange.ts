@@ -38,10 +38,14 @@ export function getComparisonRange(
   earliestTransaction: string,
   latestTransaction: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
-  reportRange?: [string, string],
+  // The report's own range and interval, which an offset moves back from
+  report?: { range: [string, string]; interval: string },
 ): [string, string] {
-  if (isOffsetComparison(comparison) && reportRange) {
-    return shiftRange(...reportRange, getOffsetDays(comparison));
+  if (isOffsetComparison(comparison) && report) {
+    return shiftRange(
+      ...report.range,
+      getComparisonShift(comparison, report.interval, report.range),
+    );
   }
   if (comparison.isDateStatic) {
     return [comparison.startDate, comparison.endDate];
@@ -72,27 +76,93 @@ export function isOffsetComparison(comparison: CustomReportComparison) {
   return comparison.mode === 'offset';
 }
 
+// How far back an offset comparison looks, in days or calendar months
+export type ComparisonShift = { unit: 'days' | 'months'; count: number };
+
+const intervalShifts: Record<string, ComparisonShift> = {
+  Daily: { unit: 'days', count: 1 },
+  Weekly: { unit: 'days', count: 7 },
+  Monthly: { unit: 'months', count: 1 },
+  Quarterly: { unit: 'months', count: 3 },
+  Yearly: { unit: 'months', count: 12 },
+};
+
 /**
- * How many days an offset comparison looks back.
+ * How far back an offset comparison looks. Weekly reports go back 52 weeks
+ * for each year, so the weekdays stay the same. A whole-month range moves
+ * by its months, and any other range by its days.
  */
-export function getOffsetDays(comparison: CustomReportComparison) {
+export function getComparisonShift(
+  comparison: CustomReportComparison,
+  interval: string,
+  [start, end]: [string, string],
+): ComparisonShift {
   const count = comparison.offsetCount ?? defaultComparison.offsetCount ?? 1;
-  return comparison.offsetUnit === 'days' ? count : count * 7;
+  const times = (shift: ComparisonShift): ComparisonShift => ({
+    unit: shift.unit,
+    count: shift.count * count,
+  });
+  switch (comparison.offsetUnit ?? 'weeks') {
+    case 'days':
+      return { unit: 'days', count };
+    case 'months':
+      return { unit: 'months', count };
+    case 'years':
+      return interval === 'Weekly'
+        ? { unit: 'days', count: count * 52 * 7 }
+        : { unit: 'months', count: count * 12 };
+    case 'intervals':
+      return times(intervalShifts[interval] ?? intervalShifts.Monthly);
+    case 'ranges': {
+      const startDay = monthUtils.dayFromDate(start);
+      const endDay = monthUtils.dayFromDate(end);
+      return startDay === monthUtils.firstDayOfMonth(startDay) &&
+        endDay === monthUtils.lastDayOfMonth(endDay)
+        ? times({
+            unit: 'months',
+            count: monthUtils.differenceInCalendarMonths(endDay, startDay) + 1,
+          })
+        : times({ unit: 'days', count: countDays(startDay, endDay) });
+    }
+    default:
+      return { unit: 'days', count: count * 7 };
+  }
 }
 
 /**
- * A range moved back by a number of days. Interval starts can be month or
- * year strings.
+ * A date moved back by a shift. Calendar months keep the day of the month,
+ * cut short to the month's length, and the end of a range stays at the end
+ * of its month, so March back a month is 1-28 February.
+ */
+export function shiftDate(
+  date: string,
+  shift: ComparisonShift,
+  isEnd: boolean,
+) {
+  const day = monthUtils.dayFromDate(date);
+  if (shift.unit === 'days') {
+    return monthUtils.subDays(day, shift.count);
+  }
+  const lastDay = monthUtils.lastDayOfMonth(
+    monthUtils.subMonths(monthUtils.getMonth(day), shift.count),
+  );
+  if (isEnd && day === monthUtils.lastDayOfMonth(day)) {
+    return lastDay;
+  }
+  const shifted = lastDay.slice(0, 8) + day.slice(8);
+  return shifted < lastDay ? shifted : lastDay;
+}
+
+/**
+ * A range moved back by a shift. Interval starts can be month or year
+ * strings.
  */
 export function shiftRange(
   start: string,
   end: string,
-  offsetDays: number,
+  shift: ComparisonShift,
 ): [string, string] {
-  return [
-    monthUtils.subDays(monthUtils.dayFromDate(start), offsetDays),
-    monthUtils.subDays(monthUtils.dayFromDate(end), offsetDays),
-  ];
+  return [shiftDate(start, shift, false), shiftDate(end, shift, true)];
 }
 
 // The longest an interval can be, in days
@@ -108,8 +178,14 @@ const longestIntervalDays: Record<string, number> = {
  * Whether an offset is short enough that an interval's past window can
  * overlap the interval itself.
  */
-export function isOffsetOverlapping(offsetDays: number, interval: string) {
-  return offsetDays < (longestIntervalDays[interval] ?? 31);
+export function isOffsetOverlapping(shift: ComparisonShift, interval: string) {
+  if (shift.unit === 'months') {
+    const intervalShift = intervalShifts[interval];
+    return (
+      intervalShift?.unit === 'months' && shift.count < intervalShift.count
+    );
+  }
+  return shift.count < (longestIntervalDays[interval] ?? 31);
 }
 
 /**
@@ -235,13 +311,7 @@ export function isBudgetedComparison(
   comparison: CustomReportComparison,
   groupBy: string,
 ) {
-  // Budgets are set per month, so an offset of days or weeks would have to
-  // spread them over part months
-  return (
-    comparison.source === 'budgeted' &&
-    !isOffsetComparison(comparison) &&
-    canUseBudgetedComparison(groupBy)
-  );
+  return comparison.source === 'budgeted' && canUseBudgetedComparison(groupBy);
 }
 
 // Graphs that can draw changes from the comparison instead of amounts with the

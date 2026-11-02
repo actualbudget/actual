@@ -38,8 +38,8 @@ import {
   canUseBudgetedComparison,
   defaultComparison,
   getComparisonRange,
+  getComparisonShift,
   getComparisonSortAmount,
-  getOffsetDays,
   isOffsetComparison,
   isOffsetOverlapping,
   rangesOverlap,
@@ -172,11 +172,13 @@ export function ReportSidebar({
     ['change', t('Change')],
   ];
   const isOffset = isOffsetComparison(comparison);
-  const offsetDays = getOffsetDays(comparison);
+  const comparisonShift = getComparisonShift(
+    comparison,
+    customReportItems.interval,
+    [customReportItems.startDate, customReportItems.endDate],
+  );
   const formatComparisonWindow = useFormatComparisonWindow();
-  // Budgets are set per month, so they can't be offset by days or weeks yet
-  const canUseBudgeted =
-    canUseBudgetedComparison(customReportItems.groupBy) && !isOffset;
+  const canUseBudgeted = canUseBudgetedComparison(customReportItems.groupBy);
   const comparisonSource = comparison.source ?? 'actual';
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -363,6 +365,10 @@ export function ReportSidebar({
           options={[
             ['days', t('days')],
             ['weeks', t('weeks')],
+            ['months', t('months')],
+            ['years', t('years')],
+            ['intervals', t('intervals')],
+            ['ranges', t('date ranges')],
           ]}
         />
       </View>
@@ -376,7 +382,7 @@ export function ReportSidebar({
           ...shiftRange(
             customReportItems.startDate,
             customReportItems.endDate,
-            offsetDays,
+            comparisonShift,
           ),
         )}
       </Text>
@@ -398,17 +404,10 @@ export function ReportSidebar({
         placement="bottom start"
         content={
           <Text>
-            {isOffset ? (
-              <Trans>
-                Budgets are set per month, so an offset comparison can only
-                compare actual amounts for now.
-              </Trans>
-            ) : (
-              <Trans>
-                Budgets are only set for categories, so a budgeted comparison
-                needs a Category, Group or Interval split.
-              </Trans>
-            )}
+            <Trans>
+              Budgets are only set for categories, so a budgeted comparison
+              needs a Category, Group or Interval split.
+            </Trans>
           </Text>
         }
         style={{ ...styles.tooltip, lineHeight: 1.5 }}
@@ -871,13 +870,8 @@ export function ReportSidebar({
               title={<Trans>Comparison</Trans>}
               offset={{
                 selected: isOffset,
-                // Budgets can't be offset by days or weeks yet
                 onSelect: () =>
-                  updateComparison({
-                    ...comparison,
-                    mode: 'offset',
-                    source: 'actual',
-                  }),
+                  updateComparison({ ...comparison, mode: 'offset' }),
                 content: comparisonOffsetRows,
               }}
               interval={customReportItems.interval}
@@ -906,15 +900,40 @@ export function ReportSidebar({
             >
               {comparisonSourceRow}
               {isOffset ? (
-                isOffsetOverlapping(offsetDays, customReportItems.interval) && (
-                  <Information style={{ marginTop: 5 }}>
-                    <Trans>
-                      The offset is shorter than an interval, so some
-                      transactions count towards both an interval and its
-                      comparison.
-                    </Trans>
-                  </Information>
-                )
+                <>
+                  {/* Only calendar months make windows of different lengths,
+                      and budgets are set per month whatever their length */}
+                  {comparisonShift.unit === 'months' &&
+                    comparisonSource === 'actual' && (
+                      <View style={{ padding: '5px 5px 0 10px' }}>
+                        <LabeledCheckbox
+                          id="comparison-daily-average"
+                          checked={!!comparison.compareDailyAverage}
+                          onChange={() =>
+                            updateComparison({
+                              ...comparison,
+                              compareDailyAverage:
+                                !comparison.compareDailyAverage,
+                            })
+                          }
+                        >
+                          <Trans>Compare daily averages</Trans>
+                        </LabeledCheckbox>
+                      </View>
+                    )}
+                  {isOffsetOverlapping(
+                    comparisonShift,
+                    customReportItems.interval,
+                  ) && (
+                    <Information style={{ marginTop: 5 }}>
+                      <Trans>
+                        The offset is shorter than an interval, so some
+                        transactions count towards both an interval and its
+                        comparison.
+                      </Trans>
+                    </Information>
+                  )}
+                </>
               ) : (
                 <>
                   <View style={{ padding: '5px 5px 0 10px' }}>
@@ -947,20 +966,20 @@ export function ReportSidebar({
                       </Trans>
                     </Information>
                   )}
-                  {/* Only these balance types count income categories */}
-                  {comparisonSource === 'budgeted' &&
-                    ['Deposit', 'Net', 'Net Deposit'].includes(
-                      customReportItems.balanceType,
-                    ) && (
-                      <Information style={{ marginTop: 5 }}>
-                        <Trans>
-                          Income isn't budgeted, so the comparison counts it as
-                          zero.
-                        </Trans>
-                      </Information>
-                    )}
                 </>
               )}
+              {/* Only these balance types count income categories */}
+              {comparisonSource === 'budgeted' &&
+                ['Deposit', 'Net', 'Net Deposit'].includes(
+                  customReportItems.balanceType,
+                ) && (
+                  <Information style={{ marginTop: 5 }}>
+                    <Trans>
+                      Income isn't budgeted, so the comparison counts it as
+                      zero.
+                    </Trans>
+                  </Information>
+                )}
             </ReportDateFilter>
           </>
         )}

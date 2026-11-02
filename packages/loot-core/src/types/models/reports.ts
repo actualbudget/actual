@@ -30,6 +30,9 @@ export type CustomReportComparison = {
   mode?: CustomReportComparisonMode;
   offsetCount?: number;
   offsetUnit?: CustomReportComparisonOffsetUnit;
+  // Scale each offset window to its interval's number of days, so windows
+  // of different lengths compare by their daily average
+  compareDailyAverage?: boolean;
 };
 
 export type CustomReportComparisonSource = 'actual' | 'budgeted';
@@ -41,7 +44,14 @@ export type CustomReportComparisonSortAmount =
   | 'comparison'
   | 'change';
 
-export type CustomReportComparisonOffsetUnit = 'days' | 'weeks';
+// Intervals are the report's own interval, and ranges its whole date range
+export type CustomReportComparisonOffsetUnit =
+  | 'days'
+  | 'weeks'
+  | 'months'
+  | 'years'
+  | 'intervals'
+  | 'ranges';
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;

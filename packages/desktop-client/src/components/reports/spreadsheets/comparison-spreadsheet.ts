@@ -25,6 +25,7 @@ import {
   getFullIntervalRange,
   shiftRange,
 } from '#components/reports/comparisonRange';
+import type { ComparisonShift } from '#components/reports/comparisonRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
@@ -66,16 +67,19 @@ export type ComparisonOptions = {
   // Compare against the average of what was budgeted over the range, rather
   // than what was spent
   budgeted?: boolean;
-  // Compare each interval with its own window this many days back, rather
-  // than with the range's average. The range is then the report's range
-  // moved back by the offset.
+  // Compare each interval with its own window this far back, rather than
+  // with the range's average. The range is then the report's range moved
+  // back by the offset.
   offset?: ComparisonOffset;
 };
 
 export type ComparisonOffset = {
-  days: number;
+  shift: ComparisonShift;
   // Windows that end before this have nothing to compare against
   earliestTransaction: string;
+  // Scale each window to its interval's days, since calendar months differ
+  // in length. Budgets are set per month, so they're never scaled.
+  compareDailyAverage?: boolean;
 };
 
 // How comparison totals map onto the report's intervals
@@ -306,13 +310,23 @@ function offsetIntervalByWindow(
   scale: ComparisonScale,
   offset: NonNullable<ComparisonScale['offset']>,
 ): IntervalEntity {
-  const [windowStart, windowEnd] = shiftRange(start, end, offset.days);
+  const [windowStart, windowEnd] = shiftRange(start, end, offset.shift);
   const window = {
     comparisonStartDate: windowStart,
     comparisonEndDate: windowEnd,
   };
-  const sum = (from: string, to: string) =>
-    sumWindow(comparison?.intervalData ?? [], offset.bucketInterval, from, to);
+  // By daily average, a window counts as if it were as long as its interval
+  const sum = (from: string, to: string, days: number) => {
+    const total = sumWindow(
+      comparison?.intervalData ?? [],
+      offset.bucketInterval,
+      from,
+      to,
+    );
+    return offset.compareDailyAverage
+      ? scaleValues(total, days / countDays(from, to))
+      : total;
+  };
   const zero = mapValues(() => 0);
   const actual = fromTotals(field => interval[field]);
 
@@ -340,7 +354,7 @@ function offsetIntervalByWindow(
       comparison: {
         expected: zero,
         actual: zero,
-        upcoming: sum(windowStart, windowEnd),
+        upcoming: sum(windowStart, windowEnd, countDays(start, end)),
         budgeted: scale.budgeted,
       },
     };
@@ -351,7 +365,8 @@ function offsetIntervalByWindow(
     : earlierOf(end, monthUtils.currentDay());
   const expected = sum(
     windowStart,
-    shiftRange(start, elapsedEnd, offset.days)[1],
+    shiftRange(start, elapsedEnd, offset.shift)[1],
+    countDays(start, elapsedEnd),
   );
   return {
     ...interval,
@@ -579,25 +594,39 @@ function offsetItemByWindows<T extends OffsetItem>(
   // nothing.
   const start = intervalData[0]?.intervalStartDate;
   const end = intervalData[intervalData.length - 1]?.intervalEndDate;
-  const [windowStart, windowEnd] =
-    start && end ? shiftRange(start, end, offset.days) : ['', ''];
-  const wholeWindow =
-    start && end
-      ? sumComparisonWindow(windowStart, windowEnd)
-      : mapValues(() => 0);
   // Each interval's own window, including the days that haven't passed yet
-  const fullWindow = sumIntervalNets
-    ? sumNets(
-        wholeWindow,
-        intervalData.map(interval =>
-          interval.comparisonStartDate && interval.comparisonEndDate
-            ? sumComparisonWindow(
-                interval.comparisonStartDate,
-                interval.comparisonEndDate,
-              )
-            : undefined,
+  const intervalWindows = intervalData.map(interval => {
+    const from = interval.comparisonStartDate;
+    const to = interval.comparisonEndDate;
+    if (!from || !to) {
+      return undefined;
+    }
+    const total = sumComparisonWindow(from, to);
+    return offset.compareDailyAverage &&
+      interval.intervalStartDate &&
+      interval.intervalEndDate
+      ? scaleValues(
+          total,
+          countDays(interval.intervalStartDate, interval.intervalEndDate) /
+            countDays(from, to),
+        )
+      : total;
+  });
+  const [windowStart, windowEnd] =
+    start && end ? shiftRange(start, end, offset.shift) : ['', ''];
+  // By daily average, the range is the sum of its scaled windows
+  const wholeWindow = offset.compareDailyAverage
+    ? fromTotals(field =>
+        intervalWindows.reduce(
+          (total, window) => total + (window ? window[field] : 0),
+          0,
         ),
       )
+    : start && end
+      ? sumComparisonWindow(windowStart, windowEnd)
+      : mapValues(() => 0);
+  const fullWindow = sumIntervalNets
+    ? sumNets(wholeWindow, intervalWindows)
     : wholeWindow;
 
   const projection = getProjection(item.intervalData, scale);
@@ -991,7 +1020,9 @@ function getScale(
     averageLength: getAverageInUnit(template, props.interval, budgeted),
     offset: comparisonOptions.offset && {
       ...comparisonOptions.offset,
-      bucketInterval: getOffsetBucketInterval(props),
+      compareDailyAverage:
+        !budgeted && !!comparisonOptions.offset.compareDailyAverage,
+      bucketInterval: getOffsetBucketInterval(props, budgeted),
     },
   };
 }
@@ -999,8 +1030,13 @@ function getScale(
 // Offset windows don't line up with the report's intervals, so the comparison
 // is fetched by day and summed per window. Budgets are dated by month, so
 // they're fetched by month and spread over the days of each window.
-function getOffsetBucketInterval(props: createCustomSpreadsheetProps) {
-  return props.balanceTypeOp === 'totalBudgeted' ? 'Monthly' : 'Daily';
+function getOffsetBucketInterval(
+  props: createCustomSpreadsheetProps,
+  budgeted: boolean,
+) {
+  return budgeted || props.balanceTypeOp === 'totalBudgeted'
+    ? 'Monthly'
+    : 'Daily';
 }
 
 // Budgets are fetched for every month a range touches
@@ -1067,7 +1103,7 @@ function getSpreadsheetProps(
         interval: 'Monthly',
       }),
       ...(comparisonOptions.offset && {
-        interval: getOffsetBucketInterval(props),
+        interval: getOffsetBucketInterval(props, !!comparisonOptions.budgeted),
       }),
     },
   };
@@ -1078,7 +1114,9 @@ function getSpreadsheetProps(
  * spent. Budgets are positive for spending, which reports count as negative.
  * Income isn't budgeted, so it's compared against nothing.
  */
-export function fromBudget<T extends ReportValues>(item: T): T {
+export function fromBudget<
+  T extends ReportValues & { intervalData?: IntervalEntity[] },
+>(item: T): T {
   const budgeted = item.totalBudgeted;
   return {
     ...item,
@@ -1091,6 +1129,10 @@ export function fromBudget<T extends ReportValues>(item: T): T {
         default:
           return -budgeted;
       }
+    }),
+    // Offset windows are summed from the intervals, so they're converted too
+    ...(item.intervalData && {
+      intervalData: item.intervalData.map(interval => fromBudget(interval)),
     }),
   };
 }

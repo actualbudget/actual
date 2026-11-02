@@ -8,7 +8,20 @@ import { requiredFields } from '#server/models';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
 import { q } from '#shared/query';
-import type { CustomReportData, CustomReportEntity } from '#types/models';
+import type {
+  CustomReportComparisonOffsetUnit,
+  CustomReportData,
+  CustomReportEntity,
+} from '#types/models';
+
+const OFFSET_UNITS: unknown[] = [
+  'days',
+  'weeks',
+  'months',
+  'years',
+  'intervals',
+  'ranges',
+] satisfies CustomReportComparisonOffsetUnit[];
 
 export const reportModel = {
   validate(
@@ -68,8 +81,9 @@ export const reportModel = {
           (!Number.isInteger(comparison.offsetCount) ||
             comparison.offsetCount < 1)) ||
         (comparison.offsetUnit !== undefined &&
-          comparison.offsetUnit !== 'days' &&
-          comparison.offsetUnit !== 'weeks'))
+          !OFFSET_UNITS.includes(comparison.offsetUnit)) ||
+        (comparison.compareDailyAverage !== undefined &&
+          typeof comparison.compareDailyAverage !== 'boolean'))
     ) {
       throw new ValidationError('Invalid report comparison.');
     }

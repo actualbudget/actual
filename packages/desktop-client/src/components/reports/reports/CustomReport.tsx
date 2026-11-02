@@ -34,8 +34,8 @@ import {
   canShowComparisonChanges,
   defaultComparison,
   getComparisonRange,
+  getComparisonShift,
   getComparisonSortAmount,
-  getOffsetDays,
   isBudgetedComparison,
   isOffsetComparison,
 } from '#components/reports/comparisonRange';
@@ -550,12 +550,16 @@ function CustomReportInner({
     earliestTransactionDate,
     latestTransactionDate,
     firstDayOfWeekIdx,
-    [startDate, endDate],
+    { range: [startDate, endDate], interval },
   );
   const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
-  const offsetDays = isOffsetComparison(comparison)
-    ? getOffsetDays(comparison)
+  // Kept as plain values, so the spreadsheets only rebuild when they change
+  const comparisonShift = isOffsetComparison(comparison)
+    ? getComparisonShift(comparison, interval, [startDate, endDate])
     : undefined;
+  const offsetShiftUnit = comparisonShift?.unit;
+  const offsetShiftCount = comparisonShift?.count ?? 0;
+  const compareDailyAverage = !!comparison.compareDailyAverage;
   const projectToFullPeriod = comparison.projectToFullPeriod;
   const budgetedComparison = isBudgetedComparison(comparison, groupBy);
   // Amounts are drawn with the comparison unless changes are asked for
@@ -591,11 +595,12 @@ function CustomReportInner({
           sortAmount,
           budgeted: budgetedComparison,
           offset:
-            offsetDays === undefined
+            offsetShiftUnit === undefined
               ? undefined
               : {
-                  days: offsetDays,
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
                   earliestTransaction: earliestTransactionDate,
+                  compareDailyAverage,
                 },
         })
       : createGroupedSpreadsheet(props);
@@ -607,7 +612,9 @@ function CustomReportInner({
     showAmounts,
     sortAmount,
     budgetedComparison,
-    offsetDays,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
     earliestTransactionDate,
     startDate,
     endDate,
@@ -660,11 +667,12 @@ function CustomReportInner({
           sortAmount,
           budgeted: budgetedComparison,
           offset:
-            offsetDays === undefined
+            offsetShiftUnit === undefined
               ? undefined
               : {
-                  days: offsetDays,
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
                   earliestTransaction: earliestTransactionDate,
+                  compareDailyAverage,
                 },
         })
       : createCustomSpreadsheet(props);
@@ -676,7 +684,9 @@ function CustomReportInner({
     showAmounts,
     sortAmount,
     budgetedComparison,
-    offsetDays,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
     earliestTransactionDate,
     startDate,
     endDate,

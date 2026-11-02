@@ -555,6 +555,14 @@ describe('fromBudget', () => {
     expect(group.totalDebts).toBe(-300);
     expect(group.categories?.[0].totalDebts).toBe(-300);
   });
+
+  it('converts intervals, which offset windows are summed from', () => {
+    const converted = fromBudget(
+      row('budget', [{ ...november(0), totalBudgeted: 3000 }]),
+    );
+
+    expect(converted.intervalData[0].totalDebts).toBe(-3000);
+  });
 });
 
 describe('budgeted comparisons', () => {
@@ -626,7 +634,7 @@ function days(start: string, count: number, debtsPerDay = -100) {
 
 // One week back, with transactions from 2016-01-01
 const weekBack = {
-  days: 7,
+  shift: { unit: 'days' as const, count: 7 },
   earliestTransaction: '2016-01-01',
   bucketInterval: 'Daily',
 };
@@ -638,7 +646,16 @@ const offsetScale: ComparisonScale = {
 // A month back, with transactions from 2016-10-01
 const monthBackScale: ComparisonScale = {
   ...offsetScale,
-  offset: { ...weekBack, days: 31, earliestTransaction: '2016-10-01' },
+  offset: {
+    ...weekBack,
+    shift: { unit: 'days', count: 31 },
+    earliestTransaction: '2016-10-01',
+  },
+};
+// A calendar month back
+const calendarMonthBack = {
+  ...weekBack,
+  shift: { unit: 'months' as const, count: 1 },
 };
 
 describe('sumWindow', () => {
@@ -681,6 +698,50 @@ describe('offset comparisons', () => {
     expect(offset.comparisonEndDate).toBe('2016-12-24');
     expect(offset.comparison?.expected.totalDebts).toBe(-3100);
     expect(offset.totalDebts).toBe(-900);
+  });
+
+  it('compares a month with the calendar month before', () => {
+    const offset = offsetInterval(
+      interval('2016-12-01', '2016-12-31', -4000),
+      comparisonDays,
+      { ...offsetScale, offset: calendarMonthBack },
+    );
+
+    expect(offset.comparisonStartDate).toBe('2016-11-01');
+    expect(offset.comparisonEndDate).toBe('2016-11-30');
+    expect(offset.comparison?.expected.totalDebts).toBe(-3000);
+  });
+
+  it('scales a shorter window to its interval by daily average', () => {
+    const offset = offsetInterval(
+      interval('2016-12-01', '2016-12-31', -4000),
+      comparisonDays,
+      {
+        ...offsetScale,
+        offset: { ...calendarMonthBack, compareDailyAverage: true },
+      },
+    );
+
+    // November's 30 days at 100 a day, counted over December's 31
+    expect(offset.comparison?.expected.totalDebts).toBe(-3100);
+  });
+
+  it('sums the scaled windows for the whole range by daily average', () => {
+    const offset = offsetItem(
+      row('totals', [
+        interval('2016-11-01', '2016-11-30', -3000),
+        interval('2016-12-01', '2016-12-31', -4000),
+      ]),
+      comparisonDays,
+      {
+        ...offsetScale,
+        projectToFullPeriod: true,
+        offset: { ...calendarMonthBack, compareDailyAverage: true },
+      },
+    );
+
+    // October counts over November's 30 days, and November over December's 31
+    expect(offset.comparison.perInterval?.totalDebts).toBe(-(3000 + 3100) / 2);
   });
 
   it('shifts the days an interval was cut short to', () => {
