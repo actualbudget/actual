@@ -619,15 +619,12 @@ export function offsetRows(
               getValue: row => row.baseline?.expected[balanceTypeOp] ?? 0,
             }
           : sortAmount === 'current'
-            ? {
+            ? // Projections scale every row by the same factor, so sorting
+              // by them would give the same order
+              {
                 balanceTypeOp,
                 sortByOp,
-                getValue: row =>
-                  row.baseline
-                    ? (row.baseline.projected ?? row.baseline.actual)[
-                        balanceTypeOp
-                      ]
-                    : 0,
+                getValue: row => row.baseline?.actual[balanceTypeOp] ?? 0,
               }
             : // A row's own amount is its change
               { balanceTypeOp, sortByOp, isSigned: true },
