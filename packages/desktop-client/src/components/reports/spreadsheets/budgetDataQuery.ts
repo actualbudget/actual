@@ -163,6 +163,10 @@ export function filterCategoriesByConditions<
     }
 
     if (condition.op === 'matches' && typeof condition.value === 'string') {
+      // Skip long patterns without excluding possible transaction-query matches.
+      if (condition.value.length > 256) {
+        return true;
+      }
       try {
         return new RegExp(condition.value).test(textValue ?? '');
       } catch {

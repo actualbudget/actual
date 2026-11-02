@@ -368,6 +368,21 @@ it('matches category names with the same wildcard semantics as queries', async (
   expect(rows.map(row => row.name)).toEqual(['Rent']);
 });
 
+it('preserves matching activity and other filters when skipping a long regex', async () => {
+  const { groups, rows } = await build({
+    conditions: [
+      { field: 'category_group', op: 'is', value: 'bills' },
+      {
+        field: 'category',
+        op: 'matches',
+        value: '^' + '(?:)'.repeat(65) + 'Rent$',
+      },
+    ],
+  });
+  expect(groups.map(row => row.name)).toEqual(['Bills']);
+  expect(rows.find(row => row.name === 'Rent')?.totalDebts).toBe(-100);
+});
+
 it('retains off-budget rows for selected categorized transactions', async () => {
   vi.mocked(fetchSpreadsheetQueryData).mockResolvedValue({
     assets: [],
