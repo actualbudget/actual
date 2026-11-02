@@ -189,17 +189,34 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
     },
   });
 
-  // `carryover-stored` holds the budget row's flag, where null means the
-  // month inherits the previous month's flag. `carryover` is the resolved
-  // flag that every other cell reads. Before the first month it's off.
+  // `carryover-stored` holds the budget row's raw flag:
+  //   null: not set, so the month continues the previous month's chain
+  //   0:    off
+  //   1:    on for this month (older versions write this for every month up
+  //         to the last one created, so these runs end where they always did)
+  //   2:    on, and following months without a flag stay on
+  // A 1 also continues a chain, so an older version switching rollover on
+  // again doesn't end it. `carryover-chain` says whether the next month
+  // continues the chain, and `carryover` is the resolved flag that every
+  // other cell reads. Before the first month the chain is off.
   sheet.get().createStatic(sheetName, `carryover-stored-${cat.id}`, null);
+  sheet.get().createDynamic(sheetName, `carryover-chain-${cat.id}`, {
+    initialValue: false,
+    dependencies: [
+      `carryover-stored-${cat.id}`,
+      `${prevSheetName}!carryover-chain-${cat.id}`,
+    ],
+    run: (stored, prevChain) =>
+      stored === 2 || (stored !== 0 && prevChain === true),
+  });
   sheet.get().createDynamic(sheetName, `carryover-${cat.id}`, {
     initialValue: false,
     dependencies: [
       `carryover-stored-${cat.id}`,
-      `${prevSheetName}!carryover-${cat.id}`,
+      `${prevSheetName}!carryover-chain-${cat.id}`,
     ],
-    run: (stored, prevCarryover) => stored ?? prevCarryover === true,
+    run: (stored, prevChain) =>
+      stored == null ? prevChain === true : stored !== 0,
   });
 
   if (getBudgetType() === 'envelope') {
@@ -281,7 +298,7 @@ function handleBudgetChange(budget) {
       .get()
       .set(
         `${sheetName}!carryover-stored-${budget.category}`,
-        budget.carryover == null ? null : budget.carryover === 1,
+        budget.carryover ?? null,
       );
     sheet.get().set(`${sheetName}!goal-${budget.category}`, budget.goal);
     sheet

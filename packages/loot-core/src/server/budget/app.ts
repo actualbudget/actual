@@ -1,14 +1,12 @@
-import { captureException } from '#platform/exceptions';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { APIError } from '#server/errors';
 import { categoryGroupModel, categoryModel } from '#server/models';
-import { mutator, runMutator } from '#server/mutators';
-import * as prefs from '#server/prefs';
+import { mutator } from '#server/mutators';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
-import { batchMessages, checkSyncingMode } from '#server/sync';
+import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
@@ -16,7 +14,6 @@ import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
-import { seedCarryoverChain } from './carryover-seed';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
@@ -183,41 +180,6 @@ app.method(
   'budget/create-cleanup-group',
   mutator(undoable(cleanupGroupActions.createCleanupGroup)),
 );
-
-function openFile(): string | null {
-  const current = prefs.getPrefs();
-  return current && db.getDatabase()
-    ? `${current.id}/${current.groupId}`
-    : null;
-}
-
-let syncStartedFor: string | null = null;
-
-// With a sync server, seed only after a full sync has pulled in every other
-// device's rows. Some syncs report success without fetching the open file's
-// rows: an offline sync, and one whose file or group changed mid-request.
-app.events.on('sync', ({ type }) => {
-  if (type === 'start') {
-    syncStartedFor = openFile();
-    return;
-  }
-
-  const file = openFile();
-  if (
-    type === 'success' &&
-    file != null &&
-    file === syncStartedFor &&
-    checkSyncingMode('enabled') &&
-    !checkSyncingMode('offline')
-  ) {
-    // A failed seed leaves the preference unset, so the next sync retries it
-    runMutator(async () => {
-      if (openFile() === file) {
-        await seedCarryoverChain();
-      }
-    }).catch(captureException);
-  }
-});
 
 // Server must return AQL entities not the raw DB data
 async function getCategories({ hidden }: { hidden?: boolean } = {}) {

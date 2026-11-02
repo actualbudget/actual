@@ -6,47 +6,101 @@ import { receiveMessages, setSyncingMode } from '#server/sync';
 import type { Message } from '#server/sync';
 import { rangeInclusive } from '#shared/months';
 
-import { getSheetBoolean, setBudget, setCategoryCarryover } from './actions';
+import {
+  getSheetBoolean,
+  getSheetValue,
+  setBudget,
+  setCategoryCarryover,
+} from './actions';
 import { createBudget } from './base';
-import { seedCarryoverChain } from './carryover-seed';
 
 vi.mock('#server/post');
 beforeEach(global.emptyDatabase());
 afterEach(() => {
-  global.currentMonth = null;
   setSyncingMode('disabled');
 });
 
-it.each(['envelope', 'tracking'] as const)(
-  'inherits rollover past twelve months until switched off (%s)',
-  async budgetType => {
-    await db.update('preferences', { id: 'budgetType', value: budgetType });
-    await db.insertCategoryGroup({ id: 'group', name: 'Group' });
-    await db.insertCategoryGroup({
-      id: 'income',
-      name: 'Income',
-      is_income: 1,
+async function setup(budgetType: 'envelope' | 'tracking') {
+  await db.update('preferences', { id: 'budgetType', value: budgetType });
+  await db.insertAccount({ id: 'account', name: 'Account' });
+  await db.insertCategoryGroup({ id: 'group', name: 'Group' });
+  await db.insertCategoryGroup({ id: 'income', name: 'Income', is_income: 1 });
+  await db.insertCategory({ id: 'card', name: 'Card', cat_group: 'group' });
+  await sheet.loadSpreadsheet(db);
+  sheet.get().meta().budgetType = budgetType;
+}
+
+it('keeps rollover runs written by older versions ending where they did', async () => {
+  await setup('envelope');
+  await createBudget(rangeInclusive('2026-01', '2026-06'));
+  // An older version switched rollover on in January with March as the last
+  // created month, so it wrote a 1 for January to March.
+  for (const month of [202601, 202602, 202603]) {
+    await db.insert('zero_budgets', {
+      id: `${month}-card`,
+      month,
+      category: 'card',
+      carryover: 1,
     });
-    await db.insertCategory({ id: 'card', name: 'Card', cat_group: 'group' });
-    await sheet.loadSpreadsheet(db);
-    sheet.get().meta().budgetType = budgetType;
+  }
+  await db.insertTransaction({
+    date: '2026-03-15',
+    amount: -1000,
+    account: 'account',
+    category: 'card',
+  });
+  await db.insertTransaction({
+    date: '2026-04-15',
+    amount: -5000,
+    account: 'account',
+    category: 'card',
+  });
+  // Budgeting May creates its row without a flag
+  await setBudget({ category: 'card', month: '2026-05', amount: 0 });
+  await sheet.waitOnSpreadsheet();
+
+  expect(await getSheetBoolean('budget202603', 'carryover-card')).toBe(true);
+  expect(await getSheetBoolean('budget202604', 'carryover-card')).toBe(false);
+  expect(await getSheetBoolean('budget202605', 'carryover-card')).toBe(false);
+  // March's overspending rolls into April, April's doesn't roll into May
+  expect(await getSheetValue('budget202604', 'leftover-card')).toBe(-6000);
+  expect(await getSheetValue('budget202605', 'leftover-card')).toBe(0);
+});
+
+it.each(['envelope', 'tracking'] as const)(
+  'keeps rollover switched on in later months until switched off (%s)',
+  async budgetType => {
+    await setup(budgetType);
+    const table =
+      budgetType === 'envelope' ? 'zero_budgets' : 'reflect_budgets';
     await createBudget(['2026-01']);
     await setCategoryCarryover({
       startMonth: '2026-01',
       category: 'card',
       flag: true,
     });
-    await createBudget(rangeInclusive('2026-01', '2027-02'));
+    await createBudget(rangeInclusive('2026-01', '2027-04'));
+    // A month budgeted later, and an older version switching rollover on
+    // in one month, both continue the run
     await setBudget({ category: 'card', month: '2027-01', amount: 5000 });
+    await db.insert(table, {
+      id: '202606-card',
+      month: 202606,
+      category: 'card',
+      carryover: 1,
+    });
     await sheet.waitOnSpreadsheet();
     expect(await getSheetBoolean('budget202702', 'carryover-card')).toBe(true);
+
     await setCategoryCarryover({
       startMonth: '2027-02',
       category: 'card',
       flag: false,
     });
     await sheet.waitOnSpreadsheet();
+    expect(await getSheetBoolean('budget202701', 'carryover-card')).toBe(true);
     expect(await getSheetBoolean('budget202702', 'carryover-card')).toBe(false);
+    expect(await getSheetBoolean('budget202704', 'carryover-card')).toBe(false);
   },
 );
 
@@ -73,30 +127,4 @@ it('preserves a peer flag regardless of delivery order or batching', async () =>
       ).toEqual({ carryover: 0 });
     }
   }
-});
-
-it('seeds expired windows once, preserving explicit flags and the open chain', async () => {
-  global.currentMonth = '2026-07';
-  for (const table of ['zero_budgets', 'reflect_budgets']) {
-    db.runQuery(`INSERT INTO ${table} (id, month, category, carryover) VALUES
-      ('202601-card', 202601, 'card', 1), ('202602-card', 202602, 'card', 0),
-      ('202603-card', 202603, 'card', 1), ('202606-card', 202606, 'card', 1)`);
-  }
-  await seedCarryoverChain();
-  for (const table of ['zero_budgets', 'reflect_budgets']) {
-    expect(
-      await db.all(`SELECT month, carryover FROM ${table} ORDER BY month`),
-    ).toEqual([
-      { month: 202601, carryover: 1 },
-      { month: 202602, carryover: 0 },
-      { month: 202603, carryover: 1 },
-      { month: 202604, carryover: 0 },
-      { month: 202606, carryover: 1 },
-    ]);
-    db.runQuery(`DELETE FROM ${table} WHERE month = 202604`);
-  }
-  await seedCarryoverChain();
-  expect(
-    await db.first('SELECT id FROM zero_budgets WHERE month = 202604'),
-  ).toBeNull();
 });

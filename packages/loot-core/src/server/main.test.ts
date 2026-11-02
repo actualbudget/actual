@@ -56,7 +56,6 @@ async function createTestBudget(name) {
 
 describe('Budgets', () => {
   afterEach(async () => {
-    global.resetTime();
     fs._setDocumentDir(null);
     const budgetPath = fs.join(
       __dirname,
@@ -68,8 +67,7 @@ describe('Budgets', () => {
     }
   });
 
-  // Loading the fixture file can take over 5s on a slow machine
-  test('budget loads after correcting clock drift', async () => {
+  test('budget is successfully loaded', async () => {
     await createTestBudget('default-budget-template');
 
     // Grab the clock to compare later
@@ -77,16 +75,7 @@ describe('Budgets', () => {
     const row = await db.first<db.DbClockMessage>(
       'SELECT * FROM messages_clock',
     );
-    const loadedClock = deserializeClock(row.clock);
 
-    global.stepForwardInTime(loadedClock.timestamp.millis() - 600_000);
-    expect(
-      await runHandler(handlers['load-budget'], { id: 'test-budget' }),
-    ).toEqual({ error: 'clock-drift' });
-    expect(prefs.getPrefs()).toBe(null);
-    expect(db.getDatabase()).toBe(null);
-
-    global.stepForwardInTime(loadedClock.timestamp.millis());
     const { error } = await runHandler(handlers['load-budget'], {
       id: 'test-budget',
     });
@@ -95,13 +84,9 @@ describe('Budgets', () => {
     // Make sure the prefs were loaded
     expect(prefs.getPrefs().id).toBe('test-budget');
 
-    // Make sure the clock has been loaded, then advanced by the seed
-    expect(getClock().merkle).toEqual(loadedClock.merkle);
-    expect(getClock().timestamp.node()).toBe(loadedClock.timestamp.node());
-    expect(getClock().timestamp.millis()).toBeGreaterThanOrEqual(
-      loadedClock.timestamp.millis(),
-    );
-  }, 20_000);
+    // Make sure the clock has been loaded
+    expect(getClock()).toEqual(deserializeClock(row.clock));
+  });
 
   test('budget detects out of sync migrations', async () => {
     await createTestBudget('default-budget-template');

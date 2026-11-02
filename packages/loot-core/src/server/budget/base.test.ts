@@ -119,7 +119,7 @@ describe('Base budget', () => {
           `SELECT carryover FROM ${table} WHERE month = ? AND category = ?`,
           [parseInt(end.replace('-', '')), 'planned'],
         );
-        expect(row?.carryover).toBe(1);
+        expect(row?.carryover).toBe(2);
       });
     },
   );
