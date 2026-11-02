@@ -19,7 +19,6 @@ export const defaultBaseline: CustomReportBaseline = {
   includeCurrentInterval: false,
   projectToFullPeriod: true,
   showChanges: false,
-  changeFromBaseline: false,
   source: 'actual',
   mode: 'range',
   // The same days of the week, a year back

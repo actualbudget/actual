@@ -9,14 +9,13 @@ type BaselineBarProps = {
   range: [number, number];
   baseline: number;
   amount: number;
-  changeFromBaseline: boolean;
   fill: string;
   opacity?: number;
 };
 
 /**
  * Draws a faint bar from zero to the baseline, with a narrower bar in front
- * for the amount, or for only its change from the baseline.
+ * for the amount.
  */
 export function BaselineBar({
   x,
@@ -26,7 +25,6 @@ export function BaselineBar({
   range: [low, high],
   baseline,
   amount,
-  changeFromBaseline,
   fill,
   opacity = 1,
 }: BaselineBarProps) {
@@ -54,7 +52,7 @@ export function BaselineBar({
       <rect
         x={x + (width - innerWidth) / 2}
         width={innerWidth}
-        {...span(changeFromBaseline ? baseline : 0, amount)}
+        {...span(0, amount)}
         fill={fill}
       />
     </g>

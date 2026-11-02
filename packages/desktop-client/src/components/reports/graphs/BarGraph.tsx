@@ -226,7 +226,6 @@ type BarGraphProps = {
   showOffBudget?: boolean;
   showTooltip?: boolean;
   showAmounts?: boolean;
-  changeFromBaseline?: boolean;
 };
 
 export function BarGraph({
@@ -241,7 +240,6 @@ export function BarGraph({
   showOffBudget,
   showTooltip = true,
   showAmounts = false,
-  changeFromBaseline = false,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -429,7 +427,6 @@ export function BarGraph({
                         height={props.height}
                         range={getBaselineRange(breakdown)}
                         {...getBaselineValues(breakdown)}
-                        changeFromBaseline={changeFromBaseline}
                         fill={fill}
                       />
                     );

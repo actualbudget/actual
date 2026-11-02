@@ -20,8 +20,6 @@ export type CustomReportBaseline = {
   // Draw graphs as changes from the baseline, rather than as amounts with the
   // baseline drawn in. Optional since older reports don't store it.
   showChanges?: boolean;
-  // With amounts on bar graphs, draw only the change, from the baseline's end
-  changeFromBaseline?: boolean;
   // Compare against what was spent over the range, or the average of what
   // was budgeted for it. Optional since older reports don't store it.
   source?: CustomReportBaselineSource;

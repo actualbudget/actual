@@ -33,7 +33,6 @@ type ChooseGraphProps = {
   showOffBudget?: boolean;
   showTrendLines?: boolean;
   showAmounts?: boolean;
-  changeFromBaseline?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
 };
@@ -54,7 +53,6 @@ export function ChooseGraph({
   showOffBudget = false,
   showTrendLines = false,
   showAmounts = false,
-  changeFromBaseline = false,
   showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
@@ -134,7 +132,6 @@ export function ChooseGraph({
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
         showAmounts={showAmounts}
-        changeFromBaseline={changeFromBaseline}
       />
     );
   }

@@ -1180,7 +1180,6 @@ function CustomReportInner({
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
                     showAmounts={showAmounts}
-                    changeFromBaseline={baseline.changeFromBaseline}
                     intervalsCount={intervals.length}
                   />
                 ) : (

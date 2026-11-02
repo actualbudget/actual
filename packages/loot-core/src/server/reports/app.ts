@@ -54,8 +54,6 @@ export const reportModel = {
         typeof baseline.projectToFullPeriod !== 'boolean' ||
         (baseline.showChanges !== undefined &&
           typeof baseline.showChanges !== 'boolean') ||
-        (baseline.changeFromBaseline !== undefined &&
-          typeof baseline.changeFromBaseline !== 'boolean') ||
         (baseline.source !== undefined &&
           baseline.source !== 'actual' &&
           baseline.source !== 'budgeted') ||

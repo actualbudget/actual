@@ -294,7 +294,6 @@ export function GetCardData({
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
         showAmounts={showAmounts}
-        changeFromBaseline={baseline.changeFromBaseline}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

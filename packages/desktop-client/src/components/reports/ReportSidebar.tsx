@@ -160,8 +160,6 @@ export function ReportSidebar({
   // choice for when the graph switches back
   const canShowChanges = canShowBaselineChanges(customReportItems.graphType);
   const isShowingChanges = canShowChanges && !!baseline.showChanges;
-  const canChangeFromBaseline =
-    customReportItems.graphType === 'BarGraph' && !isShowingChanges;
   const isOffset = isOffsetBaseline(baseline);
   const offsetDays = getOffsetDays(baseline);
   const formatBaselineWindow = useFormatBaselineWindow();
@@ -487,49 +485,32 @@ export function ReportSidebar({
               <Trans>Compare to baseline</Trans>
             </LabeledCheckbox>
             {isBaselineEnabled && (
-              <>
-                <Tooltip
-                  placement="bottom start"
-                  content={
-                    <Text>
-                      <Trans>
-                        Draw how much each amount changed from the baseline,
-                        instead of the amount with the baseline drawn in.
-                      </Trans>
-                    </Text>
-                  }
-                  style={{ ...styles.tooltip, lineHeight: 1.5 }}
-                >
-                  <LabeledCheckbox
-                    id="baseline-show-changes"
-                    checked={isShowingChanges}
-                    disabled={!canShowChanges}
-                    onChange={() =>
-                      updateBaseline({
-                        ...baseline,
-                        showChanges: !baseline.showChanges,
-                      })
-                    }
-                  >
-                    <Trans>Show as change from baseline</Trans>
-                  </LabeledCheckbox>
-                </Tooltip>
+              <Tooltip
+                placement="bottom start"
+                content={
+                  <Text>
+                    <Trans>
+                      Draw how much each amount changed from the baseline,
+                      instead of the amount with the baseline drawn in.
+                    </Trans>
+                  </Text>
+                }
+                style={{ ...styles.tooltip, lineHeight: 1.5 }}
+              >
                 <LabeledCheckbox
-                  id="baseline-change-from-baseline"
-                  checked={
-                    canChangeFromBaseline && !!baseline.changeFromBaseline
-                  }
-                  disabled={!canChangeFromBaseline}
+                  id="baseline-show-changes"
+                  checked={isShowingChanges}
+                  disabled={!canShowChanges}
                   onChange={() =>
                     updateBaseline({
                       ...baseline,
-                      changeFromBaseline: !baseline.changeFromBaseline,
+                      showChanges: !baseline.showChanges,
                     })
                   }
                 >
-                  <Trans>Start change at baseline</Trans>
+                  <Trans>Show as change from baseline</Trans>
                 </LabeledCheckbox>
-              </>
+              </Tooltip>
             )}
           </View>
         )}
