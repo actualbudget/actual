@@ -31,7 +31,6 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import { Information } from '#components/alerts';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
-import { useLocalPref } from '#hooks/useLocalPref';
 
 import {
   canShowBaselineChanges,
@@ -179,10 +178,6 @@ export function ReportSidebar({
   const canUseBudgeted =
     canUseBudgetedBaseline(customReportItems.groupBy) && !isOffset;
   const baselineSource = baseline.source ?? 'actual';
-  // Trial of two ways to colour split tables, until one is chosen
-  const [colorCurrentByChange = false, setColorCurrentByChange] = useLocalPref(
-    'reportsColorCurrentByChange',
-  );
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -526,19 +521,6 @@ export function ReportSidebar({
                 </LabeledCheckbox>
               </Tooltip>
             )}
-            {isBaselineEnabled &&
-              customReportItems.graphType === 'TableGraph' &&
-              customReportItems.mode === 'time' && (
-                <LabeledCheckbox
-                  id="baseline-color-current"
-                  checked={colorCurrentByChange}
-                  onChange={() =>
-                    setColorCurrentByChange(!colorCurrentByChange)
-                  }
-                >
-                  <Trans>Colour current amounts by change (trial)</Trans>
-                </LabeledCheckbox>
-              )}
           </View>
         )}
 

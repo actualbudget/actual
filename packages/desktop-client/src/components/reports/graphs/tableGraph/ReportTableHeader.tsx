@@ -54,6 +54,11 @@ export function ReportTableHeader({
 }: ReportTableHeaderProps) {
   const { t } = useTranslation();
   const formatBaselineWindow = useFormatBaselineWindow();
+  // Labels beside split intervals sit level with the sub-column labels, so the
+  // line under each date doesn't look like it runs on from them
+  const labelStyle = splitIntervals
+    ? { ...compactStyle, paddingTop: ROW_HEIGHT - 1 }
+    : compactStyle;
   // Total tables keep real amounts and add a change column beside them
   return (
     <Row
@@ -88,7 +93,7 @@ export function ReportTableHeader({
             flexShrink: 0,
             flexGrow: 1,
           }}
-          valueStyle={compactStyle}
+          valueStyle={labelStyle}
           value={
             groupBy === 'Interval'
               ? ReportOptions.intervalMap.get(interval)
@@ -100,7 +105,7 @@ export function ReportTableHeader({
             style={{
               minWidth: compact ? 50 : 85,
             }}
-            valueStyle={compactStyle}
+            valueStyle={labelStyle}
             value={budgetedBaseline ? t('Budgeted') : t('Baseline')}
             title={
               budgetedBaseline
@@ -170,7 +175,7 @@ export function ReportTableHeader({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
-                  valueStyle={compactStyle}
+                  valueStyle={labelStyle}
                   key={index}
                   value={header.date}
                   textAlign="right"
@@ -184,7 +189,7 @@ export function ReportTableHeader({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
-                  valueStyle={compactStyle}
+                  valueStyle={labelStyle}
                   value={t('Deposits')}
                   textAlign="right"
                   width="flex"
@@ -193,7 +198,7 @@ export function ReportTableHeader({
                   style={{
                     minWidth: compact ? 50 : 85,
                   }}
-                  valueStyle={compactStyle}
+                  valueStyle={labelStyle}
                   value={t('Payments')}
                   textAlign="right"
                   width="flex"
@@ -204,7 +209,7 @@ export function ReportTableHeader({
           style={{
             minWidth: compact ? 50 : 85,
           }}
-          valueStyle={compactStyle}
+          valueStyle={labelStyle}
           value={t('Totals')}
           textAlign="right"
           width="flex"
@@ -214,7 +219,7 @@ export function ReportTableHeader({
             style={{
               minWidth: compact ? 50 : 85,
             }}
-            valueStyle={compactStyle}
+            valueStyle={labelStyle}
             value={t('Projected')}
             title={t('The amount so far, scaled up to the whole range')}
             textAlign="right"
@@ -226,7 +231,7 @@ export function ReportTableHeader({
             style={{
               minWidth: compact ? 50 : 85,
             }}
-            valueStyle={compactStyle}
+            valueStyle={labelStyle}
             value={t('Change')}
             title={
               mode === 'time'
@@ -245,7 +250,7 @@ export function ReportTableHeader({
           style={{
             minWidth: compact ? 50 : 85,
           }}
-          valueStyle={compactStyle}
+          valueStyle={labelStyle}
           value={t('Average')}
           title={
             showBaseline && mode === 'time'

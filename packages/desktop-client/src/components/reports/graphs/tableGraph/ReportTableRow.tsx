@@ -21,7 +21,6 @@ import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
-import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
 
 import { SUB_COLUMN_MIN_WIDTH } from './ReportTableHeader';
@@ -107,9 +106,6 @@ export const ReportTableRow = memo(
     const format = useFormat();
     const { t } = useTranslation();
     const formatBaselineWindow = useFormatBaselineWindow();
-    const [colorCurrentByChange = false] = useLocalPref(
-      'reportsColorCurrentByChange',
-    );
 
     // Spells out what a baseline interval was compared against, since its
     // length can differ from the average interval in the Baseline column
@@ -284,6 +280,9 @@ export const ReportTableRow = memo(
               style={{
                 minWidth: compact ? 50 : 85,
                 backgroundColor: style?.backgroundColor,
+                ...(colorized && {
+                  color: getAmountColor(baselineAmount?.[balanceTypeOp] ?? 0),
+                }),
               }}
               unexposedContent={({ value }) => (
                 <FinancialText
@@ -336,7 +335,6 @@ export const ReportTableRow = memo(
                       backgroundColor={style?.backgroundColor}
                       hoverStyle={hoverUnderline}
                       colorized={colorized}
-                      colorCurrentByChange={colorCurrentByChange}
                       onShowInterval={onShowInterval}
                       onShowComparison={
                         // Budgets have no transactions to show
@@ -547,6 +545,7 @@ export const ReportTableRow = memo(
               compactStyle={compactStyle}
               hoverStyle={hoverUnderline}
               onClick={onShowTotals}
+              colorized={colorized}
             />
           )}
           {breakdown && (
@@ -645,7 +644,6 @@ type SplitIntervalCellsProps = {
   backgroundColor?: CSSProperties['backgroundColor'];
   hoverStyle?: CSSProperties;
   colorized?: boolean;
-  colorCurrentByChange: boolean;
   onShowInterval: () => void;
   onShowComparison?: () => void;
 };
@@ -661,7 +659,6 @@ function SplitIntervalCells({
   backgroundColor,
   hoverStyle,
   colorized,
-  colorCurrentByChange,
   onShowInterval,
   onShowComparison,
 }: SplitIntervalCellsProps) {
@@ -680,12 +677,6 @@ function SplitIntervalCells({
     hasComparison && comparison !== 0
       ? Math.round((change / Math.abs(comparison)) * 100)
       : undefined;
-  const currentColor =
-    colorCurrentByChange && hasComparison
-      ? getAmountColor(change)
-      : colorized
-        ? getAmountColor(amount)
-        : undefined;
 
   const cellStyle = {
     minWidth: SUB_COLUMN_MIN_WIDTH,
@@ -710,7 +701,10 @@ function SplitIntervalCells({
     <>
       <Cell
         textAlign="right"
-        style={{ ...cellStyle, ...(currentColor && { color: currentColor }) }}
+        style={{
+          ...cellStyle,
+          ...(colorized && { color: getAmountColor(amount) }),
+        }}
         unexposedContent={renderValue(true)}
         value={format(amount, 'financial')}
         onClick={onShowInterval}
@@ -720,7 +714,10 @@ function SplitIntervalCells({
       {hasComparison ? (
         <Cell
           textAlign="right"
-          style={cellStyle}
+          style={{
+            ...cellStyle,
+            ...(colorized && { color: getAmountColor(comparison) }),
+          }}
           unexposedContent={renderValue(!!onShowComparison)}
           value={format(comparison, 'financial')}
           onClick={onShowComparison}
