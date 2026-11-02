@@ -15,6 +15,7 @@ import { Pie, PieChart, Tooltip } from 'recharts';
 import type { PieLabelRenderProps, PieSectorShapeProps } from 'recharts';
 
 import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { getComparisonDrilldownDates } from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -60,7 +61,14 @@ type Slot = {
   size: number;
   change: number;
   drilldown: Drilldown;
+  // What the slot's comparison ring opens, unless it has no transactions
+  comparisonDrilldown: Drilldown | null;
 };
+
+type ComparisonRange = Pick<
+  DataEntity,
+  'comparisonStartDate' | 'comparisonEndDate'
+>;
 
 // One level of the split, like groups or categories, drawn as a faint ring
 // of comparisons inside a ring of amounts
@@ -139,6 +147,7 @@ export function ComparisonDonutGraph({
           colorMap: buildColorMap(groupedData, data.legend ?? []),
           balanceTypeOp,
           dates,
+          comparisonRange: data,
         })
       : [
           getLevel(
@@ -150,17 +159,22 @@ export function ComparisonDonutGraph({
                 balanceTypeOp,
                 field: groupBy.toLowerCase(),
                 dates,
+                comparisonRange: data,
               },
             ),
           ),
         ];
 
-  const onSelect = (tapKey: string, slot: Slot, compact: boolean) => {
+  const onSelect = (
+    tapKey: string,
+    drilldown: Drilldown | null,
+    compact: boolean,
+  ) => {
     if (isTouchDevice() && lastTapRef.current !== tapKey) {
       lastTapRef.current = tapKey;
       return;
     }
-    if (compact && !showTooltip) {
+    if ((compact && !showTooltip) || !drilldown) {
       return;
     }
 
@@ -173,7 +187,7 @@ export function ComparisonDonutGraph({
       showHiddenCategories,
       showOffBudget,
       type: 'totals',
-      ...slot.drilldown,
+      ...drilldown,
       scopeTagNames: data.scopeTagNames,
     });
   };
@@ -326,10 +340,13 @@ export function ComparisonDonutGraph({
                   shape={renderSegment(ring)}
                   onClick={(_: unknown, index: number) => {
                     const segment = ring.segments[index];
-                    if (segment) {
+                    const slot = segment && ring.level.slots[segment.slotIndex];
+                    if (slot) {
                       onSelect(
                         `${ring.key}-${index}`,
-                        ring.level.slots[segment.slotIndex],
+                        ring.isComparison
+                          ? slot.comparisonDrilldown
+                          : slot.drilldown,
                         compact,
                       );
                     }
@@ -387,10 +404,12 @@ function getCategoryGroupLevels(
     colorMap,
     balanceTypeOp,
     dates,
+    comparisonRange,
   }: {
     colorMap: Map<string | null, string>;
     balanceTypeOp: balanceTypeOpType;
     dates: Pick<Drilldown, 'startDate' | 'endDate'>;
+    comparisonRange: ComparisonRange;
   },
 ): Level[] {
   const groupSlots: Slot[] = [];
@@ -404,6 +423,7 @@ function getCategoryGroupLevels(
       balanceTypeOp,
       field: 'category',
       dates,
+      comparisonRange,
     });
     if (slots.length === 0) {
       continue;
@@ -418,6 +438,12 @@ function getCategoryGroupLevels(
       size: sum(slots, slot => slot.size),
       change: group[balanceTypeOp],
       drilldown: getDrilldown(group, 'group', dates),
+      comparisonDrilldown: getComparisonDrilldown(
+        group,
+        'group',
+        dates,
+        comparisonRange,
+      ),
     });
   }
 
@@ -442,11 +468,13 @@ function getSlots(
     balanceTypeOp,
     field,
     dates,
+    comparisonRange,
   }: {
     colors: string[];
     balanceTypeOp: balanceTypeOpType;
     field: string;
     dates: Pick<Drilldown, 'startDate' | 'endDate'>;
+    comparisonRange: ComparisonRange;
   },
 ): Slot[] {
   const sign = getSpendingSign(balanceTypeOp);
@@ -475,6 +503,12 @@ function getSlots(
         size: Math.max(amount, comparison),
         change: item[balanceTypeOp],
         drilldown: getDrilldown(item, field, dates),
+        comparisonDrilldown: getComparisonDrilldown(
+          item,
+          field,
+          dates,
+          comparisonRange,
+        ),
       },
     ];
   });
@@ -498,6 +532,26 @@ function getDrilldown(
         startDate: item.intervalStartDate ?? dates.startDate,
         endDate: item.intervalEndDate ?? dates.endDate,
       };
+}
+
+// Opens the comparison's dates, like the table's Comparison cells
+function getComparisonDrilldown(
+  item: GroupedEntity | IntervalEntity,
+  field: string,
+  dates: Pick<Drilldown, 'startDate' | 'endDate'>,
+  comparisonRange: ComparisonRange,
+): Drilldown | null {
+  const comparisonDates = getComparisonDrilldownDates(
+    comparisonRange,
+    item.comparison,
+    'intervalData' in item ? undefined : item,
+  );
+  return (
+    comparisonDates && {
+      ...getDrilldown(item, field, dates),
+      ...comparisonDates,
+    }
+  );
 }
 
 // A hovered gap highlights its slot's value, which ends where the gap starts.

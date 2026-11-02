@@ -11,6 +11,8 @@ type ComparisonBarProps = {
   amount: number;
   fill: string;
   opacity?: number;
+  // Opens the comparison's transactions instead of the bar's own
+  onComparisonClick?: () => void;
 };
 
 /**
@@ -27,6 +29,7 @@ export function ComparisonBar({
   amount,
   fill,
   opacity = 1,
+  onComparisonClick,
 }: ComparisonBarProps) {
   // Recharts can give range bars a negative height
   const top = Math.min(y, y + height);
@@ -48,6 +51,13 @@ export function ComparisonBar({
         {...span(0, comparison)}
         fill={fill}
         fillOpacity={0.3}
+        onClick={
+          onComparisonClick &&
+          (event => {
+            event.stopPropagation();
+            onComparisonClick();
+          })
+        }
       />
       <rect
         x={x + (width - innerWidth) / 2}

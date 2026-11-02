@@ -1,7 +1,9 @@
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
+  ComparisonBreakdown,
   CustomReportComparison,
   CustomReportComparisonSortAmount,
+  DataEntity,
   IntervalEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
@@ -289,4 +291,22 @@ export function isIntervalInProgress({
     monthUtils.dayFromDate(intervalStartDate) <= today &&
     monthUtils.dayFromDate(intervalEndDate) > today
   );
+}
+
+/**
+ * The dates a click on a comparison opens, like the table's Comparison cells:
+ * an interval's own offset window, or else the whole comparison range. Budgets
+ * and windows before the earliest transaction have no transactions to show.
+ */
+export function getComparisonDrilldownDates(
+  data: Pick<DataEntity, 'comparisonStartDate' | 'comparisonEndDate'>,
+  breakdown: ComparisonBreakdown | undefined,
+  interval?: Pick<IntervalEntity, 'comparisonStartDate' | 'comparisonEndDate'>,
+) {
+  if (!breakdown || breakdown.budgeted || breakdown.noData) {
+    return null;
+  }
+  const startDate = interval?.comparisonStartDate ?? data.comparisonStartDate;
+  const endDate = interval?.comparisonEndDate ?? data.comparisonEndDate;
+  return startDate && endDate ? { startDate, endDate } : null;
 }

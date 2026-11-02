@@ -6,6 +6,7 @@ import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
+  IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import {
@@ -21,7 +22,10 @@ import {
 import type { BarShapeProps } from 'recharts';
 
 import { useRechartsAnimation } from '#components/reports/chart-theme';
-import { isIntervalInProgress } from '#components/reports/comparisonRange';
+import {
+  getComparisonDrilldownDates,
+  isIntervalInProgress,
+} from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -111,6 +115,9 @@ export function StackedBarGraph({
   // Amounts against a comparison stack in front of a faint bar for the whole
   // interval's comparison
   const isAmounts = showAmounts && !!data.comparison;
+  const getIntervalComparisonDates = (
+    interval: Partial<IntervalEntity> | undefined,
+  ) => getComparisonDrilldownDates(data, interval?.comparison, interval);
 
   const largestValue = data.intervalData
     .flatMap(c =>
@@ -192,6 +199,36 @@ export function StackedBarGraph({
                     tooltipType="none"
                     legendType="none"
                     isAnimationActive={false}
+                    // Opens the interval's comparison for every series, like
+                    // the totals row's Comparison cell
+                    onMouseEnter={item => {
+                      if (getIntervalComparisonDates(item.payload)) {
+                        setPointer('pointer');
+                      }
+                    }}
+                    onMouseLeave={() => setPointer('')}
+                    onClick={item => {
+                      const comparisonDates = getIntervalComparisonDates(
+                        item.payload,
+                      );
+                      if (
+                        ((compact && showTooltip) || !compact) &&
+                        comparisonDates
+                      ) {
+                        showActivity({
+                          navigate,
+                          categories,
+                          accounts,
+                          balanceTypeOp,
+                          filters,
+                          showHiddenCategories,
+                          showOffBudget,
+                          type: 'totals',
+                          ...comparisonDates,
+                          scopeTagNames: data.scopeTagNames,
+                        });
+                      }
+                    }}
                     shape={(props: BarShapeProps) => (
                       <Rectangle
                         x={props.x - props.width * 0.4}

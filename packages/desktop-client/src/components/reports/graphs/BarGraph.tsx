@@ -28,7 +28,10 @@ import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
-import { isIntervalInProgress } from '#components/reports/comparisonRange';
+import {
+  getComparisonDrilldownDates,
+  isIntervalInProgress,
+} from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -250,6 +253,42 @@ export function BarGraph({
 
   const [pointer, setPointer] = useState('');
 
+  const canShowActivity = !compact || showTooltip;
+  // Interval bars drill down by their own date range instead of a field
+  const getDrilldown = (payload: unknown, id: string | undefined) => {
+    const intervalPayload = hasIntervalDates(payload) ? payload : undefined;
+    const itemPayload = hasUncategorizedId(payload) ? payload : undefined;
+    return groupBy === 'Interval'
+      ? {
+          startDate: intervalPayload?.intervalStartDate ?? data.startDate,
+          endDate: intervalPayload?.intervalEndDate ?? data.endDate,
+        }
+      : {
+          startDate: data.startDate,
+          endDate: data.endDate,
+          field: groupBy.toLowerCase(),
+          id,
+          uncategorizedId: itemPayload?.uncategorizedId,
+        };
+  };
+  const showTotals = (
+    drilldown: ReturnType<typeof getDrilldown>,
+    bucketTagNames: string[] | undefined,
+  ) =>
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp,
+      filters,
+      showHiddenCategories,
+      showOffBudget,
+      type: 'totals',
+      ...drilldown,
+      bucketTagNames,
+      scopeTagNames: data.scopeTagNames,
+    });
+
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
   const labelsMargin = viewLabels ? 30 : 0;
@@ -371,48 +410,12 @@ export function BarGraph({
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
                 onClick={item => {
-                  if (compact && !showTooltip) {
-                    return;
+                  if (canShowActivity) {
+                    showTotals(
+                      getDrilldown(item.payload, item.id),
+                      item.payload.bucketTagNames,
+                    );
                   }
-
-                  const intervalPayload = hasIntervalDates(item.payload)
-                    ? item.payload
-                    : undefined;
-                  const itemPayload = hasUncategorizedId(item.payload)
-                    ? item.payload
-                    : undefined;
-
-                  // Interval bars drill down by their own date range instead of a field
-                  const drilldown =
-                    groupBy === 'Interval'
-                      ? {
-                          startDate:
-                            intervalPayload?.intervalStartDate ??
-                            data.startDate,
-                          endDate:
-                            intervalPayload?.intervalEndDate ?? data.endDate,
-                        }
-                      : {
-                          startDate: data.startDate,
-                          endDate: data.endDate,
-                          field: groupBy.toLowerCase(),
-                          id: item.id,
-                          uncategorizedId: itemPayload?.uncategorizedId,
-                        };
-
-                  showActivity({
-                    navigate,
-                    categories,
-                    accounts,
-                    balanceTypeOp,
-                    filters,
-                    showHiddenCategories,
-                    showOffBudget,
-                    type: 'totals',
-                    ...drilldown,
-                    bucketTagNames: item.payload.bucketTagNames,
-                    scopeTagNames: data.scopeTagNames,
-                  });
                 }}
                 shape={(props: BarShapeProps) => {
                   const fill =
@@ -423,6 +426,11 @@ export function BarGraph({
                   const opacity =
                     breakdown && isIntervalInProgress(props.payload) ? 0.5 : 1;
                   if (isComparisonBars && breakdown) {
+                    const comparisonDates = getComparisonDrilldownDates(
+                      data,
+                      breakdown,
+                      groupBy === 'Interval' ? props.payload : undefined,
+                    );
                     return (
                       <ComparisonBar
                         opacity={opacity}
@@ -433,6 +441,21 @@ export function BarGraph({
                         range={getComparisonRange(breakdown)}
                         {...getComparisonValues(breakdown)}
                         fill={fill}
+                        onComparisonClick={
+                          canShowActivity && comparisonDates
+                            ? () =>
+                                showTotals(
+                                  {
+                                    ...getDrilldown(
+                                      props.payload,
+                                      props.payload?.id,
+                                    ),
+                                    ...comparisonDates,
+                                  },
+                                  props.payload?.bucketTagNames,
+                                )
+                            : undefined
+                        }
                       />
                     );
                   }
