@@ -301,6 +301,76 @@ test.describe('Accounts', () => {
     ).not.toBeVisible();
   });
 
+  test('keeps unreconciled transactions after sorting with hidden reconciled ones', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Sort Hidden Reconciled',
+      offBudget: false,
+      balance: 0,
+    });
+    await accountPage.waitFor();
+
+    async function importRows(rows: string[]) {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles({
+        name: 'transactions.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from(
+          ['Date,Payee,Notes,Category,Amount', ...rows].join('\n'),
+        ),
+      });
+      const importButton = page.getByRole('button', {
+        name: /Import \d+ transactions?/,
+      });
+      await importButton.click();
+      await expect(importButton).not.toBeVisible();
+    }
+
+    // More reconciled transactions than a single page of results (150),
+    // all older than the unreconciled one, so sorting by oldest first
+    // fills the first page with hidden transactions only.
+    await importRows(
+      Array.from(
+        { length: 160 },
+        (_, i) =>
+          `2024-01-${String((i % 28) + 1).padStart(2, '0')},Old ${i},,,-1.00`,
+      ),
+    );
+
+    await page.getByRole('button', { name: 'Reconcile' }).click();
+    const reconcilePopover = page.locator('[data-popover]');
+    await reconcilePopover.getByRole('textbox').waitFor();
+    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+    await page.getByRole('button', { name: 'Lock transactions' }).click();
+
+    await importRows(['2024-06-01,Recent,not-reconciled,,-10.00']);
+
+    await accountPage.setTransactionColumnVisibility('balance', true);
+    await accountPage.accountMenuButton.click();
+    await page
+      .getByRole('button', { name: 'Hide reconciled transactions' })
+      .click();
+
+    const unreconciled = accountPage.transactionTableRow.filter({
+      hasText: 'not-reconciled',
+    });
+    await expect(unreconciled).toBeVisible();
+
+    // Each click toggles the order: newest first, oldest first, then
+    // newest first again.
+    const dateHeader = page.getByRole('button', { name: 'Date', exact: true });
+    await dateHeader.click();
+    await dateHeader.click();
+
+    await expect(unreconciled).toBeVisible();
+
+    await dateHeader.click();
+
+    // The running balance still counts the hidden reconciled transactions.
+    await expect(unreconciled.getByTestId('balance')).toHaveText('-170.00');
+  });
+
   test('opens the other side of a transfer from its arrow', async () => {
     accountPage = await navigation.goToAccountPage('Bank of America');
     await accountPage.createSingleTransaction({

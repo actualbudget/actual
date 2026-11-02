@@ -16,6 +16,8 @@ export type ForecastDataPoint = {
   accountId: string;
   accountName: string;
   transactions: ForecastTransaction[];
+  /** Net recorded activity for this day; absent for tracking-budget forecasts. */
+  recordedAmount?: number;
 };
 
 export type ForecastTransaction = {
@@ -23,6 +25,10 @@ export type ForecastTransaction = {
   payee: string | null;
   scheduleId: string;
   scheduleName: string;
+  /** Original scheduled date, before rules can move either transfer leg. */
+  occurrenceDate?: string;
+  isTransfer?: boolean;
+  isAccountless?: boolean;
 };
 
 export type BalanceForecastConfig = {

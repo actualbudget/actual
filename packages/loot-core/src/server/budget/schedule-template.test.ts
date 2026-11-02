@@ -41,6 +41,7 @@ type RuleSpec = {
   amount: number;
   frequency: 'monthly' | 'yearly' | 'weekly' | 'daily';
   interval?: number;
+  actions?: ConstructorParameters<typeof Rule>[0]['actions'];
 };
 
 function makeRule({
@@ -49,6 +50,7 @@ function makeRule({
   amount,
   frequency,
   interval = 1,
+  actions = [],
 }: RuleSpec): Rule {
   return new Rule({
     id,
@@ -73,7 +75,7 @@ function makeRule({
       },
       { op: 'is', field: 'amount', value: amount, type: 'number' },
     ],
-    actions: [],
+    actions,
   });
 }
 
@@ -1480,5 +1482,71 @@ describe('runScheduleForecast on reviewer budgets', () => {
     expect(result.perScheduleMonthly.get(template_lines[0])).toBe(100000);
     expect(result.perScheduleMonthly.get(template_lines[1])).toBe(71429);
     expect(result.perScheduleMonthly.get(template_lines[2])).toBe(71429);
+  });
+});
+
+describe('runScheduleForecast with split rules', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(db.getAccounts).mockResolvedValue([]);
+    vi.mocked(aqlQuery).mockResolvedValue({ data: [], dependencies: [] });
+  });
+
+  // A paycheck-style schedule: a -$100.00 transaction split into a $30.00
+  // portion categorized as the budgeted category and a remainder split that
+  // sets only a payee (e.g. a transfer to another account) and no category.
+  // Only the categorized split belongs to the budgeted category.
+  it('should only budget the splits explicitly assigned to the category', async () => {
+    const template_lines = [
+      {
+        type: 'schedule',
+        name: 'Test Schedule',
+        priority: 0,
+        directive: 'template',
+      } as const,
+    ];
+    mockSingleSchedule({
+      start: '2024-08-01',
+      amount: -10000,
+      frequency: 'monthly',
+      actions: [
+        {
+          op: 'set-split-amount',
+          value: -3000,
+          options: { method: 'fixed-amount', splitIndex: 1 },
+        },
+        {
+          op: 'set',
+          field: 'category',
+          value: defaultCategory.id,
+          type: 'id',
+          options: { splitIndex: 1 },
+        },
+        {
+          op: 'set-split-amount',
+          value: null,
+          options: { method: 'remainder', splitIndex: 2 },
+        },
+        {
+          op: 'set',
+          field: 'payee',
+          value: 'other-payee',
+          type: 'id',
+          options: { splitIndex: 2 },
+        },
+      ],
+    });
+
+    const result = await runScheduleForecast(
+      template_lines,
+      '2024-08-01',
+      0,
+      0,
+      defaultCategory,
+    );
+
+    // Only the categorized split ($30.00) counts; the uncategorized remainder
+    // split must not inherit the budgeted category.
+    expect(result.to_budget).toBe(3000);
   });
 });
