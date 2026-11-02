@@ -6,6 +6,7 @@ import { ConfigurationPage } from './page-models/configuration-page';
 import type { CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
 import type { ReportsPage } from './page-models/reports-page';
+import { ScheduleEditModal } from './page-models/schedule-edit-modal';
 
 test.describe('Reports', () => {
   test.describe.configure({ mode: 'serial' });
@@ -16,7 +17,9 @@ test.describe('Reports', () => {
   let configurationPage: ConfigurationPage;
 
   test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+    // browser.newPage does not inherit the configured context's user agent.
+    // Use Actual's fixed demo dates so report screenshots remain reproducible.
+    page = await browser.newPage({ userAgent: 'playwright' });
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -174,6 +177,7 @@ test.describe('Reports', () => {
         ).toBeVisible();
       }
 
+      await expect(page.getByTestId('forecast-contributors')).toHaveCount(0);
       await selectAccounts(1, ['Capital One Checking']);
       await page.getByRole('button', { name: 'Add line', exact: true }).click();
       await page
@@ -249,6 +253,73 @@ test.describe('Reports', () => {
       await expect(
         page.getByRole('textbox', { name: 'Line 2 name', exact: true }),
       ).toHaveValue('Card');
+    });
+
+    test('explains forecast contributors and refreshes after editing a schedule', async () => {
+      test.setTimeout(120_000);
+      const forecastUrl = page.url();
+      const schedulesPage = await navigation.goToSchedulesPage();
+      for (const [name, amount] of [
+        ['Insurance', 180],
+        ['Transport', 120],
+        ['Gym', 50],
+        ['Subscriptions', 20],
+      ] satisfies Array<[string, number]>) {
+        const modal = await schedulesPage.addNewSchedule();
+        await modal.fill({
+          scheduleName: name,
+          account: 'Capital One Checking',
+          amount,
+        });
+        await modal.add();
+        await expect(modal.locator).not.toBeVisible();
+      }
+      await page.goto(forecastUrl);
+
+      const breakdown = page.getByTestId('forecast-contributors');
+      const outflows = breakdown.getByRole('table', {
+        name: 'Scheduled outflows',
+      });
+      await expect(outflows.getByRole('button')).toHaveCount(5);
+      await expect(
+        outflows.getByRole('row').filter({ hasText: 'Wedding' }),
+      ).toContainText('No account assigned');
+      await expect(outflows).toContainText('Other 2 schedules');
+      await expect(breakdown).toMatchThemeScreenshots();
+
+      await breakdown
+        .getByRole('button', { name: 'Show all', exact: true })
+        .click();
+      await expect(outflows.getByRole('button')).toHaveCount(7);
+      await expect(
+        outflows.getByRole('button', { name: 'Subscriptions', exact: true }),
+      ).toBeVisible();
+      await breakdown.getByRole('button', { name: 'Show top five' }).click();
+
+      const wedding = outflows.getByRole('row').filter({ hasText: 'Wedding' });
+      const occurrenceCount = Number(
+        await wedding.getByRole('cell').nth(1).innerText(),
+      );
+      const originalTotal = await wedding.getByRole('cell').last().innerText();
+      await wedding
+        .getByRole('button', { name: 'Wedding', exact: true })
+        .click();
+      const editModal = new ScheduleEditModal(
+        page.getByTestId('schedule-edit-modal'),
+      );
+      await expect(editModal.scheduleNameInput).toHaveValue('Wedding');
+      await editModal.fill({ amount: 100 });
+      await editModal.save();
+      await expect(editModal.locator).not.toBeVisible();
+      await expect(wedding.getByRole('cell').last()).not.toHaveText(
+        originalTotal,
+      );
+      await expect(wedding.getByRole('cell').last()).toHaveText(
+        (-100 * occurrenceCount).toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
     });
 
     test('loads tracking budget forecast report', async () => {
