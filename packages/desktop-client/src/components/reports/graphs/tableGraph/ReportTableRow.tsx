@@ -23,7 +23,7 @@ import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 
-import { SUB_COLUMN_MIN_WIDTH } from './ReportTableHeader';
+import { SPLIT_MIN_WIDTHS, splitColumnStyle } from './ReportTableHeader';
 
 type ReportTableRowProps = {
   item: GroupedEntity;
@@ -678,10 +678,9 @@ function SplitIntervalCells({
       ? Math.round((change / Math.abs(comparison)) * 100)
       : undefined;
 
-  const cellStyle = {
-    minWidth: SUB_COLUMN_MIN_WIDTH,
-    backgroundColor,
-  };
+  const [currentStyle, comparisonStyle, changeStyle] = SPLIT_MIN_WIDTHS.map(
+    minWidth => ({ ...splitColumnStyle(minWidth), backgroundColor }),
+  );
   const renderValue =
     (clickable: boolean) =>
     ({ value }: { value?: string }) => (
@@ -702,7 +701,7 @@ function SplitIntervalCells({
       <Cell
         textAlign="right"
         style={{
-          ...cellStyle,
+          ...currentStyle,
           ...(colorized && { color: getAmountColor(amount) }),
         }}
         unexposedContent={renderValue(true)}
@@ -715,7 +714,7 @@ function SplitIntervalCells({
         <Cell
           textAlign="right"
           style={{
-            ...cellStyle,
+            ...comparisonStyle,
             ...(colorized && { color: getAmountColor(comparison) }),
           }}
           unexposedContent={renderValue(!!onShowComparison)}
@@ -727,7 +726,7 @@ function SplitIntervalCells({
       ) : (
         <Cell
           textAlign="right"
-          style={{ ...cellStyle, color: theme.tableTextSubdued }}
+          style={{ ...comparisonStyle, color: theme.tableTextSubdued }}
           value={t('No data')}
           width="flex"
         />
@@ -735,7 +734,7 @@ function SplitIntervalCells({
       <Cell
         textAlign="right"
         style={{
-          ...cellStyle,
+          ...changeStyle,
           ...(hasComparison && { color: getAmountColor(change) }),
         }}
         unexposedContent={renderValue(false)}

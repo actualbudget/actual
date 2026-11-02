@@ -74,7 +74,7 @@ describe('ReportTableHeader', () => {
       'CategoryBaseline' +
         'May 2026 vs 04/03/2026 – 05/03/2026CurrentBaselineChange' +
         'Jun 2026CurrentBaselineChange' +
-        'TotalsChangeAverage',
+        'Whole rangeTotalsChangeAverage',
     );
   });
 

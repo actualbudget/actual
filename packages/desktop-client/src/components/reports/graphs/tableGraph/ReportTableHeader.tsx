@@ -13,9 +13,21 @@ import { useFormatBaselineWindow } from '#components/reports/graphs/useFormatBas
 import { ReportOptions } from '#components/reports/ReportOptions';
 import { Cell, Row, ROW_HEIGHT } from '#components/table';
 
-// Every sub-column of a split interval has the same width, so each header
-// group lines up with the three cells under it
-export const SUB_COLUMN_MIN_WIDTH = 140;
+const COLUMN_MIN_WIDTH = 85;
+// Current, comparison and change cells of a split interval. Change is wider
+// for its percentage.
+export const SPLIT_MIN_WIDTHS = [95, 95, 140];
+
+/**
+ * Split tables grow each column in proportion to its minimum width, so a
+ * header group is always as wide as the cells under it.
+ */
+export function splitColumnStyle(minWidth: number) {
+  return { minWidth, flexGrow: minWidth / COLUMN_MIN_WIDTH };
+}
+
+// The line under a group's label stops short of the next group
+const GROUP_DIVIDER_INSET = 8;
 
 type ReportTableHeaderProps = {
   groupBy: string;
@@ -57,9 +69,82 @@ export function ReportTableHeader({
   // Labels beside split intervals sit level with the sub-column labels, so the
   // line under each date doesn't look like it runs on from them
   const labelStyle = splitIntervals
-    ? { ...compactStyle, paddingTop: ROW_HEIGHT - 1 }
+    ? { ...compactStyle, paddingTop: ROW_HEIGHT }
     : compactStyle;
+
+  // A label over sub-column labels, with a line between them
+  const renderGroup = (
+    key: string | number,
+    label: string,
+    subLabels: { label: string; minWidth: number; title?: string }[],
+  ) => {
+    const minWidth = subLabels.reduce((sum, sub) => sum + sub.minWidth, 0);
+    return (
+      <View key={key} style={{ ...splitColumnStyle(minWidth), flexBasis: 0 }}>
+        <Cell
+          value={label}
+          title={label}
+          textAlign="center"
+          style={{ height: ROW_HEIGHT, borderBottomWidth: 0 }}
+        />
+        <View
+          style={{
+            height: 1,
+            marginLeft: GROUP_DIVIDER_INSET,
+            marginRight: GROUP_DIVIDER_INSET,
+            backgroundColor: theme.tableBorder,
+          }}
+        />
+        <View style={{ flexDirection: 'row', flex: 1 }}>
+          {subLabels.map((sub, subIndex) => (
+            <Cell
+              key={subIndex}
+              style={{ ...splitColumnStyle(sub.minWidth), borderTopWidth: 0 }}
+              value={sub.label}
+              title={sub.title}
+              textAlign="right"
+              width="flex"
+            />
+          ))}
+        </View>
+      </View>
+    );
+  };
   // Total tables keep real amounts and add a change column beside them
+  const rangeColumns: { label: string; title?: string }[] = [
+    { label: t('Totals') },
+    ...(showBaseline && showProjected
+      ? [
+          {
+            label: t('Projected'),
+            title: t('The amount so far, scaled up to the whole range'),
+          },
+        ]
+      : []),
+    ...(showBaseline
+      ? [
+          {
+            label: t('Change'),
+            title:
+              mode === 'time'
+                ? budgetedBaseline
+                  ? t('The average compared with the budget per interval')
+                  : t('The average compared with the baseline per interval')
+                : budgetedBaseline
+                  ? t('The difference from the budget over the whole range')
+                  : t('The difference from the baseline over the whole range'),
+          },
+        ]
+      : []),
+    {
+      label: t('Average'),
+      title:
+        showBaseline && mode === 'time'
+          ? t('An average-length interval at the pace so far')
+          : undefined,
+    },
+  ];
+
   return (
     <Row
       collapsed
@@ -135,39 +220,18 @@ export function ReportTableHeader({
                       baselineWindow,
                     })
                   : header.date;
-                return (
-                  <View
-                    key={index}
-                    style={{
-                      flex: 3,
-                      flexBasis: 0,
-                      minWidth: SUB_COLUMN_MIN_WIDTH * 3,
-                    }}
-                  >
-                    <Cell
-                      value={groupLabel}
-                      title={groupLabel}
-                      textAlign="center"
-                      style={{ height: ROW_HEIGHT }}
-                    />
-                    <View
-                      style={{ flexDirection: 'row', flex: 1, marginTop: -1 }}
-                    >
-                      {[
-                        t('Current'),
-                        budgetedBaseline ? t('Budgeted') : t('Baseline'),
-                        t('Change'),
-                      ].map((label, subIndex) => (
-                        <Cell
-                          key={subIndex}
-                          style={{ minWidth: SUB_COLUMN_MIN_WIDTH }}
-                          value={label}
-                          textAlign="right"
-                          width="flex"
-                        />
-                      ))}
-                    </View>
-                  </View>
+                const comparisonLabel = budgetedBaseline
+                  ? t('Budgeted')
+                  : t('Baseline');
+                return renderGroup(
+                  index,
+                  groupLabel,
+                  [t('Current'), comparisonLabel, t('Change')].map(
+                    (label, subIndex) => ({
+                      label,
+                      minWidth: SPLIT_MIN_WIDTHS[subIndex],
+                    }),
+                  ),
                 );
               }
               return (
@@ -205,61 +269,28 @@ export function ReportTableHeader({
                 />
               </>
             )}
-        <Cell
-          style={{
-            minWidth: compact ? 50 : 85,
-          }}
-          valueStyle={labelStyle}
-          value={t('Totals')}
-          textAlign="right"
-          width="flex"
-        />
-        {showBaseline && showProjected && (
-          <Cell
-            style={{
-              minWidth: compact ? 50 : 85,
-            }}
-            valueStyle={labelStyle}
-            value={t('Projected')}
-            title={t('The amount so far, scaled up to the whole range')}
-            textAlign="right"
-            width="flex"
-          />
-        )}
-        {showBaseline && (
-          <Cell
-            style={{
-              minWidth: compact ? 50 : 85,
-            }}
-            valueStyle={labelStyle}
-            value={t('Change')}
-            title={
-              mode === 'time'
-                ? budgetedBaseline
-                  ? t('The average compared with the budget per interval')
-                  : t('The average compared with the baseline per interval')
-                : budgetedBaseline
-                  ? t('The difference from the budget over the whole range')
-                  : t('The difference from the baseline over the whole range')
-            }
-            textAlign="right"
-            width="flex"
-          />
-        )}
-        <Cell
-          style={{
-            minWidth: compact ? 50 : 85,
-          }}
-          valueStyle={labelStyle}
-          value={t('Average')}
-          title={
-            showBaseline && mode === 'time'
-              ? t('An average-length interval at the pace so far')
-              : undefined
-          }
-          textAlign="right"
-          width="flex"
-        />
+        {splitIntervals
+          ? renderGroup(
+              'range',
+              t('Whole range'),
+              rangeColumns.map(column => ({
+                ...column,
+                minWidth: COLUMN_MIN_WIDTH,
+              })),
+            )
+          : rangeColumns.map(column => (
+              <Cell
+                key={column.label}
+                style={{
+                  minWidth: compact ? 50 : COLUMN_MIN_WIDTH,
+                }}
+                valueStyle={labelStyle}
+                value={column.label}
+                title={column.title}
+                textAlign="right"
+                width="flex"
+              />
+            ))}
       </View>
     </Row>
   );
