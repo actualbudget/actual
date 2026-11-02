@@ -111,6 +111,9 @@ export type LocalPrefs = Partial<{
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;
   reportsViewLabel: boolean;
+  // Trial: colour a split table's current cells by their change, as well as
+  // the change cells
+  reportsColorCurrentByChange: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
   'mobile.bankSyncProvidersCollapsed': boolean;

@@ -9,8 +9,13 @@ import type {
   IntervalEntity,
 } from '@actual-app/core/types/models';
 
+import { useFormatBaselineWindow } from '#components/reports/graphs/useFormatBaselineWindow';
 import { ReportOptions } from '#components/reports/ReportOptions';
-import { Cell, Row } from '#components/table';
+import { Cell, Row, ROW_HEIGHT } from '#components/table';
+
+// Every sub-column of a split interval has the same width, so each header
+// group lines up with the three cells under it
+export const SUB_COLUMN_MIN_WIDTH = 140;
 
 type ReportTableHeaderProps = {
   groupBy: string;
@@ -27,6 +32,8 @@ type ReportTableHeaderProps = {
   showProjected?: boolean;
   // The baseline is the average of what was budgeted
   budgetedBaseline?: boolean;
+  // Split each interval into current, comparison and change sub-columns
+  splitIntervals?: boolean;
 };
 
 export function ReportTableHeader({
@@ -43,12 +50,16 @@ export function ReportTableHeader({
   showBaseline = false,
   showProjected = false,
   budgetedBaseline = false,
+  splitIntervals = false,
 }: ReportTableHeaderProps) {
   const { t } = useTranslation();
+  const formatBaselineWindow = useFormatBaselineWindow();
   // Total tables keep real amounts and add a change column beside them
   return (
     <Row
       collapsed
+      // A second row under the dates for the sub-columns
+      height={splitIntervals ? ROW_HEIGHT * 2 - 1 : undefined}
       style={{
         justifyContent: 'center',
         borderBottomWidth: 1,
@@ -106,6 +117,54 @@ export function ReportTableHeader({
         )}
         {mode === 'time'
           ? data.map((header, index) => {
+              if (splitIntervals) {
+                // Range baselines compare every interval with the same range,
+                // so only offset windows go beside the date
+                const baselineWindow = formatBaselineWindow(
+                  header.baselineStartDate,
+                  header.baselineEndDate,
+                );
+                const groupLabel = baselineWindow
+                  ? t('{{date}} vs {{baselineWindow}}', {
+                      date: header.date,
+                      baselineWindow,
+                    })
+                  : header.date;
+                return (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 3,
+                      flexBasis: 0,
+                      minWidth: SUB_COLUMN_MIN_WIDTH * 3,
+                    }}
+                  >
+                    <Cell
+                      value={groupLabel}
+                      title={groupLabel}
+                      textAlign="center"
+                      style={{ height: ROW_HEIGHT }}
+                    />
+                    <View
+                      style={{ flexDirection: 'row', flex: 1, marginTop: -1 }}
+                    >
+                      {[
+                        t('Current'),
+                        budgetedBaseline ? t('Budgeted') : t('Baseline'),
+                        t('Change'),
+                      ].map((label, subIndex) => (
+                        <Cell
+                          key={subIndex}
+                          style={{ minWidth: SUB_COLUMN_MIN_WIDTH }}
+                          value={label}
+                          textAlign="right"
+                          width="flex"
+                        />
+                      ))}
+                    </View>
+                  </View>
+                );
+              }
               return (
                 <Cell
                   style={{

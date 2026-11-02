@@ -55,6 +55,29 @@ describe('ReportTableHeader', () => {
     ).toBe('CategoryBaselineMay 2026Jun 2026TotalsProjectedChangeAverage');
   });
 
+  it('splits each interval and names an offset window beside its date', () => {
+    expect(
+      renderHeader({
+        mode: 'time',
+        showBaseline: true,
+        splitIntervals: true,
+        data: [
+          {
+            ...makeInterval('May 2026'),
+            baselineStartDate: '2026-04-03',
+            baselineEndDate: '2026-05-03',
+          },
+          makeInterval('Jun 2026'),
+        ],
+      }),
+    ).toBe(
+      'CategoryBaseline' +
+        'May 2026 vs 04/03/2026 – 05/03/2026CurrentBaselineChange' +
+        'Jun 2026CurrentBaselineChange' +
+        'TotalsChangeAverage',
+    );
+  });
+
   it('leaves the columns unchanged without a baseline', () => {
     expect(renderHeader({})).toBe('CategoryDepositsPaymentsTotalsAverage');
   });

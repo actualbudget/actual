@@ -21,7 +21,10 @@ import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
+import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
+
+import { SUB_COLUMN_MIN_WIDTH } from './ReportTableHeader';
 
 type ReportTableRowProps = {
   item: GroupedEntity;
@@ -33,6 +36,8 @@ type ReportTableRowProps = {
   endDate?: string;
   showBaseline?: boolean;
   showProjected?: boolean;
+  // Split each interval into current, comparison and change cells
+  splitIntervals?: boolean;
   baselineStartDate?: string;
   baselineEndDate?: string;
   intervalsCount: number;
@@ -66,6 +71,7 @@ export const ReportTableRow = memo(
     endDate,
     showBaseline = false,
     showProjected = false,
+    splitIntervals = false,
     baselineStartDate = '',
     baselineEndDate = '',
     intervalsCount,
@@ -101,6 +107,9 @@ export const ReportTableRow = memo(
     const format = useFormat();
     const { t } = useTranslation();
     const formatBaselineWindow = useFormatBaselineWindow();
+    const [colorCurrentByChange = false] = useLocalPref(
+      'reportsColorCurrentByChange',
+    );
 
     // Spells out what a baseline interval was compared against, since its
     // length can differ from the average interval in the Baseline column
@@ -295,6 +304,68 @@ export const ReportTableRow = memo(
           )}
           {item.intervalData && mode === 'time'
             ? item.intervalData.map((intervalItem, index) => {
+                const onShowInterval = () =>
+                  canShowActivity &&
+                  showActivity({
+                    navigate,
+                    categories,
+                    accounts,
+                    balanceTypeOp,
+                    filters,
+                    showHiddenCategories,
+                    showOffBudget,
+                    type: 'time',
+                    startDate: intervalItem.intervalStartDate || '',
+                    endDate: intervalItem.intervalEndDate || '',
+                    field: drilldownField,
+                    id: item.id,
+                    uncategorizedId: item.uncategorizedId,
+                    interval,
+                    bucketTagNames: item.bucketTagNames,
+                    scopeTagNames,
+                  });
+                if (splitIntervals) {
+                  const windowStart = intervalItem.baselineStartDate;
+                  const windowEnd = intervalItem.baselineEndDate;
+                  return (
+                    <SplitIntervalCells
+                      key={index}
+                      intervalItem={intervalItem}
+                      breakdown={intervalItem.baseline}
+                      balanceTypeOp={balanceTypeOp}
+                      backgroundColor={style?.backgroundColor}
+                      hoverStyle={hoverUnderline}
+                      colorized={colorized}
+                      colorCurrentByChange={colorCurrentByChange}
+                      onShowInterval={onShowInterval}
+                      onShowComparison={
+                        // Budgets have no transactions to show
+                        intervalItem.baseline?.budgeted
+                          ? undefined
+                          : windowStart && windowEnd
+                            ? () =>
+                                canShowActivity &&
+                                showActivity({
+                                  navigate,
+                                  categories,
+                                  accounts,
+                                  balanceTypeOp,
+                                  filters,
+                                  showHiddenCategories,
+                                  showOffBudget,
+                                  type: 'totals',
+                                  ...drilldown,
+                                  startDate: windowStart,
+                                  endDate: windowEnd,
+                                  uncategorizedId: item.uncategorizedId,
+                                  bucketTagNames: item.bucketTagNames,
+                                  scopeTagNames,
+                                })
+                            : onShowBaseline
+                      }
+                    />
+                  );
+                }
                 // With a baseline, cells show real amounts coloured by their
                 // change from it
                 const intervalBreakdown = breakdown && intervalItem.baseline;
@@ -332,27 +403,7 @@ export const ReportTableRow = memo(
                     valueStyle={compactStyle}
                     value={format(intervalAmount, 'financial')}
                     title={getIntervalTitle(intervalItem, intervalBreakdown)}
-                    onClick={() =>
-                      canShowActivity &&
-                      showActivity({
-                        navigate,
-                        categories,
-                        accounts,
-                        balanceTypeOp,
-                        filters,
-                        showHiddenCategories,
-                        showOffBudget,
-                        type: 'time',
-                        startDate: intervalItem.intervalStartDate || '',
-                        endDate: intervalItem.intervalEndDate || '',
-                        field: drilldownField,
-                        id: item.id,
-                        uncategorizedId: item.uncategorizedId,
-                        interval,
-                        bucketTagNames: item.bucketTagNames,
-                        scopeTagNames,
-                      })
-                    }
+                    onClick={onShowInterval}
                     width="flex"
                     privacyFilter
                   />
@@ -584,5 +635,123 @@ function AmountCell({
       width="flex"
       privacyFilter
     />
+  );
+}
+
+type SplitIntervalCellsProps = {
+  intervalItem: IntervalEntity;
+  breakdown: BaselineBreakdown | undefined;
+  balanceTypeOp: balanceTypeOpType;
+  backgroundColor?: CSSProperties['backgroundColor'];
+  hoverStyle?: CSSProperties;
+  colorized?: boolean;
+  colorCurrentByChange: boolean;
+  onShowInterval: () => void;
+  onShowComparison?: () => void;
+};
+
+/**
+ * An interval's current amount, the amount it's compared with, and the
+ * change as an amount and a percentage of the comparison.
+ */
+function SplitIntervalCells({
+  intervalItem,
+  breakdown,
+  balanceTypeOp,
+  backgroundColor,
+  hoverStyle,
+  colorized,
+  colorCurrentByChange,
+  onShowInterval,
+  onShowComparison,
+}: SplitIntervalCellsProps) {
+  const format = useFormat();
+  const { t } = useTranslation();
+
+  const amount = breakdown
+    ? breakdown.actual[balanceTypeOp]
+    : intervalItem[balanceTypeOp];
+  // A window before the earliest transaction has nothing to compare
+  const hasComparison = !!breakdown && !breakdown.noData;
+  const comparison = breakdown?.expected[balanceTypeOp] ?? 0;
+  // An interval's own amount is its change
+  const change = intervalItem[balanceTypeOp];
+  const percent =
+    hasComparison && comparison !== 0
+      ? Math.round((change / Math.abs(comparison)) * 100)
+      : undefined;
+  const currentColor =
+    colorCurrentByChange && hasComparison
+      ? getAmountColor(change)
+      : colorized
+        ? getAmountColor(amount)
+        : undefined;
+
+  const cellStyle = {
+    minWidth: SUB_COLUMN_MIN_WIDTH,
+    backgroundColor,
+  };
+  const renderValue =
+    (clickable: boolean) =>
+    ({ value }: { value?: string }) => (
+      <FinancialText
+        style={{
+          ...(clickable && hoverStyle),
+          textAlign: 'right',
+          flexGrow: 1,
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {value}
+      </FinancialText>
+    );
+
+  return (
+    <>
+      <Cell
+        textAlign="right"
+        style={{ ...cellStyle, ...(currentColor && { color: currentColor }) }}
+        unexposedContent={renderValue(true)}
+        value={format(amount, 'financial')}
+        onClick={onShowInterval}
+        width="flex"
+        privacyFilter
+      />
+      {hasComparison ? (
+        <Cell
+          textAlign="right"
+          style={cellStyle}
+          unexposedContent={renderValue(!!onShowComparison)}
+          value={format(comparison, 'financial')}
+          onClick={onShowComparison}
+          width="flex"
+          privacyFilter
+        />
+      ) : (
+        <Cell
+          textAlign="right"
+          style={{ ...cellStyle, color: theme.tableTextSubdued }}
+          value={t('No data')}
+          width="flex"
+        />
+      )}
+      <Cell
+        textAlign="right"
+        style={{
+          ...cellStyle,
+          ...(hasComparison && { color: getAmountColor(change) }),
+        }}
+        unexposedContent={renderValue(false)}
+        value={
+          !hasComparison
+            ? ''
+            : percent === undefined
+              ? format(change, 'financial-with-sign')
+              : `${format(change, 'financial-with-sign')} (${percent > 0 ? '+' : ''}${percent}%)`
+        }
+        width="flex"
+        privacyFilter
+      />
+    </>
   );
 }

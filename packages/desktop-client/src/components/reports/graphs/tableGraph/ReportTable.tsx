@@ -72,6 +72,9 @@ export function ReportTable({
   const contentRef = useRef<HTMLDivElement>(null);
   const showBaseline = !!data.baseline;
   const showProjected = !!data.baseline?.projected;
+  // Cards are too narrow for three columns per interval, so they keep one
+  // cell coloured by its change
+  const splitIntervals = showBaseline && mode === 'time' && !compact;
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {
@@ -91,6 +94,7 @@ export function ReportTable({
         endDate={data.endDate}
         showBaseline={showBaseline}
         showProjected={showProjected}
+        splitIntervals={splitIntervals}
         baselineStartDate={data.baselineStartDate}
         baselineEndDate={data.baselineEndDate}
         intervalsCount={intervalsCount}
@@ -123,6 +127,7 @@ export function ReportTable({
         endDate={data.endDate}
         showBaseline={showBaseline}
         showProjected={showProjected}
+        splitIntervals={splitIntervals}
         baselineStartDate={data.baselineStartDate}
         baselineEndDate={data.baselineEndDate}
         intervalsCount={intervalsCount}
@@ -158,6 +163,7 @@ export function ReportTable({
         showBaseline={showBaseline}
         showProjected={showProjected}
         budgetedBaseline={!!data.baseline?.budgeted}
+        splitIntervals={splitIntervals}
       />
       <View
         style={{
