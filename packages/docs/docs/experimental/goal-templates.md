@@ -449,14 +449,14 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 
 #### Weekly averages
 
-Some spending follows the week rather than the month, like a weekly grocery shop or a commute. A month with five of those weeks needs more than a month with four. The weekly average template averages your spending per week, then budgets that amount once for every occurrence of a chosen weekday in the month.
+Often spending follows the week rather than the month, like a weekly grocery shop or a commute. This means the amount needed per month varies, depending on how the weeks fall. The weekly average template averages your spending per week, then budgets that amount once for every occurrence of a chosen weekday in the month.
 
 | Syntax                                                                                  | Description                                                                                                      |
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `#template average {number} weeks on {weekday}`                                         | Budget the average weekly spend over the last `{number}` complete weeks, once for every `{weekday}` in the month |
 | `#template average {number} weeks on {weekday} [{increase/decrease} {number\|number%}]` | Same as above, with an adjustment applied to the weekly amount before it is multiplied by the number of weekdays |
 
-The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` budgeting November 2026 averages spending from 2026-10-04 through 2026-10-31. If the budget month hasn't started yet, the window ends yesterday instead, so incomplete days are never counted. Weeks before the category's first transaction are left out of the average.
+The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` for a November 2026 budget, averages spending from 2026-10-04 through 2026-10-31. Weeks before the category's first transaction are left out of the average.
 
 As an example, assume you spent an average of \$ 50 per week over the last 4 weeks. October 2026 has five Fridays and four Mondays.
 
