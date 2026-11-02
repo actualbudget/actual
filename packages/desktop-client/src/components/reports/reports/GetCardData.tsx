@@ -21,7 +21,9 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  getOffsetDays,
   isBudgetedBaseline,
+  isOffsetBaseline,
 } from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import { getLiveRange } from '#components/reports/getLiveRange';
@@ -132,8 +134,12 @@ export function GetCardData({
     earliestTransaction,
     latestTransaction,
     firstDayOfWeekIdx,
+    [startDate, endDate],
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  const offsetDays = isOffsetBaseline(baseline)
+    ? getOffsetDays(baseline)
+    : undefined;
   const projectToFullPeriod = baseline.projectToFullPeriod;
   const budgetedBaseline = isBudgetedBaseline(baseline, report.groupBy);
   // Amounts are drawn with the baseline unless changes are asked for
@@ -186,6 +192,10 @@ export function GetCardData({
           projectToFullPeriod,
           showAmounts,
           budgeted: budgetedBaseline,
+          offset:
+            offsetDays === undefined
+              ? undefined
+              : { days: offsetDays, earliestTransaction },
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -195,6 +205,8 @@ export function GetCardData({
     projectToFullPeriod,
     showAmounts,
     budgetedBaseline,
+    offsetDays,
+    earliestTransaction,
     report,
     categories,
     startDate,
@@ -234,6 +246,10 @@ export function GetCardData({
           projectToFullPeriod,
           showAmounts,
           budgeted: budgetedBaseline,
+          offset:
+            offsetDays === undefined
+              ? undefined
+              : { days: offsetDays, earliestTransaction },
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -243,6 +259,8 @@ export function GetCardData({
     projectToFullPeriod,
     showAmounts,
     budgetedBaseline,
+    offsetDays,
+    earliestTransaction,
     report,
     categories,
     payees,

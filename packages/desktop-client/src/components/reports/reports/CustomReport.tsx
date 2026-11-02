@@ -33,7 +33,9 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  getOffsetDays,
   isBudgetedBaseline,
+  isOffsetBaseline,
 } from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
@@ -547,8 +549,12 @@ function CustomReportInner({
     earliestTransactionDate,
     latestTransactionDate,
     firstDayOfWeekIdx,
+    [startDate, endDate],
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
+  const offsetDays = isOffsetBaseline(baseline)
+    ? getOffsetDays(baseline)
+    : undefined;
   const projectToFullPeriod = baseline.projectToFullPeriod;
   const budgetedBaseline = isBudgetedBaseline(baseline, groupBy);
   // Amounts are drawn with the baseline unless changes are asked for
@@ -581,6 +587,13 @@ function CustomReportInner({
           projectToFullPeriod,
           showAmounts,
           budgeted: budgetedBaseline,
+          offset:
+            offsetDays === undefined
+              ? undefined
+              : {
+                  days: offsetDays,
+                  earliestTransaction: earliestTransactionDate,
+                },
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -590,6 +603,8 @@ function CustomReportInner({
     projectToFullPeriod,
     showAmounts,
     budgetedBaseline,
+    offsetDays,
+    earliestTransactionDate,
     startDate,
     endDate,
     interval,
@@ -639,6 +654,13 @@ function CustomReportInner({
           projectToFullPeriod,
           showAmounts,
           budgeted: budgetedBaseline,
+          offset:
+            offsetDays === undefined
+              ? undefined
+              : {
+                  days: offsetDays,
+                  earliestTransaction: earliestTransactionDate,
+                },
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -648,6 +670,8 @@ function CustomReportInner({
     projectToFullPeriod,
     showAmounts,
     budgetedBaseline,
+    offsetDays,
+    earliestTransactionDate,
     startDate,
     endDate,
     interval,

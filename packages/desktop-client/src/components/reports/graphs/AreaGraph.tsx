@@ -48,6 +48,8 @@ type PayloadItem = {
     totalTotals: number;
     totalBudgeted: number;
     baseline?: BaselineBreakdown;
+    baselineStartDate?: string;
+    baselineEndDate?: string;
   };
 };
 
@@ -74,6 +76,8 @@ const CustomTooltip = ({
         breakdown={interval.baseline}
         balanceTypeOp={balanceTypeOp}
         format={format}
+        baselineStartDate={interval.baselineStartDate}
+        baselineEndDate={interval.baselineEndDate}
       />
     );
   }

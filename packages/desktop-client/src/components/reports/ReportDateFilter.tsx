@@ -39,6 +39,8 @@ type ReportDateFilterProps = {
   onSelectRange: (dateRange: string) => void;
   onChangeDates: (startDate: string, endDate: string) => void;
   onChangeStatic: (isDateStatic: boolean) => void;
+  // Rows between the title and the range
+  header?: ReactNode;
   children?: ReactNode;
 };
 
@@ -58,6 +60,7 @@ export function ReportDateFilter({
   onSelectRange,
   onChangeDates,
   onChangeStatic,
+  header,
   children,
 }: ReportDateFilterProps) {
   const locale = useLocale();
@@ -106,6 +109,7 @@ export function ReportDateFilter({
           <Trans>Static</Trans>
         </ModeButton>
       </SpaceBetween>
+      {header}
       {!isDateStatic ? (
         <View
           style={{

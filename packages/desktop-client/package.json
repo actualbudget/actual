@@ -65,6 +65,7 @@
     "#components/reports/getLiveRange": "./src/components/reports/getLiveRange.ts",
     "#components/reports/monthRange": "./src/components/reports/monthRange.ts",
     "#components/reports/graphs/showActivity": "./src/components/reports/graphs/showActivity.ts",
+    "#components/reports/graphs/useFormatBaselineWindow": "./src/components/reports/graphs/useFormatBaselineWindow.ts",
     "#components/reports/graphs/util/computePadding": "./src/components/reports/graphs/util/computePadding.ts",
     "#components/reports/graphs/util/monteCarloCashflowChart": "./src/components/reports/graphs/util/monteCarloCashflowChart.ts",
     "#components/reports/graphs/util/monteCarloPotBalancesChart": "./src/components/reports/graphs/util/monteCarloPotBalancesChart.ts",

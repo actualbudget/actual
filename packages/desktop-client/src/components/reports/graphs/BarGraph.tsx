@@ -58,6 +58,8 @@ type PayloadItem = {
   payload: {
     name: string;
     baseline?: BaselineBreakdown;
+    baselineStartDate?: string;
+    baselineEndDate?: string;
     totalAssets: number;
     totalDebts: number;
     netAssets: number;
@@ -95,6 +97,9 @@ const CustomTooltip = ({
         breakdown={row.baseline}
         balanceTypeOp={balanceTypeOp}
         format={format}
+        // Interval bars carry their own window; category bars cover them all
+        baselineStartDate={row.baselineStartDate}
+        baselineEndDate={row.baselineEndDate}
       />
     );
   }

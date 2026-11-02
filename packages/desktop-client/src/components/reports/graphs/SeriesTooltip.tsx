@@ -22,6 +22,7 @@ import { getChangeColor } from './getChangeColor';
 import { SeriesTooltipRow } from './SeriesTooltipRow';
 import type { SeriesRow } from './SeriesTooltipRow';
 import { TooltipCard } from './TooltipCard';
+import { useFormatBaselineWindow } from './useFormatBaselineWindow';
 
 const maxCompactRows = 5;
 
@@ -69,6 +70,7 @@ export function SeriesTooltip({
   order,
   hideZero = false,
 }: SeriesTooltipProps) {
+  const formatBaselineWindow = useFormatBaselineWindow();
   const interval = payload?.[0]?.payload;
   if (!active || !interval) {
     return null;
@@ -82,7 +84,13 @@ export function SeriesTooltip({
   const breakdown = interval.baseline;
   // Intervals that haven't started only have a baseline to list
   const isUpcoming = !!breakdown?.upcoming;
-  const hasChangeColumn = !!breakdown && !isUpcoming;
+  // A window before the earliest transaction has nothing to compare
+  const hasNoData = !!breakdown?.noData;
+  const hasChangeColumn = !!breakdown && !isUpcoming && !hasNoData;
+  const baselineWindow = formatBaselineWindow(
+    interval.baselineStartDate,
+    interval.baselineEndDate,
+  );
 
   const getRow = (entry: LegendEntity): SeriesRow | null => {
     const key = entry.dataKey;
@@ -168,11 +176,24 @@ export function SeriesTooltip({
         {breakdown && (
           <>
             <span>{baselineLabel}</span>
-            <FinancialText style={{ textAlign: 'right' }}>
-              {format(sumOf(getBaselineKey), 'financial')}
-            </FinancialText>
+            {hasNoData ? (
+              <span style={{ textAlign: 'right' }}>
+                <Trans>No data</Trans>
+              </span>
+            ) : (
+              <FinancialText style={{ textAlign: 'right' }}>
+                {format(sumOf(getBaselineKey), 'financial')}
+              </FinancialText>
+            )}
             {hasChangeColumn && <span />}
           </>
+        )}
+        {baselineWindow && (
+          <span
+            style={{ gridColumn: '1 / -1', color: theme.menuItemTextHeader }}
+          >
+            <Trans>Compared with {{ baselineWindow }}</Trans>
+          </span>
         )}
         {!isUpcoming && (
           <>

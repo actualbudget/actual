@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { Input } from '@actual-app/components/input';
 import { Menu } from '@actual-app/components/menu';
 import { ModeButton } from '@actual-app/components/mode-button';
 import { Popover } from '@actual-app/components/popover';
@@ -35,11 +36,16 @@ import {
   canUseBudgetedBaseline,
   defaultBaseline,
   getBaselineRange,
+  getOffsetDays,
+  isOffsetBaseline,
+  isOffsetOverlapping,
   rangesOverlap,
+  shiftRange,
 } from './baselineRange';
 import { CategorySelector } from './CategorySelector';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
+import { useFormatBaselineWindow } from './graphs/useFormatBaselineWindow';
 import { ReportDateFilter } from './ReportDateFilter';
 import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
@@ -156,7 +162,12 @@ export function ReportSidebar({
   const isShowingChanges = canShowChanges && !!baseline.showChanges;
   const canChangeFromBaseline =
     customReportItems.graphType === 'BarGraph' && !isShowingChanges;
-  const canUseBudgeted = canUseBudgetedBaseline(customReportItems.groupBy);
+  const isOffset = isOffsetBaseline(baseline);
+  const offsetDays = getOffsetDays(baseline);
+  const formatBaselineWindow = useFormatBaselineWindow();
+  // Budgets are set per month, so they can't be offset by days or weeks yet
+  const canUseBudgeted =
+    canUseBudgetedBaseline(customReportItems.groupBy) && !isOffset;
   const baselineSource = baseline.source ?? 'actual';
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -312,6 +323,73 @@ export function ReportSidebar({
         ?.graphs.find(g => g.description === customReportItems.graphType)
         ?.disableSort ??
         false));
+
+  const baselineCompareRow = (
+    <View style={{ flexDirection: 'row', padding: 5, alignItems: 'center' }}>
+      <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+        <Trans>Using:</Trans>
+      </Text>
+      <Select
+        value={baseline.mode ?? 'range'}
+        onChange={mode =>
+          updateBaseline({
+            ...baseline,
+            mode,
+            // Budgets can't be offset by days or weeks yet
+            ...(mode === 'offset' && { source: 'actual' as const }),
+          })
+        }
+        options={[
+          ['range', t('Date range')],
+          ['offset', t('Offset')],
+        ]}
+      />
+    </View>
+  );
+
+  const baselineSourceRow = (
+    <View
+      style={{
+        flexDirection: 'row',
+        padding: 5,
+        alignItems: 'center',
+      }}
+    >
+      <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+        <Trans>Source:</Trans>
+      </Text>
+      <Tooltip
+        placement="bottom start"
+        content={
+          <Text>
+            {isOffset ? (
+              <Trans>
+                Budgets are set per month, so an offset baseline can only
+                compare actual amounts for now.
+              </Trans>
+            ) : (
+              <Trans>
+                Budgets are only set for categories, so a budgeted baseline
+                needs a Category, Group or Interval split.
+              </Trans>
+            )}
+          </Text>
+        }
+        style={{ ...styles.tooltip, lineHeight: 1.5 }}
+        triggerProps={{ isDisabled: canUseBudgeted }}
+      >
+        <Select
+          value={baselineSource}
+          onChange={source => updateBaseline({ ...baseline, source })}
+          options={[
+            ['actual', t('Actual amounts')],
+            ['budgeted', t('Budgeted')],
+          ]}
+          disabledKeys={canUseBudgeted ? [] : ['budgeted']}
+        />
+      </Tooltip>
+    </View>
+  );
 
   return (
     <View
@@ -748,102 +826,154 @@ export function ReportSidebar({
                 flexShrink: 0,
               }}
             />
-            <ReportDateFilter
-              title={<Trans>Baseline</Trans>}
-              interval={customReportItems.interval}
-              dateRange={baseline.dateRange}
-              isDateStatic={baseline.isDateStatic}
-              startDate={baseline.startDate}
-              endDate={baseline.endDate}
-              includeCurrentInterval={baseline.includeCurrentInterval}
-              dateRangeLine={dateRangeLine}
-              allIntervals={allIntervals}
-              earliestTransaction={earliestTransaction}
-              latestTransaction={latestTransaction}
-              firstDayOfWeekIdx={firstDayOfWeekIdx}
-              onSelectRange={dateRange =>
-                updateBaseline({ ...baseline, dateRange })
-              }
-              onChangeDates={(startDate, endDate) =>
-                updateBaseline({ ...baseline, startDate, endDate })
-              }
-              onChangeStatic={isDateStatic =>
-                updateBaseline({ ...baseline, isDateStatic })
-              }
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  padding: 5,
-                  alignItems: 'center',
-                }}
-              >
-                <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
-                  <Trans>Source:</Trans>
+            {isOffset ? (
+              <>
+                <Text style={{ marginTop: 10, marginBottom: 5 }}>
+                  <strong>
+                    <Trans>Baseline</Trans>
+                  </strong>
                 </Text>
-                <Tooltip
-                  placement="bottom start"
-                  content={
-                    <Text>
-                      <Trans>
-                        Budgets are only set for categories, so a budgeted
-                        baseline needs a Category, Group or Interval split.
-                      </Trans>
-                    </Text>
-                  }
-                  style={{ ...styles.tooltip, lineHeight: 1.5 }}
-                  triggerProps={{ isDisabled: canUseBudgeted }}
+                {baselineCompareRow}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    padding: 5,
+                    alignItems: 'center',
+                  }}
                 >
-                  <Select
-                    value={baselineSource}
-                    onChange={source => updateBaseline({ ...baseline, source })}
-                    options={[
-                      ['actual', t('Actual amounts')],
-                      ['budgeted', t('Budgeted')],
-                    ]}
-                    disabledKeys={canUseBudgeted ? [] : ['budgeted']}
+                  <Text
+                    style={{ width: 50, textAlign: 'right', marginRight: 5 }}
                   />
-                </Tooltip>
-              </View>
-              <View style={{ padding: '5px 5px 0 10px' }}>
-                <LabeledCheckbox
-                  id="baseline-include-current"
-                  checked={baseline.includeCurrentInterval}
-                  disabled={
-                    baseline.isDateStatic ||
-                    disabledList.currentInterval.get(baseline.dateRange)
-                  }
-                  onChange={() =>
-                    updateBaseline({
-                      ...baseline,
-                      includeCurrentInterval: !baseline.includeCurrentInterval,
-                    })
-                  }
+                  <Input
+                    type="number"
+                    min={1}
+                    step={1}
+                    aria-label={t('Offset')}
+                    defaultValue={
+                      baseline.offsetCount ?? defaultBaseline.offsetCount
+                    }
+                    // Only whole, positive offsets are saved; anything else is
+                    // put back when the field loses focus
+                    onChangeValue={value => {
+                      const offsetCount = Number(value);
+                      if (Number.isInteger(offsetCount) && offsetCount >= 1) {
+                        updateBaseline({ ...baseline, offsetCount });
+                      }
+                    }}
+                    onUpdate={(_value, event) => {
+                      event.currentTarget.value = String(
+                        baseline.offsetCount ?? defaultBaseline.offsetCount,
+                      );
+                    }}
+                    style={{ width: 60, marginRight: 5 }}
+                  />
+                  <Select
+                    value={baseline.offsetUnit ?? 'weeks'}
+                    onChange={offsetUnit =>
+                      updateBaseline({ ...baseline, offsetUnit })
+                    }
+                    options={[
+                      ['days', t('days')],
+                      ['weeks', t('weeks')],
+                    ]}
+                  />
+                </View>
+                <Text
+                  style={{
+                    padding: '0 5px 5px 60px',
+                    color: theme.pageTextSubdued,
+                  }}
                 >
-                  <Trans>Include current period</Trans>
-                </LabeledCheckbox>
-              </View>
-              {rangesOverlap(
-                [customReportItems.startDate, customReportItems.endDate],
-                [baseline.startDate, baseline.endDate],
-              ) && (
-                <Information style={{ marginTop: 5 }}>
-                  <Trans>
-                    The baseline overlaps the report's date range, so some
-                    transactions count towards both.
-                  </Trans>
-                </Information>
-              )}
-              {baselineSource === 'budgeted' &&
-                customReportItems.balanceType !== 'Payment' &&
-                customReportItems.balanceType !== 'Budgeted' && (
+                  {formatBaselineWindow(
+                    ...shiftRange(
+                      customReportItems.startDate,
+                      customReportItems.endDate,
+                      offsetDays,
+                    ),
+                  )}
+                </Text>
+                {baselineSourceRow}
+                {isOffsetOverlapping(
+                  offsetDays,
+                  customReportItems.interval,
+                ) && (
                   <Information style={{ marginTop: 5 }}>
                     <Trans>
-                      Income isn't budgeted, so the baseline counts it as zero.
+                      The offset is shorter than an interval, so some
+                      transactions count towards both an interval and its
+                      baseline.
                     </Trans>
                   </Information>
                 )}
-            </ReportDateFilter>
+              </>
+            ) : (
+              <ReportDateFilter
+                title={<Trans>Baseline</Trans>}
+                header={baselineCompareRow}
+                interval={customReportItems.interval}
+                dateRange={baseline.dateRange}
+                isDateStatic={baseline.isDateStatic}
+                startDate={baseline.startDate}
+                endDate={baseline.endDate}
+                includeCurrentInterval={baseline.includeCurrentInterval}
+                dateRangeLine={dateRangeLine}
+                allIntervals={allIntervals}
+                earliestTransaction={earliestTransaction}
+                latestTransaction={latestTransaction}
+                firstDayOfWeekIdx={firstDayOfWeekIdx}
+                onSelectRange={dateRange =>
+                  updateBaseline({ ...baseline, dateRange })
+                }
+                onChangeDates={(startDate, endDate) =>
+                  updateBaseline({ ...baseline, startDate, endDate })
+                }
+                onChangeStatic={isDateStatic =>
+                  updateBaseline({ ...baseline, isDateStatic })
+                }
+              >
+                {baselineSourceRow}
+                <View style={{ padding: '5px 5px 0 10px' }}>
+                  <LabeledCheckbox
+                    id="baseline-include-current"
+                    checked={baseline.includeCurrentInterval}
+                    disabled={
+                      baseline.isDateStatic ||
+                      disabledList.currentInterval.get(baseline.dateRange)
+                    }
+                    onChange={() =>
+                      updateBaseline({
+                        ...baseline,
+                        includeCurrentInterval:
+                          !baseline.includeCurrentInterval,
+                      })
+                    }
+                  >
+                    <Trans>Include current period</Trans>
+                  </LabeledCheckbox>
+                </View>
+                {rangesOverlap(
+                  [customReportItems.startDate, customReportItems.endDate],
+                  [baseline.startDate, baseline.endDate],
+                ) && (
+                  <Information style={{ marginTop: 5 }}>
+                    <Trans>
+                      The baseline overlaps the report's date range, so some
+                      transactions count towards both.
+                    </Trans>
+                  </Information>
+                )}
+                {baselineSource === 'budgeted' &&
+                  customReportItems.balanceType !== 'Payment' &&
+                  customReportItems.balanceType !== 'Budgeted' && (
+                    <Information style={{ marginTop: 5 }}>
+                      <Trans>
+                        Income isn't budgeted, so the baseline counts it as
+                        zero.
+                      </Trans>
+                    </Information>
+                  )}
+              </ReportDateFilter>
+            )}
           </>
         )}
         <View

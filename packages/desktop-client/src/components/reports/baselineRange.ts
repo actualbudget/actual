@@ -28,14 +28,19 @@ export const defaultBaseline: CustomReportBaseline = {
 };
 
 /**
- * The dates of a baseline, resolving live ranges against today.
+ * The dates of a baseline, resolving live ranges against today. An offset
+ * baseline covers the report's range, moved back by the offset.
  */
 export function getBaselineRange(
   baseline: CustomReportBaseline,
   earliestTransaction: string,
   latestTransaction: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
+  reportRange?: [string, string],
 ): [string, string] {
+  if (isOffsetBaseline(baseline) && reportRange) {
+    return shiftRange(...reportRange, getOffsetDays(baseline));
+  }
   if (baseline.isDateStatic) {
     return [baseline.startDate, baseline.endDate];
   }

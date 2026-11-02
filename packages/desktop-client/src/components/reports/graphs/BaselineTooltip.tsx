@@ -12,11 +12,15 @@ import type { FormatType } from '#hooks/useFormat';
 
 import { getSpendingSign } from './getSpendingSign';
 import { TooltipCard } from './TooltipCard';
+import { useFormatBaselineWindow } from './useFormatBaselineWindow';
 
 type BaselineTooltipLinesProps = {
   breakdown: BaselineBreakdown;
   balanceTypeOp: balanceTypeOpType;
   format: (value: unknown, type: FormatType) => string;
+  // With an offset baseline: the interval's past window
+  baselineStartDate?: string;
+  baselineEndDate?: string;
 };
 
 /**
@@ -26,25 +30,57 @@ export function BaselineTooltipLines({
   breakdown,
   balanceTypeOp,
   format,
+  baselineStartDate,
+  baselineEndDate,
 }: BaselineTooltipLinesProps) {
   const { t } = useTranslation();
+  const formatBaselineWindow = useFormatBaselineWindow();
   // Spending is shown as positive, like the bars it describes
   const sign = getSpendingSign(balanceTypeOp);
   const show = (value: number) => format(sign * value || 0, 'financial');
   const baselineLabel = breakdown.budgeted ? t('Budgeted:') : t('Baseline:');
+  const baselineWindow = formatBaselineWindow(
+    baselineStartDate,
+    baselineEndDate,
+  );
+  const windowLine = baselineWindow && (
+    <AlignedText left={t('Compared with:')} right={baselineWindow} />
+  );
+
+  // A window before the earliest transaction has nothing to compare
+  if (breakdown.noData) {
+    return (
+      <>
+        {windowLine}
+        <AlignedText left={baselineLabel} right={t('No data')} />
+        <AlignedText
+          left={t('Current:')}
+          right={
+            <FinancialText>
+              {show(breakdown.actual[balanceTypeOp])}
+            </FinancialText>
+          }
+          style={{ fontWeight: 600 }}
+        />
+      </>
+    );
+  }
 
   // Intervals that haven't started only have a baseline to show
   if (breakdown.upcoming) {
     return (
-      <AlignedText
-        left={baselineLabel}
-        right={
-          <FinancialText>
-            {show(breakdown.upcoming[balanceTypeOp])}
-          </FinancialText>
-        }
-        style={{ fontWeight: 600 }}
-      />
+      <>
+        {windowLine}
+        <AlignedText
+          left={baselineLabel}
+          right={
+            <FinancialText>
+              {show(breakdown.upcoming[balanceTypeOp])}
+            </FinancialText>
+          }
+          style={{ fontWeight: 600 }}
+        />
+      </>
     );
   }
 
@@ -53,6 +89,7 @@ export function BaselineTooltipLines({
 
   return (
     <>
+      {windowLine}
       <AlignedText
         left={baselineLabel}
         right={

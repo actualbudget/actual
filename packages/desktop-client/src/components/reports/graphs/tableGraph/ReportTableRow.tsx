@@ -16,6 +16,7 @@ import type {
 import { FinancialText } from '#components/FinancialText';
 import { countElapsedDays } from '#components/reports/baselineRange';
 import { showActivity } from '#components/reports/graphs/showActivity';
+import { useFormatBaselineWindow } from '#components/reports/graphs/useFormatBaselineWindow';
 import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -99,6 +100,7 @@ export const ReportTableRow = memo(
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
     const { t } = useTranslation();
+    const formatBaselineWindow = useFormatBaselineWindow();
 
     // Spells out what a baseline interval was compared against, since its
     // length can differ from the average interval in the Baseline column
@@ -113,16 +115,29 @@ export const ReportTableRow = memo(
           : undefined;
       }
 
+      const baselineWindow = formatBaselineWindow(
+        intervalItem.baselineStartDate,
+        intervalItem.baselineEndDate,
+      );
+      // A window before the earliest transaction has nothing to compare
+      if (intervalBreakdown.noData) {
+        return t('Baseline ({{baselineWindow}}): no data', { baselineWindow });
+      }
+
       const change = intervalItem[balanceTypeOp];
       const expected = format(
         intervalBreakdown.expected[balanceTypeOp],
         'financial',
       );
-      const baselineLine =
-        // Budgets are compared per interval, so their length doesn't matter
-        balanceTypeOp === 'totalBudgeted' ||
-        !intervalItem.intervalStartDate ||
-        !intervalItem.intervalEndDate
+      const baselineLine = baselineWindow
+        ? t('Baseline ({{baselineWindow}}): {{amount}}', {
+            baselineWindow,
+            amount: expected,
+          })
+        : // Budgets are compared per interval, so their length doesn't matter
+          balanceTypeOp === 'totalBudgeted' ||
+            !intervalItem.intervalStartDate ||
+            !intervalItem.intervalEndDate
           ? t('Baseline: {{amount}}', { amount: expected })
           : // Budgets are spread by months, so a day count doesn't apply
             intervalBreakdown.budgeted
@@ -286,9 +301,10 @@ export const ReportTableRow = memo(
                 const intervalAmount = intervalBreakdown
                   ? intervalBreakdown.actual[balanceTypeOp]
                   : intervalItem[balanceTypeOp];
-                const intervalChange = intervalBreakdown
-                  ? intervalItem[balanceTypeOp]
-                  : undefined;
+                const intervalChange =
+                  intervalBreakdown && !intervalBreakdown.noData
+                    ? intervalItem[balanceTypeOp]
+                    : undefined;
                 const intervalColor =
                   intervalChange !== undefined
                     ? getAmountColor(intervalChange)
