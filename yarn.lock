@@ -239,6 +239,8 @@ __metadata:
     "@actual-app/components": "workspace:*"
     "@actual-app/core": "workspace:*"
     "@babel/core": "npm:^8.0.7"
+    "@capacitor/core": "npm:^8.4.2"
+    "@capacitor/haptics": "npm:^8.0.2"
     "@codemirror/autocomplete": "npm:^6.20.3"
     "@codemirror/language": "npm:^6.13.1"
     "@codemirror/state": "npm:^6.7.6"
@@ -2126,6 +2128,15 @@ __metadata:
   dependencies:
     tslib: "npm:^2.1.0"
   checksum: 10/dc1f1cf89de2bbdce1fa4b7b8f9eac81886bed6c9956038cd9463c057aba189d1eca938acba798ba039e86ef51e8d7b0eb70db2be08994ddbbd5aa6a35a2deb6
+  languageName: node
+  linkType: hard
+
+"@capacitor/haptics@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "@capacitor/haptics@npm:8.0.2"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/cf8a685300119a2e6316b41f372fa00ba92ddae53e9ee2ed33a4e0ab154c83f4bf8d1fd6034326d477f41949bf018d0074d6db4417f44dd6a62da782196ced91
   languageName: node
   linkType: hard
 
@@ -20243,6 +20254,7 @@ __metadata:
     "@capacitor/android": "npm:^8.4.3"
     "@capacitor/cli": "npm:^8.4.2"
     "@capacitor/core": "npm:^8.4.2"
+    "@capacitor/haptics": "npm:^8.0.2"
     "@capacitor/ios": "npm:^8.5.3"
     "@capacitor/splash-screen": "npm:^8.0.2"
   languageName: unknown
