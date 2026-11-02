@@ -58,7 +58,16 @@ export const reportModel = {
           typeof baseline.changeFromBaseline !== 'boolean') ||
         (baseline.source !== undefined &&
           baseline.source !== 'actual' &&
-          baseline.source !== 'budgeted'))
+          baseline.source !== 'budgeted') ||
+        (baseline.mode !== undefined &&
+          baseline.mode !== 'range' &&
+          baseline.mode !== 'offset') ||
+        (baseline.offsetCount !== undefined &&
+          (!Number.isInteger(baseline.offsetCount) ||
+            baseline.offsetCount < 1)) ||
+        (baseline.offsetUnit !== undefined &&
+          baseline.offsetUnit !== 'days' &&
+          baseline.offsetUnit !== 'weeks'))
     ) {
       throw new ValidationError('Invalid report baseline.');
     }

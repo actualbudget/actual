@@ -7,8 +7,11 @@ import {
   defaultBaseline,
   getBaselineRange,
   getFullIntervalDays,
+  getOffsetDays,
   isBudgetedBaseline,
+  isOffsetOverlapping,
   rangesOverlap,
+  shiftRange,
 } from './baselineRange';
 import { disabledList } from './disabledList';
 import { ReportOptions } from './ReportOptions';
@@ -57,6 +60,45 @@ describe('budgeted baselines', () => {
     expect(isBudgetedBaseline(budgeted, 'Category')).toBe(true);
     expect(isBudgetedBaseline(budgeted, 'Tag')).toBe(false);
     expect(isBudgetedBaseline(defaultBaseline, 'Category')).toBe(false);
+  });
+
+  it('do not apply to offset baselines', () => {
+    const offset = {
+      ...defaultBaseline,
+      source: 'budgeted' as const,
+      mode: 'offset' as const,
+    };
+    expect(isBudgetedBaseline(offset, 'Category')).toBe(false);
+  });
+});
+
+describe('offset baselines', () => {
+  it('convert weeks to days', () => {
+    expect(
+      getOffsetDays({ ...defaultBaseline, offsetCount: 3, offsetUnit: 'days' }),
+    ).toBe(3);
+    expect(
+      getOffsetDays({ ...defaultBaseline, offsetCount: 52, offsetUnit: 'weeks' }),
+    ).toBe(364);
+  });
+
+  it('shift both ends of a range, accepting month strings', () => {
+    expect(shiftRange('2017-03', '2017-03-31', 364)).toEqual([
+      '2016-03-02',
+      '2016-04-01',
+    ]);
+    expect(shiftRange('2017-01-01', '2017-01-07', 7)).toEqual([
+      '2016-12-25',
+      '2016-12-31',
+    ]);
+  });
+
+  it('warn when windows can overlap their intervals', () => {
+    expect(isOffsetOverlapping(7, 'Weekly')).toBe(false);
+    expect(isOffsetOverlapping(6, 'Weekly')).toBe(true);
+    expect(isOffsetOverlapping(28, 'Monthly')).toBe(true);
+    expect(isOffsetOverlapping(35, 'Monthly')).toBe(false);
+    expect(isOffsetOverlapping(1, 'Daily')).toBe(false);
   });
 });
 

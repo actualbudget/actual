@@ -6,7 +6,8 @@ export type CustomReportTagScope =
 
 export type CustomReportMetadata = Record<string, unknown>;
 
-// A date range the report's data is offset against, by its daily average
+// What the report's data is offset against: a date range, by its daily
+// average, or each interval's own window an offset back in time
 export type CustomReportBaseline = {
   enabled: boolean;
   dateRange: string;
@@ -24,9 +25,17 @@ export type CustomReportBaseline = {
   // Compare against what was spent over the range, or the average of what
   // was budgeted for it. Optional since older reports don't store it.
   source?: CustomReportBaselineSource;
+  // Optional since older reports don't store them, and those use a range
+  mode?: CustomReportBaselineMode;
+  offsetCount?: number;
+  offsetUnit?: CustomReportBaselineOffsetUnit;
 };
 
 export type CustomReportBaselineSource = 'actual' | 'budgeted';
+
+export type CustomReportBaselineMode = 'range' | 'offset';
+
+export type CustomReportBaselineOffsetUnit = 'days' | 'weeks';
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
@@ -91,6 +100,9 @@ export type BaselineBreakdown = {
   pacePerInterval?: ReportValues;
   // The baseline is the average of what was budgeted, not what was spent
   budgeted?: boolean;
+  // An offset baseline's window is before the earliest transaction, so there
+  // is nothing to compare against
+  noData?: boolean;
 };
 
 export type SpendingMonthEntity = Record<
@@ -176,6 +188,9 @@ export type IntervalEntity = {
   // is null before it starts, and its baseline
   amount?: number | null;
   baselineAmount?: number | null;
+  // With an offset baseline: the past window this interval is compared with
+  baselineStartDate?: string;
+  baselineEndDate?: string;
 };
 
 export type GroupedEntity = {

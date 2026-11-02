@@ -21,6 +21,10 @@ export const defaultBaseline: CustomReportBaseline = {
   showChanges: false,
   changeFromBaseline: false,
   source: 'actual',
+  mode: 'range',
+  // The same days of the week, a year back
+  offsetCount: 52,
+  offsetUnit: 'weeks',
 };
 
 /**
@@ -44,6 +48,50 @@ export function getBaselineRange(
     firstDayOfWeekIdx,
   );
   return [start, end];
+}
+
+export function isOffsetBaseline(baseline: CustomReportBaseline) {
+  return baseline.mode === 'offset';
+}
+
+/**
+ * How many days an offset baseline looks back.
+ */
+export function getOffsetDays(baseline: CustomReportBaseline) {
+  const count = baseline.offsetCount ?? defaultBaseline.offsetCount ?? 1;
+  return baseline.offsetUnit === 'days' ? count : count * 7;
+}
+
+/**
+ * A range moved back by a number of days. Interval starts can be month or
+ * year strings.
+ */
+export function shiftRange(
+  start: string,
+  end: string,
+  offsetDays: number,
+): [string, string] {
+  return [
+    monthUtils.subDays(monthUtils.dayFromDate(start), offsetDays),
+    monthUtils.subDays(monthUtils.dayFromDate(end), offsetDays),
+  ];
+}
+
+// The longest an interval can be, in days
+const longestIntervalDays: Record<string, number> = {
+  Daily: 1,
+  Weekly: 7,
+  Monthly: 31,
+  Quarterly: 92,
+  Yearly: 366,
+};
+
+/**
+ * Whether an offset is short enough that an interval's past window can
+ * overlap the interval itself.
+ */
+export function isOffsetOverlapping(offsetDays: number, interval: string) {
+  return offsetDays < (longestIntervalDays[interval] ?? 31);
 }
 
 /**
@@ -167,7 +215,13 @@ export function isBudgetedBaseline(
   baseline: CustomReportBaseline,
   groupBy: string,
 ) {
-  return baseline.source === 'budgeted' && canUseBudgetedBaseline(groupBy);
+  // Budgets are set per month, so an offset of days or weeks would have to
+  // spread them over part months
+  return (
+    baseline.source === 'budgeted' &&
+    !isOffsetBaseline(baseline) &&
+    canUseBudgetedBaseline(groupBy)
+  );
 }
 
 // Graphs that can draw changes from the baseline instead of amounts with the
