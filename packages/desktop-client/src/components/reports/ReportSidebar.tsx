@@ -398,16 +398,16 @@ export function ReportSidebar({
   );
 
   const baselineSourceRow = (
-    <View
-      style={{
-        flexDirection: 'row',
-        padding: 5,
-        alignItems: 'center',
-      }}
-    >
-      <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+    <SpaceBetween gap={5} style={{ padding: 5 }}>
+      <Text style={{ width: 50, textAlign: 'right' }}>
         <Trans>Source:</Trans>
       </Text>
+      <ModeButton
+        selected={baselineSource === 'actual'}
+        onSelect={() => updateBaseline({ ...baseline, source: 'actual' })}
+      >
+        <Trans>Actual</Trans>
+      </ModeButton>
       <Tooltip
         placement="bottom start"
         content={
@@ -428,17 +428,15 @@ export function ReportSidebar({
         style={{ ...styles.tooltip, lineHeight: 1.5 }}
         triggerProps={{ isDisabled: canUseBudgeted }}
       >
-        <Select
-          value={baselineSource}
-          onChange={source => updateBaseline({ ...baseline, source })}
-          options={[
-            ['actual', t('Actual amounts')],
-            ['budgeted', t('Budgeted')],
-          ]}
-          disabledKeys={canUseBudgeted ? [] : ['budgeted']}
-        />
+        <ModeButton
+          selected={baselineSource === 'budgeted'}
+          isDisabled={!canUseBudgeted}
+          onSelect={() => updateBaseline({ ...baseline, source: 'budgeted' })}
+        >
+          <Trans>Budgeted</Trans>
+        </ModeButton>
       </Tooltip>
-    </View>
+    </SpaceBetween>
   );
 
   return (
@@ -662,38 +660,24 @@ export function ReportSidebar({
           </View>
         )}
         {!disableSort && isBaselineEnabled && canSortByAmount && (
-          <SpaceBetween
-            gap={5}
-            wrap={false}
-            align="start"
-            style={{ padding: 5 }}
+          <View
+            style={{
+              flexDirection: 'row',
+              padding: 5,
+              alignItems: 'center',
+            }}
           >
-            {/* Level with the text of the first row of buttons */}
-            <Text
-              style={{
-                width: 50,
-                textAlign: 'right',
-                flexShrink: 0,
-                paddingTop: 5,
-              }}
-            >
+            <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
               <Trans>By:</Trans>
             </Text>
-            {/* Wraps under the first button, not under the label */}
-            <SpaceBetween gap={5} style={{ flex: 1 }}>
-              {sortAmountOptions.map(([option, label]) => (
-                <ModeButton
-                  key={option}
-                  selected={sortAmount === option}
-                  onSelect={() =>
-                    updateBaseline({ ...baseline, sortAmount: option })
-                  }
-                >
-                  {label}
-                </ModeButton>
-              ))}
-            </SpaceBetween>
-          </SpaceBetween>
+            <Select
+              value={sortAmount}
+              onChange={sortAmount =>
+                updateBaseline({ ...baseline, sortAmount })
+              }
+              options={sortAmountOptions}
+            />
+          </View>
         )}
 
         <View
