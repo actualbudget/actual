@@ -965,9 +965,11 @@ export function ReportSidebar({
                       </Trans>
                     </Information>
                   )}
+                  {/* Only these balance types count income categories */}
                   {baselineSource === 'budgeted' &&
-                    customReportItems.balanceType !== 'Payment' &&
-                    customReportItems.balanceType !== 'Budgeted' && (
+                    ['Deposit', 'Net', 'Net Deposit'].includes(
+                      customReportItems.balanceType,
+                    ) && (
                       <Information style={{ marginTop: 5 }}>
                         <Trans>
                           Income isn't budgeted, so the baseline counts it as
