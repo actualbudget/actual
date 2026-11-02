@@ -49,19 +49,21 @@ export function XlsxOptions({ metadata, options, onChange }: XlsxOptionsProps) {
       <label htmlFor="xlsx-header-row">
         <Trans>Header row:</Trans>{' '}
         <Input
+          key={`${options.worksheet ?? ''}:${options.headerRow ?? ''}:${options.detectHeader ?? true}`}
           id="xlsx-header-row"
           type="number"
           min={1}
-          value={
+          defaultValue={
             options.headerRow === undefined ? '' : String(options.headerRow)
           }
           placeholder={metadata ? String(metadata.headerRow) : '1'}
-          onChangeValue={value =>
-            onChange({
-              ...options,
-              headerRow: value === '' ? undefined : Number(value),
-            })
-          }
+          onUpdate={value => {
+            const headerRow = value === '' ? undefined : Number(value);
+            if (headerRow !== options.headerRow) {
+              onChange({ ...options, headerRow });
+            }
+          }}
+          onEnter={(_value, event) => event.currentTarget.blur()}
           style={{ width: 80 }}
         />
       </label>
