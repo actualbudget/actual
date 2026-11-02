@@ -7,6 +7,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import {
   amountToInteger,
   currencyToAmount,
+  getNumberFormat,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -77,9 +78,15 @@ function normalizeIntegerValue(
   val: number | null | undefined,
   decimalPlaces = 2,
 ) {
-  return typeof val === 'number'
-    ? currencyToAmount(integerToCurrency(val, undefined, decimalPlaces))
-    : 0;
+  if (typeof val !== 'number') {
+    return 0;
+  }
+  // Round to the currency's digits when it shows fewer than the stored two
+  const formatter =
+    decimalPlaces < 2
+      ? getNumberFormat({ decimalPlaces }).formatter
+      : undefined;
+  return currencyToAmount(integerToCurrency(val, formatter));
 }
 
 /**
@@ -96,7 +103,6 @@ export function getGoalDifference(
   return amountToInteger(
     normalizeIntegerValue(have, decimalPlaces) -
       normalizeIntegerValue(goalValue, decimalPlaces),
-    decimalPlaces,
   );
 }
 

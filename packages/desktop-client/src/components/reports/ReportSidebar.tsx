@@ -210,7 +210,7 @@ export function ReportSidebar({
         setGroupBy('Category');
         defaultItems('Category');
       }
-      // Budgeted only supports Monthly and Yearly intervals
+      // Budgeted only supports Monthly, Quarterly and Yearly intervals
       if (
         customReportItems.interval === 'Daily' ||
         customReportItems.interval === 'Weekly'

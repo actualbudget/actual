@@ -37,6 +37,10 @@ Make a transfer of existing transactions in the same way you [bulk-edit transact
 3. Go to the drop down top right (the arrow next to "2 transactions")
 4. If the transactions are valid to be converted to a transfer, you can click **Make transfer**.
 
+## Finding the Other Side of a Transfer
+
+Next to the payee of a transfer, an arrow points to the other account. Click it to open that account with the other side of the transfer scrolled into view and briefly highlighted.
+
 ## Modifying a Transfer
 
 Some fields are tied together across the two halves of a transfer, and some are not.

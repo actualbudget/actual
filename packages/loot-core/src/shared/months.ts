@@ -249,11 +249,17 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  return month === currentMonth();
+  const isValid =
+    typeof month === 'string'
+      ? isValidYearMonth(month) || isValidYearMonthDay(month)
+      : d.isValid(month);
+  return isValid && monthFromDate(month) === currentMonth();
 }
 
 export function isCurrentDay(day: DateLike): boolean {
-  return day === currentDay();
+  const isValid =
+    typeof day === 'string' ? isValidYearMonthDay(day) : d.isValid(day);
+  return isValid && dayFromDate(day) === currentDay();
 }
 
 // TODO: This doesn't really fit in this module anymore, should
@@ -429,6 +435,29 @@ export function getQuarterStart(month: string): string {
 export function getQuarterEnd(month: string): string {
   const endMonth = getQuarter(month) * 3;
   return getYear(month) + '-' + String(endMonth).padStart(2, '0');
+}
+
+// Quarters are keyed by their first month, e.g. Q2 2024 is '2024-04'.
+export function quarterFromDate(date: DateLike): string {
+  return getQuarterStart(monthFromDate(date));
+}
+
+export function currentQuarter(): string {
+  return getQuarterStart(currentMonth());
+}
+
+export function quarterRangeInclusive(
+  start: DateLike,
+  end: DateLike,
+): string[] {
+  const quarters: string[] = [];
+  let quarter = quarterFromDate(start);
+  const endQuarter = quarterFromDate(end);
+  while (quarter <= endQuarter) {
+    quarters.push(quarter);
+    quarter = addMonths(quarter, 3);
+  }
+  return quarters;
 }
 
 export function sheetForMonth(month: string): string {

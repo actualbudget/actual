@@ -1,6 +1,7 @@
 import createDebug from 'debug';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
+import { fetch } from 'undici';
 
 import { config } from './load-config';
 import { requestLoggerMiddleware } from './util/middlewares';
