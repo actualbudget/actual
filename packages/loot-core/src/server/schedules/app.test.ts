@@ -21,6 +21,7 @@ import {
   areConditionValuesEqual,
   createSchedule,
   deleteSchedule,
+  linkTransactionsToSchedule,
   app as schedulesApp,
   setNextDate,
   skipNextDate,
@@ -1699,6 +1700,95 @@ describe('schedule app', () => {
 
       await syncSuccessfully();
       expect(syncErrors).toBe(1);
+    });
+  });
+
+  describe('linkTransactionsToSchedule', () => {
+    async function setup() {
+      const accountId = await db.insertAccount({ name: 'Checking' });
+      const groupId = await db.insertCategoryGroup({ name: 'Bills' });
+      const categoryId = await db.insertCategory({
+        name: 'Rent',
+        cat_group: groupId,
+      });
+      const scheduleId = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          { op: 'is', field: 'date', value: '2021-05-01' },
+        ],
+      });
+      const transactionId = await db.insertTransaction({
+        account: accountId,
+        amount: -100000,
+        date: '2021-05-01',
+        notes: 'May',
+      });
+      const {
+        data: [{ rule: ruleId }],
+      } = await aqlQuery(
+        q('schedules').filter({ id: scheduleId }).select(['rule']),
+      );
+      return { categoryId, scheduleId, transactionId, ruleId };
+    }
+
+    async function getTransaction(id: string) {
+      const {
+        data: [transaction],
+      } = await aqlQuery(
+        q('transactions')
+          .filter({ id })
+          .select(['schedule', 'category', 'notes']),
+      );
+      return transaction;
+    }
+
+    it('links without changing anything else when the rule has no extra actions', async () => {
+      const { scheduleId, transactionId } = await setup();
+
+      await linkTransactionsToSchedule({ ids: [transactionId], scheduleId });
+
+      expect(await getTransaction(transactionId)).toMatchObject({
+        schedule: scheduleId,
+        category: null,
+        notes: 'May',
+      });
+    });
+
+    it("applies the schedule rule's set and notes actions", async () => {
+      const { categoryId, scheduleId, transactionId, ruleId } = await setup();
+      await updateRule({
+        id: ruleId,
+        actions: [
+          { op: 'link-schedule', value: scheduleId },
+          { op: 'set', field: 'category', value: categoryId, type: 'id' },
+          { op: 'append-notes', value: ' rent' },
+        ],
+      });
+
+      await linkTransactionsToSchedule({ ids: [transactionId], scheduleId });
+
+      expect(await getTransaction(transactionId)).toMatchObject({
+        schedule: scheduleId,
+        category: categoryId,
+        notes: 'May rent',
+      });
+    });
+
+    it('does not replay delete actions', async () => {
+      const { scheduleId, transactionId, ruleId } = await setup();
+      await updateRule({
+        id: ruleId,
+        actions: [
+          { op: 'link-schedule', value: scheduleId },
+          { op: 'delete-transaction', value: null },
+        ],
+      });
+
+      await linkTransactionsToSchedule({ ids: [transactionId], scheduleId });
+
+      expect(await getTransaction(transactionId)).toMatchObject({
+        schedule: scheduleId,
+      });
     });
   });
 

@@ -137,12 +137,9 @@ export function MobileScheduleEditPage() {
   }
 
   async function onLinkTransactions(ids: string[], scheduleId?: string) {
-    await send('transactions-batch-update', {
-      updated: ids.map(id => ({
-        id,
-        schedule: scheduleId,
-      })),
-    });
+    if (scheduleId) {
+      await send('schedule/link-transactions', { ids, scheduleId });
+    }
     selectedInst.dispatch({ type: 'select-none' });
   }
 
