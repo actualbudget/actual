@@ -815,7 +815,9 @@ export function Overview({ dashboard }: OverviewProps) {
                   enabled: currentBreakpoint === 'desktop' && isEditing,
                 }}
                 onDragStart={
-                  currentBreakpoint === 'desktop' ? lockDragMinHeight : undefined
+                  currentBreakpoint === 'desktop'
+                    ? lockDragMinHeight
+                    : undefined
                 }
                 onDragStop={
                   currentBreakpoint === 'desktop'
