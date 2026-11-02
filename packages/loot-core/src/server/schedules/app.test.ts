@@ -1318,13 +1318,13 @@ describe('schedule app', () => {
 
   describe('schedule advancement failures', () => {
     let accountId: string;
-    let applyFailures: number;
+    let syncErrors: number;
     const catchUpDates = ['2016-12-18', '2016-12-25', '2017-01-01'];
     const healthyDates = ['2016-12-25', '2017-01-01'];
 
     function forwardSync(event: ServerEvents['sync-event']) {
-      if (event.type === 'error' && event.subtype === 'apply-failure') {
-        applyFailures++;
+      if (event.type === 'error') {
+        syncErrors++;
       }
       schedulesApp.events.emit('sync', event);
     }
@@ -1334,7 +1334,7 @@ describe('schedule app', () => {
       schedulesApp.startServices();
       await prefs.loadPrefs();
       accountId = await db.insertAccount({ name: 'Checking', closed: 0 });
-      applyFailures = 0;
+      syncErrors = 0;
       // Production also registers the schedule listener on the main app.
       mainApp.events.on('sync', forwardSync);
     });
@@ -1433,7 +1433,7 @@ describe('schedule app', () => {
         `);
 
         await syncSuccessfully();
-        expect.soft(applyFailures).toBe(1);
+        expect.soft(syncErrors).toBe(1);
         expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
         expect(await postedDates(failedId)).toEqual(['2016-12-18']);
         expect(await postedDates(healthyId)).toEqual(healthyDates);
@@ -1459,6 +1459,28 @@ describe('schedule app', () => {
         expect(unchangedDate).toBe('2016-12-18');
       },
     );
+
+    it('does not retry its own clock-drift error', async () => {
+      const id = await createSchedule({
+        schedule: { posts_transaction: true },
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          { op: 'is', field: 'date', value: '2016-12-18' },
+        ],
+      });
+      // Completing this paid one-time schedule writes a new message.
+      await db.insertTransaction({
+        account: accountId,
+        amount: 0,
+        date: '2016-12-18',
+        schedule: id,
+      });
+      // A backward clock correction leaves the clock over five minutes ahead.
+      MockDate.set(new Date(2016, 11, 31, 11, 50));
+
+      await syncSuccessfully();
+      expect(syncErrors).toBe(1);
+    });
   });
 
   describe('auto-post service throttling', () => {
