@@ -66,9 +66,6 @@ export function trimWeeklyAverageWindow(
   if (firstActivityDate == null || firstActivityDate > window.end) {
     return null;
   }
-  if (firstActivityDate <= window.start) {
-    return window;
-  }
 
   const daysWithActivity =
     monthUtils.differenceInCalendarDays(window.end, firstActivityDate) + 1;

@@ -54,31 +54,13 @@ export const AmountAdjustment = ({
     next: number | undefined,
     type: AdjustmentType | undefined,
   ) => {
-    if (template.type === 'schedule') {
-      dispatch(
-        updateTemplate({
-          type: 'schedule',
-          adjustment: next,
-          adjustmentType: type,
-        }),
-      );
-    } else if (template.type === 'weeklyAverage') {
-      dispatch(
-        updateTemplate({
-          type: 'weeklyAverage',
-          adjustment: next,
-          adjustmentType: type,
-        }),
-      );
-    } else {
-      dispatch(
-        updateTemplate({
-          type: 'average',
-          adjustment: next,
-          adjustmentType: type,
-        }),
-      );
-    }
+    dispatch(
+      updateTemplate({
+        type: template.type,
+        adjustment: next,
+        adjustmentType: type,
+      }),
+    );
   };
 
   const changeUnit = (unit: UnitOption) => {
