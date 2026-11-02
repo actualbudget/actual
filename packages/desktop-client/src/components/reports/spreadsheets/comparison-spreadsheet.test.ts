@@ -13,6 +13,7 @@ import {
   offsetItem,
   offsetRows,
   rowsFromBudget,
+  sumNetsFromRows,
   sumWindow,
 } from './comparison-spreadsheet';
 import type { ComparisonScale } from './comparison-spreadsheet';
@@ -203,6 +204,84 @@ describe('offsetItem', () => {
     });
 
     expect(item.comparison.perInterval?.totalDebts).toBe(-3000);
+  });
+});
+
+describe('sumNetsFromRows', () => {
+  // Income outweighs spending, so the whole total has no net payment
+  function earning(
+    start: string,
+    end: string,
+    debts: number,
+    assets = 5000,
+  ): IntervalEntity {
+    const totalTotals = assets + debts;
+    return {
+      ...interval(start, end, debts),
+      totalAssets: assets,
+      totalTotals,
+      netAssets: Math.max(totalTotals, 0),
+      netDebts: Math.min(totalTotals, 0),
+      totalBudgeted: totalTotals,
+    };
+  }
+  function earningRow(id: string, intervals: IntervalEntity[]): GroupedEntity {
+    const totalTotals = intervals.reduce((sum, i) => sum + i.totalTotals, 0);
+    return {
+      ...row(id, intervals),
+      totalAssets: intervals.reduce((sum, i) => sum + i.totalAssets, 0),
+      totalTotals,
+      netAssets: Math.max(totalTotals, 0),
+      netDebts: Math.min(totalTotals, 0),
+      totalBudgeted: totalTotals,
+    };
+  }
+  const noProjection = { ...scale, projectToFullPeriod: false };
+  const comparison = earningRow('comparison', [
+    earning('2016-07-01', '', -18400, 30000),
+  ]);
+  const totals = offsetItem(
+    earningRow('totals', [
+      earning('2016-11-01', '2016-11-30', -4000),
+      earning('2016-12-01', '2016-12-31', -3100),
+    ]),
+    comparison,
+    noProjection,
+  );
+  const rows = [
+    offsetItem(
+      row('rent', [november(-4000), december(-3100)]),
+      comparisonTotals,
+      noProjection,
+    ),
+    offsetItem(
+      row('salary', [november(0), december(0)]),
+      { ...comparisonTotals, totalDebts: 0, totalTotals: 0, netDebts: 0 },
+      noProjection,
+    ),
+  ];
+
+  it('gives each interval the net payment of its rows, not of its total', () => {
+    expect(totals.intervalData[0].comparison?.expected.netDebts).toBe(0);
+
+    const summed = sumNetsFromRows(totals, rows, 'Category');
+
+    expect(
+      summed.intervalData.map(i => i.comparison?.expected.netDebts),
+    ).toEqual([-3000, -3100]);
+    expect(summed.intervalData.map(i => i.comparison?.actual.netDebts)).toEqual(
+      [-4000, -3100],
+    );
+    expect(summed.comparison.expected.netDebts).toBe(-6100);
+    expect(summed.netDebts).toBe(rows[0].netDebts);
+  });
+
+  it('sums the intervals themselves when split by interval', () => {
+    const summed = sumNetsFromRows(totals, rows, 'Interval');
+
+    expect(summed.intervalData).toBe(totals.intervalData);
+    expect(summed.comparison.actual.netDebts).toBe(0);
+    expect(summed.comparison.actual.netAssets).toBe(1000 + 1900);
   });
 });
 

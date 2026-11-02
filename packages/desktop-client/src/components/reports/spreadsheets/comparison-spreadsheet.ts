@@ -149,6 +149,76 @@ function fromTotals(getValue: (field: AdditiveField) => number): ReportValues {
   };
 }
 
+const BREAKDOWN_VALUES = [
+  'expected',
+  'actual',
+  'projected',
+  'perInterval',
+  'upcoming',
+  'pacePerInterval',
+] as const;
+
+// Net fields only keep one sign, so a total's net is the sum of what it's made
+// of rather than its own total's net
+function sumNets<T extends ReportValues>(
+  target: T,
+  sources: (ReportValues | undefined)[],
+): T {
+  const sum = (field: 'netAssets' | 'netDebts') =>
+    sources.reduce((total, source) => total + (source?.[field] ?? 0), 0);
+  return { ...target, netAssets: sum('netAssets'), netDebts: sum('netDebts') };
+}
+
+function sumBreakdownNets(
+  target: ComparisonBreakdown,
+  sources: (ComparisonBreakdown | undefined)[],
+): ComparisonBreakdown {
+  const result = { ...target };
+  for (const key of BREAKDOWN_VALUES) {
+    const values = target[key];
+    const parts = sources.map(source => source?.[key]);
+    // Intervals have no averages of their own, so those are kept
+    if (values && parts.some(Boolean)) {
+      result[key] = sumNets(values, parts);
+    }
+  }
+  return result;
+}
+
+/**
+ * Sums a total's net fields from the rows that are shown, so they match the
+ * bars stacked from them and the rows in the table. Split by interval, each
+ * interval is a bar of its own, so only the whole range is summed.
+ */
+export function sumNetsFromRows<
+  T extends OffsetItem & { comparison: ComparisonBreakdown },
+>(totals: T, rows: GroupedEntity[], groupBy: string): T {
+  const intervalData =
+    groupBy === 'Interval'
+      ? totals.intervalData
+      : totals.intervalData.map((interval, index) => {
+          const parts = rows.map(row => row.intervalData[index]);
+          return {
+            ...sumNets(interval, parts),
+            comparison:
+              interval.comparison &&
+              sumBreakdownNets(
+                interval.comparison,
+                parts.map(part => part?.comparison),
+              ),
+          };
+        });
+  const parts = groupBy === 'Interval' ? intervalData : rows;
+  return {
+    ...sumNets(totals, parts),
+    intervalData,
+    comparison: sumBreakdownNets(
+      totals.comparison,
+      parts.map(part => part.comparison),
+    ),
+  };
+}
+
 function subtract(a: ReportValues, b: ReportValues): ReportValues {
   return mapValues(field => a[field] - b[field]);
 }
@@ -1051,7 +1121,7 @@ export function createComparisonSpreadsheet(
         )
       : null;
     // The Comparison column follows the intervals left after trimming
-    const { rows: untrimmedRows, totals } = trimRange
+    const { rows: untrimmedRows, totals: offsetTotals } = trimRange
       ? offset(
           getVisibleScale(
             scale,
@@ -1061,6 +1131,7 @@ export function createComparisonSpreadsheet(
           ),
         )
       : untrimmed;
+    const totals = sumNetsFromRows(offsetTotals, untrimmedRows, groupBy);
     const rows = trimRange ? trimRows(untrimmedRows, trimRange) : untrimmedRows;
     const intervalData = stackIntervals(
       trimRange
