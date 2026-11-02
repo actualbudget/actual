@@ -1,6 +1,11 @@
+import { unzipSync, zipSync } from 'fflate';
 import { utils, write } from 'xlsx';
 
 import { parseXlsx } from './xlsx';
+
+function zipWorkbook(entries: Record<string, Uint8Array>) {
+  return zipSync(entries, { mtime: new Date('2026-01-01') });
+}
 
 function workbookBytes(rows: unknown[][], extraSheet = true, date1904 = false) {
   const workbook = utils.book_new();
@@ -138,6 +143,52 @@ describe('native XLSX import', () => {
     expect(result.errors[0].message).toContain('B2 contains an error');
     expect(result.transactions).toEqual([]);
     expect(result.xlsx.worksheets).toEqual(['Transactions']);
+  });
+
+  it('accepts compressed workbooks', () => {
+    const bytes = zipWorkbook(unzipSync(workbookBytes([['Amount'], [3]])));
+    expect(parseXlsx(bytes).transactions).toEqual([{ Amount: '3' }]);
+  });
+
+  it('enforces entry and cumulative expanded limits across unused resources', () => {
+    const entries = unzipSync(workbookBytes([['Amount'], [3]]));
+    expect(() =>
+      parseXlsx(
+        zipWorkbook({
+          ...entries,
+          'unused.bin': new Uint8Array(25 * 1024 * 1024 + 1),
+        }),
+      ),
+    ).toThrow('expanded size');
+    expect(() =>
+      parseXlsx(
+        zipWorkbook({
+          ...entries,
+          'unused1.bin': new Uint8Array(20 * 1024 * 1024),
+          'unused2.bin': new Uint8Array(20 * 1024 * 1024),
+          'unused3.bin': new Uint8Array(20 * 1024 * 1024),
+        }),
+      ),
+    ).toThrow('expanded size');
+  });
+
+  it('rejects forged sizes even when local and central headers agree', () => {
+    const bytes = zipWorkbook({ 'unused.bin': new Uint8Array(1024 * 1024) });
+    const view = new DataView(bytes.buffer);
+    const directory = view.getUint32(bytes.length - 6, true);
+    view.setUint32(22, 1, true);
+    view.setUint32(directory + 24, 1, true);
+    expect(() => parseXlsx(bytes)).toThrow('Invalid XLSX ZIP sizes');
+  });
+
+  it('rejects inconsistent headers and incomplete directories', () => {
+    const bytes = workbookBytes([['Amount'], [3]]);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(22, 1, true);
+    expect(() => parseXlsx(bytes)).toThrow('Invalid XLSX ZIP sizes');
+    const truncated = workbookBytes([['Amount'], [3]]);
+    new DataView(truncated.buffer).setUint16(truncated.length - 12, 0, true);
+    expect(() => parseXlsx(truncated)).toThrow('Invalid XLSX archive');
   });
 
   it('rejects malformed archives, invalid columns, oversized sheets and empty sheets', () => {

@@ -1,3 +1,4 @@
+import { Inflate } from 'fflate';
 import { read, SSF, utils } from 'xlsx';
 import type { CellObject, WorkBook, WorkSheet } from 'xlsx';
 
@@ -158,6 +159,7 @@ function parseWorksheet(
   };
 }
 
+// Validate every member, including sheets and resources that are not selected.
 function normalizeStoredZip(data: Uint8Array) {
   const bytes = new Uint8Array(data);
   const view = new DataView(bytes.buffer);
@@ -187,6 +189,20 @@ function normalizeStoredZip(data: Uint8Array) {
 
   const entryCount = view.getUint16(end + 10, true);
   let directoryOffset = view.getUint32(end + 16, true);
+  const directoryStart = directoryOffset;
+  if (
+    view.getUint16(end + 4, true) !== 0 ||
+    view.getUint16(end + 6, true) !== 0 ||
+    view.getUint16(end + 8, true) !== entryCount ||
+    entryCount === 0xffff ||
+    directoryStart + view.getUint32(end + 12, true) !== end
+  ) {
+    throw new Error('Invalid XLSX archive');
+  }
+  const maxEntrySize = 25 * 1024 * 1024;
+  const maxExpandedSize = 50 * 1024 * 1024;
+  let expandedSize = 0;
+  const spans: { start: number; end: number }[] = [];
   for (let i = 0; i < entryCount; i++) {
     if (
       directoryOffset + directoryHeaderSize > end ||
@@ -198,6 +214,99 @@ function normalizeStoredZip(data: Uint8Array) {
     const flags = view.getUint16(directoryOffset + 8, true);
     const method = view.getUint16(directoryOffset + 10, true);
     const localOffset = view.getUint32(directoryOffset + 42, true);
+    const compressedSize = view.getUint32(directoryOffset + 20, true);
+    const originalSize = view.getUint32(directoryOffset + 24, true);
+    expandedSize += originalSize;
+    if (originalSize > maxEntrySize || expandedSize > maxExpandedSize) {
+      throw new Error('XLSX expanded size exceeds the import limit.');
+    }
+    const nameLength = view.getUint16(directoryOffset + 28, true);
+    const extraLength = view.getUint16(directoryOffset + 30, true);
+    const commentLength = view.getUint16(directoryOffset + 32, true);
+    const nextDirectory =
+      directoryOffset +
+      directoryHeaderSize +
+      nameLength +
+      extraLength +
+      commentLength;
+    if (
+      nextDirectory > end ||
+      flags & encryptedFlag ||
+      (method !== 0 && method !== 8) ||
+      view.getUint16(directoryOffset + 34, true) !== 0 ||
+      localOffset + localHeaderSize > directoryStart ||
+      view.getUint32(localOffset, true) !== localSignature ||
+      view.getUint16(localOffset + 6, true) !== flags ||
+      view.getUint16(localOffset + 8, true) !== method ||
+      view.getUint16(localOffset + 26, true) !== nameLength
+    ) {
+      throw new Error('Invalid XLSX ZIP entry');
+    }
+    const contentStart =
+      localOffset +
+      localHeaderSize +
+      nameLength +
+      view.getUint16(localOffset + 28, true);
+    const contentEnd = contentStart + compressedSize;
+    if (
+      contentEnd > directoryStart ||
+      !bytes
+        .subarray(
+          localOffset + localHeaderSize,
+          localOffset + localHeaderSize + nameLength,
+        )
+        .every(
+          (byte, index) =>
+            byte === bytes[directoryOffset + directoryHeaderSize + index],
+        )
+    ) {
+      throw new Error('Invalid XLSX ZIP entry');
+    }
+    let entryEnd = contentEnd;
+    if (flags & dataDescriptorFlag) {
+      const descriptor =
+        contentEnd +
+        (contentEnd + 4 <= directoryStart &&
+        view.getUint32(contentEnd, true) === 0x08074b50
+          ? 4
+          : 0);
+      if (
+        descriptor + 12 > directoryStart ||
+        view.getUint32(descriptor, true) !==
+          view.getUint32(directoryOffset + 16, true) ||
+        view.getUint32(descriptor + 4, true) !== compressedSize ||
+        view.getUint32(descriptor + 8, true) !== originalSize
+      ) {
+        throw new Error('Invalid XLSX ZIP descriptor');
+      }
+      entryEnd = descriptor + 12;
+    } else if (
+      view.getUint32(localOffset + 14, true) !==
+        view.getUint32(directoryOffset + 16, true) ||
+      view.getUint32(localOffset + 18, true) !== compressedSize ||
+      view.getUint32(localOffset + 22, true) !== originalSize
+    ) {
+      throw new Error('Invalid XLSX ZIP sizes');
+    }
+    spans.push({ start: localOffset, end: entryEnd });
+    // Do not trust declared sizes alone: stream in small compressed chunks so
+    // forged sizes cannot cause an unbounded allocation before being rejected.
+    let actualSize = 0;
+    if (method === 8) {
+      const inflater = new Inflate(chunk => {
+        actualSize += chunk.length;
+        if (actualSize > originalSize) {
+          throw new Error('Invalid XLSX ZIP sizes');
+        }
+      });
+      for (let offset = contentStart; offset < contentEnd; offset += 1024) {
+        const next = Math.min(offset + 1024, contentEnd);
+        inflater.push(bytes.subarray(offset, next), next === contentEnd);
+      }
+    } else {
+      actualSize = compressedSize;
+    }
+    if (actualSize !== originalSize) throw new Error('Invalid XLSX ZIP sizes');
     const needsSizes =
       method === storedMethod &&
       flags & dataDescriptorFlag &&
@@ -233,12 +342,15 @@ function normalizeStoredZip(data: Uint8Array) {
       );
     }
 
-    const nameLength = view.getUint16(directoryOffset + 28, true);
-    const extraLength = view.getUint16(directoryOffset + 30, true);
-    const commentLength = view.getUint16(directoryOffset + 32, true);
-    directoryOffset +=
-      directoryHeaderSize + nameLength + extraLength + commentLength;
+    directoryOffset = nextDirectory;
   }
+  if (directoryOffset !== end) throw new Error('Invalid XLSX ZIP directory');
+  let nextLocal = 0;
+  for (const span of spans.sort((a, b) => a.start - b.start)) {
+    if (span.start !== nextLocal) throw new Error('Invalid XLSX ZIP layout');
+    nextLocal = span.end;
+  }
+  if (nextLocal !== directoryStart) throw new Error('Invalid XLSX ZIP layout');
   return bytes;
 }
 
