@@ -1,5 +1,10 @@
 // @ts-strict-ignore
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import * as d from 'date-fns';
+import { utils, write } from 'xlsx';
 
 import { reconcileTransactions } from '#server/accounts/sync';
 import * as db from '#server/db';
@@ -397,5 +402,120 @@ describe('File import', () => {
         notes: 'Restaurant Schrödingers Katze und Café Ünique',
       },
     ]);
+  });
+});
+
+describe('XLSX file import', () => {
+  let directory: string;
+
+  beforeEach(async () => {
+    directory = await mkdtemp(join(tmpdir(), 'actual-xlsx-'));
+  });
+
+  afterEach(async () => {
+    await rm(directory, { recursive: true, force: true });
+  });
+
+  it('passes worksheet and required-column options through the shared parser', async () => {
+    const workbook = utils.book_new();
+    utils.book_append_sheet(
+      workbook,
+      utils.aoa_to_sheet([['Report']]),
+      'Summary',
+    );
+    utils.book_append_sheet(
+      workbook,
+      utils.aoa_to_sheet([
+        ['Report'],
+        ['Date', 'Amount'],
+        ['2026-10-01', 0],
+        ['2026-10-02', null],
+      ]),
+      'Transactions',
+    );
+    const filepath = join(directory, 'transactions.XLSX');
+    await writeFile(
+      filepath,
+      write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+    );
+
+    const result = await parseFile(filepath, {
+      worksheet: 'Transactions',
+      headerRow: 2,
+      requiredColumns: [1],
+    });
+
+    expect(result.errors).toEqual([]);
+    expect(result.transactions).toEqual([{ Date: '2026-10-01', Amount: '0' }]);
+    expect(result.xlsx).toEqual({
+      worksheets: ['Summary', 'Transactions'],
+      worksheet: 'Transactions',
+      headerRow: 2,
+      columns: ['Date', 'Amount'],
+      excludedRows: 1,
+    });
+  });
+
+  it.each(['oversized', 'error cell'])(
+    'keeps worksheets selectable after an %s first sheet fails',
+    async failure => {
+      const workbook = utils.book_new();
+      const summary = utils.aoa_to_sheet(
+        failure === 'oversized'
+          ? [Array(257).fill('Heading')]
+          : [
+              ['Date', 'Amount'],
+              ['2026-10-01', 1],
+            ],
+      );
+      if (failure === 'error cell') {
+        summary.B2 = { t: 'e', v: 7 };
+      }
+      utils.book_append_sheet(workbook, summary, 'Summary');
+      utils.book_append_sheet(
+        workbook,
+        utils.aoa_to_sheet([
+          ['Date', 'Amount'],
+          ['2026-10-01', -5],
+        ]),
+        'Transactions',
+      );
+      const filepath = join(directory, 'transactions.xlsx');
+      await writeFile(
+        filepath,
+        write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+      );
+
+      const failed = await parseFile(filepath);
+      expect(failed.errors).toHaveLength(1);
+      expect(failed.transactions).toEqual([]);
+      expect(failed.xlsx).toMatchObject({
+        worksheet: 'Summary',
+        worksheets: ['Summary', 'Transactions'],
+      });
+
+      const recovered = await parseFile(filepath, {
+        worksheet: 'Transactions',
+      });
+      expect(recovered.errors).toEqual([]);
+      expect(recovered.transactions).toEqual([
+        { Date: '2026-10-01', Amount: '-5' },
+      ]);
+    },
+  );
+
+  it('returns parser failures using the shared file-import error result', async () => {
+    const filepath = join(directory, 'invalid.xlsx');
+    await writeFile(filepath, 'invalid workbook');
+
+    expect(await parseFile(filepath)).toEqual({
+      errors: [
+        {
+          message: 'Choose an unencrypted XLSX workbook.',
+          internal: 'Choose an unencrypted XLSX workbook.',
+        },
+      ],
+      transactions: [],
+    });
   });
 });
