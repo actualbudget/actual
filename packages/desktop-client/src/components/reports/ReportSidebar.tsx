@@ -180,6 +180,7 @@ export function ReportSidebar({
   const comparisonSource = comparison.source ?? 'actual';
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [offsetCountDraft, setOffsetCountDraft] = useState<string | null>(null);
   const triggerRef = useRef(null);
 
   const onSelectRange = (cond: string) => {
@@ -338,20 +339,20 @@ export function ReportSidebar({
           min={1}
           step={1}
           aria-label={t('Offset')}
-          defaultValue={comparison.offsetCount ?? defaultComparison.offsetCount}
-          // Only whole, positive offsets are saved; anything else is
-          // put back when the field loses focus
+          // Shows what is typed until the field loses focus, then the saved
+          // offset. Only whole, positive offsets are saved.
+          value={
+            offsetCountDraft ??
+            String(comparison.offsetCount ?? defaultComparison.offsetCount)
+          }
           onChangeValue={value => {
+            setOffsetCountDraft(value);
             const offsetCount = Number(value);
             if (Number.isInteger(offsetCount) && offsetCount >= 1) {
               updateComparison({ ...comparison, offsetCount });
             }
           }}
-          onUpdate={(_value, event) => {
-            event.currentTarget.value = String(
-              comparison.offsetCount ?? defaultComparison.offsetCount,
-            );
-          }}
+          onUpdate={() => setOffsetCountDraft(null)}
           style={{ width: 60, marginRight: 5 }}
         />
         <Select
