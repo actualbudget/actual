@@ -742,8 +742,8 @@ function SplitIntervalCells({
           !hasComparison
             ? ''
             : percent === undefined
-              ? format(change, 'financial-with-sign')
-              : `${format(change, 'financial-with-sign')} (${percent > 0 ? '+' : ''}${percent}%)`
+              ? format(change, 'financial')
+              : `${format(change, 'financial')} (${percent}%)`
         }
         width="flex"
         privacyFilter
