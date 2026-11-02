@@ -8,6 +8,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import type {
   AverageTemplate,
   CopyTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
@@ -21,7 +22,7 @@ import {
 import { FormField, FormLabel } from '#components/forms';
 
 type HistoricalAutomationProps = {
-  template: CopyTemplate | AverageTemplate;
+  template: CopyTemplate | AverageTemplate | WeeklyAverageTemplate;
   dispatch: (action: Action) => void;
 };
 
@@ -33,26 +34,33 @@ export const HistoricalAutomation = ({
   const { isNarrowWidth } = useResponsive();
   const fieldFlex = isNarrowWidth ? STACKED_FIELD_FLEX : 1;
 
-  const months =
-    template.type === 'average' ? template.numMonths : template.lookBack;
-  const [rawMonths, setRawMonths] = useState(String(months));
-  const [prevMonths, setPrevMonths] = useState(months);
-  if (months !== prevMonths) {
-    setPrevMonths(months);
-    setRawMonths(String(months));
+  const periods = getPeriodCount(template);
+  const [rawPeriods, setRawPeriods] = useState(String(periods));
+  const [prevPeriods, setPrevPeriods] = useState(periods);
+  if (periods !== prevPeriods) {
+    setPrevPeriods(periods);
+    setRawPeriods(String(periods));
   }
 
-  const commitMonths = () => {
-    const parsed = Math.max(1, Math.trunc(Number(rawMonths)) || 1);
-    setRawMonths(String(parsed));
-    if (parsed === months) return;
-    dispatch(
-      updateTemplate(
-        template.type === 'average'
-          ? { type: 'average', numMonths: parsed }
-          : { type: 'copy', lookBack: parsed },
-      ),
-    );
+  const commitPeriods = () => {
+    const parsed = Math.max(1, Math.trunc(Number(rawPeriods)) || 1);
+    setRawPeriods(String(parsed));
+    if (parsed === periods) return;
+    switch (template.type) {
+      case 'average':
+        dispatch(updateTemplate({ type: 'average', numMonths: parsed }));
+        break;
+      case 'weeklyAverage':
+        dispatch(updateTemplate({ type: 'weeklyAverage', numWeeks: parsed }));
+        break;
+      case 'copy':
+        dispatch(updateTemplate({ type: 'copy', lookBack: parsed }));
+        break;
+      default:
+        throw new Error(
+          `Unknown historical template: ${String(template satisfies never)}`,
+        );
+    }
   };
 
   return (
@@ -69,6 +77,7 @@ export const HistoricalAutomation = ({
             options={[
               ['copy', t('Copy a previous month')],
               ['average', t('Average of previous months')],
+              ['weeklyAverage', t('Average of previous weeks')],
             ]}
             value={template.type}
             onChange={type => dispatch(updateTemplate({ type }))}
@@ -76,7 +85,11 @@ export const HistoricalAutomation = ({
         </FormField>
         <FormField style={{ flex: fieldFlex }}>
           <FormLabel
-            title={t('Number of months back')}
+            title={
+              template.type === 'weeklyAverage'
+                ? t('Number of weeks back')
+                : t('Number of months back')
+            }
             htmlFor="look-back-field"
           />
           <Input
@@ -84,15 +97,53 @@ export const HistoricalAutomation = ({
             type="number"
             min={1}
             step={1}
-            value={rawMonths}
-            onChangeValue={setRawMonths}
-            onBlur={commitMonths}
+            value={rawPeriods}
+            onChangeValue={setRawPeriods}
+            onBlur={commitPeriods}
           />
         </FormField>
+        {template.type === 'weeklyAverage' && (
+          <FormField style={{ flex: fieldFlex }}>
+            <FormLabel title={t('Once every')} htmlFor="weekday-field" />
+            <Select
+              id="weekday-field"
+              options={[
+                ['monday', t('Monday')],
+                ['tuesday', t('Tuesday')],
+                ['wednesday', t('Wednesday')],
+                ['thursday', t('Thursday')],
+                ['friday', t('Friday')],
+                ['saturday', t('Saturday')],
+                ['sunday', t('Sunday')],
+              ]}
+              value={template.weekday}
+              onChange={weekday =>
+                dispatch(updateTemplate({ type: 'weeklyAverage', weekday }))
+              }
+            />
+          </FormField>
+        )}
       </SpaceBetween>
-      {template.type === 'average' && (
+      {(template.type === 'average' || template.type === 'weeklyAverage') && (
         <AmountAdjustment template={template} dispatch={dispatch} />
       )}
     </>
   );
 };
+
+function getPeriodCount(
+  template: CopyTemplate | AverageTemplate | WeeklyAverageTemplate,
+): number {
+  switch (template.type) {
+    case 'average':
+      return template.numMonths;
+    case 'weeklyAverage':
+      return template.numWeeks;
+    case 'copy':
+      return template.lookBack;
+    default:
+      throw new Error(
+        `Unknown historical template: ${String(template satisfies never)}`,
+      );
+  }
+}

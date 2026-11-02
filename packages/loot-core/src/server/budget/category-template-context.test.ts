@@ -19,6 +19,7 @@ import * as statements from './statements';
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
   getCategoryAverage: vi.fn(),
+  getCategoryWeeklyAverage: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
   isTrackingBudget: vi.fn(),
@@ -653,6 +654,46 @@ describe('CategoryTemplateContext', () => {
         'total-income',
       );
     });
+  });
+
+  describe('runWeeklyAverage', () => {
+    // October 2026 starts on a Thursday and has 31 days, so it has five
+    // Fridays but only four Mondays.
+    it.each([
+      ['friday', 1250],
+      ['monday', 1000],
+    ] as const)(
+      'budgets the weekly average for every %s in the month',
+      async (weekday, expected) => {
+        const category: CategoryEntity = {
+          id: 'test',
+          name: 'Test Category',
+          group: 'test-group',
+          is_income: false,
+        };
+        const instance = new TestCategoryTemplateContext(
+          [],
+          category,
+          '2026-10',
+          0,
+          0,
+        );
+        vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
+
+        const result = await CategoryTemplateContext.runWeeklyAverage(
+          {
+            type: 'weeklyAverage',
+            numWeeks: 4,
+            weekday,
+            directive: 'template',
+            priority: 1,
+          },
+          instance,
+        );
+
+        expect(result).toBe(expected);
+      },
+    );
   });
 
   describe('runAverage', () => {

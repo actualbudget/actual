@@ -4,12 +4,17 @@ import {
   firstDayOfMonth,
   monthFromDate,
 } from '@actual-app/core/shared/months';
-import type { Template } from '@actual-app/core/types/models/templates';
+import type {
+  Template,
+  Weekday,
+} from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
+const DEFAULT_WEEKLY_AVERAGE_WEEKS = 4;
+const DEFAULT_WEEKLY_AVERAGE_WEEKDAY: Weekday = 'monday';
 
 export const getInitialState = (template: Template | null): ReducerState => {
   if (!template) {
@@ -72,6 +77,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'refill',
       };
     case 'average':
+    case 'weeklyAverage':
     case 'copy':
       return {
         template,
@@ -172,7 +178,8 @@ const changeType = (
     case 'historical':
       if (
         prevState.template.type === 'copy' ||
-        prevState.template.type === 'average'
+        prevState.template.type === 'average' ||
+        prevState.template.type === 'weeklyAverage'
       ) {
         return prevState;
       }
@@ -257,6 +264,21 @@ function mapTemplateTypesForUpdate(
               priority: state.template.priority,
             },
           };
+        case 'weeklyAverage':
+          return {
+            ...state,
+            displayType: 'historical',
+            template: {
+              ...template,
+              directive: 'template',
+              type: 'weeklyAverage',
+              numWeeks: DEFAULT_WEEKLY_AVERAGE_WEEKS,
+              weekday: DEFAULT_WEEKLY_AVERAGE_WEEKDAY,
+              adjustment: state.template.adjustment,
+              adjustmentType: state.template.adjustmentType,
+              priority: state.template.priority,
+            },
+          };
         default:
           break;
       }
@@ -272,6 +294,51 @@ function mapTemplateTypesForUpdate(
               directive: 'template',
               type: 'average',
               numMonths: state.template.lookBack,
+              priority: state.template.priority,
+            },
+          };
+        case 'weeklyAverage':
+          return {
+            ...state,
+            displayType: 'historical',
+            template: {
+              ...template,
+              directive: 'template',
+              type: 'weeklyAverage',
+              numWeeks: DEFAULT_WEEKLY_AVERAGE_WEEKS,
+              weekday: DEFAULT_WEEKLY_AVERAGE_WEEKDAY,
+              priority: state.template.priority,
+            },
+          };
+        default:
+          break;
+      }
+      break;
+    case 'weeklyAverage':
+      switch (template.type) {
+        case 'average':
+          return {
+            ...state,
+            displayType: 'historical',
+            template: {
+              ...template,
+              directive: 'template',
+              type: 'average',
+              numMonths: 3,
+              adjustment: state.template.adjustment,
+              adjustmentType: state.template.adjustmentType,
+              priority: state.template.priority,
+            },
+          };
+        case 'copy':
+          return {
+            ...state,
+            displayType: 'historical',
+            template: {
+              ...template,
+              directive: 'template',
+              type: 'copy',
+              lookBack: 1,
               priority: state.template.priority,
             },
           };

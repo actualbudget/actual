@@ -168,6 +168,7 @@ export function AutomationEditorPane({
           case 'simple':
           case 'schedule':
           case 'average':
+          case 'weeklyAverage':
           case 'copy':
           case 'refill':
             return { ...entry, template: { ...t, priority } };

@@ -6,6 +6,7 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type {
   AverageTemplate,
   ScheduleTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
@@ -14,7 +15,10 @@ import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { PercentInput } from '#components/util/PercentInput';
 
-type AdjustableTemplate = ScheduleTemplate | AverageTemplate;
+type AdjustableTemplate =
+  | ScheduleTemplate
+  | AverageTemplate
+  | WeeklyAverageTemplate;
 type AdjustmentType = 'percent' | 'fixed';
 type UnitOption = 'none' | AdjustmentType;
 type Direction = 'increase' | 'decrease';
@@ -30,7 +34,7 @@ type AmountAdjustmentProps = {
 };
 
 // Editor for the optional increase/decrease modifier on schedule and average
-// templates. `adjustment` is stored as a single signed number. The unit
+// (monthly or weekly) templates. `adjustment` is stored as a single signed number. The unit
 // dropdown turns the adjustment on and off and picks percentage vs fixed
 // amount. A percentage uses an increase/decrease selector for the direction;
 // a fixed amount uses AmountInput, whose own sign is the direction.
@@ -54,6 +58,14 @@ export const AmountAdjustment = ({
       dispatch(
         updateTemplate({
           type: 'schedule',
+          adjustment: next,
+          adjustmentType: type,
+        }),
+      );
+    } else if (template.type === 'weeklyAverage') {
+      dispatch(
+        updateTemplate({
+          type: 'weeklyAverage',
           adjustment: next,
           adjustmentType: type,
         }),

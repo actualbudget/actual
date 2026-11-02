@@ -17,16 +17,19 @@ import type {
   SimpleTemplate,
   SpendTemplate,
   Template,
+  WeeklyAverageTemplate,
 } from '#types/models/templates';
 
 import {
   getCategoryAverage,
+  getCategoryWeeklyAverage,
   getSheetBoolean,
   getSheetValue,
   isTrackingBudget,
 } from './actions';
 import { runScheduleForecast } from './schedule-template';
 import { getActiveSchedules } from './statements';
+import { countWeekdayInMonth } from './weekly-average';
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------
@@ -217,6 +220,13 @@ export class CategoryTemplateContext {
         }
         case 'average': {
           newBudget = await CategoryTemplateContext.runAverage(template, this);
+          break;
+        }
+        case 'weeklyAverage': {
+          newBudget = await CategoryTemplateContext.runWeeklyAverage(
+            template,
+            this,
+          );
           break;
         }
         default: {
@@ -867,24 +877,32 @@ export class CategoryTemplateContext {
       average *= -1;
     }
 
-    if (template.adjustment !== undefined && template.adjustmentType) {
-      switch (template.adjustmentType) {
-        case 'percent': {
-          const adjustmentFactor = 1 + template.adjustment / 100;
-          average = adjustmentFactor * average;
-          break;
-        }
-        case 'fixed': {
-          average += amountToInteger(template.adjustment);
-          break;
-        }
+    return Math.round(applyAverageAdjustment(average, template));
+  }
 
-        default:
-        //no valid adjustment was found
-      }
+  // Budgets the weekly average once per occurrence of the template's weekday
+  // in the month, so a month with five Fridays gets five weeks' worth.
+  // Adjustments apply to the weekly amount, before multiplying.
+  static async runWeeklyAverage(
+    template: WeeklyAverageTemplate,
+    templateContext: CategoryTemplateContext,
+  ): Promise<number> {
+    let weeklyAverage = await getCategoryWeeklyAverage({
+      month: templateContext.month,
+      numWeeks: template.numWeeks,
+      categoryId: templateContext.category.id,
+    });
+    // negate as spending is negative
+    if (weeklyAverage < 0) {
+      weeklyAverage *= -1;
     }
 
-    return Math.round(average);
+    const perWeek = applyAverageAdjustment(weeklyAverage, template);
+    const occurrences = countWeekdayInMonth(
+      templateContext.month,
+      template.weekday,
+    );
+    return Math.round(perWeek * occurrences);
   }
 
   static runBy(templateContext: CategoryTemplateContext): {
@@ -1013,4 +1031,22 @@ function redistributeBatch<T extends Template>(
     );
     remaining -= allocated;
   });
+}
+
+function applyAverageAdjustment(
+  amount: number,
+  template: AverageTemplate | WeeklyAverageTemplate,
+): number {
+  if (template.adjustment === undefined || !template.adjustmentType) {
+    return amount;
+  }
+  switch (template.adjustmentType) {
+    case 'percent':
+      return (1 + template.adjustment / 100) * amount;
+    case 'fixed':
+      return amount + amountToInteger(template.adjustment);
+    default:
+      // no valid adjustment was found
+      return amount;
+  }
 }

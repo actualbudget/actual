@@ -4,12 +4,13 @@ import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
   AverageTemplate,
   ScheduleTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 import { useFormat } from '#hooks/useFormat';
 
 type AmountAdjustmentSummaryProps = {
-  template: ScheduleTemplate | AverageTemplate;
+  template: ScheduleTemplate | AverageTemplate | WeeklyAverageTemplate;
 };
 
 // Trailing clause for a template's increase or decrease adjustment, e.g.

@@ -7,6 +7,7 @@ import * as sheet from '#server/sheet';
 import {
   copyUntilYearEnd,
   coverOverbudgeted,
+  getCategoryWeeklyAverage,
   getSheetValue,
   set3MonthAvg,
   setBudget,
@@ -192,6 +193,68 @@ describe('set budget average', () => {
     await sheet.waitOnSpreadsheet();
 
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+});
+
+// Tests run with the current day fixed at 2017-01-01.
+describe('getCategoryWeeklyAverage', () => {
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategory({ id: 'cat1', name: 'cat1', cat_group: 'group1' });
+  });
+
+  async function addSpend(date: string, amount: number) {
+    await db.insertTransaction({
+      date,
+      amount,
+      account: 'account1',
+      category: 'cat1',
+    });
+  }
+
+  it('averages the complete weeks just before the budget month', async () => {
+    // 2 weeks before 2016-11 is 2016-10-18 through 2016-10-31.
+    await addSpend('2016-10-17', -1000);
+    await addSpend('2016-10-18', -300);
+    await addSpend('2016-10-31', -100);
+    await addSpend('2016-11-01', -1000);
+
+    expect(
+      await getCategoryWeeklyAverage({
+        month: '2016-11',
+        numWeeks: 2,
+        categoryId: 'cat1',
+      }),
+    ).toBe(-200);
+  });
+
+  it('ends the window yesterday when the budget month is in the future', async () => {
+    await addSpend('2016-12-24', -1000);
+    await addSpend('2016-12-25', -350);
+    await addSpend('2017-01-01', -1000);
+
+    expect(
+      await getCategoryWeeklyAverage({
+        month: '2017-03',
+        numWeeks: 1,
+        categoryId: 'cat1',
+      }),
+    ).toBe(-350);
+  });
+
+  it('skips weeks before the first transaction', async () => {
+    // Only the last of the 4 weeks has any activity.
+    await addSpend('2016-10-25', -700);
+
+    expect(
+      await getCategoryWeeklyAverage({
+        month: '2016-11',
+        numWeeks: 4,
+        categoryId: 'cat1',
+      }),
+    ).toBe(-700);
   });
 });
 
