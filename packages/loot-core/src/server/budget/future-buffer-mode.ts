@@ -62,12 +62,13 @@ export async function turnOffFutureBuffer(): Promise<boolean> {
   }
 
   // Income auto-hold flags are ignored in managed months but would apply
-  // again once the mode is off. Name the table: this also runs just before
-  // a switch to Tracking, and the switch must not touch `reflect_budgets`.
+  // again once the mode is off. Both 1 (one month, from older versions) and
+  // 2 (persistent) are on. Name the table: this also runs just before a
+  // switch to Tracking, and the switch must not touch `reflect_budgets`.
   const autoHolds = await db.all<Pick<db.DbZeroBudget, 'id'>>(
     `SELECT b.id FROM zero_budgets b
      JOIN categories c ON c.id = b.category
-     WHERE c.is_income = 1 AND b.carryover = 1 AND b.month >= ?`,
+     WHERE c.is_income = 1 AND b.carryover IN (1, 2) AND b.month >= ?`,
     [dbMonth(startMonth)],
   );
   const incomeCategories = await db.all<Pick<db.DbCategory, 'id'>>(
