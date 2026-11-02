@@ -24,6 +24,24 @@ describe('weekly average defaults', () => {
     });
   });
 
+  it.each([
+    ['drops a fixed', 'fixed', undefined],
+    ['keeps a percentage', 'percent', 10],
+  ] as const)(
+    '%s adjustment when switching into weekly mode',
+    (_, adjustmentType, expected) => {
+      const state = templateReducer(
+        getInitialState({ ...average, adjustment: 10, adjustmentType }),
+        updateTemplate({ type: 'weeklyAverage' }),
+      );
+
+      expect(state.template).toMatchObject({ type: 'weeklyAverage' });
+      expect(
+        'adjustment' in state.template ? state.template.adjustment : undefined,
+      ).toBe(expected);
+    },
+  );
+
   it('keeps the number of weeks on a saved weekly automation', () => {
     const state = templateReducer(
       getInitialState(average),

@@ -266,8 +266,10 @@ function isHistoricalUpdate(
 }
 
 // Switches between the historical modes, keeping whatever carries over: the
-// month count between copy and average, the adjustment between the two
-// averages, and the priority always.
+// month count between copy and average, a percentage adjustment between the
+// two averages, and the priority always. Fixed adjustments are dropped: the
+// monthly average adds them once per month but the weekly average once per
+// week, so carrying one over would silently change the budgeted amount.
 function convertHistoricalTemplate(
   prev: HistoricalTemplate,
   template: HistoricalUpdate,
@@ -279,9 +281,9 @@ function convertHistoricalTemplate(
         ? prev.lookBack
         : undefined;
   const adjustment =
-    prev.type === 'copy'
-      ? {}
-      : { adjustment: prev.adjustment, adjustmentType: prev.adjustmentType };
+    prev.type !== 'copy' && prev.adjustmentType === 'percent'
+      ? { adjustment: prev.adjustment, adjustmentType: prev.adjustmentType }
+      : {};
 
   switch (template.type) {
     case 'copy':
