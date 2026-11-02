@@ -1,11 +1,13 @@
-import { Trans, useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
+import { WEEKDAYS } from '@actual-app/core/shared/months';
 import type {
   AverageTemplate,
   CopyTemplate,
-  Weekday,
   WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
+
+import { useDaysOfWeek } from '#hooks/useDaysOfWeek';
 
 import { AmountAdjustmentSummary } from './AmountAdjustmentSummary';
 
@@ -50,17 +52,8 @@ function WeeklyAverageSentence({
 }: {
   template: WeeklyAverageTemplate;
 }) {
-  const { t } = useTranslation();
-  const weekdayNames: Record<Weekday, string> = {
-    monday: t('Monday'),
-    tuesday: t('Tuesday'),
-    wednesday: t('Wednesday'),
-    thursday: t('Thursday'),
-    friday: t('Friday'),
-    saturday: t('Saturday'),
-    sunday: t('Sunday'),
-  };
-  const weekday = weekdayNames[template.weekday];
+  const daysOfWeek = useDaysOfWeek();
+  const weekday = daysOfWeek[WEEKDAYS.indexOf(template.weekday)];
 
   return (
     <Trans count={template.numWeeks}>

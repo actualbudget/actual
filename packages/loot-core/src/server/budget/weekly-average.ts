@@ -1,16 +1,4 @@
 import * as monthUtils from '#shared/months';
-import type { Weekday } from '#types/models/templates';
-
-// Ordered to match `Date.prototype.getDay()` (0 = Sunday).
-export const WEEKDAYS = [
-  'sunday',
-  'monday',
-  'tuesday',
-  'wednesday',
-  'thursday',
-  'friday',
-  'saturday',
-] as const satisfies readonly Weekday[];
 
 export type WeeklyAverageWindow = {
   // First and last day of the window, both inclusive (YYYY-MM-DD).

@@ -29,7 +29,6 @@ import {
 } from './actions';
 import { runScheduleForecast } from './schedule-template';
 import { getActiveSchedules } from './statements';
-import { WEEKDAYS } from './weekly-average';
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------
@@ -901,7 +900,7 @@ export class CategoryTemplateContext {
     const occurrences = isWeekly
       ? monthUtils.countDayOfWeekInMonth(
           templateContext.month,
-          WEEKDAYS.indexOf(template.weekday),
+          monthUtils.WEEKDAYS.indexOf(template.weekday),
         )
       : 1;
     return Math.round(average * occurrences);
