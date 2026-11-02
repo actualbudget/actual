@@ -299,6 +299,10 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
+      // trx_ids rejected because their amount cannot be represented; used to
+      // keep these rows out of the displayed preview so they cannot block the
+      // import.
+      const skippedUnsafeIds: string[] = [];
       const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
       const getTransDate: (trans: ImportTransaction) => string | null =
         isOfxFile(filetype)
@@ -353,6 +357,7 @@ export function ImportTransactionsModal({
           console.log(
             `Transaction on ${trans.date} has an amount too large to import`,
           );
+          skippedUnsafeIds.push(trans.trx_id);
           continue;
         }
 
@@ -378,7 +383,7 @@ export function ImportTransactionsModal({
         });
       }
 
-      return previewTransactions;
+      return { previewTransactions, skippedUnsafeIds };
     },
     [categories, clearOnImport],
   );
@@ -830,16 +835,23 @@ export function ImportTransactionsModal({
     );
 
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
-    const previewTransactionsToImport = await getImportPreview(
-      filteredTransactions,
-      filetype,
-      flipAmount,
-      fieldMappings,
-      splitMode,
-      parseDateFormat,
-      inOutMode,
-      outValue,
-      multiplierAmount,
+    const { previewTransactions: previewTransactionsToImport, skippedUnsafeIds } =
+      await getImportPreview(
+        filteredTransactions,
+        filetype,
+        flipAmount,
+        fieldMappings,
+        splitMode,
+        parseDateFormat,
+        inOutMode,
+        outValue,
+        multiplierAmount,
+      );
+    // Rows whose amount cannot be represented are excluded from the import;
+    // keep them out of the displayed preview as well so they cannot block
+    // submission.
+    const displayableTransactions = filteredTransactions.filter(
+      trans => !skippedUnsafeIds.includes(trans.trx_id),
     );
 
     // Retreive the transactions that would be updated (along with the existing trx)
@@ -857,7 +869,7 @@ export function ImportTransactionsModal({
             return map;
           }, {});
 
-          const previewTransactions = filteredTransactions
+          const previewTransactions = displayableTransactions
             .filter(trans => !trans.isMatchedTransaction)
             .reduce((previous, currentTrx) => {
               let next = previous;
