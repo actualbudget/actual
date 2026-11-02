@@ -458,7 +458,7 @@ Often spending follows the week rather than the month, like a weekly grocery sho
 
 The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` for a November 2026 budget, averages spending from 2026-10-04 through 2026-10-31. Weeks before the category's first transaction are left out of the average.
 
-For averages calculated in future months, is uses yesterday as the cut-off point for full 7-day weeks. This ensures averages take into account recent spending.
+For averages calculated in future months, the window uses yesterday as the cut-off point for full 7-day weeks. This ensures averages take into account recent spending.
 
 As an example, assume you spent an average of \$ 50 per week over the last 4 weeks. October 2026 has five Fridays and four Mondays.
 
