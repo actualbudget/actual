@@ -874,37 +874,13 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
-// Failed schedule writes emit sync errors too. While a run is active, ignore
-// them so the retry waits for a later external sync instead of this run.
-let advancingAfterSync = false;
-
-async function advanceSchedulesAfterSync(syncSuccess: boolean) {
-  const runDay = currentDay();
-  // An earlier queued sync may have completed today's work already.
-  if (prefs.getPrefs().lastScheduleRun === runDay) {
-    return;
-  }
-
-  advancingAfterSync = true;
-  try {
-    await advanceSchedulesService(syncSuccess);
-
-    // Rejected or offline runs must remain retryable on a later sync.
-    if (syncSuccess) {
-      await prefs.savePrefs({ lastScheduleRun: runDay });
-    }
-  } finally {
-    advancingAfterSync = false;
-  }
-}
-
-app.events.on('sync', ({ type }) => {
-  if (advancingAfterSync) {
-    return;
-  }
-
+app.events.on('sync', event => {
+  const { type } = event;
+  // apply-failure reports a failed local write, not a finished sync
   const completeEvent =
-    type === 'success' || type === 'error' || type === 'unauthorized';
+    type === 'success' ||
+    (type === 'error' && event.subtype !== 'apply-failure') ||
+    type === 'unauthorized';
 
   if (completeEvent && prefs.getPrefs()) {
     if (!db.getDatabase()) {
@@ -913,11 +889,24 @@ app.events.on('sync', ({ type }) => {
     }
 
     if (prefs.getPrefs().lastScheduleRun !== currentDay()) {
-      runMutator(() => advanceSchedulesAfterSync(type === 'success')).catch(
-        error => {
-          logger.error('Failed to run schedule service after sync', error);
-        },
-      );
+      void runMutator(async () => {
+        const runDay = currentDay();
+        const { lastScheduleRun } = prefs.getPrefs();
+        // A run queued by an earlier sync may have already finished today
+        if (lastScheduleRun === runDay) {
+          return;
+        }
+
+        await advanceSchedulesService(type === 'success');
+
+        // Only mark the day as done when sync succeeded, so that
+        // schedule auto-posting is retried on subsequent successful syncs
+        if (type === 'success') {
+          await prefs.savePrefs({ lastScheduleRun: runDay });
+        }
+      }).catch(error => {
+        logger.error('Failed to run schedule service after sync', error);
+      });
     }
   }
 });
