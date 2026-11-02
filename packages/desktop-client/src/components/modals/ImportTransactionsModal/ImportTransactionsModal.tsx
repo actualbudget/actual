@@ -835,18 +835,20 @@ export function ImportTransactionsModal({
     );
 
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
-    const { previewTransactions: previewTransactionsToImport, skippedUnsafeIds } =
-      await getImportPreview(
-        filteredTransactions,
-        filetype,
-        flipAmount,
-        fieldMappings,
-        splitMode,
-        parseDateFormat,
-        inOutMode,
-        outValue,
-        multiplierAmount,
-      );
+    const {
+      previewTransactions: previewTransactionsToImport,
+      skippedUnsafeIds,
+    } = await getImportPreview(
+      filteredTransactions,
+      filetype,
+      flipAmount,
+      fieldMappings,
+      splitMode,
+      parseDateFormat,
+      inOutMode,
+      outValue,
+      multiplierAmount,
+    );
     // Rows whose amount cannot be represented are excluded from the import;
     // keep them out of the displayed preview as well so they cannot block
     // submission.
