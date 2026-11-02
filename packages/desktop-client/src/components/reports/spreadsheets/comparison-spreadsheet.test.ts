@@ -8,6 +8,7 @@ import {
   fromBudget,
   getAverageDays,
   getAverageMonths,
+  getRangeBucketInterval,
   getTrimRange,
   offsetInterval,
   offsetItem,
@@ -397,6 +398,22 @@ describe('getAverageDays', () => {
     expect(
       getAverageDays([interval('2016-11-15', '2016-11-30', 0)], 'Monthly'),
     ).toBe(30);
+  });
+});
+
+describe('getRangeBucketInterval', () => {
+  it('fetches whole years by year', () => {
+    expect(getRangeBucketInterval('2025-01-01', '2026-12-31')).toBe('Yearly');
+  });
+
+  it('fetches whole months by month', () => {
+    expect(getRangeBucketInterval('2026-05-01', '2026-10-31')).toBe('Monthly');
+    expect(getRangeBucketInterval('2026-01-01', '2026-10-31')).toBe('Monthly');
+  });
+
+  it('fetches by day when a range cuts a month short', () => {
+    expect(getRangeBucketInterval('2026-10-03', '2026-11-02')).toBe('Weekly');
+    expect(getRangeBucketInterval('2026-05-01', '2026-11-02')).toBe('Weekly');
   });
 });
 

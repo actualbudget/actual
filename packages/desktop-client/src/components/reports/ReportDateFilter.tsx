@@ -31,6 +31,8 @@ type ReportDateFilterProps = {
   startDate: string;
   endDate: string;
   includeCurrentInterval: boolean;
+  // Offer every range, not only those that suit the interval
+  offerAllRanges?: boolean;
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
   earliestTransaction: TransactionEntity['date'];
@@ -56,6 +58,7 @@ export function ReportDateFilter({
   startDate,
   endDate,
   includeCurrentInterval,
+  offerAllRanges = false,
   dateRangeLine,
   allIntervals,
   earliestTransaction,
@@ -73,7 +76,7 @@ export function ReportDateFilter({
 
   const rangeOptions = useMemo(() => {
     const options: SelectOption[] = ReportOptions.dateRange
-      .filter(f => f[interval as keyof dateRangeProps])
+      .filter(f => offerAllRanges || f[interval as keyof dateRangeProps])
       .map(option => [option.key, option.description]);
 
     // Append separator if necessary
@@ -81,7 +84,7 @@ export function ReportDateFilter({
       options.splice(dateRangeLine, 0, Menu.line);
     }
     return options;
-  }, [interval, dateRangeLine]);
+  }, [interval, offerAllRanges, dateRangeLine]);
 
   const intervalOptions = allIntervals.map(({ name, pretty }) => [
     name,

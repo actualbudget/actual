@@ -231,20 +231,6 @@ export function ReportSidebar({
     setComparison(resolved);
   };
 
-  // Like the report's own range, a comparison range the new interval doesn't
-  // offer falls back to that interval's default
-  const keepComparisonRangeAvailable = (interval: string) => {
-    if (
-      isComparisonEnabled &&
-      isRangeUnavailable(comparison.dateRange, interval)
-    ) {
-      updateComparison({
-        ...comparison,
-        dateRange: defaultsList.intervalRange.get(interval) || '',
-      });
-    }
-  };
-
   // Projection only changes anything while the report's range runs past today
   const canProjectToFullPeriod =
     customReportItems.balanceType !== 'Budgeted' &&
@@ -315,7 +301,6 @@ export function ReportSidebar({
         if (isRangeUnavailable(customReportItems.dateRange, 'Monthly')) {
           onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
         }
-        keepComparisonRangeAvailable('Monthly');
       }
     }
   };
@@ -615,7 +600,6 @@ export function ReportSidebar({
               if (isRangeUnavailable(customReportItems.dateRange, e)) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
-              keepComparisonRangeAvailable(e);
             }}
             options={ReportOptions.interval.map(option => [
               option.key,
@@ -901,7 +885,10 @@ export function ReportSidebar({
               startDate={comparison.startDate}
               endDate={comparison.endDate}
               includeCurrentInterval={comparison.includeCurrentInterval}
-              dateRangeLine={dateRangeLine}
+              // Only the comparison's totals are used, so any interval can
+              // compare against any range
+              offerAllRanges
+              dateRangeLine={ReportOptions.dateRange.length - 3}
               allIntervals={allIntervals}
               earliestTransaction={earliestTransaction}
               latestTransaction={latestTransaction}

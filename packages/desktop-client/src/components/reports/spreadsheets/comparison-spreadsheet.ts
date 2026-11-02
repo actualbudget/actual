@@ -1011,6 +1011,22 @@ function getVisibleScale(
 // Empty rows are filtered and intervals trimmed after offsetting, since
 // projecting and comparing a range needs all of its intervals, including ones
 // that haven't started yet
+/**
+ * The coarsest interval whose buckets start and end with a range. Queries
+ * round a range out to whole buckets, except Weekly, which is queried by day.
+ */
+export function getRangeBucketInterval(startDate: string, endDate: string) {
+  if (
+    startDate !== monthUtils.firstDayOfMonth(startDate) ||
+    endDate !== monthUtils.lastDayOfMonth(endDate)
+  ) {
+    return 'Weekly';
+  }
+  return startDate.slice(5, 7) === '01' && endDate.slice(5, 7) === '12'
+    ? 'Yearly'
+    : 'Monthly';
+}
+
 function getSpreadsheetProps(
   props: createCustomSpreadsheetProps,
   comparisonOptions: ComparisonOptions,
@@ -1022,8 +1038,13 @@ function getSpreadsheetProps(
       ...actual,
       startDate: comparisonOptions.startDate,
       endDate: comparisonOptions.endDate,
-      // A range comparison only compares its totals. Budgets are dated by
-      // month, so they're fetched by month whatever the report's interval is.
+      // A range comparison only compares its totals, so it's fetched in
+      // the fewest buckets that keep its dates. Budgets are dated by month,
+      // so they're fetched by month whatever the report's interval is.
+      interval: getRangeBucketInterval(
+        comparisonOptions.startDate,
+        comparisonOptions.endDate,
+      ),
       ...(comparisonOptions.budgeted && {
         balanceTypeOp: 'totalBudgeted' as const,
         interval: 'Monthly',
