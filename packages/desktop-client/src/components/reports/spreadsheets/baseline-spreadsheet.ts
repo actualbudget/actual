@@ -3,6 +3,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   balanceTypeOpType,
   BaselineBreakdown,
+  CustomReportBaselineSortAmount,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
@@ -60,6 +61,8 @@ export type BaselineOptions = {
   // Graphs draw amounts against the baseline rather than changes, so rows
   // sort by amount and intervals carry each series' amount and baseline
   showAmounts?: boolean;
+  // The amount rows sort by. Without it, rows sort by the current amount.
+  sortAmount?: CustomReportBaselineSortAmount;
   // Compare against the average of what was budgeted over the range, rather
   // than what was spent
   budgeted?: boolean;
@@ -112,7 +115,7 @@ type BaselineContext = {
   showEmpty: boolean;
   balanceTypeOp: balanceTypeOpType;
   sortByOp: sortByOpType;
-  showAmounts: boolean;
+  sortAmount: CustomReportBaselineSortAmount;
 };
 
 // Amounts are drawn like other report graphs, with spending pointing up
@@ -573,7 +576,7 @@ export function offsetRows(
   baselineRows: GroupedEntity[],
   context: BaselineContext,
 ): GroupedEntity[] {
-  const { scale, template, showEmpty, balanceTypeOp, sortByOp, showAmounts } =
+  const { scale, template, showEmpty, balanceTypeOp, sortByOp, sortAmount } =
     context;
   const baselineByKey = new Map(baselineRows.map(row => [rowKey(row), row]));
   const actualKeys = new Set(actualRows.map(rowKey));
@@ -609,18 +612,25 @@ export function offsetRows(
     })
     .sort(
       sortData(
-        showAmounts
+        sortAmount === 'comparison'
           ? {
               balanceTypeOp,
               sortByOp,
-              getValue: row =>
-                row.baseline
-                  ? (row.baseline.projected ?? row.baseline.actual)[
-                      balanceTypeOp
-                    ]
-                  : 0,
+              getValue: row => row.baseline?.expected[balanceTypeOp] ?? 0,
             }
-          : { balanceTypeOp, sortByOp, isSigned: true },
+          : sortAmount === 'current'
+            ? {
+                balanceTypeOp,
+                sortByOp,
+                getValue: row =>
+                  row.baseline
+                    ? (row.baseline.projected ?? row.baseline.actual)[
+                        balanceTypeOp
+                      ]
+                    : 0,
+              }
+            : // A row's own amount is its change
+              { balanceTypeOp, sortByOp, isSigned: true },
       ),
     );
 }
@@ -1059,7 +1069,7 @@ export function createBaselineSpreadsheet(
         showEmpty,
         balanceTypeOp,
         sortByOp,
-        showAmounts: !!baselineOptions.showAmounts,
+        sortAmount: baselineOptions.sortAmount ?? 'current',
       }),
       totals: offsetItem(actual, baseline, scale),
     });
@@ -1159,7 +1169,7 @@ export function createBaselineGroupedSpreadsheet(
         showEmpty,
         balanceTypeOp,
         sortByOp,
-        showAmounts: !!baselineOptions.showAmounts,
+        sortAmount: baselineOptions.sortAmount ?? 'current',
       });
 
     const scale = getScale(props, baselineOptions, template);

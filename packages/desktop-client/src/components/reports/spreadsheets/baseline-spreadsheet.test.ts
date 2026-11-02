@@ -211,7 +211,7 @@ describe('offsetRows', () => {
     showEmpty: false,
     balanceTypeOp: 'totalDebts' as const,
     sortByOp: 'desc' as const,
-    showAmounts: false,
+    sortAmount: 'change' as const,
   };
 
   it('keeps rows with activity in only one of the ranges', () => {
@@ -254,10 +254,23 @@ describe('offsetRows', () => {
         row('less', [interval('2016-07-01', '', -18400)]),
         row('more', [interval('2016-07-01', '', -1840)]),
       ],
-      { ...context, showAmounts: true },
+      { ...context, sortAmount: 'current' },
     );
 
     expect(rows.map(r => r.id)).toEqual(['more', 'less']);
+  });
+
+  it('sorts by the comparison, largest spending first', () => {
+    const rows = offsetRows(
+      [row('less', [november(-1000)]), row('more', [november(-4000)])],
+      [
+        row('less', [interval('2016-07-01', '', -18400)]),
+        row('more', [interval('2016-07-01', '', -1840)]),
+      ],
+      { ...context, sortAmount: 'comparison' },
+    );
+
+    expect(rows.map(r => r.id)).toEqual(['less', 'more']);
   });
 
   it('sorts spending changes by their signed value', () => {

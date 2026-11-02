@@ -20,6 +20,9 @@ export type CustomReportBaseline = {
   // Draw graphs as changes from the baseline, rather than as amounts with the
   // baseline drawn in. Optional since older reports don't store it.
   showChanges?: boolean;
+  // The amount rows sort by. Without it, rows sort by the current amount when
+  // drawing amounts, and by the change when drawing changes.
+  sortAmount?: CustomReportBaselineSortAmount;
   // Compare against what was spent over the range, or the average of what
   // was budgeted for it. Optional since older reports don't store it.
   source?: CustomReportBaselineSource;
@@ -32,6 +35,11 @@ export type CustomReportBaseline = {
 export type CustomReportBaselineSource = 'actual' | 'budgeted';
 
 export type CustomReportBaselineMode = 'range' | 'offset';
+
+export type CustomReportBaselineSortAmount =
+  | 'current'
+  | 'comparison'
+  | 'change';
 
 export type CustomReportBaselineOffsetUnit = 'days' | 'weeks';
 

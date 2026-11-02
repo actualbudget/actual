@@ -6,6 +6,7 @@ import {
   countMonths,
   defaultBaseline,
   getBaselineRange,
+  getBaselineSortAmount,
   getFullIntervalDays,
   getOffsetDays,
   isBudgetedBaseline,
@@ -103,6 +104,19 @@ describe('offset baselines', () => {
     expect(isOffsetOverlapping(28, 'Monthly')).toBe(true);
     expect(isOffsetOverlapping(35, 'Monthly')).toBe(false);
     expect(isOffsetOverlapping(1, 'Daily')).toBe(false);
+  });
+});
+
+describe('getBaselineSortAmount', () => {
+  it('sorts by what is drawn unless another amount is chosen', () => {
+    expect(getBaselineSortAmount(defaultBaseline, true)).toBe('current');
+    expect(getBaselineSortAmount(defaultBaseline, false)).toBe('change');
+    expect(
+      getBaselineSortAmount(
+        { ...defaultBaseline, sortAmount: 'comparison' },
+        false,
+      ),
+    ).toBe('comparison');
   });
 });
 

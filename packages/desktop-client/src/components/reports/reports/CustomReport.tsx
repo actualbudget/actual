@@ -33,6 +33,7 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  getBaselineSortAmount,
   getOffsetDays,
   isBudgetedBaseline,
   isOffsetBaseline,
@@ -561,6 +562,7 @@ function CustomReportInner({
   const showAmounts = !(
     baseline.showChanges && canShowBaselineChanges(graphType)
   );
+  const sortAmount = getBaselineSortAmount(baseline, showAmounts);
 
   const getGroupData = useMemo(() => {
     const props = {
@@ -586,6 +588,7 @@ function CustomReportInner({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          sortAmount,
           budgeted: budgetedBaseline,
           offset:
             offsetDays === undefined
@@ -602,6 +605,7 @@ function CustomReportInner({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    sortAmount,
     budgetedBaseline,
     offsetDays,
     earliestTransactionDate,
@@ -653,6 +657,7 @@ function CustomReportInner({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          sortAmount,
           budgeted: budgetedBaseline,
           offset:
             offsetDays === undefined
@@ -669,6 +674,7 @@ function CustomReportInner({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    sortAmount,
     budgetedBaseline,
     offsetDays,
     earliestTransactionDate,

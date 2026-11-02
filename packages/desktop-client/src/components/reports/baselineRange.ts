@@ -1,6 +1,7 @@
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CustomReportBaseline,
+  CustomReportBaselineSortAmount,
   IntervalEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
@@ -52,6 +53,17 @@ export function getBaselineRange(
     firstDayOfWeekIdx,
   );
   return [start, end];
+}
+
+/**
+ * The amount rows sort by. Rows sort by what is drawn unless another amount
+ * is chosen.
+ */
+export function getBaselineSortAmount(
+  baseline: CustomReportBaseline,
+  showAmounts: boolean,
+): CustomReportBaselineSortAmount {
+  return baseline.sortAmount ?? (showAmounts ? 'current' : 'change');
 }
 
 export function isOffsetBaseline(baseline: CustomReportBaseline) {

@@ -18,6 +18,7 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   CustomReportBaseline,
+  CustomReportBaselineSortAmount,
   CustomReportEntity,
   CustomReportTagScope,
   sortByOpType,
@@ -36,6 +37,7 @@ import {
   canUseBudgetedBaseline,
   defaultBaseline,
   getBaselineRange,
+  getBaselineSortAmount,
   getOffsetDays,
   isOffsetBaseline,
   isOffsetOverlapping,
@@ -160,6 +162,15 @@ export function ReportSidebar({
   // choice for when the graph switches back
   const canShowChanges = canShowBaselineChanges(customReportItems.graphType);
   const isShowingChanges = canShowChanges && !!baseline.showChanges;
+  // Sorting by name or budget doesn't look at amounts
+  const canSortByAmount =
+    customReportItems.sortBy === 'asc' || customReportItems.sortBy === 'desc';
+  const sortAmount = getBaselineSortAmount(baseline, !isShowingChanges);
+  const sortAmountOptions: [CustomReportBaselineSortAmount, string][] = [
+    ['current', t('Current')],
+    ['comparison', t('Baseline')],
+    ['change', t('Change')],
+  ];
   const isOffset = isOffsetBaseline(baseline);
   const offsetDays = getOffsetDays(baseline);
   const formatBaselineWindow = useFormatBaselineWindow();
@@ -631,6 +642,40 @@ export function ReportSidebar({
               disabledKeys={disabledItems('sort') as sortByOpType[]}
             />
           </View>
+        )}
+        {!disableSort && isBaselineEnabled && canSortByAmount && (
+          <SpaceBetween
+            gap={5}
+            wrap={false}
+            align="start"
+            style={{ padding: 5 }}
+          >
+            {/* Level with the text of the first row of buttons */}
+            <Text
+              style={{
+                width: 50,
+                textAlign: 'right',
+                flexShrink: 0,
+                paddingTop: 5,
+              }}
+            >
+              <Trans>By:</Trans>
+            </Text>
+            {/* Wraps under the first button, not under the label */}
+            <SpaceBetween gap={5} style={{ flex: 1 }}>
+              {sortAmountOptions.map(([option, label]) => (
+                <ModeButton
+                  key={option}
+                  selected={sortAmount === option}
+                  onSelect={() =>
+                    updateBaseline({ ...baseline, sortAmount: option })
+                  }
+                >
+                  {label}
+                </ModeButton>
+              ))}
+            </SpaceBetween>
+          </SpaceBetween>
         )}
 
         <View

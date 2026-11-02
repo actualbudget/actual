@@ -21,6 +21,7 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  getBaselineSortAmount,
   getOffsetDays,
   isBudgetedBaseline,
   isOffsetBaseline,
@@ -146,6 +147,7 @@ export function GetCardData({
   const showAmounts = !(
     baseline.showChanges && canShowBaselineChanges(report.graphType)
   );
+  const sortAmount = getBaselineSortAmount(baseline, showAmounts);
 
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
@@ -191,6 +193,7 @@ export function GetCardData({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          sortAmount,
           budgeted: budgetedBaseline,
           offset:
             offsetDays === undefined
@@ -204,6 +207,7 @@ export function GetCardData({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    sortAmount,
     budgetedBaseline,
     offsetDays,
     earliestTransaction,
@@ -245,6 +249,7 @@ export function GetCardData({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          sortAmount,
           budgeted: budgetedBaseline,
           offset:
             offsetDays === undefined
@@ -258,6 +263,7 @@ export function GetCardData({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    sortAmount,
     budgetedBaseline,
     offsetDays,
     earliestTransaction,
