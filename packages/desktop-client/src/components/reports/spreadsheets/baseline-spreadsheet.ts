@@ -709,50 +709,6 @@ function stackIntervals(
   });
 }
 
-// The rows the report would show without a baseline, in its order, then the
-// rows with only baseline activity, which it would hide as empty
-function getAmountOrder(
-  rows: GroupedEntity[],
-  {
-    showEmpty,
-    balanceTypeOp,
-    sortByOp,
-  }: {
-    showEmpty: boolean;
-    balanceTypeOp: balanceTypeOpType;
-    sortByOp: sortByOpType;
-  },
-) {
-  const actualRows = rows.map(row =>
-    row.baseline ? { ...row, ...row.baseline.actual } : row,
-  );
-  const isShown = (row: GroupedEntity) =>
-    filterEmptyRows({ showEmpty, data: row, balanceTypeOp });
-
-  return [
-    ...actualRows.filter(isShown).sort(sortData({ balanceTypeOp, sortByOp })),
-    ...actualRows.filter(row => !isShown(row)),
-  ];
-}
-
-/**
- * Colours series as the report would without a baseline, where they're
- * ordered by amount, so turning the baseline on or off or sorting by change
- * doesn't reshuffle the colours.
- */
-function keepAmountColors(
-  legend: LegendEntity[],
-  amountOrderLegend: LegendEntity[],
-): LegendEntity[] {
-  const colors = new Map(
-    amountOrderLegend.map(entry => [entry.dataKey, entry.color]),
-  );
-  return legend.map(entry => ({
-    ...entry,
-    color: colors.get(entry.dataKey) ?? entry.color,
-  }));
-}
-
 function colorBySign(
   legend: LegendEntity[],
   values: ReportValues[],
@@ -1108,15 +1064,13 @@ export function createBaselineSpreadsheet(
       !!baselineOptions.showAmounts,
     );
 
-    const legend = keepAmountColors(
-      calculateLegend(intervalData, rows, groupBy, graphType, balanceTypeOp),
-      calculateLegend(
-        intervalData,
-        getAmountOrder(rows, { showEmpty, balanceTypeOp, sortByOp }),
-        groupBy,
-        graphType,
-        balanceTypeOp,
-      ),
+    // Series are coloured in the order shown, like reports without a baseline
+    const legend = calculateLegend(
+      intervalData,
+      rows,
+      groupBy,
+      graphType,
+      balanceTypeOp,
     );
 
     setData({
