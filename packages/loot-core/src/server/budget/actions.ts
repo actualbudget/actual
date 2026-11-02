@@ -420,6 +420,8 @@ export async function getCategoryAverage({
 // Average weekly spending (signed, like `sum-amount`) over the `numWeeks`
 // complete weeks before `month`. See `getWeeklyAverageWindow` for the exact
 // window. Weeks before the category's first transaction are left out.
+// Not rounded: callers multiply it by the weekday count first, so rounding
+// here would drift the monthly amount by up to a few minor units.
 export async function getCategoryWeeklyAverage({
   month,
   numWeeks,
@@ -465,7 +467,7 @@ export async function getCategoryWeeklyAverage({
     [categoryId, db.toDateRepr(window.start), db.toDateRepr(window.end)],
   );
 
-  return Math.round(safeNumber(total?.amount ?? 0) / window.numWeeks);
+  return safeNumber(total?.amount ?? 0) / window.numWeeks;
 }
 
 async function getAverageMonths({

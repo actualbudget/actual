@@ -244,6 +244,18 @@ describe('getCategoryWeeklyAverage', () => {
     ).toBe(-350);
   });
 
+  it('keeps fractional minor units in the weekly average', async () => {
+    await addSpend('2016-10-04', -1001);
+
+    expect(
+      await getCategoryWeeklyAverage({
+        month: '2016-11',
+        numWeeks: 4,
+        categoryId: 'cat1',
+      }),
+    ).toBe(-250.25);
+  });
+
   it('skips weeks before the first transaction', async () => {
     // Only the last of the 4 weeks has any activity.
     await addSpend('2016-10-25', -700);

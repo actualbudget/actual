@@ -98,7 +98,16 @@ export const AmountAdjustment = ({
   return (
     <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
-        <FormLabel title={t('Adjustment')} htmlFor="adjustment-unit-field" />
+        <FormLabel
+          title={
+            // Weekly averages add a fixed adjustment once per week, so the
+            // month moves by 4-5x the entered amount.
+            template.type === 'weeklyAverage'
+              ? t('Adjustment per week')
+              : t('Adjustment')
+          }
+          htmlFor="adjustment-unit-field"
+        />
         <SpaceBetween align="center" gap={12}>
           <Select
             id="adjustment-unit-field"
