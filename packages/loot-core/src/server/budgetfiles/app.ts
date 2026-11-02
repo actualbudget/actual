@@ -595,7 +595,8 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'loading-budget'
     | 'out-of-sync-migrations'
     | 'out-of-sync-data'
-    | 'opening-budget';
+    | 'opening-budget'
+    | 'clock-drift';
 }> {
   let dir: string;
   try {
@@ -743,7 +744,12 @@ async function _loadBudget(id: Budget['id']): Promise<{
       // don't open the file. It's retried on the next load.
       captureException(e);
       await closeBudget();
-      return { error: 'loading-budget' };
+      return {
+        error:
+          e instanceof CRDT.Timestamp.ClockDriftError
+            ? 'clock-drift'
+            : 'loading-budget',
+      };
     }
   }
 
