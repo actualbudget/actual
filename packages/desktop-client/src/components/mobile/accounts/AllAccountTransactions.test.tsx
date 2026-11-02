@@ -127,5 +127,14 @@ describe('AllAccountTransactions', () => {
       { timeout: 2000 },
     );
     expect(makeFilters).toHaveBeenCalledTimes(1);
+    // The filtered query is never handed over without the search on top.
+    const filteredQueries = vi
+      .mocked(useTransactions)
+      .mock.calls.map(
+        ([props]) =>
+          (props.query as Query | undefined)?.serializeAsString() ?? '',
+      )
+      .filter(query => query.includes('from-report'));
+    expect(filteredQueries.every(query => query.includes('%Fuel%'))).toBe(true);
   });
 });

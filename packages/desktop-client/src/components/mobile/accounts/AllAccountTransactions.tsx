@@ -122,11 +122,24 @@ function TransactionListWithPreviews() {
       const query = rootQuery.filter({ $and: queryFilters });
       if (!isStale) {
         setCurrentQuery(query);
-        setTransactionsQuery(query);
         // A search typed or restored before the filters loaded had no query
-        // to apply to; re-run it on top of the filtered query.
-        if (searchTextRef.current !== '') {
-          search(searchTextRef.current);
+        // to apply to; apply it now so rows that only match the filters
+        // never show.
+        const text = searchTextRef.current;
+        setTransactionsQuery(
+          text !== ''
+            ? queries.transactionsSearch(
+                query,
+                text,
+                dateFormat,
+                currencySymbol,
+              )
+            : query,
+        );
+        // Restart any pending debounced search so it can't fire with the
+        // query from before the filters loaded.
+        if (text !== '') {
+          search(text);
         }
       }
     };
@@ -139,7 +152,13 @@ function TransactionListWithPreviews() {
     return () => {
       isStale = true;
     };
-  }, [filterConditionsKey, makeRootTransactionsQuery, search]);
+  }, [
+    filterConditionsKey,
+    makeRootTransactionsQuery,
+    search,
+    dateFormat,
+    currencySymbol,
+  ]);
 
   const {
     transactions,
