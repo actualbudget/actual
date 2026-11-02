@@ -18,8 +18,8 @@ import {
   YAxis,
 } from 'recharts';
 
-import { getBaselineKey } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { getComparisonKey } from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -72,12 +72,12 @@ export function LineGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
-  // Amounts against a baseline draw each series beside a faint baseline line
-  const isAmounts = showAmounts && !!data.baseline;
+  // Amounts against a comparison draw each series beside a faint comparison line
+  const isAmounts = showAmounts && !!data.comparison;
 
   const largestValue = data.intervalData
     .flatMap(c =>
-      isAmounts ? [c.amount ?? 0, c.baselineAmount ?? 0] : [c[balanceTypeOp]],
+      isAmounts ? [c.amount ?? 0, c.comparisonAmount ?? 0] : [c[balanceTypeOp]],
     )
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
@@ -182,10 +182,10 @@ export function LineGraph({
               {isAmounts &&
                 data.legend.map(entry => (
                   <Line
-                    key={getBaselineKey(entry.dataKey)}
+                    key={getComparisonKey(entry.dataKey)}
                     strokeWidth={2}
                     type="monotone"
-                    dataKey={getBaselineKey(entry.dataKey)}
+                    dataKey={getComparisonKey(entry.dataKey)}
                     stroke={entry.color}
                     strokeOpacity={0.35}
                     dot={false}

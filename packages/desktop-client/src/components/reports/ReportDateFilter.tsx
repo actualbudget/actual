@@ -100,24 +100,26 @@ export function ReportDateFilter({
         <Text>
           <strong>{title}</strong>
         </Text>
-        <View style={{ flex: 1 }} />
-        <ModeButton
-          selected={!isOffset && !isDateStatic}
-          onSelect={() => onChangeStatic(false)}
-        >
-          <Trans>Live</Trans>
-        </ModeButton>
-        <ModeButton
-          selected={!isOffset && isDateStatic}
-          onSelect={() => onChangeStatic(true)}
-        >
-          <Trans>Static</Trans>
-        </ModeButton>
-        {offset && (
-          <ModeButton selected={offset.selected} onSelect={offset.onSelect}>
-            <Trans>Offset</Trans>
+        {/* The buttons wrap under the title together, not one at a time */}
+        <SpaceBetween gap={5} wrap={false} style={{ marginLeft: 'auto' }}>
+          <ModeButton
+            selected={!isOffset && !isDateStatic}
+            onSelect={() => onChangeStatic(false)}
+          >
+            <Trans>Live</Trans>
           </ModeButton>
-        )}
+          <ModeButton
+            selected={!isOffset && isDateStatic}
+            onSelect={() => onChangeStatic(true)}
+          >
+            <Trans>Static</Trans>
+          </ModeButton>
+          {offset && (
+            <ModeButton selected={offset.selected} onSelect={offset.onSelect}>
+              <Trans>Offset</Trans>
+            </ModeButton>
+          )}
+        </SpaceBetween>
       </SpaceBetween>
       {offset?.selected ? (
         offset.content

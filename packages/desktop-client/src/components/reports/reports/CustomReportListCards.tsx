@@ -201,7 +201,7 @@ type DateSelection = Pick<
 function ReportCardDates({ report }: { report: CustomReportEntity }) {
   const { t } = useTranslation();
   const locale = useLocale();
-  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
 
   const getRangeLabel = (range: DateSelection) => {
     if (!range.isDateStatic) {
@@ -212,13 +212,13 @@ function ReportCardDates({ report }: { report: CustomReportEntity }) {
     return start === end ? start : `${start} - ${end}`;
   };
 
-  if (reportBaselineEnabled && report.baseline?.enabled) {
+  if (reportComparisonEnabled && report.comparison?.enabled) {
     const current = getRangeLabel(report);
-    const baseline = getRangeLabel(report.baseline);
+    const comparison = getRangeLabel(report.comparison);
     return (
       <Text style={{ color: theme.pageTextSubdued }}>
         <Trans>
-          Compare {{ current }} to {{ baseline }}
+          Compare {{ current }} to {{ comparison }}
         </Trans>
       </Text>
     );

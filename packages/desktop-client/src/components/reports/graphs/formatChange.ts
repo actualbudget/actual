@@ -5,7 +5,7 @@ import type { FormatType } from '#hooks/useFormat';
 import { getSpendingSign } from './getSpendingSign';
 
 /**
- * A change from a baseline, with a plus sign when it's positive. Spending is
+ * A change from a comparison, with a plus sign when it's positive. Spending is
  * shown as positive amounts, so its changes are flipped to match: more
  * spending reads as a rise.
  */

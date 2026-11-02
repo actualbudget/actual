@@ -20,8 +20,8 @@ import {
 } from 'recharts';
 import type { BarShapeProps } from 'recharts';
 
-import { isIntervalInProgress } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { isIntervalInProgress } from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -99,13 +99,13 @@ export function StackedBarGraph({
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
 
-  // Amounts against a baseline stack in front of a faint bar for the whole
-  // interval's baseline
-  const isAmounts = showAmounts && !!data.baseline;
+  // Amounts against a comparison stack in front of a faint bar for the whole
+  // interval's comparison
+  const isAmounts = showAmounts && !!data.comparison;
 
   const largestValue = data.intervalData
     .flatMap(c =>
-      isAmounts ? [c.amount ?? 0, c.baselineAmount ?? 0] : [c[balanceTypeOp]],
+      isAmounts ? [c.amount ?? 0, c.comparisonAmount ?? 0] : [c[balanceTypeOp]],
     )
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
@@ -119,8 +119,8 @@ export function StackedBarGraph({
       }}
     >
       {(width, height) => {
-        // The baseline and the stack share a slot, overlapped by a negative
-        // gap, and the baseline draws itself wider so it shows around the
+        // The comparison and the stack share a slot, overlapped by a negative
+        // gap, and the comparison draws itself wider so it shows around the
         // stack
         const barSize = isAmounts
           ? (width / Math.max(data.intervalData.length, 1)) * 0.45
@@ -179,7 +179,7 @@ export function StackedBarGraph({
                 )}
                 {isAmounts && (
                   <Bar
-                    dataKey="baselineAmount"
+                    dataKey="comparisonAmount"
                     tooltipType="none"
                     legendType="none"
                     isAnimationActive={false}
@@ -210,7 +210,8 @@ export function StackedBarGraph({
                         <Rectangle
                           {...props}
                           fillOpacity={
-                            data.baseline && isIntervalInProgress(props.payload)
+                            data.comparison &&
+                            isIntervalInProgress(props.payload)
                               ? 0.5
                               : 1
                           }

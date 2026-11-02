@@ -17,23 +17,23 @@ import type {
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
-import {
-  canShowBaselineChanges,
-  defaultBaseline,
-  getBaselineRange,
-  getBaselineSortAmount,
-  getOffsetDays,
-  isBudgetedBaseline,
-  isOffsetBaseline,
-} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
+import {
+  canShowComparisonChanges,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonSortAmount,
+  getOffsetDays,
+  isBudgetedComparison,
+  isOffsetComparison,
+} from '#components/reports/comparisonRange';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import {
-  createBaselineGroupedSpreadsheet,
-  createBaselineSpreadsheet,
-} from '#components/reports/spreadsheets/baseline-spreadsheet';
+  createComparisonGroupedSpreadsheet,
+  createComparisonSpreadsheet,
+} from '#components/reports/spreadsheets/comparison-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
@@ -128,26 +128,26 @@ export function GetCardData({
     endDate = dateEnd || report.endDate;
   }
 
-  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
-  const baseline = report.baseline ?? defaultBaseline;
-  const [baselineStartDate, baselineEndDate] = getBaselineRange(
-    baseline,
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
+  const comparison = report.comparison ?? defaultComparison;
+  const [comparisonStartDate, comparisonEndDate] = getComparisonRange(
+    comparison,
     earliestTransaction,
     latestTransaction,
     firstDayOfWeekIdx,
     [startDate, endDate],
   );
-  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
-  const offsetDays = isOffsetBaseline(baseline)
-    ? getOffsetDays(baseline)
+  const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
+  const offsetDays = isOffsetComparison(comparison)
+    ? getOffsetDays(comparison)
     : undefined;
-  const projectToFullPeriod = baseline.projectToFullPeriod;
-  const budgetedBaseline = isBudgetedBaseline(baseline, report.groupBy);
-  // Amounts are drawn with the baseline unless changes are asked for
+  const projectToFullPeriod = comparison.projectToFullPeriod;
+  const budgetedComparison = isBudgetedComparison(comparison, report.groupBy);
+  // Amounts are drawn with the comparison unless changes are asked for
   const showAmounts = !(
-    baseline.showChanges && canShowBaselineChanges(report.graphType)
+    comparison.showChanges && canShowComparisonChanges(report.graphType)
   );
-  const sortAmount = getBaselineSortAmount(baseline, showAmounts);
+  const sortAmount = getComparisonSortAmount(comparison, showAmounts);
 
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
@@ -187,14 +187,14 @@ export function GetCardData({
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
     };
-    return isBaselineEnabled
-      ? createBaselineGroupedSpreadsheet(props, {
-          startDate: baselineStartDate,
-          endDate: baselineEndDate,
+    return isComparisonEnabled
+      ? createComparisonGroupedSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
           projectToFullPeriod,
           showAmounts,
           sortAmount,
-          budgeted: budgetedBaseline,
+          budgeted: budgetedComparison,
           offset:
             offsetDays === undefined
               ? undefined
@@ -202,13 +202,13 @@ export function GetCardData({
         })
       : createGroupedSpreadsheet(props);
   }, [
-    isBaselineEnabled,
-    baselineStartDate,
-    baselineEndDate,
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
     projectToFullPeriod,
     showAmounts,
     sortAmount,
-    budgetedBaseline,
+    budgetedComparison,
     offsetDays,
     earliestTransaction,
     report,
@@ -243,14 +243,14 @@ export function GetCardData({
       sortByOp: report.sortBy,
       dateFormat,
     };
-    return isBaselineEnabled
-      ? createBaselineSpreadsheet(props, {
-          startDate: baselineStartDate,
-          endDate: baselineEndDate,
+    return isComparisonEnabled
+      ? createComparisonSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
           projectToFullPeriod,
           showAmounts,
           sortAmount,
-          budgeted: budgetedBaseline,
+          budgeted: budgetedComparison,
           offset:
             offsetDays === undefined
               ? undefined
@@ -258,13 +258,13 @@ export function GetCardData({
         })
       : createCustomSpreadsheet(props);
   }, [
-    isBaselineEnabled,
-    baselineStartDate,
-    baselineEndDate,
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
     projectToFullPeriod,
     showAmounts,
     sortAmount,
-    budgetedBaseline,
+    budgetedComparison,
     offsetDays,
     earliestTransaction,
     report,

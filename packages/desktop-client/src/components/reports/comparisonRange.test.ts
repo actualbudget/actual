@@ -1,24 +1,24 @@
 import {
-  canUseBudgetedBaseline,
+  canUseBudgetedComparison,
   countDays,
   countElapsedDays,
   countElapsedMonths,
   countMonths,
-  defaultBaseline,
-  getBaselineRange,
-  getBaselineSortAmount,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonSortAmount,
   getFullIntervalDays,
   getOffsetDays,
-  isBudgetedBaseline,
+  isBudgetedComparison,
   isOffsetOverlapping,
   rangesOverlap,
   shiftRange,
-} from './baselineRange';
+} from './comparisonRange';
 import { disabledList } from './disabledList';
 import { ReportOptions } from './ReportOptions';
 
 // In test mode, monthUtils.currentDay() returns '2017-01-01'
-describe('baseline day counts', () => {
+describe('comparison day counts', () => {
   it('counts days inclusively, accepting month strings', () => {
     expect(countDays('2016-12-01', '2016-12-31')).toBe(31);
     expect(countDays('2016-12', '2016-12-31')).toBe(31);
@@ -30,7 +30,7 @@ describe('baseline day counts', () => {
   });
 });
 
-describe('baseline month counts', () => {
+describe('comparison month counts', () => {
   it('counts part months by their share of days', () => {
     expect(countMonths('2016-11-01', '2016-12-31')).toBe(2);
     expect(countMonths('2016-11-16', '2016-12-31')).toBeCloseTo(1.5);
@@ -48,39 +48,43 @@ describe('baseline month counts', () => {
   });
 });
 
-describe('budgeted baselines', () => {
+describe('budgeted comparisons', () => {
   it('only apply to splits with budgets', () => {
-    expect(canUseBudgetedBaseline('Category')).toBe(true);
-    expect(canUseBudgetedBaseline('Group')).toBe(true);
-    expect(canUseBudgetedBaseline('Interval')).toBe(true);
-    expect(canUseBudgetedBaseline('Payee')).toBe(false);
+    expect(canUseBudgetedComparison('Category')).toBe(true);
+    expect(canUseBudgetedComparison('Group')).toBe(true);
+    expect(canUseBudgetedComparison('Interval')).toBe(true);
+    expect(canUseBudgetedComparison('Payee')).toBe(false);
   });
 
   it('need a budgeted source', () => {
-    const budgeted = { ...defaultBaseline, source: 'budgeted' as const };
-    expect(isBudgetedBaseline(budgeted, 'Category')).toBe(true);
-    expect(isBudgetedBaseline(budgeted, 'Tag')).toBe(false);
-    expect(isBudgetedBaseline(defaultBaseline, 'Category')).toBe(false);
+    const budgeted = { ...defaultComparison, source: 'budgeted' as const };
+    expect(isBudgetedComparison(budgeted, 'Category')).toBe(true);
+    expect(isBudgetedComparison(budgeted, 'Tag')).toBe(false);
+    expect(isBudgetedComparison(defaultComparison, 'Category')).toBe(false);
   });
 
-  it('do not apply to offset baselines', () => {
+  it('do not apply to offset comparisons', () => {
     const offset = {
-      ...defaultBaseline,
+      ...defaultComparison,
       source: 'budgeted' as const,
       mode: 'offset' as const,
     };
-    expect(isBudgetedBaseline(offset, 'Category')).toBe(false);
+    expect(isBudgetedComparison(offset, 'Category')).toBe(false);
   });
 });
 
-describe('offset baselines', () => {
+describe('offset comparisons', () => {
   it('convert weeks to days', () => {
     expect(
-      getOffsetDays({ ...defaultBaseline, offsetCount: 3, offsetUnit: 'days' }),
+      getOffsetDays({
+        ...defaultComparison,
+        offsetCount: 3,
+        offsetUnit: 'days',
+      }),
     ).toBe(3);
     expect(
       getOffsetDays({
-        ...defaultBaseline,
+        ...defaultComparison,
         offsetCount: 52,
         offsetUnit: 'weeks',
       }),
@@ -107,13 +111,13 @@ describe('offset baselines', () => {
   });
 });
 
-describe('getBaselineSortAmount', () => {
+describe('getComparisonSortAmount', () => {
   it('sorts by what is drawn unless another amount is chosen', () => {
-    expect(getBaselineSortAmount(defaultBaseline, true)).toBe('current');
-    expect(getBaselineSortAmount(defaultBaseline, false)).toBe('change');
+    expect(getComparisonSortAmount(defaultComparison, true)).toBe('current');
+    expect(getComparisonSortAmount(defaultComparison, false)).toBe('change');
     expect(
-      getBaselineSortAmount(
-        { ...defaultBaseline, sortAmount: 'comparison' },
+      getComparisonSortAmount(
+        { ...defaultComparison, sortAmount: 'comparison' },
         false,
       ),
     ).toBe('comparison');
@@ -131,18 +135,18 @@ describe('rangesOverlap', () => {
   });
 });
 
-describe('getBaselineRange', () => {
+describe('getComparisonRange', () => {
   it('defaults to the six complete months before today', () => {
     expect(
-      getBaselineRange(defaultBaseline, '2015-01-01', '2017-01-01'),
+      getComparisonRange(defaultComparison, '2015-01-01', '2017-01-01'),
     ).toEqual(['2016-07-01', '2016-12-31']);
   });
 
   it('keeps a static range as chosen', () => {
     expect(
-      getBaselineRange(
+      getComparisonRange(
         {
-          ...defaultBaseline,
+          ...defaultComparison,
           isDateStatic: true,
           startDate: '2016-03-01',
           endDate: '2016-03-15',
@@ -154,7 +158,7 @@ describe('getBaselineRange', () => {
   });
 });
 
-describe('baseline "include current" checkbox', () => {
+describe('comparison "include current" checkbox', () => {
   // "Last month" disables the toggle but its saved value still widens the
   // range. The date filter has the same bug and the fix is pending upstream;
   // once it lands this starts passing and should move to the main list.
@@ -162,8 +166,8 @@ describe('baseline "include current" checkbox', () => {
 
   function expectToggleMatchesEnabledState(dateRange: string) {
     const resolve = (includeCurrentInterval: boolean) =>
-      getBaselineRange(
-        { ...defaultBaseline, dateRange, includeCurrentInterval },
+      getComparisonRange(
+        { ...defaultComparison, dateRange, includeCurrentInterval },
         '2015-01-01',
         '2017-01-01',
       );
@@ -189,15 +193,15 @@ describe('baseline "include current" checkbox', () => {
   );
 
   it('never changes a static range', () => {
-    const range = { ...defaultBaseline, isDateStatic: true };
+    const range = { ...defaultComparison, isDateStatic: true };
     expect(
-      getBaselineRange(
+      getComparisonRange(
         { ...range, includeCurrentInterval: true },
         '2015-01-01',
         '2017-01-01',
       ),
     ).toEqual(
-      getBaselineRange(
+      getComparisonRange(
         { ...range, includeCurrentInterval: false },
         '2015-01-01',
         '2017-01-01',

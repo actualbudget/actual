@@ -12,7 +12,7 @@ const RADIAN = Math.PI / 180;
 
 // Rough sizes for a label before it's first drawn and measured: the average
 // width of a character, and its extent from above the name to below the
-// percent row, relative to the name's baseline
+// percent row, relative to the name's comparison
 const ESTIMATED_CHAR_WIDTH = 7;
 const ESTIMATED_LABEL_TOP = -12;
 const ESTIMATED_LABEL_HEIGHT = 52;
@@ -25,7 +25,7 @@ const DOT_GAP = 8;
 // highlight drawn inside it
 const DOT_EDGE_CLEARANCE = 6;
 
-// The label's size, with its top relative to the name's baseline
+// The label's size, with its top relative to the name's comparison
 type LabelBox = { width: number; top: number; height: number };
 
 /**
@@ -84,7 +84,7 @@ export function DonutActiveShapeDesktop({
   };
 
   // The label's size is only known once it's drawn. The rows are drawn from
-  // the name's baseline inside a moved group, so they measure the same
+  // the name's comparison inside a moved group, so they measure the same
   // wherever the label goes. This runs before the browser paints, so the
   // estimated position is never seen.
   useLayoutEffect(() => {

@@ -41,44 +41,44 @@ export const reportModel = {
       throw new ValidationError('Invalid report tag scope.');
     }
 
-    const baseline = report.baseline;
+    const comparison = report.comparison;
     if (
-      baseline !== undefined &&
-      (baseline === null ||
-        typeof baseline.enabled !== 'boolean' ||
-        typeof baseline.dateRange !== 'string' ||
-        typeof baseline.startDate !== 'string' ||
-        typeof baseline.endDate !== 'string' ||
-        typeof baseline.isDateStatic !== 'boolean' ||
-        typeof baseline.includeCurrentInterval !== 'boolean' ||
-        typeof baseline.projectToFullPeriod !== 'boolean' ||
-        (baseline.showChanges !== undefined &&
-          typeof baseline.showChanges !== 'boolean') ||
-        (baseline.sortAmount !== undefined &&
-          baseline.sortAmount !== 'current' &&
-          baseline.sortAmount !== 'comparison' &&
-          baseline.sortAmount !== 'change') ||
-        (baseline.source !== undefined &&
-          baseline.source !== 'actual' &&
-          baseline.source !== 'budgeted') ||
-        (baseline.mode !== undefined &&
-          baseline.mode !== 'range' &&
-          baseline.mode !== 'offset') ||
-        (baseline.offsetCount !== undefined &&
-          (!Number.isInteger(baseline.offsetCount) ||
-            baseline.offsetCount < 1)) ||
-        (baseline.offsetUnit !== undefined &&
-          baseline.offsetUnit !== 'days' &&
-          baseline.offsetUnit !== 'weeks'))
+      comparison !== undefined &&
+      (comparison === null ||
+        typeof comparison.enabled !== 'boolean' ||
+        typeof comparison.dateRange !== 'string' ||
+        typeof comparison.startDate !== 'string' ||
+        typeof comparison.endDate !== 'string' ||
+        typeof comparison.isDateStatic !== 'boolean' ||
+        typeof comparison.includeCurrentInterval !== 'boolean' ||
+        typeof comparison.projectToFullPeriod !== 'boolean' ||
+        (comparison.showChanges !== undefined &&
+          typeof comparison.showChanges !== 'boolean') ||
+        (comparison.sortAmount !== undefined &&
+          comparison.sortAmount !== 'current' &&
+          comparison.sortAmount !== 'comparison' &&
+          comparison.sortAmount !== 'change') ||
+        (comparison.source !== undefined &&
+          comparison.source !== 'actual' &&
+          comparison.source !== 'budgeted') ||
+        (comparison.mode !== undefined &&
+          comparison.mode !== 'range' &&
+          comparison.mode !== 'offset') ||
+        (comparison.offsetCount !== undefined &&
+          (!Number.isInteger(comparison.offsetCount) ||
+            comparison.offsetCount < 1)) ||
+        (comparison.offsetUnit !== undefined &&
+          comparison.offsetUnit !== 'days' &&
+          comparison.offsetUnit !== 'weeks'))
     ) {
-      throw new ValidationError('Invalid report baseline.');
+      throw new ValidationError('Invalid report comparison.');
     }
 
     return report;
   },
 
   toJS(row: CustomReportData): CustomReportEntity {
-    const { tagScope, baseline, ...metadata } = row.metadata ?? {};
+    const { tagScope, comparison, ...metadata } = row.metadata ?? {};
 
     return {
       id: row.id,
@@ -90,7 +90,7 @@ export const reportModel = {
       mode: row.mode,
       groupBy: row.group_by,
       tagScope,
-      baseline,
+      comparison,
       sortBy: row.sort_by,
       interval: row.interval,
       balanceType: row.balance_type,
@@ -134,7 +134,7 @@ export const reportModel = {
       metadata: {
         ...report.metadata,
         tagScope: report.tagScope,
-        baseline: report.baseline,
+        comparison: report.comparison,
       },
     };
   },

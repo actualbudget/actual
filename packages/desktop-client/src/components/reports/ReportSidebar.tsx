@@ -17,8 +17,8 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
-  CustomReportBaseline,
-  CustomReportBaselineSortAmount,
+  CustomReportComparison,
+  CustomReportComparisonSortAmount,
   CustomReportEntity,
   CustomReportTagScope,
   sortByOpType,
@@ -32,22 +32,22 @@ import { Information } from '#components/alerts';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
+import { CategorySelector } from './CategorySelector';
 import {
-  canShowBaselineChanges,
-  canUseBudgetedBaseline,
-  defaultBaseline,
-  getBaselineRange,
-  getBaselineSortAmount,
+  canShowComparisonChanges,
+  canUseBudgetedComparison,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonSortAmount,
   getOffsetDays,
-  isOffsetBaseline,
+  isOffsetComparison,
   isOffsetOverlapping,
   rangesOverlap,
   shiftRange,
-} from './baselineRange';
-import { CategorySelector } from './CategorySelector';
+} from './comparisonRange';
 import { defaultsList, disabledList } from './disabledList';
 import { getLiveRange } from './getLiveRange';
-import { useFormatBaselineWindow } from './graphs/useFormatBaselineWindow';
+import { useFormatComparisonWindow } from './graphs/useFormatComparisonWindow';
 import { ReportDateFilter } from './ReportDateFilter';
 import { ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
@@ -80,7 +80,7 @@ type ReportSidebarProps = {
   ) => void;
   setTrimIntervals: (value: CustomReportEntity['trimIntervals']) => void;
   setShowTrendLines: (value: CustomReportEntity['showTrendLines']) => void;
-  setBaseline: (value: CustomReportBaseline) => void;
+  setComparison: (value: CustomReportComparison) => void;
   setIncludeCurrentInterval: (
     value: CustomReportEntity['includeCurrentInterval'],
   ) => void;
@@ -130,7 +130,7 @@ export function ReportSidebar({
   setShowUncategorized,
   setTrimIntervals,
   setShowTrendLines,
-  setBaseline,
+  setComparison,
   setSelectedCategories,
   onChangeDates,
   onReportChange,
@@ -143,41 +143,41 @@ export function ReportSidebar({
   isComplexCategoryCondition = false,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
-  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
-  const savedBaseline = customReportItems.baseline ?? defaultBaseline;
-  // Live baselines are resolved against today, since saved dates go stale
-  const [baselineStartDate, baselineEndDate] = getBaselineRange(
-    savedBaseline,
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
+  const savedComparison = customReportItems.comparison ?? defaultComparison;
+  // Live comparisons are resolved against today, since saved dates go stale
+  const [comparisonStartDate, comparisonEndDate] = getComparisonRange(
+    savedComparison,
     earliestTransaction,
     latestTransaction,
     firstDayOfWeekIdx,
   );
-  const baseline = {
-    ...savedBaseline,
-    startDate: baselineStartDate,
-    endDate: baselineEndDate,
+  const comparison = {
+    ...savedComparison,
+    startDate: comparisonStartDate,
+    endDate: comparisonEndDate,
   };
-  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
-  // Baseline options only show as ticked where they apply, keeping the saved
+  const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
+  // Comparison options only show as ticked where they apply, keeping the saved
   // choice for when the graph switches back
-  const canShowChanges = canShowBaselineChanges(customReportItems.graphType);
-  const isShowingChanges = canShowChanges && !!baseline.showChanges;
+  const canShowChanges = canShowComparisonChanges(customReportItems.graphType);
+  const isShowingChanges = canShowChanges && !!comparison.showChanges;
   // Sorting by name or budget doesn't look at amounts
   const canSortByAmount =
     customReportItems.sortBy === 'asc' || customReportItems.sortBy === 'desc';
-  const sortAmount = getBaselineSortAmount(baseline, !isShowingChanges);
-  const sortAmountOptions: [CustomReportBaselineSortAmount, string][] = [
+  const sortAmount = getComparisonSortAmount(comparison, !isShowingChanges);
+  const sortAmountOptions: [CustomReportComparisonSortAmount, string][] = [
     ['current', t('Current')],
-    ['comparison', t('Baseline')],
+    ['comparison', t('Comparison')],
     ['change', t('Change')],
   ];
-  const isOffset = isOffsetBaseline(baseline);
-  const offsetDays = getOffsetDays(baseline);
-  const formatBaselineWindow = useFormatBaselineWindow();
+  const isOffset = isOffsetComparison(comparison);
+  const offsetDays = getOffsetDays(comparison);
+  const formatComparisonWindow = useFormatComparisonWindow();
   // Budgets are set per month, so they can't be offset by days or weeks yet
   const canUseBudgeted =
-    canUseBudgetedBaseline(customReportItems.groupBy) && !isOffset;
-  const baselineSource = baseline.source ?? 'actual';
+    canUseBudgetedComparison(customReportItems.groupBy) && !isOffset;
+  const comparisonSource = comparison.source ?? 'actual';
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -218,25 +218,28 @@ export function ReportSidebar({
     }, [customReportItems.dateRange, t]);
 
   // Live dates are resolved on every change so a static switch keeps them
-  const updateBaseline = (next: CustomReportBaseline) => {
-    const [startDate, endDate] = getBaselineRange(
+  const updateComparison = (next: CustomReportComparison) => {
+    const [startDate, endDate] = getComparisonRange(
       next,
       earliestTransaction,
       latestTransaction,
       firstDayOfWeekIdx,
     );
     const resolved = { ...next, startDate, endDate };
-    setSessionReport('baseline', resolved);
+    setSessionReport('comparison', resolved);
     onReportChange({ type: 'modify' });
-    setBaseline(resolved);
+    setComparison(resolved);
   };
 
-  // Like the report's own range, a baseline range the new interval doesn't
+  // Like the report's own range, a comparison range the new interval doesn't
   // offer falls back to that interval's default
-  const keepBaselineRangeAvailable = (interval: string) => {
-    if (isBaselineEnabled && isRangeUnavailable(baseline.dateRange, interval)) {
-      updateBaseline({
-        ...baseline,
+  const keepComparisonRangeAvailable = (interval: string) => {
+    if (
+      isComparisonEnabled &&
+      isRangeUnavailable(comparison.dateRange, interval)
+    ) {
+      updateComparison({
+        ...comparison,
         dateRange: defaultsList.intervalRange.get(interval) || '',
       });
     }
@@ -275,8 +278,8 @@ export function ReportSidebar({
     defaultItems(cond);
     // Budgets only exist per category, so other splits compare against what
     // was spent
-    if (baselineSource === 'budgeted' && !canUseBudgetedBaseline(cond)) {
-      updateBaseline({ ...baseline, source: 'actual' });
+    if (comparisonSource === 'budgeted' && !canUseBudgetedComparison(cond)) {
+      updateComparison({ ...comparison, source: 'actual' });
     }
   };
 
@@ -312,7 +315,7 @@ export function ReportSidebar({
         if (isRangeUnavailable(customReportItems.dateRange, 'Monthly')) {
           onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
         }
-        keepBaselineRangeAvailable('Monthly');
+        keepComparisonRangeAvailable('Monthly');
       }
     }
   };
@@ -333,7 +336,7 @@ export function ReportSidebar({
         ?.disableSort ??
         false));
 
-  const baselineOffsetRows = (
+  const comparisonOffsetRows = (
     <>
       <View
         style={{
@@ -350,25 +353,27 @@ export function ReportSidebar({
           min={1}
           step={1}
           aria-label={t('Offset')}
-          defaultValue={baseline.offsetCount ?? defaultBaseline.offsetCount}
+          defaultValue={comparison.offsetCount ?? defaultComparison.offsetCount}
           // Only whole, positive offsets are saved; anything else is
           // put back when the field loses focus
           onChangeValue={value => {
             const offsetCount = Number(value);
             if (Number.isInteger(offsetCount) && offsetCount >= 1) {
-              updateBaseline({ ...baseline, offsetCount });
+              updateComparison({ ...comparison, offsetCount });
             }
           }}
           onUpdate={(_value, event) => {
             event.currentTarget.value = String(
-              baseline.offsetCount ?? defaultBaseline.offsetCount,
+              comparison.offsetCount ?? defaultComparison.offsetCount,
             );
           }}
           style={{ width: 60, marginRight: 5 }}
         />
         <Select
-          value={baseline.offsetUnit ?? 'weeks'}
-          onChange={offsetUnit => updateBaseline({ ...baseline, offsetUnit })}
+          value={comparison.offsetUnit ?? 'weeks'}
+          onChange={offsetUnit =>
+            updateComparison({ ...comparison, offsetUnit })
+          }
           options={[
             ['days', t('days')],
             ['weeks', t('weeks')],
@@ -381,7 +386,7 @@ export function ReportSidebar({
           color: theme.pageTextSubdued,
         }}
       >
-        {formatBaselineWindow(
+        {formatComparisonWindow(
           ...shiftRange(
             customReportItems.startDate,
             customReportItems.endDate,
@@ -392,14 +397,14 @@ export function ReportSidebar({
     </>
   );
 
-  const baselineSourceRow = (
+  const comparisonSourceRow = (
     <SpaceBetween gap={5} style={{ padding: 5 }}>
       <Text style={{ width: 50, textAlign: 'right' }}>
         <Trans>Source:</Trans>
       </Text>
       <ModeButton
-        selected={baselineSource === 'actual'}
-        onSelect={() => updateBaseline({ ...baseline, source: 'actual' })}
+        selected={comparisonSource === 'actual'}
+        onSelect={() => updateComparison({ ...comparison, source: 'actual' })}
       >
         <Trans>Actual</Trans>
       </ModeButton>
@@ -409,12 +414,12 @@ export function ReportSidebar({
           <Text>
             {isOffset ? (
               <Trans>
-                Budgets are set per month, so an offset baseline can only
+                Budgets are set per month, so an offset comparison can only
                 compare actual amounts for now.
               </Trans>
             ) : (
               <Trans>
-                Budgets are only set for categories, so a budgeted baseline
+                Budgets are only set for categories, so a budgeted comparison
                 needs a Category, Group or Interval split.
               </Trans>
             )}
@@ -424,9 +429,11 @@ export function ReportSidebar({
         triggerProps={{ isDisabled: canUseBudgeted }}
       >
         <ModeButton
-          selected={baselineSource === 'budgeted'}
+          selected={comparisonSource === 'budgeted'}
           isDisabled={!canUseBudgeted}
-          onSelect={() => updateBaseline({ ...baseline, source: 'budgeted' })}
+          onSelect={() =>
+            updateComparison({ ...comparison, source: 'budgeted' })
+          }
         >
           <Trans>Budgeted</Trans>
         </ModeButton>
@@ -481,43 +488,46 @@ export function ReportSidebar({
             <Trans>Time</Trans>
           </ModeButton>
         </SpaceBetween>
-        {reportBaselineEnabled && (
+        {reportComparisonEnabled && (
           // Lines up with the controls beside the 50px row labels
           <View style={{ padding: '0 5px 0 60px' }}>
             <LabeledCheckbox
-              id="baseline-enabled"
-              checked={baseline.enabled}
+              id="comparison-enabled"
+              checked={comparison.enabled}
               onChange={() =>
-                updateBaseline({ ...baseline, enabled: !baseline.enabled })
+                updateComparison({
+                  ...comparison,
+                  enabled: !comparison.enabled,
+                })
               }
             >
-              <Trans>Compare to baseline</Trans>
+              <Trans>Add a comparison</Trans>
             </LabeledCheckbox>
-            {isBaselineEnabled && (
+            {isComparisonEnabled && (
               <Tooltip
                 placement="bottom start"
                 content={
                   <Text>
                     <Trans>
-                      Draw how much each amount changed from the baseline,
-                      instead of the amount with the baseline drawn in.
+                      Draw how much each amount changed from the comparison,
+                      instead of the amount with the comparison drawn in.
                     </Trans>
                   </Text>
                 }
                 style={{ ...styles.tooltip, lineHeight: 1.5 }}
               >
                 <LabeledCheckbox
-                  id="baseline-show-changes"
+                  id="comparison-show-changes"
                   checked={isShowingChanges}
                   disabled={!canShowChanges}
                   onChange={() =>
-                    updateBaseline({
-                      ...baseline,
-                      showChanges: !baseline.showChanges,
+                    updateComparison({
+                      ...comparison,
+                      showChanges: !comparison.showChanges,
                     })
                   }
                 >
-                  <Trans>Show as change from baseline</Trans>
+                  <Trans>Show as change from comparison</Trans>
                 </LabeledCheckbox>
               </Tooltip>
             )}
@@ -605,7 +615,7 @@ export function ReportSidebar({
               if (isRangeUnavailable(customReportItems.dateRange, e)) {
                 onSelectRange(defaultsList.intervalRange.get(e) || '');
               }
-              keepBaselineRangeAvailable(e);
+              keepComparisonRangeAvailable(e);
             }}
             options={ReportOptions.interval.map(option => [
               option.key,
@@ -641,7 +651,7 @@ export function ReportSidebar({
             />
           </View>
         )}
-        {!disableSort && isBaselineEnabled && canSortByAmount && (
+        {!disableSort && isComparisonEnabled && canSortByAmount && (
           <View
             style={{
               flexDirection: 'row',
@@ -655,7 +665,7 @@ export function ReportSidebar({
             <Select
               value={sortAmount}
               onChange={sortAmount =>
-                updateBaseline({ ...baseline, sortAmount })
+                updateComparison({ ...comparison, sortAmount })
               }
               options={sortAmountOptions}
             />
@@ -831,7 +841,7 @@ export function ReportSidebar({
             }
           }}
         >
-          {isBaselineEnabled && (
+          {isComparisonEnabled && (
             <View style={{ padding: '5px 5px 0 10px' }}>
               <Tooltip
                 placement="bottom start"
@@ -846,13 +856,13 @@ export function ReportSidebar({
                 style={{ ...styles.tooltip, lineHeight: 1.5 }}
               >
                 <LabeledCheckbox
-                  id="baseline-project-full-period"
-                  checked={baseline.projectToFullPeriod}
+                  id="comparison-project-full-period"
+                  checked={comparison.projectToFullPeriod}
                   disabled={!canProjectToFullPeriod}
                   onChange={() =>
-                    updateBaseline({
-                      ...baseline,
-                      projectToFullPeriod: !baseline.projectToFullPeriod,
+                    updateComparison({
+                      ...comparison,
+                      projectToFullPeriod: !comparison.projectToFullPeriod,
                     })
                   }
                 >
@@ -862,7 +872,7 @@ export function ReportSidebar({
             </View>
           )}
         </ReportDateFilter>
-        {isBaselineEnabled && (
+        {isComparisonEnabled && (
           <>
             <View
               style={{
@@ -873,47 +883,47 @@ export function ReportSidebar({
               }}
             />
             <ReportDateFilter
-              title={<Trans>Baseline</Trans>}
+              title={<Trans>Comparison</Trans>}
               offset={{
                 selected: isOffset,
                 // Budgets can't be offset by days or weeks yet
                 onSelect: () =>
-                  updateBaseline({
-                    ...baseline,
+                  updateComparison({
+                    ...comparison,
                     mode: 'offset',
                     source: 'actual',
                   }),
-                content: baselineOffsetRows,
+                content: comparisonOffsetRows,
               }}
               interval={customReportItems.interval}
-              dateRange={baseline.dateRange}
-              isDateStatic={baseline.isDateStatic}
-              startDate={baseline.startDate}
-              endDate={baseline.endDate}
-              includeCurrentInterval={baseline.includeCurrentInterval}
+              dateRange={comparison.dateRange}
+              isDateStatic={comparison.isDateStatic}
+              startDate={comparison.startDate}
+              endDate={comparison.endDate}
+              includeCurrentInterval={comparison.includeCurrentInterval}
               dateRangeLine={dateRangeLine}
               allIntervals={allIntervals}
               earliestTransaction={earliestTransaction}
               latestTransaction={latestTransaction}
               firstDayOfWeekIdx={firstDayOfWeekIdx}
               onSelectRange={dateRange =>
-                updateBaseline({ ...baseline, dateRange })
+                updateComparison({ ...comparison, dateRange })
               }
               onChangeDates={(startDate, endDate) =>
-                updateBaseline({ ...baseline, startDate, endDate })
+                updateComparison({ ...comparison, startDate, endDate })
               }
               onChangeStatic={isDateStatic =>
-                updateBaseline({ ...baseline, mode: 'range', isDateStatic })
+                updateComparison({ ...comparison, mode: 'range', isDateStatic })
               }
             >
-              {baselineSourceRow}
+              {comparisonSourceRow}
               {isOffset ? (
                 isOffsetOverlapping(offsetDays, customReportItems.interval) && (
                   <Information style={{ marginTop: 5 }}>
                     <Trans>
                       The offset is shorter than an interval, so some
                       transactions count towards both an interval and its
-                      baseline.
+                      comparison.
                     </Trans>
                   </Information>
                 )
@@ -921,17 +931,17 @@ export function ReportSidebar({
                 <>
                   <View style={{ padding: '5px 5px 0 10px' }}>
                     <LabeledCheckbox
-                      id="baseline-include-current"
-                      checked={baseline.includeCurrentInterval}
+                      id="comparison-include-current"
+                      checked={comparison.includeCurrentInterval}
                       disabled={
-                        baseline.isDateStatic ||
-                        disabledList.currentInterval.get(baseline.dateRange)
+                        comparison.isDateStatic ||
+                        disabledList.currentInterval.get(comparison.dateRange)
                       }
                       onChange={() =>
-                        updateBaseline({
-                          ...baseline,
+                        updateComparison({
+                          ...comparison,
                           includeCurrentInterval:
-                            !baseline.includeCurrentInterval,
+                            !comparison.includeCurrentInterval,
                         })
                       }
                     >
@@ -940,23 +950,23 @@ export function ReportSidebar({
                   </View>
                   {rangesOverlap(
                     [customReportItems.startDate, customReportItems.endDate],
-                    [baseline.startDate, baseline.endDate],
+                    [comparison.startDate, comparison.endDate],
                   ) && (
                     <Information style={{ marginTop: 5 }}>
                       <Trans>
-                        The baseline overlaps the report's date range, so some
+                        The comparison overlaps the report's date range, so some
                         transactions count towards both.
                       </Trans>
                     </Information>
                   )}
                   {/* Only these balance types count income categories */}
-                  {baselineSource === 'budgeted' &&
+                  {comparisonSource === 'budgeted' &&
                     ['Deposit', 'Net', 'Net Deposit'].includes(
                       customReportItems.balanceType,
                     ) && (
                       <Information style={{ marginTop: 5 }}>
                         <Trans>
-                          Income isn't budgeted, so the baseline counts it as
+                          Income isn't budgeted, so the comparison counts it as
                           zero.
                         </Trans>
                       </Information>

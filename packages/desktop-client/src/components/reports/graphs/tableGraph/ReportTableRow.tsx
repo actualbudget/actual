@@ -7,16 +7,16 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
+  ComparisonBreakdown,
   GroupedEntity,
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
-import { countElapsedDays } from '#components/reports/baselineRange';
+import { countElapsedDays } from '#components/reports/comparisonRange';
 import { showActivity } from '#components/reports/graphs/showActivity';
-import { useFormatBaselineWindow } from '#components/reports/graphs/useFormatBaselineWindow';
+import { useFormatComparisonWindow } from '#components/reports/graphs/useFormatComparisonWindow';
 import { Cell, Row } from '#components/table';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
@@ -33,12 +33,12 @@ type ReportTableRowProps = {
   filters?: RuleConditionEntity[];
   startDate?: string;
   endDate?: string;
-  showBaseline?: boolean;
+  showComparison?: boolean;
   showProjected?: boolean;
   // Split each interval into current, comparison and change cells
   splitIntervals?: boolean;
-  baselineStartDate?: string;
-  baselineEndDate?: string;
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
   intervalsCount: number;
   compact: boolean;
   style?: CSSProperties;
@@ -68,11 +68,11 @@ export const ReportTableRow = memo(
     filters = [],
     startDate = '',
     endDate,
-    showBaseline = false,
+    showComparison = false,
     showProjected = false,
     splitIntervals = false,
-    baselineStartDate = '',
-    baselineEndDate = '',
+    comparisonStartDate = '',
+    comparisonEndDate = '',
     intervalsCount,
     compact,
     style,
@@ -87,31 +87,31 @@ export const ReportTableRow = memo(
     colorized,
     scopeTagNames,
   }: ReportTableRowProps) => {
-    const breakdown = showBaseline ? item.baseline : undefined;
-    // Baseline tables keep real amounts, so they match the transactions a
+    const breakdown = showComparison ? item.comparison : undefined;
+    // Comparison tables keep real amounts, so they match the transactions a
     // click-through shows, and put the change in its own column
     const amounts = breakdown ? breakdown.actual : item;
-    const baselineAmount =
+    const comparisonAmount =
       mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
     // Time tables compare a typical interval at the pace so far against the
-    // Baseline column, while total tables compare the whole range
+    // Comparison column, while total tables compare the whole range
     const pace = mode === 'time' ? breakdown?.pacePerInterval : undefined;
     const average = pace
       ? pace[balanceTypeOp]
       : Math.round(amounts[balanceTypeOp] / intervalsCount);
     const change = pace
-      ? average - (baselineAmount?.[balanceTypeOp] ?? 0)
+      ? average - (comparisonAmount?.[balanceTypeOp] ?? 0)
       : item[balanceTypeOp];
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
     const format = useFormat();
     const { t } = useTranslation();
-    const formatBaselineWindow = useFormatBaselineWindow();
+    const formatComparisonWindow = useFormatComparisonWindow();
 
-    // Spells out what a baseline interval was compared against, since its
-    // length can differ from the average interval in the Baseline column
+    // Spells out what a comparison interval was compared against, since its
+    // length can differ from the average interval in the Comparison column
     const getIntervalTitle = (
       intervalItem: IntervalEntity,
-      intervalBreakdown: BaselineBreakdown | undefined,
+      intervalBreakdown: ComparisonBreakdown | undefined,
     ) => {
       if (!intervalBreakdown) {
         const amount = intervalItem[balanceTypeOp];
@@ -120,13 +120,15 @@ export const ReportTableRow = memo(
           : undefined;
       }
 
-      const baselineWindow = formatBaselineWindow(
-        intervalItem.baselineStartDate,
-        intervalItem.baselineEndDate,
+      const comparisonWindow = formatComparisonWindow(
+        intervalItem.comparisonStartDate,
+        intervalItem.comparisonEndDate,
       );
       // A window before the earliest transaction has nothing to compare
       if (intervalBreakdown.noData) {
-        return t('Baseline ({{baselineWindow}}): no data', { baselineWindow });
+        return t('Comparison ({{comparisonWindow}}): no data', {
+          comparisonWindow,
+        });
       }
 
       const change = intervalItem[balanceTypeOp];
@@ -134,20 +136,20 @@ export const ReportTableRow = memo(
         intervalBreakdown.expected[balanceTypeOp],
         'financial',
       );
-      const baselineLine = baselineWindow
-        ? t('Baseline ({{baselineWindow}}): {{amount}}', {
-            baselineWindow,
+      const comparisonLine = comparisonWindow
+        ? t('Comparison ({{comparisonWindow}}): {{amount}}', {
+            comparisonWindow,
             amount: expected,
           })
         : // Budgets are compared per interval, so their length doesn't matter
           balanceTypeOp === 'totalBudgeted' ||
             !intervalItem.intervalStartDate ||
             !intervalItem.intervalEndDate
-          ? t('Baseline: {{amount}}', { amount: expected })
+          ? t('Comparison: {{amount}}', { amount: expected })
           : // Budgets are spread by months, so a day count doesn't apply
             intervalBreakdown.budgeted
             ? t('Budgeted: {{amount}}', { amount: expected })
-            : t('Baseline: {{amount}} over {{count}} days', {
+            : t('Comparison: {{amount}} over {{count}} days', {
                 amount: expected,
                 // Intervals in progress compare the days so far
                 count: countElapsedDays(
@@ -156,7 +158,7 @@ export const ReportTableRow = memo(
                 ),
               });
       const lines = [
-        baselineLine,
+        comparisonLine,
         t('Change: {{amount}}', {
           amount: (change > 0 ? '+' : '') + format(change, 'financial'),
         }),
@@ -208,9 +210,9 @@ export const ReportTableRow = memo(
         scopeTagNames,
       });
 
-    // A single interval has no matching slice of the baseline, so interval
-    // rows open the whole baseline range
-    const onShowBaseline = () =>
+    // A single interval has no matching slice of the comparison, so interval
+    // rows open the whole comparison range
+    const onShowComparison = () =>
       canShowActivity &&
       showActivity({
         navigate,
@@ -222,8 +224,8 @@ export const ReportTableRow = memo(
         showOffBudget,
         type: 'totals',
         ...drilldown,
-        startDate: baselineStartDate,
-        endDate: baselineEndDate,
+        startDate: comparisonStartDate,
+        endDate: comparisonEndDate,
         uncategorizedId: item.uncategorizedId,
         bucketTagNames: item.bucketTagNames,
         scopeTagNames,
@@ -273,15 +275,18 @@ export const ReportTableRow = memo(
             }}
             valueStyle={compactStyle}
           />
-          {showBaseline && (
+          {showComparison && (
             <Cell
-              value={format(baselineAmount?.[balanceTypeOp] ?? 0, 'financial')}
+              value={format(
+                comparisonAmount?.[balanceTypeOp] ?? 0,
+                'financial',
+              )}
               textAlign="right"
               style={{
                 minWidth: compact ? 50 : 85,
                 backgroundColor: style?.backgroundColor,
                 ...(colorized && {
-                  color: getAmountColor(baselineAmount?.[balanceTypeOp] ?? 0),
+                  color: getAmountColor(comparisonAmount?.[balanceTypeOp] ?? 0),
                 }),
               }}
               unexposedContent={({ value }) => (
@@ -296,7 +301,7 @@ export const ReportTableRow = memo(
                 </FinancialText>
               )}
               valueStyle={compactStyle}
-              onClick={onShowBaseline}
+              onClick={onShowComparison}
               width="flex"
               privacyFilter
             />
@@ -324,13 +329,13 @@ export const ReportTableRow = memo(
                     scopeTagNames,
                   });
                 if (splitIntervals) {
-                  const windowStart = intervalItem.baselineStartDate;
-                  const windowEnd = intervalItem.baselineEndDate;
+                  const windowStart = intervalItem.comparisonStartDate;
+                  const windowEnd = intervalItem.comparisonEndDate;
                   return (
                     <SplitIntervalCells
                       key={index}
                       intervalItem={intervalItem}
-                      breakdown={intervalItem.baseline}
+                      breakdown={intervalItem.comparison}
                       balanceTypeOp={balanceTypeOp}
                       backgroundColor={style?.backgroundColor}
                       hoverStyle={hoverUnderline}
@@ -338,7 +343,7 @@ export const ReportTableRow = memo(
                       onShowInterval={onShowInterval}
                       onShowComparison={
                         // Budgets have no transactions to show
-                        intervalItem.baseline?.budgeted
+                        intervalItem.comparison?.budgeted
                           ? undefined
                           : windowStart && windowEnd
                             ? () =>
@@ -359,14 +364,14 @@ export const ReportTableRow = memo(
                                   bucketTagNames: item.bucketTagNames,
                                   scopeTagNames,
                                 })
-                            : onShowBaseline
+                            : onShowComparison
                       }
                     />
                   );
                 }
-                // With a baseline, cells show real amounts coloured by their
+                // With a comparison, cells show real amounts coloured by their
                 // change from it
-                const intervalBreakdown = breakdown && intervalItem.baseline;
+                const intervalBreakdown = breakdown && intervalItem.comparison;
                 const intervalAmount = intervalBreakdown
                   ? intervalBreakdown.actual[balanceTypeOp]
                   : intervalItem[balanceTypeOp];
@@ -639,7 +644,7 @@ function AmountCell({
 
 type SplitIntervalCellsProps = {
   intervalItem: IntervalEntity;
-  breakdown: BaselineBreakdown | undefined;
+  breakdown: ComparisonBreakdown | undefined;
   balanceTypeOp: balanceTypeOpType;
   backgroundColor?: CSSProperties['backgroundColor'];
   hoverStyle?: CSSProperties;
@@ -670,12 +675,12 @@ function SplitIntervalCells({
     : intervalItem[balanceTypeOp];
   // A window before the earliest transaction has nothing to compare
   const hasComparison = !!breakdown && !breakdown.noData;
-  const comparison = breakdown?.expected[balanceTypeOp] ?? 0;
+  const comparedAmount = breakdown?.expected[balanceTypeOp] ?? 0;
   // An interval's own amount is its change
   const change = intervalItem[balanceTypeOp];
   const percent =
-    hasComparison && comparison !== 0
-      ? Math.round((change / Math.abs(comparison)) * 100)
+    hasComparison && comparedAmount !== 0
+      ? Math.round((change / Math.abs(comparedAmount)) * 100)
       : undefined;
 
   const [currentStyle, comparisonStyle, changeStyle] = SPLIT_MIN_WIDTHS.map(
@@ -715,10 +720,10 @@ function SplitIntervalCells({
           textAlign="right"
           style={{
             ...comparisonStyle,
-            ...(colorized && { color: getAmountColor(comparison) }),
+            ...(colorized && { color: getAmountColor(comparedAmount) }),
           }}
           unexposedContent={renderValue(!!onShowComparison)}
-          value={format(comparison, 'financial')}
+          value={format(comparedAmount, 'financial')}
           onClick={onShowComparison}
           width="flex"
           privacyFilter

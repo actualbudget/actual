@@ -13,7 +13,7 @@ export type SeriesRow = {
   name: string;
   color: string;
   value: number;
-  // How the amount compares with the baseline, when there is one
+  // How the amount compares with the comparison, when there is one
   change?: number;
 };
 

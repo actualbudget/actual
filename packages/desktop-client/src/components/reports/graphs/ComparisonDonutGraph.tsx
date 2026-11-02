@@ -36,7 +36,7 @@ import { showActivity } from './showActivity';
 
 const RADIAN = Math.PI / 180;
 
-// How solid baselines, and their highlights, are drawn
+// How solid comparisons, and their highlights, are drawn
 const GHOST_OPACITY = 0.3;
 
 const sectorCursor = css({ '& .recharts-pie-sector': { cursor: 'pointer' } });
@@ -51,24 +51,24 @@ type Drilldown = {
   bucketTagNames?: string[];
 };
 
-// One slice of the chart, sized by the larger of its amount and baseline
+// One slice of the chart, sized by the larger of its amount and comparison
 type Slot = {
   name: string;
   color: string;
   amount: number;
-  baseline: number;
+  comparison: number;
   size: number;
   change: number;
   drilldown: Drilldown;
 };
 
 // One level of the split, like groups or categories, drawn as a faint ring
-// of baselines inside a ring of amounts
+// of comparisons inside a ring of amounts
 type Level = {
   key: string;
   slots: Slot[];
   totalAmount: number;
-  totalBaseline: number;
+  totalComparison: number;
 };
 
 // A ring is drawn as each slot's value then a gap filling the rest of the
@@ -83,7 +83,7 @@ type Ring = {
   key: string;
   level: Level;
   segments: Segment[];
-  isBaseline: boolean;
+  isComparison: boolean;
   innerRadius: number;
   outerRadius: number;
   // Whether the hovered segment is highlighted in the hole rather than
@@ -91,7 +91,7 @@ type Ring = {
   expandInward: boolean;
 };
 
-type BaselineDonutGraphProps = {
+type ComparisonDonutGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
   filters: RuleConditionEntity[];
@@ -104,12 +104,12 @@ type BaselineDonutGraphProps = {
 };
 
 /**
- * A donut comparing amounts with a baseline: each amount ring has a faint
- * ring of its baselines inside it, both starting from the same angle in a
+ * A donut comparing amounts with a comparison: each amount ring has a faint
+ * ring of its comparisons inside it, both starting from the same angle in a
  * slice sized by whichever is larger. Split by category and group, the group
  * rings sit inside the category rings, each group spanning its categories.
  */
-export function BaselineDonutGraph({
+export function ComparisonDonutGraph({
   style,
   data,
   filters,
@@ -119,7 +119,7 @@ export function BaselineDonutGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTooltip = true,
-}: BaselineDonutGraphProps) {
+}: ComparisonDonutGraphProps) {
   const animationProps = useRechartsAnimation({ animationDuration: 500 });
   const { t } = useTranslation();
   const format = useFormat();
@@ -192,9 +192,9 @@ export function BaselineDonutGraph({
 
         // A hovered segment is drawn like other donuts' active sectors,
         // labelled with its own ring's values. Gaps highlight the slot's
-        // empty part and stay transparent, and baselines stay faint.
+        // empty part and stay transparent, and comparisons stay faint.
         const renderSegment =
-          ({ level, segments, isBaseline, expandInward }: Ring) =>
+          ({ level, segments, isComparison, expandInward }: Ring) =>
           (props: PieSectorShapeProps) => {
             const segment = segments[props.index];
             if (!segment) {
@@ -202,8 +202,10 @@ export function BaselineDonutGraph({
             }
 
             const slot = level.slots[segment.slotIndex];
-            const value = isBaseline ? slot.baseline : slot.amount;
-            const total = isBaseline ? level.totalBaseline : level.totalAmount;
+            const value = isComparison ? slot.comparison : slot.amount;
+            const total = isComparison
+              ? level.totalComparison
+              : level.totalAmount;
             const ActiveShape = compact
               ? DonutActiveShapeMobile
               : DonutActiveShapeDesktop;
@@ -217,24 +219,24 @@ export function BaselineDonutGraph({
                   // just past this ring's
                   outerRadius={outerRadius}
                   fill={slot.color}
-                  highlightOpacity={isBaseline ? GHOST_OPACITY : undefined}
+                  highlightOpacity={isComparison ? GHOST_OPACITY : undefined}
                   payload={{ name: slot.name }}
                   value={value}
-                  // A baseline says what it is, and an amount shows its
-                  // change from the baseline
+                  // A comparison says what it is, and an amount shows its
+                  // change from the comparison
                   valueText={
-                    isBaseline
-                      ? data.baseline?.budgeted
+                    isComparison
+                      ? data.comparison?.budgeted
                         ? t('Budgeted: {{amount}}', {
                             amount: format(value, 'financial'),
                           })
-                        : t('Baseline: {{amount}}', {
+                        : t('Comparison: {{amount}}', {
                             amount: format(value, 'financial'),
                           })
                       : undefined
                   }
                   change={
-                    isBaseline
+                    isComparison
                       ? undefined
                       : {
                           text: formatChange(
@@ -258,7 +260,7 @@ export function BaselineDonutGraph({
               <DonutSector
                 sector={props}
                 fill={segment.isGap ? 'transparent' : slot.color}
-                fillOpacity={getSegmentOpacity(segment, isBaseline)}
+                fillOpacity={getSegmentOpacity(segment, isComparison)}
                 stroke={segment.isGap ? 'none' : undefined}
                 highlight={highlight}
               />
@@ -342,8 +344,8 @@ export function BaselineDonutGraph({
   );
 }
 
-// Each level gets a baseline ring then an amount ring, outwards. With more
-// than one level the baseline rings are half as wide, and the inner level is
+// Each level gets a comparison ring then an amount ring, outwards. With more
+// than one level the comparison rings are half as wide, and the inner level is
 // highlighted in the hole while the outer one is highlighted outside the
 // chart, so neither highlight covers another ring.
 function getRings(
@@ -352,26 +354,26 @@ function getRings(
   outerRadius: number,
 ): Ring[] {
   const isNested = levels.length > 1;
-  const baselineWidth = isNested ? 1 : 2;
+  const comparisonWidth = isNested ? 1 : 2;
   const amountWidth = 2;
   const unit =
     (outerRadius - innerRadius) /
-    (levels.length * (baselineWidth + amountWidth));
+    (levels.length * (comparisonWidth + amountWidth));
 
   return levels.flatMap((level, levelIndex): Ring[] => {
     const levelInner =
-      innerRadius + levelIndex * (baselineWidth + amountWidth) * unit;
-    const baselineOuter = levelInner + baselineWidth * unit;
-    const ring = (isBaseline: boolean): Ring => ({
-      key: `${level.key}-${isBaseline ? 'baseline' : 'amount'}`,
+      innerRadius + levelIndex * (comparisonWidth + amountWidth) * unit;
+    const comparisonOuter = levelInner + comparisonWidth * unit;
+    const ring = (isComparison: boolean): Ring => ({
+      key: `${level.key}-${isComparison ? 'comparison' : 'amount'}`,
       level,
-      segments: getSegments(level.slots, isBaseline),
-      isBaseline,
-      innerRadius: isBaseline ? levelInner : baselineOuter,
-      outerRadius: isBaseline
-        ? baselineOuter
-        : baselineOuter + amountWidth * unit,
-      expandInward: isNested ? levelIndex === 0 : isBaseline,
+      segments: getSegments(level.slots, isComparison),
+      isComparison,
+      innerRadius: isComparison ? levelInner : comparisonOuter,
+      outerRadius: isComparison
+        ? comparisonOuter
+        : comparisonOuter + amountWidth * unit,
+      expandInward: isNested ? levelIndex === 0 : isComparison,
     });
     return [ring(true), ring(false)];
   });
@@ -412,7 +414,7 @@ function getCategoryGroupLevels(
       name: group.name,
       color: colorMap.get(group.id) ?? theme.pageTextLight,
       amount: sum(slots, slot => slot.amount),
-      baseline: sum(slots, slot => slot.baseline),
+      comparison: sum(slots, slot => slot.comparison),
       size: sum(slots, slot => slot.size),
       change: group[balanceTypeOp],
       drilldown: getDrilldown(group, 'group', dates),
@@ -427,7 +429,7 @@ function getLevel(key: string, slots: Slot[]): Level {
     key,
     slots,
     totalAmount: sum(slots, slot => slot.amount),
-    totalBaseline: sum(slots, slot => slot.baseline),
+    totalComparison: sum(slots, slot => slot.comparison),
   };
 }
 
@@ -450,7 +452,7 @@ function getSlots(
   const sign = getSpendingSign(balanceTypeOp);
 
   return items.flatMap((item, index) => {
-    const breakdown = item.baseline;
+    const breakdown = item.comparison;
     if (!breakdown) {
       return [];
     }
@@ -459,8 +461,8 @@ function getSlots(
       sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
       0,
     );
-    const baseline = Math.max(sign * breakdown.expected[balanceTypeOp], 0);
-    if (amount === 0 && baseline === 0) {
+    const comparison = Math.max(sign * breakdown.expected[balanceTypeOp], 0);
+    if (amount === 0 && comparison === 0) {
       return [];
     }
 
@@ -469,8 +471,8 @@ function getSlots(
         name: 'intervalData' in item ? item.name : item.date,
         color: colors[index] ?? theme.pageTextLight,
         amount,
-        baseline,
-        size: Math.max(amount, baseline),
+        comparison,
+        size: Math.max(amount, comparison),
         change: item[balanceTypeOp],
         drilldown: getDrilldown(item, field, dates),
       },
@@ -515,14 +517,14 @@ function getHighlightAngles(
   return { startAngle, endAngle, midAngle: (startAngle + endAngle) / 2 };
 }
 
-function getSegmentOpacity(segment: Segment, isBaseline: boolean) {
+function getSegmentOpacity(segment: Segment, isComparison: boolean) {
   if (segment.isGap) return 0;
-  return isBaseline ? GHOST_OPACITY : 1;
+  return isComparison ? GHOST_OPACITY : 1;
 }
 
-function getSegments(slots: Slot[], isBaseline: boolean) {
+function getSegments(slots: Slot[], isComparison: boolean) {
   return slots.flatMap((slot, slotIndex): Segment[] => {
-    const value = isBaseline ? slot.baseline : slot.amount;
+    const value = isComparison ? slot.comparison : slot.amount;
     return [
       { slotIndex, value, isGap: false },
       { slotIndex, value: slot.size - value, isGap: true },

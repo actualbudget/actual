@@ -44,41 +44,41 @@ function renderHeader(
 
 describe('ReportTableHeader', () => {
   it('shows real amounts then the projection and change in total mode', () => {
-    expect(renderHeader({ showBaseline: true, showProjected: true })).toBe(
-      'CategoryBaselineDepositsPaymentsTotalsProjectedChangeAverage',
+    expect(renderHeader({ showComparison: true, showProjected: true })).toBe(
+      'CategoryComparisonDepositsPaymentsTotalsProjectedChangeAverage',
     );
   });
 
   it('ends time mode with the same projection and change columns', () => {
     expect(
-      renderHeader({ mode: 'time', showBaseline: true, showProjected: true }),
-    ).toBe('CategoryBaselineMay 2026Jun 2026TotalsProjectedChangeAverage');
+      renderHeader({ mode: 'time', showComparison: true, showProjected: true }),
+    ).toBe('CategoryComparisonMay 2026Jun 2026TotalsProjectedChangeAverage');
   });
 
   it('splits each interval and names an offset window beside its date', () => {
     expect(
       renderHeader({
         mode: 'time',
-        showBaseline: true,
+        showComparison: true,
         splitIntervals: true,
         data: [
           {
             ...makeInterval('May 2026'),
-            baselineStartDate: '2026-04-03',
-            baselineEndDate: '2026-05-03',
+            comparisonStartDate: '2026-04-03',
+            comparisonEndDate: '2026-05-03',
           },
           makeInterval('Jun 2026'),
         ],
       }),
     ).toBe(
-      'CategoryBaseline' +
-        'May 2026 vs 04/03/2026 – 05/03/2026CurrentBaselineChange' +
-        'Jun 2026CurrentBaselineChange' +
+      'CategoryComparison' +
+        'May 2026 vs 04/03/2026 – 05/03/2026CurrentComparisonChange' +
+        'Jun 2026CurrentComparisonChange' +
         'Whole rangeTotalsChangeAverage',
     );
   });
 
-  it('leaves the columns unchanged without a baseline', () => {
+  it('leaves the columns unchanged without a comparison', () => {
     expect(renderHeader({})).toBe('CategoryDepositsPaymentsTotalsAverage');
   });
 });

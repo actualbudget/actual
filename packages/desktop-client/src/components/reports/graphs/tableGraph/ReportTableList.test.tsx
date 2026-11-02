@@ -79,15 +79,15 @@ describe('ReportTableList', () => {
     );
   });
 
-  it('keeps each interval baseline on its row when split by interval', () => {
+  it('keeps each interval comparison on its row when split by interval', () => {
     const renderRow = vi.fn(() => null);
     const values = makeInterval('', '', '');
-    const baseline = { expected: values, actual: values };
+    const comparison = { expected: values, actual: values };
     const data: DataEntity = {
       intervalData: [
         {
           ...makeInterval('May 2026', '2026-05-01', '2026-05-31'),
-          baseline,
+          comparison,
         },
       ],
       totalAssets: 0,
@@ -111,7 +111,7 @@ describe('ReportTableList', () => {
 
     expect(renderRow).toHaveBeenCalledWith(
       expect.objectContaining({
-        item: expect.objectContaining({ baseline }),
+        item: expect.objectContaining({ comparison }),
       }),
     );
   });

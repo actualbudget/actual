@@ -2,8 +2,8 @@ import { theme } from '@actual-app/components/theme';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
-  CustomReportBaselineSortAmount,
+  ComparisonBreakdown,
+  CustomReportComparisonSortAmount,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
@@ -18,13 +18,13 @@ import {
   countElapsedMonths,
   countMonths,
   getAmountKey,
-  getBaselineKey,
   getChangeKey,
+  getComparisonKey,
   getFullIntervalDays,
   getFullIntervalMonths,
   getFullIntervalRange,
   shiftRange,
-} from '#components/reports/baselineRange';
+} from '#components/reports/comparisonRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
 
@@ -54,68 +54,68 @@ type AdditiveField =
 
 type OffsetItem = ReportValues & { intervalData: IntervalEntity[] };
 
-export type BaselineOptions = {
+export type ComparisonOptions = {
   startDate: string;
   endDate: string;
   projectToFullPeriod: boolean;
-  // Graphs draw amounts against the baseline rather than changes, so rows
-  // sort by amount and intervals carry each series' amount and baseline
+  // Graphs draw amounts against the comparison rather than changes, so rows
+  // sort by amount and intervals carry each series' amount and comparison
   showAmounts?: boolean;
   // The amount rows sort by. Without it, rows sort by the current amount.
-  sortAmount?: CustomReportBaselineSortAmount;
+  sortAmount?: CustomReportComparisonSortAmount;
   // Compare against the average of what was budgeted over the range, rather
   // than what was spent
   budgeted?: boolean;
   // Compare each interval with its own window this many days back, rather
   // than with the range's average. The range is then the report's range
   // moved back by the offset.
-  offset?: BaselineOffset;
+  offset?: ComparisonOffset;
 };
 
-export type BaselineOffset = {
+export type ComparisonOffset = {
   days: number;
   // Windows that end before this have nothing to compare against
   earliestTransaction: string;
 };
 
-// How baseline totals map onto the report's intervals
-export type BaselineScale = {
-  // The baseline's length in its unit. Spending accrues per day, and budgets
-  // are set per month, so a budgeted baseline is spread by months.
-  baselineLength: number;
+// How comparison totals map onto the report's intervals
+export type ComparisonScale = {
+  // The comparison's length in its unit. Spending accrues per day, and budgets
+  // are set per month, so a budgeted comparison is spread by months.
+  comparisonLength: number;
   budgeted: boolean;
-  baselineIntervals: number;
+  comparisonIntervals: number;
   // Budgets are set per interval rather than accrued per day
   perInterval: boolean;
   projectToFullPeriod: boolean;
   // Average full length of the displayed intervals in days, for the pace of
   // actual amounts
   averageDays: number;
-  // The same in the baseline's unit, for the Baseline column
+  // The same in the comparison's unit, for the Comparison column
   averageLength: number;
-  // With an offset baseline: the offset, and the interval the baseline was
+  // With an offset comparison: the offset, and the interval the comparison was
   // fetched by, which windows are summed from
-  offset?: BaselineOffset & { bucketInterval: string };
+  offset?: ComparisonOffset & { bucketInterval: string };
 };
 
-// How much of the baseline a range gets, in the baseline's unit
-function measure(scale: BaselineScale, start: string, end: string) {
+// How much of the comparison a range gets, in the comparison's unit
+function measure(scale: ComparisonScale, start: string, end: string) {
   return scale.budgeted ? countMonths(start, end) : countDays(start, end);
 }
 
-function measureElapsed(scale: BaselineScale, start: string, end: string) {
+function measureElapsed(scale: ComparisonScale, start: string, end: string) {
   return scale.budgeted
     ? countElapsedMonths(start, end)
     : countElapsedDays(start, end);
 }
 
-type BaselineContext = {
-  scale: BaselineScale;
+type ComparisonContext = {
+  scale: ComparisonScale;
   template: IntervalEntity[];
   showEmpty: boolean;
   balanceTypeOp: balanceTypeOpType;
   sortByOp: sortByOpType;
-  sortAmount: CustomReportBaselineSortAmount;
+  sortAmount: CustomReportComparisonSortAmount;
 };
 
 // Amounts are drawn like other report graphs, with spending pointing up
@@ -183,7 +183,7 @@ function findFirstBucket(
 }
 
 /**
- * The baseline's total over a window, from the intervals it was fetched by.
+ * The comparison's total over a window, from the intervals it was fetched by.
  * A bucket the window only partly covers counts by its share of days, so
  * days sum exactly and a month of budgets is spread over its days.
  */
@@ -228,14 +228,17 @@ function offsetIntervalByWindow(
   interval: IntervalEntity,
   start: string,
   end: string,
-  baseline: OffsetItem | undefined,
-  scale: BaselineScale,
-  offset: NonNullable<BaselineScale['offset']>,
+  comparison: OffsetItem | undefined,
+  scale: ComparisonScale,
+  offset: NonNullable<ComparisonScale['offset']>,
 ): IntervalEntity {
   const [windowStart, windowEnd] = shiftRange(start, end, offset.days);
-  const window = { baselineStartDate: windowStart, baselineEndDate: windowEnd };
+  const window = {
+    comparisonStartDate: windowStart,
+    comparisonEndDate: windowEnd,
+  };
   const sum = (from: string, to: string) =>
-    sumWindow(baseline?.intervalData ?? [], offset.bucketInterval, from, to);
+    sumWindow(comparison?.intervalData ?? [], offset.bucketInterval, from, to);
   const zero = mapValues(() => 0);
   const actual = fromTotals(field => interval[field]);
 
@@ -244,7 +247,7 @@ function offsetIntervalByWindow(
       ...interval,
       ...window,
       ...zero,
-      baseline: {
+      comparison: {
         expected: zero,
         actual,
         budgeted: scale.budgeted,
@@ -260,7 +263,7 @@ function offsetIntervalByWindow(
       ...interval,
       ...window,
       ...zero,
-      baseline: {
+      comparison: {
         expected: zero,
         actual: zero,
         upcoming: sum(windowStart, windowEnd),
@@ -280,23 +283,23 @@ function offsetIntervalByWindow(
     ...interval,
     ...window,
     ...subtract(actual, expected),
-    baseline: { expected, actual, budgeted: scale.budgeted },
+    comparison: { expected, actual, budgeted: scale.budgeted },
   };
 }
 
 /**
- * Offsets one interval by the baseline's average over the same length, or
- * by its own window with an offset baseline.
+ * Offsets one interval by the comparison's average over the same length, or
+ * by its own window with an offset comparison.
  */
 export function offsetInterval(
   interval: IntervalEntity,
-  baseline: OffsetItem | undefined,
-  scale: BaselineScale,
+  comparison: OffsetItem | undefined,
+  scale: ComparisonScale,
 ): IntervalEntity {
   const start = interval.intervalStartDate;
   const end = interval.intervalEndDate ?? start;
   // Report spreadsheets always date their intervals; without dates there's
-  // no length to scale the baseline by
+  // no length to scale the comparison by
   if (!start || !end) {
     return interval;
   }
@@ -306,30 +309,30 @@ export function offsetInterval(
       interval,
       monthUtils.dayFromDate(start),
       monthUtils.dayFromDate(end),
-      baseline,
+      comparison,
       scale,
       scale.offset,
     );
   }
 
   // Intervals that haven't started have nothing to compare yet, so they stay
-  // empty rather than showing the whole baseline as a change. Budgets are set
+  // empty rather than showing the whole comparison as a change. Budgets are set
   // ahead of time, so theirs are still compared.
   if (!scale.perInterval && isFuture(start)) {
     const zero = mapValues(() => 0);
-    // Charts only draw the baseline ahead when the amount is projected there
+    // Charts only draw the comparison ahead when the amount is projected there
     const length = measure(scale, start, end);
     const upcoming = scale.projectToFullPeriod
       ? fromTotals(field =>
           Math.round(
-            ((baseline?.[field] ?? 0) * length) / scale.baselineLength,
+            ((comparison?.[field] ?? 0) * length) / scale.comparisonLength,
           ),
         )
       : undefined;
     return {
       ...interval,
       ...zero,
-      baseline: {
+      comparison: {
         expected: zero,
         actual: zero,
         upcoming,
@@ -338,22 +341,22 @@ export function offsetInterval(
     };
   }
 
-  // An interval in progress is compared against the baseline over the days
+  // An interval in progress is compared with the comparison over the days
   // that have passed. Projecting from its first few days is too unreliable,
   // so projections only cover the whole range.
   const share = scale.perInterval
-    ? 1 / scale.baselineIntervals
-    : measureElapsed(scale, start, end) / scale.baselineLength;
+    ? 1 / scale.comparisonIntervals
+    : measureElapsed(scale, start, end) / scale.comparisonLength;
 
   const expected = fromTotals(field =>
-    Math.round((baseline?.[field] ?? 0) * share),
+    Math.round((comparison?.[field] ?? 0) * share),
   );
   const actual = fromTotals(field => interval[field]);
 
   return {
     ...interval,
     ...subtract(actual, expected),
-    baseline: { expected, actual, budgeted: scale.budgeted },
+    comparison: { expected, actual, budgeted: scale.budgeted },
   };
 }
 
@@ -362,7 +365,7 @@ function isFuture(date: string) {
 }
 
 // The whole range a row's intervals cover, for projecting its total
-function getProjection(intervals: IntervalEntity[], scale: BaselineScale) {
+function getProjection(intervals: IntervalEntity[], scale: ComparisonScale) {
   const start = intervals[0]?.intervalStartDate;
   const end = intervals[intervals.length - 1]?.intervalEndDate;
   if (!scale.projectToFullPeriod || scale.perInterval || !start || !end) {
@@ -378,7 +381,7 @@ function getProjection(intervals: IntervalEntity[], scale: BaselineScale) {
 
 // Scales a row's amount so far to an average-length interval, using its daily
 // pace over the days that have passed. Budgets are set per interval instead.
-function getPaceShare(intervals: IntervalEntity[], scale: BaselineScale) {
+function getPaceShare(intervals: IntervalEntity[], scale: ComparisonScale) {
   const start = intervals[0]?.intervalStartDate;
   const end = intervals[intervals.length - 1]?.intervalEndDate;
   if (scale.perInterval || !start || !end) {
@@ -391,35 +394,35 @@ function getPaceShare(intervals: IntervalEntity[], scale: BaselineScale) {
  * Offsets a row or the report totals. Without a projection, item values are
  * summed from the offset intervals so table columns add up. With one, the
  * total is spending so far scaled to the whole range, compared against the
- * baseline over the whole range, which includes intervals that haven't
+ * comparison over the whole range, which includes intervals that haven't
  * started.
  */
 export function offsetItem<T extends OffsetItem>(
   item: T,
-  baseline: OffsetItem | undefined,
-  scale: BaselineScale,
-): T & { baseline: BaselineBreakdown } {
+  comparison: OffsetItem | undefined,
+  scale: ComparisonScale,
+): T & { comparison: ComparisonBreakdown } {
   const intervalData = item.intervalData.map(interval =>
-    offsetInterval(interval, baseline, scale),
+    offsetInterval(interval, comparison, scale),
   );
   if (scale.offset) {
     return offsetItemByWindows(
       item,
       intervalData,
-      baseline,
+      comparison,
       scale,
       scale.offset,
     );
   }
   const sum = (
-    pick: (breakdown: BaselineBreakdown) => ReportValues | undefined,
+    pick: (breakdown: ComparisonBreakdown) => ReportValues | undefined,
   ) =>
     fromTotals(field =>
       intervalData.reduce(
         (total, interval) =>
           total +
-          (interval.baseline
-            ? (pick(interval.baseline) ?? interval.baseline.actual)[field]
+          (interval.comparison
+            ? (pick(interval.comparison) ?? interval.comparison.actual)[field]
             : 0),
         0,
       ),
@@ -430,7 +433,8 @@ export function offsetItem<T extends OffsetItem>(
   const expected = projection
     ? fromTotals(field =>
         Math.round(
-          ((baseline?.[field] ?? 0) * projection.length) / scale.baselineLength,
+          ((comparison?.[field] ?? 0) * projection.length) /
+            scale.comparisonLength,
         ),
       )
     : sum(breakdown => breakdown.expected);
@@ -438,20 +442,20 @@ export function offsetItem<T extends OffsetItem>(
     ? fromTotals(field => Math.round(actual[field] * projection.scale))
     : undefined;
   const perIntervalShare = scale.perInterval
-    ? 1 / scale.baselineIntervals
-    : scale.averageLength / scale.baselineLength;
+    ? 1 / scale.comparisonIntervals
+    : scale.averageLength / scale.comparisonLength;
   const paceShare = getPaceShare(item.intervalData, scale);
 
   return {
     ...item,
     ...subtract(projected ?? actual, expected),
     intervalData,
-    baseline: {
+    comparison: {
       expected,
       actual,
       projected,
       perInterval: fromTotals(field =>
-        Math.round((baseline?.[field] ?? 0) * perIntervalShare),
+        Math.round((comparison?.[field] ?? 0) * perIntervalShare),
       ),
       pacePerInterval: fromTotals(field =>
         Math.round(actual[field] * paceShare),
@@ -462,35 +466,35 @@ export function offsetItem<T extends OffsetItem>(
 }
 
 /**
- * offsetItem for an offset baseline. Intervals whose window has no data
+ * offsetItem for an offset comparison. Intervals whose window has no data
  * aren't compared, so they count towards the amount but not the change.
  */
 function offsetItemByWindows<T extends OffsetItem>(
   item: T,
   intervalData: IntervalEntity[],
-  baseline: OffsetItem | undefined,
-  scale: BaselineScale,
-  offset: NonNullable<BaselineScale['offset']>,
-): T & { baseline: BaselineBreakdown } {
+  comparison: OffsetItem | undefined,
+  scale: ComparisonScale,
+  offset: NonNullable<ComparisonScale['offset']>,
+): T & { comparison: ComparisonBreakdown } {
   const sum = (
-    pick: (breakdown: BaselineBreakdown) => ReportValues | undefined,
+    pick: (breakdown: ComparisonBreakdown) => ReportValues | undefined,
   ) =>
     fromTotals(field =>
       intervalData.reduce((total, interval) => {
-        const value = interval.baseline && pick(interval.baseline);
+        const value = interval.comparison && pick(interval.comparison);
         return total + (value ? value[field] : 0);
       }, 0),
     );
-  const isCompared = (breakdown: BaselineBreakdown) => !breakdown.noData;
+  const isCompared = (breakdown: ComparisonBreakdown) => !breakdown.noData;
   const actual = sum(breakdown => breakdown.actual);
   const comparedActual = sum(breakdown =>
     isCompared(breakdown) ? breakdown.actual : undefined,
   );
   const comparedCount = intervalData.filter(
-    interval => interval.baseline && isCompared(interval.baseline),
+    interval => interval.comparison && isCompared(interval.comparison),
   ).length;
 
-  // The whole range's window, for projections and the Baseline column.
+  // The whole range's window, for projections and the Comparison column.
   // Days before the earliest transaction have nothing in them, so they add
   // nothing.
   const start = intervalData[0]?.intervalStartDate;
@@ -500,7 +504,7 @@ function offsetItemByWindows<T extends OffsetItem>(
   const fullWindow =
     start && end
       ? sumWindow(
-          baseline?.intervalData ?? [],
+          comparison?.intervalData ?? [],
           offset.bucketInterval,
           windowStart,
           windowEnd,
@@ -522,7 +526,7 @@ function offsetItemByWindows<T extends OffsetItem>(
     ...item,
     ...subtract(projected ?? comparedActual, expected),
     intervalData,
-    baseline: {
+    comparison: {
       expected,
       actual,
       projected,
@@ -567,44 +571,46 @@ function hasActivity(
 }
 
 /**
- * Pairs rows with their baseline and offsets each one. Rows only present in
- * the baseline are kept, since dropping to nothing is a change worth showing.
+ * Pairs rows with their comparison and offsets each one. Rows only present in
+ * the comparison are kept, since dropping to nothing is a change worth showing.
  * A row is only empty when neither range had any activity.
  */
 export function offsetRows(
   actualRows: GroupedEntity[],
-  baselineRows: GroupedEntity[],
-  context: BaselineContext,
+  comparisonRows: GroupedEntity[],
+  context: ComparisonContext,
 ): GroupedEntity[] {
   const { scale, template, showEmpty, balanceTypeOp, sortByOp, sortAmount } =
     context;
-  const baselineByKey = new Map(baselineRows.map(row => [rowKey(row), row]));
+  const comparisonByKey = new Map(
+    comparisonRows.map(row => [rowKey(row), row]),
+  );
   const actualKeys = new Set(actualRows.map(rowKey));
   const pairs = [
     ...actualRows.map(row => ({
       actual: row,
-      baseline: baselineByKey.get(rowKey(row)),
+      comparison: comparisonByKey.get(rowKey(row)),
     })),
-    ...baselineRows
+    ...comparisonRows
       .filter(row => !actualKeys.has(rowKey(row)))
-      .map(row => ({ actual: emptyRow(row, template), baseline: row })),
+      .map(row => ({ actual: emptyRow(row, template), comparison: row })),
   ];
 
   return pairs
     .filter(
-      ({ actual, baseline }) =>
+      ({ actual, comparison }) =>
         showEmpty ||
         hasActivity(actual, balanceTypeOp) ||
-        hasActivity(baseline, balanceTypeOp),
+        hasActivity(comparison, balanceTypeOp),
     )
-    .map(({ actual, baseline }) => {
-      const hasCategories = !!(actual.categories || baseline?.categories);
+    .map(({ actual, comparison }) => {
+      const hasCategories = !!(actual.categories || comparison?.categories);
       return {
-        ...offsetItem(actual, baseline, scale),
+        ...offsetItem(actual, comparison, scale),
         categories: hasCategories
           ? offsetRows(
               actual.categories ?? [],
-              baseline?.categories ?? [],
+              comparison?.categories ?? [],
               context,
             )
           : undefined,
@@ -616,7 +622,7 @@ export function offsetRows(
           ? {
               balanceTypeOp,
               sortByOp,
-              getValue: row => row.baseline?.expected[balanceTypeOp] ?? 0,
+              getValue: row => row.comparison?.expected[balanceTypeOp] ?? 0,
             }
           : sortAmount === 'current'
             ? // Projections scale every row by the same factor, so sorting
@@ -624,7 +630,7 @@ export function offsetRows(
               {
                 balanceTypeOp,
                 sortByOp,
-                getValue: row => row.baseline?.actual[balanceTypeOp] ?? 0,
+                getValue: row => row.comparison?.actual[balanceTypeOp] ?? 0,
               }
             : // A row's own amount is its change
               { balanceTypeOp, sortByOp, isSigned: true },
@@ -640,21 +646,21 @@ function stackIntervals(
 ): IntervalEntity[] {
   const sign = getAmountSign(balanceTypeOp);
   // Intervals that haven't started have no amount, so lines stop at today.
-  // Their baseline is drawn ahead only when it was kept for a projection.
+  // Their comparison is drawn ahead only when it was kept for a projection.
   // Budgets are set ahead of time, so theirs are drawn as they are.
   const isUpcoming = (interval: IntervalEntity) =>
     balanceTypeOp !== 'totalBudgeted' &&
     !!interval.intervalStartDate &&
     isFuture(interval.intervalStartDate);
   const getAmount = (interval: IntervalEntity) => {
-    const breakdown = interval.baseline;
+    const breakdown = interval.comparison;
     if (!breakdown || isUpcoming(interval)) {
       return null;
     }
     return sign * breakdown.actual[balanceTypeOp];
   };
-  const getBaseline = (interval: IntervalEntity) => {
-    const breakdown = interval.baseline;
+  const getComparison = (interval: IntervalEntity) => {
+    const breakdown = interval.comparison;
     if (!breakdown || breakdown.noData) {
       return null;
     }
@@ -680,26 +686,26 @@ function stackIntervals(
       const key = row.id || row.name;
       const amount = getAmount(rowInterval);
       const change =
-        isUpcoming(rowInterval) || rowInterval.baseline?.noData
+        isUpcoming(rowInterval) || rowInterval.comparison?.noData
           ? null
           : rowInterval[balanceTypeOp];
       stacked[key] = showAmounts ? amount : change;
       stacked[getAmountKey(key)] = amount;
       stacked[getChangeKey(key)] = change;
-      stacked[getBaselineKey(key)] = getBaseline(rowInterval);
+      stacked[getComparisonKey(key)] = getComparison(rowInterval);
     }
 
     return {
       date: interval.date,
       intervalStartDate: interval.intervalStartDate,
       intervalEndDate: interval.intervalEndDate,
-      baselineStartDate: interval.baselineStartDate,
-      baselineEndDate: interval.baselineEndDate,
+      comparisonStartDate: interval.comparisonStartDate,
+      comparisonEndDate: interval.comparisonEndDate,
       ...mapValues(field => interval[field]),
-      baseline: interval.baseline,
+      comparison: interval.comparison,
       ...(showAmounts && {
         amount: getAmount(interval),
-        baselineAmount: getBaseline(interval),
+        comparisonAmount: getComparison(interval),
       }),
       ...stacked,
     };
@@ -721,7 +727,7 @@ function colorBySign(
 }
 
 // A single series is coloured by the sign of what it draws: its change, or
-// its amount like it would be without a baseline. Everything else keeps its
+// its amount like it would be without a comparison. Everything else keeps its
 // category colours.
 function colorLegend(
   legend: LegendEntity[],
@@ -743,18 +749,20 @@ function colorLegend(
   return colorBySign(
     legend,
     showAmounts
-      ? intervalData.map(interval => interval.baseline?.actual ?? interval)
+      ? intervalData.map(interval => interval.comparison?.actual ?? interval)
       : intervalData,
     balanceTypeOp,
   );
 }
 
 // Trimming looks at what actually happened, so an interval doesn't count as
-// active just because it differs from the baseline. Intervals that haven't
+// active just because it differs from the comparison. Intervals that haven't
 // started are empty, so trailing ones are trimmed too.
 function toActual(intervals: IntervalEntity[]): IntervalEntity[] {
   return intervals.map(interval =>
-    interval.baseline ? { ...interval, ...interval.baseline.actual } : interval,
+    interval.comparison
+      ? { ...interval, ...interval.comparison.actual }
+      : interval,
   );
 }
 
@@ -823,7 +831,7 @@ function countIntervals(
 }
 
 /**
- * The average full length of the given intervals, for the Baseline column.
+ * The average full length of the given intervals, for the Comparison column.
  * Using full lengths keeps the column equal to what every whole interval is
  * compared against, so only intervals the range cuts short differ from it.
  */
@@ -832,7 +840,7 @@ export function getAverageDays(intervals: IntervalEntity[], interval: string) {
 }
 
 /**
- * The same as getAverageDays, in months, for budgeted baselines.
+ * The same as getAverageDays, in months, for budgeted comparisons.
  */
 export function getAverageMonths(
   intervals: IntervalEntity[],
@@ -867,35 +875,41 @@ function getAverageInUnit(
 
 function getScale(
   props: createCustomSpreadsheetProps,
-  baselineOptions: BaselineOptions,
+  comparisonOptions: ComparisonOptions,
   template: IntervalEntity[],
-): BaselineScale {
-  const budgeted = !!baselineOptions.budgeted;
+): ComparisonScale {
+  const budgeted = !!comparisonOptions.budgeted;
   return {
-    // Budgets are set ahead for whole months, so a budgeted baseline counts
+    // Budgets are set ahead for whole months, so a budgeted comparison counts
     // all of its months, even ones that haven't finished
-    baselineLength: budgeted
-      ? countBudgetMonths(baselineOptions.startDate, baselineOptions.endDate)
-      : countElapsedDays(baselineOptions.startDate, baselineOptions.endDate),
+    comparisonLength: budgeted
+      ? countBudgetMonths(
+          comparisonOptions.startDate,
+          comparisonOptions.endDate,
+        )
+      : countElapsedDays(
+          comparisonOptions.startDate,
+          comparisonOptions.endDate,
+        ),
     budgeted,
-    baselineIntervals: countIntervals(
-      baselineOptions.startDate,
-      baselineOptions.endDate,
+    comparisonIntervals: countIntervals(
+      comparisonOptions.startDate,
+      comparisonOptions.endDate,
       props.interval,
       props.firstDayOfWeekIdx,
     ),
     perInterval: props.balanceTypeOp === 'totalBudgeted',
-    projectToFullPeriod: baselineOptions.projectToFullPeriod,
+    projectToFullPeriod: comparisonOptions.projectToFullPeriod,
     averageDays: getAverageDays(template, props.interval),
     averageLength: getAverageInUnit(template, props.interval, budgeted),
-    offset: baselineOptions.offset && {
-      ...baselineOptions.offset,
+    offset: comparisonOptions.offset && {
+      ...comparisonOptions.offset,
       bucketInterval: getOffsetBucketInterval(props),
     },
   };
 }
 
-// Offset windows don't line up with the report's intervals, so the baseline
+// Offset windows don't line up with the report's intervals, so the comparison
 // is fetched by day and summed per window. Budgets are dated by month, so
 // they're fetched by month and spread over the days of each window.
 function getOffsetBucketInterval(props: createCustomSpreadsheetProps) {
@@ -911,11 +925,11 @@ function countBudgetMonths(startDate: string, endDate: string) {
 }
 
 function getVisibleScale(
-  scale: BaselineScale,
+  scale: ComparisonScale,
   template: IntervalEntity[],
   { startIndex, endIndex }: { startIndex: number; endIndex: number },
   interval: string,
-): BaselineScale {
+): ComparisonScale {
   const visible = trimIntervalDataToRange(template, startIndex, endIndex);
   return {
     ...scale,
@@ -929,22 +943,22 @@ function getVisibleScale(
 // that haven't started yet
 function getSpreadsheetProps(
   props: createCustomSpreadsheetProps,
-  baselineOptions: BaselineOptions,
+  comparisonOptions: ComparisonOptions,
 ) {
   const actual = { ...props, showEmpty: true, trimIntervals: false };
   return {
     actual,
-    baseline: {
+    comparison: {
       ...actual,
-      startDate: baselineOptions.startDate,
-      endDate: baselineOptions.endDate,
-      // A range baseline only compares its totals. Budgets are dated by
+      startDate: comparisonOptions.startDate,
+      endDate: comparisonOptions.endDate,
+      // A range comparison only compares its totals. Budgets are dated by
       // month, so they're fetched by month whatever the report's interval is.
-      ...(baselineOptions.budgeted && {
+      ...(comparisonOptions.budgeted && {
         balanceTypeOp: 'totalBudgeted' as const,
         interval: 'Monthly',
       }),
-      ...(baselineOptions.offset && {
+      ...(comparisonOptions.offset && {
         interval: getOffsetBucketInterval(props),
       }),
     },
@@ -980,9 +994,9 @@ export function rowsFromBudget(rows: GroupedEntity[]): GroupedEntity[] {
   }));
 }
 
-export function createBaselineSpreadsheet(
+export function createComparisonSpreadsheet(
   props: createCustomSpreadsheetProps,
-  baselineOptions: BaselineOptions,
+  comparisonOptions: ComparisonOptions,
 ) {
   const {
     showEmpty,
@@ -992,42 +1006,42 @@ export function createBaselineSpreadsheet(
     groupBy = '',
     graphType,
   } = props;
-  const spreadsheetProps = getSpreadsheetProps(props, baselineOptions);
+  const spreadsheetProps = getSpreadsheetProps(props, comparisonOptions);
   const getActual = createCustomSpreadsheet(spreadsheetProps.actual);
-  const getBaseline = createCustomSpreadsheet(spreadsheetProps.baseline);
+  const getComparison = createCustomSpreadsheet(spreadsheetProps.comparison);
 
   return async (
     spreadsheet: Spreadsheet,
     setData: (data: DataEntity) => void,
   ) => {
-    const [actual, fetchedBaseline] = await Promise.all([
+    const [actual, fetchedComparison] = await Promise.all([
       collect(getActual, spreadsheet),
-      collect(getBaseline, spreadsheet),
+      collect(getComparison, spreadsheet),
     ]);
     if (!actual) {
       return;
     }
-    const baseline =
-      fetchedBaseline && baselineOptions.budgeted
+    const comparison =
+      fetchedComparison && comparisonOptions.budgeted
         ? {
-            ...fromBudget(fetchedBaseline),
-            data: rowsFromBudget(fetchedBaseline.data ?? []),
+            ...fromBudget(fetchedComparison),
+            data: rowsFromBudget(fetchedComparison.data ?? []),
           }
-        : fetchedBaseline;
+        : fetchedComparison;
 
-    const offset = (scale: BaselineScale) => ({
-      rows: offsetRows(actual.data ?? [], baseline?.data ?? [], {
+    const offset = (scale: ComparisonScale) => ({
+      rows: offsetRows(actual.data ?? [], comparison?.data ?? [], {
         scale,
         template: actual.intervalData,
         showEmpty,
         balanceTypeOp,
         sortByOp,
-        sortAmount: baselineOptions.sortAmount ?? 'current',
+        sortAmount: comparisonOptions.sortAmount ?? 'current',
       }),
-      totals: offsetItem(actual, baseline, scale),
+      totals: offsetItem(actual, comparison, scale),
     });
 
-    const scale = getScale(props, baselineOptions, actual.intervalData);
+    const scale = getScale(props, comparisonOptions, actual.intervalData);
     const untrimmed = offset(scale);
     const trimRange = trimIntervals
       ? getTrimRange(
@@ -1036,7 +1050,7 @@ export function createBaselineSpreadsheet(
           balanceTypeOp,
         )
       : null;
-    // The Baseline column follows the intervals left after trimming
+    // The Comparison column follows the intervals left after trimming
     const { rows: untrimmedRows, totals } = trimRange
       ? offset(
           getVisibleScale(
@@ -1058,10 +1072,10 @@ export function createBaselineSpreadsheet(
         : totals.intervalData,
       rows,
       balanceTypeOp,
-      !!baselineOptions.showAmounts,
+      !!comparisonOptions.showAmounts,
     );
 
-    // Series are coloured in the order shown, like reports without a baseline
+    // Series are coloured in the order shown, like reports without a comparison
     const legend = calculateLegend(
       intervalData,
       rows,
@@ -1078,17 +1092,17 @@ export function createBaselineSpreadsheet(
         groupBy,
         intervalData,
         balanceTypeOp,
-        showAmounts: !!baselineOptions.showAmounts,
+        showAmounts: !!comparisonOptions.showAmounts,
       }),
-      baselineStartDate: baselineOptions.startDate,
-      baselineEndDate: baselineOptions.endDate,
+      comparisonStartDate: comparisonOptions.startDate,
+      comparisonEndDate: comparisonOptions.endDate,
     });
   };
 }
 
-export function createBaselineGroupedSpreadsheet(
+export function createComparisonGroupedSpreadsheet(
   props: createCustomSpreadsheetProps,
-  baselineOptions: BaselineOptions,
+  comparisonOptions: ComparisonOptions,
 ) {
   const {
     showEmpty,
@@ -1096,41 +1110,41 @@ export function createBaselineGroupedSpreadsheet(
     balanceTypeOp = 'totalDebts',
     sortByOp = 'desc',
   } = props;
-  const spreadsheetProps = getSpreadsheetProps(props, baselineOptions);
+  const spreadsheetProps = getSpreadsheetProps(props, comparisonOptions);
   const getActual = createGroupedSpreadsheet(spreadsheetProps.actual);
-  const getBaseline = createGroupedSpreadsheet(spreadsheetProps.baseline);
+  const getComparison = createGroupedSpreadsheet(spreadsheetProps.comparison);
 
   return async (
     spreadsheet: Spreadsheet,
     setData: (data: GroupedEntity[]) => void,
   ) => {
-    const [actual = [], fetchedBaseline = []] = await Promise.all([
+    const [actual = [], fetchedComparison = []] = await Promise.all([
       collect(getActual, spreadsheet),
-      collect(getBaseline, spreadsheet),
+      collect(getComparison, spreadsheet),
     ]);
-    const baseline = baselineOptions.budgeted
-      ? rowsFromBudget(fetchedBaseline)
-      : fetchedBaseline;
+    const comparison = comparisonOptions.budgeted
+      ? rowsFromBudget(fetchedComparison)
+      : fetchedComparison;
 
     const template = actual[0]?.intervalData ?? [];
-    const offset = (scale: BaselineScale) =>
-      offsetRows(actual, baseline, {
+    const offset = (scale: ComparisonScale) =>
+      offsetRows(actual, comparison, {
         scale,
         template,
         showEmpty,
         balanceTypeOp,
         sortByOp,
-        sortAmount: baselineOptions.sortAmount ?? 'current',
+        sortAmount: comparisonOptions.sortAmount ?? 'current',
       });
 
-    const scale = getScale(props, baselineOptions, template);
+    const scale = getScale(props, comparisonOptions, template);
     const rows = offset(scale);
     if (!trimIntervals) {
       setData(rows);
       return;
     }
 
-    // The Baseline column follows the intervals left after trimming
+    // The Comparison column follows the intervals left after trimming
     const trimRange = getTrimRange(
       rows,
       rows[0]?.intervalData ?? [],

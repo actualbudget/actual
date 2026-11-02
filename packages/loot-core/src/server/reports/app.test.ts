@@ -10,7 +10,7 @@ import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { runMutator } from '#server/mutators';
 import type {
-  CustomReportBaseline,
+  CustomReportComparison,
   CustomReportEntity,
   CustomReportTagScope,
 } from '#types/models';
@@ -183,8 +183,8 @@ describe('custom report tag scope mapping', () => {
   );
 });
 
-describe('custom report baseline', () => {
-  const baseline = {
+describe('custom report comparison', () => {
+  const comparison = {
     enabled: true,
     dateRange: 'Last 6 months',
     isDateStatic: false,
@@ -195,7 +195,7 @@ describe('custom report baseline', () => {
     showChanges: true,
     sortAmount: 'comparison',
     source: 'budgeted',
-  } satisfies CustomReportBaseline;
+  } satisfies CustomReportComparison;
 
   beforeEach(async () => {
     await global.emptyDatabase()();
@@ -208,29 +208,29 @@ describe('custom report baseline', () => {
     }
   });
 
-  it('stores the baseline alongside other metadata', async () => {
+  it('stores the comparison alongside other metadata', async () => {
     await db.insertWithSchema(
       'custom_reports',
       reportModel.fromJS({
         ...report,
-        baseline,
+        comparison,
         metadata: { presentation: 'compact' },
       }),
     );
 
     const [loadedReport] = await reportApp.handlers['report/get']();
-    expect(loadedReport.baseline).toEqual(baseline);
+    expect(loadedReport.comparison).toEqual(comparison);
     expect(loadedReport.metadata).toEqual({ presentation: 'compact' });
   });
 
   it.each([
-    { baseline: null },
-    { baseline: { ...baseline, dateRange: 3 } },
-    { baseline: { ...baseline, enabled: 'yes' } },
-    { baseline: { ...baseline, showChanges: 'yes' } },
-    { baseline: { ...baseline, sortAmount: 'average' } },
-    { baseline: { ...baseline, source: 'forecast' } },
-  ])('rejects invalid imported baselines: %j', async invalid => {
+    { comparison: null },
+    { comparison: { ...comparison, dateRange: 3 } },
+    { comparison: { ...comparison, enabled: 'yes' } },
+    { comparison: { ...comparison, showChanges: 'yes' } },
+    { comparison: { ...comparison, sortAmount: 'average' } },
+    { comparison: { ...comparison, source: 'forecast' } },
+  ])('rejects invalid imported comparisons: %j', async invalid => {
     await writeDashboardReport({ ...report, ...invalid });
 
     await expect(

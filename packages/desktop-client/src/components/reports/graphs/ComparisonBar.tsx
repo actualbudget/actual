@@ -1,33 +1,33 @@
 import React from 'react';
 
-type BaselineBarProps = {
+type ComparisonBarProps = {
   // The bar Recharts lays out, spanning every value drawn in it
   x: number;
   y: number;
   width: number;
   height: number;
   range: [number, number];
-  baseline: number;
+  comparison: number;
   amount: number;
   fill: string;
   opacity?: number;
 };
 
 /**
- * Draws a faint bar from zero to the baseline, with a narrower bar in front
+ * Draws a faint bar from zero to the comparison, with a narrower bar in front
  * for the amount.
  */
-export function BaselineBar({
+export function ComparisonBar({
   x,
   y,
   width,
   height,
   range: [low, high],
-  baseline,
+  comparison,
   amount,
   fill,
   opacity = 1,
-}: BaselineBarProps) {
+}: ComparisonBarProps) {
   // Recharts can give range bars a negative height
   const top = Math.min(y, y + height);
   const length = Math.abs(height);
@@ -45,7 +45,7 @@ export function BaselineBar({
       <rect
         x={x}
         width={width}
-        {...span(0, baseline)}
+        {...span(0, comparison)}
         fill={fill}
         fillOpacity={0.3}
       />

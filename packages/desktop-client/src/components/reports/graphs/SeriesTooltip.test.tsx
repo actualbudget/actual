@@ -63,15 +63,15 @@ function renderTooltip(
 }
 
 describe('SeriesTooltip', () => {
-  it('lists each series and their total without a baseline', () => {
+  it('lists each series and their total without a comparison', () => {
     expect(renderTooltip(makeInterval({}, { food: -80, fun: -20 }))).toBe(
       'Oct 2026Fun-20Food-80Total-100',
     );
   });
 
-  it('lists each amount beside its change from the baseline', () => {
+  it('lists each amount beside its change from the comparison', () => {
     const interval = makeInterval(
-      { baseline: { expected: values(-150), actual: values(-100) } },
+      { comparison: { expected: values(-150), actual: values(-100) } },
       {
         food: -80,
         'food:amount': -80,
@@ -79,21 +79,21 @@ describe('SeriesTooltip', () => {
         fun: -20,
         'fun:amount': -20,
         'fun:change': -10,
-        'food:baseline': -120,
-        'fun:baseline': -30,
+        'food:comparison': -120,
+        'fun:comparison': -30,
       },
     );
 
     expect(renderTooltip(interval)).toBe(
-      'Oct 2026Amountvs baselineFun-20-10Food-80+40' +
-        'Baseline-150Total-100+30',
+      'Oct 2026Amountvs comparisonFun-20-10Food-80+40' +
+        'Comparison-150Total-100+30',
     );
   });
 
-  it('lists only the baseline for intervals that have not started', () => {
+  it('lists only the comparison for intervals that have not started', () => {
     const interval = makeInterval(
       {
-        baseline: {
+        comparison: {
           expected: values(0),
           actual: values(0),
           upcoming: values(-150),
@@ -102,15 +102,15 @@ describe('SeriesTooltip', () => {
       {
         food: null,
         'food:amount': null,
-        'food:baseline': -120,
+        'food:comparison': -120,
         fun: null,
         'fun:amount': null,
-        'fun:baseline': -30,
+        'fun:comparison': -30,
       },
     );
 
     expect(renderTooltip(interval)).toBe(
-      'Oct 2026BaselineFun-30Food-120Baseline-150',
+      'Oct 2026ComparisonFun-30Food-120Comparison-150',
     );
   });
 });

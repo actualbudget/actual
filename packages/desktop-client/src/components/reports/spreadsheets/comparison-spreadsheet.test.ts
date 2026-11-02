@@ -14,8 +14,8 @@ import {
   offsetRows,
   rowsFromBudget,
   sumWindow,
-} from './baseline-spreadsheet';
-import type { BaselineScale } from './baseline-spreadsheet';
+} from './comparison-spreadsheet';
+import type { ComparisonScale } from './comparison-spreadsheet';
 
 // In test mode, monthUtils.currentDay() returns '2017-01-01'
 function interval(
@@ -55,85 +55,87 @@ const november = (debts: number) => interval('2016-11-01', '2016-11-30', debts);
 const december = (debts: number) => interval('2016-12-01', '2016-12-31', debts);
 const january = (debts: number) => interval('2017-01-01', '2017-01-31', debts);
 
-// A baseline of 184 days, so a total of -18400 spends 100 a day
-const scale: BaselineScale = {
-  baselineLength: 184,
+// A comparison of 184 days, so a total of -18400 spends 100 a day
+const scale: ComparisonScale = {
+  comparisonLength: 184,
   budgeted: false,
-  baselineIntervals: 6,
+  comparisonIntervals: 6,
   perInterval: false,
   projectToFullPeriod: true,
   averageDays: 30.5,
   averageLength: 30.5,
 };
-const baselineTotals = row('baseline', [interval('2016-07-01', '', -18400)]);
+const comparisonTotals = row('comparison', [
+  interval('2016-07-01', '', -18400),
+]);
 
 describe('offsetInterval', () => {
   it('leaves intervals without dates unchanged', () => {
     const undated = { ...november(-4000), intervalStartDate: undefined };
 
-    expect(offsetInterval(undated, baselineTotals, scale)).toBe(undated);
+    expect(offsetInterval(undated, comparisonTotals, scale)).toBe(undated);
   });
 
   it('leaves intervals that have not started empty', () => {
     const offset = offsetInterval(
       interval('2017-02-01', '2017-02-28', 0),
-      baselineTotals,
+      comparisonTotals,
       scale,
     );
 
     expect(offset.totalDebts).toBe(0);
-    expect(offset.baseline?.expected.totalDebts).toBe(0);
-    // Its baseline is still kept for charts to draw ahead: 28 days at 100
-    expect(offset.baseline?.upcoming?.totalDebts).toBe(-2800);
+    expect(offset.comparison?.expected.totalDebts).toBe(0);
+    // Its comparison is still kept for charts to draw ahead: 28 days at 100
+    expect(offset.comparison?.upcoming?.totalDebts).toBe(-2800);
   });
 
-  it('only keeps the baseline ahead when projecting', () => {
+  it('only keeps the comparison ahead when projecting', () => {
     const offset = offsetInterval(
       interval('2017-02-01', '2017-02-28', 0),
-      baselineTotals,
+      comparisonTotals,
       { ...scale, projectToFullPeriod: false },
     );
 
-    expect(offset.baseline?.upcoming).toBeUndefined();
+    expect(offset.comparison?.upcoming).toBeUndefined();
   });
 
   it('still compares budgets for intervals that have not started', () => {
     const offset = offsetInterval(
       interval('2017-02-01', '2017-02-28', -12000),
-      row('baseline', [interval('2016-05-01', '', -60000)]),
+      row('comparison', [interval('2016-05-01', '', -60000)]),
       { ...scale, perInterval: true },
     );
 
     expect(offset.totalBudgeted).toBe(-2000);
   });
 
-  it('offsets by the baseline daily average over the interval length', () => {
-    const offset = offsetInterval(november(-4000), baselineTotals, scale);
+  it('offsets by the comparison daily average over the interval length', () => {
+    const offset = offsetInterval(november(-4000), comparisonTotals, scale);
 
     // 30 days at 100 a day is 3000 expected, so 1000 more was spent
-    expect(offset.baseline?.expected.totalDebts).toBe(-3000);
+    expect(offset.comparison?.expected.totalDebts).toBe(-3000);
     expect(offset.totalDebts).toBe(-1000);
-    expect(offset.baseline?.projected).toBeUndefined();
+    expect(offset.comparison?.projected).toBeUndefined();
   });
 
   it('compares an unfinished interval against the days so far', () => {
     // Even when projecting, which only covers the whole range
-    const offset = offsetInterval(january(-100), baselineTotals, scale);
+    const offset = offsetInterval(january(-100), comparisonTotals, scale);
 
     // One day has passed, so 100 is expected rather than the whole month
-    expect(offset.baseline?.projected).toBeUndefined();
-    expect(offset.baseline?.expected.totalDebts).toBe(-100);
+    expect(offset.comparison?.projected).toBeUndefined();
+    expect(offset.comparison?.expected.totalDebts).toBe(-100);
     expect(offset.totalDebts).toBe(0);
   });
 
   it('spreads budgets per interval rather than per day', () => {
     const offset = offsetInterval(
       interval('2016-11-01', '2016-11-30', -12000),
-      row('baseline', [interval('2016-05-01', '', -60000)]),
+      row('comparison', [interval('2016-05-01', '', -60000)]),
       { ...scale, perInterval: true },
     );
 
-    expect(offset.baseline?.expected.totalBudgeted).toBe(-10000);
+    expect(offset.comparison?.expected.totalBudgeted).toBe(-10000);
     expect(offset.totalBudgeted).toBe(-2000);
   });
 });
@@ -142,42 +144,42 @@ describe('offsetItem', () => {
   const months = [november(-4000), december(-3100), january(-100)];
 
   it('sums offset intervals so the columns add up without a projection', () => {
-    const item = offsetItem(row('groceries', months), baselineTotals, {
+    const item = offsetItem(row('groceries', months), comparisonTotals, {
       ...scale,
       projectToFullPeriod: false,
     });
 
     expect(item.intervalData.map(i => i.totalDebts)).toEqual([-1000, 0, 0]);
     expect(item.totalDebts).toBe(-1000);
-    expect(item.baseline.expected.totalDebts).toBe(-6200);
-    expect(item.baseline.projected).toBeUndefined();
+    expect(item.comparison.expected.totalDebts).toBe(-6200);
+    expect(item.comparison.projected).toBeUndefined();
   });
 
   it('scales the pace so far to an average-length interval', () => {
-    const item = offsetItem(row('groceries', months), baselineTotals, scale);
+    const item = offsetItem(row('groceries', months), comparisonTotals, scale);
 
     // 7200 over the 62 days so far, over a 30.5-day interval
-    expect(item.baseline.pacePerInterval?.totalDebts).toBe(-3542);
-    expect(item.baseline.perInterval?.totalDebts).toBe(-3050);
+    expect(item.comparison.pacePerInterval?.totalDebts).toBe(-3542);
+    expect(item.comparison.perInterval?.totalDebts).toBe(-3050);
   });
 
   it('averages budgets per interval rather than by pace', () => {
     const item = offsetItem(
       row('groceries', months),
-      row('baseline', [interval('2016-05-01', '', -60000)]),
+      row('comparison', [interval('2016-05-01', '', -60000)]),
       { ...scale, perInterval: true },
     );
 
-    expect(item.baseline.pacePerInterval?.totalBudgeted).toBe(-2400);
+    expect(item.comparison.pacePerInterval?.totalBudgeted).toBe(-2400);
   });
 
   it('projects the total over the whole range at its pace so far', () => {
-    const item = offsetItem(row('groceries', months), baselineTotals, scale);
+    const item = offsetItem(row('groceries', months), comparisonTotals, scale);
 
     // 7200 over the 62 days so far projects to 10684 over all 92 days
-    expect(item.baseline.actual.totalDebts).toBe(-7200);
-    expect(item.baseline.projected?.totalDebts).toBe(-10684);
-    expect(item.baseline.expected.totalDebts).toBe(-9200);
+    expect(item.comparison.actual.totalDebts).toBe(-7200);
+    expect(item.comparison.projected?.totalDebts).toBe(-10684);
+    expect(item.comparison.expected.totalDebts).toBe(-9200);
     expect(item.totalDebts).toBe(-1484);
   });
 
@@ -188,19 +190,19 @@ describe('offsetItem', () => {
       interval('2017-01-02', '2017-01-02', 0),
       interval('2017-01-03', '2017-01-03', 0),
     ];
-    const item = offsetItem(row('groceries', days), baselineTotals, scale);
+    const item = offsetItem(row('groceries', days), comparisonTotals, scale);
 
-    expect(item.baseline.projected?.totalDebts).toBe(-400);
+    expect(item.comparison.projected?.totalDebts).toBe(-400);
     expect(item.totalDebts).toBe(0);
   });
 
-  it('gives the baseline over an average-length interval', () => {
-    const item = offsetItem(row('groceries', [november(0)]), baselineTotals, {
+  it('gives the comparison over an average-length interval', () => {
+    const item = offsetItem(row('groceries', [november(0)]), comparisonTotals, {
       ...scale,
       averageLength: 30,
     });
 
-    expect(item.baseline.perInterval?.totalDebts).toBe(-3000);
+    expect(item.comparison.perInterval?.totalDebts).toBe(-3000);
   });
 });
 
@@ -227,7 +229,7 @@ describe('offsetRows', () => {
     expect(rows.map(r => r.id).sort()).toEqual(['dropped', 'new']);
   });
 
-  it('keeps rows that only exist in the baseline', () => {
+  it('keeps rows that only exist in the comparison', () => {
     const [dropped] = offsetRows(
       [],
       [row('dropped', [interval('2016-07-01', '', -18400)])],
@@ -239,11 +241,11 @@ describe('offsetRows', () => {
 
   it('hides rows with no activity in either range unless asked', () => {
     const actual = [row('unused', [november(0)])];
-    const baseline = [row('unused', [interval('2016-07-01', '', 0)])];
+    const comparison = [row('unused', [interval('2016-07-01', '', 0)])];
 
-    expect(offsetRows(actual, baseline, context)).toEqual([]);
+    expect(offsetRows(actual, comparison, context)).toEqual([]);
     expect(
-      offsetRows(actual, baseline, { ...context, showEmpty: true }),
+      offsetRows(actual, comparison, { ...context, showEmpty: true }),
     ).toHaveLength(1);
   });
 
@@ -331,9 +333,9 @@ describe('getTrimRange', () => {
   ];
 
   it('trims by what actually happened, not by the change', () => {
-    const item = offsetItem(row('groceries', months), baselineTotals, scale);
+    const item = offsetItem(row('groceries', months), comparisonTotals, scale);
 
-    // Quiet months still differ from the baseline, but count as empty
+    // Quiet months still differ from the comparison, but count as empty
     expect(getTrimRange([item], item.intervalData, 'totalDebts')).toEqual({
       startIndex: 1,
       endIndex: 2,
@@ -346,7 +348,7 @@ describe('getTrimRange', () => {
         ...months.slice(0, 4),
         interval('2017-02-01', '2017-02-28', -500),
       ]),
-      baselineTotals,
+      comparisonTotals,
       scale,
     );
 
@@ -356,21 +358,21 @@ describe('getTrimRange', () => {
   });
 
   it('keeps totals covering the whole range', () => {
-    const item = offsetItem(row('groceries', months), baselineTotals, {
+    const item = offsetItem(row('groceries', months), comparisonTotals, {
       ...scale,
       projectToFullPeriod: false,
     });
 
-    // Totals include the baseline for the quiet months either side, and for
+    // Totals include the comparison for the quiet months either side, and for
     // the day of January so far
-    expect(item.baseline.expected.totalDebts).toBe(-9300);
+    expect(item.comparison.expected.totalDebts).toBe(-9300);
   });
 });
 
 // Six months of budgets adding up to 60000, so 10000 a month
-const budgetScale: BaselineScale = {
+const budgetScale: ComparisonScale = {
   ...scale,
-  baselineLength: 6,
+  comparisonLength: 6,
   budgeted: true,
   projectToFullPeriod: false,
   averageLength: 1,
@@ -411,18 +413,18 @@ describe('fromBudget', () => {
   });
 });
 
-describe('budgeted baselines', () => {
+describe('budgeted comparisons', () => {
   it('compares each month against the average monthly budget', () => {
     // Spread by days, November and December would differ by their lengths
     expect(
-      offsetInterval(november(-12000), budgetTotals, budgetScale).baseline
+      offsetInterval(november(-12000), budgetTotals, budgetScale).comparison
         ?.expected.totalDebts,
     ).toBe(-10000);
     expect(
       offsetInterval(december(-12000), budgetTotals, budgetScale),
     ).toMatchObject({
       totalDebts: -2000,
-      baseline: { expected: { totalDebts: -10000 }, budgeted: true },
+      comparison: { expected: { totalDebts: -10000 }, budgeted: true },
     });
   });
 
@@ -430,14 +432,14 @@ describe('budgeted baselines', () => {
     const week = interval('2016-12-04', '2016-12-10', 0);
 
     expect(
-      offsetInterval(week, budgetTotals, budgetScale).baseline?.expected
+      offsetInterval(week, budgetTotals, budgetScale).comparison?.expected
         .totalDebts,
     ).toBe(Math.round((-10000 * 7) / 31));
   });
 
   it('compares a month in progress against the budget for the days so far', () => {
     expect(
-      offsetInterval(january(-500), budgetTotals, budgetScale).baseline
+      offsetInterval(january(-500), budgetTotals, budgetScale).comparison
         ?.expected.totalDebts,
     ).toBe(Math.round(-10000 / 31));
   });
@@ -449,9 +451,9 @@ describe('budgeted baselines', () => {
       budgetScale,
     );
 
-    expect(item.baseline.perInterval?.totalDebts).toBe(-10000);
-    expect(item.baseline.expected.totalDebts).toBe(-20000);
-    expect(item.baseline.budgeted).toBe(true);
+    expect(item.comparison.perInterval?.totalDebts).toBe(-10000);
+    expect(item.comparison.expected.totalDebts).toBe(-20000);
+    expect(item.comparison.budgeted).toBe(true);
   });
 });
 
@@ -470,7 +472,7 @@ describe('getAverageMonths', () => {
   });
 });
 
-// Daily buckets as an offset baseline is fetched, each spending 100
+// Daily buckets as an offset comparison is fetched, each spending 100
 function days(start: string, count: number, debtsPerDay = -100) {
   return Array.from({ length: count }, (_, index) => {
     const day = monthUtils.addDays(start, index);
@@ -484,13 +486,13 @@ const weekBack = {
   earliestTransaction: '2016-01-01',
   bucketInterval: 'Daily',
 };
-const offsetScale: BaselineScale = {
+const offsetScale: ComparisonScale = {
   ...scale,
   projectToFullPeriod: false,
   offset: weekBack,
 };
 // A month back, with transactions from 2016-10-01
-const monthBackScale: BaselineScale = {
+const monthBackScale: ComparisonScale = {
   ...offsetScale,
   offset: { ...weekBack, days: 31, earliestTransaction: '2016-10-01' },
 };
@@ -521,66 +523,66 @@ describe('sumWindow', () => {
   });
 });
 
-describe('offset baselines', () => {
-  const baselineDays = row('baseline', days('2016-10-01', 130));
+describe('offset comparisons', () => {
+  const comparisonDays = row('comparison', days('2016-10-01', 130));
 
   it('compares each interval with its own window', () => {
     const offset = offsetInterval(
       interval('2016-12-01', '2016-12-31', -4000),
-      baselineDays,
+      comparisonDays,
       offsetScale,
     );
 
-    expect(offset.baselineStartDate).toBe('2016-11-24');
-    expect(offset.baselineEndDate).toBe('2016-12-24');
-    expect(offset.baseline?.expected.totalDebts).toBe(-3100);
+    expect(offset.comparisonStartDate).toBe('2016-11-24');
+    expect(offset.comparisonEndDate).toBe('2016-12-24');
+    expect(offset.comparison?.expected.totalDebts).toBe(-3100);
     expect(offset.totalDebts).toBe(-900);
   });
 
   it('shifts the days an interval was cut short to', () => {
     const offset = offsetInterval(
       interval('2016-12-10', '2016-12-31', -4000),
-      baselineDays,
+      comparisonDays,
       offsetScale,
     );
 
-    expect(offset.baselineStartDate).toBe('2016-12-03');
-    expect(offset.baseline?.expected.totalDebts).toBe(-2200);
+    expect(offset.comparisonStartDate).toBe('2016-12-03');
+    expect(offset.comparison?.expected.totalDebts).toBe(-2200);
   });
 
   it('compares an interval in progress with the same days of its window', () => {
     const offset = offsetInterval(
       interval('2017-01-01', '2017-01-31', -100),
-      baselineDays,
+      comparisonDays,
       offsetScale,
     );
 
     // Only 1 January has passed, so only 25 December is compared
-    expect(offset.baseline?.expected.totalDebts).toBe(-100);
+    expect(offset.comparison?.expected.totalDebts).toBe(-100);
     expect(offset.totalDebts).toBe(0);
   });
 
   it('keeps the whole window ahead for intervals that have not started', () => {
     const offset = offsetInterval(
       interval('2017-01-02', '2017-01-08', 0),
-      baselineDays,
+      comparisonDays,
       { ...offsetScale, projectToFullPeriod: false },
     );
 
-    expect(offset.baseline?.expected.totalDebts).toBe(0);
-    expect(offset.baseline?.upcoming?.totalDebts).toBe(-700);
+    expect(offset.comparison?.expected.totalDebts).toBe(0);
+    expect(offset.comparison?.upcoming?.totalDebts).toBe(-700);
   });
 
   it('has no data for windows before the earliest transaction', () => {
     const offset = offsetInterval(
       interval('2016-10-01', '2016-10-31', -4000),
-      baselineDays,
+      comparisonDays,
       monthBackScale,
     );
 
-    expect(offset.baseline?.noData).toBe(true);
+    expect(offset.comparison?.noData).toBe(true);
     expect(offset.totalDebts).toBe(0);
-    expect(offset.baseline?.actual.totalDebts).toBe(-4000);
+    expect(offset.comparison?.actual.totalDebts).toBe(-4000);
   });
 
   it('only compares intervals with data in totals', () => {
@@ -590,15 +592,15 @@ describe('offset baselines', () => {
     ];
     const offset = offsetItem(
       row('actual', months),
-      baselineDays,
+      comparisonDays,
       monthBackScale,
     );
 
     // November's window is 1-30 October, 3000 against 4000 spent
-    expect(offset.baseline.actual.totalDebts).toBe(-8000);
-    expect(offset.baseline.expected.totalDebts).toBe(-3000);
+    expect(offset.comparison.actual.totalDebts).toBe(-8000);
+    expect(offset.comparison.expected.totalDebts).toBe(-3000);
     expect(offset.totalDebts).toBe(-1000);
-    expect(offset.baseline.noData).toBeUndefined();
+    expect(offset.comparison.noData).toBeUndefined();
   });
 
   it('sums intervals so the columns add up', () => {
@@ -606,12 +608,16 @@ describe('offset baselines', () => {
       interval('2016-11-01', '2016-11-30', -4000),
       interval('2016-12-01', '2016-12-31', -3000),
     ];
-    const offset = offsetItem(row('actual', months), baselineDays, offsetScale);
+    const offset = offsetItem(
+      row('actual', months),
+      comparisonDays,
+      offsetScale,
+    );
 
-    expect(offset.baseline.expected.totalDebts).toBe(-6100);
+    expect(offset.comparison.expected.totalDebts).toBe(-6100);
     expect(offset.totalDebts).toBe(-900);
     // The whole window over two intervals
-    expect(offset.baseline.perInterval?.totalDebts).toBe(-3050);
+    expect(offset.comparison.perInterval?.totalDebts).toBe(-3050);
   });
 
   it('projects against the whole range back', () => {
@@ -619,14 +625,14 @@ describe('offset baselines', () => {
       interval('2016-12-01', '2016-12-31', -3100),
       interval('2017-01-01', '2017-01-31', -100),
     ];
-    const offset = offsetItem(row('actual', months), baselineDays, {
+    const offset = offsetItem(row('actual', months), comparisonDays, {
       ...offsetScale,
       projectToFullPeriod: true,
     });
 
     // 3200 over 32 days, projected over 62
-    expect(offset.baseline.projected?.totalDebts).toBe(-6200);
-    expect(offset.baseline.expected.totalDebts).toBe(-6200);
+    expect(offset.comparison.projected?.totalDebts).toBe(-6200);
+    expect(offset.comparison.expected.totalDebts).toBe(-6200);
     expect(offset.totalDebts).toBe(0);
   });
 });

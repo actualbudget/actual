@@ -70,11 +70,11 @@ export function ReportTable({
   showOffBudget,
 }: ReportTableProps) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const showBaseline = !!data.baseline;
-  const showProjected = !!data.baseline?.projected;
+  const showComparison = !!data.comparison;
+  const showProjected = !!data.comparison?.projected;
   // Cards are too narrow for three columns per interval, so they keep one
   // cell coloured by its change
-  const splitIntervals = showBaseline && mode === 'time' && !compact;
+  const splitIntervals = showComparison && mode === 'time' && !compact;
 
   useLayoutEffect(() => {
     if (contentRef.current && saveScrollWidth) {
@@ -92,11 +92,11 @@ export function ReportTable({
         filters={filters}
         startDate={data.startDate}
         endDate={data.endDate}
-        showBaseline={showBaseline}
+        showComparison={showComparison}
         showProjected={showProjected}
         splitIntervals={splitIntervals}
-        baselineStartDate={data.baselineStartDate}
-        baselineEndDate={data.baselineEndDate}
+        comparisonStartDate={data.comparisonStartDate}
+        comparisonEndDate={data.comparisonEndDate}
         intervalsCount={intervalsCount}
         compact={compact}
         style={style}
@@ -125,11 +125,11 @@ export function ReportTable({
         filters={filters}
         startDate={data.startDate}
         endDate={data.endDate}
-        showBaseline={showBaseline}
+        showComparison={showComparison}
         showProjected={showProjected}
         splitIntervals={splitIntervals}
-        baselineStartDate={data.baselineStartDate}
-        baselineEndDate={data.baselineEndDate}
+        comparisonStartDate={data.comparisonStartDate}
+        comparisonEndDate={data.comparisonEndDate}
         intervalsCount={intervalsCount}
         compact={compact}
         style={totalsStyle}
@@ -160,9 +160,9 @@ export function ReportTable({
         style={style}
         compactStyle={compactStyle}
         mode={mode}
-        showBaseline={showBaseline}
+        showComparison={showComparison}
         showProjected={showProjected}
-        budgetedBaseline={!!data.baseline?.budgeted}
+        budgetedComparison={!!data.comparison?.budgeted}
         splitIntervals={splitIntervals}
       />
       <View

@@ -8,7 +8,7 @@ export type CustomReportMetadata = Record<string, unknown>;
 
 // What the report's data is offset against: a date range, by its daily
 // average, or each interval's own window an offset back in time
-export type CustomReportBaseline = {
+export type CustomReportComparison = {
   enabled: boolean;
   dateRange: string;
   isDateStatic: boolean;
@@ -17,35 +17,35 @@ export type CustomReportBaseline = {
   includeCurrentInterval: boolean;
   // Project amounts so far over the report's whole range, by days elapsed
   projectToFullPeriod: boolean;
-  // Draw graphs as changes from the baseline, rather than as amounts with the
-  // baseline drawn in. Optional since older reports don't store it.
+  // Draw graphs as changes from the comparison, rather than as amounts with the
+  // comparison drawn in. Optional since older reports don't store it.
   showChanges?: boolean;
   // The amount rows sort by. Without it, rows sort by the current amount when
   // drawing amounts, and by the change when drawing changes.
-  sortAmount?: CustomReportBaselineSortAmount;
+  sortAmount?: CustomReportComparisonSortAmount;
   // Compare against what was spent over the range, or the average of what
   // was budgeted for it. Optional since older reports don't store it.
-  source?: CustomReportBaselineSource;
+  source?: CustomReportComparisonSource;
   // Optional since older reports don't store them, and those use a range
-  mode?: CustomReportBaselineMode;
+  mode?: CustomReportComparisonMode;
   offsetCount?: number;
-  offsetUnit?: CustomReportBaselineOffsetUnit;
+  offsetUnit?: CustomReportComparisonOffsetUnit;
 };
 
-export type CustomReportBaselineSource = 'actual' | 'budgeted';
+export type CustomReportComparisonSource = 'actual' | 'budgeted';
 
-export type CustomReportBaselineMode = 'range' | 'offset';
+export type CustomReportComparisonMode = 'range' | 'offset';
 
-export type CustomReportBaselineSortAmount =
+export type CustomReportComparisonSortAmount =
   | 'current'
   | 'comparison'
   | 'change';
 
-export type CustomReportBaselineOffsetUnit = 'days' | 'weeks';
+export type CustomReportComparisonOffsetUnit = 'days' | 'weeks';
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
-  baseline?: CustomReportBaseline;
+  comparison?: CustomReportComparison;
 };
 
 export type CustomReportEntity = {
@@ -68,7 +68,7 @@ export type CustomReportEntity = {
   showUncategorized: boolean;
   trimIntervals: boolean;
   showTrendLines: boolean;
-  baseline?: CustomReportBaseline;
+  comparison?: CustomReportComparison;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -88,25 +88,25 @@ export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
 
 export type ReportValues = Record<balanceTypeOpType, number>;
 
-// What an amount offset against a baseline was built from
-export type BaselineBreakdown = {
-  // The baseline's daily average over the same number of days
+// What an amount offset against a comparison was built from
+export type ComparisonBreakdown = {
+  // The comparison's daily average over the same number of days
   expected: ReportValues;
   actual: ReportValues;
   // A row's or total's actual amount projected over the whole range from its
   // pace so far. Single intervals aren't projected.
   projected?: ReportValues;
-  // The baseline over an average-length interval, for tables and summaries
+  // The comparison over an average-length interval, for tables and summaries
   perInterval?: ReportValues;
-  // The baseline over an interval that hasn't started, which compares
-  // nothing yet but lets charts draw the baseline ahead
+  // The comparison over an interval that hasn't started, which compares
+  // nothing yet but lets charts draw the comparison ahead
   upcoming?: ReportValues;
   // The actual amount at its pace so far over an average-length interval, to
   // compare against perInterval
   pacePerInterval?: ReportValues;
-  // The baseline is the average of what was budgeted, not what was spent
+  // The comparison is the average of what was budgeted, not what was spent
   budgeted?: boolean;
-  // An offset baseline's window is before the earliest transaction, so there
+  // An offset comparison's window is before the earliest transaction, so there
   // is nothing to compare against
   noData?: boolean;
 };
@@ -164,9 +164,9 @@ export type DataEntity = {
   totalTotals: number;
   totalBudgeted: number;
   scopeTagNames?: string[];
-  baseline?: BaselineBreakdown;
-  baselineStartDate?: string;
-  baselineEndDate?: string;
+  comparison?: ComparisonBreakdown;
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
 };
 
 export type LegendEntity = {
@@ -189,14 +189,14 @@ export type IntervalEntity = {
   netDebts: number;
   totalTotals: number;
   totalBudgeted: number;
-  baseline?: BaselineBreakdown;
-  // When graphs draw amounts against a baseline: the interval's amount, which
-  // is null before it starts, and its baseline
+  comparison?: ComparisonBreakdown;
+  // When graphs draw amounts against a comparison: the interval's amount, which
+  // is null before it starts, and its comparison
   amount?: number | null;
-  baselineAmount?: number | null;
-  // With an offset baseline: the past window this interval is compared with
-  baselineStartDate?: string;
-  baselineEndDate?: string;
+  comparisonAmount?: number | null;
+  // With an offset comparison: the past window this interval is compared with
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
 };
 
 export type GroupedEntity = {
@@ -213,7 +213,7 @@ export type GroupedEntity = {
   totalBudgeted: number;
   categories?: GroupedEntity[];
   bucketTagNames?: string[];
-  baseline?: BaselineBreakdown;
+  comparison?: ComparisonBreakdown;
 };
 
 export type Interval = {

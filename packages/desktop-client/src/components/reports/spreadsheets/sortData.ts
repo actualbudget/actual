@@ -22,10 +22,10 @@ export function sortData({
 }: {
   balanceTypeOp?: balanceTypeOpType;
   sortByOp?: sortByOpType;
-  // Signed values, like changes from a baseline, are shown as they are, so
+  // Signed values, like changes from a comparison, are shown as they are, so
   // spending isn't flipped to sort largest first
   isSigned?: boolean;
-  // Sorts by another amount than the row's own, like its baseline
+  // Sorts by another amount than the row's own, like its comparison
   getValue?: (row: GroupedEntity) => number;
 }): (a: GroupedEntity, b: GroupedEntity) => number {
   if (!balanceTypeOp || !sortByOp) return () => 0;

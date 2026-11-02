@@ -4,7 +4,7 @@ import type { DataEntity, LegendEntity } from '@actual-app/core/types/models';
 import {
   countElapsedDays,
   getFullIntervalDays,
-} from '#components/reports/baselineRange';
+} from '#components/reports/comparisonRange';
 
 export type TrendLineSegment = {
   id: string;

@@ -29,16 +29,16 @@ import { FinancialText } from '#components/FinancialText';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import {
-  canShowBaselineChanges,
-  defaultBaseline,
-  getBaselineRange,
-  getBaselineSortAmount,
-  getOffsetDays,
-  isBudgetedBaseline,
-  isOffsetBaseline,
-} from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
+import {
+  canShowComparisonChanges,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonSortAmount,
+  getOffsetDays,
+  isBudgetedComparison,
+  isOffsetComparison,
+} from '#components/reports/comparisonRange';
 import {
   defaultsGraphList,
   defaultsList,
@@ -61,9 +61,9 @@ import { ReportTopbar } from '#components/reports/ReportTopbar';
 import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
 import {
-  createBaselineGroupedSpreadsheet,
-  createBaselineSpreadsheet,
-} from '#components/reports/spreadsheets/baseline-spreadsheet';
+  createComparisonGroupedSpreadsheet,
+  createComparisonSpreadsheet,
+} from '#components/reports/spreadsheets/comparison-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { normalizeTagScope } from '#components/reports/tagScope';
@@ -311,10 +311,10 @@ function CustomReportInner({
     loadReport.showTrendLines,
   );
   const [graphType, setGraphType] = useState(loadReport.graphType);
-  const [baseline, setBaseline] = useState(
-    loadReport.baseline ?? defaultBaseline,
+  const [comparison, setComparison] = useState(
+    loadReport.comparison ?? defaultComparison,
   );
-  const reportBaselineEnabled = useFeatureFlag('reportBaseline');
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const dateRangeLine =
@@ -544,25 +544,25 @@ function CustomReportInner({
     });
   }, [balanceTypeOp, conditions, onApplyFilter]);
 
-  // Live baselines are resolved again so saved dates don't go stale
-  const [baselineStartDate, baselineEndDate] = getBaselineRange(
-    baseline,
+  // Live comparisons are resolved again so saved dates don't go stale
+  const [comparisonStartDate, comparisonEndDate] = getComparisonRange(
+    comparison,
     earliestTransactionDate,
     latestTransactionDate,
     firstDayOfWeekIdx,
     [startDate, endDate],
   );
-  const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
-  const offsetDays = isOffsetBaseline(baseline)
-    ? getOffsetDays(baseline)
+  const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
+  const offsetDays = isOffsetComparison(comparison)
+    ? getOffsetDays(comparison)
     : undefined;
-  const projectToFullPeriod = baseline.projectToFullPeriod;
-  const budgetedBaseline = isBudgetedBaseline(baseline, groupBy);
-  // Amounts are drawn with the baseline unless changes are asked for
+  const projectToFullPeriod = comparison.projectToFullPeriod;
+  const budgetedComparison = isBudgetedComparison(comparison, groupBy);
+  // Amounts are drawn with the comparison unless changes are asked for
   const showAmounts = !(
-    baseline.showChanges && canShowBaselineChanges(graphType)
+    comparison.showChanges && canShowComparisonChanges(graphType)
   );
-  const sortAmount = getBaselineSortAmount(baseline, showAmounts);
+  const sortAmount = getComparisonSortAmount(comparison, showAmounts);
 
   const getGroupData = useMemo(() => {
     const props = {
@@ -582,14 +582,14 @@ function CustomReportInner({
       sortByOp,
       firstDayOfWeekIdx,
     };
-    return isBaselineEnabled
-      ? createBaselineGroupedSpreadsheet(props, {
-          startDate: baselineStartDate,
-          endDate: baselineEndDate,
+    return isComparisonEnabled
+      ? createComparisonGroupedSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
           projectToFullPeriod,
           showAmounts,
           sortAmount,
-          budgeted: budgetedBaseline,
+          budgeted: budgetedComparison,
           offset:
             offsetDays === undefined
               ? undefined
@@ -600,13 +600,13 @@ function CustomReportInner({
         })
       : createGroupedSpreadsheet(props);
   }, [
-    isBaselineEnabled,
-    baselineStartDate,
-    baselineEndDate,
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
     projectToFullPeriod,
     showAmounts,
     sortAmount,
-    budgetedBaseline,
+    budgetedComparison,
     offsetDays,
     earliestTransactionDate,
     startDate,
@@ -651,14 +651,14 @@ function CustomReportInner({
       firstDayOfWeekIdx,
       dateFormat,
     };
-    return isBaselineEnabled
-      ? createBaselineSpreadsheet(props, {
-          startDate: baselineStartDate,
-          endDate: baselineEndDate,
+    return isComparisonEnabled
+      ? createComparisonSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
           projectToFullPeriod,
           showAmounts,
           sortAmount,
-          budgeted: budgetedBaseline,
+          budgeted: budgetedComparison,
           offset:
             offsetDays === undefined
               ? undefined
@@ -669,13 +669,13 @@ function CustomReportInner({
         })
       : createCustomSpreadsheet(props);
   }, [
-    isBaselineEnabled,
-    baselineStartDate,
-    baselineEndDate,
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
     projectToFullPeriod,
     showAmounts,
     sortAmount,
-    budgetedBaseline,
+    budgetedComparison,
     offsetDays,
     earliestTransactionDate,
     startDate,
@@ -729,7 +729,7 @@ function CustomReportInner({
     showUncategorized,
     trimIntervals,
     showTrendLines,
-    baseline,
+    comparison,
     graphType,
     conditions,
     conditionsOp,
@@ -879,7 +879,7 @@ function CustomReportInner({
     setShowUncategorized(input.showUncategorized);
     setTrimIntervals(input.trimIntervals);
     setShowTrendLines(input.showTrendLines);
-    setBaseline(input.baseline ?? defaultBaseline);
+    setComparison(input.comparison ?? defaultComparison);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => {
@@ -1027,7 +1027,7 @@ function CustomReportInner({
             setShowUncategorized={setShowUncategorized}
             setTrimIntervals={setTrimIntervals}
             setShowTrendLines={setShowTrendLines}
-            setBaseline={setBaseline}
+            setComparison={setComparison}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -1147,12 +1147,12 @@ function CustomReportInner({
                     <AlignedText
                       left={
                         <Block>
-                          {isBaselineEnabled
-                            ? budgetedBaseline
+                          {isComparisonEnabled
+                            ? budgetedComparison
                               ? t('{{balanceType}} vs budgeted:', {
                                   balanceType,
                                 })
-                              : t('{{balanceType}} vs baseline:', {
+                              : t('{{balanceType}} vs comparison:', {
                                   balanceType,
                                 })
                             : `${balanceType}:`}

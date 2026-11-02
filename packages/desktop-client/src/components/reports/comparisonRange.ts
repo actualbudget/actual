@@ -1,15 +1,15 @@
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
-  CustomReportBaseline,
-  CustomReportBaselineSortAmount,
+  CustomReportComparison,
+  CustomReportComparisonSortAmount,
   IntervalEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { getLiveRange } from './getLiveRange';
 
-// Six complete months, so a new baseline doesn't overlap the report's range
-export const defaultBaseline: CustomReportBaseline = {
+// Six complete months, so a new comparison doesn't overlap the report's range
+export const defaultComparison: CustomReportComparison = {
   enabled: false,
   dateRange: 'Last 6 months',
   isDateStatic: false,
@@ -28,28 +28,28 @@ export const defaultBaseline: CustomReportBaseline = {
 };
 
 /**
- * The dates of a baseline, resolving live ranges against today. An offset
- * baseline covers the report's range, moved back by the offset.
+ * The dates of a comparison, resolving live ranges against today. An offset
+ * comparison covers the report's range, moved back by the offset.
  */
-export function getBaselineRange(
-  baseline: CustomReportBaseline,
+export function getComparisonRange(
+  comparison: CustomReportComparison,
   earliestTransaction: string,
   latestTransaction: string,
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'],
   reportRange?: [string, string],
 ): [string, string] {
-  if (isOffsetBaseline(baseline) && reportRange) {
-    return shiftRange(...reportRange, getOffsetDays(baseline));
+  if (isOffsetComparison(comparison) && reportRange) {
+    return shiftRange(...reportRange, getOffsetDays(comparison));
   }
-  if (baseline.isDateStatic) {
-    return [baseline.startDate, baseline.endDate];
+  if (comparison.isDateStatic) {
+    return [comparison.startDate, comparison.endDate];
   }
 
   const [start, end] = getLiveRange(
-    baseline.dateRange,
+    comparison.dateRange,
     earliestTransaction,
     latestTransaction,
-    baseline.includeCurrentInterval,
+    comparison.includeCurrentInterval,
     firstDayOfWeekIdx,
   );
   return [start, end];
@@ -59,23 +59,23 @@ export function getBaselineRange(
  * The amount rows sort by. Rows sort by what is drawn unless another amount
  * is chosen.
  */
-export function getBaselineSortAmount(
-  baseline: CustomReportBaseline,
+export function getComparisonSortAmount(
+  comparison: CustomReportComparison,
   showAmounts: boolean,
-): CustomReportBaselineSortAmount {
-  return baseline.sortAmount ?? (showAmounts ? 'current' : 'change');
+): CustomReportComparisonSortAmount {
+  return comparison.sortAmount ?? (showAmounts ? 'current' : 'change');
 }
 
-export function isOffsetBaseline(baseline: CustomReportBaseline) {
-  return baseline.mode === 'offset';
+export function isOffsetComparison(comparison: CustomReportComparison) {
+  return comparison.mode === 'offset';
 }
 
 /**
- * How many days an offset baseline looks back.
+ * How many days an offset comparison looks back.
  */
-export function getOffsetDays(baseline: CustomReportBaseline) {
-  const count = baseline.offsetCount ?? defaultBaseline.offsetCount ?? 1;
-  return baseline.offsetUnit === 'days' ? count : count * 7;
+export function getOffsetDays(comparison: CustomReportComparison) {
+  const count = comparison.offsetCount ?? defaultComparison.offsetCount ?? 1;
+  return comparison.offsetUnit === 'days' ? count : count * 7;
 }
 
 /**
@@ -218,46 +218,46 @@ export function countElapsedMonths(start: string, end: string) {
 }
 
 // Budgets only exist per category, so other groupings have nothing to compare
-// against a budgeted baseline
-const budgetedBaselineGroups = new Set(['Category', 'Group', 'Interval']);
+// against a budgeted comparison
+const budgetedComparisonGroups = new Set(['Category', 'Group', 'Interval']);
 
-export function canUseBudgetedBaseline(groupBy: string) {
-  return budgetedBaselineGroups.has(groupBy);
+export function canUseBudgetedComparison(groupBy: string) {
+  return budgetedComparisonGroups.has(groupBy);
 }
 
 /**
- * Whether a baseline compares against budgets, which only applies where the
+ * Whether a comparison compares against budgets, which only applies where the
  * report's grouping has budgets.
  */
-export function isBudgetedBaseline(
-  baseline: CustomReportBaseline,
+export function isBudgetedComparison(
+  comparison: CustomReportComparison,
   groupBy: string,
 ) {
   // Budgets are set per month, so an offset of days or weeks would have to
   // spread them over part months
   return (
-    baseline.source === 'budgeted' &&
-    !isOffsetBaseline(baseline) &&
-    canUseBudgetedBaseline(groupBy)
+    comparison.source === 'budgeted' &&
+    !isOffsetComparison(comparison) &&
+    canUseBudgetedComparison(groupBy)
   );
 }
 
-// Graphs that can draw changes from the baseline instead of amounts with the
-// baseline drawn in. Tables always show both, and donuts can't draw negative
+// Graphs that can draw changes from the comparison instead of amounts with the
+// comparison drawn in. Tables always show both, and donuts can't draw negative
 // changes, so they always compare amounts.
-const baselineChangeGraphs = new Set([
+const comparisonChangeGraphs = new Set([
   'BarGraph',
   'StackedBarGraph',
   'LineGraph',
   'AreaGraph',
 ]);
 
-export function canShowBaselineChanges(graphType: string) {
-  return baselineChangeGraphs.has(graphType);
+export function canShowComparisonChanges(graphType: string) {
+  return comparisonChangeGraphs.has(graphType);
 }
 
-// Each series in baseline interval data also carries its amount, change and
-// baseline under these keys, whichever of them is drawn
+// Each series in comparison interval data also carries its amount, change and
+// comparison under these keys, whichever of them is drawn
 function getSeriesKey(dataKey: string, suffix: string) {
   return `${dataKey}:${suffix}`;
 }
@@ -270,8 +270,8 @@ export function getChangeKey(dataKey: string) {
   return getSeriesKey(dataKey, 'change');
 }
 
-export function getBaselineKey(dataKey: string) {
-  return getSeriesKey(dataKey, 'baseline');
+export function getComparisonKey(dataKey: string) {
+  return getSeriesKey(dataKey, 'comparison');
 }
 
 /**

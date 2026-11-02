@@ -9,7 +9,7 @@ import type {
   IntervalEntity,
 } from '@actual-app/core/types/models';
 
-import { useFormatBaselineWindow } from '#components/reports/graphs/useFormatBaselineWindow';
+import { useFormatComparisonWindow } from '#components/reports/graphs/useFormatComparisonWindow';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import { Cell, Row, ROW_HEIGHT } from '#components/table';
 
@@ -40,10 +40,10 @@ type ReportTableHeaderProps = {
   style?: CSSProperties;
   compactStyle?: CSSProperties;
   mode: string;
-  showBaseline?: boolean;
+  showComparison?: boolean;
   showProjected?: boolean;
-  // The baseline is the average of what was budgeted
-  budgetedBaseline?: boolean;
+  // The comparison is the average of what was budgeted
+  budgetedComparison?: boolean;
   // Split each interval into current, comparison and change sub-columns
   splitIntervals?: boolean;
 };
@@ -59,13 +59,13 @@ export function ReportTableHeader({
   style,
   compactStyle,
   mode,
-  showBaseline = false,
+  showComparison = false,
   showProjected = false,
-  budgetedBaseline = false,
+  budgetedComparison = false,
   splitIntervals = false,
 }: ReportTableHeaderProps) {
   const { t } = useTranslation();
-  const formatBaselineWindow = useFormatBaselineWindow();
+  const formatComparisonWindow = useFormatComparisonWindow();
   // Labels beside split intervals sit level with the sub-column labels, so the
   // line under each date doesn't look like it runs on from them
   const labelStyle = splitIntervals
@@ -113,7 +113,7 @@ export function ReportTableHeader({
   // Total tables keep real amounts and add a change column beside them
   const rangeColumns: { label: string; title?: string }[] = [
     { label: t('Totals') },
-    ...(showBaseline && showProjected
+    ...(showComparison && showProjected
       ? [
           {
             label: t('Projected'),
@@ -121,25 +121,27 @@ export function ReportTableHeader({
           },
         ]
       : []),
-    ...(showBaseline
+    ...(showComparison
       ? [
           {
             label: t('Change'),
             title:
               mode === 'time'
-                ? budgetedBaseline
+                ? budgetedComparison
                   ? t('The average compared with the budget per interval')
-                  : t('The average compared with the baseline per interval')
-                : budgetedBaseline
+                  : t('The average change from the comparison per interval')
+                : budgetedComparison
                   ? t('The difference from the budget over the whole range')
-                  : t('The difference from the baseline over the whole range'),
+                  : t(
+                      'The difference from the comparison over the whole range',
+                    ),
           },
         ]
       : []),
     {
       label: t('Average'),
       title:
-        showBaseline && mode === 'time'
+        showComparison && mode === 'time'
           ? t('An average-length interval at the pace so far')
           : undefined,
     },
@@ -185,21 +187,21 @@ export function ReportTableHeader({
               : groupBy
           }
         />
-        {showBaseline && (
+        {showComparison && (
           <Cell
             style={{
               minWidth: compact ? 50 : 85,
             }}
             valueStyle={labelStyle}
-            value={budgetedBaseline ? t('Budgeted') : t('Baseline')}
+            value={budgetedComparison ? t('Budgeted') : t('Comparison')}
             title={
-              budgetedBaseline
+              budgetedComparison
                 ? mode === 'time'
                   ? t('The average budgeted over one interval')
                   : t('The average budgeted over the same length of time')
                 : mode === 'time'
-                  ? t('The baseline average over one interval')
-                  : t('The baseline average over the same number of days')
+                  ? t('The comparison average over one interval')
+                  : t('The comparison average over the same number of days')
             }
             textAlign="right"
             width="flex"
@@ -208,21 +210,21 @@ export function ReportTableHeader({
         {mode === 'time'
           ? data.map((header, index) => {
               if (splitIntervals) {
-                // Range baselines compare every interval with the same range,
+                // Range comparisons compare every interval with the same range,
                 // so only offset windows go beside the date
-                const baselineWindow = formatBaselineWindow(
-                  header.baselineStartDate,
-                  header.baselineEndDate,
+                const comparisonWindow = formatComparisonWindow(
+                  header.comparisonStartDate,
+                  header.comparisonEndDate,
                 );
-                const groupLabel = baselineWindow
-                  ? t('{{date}} vs {{baselineWindow}}', {
+                const groupLabel = comparisonWindow
+                  ? t('{{date}} vs {{comparisonWindow}}', {
                       date: header.date,
-                      baselineWindow,
+                      comparisonWindow,
                     })
                   : header.date;
-                const comparisonLabel = budgetedBaseline
+                const comparisonLabel = budgetedComparison
                   ? t('Budgeted')
-                  : t('Baseline');
+                  : t('Comparison');
                 return renderGroup(
                   index,
                   groupLabel,

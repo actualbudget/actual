@@ -6,7 +6,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
+  ComparisonBreakdown,
   DataEntity,
   IntervalEntity,
   RuleConditionEntity,
@@ -33,7 +33,7 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
-import { BaselineTooltip } from './BaselineTooltip';
+import { ComparisonTooltip } from './ComparisonTooltip';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
 import { TooltipCard } from './TooltipCard';
@@ -47,9 +47,9 @@ type PayloadItem = {
     netDebts: number;
     totalTotals: number;
     totalBudgeted: number;
-    baseline?: BaselineBreakdown;
-    baselineStartDate?: string;
-    baselineEndDate?: string;
+    comparison?: ComparisonBreakdown;
+    comparisonStartDate?: string;
+    comparisonEndDate?: string;
   };
 };
 
@@ -69,15 +69,15 @@ const CustomTooltip = ({
   const { t } = useTranslation();
 
   const interval = payload?.[0]?.payload;
-  if (active && interval?.baseline) {
+  if (active && interval?.comparison) {
     return (
-      <BaselineTooltip
+      <ComparisonTooltip
         title={interval.date}
-        breakdown={interval.baseline}
+        breakdown={interval.comparison}
         balanceTypeOp={balanceTypeOp}
         format={format}
-        baselineStartDate={interval.baselineStartDate}
-        baselineEndDate={interval.baselineEndDate}
+        comparisonStartDate={interval.comparisonStartDate}
+        comparisonEndDate={interval.comparisonEndDate}
       />
     );
   }
@@ -223,22 +223,22 @@ export function AreaGraph({
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const privacyMode = usePrivacyMode();
-  // Amounts against a baseline draw the amount with a faint baseline line.
+  // Amounts against a comparison draw the amount with a faint comparison line.
   // The spreadsheet flips spending to point up, but area graphs draw it below
   // zero, so it's flipped back.
-  const isAmounts = showAmounts && !!data.baseline;
+  const isAmounts = showAmounts && !!data.comparison;
   const amountSign =
     balanceTypeOp === 'totalDebts' || balanceTypeOp === 'netDebts' ? -1 : 1;
   const toAreaValue = (value: number | null | undefined) =>
     value == null ? null : amountSign * value;
   const getValue = (interval: IntervalEntity) =>
     isAmounts ? toAreaValue(interval.amount) : interval[balanceTypeOp];
-  const getBaselineValue = (interval: IntervalEntity) =>
-    toAreaValue(interval.baselineAmount);
+  const getComparisonValue = (interval: IntervalEntity) =>
+    toAreaValue(interval.comparisonAmount);
 
   const values = data.intervalData.flatMap(i =>
     isAmounts
-      ? [getValue(i), getBaselineValue(i)].filter(value => value != null)
+      ? [getValue(i), getComparisonValue(i)].filter(value => value != null)
       : [i[balanceTypeOp]],
   );
   const dataMax = Math.max(...values);
@@ -317,7 +317,7 @@ export function AreaGraph({
               )}
               {compact ? null : (
                 <YAxis
-                  // Amounts span both their own and the baseline's values
+                  // Amounts span both their own and the comparison's values
                   dataKey={isAmounts ? undefined : balanceTypeOp}
                   domain={[
                     viewLabels || isAmounts ? labelsMin : 'auto',
@@ -382,7 +382,7 @@ export function AreaGraph({
               {isAmounts && (
                 <Area
                   type="linear"
-                  dataKey={getBaselineValue}
+                  dataKey={getComparisonValue}
                   stroke={theme.pageTextLight}
                   strokeOpacity={0.5}
                   strokeWidth={2}

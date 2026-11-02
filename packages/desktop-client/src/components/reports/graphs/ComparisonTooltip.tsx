@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
+  ComparisonBreakdown,
 } from '@actual-app/core/types/models';
 
 import { FinancialText } from '#components/FinancialText';
@@ -12,39 +12,41 @@ import type { FormatType } from '#hooks/useFormat';
 
 import { getSpendingSign } from './getSpendingSign';
 import { TooltipCard } from './TooltipCard';
-import { useFormatBaselineWindow } from './useFormatBaselineWindow';
+import { useFormatComparisonWindow } from './useFormatComparisonWindow';
 
-type BaselineTooltipLinesProps = {
-  breakdown: BaselineBreakdown;
+type ComparisonTooltipLinesProps = {
+  breakdown: ComparisonBreakdown;
   balanceTypeOp: balanceTypeOpType;
   format: (value: unknown, type: FormatType) => string;
-  // With an offset baseline: the interval's past window
-  baselineStartDate?: string;
-  baselineEndDate?: string;
+  // With an offset comparison: the interval's past window
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
 };
 
 /**
- * What an amount offset against a baseline was built from, for chart tooltips.
+ * What an amount offset against a comparison was built from, for chart tooltips.
  */
-export function BaselineTooltipLines({
+export function ComparisonTooltipLines({
   breakdown,
   balanceTypeOp,
   format,
-  baselineStartDate,
-  baselineEndDate,
-}: BaselineTooltipLinesProps) {
+  comparisonStartDate,
+  comparisonEndDate,
+}: ComparisonTooltipLinesProps) {
   const { t } = useTranslation();
-  const formatBaselineWindow = useFormatBaselineWindow();
+  const formatComparisonWindow = useFormatComparisonWindow();
   // Spending is shown as positive, like the bars it describes
   const sign = getSpendingSign(balanceTypeOp);
   const show = (value: number) => format(sign * value || 0, 'financial');
-  const baselineLabel = breakdown.budgeted ? t('Budgeted:') : t('Baseline:');
-  const baselineWindow = formatBaselineWindow(
-    baselineStartDate,
-    baselineEndDate,
+  const comparisonLabel = breakdown.budgeted
+    ? t('Budgeted:')
+    : t('Comparison:');
+  const comparisonWindow = formatComparisonWindow(
+    comparisonStartDate,
+    comparisonEndDate,
   );
-  const windowLine = baselineWindow && (
-    <AlignedText left={t('Compared with:')} right={baselineWindow} />
+  const windowLine = comparisonWindow && (
+    <AlignedText left={t('Compared with:')} right={comparisonWindow} />
   );
 
   // A window before the earliest transaction has nothing to compare
@@ -52,7 +54,7 @@ export function BaselineTooltipLines({
     return (
       <>
         {windowLine}
-        <AlignedText left={baselineLabel} right={t('No data')} />
+        <AlignedText left={comparisonLabel} right={t('No data')} />
         <AlignedText
           left={t('Current:')}
           right={
@@ -66,13 +68,13 @@ export function BaselineTooltipLines({
     );
   }
 
-  // Intervals that haven't started only have a baseline to show
+  // Intervals that haven't started only have a comparison to show
   if (breakdown.upcoming) {
     return (
       <>
         {windowLine}
         <AlignedText
-          left={baselineLabel}
+          left={comparisonLabel}
           right={
             <FinancialText>
               {show(breakdown.upcoming[balanceTypeOp])}
@@ -91,7 +93,7 @@ export function BaselineTooltipLines({
     <>
       {windowLine}
       <AlignedText
-        left={baselineLabel}
+        left={comparisonLabel}
         right={
           <FinancialText>
             {show(breakdown.expected[balanceTypeOp])}
@@ -123,17 +125,17 @@ export function BaselineTooltipLines({
   );
 }
 
-type BaselineTooltipProps = BaselineTooltipLinesProps & {
+type ComparisonTooltipProps = ComparisonTooltipLinesProps & {
   title: string;
 };
 
 /**
- * A whole tooltip for a single amount offset against a baseline.
+ * A whole tooltip for a single amount offset against a comparison.
  */
-export function BaselineTooltip({ title, ...props }: BaselineTooltipProps) {
+export function ComparisonTooltip({ title, ...props }: ComparisonTooltipProps) {
   return (
     <TooltipCard title={title}>
-      <BaselineTooltipLines {...props} />
+      <ComparisonTooltipLines {...props} />
     </TooltipCard>
   );
 }

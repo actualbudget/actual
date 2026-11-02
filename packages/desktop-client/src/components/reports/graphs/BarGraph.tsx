@@ -7,7 +7,7 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
-  BaselineBreakdown,
+  ComparisonBreakdown,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
@@ -27,8 +27,8 @@ import {
 import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
-import { isIntervalInProgress } from '#components/reports/baselineRange';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
+import { isIntervalInProgress } from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -40,8 +40,8 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
-import { BaselineBar } from './BaselineBar';
-import { BaselineTooltip } from './BaselineTooltip';
+import { ComparisonBar } from './ComparisonBar';
+import { ComparisonTooltip } from './ComparisonTooltip';
 import { getSpendingSign } from './getSpendingSign';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
@@ -57,9 +57,9 @@ type PayloadChild = {
 type PayloadItem = {
   payload: {
     name: string;
-    baseline?: BaselineBreakdown;
-    baselineStartDate?: string;
-    baselineEndDate?: string;
+    comparison?: ComparisonBreakdown;
+    comparisonStartDate?: string;
+    comparisonEndDate?: string;
     totalAssets: number;
     totalDebts: number;
     netAssets: number;
@@ -90,16 +90,16 @@ const CustomTooltip = ({
   const { t } = useTranslation();
 
   const row = payload?.[0]?.payload;
-  if (active && row?.baseline) {
+  if (active && row?.comparison) {
     return (
-      <BaselineTooltip
+      <ComparisonTooltip
         title={row[yAxis]}
-        breakdown={row.baseline}
+        breakdown={row.comparison}
         balanceTypeOp={balanceTypeOp}
         format={format}
         // Interval bars carry their own window; category bars cover them all
-        baselineStartDate={row.baselineStartDate}
-        baselineEndDate={row.baselineEndDate}
+        comparisonStartDate={row.comparisonStartDate}
+        comparisonEndDate={row.comparisonEndDate}
       />
     );
   }
@@ -173,7 +173,7 @@ const CustomTooltip = ({
   }
 };
 
-// Baseline bars label their change above the bar, whichever way it goes,
+// Comparison bars label their change above the bar, whichever way it goes,
 // with spending's change flipped to match the bar's positive amounts
 const customLabel = (props, typeOp, format, isAbove = false) => {
   const calcX = props.x + props.width / 2;
@@ -255,34 +255,39 @@ export function BarGraph({
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    // Spending is flipped so it points up, but baseline changes are already
+    // Spending is flipped so it points up, but comparison changes are already
     // signed and point the same way as their numbers
-    if (!data.baseline && ['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+    if (
+      !data.comparison &&
+      ['totalDebts', 'netDebts'].includes(balanceTypeOp)
+    ) {
       return -1 * obj[balanceTypeOp];
     }
 
     return obj[balanceTypeOp];
   };
 
-  // Baseline bars show amounts rather than changes, so spending is flipped to
+  // Comparison bars show amounts rather than changes, so spending is flipped to
   // point up like other spending charts
-  const isBaselineBars = showAmounts && !!data.baseline;
+  const isComparisonBars = showAmounts && !!data.comparison;
   const sign = getSpendingSign(balanceTypeOp);
-  const getBaselineValues = (breakdown: BaselineBreakdown) => ({
-    baseline: sign * breakdown.expected[balanceTypeOp],
+  const getComparisonValues = (breakdown: ComparisonBreakdown) => ({
+    comparison: sign * breakdown.expected[balanceTypeOp],
     amount: sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
   });
 
-  // Baseline bars span everything drawn in them, so their shape can place
+  // Comparison bars span everything drawn in them, so their shape can place
   // each part along the same scale
-  const getBaselineRange = (breakdown: BaselineBreakdown): [number, number] => {
-    const { baseline, amount } = getBaselineValues(breakdown);
-    return [Math.min(0, baseline, amount), Math.max(0, baseline, amount)];
+  const getComparisonRange = (
+    breakdown: ComparisonBreakdown,
+  ): [number, number] => {
+    const { comparison, amount } = getComparisonValues(breakdown);
+    return [Math.min(0, comparison, amount), Math.max(0, comparison, amount)];
   };
 
   const getBarValue = (obj: GroupedEntity | IntervalEntity) =>
-    isBaselineBars && obj.baseline
-      ? getBaselineRange(obj.baseline)
+    isComparisonBars && obj.comparison
+      ? getComparisonRange(obj.comparison)
       : getVal(obj);
 
   const longestLabelLength = data[splitData]
@@ -361,7 +366,7 @@ export function BarGraph({
               <Bar
                 dataKey={getBarValue}
                 // Recharts can't stack range bars
-                stackId={isBaselineBars ? undefined : 'a'}
+                stackId={isComparisonBars ? undefined : 'a'}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
@@ -412,21 +417,21 @@ export function BarGraph({
                 shape={(props: BarShapeProps) => {
                   const fill =
                     data.legend[props.index]?.color ?? props.fill ?? undefined;
-                  const breakdown = props.payload?.baseline;
+                  const breakdown = props.payload?.comparison;
                   // An interval in progress is faded, since its amount is
                   // only part of what it will be
                   const opacity =
                     breakdown && isIntervalInProgress(props.payload) ? 0.5 : 1;
-                  if (isBaselineBars && breakdown) {
+                  if (isComparisonBars && breakdown) {
                     return (
-                      <BaselineBar
+                      <ComparisonBar
                         opacity={opacity}
                         x={props.x}
                         y={props.y}
                         width={props.width}
                         height={props.height}
-                        range={getBaselineRange(breakdown)}
-                        {...getBaselineValues(breakdown)}
+                        range={getComparisonRange(breakdown)}
+                        {...getComparisonValues(breakdown)}
                         fill={fill}
                       />
                     );
@@ -441,7 +446,7 @@ export function BarGraph({
                   <LabelList
                     dataKey={val => getVal(val)}
                     content={e =>
-                      customLabel(e, balanceTypeOp, format, isBaselineBars)
+                      customLabel(e, balanceTypeOp, format, isComparisonBars)
                     }
                   />
                 )}

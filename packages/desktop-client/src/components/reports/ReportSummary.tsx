@@ -52,9 +52,9 @@ export function ReportSummary({
           ? t('PAYMENT')
           : t('DEPOSIT');
   const average = Math.round(data[balanceTypeOp] / intervalsCount);
-  // Baselines compare an average-length interval at the pace so far
-  const baselineAverage = data.baseline?.perInterval?.[balanceTypeOp] ?? 0;
-  const paceAverage = data.baseline?.pacePerInterval?.[balanceTypeOp] ?? 0;
+  // Comparisons compare an average-length interval at the pace so far
+  const comparisonAverage = data.comparison?.perInterval?.[balanceTypeOp] ?? 0;
+  const paceAverage = data.comparison?.pacePerInterval?.[balanceTypeOp] ?? 0;
   const perIntervalCaption = (
     <Trans>
       Per{' '}
@@ -93,15 +93,15 @@ export function ReportSummary({
             ` ${t('to')} ` + monthUtils.format(endDate, intervalFormat, locale)}
         </Text>
       </View>
-      {data.baseline ? (
+      {data.comparison ? (
         <>
           <SummaryBox
             label={
-              data.baseline.budgeted
+              data.comparison.budgeted
                 ? t('BUDGETED AVERAGE')
-                : t('BASELINE AVERAGE')
+                : t('COMPARISON AVERAGE')
             }
-            value={baselineAverage}
+            value={comparisonAverage}
             caption={perIntervalCaption}
           />
           <SummaryBox
@@ -111,7 +111,7 @@ export function ReportSummary({
           />
           <SummaryBox
             label={t('AVERAGE CHANGE')}
-            value={paceAverage - baselineAverage}
+            value={paceAverage - comparisonAverage}
             caption={perIntervalCaption}
           />
         </>

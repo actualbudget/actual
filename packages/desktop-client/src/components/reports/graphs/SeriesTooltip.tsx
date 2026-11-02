@@ -12,9 +12,9 @@ import type {
 import { FinancialText } from '#components/FinancialText';
 import {
   getAmountKey,
-  getBaselineKey,
   getChangeKey,
-} from '#components/reports/baselineRange';
+  getComparisonKey,
+} from '#components/reports/comparisonRange';
 import type { FormatType } from '#hooks/useFormat';
 
 import { formatChange } from './formatChange';
@@ -22,7 +22,7 @@ import { getChangeColor } from './getChangeColor';
 import { SeriesTooltipRow } from './SeriesTooltipRow';
 import type { SeriesRow } from './SeriesTooltipRow';
 import { TooltipCard } from './TooltipCard';
-import { useFormatBaselineWindow } from './useFormatBaselineWindow';
+import { useFormatComparisonWindow } from './useFormatComparisonWindow';
 
 const maxCompactRows = 5;
 
@@ -56,8 +56,8 @@ type SeriesTooltipProps = {
 
 /**
  * A tooltip listing every series in one interval of a time graph. Against a
- * baseline, each series shows its amount and how it compares, then the
- * interval's baseline summary; otherwise the series add up to a total.
+ * comparison, each series shows its amount and how it compares, then the
+ * interval's comparison summary; otherwise the series add up to a total.
  */
 export function SeriesTooltip({
   active,
@@ -70,7 +70,7 @@ export function SeriesTooltip({
   order,
   hideZero = false,
 }: SeriesTooltipProps) {
-  const formatBaselineWindow = useFormatBaselineWindow();
+  const formatComparisonWindow = useFormatComparisonWindow();
   const interval = payload?.[0]?.payload;
   if (!active || !interval) {
     return null;
@@ -81,21 +81,21 @@ export function SeriesTooltip({
     string,
     number | null | undefined
   >;
-  const breakdown = interval.baseline;
-  // Intervals that haven't started only have a baseline to list
+  const breakdown = interval.comparison;
+  // Intervals that haven't started only have a comparison to list
   const isUpcoming = !!breakdown?.upcoming;
   // A window before the earliest transaction has nothing to compare
   const hasNoData = !!breakdown?.noData;
   const hasChangeColumn = !!breakdown && !isUpcoming && !hasNoData;
-  const baselineWindow = formatBaselineWindow(
-    interval.baselineStartDate,
-    interval.baselineEndDate,
+  const comparisonWindow = formatComparisonWindow(
+    interval.comparisonStartDate,
+    interval.comparisonEndDate,
   );
 
   const getRow = (entry: LegendEntity): SeriesRow | null => {
     const key = entry.dataKey;
     const value = breakdown
-      ? values[isUpcoming ? getBaselineKey(key) : getAmountKey(key)]
+      ? values[isUpcoming ? getComparisonKey(key) : getAmountKey(key)]
       : values[key];
     if (value == null || (hideZero && value === 0)) {
       return null;
@@ -128,10 +128,10 @@ export function SeriesTooltip({
   const total = sumOf(key =>
     breakdown && !isUpcoming ? getAmountKey(key) : key,
   );
-  const baselineLabel = breakdown?.budgeted ? (
+  const comparisonLabel = breakdown?.budgeted ? (
     <Trans>Budgeted</Trans>
   ) : (
-    <Trans>Baseline</Trans>
+    <Trans>Comparison</Trans>
   );
 
   return (
@@ -147,14 +147,14 @@ export function SeriesTooltip({
           <>
             <span />
             <span style={headerStyle}>
-              {isUpcoming ? baselineLabel : <Trans>Amount</Trans>}
+              {isUpcoming ? comparisonLabel : <Trans>Amount</Trans>}
             </span>
             {hasChangeColumn && (
               <span style={headerStyle}>
                 {breakdown.budgeted ? (
                   <Trans>vs budgeted</Trans>
                 ) : (
-                  <Trans>vs baseline</Trans>
+                  <Trans>vs comparison</Trans>
                 )}
               </span>
             )}
@@ -175,24 +175,24 @@ export function SeriesTooltip({
         <span style={dividerStyle} />
         {breakdown && (
           <>
-            <span>{baselineLabel}</span>
+            <span>{comparisonLabel}</span>
             {hasNoData ? (
               <span style={{ textAlign: 'right' }}>
                 <Trans>No data</Trans>
               </span>
             ) : (
               <FinancialText style={{ textAlign: 'right' }}>
-                {format(sumOf(getBaselineKey), 'financial')}
+                {format(sumOf(getComparisonKey), 'financial')}
               </FinancialText>
             )}
             {hasChangeColumn && <span />}
           </>
         )}
-        {baselineWindow && (
+        {comparisonWindow && (
           <span
             style={{ gridColumn: '1 / -1', color: theme.menuItemTextHeader }}
           >
-            <Trans>Compared with {{ baselineWindow }}</Trans>
+            <Trans>Compared with {{ comparisonWindow }}</Trans>
           </span>
         )}
         {!isUpcoming && (

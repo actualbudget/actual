@@ -275,10 +275,10 @@ export function ExperimentalFeatures() {
       </FeatureToggle>
       {/* TODO: replace with the feedback issue once the draft PR is open */}
       <FeatureToggle
-        flag="reportBaseline"
+        flag="reportComparison"
         feedbackLink="https://github.com/actualbudget/actual/issues/TODO"
       >
-        <Trans>Baseline comparison for custom reports</Trans>
+        <Trans>Comparisons for custom reports</Trans>
       </FeatureToggle>
       {isUsingServer && (
         <FeatureToggle

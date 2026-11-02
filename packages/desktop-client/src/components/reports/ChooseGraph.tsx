@@ -10,7 +10,7 @@ import type {
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
 import { BarLineGraph } from './graphs/BarLineGraph';
-import { BaselineDonutGraph } from './graphs/BaselineDonutGraph';
+import { ComparisonDonutGraph } from './graphs/ComparisonDonutGraph';
 import { DonutGraph } from './graphs/DonutGraph';
 import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
@@ -145,9 +145,9 @@ export function ChooseGraph({
       />
     );
   }
-  if (graphType === 'DonutGraph' && data.baseline) {
+  if (graphType === 'DonutGraph' && data.comparison) {
     return (
-      <BaselineDonutGraph
+      <ComparisonDonutGraph
         style={graphStyle}
         data={data}
         filters={filters}

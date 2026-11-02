@@ -4,10 +4,10 @@ import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
 
 /**
- * Formats the past window an offset baseline compares an interval with.
- * Range baselines don't give intervals a window, so they get null.
+ * Formats the past window an offset comparison compares an interval with.
+ * Range comparisons don't give intervals a window, so they get null.
  */
-export function useFormatBaselineWindow() {
+export function useFormatComparisonWindow() {
   const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   return (startDate: string | undefined, endDate: string | undefined) =>

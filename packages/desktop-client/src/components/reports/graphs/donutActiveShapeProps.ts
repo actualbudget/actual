@@ -16,9 +16,9 @@ export type DonutActiveShapeProps = {
   expandInward: boolean;
   chartInnerRadius: number;
   chartOuterRadius: number;
-  // Shown instead of the plain amount, like "Baseline: 12.00"
+  // Shown instead of the plain amount, like "Comparison: 12.00"
   valueText?: string;
-  // Shown in brackets after the amount, like a change from a baseline
+  // Shown in brackets after the amount, like a change from a comparison
   change?: { text: string; color: string };
   // How solid the highlight is, so a faint ring gets a faint highlight
   highlightOpacity?: number;
