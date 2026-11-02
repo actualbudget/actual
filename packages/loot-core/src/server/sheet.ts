@@ -260,7 +260,7 @@ export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
         sheet.set(`${sheetName}!budget-${budget.category}`, budget.amount);
         sheet.set(
           `${sheetName}!carryover-stored-${budget.category}`,
-          budget.carryover == null ? null : budget.carryover === 1,
+          budget.carryover ?? null,
         );
         sheet.set(`${sheetName}!goal-${budget.category}`, budget.goal);
         sheet.set(

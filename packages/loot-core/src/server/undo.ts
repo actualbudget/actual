@@ -190,7 +190,7 @@ function undoMessage(message, oldData) {
       ) {
         // Only these fields are reversable
         if (message.column === 'carryover') {
-          // The created row goes back to inheriting the previous month's flag
+          // The created row goes back to continuing the previous month's rollover
           return { ...message, value: null };
         }
         if (['buffered', 'amount'].includes(message.column)) {
