@@ -39,8 +39,12 @@ type ReportDateFilterProps = {
   onSelectRange: (dateRange: string) => void;
   onChangeDates: (startDate: string, endDate: string) => void;
   onChangeStatic: (isDateStatic: boolean) => void;
-  // Rows between the title and the range
-  header?: ReactNode;
+  // A third mode beside Live and Static, whose rows take the range's place
+  offset?: {
+    selected: boolean;
+    onSelect: () => void;
+    content: ReactNode;
+  };
   children?: ReactNode;
 };
 
@@ -60,11 +64,12 @@ export function ReportDateFilter({
   onSelectRange,
   onChangeDates,
   onChangeStatic,
-  header,
+  offset,
   children,
 }: ReportDateFilterProps) {
   const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const isOffset = !!offset?.selected;
 
   const rangeOptions = useMemo(() => {
     const options: SelectOption[] = ReportOptions.dateRange
@@ -97,20 +102,26 @@ export function ReportDateFilter({
         </Text>
         <View style={{ flex: 1 }} />
         <ModeButton
-          selected={!isDateStatic}
+          selected={!isOffset && !isDateStatic}
           onSelect={() => onChangeStatic(false)}
         >
           <Trans>Live</Trans>
         </ModeButton>
         <ModeButton
-          selected={isDateStatic}
+          selected={!isOffset && isDateStatic}
           onSelect={() => onChangeStatic(true)}
         >
           <Trans>Static</Trans>
         </ModeButton>
+        {offset && (
+          <ModeButton selected={offset.selected} onSelect={offset.onSelect}>
+            <Trans>Offset</Trans>
+          </ModeButton>
+        )}
       </SpaceBetween>
-      {header}
-      {!isDateStatic ? (
+      {offset?.selected ? (
+        offset.content
+      ) : !isDateStatic ? (
         <View
           style={{
             flexDirection: 'row',
