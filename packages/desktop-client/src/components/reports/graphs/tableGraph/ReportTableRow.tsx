@@ -93,6 +93,8 @@ export const ReportTableRow = memo(
     const amounts = breakdown ? breakdown.actual : item;
     const comparisonAmount =
       mode === 'time' ? breakdown?.perInterval : breakdown?.expected;
+    // Every window is before the earliest transaction, so nothing is compared
+    const hasNoComparisonData = !!breakdown?.noData;
     // Time tables compare a typical interval at the pace so far against the
     // Comparison column, while total tables compare the whole range
     const pace = mode === 'time' ? breakdown?.pacePerInterval : undefined;
@@ -283,7 +285,20 @@ export const ReportTableRow = memo(
             }}
             valueStyle={compactStyle}
           />
-          {showComparison && (
+          {showComparison && hasNoComparisonData && (
+            <Cell
+              value={t('No data')}
+              textAlign="right"
+              style={{
+                minWidth: compact ? 50 : 85,
+                backgroundColor: style?.backgroundColor,
+                color: theme.tableTextSubdued,
+              }}
+              valueStyle={compactStyle}
+              width="flex"
+            />
+          )}
+          {showComparison && !hasNoComparisonData && (
             <Cell
               value={format(
                 comparisonAmount?.[balanceTypeOp] ?? 0,
@@ -561,7 +576,17 @@ export const ReportTableRow = memo(
               colorized={colorized}
             />
           )}
-          {breakdown && (
+          {breakdown && hasNoComparisonData && (
+            <Cell
+              value=""
+              style={{
+                minWidth: compact ? 50 : 85,
+                backgroundColor: style?.backgroundColor,
+              }}
+              width="flex"
+            />
+          )}
+          {breakdown && !hasNoComparisonData && (
             <AmountCell
               value={change}
               compact={compact}
