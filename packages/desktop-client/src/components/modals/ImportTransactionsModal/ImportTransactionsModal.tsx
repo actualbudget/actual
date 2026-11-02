@@ -353,7 +353,7 @@ export function ImportTransactionsModal({
           console.log(
             `Transaction on ${trans.date} has an amount too large to import`,
           );
-          break;
+          continue;
         }
 
         const category_id = parseCategoryFields(trans, categories);
