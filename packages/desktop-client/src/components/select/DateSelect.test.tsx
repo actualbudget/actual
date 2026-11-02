@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { DateSelect } from './DateSelect';
+
+// vi.mock is hoisted above the imports by vitest, so these apply even
+// though they are written after them (required by the import-order rule).
 vi.mock('#hooks/useSyncedPref', () => ({
   useSyncedPref: () => [undefined, vi.fn()],
 }));
@@ -9,8 +13,6 @@ vi.mock('#hooks/useSyncedPref', () => ({
 vi.mock('#hooks/useLocale', () => ({
   useLanguage: () => 'en-US',
 }));
-
-import { DateSelect } from './DateSelect';
 
 describe('DateSelect', () => {
   it('returns focus to the input after picking a day from the calendar', async () => {
