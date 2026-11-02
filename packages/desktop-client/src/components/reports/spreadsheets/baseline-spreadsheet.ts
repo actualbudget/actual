@@ -21,6 +21,8 @@ import {
   getChangeKey,
   getFullIntervalDays,
   getFullIntervalMonths,
+  getFullIntervalRange,
+  shiftRange,
 } from '#components/reports/baselineRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
@@ -61,6 +63,16 @@ export type BaselineOptions = {
   // Compare against the average of what was budgeted over the range, rather
   // than what was spent
   budgeted?: boolean;
+  // Compare each interval with its own window this many days back, rather
+  // than with the range's average. The range is then the report's range
+  // moved back by the offset.
+  offset?: BaselineOffset;
+};
+
+export type BaselineOffset = {
+  days: number;
+  // Windows that end before this have nothing to compare against
+  earliestTransaction: string;
 };
 
 // How baseline totals map onto the report's intervals
@@ -78,6 +90,9 @@ export type BaselineScale = {
   averageDays: number;
   // The same in the baseline's unit, for the Baseline column
   averageLength: number;
+  // With an offset baseline: the offset, and the interval the baseline was
+  // fetched by, which windows are summed from
+  offset?: BaselineOffset & { bucketInterval: string };
 };
 
 // How much of the baseline a range gets, in the baseline's unit
@@ -135,12 +150,144 @@ function subtract(a: ReportValues, b: ReportValues): ReportValues {
   return mapValues(field => a[field] - b[field]);
 }
 
+function laterOf(a: string, b: string) {
+  return a > b ? a : b;
+}
+
+function earlierOf(a: string, b: string) {
+  return a < b ? a : b;
+}
+
+// Buckets are in date order, so the first one a window reaches is found by
+// a binary search on where each bucket ends
+function findFirstBucket(
+  buckets: IntervalEntity[],
+  interval: string,
+  start: string,
+) {
+  let low = 0;
+  let high = buckets.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    const bucketStart = buckets[middle].intervalStartDate;
+    if (bucketStart && getFullIntervalRange(bucketStart, interval)[1] < start) {
+      low = middle + 1;
+    } else {
+      high = middle;
+    }
+  }
+  return low;
+}
+
 /**
- * Offsets one interval by the baseline's average over the same length.
+ * The baseline's total over a window, from the intervals it was fetched by.
+ * A bucket the window only partly covers counts by its share of days, so
+ * days sum exactly and a month of budgets is spread over its days.
+ */
+export function sumWindow(
+  buckets: IntervalEntity[],
+  interval: string,
+  start: string,
+  end: string,
+): ReportValues {
+  const totals = mapValues(() => 0);
+  for (
+    let index = findFirstBucket(buckets, interval, start);
+    index < buckets.length;
+    index++
+  ) {
+    const bucket = buckets[index];
+    if (!bucket.intervalStartDate) {
+      continue;
+    }
+    const [bucketStart, bucketEnd] = getFullIntervalRange(
+      bucket.intervalStartDate,
+      interval,
+    );
+    if (bucketStart > end) {
+      break;
+    }
+    const share =
+      countDays(laterOf(start, bucketStart), earlierOf(end, bucketEnd)) /
+      countDays(bucketStart, bucketEnd);
+    for (const field of Object.keys(totals) as balanceTypeOpType[]) {
+      totals[field] += bucket[field] * share;
+    }
+  }
+  return fromTotals(field => Math.round(totals[field]));
+}
+
+/**
+ * Offsets one interval by its own window an offset back. An interval in
+ * progress is compared with the same days of its window.
+ */
+function offsetIntervalByWindow(
+  interval: IntervalEntity,
+  start: string,
+  end: string,
+  baseline: OffsetItem | undefined,
+  scale: BaselineScale,
+  offset: NonNullable<BaselineScale['offset']>,
+): IntervalEntity {
+  const [windowStart, windowEnd] = shiftRange(start, end, offset.days);
+  const window = { baselineStartDate: windowStart, baselineEndDate: windowEnd };
+  const sum = (from: string, to: string) =>
+    sumWindow(baseline?.intervalData ?? [], offset.bucketInterval, from, to);
+  const zero = mapValues(() => 0);
+  const actual = fromTotals(field => interval[field]);
+
+  if (windowEnd < offset.earliestTransaction) {
+    return {
+      ...interval,
+      ...window,
+      ...zero,
+      baseline: {
+        expected: zero,
+        actual,
+        budgeted: scale.budgeted,
+        noData: true,
+      },
+    };
+  }
+
+  // The window's amounts are known even ahead of today, so charts can always
+  // draw them for intervals that haven't started
+  if (!scale.perInterval && isFuture(start)) {
+    return {
+      ...interval,
+      ...window,
+      ...zero,
+      baseline: {
+        expected: zero,
+        actual: zero,
+        upcoming: sum(windowStart, windowEnd),
+        budgeted: scale.budgeted,
+      },
+    };
+  }
+
+  const elapsedEnd = scale.perInterval
+    ? end
+    : earlierOf(end, monthUtils.currentDay());
+  const expected = sum(
+    windowStart,
+    shiftRange(start, elapsedEnd, offset.days)[1],
+  );
+  return {
+    ...interval,
+    ...window,
+    ...subtract(actual, expected),
+    baseline: { expected, actual, budgeted: scale.budgeted },
+  };
+}
+
+/**
+ * Offsets one interval by the baseline's average over the same length, or
+ * by its own window with an offset baseline.
  */
 export function offsetInterval(
   interval: IntervalEntity,
-  baseline: ReportValues | undefined,
+  baseline: OffsetItem | undefined,
   scale: BaselineScale,
 ): IntervalEntity {
   const start = interval.intervalStartDate;
@@ -149,6 +296,17 @@ export function offsetInterval(
   // no length to scale the baseline by
   if (!start || !end) {
     return interval;
+  }
+
+  if (scale.offset) {
+    return offsetIntervalByWindow(
+      interval,
+      monthUtils.dayFromDate(start),
+      monthUtils.dayFromDate(end),
+      baseline,
+      scale,
+      scale.offset,
+    );
   }
 
   // Intervals that haven't started have nothing to compare yet, so they stay
@@ -235,12 +393,21 @@ function getPaceShare(intervals: IntervalEntity[], scale: BaselineScale) {
  */
 export function offsetItem<T extends OffsetItem>(
   item: T,
-  baseline: ReportValues | undefined,
+  baseline: OffsetItem | undefined,
   scale: BaselineScale,
 ): T & { baseline: BaselineBreakdown } {
   const intervalData = item.intervalData.map(interval =>
     offsetInterval(interval, baseline, scale),
   );
+  if (scale.offset) {
+    return offsetItemByWindows(
+      item,
+      intervalData,
+      baseline,
+      scale,
+      scale.offset,
+    );
+  }
   const sum = (
     pick: (breakdown: BaselineBreakdown) => ReportValues | undefined,
   ) =>
@@ -287,6 +454,83 @@ export function offsetItem<T extends OffsetItem>(
         Math.round(actual[field] * paceShare),
       ),
       budgeted: scale.budgeted,
+    },
+  };
+}
+
+/**
+ * offsetItem for an offset baseline. Intervals whose window has no data
+ * aren't compared, so they count towards the amount but not the change.
+ */
+function offsetItemByWindows<T extends OffsetItem>(
+  item: T,
+  intervalData: IntervalEntity[],
+  baseline: OffsetItem | undefined,
+  scale: BaselineScale,
+  offset: NonNullable<BaselineScale['offset']>,
+): T & { baseline: BaselineBreakdown } {
+  const sum = (
+    pick: (breakdown: BaselineBreakdown) => ReportValues | undefined,
+  ) =>
+    fromTotals(field =>
+      intervalData.reduce((total, interval) => {
+        const value = interval.baseline && pick(interval.baseline);
+        return total + (value ? value[field] : 0);
+      }, 0),
+    );
+  const isCompared = (breakdown: BaselineBreakdown) => !breakdown.noData;
+  const actual = sum(breakdown => breakdown.actual);
+  const comparedActual = sum(breakdown =>
+    isCompared(breakdown) ? breakdown.actual : undefined,
+  );
+  const comparedCount = intervalData.filter(
+    interval => interval.baseline && isCompared(interval.baseline),
+  ).length;
+
+  // The whole range's window, for projections and the Baseline column.
+  // Days before the earliest transaction have nothing in them, so they add
+  // nothing.
+  const start = intervalData[0]?.intervalStartDate;
+  const end = intervalData[intervalData.length - 1]?.intervalEndDate;
+  const [windowStart, windowEnd] =
+    start && end ? shiftRange(start, end, offset.days) : ['', ''];
+  const fullWindow =
+    start && end
+      ? sumWindow(
+          baseline?.intervalData ?? [],
+          offset.bucketInterval,
+          windowStart,
+          windowEnd,
+        )
+      : mapValues(() => 0);
+
+  const projection = getProjection(item.intervalData, scale);
+  const expected = projection
+    ? fullWindow
+    : sum(breakdown =>
+        isCompared(breakdown) ? breakdown.expected : undefined,
+      );
+  const projected = projection
+    ? fromTotals(field => Math.round(actual[field] * projection.scale))
+    : undefined;
+  const paceShare = getPaceShare(item.intervalData, scale);
+
+  return {
+    ...item,
+    ...subtract(projected ?? comparedActual, expected),
+    intervalData,
+    baseline: {
+      expected,
+      actual,
+      projected,
+      perInterval: fromTotals(field =>
+        Math.round(fullWindow[field] / Math.max(comparedCount, 1)),
+      ),
+      pacePerInterval: fromTotals(field =>
+        Math.round(actual[field] * paceShare),
+      ),
+      budgeted: scale.budgeted,
+      ...(intervalData.length > 0 && comparedCount === 0 && { noData: true }),
     },
   };
 }
@@ -404,7 +648,7 @@ function stackIntervals(
   };
   const getBaseline = (interval: IntervalEntity) => {
     const breakdown = interval.baseline;
-    if (!breakdown) {
+    if (!breakdown || breakdown.noData) {
       return null;
     }
     if (isUpcoming(interval)) {
@@ -428,9 +672,10 @@ function stackIntervals(
       // flip so it points up.
       const key = row.id || row.name;
       const amount = getAmount(rowInterval);
-      const change = isUpcoming(rowInterval)
-        ? null
-        : rowInterval[balanceTypeOp];
+      const change =
+        isUpcoming(rowInterval) || rowInterval.baseline?.noData
+          ? null
+          : rowInterval[balanceTypeOp];
       stacked[key] = showAmounts ? amount : change;
       stacked[getAmountKey(key)] = amount;
       stacked[getChangeKey(key)] = change;
@@ -441,6 +686,8 @@ function stackIntervals(
       date: interval.date,
       intervalStartDate: interval.intervalStartDate,
       intervalEndDate: interval.intervalEndDate,
+      baselineStartDate: interval.baselineStartDate,
+      baselineEndDate: interval.baselineEndDate,
       ...mapValues(field => interval[field]),
       baseline: interval.baseline,
       ...(showAmounts && {
@@ -678,7 +925,18 @@ function getScale(
     projectToFullPeriod: baselineOptions.projectToFullPeriod,
     averageDays: getAverageDays(template, props.interval),
     averageLength: getAverageInUnit(template, props.interval, budgeted),
+    offset: baselineOptions.offset && {
+      ...baselineOptions.offset,
+      bucketInterval: getOffsetBucketInterval(props),
+    },
   };
+}
+
+// Offset windows don't line up with the report's intervals, so the baseline
+// is fetched by day and summed per window. Budgets are dated by month, so
+// they're fetched by month and spread over the days of each window.
+function getOffsetBucketInterval(props: createCustomSpreadsheetProps) {
+  return props.balanceTypeOp === 'totalBudgeted' ? 'Monthly' : 'Daily';
 }
 
 // Budgets are fetched for every month a range touches
@@ -717,11 +975,14 @@ function getSpreadsheetProps(
       ...actual,
       startDate: baselineOptions.startDate,
       endDate: baselineOptions.endDate,
-      // Only a baseline's totals are compared. Budgets are dated by month, so
-      // they're fetched by month whatever the report's interval is.
+      // A range baseline only compares its totals. Budgets are dated by
+      // month, so they're fetched by month whatever the report's interval is.
       ...(baselineOptions.budgeted && {
         balanceTypeOp: 'totalBudgeted' as const,
         interval: 'Monthly',
+      }),
+      ...(baselineOptions.offset && {
+        interval: getOffsetBucketInterval(props),
       }),
     },
   };

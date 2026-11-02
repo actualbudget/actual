@@ -122,8 +122,10 @@ export function rangesOverlap(
   return startA <= endB && startB <= endA;
 }
 
-// An interval's whole range, even when the report's range cuts it short
-function getFullIntervalRange(
+/**
+ * An interval's whole range, even when the report's range cuts it short.
+ */
+export function getFullIntervalRange(
   intervalStartDate: string,
   interval: string,
 ): [string, string] {

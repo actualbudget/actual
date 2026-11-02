@@ -1,3 +1,4 @@
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   GroupedEntity,
   IntervalEntity,
@@ -12,6 +13,7 @@ import {
   offsetItem,
   offsetRows,
   rowsFromBudget,
+  sumWindow,
 } from './baseline-spreadsheet';
 import type { BaselineScale } from './baseline-spreadsheet';
 
@@ -452,5 +454,166 @@ describe('getAverageMonths', () => {
     expect(
       getAverageMonths([interval('2016-12-04', '2016-12-10', 0)], 'Weekly'),
     ).toBeCloseTo(7 / 31);
+  });
+});
+
+// Daily buckets as an offset baseline is fetched, each spending 100
+function days(start: string, count: number, debtsPerDay = -100) {
+  return Array.from({ length: count }, (_, index) => {
+    const day = monthUtils.addDays(start, index);
+    return interval(day, day, debtsPerDay);
+  });
+}
+
+// One week back, with transactions from 2016-01-01
+const weekBack = {
+  days: 7,
+  earliestTransaction: '2016-01-01',
+  bucketInterval: 'Daily',
+};
+const offsetScale: BaselineScale = {
+  ...scale,
+  projectToFullPeriod: false,
+  offset: weekBack,
+};
+// A month back, with transactions from 2016-10-01
+const monthBackScale: BaselineScale = {
+  ...offsetScale,
+  offset: { ...weekBack, days: 31, earliestTransaction: '2016-10-01' },
+};
+
+describe('sumWindow', () => {
+  it('sums the days of a window', () => {
+    const buckets = days('2016-11-01', 30);
+
+    expect(
+      sumWindow(buckets, 'Daily', '2016-11-05', '2016-11-14').totalDebts,
+    ).toBe(-1000);
+    expect(
+      sumWindow(buckets, 'Daily', '2016-10-25', '2016-11-02').totalDebts,
+    ).toBe(-200);
+  });
+
+  it('spreads a month of budgets over the days of a window', () => {
+    // Report spreadsheets start their first interval at the range's start
+    const buckets = [
+      interval('2016-11-15', '2016-11-30', -3000),
+      interval('2016-12', '2016-12-31', -3100),
+    ];
+
+    // 16 of November's 30 days and 15 of December's 31
+    expect(
+      sumWindow(buckets, 'Monthly', '2016-11-15', '2016-12-15').totalDebts,
+    ).toBe(-1600 - 1500);
+  });
+});
+
+describe('offset baselines', () => {
+  const baselineDays = row('baseline', days('2016-10-01', 130));
+
+  it('compares each interval with its own window', () => {
+    const offset = offsetInterval(
+      interval('2016-12-01', '2016-12-31', -4000),
+      baselineDays,
+      offsetScale,
+    );
+
+    expect(offset.baselineStartDate).toBe('2016-11-24');
+    expect(offset.baselineEndDate).toBe('2016-12-24');
+    expect(offset.baseline?.expected.totalDebts).toBe(-3100);
+    expect(offset.totalDebts).toBe(-900);
+  });
+
+  it('shifts the days an interval was cut short to', () => {
+    const offset = offsetInterval(
+      interval('2016-12-10', '2016-12-31', -4000),
+      baselineDays,
+      offsetScale,
+    );
+
+    expect(offset.baselineStartDate).toBe('2016-12-03');
+    expect(offset.baseline?.expected.totalDebts).toBe(-2200);
+  });
+
+  it('compares an interval in progress with the same days of its window', () => {
+    const offset = offsetInterval(
+      interval('2017-01-01', '2017-01-31', -100),
+      baselineDays,
+      offsetScale,
+    );
+
+    // Only 1 January has passed, so only 25 December is compared
+    expect(offset.baseline?.expected.totalDebts).toBe(-100);
+    expect(offset.totalDebts).toBe(0);
+  });
+
+  it('keeps the whole window ahead for intervals that have not started', () => {
+    const offset = offsetInterval(
+      interval('2017-01-02', '2017-01-08', 0),
+      baselineDays,
+      { ...offsetScale, projectToFullPeriod: false },
+    );
+
+    expect(offset.baseline?.expected.totalDebts).toBe(0);
+    expect(offset.baseline?.upcoming?.totalDebts).toBe(-700);
+  });
+
+  it('has no data for windows before the earliest transaction', () => {
+    const offset = offsetInterval(
+      interval('2016-10-01', '2016-10-31', -4000),
+      baselineDays,
+      monthBackScale,
+    );
+
+    expect(offset.baseline?.noData).toBe(true);
+    expect(offset.totalDebts).toBe(0);
+    expect(offset.baseline?.actual.totalDebts).toBe(-4000);
+  });
+
+  it('only compares intervals with data in totals', () => {
+    const months = [
+      interval('2016-10-01', '2016-10-31', -4000),
+      interval('2016-11-01', '2016-11-30', -4000),
+    ];
+    const offset = offsetItem(
+      row('actual', months),
+      baselineDays,
+      monthBackScale,
+    );
+
+    // November's window is 1-30 October, 3000 against 4000 spent
+    expect(offset.baseline.actual.totalDebts).toBe(-8000);
+    expect(offset.baseline.expected.totalDebts).toBe(-3000);
+    expect(offset.totalDebts).toBe(-1000);
+    expect(offset.baseline.noData).toBeUndefined();
+  });
+
+  it('sums intervals so the columns add up', () => {
+    const months = [
+      interval('2016-11-01', '2016-11-30', -4000),
+      interval('2016-12-01', '2016-12-31', -3000),
+    ];
+    const offset = offsetItem(row('actual', months), baselineDays, offsetScale);
+
+    expect(offset.baseline.expected.totalDebts).toBe(-6100);
+    expect(offset.totalDebts).toBe(-900);
+    // The whole window over two intervals
+    expect(offset.baseline.perInterval?.totalDebts).toBe(-3050);
+  });
+
+  it('projects against the whole range back', () => {
+    const months = [
+      interval('2016-12-01', '2016-12-31', -3100),
+      interval('2017-01-01', '2017-01-31', -100),
+    ];
+    const offset = offsetItem(row('actual', months), baselineDays, {
+      ...offsetScale,
+      projectToFullPeriod: true,
+    });
+
+    // 3200 over 32 days, projected over 62
+    expect(offset.baseline.projected?.totalDebts).toBe(-6200);
+    expect(offset.baseline.expected.totalDebts).toBe(-6200);
+    expect(offset.totalDebts).toBe(0);
   });
 });

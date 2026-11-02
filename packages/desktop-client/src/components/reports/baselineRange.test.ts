@@ -78,7 +78,11 @@ describe('offset baselines', () => {
       getOffsetDays({ ...defaultBaseline, offsetCount: 3, offsetUnit: 'days' }),
     ).toBe(3);
     expect(
-      getOffsetDays({ ...defaultBaseline, offsetCount: 52, offsetUnit: 'weeks' }),
+      getOffsetDays({
+        ...defaultBaseline,
+        offsetCount: 52,
+        offsetUnit: 'weeks',
+      }),
     ).toBe(364);
   });
 
