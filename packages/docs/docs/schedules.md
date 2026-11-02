@@ -166,15 +166,12 @@ If you click on the ellipsis at the end of the schedule line, you will see vario
 In addition to the requirements you have specified when creating a schedule, a transaction must also meet the date requirements to be matched to a schedule. Transactions must be dated within 2 days before or after the scheduled date.
 
 For example, you have a schedule set up for your power bill to be paid on the 15th of every month. Today is the 10th of the month, and you can see an upcoming scheduled transaction of your bill in Actual.
-The utility company decided to withdraw the funds on the 10th of this month. Therefore, post the transaction to Actual early and update the transaction date to match your bank statement.
+The utility company decided to withdraw the funds on the 10th of this month.
 
-A problem has occurred because the posted transaction is now outside the 2-day window to match scheduled transactions.
-You'll see your bill posted in the Actual account ledger, but you'll also see an upcoming transaction for the power bill on the 15th, even though you just entered it. This is the expected behaviour when using schedules.
+If you post the bill with **Post transaction** or **Post transaction today** from the schedule menu, Actual treats it as the payment for the 15th. The schedule moves on to the 15th of next month, and no upcoming transaction shows for this month. A one-time schedule is marked as completed.
 
-You can resolve this issue in one of two ways.
-
-1. Skip the next schedule by selecting the upcoming scheduled transaction and choosing the "Skip Scheduled Date" from the menu options.
-2. Accept that the date doesn't match and leave it as is so the schedule doesn't prompt a second transaction.
+If you enter the transaction yourself instead, it is outside the 2-day window and does not match the schedule.
+You'll see your bill in the Actual account ledger, but you'll also see an upcoming transaction for the power bill on the 15th. To remove it, select the upcoming scheduled transaction and choose "Skip Scheduled Date" from the menu options.
 
 ## How To Use Rules With Schedules
 
