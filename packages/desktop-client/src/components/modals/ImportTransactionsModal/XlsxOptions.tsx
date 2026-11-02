@@ -27,9 +27,11 @@ export function XlsxOptions({ metadata, options, onChange }: XlsxOptionsProps) {
             id="xlsx-worksheet"
             value={metadata.worksheet}
             options={metadata.worksheets.map(name => [name, name])}
-            onChange={worksheet =>
-              onChange({ worksheet, detectHeader: options.detectHeader })
-            }
+            onChange={worksheet => {
+              if (worksheet !== metadata.worksheet) {
+                onChange({ worksheet, detectHeader: options.detectHeader });
+              }
+            }}
           />
         </label>
       )}
