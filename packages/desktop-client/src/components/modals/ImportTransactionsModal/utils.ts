@@ -1,5 +1,9 @@
 import { format as formatDate_ } from '@actual-app/core/shared/months';
-import { looselyParseAmount } from '@actual-app/core/shared/util';
+import {
+  amountToInteger,
+  looselyParseAmount,
+  MAX_SAFE_NUMBER,
+} from '@actual-app/core/shared/util';
 import * as d from 'date-fns';
 
 export type DateFormat =
@@ -201,6 +205,15 @@ function parseAmount(
   }
 
   return mapper(parsed);
+}
+
+export function isSafeImportAmount(amount: number): boolean {
+  // Transactions whose integer amount (amount × 100) falls outside the
+  // range safeNumber accepts would crash the transaction list on render,
+  // so they must be rejected at import time. This mirrors the check in
+  // safeNumber using the same bound.
+  const integerAmount = amountToInteger(amount);
+  return integerAmount <= MAX_SAFE_NUMBER && integerAmount >= -MAX_SAFE_NUMBER;
 }
 
 export function parseAmountFields(

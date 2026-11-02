@@ -51,6 +51,7 @@ import {
   dateFormats,
   filterByStartDate,
   isDateFormat,
+  isSafeImportAmount,
   parseAmountFields,
   parseCategoryFields,
   parseDate,
@@ -346,6 +347,12 @@ export function ImportTransactionsModal({
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
+          break;
+        }
+        if (!isSafeImportAmount(amount)) {
+          console.log(
+            `Transaction on ${trans.date} has an amount too large to import`,
+          );
           break;
         }
 
@@ -677,6 +684,13 @@ export function ImportTransactionsModal({
         errorMessage = t('Transaction on {{date}} has no amount', {
           date: trans.date,
         });
+        break;
+      }
+      if (!isSafeImportAmount(amount)) {
+        errorMessage = t(
+          'Transaction on {{date}} has an amount too large to import',
+          { date: trans.date },
+        );
         break;
       }
 
