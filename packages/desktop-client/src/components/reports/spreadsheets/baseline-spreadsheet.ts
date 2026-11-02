@@ -14,10 +14,13 @@ import type {
 import {
   countDays,
   countElapsedDays,
+  countElapsedMonths,
+  countMonths,
   getAmountKey,
   getBaselineKey,
   getChangeKey,
   getFullIntervalDays,
+  getFullIntervalMonths,
 } from '#components/reports/baselineRange';
 import { ReportOptions } from '#components/reports/ReportOptions';
 import type { useSpreadsheet } from '#hooks/useSpreadsheet';
@@ -55,18 +58,38 @@ export type BaselineOptions = {
   // Graphs draw amounts against the baseline rather than changes, so rows
   // sort by amount and intervals carry each series' amount and baseline
   showAmounts?: boolean;
+  // Compare against the average of what was budgeted over the range, rather
+  // than what was spent
+  budgeted?: boolean;
 };
 
 // How baseline totals map onto the report's intervals
 export type BaselineScale = {
-  baselineDays: number;
+  // The baseline's length in its unit. Spending accrues per day, and budgets
+  // are set per month, so a budgeted baseline is spread by months.
+  baselineLength: number;
+  budgeted: boolean;
   baselineIntervals: number;
   // Budgets are set per interval rather than accrued per day
   perInterval: boolean;
   projectToFullPeriod: boolean;
-  // Average full length of the displayed intervals, for the Baseline column
+  // Average full length of the displayed intervals in days, for the pace of
+  // actual amounts
   averageDays: number;
+  // The same in the baseline's unit, for the Baseline column
+  averageLength: number;
 };
+
+// How much of the baseline a range gets, in the baseline's unit
+function measure(scale: BaselineScale, start: string, end: string) {
+  return scale.budgeted ? countMonths(start, end) : countDays(start, end);
+}
+
+function measureElapsed(scale: BaselineScale, start: string, end: string) {
+  return scale.budgeted
+    ? countElapsedMonths(start, end)
+    : countElapsedDays(start, end);
+}
 
 type BaselineContext = {
   scale: BaselineScale;
@@ -131,19 +154,26 @@ export function offsetInterval(
   // Intervals that haven't started have nothing to compare yet, so they stay
   // empty rather than showing the whole baseline as a change. Budgets are set
   // ahead of time, so theirs are still compared.
-  const days = countDays(start, end);
   if (!scale.perInterval && isFuture(start)) {
     const zero = mapValues(() => 0);
     // Charts only draw the baseline ahead when the amount is projected there
+    const length = measure(scale, start, end);
     const upcoming = scale.projectToFullPeriod
       ? fromTotals(field =>
-          Math.round(((baseline?.[field] ?? 0) * days) / scale.baselineDays),
+          Math.round(
+            ((baseline?.[field] ?? 0) * length) / scale.baselineLength,
+          ),
         )
       : undefined;
     return {
       ...interval,
       ...zero,
-      baseline: { expected: zero, actual: zero, upcoming },
+      baseline: {
+        expected: zero,
+        actual: zero,
+        upcoming,
+        budgeted: scale.budgeted,
+      },
     };
   }
 
@@ -152,7 +182,7 @@ export function offsetInterval(
   // so projections only cover the whole range.
   const share = scale.perInterval
     ? 1 / scale.baselineIntervals
-    : countElapsedDays(start, end) / scale.baselineDays;
+    : measureElapsed(scale, start, end) / scale.baselineLength;
 
   const expected = fromTotals(field =>
     Math.round((baseline?.[field] ?? 0) * share),
@@ -162,7 +192,7 @@ export function offsetInterval(
   return {
     ...interval,
     ...subtract(actual, expected),
-    baseline: { expected, actual },
+    baseline: { expected, actual, budgeted: scale.budgeted },
   };
 }
 
@@ -180,7 +210,9 @@ function getProjection(intervals: IntervalEntity[], scale: BaselineScale) {
 
   const days = countDays(start, end);
   const elapsedDays = countElapsedDays(start, end);
-  return days > elapsedDays ? { days, scale: days / elapsedDays } : null;
+  return days > elapsedDays
+    ? { length: measure(scale, start, end), scale: days / elapsedDays }
+    : null;
 }
 
 // Scales a row's amount so far to an average-length interval, using its daily
@@ -228,7 +260,7 @@ export function offsetItem<T extends OffsetItem>(
   const expected = projection
     ? fromTotals(field =>
         Math.round(
-          ((baseline?.[field] ?? 0) * projection.days) / scale.baselineDays,
+          ((baseline?.[field] ?? 0) * projection.length) / scale.baselineLength,
         ),
       )
     : sum(breakdown => breakdown.expected);
@@ -237,7 +269,7 @@ export function offsetItem<T extends OffsetItem>(
     : undefined;
   const perIntervalShare = scale.perInterval
     ? 1 / scale.baselineIntervals
-    : scale.averageDays / scale.baselineDays;
+    : scale.averageLength / scale.baselineLength;
   const paceShare = getPaceShare(item.intervalData, scale);
 
   return {
@@ -254,6 +286,7 @@ export function offsetItem<T extends OffsetItem>(
       pacePerInterval: fromTotals(field =>
         Math.round(actual[field] * paceShare),
       ),
+      budgeted: scale.budgeted,
     },
   };
 }
@@ -585,13 +618,41 @@ function countIntervals(
  * compared against, so only intervals the range cuts short differ from it.
  */
 export function getAverageDays(intervals: IntervalEntity[], interval: string) {
+  return getAverageLength(intervals, interval, getFullIntervalDays);
+}
+
+/**
+ * The same as getAverageDays, in months, for budgeted baselines.
+ */
+export function getAverageMonths(
+  intervals: IntervalEntity[],
+  interval: string,
+) {
+  return getAverageLength(intervals, interval, getFullIntervalMonths);
+}
+
+function getAverageLength(
+  intervals: IntervalEntity[],
+  interval: string,
+  getFullLength: (intervalStartDate: string, interval: string) => number,
+) {
   const lengths = intervals.flatMap(({ intervalStartDate }) =>
-    intervalStartDate ? [getFullIntervalDays(intervalStartDate, interval)] : [],
+    intervalStartDate ? [getFullLength(intervalStartDate, interval)] : [],
   );
   if (lengths.length === 0) {
     return 1;
   }
-  return lengths.reduce((sum, days) => sum + days, 0) / lengths.length;
+  return lengths.reduce((sum, length) => sum + length, 0) / lengths.length;
+}
+
+function getAverageInUnit(
+  intervals: IntervalEntity[],
+  interval: string,
+  budgeted: boolean,
+) {
+  return budgeted
+    ? getAverageMonths(intervals, interval)
+    : getAverageDays(intervals, interval);
 }
 
 function getScale(
@@ -599,11 +660,14 @@ function getScale(
   baselineOptions: BaselineOptions,
   template: IntervalEntity[],
 ): BaselineScale {
+  const budgeted = !!baselineOptions.budgeted;
   return {
-    baselineDays: countElapsedDays(
-      baselineOptions.startDate,
-      baselineOptions.endDate,
-    ),
+    // Budgets are set ahead for whole months, so a budgeted baseline counts
+    // all of its months, even ones that haven't finished
+    baselineLength: budgeted
+      ? countBudgetMonths(baselineOptions.startDate, baselineOptions.endDate)
+      : countElapsedDays(baselineOptions.startDate, baselineOptions.endDate),
+    budgeted,
     baselineIntervals: countIntervals(
       baselineOptions.startDate,
       baselineOptions.endDate,
@@ -613,7 +677,16 @@ function getScale(
     perInterval: props.balanceTypeOp === 'totalBudgeted',
     projectToFullPeriod: baselineOptions.projectToFullPeriod,
     averageDays: getAverageDays(template, props.interval),
+    averageLength: getAverageInUnit(template, props.interval, budgeted),
   };
+}
+
+// Budgets are fetched for every month a range touches
+function countBudgetMonths(startDate: string, endDate: string) {
+  return monthUtils.rangeInclusive(
+    monthUtils.getMonth(startDate),
+    monthUtils.getMonth(endDate),
+  ).length;
 }
 
 function getVisibleScale(
@@ -622,12 +695,11 @@ function getVisibleScale(
   { startIndex, endIndex }: { startIndex: number; endIndex: number },
   interval: string,
 ): BaselineScale {
+  const visible = trimIntervalDataToRange(template, startIndex, endIndex);
   return {
     ...scale,
-    averageDays: getAverageDays(
-      trimIntervalDataToRange(template, startIndex, endIndex),
-      interval,
-    ),
+    averageDays: getAverageDays(visible, interval),
+    averageLength: getAverageInUnit(visible, interval, scale.budgeted),
   };
 }
 
@@ -645,8 +717,43 @@ function getSpreadsheetProps(
       ...actual,
       startDate: baselineOptions.startDate,
       endDate: baselineOptions.endDate,
+      // Only a baseline's totals are compared. Budgets are dated by month, so
+      // they're fetched by month whatever the report's interval is.
+      ...(baselineOptions.budgeted && {
+        balanceTypeOp: 'totalBudgeted' as const,
+        interval: 'Monthly',
+      }),
     },
   };
+}
+
+/**
+ * Budgets as the amounts they plan for, so they compare against what was
+ * spent. Budgets are positive for spending, which reports count as negative.
+ * Income isn't budgeted, so it's compared against nothing.
+ */
+export function fromBudget<T extends ReportValues>(item: T): T {
+  const budgeted = item.totalBudgeted;
+  return {
+    ...item,
+    ...fromTotals(field => {
+      switch (field) {
+        case 'totalAssets':
+          return 0;
+        case 'totalBudgeted':
+          return budgeted;
+        default:
+          return -budgeted;
+      }
+    }),
+  };
+}
+
+export function rowsFromBudget(rows: GroupedEntity[]): GroupedEntity[] {
+  return rows.map(row => ({
+    ...fromBudget(row),
+    categories: row.categories && rowsFromBudget(row.categories),
+  }));
 }
 
 export function createBaselineSpreadsheet(
@@ -669,13 +776,20 @@ export function createBaselineSpreadsheet(
     spreadsheet: Spreadsheet,
     setData: (data: DataEntity) => void,
   ) => {
-    const [actual, baseline] = await Promise.all([
+    const [actual, fetchedBaseline] = await Promise.all([
       collect(getActual, spreadsheet),
       collect(getBaseline, spreadsheet),
     ]);
     if (!actual) {
       return;
     }
+    const baseline =
+      fetchedBaseline && baselineOptions.budgeted
+        ? {
+            ...fromBudget(fetchedBaseline),
+            data: rowsFromBudget(fetchedBaseline.data ?? []),
+          }
+        : fetchedBaseline;
 
     const offset = (scale: BaselineScale) => ({
       rows: offsetRows(actual.data ?? [], baseline?.data ?? [], {
@@ -768,10 +882,13 @@ export function createBaselineGroupedSpreadsheet(
     spreadsheet: Spreadsheet,
     setData: (data: GroupedEntity[]) => void,
   ) => {
-    const [actual = [], baseline = []] = await Promise.all([
+    const [actual = [], fetchedBaseline = []] = await Promise.all([
       collect(getActual, spreadsheet),
       collect(getBaseline, spreadsheet),
     ]);
+    const baseline = baselineOptions.budgeted
+      ? rowsFromBudget(fetchedBaseline)
+      : fetchedBaseline;
 
     const template = actual[0]?.intervalData ?? [];
     const offset = (scale: BaselineScale) =>

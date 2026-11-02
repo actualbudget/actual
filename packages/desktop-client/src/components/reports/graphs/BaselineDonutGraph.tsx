@@ -224,9 +224,13 @@ export function BaselineDonutGraph({
                   // change from the baseline
                   valueText={
                     isBaseline
-                      ? t('Baseline: {{amount}}', {
-                          amount: format(value, 'financial'),
-                        })
+                      ? data.baseline?.budgeted
+                        ? t('Budgeted: {{amount}}', {
+                            amount: format(value, 'financial'),
+                          })
+                        : t('Baseline: {{amount}}', {
+                            amount: format(value, 'financial'),
+                          })
                       : undefined
                   }
                   change={

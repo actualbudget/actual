@@ -21,6 +21,7 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  isBudgetedBaseline,
 } from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import { getLiveRange } from '#components/reports/getLiveRange';
@@ -134,6 +135,7 @@ export function GetCardData({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
+  const budgetedBaseline = isBudgetedBaseline(baseline, report.groupBy);
   // Amounts are drawn with the baseline unless changes are asked for
   const showAmounts = !(
     baseline.showChanges && canShowBaselineChanges(report.graphType)
@@ -183,6 +185,7 @@ export function GetCardData({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          budgeted: budgetedBaseline,
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -191,6 +194,7 @@ export function GetCardData({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    budgetedBaseline,
     report,
     categories,
     startDate,
@@ -229,6 +233,7 @@ export function GetCardData({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          budgeted: budgetedBaseline,
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -237,6 +242,7 @@ export function GetCardData({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    budgetedBaseline,
     report,
     categories,
     payees,

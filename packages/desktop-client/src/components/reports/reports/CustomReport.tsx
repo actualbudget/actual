@@ -33,6 +33,7 @@ import {
   canShowBaselineChanges,
   defaultBaseline,
   getBaselineRange,
+  isBudgetedBaseline,
 } from '#components/reports/baselineRange';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
@@ -549,6 +550,7 @@ function CustomReportInner({
   );
   const isBaselineEnabled = reportBaselineEnabled && baseline.enabled;
   const projectToFullPeriod = baseline.projectToFullPeriod;
+  const budgetedBaseline = isBudgetedBaseline(baseline, groupBy);
   // Amounts are drawn with the baseline unless changes are asked for
   const showAmounts = !(
     baseline.showChanges && canShowBaselineChanges(graphType)
@@ -578,6 +580,7 @@ function CustomReportInner({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          budgeted: budgetedBaseline,
         })
       : createGroupedSpreadsheet(props);
   }, [
@@ -586,6 +589,7 @@ function CustomReportInner({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    budgetedBaseline,
     startDate,
     endDate,
     interval,
@@ -634,6 +638,7 @@ function CustomReportInner({
           endDate: baselineEndDate,
           projectToFullPeriod,
           showAmounts,
+          budgeted: budgetedBaseline,
         })
       : createCustomSpreadsheet(props);
   }, [
@@ -642,6 +647,7 @@ function CustomReportInner({
     baselineEndDate,
     projectToFullPeriod,
     showAmounts,
+    budgetedBaseline,
     startDate,
     endDate,
     interval,
@@ -1112,7 +1118,13 @@ function CustomReportInner({
                       left={
                         <Block>
                           {isBaselineEnabled
-                            ? t('{{balanceType}} vs baseline:', { balanceType })
+                            ? budgetedBaseline
+                              ? t('{{balanceType}} vs budgeted:', {
+                                  balanceType,
+                                })
+                              : t('{{balanceType}} vs baseline:', {
+                                  balanceType,
+                                })
                             : `${balanceType}:`}
                         </Block>
                       }

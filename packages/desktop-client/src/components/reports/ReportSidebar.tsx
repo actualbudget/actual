@@ -32,6 +32,7 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
 import {
   canShowBaselineChanges,
+  canUseBudgetedBaseline,
   defaultBaseline,
   getBaselineRange,
   rangesOverlap,
@@ -155,6 +156,8 @@ export function ReportSidebar({
   const isShowingChanges = canShowChanges && !!baseline.showChanges;
   const canChangeFromBaseline =
     customReportItems.graphType === 'BarGraph' && !isShowingChanges;
+  const canUseBudgeted = canUseBudgetedBaseline(customReportItems.groupBy);
+  const baselineSource = baseline.source ?? 'actual';
 
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -250,6 +253,11 @@ export function ReportSidebar({
     onReportChange({ type: 'modify' });
     setGroupBy(cond);
     defaultItems(cond);
+    // Budgets only exist per category, so other splits compare against what
+    // was spent
+    if (baselineSource === 'budgeted' && !canUseBudgetedBaseline(cond)) {
+      updateBaseline({ ...baseline, source: 'actual' });
+    }
   };
 
   const onChangeTagScope = (scope: CustomReportTagScope) => {
@@ -763,6 +771,40 @@ export function ReportSidebar({
                 updateBaseline({ ...baseline, isDateStatic })
               }
             >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  padding: 5,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }}>
+                  <Trans>Source:</Trans>
+                </Text>
+                <Tooltip
+                  placement="bottom start"
+                  content={
+                    <Text>
+                      <Trans>
+                        Budgets are only set for categories, so a budgeted
+                        baseline needs a Category, Group or Interval split.
+                      </Trans>
+                    </Text>
+                  }
+                  style={{ ...styles.tooltip, lineHeight: 1.5 }}
+                  triggerProps={{ isDisabled: canUseBudgeted }}
+                >
+                  <Select
+                    value={baselineSource}
+                    onChange={source => updateBaseline({ ...baseline, source })}
+                    options={[
+                      ['actual', t('Actual amounts')],
+                      ['budgeted', t('Budgeted')],
+                    ]}
+                    disabledKeys={canUseBudgeted ? [] : ['budgeted']}
+                  />
+                </Tooltip>
+              </View>
               <View style={{ padding: '5px 5px 0 10px' }}>
                 <LabeledCheckbox
                   id="baseline-include-current"
@@ -792,6 +834,15 @@ export function ReportSidebar({
                   </Trans>
                 </Information>
               )}
+              {baselineSource === 'budgeted' &&
+                customReportItems.balanceType !== 'Payment' &&
+                customReportItems.balanceType !== 'Budgeted' && (
+                  <Information style={{ marginTop: 5 }}>
+                    <Trans>
+                      Income isn't budgeted, so the baseline counts it as zero.
+                    </Trans>
+                  </Information>
+                )}
             </ReportDateFilter>
           </>
         )}

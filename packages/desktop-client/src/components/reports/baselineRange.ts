@@ -20,6 +20,7 @@ export const defaultBaseline: CustomReportBaseline = {
   projectToFullPeriod: true,
   showChanges: false,
   changeFromBaseline: false,
+  source: 'actual',
 };
 
 /**
@@ -73,6 +74,34 @@ export function rangesOverlap(
   return startA <= endB && startB <= endA;
 }
 
+// An interval's whole range, even when the report's range cuts it short
+function getFullIntervalRange(
+  intervalStartDate: string,
+  interval: string,
+): [string, string] {
+  switch (interval) {
+    case 'Daily':
+      return [intervalStartDate, intervalStartDate];
+    case 'Weekly':
+      return [intervalStartDate, monthUtils.addDays(intervalStartDate, 6)];
+    case 'Quarterly': {
+      const quarter = monthUtils.quarterFromDate(intervalStartDate);
+      return [
+        `${quarter}-01`,
+        monthUtils.lastDayOfMonth(monthUtils.addMonths(quarter, 2)),
+      ];
+    }
+    case 'Yearly': {
+      const year = intervalStartDate.slice(0, 4);
+      return [`${year}-01-01`, `${year}-12-31`];
+    }
+    default: {
+      const month = intervalStartDate.slice(0, 7);
+      return [`${month}-01`, monthUtils.lastDayOfMonth(month)];
+    }
+  }
+}
+
 /**
  * An interval's whole length in days, even when a range cuts it short.
  */
@@ -80,20 +109,65 @@ export function getFullIntervalDays(
   intervalStartDate: string,
   interval: string,
 ) {
-  switch (interval) {
-    case 'Daily':
-      return 1;
-    case 'Weekly':
-      return 7;
-    case 'Yearly': {
-      const year = intervalStartDate.slice(0, 4);
-      return countDays(`${year}-01-01`, `${year}-12-31`);
-    }
-    default: {
-      const month = intervalStartDate.slice(0, 7);
-      return countDays(`${month}-01`, monthUtils.lastDayOfMonth(month));
-    }
-  }
+  return countDays(...getFullIntervalRange(intervalStartDate, interval));
+}
+
+/**
+ * An interval's whole length in months, even when a range cuts it short.
+ */
+export function getFullIntervalMonths(
+  intervalStartDate: string,
+  interval: string,
+) {
+  return countMonths(...getFullIntervalRange(intervalStartDate, interval));
+}
+
+/**
+ * Months in a range, inclusive, with part months counted by their share of
+ * days. Budgets are set per month, so this is how they're spread over a range.
+ */
+export function countMonths(start: string, end: string) {
+  const first = monthUtils.dayFromDate(start);
+  const last = monthUtils.dayFromDate(end);
+  return monthUtils
+    .rangeInclusive(monthUtils.getMonth(first), monthUtils.getMonth(last))
+    .reduce((total, month) => {
+      const monthStart = `${month}-01`;
+      const monthEnd = monthUtils.lastDayOfMonth(month);
+      const from = first > monthStart ? first : monthStart;
+      const to = last < monthEnd ? last : monthEnd;
+      return total + countDays(from, to) / countDays(monthStart, monthEnd);
+    }, 0);
+}
+
+/**
+ * Months of a range that have already happened, and at least one day's worth.
+ */
+export function countElapsedMonths(start: string, end: string) {
+  const today = monthUtils.currentDay();
+  const first = monthUtils.dayFromDate(start);
+  const last = monthUtils.dayFromDate(end);
+  const elapsedEnd = last < today ? last : today;
+  return countMonths(first, elapsedEnd < first ? first : elapsedEnd);
+}
+
+// Budgets only exist per category, so other groupings have nothing to compare
+// against a budgeted baseline
+const budgetedBaselineGroups = new Set(['Category', 'Group', 'Interval']);
+
+export function canUseBudgetedBaseline(groupBy: string) {
+  return budgetedBaselineGroups.has(groupBy);
+}
+
+/**
+ * Whether a baseline compares against budgets, which only applies where the
+ * report's grouping has budgets.
+ */
+export function isBudgetedBaseline(
+  baseline: CustomReportBaseline,
+  groupBy: string,
+) {
+  return baseline.source === 'budgeted' && canUseBudgetedBaseline(groupBy);
 }
 
 // Graphs that can draw changes from the baseline instead of amounts with the

@@ -1,8 +1,13 @@
 import {
+  canUseBudgetedBaseline,
   countDays,
   countElapsedDays,
+  countElapsedMonths,
+  countMonths,
   defaultBaseline,
   getBaselineRange,
+  getFullIntervalDays,
+  isBudgetedBaseline,
   rangesOverlap,
 } from './baselineRange';
 import { disabledList } from './disabledList';
@@ -18,6 +23,40 @@ describe('baseline day counts', () => {
   it('only counts days that have already happened', () => {
     expect(countElapsedDays('2016-12-01', '2017-01-31')).toBe(32);
     expect(countElapsedDays('2017-02-01', '2017-02-28')).toBe(1);
+  });
+});
+
+describe('baseline month counts', () => {
+  it('counts part months by their share of days', () => {
+    expect(countMonths('2016-11-01', '2016-12-31')).toBe(2);
+    expect(countMonths('2016-11-16', '2016-12-31')).toBeCloseTo(1.5);
+  });
+
+  it('only counts days that have already happened', () => {
+    expect(countElapsedMonths('2016-12-01', '2017-01-31')).toBeCloseTo(
+      1 + 1 / 31,
+    );
+    expect(countElapsedMonths('2017-02-01', '2017-02-28')).toBeCloseTo(1 / 28);
+  });
+
+  it('gives quarters their full length in days', () => {
+    expect(getFullIntervalDays('2016-11-15', 'Quarterly')).toBe(92);
+  });
+});
+
+describe('budgeted baselines', () => {
+  it('only apply to splits with budgets', () => {
+    expect(canUseBudgetedBaseline('Category')).toBe(true);
+    expect(canUseBudgetedBaseline('Group')).toBe(true);
+    expect(canUseBudgetedBaseline('Interval')).toBe(true);
+    expect(canUseBudgetedBaseline('Payee')).toBe(false);
+  });
+
+  it('need a budgeted source', () => {
+    const budgeted = { ...defaultBaseline, source: 'budgeted' as const };
+    expect(isBudgetedBaseline(budgeted, 'Category')).toBe(true);
+    expect(isBudgetedBaseline(budgeted, 'Tag')).toBe(false);
+    expect(isBudgetedBaseline(defaultBaseline, 'Category')).toBe(false);
   });
 });
 

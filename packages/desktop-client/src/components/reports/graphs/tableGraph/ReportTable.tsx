@@ -157,6 +157,7 @@ export function ReportTable({
         mode={mode}
         showBaseline={showBaseline}
         showProjected={showProjected}
+        budgetedBaseline={!!data.baseline?.budgeted}
       />
       <View
         style={{

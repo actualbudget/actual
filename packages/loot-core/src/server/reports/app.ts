@@ -55,7 +55,10 @@ export const reportModel = {
         (baseline.showChanges !== undefined &&
           typeof baseline.showChanges !== 'boolean') ||
         (baseline.changeFromBaseline !== undefined &&
-          typeof baseline.changeFromBaseline !== 'boolean'))
+          typeof baseline.changeFromBaseline !== 'boolean') ||
+        (baseline.source !== undefined &&
+          baseline.source !== 'actual' &&
+          baseline.source !== 'budgeted'))
     ) {
       throw new ValidationError('Invalid report baseline.');
     }

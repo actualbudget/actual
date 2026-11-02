@@ -96,7 +96,11 @@ export function ReportSummary({
       {data.baseline ? (
         <>
           <SummaryBox
-            label={t('BASELINE AVERAGE')}
+            label={
+              data.baseline.budgeted
+                ? t('BUDGETED AVERAGE')
+                : t('BASELINE AVERAGE')
+            }
             value={baselineAverage}
             caption={perIntervalCaption}
           />

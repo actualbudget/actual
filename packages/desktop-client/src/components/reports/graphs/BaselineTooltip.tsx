@@ -31,12 +31,13 @@ export function BaselineTooltipLines({
   // Spending is shown as positive, like the bars it describes
   const sign = getSpendingSign(balanceTypeOp);
   const show = (value: number) => format(sign * value || 0, 'financial');
+  const baselineLabel = breakdown.budgeted ? t('Budgeted:') : t('Baseline:');
 
   // Intervals that haven't started only have a baseline to show
   if (breakdown.upcoming) {
     return (
       <AlignedText
-        left={t('Baseline:')}
+        left={baselineLabel}
         right={
           <FinancialText>
             {show(breakdown.upcoming[balanceTypeOp])}
@@ -53,7 +54,7 @@ export function BaselineTooltipLines({
   return (
     <>
       <AlignedText
-        left={t('Baseline:')}
+        left={baselineLabel}
         right={
           <FinancialText>
             {show(breakdown.expected[balanceTypeOp])}

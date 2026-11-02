@@ -25,6 +25,8 @@ type ReportTableHeaderProps = {
   mode: string;
   showBaseline?: boolean;
   showProjected?: boolean;
+  // The baseline is the average of what was budgeted
+  budgetedBaseline?: boolean;
 };
 
 export function ReportTableHeader({
@@ -40,6 +42,7 @@ export function ReportTableHeader({
   mode,
   showBaseline = false,
   showProjected = false,
+  budgetedBaseline = false,
 }: ReportTableHeaderProps) {
   const { t } = useTranslation();
   // Total tables keep real amounts and add a change column beside them
@@ -87,11 +90,15 @@ export function ReportTableHeader({
               minWidth: compact ? 50 : 85,
             }}
             valueStyle={compactStyle}
-            value={t('Baseline')}
+            value={budgetedBaseline ? t('Budgeted') : t('Baseline')}
             title={
-              mode === 'time'
-                ? t('The baseline average over one interval')
-                : t('The baseline average over the same number of days')
+              budgetedBaseline
+                ? mode === 'time'
+                  ? t('The average budgeted over one interval')
+                  : t('The average budgeted over the same length of time')
+                : mode === 'time'
+                  ? t('The baseline average over one interval')
+                  : t('The baseline average over the same number of days')
             }
             textAlign="right"
             width="flex"
@@ -164,8 +171,12 @@ export function ReportTableHeader({
             value={t('Change')}
             title={
               mode === 'time'
-                ? t('The average compared with the baseline per interval')
-                : t('The difference from the baseline over the whole range')
+                ? budgetedBaseline
+                  ? t('The average compared with the budget per interval')
+                  : t('The average compared with the baseline per interval')
+                : budgetedBaseline
+                  ? t('The difference from the budget over the whole range')
+                  : t('The difference from the baseline over the whole range')
             }
             textAlign="right"
             width="flex"

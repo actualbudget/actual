@@ -120,6 +120,11 @@ export function SeriesTooltip({
   const total = sumOf(key =>
     breakdown && !isUpcoming ? getAmountKey(key) : key,
   );
+  const baselineLabel = breakdown?.budgeted ? (
+    <Trans>Budgeted</Trans>
+  ) : (
+    <Trans>Baseline</Trans>
+  );
 
   return (
     <TooltipCard title={interval.date}>
@@ -134,11 +139,15 @@ export function SeriesTooltip({
           <>
             <span />
             <span style={headerStyle}>
-              {isUpcoming ? <Trans>Baseline</Trans> : <Trans>Amount</Trans>}
+              {isUpcoming ? baselineLabel : <Trans>Amount</Trans>}
             </span>
             {hasChangeColumn && (
               <span style={headerStyle}>
-                <Trans>vs baseline</Trans>
+                {breakdown.budgeted ? (
+                  <Trans>vs budgeted</Trans>
+                ) : (
+                  <Trans>vs baseline</Trans>
+                )}
               </span>
             )}
           </>
@@ -158,9 +167,7 @@ export function SeriesTooltip({
         <span style={dividerStyle} />
         {breakdown && (
           <>
-            <span>
-              <Trans>Baseline</Trans>
-            </span>
+            <span>{baselineLabel}</span>
             <FinancialText style={{ textAlign: 'right' }}>
               {format(sumOf(getBaselineKey), 'financial')}
             </FinancialText>

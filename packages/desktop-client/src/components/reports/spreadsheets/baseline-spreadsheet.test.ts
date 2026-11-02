@@ -4,11 +4,14 @@ import type {
 } from '@actual-app/core/types/models';
 
 import {
+  fromBudget,
   getAverageDays,
+  getAverageMonths,
   getTrimRange,
   offsetInterval,
   offsetItem,
   offsetRows,
+  rowsFromBudget,
 } from './baseline-spreadsheet';
 import type { BaselineScale } from './baseline-spreadsheet';
 
@@ -52,11 +55,13 @@ const january = (debts: number) => interval('2017-01-01', '2017-01-31', debts);
 
 // A baseline of 184 days, so a total of -18400 spends 100 a day
 const scale: BaselineScale = {
-  baselineDays: 184,
+  baselineLength: 184,
+  budgeted: false,
   baselineIntervals: 6,
   perInterval: false,
   projectToFullPeriod: true,
   averageDays: 30.5,
+  averageLength: 30.5,
 };
 const baselineTotals = row('baseline', [interval('2016-07-01', '', -18400)]);
 
@@ -190,7 +195,7 @@ describe('offsetItem', () => {
   it('gives the baseline over an average-length interval', () => {
     const item = offsetItem(row('groceries', [november(0)]), baselineTotals, {
       ...scale,
-      averageDays: 30,
+      averageLength: 30,
     });
 
     expect(item.baseline.perInterval?.totalDebts).toBe(-3000);
@@ -344,5 +349,108 @@ describe('getTrimRange', () => {
     // Totals include the baseline for the quiet months either side, and for
     // the day of January so far
     expect(item.baseline.expected.totalDebts).toBe(-9300);
+  });
+});
+
+// Six months of budgets adding up to 60000, so 10000 a month
+const budgetScale: BaselineScale = {
+  ...scale,
+  baselineLength: 6,
+  budgeted: true,
+  projectToFullPeriod: false,
+  averageLength: 1,
+};
+const budgetTotals = fromBudget({
+  ...row('budget', []),
+  totalAssets: 60000,
+  totalDebts: 0,
+  totalTotals: 60000,
+  netAssets: 60000,
+  netDebts: 0,
+  totalBudgeted: 60000,
+});
+
+describe('fromBudget', () => {
+  it('compares budgets against spending, and income against nothing', () => {
+    expect(budgetTotals).toMatchObject({
+      totalAssets: 0,
+      totalDebts: -60000,
+      totalTotals: -60000,
+      netAssets: 0,
+      netDebts: -60000,
+      totalBudgeted: 60000,
+    });
+  });
+
+  it('converts categories within groups', () => {
+    const [group] = rowsFromBudget([
+      {
+        ...row('group', []),
+        totalBudgeted: 300,
+        categories: [{ ...row('category', []), totalBudgeted: 300 }],
+      },
+    ]);
+
+    expect(group.totalDebts).toBe(-300);
+    expect(group.categories?.[0].totalDebts).toBe(-300);
+  });
+});
+
+describe('budgeted baselines', () => {
+  it('compares each month against the average monthly budget', () => {
+    // Spread by days, November and December would differ by their lengths
+    expect(
+      offsetInterval(november(-12000), budgetTotals, budgetScale).baseline
+        ?.expected.totalDebts,
+    ).toBe(-10000);
+    expect(
+      offsetInterval(december(-12000), budgetTotals, budgetScale),
+    ).toMatchObject({
+      totalDebts: -2000,
+      baseline: { expected: { totalDebts: -10000 }, budgeted: true },
+    });
+  });
+
+  it('spreads a monthly budget over a week by its share of the month', () => {
+    const week = interval('2016-12-04', '2016-12-10', 0);
+
+    expect(
+      offsetInterval(week, budgetTotals, budgetScale).baseline?.expected
+        .totalDebts,
+    ).toBe(Math.round((-10000 * 7) / 31));
+  });
+
+  it('compares a month in progress against the budget for the days so far', () => {
+    expect(
+      offsetInterval(january(-500), budgetTotals, budgetScale).baseline
+        ?.expected.totalDebts,
+    ).toBe(Math.round(-10000 / 31));
+  });
+
+  it('gives the average monthly budget per interval', () => {
+    const item = offsetItem(
+      row('groceries', [november(0), december(0)]),
+      budgetTotals,
+      budgetScale,
+    );
+
+    expect(item.baseline.perInterval?.totalDebts).toBe(-10000);
+    expect(item.baseline.expected.totalDebts).toBe(-20000);
+    expect(item.baseline.budgeted).toBe(true);
+  });
+});
+
+describe('getAverageMonths', () => {
+  it('counts each interval in months', () => {
+    expect(getAverageMonths([november(0), december(0)], 'Monthly')).toBe(1);
+    expect(
+      getAverageMonths([interval('2016-10-01', '2016-12-31', 0)], 'Quarterly'),
+    ).toBe(3);
+    expect(
+      getAverageMonths([interval('2016-01-01', '2016-12-31', 0)], 'Yearly'),
+    ).toBe(12);
+    expect(
+      getAverageMonths([interval('2016-12-04', '2016-12-10', 0)], 'Weekly'),
+    ).toBeCloseTo(7 / 31);
   });
 });

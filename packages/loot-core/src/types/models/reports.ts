@@ -21,7 +21,12 @@ export type CustomReportBaseline = {
   showChanges?: boolean;
   // With amounts on bar graphs, draw only the change, from the baseline's end
   changeFromBaseline?: boolean;
+  // Compare against what was spent over the range, or the average of what
+  // was budgeted for it. Optional since older reports don't store it.
+  source?: CustomReportBaselineSource;
 };
+
+export type CustomReportBaselineSource = 'actual' | 'budgeted';
 
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
@@ -84,6 +89,8 @@ export type BaselineBreakdown = {
   // The actual amount at its pace so far over an average-length interval, to
   // compare against perInterval
   pacePerInterval?: ReportValues;
+  // The baseline is the average of what was budgeted, not what was spent
+  budgeted?: boolean;
 };
 
 export type SpendingMonthEntity = Record<

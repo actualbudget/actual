@@ -194,6 +194,7 @@ describe('custom report baseline', () => {
     projectToFullPeriod: true,
     showChanges: true,
     changeFromBaseline: false,
+    source: 'budgeted',
   } satisfies CustomReportBaseline;
 
   beforeEach(async () => {
@@ -228,6 +229,7 @@ describe('custom report baseline', () => {
     { baseline: { ...baseline, enabled: 'yes' } },
     { baseline: { ...baseline, showChanges: 'yes' } },
     { baseline: { ...baseline, changeFromBaseline: 'yes' } },
+    { baseline: { ...baseline, source: 'forecast' } },
   ])('rejects invalid imported baselines: %j', async invalid => {
     await writeDashboardReport({ ...report, ...invalid });
 

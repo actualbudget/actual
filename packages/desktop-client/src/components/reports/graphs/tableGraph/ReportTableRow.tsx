@@ -124,14 +124,17 @@ export const ReportTableRow = memo(
         !intervalItem.intervalStartDate ||
         !intervalItem.intervalEndDate
           ? t('Baseline: {{amount}}', { amount: expected })
-          : t('Baseline: {{amount}} over {{count}} days', {
-              amount: expected,
-              // Intervals in progress compare the days so far
-              count: countElapsedDays(
-                intervalItem.intervalStartDate,
-                intervalItem.intervalEndDate,
-              ),
-            });
+          : // Budgets are spread by months, so a day count doesn't apply
+            intervalBreakdown.budgeted
+            ? t('Budgeted: {{amount}}', { amount: expected })
+            : t('Baseline: {{amount}} over {{count}} days', {
+                amount: expected,
+                // Intervals in progress compare the days so far
+                count: countElapsedDays(
+                  intervalItem.intervalStartDate,
+                  intervalItem.intervalEndDate,
+                ),
+              });
       const lines = [
         baselineLine,
         t('Change: {{amount}}', {
