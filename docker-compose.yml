@@ -9,7 +9,8 @@ services:
     build: .
     image: actual-development
     # Run as the host user so files written to the bind mount aren't owned by
-    # root. Export UID and GID first if yours aren't 1000.
+    # root. Pass UID and GID (e.g. `env UID="$(id -u)" GID="$(id -g)" docker
+    # compose up`); they default to 1000.
     user: '${UID:-1000}:${GID:-1000}'
     environment:
       - HTTPS

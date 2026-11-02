@@ -62,10 +62,10 @@ The dev server will be available at `http://localhost:3001/`. Most editors autom
 For other editors, run from the repo root:
 
 ```bash
-docker compose up --build
+env UID="$(id -u)" GID="$(id -g)" docker compose up --build
 ```
 
-This starts a container that runs `yarn start:browser` on port 3001. Open `http://localhost:3001/` in your browser.
+This starts a container that runs `yarn start:browser` on port 3001. Passing `UID` and `GID` makes the container run as your user, so files it writes to your checkout aren't owned by someone else. Open `http://localhost:3001/` in your browser.
 
 :::note
 The container mounts your repo at `/app`. If you've already run `yarn install` on your host, the native modules (`better-sqlite3`, `bcrypt`, `electron`, `sharp`) will be compiled for your host OS and won't work inside the Linux container. Either delete `node_modules/` first and let the container reinstall, or run the dev container path above (which rebuilds them automatically).
