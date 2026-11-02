@@ -136,6 +136,11 @@ function mapValues(getValue: (field: balanceTypeOpType) => number) {
   } satisfies ReportValues;
 }
 
+// Scales every field, so nets summed from intervals keep their own scale
+function scaleValues(values: ReportValues, factor: number): ReportValues {
+  return mapValues(field => Math.round(values[field] * factor));
+}
+
 // Net fields are derived from the total, as the report spreadsheets do
 function fromTotals(getValue: (field: AdditiveField) => number): ReportValues {
   const totalTotals = getValue('totalTotals');
@@ -188,33 +193,32 @@ function sumBreakdownNets(
 /**
  * Sums a total's net fields from the rows that are shown, so they match the
  * bars stacked from them and the rows in the table. Split by interval, each
- * interval is a bar of its own, so only the whole range is summed.
+ * interval is a row of its own, and offsetItem sums their nets instead.
  */
 export function sumNetsFromRows<
   T extends OffsetItem & { comparison: ComparisonBreakdown },
 >(totals: T, rows: GroupedEntity[], groupBy: string): T {
-  const intervalData =
-    groupBy === 'Interval'
-      ? totals.intervalData
-      : totals.intervalData.map((interval, index) => {
-          const parts = rows.map(row => row.intervalData[index]);
-          return {
-            ...sumNets(interval, parts),
-            comparison:
-              interval.comparison &&
-              sumBreakdownNets(
-                interval.comparison,
-                parts.map(part => part?.comparison),
-              ),
-          };
-        });
-  const parts = groupBy === 'Interval' ? intervalData : rows;
+  if (groupBy === 'Interval') {
+    return totals;
+  }
+  const intervalData = totals.intervalData.map((interval, index) => {
+    const parts = rows.map(row => row.intervalData[index]);
+    return {
+      ...sumNets(interval, parts),
+      comparison:
+        interval.comparison &&
+        sumBreakdownNets(
+          interval.comparison,
+          parts.map(part => part?.comparison),
+        ),
+    };
+  });
   return {
-    ...sumNets(totals, parts),
+    ...sumNets(totals, rows),
     intervalData,
     comparison: sumBreakdownNets(
       totals.comparison,
-      parts.map(part => part.comparison),
+      rows.map(row => row.comparison),
     ),
   };
 }
@@ -465,12 +469,14 @@ function getPaceShare(intervals: IntervalEntity[], scale: ComparisonScale) {
  * summed from the offset intervals so table columns add up. With one, the
  * total is spending so far scaled to the whole range, compared against the
  * comparison over the whole range, which includes intervals that haven't
- * started.
+ * started. When the intervals are the report's rows, sumIntervalNets sums
+ * net fields from them, like totals summed from rows.
  */
 export function offsetItem<T extends OffsetItem>(
   item: T,
   comparison: OffsetItem | undefined,
   scale: ComparisonScale,
+  sumIntervalNets = false,
 ): T & { comparison: ComparisonBreakdown } {
   const intervalData = item.intervalData.map(interval =>
     offsetInterval(interval, comparison, scale),
@@ -482,21 +488,22 @@ export function offsetItem<T extends OffsetItem>(
       comparison,
       scale,
       scale.offset,
+      sumIntervalNets,
     );
   }
   const sum = (
     pick: (breakdown: ComparisonBreakdown) => ReportValues | undefined,
-  ) =>
-    fromTotals(field =>
-      intervalData.reduce(
-        (total, interval) =>
-          total +
-          (interval.comparison
-            ? (pick(interval.comparison) ?? interval.comparison.actual)[field]
-            : 0),
-        0,
-      ),
+  ) => {
+    const parts = intervalData.map(
+      interval =>
+        interval.comparison &&
+        (pick(interval.comparison) ?? interval.comparison.actual),
     );
+    const total = fromTotals(field =>
+      parts.reduce((sum, part) => sum + (part ? part[field] : 0), 0),
+    );
+    return sumIntervalNets ? sumNets(total, parts) : total;
+  };
 
   const actual = sum(breakdown => breakdown.actual);
   const projection = getProjection(item.intervalData, scale);
@@ -509,7 +516,7 @@ export function offsetItem<T extends OffsetItem>(
       )
     : sum(breakdown => breakdown.expected);
   const projected = projection
-    ? fromTotals(field => Math.round(actual[field] * projection.scale))
+    ? scaleValues(actual, projection.scale)
     : undefined;
   const perIntervalShare = scale.perInterval
     ? 1 / scale.comparisonIntervals
@@ -527,9 +534,7 @@ export function offsetItem<T extends OffsetItem>(
       perInterval: fromTotals(field =>
         Math.round((comparison?.[field] ?? 0) * perIntervalShare),
       ),
-      pacePerInterval: fromTotals(field =>
-        Math.round(actual[field] * paceShare),
-      ),
+      pacePerInterval: scaleValues(actual, paceShare),
       budgeted: scale.budgeted,
     },
   };
@@ -545,16 +550,21 @@ function offsetItemByWindows<T extends OffsetItem>(
   comparison: OffsetItem | undefined,
   scale: ComparisonScale,
   offset: NonNullable<ComparisonScale['offset']>,
+  sumIntervalNets: boolean,
 ): T & { comparison: ComparisonBreakdown } {
   const sum = (
     pick: (breakdown: ComparisonBreakdown) => ReportValues | undefined,
-  ) =>
-    fromTotals(field =>
-      intervalData.reduce((total, interval) => {
-        const value = interval.comparison && pick(interval.comparison);
-        return total + (value ? value[field] : 0);
-      }, 0),
+  ) => {
+    const parts = intervalData.map(
+      interval => interval.comparison && pick(interval.comparison),
     );
+    const total = fromTotals(field =>
+      parts.reduce((sum, part) => sum + (part ? part[field] : 0), 0),
+    );
+    return sumIntervalNets ? sumNets(total, parts) : total;
+  };
+  const sumComparisonWindow = (from: string, to: string) =>
+    sumWindow(comparison?.intervalData ?? [], offset.bucketInterval, from, to);
   const isCompared = (breakdown: ComparisonBreakdown) => !breakdown.noData;
   const actual = sum(breakdown => breakdown.actual);
   const comparedActual = sum(breakdown =>
@@ -571,15 +581,24 @@ function offsetItemByWindows<T extends OffsetItem>(
   const end = intervalData[intervalData.length - 1]?.intervalEndDate;
   const [windowStart, windowEnd] =
     start && end ? shiftRange(start, end, offset.days) : ['', ''];
-  const fullWindow =
+  const wholeWindow =
     start && end
-      ? sumWindow(
-          comparison?.intervalData ?? [],
-          offset.bucketInterval,
-          windowStart,
-          windowEnd,
-        )
+      ? sumComparisonWindow(windowStart, windowEnd)
       : mapValues(() => 0);
+  // Each interval's own window, including the days that haven't passed yet
+  const fullWindow = sumIntervalNets
+    ? sumNets(
+        wholeWindow,
+        intervalData.map(interval =>
+          interval.comparisonStartDate && interval.comparisonEndDate
+            ? sumComparisonWindow(
+                interval.comparisonStartDate,
+                interval.comparisonEndDate,
+              )
+            : undefined,
+        ),
+      )
+    : wholeWindow;
 
   const projection = getProjection(item.intervalData, scale);
   const expected = projection
@@ -588,7 +607,7 @@ function offsetItemByWindows<T extends OffsetItem>(
         isCompared(breakdown) ? breakdown.expected : undefined,
       );
   const projected = projection
-    ? fromTotals(field => Math.round(actual[field] * projection.scale))
+    ? scaleValues(actual, projection.scale)
     : undefined;
   const paceShare = getPaceShare(item.intervalData, scale);
 
@@ -600,12 +619,10 @@ function offsetItemByWindows<T extends OffsetItem>(
       expected,
       actual,
       projected,
-      perInterval: fromTotals(field =>
+      perInterval: mapValues(field =>
         Math.round(fullWindow[field] / Math.max(comparedCount, 1)),
       ),
-      pacePerInterval: fromTotals(field =>
-        Math.round(actual[field] * paceShare),
-      ),
+      pacePerInterval: scaleValues(actual, paceShare),
       budgeted: scale.budgeted,
       ...(intervalData.length > 0 && comparedCount === 0 && { noData: true }),
     },
@@ -1129,7 +1146,7 @@ export function createComparisonSpreadsheet(
         sortByOp,
         sortAmount: comparisonOptions.sortAmount ?? 'current',
       }),
-      totals: offsetItem(actual, comparison, scale),
+      totals: offsetItem(actual, comparison, scale, groupBy === 'Interval'),
     });
 
     const scale = getScale(props, comparisonOptions, actual.intervalData);

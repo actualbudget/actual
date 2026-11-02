@@ -277,12 +277,60 @@ describe('sumNetsFromRows', () => {
     expect(summed.netDebts).toBe(rows[0].netDebts);
   });
 
-  it('sums the intervals themselves when split by interval', () => {
-    const summed = sumNetsFromRows(totals, rows, 'Interval');
+  it('leaves the totals of an Interval split to offsetItem', () => {
+    expect(sumNetsFromRows(totals, rows, 'Interval')).toBe(totals);
+  });
 
-    expect(summed.intervalData).toBe(totals.intervalData);
-    expect(summed.comparison.actual.netDebts).toBe(0);
-    expect(summed.comparison.actual.netAssets).toBe(1000 + 1900);
+  it('sums net fields from the intervals when they are the rows', () => {
+    // November earns 1000 and December pays 1100, so the whole total pays 100
+    const intervals = [
+      earning('2016-11-01', '2016-11-30', -4000),
+      earning('2016-12-01', '2016-12-31', -6100),
+    ];
+    const byInterval = offsetItem(
+      earningRow('totals', intervals),
+      comparison,
+      noProjection,
+      true,
+    );
+
+    expect(byInterval.comparison.actual.netDebts).toBe(-1100);
+    expect(byInterval.comparison.actual.netAssets).toBe(1000);
+    // 30.5 of the 61 days, at the same pace
+    expect(byInterval.comparison.pacePerInterval?.netDebts).toBe(-550);
+    expect(byInterval.comparison.pacePerInterval?.netAssets).toBe(500);
+    expect(byInterval.netDebts).toBe(-1100);
+  });
+
+  it('sums net fields from the windows of each interval', () => {
+    // 100 a day is spent until 24 December, then 200 a day is earned
+    const earningDays = Array.from({ length: 38 }, (_, index) =>
+      earning(
+        monthUtils.addDays('2016-12-25', index),
+        monthUtils.addDays('2016-12-25', index),
+        0,
+        200,
+      ),
+    );
+    const comparisonDays = row('comparison', [
+      ...days('2016-11-01', 54),
+      ...earningDays,
+    ]);
+    const byInterval = offsetItem(
+      row('totals', [
+        interval('2016-12-01', '2016-12-31', -4000),
+        interval('2017-01-01', '2017-01-31', -100),
+      ]),
+      comparisonDays,
+      { ...offsetScale, projectToFullPeriod: true },
+      true,
+    );
+
+    // December's window pays 3100 and January's earns 6200
+    expect(byInterval.comparison.expected.netDebts).toBe(-3100);
+    expect(byInterval.comparison.expected.netAssets).toBe(6200);
+    expect(byInterval.comparison.perInterval?.netDebts).toBe(-1550);
+    expect(byInterval.comparison.perInterval?.netAssets).toBe(3100);
   });
 });
 
