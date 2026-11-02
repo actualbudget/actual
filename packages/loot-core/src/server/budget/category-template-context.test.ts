@@ -656,46 +656,6 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
-  describe('runAverage with a weekly template', () => {
-    // October 2026 starts on a Thursday and has 31 days, so it has five
-    // Fridays but only four Mondays.
-    it.each([
-      ['friday', 1250],
-      ['monday', 1000],
-    ] as const)(
-      'budgets the weekly average for every %s in the month',
-      async (weekday, expected) => {
-        const category: CategoryEntity = {
-          id: 'test',
-          name: 'Test Category',
-          group: 'test-group',
-          is_income: false,
-        };
-        const instance = new TestCategoryTemplateContext(
-          [],
-          category,
-          '2026-10',
-          0,
-          0,
-        );
-        vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
-
-        const result = await CategoryTemplateContext.runAverage(
-          {
-            type: 'weeklyAverage',
-            numWeeks: 4,
-            weekday,
-            directive: 'template',
-            priority: 1,
-          },
-          instance,
-        );
-
-        expect(result).toBe(expected);
-      },
-    );
-  });
-
   describe('runAverage', () => {
     let instance: TestCategoryTemplateContext;
     let originalCurrentMonth: string | null;
@@ -716,6 +676,29 @@ describe('CategoryTemplateContext', () => {
     afterEach(() => {
       global.currentMonth = originalCurrentMonth;
     });
+
+    // January 2024 has five Mondays but only four Fridays.
+    it.each([
+      ['monday', 1250],
+      ['friday', 1000],
+    ] as const)(
+      'budgets a weekly average for every %s in the month',
+      async (weekday, expected) => {
+        vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
+
+        const result = await CategoryTemplateContext.runAverage(
+          {
+            type: 'weeklyAverage',
+            numWeeks: 4,
+            weekday,
+            directive: 'template',
+            priority: 1,
+          },
+          instance,
+        );
+        expect(result).toBe(expected);
+      },
+    );
 
     it('should calculate average of 3 months', async () => {
       const template: Template = {
