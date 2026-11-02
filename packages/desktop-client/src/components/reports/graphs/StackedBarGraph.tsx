@@ -44,7 +44,9 @@ const customLabel = props => {
   const textSize = '12px';
   const showLabel = props.height;
   const showLabelThreshold = 20;
-  const fill = theme.reportsInnerLabel;
+  // A faded bar lets the page show through, so its label is coloured like
+  // text on the page
+  const fill = props.isFaded ? theme.pageText : theme.reportsInnerLabel;
 
   return renderCustomLabel(
     calcX,
@@ -94,7 +96,14 @@ export function StackedBarGraph({
   const privacyMode = usePrivacyMode();
   const format = useFormat();
 
-  const customLabelWithFormat = props => customLabel({ ...props, format });
+  const customLabelWithFormat = props =>
+    customLabel({
+      ...props,
+      format,
+      isFaded:
+        !!data.comparison &&
+        isIntervalInProgress(data.intervalData[props.index]),
+    });
 
   const [pointer, setPointer] = useState('');
   const [tooltip, setTooltip] = useState('');
