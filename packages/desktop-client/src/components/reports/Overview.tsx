@@ -28,6 +28,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import {
   useDashboardPages,
   useDashboardPageWidgets,
+  useLandingDashboardId,
 } from '#hooks/useDashboardPages';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
@@ -106,6 +107,7 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+  const [, setDefaultDashboardId] = useSyncedPref('reports-default-dashboard');
   const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
@@ -130,6 +132,7 @@ export function Overview({ dashboard }: OverviewProps) {
   );
   const { data: dashboardPages = [], isPending: isDashboardPageLoading } =
     useDashboardPages();
+  const landingDashboardId = useLandingDashboardId();
 
   const { data: widgets = [], isPending: isWidgetsLoading } =
     useDashboardPageWidgets(dashboard.id);
@@ -712,6 +715,9 @@ export function Overview({ dashboard }: OverviewProps) {
                               case 'import':
                                 void onImport();
                                 break;
+                              case 'set-default':
+                                setDefaultDashboardId(dashboard.id);
+                                break;
                               case 'delete':
                                 void onDeleteDashboard(dashboard.id);
                                 break;
@@ -739,6 +745,15 @@ export function Overview({ dashboard }: OverviewProps) {
                               disabled: isImporting,
                             },
                             Menu.line,
+                            {
+                              name: 'set-default',
+                              text: t('Set as default'),
+                              // Disabled on the dashboard that /reports opens,
+                              // which shows which one is the default
+                              disabled:
+                                isImporting ||
+                                dashboard.id === landingDashboardId,
+                            },
                             {
                               name: 'delete',
                               text: t('Delete dashboard'),

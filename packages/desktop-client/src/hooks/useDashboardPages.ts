@@ -4,10 +4,23 @@ import type {
 } from '@actual-app/core/types/models';
 import { useQuery } from '@tanstack/react-query';
 
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { dashboardQueries } from '#reports';
 
 export function useDashboardPages() {
   return useQuery(dashboardQueries.listDashboardPages());
+}
+
+// The dashboard that /reports opens: the default one if it still exists,
+// otherwise the first one
+export function useLandingDashboardId() {
+  const { data: dashboardPages = [] } = useDashboardPages();
+  const [defaultDashboardId] = useSyncedPref('reports-default-dashboard');
+  const landingDashboard =
+    dashboardPages.find(
+      dashboardPage => dashboardPage.id === defaultDashboardId,
+    ) ?? dashboardPages[0];
+  return landingDashboard?.id;
 }
 
 export function useDashboardPageWidgets<W extends DashboardWidgetEntity>(

@@ -5,7 +5,10 @@ import { useParams } from 'react-router';
 import { Block } from '@actual-app/components/block';
 import { View } from '@actual-app/components/view';
 
-import { useDashboardPages } from '#hooks/useDashboardPages';
+import {
+  useDashboardPages,
+  useLandingDashboardId,
+} from '#hooks/useDashboardPages';
 import { useNavigate } from '#hooks/useNavigate';
 
 import { LoadingIndicator } from './LoadingIndicator';
@@ -16,13 +19,14 @@ export function ReportsDashboardRouter() {
   const { dashboardId } = useParams<{ dashboardId?: string }>();
   const navigate = useNavigate();
   const { data: dashboardPages = [], isPending } = useDashboardPages();
+  const landingDashboardId = useLandingDashboardId();
 
-  // Redirect to first dashboard if no dashboardId in URL
+  // Redirect to the default dashboard, or the first one, if no dashboardId in URL
   useEffect(() => {
-    if (!dashboardId && !isPending && dashboardPages.length > 0) {
-      void navigate(`/reports/${dashboardPages[0].id}`, { replace: true });
+    if (!dashboardId && !isPending && landingDashboardId) {
+      void navigate(`/reports/${landingDashboardId}`, { replace: true });
     }
-  }, [dashboardId, isPending, dashboardPages, navigate]);
+  }, [dashboardId, isPending, landingDashboardId, navigate]);
 
   // Show loading while we're fetching dashboards or redirecting
   if (isPending || (!dashboardId && dashboardPages.length > 0)) {
