@@ -59,6 +59,12 @@ export function XlsxOptions({ metadata, options, onChange }: XlsxOptionsProps) {
           placeholder={metadata ? String(metadata.headerRow) : '1'}
           onUpdate={value => {
             const headerRow = value === '' ? undefined : Number(value);
+            if (
+              headerRow !== undefined &&
+              (!Number.isInteger(headerRow) || headerRow < 1)
+            ) {
+              return;
+            }
             if (headerRow !== options.headerRow) {
               onChange({ ...options, headerRow });
             }
