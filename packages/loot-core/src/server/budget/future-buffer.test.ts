@@ -191,7 +191,7 @@ describe('future buffer', () => {
     ).toEqual(expect.arrayContaining([{ carryover: 0 }]));
     expect(
       await db.first(
-        'SELECT * FROM zero_budgets WHERE category = ? AND carryover = 1',
+        'SELECT * FROM zero_budgets WHERE category = ? AND carryover IN (1, 2)',
         ['income'],
       ),
     ).toBeNull();
