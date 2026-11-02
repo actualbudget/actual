@@ -29,7 +29,7 @@ import {
 } from './actions';
 import { runScheduleForecast } from './schedule-template';
 import { getActiveSchedules } from './statements';
-import { countWeekdayInMonth } from './weekly-average';
+import { WEEKDAYS } from './weekly-average';
 
 export class CategoryTemplateContext {
   /*----------------------------------------------------------------------------
@@ -218,15 +218,9 @@ export class CategoryTemplateContext {
           }
           break;
         }
-        case 'average': {
-          newBudget = await CategoryTemplateContext.runAverage(template, this);
-          break;
-        }
+        case 'average':
         case 'weeklyAverage': {
-          newBudget = await CategoryTemplateContext.runWeeklyAverage(
-            template,
-            this,
-          );
+          newBudget = await CategoryTemplateContext.runAverage(template, this);
           break;
         }
         default: {
@@ -863,46 +857,54 @@ export class CategoryTemplateContext {
     return Math.max(0, Math.round(monthlyIncome * (percent / 100)));
   }
 
+  // Monthly averages budget the average once. Weekly averages budget it once
+  // per occurrence of the template's weekday in the month, so a month with
+  // five Fridays gets five weeks' worth; adjustments apply per week.
   static async runAverage(
-    template: AverageTemplate,
+    template: AverageTemplate | WeeklyAverageTemplate,
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
-    let average = await getCategoryAverage({
-      month: templateContext.month,
-      maxMonths: template.numMonths,
-      categoryId: templateContext.category.id,
-    });
+    const isWeekly = template.type === 'weeklyAverage';
+    let average = isWeekly
+      ? await getCategoryWeeklyAverage({
+          month: templateContext.month,
+          numWeeks: template.numWeeks,
+          categoryId: templateContext.category.id,
+        })
+      : await getCategoryAverage({
+          month: templateContext.month,
+          maxMonths: template.numMonths,
+          categoryId: templateContext.category.id,
+        });
     // negate as sheet value is cost ie negative
     if (average < 0) {
       average *= -1;
     }
 
-    return Math.round(applyAverageAdjustment(average, template));
-  }
+    if (template.adjustment !== undefined && template.adjustmentType) {
+      switch (template.adjustmentType) {
+        case 'percent': {
+          const adjustmentFactor = 1 + template.adjustment / 100;
+          average = adjustmentFactor * average;
+          break;
+        }
+        case 'fixed': {
+          average += amountToInteger(template.adjustment);
+          break;
+        }
 
-  // Budgets the weekly average once per occurrence of the template's weekday
-  // in the month, so a month with five Fridays gets five weeks' worth.
-  // Adjustments apply to the weekly amount, before multiplying.
-  static async runWeeklyAverage(
-    template: WeeklyAverageTemplate,
-    templateContext: CategoryTemplateContext,
-  ): Promise<number> {
-    let weeklyAverage = await getCategoryWeeklyAverage({
-      month: templateContext.month,
-      numWeeks: template.numWeeks,
-      categoryId: templateContext.category.id,
-    });
-    // negate as spending is negative
-    if (weeklyAverage < 0) {
-      weeklyAverage *= -1;
+        default:
+        //no valid adjustment was found
+      }
     }
 
-    const perWeek = applyAverageAdjustment(weeklyAverage, template);
-    const occurrences = countWeekdayInMonth(
-      templateContext.month,
-      template.weekday,
-    );
-    return Math.round(perWeek * occurrences);
+    const occurrences = isWeekly
+      ? monthUtils.countDayOfWeekInMonth(
+          templateContext.month,
+          WEEKDAYS.indexOf(template.weekday),
+        )
+      : 1;
+    return Math.round(average * occurrences);
   }
 
   static runBy(templateContext: CategoryTemplateContext): {
@@ -1031,22 +1033,4 @@ function redistributeBatch<T extends Template>(
     );
     remaining -= allocated;
   });
-}
-
-function applyAverageAdjustment(
-  amount: number,
-  template: AverageTemplate | WeeklyAverageTemplate,
-): number {
-  if (template.adjustment === undefined || !template.adjustmentType) {
-    return amount;
-  }
-  switch (template.adjustmentType) {
-    case 'percent':
-      return (1 + template.adjustment / 100) * amount;
-    case 'fixed':
-      return amount + amountToInteger(template.adjustment);
-    default:
-      // no valid adjustment was found
-      return amount;
-  }
 }

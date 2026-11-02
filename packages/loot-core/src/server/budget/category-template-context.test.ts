@@ -656,7 +656,7 @@ describe('CategoryTemplateContext', () => {
     });
   });
 
-  describe('runWeeklyAverage', () => {
+  describe('runAverage with a weekly template', () => {
     // October 2026 starts on a Thursday and has 31 days, so it has five
     // Fridays but only four Mondays.
     it.each([
@@ -680,7 +680,7 @@ describe('CategoryTemplateContext', () => {
         );
         vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
 
-        const result = await CategoryTemplateContext.runWeeklyAverage(
+        const result = await CategoryTemplateContext.runAverage(
           {
             type: 'weeklyAverage',
             numWeeks: 4,

@@ -19,19 +19,6 @@ export type WeeklyAverageWindow = {
   numWeeks: number;
 };
 
-// How many times `weekday` falls in `month` (YYYY-MM). Always 4 or 5.
-export function countWeekdayInMonth(month: string, weekday: Weekday): number {
-  const year = Number(month.slice(0, 4));
-  const monthIndex = monthUtils.getMonthIndex(month);
-  const firstWeekday = new Date(year, monthIndex, 1).getDay();
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-  // Days from the 1st to the first occurrence of the target weekday.
-  const offset = (WEEKDAYS.indexOf(weekday) - firstWeekday + 7) % 7;
-  // Every month has 4 full weeks (28 days); the extra 0-3 days decide whether
-  // the weekday appears a fifth time.
-  return offset < daysInMonth - 28 ? 5 : 4;
-}
-
 // The averaging window is the `numWeeks` complete 7-day weeks immediately
 // before the budget month starts. When the budget month hasn't started yet the
 // window ends yesterday instead, so it never includes today (incomplete) or
