@@ -12,11 +12,12 @@ import {
   setBudget,
   setCategoryCarryover,
 } from './actions';
-import { createBudget } from './base';
+import { createAllBudgets, createBudget } from './base';
 
 vi.mock('#server/post');
 beforeEach(global.emptyDatabase());
 afterEach(() => {
+  global.currentMonth = null;
   setSyncingMode('disabled');
 });
 
@@ -103,6 +104,24 @@ it.each(['envelope', 'tracking'] as const)(
     expect(await getSheetBoolean('budget202704', 'carryover-card')).toBe(false);
   },
 );
+
+it('keeps rollover on when a budget opens after its last created month', async () => {
+  global.currentMonth = '2026-01';
+  await setup('envelope');
+  await createAllBudgets();
+  await setCategoryCarryover({
+    startMonth: '2026-01',
+    category: 'card',
+    flag: true,
+  });
+
+  // Reopen two years later, with no transactions to extend the range back
+  global.currentMonth = '2028-01';
+  await sheet.loadSpreadsheet(db);
+  await createAllBudgets();
+  await sheet.waitOnSpreadsheet();
+  expect(await getSheetBoolean('budget202801', 'carryover-card')).toBe(true);
+});
 
 it('preserves a peer flag regardless of delivery order or batching', async () => {
   setSyncingMode('enabled');

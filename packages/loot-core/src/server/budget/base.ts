@@ -71,11 +71,26 @@ async function getLatestAllocatedMonth(): Promise<string | null> {
      JOIN categories c ON c.id = b.category
      WHERE c.tombstone = 0 AND b.amount != 0`,
   );
-  if (!row?.month) {
+  return fromDbMonth(row?.month);
+}
+
+// Rollover stored as 2 reaches later months through each month's
+// `carryover-chain` cell, so the range has to start at or before it.
+async function getEarliestPersistentCarryoverMonth(): Promise<string | null> {
+  const table =
+    getBudgetType() === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+  const row = await db.first<{ month: number | null }>(
+    `SELECT MIN(month) AS month FROM ${table} WHERE carryover = 2`,
+  );
+  return fromDbMonth(row?.month);
+}
+
+function fromDbMonth(month: number | null | undefined): string | null {
+  if (!month) {
     return null;
   }
-  const month = String(row.month);
-  return `${month.slice(0, 4)}-${month.slice(4)}`;
+  const str = String(month);
+  return `${str.slice(0, 4)}-${str.slice(4)}`;
 }
 
 // The day range spanning the given months. They aren't guaranteed to be
@@ -502,12 +517,17 @@ export async function createAllBudgets() {
   const earliestDate =
     earliestTransaction && db.fromDateRepr(earliestTransaction.date);
   const currentMonth = monthUtils.currentMonth();
+  let startMonth = monthUtils.getMonth(earliestDate || currentMonth);
+  const persistentMonth = await getEarliestPersistentCarryoverMonth();
+  if (persistentMonth && persistentMonth < startMonth) {
+    startMonth = persistentMonth;
+  }
 
-  // Get the range based off of the earliest transaction and the
-  // current month. If no transactions currently exist the current
-  // month is also used as the starting month
+  // Get the range based off of the earliest transaction (or persistent
+  // rollover) and the current month. If no transactions currently exist the
+  // current month is also used as the starting month
   const { start, end, range } = getBudgetRange(
-    earliestDate || currentMonth,
+    startMonth,
     currentMonth,
     await getLatestAllocatedMonth(),
   );

@@ -113,6 +113,7 @@ You can automate holding funds from specific income categories for future months
 
 When the _auto hold_ function has been enabled for an income category, this will be indicated by an arrow.
 The income category will be set for automatic holding from the current month until you turn it off.
+Auto hold that was enabled in an earlier version of Actual still stops after about 12 months. Disable and enable it again to keep it on.
 If wanted, the _auto hold_ functionality can be turned off by clicking the income balance and choosing "Disable auto hold".
 
 <img width="724" alt="The Income category with the auto hold arrow next to its amount" src="/img/budgeting/budgeting-auto-hold-indicator@2x.webp" />
