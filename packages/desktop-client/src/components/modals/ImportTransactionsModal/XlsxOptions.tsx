@@ -81,28 +81,32 @@ export function XlsxOptions({ metadata, options, onChange }: XlsxOptionsProps) {
       </label>
       {metadata && (
         <>
-          <Text>
-            <Trans>Select columns that must have a value:</Trans>
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {metadata.columns.map((column, index) => (
-              <LabeledCheckbox
-                key={column}
-                id={`xlsx-required-${index}`}
-                checked={options.requiredColumns?.includes(index) ?? false}
-                onChange={() =>
-                  onChange({
-                    ...options,
-                    requiredColumns: options.requiredColumns?.includes(index)
-                      ? options.requiredColumns.filter(value => value !== index)
-                      : [...(options.requiredColumns ?? []), index],
-                  })
-                }
-              >
-                {column}
-              </LabeledCheckbox>
-            ))}
-          </View>
+          <fieldset style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }}>
+            <legend style={{ padding: 0, marginBottom: 8 }}>
+              <Trans>Select columns that must have a value:</Trans>
+            </legend>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+              {metadata.columns.map((column, index) => (
+                <LabeledCheckbox
+                  key={column}
+                  id={`xlsx-required-${index}`}
+                  checked={options.requiredColumns?.includes(index) ?? false}
+                  onChange={() =>
+                    onChange({
+                      ...options,
+                      requiredColumns: options.requiredColumns?.includes(index)
+                        ? options.requiredColumns.filter(
+                            value => value !== index,
+                          )
+                        : [...(options.requiredColumns ?? []), index],
+                    })
+                  }
+                >
+                  {column}
+                </LabeledCheckbox>
+              ))}
+            </View>
+          </fieldset>
           <Text>
             <Trans>
               Rows excluded for missing values:{' '}
