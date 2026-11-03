@@ -349,7 +349,14 @@ describe('isSafeImportAmount', () => {
 describe('parseAmountFields unparseable amounts', () => {
   it('rejects a non-empty unparseable amount string', () => {
     expect(
-      parseAmountFields({ amount: 'abc' }, false, false, '', false, ''),
+      parseAmountFields(
+        { amount: 'abc' } as unknown as Partial<ImportTransaction>,
+        false,
+        false,
+        '',
+        false,
+        '',
+      ),
     ).toEqual({ amount: null, outflow: null, inflow: null });
   });
 
@@ -368,7 +375,14 @@ describe('parseAmountFields unparseable amounts', () => {
 
   it('keeps coercing an empty amount to 0', () => {
     expect(
-      parseAmountFields({ amount: '' }, false, false, '', false, ''),
+      parseAmountFields(
+        { amount: '' } as unknown as Partial<ImportTransaction>,
+        false,
+        false,
+        '',
+        false,
+        '',
+      ),
     ).toEqual({ amount: 0, outflow: null, inflow: null });
   });
 

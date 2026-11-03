@@ -299,8 +299,9 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
-      // trx_ids rejected because their amount cannot be represented; used to
-      // keep these rows out of the displayed preview so they cannot block the
+      // trx_ids rejected during validation — amounts that cannot be
+      // represented, or amount fields present but unparseable; used to keep
+      // these rows out of the displayed preview so they cannot block the
       // import.
       const skippedUnsafeIds: string[] = [];
       const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
@@ -351,7 +352,8 @@ export function ImportTransactionsModal({
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
-          break;
+          skippedIds.push(trans.trx_id);
+          continue;
         }
         if (!isSafeImportAmount(amount)) {
           console.log(
