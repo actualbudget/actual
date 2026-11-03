@@ -83,6 +83,11 @@ export async function createScheduleList(
         ? fromDateRepr(storedNextDateRepr)
         : null;
     const rule = await getRuleForSchedule(sid);
+    if (!rule) {
+      throw new Error(
+        `Schedule ${scheduleName} has no associated rule. Repair the schedule's rule, or remove this schedule template.`,
+      );
+    }
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);

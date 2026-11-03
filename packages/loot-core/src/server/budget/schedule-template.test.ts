@@ -182,6 +182,25 @@ describe('createScheduleList', () => {
     ).rejects.toThrow('has no amount condition');
   });
 
+  it('throws a clear error when the schedule has no associated rule', async () => {
+    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
+    vi.mocked(getRuleForSchedule).mockResolvedValue(
+      undefined as unknown as Rule,
+    );
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
+
+    const template = {
+      type: 'schedule',
+      name: 'Test Schedule',
+      priority: 0,
+      directive: 'template',
+    } as const;
+
+    await expect(
+      createScheduleList([template], '2024-08-01', defaultCategory),
+    ).rejects.toThrow('has no associated rule');
+  });
+
   it('throws a clear error when the schedule rule has no date condition', async () => {
     vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
     vi.mocked(getRuleForSchedule).mockResolvedValue(
