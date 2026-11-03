@@ -36,4 +36,28 @@ describe('DateSelect', () => {
     expect(onSelect).toHaveBeenCalled();
     expect(document.activeElement).toBe(input);
   });
+
+  it('keeps the picker closed after picking a day when it opened without input focus', async () => {
+    const user = userEvent.setup();
+    const onSelect = vi.fn();
+
+    render(
+      <DateSelect
+        value="2026-11-01"
+        dateFormat="yyyy-MM-dd"
+        isOpen
+        onSelect={onSelect}
+      />,
+    );
+
+    // The picker is open, but the input was never focused.
+    const dayButton = await screen.findByText('10');
+    await user.click(dayButton);
+
+    expect(onSelect).toHaveBeenCalled();
+    expect(document.activeElement).toBe(screen.getByRole('textbox'));
+    // The focus restoration must not re-open the picker that the
+    // selection just closed.
+    expect(screen.queryByTestId('date-select-tooltip')).toBeNull();
+  });
 });
