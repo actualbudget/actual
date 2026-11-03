@@ -190,7 +190,12 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
+  const result = simpleSync.sync(messages, since, groupId);
+  if (result.error) {
+    res.status(400).send(result.error);
+    return;
+  }
+  const { trie, newMessages } = result;
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),
