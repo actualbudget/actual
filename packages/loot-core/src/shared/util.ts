@@ -580,15 +580,29 @@ export function looselyParseAmount(amount: string) {
   }
 
   // Scientific notation (e.g. "-1.26E-06" from forex exports): parse the
-  // mantissa as a normal amount, then apply the exponent (#9415). Checked
-  // after the sign normalization so "(1.26E-06)" / "−1.26E-06" also match.
+  // mantissa, then apply the exponent (#9415). Checked after the sign
+  // normalization so "(1.26E-06)" / "−1.26E-06" also match.
   const scientific = amount.match(/^(.*)e([+-]?\d+)$/i);
   if (scientific) {
-    const mantissa = looselyParseAmount(scientific[1]);
-    if (mantissa === null) {
+    // Inside scientific notation the mantissa is a plain decimal number, so
+    // its last separator is the decimal marker even when three digits follow
+    // it: `1.234e2` is 123.4, not the thousands-grouped 1234e2.
+    const mantissaText = scientific[1].replace(/[^0-9.,-]/g, '');
+    const lastSeparator = Math.max(
+      mantissaText.lastIndexOf('.'),
+      mantissaText.lastIndexOf(','),
+    );
+    const mantissa =
+      lastSeparator === -1
+        ? mantissaText
+        : mantissaText.slice(0, lastSeparator).replace(/[.,]/g, '') +
+          '.' +
+          mantissaText.slice(lastSeparator + 1).replace(/[.,]/g, '');
+    const mantissaValue = parseFloat(mantissa);
+    if (Number.isNaN(mantissaValue)) {
       return null;
     }
-    return safeNumber(parseFloat(`${mantissa}e${scientific[2]}`));
+    return safeNumber(parseFloat(`${mantissaValue}e${scientific[2]}`));
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4+ decimal places.

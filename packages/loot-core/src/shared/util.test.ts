@@ -70,6 +70,11 @@ describe('utility functions', () => {
       15,
     );
     expect(looselyParseAmount('(1.26E-06)')).toBeCloseTo(-1.26e-6, 15);
+    // A three-digit fraction is still a decimal inside scientific notation,
+    // not a thousands group.
+    expect(looselyParseAmount('1.234e2')).toBeCloseTo(123.4, 10);
+    expect(looselyParseAmount('1,234E+02')).toBeCloseTo(123.4, 10);
+    expect(looselyParseAmount('-2.500E+03')).toBeCloseTo(-2500, 10);
   });
 
   test('looseParseAmount works with more than 9 decimal places', () => {
