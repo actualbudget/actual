@@ -52,12 +52,7 @@ export async function createScheduleList(
     // for notes-source templates (and legacy ui-source data) that only carry
     // the name.
     // next_date mirrors the v_schedules view's computed column.
-    const {
-      id: sid,
-      name: scheduleName,
-      completed,
-      next_date: storedNextDateRepr,
-    } = await db.first<
+    const schedule = await db.first<
       Pick<db.DbSchedule, 'id' | 'name' | 'completed'> & {
         next_date: number | null;
       }
@@ -72,6 +67,17 @@ export async function createScheduleList(
        WHERE ${template.scheduleId ? 's.id = ?' : 'TRIM(s.name) = ?'} AND s.tombstone = 0`,
       [template.scheduleId ?? template.name],
     );
+    if (!schedule) {
+      throw new Error(
+        `Schedule ${template.name ?? template.scheduleId} does not exist`,
+      );
+    }
+    const {
+      id: sid,
+      name: scheduleName,
+      completed,
+      next_date: storedNextDateRepr,
+    } = schedule;
     const storedNextDate =
       typeof storedNextDateRepr === 'number'
         ? fromDateRepr(storedNextDateRepr)
@@ -80,6 +86,16 @@ export async function createScheduleList(
     const conditions = rule.serialize().conditions;
     const { date: dateConditions, amount: amountCondition } =
       extractScheduleConds(conditions);
+    if (!amountCondition) {
+      throw new Error(
+        `Schedule ${scheduleName} has no amount condition. Add an amount criterion to the schedule's rule, or remove this schedule template.`,
+      );
+    }
+    if (!dateConditions) {
+      throw new Error(
+        `Schedule ${scheduleName} has no date condition. Add a date criterion to the schedule's rule, or remove this schedule template.`,
+      );
+    }
     let scheduleAmount =
       amountCondition.op === 'isbetween'
         ? Math.round(amountCondition.value.num1 + amountCondition.value.num2) /

@@ -136,6 +136,78 @@ describe('createScheduleList', () => {
     expect(t[0].dateConditions).toBeDefined();
     expect(t[0].dateConditions.value.frequency).toBe('monthly');
   });
+
+  it('throws a clear error when the schedule rule has no amount condition', async () => {
+    // Regression test for #9126: deleting the amount criterion from a
+    // schedule's rule used to crash template application with the opaque
+    // "Cannot read properties of null (reading 'op')".
+    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
+    vi.mocked(getRuleForSchedule).mockResolvedValue(
+      new Rule({
+        id: 'r',
+        stage: 'pre',
+        conditionsOp: 'and',
+        conditions: [
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2024-08-01',
+              interval: 1,
+              frequency: 'monthly',
+              patterns: [],
+              skipWeekend: false,
+              weekendSolveMode: 'before',
+              endMode: 'never',
+              endOccurrences: 1,
+              endDate: '2099-01-01',
+            },
+            type: 'date',
+          },
+        ],
+        actions: [],
+      }),
+    );
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
+
+    const template = {
+      type: 'schedule',
+      name: 'Test Schedule',
+      priority: 0,
+      directive: 'template',
+    } as const;
+
+    await expect(
+      createScheduleList([template], '2024-08-01', defaultCategory),
+    ).rejects.toThrow('has no amount condition');
+  });
+
+  it('throws a clear error when the schedule rule has no date condition', async () => {
+    vi.mocked(db.first).mockResolvedValue({ id: 1, completed: 0 });
+    vi.mocked(getRuleForSchedule).mockResolvedValue(
+      new Rule({
+        id: 'r',
+        stage: 'pre',
+        conditionsOp: 'and',
+        conditions: [
+          { op: 'is', field: 'amount', value: -10000, type: 'number' },
+        ],
+        actions: [],
+      }),
+    );
+    vi.mocked(isTrackingBudget).mockReturnValue(false);
+
+    const template = {
+      type: 'schedule',
+      name: 'Test Schedule',
+      priority: 0,
+      directive: 'template',
+    } as const;
+
+    await expect(
+      createScheduleList([template], '2024-08-01', defaultCategory),
+    ).rejects.toThrow('has no date condition');
+  });
 });
 
 describe('buildMonthlyOutflow', () => {
