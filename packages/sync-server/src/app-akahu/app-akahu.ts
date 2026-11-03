@@ -6,8 +6,6 @@ import type {
   PendingTransaction,
   Transaction,
 } from 'akahu';
-// For some reason this is not provided in the provided index.d.ts file
-import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -320,11 +318,7 @@ function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-type AnyTransaction =
-  | Transaction
-  | EnrichedTransaction
-  | PendingTransaction
-  | EnrichedPendingTransaction;
+type AnyTransaction = Transaction | EnrichedTransaction | PendingTransaction;
 
 function getPayeeName(trans: AnyTransaction): string {
   return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
@@ -345,7 +339,7 @@ function getOtherAccount(trans: AnyTransaction): string | undefined {
 }
 
 function processPendingTransaction(
-  trans: PendingTransaction | EnrichedPendingTransaction,
+  trans: PendingTransaction,
   account: Account,
 ): AkahuTransaction {
   const transactionDate = new Date(trans.date);

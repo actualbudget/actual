@@ -17,6 +17,7 @@ export const OS: typeof T.OS = isWindows
       : 'unknown';
 export const env: typeof T.env = 'unknown';
 export const isBrowser: typeof T.isBrowser = false;
+export const isNativeMobileApp: typeof T.isNativeMobileApp = false;
 
 export const isIOSAgent: typeof T.isIOSAgent = false;
 export const isIOS: typeof T.isIOS = false;
