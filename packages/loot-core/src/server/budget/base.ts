@@ -89,6 +89,19 @@ async function getEarliestPersistentCarryoverMonth(): Promise<string | null> {
   return fromDbMonth(row?.month);
 }
 
+// A frozen month keeps the buffer it closed with. The range has to keep it
+// once automatic "For next month" is off, when the start month no longer
+// reaches back to it.
+async function getEarliestFrozenMonth(): Promise<string | null> {
+  if (getBudgetType() === 'tracking') {
+    return null;
+  }
+  const row = await db.first<{ month: string | null }>(
+    'SELECT MIN(id) AS month FROM zero_budget_months WHERE frozen = 1',
+  );
+  return row?.month ?? null;
+}
+
 function fromDbMonth(month: number | null | undefined): string | null {
   if (!month) {
     return null;
@@ -581,10 +594,15 @@ export async function createAllBudgets() {
   // rollover) and the current month. If no transactions currently exist the
   // current month is also used as the starting month. It also reaches back to
   // automatic "For next month"'s start month, so every month it freezes
-  // has a sheet.
-  const futureBufferStart = await getFutureBufferStart();
-  if (futureBufferStart && futureBufferStart < startMonth) {
-    startMonth = futureBufferStart;
+  // has a sheet, and to the earliest frozen month, so turning the mode off
+  // doesn't drop those months from the next cold load.
+  for (const month of [
+    await getFutureBufferStart(),
+    await getEarliestFrozenMonth(),
+  ]) {
+    if (month && month < startMonth) {
+      startMonth = month;
+    }
   }
   const { start, end, range } = getBudgetRange(
     startMonth,
