@@ -163,6 +163,8 @@ export function getSyncError(error: string, id: string, meta?: unknown) {
     return `Budget "${id}" not found. Check the ID of your budget in the Advanced section of the settings page.`;
   } else if (error === 'clock-drift') {
     return 'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
+  } else if (error === 'out-of-sync') {
+    return `The local copy of budget "${id}" is out of sync with the server. Delete the "${id}" folder from your data directory and download the budget again (any changes not yet synced to the server will be lost).`;
   } else {
     return `We had an unknown problem opening "${id}".`;
   }
