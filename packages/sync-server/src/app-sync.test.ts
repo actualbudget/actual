@@ -1594,8 +1594,11 @@ describe('/sync', () => {
     syncRequest.messages = [createMessage(futureTimestamp())];
 
     vi.useFakeTimers({ toFake: ['Date'], now: Date.now() + 2 * DAY_MS });
-    await sendSyncRequest(syncRequest);
-    vi.useRealTimers();
+    try {
+      await sendSyncRequest(syncRequest);
+    } finally {
+      vi.useRealTimers();
+    }
 
     const res = await sendSyncRequest(syncRequest);
 
