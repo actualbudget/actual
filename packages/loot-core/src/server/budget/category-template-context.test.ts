@@ -1936,6 +1936,33 @@ describe('CategoryTemplateContext', () => {
       vi.mocked(statements.getActiveSchedules).mockResolvedValue([
         { name: 'Rent', id: 's1' },
       ] as Awaited<ReturnType<typeof statements.getActiveSchedules>>);
+      vi.mocked(getRuleForSchedule).mockResolvedValue(
+        new Rule({
+          id: 'r1',
+          stage: 'pre',
+          conditionsOp: 'and',
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2024-01-15',
+                interval: 1,
+                frequency: 'monthly',
+                patterns: [],
+                skipWeekend: false,
+                weekendSolveMode: 'before',
+                endMode: 'never',
+                endOccurrences: 1,
+                endDate: '2099-01-01',
+              },
+              type: 'date',
+            },
+            { op: 'is', field: 'amount', value: -10000, type: 'number' },
+          ],
+          actions: [],
+        }),
+      );
       const templates: Template[] = [
         {
           type: 'schedule',

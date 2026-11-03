@@ -1,7 +1,9 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { getRuleForSchedule } from '#server/schedules/app';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { extractScheduleConds } from '#shared/schedules';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type {
@@ -474,26 +476,43 @@ export class CategoryTemplateContext {
     //check schedule existence (prefer scheduleId, fall back to name)
     const activeSchedules = await getActiveSchedules();
     const scheduleIds = new Set(activeSchedules.map(s => s.id));
-    const scheduleNames = new Set(
-      activeSchedules.map(s => s.name?.trim()).filter(Boolean),
+    const scheduleNameById = new Map(
+      activeSchedules.map(s => [s.id, s.name?.trim()]),
     );
-    templates
-      .filter(t => t.type === 'schedule')
-      .forEach(t => {
-        if (t.scheduleId) {
-          if (!scheduleIds.has(t.scheduleId)) {
-            throw new Error(
-              `Schedule ${t.name ?? t.scheduleId} does not exist`,
-            );
-          }
-        } else if (t.name) {
-          if (!scheduleNames.has(t.name.trim())) {
-            throw new Error(`Schedule ${t.name.trim()} does not exist`);
-          }
-        } else {
-          throw new Error('Schedule template has no scheduleId or name');
-        }
-      });
+    const scheduleIdByName = new Map(
+      activeSchedules
+        .filter(s => s.name?.trim())
+        .map(s => [s.name.trim(), s.id]),
+    );
+    for (const t of templates.filter(t => t.type === 'schedule')) {
+      const scheduleId = t.scheduleId ?? scheduleIdByName.get(t.name?.trim());
+      if (!scheduleId || !scheduleIds.has(scheduleId)) {
+        throw new Error(
+          t.scheduleId || t.name
+            ? `Schedule ${t.name ?? t.scheduleId} does not exist`
+            : 'Schedule template has no scheduleId or name',
+        );
+      }
+      // Check the rule here (init) so a schedule missing its amount or date
+      // criterion reports through the template-errors notification instead of
+      // rejecting applyTemplate from the priority loop (#9126).
+      const conditions = (
+        await getRuleForSchedule(scheduleId)
+      ).serialize().conditions;
+      const { amount: amountCondition, date: dateConditions } =
+        extractScheduleConds(conditions);
+      const scheduleName = scheduleNameById.get(scheduleId) ?? t.name;
+      if (!amountCondition) {
+        throw new Error(
+          `Schedule ${scheduleName} has no amount condition. Add an amount criterion to the schedule's rule, or remove this schedule template.`,
+        );
+      }
+      if (!dateConditions) {
+        throw new Error(
+          `Schedule ${scheduleName} has no date condition. Add a date criterion to the schedule's rule, or remove this schedule template.`,
+        );
+      }
+    }
     //find lowest priority
     const lowestPriority = Math.min(
       ...templates
