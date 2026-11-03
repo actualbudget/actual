@@ -14,7 +14,9 @@ import { mutator, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
 import { Rule } from '#server/rules';
 import { addSyncListener, batchMessages } from '#server/sync';
+import { batchUpdateTransactions } from '#server/transactions';
 import {
+  applyActions,
   getRules,
   insertRule,
   ruleModel,
@@ -39,6 +41,7 @@ import type {
   RuleActionEntity,
   RuleConditionEntity,
   ScheduleEntity,
+  TransactionEntity,
 } from '#types/models';
 
 import { findSchedules } from './find-schedules';
@@ -507,6 +510,56 @@ export async function skipNextDate({ id }) {
   return setNextDate({ id, advance: true });
 }
 
+// Rule actions that are safe to replay on a transaction the user links to a
+// schedule by hand. Split and delete actions are left out on purpose: they
+// restructure or remove the transaction, which is surprising for a "link".
+function isReplayableOnManualLink(action: RuleActionEntity) {
+  return (
+    action.op === 'set' ||
+    action.op === 'prepend-notes' ||
+    action.op === 'append-notes'
+  );
+}
+
+/**
+ * Link transactions to a schedule and apply the schedule rule's other
+ * actions (e.g. "set category") to them, the same way an automatic match
+ * would have.
+ */
+export async function linkTransactionsToSchedule({
+  ids,
+  scheduleId,
+}: {
+  ids: Array<TransactionEntity['id']>;
+  scheduleId: ScheduleEntity['id'];
+}) {
+  await batchUpdateTransactions({
+    updated: ids.map(id => ({ id, schedule: scheduleId })),
+  });
+
+  const rule = await getRuleForSchedule(scheduleId);
+  const extraActions = rule
+    ? rule.serialize().actions.filter(isReplayableOnManualLink)
+    : [];
+
+  if (extraActions.length === 0) {
+    return;
+  }
+
+  // `inline` returns only non-parent rows, so split parents are skipped and
+  // their children keep their own categories.
+  const { data: transactions } = await aqlQuery(
+    q('transactions')
+      .filter({ id: { $oneof: ids } })
+      .select('*')
+      .options({ splits: 'inline' }),
+  );
+
+  if (transactions.length > 0) {
+    await applyActions(transactions, extraActions);
+  }
+}
+
 function discoverSchedules() {
   return findSchedules();
 }
@@ -831,6 +884,7 @@ export type SchedulesHandlers = {
   'schedule/delete': typeof deleteSchedule;
   'schedule/move': typeof moveSchedule;
   'schedule/skip-next-date': typeof skipNextDate;
+  'schedule/link-transactions': typeof linkTransactionsToSchedule;
   'schedule/post-transaction': typeof postTransactionForSchedule;
   'schedule/force-run-service': typeof advanceSchedulesService;
   'schedule/discover': typeof discoverSchedules;
@@ -845,6 +899,10 @@ app.method('schedule/update', mutator(undoable(updateSchedule)));
 app.method('schedule/delete', mutator(undoable(deleteSchedule)));
 app.method('schedule/move', mutator(undoable(moveSchedule)));
 app.method('schedule/skip-next-date', mutator(undoable(skipNextDate)));
+app.method(
+  'schedule/link-transactions',
+  mutator(undoable(linkTransactionsToSchedule)),
+);
 app.method(
   'schedule/post-transaction',
   mutator(undoable(postTransactionForSchedule)),

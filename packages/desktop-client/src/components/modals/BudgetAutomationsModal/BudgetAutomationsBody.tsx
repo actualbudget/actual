@@ -389,6 +389,7 @@ export function BudgetAutomationsBody({
             <EmptyState onAdd={onAddAutomation} />
           ) : (
             <AutomationEditorPane
+              categoryId={categoryId}
               entries={entries}
               activeIdx={safeActiveIdx}
               automationErrors={automationErrors}
