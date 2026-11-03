@@ -18,7 +18,7 @@ import {
   setBuffer,
   setCategoryCarryover,
 } from './actions';
-import { createBudget } from './base';
+import { createAllBudgets, createBudget } from './base';
 import { freezeClosedMonths } from './freeze';
 import { setFutureBufferMode } from './future-buffer-mode';
 
@@ -45,8 +45,7 @@ function setMode(mode: 'manual' | 'automatic') {
   return runMutator(() => setFutureBufferMode({ mode }));
 }
 
-async function setup() {
-  global.currentMonth = '2026-10';
+async function createCategories() {
   await db.insertAccount({ id: 'account', name: 'Account' });
   await db.insertCategoryGroup({
     id: 'income-group',
@@ -61,8 +60,17 @@ async function setup() {
   });
   await db.insertCategoryGroup({ id: 'group', name: 'Group' });
   await db.insertCategory({ id: 'bills', name: 'Bills', cat_group: 'group' });
+}
+
+async function openBudget() {
   await sheet.loadSpreadsheet(db);
   sheet.get().meta().budgetType = 'envelope';
+}
+
+async function setup() {
+  global.currentMonth = '2026-10';
+  await createCategories();
+  await openBudget();
   await createBudget(WINDOW);
   await db.insertTransaction({
     date: '2026-10-01',
@@ -214,5 +222,37 @@ describe('future buffer', () => {
     ).toEqual({ value: null });
     expect(monthRow('2026-10')?.buffered).toBe(200000);
     expect(monthRow('2026-11')?.buffered).toBe(50000);
+  });
+
+  it('keeps closed months on a cold load after turning automatic mode off', async () => {
+    // Budgeted in January, with no transaction until May
+    global.currentMonth = '2026-01';
+    await createCategories();
+    await openBudget();
+    await createAllBudgets();
+    await setBudget({ category: 'bills', month: '2026-01', amount: 10000 });
+    await setMode('automatic');
+    global.currentMonth = '2026-05';
+    await db.insertTransaction({
+      date: '2026-05-10',
+      amount: 20000,
+      account: 'account',
+      category: 'income',
+    });
+    await createAllBudgets();
+    await setMode('manual');
+    await sheet.waitOnSpreadsheet();
+    expect(monthRow('2026-01')).toEqual({
+      id: '2026-01',
+      buffered: 0,
+      frozen: 1,
+    });
+    expect(await toBudget('2026-05')).toBe(10000);
+
+    sheet.unloadSpreadsheet();
+    await openBudget();
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+    expect(await toBudget('2026-05')).toBe(10000);
   });
 });
