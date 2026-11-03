@@ -59,6 +59,7 @@ describe('dashboard-update', () => {
       height: 2,
       x,
       y: 0,
+      meta: { content: 'test content' },
       dashboard_page_id: 'dashboard-page-id',
     });
   }
@@ -184,6 +185,39 @@ describe('dashboard metadata validation', () => {
         ]),
       ),
     ).rejects.toThrow('custom-report widget requires meta.id');
+  });
+
+  it('rejects updating markdown-card widget to null metadata', async () => {
+    await db.insertWithSchema('dashboard', {
+      id: 'markdown-widget-1',
+      type: 'markdown-card',
+      width: 4,
+      height: 2,
+      x: 0,
+      y: 0,
+      dashboard_page_id: 'dashboard-page-id',
+      meta: { content: 'hello' },
+    });
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-update-widget']({
+          id: 'markdown-widget-1',
+          meta: null,
+        }),
+      ),
+    ).rejects.toThrow('markdown-card widget requires meta.content');
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-update']([
+          {
+            id: 'markdown-widget-1',
+            meta: null,
+          },
+        ]),
+      ),
+    ).rejects.toThrow('markdown-card widget requires meta.content');
   });
 
   it('preserves valid partial updates on custom-report widget without meta', async () => {

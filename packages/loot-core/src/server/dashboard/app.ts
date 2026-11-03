@@ -187,9 +187,7 @@ async function updateDashboard(
       meta: widget.meta !== undefined ? widget.meta : existingMeta,
     };
 
-    if (merged.type === 'custom-report') {
-      validateWidgetMeta(merged);
-    }
+    validateWidgetMeta(merged);
   }
 
   await batchMessages(async () => {
@@ -225,9 +223,7 @@ async function updateDashboardWidget(
     meta: widget.meta !== undefined ? widget.meta : existingMeta,
   };
 
-  if (merged.type === 'custom-report') {
-    validateWidgetMeta(merged);
-  }
+  validateWidgetMeta(merged);
 
   await db.updateWithSchema('dashboard', widget);
 }

@@ -563,9 +563,10 @@ export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
     }
   }
 
-  const { meta = null, ...restWidget } = widget;
+  const { meta = null, x, y, ...restWidget } = widget;
   return send('dashboard-add-widget', {
     ...restWidget,
+    ...(x !== undefined && y !== undefined ? { x, y } : {}),
     meta,
     dashboard_page_id: dashboardPageId,
   });
