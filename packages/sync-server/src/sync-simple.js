@@ -11,21 +11,9 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
-// A client with a badly drifted clock can send a timestamp far in the
-// future, which would otherwise get baked into the shared merkle trie
-// forever and break sync for every device in the group.
-const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000; // 1 day
-
-export const CLOCK_DRIFT_ERROR_CODE = 'clock-drift';
-export const INVALID_TIMESTAMP_ERROR_CODE = 'invalid-timestamp';
-
-function createSyncError(code, message) {
-  return Object.assign(new Error(message), { code });
-}
-
-function isTimestampTooFarInFuture(parsed) {
-  return parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
-}
+// A far-future timestamp would be stored in the merkle trie and break sync
+// for every other device in the group.
+const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000;
 
 function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
@@ -53,26 +41,14 @@ function addMessages(db, messages) {
           [msg.timestamp, msg.isEncrypted ? 1 : 0, Buffer.from(msg.content)],
         );
 
-        // Check new messages for invalid timestamps
         if (info.changes > 0) {
-          const parsed = Timestamp.parse(msg.timestamp);
-
-          if (!parsed) {
-            throw createSyncError(
-              INVALID_TIMESTAMP_ERROR_CODE,
-              'Rejecting sync message with invalid timestamp: ' + msg.timestamp,
-            );
+          const timestamp = Timestamp.parse(msg.timestamp);
+          const error = getTimestampError(timestamp);
+          if (error) {
+            // Throwing rolls back the transaction
+            throw Object.assign(new Error(error), { rejectedReason: error });
           }
-
-          if (isTimestampTooFarInFuture(parsed)) {
-            throw createSyncError(
-              CLOCK_DRIFT_ERROR_CODE,
-              'Rejecting sync message with timestamp too far in the future: ' +
-                msg.timestamp,
-            );
-          }
-
-          trie = merkle.insert(trie, parsed);
+          trie = merkle.insert(trie, timestamp);
         }
       }
     }
@@ -88,6 +64,16 @@ function addMessages(db, messages) {
   });
 
   return returnValue;
+}
+
+function getTimestampError(timestamp) {
+  if (!timestamp) {
+    return 'invalid-timestamp';
+  }
+  if (timestamp.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS) {
+    return 'clock-drift';
+  }
+  return null;
 }
 
 function getMerkle(db) {
@@ -124,6 +110,11 @@ export function sync(messages, since, groupId) {
         }),
       ),
     };
+  } catch (e) {
+    if (e.rejectedReason) {
+      return { error: e.rejectedReason };
+    }
+    throw e;
   } finally {
     db.close();
   }

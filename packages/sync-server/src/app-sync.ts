@@ -188,20 +188,12 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  let trie, newMessages;
-  try {
-    ({ trie, newMessages } = simpleSync.sync(messages, since, groupId));
-  } catch (e) {
-    if (e.code === simpleSync.CLOCK_DRIFT_ERROR_CODE) {
-      res.status(400).send('clock-drift');
-      return;
-    }
-    if (e.code === simpleSync.INVALID_TIMESTAMP_ERROR_CODE) {
-      res.status(400).send('invalid-timestamp');
-      return;
-    }
-    throw e;
+  const result = simpleSync.sync(messages, since, groupId);
+  if (result.error) {
+    res.status(400).send(result.error);
+    return;
   }
+  const { trie, newMessages } = result;
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),
