@@ -69,7 +69,7 @@ function getTimestampError(timestamp) {
   if (!timestamp) {
     return 'invalid-timestamp';
   }
-  if (timestamp.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS) {
+  if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
     return 'clock-drift';
   }
   return null;

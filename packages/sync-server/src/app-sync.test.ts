@@ -1592,8 +1592,8 @@ describe('/sync', () => {
   );
 
   it.each([
-    { offset: 5 * 60 * 1000 - 1, status: 200 },
-    { offset: 5 * 60 * 1000, status: 400 },
+    { offset: 5 * 60 * 1000, status: 200 },
+    { offset: 5 * 60 * 1000 + 1, status: 400 },
   ])(
     'returns $status for a message $offset ms ahead',
     async ({ offset, status }) => {
