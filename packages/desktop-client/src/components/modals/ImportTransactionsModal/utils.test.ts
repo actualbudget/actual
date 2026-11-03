@@ -7,6 +7,7 @@ import {
 import {
   filterByStartDate,
   isSafeImportAmount,
+  parseAmountFields,
   parseCategoryFields,
   parseDate,
 } from './utils';
@@ -342,5 +343,40 @@ describe('isSafeImportAmount', () => {
     expect(isSafeImportAmount(maxSafeAmount)).toBe(true);
     expect(isSafeImportAmount(-maxSafeAmount)).toBe(true);
     expect(isSafeImportAmount(100.5)).toBe(true);
+  });
+});
+
+describe('parseAmountFields unparseable amounts', () => {
+  it('rejects a non-empty unparseable amount string', () => {
+    expect(
+      parseAmountFields({ amount: 'abc' }, false, false, '', false, ''),
+    ).toEqual({ amount: null, outflow: null, inflow: null });
+  });
+
+  it('rejects a non-empty unparseable outflow in split mode', () => {
+    expect(
+      parseAmountFields(
+        { outflow: 'abc' } as Partial<ImportTransaction>,
+        true,
+        false,
+        '',
+        false,
+        '',
+      ),
+    ).toEqual({ amount: null, outflow: null, inflow: null });
+  });
+
+  it('keeps coercing an empty amount to 0', () => {
+    expect(
+      parseAmountFields({ amount: '' }, false, false, '', false, ''),
+    ).toEqual({ amount: 0, outflow: null, inflow: null });
+  });
+
+  it('keeps coercing a missing amount to 0', () => {
+    expect(parseAmountFields({}, false, false, '', false, '')).toEqual({
+      amount: 0,
+      outflow: null,
+      inflow: null,
+    });
   });
 });

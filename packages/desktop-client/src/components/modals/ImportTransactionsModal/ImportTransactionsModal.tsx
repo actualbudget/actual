@@ -547,8 +547,10 @@ export function ImportTransactionsModal({
     setSplitMode(isSplit);
 
     // Run auto-detection on the fields to try to detect the fields
-    // automatically
-    const mappings = getInitialMappings(transactions);
+    // automatically. Use the original parsed rows: if every row was
+    // filtered out of the preview (e.g. all amounts oversized), the mapping
+    // controls must stay usable so the user can correct the fields.
+    const mappings = getInitialMappings(parsedTransactions);
 
     const newFieldMappings = isSplit
       ? {
@@ -929,6 +931,11 @@ export function ImportTransactionsModal({
     fieldMappings,
     parseDateFormat,
     reimportDeleted,
+    multiplierAmount,
+    splitMode,
+    flipAmount,
+    inOutMode,
+    outValue,
   ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [

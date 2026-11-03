@@ -236,17 +236,34 @@ export function parseAmountFields(
     inflow: 0,
   };
 
+  // An amount field that is present but unparseable (e.g. stray text) must
+  // surface as "no amount" rather than silently coercing to 0, the same way
+  // an oversized amount is rejected: importing such a row as 0 would corrupt
+  // the data it stands for.
+  const unparseable = (raw: unknown, parsed: number | null) =>
+    parsed === null && String(raw ?? '').trim() !== '';
+
   // Determine the base value of the transaction from the amount or inflow/outflow fields
   if (splitMode && !inOutMode) {
     // Split mode is a little weird; first we look for an outflow and
     // if that has a value, we never want to show a number in the
     // inflow. Same for `amount`; we choose outflow first and then inflow
-    value.outflow = parseAmount(trans.outflow, n => -Math.abs(n)) || 0;
-    value.inflow = value.outflow
-      ? 0
-      : parseAmount(trans.inflow, n => Math.abs(n)) || 0;
+    const parsedOutflow = parseAmount(trans.outflow, n => -Math.abs(n));
+    if (unparseable(trans.outflow, parsedOutflow)) {
+      return { amount: null, inflow: null, outflow: null };
+    }
+    value.outflow = parsedOutflow || 0;
+    const parsedInflow = parseAmount(trans.inflow, n => Math.abs(n));
+    if (unparseable(trans.inflow, parsedInflow)) {
+      return { amount: null, inflow: null, outflow: null };
+    }
+    value.inflow = value.outflow ? 0 : parsedInflow || 0;
   } else {
-    const amount = parseAmount(trans.amount, n => n) || 0;
+    const parsedAmount = parseAmount(trans.amount, n => n);
+    if (unparseable(trans.amount, parsedAmount)) {
+      return { amount: null, inflow: null, outflow: null };
+    }
+    const amount = parsedAmount || 0;
     if (amount >= 0) value.inflow = amount;
     else value.outflow = amount;
   }
