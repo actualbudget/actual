@@ -579,11 +579,20 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace(/\u2212/g, '-');
   }
 
-  // Look for a decimal marker, then look for either 1-2 or 4-9 decimal places.
+  // Scientific notation (e.g. "-1.26E-06" from forex exports): extract the
+  // value directly. The decimal-regex path below would otherwise read "E-06"
+  // as a 2-digit decimal marker and concat the exponent digits into a huge
+  // number, overflowing safeNumber later (#9415). Checked after the sign
+  // normalization so "(1.26E-06)" / "−1.26E-06" also match.
+  if (/e[+-]?\d+$/i.test(amount)) {
+    return safeNumber(parseFloat(amount));
+  }
+
+  // Look for a decimal marker, then look for either 1-2 or 4+ decimal places.
   // This avoids matching against 3 places which may not actually be decimal.
   // Only digits count as places, so a currency symbol or code after the
   // number does not change how many there are.
-  const m = amount.match(/[.,](\d{4,9}|\d{1,2})[^\d.,]*$/);
+  const m = amount.match(/[.,](\d{4,}|\d{1,2})[^\d.,]*$/);
   if (!m || m.index === undefined) {
     return safeNumber(parseFloat(extractNumbers(amount)));
   }
