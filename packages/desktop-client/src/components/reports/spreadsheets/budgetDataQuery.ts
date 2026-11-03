@@ -228,7 +228,12 @@ export async function fetchBudgetData({
   );
 
   for (const { month, monthData } of monthDataList) {
-    const dateKey = interval === 'Yearly' ? month.slice(0, 4) : month;
+    const dateKey =
+      interval === 'Yearly'
+        ? month.slice(0, 4)
+        : interval === 'Quarterly'
+          ? monthUtils.quarterFromDate(month)
+          : month;
 
     for (const cat of filteredCategories) {
       if (cat.is_income) {

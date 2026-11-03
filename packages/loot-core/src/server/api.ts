@@ -652,13 +652,14 @@ handlers['api/transaction-update'] = withMutation(async function ({
   );
   const transactions = ungroupTransactions(data);
 
-  if (transactions.length === 0) {
+  const existing = transactions.find(t => t.id === id);
+  if (!existing) {
     return [];
   }
 
-  // @ts-expect-error - fix me
-  const { diff } = updateTransaction(transactions, { id, ...fields });
-  return handlers['transactions-batch-update'](diff)['updated'];
+  // `fields` is partial; updateTransaction replaces a split child wholesale
+  const { diff } = updateTransaction(transactions, { ...existing, ...fields });
+  return (await handlers['transactions-batch-update'](diff))['updated'];
 });
 
 handlers['api/transaction-delete'] = withMutation(async function ({ id }) {

@@ -3,6 +3,7 @@ import type { ServerEvents } from '@actual-app/core/types/server-events';
 import type { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { budgetBoundsQueries } from './budget';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
@@ -58,6 +59,28 @@ describe('listenForSyncEvent', () => {
   beforeEach(() => {
     eventListeners.clear();
     vi.clearAllMocks();
+  });
+
+  it.each([
+    'zero_budgets',
+    'reflect_budgets',
+    'transactions',
+    'categories',
+    'preferences',
+  ])('refreshes budget bounds after %s changes', table => {
+    const { invalidateQueries } = setup();
+    publishSyncEvent(appliedEvent([table]));
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: budgetBoundsQueries.all(),
+    });
+  });
+
+  it('leaves budget bounds alone for unrelated changes', () => {
+    const { invalidateQueries } = setup();
+    publishSyncEvent(appliedEvent(['payees']));
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
+      queryKey: budgetBoundsQueries.all(),
+    });
   });
 
   it('invalidates the dashboard queries when widgets sync', () => {

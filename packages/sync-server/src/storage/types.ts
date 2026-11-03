@@ -13,10 +13,12 @@ export type SyncMessage = {
   content: Uint8Array;
 };
 
-export type SyncResult = {
-  trie: object;
-  newMessages: SyncMessage[];
-};
+export type SyncResult =
+  | {
+      trie: object;
+      newMessages: SyncMessage[];
+    }
+  | { error: 'invalid-timestamp' | 'clock-drift' };
 
 export type SyncStore = {
   sync(

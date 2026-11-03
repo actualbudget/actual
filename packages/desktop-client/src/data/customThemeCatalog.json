@@ -413,5 +413,18 @@
       "#5ad4e6"
     ],
     "mode": "dark"
+  },
+  {
+    "name": "Porcelain",
+    "repo": "tostasmistas/actual-budget-porcelain-theme",
+    "colors": [
+      "#f1f3f8",
+      "#e8ecf3",
+      "#383a42",
+      "#4b6fc6",
+      "#21703c",
+      "#b03b4a"
+    ],
+    "mode": "light"
   }
 ]

@@ -15,6 +15,14 @@ const secondMessage = {
   content: Buffer.from('second message'),
 } satisfies SyncMessage;
 
+function syncOk(...args: Parameters<typeof syncGroup>) {
+  const result = syncGroup(...args);
+  if ('error' in result) {
+    throw new Error(`Unexpected sync error: ${result.error}`);
+  }
+  return result;
+}
+
 describe('syncGroup', () => {
   let db: ReturnType<typeof openDatabase>;
 
@@ -28,20 +36,20 @@ describe('syncGroup', () => {
   });
 
   it('returns stored messages in timestamp order without echoing new messages', () => {
-    const initial = syncGroup(db, [secondMessage, firstMessage], since);
+    const initial = syncOk(db, [secondMessage, firstMessage], since);
     expect(initial.newMessages).toEqual([]);
 
-    const result = syncGroup(db, [], since);
+    const result = syncOk(db, [], since);
     expect(result.newMessages).toEqual([firstMessage, secondMessage]);
     expect(result.trie).toEqual(initial.trie);
-    expect(syncGroup(db, [], firstMessage.timestamp).newMessages).toEqual([
+    expect(syncOk(db, [], firstMessage.timestamp).newMessages).toEqual([
       secondMessage,
     ]);
   });
 
   it('keeps message contents and the merkle trie unchanged when retrying a timestamp', () => {
-    const initial = syncGroup(db, [firstMessage], since);
-    const retry = syncGroup(
+    const initial = syncOk(db, [firstMessage], since);
+    const retry = syncOk(
       db,
       [{ ...firstMessage, content: Buffer.from('different content') }],
       since,
@@ -49,19 +57,35 @@ describe('syncGroup', () => {
 
     expect(retry.trie).toEqual(initial.trie);
     expect(retry.newMessages).toEqual([firstMessage]);
-    expect(syncGroup(db, [], since).newMessages).toEqual([firstMessage]);
+    expect(syncOk(db, [], since).newMessages).toEqual([firstMessage]);
   });
 
-  it('rolls back the entire batch if a message cannot be applied', () => {
-    expect(() =>
+  it('rejects and rolls back the entire batch if a timestamp is invalid', () => {
+    expect(
       syncGroup(
         db,
         [firstMessage, { ...secondMessage, timestamp: 'invalid' }],
         since,
       ),
-    ).toThrow();
+    ).toEqual({ error: 'invalid-timestamp' });
 
-    expect(syncGroup(db, [], since).newMessages).toEqual([]);
+    expect(syncOk(db, [], since).newMessages).toEqual([]);
+    expect(db.all('SELECT * FROM messages_binary')).toEqual([]);
+  });
+
+  it('rejects and rolls back the entire batch if a timestamp is too far in the future', () => {
+    const future = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    expect(
+      syncGroup(
+        db,
+        [
+          firstMessage,
+          { ...secondMessage, timestamp: `${future}-0000-0000000000000001` },
+        ],
+        since,
+      ),
+    ).toEqual({ error: 'clock-drift' });
+
     expect(db.all('SELECT * FROM messages_binary')).toEqual([]);
   });
 });

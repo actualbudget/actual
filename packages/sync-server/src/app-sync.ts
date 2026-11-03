@@ -184,7 +184,12 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const { trie, newMessages } = await syncStore.sync(messages, since, groupId);
+  const result = await syncStore.sync(messages, since, groupId);
+  if ('error' in result) {
+    res.status(400).send(result.error);
+    return;
+  }
+  const { trie, newMessages } = result;
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),

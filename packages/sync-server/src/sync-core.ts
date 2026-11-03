@@ -24,6 +24,17 @@ type MessageRow = {
 
 export { messagesSql };
 
+// Matches the client's Timestamp maxDrift; later messages break sync on other devices
+const MAX_FUTURE_DRIFT_MS = 5 * 60 * 1000;
+
+type SyncRejectedReason = 'invalid-timestamp' | 'clock-drift';
+
+class SyncRejectedError extends Error {
+  constructor(readonly rejectedReason: SyncRejectedReason) {
+    super(rejectedReason);
+  }
+}
+
 function addMessages(db: SyncDatabase, messages: SyncMessage[]) {
   let returnValue: merkle.TrieNode = {};
   db.transaction(() => {
@@ -39,8 +50,12 @@ function addMessages(db: SyncDatabase, messages: SyncMessage[]) {
 
         if (info.changes > 0) {
           const timestamp = Timestamp.parse(msg.timestamp);
+          // Throwing rolls back the transaction
           if (!timestamp) {
-            throw new Error('Invalid sync message timestamp');
+            throw new SyncRejectedError('invalid-timestamp');
+          }
+          if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
+            throw new SyncRejectedError('clock-drift');
           }
           trie = merkle.insert(trie, timestamp);
         }
@@ -75,7 +90,8 @@ function getMerkle(db: SyncDatabase): merkle.TrieNode {
 
 /**
  * Stores `messages` in the group db and returns the updated merkle trie plus
- * every message newer than `since`. Inputs and outputs are plain objects;
+ * every message newer than `since`, or an `error` (and no changes) when a
+ * message's timestamp is rejected. Inputs and outputs are plain objects;
  * the route handler handles protobuf serialization.
  */
 export function syncGroup(
@@ -91,7 +107,15 @@ export function syncGroup(
     [since],
   ) as MessageRow[];
 
-  const trie = addMessages(db, messages);
+  let trie: merkle.TrieNode;
+  try {
+    trie = addMessages(db, messages);
+  } catch (e) {
+    if (e instanceof SyncRejectedError) {
+      return { error: e.rejectedReason };
+    }
+    throw e;
+  }
 
   return {
     trie,

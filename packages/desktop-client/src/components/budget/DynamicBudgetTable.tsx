@@ -15,6 +15,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+import { clampMonth } from './MonthsContext';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -63,21 +64,38 @@ const DynamicBudgetTable = ({
   const numMonths = Math.min(numPossible, maxMonths);
   const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
 
+  // Every displayed column must stay inside the bounds, so the first
+  // column can go no later than `numMonths - 1` months before the end.
+  const latestStartMonth = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+
+  function getValidMonth(month: string) {
+    return clampMonth(month, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
+  }
+
+  // Keep the last column in range when the bounds change (e.g. switching
+  // budget type) or more columns fit on screen.
+  useEffect(() => {
+    const validMonth = clampMonth(startMonth, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
+    if (validMonth !== startMonth) {
+      onMonthSelect(validMonth, numMonths);
+    }
+  }, [
+    monthBounds.start,
+    latestStartMonth,
+    numMonths,
+    onMonthSelect,
+    startMonth,
+  ]);
+
   useEffect(() => {
     setDisplayMax(numPossible);
   }, [setDisplayMax, numPossible]);
-
-  function getValidMonth(month) {
-    const start = monthBounds.start;
-    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
-
-    if (month < start) {
-      return start;
-    } else if (month > end) {
-      return end;
-    }
-    return month;
-  }
 
   function _onMonthSelect(month) {
     onMonthSelect(getValidMonth(month), numMonths);

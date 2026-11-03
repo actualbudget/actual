@@ -15,10 +15,7 @@ export function LongTermGoalAutomationReadOnly({
   template,
 }: LongTermGoalAutomationReadOnlyProps) {
   const format = useFormat();
-  const amount = format(
-    amountToInteger(template.amount, format.currency.decimalPlaces),
-    'financial',
-  );
+  const amount = format(amountToInteger(template.amount), 'financial');
 
   return (
     <Trans>

@@ -12,12 +12,23 @@ import * as budgetActions from './actions';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
 
+// How far ahead budget months are available. Planning past the minimum
+// keeps a few empty months after the latest allocation, up to a hard cap
+// so stray far-future data can't create an unbounded number of months.
+const MIN_MONTHS_AHEAD = 12;
+const MONTHS_AFTER_LATEST_ALLOCATION = 3;
+const MAX_MONTHS_AHEAD = 60;
+
 export function getBudgetType() {
   const meta = sheet.get().meta();
   return meta.budgetType || 'envelope';
 }
 
-export function getBudgetRange(start: string, end: string) {
+export function getBudgetRange(
+  start: string,
+  end: string,
+  latestAllocatedMonth?: string | null,
+) {
   start = monthUtils.getMonth(start);
   end = monthUtils.getMonth(end);
 
@@ -28,14 +39,43 @@ export function getBudgetRange(start: string, end: string) {
     start = end;
   }
 
+  const maxEnd = monthUtils.addMonths(end, MAX_MONTHS_AHEAD);
+
   // Budgets should exist 3 months before the earliest needed date
   // (either the oldest transaction or the current month if no
-  // transactions yet), and a year from the current date. There's no
-  // need to ever have budgets outside that range.
+  // transactions yet), and at least a year from the current date.
   start = monthUtils.subMonths(start, 3);
-  end = monthUtils.addMonths(end, 12);
+  end = monthUtils.addMonths(end, MIN_MONTHS_AHEAD);
+
+  if (latestAllocatedMonth) {
+    const plannedEnd = monthUtils.addMonths(
+      latestAllocatedMonth,
+      MONTHS_AFTER_LATEST_ALLOCATION,
+    );
+    if (plannedEnd > end) {
+      end = plannedEnd < maxEnd ? plannedEnd : maxEnd;
+    }
+  }
 
   return { start, end, range: monthUtils.rangeInclusive(start, end) };
+}
+
+// The latest month with a non-zero amount in the active budget type.
+// Envelope and tracking amounts are stored separately, so each type
+// extends its own range.
+async function getLatestAllocatedMonth(): Promise<string | null> {
+  const table =
+    getBudgetType() === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+  const row = await db.first<{ month: number | null }>(
+    `SELECT MAX(b.month) AS month FROM ${table} b
+     JOIN categories c ON c.id = b.category
+     WHERE c.tombstone = 0 AND b.amount != 0`,
+  );
+  if (!row?.month) {
+    return null;
+  }
+  const month = String(row.month);
+  return `${month.slice(0, 4)}-${month.slice(4)}`;
 }
 
 // The day range spanning the given months. They aren't guaranteed to be
@@ -433,6 +473,7 @@ export async function createAllBudgets() {
   const { start, end, range } = getBudgetRange(
     earliestDate || currentMonth,
     currentMonth,
+    await getLatestAllocatedMonth(),
   );
 
   const meta = sheet.get().meta();
@@ -443,7 +484,16 @@ export async function createAllBudgets() {
     await createBudget(range);
   }
 
-  return { start, end };
+  // The range only grows while the budget is open, so every created month
+  // stays reachable. Clearing allocations shrinks it on the next load.
+  let lastMonth = end;
+  for (const month of sheet.get().meta().createdMonths) {
+    if (month > lastMonth) {
+      lastMonth = month;
+    }
+  }
+
+  return { start, end: lastMonth };
 }
 
 export async function setType(type) {

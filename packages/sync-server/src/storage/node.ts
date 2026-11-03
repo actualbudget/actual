@@ -1,8 +1,8 @@
-import fs from 'node:fs/promises';
 import path, { resolve } from 'node:path';
 
 import { config } from '#load-config';
 import * as simpleSync from '#sync-simple';
+import { atomicWriteFile } from '#util/atomic-write';
 import { getPathForUserFile } from '#util/paths';
 
 import type { BlobStore, MigrationStateStore, SyncStore } from './types';
@@ -18,7 +18,7 @@ export const syncStore: SyncStore = {
 
 export const blobStore: BlobStore = {
   async write(fileId, data) {
-    await fs.writeFile(getPathForUserFile(fileId), data);
+    await atomicWriteFile(getPathForUserFile(fileId), data);
   },
   async send(fileId, res) {
     const filePath = getPathForUserFile(fileId);
