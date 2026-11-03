@@ -447,6 +447,28 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
 
+#### Weekly averages
+
+Often spending follows the week rather than the month, like a weekly grocery shop or a commute. This means the amount needed per month varies, depending on how the weeks fall. The weekly average template averages your spending per week, then budgets that amount once for every occurrence of a chosen weekday in the month.
+
+| Syntax                                                                                  | Description                                                                                                      |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `#template average {number} weeks on {weekday}`                                         | Budget the average weekly spend over the last `{number}` complete weeks, once for every `{weekday}` in the month |
+| `#template average {number} weeks on {weekday} [{increase/decrease} {number\|number%}]` | Same as above, with an adjustment applied to the weekly amount before it is multiplied by the number of weekdays |
+
+The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` for a November 2026 budget, averages spending from 2026-10-04 through 2026-10-31. Weeks before the category's first transaction are left out of the average.
+
+For averages calculated in future months, the window uses yesterday as the cut-off point for full 7-day weeks. This ensures averages take into account recent spending.
+
+As an example, assume you spent an average of \$ 50 per week over the last 4 weeks. October 2026 has five Fridays and four Mondays.
+
+| Template line                                        | Budgeted Amount (October 2026) |
+| ---------------------------------------------------- | :----------------------------: |
+| `#template average 4 weeks on friday`                |             \$ 250             |
+| `#template average 4 weeks on monday`                |             \$ 200             |
+| `#template average 4 weeks on friday [increase 10%]` |             \$ 275             |
+| `#template average 4 weeks on monday [increase 5]`   |             \$ 220             |
+
 ### Copy Type
 
 The Copy template will copy the budget amount from some number of months prior.

@@ -10,6 +10,11 @@ import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
+import {
+  getWeeklyAverageWindow,
+  trimWeeklyAverageWindow,
+} from './weekly-average';
+
 export async function getSheetValue(
   sheetName: string,
   cell: string,
@@ -410,6 +415,59 @@ export async function getCategoryAverage({
     );
   }
   return Math.round(sumAmount / months.length);
+}
+
+// Average weekly spending (signed, like `sum-amount`) over the `numWeeks`
+// complete weeks before `month`. See `getWeeklyAverageWindow` for the exact
+// window. Weeks before the category's first transaction are left out.
+// Not rounded: callers multiply it by the weekday count first, so rounding
+// here would drift the monthly amount by up to a few minor units.
+export async function getCategoryWeeklyAverage({
+  month,
+  numWeeks,
+  categoryId,
+}: {
+  month: string;
+  numWeeks: number;
+  categoryId: string;
+}): Promise<number> {
+  const fullWindow = getWeeklyAverageWindow({
+    month,
+    numWeeks,
+    today: monthUtils.currentDay(),
+  });
+
+  const firstActivity = await db.first<{ date: number | null }>(
+    `SELECT MIN(t.date) AS date
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+      WHERE t.category = ?
+        AND t.date <= ?
+        AND a.offbudget = 0`,
+    [categoryId, db.toDateRepr(fullWindow.end)],
+  );
+  const window = trimWeeklyAverageWindow(
+    fullWindow,
+    firstActivity?.date == null ? null : db.fromDateRepr(firstActivity.date),
+  );
+  if (window == null) {
+    return 0;
+  }
+
+  // Same filters as the `sum-amount` cells so weekly and monthly averages
+  // agree on which transactions count.
+  const total = await db.first<{ amount: number | null }>(
+    `SELECT SUM(t.amount) AS amount
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+      WHERE t.category = ?
+        AND t.date >= ?
+        AND t.date <= ?
+        AND a.offbudget = 0`,
+    [categoryId, db.toDateRepr(window.start), db.toDateRepr(window.end)],
+  );
+
+  return safeNumber(total?.amount ?? 0) / window.numWeeks;
 }
 
 async function getAverageMonths({
