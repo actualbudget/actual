@@ -161,5 +161,14 @@ export function ToBudgetMenu({
     month,
   });
 
-  return <Menu {...props} onMenuSelect={onMenuSelect} items={items} />;
+  return (
+    <Menu
+      // Menu items are centered buttons, so a label that wraps in the
+      // narrow popover would center its lines
+      getItemStyle={() => ({ textAlign: 'left' })}
+      {...props}
+      onMenuSelect={onMenuSelect}
+      items={items}
+    />
+  );
 }
