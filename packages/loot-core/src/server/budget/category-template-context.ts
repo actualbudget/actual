@@ -17,10 +17,12 @@ import type {
   SimpleTemplate,
   SpendTemplate,
   Template,
+  WeeklyAverageTemplate,
 } from '#types/models/templates';
 
 import {
   getCategoryAverage,
+  getCategoryWeeklyAverage,
   getSheetBoolean,
   getSheetValue,
   isTrackingBudget,
@@ -215,7 +217,8 @@ export class CategoryTemplateContext {
           }
           break;
         }
-        case 'average': {
+        case 'average':
+        case 'weeklyAverage': {
           newBudget = await CategoryTemplateContext.runAverage(template, this);
           break;
         }
@@ -853,15 +856,25 @@ export class CategoryTemplateContext {
     return Math.max(0, Math.round(monthlyIncome * (percent / 100)));
   }
 
+  // Monthly averages budget the average once. Weekly averages budget it once
+  // per occurrence of the template's weekday in the month, so a month with
+  // five Fridays gets five weeks' worth; adjustments apply per week.
   static async runAverage(
-    template: AverageTemplate,
+    template: AverageTemplate | WeeklyAverageTemplate,
     templateContext: CategoryTemplateContext,
   ): Promise<number> {
-    let average = await getCategoryAverage({
-      month: templateContext.month,
-      maxMonths: template.numMonths,
-      categoryId: templateContext.category.id,
-    });
+    const isWeekly = template.type === 'weeklyAverage';
+    let average = isWeekly
+      ? await getCategoryWeeklyAverage({
+          month: templateContext.month,
+          numWeeks: template.numWeeks,
+          categoryId: templateContext.category.id,
+        })
+      : await getCategoryAverage({
+          month: templateContext.month,
+          maxMonths: template.numMonths,
+          categoryId: templateContext.category.id,
+        });
     // negate as sheet value is cost ie negative
     if (average < 0) {
       average *= -1;
@@ -884,7 +897,13 @@ export class CategoryTemplateContext {
       }
     }
 
-    return Math.round(average);
+    const occurrences = isWeekly
+      ? monthUtils.countDayOfWeekInMonth(
+          templateContext.month,
+          monthUtils.WEEKDAYS.indexOf(template.weekday),
+        )
+      : 1;
+    return Math.round(average * occurrences);
   }
 
   static runBy(templateContext: CategoryTemplateContext): {

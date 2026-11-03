@@ -774,6 +774,34 @@ describe('Transactions', () => {
     expect(input.value).toEqual(oldValue);
   });
 
+  test.each(['debit', 'credit'] as const)(
+    'invalid arithmetic in %s preserves the amount and allows correction',
+    async field => {
+      const onTransactionsChange = vi.fn();
+      const { container } = renderTransactions({ onTransactionsChange });
+      const input = await editField(container, field, 0);
+      await userEvent.clear(input);
+      await userEvent.type(input, '1/0[Tab]');
+
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([expect.objectContaining({ amount: -2777 })]),
+      );
+      expect(queryField(container, 'debit', 'div', 0).textContent).toBe(
+        '27.77',
+      );
+      expect(queryField(container, 'credit', '', 0).textContent).toBe('');
+
+      const correctedInput = await editField(container, field, 0);
+      await userEvent.clear(correctedInput);
+      await userEvent.type(correctedInput, '12/2[Tab]');
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ amount: field === 'debit' ? -600 : 600 }),
+        ]),
+      );
+    },
+  );
+
   test('text fields save when moved away from', async () => {
     const { container, getTransactions } = renderTransactions();
 
