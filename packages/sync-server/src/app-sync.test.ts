@@ -1591,6 +1591,31 @@ describe('/sync', () => {
     },
   );
 
+  it.each([
+    { offset: 5 * 60 * 1000 - 1, status: 200 },
+    { offset: 5 * 60 * 1000, status: 400 },
+  ])(
+    'returns $status for a message $offset ms ahead',
+    async ({ offset, status }) => {
+      const fileId = crypto.randomBytes(16).toString('hex');
+      const groupId = crypto.randomBytes(16).toString('hex');
+      const keyId = 'key-id';
+      addMockFile(fileId, groupId, keyId, JSON.stringify({ keyId }), 2);
+
+      const syncRequest = createMinimalSyncRequest(fileId, groupId, keyId);
+
+      vi.useFakeTimers({ toFake: ['Date'], now: Date.now() });
+      try {
+        syncRequest.messages = [createMessage(futureTimestamp(offset))];
+        const res = await sendSyncRequest(syncRequest);
+
+        expect(res.statusCode).toEqual(status);
+      } finally {
+        vi.useRealTimers();
+      }
+    },
+  );
+
   it('accepts a resent far-future message the server already has', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
     const groupId = crypto.randomBytes(16).toString('hex');
@@ -1661,8 +1686,8 @@ function createMinimalSyncRequest(fileId, groupId, keyId) {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function futureTimestamp() {
-  return `${new Date(Date.now() + 2 * DAY_MS).toISOString()}-0000-0000000000000000`;
+function futureTimestamp(offset = 2 * DAY_MS) {
+  return `${new Date(Date.now() + offset).toISOString()}-0000-0000000000000000`;
 }
 
 function createMessage(timestamp: string) {
