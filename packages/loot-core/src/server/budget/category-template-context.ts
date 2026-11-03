@@ -496,9 +496,8 @@ export class CategoryTemplateContext {
       // Check the rule here (init) so a schedule missing its amount or date
       // criterion reports through the template-errors notification instead of
       // rejecting applyTemplate from the priority loop (#9126).
-      const conditions = (
-        await getRuleForSchedule(scheduleId)
-      ).serialize().conditions;
+      const conditions = (await getRuleForSchedule(scheduleId)).serialize()
+        .conditions;
       const { amount: amountCondition, date: dateConditions } =
         extractScheduleConds(conditions);
       const scheduleName = scheduleNameById.get(scheduleId) ?? t.name;
