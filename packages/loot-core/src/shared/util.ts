@@ -579,13 +579,16 @@ export function looselyParseAmount(amount: string) {
     amount = amount.replace(/\u2212/g, '-');
   }
 
-  // Scientific notation (e.g. "-1.26E-06" from forex exports): extract the
-  // value directly. The decimal-regex path below would otherwise read "E-06"
-  // as a 2-digit decimal marker and concat the exponent digits into a huge
-  // number, overflowing safeNumber later (#9415). Checked after the sign
-  // normalization so "(1.26E-06)" / "−1.26E-06" also match.
-  if (/e[+-]?\d+$/i.test(amount)) {
-    return safeNumber(parseFloat(amount));
+  // Scientific notation (e.g. "-1.26E-06" from forex exports): parse the
+  // mantissa as a normal amount, then apply the exponent (#9415). Checked
+  // after the sign normalization so "(1.26E-06)" / "−1.26E-06" also match.
+  const scientific = amount.match(/^(.*)e([+-]?\d+)$/i);
+  if (scientific) {
+    const mantissa = looselyParseAmount(scientific[1]);
+    if (mantissa === null) {
+      return null;
+    }
+    return safeNumber(parseFloat(`${mantissa}e${scientific[2]}`));
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4+ decimal places.
