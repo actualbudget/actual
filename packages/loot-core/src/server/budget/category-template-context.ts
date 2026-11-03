@@ -485,7 +485,9 @@ export class CategoryTemplateContext {
         .map(s => [s.name.trim(), s.id]),
     );
     for (const t of templates.filter(t => t.type === 'schedule')) {
-      const scheduleId = t.scheduleId ?? scheduleIdByName.get(t.name?.trim());
+      const scheduleId =
+        t.scheduleId ??
+        (t.name ? scheduleIdByName.get(t.name.trim()) : undefined);
       if (!scheduleId || !scheduleIds.has(scheduleId)) {
         throw new Error(
           t.scheduleId || t.name
