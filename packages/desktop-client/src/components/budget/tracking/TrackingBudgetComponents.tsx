@@ -477,7 +477,6 @@ export const CategoryMonth = memo(function CategoryMonth({
           >
             <BalanceWithCarryover
               isDisabled={category.is_income}
-              isIncome={category.is_income}
               carryover={trackingBudget.catCarryover(category.id)}
               balance={trackingBudget.catBalance(category.id)}
               goal={trackingBudget.catGoal(category.id)}

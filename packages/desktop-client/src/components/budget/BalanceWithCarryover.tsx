@@ -14,6 +14,7 @@ import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useSheetValue } from '#hooks/useSheetValue';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import type { Binding } from '#spreadsheet';
 
 import { GoalProgressRing } from './GoalProgressRing';
@@ -79,7 +80,10 @@ type BalanceWithCarryoverProps = Omit<
   budgeted: Binding<'envelope-budget' | 'tracking-budget', 'budget'>;
   longGoal: Binding<'envelope-budget' | 'tracking-budget', 'long-goal'>;
   isDisabled?: boolean;
-  /** Goals describe spending, so income categories never show goal progress */
+  /**
+   * Only tracking budgets use goals on income categories, so envelope budgets
+   * ignore any goal left on one
+   */
   isIncome?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
@@ -105,13 +109,15 @@ export function BalanceWithCarryover({
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const { decimalPlaces } = useFormat().currency;
 
-  const hasGoal = isGoalTemplatesEnabled && !isIncome;
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
+  const canShowGoal =
+    isGoalTemplatesEnabled && !(isIncome && budgetType !== 'tracking');
   // Long goals count the balance towards the goal, others the budgeted amount
   const getHave = (balanceValue: number) =>
     longGoalValue === 1 ? balanceValue : budgetedValue;
 
   const getRingProgress = (balanceValue: number) =>
-    hasGoal
+    canShowGoal
       ? getGoalRingProgress(
           balanceValue,
           goalValue,
@@ -123,7 +129,7 @@ export function BalanceWithCarryover({
   const getBalanceAmountStyle = (balanceValue: number) =>
     makeBalanceAmountStyle(
       balanceValue,
-      hasGoal ? goalValue : null,
+      canShowGoal ? goalValue : null,
       getHave(balanceValue),
       decimalPlaces,
     );
@@ -190,25 +196,23 @@ export function BalanceWithCarryover({
                 style={getBalanceAmountStyle(balanceValue)}
               />
             )}
-            {shouldInlineGoalStatus &&
-              isGoalTemplatesEnabled &&
-              goalValue != null && (
-                <>
-                  <View
-                    style={{
-                      borderTop: '1px solid ' + theme.tableBorderSeparator,
-                      width: '160px',
-                      margin: '3px 0px',
-                    }}
-                  />
-                  <GoalStatus
-                    balance={balance}
-                    goal={goal}
-                    budgeted={budgeted}
-                    longGoal={longGoal}
-                  />
-                </>
-              )}
+            {shouldInlineGoalStatus && canShowGoal && goalValue != null && (
+              <>
+                <View
+                  style={{
+                    borderTop: '1px solid ' + theme.tableBorderSeparator,
+                    width: '160px',
+                    margin: '3px 0px',
+                  }}
+                />
+                <GoalStatus
+                  balance={balance}
+                  goal={goal}
+                  budgeted={budgeted}
+                  longGoal={longGoal}
+                />
+              </>
+            )}
           </>
         );
       }}
