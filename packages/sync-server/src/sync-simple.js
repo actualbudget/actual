@@ -11,6 +11,9 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
+// Matches the client's Timestamp maxDrift; later messages break sync on other devices
+const MAX_FUTURE_DRIFT_MS = 5 * 60 * 1000;
+
 function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
@@ -38,7 +41,13 @@ function addMessages(db, messages) {
         );
 
         if (info.changes > 0) {
-          trie = merkle.insert(trie, Timestamp.parse(msg.timestamp));
+          const timestamp = Timestamp.parse(msg.timestamp);
+          const error = getTimestampError(timestamp);
+          if (error) {
+            // Throwing rolls back the transaction
+            throw Object.assign(new Error(error), { rejectedReason: error });
+          }
+          trie = merkle.insert(trie, timestamp);
         }
       }
     }
@@ -56,6 +65,16 @@ function addMessages(db, messages) {
   return returnValue;
 }
 
+function getTimestampError(timestamp) {
+  if (!timestamp) {
+    return 'invalid-timestamp';
+  }
+  if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
+    return 'clock-drift';
+  }
+  return null;
+}
+
 function getMerkle(db) {
   const rows = db.all('SELECT * FROM messages_merkles');
 
@@ -70,25 +89,32 @@ function getMerkle(db) {
 
 export function sync(messages, since, groupId) {
   const db = getGroupDb(groupId);
-  const newMessages = db.all(
-    `SELECT * FROM messages_binary
-         WHERE timestamp > ?
-         ORDER BY timestamp`,
-    [since],
-  );
+  try {
+    const newMessages = db.all(
+      `SELECT * FROM messages_binary
+           WHERE timestamp > ?
+           ORDER BY timestamp`,
+      [since],
+    );
 
-  const trie = addMessages(db, messages);
+    const trie = addMessages(db, messages);
 
-  db.close();
-
-  return {
-    trie,
-    newMessages: newMessages.map(msg =>
-      create(MessageEnvelopeSchema, {
-        timestamp: msg.timestamp,
-        isEncrypted: msg.is_encrypted === 1,
-        content: msg.content,
-      }),
-    ),
-  };
+    return {
+      trie,
+      newMessages: newMessages.map(msg =>
+        create(MessageEnvelopeSchema, {
+          timestamp: msg.timestamp,
+          isEncrypted: msg.is_encrypted === 1,
+          content: msg.content,
+        }),
+      ),
+    };
+  } catch (e) {
+    if (e.rejectedReason) {
+      return { error: e.rejectedReason };
+    }
+    throw e;
+  } finally {
+    db.close();
+  }
 }
