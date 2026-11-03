@@ -442,6 +442,14 @@ export async function createBudget(months) {
     meta.createdMonths.add(month);
   });
 
+  if (budgetType === 'envelope') {
+    envelopeBudget.createFutureAwareToBudget(
+      months,
+      monthUtils.currentMonth(),
+      true,
+    );
+  }
+
   sheet.get().setMeta(meta);
   sheet.endTransaction();
 
@@ -482,6 +490,11 @@ export async function createAllBudgets() {
 
   if (newMonths.length > 0) {
     await createBudget(range);
+  } else if (getBudgetType() === 'envelope') {
+    sheet.startTransaction();
+    envelopeBudget.createFutureAwareToBudget(range, currentMonth, true);
+    sheet.endTransaction();
+    await sheet.waitOnSpreadsheet();
   }
 
   // The range only grows while the budget is open, so every created month

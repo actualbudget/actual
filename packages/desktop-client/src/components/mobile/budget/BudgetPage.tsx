@@ -45,6 +45,7 @@ import {
   useSortCategoriesMutation,
 } from '#budget';
 import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
@@ -66,7 +67,6 @@ import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
 import { uncategorizedTransactions } from '#queries';
 import { useDispatch } from '#redux';
-import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { BudgetTable, PILL_STYLE } from './BudgetTable';
 
@@ -723,10 +723,11 @@ function UncategorizedTransactionsBanner(props) {
 function OverbudgetedBanner({ month, onBudgetAction, ...props }) {
   const { t } = useTranslation();
   const format = useFormat();
+  const { toBudgetBinding } = useToBudgetMode(month);
   const toBudgetAmount = useSheetValue<
     'envelope-budget',
-    typeof envelopeBudget.toBudget
-  >(envelopeBudget.toBudget);
+    'to-budget' | 'ready-to-assign'
+  >(toBudgetBinding);
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   const { data: { list: categories } = { list: [] } } = useCategories();

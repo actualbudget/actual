@@ -6,6 +6,7 @@ import { Menu } from '@actual-app/components/menu';
 import type { MenuItemObject } from '@actual-app/components/menu';
 
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 export type ToBudgetMenuActions = {
@@ -26,8 +27,9 @@ export function useToBudgetMenu({
   month,
 }: ToBudgetMenuActions) {
   const { t } = useTranslation();
+  const { toBudgetBinding, includesFutureAssignments } = useToBudgetMode(month);
 
-  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+  const toBudget = useEnvelopeSheetValue(toBudgetBinding) ?? 0;
   const forNextMonth = useEnvelopeSheetValue(envelopeBudget.forNextMonth) ?? 0;
   const manualBuffered =
     useEnvelopeSheetValue(envelopeBudget.manualBuffered) ?? 0;
@@ -42,7 +44,7 @@ export function useToBudgetMenu({
           },
         ]
       : []),
-    ...(autoBuffered === 0 && toBudget > 0
+    ...(!includesFutureAssignments && autoBuffered === 0 && toBudget > 0
       ? [
           {
             name: 'buffer',
