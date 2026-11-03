@@ -58,6 +58,10 @@ const AmountInput = memo(function AmountInput({
   );
 
   const initialValue = Math.abs(props.value);
+  const formattedValue = format.forEdit(amountToInteger(value));
+  // Show the real amount in the input so it can be selected and copied.
+  // Zero stays empty so typed digits don't get appended to "0.00".
+  const inputValue = editing ? text : value === 0 ? '' : formattedValue;
 
   useEffect(() => {
     if (focused) {
@@ -88,7 +92,7 @@ const AmountInput = memo(function AmountInput({
   const applyText = (rawInput?: string) => {
     const domText = rawInput ?? inputRef.current?.value ?? text;
     const parsed = currencyToAmount(domText) || 0;
-    const hasPendingInput = domText !== '' || editing;
+    const hasPendingInput = editing || domText !== inputValue;
     const newValue = hasPendingInput ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -100,6 +104,10 @@ const AmountInput = memo(function AmountInput({
 
   const onFocus: HTMLProps<HTMLInputElement>['onFocus'] = e => {
     props.onFocus?.(e);
+    // Typing or pasting replaces the amount, like a regular input. Deferred
+    // because iOS Safari ignores selection changes made during focus.
+    const input = e.currentTarget;
+    setTimeout(() => input.setSelectionRange(0, input.value.length), 0);
   };
 
   const onUpdate = (value: string) => {
@@ -137,7 +145,7 @@ const AmountInput = memo(function AmountInput({
     <input
       type="text"
       ref={mergedInputRef}
-      value={text}
+      value={inputValue}
       inputMode="decimal"
       autoCapitalize="none"
       onChange={e => onChangeText(e.target.value)}
@@ -145,7 +153,22 @@ const AmountInput = memo(function AmountInput({
       onBlur={onBlur}
       onKeyUp={onKeyUp}
       data-testid="amount-input"
-      style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
+      style={{
+        ...textStyle,
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        padding: 5,
+        border: 0,
+        outline: 0,
+        background: 'transparent',
+        // The Text below draws the amount; the input only handles
+        // selection, caret and editing.
+        color: 'transparent',
+        caretColor: theme.pageText,
+      }}
     />
   );
 
@@ -162,7 +185,7 @@ const AmountInput = memo(function AmountInput({
         ...style,
       }}
     >
-      <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+      {input}
       <Text
         style={{
           pointerEvents: 'none',
@@ -170,9 +193,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing
-          ? text || format.forEdit(0)
-          : format.forEdit(amountToInteger(value))}
+        {editing ? text || format.forEdit(0) : formattedValue}
       </Text>
     </View>
   );
