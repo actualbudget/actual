@@ -75,12 +75,15 @@ async function getLatestAllocatedMonth(): Promise<string | null> {
 }
 
 // Rollover stored as 2 reaches later months through each month's
-// `carryover-chain` cell, so the range has to start at or before it.
+// `carryover-chain` cell, so the range has to start at or before it. A
+// deleted category keeps its rows but has no cells, so it doesn't count.
 async function getEarliestPersistentCarryoverMonth(): Promise<string | null> {
   const table =
     getBudgetType() === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
   const row = await db.first<{ month: number | null }>(
-    `SELECT MIN(month) AS month FROM ${table} WHERE carryover = 2`,
+    `SELECT MIN(b.month) AS month FROM ${table} b
+     JOIN categories c ON c.id = b.category
+     WHERE c.tombstone = 0 AND b.carryover = 2`,
   );
   return fromDbMonth(row?.month);
 }
