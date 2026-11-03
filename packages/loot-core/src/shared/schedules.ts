@@ -111,7 +111,7 @@ export function getScheduleOccurrenceMatchStartDate(
     if (value.type === 'recur') {
       const previous = value.schedule
         .occurrences({
-          end: monthUtils.addDays(monthUtils.parseDate(occurrenceDate), 1),
+          end: d.endOfDay(monthUtils.parseDate(occurrenceDate)),
           reverse: true,
           take: 2,
         })
