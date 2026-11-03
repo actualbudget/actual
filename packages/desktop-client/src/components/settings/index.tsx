@@ -41,6 +41,7 @@ import { ResetCache, ResetSync } from './Reset';
 import { SettingsBackButton } from './SettingsBackButton';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
+import { SettingsPageTitle } from './SettingsPageTitle';
 import { SettingsRow } from './SettingsRow';
 import { SidebarSettings } from './SidebarSettings';
 import { ThemeSettings } from './Themes';
@@ -201,7 +202,12 @@ function SettingsSections({ title, children }: SettingsSectionsProps) {
   );
 
   if (!isNarrowWidth) {
-    return sections;
+    return (
+      <View style={{ flexShrink: 0, gap: spacing.lg }}>
+        <SettingsPageTitle>{title}</SettingsPageTitle>
+        {sections}
+      </View>
+    );
   }
 
   return (

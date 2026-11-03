@@ -357,7 +357,9 @@ test.describe('Reports', () => {
       test.setTimeout(90_000);
       const settingsPage = await navigation.goToSettingsPage();
       await settingsPage.goToSection('Tags');
-      await page.getByRole('button', { name: 'Add New', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Add new tag', exact: true })
+        .click();
       for (const tag of ['red', 'circle']) {
         await page.getByPlaceholder('New tag', { exact: true }).fill(tag);
         await page.getByTestId('new-tag').getByTestId('add-button').click();
