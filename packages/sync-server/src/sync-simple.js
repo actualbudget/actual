@@ -11,8 +11,7 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
-// A far-future timestamp would be stored in the merkle trie and break sync
-// for every other device in the group.
+// Far-future messages would break sync for every other device in the group
 const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000;
 
 function getGroupDb(groupId) {

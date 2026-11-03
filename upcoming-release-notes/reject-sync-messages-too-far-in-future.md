@@ -1,6 +1,6 @@
 ---
-category: Bugfixes
+category: Bugfix
 authors: [jsoberg]
 ---
 
-Fixed an issue where a device with an incorrect clock could permanently break syncing for everyone sharing the budget.
+Prevent a device with an incorrect clock from breaking sync for everyone sharing the budget.
