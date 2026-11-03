@@ -1571,18 +1571,25 @@ describe('/sync', () => {
   it.each([
     { reason: 'clock-drift', timestamp: futureTimestamp() },
     { reason: 'invalid-timestamp', timestamp: 'invalid' },
-  ])('returns 400 $reason for a new message', async ({ reason, timestamp }) => {
-    const fileId = crypto.randomBytes(16).toString('hex');
-    const keyId = 'key-id';
-    addMockFile(fileId, 'group-id', keyId, JSON.stringify({ keyId }), 2);
+  ])(
+    'returns 400 $reason for a new message without storing it',
+    async ({ reason, timestamp }) => {
+      const fileId = crypto.randomBytes(16).toString('hex');
+      const keyId = 'key-id';
+      addMockFile(fileId, 'group-id', keyId, JSON.stringify({ keyId }), 2);
 
-    const syncRequest = createMinimalSyncRequest(fileId, 'group-id', keyId);
-    syncRequest.messages = [createMessage(timestamp)];
-    const res = await sendSyncRequest(syncRequest);
+      const syncRequest = createMinimalSyncRequest(fileId, 'group-id', keyId);
+      syncRequest.messages = [createMessage(timestamp)];
+      const res = await sendSyncRequest(syncRequest);
+      // A stored message would be accepted as a duplicate on retry
+      const retryRes = await sendSyncRequest(syncRequest);
 
-    expect(res.statusCode).toEqual(400);
-    expect(res.text).toEqual(reason);
-  });
+      expect(res.statusCode).toEqual(400);
+      expect(res.text).toEqual(reason);
+      expect(retryRes.statusCode).toEqual(400);
+      expect(retryRes.text).toEqual(reason);
+    },
+  );
 
   it('accepts a resent far-future message the server already has', async () => {
     const fileId = crypto.randomBytes(16).toString('hex');
