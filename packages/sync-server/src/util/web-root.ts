@@ -2,7 +2,10 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 
 function resolveWebPackageJson(moduleUrl: string) {
-  return createRequire(moduleUrl).resolve('@actual-app/web/package.json');
+  // Keep the `require.resolve(...)` form: it's how knip sees that this
+  // package depends on @actual-app/web.
+  const require = createRequire(moduleUrl);
+  return require.resolve('@actual-app/web/package.json');
 }
 
 function isModuleNotFound(error: unknown) {
