@@ -1505,17 +1505,50 @@ describe('Dashboard and widget operations', () => {
       dashboard_page_id: pageId,
     });
 
+    // 5b. Validate required metadata for custom-report and markdown-card
+    await expect(
+      api.addDashboardWidget({
+        type: 'custom-report',
+        width: 4,
+        height: 2,
+        dashboard_page_id: pageId,
+        meta: null,
+      } as unknown as Parameters<typeof api.addDashboardWidget>[0]),
+    ).rejects.toThrow('custom-report widget requires meta.id');
+
+    await expect(
+      api.addDashboardWidget({
+        type: 'markdown-card',
+        width: 4,
+        height: 2,
+        dashboard_page_id: pageId,
+        meta: null,
+      } as unknown as Parameters<typeof api.addDashboardWidget>[0]),
+    ).rejects.toThrow('markdown-card widget requires meta.content');
+
+    // 5c. Add custom-report widget with valid metadata
+    await api.addDashboardWidget({
+      type: 'custom-report',
+      width: 4,
+      height: 2,
+      dashboard_page_id: pageId,
+      meta: { id: 'report-id-1' },
+    });
+
     // 6. Get widgets for the page
     const widgets = await api.getDashboardWidgets(pageId);
-    expect(widgets.length).toBe(2);
+    expect(widgets.length).toBe(3);
     const netWorth = widgets.find(w => w.type === 'net-worth-card');
     const cashFlow = widgets.find(w => w.type === 'cash-flow-card');
+    const customReport = widgets.find(w => w.type === 'custom-report');
     expect(netWorth).toBeDefined();
     expect(cashFlow).toBeDefined();
+    expect(customReport).toBeDefined();
     expect(netWorth?.width).toBe(6);
+    expect(customReport?.meta).toEqual({ id: 'report-id-1' });
 
     // 7. Update single widget
-    if (netWorth && cashFlow) {
+    if (netWorth && cashFlow && customReport) {
       await api.updateDashboardWidget({
         id: netWorth.id,
         width: 12,
@@ -1523,6 +1556,25 @@ describe('Dashboard and widget operations', () => {
       const reloadedWidgets = await api.getDashboardWidgets(pageId);
       const updatedWidget = reloadedWidgets.find(w => w.id === netWorth.id);
       expect(updatedWidget?.width).toBe(12);
+
+      // 7b. Partial update on custom-report preserves meta
+      await api.updateDashboardWidget({
+        id: customReport.id,
+        width: 8,
+      });
+      const updatedCustomReport = (await api.getDashboardWidgets(pageId)).find(
+        w => w.id === customReport.id,
+      );
+      expect(updatedCustomReport?.width).toBe(8);
+      expect(updatedCustomReport?.meta).toEqual({ id: 'report-id-1' });
+
+      // 7c. Reject null metadata on custom-report update
+      await expect(
+        api.updateDashboardWidget({
+          id: customReport.id,
+          meta: null,
+        }),
+      ).rejects.toThrow('custom-report widget requires meta.id');
 
       // 8. Update dashboard layout batch with multiple widgets
       await api.updateDashboard([
@@ -1539,7 +1591,7 @@ describe('Dashboard and widget operations', () => {
       await api.removeDashboardWidget(netWorth.id);
       const remainingWidgets = await api.getDashboardWidgets(pageId);
       expect(remainingWidgets.find(w => w.id === netWorth.id)).toBeUndefined();
-      expect(remainingWidgets.length).toBe(1);
+      expect(remainingWidgets.length).toBe(2);
     }
 
     // 10. Delete the custom dashboard page

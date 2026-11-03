@@ -140,6 +140,25 @@ async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
 }
 
+function validateWidgetMeta(widget: { type: string; meta?: unknown }) {
+  if (widget.type === 'custom-report') {
+    const meta = widget.meta as { id?: unknown } | null | undefined;
+    if (
+      !meta ||
+      typeof meta !== 'object' ||
+      typeof meta.id !== 'string' ||
+      meta.id.trim() === ''
+    ) {
+      throw new ValidationError('custom-report widget requires meta.id');
+    }
+  } else if (widget.type === 'markdown-card') {
+    const meta = widget.meta as { content?: unknown } | null | undefined;
+    if (!meta || typeof meta !== 'object' || typeof meta.content !== 'string') {
+      throw new ValidationError('markdown-card widget requires meta.content');
+    }
+  }
+}
+
 async function updateDashboard(
   widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
 ) {
@@ -151,6 +170,27 @@ async function updateDashboard(
   const dbWidgetMap = new Map(
     (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
+
+  for (const widget of widgets) {
+    const existing = dbWidgetMap.get(widget.id);
+    if (!existing) {
+      throw new Error(`Widget not found: ${widget.id}`);
+    }
+    const existingMeta =
+      typeof existing.meta === 'string'
+        ? JSON.parse(existing.meta || '{}')
+        : existing.meta;
+
+    const merged = {
+      ...existing,
+      ...widget,
+      meta: widget.meta !== undefined ? widget.meta : existingMeta,
+    };
+
+    if (merged.type === 'custom-report') {
+      validateWidgetMeta(merged);
+    }
+  }
 
   await batchMessages(async () => {
     await Promise.all(
@@ -165,6 +205,30 @@ async function updateDashboard(
 async function updateDashboardWidget(
   widget: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>,
 ) {
+  const { data } = await aqlQuery(
+    q('dashboard').filter({ id: widget.id }).select('*'),
+  );
+  const existing = (data as DashboardWidgetEntity[])[0];
+
+  if (!existing) {
+    throw new Error(`Widget not found: ${widget.id}`);
+  }
+
+  const existingMeta =
+    typeof existing.meta === 'string'
+      ? JSON.parse(existing.meta || '{}')
+      : existing.meta;
+
+  const merged = {
+    ...existing,
+    ...widget,
+    meta: widget.meta !== undefined ? widget.meta : existingMeta,
+  };
+
+  if (merged.type === 'custom-report') {
+    validateWidgetMeta(merged);
+  }
+
   await db.updateWithSchema('dashboard', widget);
 }
 
@@ -194,6 +258,12 @@ async function addDashboardWidget(
     'x' | 'y'
   >,
 ) {
+  if (!isWidgetType(widget.type as string)) {
+    throw new ValidationError(
+      `Unsupported widget type: ${String(widget.type)}`,
+    );
+  }
+  validateWidgetMeta(widget);
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
   if (!('x' in widget) && !('y' in widget)) {

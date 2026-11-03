@@ -519,15 +519,20 @@ export async function getDashboardWidgets(
   })) as DashboardWidgetEntity[];
 }
 
-export type AddDashboardWidgetInput = Omit<
-  DashboardWidgetEntity,
+type BaseAddDashboardWidgetInput<W extends DashboardWidgetEntity> = Omit<
+  W,
   'id' | 'tombstone' | 'meta' | 'x' | 'y' | 'dashboard_page_id'
 > &
   ({ x: number; y: number } | { x?: never; y?: never }) & {
-    meta?: Record<string, unknown> | null;
     dashboard_page_id?: string;
     id?: string;
-  };
+  } & (null extends W['meta'] ? { meta?: W['meta'] } : { meta: W['meta'] });
+
+export type AddDashboardWidgetInput = DashboardWidgetEntity extends infer W
+  ? W extends DashboardWidgetEntity
+    ? BaseAddDashboardWidgetInput<W>
+    : never
+  : never;
 
 export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
   let dashboardPageId = widget.dashboard_page_id;
@@ -540,9 +545,28 @@ export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
   if (!dashboardPageId) {
     throw new Error('No dashboard page found to add widget to');
   }
+
+  if (widget.type === 'custom-report') {
+    const meta = widget.meta as { id?: unknown } | null | undefined;
+    if (
+      !meta ||
+      typeof meta !== 'object' ||
+      typeof meta.id !== 'string' ||
+      meta.id.trim() === ''
+    ) {
+      throw new Error('custom-report widget requires meta.id');
+    }
+  } else if (widget.type === 'markdown-card') {
+    const meta = widget.meta as { content?: unknown } | null | undefined;
+    if (!meta || typeof meta !== 'object' || typeof meta.content !== 'string') {
+      throw new Error('markdown-card widget requires meta.content');
+    }
+  }
+
+  const { meta = null, ...restWidget } = widget;
   return send('dashboard-add-widget', {
-    meta: null,
-    ...widget,
+    ...restWidget,
+    meta,
     dashboard_page_id: dashboardPageId,
   });
 }

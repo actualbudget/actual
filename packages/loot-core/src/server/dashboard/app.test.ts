@@ -114,3 +114,101 @@ describe('dashboard-update', () => {
     });
   });
 });
+
+describe('dashboard metadata validation', () => {
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+  });
+
+  it('rejects adding custom-report widget without meta.id', async () => {
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-add-widget']({
+          type: 'custom-report',
+          width: 4,
+          height: 2,
+          dashboard_page_id: 'dashboard-page-id',
+          meta: null,
+        } as unknown as Parameters<
+          (typeof dashboardApp.handlers)['dashboard-add-widget']
+        >[0]),
+      ),
+    ).rejects.toThrow('custom-report widget requires meta.id');
+  });
+
+  it('rejects adding markdown-card widget without meta.content', async () => {
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-add-widget']({
+          type: 'markdown-card',
+          width: 4,
+          height: 2,
+          dashboard_page_id: 'dashboard-page-id',
+          meta: null,
+        } as unknown as Parameters<
+          (typeof dashboardApp.handlers)['dashboard-add-widget']
+        >[0]),
+      ),
+    ).rejects.toThrow('markdown-card widget requires meta.content');
+  });
+
+  it('rejects updating custom-report widget to null metadata', async () => {
+    await db.insertWithSchema('dashboard', {
+      id: 'report-widget-1',
+      type: 'custom-report',
+      width: 4,
+      height: 2,
+      x: 0,
+      y: 0,
+      dashboard_page_id: 'dashboard-page-id',
+      meta: { id: 'report-1' },
+    });
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-update-widget']({
+          id: 'report-widget-1',
+          meta: null,
+        }),
+      ),
+    ).rejects.toThrow('custom-report widget requires meta.id');
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-update']([
+          {
+            id: 'report-widget-1',
+            meta: null,
+          },
+        ]),
+      ),
+    ).rejects.toThrow('custom-report widget requires meta.id');
+  });
+
+  it('preserves valid partial updates on custom-report widget without meta', async () => {
+    await db.insertWithSchema('dashboard', {
+      id: 'report-widget-2',
+      type: 'custom-report',
+      width: 4,
+      height: 2,
+      x: 0,
+      y: 0,
+      dashboard_page_id: 'dashboard-page-id',
+      meta: { id: 'report-1' },
+    });
+
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-update-widget']({
+        id: 'report-widget-2',
+        width: 8,
+      }),
+    );
+
+    const { data } = await aqlQuery(
+      q('dashboard').filter({ id: 'report-widget-2' }).select('*'),
+    );
+    expect(data[0].width).toBe(8);
+    expect(data[0].meta).toEqual({ id: 'report-1' });
+  });
+});
