@@ -4,6 +4,7 @@ import type { Locale } from 'date-fns';
 
 import { memoizeOne } from '#shared/memoize';
 import * as Platform from '#shared/platform';
+import type { Weekday } from '#types/models/templates';
 import type { SyncedPrefs } from '#types/prefs';
 
 type DateLike = string | Date;
@@ -398,6 +399,31 @@ export function getMonth(day: string): string {
 
 export function getDay(day: string): number {
   return Number(d.format(_parse(day), 'dd'));
+}
+
+// Weekday names ordered to match `Date.prototype.getDay()` (0 = Sunday).
+export const WEEKDAYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const satisfies readonly Weekday[];
+
+// How many times a day of the week (0 = Sunday, as `Date.getDay()`) falls in
+// `month`. Always 4 or 5.
+export function countDayOfWeekInMonth(
+  month: DateLike,
+  dayOfWeek: number,
+): number {
+  const start = _parse(firstDayOfMonth(month));
+  // Days from the 1st to the first occurrence of `dayOfWeek`.
+  const offset = (dayOfWeek - d.getDay(start) + 7) % 7;
+  // Every month has 4 full weeks (28 days); the extra 0-3 days decide whether
+  // the day appears a fifth time.
+  return offset < d.getDaysInMonth(start) - 28 ? 5 : 4;
 }
 
 export function getMonthEnd(day: string): string {
