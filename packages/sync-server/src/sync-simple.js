@@ -11,8 +11,8 @@ import { openDatabase } from './db';
 import messagesSql from './sql/messages.sql?raw';
 import { getPathForGroupFile } from './util/paths';
 
-// Far-future messages would break sync for every other device in the group
-const MAX_FUTURE_DRIFT_MS = 24 * 60 * 60 * 1000;
+// Matches the client's Timestamp maxDrift; later messages break sync on other devices
+const MAX_FUTURE_DRIFT_MS = 5 * 60 * 1000;
 
 function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
