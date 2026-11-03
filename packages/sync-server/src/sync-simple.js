@@ -27,7 +27,7 @@ function isTimestampTooFarInFuture(parsed) {
   return parsed.millis() - Date.now() >= MAX_FUTURE_DRIFT_MS;
 }
 
-export function getGroupDb(groupId) {
+function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
   const needsInit = !existsSync(path);
 
