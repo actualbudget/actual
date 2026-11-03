@@ -1,4 +1,3 @@
-import { createRequire } from 'module';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,6 +7,7 @@ import createDebug from 'debug';
 
 import { applyFileEnv } from './config-file-env';
 import { parseAllowedNetwork } from './util/ssrf';
+import { resolveWebBuildPath } from './util/web-root';
 
 const debug = createDebug('actual:config');
 const debugSensitive = createDebug('actual-sensitive:config');
@@ -26,21 +26,7 @@ const defaultDataDir = process.env.ACTUAL_DATA_DIR
 
 debug(`Project root: '${projectRoot}'`);
 
-function resolveWebBuildPath() {
-  try {
-    const require = createRequire(moduleUrl);
-    return path.join(
-      path.dirname(require.resolve('@actual-app/web/package.json')),
-      'build',
-    );
-  } catch {
-    // Not resolvable when the web app isn't installed alongside the server,
-    // e.g. when its build is served separately.
-    return '';
-  }
-}
-
-const actualAppWebBuildPath = resolveWebBuildPath();
+const actualAppWebBuildPath = resolveWebBuildPath(moduleUrl);
 debug(`Actual web build path: '${actualAppWebBuildPath}'`);
 
 // Custom formats

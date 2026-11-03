@@ -8,6 +8,7 @@ import express from 'express';
 import { createApp, setupOpenIdFromConfig } from './create-app';
 import { config } from './load-config';
 import { listen } from './util/server-listen';
+import { requireWebRoot } from './util/web-root';
 
 const debugSensitive = createDebug('actual-sensitive:server');
 
@@ -109,9 +110,10 @@ if (isDev) {
 } else {
   console.log('Running in production mode - Serving static React app');
 
-  app.use(express.static(config.get('webRoot'), { index: false }));
+  const webRoot = requireWebRoot(config.get('webRoot'));
+  app.use(express.static(webRoot, { index: false }));
   app.get('/{*splat}', (req, res) =>
-    res.sendFile('index.html', { root: config.get('webRoot') }),
+    res.sendFile('index.html', { root: webRoot }),
   );
 }
 
