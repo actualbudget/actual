@@ -115,10 +115,18 @@ it('keeps rollover on when a budget opens after its last created month', async (
     flag: true,
   });
 
+  // A deleted category's older toggle keeps its rows but has no cells
+  db.runQuery(
+    "INSERT INTO categories (id, name, cat_group, tombstone) VALUES ('old', 'Old', 'group', 1)",
+  );
+  db.runQuery(
+    "INSERT INTO zero_budgets (id, month, category, carryover) VALUES ('202001-old', 202001, 'old', 2)",
+  );
+
   // Reopen two years later, with no transactions to extend the range back
   global.currentMonth = '2028-01';
   await sheet.loadSpreadsheet(db);
-  await createAllBudgets();
+  expect((await createAllBudgets()).start).toBe('2025-10');
   await sheet.waitOnSpreadsheet();
   expect(await getSheetBoolean('budget202801', 'carryover-card')).toBe(true);
 });
