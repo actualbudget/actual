@@ -352,7 +352,7 @@ export function ImportTransactionsModal({
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
-          skippedIds.push(trans.trx_id);
+          skippedUnsafeIds.push(trans.trx_id);
           continue;
         }
         if (!isSafeImportAmount(amount)) {

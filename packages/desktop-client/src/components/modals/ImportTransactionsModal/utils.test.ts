@@ -363,7 +363,7 @@ describe('parseAmountFields unparseable amounts', () => {
   it('rejects a non-empty unparseable outflow in split mode', () => {
     expect(
       parseAmountFields(
-        { outflow: 'abc' } as Partial<ImportTransaction>,
+        { outflow: 'abc' } as unknown as Partial<ImportTransaction>,
         true,
         false,
         '',
