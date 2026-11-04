@@ -192,7 +192,7 @@ const parseOptionKeys = [
   'detectHeader',
 ] satisfies Array<keyof ParseFileOptions>;
 
-function shouldPreserveImportSettingsForParse(
+export function shouldPreserveImportSettingsForParse(
   lastParse: LastParse | null,
   filename: string,
   fileType: string,
