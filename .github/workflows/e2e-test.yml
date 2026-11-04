@@ -107,6 +107,42 @@ jobs:
           retention-days: 1
           overwrite: true
 
+  # The storage and multi-tab tests once more on the sqlite-wasm fallback
+  # (memory plus IndexedDB), which browsers without sync access handles get.
+  functional-fallback-storage:
+    name: Functional, storage fallback
+    runs-on: depot-ubuntu-latest-4
+    needs: build-web
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-jammy
+    env:
+      E2E_USE_BUILD: '1'
+      E2E_STORAGE_BACKEND: memory-idb
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Trust the repository directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Download web build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: desktop-client-build
+          path: packages/desktop-client/build/
+      - name: Run storage E2E tests
+        run: yarn e2e storage.test.ts multitab.test.ts
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: desktop-client-test-results-fallback-storage
+          path: packages/desktop-client/test-results/
+          retention-days: 30
+          overwrite: true
+
   report-e2e:
     name: Report E2E results to Depot
     needs: functional

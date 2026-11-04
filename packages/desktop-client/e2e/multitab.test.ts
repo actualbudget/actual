@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test';
 
-import { disableAnimationsInitScript, expect, test } from './fixtures';
+import { addE2EInitScripts, expect, test } from './fixtures';
 import { BudgetPage } from './page-models/budget-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { Navigation } from './page-models/navigation';
@@ -62,7 +62,7 @@ test.describe('Multiple tabs on one budget', () => {
 
   test.beforeEach(async ({ browser }) => {
     context = await browser.newContext({ userAgent: CHROME_USER_AGENT });
-    await context.addInitScript(disableAnimationsInitScript);
+    await addE2EInitScripts(context);
     leader = await context.newPage();
     await leader.goto('/');
     await new ConfigurationPage(leader).createTestFile();
@@ -122,7 +122,7 @@ test.describe('Refreshing a tab', () => {
     browser,
   }) => {
     const context = await browser.newContext({ userAgent: CHROME_USER_AGENT });
-    await context.addInitScript(disableAnimationsInitScript);
+    await addE2EInitScripts(context);
     const creator = await context.newPage();
     await creator.goto('/');
     // The second tab opens once the first has booted, as a user would
@@ -157,7 +157,7 @@ test.describe('Refreshing a tab', () => {
     browser,
   }) => {
     const context = await browser.newContext({ userAgent: CHROME_USER_AGENT });
-    await context.addInitScript(disableAnimationsInitScript);
+    await addE2EInitScripts(context);
     // The first tab creates the budget and goes back to the file list
     const closer = await context.newPage();
     await closer.goto('/');

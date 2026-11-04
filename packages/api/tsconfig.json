@@ -8,6 +8,9 @@
     "module": "es2022",
     "moduleResolution": "bundler",
     "customConditions": ["api"],
+    // The tests and the browser worker use Node globals; the root config
+    // limits automatic @types inclusion, so list them here
+    "types": ["vite/client", "vitest/globals", "node"],
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,

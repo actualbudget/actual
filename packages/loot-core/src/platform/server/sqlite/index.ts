@@ -1,111 +1,93 @@
-import type {
-  Database as SqlJsDatabase,
-  Statement as SqlJsStatement,
-} from '@jlongster/sql.js';
-
-import * as legacy from './engine.sqljs.legacy';
+import { wasmEngine } from './engine.wasm';
+import { findMigratedStorageKind } from './storage/files-store';
 import type {
   Database,
-  SqliteEngine,
   SqlParam,
   Statement,
+  StorageBackend,
   TransactionOptions,
 } from './types';
 
 export type {
   Database,
   SqlParam,
-  SqliteEngine,
   Statement,
+  StorageBackend,
   TransactionOptions,
 } from './types';
-// Used by the legacy filesystem layer and its tests
-export { _getModule } from './engine.sqljs.legacy';
-export type { SqlJsModule } from './engine.sqljs.legacy';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 
-// The web sqlite module is a facade over an engine. The legacy sql.js
-// build over absurd-sql is built in and the default; other engines (the
-// official sqlite-wasm build) are registered by whichever entry point
-// wants them, so a build that never imports one does not bundle it.
-// Callers only see the opaque `Database` and `Statement` handles.
+// The web sqlite module: the official sqlite-wasm build over the OPFS pool
+// store, or over the in-memory store persisted to IndexedDB where sync
+// access handles are unavailable. Callers only see the opaque `Database`
+// and `Statement` handles from `./types`.
+const engine = wasmEngine;
 
-function asSqlJs(db: Database): SqlJsDatabase {
-  return db as unknown as SqlJsDatabase;
-}
+let activeBackend: StorageBackend = 'opfs';
 
-function asSqlJsStatement(sql: string | Statement): string | SqlJsStatement {
-  return sql as unknown as string | SqlJsStatement;
-}
+// Opt-in: the browser build of `@actual-app/api` embeds the wasm and hands
+// it over here before `init`, so the engine is instantiated from these
+// bytes instead of fetching them.
+let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
 
-const legacyEngine: SqliteEngine = {
-  init: async options => {
-    await legacy.init(options);
-  },
-  setWasmBinary: binary => legacy.setWasmBinary(binary),
-  prepare: (db, sql) =>
-    legacy.prepare(asSqlJs(db), sql) as unknown as Statement,
-  finalizeStatement: statement =>
-    (statement as unknown as SqlJsStatement).free(),
-  runQuery: <T>(
-    db: Database,
-    sql: string | Statement,
-    params: SqlParam[],
-    fetchAll: boolean,
-  ) =>
-    fetchAll
-      ? legacy.runQuery<T>(asSqlJs(db), asSqlJsStatement(sql), params, true)
-      : legacy.runQuery(asSqlJs(db), asSqlJsStatement(sql), params, false),
-  execQuery: (db, sql) => legacy.execQuery(asSqlJs(db), sql),
-  openDatabase: async pathOrBuffer =>
-    (await legacy.openDatabase(pathOrBuffer)) as unknown as Database,
-  closeDatabase: db => legacy.closeDatabase(asSqlJs(db)),
-  exportDatabase: db => legacy.exportDatabase(asSqlJs(db)),
-};
-
-export type EngineName = 'legacy' | 'wasm';
-
-const engines: Partial<Record<EngineName, SqliteEngine>> = {
-  legacy: legacyEngine,
-};
-
-let activeEngine: SqliteEngine = legacyEngine;
-
-export function registerEngine(name: EngineName, engine: SqliteEngine) {
-  engines[name] = engine;
-}
-
-// The browser build of `@actual-app/api` embeds sql.js's wasm; the
-// sqlite-wasm engine fetches its own file.
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacyEngine.setWasmBinary(binary);
+  wasmBinaryOverride = binary;
 }
 
+// Resolves to the backend actually in use: `opfs` falls back to
+// `memory-idb` when sync access handles are unavailable. `legacy` (the
+// removed absurd-sql engine) is treated as the default; its data is
+// migrated when a budget is next opened.
 export async function init({
   baseURL,
   wasmBinary,
-  engine = 'legacy',
+  storage = 'opfs',
 }: {
   baseURL?: string;
   wasmBinary?: ArrayBuffer | Uint8Array;
-  engine?: EngineName;
-} = {}): Promise<void> {
-  const selected = engines[engine];
-  if (selected == null) {
-    throw new Error(`sqlite engine "${engine}" has not been registered`);
-  }
-  activeEngine = selected;
-  await activeEngine.init({ baseURL, wasmBinary });
+  storage?: StorageBackend;
+} = {}): Promise<StorageBackend> {
+  activeBackend = await engine.init({
+    baseURL,
+    wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    storage: storage === 'legacy' ? 'opfs' : storage,
+  });
+  return activeBackend;
+}
+
+export function getStorageBackend(): StorageBackend {
+  return activeBackend;
+}
+
+// A backend already holding migrated data, if any. Chosen over the flag at
+// startup so a cleared flag can never show an empty app.
+export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
+  return findMigratedStorageKind();
+}
+
+// Persist anything pending (the IndexedDB fallback writes lazily)
+export async function flushSqliteStorage(): Promise<void> {
+  await engine.flushStorage?.();
+}
+
+// Let go of storage handles and locks so another worker can take over
+export async function releaseSqliteStorage(): Promise<void> {
+  await engine.releaseStorage?.();
 }
 
 export function prepare(db: Database, sql: string): Statement {
-  return activeEngine.prepare(db, sql);
+  return engine.prepare(db, sql);
 }
 
 // Frees a prepared statement that is no longer needed (for example when
 // it is evicted from a statement cache). Closing the database also frees
 // its statements, so this is only an optimisation for long sessions.
 export function finalizeStatement(statement: Statement) {
-  activeEngine.finalizeStatement(statement);
+  engine.finalizeStatement(statement);
 }
 
 export function runQuery(
@@ -126,11 +108,11 @@ export function runQuery<T>(
   params: SqlParam[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
-  return activeEngine.runQuery<T>(db, sql, params, fetchAll);
+  return engine.runQuery<T>(db, sql, params, fetchAll);
 }
 
 export function execQuery(db: Database, sql: string) {
-  activeEngine.execQuery(db, sql);
+  engine.execQuery(db, sql);
 }
 
 let transactionDepth = 0;
@@ -197,13 +179,13 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<Database> {
-  return activeEngine.openDatabase(pathOrBuffer);
+  return engine.openDatabase(pathOrBuffer);
 }
 
 export function closeDatabase(db: Database) {
-  activeEngine.closeDatabase(db);
+  engine.closeDatabase(db);
 }
 
 export async function exportDatabase(db: Database): Promise<Uint8Array> {
-  return activeEngine.exportDatabase(db);
+  return engine.exportDatabase(db);
 }

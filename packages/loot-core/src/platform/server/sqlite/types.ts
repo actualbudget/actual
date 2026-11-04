@@ -19,14 +19,22 @@ export type TransactionOptions = {
   immediate?: boolean;
 };
 
-// What a web sqlite engine provides to the facade in `index.ts`. Engines
-// other than the default register themselves at startup, so a build that
-// never imports one does not bundle it.
+// Which engine holds budget files. `opfs` is the official sqlite-wasm build
+// over the origin private file system, `memory-idb` the same engine kept in
+// memory and persisted to IndexedDB where sync access handles are missing.
+// `legacy` is the platform's native engine (Electron and the node API use
+// better-sqlite3); the browser's previous absurd-sql engine of that name is
+// gone, and asking for it yields the default.
+export type StorageBackend = 'legacy' | 'opfs' | 'memory-idb';
+
+// What the web sqlite engine provides to the facade in `index.ts`.
 export type SqliteEngine = {
+  // Resolves to the storage backend actually in use
   init(options: {
     baseURL?: string;
     wasmBinary?: ArrayBuffer | Uint8Array;
-  }): Promise<void>;
+    storage?: StorageBackend;
+  }): Promise<StorageBackend>;
   setWasmBinary(binary: ArrayBuffer | Uint8Array): void;
   prepare(db: Database, sql: string): Statement;
   finalizeStatement(statement: Statement): void;
@@ -40,4 +48,8 @@ export type SqliteEngine = {
   openDatabase(pathOrBuffer?: string | Uint8Array): Promise<Database>;
   closeDatabase(db: Database): void;
   exportDatabase(db: Database): Promise<Uint8Array>;
+  // Persist anything pending (the IndexedDB fallback writes lazily)
+  flushStorage?(): Promise<void>;
+  // Let go of storage handles and locks so another worker can take over
+  releaseStorage?(): Promise<void>;
 };
