@@ -75,6 +75,10 @@ describe('utility functions', () => {
     expect(looselyParseAmount('1.234e2')).toBeCloseTo(123.4, 10);
     expect(looselyParseAmount('1,234E+02')).toBeCloseTo(123.4, 10);
     expect(looselyParseAmount('-2.500E+03')).toBeCloseTo(-2500, 10);
+    // The mantissa can be tiny or large in absolute terms while the final
+    // amount is ordinary; only the scaled result may be range-checked.
+    expect(looselyParseAmount('0.0000001e8')).toBe(10);
+    expect(looselyParseAmount('1000000000000000e-14')).toBe(10);
   });
 
   test('looseParseAmount works with more than 9 decimal places', () => {

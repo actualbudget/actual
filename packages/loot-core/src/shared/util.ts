@@ -598,11 +598,12 @@ export function looselyParseAmount(amount: string) {
         : mantissaText.slice(0, lastSeparator).replace(/[.,]/g, '') +
           '.' +
           mantissaText.slice(lastSeparator + 1).replace(/[.,]/g, '');
-    const mantissaValue = parseFloat(mantissa);
-    if (Number.isNaN(mantissaValue)) {
-      return null;
-    }
-    return safeNumber(parseFloat(`${mantissaValue}e${scientific[2]}`));
+    // Keep the mantissa as text: going through Number() would print small
+    // values back in exponential form (`1e-7`), which parseFloat cannot
+    // combine with a second exponent (`1e-7e8` -> 1e-7). parseFloat rounds
+    // the combined string correctly, so `0.0000001e8` is 10 and
+    // `1000000000000000e-14` is 10 rather than being rejected as unsafe.
+    return safeNumber(parseFloat(`${mantissa}e${scientific[2]}`));
   }
 
   // Look for a decimal marker, then look for either 1-2 or 4+ decimal places.
