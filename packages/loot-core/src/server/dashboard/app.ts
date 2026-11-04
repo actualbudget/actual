@@ -140,6 +140,25 @@ async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
 }
 
+function normalizeImportedWidgetMeta(
+  widget: ExportImportDashboardWidget,
+): DashboardWidgetEntity['meta'] {
+  if (isExportedCustomReportWidget(widget)) {
+    return { id: widget.meta.id };
+  }
+  if (widget.type === 'markdown-card') {
+    const meta = widget.meta as { content?: unknown } | null | undefined;
+    return {
+      ...(meta && typeof meta === 'object' ? meta : {}),
+      content:
+        meta && typeof meta === 'object' && typeof meta.content === 'string'
+          ? meta.content
+          : '',
+    };
+  }
+  return widget.meta;
+}
+
 function validateWidgetMeta(widget: { type: string; meta?: unknown }) {
   if (widget.type === 'custom-report') {
     const meta = widget.meta as { id?: unknown } | null | undefined;
@@ -162,6 +181,14 @@ function validateWidgetMeta(widget: { type: string; meta?: unknown }) {
 async function updateDashboard(
   widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
 ) {
+  const seenIds = new Set<string>();
+  for (const widget of widgets) {
+    if (seenIds.has(widget.id)) {
+      throw new ValidationError(`Duplicate widget id in batch: ${widget.id}`);
+    }
+    seenIds.add(widget.id);
+  }
+
   const { data: dbWidgets } = await aqlQuery(
     q('dashboard')
       .filter({ id: { $oneof: widgets.map(({ id }) => id) } })
@@ -187,7 +214,9 @@ async function updateDashboard(
       meta: widget.meta !== undefined ? widget.meta : existingMeta,
     };
 
-    validateWidgetMeta(merged);
+    if (widget.meta !== undefined || widget.type !== undefined) {
+      validateWidgetMeta(merged);
+    }
   }
 
   await batchMessages(async () => {
@@ -223,7 +252,9 @@ async function updateDashboardWidget(
     meta: widget.meta !== undefined ? widget.meta : existingMeta,
   };
 
-  validateWidgetMeta(merged);
+  if (widget.meta !== undefined || widget.type !== undefined) {
+    validateWidgetMeta(merged);
+  }
 
   await db.updateWithSchema('dashboard', widget);
 }
@@ -368,9 +399,7 @@ async function importDashboard({
             x: widget.x,
             y: widget.y,
             dashboard_page_id: dashboardPageId,
-            meta: isExportedCustomReportWidget(widget)
-              ? { id: widget.meta.id }
-              : widget.meta,
+            meta: normalizeImportedWidgetMeta(widget),
           }),
         ),
 
