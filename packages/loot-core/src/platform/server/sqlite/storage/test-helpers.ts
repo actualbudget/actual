@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
-import { wasmEngine } from '#platform/server/sqlite/engine.wasm';
 import { init, registerEngine } from '#platform/server/sqlite';
+import { wasmEngine } from '#platform/server/sqlite/engine.wasm';
 import type { StorageBackend } from '#platform/server/sqlite/types';
 
 import { pageSizeFromHeader } from './absurd-migration';
