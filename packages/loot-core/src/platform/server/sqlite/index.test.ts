@@ -1,12 +1,9 @@
 import 'fake-indexeddb/auto';
-import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
 
-import { wasmEngine } from './engine.wasm';
+import { initWasmEngine } from './storage/test-helpers';
 import type { Database } from './types';
 
 import {
@@ -16,12 +13,9 @@ import {
   init,
   openDatabase,
   prepare,
-  registerEngine,
   runQuery,
   transaction,
 } from './index';
-
-const require = createRequire(import.meta.url);
 
 const initSQL = `
 CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
@@ -329,14 +323,7 @@ describe('legacy sql.js engine', () => {
 });
 
 describe('sqlite-wasm engine', () => {
-  beforeAll(() => {
-    // No fetch in tests: hand the engine the wasm bytes directly
-    const wasmBinary = readFileSync(
-      require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'),
-    );
-    registerEngine('wasm', wasmEngine);
-    return init({ storage: 'memory-idb', wasmBinary });
-  });
+  beforeAll(() => initWasmEngine());
 
   itBehavesLikeSqlite();
 

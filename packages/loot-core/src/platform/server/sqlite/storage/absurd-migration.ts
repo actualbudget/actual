@@ -1,57 +1,40 @@
+import type { Data } from '#platform/server/indexeddb';
+import { logger } from '#platform/server/log';
+import type { WasmDatabase } from '#platform/server/sqlite/wasm';
+
 import { StorageMigrationError } from './errors';
+import { putSqliteFileRow } from './files-store';
+import { legacyDatabaseName } from './paths';
 import type { MigrationProgress } from './types';
 
 // absurd-sql kept each sqlite file in its own IndexedDB database, named
 // after the file path, with a single object store `data`: key -1 holds
-// `{ size }` and keys 0..N hold the file's blocks (one sqlite page each).
+// `{ size }` and keys 0..N hold the file's blocks, one sqlite page each.
 // These helpers read that layout so a budget can be moved into the new
-// storage, and write it back so the opt-in can be reversed.
+// storage, and finish the move the same way for both stores.
 
 const LEGACY_STORE = 'data';
-const LEGACY_VERSION = 2;
-// Opening at a higher version makes absurd-sql connections in other tabs
-// close (they listen for `versionchange`), so nothing writes during a copy
+// Opening at a higher version than absurd-sql's (2) makes its connections
+// in other tabs close (they listen for `versionchange`), so nothing writes
+// during a copy
 const MIGRATION_VERSION = 3;
 const BLOCKS_PER_CHUNK = 256;
+const DELETE_TIMEOUT_MS = 5000;
 const SQLITE_HEADER = 'SQLite format 3\0';
 
-type LegacyMeta = { size: number; blockSize?: number };
+type LegacyMeta = { size: number };
 
-export async function legacyDatabaseExists(name: string): Promise<boolean> {
-  if (typeof indexedDB.databases === 'function') {
-    const databases = await indexedDB.databases();
-    return databases.some(database => database.name === name);
-  }
-
-  // Older browsers: opening creates the database if it is missing, which
-  // fires `upgradeneeded`. Abort that and clean up.
-  return new Promise(resolve => {
-    let created = false;
-    const request = indexedDB.open(name);
-    request.onupgradeneeded = () => {
-      created = true;
-      request.transaction?.abort();
-    };
-    request.onsuccess = () => {
-      request.result.close();
-      resolve(!created);
-    };
-    request.onerror = () => {
-      if (created) {
-        indexedDB.deleteDatabase(name);
-      }
-      resolve(false);
-    };
-  });
-}
-
-function openLegacyDatabase(name: string): Promise<IDBDatabase> {
+// Resolves null when no absurd-sql database exists under this name. A
+// missing database would be created by the open; aborting the upgrade
+// that creates it leaves nothing behind.
+function openLegacyDatabase(name: string): Promise<IDBDatabase | null> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, MIGRATION_VERSION);
+    let missing = false;
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
+        missing = true;
         request.transaction?.abort();
-        reject(new Error(`${name} is not an absurd-sql database`));
       }
     };
     request.onblocked = () => {
@@ -63,7 +46,13 @@ function openLegacyDatabase(name: string): Promise<IDBDatabase> {
       database.onversionchange = () => database.close();
       resolve(database);
     };
-    request.onerror = () => reject(request.error);
+    request.onerror = () => {
+      if (missing) {
+        resolve(null);
+      } else {
+        reject(request.error);
+      }
+    };
   });
 }
 
@@ -74,24 +63,11 @@ function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   });
 }
 
-async function readLegacyMeta(
-  database: IDBDatabase,
-): Promise<LegacyMeta | undefined> {
+function readLegacyKey<T>(database: IDBDatabase, key: number): Promise<T> {
   const store = database
     .transaction([LEGACY_STORE], 'readonly')
     .objectStore(LEGACY_STORE);
-  const meta = await requestToPromise(store.get(-1));
-  return meta as LegacyMeta | undefined;
-}
-
-async function readLegacyBlock(
-  database: IDBDatabase,
-  key: number,
-): Promise<ArrayBuffer | undefined> {
-  const store = database
-    .transaction([LEGACY_STORE], 'readonly')
-    .objectStore(LEGACY_STORE);
-  return (await requestToPromise(store.get(key))) as ArrayBuffer | undefined;
+  return requestToPromise(store.get(key)) as Promise<T>;
 }
 
 export function pageSizeFromHeader(header: Uint8Array): number | null {
@@ -104,33 +80,26 @@ export function pageSizeFromHeader(header: Uint8Array): number | null {
   return raw === 1 ? 65536 : raw;
 }
 
-type BlockReader = {
-  // Resolves with the next chunk of the file, or undefined at the end
-  next: () => Promise<Uint8Array | undefined>;
-  blockSize: number;
-  size: number;
-};
-
 // Reads the blocks in order, in short IndexedDB transactions, filling gaps
-// with zeros and cutting the last block to the file size.
+// with zeros and cutting the last block to the file size. Resolves with
+// undefined at the end of the file.
 async function createBlockReader(
   database: IDBDatabase,
-  meta: LegacyMeta,
+  size: number,
   onProgress?: (percent: number) => void,
-): Promise<BlockReader> {
-  const first = await readLegacyBlock(database, 0);
+): Promise<() => Promise<Uint8Array | undefined>> {
+  const first = await readLegacyKey<ArrayBuffer | undefined>(database, 0);
   if (first == null) {
     throw new Error('legacy database has no first block');
   }
-  const pageSize = pageSizeFromHeader(new Uint8Array(first));
-  if (pageSize == null) {
+  const blockSize = pageSizeFromHeader(new Uint8Array(first));
+  if (blockSize == null) {
     throw new Error('legacy database does not start with a sqlite header');
   }
-  const blockSize = meta.blockSize ?? pageSize;
-  const totalBlocks = Math.ceil(meta.size / blockSize);
+  const totalBlocks = Math.ceil(size / blockSize);
   let nextBlock = 0;
 
-  async function next(): Promise<Uint8Array | undefined> {
+  return async function next() {
     if (nextBlock >= totalBlocks) {
       return undefined;
     }
@@ -145,7 +114,7 @@ async function createBlockReader(
     ]);
 
     const chunkStart = nextBlock * blockSize;
-    const chunkEnd = Math.min((lastBlock + 1) * blockSize, meta.size);
+    const chunkEnd = Math.min((lastBlock + 1) * blockSize, size);
     const chunk = new Uint8Array(chunkEnd - chunkStart);
     for (let index = 0; index < keys.length; index++) {
       const key = keys[index] as number;
@@ -160,18 +129,14 @@ async function createBlockReader(
     nextBlock = lastBlock + 1;
     onProgress?.(Math.round((100 * nextBlock) / totalBlocks));
     return chunk;
-  }
-
-  return { next, blockSize, size: meta.size };
+  };
 }
 
-export async function deleteLegacyDatabase(
-  name: string,
-  { blockedTimeoutMs = 5000 }: { blockedTimeoutMs?: number } = {},
-): Promise<boolean> {
+// Resolves false when the database is still open elsewhere after a while
+export function deleteLegacyDatabase(name: string): Promise<boolean> {
   return new Promise(resolve => {
     const request = indexedDB.deleteDatabase(name);
-    const timer = setTimeout(() => resolve(false), blockedTimeoutMs);
+    const timer = setTimeout(() => resolve(false), DELETE_TIMEOUT_MS);
     request.onsuccess = () => {
       clearTimeout(timer);
       resolve(true);
@@ -184,37 +149,34 @@ export async function deleteLegacyDatabase(
 }
 
 export type LegacyDatabaseContents = {
-  // Feeds the file in chunks; for `importDb` or a sync access handle
+  // Feeds the file in chunks, for `importDb`
   read: () => Promise<Uint8Array | undefined>;
   size: number;
   close: () => void;
 };
 
-// Opens the legacy database for reading. Returns null when there is none,
-// or when it is empty (absurd-sql created the IndexedDB database before
-// the first write).
+// Opens the absurd-sql database of a sqlite path for reading. Resolves
+// null when there is none, or when it is empty (absurd-sql created the
+// IndexedDB database before the first write).
 export async function openLegacyDatabaseContents(
   path: string,
-  name: string,
   onProgress?: (percent: number) => void,
 ): Promise<LegacyDatabaseContents | null> {
-  if (!(await legacyDatabaseExists(name))) {
+  const name = legacyDatabaseName(path);
+  const database = await openLegacyDatabase(name);
+  if (database == null) {
     return null;
   }
-  const database = await openLegacyDatabase(name);
   try {
-    const meta = await readLegacyMeta(database);
-    if (meta == null || !(meta.size > 0)) {
+    const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
+    if (typeof meta?.size !== 'number' || meta.size <= 0) {
       database.close();
       await deleteLegacyDatabase(name);
       return null;
     }
-    const reader = await createBlockReader(database, meta, onProgress);
-    return {
-      read: reader.next,
-      size: reader.size,
-      close: () => database.close(),
-    };
+    const read = await createBlockReader(database, meta.size, onProgress);
+    onProgress?.(0);
+    return { read, size: meta.size, close: () => database.close() };
   } catch (error) {
     database.close();
     throw new StorageMigrationError(path, error);
@@ -224,10 +186,9 @@ export async function openLegacyDatabaseContents(
 // The whole legacy file in memory, for the fallback store
 export async function readLegacyDatabaseBytes(
   path: string,
-  name: string,
   onProgress?: (percent: number) => void,
 ): Promise<Uint8Array | null> {
-  const contents = await openLegacyDatabaseContents(path, name, onProgress);
+  const contents = await openLegacyDatabaseContents(path, onProgress);
   if (contents == null) {
     return null;
   }
@@ -250,51 +211,30 @@ export async function readLegacyDatabaseBytes(
   }
 }
 
-// Writes a sqlite file back into absurd-sql's layout so switching the
-// storage flag off again keeps the data.
-export async function writeLegacyDatabaseBytes(
-  name: string,
-  bytes: Uint8Array,
-): Promise<void> {
-  const blockSize = pageSizeFromHeader(bytes) ?? 4096;
-  await deleteLegacyDatabase(name);
-  const database = await new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(name, LEGACY_VERSION);
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(LEGACY_STORE);
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-  try {
-    const transaction = database.transaction([LEGACY_STORE], 'readwrite');
-    const store = transaction.objectStore(LEGACY_STORE);
-    store.put({ size: bytes.length }, -1);
-    for (
-      let offset = 0, key = 0;
-      offset < bytes.length;
-      offset += blockSize, key++
-    ) {
-      const block = new Uint8Array(blockSize);
-      block.set(
-        bytes.subarray(offset, Math.min(offset + blockSize, bytes.length)),
-      );
-      store.put(block.buffer, key);
-    }
-    await new Promise<void>((resolve, reject) => {
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(transaction.error);
-    });
-  } finally {
-    database.close();
+// What both stores check on a freshly copied database before trusting
+// it: structurally sound, and an Actual budget
+export function verifyMigratedDatabase(db: WasmDatabase) {
+  const result = db.selectValue('PRAGMA quick_check');
+  if (result !== 'ok') {
+    throw new Error(`quick_check: ${String(result)}`);
   }
+  db.selectValue('SELECT 1 FROM __migrations__ LIMIT 1');
 }
 
-export function reportMigration(
-  progress: MigrationProgress | undefined,
-  phase: Parameters<MigrationProgress>[0],
-  percent?: number,
+// Records that the file now lives in the new storage, then drops the
+// absurd-sql copy. The marker goes first so a crash in between can never
+// make the budget look empty on the next start.
+export async function completeMigration(
+  marker: Data,
+  onProgress?: MigrationProgress,
 ) {
-  progress?.(phase, percent);
+  onProgress?.('cleanup');
+  await putSqliteFileRow(marker);
+  if (!(await deleteLegacyDatabase(legacyDatabaseName(marker.filepath)))) {
+    logger.warn(
+      'sqlite storage: the absurd-sql copy could not be deleted',
+      marker.filepath,
+    );
+  }
+  onProgress?.('done');
 }

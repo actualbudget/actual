@@ -1,6 +1,6 @@
 import { logger } from '#platform/server/log';
 
-import { getSqliteStore, hasSqliteStore, initSqliteStorage } from './storage';
+import { getSqliteStore } from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
@@ -13,13 +13,12 @@ import type { PreparedStatement, WasmDatabase } from './wasm';
 
 export type { WasmDatabase, PreparedStatement };
 
-// sqlite engine over the official `@sqlite.org/sqlite-wasm` build. It is
-// bundled only by entry points that register it with the facade in
-// `index.ts` (see `engines.web.ts`). File-backed databases are opened
-// through the sqlite storage (OPFS, or IndexedDB as a whole file);
-// `:memory:` and byte buffers live in memory. The module-level pieces
-// (init, user functions, memory databases) live in `wasm.ts` so the
-// storage layer can use them without importing the engine.
+// sqlite engine over the official `@sqlite.org/sqlite-wasm` build, behind
+// the facade in `index.ts`. File-backed databases are opened through the
+// sqlite storage (OPFS, or IndexedDB as a whole file); `:memory:` and byte
+// buffers live in memory. The module-level pieces (init, user functions,
+// memory databases) live in `wasm.ts` so the storage layer can use them
+// without importing the engine.
 
 function asWasm(db: Database): WasmDatabase {
   return db as unknown as WasmDatabase;
@@ -33,9 +32,7 @@ function asWasmStatement(sql: string | Statement): string | PreparedStatement {
 const openPaths = new Map<WasmDatabase, string>();
 
 function notifyWrite(db: WasmDatabase) {
-  if (hasSqliteStore()) {
-    getSqliteStore().onWrite?.(db);
-  }
+  getSqliteStore().onWrite?.(db);
 }
 
 function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
@@ -146,11 +143,8 @@ async function exportDatabase(db: Database): Promise<Uint8Array> {
 }
 
 export const wasmEngine: SqliteEngine = {
-  // `opfs` falls back to `memory-idb` when sync access handles are
-  // unavailable; the resolved kind is what the caller gets back
-  init: async ({ baseURL, wasmBinary, storage = 'opfs' }) => {
-    await initSqlite3({ baseURL, wasmBinary });
-    return initSqliteStorage(storage === 'legacy' ? 'opfs' : storage);
+  init: async options => {
+    await initSqlite3(options);
   },
   setWasmBinary,
   prepare,
@@ -160,14 +154,4 @@ export const wasmEngine: SqliteEngine = {
   openDatabase,
   closeDatabase,
   exportDatabase,
-  flushStorage: async () => {
-    if (hasSqliteStore()) {
-      await getSqliteStore().flush();
-    }
-  },
-  releaseStorage: async () => {
-    if (hasSqliteStore()) {
-      await getSqliteStore().releaseAll();
-    }
-  },
 };

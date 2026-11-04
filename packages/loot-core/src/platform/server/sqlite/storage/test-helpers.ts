@@ -1,11 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
-import { init, registerEngine } from '#platform/server/sqlite';
-import { wasmEngine } from '#platform/server/sqlite/engine.wasm';
-import type { StorageBackend } from '#platform/server/sqlite/types';
+import { IDBFactory } from 'fake-indexeddb';
+
+import * as idb from '#platform/server/indexeddb';
+import { init } from '#platform/server/sqlite';
 
 import { pageSizeFromHeader } from './absurd-migration';
+import type { FileStoreKind } from './types';
 
 const require = createRequire(import.meta.url);
 
@@ -14,13 +16,15 @@ export function readSqliteWasm(): Buffer {
   return readFileSync(require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'));
 }
 
-// Registers the sqlite-wasm engine (the worker entry does this in the app)
-// and starts it on the given storage
-export function initWasmEngine(
-  storage: Exclude<StorageBackend, 'legacy'> = 'memory-idb',
-) {
-  registerEngine('wasm', wasmEngine);
+// Starts the sqlite-wasm engine on the given storage
+export function initWasmEngine(storage: FileStoreKind = 'memory-idb') {
   return init({ storage, wasmBinary: readSqliteWasm() });
+}
+
+// A fresh IndexedDB for each test
+export async function resetIndexedDb() {
+  globalThis.indexedDB = new IDBFactory();
+  await idb.closeDatabase();
 }
 
 // A small database file as absurd-sql would have stored it: one IndexedDB

@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { MemFs } from './memfs';
+import { createMemFs } from './memfs';
 
-describe('MemFs', () => {
+describe('memfs', () => {
   it('creates directories and lists children', () => {
-    const fs = new MemFs();
+    const fs = createMemFs();
     fs.mkdirp('/documents/Actual/budget');
     fs.writeFile('/documents/Actual/budget/metadata.json', '{}');
     fs.writeFile('/documents/Actual/budget/db.sqlite', null);
@@ -19,13 +19,12 @@ describe('MemFs', () => {
       'metadata.json',
     ]);
     expect(fs.isDirectory('/documents/Actual')).toBe(true);
-    expect(fs.isFile('/documents/Actual/budget/db.sqlite')).toBe(true);
     expect(fs.readFile('/documents/Actual/budget/db.sqlite')).toBe(null);
     expect(fs.readFile('/missing')).toBe(undefined);
   });
 
   it('refuses to remove a non-empty directory and removes empty ones', () => {
-    const fs = new MemFs();
+    const fs = createMemFs();
     fs.writeFile('/a/b/c.txt', 'x');
     expect(() => fs.rmdir('/a/b')).toThrow(/not empty/);
     fs.unlink('/a/b/c.txt');
@@ -35,7 +34,7 @@ describe('MemFs', () => {
   });
 
   it('requires a parent directory for mkdir and tolerates trailing slashes', () => {
-    const fs = new MemFs();
+    const fs = createMemFs();
     expect(() => fs.mkdir('/x/y')).toThrow(/parent/);
     fs.mkdir('/x');
     fs.mkdir('/x/y/');

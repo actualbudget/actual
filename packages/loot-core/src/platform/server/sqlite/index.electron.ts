@@ -23,11 +23,7 @@ export type {
   StorageBackend,
   TransactionOptions,
 } from './types';
-export {
-  BudgetInUseError,
-  StorageMigrationError,
-  StorageUnavailableError,
-} from './storage/errors';
+export { BudgetInUseError, StorageMigrationError } from './storage/errors';
 
 // Callers hold the opaque handles from `./types`; the native module is the
 // only place that knows they are better-sqlite3 objects
@@ -52,22 +48,6 @@ export async function init(_options?: {
   // No need to initialise on electron; the storage backend only exists on
   // the web, so report the native build as `legacy`
   return 'legacy';
-}
-
-export function getStorageBackend(): StorageBackend {
-  return 'legacy';
-}
-
-export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
-  return null;
-}
-
-export async function flushSqliteStorage(): Promise<void> {
-  // Native sqlite writes through to disk
-}
-
-export async function releaseSqliteStorage(): Promise<void> {
-  // Nothing to release on native sqlite
 }
 
 // Parity with the browser sqlite backend (which instantiates sql.js from an

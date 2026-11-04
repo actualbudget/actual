@@ -19,22 +19,18 @@ export type TransactionOptions = {
   immediate?: boolean;
 };
 
-// Which storage engine backs sqlite on the web. `legacy` is sql.js over
-// absurd-sql (IndexedDB blocks, needs SharedArrayBuffer); the other two
-// use the official sqlite-wasm build, persisted to OPFS or, when sync
-// access handles are unavailable, to IndexedDB as a whole file.
+// Which storage backs sqlite on the web. `legacy` is sql.js over absurd-sql
+// (IndexedDB blocks, needs SharedArrayBuffer); the other two use the
+// official sqlite-wasm build, persisted to OPFS or, when sync access
+// handles are unavailable, to IndexedDB as a whole file.
 export type StorageBackend = 'legacy' | 'opfs' | 'memory-idb';
 
-// What a web sqlite engine provides to the facade in `index.ts`. Engines
-// other than the default register themselves at startup, so a build that
-// never imports one does not bundle it.
+// What a web sqlite engine provides to the facade in `index.ts`
 export type SqliteEngine = {
-  // Resolves to the storage backend actually in use
   init(options: {
     baseURL?: string;
     wasmBinary?: ArrayBuffer | Uint8Array;
-    storage?: StorageBackend;
-  }): Promise<StorageBackend>;
+  }): Promise<void>;
   setWasmBinary(binary: ArrayBuffer | Uint8Array): void;
   prepare(db: Database, sql: string): Statement;
   finalizeStatement(statement: Statement): void;
@@ -48,8 +44,4 @@ export type SqliteEngine = {
   openDatabase(pathOrBuffer?: string | Uint8Array): Promise<Database>;
   closeDatabase(db: Database): void;
   exportDatabase(db: Database): Promise<Uint8Array>;
-  // Persist anything pending (the IndexedDB fallback writes lazily)
-  flushStorage?(): Promise<void>;
-  // Let go of storage handles and locks so another worker can take over
-  releaseStorage?(): Promise<void>;
 };

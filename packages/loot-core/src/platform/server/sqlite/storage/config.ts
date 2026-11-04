@@ -1,29 +1,29 @@
 import { logger } from '#platform/server/log';
 import { getSqlite3 } from '#platform/server/sqlite/wasm';
 
-import { MIN_SQLITE_VERSION } from './opfs-sahpool';
-
+// `preserveOnInitFailure` arrived in sqlite-wasm 3.54; without it a failed
+// pool install deletes the pool directory, which is never acceptable for
+// user data
+export const MIN_SQLITE_VERSION = 3054000;
+// The parent of the pool directories (see POOL_ROOT in opfs-sahpool.ts)
 const PROBE_DIRECTORY = 'actual';
 
-// Whether this worker can use OPFS sync access handles: the API has to be
-// present (dedicated worker, secure context, Chrome 108, Firefox 111,
-// Safari 16.4) and actually usable (Safari private browsing throws from
-// `getDirectory`), and the sqlite build must be new enough to keep the
-// pool directory when an install fails.
+// Whether this worker can use OPFS sync access handles: present (dedicated
+// worker, secure context, Chrome 108, Firefox 111, Safari 16.4) and usable
+// (Safari private browsing throws from `getDirectory`), on a sqlite build
+// new enough to keep the pool directory when an install fails.
 export async function detectOpfsSyncAccess(): Promise<boolean> {
+  if (
+    typeof navigator === 'undefined' ||
+    typeof navigator.storage?.getDirectory !== 'function'
+  ) {
+    return false;
+  }
+  if (getSqlite3().version.libVersionNumber < MIN_SQLITE_VERSION) {
+    logger.warn('sqlite storage: OPFS disabled, sqlite-wasm older than 3.54');
+    return false;
+  }
   try {
-    if (
-      typeof navigator === 'undefined' ||
-      typeof navigator.storage?.getDirectory !== 'function' ||
-      typeof FileSystemFileHandle === 'undefined' ||
-      !('createSyncAccessHandle' in FileSystemFileHandle.prototype)
-    ) {
-      return false;
-    }
-    if (getSqlite3().version.libVersionNumber < MIN_SQLITE_VERSION) {
-      logger.warn('sqlite storage: OPFS disabled, sqlite-wasm older than 3.54');
-      return false;
-    }
     const root = await navigator.storage.getDirectory();
     const directory = await root.getDirectoryHandle(PROBE_DIRECTORY, {
       create: true,

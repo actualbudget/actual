@@ -4,6 +4,8 @@ import type {
 } from '@jlongster/sql.js';
 
 import * as legacy from './engine.sqljs.legacy';
+import { wasmEngine } from './engine.wasm';
+import { initSqliteStorage } from './storage';
 import { findMigratedStorageKind } from './storage/files-store';
 import type {
   Database,
@@ -17,25 +19,18 @@ import type {
 export type {
   Database,
   SqlParam,
-  SqliteEngine,
   Statement,
   StorageBackend,
   TransactionOptions,
 } from './types';
-export {
-  BudgetInUseError,
-  StorageMigrationError,
-  StorageUnavailableError,
-} from './storage/errors';
+export { BudgetInUseError, StorageMigrationError } from './storage/errors';
 // Used by the legacy filesystem layer and its tests
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';
 
-// The web sqlite module is a facade over an engine. The legacy sql.js
-// build over absurd-sql is built in and the default; the official
-// sqlite-wasm engine is registered by the worker entry point (see
-// `engines.web.ts`), so a build that never imports it does not bundle it.
-// `init` picks the engine from the storage backend; everything else
+// The web sqlite module is a facade over two engines: the legacy sql.js
+// build over absurd-sql, and the official sqlite-wasm build on the sqlite
+// storage. `init` picks one from the storage backend; everything else
 // forwards to it. Callers only see the opaque `Database` and `Statement`
 // handles from `./types`.
 
@@ -50,7 +45,6 @@ function asSqlJsStatement(sql: string | Statement): string | SqlJsStatement {
 const legacyEngine: SqliteEngine = {
   init: async options => {
     await legacy.init(options);
-    return 'legacy';
   },
   setWasmBinary: binary => legacy.setWasmBinary(binary),
   prepare: (db, sql) =>
@@ -73,18 +67,7 @@ const legacyEngine: SqliteEngine = {
   exportDatabase: db => legacy.exportDatabase(asSqlJs(db)),
 };
 
-export type EngineName = 'legacy' | 'wasm';
-
-const engines: Partial<Record<EngineName, SqliteEngine>> = {
-  legacy: legacyEngine,
-};
-
 let activeEngine: SqliteEngine = legacyEngine;
-let activeBackend: StorageBackend = 'legacy';
-
-export function registerEngine(name: EngineName, engine: SqliteEngine) {
-  engines[name] = engine;
-}
 
 // The browser build of `@actual-app/api` embeds sql.js's wasm; the
 // sqlite-wasm engine fetches its own file.
@@ -92,8 +75,10 @@ export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   legacyEngine.setWasmBinary(binary);
 }
 
-// Resolves to the backend actually in use: `opfs` falls back to
-// `memory-idb` when sync access handles are unavailable.
+// Starts the engine for the requested storage and resolves to the backend
+// actually in use: data already moved to the new storage wins over a
+// `legacy` request, so a cleared flag never shows an empty app, and `opfs`
+// falls back to `memory-idb` where sync access handles are unavailable.
 export async function init({
   baseURL,
   wasmBinary,
@@ -103,34 +88,18 @@ export async function init({
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
-  const name: EngineName = storage === 'legacy' ? 'legacy' : 'wasm';
-  const selected = engines[name];
-  if (selected == null) {
-    throw new Error(`sqlite engine "${name}" has not been registered`);
+  const requested =
+    storage === 'legacy'
+      ? ((await findMigratedStorageKind()) ?? 'legacy')
+      : storage;
+  if (requested === 'legacy') {
+    activeEngine = legacyEngine;
+    await legacyEngine.init({ baseURL, wasmBinary });
+    return 'legacy';
   }
-  activeEngine = selected;
-  activeBackend = await activeEngine.init({ baseURL, wasmBinary, storage });
-  return activeBackend;
-}
-
-export function getStorageBackend(): StorageBackend {
-  return activeBackend;
-}
-
-// A backend already holding migrated data, if any. Chosen over the flag at
-// startup so a cleared flag can never show an empty app.
-export async function findMigratedStorageBackend(): Promise<StorageBackend | null> {
-  return findMigratedStorageKind();
-}
-
-// Persist anything pending (the IndexedDB fallback writes lazily)
-export async function flushSqliteStorage(): Promise<void> {
-  await activeEngine.flushStorage?.();
-}
-
-// Let go of storage handles and locks so another worker can take over
-export async function releaseSqliteStorage(): Promise<void> {
-  await activeEngine.releaseStorage?.();
+  activeEngine = wasmEngine;
+  await wasmEngine.init({ baseURL, wasmBinary });
+  return initSqliteStorage(requested);
 }
 
 export function prepare(db: Database, sql: string): Statement {

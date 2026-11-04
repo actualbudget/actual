@@ -5,8 +5,10 @@ import { exportBytes, getSqlite3 } from '#platform/server/sqlite/wasm';
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 
 import {
+  completeMigration,
   deleteLegacyDatabase,
   openLegacyDatabaseContents,
+  verifyMigratedDatabase,
 } from './absurd-migration';
 import { BudgetInUseError, StorageMigrationError } from './errors';
 import {
@@ -16,7 +18,7 @@ import {
 } from './files-store';
 import { acquireWebLock } from './locks';
 import { legacyDatabaseName, splitSqlitePath } from './paths';
-import type { MigrationProgress, OpenOptions, SqliteFileStore } from './types';
+import type { MigrationProgress, SqliteFileStore } from './types';
 
 // Primary web storage: SQLite's own `opfs-sahpool` VFS, one pool per
 // budget directory so budgets can be open in different tabs at once. A
@@ -26,13 +28,12 @@ import type { MigrationProgress, OpenOptions, SqliteFileStore } from './types';
 
 export const POOL_ROOT = 'actual/pools';
 const LOCK_TIMEOUT_MS = 10_000;
+// A terminated worker releases its access handles asynchronously, so an
+// install right after a tab hand-over can fail; retry with backoff
 const INSTALL_DELAYS_MS = [0, 100, 250, 500, 1000, 2000, 3000];
-// `preserveOnInitFailure` arrived in 3.54; without it a failed install
-// deletes the pool directory, which is never acceptable for user data
-export const MIN_SQLITE_VERSION = 3054000;
 
+// The package's types trail the runtime by one option
 type PoolOptions = Parameters<Sqlite3Static['installOpfsSAHPoolVfs']>[0] & {
-  preserveOnInitFailure?: boolean;
   forceReinitIfPreviouslyFailed?: boolean;
 };
 
@@ -50,8 +51,9 @@ export type OpfsStoreDependencies = {
   sleep?: (ms: number) => Promise<void>;
 };
 
-const defaultSleep = (ms: number) =>
-  new Promise<void>(resolve => setTimeout(resolve, ms));
+function defaultSleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export function applyFilePragmas(db: WasmDatabase) {
   db.exec(`
@@ -72,29 +74,24 @@ export function createOpfsStore({
   const pools = new Map<string, Pool>();
 
   async function installPool(dirId: string): Promise<SAHPoolUtil> {
-    const api = sqlite3();
-    if (api.version.libVersionNumber < MIN_SQLITE_VERSION) {
-      throw new Error(
-        `sqlite-wasm ${api.version.libVersion} is too old for OPFS pools`,
-      );
-    }
     let lastError: unknown;
-    for (let attempt = 0; attempt < INSTALL_DELAYS_MS.length; attempt++) {
-      if (INSTALL_DELAYS_MS[attempt] > 0) {
-        await sleep(INSTALL_DELAYS_MS[attempt]);
+    for (const delay of INSTALL_DELAYS_MS) {
+      if (delay > 0) {
+        await sleep(delay);
       }
       const options: PoolOptions = {
         name: `actual-${dirId}`,
         directory: `${POOL_ROOT}/${dirId}`,
         initialCapacity: 6,
         clearOnInit: false,
+        // Keep the directory when an install fails, and retry for real
+        // instead of replaying a failure the library cached earlier
         preserveOnInitFailure: true,
-        forceReinitIfPreviouslyFailed: attempt > 0,
+        forceReinitIfPreviouslyFailed: true,
       };
       try {
-        return await api.installOpfsSAHPoolVfs(options);
+        return await sqlite3().installOpfsSAHPoolVfs(options);
       } catch (error) {
-        // Typically the previous worker's handles are still being released
         lastError = error;
       }
     }
@@ -127,6 +124,8 @@ export function createOpfsStore({
       return pool;
     } catch (error) {
       releaseLock();
+      // Chrome raises NoModificationAllowedError from createSyncAccessHandle
+      // while another worker still holds the handles
       if (
         error instanceof Error &&
         /lock|NoModificationAllowed/i.test(error.name + error.message)
@@ -150,66 +149,111 @@ export function createOpfsStore({
     pool.releaseLock = null;
   }
 
+  function verifyImported(pool: Pool, fileName: string) {
+    const db = new (sqlite3().oo1.DB)({
+      filename: fileName,
+      flags: 'w',
+      vfs: pool.util.vfsName,
+    });
+    try {
+      verifyMigratedDatabase(db);
+    } finally {
+      db.close();
+    }
+  }
+
+  function discardImport(pool: Pool, fileName: string) {
+    try {
+      pool.util.unlink(fileName);
+    } catch {
+      // Nothing to clean up
+    }
+  }
+
+  // Copies absurd-sql's data into the pool, if there is any
   async function migrateLegacy(
     pool: Pool,
     path: string,
     fileName: string,
   ): Promise<boolean> {
-    const name = legacyDatabaseName(path);
-    const contents = await openLegacyDatabaseContents(path, name, percent =>
+    const contents = await openLegacyDatabaseContents(path, percent =>
       onMigrationProgress?.('copy', percent),
     );
     if (contents == null) {
       return false;
     }
-    onMigrationProgress?.('copy', 0);
     try {
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
-      const db = new (sqlite3().oo1.DB)({
-        filename: fileName,
-        flags: 'w',
-        vfs: pool.util.vfsName,
-      });
-      try {
-        const result = db.selectValue('PRAGMA quick_check');
-        if (result !== 'ok') {
-          throw new Error(`quick_check: ${String(result)}`);
-        }
-        db.selectValue('SELECT 1 FROM __migrations__ LIMIT 1');
-      } finally {
-        db.close();
-      }
+      verifyImported(pool, fileName);
     } catch (error) {
-      try {
-        pool.util.unlink(fileName);
-      } catch {
-        // Nothing to clean up
-      }
-      contents.close();
+      discardImport(pool, fileName);
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
+    } finally {
+      contents.close();
     }
-    contents.close();
-
-    onMigrationProgress?.('cleanup');
     const row = await getSqliteFileRow(path);
-    const deleted = await deleteLegacyDatabase(name);
+    await completeMigration(
+      { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
+      onMigrationProgress,
+    );
+    return true;
+  }
+
+  // Adopts a database the fallback store persisted whole into its row (the
+  // browser gained sync access handles since), so it is never shadowed by
+  // an empty one
+  async function promoteFallbackRow(
+    pool: Pool,
+    path: string,
+    fileName: string,
+  ): Promise<boolean> {
+    const row = await getSqliteFileRow(path);
+    if (
+      row?.storage !== 'memory-idb' ||
+      !ArrayBuffer.isView(row.contents) ||
+      row.contents.byteLength === 0
+    ) {
+      return false;
+    }
+    const bytes = row.contents;
+    try {
+      await pool.util.importDb(
+        fileName,
+        new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
+      );
+      verifyImported(pool, fileName);
+    } catch (error) {
+      discardImport(pool, fileName);
+      throw new StorageMigrationError(path, error);
+    }
     await putSqliteFileRow({
       filepath: path,
       contents: '',
       storage: 'opfs',
-      rev: row?.rev,
-      ...(deleted ? {} : { legacyCleanup: 'pending' as const }),
+      rev: row.rev,
     });
-    onMigrationProgress?.('done');
     return true;
+  }
+
+  // Whatever already holds this database: absurd-sql's layout, or the
+  // fallback store's row
+  async function importExisting(
+    pool: Pool,
+    path: string,
+    fileName: string,
+  ): Promise<boolean> {
+    return (
+      (await migrateLegacy(pool, path, fileName)) ||
+      (await promoteFallbackRow(pool, path, fileName))
+    );
   }
 
   const store: SqliteFileStore = {
     kind: 'opfs',
 
-    async open(path, { create = true }: OpenOptions = {}) {
+    async open(path) {
       const { dirId, fileName } = splitSqlitePath(path);
       const pool = await acquire(dirId, path);
       const already = pool.open.get(fileName);
@@ -217,19 +261,15 @@ export function createOpfsStore({
         return already;
       }
       try {
-        let present = pool.util.getFileNames().includes(fileName);
-        if (!present) {
-          present = await migrateLegacy(pool, path, fileName);
-        }
-        if (!present && !create) {
-          throw new Error(`database does not exist: ${path}`);
-        }
+        const present =
+          pool.util.getFileNames().includes(fileName) ||
+          (await importExisting(pool, path, fileName));
         if (!present) {
           logger.warn('sqlite storage: creating missing database', path);
         }
         const db = new (sqlite3().oo1.DB)({
           filename: fileName,
-          flags: create ? 'c' : 'w',
+          flags: 'c',
           vfs: pool.util.vfsName,
         });
         applyFilePragmas(db);
@@ -258,11 +298,6 @@ export function createOpfsStore({
       }
     },
 
-    isOpen(path) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      return pools.get(dirId)?.open.has(fileName) ?? false;
-    },
-
     async readFile(path) {
       const { dirId, fileName } = splitSqlitePath(path);
       const open = pools.get(dirId)?.open.get(fileName);
@@ -271,11 +306,11 @@ export function createOpfsStore({
       }
       const pool = await acquire(dirId, path);
       try {
-        if (!pool.util.getFileNames().includes(fileName)) {
-          const migrated = await migrateLegacy(pool, path, fileName);
-          if (!migrated) {
-            throw new Error('File does not exist: ' + path);
-          }
+        if (
+          !pool.util.getFileNames().includes(fileName) &&
+          !(await importExisting(pool, path, fileName))
+        ) {
+          throw new Error('File does not exist: ' + path);
         }
         return pool.util.exportFile(fileName);
       } finally {
@@ -318,6 +353,8 @@ export function createOpfsStore({
           }
         }
         if (pool.util.getFileCount() === 0) {
+          // `unlink` only frees the slot; the bytes stay in the OPFS file
+          // until the pool truncates its spare slots
           await pool.util.wipeFiles();
         }
       } finally {
@@ -333,16 +370,6 @@ export function createOpfsStore({
 
     async flush() {
       // Writes go straight to the access handles and are flushed by sqlite
-    },
-
-    async releaseAll() {
-      for (const pool of pools.values()) {
-        for (const [fileName, db] of pool.open) {
-          db.close();
-          pool.open.delete(fileName);
-        }
-        release(pool);
-      }
     },
   };
 

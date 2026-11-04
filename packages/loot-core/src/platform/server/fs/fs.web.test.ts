@@ -1,11 +1,11 @@
 import 'fake-indexeddb/auto';
-import { IDBFactory } from 'fake-indexeddb';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
 import {
   initWasmEngine,
+  resetIndexedDb,
   sleep,
 } from '#platform/server/sqlite/storage/test-helpers';
 
@@ -25,11 +25,7 @@ import {
 
 beforeAll(() => initWasmEngine());
 
-beforeEach(async () => {
-  global.indexedDB = new IDBFactory();
-  await idb.closeDatabase();
-  void idb.openDatabase();
-});
+beforeEach(() => resetIndexedDb());
 
 async function databaseBytes(): Promise<Uint8Array> {
   const db = await sqlite.openDatabase();
@@ -96,6 +92,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
       { v: 'x' },
     ]);
     sqlite.closeDatabase(db);
+    // Let the close's write land before the next test resets IndexedDB
     await sleep(10);
   });
 
@@ -177,14 +174,5 @@ describe('web filesystem (sqlite-wasm storage)', () => {
       filepath: '/budget/foo.txt',
       contents: 'hello',
     });
-
-    await writeFile('/budget/db.sqlite', await databaseBytes());
-    const { store: sqliteStore } = idb.getStore(
-      await idb.openDatabase(),
-      'files',
-    );
-    expect((await idb.get(sqliteStore, '/budget/db.sqlite'))?.storage).toBe(
-      'memory-idb',
-    );
   });
 });

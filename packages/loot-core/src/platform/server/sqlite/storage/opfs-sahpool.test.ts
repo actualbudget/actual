@@ -1,9 +1,7 @@
 import 'fake-indexeddb/auto';
 import type { Sqlite3Static } from '@sqlite.org/sqlite-wasm';
-import { IDBFactory } from 'fake-indexeddb';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as idb from '#platform/server/indexeddb';
 import {
   closeDatabase,
   execQuery,
@@ -12,12 +10,16 @@ import {
   runQuery,
 } from '#platform/server/sqlite';
 
-import { legacyDatabaseExists } from './absurd-migration';
 import { BudgetInUseError } from './errors';
-import { getSqliteFileRow } from './files-store';
+import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
-import { initWasmEngine, seedLegacyDatabase } from './test-helpers';
+import {
+  initWasmEngine,
+  listIndexedDbNames,
+  resetIndexedDb,
+  seedLegacyDatabase,
+} from './test-helpers';
 
 const noSleep = () => Promise.resolve();
 
@@ -82,7 +84,7 @@ function fakePool(files = new Map<string, Uint8Array>()) {
 // are real in-memory databases loaded from the fake pool's bytes.
 function fakeSqlite3(
   pool: ReturnType<typeof fakePool>,
-  { version = 3054000, failInstalls = 0 } = {},
+  { failInstalls = 0 } = {},
 ) {
   let installs = 0;
   const execLog: string[] = [];
@@ -106,7 +108,6 @@ function fakeSqlite3(
     }
   }
   const api = {
-    version: { libVersion: String(version), libVersionNumber: version },
     installOpfsSAHPoolVfs: vi.fn(async () => {
       installs++;
       if (installs <= failInstalls) {
@@ -136,11 +137,20 @@ function trackingLock() {
 
 beforeAll(() => initWasmEngine());
 
-beforeEach(async () => {
-  global.indexedDB = new IDBFactory();
-  await idb.closeDatabase();
-  void idb.openDatabase();
-});
+beforeEach(() => resetIndexedDb());
+
+// A budget database as the app would have written it
+async function budgetBytes(value: string): Promise<Uint8Array> {
+  const source = await openDatabase();
+  execQuery(
+    source,
+    'CREATE TABLE __migrations__ (id INTEGER PRIMARY KEY); CREATE TABLE t (v TEXT);',
+  );
+  runQuery(source, 'INSERT INTO t (v) VALUES (?)', [value]);
+  const bytes = await exportDatabase(source);
+  closeDatabase(source);
+  return bytes;
+}
 
 describe('OPFS pool store', () => {
   it('installs each budget pool with the data-preserving options', async () => {
@@ -160,7 +170,7 @@ describe('OPFS pool store', () => {
         name: 'actual-documents-Actual-budget-one',
         directory: `${POOL_ROOT}/documents-Actual-budget-one`,
         preserveOnInitFailure: true,
-        forceReinitIfPreviouslyFailed: false,
+        forceReinitIfPreviouslyFailed: true,
         clearOnInit: false,
       }),
     );
@@ -173,7 +183,7 @@ describe('OPFS pool store', () => {
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
   });
 
-  it('retries a failed install and only then forces a re-init', async () => {
+  it('retries a failed install', async () => {
     const pool = fakePool();
     const sqlite3 = fakeSqlite3(pool, { failInstalls: 2 });
     const store = createOpfsStore({
@@ -183,11 +193,7 @@ describe('OPFS pool store', () => {
     });
 
     await store.open(PATH);
-    const calls = (sqlite3.installOpfsSAHPoolVfs as ReturnType<typeof vi.fn>)
-      .mock.calls;
-    expect(calls.length).toBe(3);
-    expect(calls[0][0].forceReinitIfPreviouslyFailed).toBe(false);
-    expect(calls[1][0].forceReinitIfPreviouslyFailed).toBe(true);
+    expect(sqlite3.installOpfsSAHPoolVfs).toHaveBeenCalledTimes(3);
   });
 
   it('reports a budget in use when the lock cannot be taken', async () => {
@@ -199,16 +205,6 @@ describe('OPFS pool store', () => {
     });
     await expect(store.open(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
     expect(sqlite3.installOpfsSAHPoolVfs).not.toHaveBeenCalled();
-  });
-
-  it('refuses sqlite builds that would wipe a pool on a failed install', async () => {
-    const sqlite3 = fakeSqlite3(fakePool(), { version: 3053004 });
-    const store = createOpfsStore({
-      sqlite3: () => sqlite3,
-      acquireLock: trackingLock().acquire,
-      sleep: noSleep,
-    });
-    await expect(store.open(PATH)).rejects.toThrow(/too old/);
   });
 
   it('pauses the pool and releases the lock when the last database closes', async () => {
@@ -254,19 +250,13 @@ describe('OPFS pool store', () => {
     await store.removeFile(PATH);
     expect(pool.unlink).toHaveBeenCalledWith('/db.sqlite');
     expect(pool.unlink).toHaveBeenCalledWith('/db.sqlite-journal');
+    expect(pool.wipeFiles).toHaveBeenCalled();
     expect(pool.removeVfs).not.toHaveBeenCalled();
     expect(pool.pauseVfs).toHaveBeenCalled();
   });
 
   it('imports an absurd-sql database into the pool and verifies it', async () => {
-    const source = await openDatabase();
-    execQuery(
-      source,
-      'CREATE TABLE __migrations__ (id INTEGER PRIMARY KEY); CREATE TABLE t (v TEXT);',
-    );
-    runQuery(source, "INSERT INTO t (v) VALUES ('legacy')");
-    const bytes = await exportDatabase(source);
-    closeDatabase(source);
+    const bytes = await budgetBytes('legacy');
     const name = legacyDatabaseName(PATH);
     await seedLegacyDatabase(name, bytes);
 
@@ -288,8 +278,35 @@ describe('OPFS pool store', () => {
     expect(phases).toEqual(
       expect.arrayContaining(['copy', 'verify', 'cleanup', 'done']),
     );
-    expect(await legacyDatabaseExists(name)).toBe(false);
+    expect(await listIndexedDbNames()).not.toContain(name);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+  });
+
+  it('adopts a database the fallback store persisted', async () => {
+    // The browser gained sync access handles since the fallback stored
+    // this budget whole in its row
+    const bytes = await budgetBytes('from fallback');
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: bytes,
+      storage: 'memory-idb',
+      rev: 7,
+    });
+
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH);
+    const imported = pool.files.get('/db.sqlite');
+    expect(imported && Buffer.from(imported).equals(Buffer.from(bytes))).toBe(
+      true,
+    );
+    const row = await getSqliteFileRow(PATH);
+    expect(row).toMatchObject({ storage: 'opfs', contents: '', rev: 7 });
   });
 
   it('applies the file pragmas to a real database', async () => {

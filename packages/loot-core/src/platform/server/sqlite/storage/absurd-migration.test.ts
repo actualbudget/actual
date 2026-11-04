@@ -1,5 +1,4 @@
 import 'fake-indexeddb/auto';
-import { IDBFactory } from 'fake-indexeddb';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -12,14 +11,17 @@ import {
 
 import {
   deleteLegacyDatabase,
-  legacyDatabaseExists,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
-  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import { StorageMigrationError } from './errors';
 import { legacyDatabaseName } from './paths';
-import { initWasmEngine, seedLegacyDatabase } from './test-helpers';
+import {
+  initWasmEngine,
+  listIndexedDbNames,
+  resetIndexedDb,
+  seedLegacyDatabase,
+} from './test-helpers';
 
 const PATH = '/documents/Actual/My-Budget-abc123/db.sqlite';
 const NAME = legacyDatabaseName(PATH);
@@ -45,9 +47,7 @@ async function makeDatabaseBytes(
 
 beforeAll(() => initWasmEngine());
 
-beforeEach(() => {
-  global.indexedDB = new IDBFactory();
-});
+beforeEach(() => resetIndexedDb());
 
 describe('absurd-sql migration helpers', () => {
   it('derives the legacy database name from the path', () => {
@@ -63,12 +63,6 @@ describe('absurd-sql migration helpers', () => {
     expect(pageSizeFromHeader(new TextEncoder().encode('nope'))).toBe(null);
   });
 
-  it('detects whether a legacy database exists', async () => {
-    expect(await legacyDatabaseExists(NAME)).toBe(false);
-    await seedLegacyDatabase(NAME, await makeDatabaseBytes(1));
-    expect(await legacyDatabaseExists(NAME)).toBe(true);
-  });
-
   it('reads a legacy database back byte for byte across several chunks', async () => {
     // Enough data for several hundred pages, so more than one chunk
     const bytes = await makeDatabaseBytes(3000, 1024);
@@ -77,7 +71,7 @@ describe('absurd-sql migration helpers', () => {
     await seedLegacyDatabase(NAME, bytes);
 
     const percents: number[] = [];
-    const read = await readLegacyDatabaseBytes(PATH, NAME, percent =>
+    const read = await readLegacyDatabaseBytes(PATH, percent =>
       percents.push(percent),
     );
     expect(read).not.toBeNull();
@@ -85,6 +79,7 @@ describe('absurd-sql migration helpers', () => {
     expect(Buffer.from(read as Uint8Array).equals(Buffer.from(bytes))).toBe(
       true,
     );
+    expect(percents[0]).toBe(0);
     expect(percents[percents.length - 1]).toBe(100);
 
     // And it is a working database
@@ -93,6 +88,9 @@ describe('absurd-sql migration helpers', () => {
       { n: 3000 },
     ]);
     closeDatabase(db);
+
+    expect(await deleteLegacyDatabase(NAME)).toBe(true);
+    expect(await listIndexedDbNames()).not.toContain(NAME);
   });
 
   it('zero-fills missing blocks and truncates to the recorded size', async () => {
@@ -101,37 +99,27 @@ describe('absurd-sql migration helpers', () => {
     const lastBlock = Math.ceil(bytes.length / pageSize) - 1;
     await seedLegacyDatabase(NAME, bytes, { skipBlocks: [lastBlock] });
 
-    const read = await readLegacyDatabaseBytes(PATH, NAME);
+    const read = await readLegacyDatabaseBytes(PATH);
     expect(read?.length).toBe(bytes.length);
     const tail = (read as Uint8Array).subarray(lastBlock * pageSize);
     expect(tail.every(byte => byte === 0)).toBe(true);
   });
 
   it('returns null for a missing or empty legacy database', async () => {
-    expect(await readLegacyDatabaseBytes(PATH, NAME)).toBeNull();
+    expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
+    // Looking did not create one
+    expect(await listIndexedDbNames()).not.toContain(NAME);
     await seedLegacyDatabase(NAME, new Uint8Array(0));
-    expect(await readLegacyDatabaseBytes(PATH, NAME)).toBeNull();
+    expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
     // The empty one is cleaned up
-    expect(await legacyDatabaseExists(NAME)).toBe(false);
+    expect(await listIndexedDbNames()).not.toContain(NAME);
   });
 
   it('fails without touching the legacy data when the header is not sqlite', async () => {
     await seedLegacyDatabase(NAME, new TextEncoder().encode('x'.repeat(8192)));
-    await expect(readLegacyDatabaseBytes(PATH, NAME)).rejects.toBeInstanceOf(
+    await expect(readLegacyDatabaseBytes(PATH)).rejects.toBeInstanceOf(
       StorageMigrationError,
     );
-    expect(await legacyDatabaseExists(NAME)).toBe(true);
-  });
-
-  it('round-trips through the legacy layout and deletes it', async () => {
-    const bytes = await makeDatabaseBytes(20);
-    await writeLegacyDatabaseBytes(NAME, bytes);
-    const read = await readLegacyDatabaseBytes(PATH, NAME);
-    expect(Buffer.from(read as Uint8Array).equals(Buffer.from(bytes))).toBe(
-      true,
-    );
-
-    expect(await deleteLegacyDatabase(NAME)).toBe(true);
-    expect(await legacyDatabaseExists(NAME)).toBe(false);
+    expect(await listIndexedDbNames()).toContain(NAME);
   });
 });

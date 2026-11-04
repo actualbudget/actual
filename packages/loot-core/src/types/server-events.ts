@@ -1,4 +1,4 @@
-import type { StorageBackend } from '#platform/server/sqlite';
+import type { MigrationPhase } from '#platform/server/sqlite/storage/types';
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
 
@@ -102,13 +102,7 @@ type PrefsUpdatedEvent = undefined;
 
 // Progress while a budget's database is moved from absurd-sql's
 // IndexedDB blocks into the sqlite-wasm storage
-type StorageMigrationEvent = {
-  phase: 'copy' | 'verify' | 'cleanup' | 'done' | 'failed';
-  percent?: number;
-};
-
-// Which storage the backend worker ended up using
-type StorageStatusEvent = { backend: StorageBackend };
+type StorageMigrationEvent = { phase: MigrationPhase; percent?: number };
 type SchedulesOfflineEvent = undefined;
 type ServerErrorEvent = undefined;
 type ShowBudgetsEvent = undefined;
@@ -132,7 +126,6 @@ export type ServerEvents = {
   'start-import': StartImportEvent;
   'start-load': StartLoadEvent;
   'storage-migration': StorageMigrationEvent;
-  'storage-status': StorageStatusEvent;
   'sync-event': SyncEvent;
   'undo-event': UndoState;
   'api-fetch-redirected': ApiFetchRedirectedEvent;

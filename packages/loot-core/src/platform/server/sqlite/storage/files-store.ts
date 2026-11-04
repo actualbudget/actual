@@ -1,34 +1,23 @@
 import * as idb from '#platform/server/indexeddb';
+import type { Data } from '#platform/server/indexeddb';
 
 import type { FileStoreKind } from './types';
 
 // The IndexedDB `files` store keeps one row per persisted path. For a
 // sqlite path the row is the marker the filesystem rebuilds its hierarchy
 // from, records which store holds the bytes, and for the IndexedDB
-// fallback holds the bytes themselves.
-export type SqliteFileRow = {
-  filepath: string;
-  contents: string | Uint8Array;
-  storage?: FileStoreKind;
-  // Bumped on every write by the fallback store so a second tab's writes
-  // can be detected
-  rev?: number;
-  // The absurd-sql database could not be deleted after migration yet
-  legacyCleanup?: 'pending';
-};
-
-// Each helper opens its transaction right before the request so the
-// transaction cannot go inactive in between
+// fallback holds the bytes themselves. Each helper opens its transaction
+// right before the request so the transaction cannot go inactive in
+// between.
 
 export async function getSqliteFileRow(
   path: string,
-): Promise<SqliteFileRow | undefined> {
+): Promise<Data | undefined> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  const row = await idb.get(store, path);
-  return row as SqliteFileRow | undefined;
+  return idb.get(store, path);
 }
 
-export async function putSqliteFileRow(row: SqliteFileRow): Promise<void> {
+export async function putSqliteFileRow(row: Data): Promise<void> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
   await idb.set(store, row);
 }
@@ -40,18 +29,26 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
 
 // Any sqlite file already moved off absurd-sql. Used at startup: once data
 // lives in the new storage the legacy engine must not be chosen, whatever
-// the flag says.
+// the flag says. Walks the rows with a cursor and stops at the first
+// marked one, so the fallback's whole-file rows are not all read into
+// memory.
 export async function findMigratedStorageKind(): Promise<FileStoreKind | null> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  const rows = await new Promise<SqliteFileRow[]>((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result as SqliteFileRow[]);
+  return new Promise((resolve, reject) => {
+    const request = store.openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) {
+        resolve(null);
+        return;
+      }
+      const { storage } = cursor.value as Data;
+      if (storage) {
+        resolve(storage);
+        return;
+      }
+      cursor.continue();
+    };
     request.onerror = () => reject(request.error);
   });
-  for (const row of rows) {
-    if (row.storage === 'opfs' || row.storage === 'memory-idb') {
-      return row.storage;
-    }
-  }
-  return null;
 }

@@ -2,11 +2,10 @@ import { join } from '#platform/server/fs/path-join';
 import * as idb from '#platform/server/indexeddb';
 import { getSqliteStore } from '#platform/server/sqlite/storage/index';
 
-import { MemFs } from './memfs';
+import { createMemFs } from './memfs';
 import type { MemFsContents } from './memfs';
 import { _setDocumentDir as _setDocumentDirShared } from './shared';
 import {
-  dirname,
   isSqlitePath,
   isUnderRoot,
   normalizePath,
@@ -27,7 +26,9 @@ export { getDocumentDir, getBudgetDir } from './shared';
 export { pathToId };
 export const getDataDir = () => process.env.ACTUAL_DATA_DIR;
 
-const memfs = new MemFs();
+const memfs = createMemFs();
+// Bundled files registered at startup but fetched on first read. Their
+// memfs entry is `null` until then, like a persisted file's.
 const lazyFiles = new Map<string, () => Promise<Uint8Array>>();
 let customPersistedRoot: string | null = null;
 
@@ -39,29 +40,18 @@ function isPersistedPath(filepath: string): boolean {
   );
 }
 
-export const _setDocumentDir = (dir: string) => {
-  const normalized = typeof dir === 'string' ? normalizePath(dir) : '';
-  if (normalized !== '') {
-    customPersistedRoot = normalized;
-    memfs.mkdirp(normalized);
+export const _setDocumentDir = (dir: string | null) => {
+  if (dir) {
+    customPersistedRoot = normalizePath(dir);
+    memfs.mkdirp(customPersistedRoot);
   }
   return _setDocumentDirShared(dir);
 };
 
 function toStoredContents(
-  contents: string | ArrayBuffer | ArrayBufferView,
+  contents: string | ArrayBuffer | Uint8Array,
 ): MemFsContents {
-  if (contents instanceof ArrayBuffer) {
-    return new Uint8Array(contents);
-  }
-  if (ArrayBuffer.isView(contents)) {
-    return new Uint8Array(
-      contents.buffer,
-      contents.byteOffset,
-      contents.byteLength,
-    );
-  }
-  return contents;
+  return contents instanceof ArrayBuffer ? new Uint8Array(contents) : contents;
 }
 
 function toBytes(contents: MemFsContents): Uint8Array {
@@ -146,7 +136,7 @@ async function _readFile(
 
 async function _writeFile(
   filepath: string,
-  contents: string | ArrayBuffer | ArrayBufferView,
+  contents: string | ArrayBuffer | Uint8Array,
 ): Promise<boolean> {
   const path = normalizePath(filepath);
   const stored = toStoredContents(contents);
@@ -215,7 +205,6 @@ async function populateFileHierarchy() {
   });
 
   for (const path of paths) {
-    memfs.mkdirp(dirname(path));
     memfs.writeFile(path, null);
   }
 }
@@ -233,11 +222,6 @@ export const init = async function () {
   await populateFileHierarchy();
 };
 
-export const basename = function (filepath: string) {
-  const parts = filepath.split('/');
-  return parts.slice(0, -1).join('/');
-};
-
 export const listDir = async function (filepath: string) {
   return memfs.readdir(filepath);
 };
@@ -250,11 +234,6 @@ export const mkdir = async function (filepath: string) {
   memfs.mkdir(filepath);
 };
 
-export const size = async function (filepath: string) {
-  const contents = await _readFile(filepath, { encoding: 'binary' });
-  return contents.byteLength;
-};
-
 export const copyFile = async function (
   frompath: string,
   topath: string,
@@ -263,9 +242,9 @@ export const copyFile = async function (
     const contents = await _readFile(frompath);
     return await _writeFile(topath, contents);
   } catch (error) {
-    throw new Error(
-      `Failed to copy file from ${frompath} to ${topath}: ${(error as Error).message}`,
-    );
+    throw new Error(`Failed to copy file from ${frompath} to ${topath}`, {
+      cause: error,
+    });
   }
 };
 
@@ -290,7 +269,7 @@ export async function readFile(
 
 export const writeFile = async function (
   filepath: string,
-  contents: string | ArrayBuffer | ArrayBufferView,
+  contents: string | ArrayBuffer | Uint8Array,
 ) {
   return _writeFile(filepath, contents);
 };

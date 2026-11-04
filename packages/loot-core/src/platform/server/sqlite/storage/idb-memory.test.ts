@@ -1,8 +1,6 @@
 import 'fake-indexeddb/auto';
-import { IDBFactory } from 'fake-indexeddb';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as idb from '#platform/server/indexeddb';
 import {
   closeDatabase,
   execQuery,
@@ -12,13 +10,19 @@ import {
   transaction,
 } from '#platform/server/sqlite';
 
-import { legacyDatabaseExists } from './absurd-migration';
+import { StorageUnavailableError } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
-import { createMemoryIdbStore } from './idb-memory';
+import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { legacyDatabaseName } from './paths';
-import { initWasmEngine, seedLegacyDatabase, sleep } from './test-helpers';
+import {
+  initWasmEngine,
+  listIndexedDbNames,
+  resetIndexedDb,
+  seedLegacyDatabase,
+  sleep,
+} from './test-helpers';
 
-import { setSqliteStore } from './index';
+import { getSqliteStore, setSqliteStore } from './index';
 
 const sendMock = vi.hoisted(() => vi.fn());
 vi.mock('#platform/server/connection', () => ({ send: sendMock }));
@@ -30,18 +34,14 @@ const SCHEMA =
 beforeAll(() => initWasmEngine());
 
 beforeEach(async () => {
-  global.indexedDB = new IDBFactory();
-  await idb.closeDatabase();
-  void idb.openDatabase();
+  await resetIndexedDb();
   sendMock.mockClear();
   setSqliteStore(createMemoryIdbStore({ debounceMs: 30, maxDirtyMs: 200 }));
 });
 
 async function rowBytes(path: string): Promise<Uint8Array | null> {
   const row = await getSqliteFileRow(path);
-  return row && ArrayBuffer.isView(row.contents) && row.contents.byteLength > 0
-    ? (row.contents as Uint8Array)
-    : null;
+  return row && isByteContents(row.contents) ? row.contents : null;
 }
 
 describe('IndexedDB in-memory store', () => {
@@ -107,7 +107,7 @@ describe('IndexedDB in-memory store', () => {
     const db = await openDatabase(PATH);
     execQuery(db, SCHEMA);
     runQuery(db, "INSERT INTO t (v) VALUES ('live')");
-    const store = (await import('./index')).getSqliteStore();
+    const store = getSqliteStore();
     const live = await openDatabase(await store.readFile(PATH));
     expect(runQuery(live, 'SELECT v FROM t', [], true)).toEqual([
       { v: 'live' },
@@ -167,10 +167,19 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(db);
     await sleep(10);
 
-    expect(await legacyDatabaseExists(name)).toBe(false);
+    expect(await listIndexedDbNames()).not.toContain(name);
     const row = await getSqliteFileRow(PATH);
     expect(row?.storage).toBe('memory-idb');
     expect(ArrayBuffer.isView(row?.contents)).toBe(true);
+  });
+
+  it('refuses a database held in OPFS rather than shadow it', async () => {
+    await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+    await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    // Nothing was written over the marker
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
   });
 
   it('keeps transactions working through the facade on file databases', async () => {

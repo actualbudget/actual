@@ -1,4 +1,5 @@
 import * as connection from '#platform/server/connection';
+import type { Data } from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
 import {
   exportBytes,
@@ -8,25 +9,32 @@ import {
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 
 import {
+  completeMigration,
   deleteLegacyDatabase,
   readLegacyDatabaseBytes,
+  verifyMigratedDatabase,
 } from './absurd-migration';
-import { BudgetInUseError, StorageMigrationError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './errors';
 import {
   deleteSqliteFileRow,
   getSqliteFileRow,
   putSqliteFileRow,
 } from './files-store';
-import type { SqliteFileRow } from './files-store';
 import { acquireWebLock } from './locks';
 import { legacyDatabaseName } from './paths';
-import type { MigrationProgress, OpenOptions, SqliteFileStore } from './types';
+import type { MigrationProgress, SqliteFileStore } from './types';
 
 // The fallback for browsers without OPFS sync access handles. Each
 // database runs in memory and its bytes are written back to the
 // IndexedDB `files` row after writes, debounced, plus on close and on
-// request. Single tab only: a second tab's writes are detected by a
-// revision counter and reported, after which this tab stops persisting.
+// request. A Web Lock keeps a second worker out where locks exist; the
+// row's revision counter is the backstop where they do not: a write by
+// another tab is noticed on the next persist and reported, and this tab
+// stops overwriting.
 
 const DEFAULT_DEBOUNCE_MS = 1000;
 const DEFAULT_MAX_DIRTY_MS = 5000;
@@ -53,7 +61,7 @@ type Entry = {
 
 // Rows read back from IndexedDB may be views from another realm, so do
 // not rely on `instanceof`
-function isByteContents(contents: unknown): contents is Uint8Array {
+export function isByteContents(contents: unknown): contents is Uint8Array {
   return ArrayBuffer.isView(contents) && contents.byteLength > 0;
 }
 
@@ -83,14 +91,14 @@ export function createMemoryIdbStore({
       connection.send('fallback-write-error');
       return;
     }
-    const row: SqliteFileRow = {
+    const rev = entry.rev + 1;
+    await putSqliteFileRow({
       filepath: entry.path,
       contents: bytes,
       storage: 'memory-idb',
-      rev: entry.rev + 1,
-    };
-    await putSqliteFileRow(row);
-    entry.rev = row.rev as number;
+      rev,
+    });
+    entry.rev = rev;
   }
 
   function schedule(entry: Entry) {
@@ -111,7 +119,9 @@ export function createMemoryIdbStore({
       return entry.pending ?? Promise.resolve();
     }
     if (inTransaction(entry.db)) {
-      // Never snapshot half a transaction; try again shortly
+      // Never snapshot half a transaction. The cap restarts too, so a long
+      // transaction is polled once per debounce rather than continuously.
+      entry.firstDirtyAt = Date.now();
       schedule(entry);
       return entry.pending ?? Promise.resolve();
     }
@@ -134,72 +144,60 @@ export function createMemoryIdbStore({
     return pending;
   }
 
-  async function settle(path: string) {
-    const entry = entries.get(path);
-    if (entry?.pending) {
-      await entry.pending;
-    }
-  }
-
+  // The stored bytes of a path (null for a database that does not exist
+  // yet) and the row revision to continue from
   async function loadBytes(
     path: string,
-    row: SqliteFileRow | undefined,
-  ): Promise<Uint8Array | null> {
+    row: Data | undefined,
+  ): Promise<{ bytes: Uint8Array | null; rev: number }> {
+    if (row?.storage === 'opfs') {
+      // The bytes live in an OPFS pool this session cannot reach; never
+      // shadow them with an empty database
+      throw new StorageUnavailableError(
+        `${path} is stored in OPFS, which is not available here`,
+      );
+    }
+    const rev = row?.rev ?? 0;
     if (row && isByteContents(row.contents)) {
-      return row.contents;
+      return { bytes: row.contents, rev };
     }
-    if (row && row.storage != null) {
+    if (row?.storage) {
       // Marked as ours but empty: nothing to load
-      return null;
+      return { bytes: null, rev };
     }
-    // Either no row or the legacy marker: look for absurd-sql data
-    const name = legacyDatabaseName(path);
-    onMigrationProgress?.('copy', 0);
-    const bytes = await readLegacyDatabaseBytes(path, name, percent =>
+    // Either no row or the legacy filesystem's marker: look for absurd-sql
+    // data
+    const bytes = await readLegacyDatabaseBytes(path, percent =>
       onMigrationProgress?.('copy', percent),
     );
     if (bytes == null) {
-      return null;
+      return { bytes: null, rev };
     }
     onMigrationProgress?.('verify');
     const check = openMemoryDatabase(bytes);
     try {
-      const result = check.selectValue('PRAGMA quick_check');
-      if (result !== 'ok') {
-        throw new Error(`quick_check: ${String(result)}`);
-      }
+      verifyMigratedDatabase(check);
     } catch (error) {
+      onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
     } finally {
       check.close();
     }
-    await putSqliteFileRow({
-      filepath: path,
-      contents: bytes,
-      storage: 'memory-idb',
-      rev: (row?.rev ?? 0) + 1,
-    });
-    onMigrationProgress?.('cleanup');
-    const deleted = await deleteLegacyDatabase(name);
-    if (!deleted) {
-      const saved = await getSqliteFileRow(path);
-      if (saved) {
-        await putSqliteFileRow({ ...saved, legacyCleanup: 'pending' });
-      }
-    }
-    onMigrationProgress?.('done');
-    return bytes;
+    await completeMigration(
+      { filepath: path, contents: bytes, storage: 'memory-idb', rev: rev + 1 },
+      onMigrationProgress,
+    );
+    return { bytes, rev: rev + 1 };
   }
 
   const store: SqliteFileStore = {
     kind: 'memory-idb',
 
-    async open(path, { create = true }: OpenOptions = {}) {
+    async open(path) {
       const existing = entries.get(path);
       if (existing) {
         return existing.db;
       }
-      await settle(path);
       await pendingWrites.get(path);
       const releaseLock = await acquireWebLock(
         'actual-budget:' + path,
@@ -208,17 +206,15 @@ export function createMemoryIdbStore({
         throw new BudgetInUseError(path);
       });
       try {
-        const row = await getSqliteFileRow(path);
-        const bytes = await loadBytes(path, row);
-        if (bytes == null && !create) {
-          throw new Error(`database does not exist: ${path}`);
-        }
+        const { bytes, rev } = await loadBytes(
+          path,
+          await getSqliteFileRow(path),
+        );
         const db = openMemoryDatabase(bytes ?? undefined);
-        const latest = bytes == null ? row : await getSqliteFileRow(path);
         const entry: Entry = {
           path,
           db,
-          rev: latest?.rev ?? 0,
+          rev,
           dirty: false,
           conflicted: false,
           firstDirtyAt: null,
@@ -232,7 +228,7 @@ export function createMemoryIdbStore({
             filepath: path,
             contents: new Uint8Array(0),
             storage: 'memory-idb',
-            rev: entry.rev,
+            rev,
           });
           entry.dirty = true;
           entry.firstDirtyAt = Date.now();
@@ -285,18 +281,13 @@ export function createMemoryIdbStore({
       });
     },
 
-    isOpen(path) {
-      return entries.has(path);
-    },
-
     async readFile(path) {
       await pendingWrites.get(path);
       const entry = entries.get(path);
       if (entry) {
         return exportBytes(entry.db);
       }
-      const row = await getSqliteFileRow(path);
-      const bytes = await loadBytes(path, row);
+      const { bytes } = await loadBytes(path, await getSqliteFileRow(path));
       if (bytes == null) {
         throw new Error('File does not exist: ' + path);
       }
@@ -332,18 +323,8 @@ export function createMemoryIdbStore({
       return (await getSqliteFileRow(path)) != null;
     },
 
-    async flush(path) {
-      const targets = path ? [entries.get(path)] : [...entries.values()];
-      await Promise.all(
-        targets.map(entry => (entry ? flushEntry(entry) : undefined)),
-      );
-    },
-
-    async releaseAll() {
-      for (const entry of [...entries.values()]) {
-        store.close(entry.path, entry.db);
-      }
-      await Promise.all([...pendingWrites.values()]);
+    async flush() {
+      await Promise.all([...entries.values()].map(flushEntry));
     },
 
     onWrite(db) {

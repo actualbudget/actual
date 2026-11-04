@@ -5,7 +5,6 @@ import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import type { StorageBackend } from '#platform/server/sqlite';
-import { registerSqliteEngines } from '#platform/server/sqlite/engines';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
@@ -38,7 +37,6 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
 import { app as spreadsheetApp } from './spreadsheet/app';
-import { app as storageApp } from './storage/app';
 import { fullSync, setSyncingMode } from './sync';
 import { app as syncApp } from './sync/app';
 import { app as tagsApp } from './tags/app';
@@ -155,7 +153,6 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
-  storageApp,
 );
 
 export function getDefaultDocumentDir() {
@@ -215,28 +212,13 @@ async function ensureUsable(dir) {
   await fs.removeDir(probeDir);
 }
 
-// The storage flag asks for a backend; data already moved to the new
-// storage wins over it, so a cleared flag never shows an empty app
-async function resolveStorageBackend(
-  requested: StorageBackend,
-): Promise<StorageBackend> {
-  if (requested !== 'legacy') {
-    return requested;
-  }
-  const migrated = await sqlite.findMigratedStorageBackend();
-  return migrated ?? 'legacy';
-}
-
 export async function initApp(
   isDev,
   socketName,
   { storageBackend = 'legacy' }: { storageBackend?: StorageBackend } = {},
 ) {
+  const storage = await sqlite.init({ storage: storageBackend });
   asyncStorage.init();
-  registerSqliteEngines();
-  const storage = await sqlite.init({
-    storage: await resolveStorageBackend(storageBackend),
-  });
   await fs.init({ storage });
   await setupDocumentsDir();
 
@@ -265,7 +247,6 @@ export async function initApp(
   setServer(url);
 
   connection.init(socketName, app.handlers);
-  connection.send('storage-status', { backend: storage });
 
   // Allow running DB queries locally
   global.$query = aqlQuery;
@@ -279,12 +260,6 @@ export async function initApp(
 }
 
 type BaseInitConfig = {
-  /**
-   * Browser build only: which storage holds budgets. `legacy` is the
-   * absurd-sql IndexedDB store; `opfs` uses the origin private file
-   * system, falling back to `memory-idb` where unavailable.
-   */
-  storageBackend?: StorageBackend;
   /**
    * Directory where budget data is stored. In Node this is a directory on
    * disk (defaults to the current working directory) and must already exist.
@@ -338,11 +313,8 @@ export async function init(config: InitConfig) {
     serverURL = process.env.ACTUAL_SERVER_URL;
   }
 
+  const storage = await sqlite.init();
   asyncStorage.init({ persist: false });
-  registerSqliteEngines();
-  const storage = await sqlite.init({
-    storage: await resolveStorageBackend(config?.storageBackend ?? 'legacy'),
-  });
   await fs.init({ storage });
   fs._setDocumentDir(dataDir || process.cwd());
 

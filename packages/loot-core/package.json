@@ -61,11 +61,6 @@
       "api": "./src/platform/server/sqlite/index.api.ts",
       "default": "./src/platform/server/sqlite/index.ts"
     },
-    "#platform/server/sqlite/engines": {
-      "electron": "./src/platform/server/sqlite/engines.native.ts",
-      "api": "./src/platform/server/sqlite/engines.native.ts",
-      "default": "./src/platform/server/sqlite/engines.web.ts"
-    },
     "#platform/client/connection": {
       "electron-renderer": "./src/platform/client/connection/index.electron.ts",
       "default": "./src/platform/client/connection/index.ts"
