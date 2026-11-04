@@ -230,6 +230,7 @@ export function ImportTransactionsModal({
     message: string;
   } | null>(null);
   const [filename, setFilename] = useState(originalFileName);
+  const [fileSelectionVersion, setFileSelectionVersion] = useState(0);
   const [transactions, setTransactions] = useState<ImportTransaction[]>([]);
   const [parsedTransactions, setParsedTransactions] = useState<
     ImportTransaction[]
@@ -540,6 +541,7 @@ export function ImportTransactionsModal({
     });
   }, [
     filename,
+    fileSelectionVersion,
     xlsxOptions,
     delimiter,
     csvEncoding,
@@ -594,7 +596,9 @@ export function ImportTransactionsModal({
     if (getFileType(res[0]) === 'xlsx') setHasHeaderRow(true);
     setXlsxOptions({ detectHeader: true });
     setXlsxMetadata(null);
+    lastParseRef.current = null;
     setFilename(res[0]);
+    setFileSelectionVersion(version => version + 1);
   }
 
   function onUpdateFields(field, name) {
