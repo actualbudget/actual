@@ -172,6 +172,7 @@ Choose a mode (A) and the number of months back (B). This is another automation 
 
 - **Copy a previous month.** This will copy the **budget** from a previous month.
 - **Average of previous months.** This will average the **spending** from the previous number of months you choose. The average is calculated from completed months only, to ensure the amount accurately reflects actual spending behavior.
+- **Average of previous weeks.** This will average the weekly **spending** over the number of weeks you choose, then budget that amount once for every occurrence of the chosen weekday in the month. A month with five Fridays gets five weeks' worth. The weeks are the complete 7-day weeks ending the day before the month starts (or yesterday, for future months). Adjustments apply to the weekly amount.
 
 ### % of Income {#percentage}
 

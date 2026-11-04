@@ -4,12 +4,13 @@ import { amountToInteger } from '@actual-app/core/shared/util';
 import type {
   AverageTemplate,
   ScheduleTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 import { useFormat } from '#hooks/useFormat';
 
 type AmountAdjustmentSummaryProps = {
-  template: ScheduleTemplate | AverageTemplate;
+  template: ScheduleTemplate | AverageTemplate | WeeklyAverageTemplate;
 };
 
 // Trailing clause for a template's increase or decrease adjustment, e.g.
@@ -28,6 +29,13 @@ export function AmountAdjustmentSummary({
 
   if (template.adjustmentType === 'fixed') {
     const amount = format(amountToInteger(magnitude), 'financial');
+    if (template.type === 'weeklyAverage') {
+      return increase ? (
+        <Trans>(increased by {{ amount }} per week)</Trans>
+      ) : (
+        <Trans>(decreased by {{ amount }} per week)</Trans>
+      );
+    }
     return increase ? (
       <Trans>(increased by {{ amount }})</Trans>
     ) : (
