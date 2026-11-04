@@ -4,10 +4,9 @@ import type {
 } from '@jlongster/sql.js';
 
 import * as legacy from './engine.sqljs.legacy';
-import * as wasm from './engine.wasm';
-import type { PreparedStatement, WasmDatabase } from './engine.wasm';
 import type {
   Database,
+  SqliteEngine,
   SqlParam,
   Statement,
   TransactionOptions,
@@ -16,6 +15,7 @@ import type {
 export type {
   Database,
   SqlParam,
+  SqliteEngine,
   Statement,
   TransactionOptions,
 } from './types';
@@ -23,13 +23,11 @@ export type {
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';
 
-// The web sqlite module is a facade over two engines: the legacy sql.js
-// build over absurd-sql, and the official sqlite-wasm build. `init` picks
-// one; everything else forwards to it. Callers only see the opaque
-// `Database` and `Statement` handles from `./types`.
-type Engine = 'legacy' | 'wasm';
-
-let engine: Engine = 'legacy';
+// The web sqlite module is a facade over an engine. The legacy sql.js
+// build over absurd-sql is built in and the default; other engines (the
+// official sqlite-wasm build) are registered by whichever entry point
+// wants them, so a build that never imports one does not bundle it.
+// Callers only see the opaque `Database` and `Statement` handles.
 
 function asSqlJs(db: Database): SqlJsDatabase {
   return db as unknown as SqlJsDatabase;
@@ -39,54 +37,75 @@ function asSqlJsStatement(sql: string | Statement): string | SqlJsStatement {
   return sql as unknown as string | SqlJsStatement;
 }
 
-function asWasm(db: Database): WasmDatabase {
-  return db as unknown as WasmDatabase;
-}
+const legacyEngine: SqliteEngine = {
+  init: async options => {
+    await legacy.init(options);
+  },
+  setWasmBinary: binary => legacy.setWasmBinary(binary),
+  prepare: (db, sql) =>
+    legacy.prepare(asSqlJs(db), sql) as unknown as Statement,
+  finalizeStatement: statement =>
+    (statement as unknown as SqlJsStatement).free(),
+  runQuery: <T>(
+    db: Database,
+    sql: string | Statement,
+    params: SqlParam[],
+    fetchAll: boolean,
+  ) =>
+    fetchAll
+      ? legacy.runQuery<T>(asSqlJs(db), asSqlJsStatement(sql), params, true)
+      : legacy.runQuery(asSqlJs(db), asSqlJsStatement(sql), params, false),
+  execQuery: (db, sql) => legacy.execQuery(asSqlJs(db), sql),
+  openDatabase: async pathOrBuffer =>
+    (await legacy.openDatabase(pathOrBuffer)) as unknown as Database,
+  closeDatabase: db => legacy.closeDatabase(asSqlJs(db)),
+  exportDatabase: db => legacy.exportDatabase(asSqlJs(db)),
+};
 
-function asWasmStatement(sql: string | Statement): string | PreparedStatement {
-  return sql as unknown as string | PreparedStatement;
+export type EngineName = 'legacy' | 'wasm';
+
+const engines: Partial<Record<EngineName, SqliteEngine>> = {
+  legacy: legacyEngine,
+};
+
+let activeEngine: SqliteEngine = legacyEngine;
+
+export function registerEngine(name: EngineName, engine: SqliteEngine) {
+  engines[name] = engine;
 }
 
 // The browser build of `@actual-app/api` embeds sql.js's wasm; the
 // sqlite-wasm engine fetches its own file.
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacy.setWasmBinary(binary);
+  legacyEngine.setWasmBinary(binary);
 }
 
 export async function init({
   baseURL,
   wasmBinary,
-  engine: requested = 'legacy',
+  engine = 'legacy',
 }: {
   baseURL?: string;
   wasmBinary?: ArrayBuffer | Uint8Array;
-  engine?: Engine;
+  engine?: EngineName;
 } = {}): Promise<void> {
-  engine = requested;
-  if (engine === 'wasm') {
-    await wasm.init({ baseURL, wasmBinary });
-  } else {
-    await legacy.init({ baseURL, wasmBinary });
+  const selected = engines[engine];
+  if (selected == null) {
+    throw new Error(`sqlite engine "${engine}" has not been registered`);
   }
+  activeEngine = selected;
+  await activeEngine.init({ baseURL, wasmBinary });
 }
 
 export function prepare(db: Database, sql: string): Statement {
-  const statement =
-    engine === 'wasm'
-      ? wasm.prepare(asWasm(db), sql)
-      : legacy.prepare(asSqlJs(db), sql);
-  return statement as unknown as Statement;
+  return activeEngine.prepare(db, sql);
 }
 
 // Frees a prepared statement that is no longer needed (for example when
 // it is evicted from a statement cache). Closing the database also frees
 // its statements, so this is only an optimisation for long sessions.
 export function finalizeStatement(statement: Statement) {
-  if (engine === 'wasm') {
-    wasm.finalizeStatement(statement as unknown as PreparedStatement);
-  } else {
-    (statement as unknown as SqlJsStatement).free();
-  }
+  activeEngine.finalizeStatement(statement);
 }
 
 export function runQuery(
@@ -107,22 +126,11 @@ export function runQuery<T>(
   params: SqlParam[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
-  if (engine === 'wasm') {
-    return fetchAll
-      ? wasm.runQuery<T>(asWasm(db), asWasmStatement(sql), params, true)
-      : wasm.runQuery(asWasm(db), asWasmStatement(sql), params, false);
-  }
-  return fetchAll
-    ? legacy.runQuery<T>(asSqlJs(db), asSqlJsStatement(sql), params, true)
-    : legacy.runQuery(asSqlJs(db), asSqlJsStatement(sql), params, false);
+  return activeEngine.runQuery<T>(db, sql, params, fetchAll);
 }
 
 export function execQuery(db: Database, sql: string) {
-  if (engine === 'wasm') {
-    wasm.execQuery(asWasm(db), sql);
-  } else {
-    legacy.execQuery(asSqlJs(db), sql);
-  }
+  activeEngine.execQuery(db, sql);
 }
 
 let transactionDepth = 0;
@@ -189,23 +197,13 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<Database> {
-  const db =
-    engine === 'wasm'
-      ? await wasm.openDatabase(pathOrBuffer)
-      : await legacy.openDatabase(pathOrBuffer);
-  return db as unknown as Database;
+  return activeEngine.openDatabase(pathOrBuffer);
 }
 
 export function closeDatabase(db: Database) {
-  if (engine === 'wasm') {
-    wasm.closeDatabase(asWasm(db));
-  } else {
-    legacy.closeDatabase(asSqlJs(db));
-  }
+  activeEngine.closeDatabase(db);
 }
 
 export async function exportDatabase(db: Database): Promise<Uint8Array> {
-  return engine === 'wasm'
-    ? wasm.exportDatabase(asWasm(db))
-    : legacy.exportDatabase(asSqlJs(db));
+  return activeEngine.exportDatabase(db);
 }

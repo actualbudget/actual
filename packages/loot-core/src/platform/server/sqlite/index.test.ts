@@ -5,6 +5,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
 
+import { wasmEngine } from './engine.wasm';
 import type { Database } from './types';
 
 import {
@@ -14,6 +15,7 @@ import {
   init,
   openDatabase,
   prepare,
+  registerEngine,
   runQuery,
   transaction,
 } from './index';
@@ -331,6 +333,7 @@ describe('sqlite-wasm engine', () => {
     const wasmBinary = readFileSync(
       require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'),
     );
+    registerEngine('wasm', wasmEngine);
     return init({ engine: 'wasm', wasmBinary });
   });
 

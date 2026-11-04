@@ -9,15 +9,16 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import type { SqlParam } from './types';
+import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import { unicodeLike } from './unicodeLike';
 
 export type { WasmDatabase, PreparedStatement };
 
-// sqlite engine over the official `@sqlite.org/sqlite-wasm` build. The
-// call shapes mirror the legacy sql.js engine so the facade in `index.ts`
-// can forward to either. File-backed databases arrive with the storage
-// layer; for now only `:memory:` and byte buffers can be opened.
+// sqlite engine over the official `@sqlite.org/sqlite-wasm` build. It is
+// not bundled unless something imports it and registers it with the
+// facade in `index.ts` (`registerEngine('wasm', wasmEngine)`). File-backed
+// databases arrive with the storage layer; for now only `:memory:` and
+// byte buffers can be opened.
 
 // The package types `init()` without parameters, but the runtime is the
 // Emscripten module factory and accepts the usual module options.
@@ -39,11 +40,19 @@ let initPromise: Promise<void> | null = null;
 // uses this to ship a self-contained worker.
 let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
 
-export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
+function asWasm(db: Database): WasmDatabase {
+  return db as unknown as WasmDatabase;
+}
+
+function asWasmStatement(sql: string | Statement): string | PreparedStatement {
+  return sql as unknown as string | PreparedStatement;
+}
+
+function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   wasmBinaryOverride = binary;
 }
 
-export function init({
+function init({
   baseURL = process.env.PUBLIC_URL,
   wasmBinary = wasmBinaryOverride,
 }: { baseURL?: string; wasmBinary?: ArrayBuffer | Uint8Array } = {}) {
@@ -85,7 +94,7 @@ function getSqlite3(): Sqlite3Static {
   return sqlite3;
 }
 
-function verifyParamTypes(sql: string | PreparedStatement, params: SqlParam[]) {
+function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
   for (const value of params) {
     if (
       typeof value !== 'string' &&
@@ -97,35 +106,26 @@ function verifyParamTypes(sql: string | PreparedStatement, params: SqlParam[]) {
   }
 }
 
-export function prepare(db: WasmDatabase, sql: string): PreparedStatement {
-  return db.prepare(sql);
+function prepare(db: Database, sql: string): Statement {
+  return asWasm(db).prepare(sql) as unknown as Statement;
 }
 
-export function finalizeStatement(statement: PreparedStatement) {
-  statement.finalize();
+function finalizeStatement(statement: Statement) {
+  (statement as unknown as PreparedStatement).finalize();
 }
 
-export function runQuery(
-  db: WasmDatabase,
-  sql: string | PreparedStatement,
-  params?: SqlParam[],
-  fetchAll?: false,
-): { changes: number };
-export function runQuery<T>(
-  db: WasmDatabase,
-  sql: string | PreparedStatement,
+function runQuery<T>(
+  db: Database,
+  sql: string | Statement,
   params: SqlParam[],
-  fetchAll: true,
-): T[];
-export function runQuery<T>(
-  db: WasmDatabase,
-  sql: string | PreparedStatement,
-  params: SqlParam[] = [],
-  fetchAll = false,
+  fetchAll: boolean,
 ): T[] | { changes: number } {
   verifyParamTypes(sql, params);
 
-  const statement = typeof sql === 'string' ? db.prepare(sql) : sql;
+  const database = asWasm(db);
+  const source = asWasmStatement(sql);
+  const statement =
+    typeof source === 'string' ? database.prepare(source) : source;
 
   try {
     if (params.length > 0) {
@@ -147,14 +147,14 @@ export function runQuery<T>(
     }
 
     statement.step();
-    return { changes: db.changes() };
+    return { changes: database.changes() };
   } catch (error) {
     logger.log(sql);
     throw error;
   } finally {
     // Statements live in the wasm heap until finalized. Cached statements
     // are reset instead, with their bindings cleared for the next call.
-    if (typeof sql === 'string') {
+    if (typeof source === 'string') {
       statement.finalize();
     } else {
       statement.reset(true);
@@ -162,8 +162,8 @@ export function runQuery<T>(
   }
 }
 
-export function execQuery(db: WasmDatabase, sql: string) {
-  db.exec(sql);
+function execQuery(db: Database, sql: string) {
+  asWasm(db).exec(sql);
 }
 
 type ScalarFunction = (...args: Array<string | null>) => unknown;
@@ -206,9 +206,9 @@ function pointerOf(db: WasmDatabase): number {
   return db.pointer;
 }
 
-export async function openDatabase(
+async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
-): Promise<WasmDatabase> {
+): Promise<Database> {
   if (typeof pathOrBuffer === 'string' && pathOrBuffer !== ':memory:') {
     throw new Error(
       `openDatabase: file-backed databases are not supported by the sqlite-wasm engine yet (${pathOrBuffer})`,
@@ -245,14 +245,26 @@ export async function openDatabase(
   }
 
   installUserFunctions(db);
-  return db;
+  return db as unknown as Database;
 }
 
-export function closeDatabase(db: WasmDatabase) {
-  db.close();
+function closeDatabase(db: Database) {
+  asWasm(db).close();
 }
 
 // The bytes of the database file, whether it lives in memory or on disk
-export async function exportDatabase(db: WasmDatabase): Promise<Uint8Array> {
-  return getSqlite3().capi.sqlite3_js_db_export(pointerOf(db));
+async function exportDatabase(db: Database): Promise<Uint8Array> {
+  return getSqlite3().capi.sqlite3_js_db_export(pointerOf(asWasm(db)));
 }
+
+export const wasmEngine: SqliteEngine = {
+  init,
+  setWasmBinary,
+  prepare,
+  finalizeStatement,
+  runQuery,
+  execQuery,
+  openDatabase,
+  closeDatabase,
+  exportDatabase,
+};

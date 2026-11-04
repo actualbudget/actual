@@ -18,3 +18,26 @@ export type TransactionOptions = {
   // lands just after it fails with "TransactionInactiveError".
   immediate?: boolean;
 };
+
+// What a web sqlite engine provides to the facade in `index.ts`. Engines
+// other than the default register themselves at startup, so a build that
+// never imports one does not bundle it.
+export type SqliteEngine = {
+  init(options: {
+    baseURL?: string;
+    wasmBinary?: ArrayBuffer | Uint8Array;
+  }): Promise<void>;
+  setWasmBinary(binary: ArrayBuffer | Uint8Array): void;
+  prepare(db: Database, sql: string): Statement;
+  finalizeStatement(statement: Statement): void;
+  runQuery<T>(
+    db: Database,
+    sql: string | Statement,
+    params: SqlParam[],
+    fetchAll: boolean,
+  ): T[] | { changes: unknown };
+  execQuery(db: Database, sql: string): void;
+  openDatabase(pathOrBuffer?: string | Uint8Array): Promise<Database>;
+  closeDatabase(db: Database): void;
+  exportDatabase(db: Database): Promise<Uint8Array>;
+};
