@@ -123,7 +123,7 @@ Contributions pair naturally with a spending phase set to 0: while you're workin
 
 ### Spending
 
-<img width="1184" alt="The Spending tab with three spending phases and its controls labeled" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-withdrawals@2x.webp" />
+<img width="1184" alt="The Spending tab with three spending phases, a one-off withdrawal and its controls labeled" src="/img/experimental/monte-carlo-analysis/monte-carlo-analysis-withdrawals@2x.webp" />
 
 - **A. Spending phases** - how much you take out each year to live on. You can keep it simple with a single phase, or split your plan into phases with different amounts - for example, $30,000 a year for your first 10 years of retirement while you're travelling, then $20,000 a year onwards. Each phase sets a yearly amount from a chosen age until the next phase begins; the first phase always starts now. Amounts are in today's money - the inflation settings on the Plan Details tab are applied on top, so "$20,000 from age 65" always means $20,000 of today's spending power.
 - **B. Withdrawal order** - only matters if you have more than one pot:
