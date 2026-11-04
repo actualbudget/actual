@@ -242,6 +242,7 @@ export function MonteCarlo() {
     contributions: resolvedConfig.contributions,
     incomeStreams: resolvedConfig.incomeStreams,
     spendingPhases: resolvedConfig.spendingPhases,
+    lumpSums: resolvedConfig.lumpSums,
     startAge: config.currentAge,
   };
 
@@ -588,7 +589,8 @@ export function MonteCarlo() {
                   <Trans>
                     Money flowing in and out each year of this simulated run:
                     withdrawals and income above zero; planned spending, tax,
-                    contributions and money saved into the surplus pot below.
+                    contributions, money saved into the surplus pot and any
+                    one-off withdrawals below.
                   </Trans>
                 </Text>
                 <MonteCarloCashflowGraph
@@ -634,6 +636,7 @@ export function MonteCarlo() {
                 config.pots.some(pot => pot.isSurplus)
               }
               incomeStreams={resolvedConfig.incomeStreams}
+              lumpSums={resolvedConfig.lumpSums}
               withdrawalRule={resolvedConfig.withdrawalRule}
               cashflowGraph={
                 <MonteCarloCashflowGraph
