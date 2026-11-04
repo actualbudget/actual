@@ -170,12 +170,17 @@ export async function loadSpreadsheet(
       true,
     );
 
-    // A cache with carryover cells but no `carryover-stored-*` predates the
-    // inherited flag, so its stored flags only exist in the database.
-    // Rebuild it from there.
+    // Older caches either have no stored flags or store them as booleans.
+    // Persistent rollover reads numeric flags, so rebuild those caches from
+    // the database rather than interpreting a cached false as a nonzero flag.
     const isOutdated =
-      cachedRows.some(row => row.key.includes('!carryover-')) &&
-      !cachedRows.some(row => row.key.includes('!carryover-stored-'));
+      (cachedRows.some(row => row.key.includes('!carryover-')) &&
+        !cachedRows.some(row => row.key.includes('!carryover-stored-'))) ||
+      cachedRows.some(
+        row =>
+          row.key.includes('!carryover-stored-') &&
+          (row.value === 'true' || row.value === 'false'),
+      );
     if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
       setCacheStatus(mainDb, cacheDb, { clean: false });
