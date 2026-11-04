@@ -1457,11 +1457,16 @@ export function runMonteCarloSimulation(
   if (taxBands.length === 0 || taxBands[0].from > 0) {
     taxBands.unshift({ from: 0, rate: 0 });
   }
-  const hasTax =
-    taxModel === 'bands'
-      ? taxBands.some(band => band.rate > 0) &&
-        potTaxableFractions.some(fraction => fraction > 0)
-      : potTaxRates.some(rate => rate > 0);
+  const hasBandTax = taxBands.some(band => band.rate > 0);
+  // Whether a group of flows (pots, income streams, lump sums) can owe
+  // tax: under the bands model some band must charge and some flow be
+  // taxable; under the flat model some flow needs a rate
+  function hasAnyTax(rates: number[], taxableFractions: number[]) {
+    return taxModel === 'bands'
+      ? hasBandTax && taxableFractions.some(fraction => fraction > 0)
+      : rates.some(rate => rate > 0);
+  }
+  const hasTax = hasAnyTax(potTaxRates, potTaxableFractions);
 
   // Income streams are taxed the same two ways as pots. Under the bands
   // model their taxable income fills the lower bands first, so the year's
@@ -1474,11 +1479,7 @@ export function runMonteCarloSimulation(
   const incomeTaxableFractions = incomeStreams.map(incomeStream =>
     clamp(incomeStream.taxableFraction, 0, 1),
   );
-  const hasIncomeTax =
-    taxModel === 'bands'
-      ? taxBands.some(band => band.rate > 0) &&
-        incomeTaxableFractions.some(fraction => fraction > 0)
-      : incomeTaxRates.some(rate => rate > 0);
+  const hasIncomeTax = hasAnyTax(incomeTaxRates, incomeTaxableFractions);
 
   // Worst-case share of a gross withdrawal lost to tax; used to skip the
   // per-year shortfall precheck when capacity is comfortably sufficient
@@ -1506,11 +1507,42 @@ export function runMonteCarloSimulation(
     return tax;
   }
 
-  // Tax due on the takes currently in potTakes. Band thresholds are in
-  // today's money, so taxable income is deflated by the replay's inflation
-  // path before banding (thresholds effectively rise with inflation).
-  // Under the bands model the year's income has already used up the
-  // lower bands, so the takes are taxed as the slice above it.
+  // Band tax on a nominal taxable slice taken on top of `taxableBase`
+  // (nominal taxable income already in the bands this year). Band
+  // thresholds are in today's money, so both are deflated by the replay's
+  // inflation path before banding (thresholds effectively rise with
+  // inflation) and the tax is reinflated
+  function bandTaxOnSlice(
+    taxableSlice: number,
+    taxableBase: number,
+    cumulativeInflationNow: number,
+  ) {
+    const baseToday = taxableBase / cumulativeInflationNow;
+    return (
+      (bandTax(baseToday + taxableSlice / cumulativeInflationNow) -
+        bandTax(baseToday)) *
+      cumulativeInflationNow
+    );
+  }
+
+  // Solves the gross that delivers `net` after tax: g = net + tax(g).
+  // Tax is piecewise linear in g with marginal rates < 1, so this fixed
+  // point converges geometrically
+  function solveGross(net: number, taxForGross: (gross: number) => number) {
+    let gross = net;
+    for (let iteration = 0; iteration < 40; iteration++) {
+      const next = net + taxForGross(gross);
+      if (Math.abs(next - gross) <= 1e-7 * Math.max(1, next)) {
+        return next;
+      }
+      gross = next;
+    }
+    return gross;
+  }
+
+  // Tax due on the takes currently in potTakes. Under the bands model the
+  // year's income has already used up the lower bands, so the takes are
+  // taxed as the slice above it.
   function taxForTakes(
     cumulativeInflationNow: number,
     taxableIncomeBase: number,
@@ -1529,12 +1561,7 @@ export function runMonteCarloSimulation(
     for (let potIndex = 0; potIndex < potCount; potIndex++) {
       taxable += potTakes[potIndex] * potTaxableFractions[potIndex];
     }
-    const baseToday = taxableIncomeBase / cumulativeInflationNow;
-    return (
-      (bandTax(baseToday + taxable / cumulativeInflationNow) -
-        bandTax(baseToday)) *
-      cumulativeInflationNow
-    );
+    return bandTaxOnSlice(taxable, taxableIncomeBase, cumulativeInflationNow);
   }
 
   // The slice of each pot's take (currently in potTakes) that was assessed
@@ -1900,11 +1927,7 @@ export function runMonteCarloSimulation(
   const lumpSumTaxableFractions = lumpSums.map(lumpSum =>
     clamp(lumpSum.taxableFraction, 0, 1),
   );
-  const hasLumpSumTax =
-    taxModel === 'bands'
-      ? taxBands.some(band => band.rate > 0) &&
-        lumpSumTaxableFractions.some(fraction => fraction > 0)
-      : lumpSumTaxRates.some(rate => rate > 0);
+  const hasLumpSumTax = hasAnyTax(lumpSumTaxRates, lumpSumTaxableFractions);
   // A lump sum is a one-year window; the age is rounded like access ages
   // so a typed fraction still lands on a year
   const lumpSumSchedule = scheduleByYear(
@@ -1942,9 +1965,8 @@ export function runMonteCarloSimulation(
   }
 
   // Tax on a lump sum's gross taken on top of `taxableBase` (nominal
-  // taxable income already in the bands this year). The bands model
-  // deflates to today's money like taxForTakes; the flat model applies
-  // the lump sum's own rate
+  // taxable income already in the bands this year), under the lump sum's
+  // own tax setting rather than any pot's
   function taxOnLumpSumGross(
     gross: number,
     lumpSumIndex: number,
@@ -1961,11 +1983,10 @@ export function runMonteCarloSimulation(
     if (taxableFraction <= 0) {
       return 0;
     }
-    const baseToday = taxableBase / cumulativeInflationNow;
-    return (
-      (bandTax(baseToday + (gross * taxableFraction) / cumulativeInflationNow) -
-        bandTax(baseToday)) *
-      cumulativeInflationNow
+    return bandTaxOnSlice(
+      gross * taxableFraction,
+      taxableBase,
+      cumulativeInflationNow,
     );
   }
 
@@ -1983,22 +2004,14 @@ export function runMonteCarloSimulation(
     if (taxModel === 'flat') {
       return net / (1 - lumpSumTaxRates[lumpSumIndex]);
     }
-    let gross = net;
-    for (let iteration = 0; iteration < 40; iteration++) {
-      const next =
-        net +
-        taxOnLumpSumGross(
-          gross,
-          lumpSumIndex,
-          cumulativeInflationNow,
-          taxableBase,
-        );
-      if (Math.abs(next - gross) <= 1e-7 * Math.max(1, next)) {
-        return next;
-      }
-      gross = next;
-    }
-    return gross;
+    return solveGross(net, gross =>
+      taxOnLumpSumGross(
+        gross,
+        lumpSumIndex,
+        cumulativeInflationNow,
+        taxableBase,
+      ),
+    );
   }
 
   // Takes `gross` out of the pots for a lump sum: the chosen pot first
@@ -2720,23 +2733,20 @@ export function runMonteCarloSimulation(
           simulationDepletionYear = year;
           depletionCounts[year]++;
         } else {
-          // Solve the gross withdrawal that delivers the net requirement:
-          // g = net + tax(takes(g)). Tax is piecewise linear in g with
-          // marginal rates < 1, so this fixed point converges geometrically
+          // Solve the gross withdrawal that delivers the net requirement,
+          // taxed on the pot split it would be taken as
           let grossTotal = netRequired;
           if (hasTax) {
-            for (let iteration = 0; iteration < 40; iteration++) {
-              computeTakes(grossTotal, year, accessibleAfterLumpSums);
-              const next =
-                netRequired +
-                taxForTakes(cumulativeInflation, taxableBaseForWithdrawal);
-              if (Math.abs(next - grossTotal) <= 1e-7 * Math.max(1, next)) {
-                grossTotal = next;
-                break;
-              }
-              grossTotal = next;
-            }
-            grossTotal = Math.min(grossTotal, accessibleAfterLumpSums);
+            grossTotal = Math.min(
+              solveGross(netRequired, gross => {
+                computeTakes(gross, year, accessibleAfterLumpSums);
+                return taxForTakes(
+                  cumulativeInflation,
+                  taxableBaseForWithdrawal,
+                );
+              }),
+              accessibleAfterLumpSums,
+            );
           }
 
           computeTakes(grossTotal, year, accessibleAfterLumpSums);

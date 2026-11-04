@@ -201,6 +201,42 @@ export function MonteCarloRunDetailTable({
     });
   }
 
+  // The working line for a year's one-off withdrawals. A year that could
+  // not take everything asked for says so, with the requested total, so
+  // the per-item amounts listed after it read as requests
+  function getLumpSumWorkingSentence(
+    row: MonteCarloRunDetailRow,
+    requested: number,
+  ) {
+    const gross = format(row.lumpSumWithdrawal, 'financial');
+    const tax = format(row.lumpSumTax, 'financial');
+    const net = format(row.lumpSumWithdrawal - row.lumpSumTax, 'financial');
+    if (row.lumpSumWithdrawal - row.lumpSumTax >= requested) {
+      return row.lumpSumTax > 0
+        ? t(
+            'One-off withdrawals: {{gross}} gross − {{tax}} tax = {{net}} received.',
+            { gross, tax, net },
+          )
+        : t('One-off withdrawals: {{gross}}, untaxed.', { gross });
+    }
+    const requestedText = format(requested, 'financial');
+    if (row.lumpSumWithdrawal <= 0) {
+      return t(
+        'One-off withdrawals: {{requested}} requested, but nothing could be taken.',
+        { requested: requestedText },
+      );
+    }
+    return row.lumpSumTax > 0
+      ? t(
+          'One-off withdrawals: {{requested}} requested, but only {{gross}} gross − {{tax}} tax = {{net}} could be taken.',
+          { requested: requestedText, gross, tax, net },
+        )
+      : t(
+          'One-off withdrawals: {{requested}} requested, but only {{gross}} could be taken.',
+          { requested: requestedText, gross },
+        );
+  }
+
   function getIncomeTotalsSentence() {
     const total = format(totalIncome, 'financial');
     const tax = format(totalIncomeTax, 'financial');
@@ -597,6 +633,10 @@ export function MonteCarloRunDetailTable({
 
           {rows.map(row => {
             const isFailureRow = row === lastRow && !hasSurvived;
+            const lumpSumRequested = row.lumpSumAmounts.reduce(
+              (sum, amount) => sum + amount,
+              0,
+            );
             const isExpanded = expandedYears.has(row.year);
             const showsWorking = workingYears.has(row.year);
             // Growth applies to what stayed invested after contributions
@@ -887,38 +927,14 @@ export function MonteCarloRunDetailTable({
                             </FinancialText>
                           </PrivacyFilter>
                         </Text>
-                        {row.lumpSumWithdrawal > 0 && (
+                        {lumpSumRequested > 0 && (
                           <Text size="medium" style={{ color: theme.pageText }}>
                             <PrivacyFilter>
                               <FinancialText as="span">
-                                {row.lumpSumTax > 0
-                                  ? t(
-                                      'One-off withdrawals: {{gross}} gross − {{tax}} tax = {{net}} received.',
-                                      {
-                                        gross: format(
-                                          row.lumpSumWithdrawal,
-                                          'financial',
-                                        ),
-                                        tax: format(
-                                          row.lumpSumTax,
-                                          'financial',
-                                        ),
-                                        net: format(
-                                          row.lumpSumWithdrawal -
-                                            row.lumpSumTax,
-                                          'financial',
-                                        ),
-                                      },
-                                    )
-                                  : t(
-                                      'One-off withdrawals: {{gross}}, untaxed.',
-                                      {
-                                        gross: format(
-                                          row.lumpSumWithdrawal,
-                                          'financial',
-                                        ),
-                                      },
-                                    )}
+                                {getLumpSumWorkingSentence(
+                                  row,
+                                  lumpSumRequested,
+                                )}
                                 {lumpSums.length > 1 &&
                                   ` (${row.lumpSumAmounts
                                     .map((amount, lumpSumIndex) =>

@@ -73,10 +73,13 @@ export function MonteCarloLumpSums({
     });
   }
 
+  // The plan's last simulated year is the one before the target age
+  const lastAge = targetAge - 1;
+
   function addLumpSum() {
     // A few years out by default, so it lands inside the plan without
     // sitting on the current year
-    const age = Math.min(targetAge, currentAge + 5);
+    const age = Math.min(lastAge, currentAge + 5);
     onConfigChange({
       lumpSums: [...lumpSums, createMonteCarloLumpSum(uuidv4(), age)],
     });
@@ -180,6 +183,16 @@ export function MonteCarloLumpSums({
             const sourcePot = pots.find(pot => pot.id === lumpSum.sourcePotId);
             const sourceIsLocked =
               sourcePot?.accessAge != null && sourcePot.accessAge > lumpSum.age;
+            // A source that is no longer offered (removed, or now the
+            // surplus pot) is what the simulation does with it: the order
+            const sourceValue =
+              sourcePot != null && !sourcePot.isSurplus
+                ? sourcePot.id
+                : WITHDRAWAL_ORDER_SOURCE;
+            // Ages can drift outside the plan when the current or target
+            // age changes; those are never simulated
+            const isOutsidePlan =
+              lumpSum.age < currentAge || lumpSum.age > lastAge;
             return (
               <Fragment key={lumpSum.id}>
                 <Row
@@ -217,7 +230,7 @@ export function MonteCarloLumpSums({
                       aria-label={t('Age')}
                       roundToInteger
                       min={currentAge}
-                      max={targetAge}
+                      max={lastAge}
                       step={1}
                       onCommit={newValue =>
                         updateLumpSum(lumpSum.id, {
@@ -253,7 +266,7 @@ export function MonteCarloLumpSums({
                     truncate={false}
                   >
                     <Select
-                      value={lumpSum.sourcePotId ?? WITHDRAWAL_ORDER_SOURCE}
+                      value={sourceValue}
                       onChange={value =>
                         updateLumpSum(lumpSum.id, {
                           sourcePotId:
@@ -331,7 +344,23 @@ export function MonteCarloLumpSums({
                     </Button>
                   </Field>
                 </Row>
-                {sourceIsLocked && (
+                {isOutsidePlan && (
+                  <View
+                    style={{
+                      backgroundColor: theme.tableBackground,
+                      padding: '2px 10px 8px',
+                    }}
+                  >
+                    <Text size="medium" style={{ color: theme.warningText }}>
+                      <Trans>
+                        Age {{ age: lumpSum.age }} is outside the plan (ages{' '}
+                        {{ currentAge }} to {{ lastAge }}), so this is never
+                        taken.
+                      </Trans>
+                    </Text>
+                  </View>
+                )}
+                {!isOutsidePlan && sourceIsLocked && (
                   <View
                     style={{
                       backgroundColor: theme.tableBackground,

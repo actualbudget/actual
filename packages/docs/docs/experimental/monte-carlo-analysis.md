@@ -200,7 +200,7 @@ By default, every money figure in the results is shown in **today's money** - wh
 
 - **Success rate** - the big number: the percentage of replays in which every year's spending was paid for, from income and pots together. There's no single "right" target, but many planners aim for 80–90%. (Running the pots down to nothing isn't a failure by itself - only a year whose spending goes unfunded is.)
 - **Median ending balance** - in the middle-of-the-road replay, how much was left at the end.
-- **Median total withdrawn** - how much income the middle replay actually paid you over the whole period. Especially useful when comparing withdrawal rules.
+- **Median total withdrawn** - how much the middle replay actually paid you over the whole period, including any one-off withdrawals. Especially useful when comparing withdrawal rules: a one-off is the same under every rule, so any difference between rules is living income.
 - **Chance of running out of money** - the flip side of the success rate.
 - **Typical failure runs out at** - among the replays that failed, the typical age the money ran out.
 
