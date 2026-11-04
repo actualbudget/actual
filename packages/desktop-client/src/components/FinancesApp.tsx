@@ -13,6 +13,7 @@ import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
 import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
+import { useExchangeRatesReminder } from '#hooks/useExchangeRatesReminder';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -27,6 +28,7 @@ import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { ContextMenu } from './ContextMenu';
+import { ExchangeRatesPage } from './currency/ExchangeRatesPage';
 import { EnableBankingCallback } from './EnableBankingCallback';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
@@ -118,6 +120,7 @@ export function FinancesApp() {
   const multiuserEnabled = useMultiuserEnabled();
 
   useAutomaticBankSync();
+  useExchangeRatesReminder();
   useNewsNotification();
 
   const init = useEffectEvent(() => {
@@ -394,6 +397,14 @@ export function FinancesApp() {
                       }
                     />
                     <Route
+                      path="/exchange-rates"
+                      element={
+                        <SidebarMenuRoute id="exchange-rates">
+                          <ExchangeRatesPage />
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
                       path="/notifications"
                       element={<NotificationsPage />}
                     />
@@ -457,6 +468,14 @@ export function FinancesApp() {
                             >
                               <NarrowAlternate name="BankSync" />
                             </ErrorBoundary>
+                          </SidebarMenuRoute>
+                        }
+                      />
+                      <Route
+                        path="exchange-rates"
+                        element={
+                          <SidebarMenuRoute id="exchange-rates" isInSettings>
+                            <ExchangeRatesPage />
                           </SidebarMenuRoute>
                         }
                       />

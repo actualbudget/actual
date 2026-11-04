@@ -23,16 +23,19 @@ import { css, cx } from '@emotion/css';
 import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
+import { ConvertedCellValue } from '#components/currency/ConvertedCellValue';
 import { Notes } from '#components/Notes';
 import { DropHighlight, useDraggable, useDroppable } from '#components/sort';
 import type { OnDragChangeCallback, OnDropCallback } from '#components/sort';
-import { CellValue } from '#components/spreadsheet/CellValue';
+import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { useContextMenu } from '#hooks/useContextMenu';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDragRef } from '#hooks/useDragRef';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { openAccountCloseModal } from '#modals/modalsSlice';
+import { openAccountCloseModal, pushModal } from '#modals/modalsSlice';
 import { useDispatch, useSelector } from '#redux';
 import type { Binding, SheetFields } from '#spreadsheet';
 import { isTouchDevice } from '#util/isTouchDevice';
@@ -66,6 +69,9 @@ type AccountProps<FieldName extends SheetFields<'account'>> = {
   titleAccount?: boolean;
   isExactPathMatch?: boolean;
   balanceTestId?: string;
+  // For totals: the accounts that `query` adds up, so balances in other
+  // currencies can be converted first
+  totalAccounts?: AccountEntity[];
 };
 
 export function Account<FieldName extends SheetFields<'account'>>({
@@ -84,6 +90,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
   titleAccount,
   isExactPathMatch,
   balanceTestId,
+  totalAccounts,
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
@@ -123,8 +130,32 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const needsTooltip = !!account?.id && !isTouchDevice();
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
-  const balanceCell = <CellValue binding={query} type="financial" />;
+  const { formatAmount, getAccountCurrency } = useCurrencyFormatter();
+
+  // Accounts in another currency show their balance in that currency
+  const balanceCell = totalAccounts ? (
+    <ConvertedCellValue<'account', FieldName>
+      binding={query}
+      accounts={totalAccounts}
+      type="financial"
+    />
+  ) : (
+    <CellValue<'account', FieldName> binding={query} type="financial">
+      {props => (
+        <CellValueText<'account', FieldName>
+          {...props}
+          formatter={
+            account
+              ? value =>
+                  formatAmount(Number(value ?? 0), getAccountCurrency(account))
+              : undefined
+          }
+        />
+      )}
+    </CellValue>
+  );
 
   const isContextMenuOpen = useSelector(state =>
     state.contextMenu.items.some(
@@ -153,6 +184,23 @@ export function Account<FieldName extends SheetFields<'account'>>({
             onClick: () =>
               dispatch(openAccountCloseModal({ accountId: account.id })),
           },
+      ...(account && isMultiCurrencyEnabled
+        ? [
+            {
+              name: 'account-settings',
+              text: t('Account settings'),
+              onClick: () =>
+                dispatch(
+                  pushModal({
+                    modal: {
+                      name: 'account-settings',
+                      options: { accountId: account.id },
+                    },
+                  }),
+                ),
+            },
+          ]
+        : []),
     ],
   });
 

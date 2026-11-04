@@ -14,7 +14,13 @@ import { baseInputStyle, Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
-import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
+import { getDecimalPlaces } from '@actual-app/core/shared/currencies';
+import {
+  amountToInteger,
+  integerToAmount,
+  integerToCurrencyForEdit,
+  integerToCurrencyWithDecimal,
+} from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
@@ -41,6 +47,9 @@ type AmountInputProps = {
   focused?: boolean;
   disabled?: boolean;
   autoDecimals?: boolean;
+  // The currency of the amount when it isn't the default one: the amount is
+  // then shown and typed with the decimal places of that currency
+  currencyCode?: string;
 };
 
 export function AmountInput({
@@ -60,9 +69,26 @@ export function AmountInput({
   focused,
   disabled = false,
   autoDecimals = false,
+  currencyCode,
 }: AmountInputProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  // Amounts in another currency are shown without its code, like the amounts
+  // typed into them
+  const forEdit = useCallback(
+    (amount: IntegerAmount) =>
+      currencyCode === undefined
+        ? format.forEdit(amount)
+        : integerToCurrencyForEdit(amount, currencyCode),
+    [format, currencyCode],
+  );
+  const forDisplay = useCallback(
+    (amount: IntegerAmount) =>
+      currencyCode === undefined
+        ? format(amount, 'financial')
+        : integerToCurrencyWithDecimal(amount, currencyCode),
+    [format, currencyCode],
+  );
   const [symbol, setSymbol] = useState<'+' | '-'>(() => {
     if (sign) return sign;
     return initialValue === 0 ? zeroSign : initialValue > 0 ? '+' : '-';
@@ -73,11 +99,9 @@ export function AmountInput({
   const getDisplayValue = useCallback(
     (value: number, isEditing: boolean) => {
       const absoluteValue = Math.abs(value || 0);
-      return isEditing
-        ? format.forEdit(absoluteValue)
-        : format(absoluteValue, 'financial');
+      return isEditing ? forEdit(absoluteValue) : forDisplay(absoluteValue);
     },
-    [format],
+    [forEdit, forDisplay],
   );
 
   const [value, setValue] = useState(getDisplayValue(initialValue, false));
@@ -143,12 +167,13 @@ export function AmountInput({
       if (digits === '') {
         newText = '';
       } else {
+        const decimalPlaces =
+          currencyCode === undefined
+            ? format.currency.decimalPlaces
+            : getDecimalPlaces(currencyCode);
         // Typed digits are in the currency's smallest unit (cents, whole yen)
-        const amount = integerToAmount(
-          parseInt(digits, 10),
-          format.currency.decimalPlaces,
-        );
-        newText = format.forEdit(amountToInteger(amount));
+        const amount = integerToAmount(parseInt(digits, 10), decimalPlaces);
+        newText = forEdit(amountToInteger(amount));
       }
     }
 
@@ -170,7 +195,7 @@ export function AmountInput({
         setSymbol('-');
       }
     }
-    setValue(format(Math.abs(amount), 'financial'));
+    setValue(forDisplay(Math.abs(amount)));
   }
 
   function onInputAmountBlur(e) {
@@ -233,7 +258,7 @@ export function AmountInput({
         )}
         onFocus={e => {
           setIsFocused(true);
-          setValue(format.forEdit(Math.abs(initialValue ?? 0)));
+          setValue(forEdit(Math.abs(initialValue ?? 0)));
           setTimeout(() => innerRef.current?.select(), 0);
           onFocus?.(e);
         }}

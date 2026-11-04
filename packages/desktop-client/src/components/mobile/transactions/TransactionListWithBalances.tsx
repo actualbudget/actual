@@ -8,11 +8,16 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
-import type { TransactionEntity } from '@actual-app/core/types/models';
+import type {
+  AccountEntity,
+  TransactionEntity,
+} from '@actual-app/core/types/models';
 
+import { ConvertedCellValue } from '#components/currency/ConvertedCellValue';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { DisplayPayeeProvider } from '#hooks/useDisplayPayee';
+import type { FormatType } from '#hooks/useFormat';
 import { SelectedProvider, useSelected } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import type { Binding, SheetFields, SheetNames } from '#spreadsheet';
@@ -49,6 +54,11 @@ type TransactionListWithBalancesProps = {
   isReconciling?: boolean;
   onToggleTransactionCleared?: (transaction: TransactionEntity) => void;
   filtered?: boolean;
+  // Formats the balances, e.g. in the currency of the account
+  balanceFormatter?: (value: number) => string;
+  // For totals: the accounts that `balance` adds up, so balances in other
+  // currencies can be converted first
+  balanceAccounts?: AccountEntity[];
 };
 
 export function TransactionListWithBalances({
@@ -69,6 +79,8 @@ export function TransactionListWithBalances({
   isReconciling = false,
   onToggleTransactionCleared,
   filtered = false,
+  balanceFormatter,
+  balanceAccounts,
 }: TransactionListWithBalancesProps) {
   const selectedInst = useSelected('transactions', [...transactions], []);
 
@@ -93,11 +105,16 @@ export function TransactionListWithBalances({
                 balanceCleared={balanceCleared}
                 balanceUncleared={balanceUncleared}
                 alwaysShowCleared={isReconciling}
+                formatter={balanceFormatter}
               />
             ) : (
               <>
                 <View style={{ flexBasis: '33%' }} />
-                <Balance balance={balance} />
+                <Balance
+                  balance={balance}
+                  formatter={balanceFormatter}
+                  accounts={balanceAccounts}
+                />
                 <View
                   style={{
                     flexBasis: '33%',
@@ -176,6 +193,12 @@ const TransactionListBalanceCellValue = <
   return <CellValue {...props} />;
 };
 
+// Three balances share the width of a phone; an amount shown with its
+// converted value, e.g. "USD$1,774.45 (2,520.17)", goes on two lines
+// rather than running into its neighbours
+const balanceColumnStyle = { flexBasis: '33%', minWidth: 0 };
+const wrappingAmountStyle = { whiteSpace: 'normal' } as const;
+
 type BalanceWithClearedProps = {
   balanceUncleared: NonNullable<
     TransactionListWithBalancesProps['balanceUncleared']
@@ -185,6 +208,7 @@ type BalanceWithClearedProps = {
   >;
   balance: TransactionListWithBalancesProps['balance'];
   alwaysShowCleared?: boolean;
+  formatter?: (value: number) => string;
 };
 
 function BalanceWithCleared({
@@ -192,6 +216,7 @@ function BalanceWithCleared({
   balanceCleared,
   balance,
   alwaysShowCleared = false,
+  formatter,
 }: BalanceWithClearedProps) {
   const { t } = useTranslation();
   const unclearedAmount = useSheetValue<
@@ -204,8 +229,8 @@ function BalanceWithCleared({
     <>
       <View
         style={{
+          ...balanceColumnStyle,
           display: !showCleared ? 'none' : undefined,
-          flexBasis: '33%',
         }}
       >
         <Label
@@ -219,7 +244,9 @@ function BalanceWithCleared({
           {props => (
             <CellValueText
               {...props}
+              formatter={formatter}
               style={{
+                ...wrappingAmountStyle,
                 fontSize: 12,
                 textAlign: 'center',
                 fontWeight: '500',
@@ -229,11 +256,11 @@ function BalanceWithCleared({
           )}
         </TransactionListBalanceCellValue>
       </View>
-      <Balance balance={balance} />
+      <Balance balance={balance} formatter={formatter} />
       <View
         style={{
+          ...balanceColumnStyle,
           display: !showCleared ? 'none' : undefined,
-          flexBasis: '33%',
         }}
       >
         <Label
@@ -247,7 +274,9 @@ function BalanceWithCleared({
           {props => (
             <CellValueText
               {...props}
+              formatter={formatter}
               style={{
+                ...wrappingAmountStyle,
                 fontSize: 12,
                 textAlign: 'center',
                 fontWeight: '500',
@@ -263,32 +292,67 @@ function BalanceWithCleared({
 
 type BalanceProps = {
   balance: TransactionListWithBalancesProps['balance'];
+  formatter?: (value: number) => string;
+  accounts?: AccountEntity[];
 };
 
-function Balance({ balance }: BalanceProps) {
+function Balance({ balance, formatter, accounts }: BalanceProps) {
   const { t } = useTranslation();
+  const renderBalance = ({
+    value,
+    ...props
+  }: {
+    type?: FormatType;
+    name: string;
+    value: number;
+    formatter?: (value: number, type?: FormatType) => string;
+    title?: string;
+  }) => (
+    <CellValueText
+      {...props}
+      value={value}
+      formatter={formatter ?? props.formatter}
+      style={{
+        ...wrappingAmountStyle,
+        fontSize: 18,
+        textAlign: 'center',
+        fontWeight: '500',
+        color:
+          value < 0
+            ? theme.numberNegative
+            : value > 0
+              ? theme.numberPositive
+              : theme.numberNeutral,
+      }}
+      data-testid="transactions-balance"
+    />
+  );
+
   return (
-    <View style={{ flexBasis: '33%' }}>
+    <View style={balanceColumnStyle}>
       <Label title={t('Balance')} style={{ textAlign: 'center' }} />
-      <TransactionListBalanceCellValue binding={balance} type="financial">
-        {props => (
-          <CellValueText
-            {...props}
-            style={{
-              fontSize: 18,
-              textAlign: 'center',
-              fontWeight: '500',
-              color:
-                props.value < 0
-                  ? theme.numberNegative
-                  : props.value > 0
-                    ? theme.numberPositive
-                    : theme.numberNeutral,
-            }}
-            data-testid="transactions-balance"
-          />
-        )}
-      </TransactionListBalanceCellValue>
+      {accounts ? (
+        <ConvertedCellValue
+          // Totals across accounts are always account sheet cells
+          binding={balance as Binding<'account', SheetFields<'account'>>}
+          accounts={accounts}
+          type="financial"
+        >
+          {props =>
+            renderBalance({
+              ...props,
+              value: Number(props.value),
+              formatter: props.formatter
+                ? (value, type) => props.formatter?.(value, type) ?? ''
+                : undefined,
+            })
+          }
+        </ConvertedCellValue>
+      ) : (
+        <TransactionListBalanceCellValue binding={balance} type="financial">
+          {renderBalance}
+        </TransactionListBalanceCellValue>
+      )}
     </View>
   );
 }

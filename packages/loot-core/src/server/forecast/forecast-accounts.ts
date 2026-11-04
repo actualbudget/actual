@@ -16,6 +16,8 @@ export type AccountWithComputedBalance = {
   closed: number;
   offbudget: number;
   balance_current: number;
+  // null when the account follows the budget's default currency
+  currency?: string | null;
 };
 
 function getAccountName(account: AccountMatchable) {
@@ -150,6 +152,7 @@ export async function getAccounts(
     closed: account.closed,
     offbudget: account.offbudget,
     balance_current: balanceByAccount.get(account.id) ?? 0,
+    currency: account.currency ?? null,
   }));
 }
 

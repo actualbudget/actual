@@ -2,12 +2,15 @@ import type { SyncResponseWithErrors } from '#server/accounts/app';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { getBankSyncError } from '#shared/errors';
+import { setSqlConversionState } from '#shared/fx/sql';
 import type { ServerHandlers } from '#types/server-handlers';
 
 import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
+import { app as fxApp } from './fx/app';
+import { loadSqlConversionState } from './fx/sqlState';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
@@ -219,6 +222,234 @@ describe('API handlers', () => {
       await expect(handlers['api/account-groups-get']()).resolves.toEqual([]);
       const after = await handlers['api/accounts-get']();
       expect(after[0].account_group_id).toBeNull();
+    });
+  });
+
+  describe('api/exchange-rates', () => {
+    beforeEach(global.emptyDatabase());
+
+    beforeEach(async () => {
+      await prefs.loadPrefs();
+
+      handlers['exchange-rates-get'] = fxApp.handlers['exchange-rates-get'];
+      handlers['exchange-rate-create'] = fxApp.handlers['exchange-rate-create'];
+      handlers['exchange-rate-update'] = fxApp.handlers['exchange-rate-update'];
+      handlers['exchange-rate-delete'] = fxApp.handlers['exchange-rate-delete'];
+      handlers['accounts-get'] = accountsApp.handlers['accounts-get'];
+      handlers['account-create'] = accountsApp.handlers['account-create'];
+    });
+
+    afterEach(() => {
+      setSqlConversionState({
+        enabled: false,
+        defaultCurrencyCode: '',
+        rateMode: 'latest',
+        rates: [],
+      });
+    });
+
+    async function setMultiCurrency(defaultCurrencyCode: string) {
+      await db.update('preferences', { id: 'flags.currency', value: 'true' });
+      await db.update('preferences', {
+        id: 'flags.multiCurrency',
+        value: 'true',
+      });
+      await db.update('preferences', {
+        id: 'defaultCurrencyCode',
+        value: defaultCurrencyCode,
+      });
+      loadSqlConversionState();
+    }
+
+    const usdToCad = {
+      from_currency: 'USD',
+      to_currency: 'CAD',
+      rate: 1.38,
+      date: '2026-10-01',
+    };
+
+    const notEnabled = {
+      type: 'APIError',
+      message: expect.stringMatching(/^Multiple currencies are not enabled/),
+    };
+
+    describe('while multiple currencies are on', () => {
+      beforeEach(() => setMultiCurrency('CAD'));
+
+      it('round-trips exchange rates', async () => {
+        const id = await handlers['api/exchange-rate-create']({
+          exchangeRate: usdToCad,
+        });
+        await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([
+          { id, ...usdToCad, source: 'manual' },
+        ]);
+
+        await handlers['api/exchange-rate-update']({
+          id,
+          fields: { rate: 1.4 },
+        });
+        const updated = await handlers['api/exchange-rates-get']();
+        expect(updated[0].rate).toBe(1.4);
+
+        await handlers['api/exchange-rate-delete']({ id });
+        await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([]);
+      });
+
+      it('validates exchange rates', async () => {
+        await expect(
+          // @ts-expect-error - a script can leave the rate out
+          handlers['api/exchange-rate-create']({}),
+        ).rejects.toMatchObject({
+          type: 'APIError',
+          message: 'exchangeRate is required',
+        });
+        await expect(
+          handlers['api/exchange-rate-create']({
+            exchangeRate: { ...usdToCad, rate: 1e15 },
+          }),
+        ).rejects.toThrow(/positive rate between/);
+
+        const id = await handlers['api/exchange-rate-create']({
+          exchangeRate: usdToCad,
+        });
+        await expect(
+          // @ts-expect-error - a script can leave the fields out
+          handlers['api/exchange-rate-update']({ id }),
+        ).rejects.toMatchObject({
+          type: 'APIError',
+          message: 'fields is required',
+        });
+      });
+
+      it('exposes and updates the account currency', async () => {
+        const id = await handlers['api/account-create']({
+          account: { name: 'US Savings', currency: 'USD' },
+          initialBalance: 12345,
+        });
+        let accounts = await handlers['api/accounts-get']();
+        expect(accounts[0]).toMatchObject({ id, currency: 'USD' });
+
+        const [starting] = await db.getTransactions(id);
+        expect(starting.amount).toBe(12345);
+
+        await handlers['api/account-update']({
+          id,
+          fields: { currency: null },
+        });
+        accounts = await handlers['api/accounts-get']();
+        expect(accounts[0].currency).toBeNull();
+      });
+
+      it('works with a default currency without decimals', async () => {
+        await setMultiCurrency('JPY');
+
+        await expect(
+          handlers['api/exchange-rate-create']({ exchangeRate: usdToCad }),
+        ).resolves.toEqual(expect.any(String));
+      });
+
+      it('accepts currencies without decimals, with amounts at the same scale', async () => {
+        const yenId = await handlers['api/account-create']({
+          account: { name: 'Yen wallet', currency: 'JPY' },
+          // ¥1,500
+          initialBalance: 150000,
+        });
+        const usdId = await handlers['api/account-create']({
+          account: { name: 'US Savings', currency: 'USD' },
+          initialBalance: 12345,
+        });
+        await handlers['api/account-update']({
+          id: usdId,
+          fields: { currency: 'KRW' },
+        });
+
+        await expect(handlers['api/accounts-get']()).resolves.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: yenId, currency: 'JPY' }),
+            expect.objectContaining({ id: usdId, currency: 'KRW' }),
+          ]),
+        );
+        const [start] = await db.getTransactions(yenId);
+        expect(start.amount).toBe(150000);
+      });
+
+      it('refuses setting the currency of an account that does not exist', async () => {
+        await expect(
+          handlers['api/account-update']({
+            id: 'missing',
+            fields: { currency: 'USD' },
+          }),
+        ).rejects.toThrow(/does not exist/);
+        await expect(handlers['api/accounts-get']()).resolves.toEqual([]);
+      });
+    });
+
+    describe('while multiple currencies are off', () => {
+      it('refuses to set account currencies or exchange rates', async () => {
+        await expect(
+          handlers['api/account-create']({
+            account: { name: 'US Savings', currency: 'USD' },
+          }),
+        ).rejects.toMatchObject(notEnabled);
+
+        const id = await handlers['api/account-create']({
+          account: { name: 'Chequing' },
+        });
+        await expect(
+          handlers['api/account-update']({ id, fields: { currency: 'USD' } }),
+        ).rejects.toMatchObject(notEnabled);
+        await expect(handlers['api/accounts-get']()).resolves.toEqual([
+          expect.objectContaining({ id, currency: null }),
+        ]);
+
+        await expect(
+          handlers['api/exchange-rate-create']({ exchangeRate: usdToCad }),
+        ).rejects.toMatchObject(notEnabled);
+        const rateId = await fxApp.handlers['exchange-rate-create'](usdToCad);
+        await expect(
+          handlers['api/exchange-rate-update']({
+            id: rateId,
+            fields: { rate: 1.4 },
+          }),
+        ).rejects.toMatchObject(notEnabled);
+
+        // Rates can still be read and removed
+        await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([
+          { id: rateId, ...usdToCad, source: 'manual' },
+        ]);
+        await handlers['api/exchange-rate-delete']({ id: rateId });
+        await expect(handlers['api/exchange-rates-get']()).resolves.toEqual([]);
+      });
+
+      it('accepts accounts written back as they were read', async () => {
+        const id = await handlers['api/account-create']({
+          account: { name: 'Chequing' },
+        });
+        await db.insertAccount({ id: 'yen', name: 'Yen', currency: 'JPY' });
+
+        for (const account of await handlers['api/accounts-get']()) {
+          await handlers['api/account-update']({
+            id: account.id,
+            fields: { ...account, name: `${account.name} (renamed)` },
+          });
+        }
+
+        const accounts = await handlers['api/accounts-get']();
+        expect(accounts).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id,
+              name: 'Chequing (renamed)',
+              currency: null,
+            }),
+            expect.objectContaining({
+              id: 'yen',
+              name: 'Yen (renamed)',
+              currency: 'JPY',
+            }),
+          ]),
+        );
+      });
     });
   });
 

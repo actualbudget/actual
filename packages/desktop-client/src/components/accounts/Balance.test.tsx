@@ -8,7 +8,7 @@ import { useSelectedItems } from '#hooks/useSelected';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { TestProviders } from '#mocks';
 
-import { SelectedBalance } from './Balance';
+import { getSchedulePreviewsBalance, SelectedBalance } from './Balance';
 
 vi.mock('#hooks/useSelected', () => ({
   useSelectedItems: vi.fn(),
@@ -132,5 +132,46 @@ describe('SelectedBalance – preview (scheduled) transactions', () => {
     );
 
     expect(screen.getByText('-100.00')).toBeInTheDocument();
+  });
+});
+
+describe('getSchedulePreviewsBalance', () => {
+  const schedules = [
+    makeSchedule('cad-bill', -5000, 'cad-account'),
+    makeSchedule('usd-bill', -1000, 'usd-account'),
+  ];
+  const selectedIds = [
+    'preview/cad-bill/2026-03-24',
+    'preview/usd-bill/2026-03-24',
+    'transaction-1',
+  ];
+
+  test('adds up the amounts of the selected previews', () => {
+    expect(getSchedulePreviewsBalance({ selectedIds, schedules })).toEqual({
+      balance: -6000,
+      isExact: true,
+    });
+  });
+
+  test('converts each preview from the currency of its account', () => {
+    const convert = vi.fn((amount: number, accountId: string) =>
+      accountId === 'usd-account'
+        ? { amount: amount * 1.25, isExact: true }
+        : { amount, isExact: true },
+    );
+    expect(
+      getSchedulePreviewsBalance({ selectedIds, schedules, convert }),
+    ).toEqual({ balance: -6250, isExact: true });
+    expect(convert).toHaveBeenCalledWith(-1000, 'usd-account');
+  });
+
+  test('is approximate when a preview has no rate', () => {
+    expect(
+      getSchedulePreviewsBalance({
+        selectedIds,
+        schedules,
+        convert: amount => ({ amount, isExact: false }),
+      }),
+    ).toEqual({ balance: -6000, isExact: false });
   });
 });
