@@ -485,6 +485,57 @@ await updateAccount(allySavingsId, { account_group_id: groupId });
 await updateAccount(marcusSavingsId, { account_group_id: groupId });
 ```
 
+## Exchange Rates
+
+### Exchange Rate
+
+<StructType fields={objects.exchangeRate} />
+
+Exchange rates convert balances of accounts in other currencies into the budget's default currency. Rates are dated: a conversion uses the latest rate on or before the date it needs. A rate only needs to be stored in one direction; the inverse is derived. A rate must be between 0.000000001 and 1,000,000,000.
+
+Creating or updating rates, creating an account with a `currency`, and changing an account's `currency` with `updateAccount` need the `currency` and `multiCurrency` feature flags and a default currency; otherwise they throw. Any currency Actual supports can be given to an account. `updateAccount` leaves an unchanged `currency` alone, and setting a currency on an account that doesn't exist throws. `getExchangeRates` and `deleteExchangeRate` always work.
+
+#### Methods
+
+#### `getExchangeRates`
+
+<Method name="getExchangeRates" args={[]} returns="Promise<ExchangeRate[]>" />
+
+Get all exchange rates, newest first. Returns an array of [`Exchange Rate`](#exchange-rate) objects.
+
+#### `createExchangeRate`
+
+<Method name="createExchangeRate" args={[{ name: 'exchangeRate', type: 'ExchangeRate' }]} returns="Promise<id>" />
+
+Create an exchange rate. If a rate already exists for the same currencies and date, its value is replaced instead and its `id` is returned.
+
+#### `updateExchangeRate`
+
+<Method name="updateExchangeRate" args={[{ name: 'id', type: 'id' }, { name: 'fields', type: 'object' }]} />
+
+Update fields of an exchange rate. `fields` can specify any field described in [`Exchange Rate`](#exchange-rate) except `id` and `source`.
+
+#### `deleteExchangeRate`
+
+<Method name="deleteExchangeRate" args={[{ name: 'id', type: 'id' }]} />
+
+Delete an exchange rate.
+
+#### Examples
+
+```js
+// 1 USD = 1.38 CAD from October 1st
+await createExchangeRate({
+  from_currency: 'USD',
+  to_currency: 'CAD',
+  rate: 1.38,
+  date: '2026-10-01',
+});
+
+// Mark an account as holding US dollars
+await updateAccount(usdAccountId, { currency: 'USD' });
+```
+
 ## Categories
 
 #### Category

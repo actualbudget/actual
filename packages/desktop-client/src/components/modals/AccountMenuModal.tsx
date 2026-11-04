@@ -7,9 +7,12 @@ import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { validateAccountName } from '#components/util/accountValidation';
 import { useAccount } from '#hooks/useAccount';
 import { useAccounts } from '#hooks/useAccounts';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 type AccountMenuModalProps = Extract<
   ModalType,
@@ -35,6 +38,8 @@ export function AccountMenuModal({
   const [hideReconciled, setHideReconciled] = useSyncedPref(
     `hide-reconciled-${accountId}`,
   );
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
+  const dispatch = useDispatch();
 
   if (!account) {
     return null;
@@ -93,6 +98,21 @@ export function AccountMenuModal({
                 setHideReconciled(hideReconciled === 'true' ? 'false' : 'true');
               }}
             />
+            {isMultiCurrencyEnabled && (
+              <MobileSheetRow
+                label={t('Account settings')}
+                onPress={() =>
+                  dispatch(
+                    pushModal({
+                      modal: {
+                        name: 'account-settings',
+                        options: { accountId: account.id },
+                      },
+                    }),
+                  )
+                }
+              />
+            )}
             {account.closed ? (
               <MobileSheetRow
                 label={t('Reopen account')}

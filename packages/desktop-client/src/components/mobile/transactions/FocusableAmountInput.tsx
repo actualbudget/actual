@@ -12,10 +12,13 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { getDecimalPlaces } from '@actual-app/core/shared/currencies';
 import {
   amountToInteger,
   appendDecimals,
   currencyToAmount,
+  getNumberFormat,
+  integerToCurrencyWithDecimal,
   reapplyThousandSeparators,
 } from '@actual-app/core/shared/util';
 import { css } from '@emotion/css';
@@ -23,10 +26,39 @@ import { css } from '@emotion/css';
 import { makeAmountFullStyle } from '#components/budget/util';
 import { useFormat } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
+import { useForeignCurrencyCode } from '#hooks/useMultiCurrency';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+
+// Amounts in another currency than the default one are shown with the decimal
+// places of that currency; all others follow the budget's format, including
+// whether decimals are hidden
+function showAmount(
+  format: ReturnType<typeof useFormat>,
+  amount: number,
+  foreignCurrencyCode?: string,
+) {
+  return foreignCurrencyCode === undefined
+    ? format.forEdit(amountToInteger(amount))
+    : integerToCurrencyWithDecimal(
+        amountToInteger(amount),
+        foreignCurrencyCode,
+      );
+}
+
+// Like `appendDecimals`, typed digits fill the currency's decimal places from
+// the right: typing 1, 5, 0, 0 gives 0.01, 0.15, 1.50 and 15.00
+function appendCurrencyDecimals(text: string, currencyCode: string) {
+  const decimalPlaces = getDecimalPlaces(currencyCode);
+  const minorUnits = Number(text.replace(/\D/g, ''));
+  return getNumberFormat({ decimalPlaces }).formatter.format(
+    minorUnits / 10 ** decimalPlaces,
+  );
+}
 
 type AmountInputProps = {
   value: number;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string;
   focused?: boolean;
   style?: CSSProperties;
   textStyle?: CSSProperties;
@@ -43,6 +75,8 @@ const AmountInput = memo(function AmountInput({
   focused,
   style,
   textStyle,
+  // Only set for a currency other than the default one
+  currencyCode: foreignCurrencyCode,
   ...props
 }: AmountInputProps) {
   const [editing, setEditing] = useState(false);
@@ -119,7 +153,9 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onChangeText = (text: string) => {
-    if (format.currency.decimalPlaces === 0) {
+    if (foreignCurrencyCode !== undefined) {
+      text = appendCurrencyDecimals(text, foreignCurrencyCode);
+    } else if (format.currency.decimalPlaces === 0) {
       // Typed digits are whole units, whatever the hideFraction setting
       text = format.forEdit(amountToInteger(Number(text.replace(/\D/g, ''))));
     } else {
@@ -171,8 +207,8 @@ const AmountInput = memo(function AmountInput({
         data-testid="amount-input-text"
       >
         {editing
-          ? text || format.forEdit(0)
-          : format.forEdit(amountToInteger(value))}
+          ? text || showAmount(format, 0, foreignCurrencyCode)
+          : showAmount(format, value, foreignCurrencyCode)}
       </Text>
     </View>
   );
@@ -200,12 +236,16 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   style,
   focusedStyle,
   buttonProps,
+  currencyCode,
   onFocus,
   onBlur,
   onChangeValue,
   ...props
 }: FocusableAmountInputProps) {
   const format = useFormat();
+  // Hiding decimals is chosen for the default currency, so an account in the
+  // default currency is typed like an account without a currency of its own
+  const foreignCurrencyCode = useForeignCurrencyCode(currencyCode);
   const [isNegative, setIsNegative] = useState(true);
   const [liveValue, setLiveValue] = useState(Math.abs(value));
   const [prevValue, setPrevValue] = useState(value);
@@ -249,6 +289,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
     <View>
       <AmountInput
         {...props}
+        currencyCode={foreignCurrencyCode}
         value={value}
         onFocus={onFocus}
         onBlur={onBlur}
@@ -321,7 +362,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...textStyle,
               }}
             >
-              {format.forEdit(amountToInteger(Math.abs(value)))}
+              {showAmount(format, Math.abs(value), foreignCurrencyCode)}
             </Text>
           </View>
         </Button>

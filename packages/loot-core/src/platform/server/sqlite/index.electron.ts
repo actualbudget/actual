@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDataDir, readFile, removeFile } from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 
+import { fxConvert, fxConvertOnDate } from './fx';
 import { normalise } from './normalise';
 import { regexp } from './regexp';
 import type { SqlParam } from './types';
@@ -135,6 +136,9 @@ export function openDatabase(pathOrBuffer: string | Buffer): SQL.Database {
   db.function('UNICODE_LIKE', { deterministic: true }, unicodeLike);
   db.function('REGEXP', { deterministic: true }, regexp);
   db.function('NORMALISE', { deterministic: true }, normalise);
+  // Not deterministic: the result depends on the budget's exchange rates
+  db.function('FX_CONVERT', fxConvert);
+  db.function('FX_CONVERT_ON_DATE', fxConvertOnDate);
   return db;
 }
 

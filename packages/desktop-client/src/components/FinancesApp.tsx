@@ -27,6 +27,7 @@ import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { ContextMenu } from './ContextMenu';
+import { ExchangeRatesPage } from './currency/ExchangeRatesPage';
 import { EnableBankingCallback } from './EnableBankingCallback';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
@@ -394,6 +395,14 @@ export function FinancesApp() {
                       }
                     />
                     <Route
+                      path="/exchange-rates"
+                      element={
+                        <SidebarMenuRoute id="exchange-rates">
+                          <ExchangeRatesPage />
+                        </SidebarMenuRoute>
+                      }
+                    />
+                    <Route
                       path="/notifications"
                       element={<NotificationsPage />}
                     />
@@ -457,6 +466,14 @@ export function FinancesApp() {
                             >
                               <NarrowAlternate name="BankSync" />
                             </ErrorBoundary>
+                          </SidebarMenuRoute>
+                        }
+                      />
+                      <Route
+                        path="exchange-rates"
+                        element={
+                          <SidebarMenuRoute id="exchange-rates" isInSettings>
+                            <ExchangeRatesPage />
                           </SidebarMenuRoute>
                         }
                       />

@@ -892,7 +892,8 @@ class AccountInternal extends PureComponent<
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'account-settings',
   ) => {
     const accountId = this.props.accountId!;
     const account = this.props.accounts.find(
@@ -936,6 +937,18 @@ class AccountInternal extends PureComponent<
           pushModal({
             modal: {
               name: 'account-groups',
+              options: {
+                accountId,
+              },
+            },
+          }),
+        );
+        break;
+      case 'account-settings':
+        this.props.dispatch(
+          pushModal({
+            modal: {
+              name: 'account-settings',
               options: {
                 accountId,
               },
@@ -1946,6 +1959,7 @@ class AccountInternal extends PureComponent<
                 showEmptyMessage={showEmptyMessage ?? false}
                 balanceQuery={balanceQuery}
                 filteredAmount={filteredAmount}
+                filteredQuery={this.paged?.query ?? null}
                 isFiltered={transactionsFiltered ?? false}
                 isSorted={this.state.sort !== null}
                 reconcileAmount={reconcileAmount}

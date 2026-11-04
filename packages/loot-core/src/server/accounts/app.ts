@@ -12,7 +12,12 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+} from '#server/fx/accountCurrency';
 import { app as mainApp } from '#server/main-app';
+import { accountModel } from '#server/models';
 import { mutator } from '#server/mutators';
 import { del, get, post } from '#server/post';
 import { getPrefs } from '#server/prefs';
@@ -54,6 +59,7 @@ type LinkAccountBaseParams = {
 
 export type AccountHandlers = {
   'account-update': typeof updateAccount;
+  'accounts-set-currency': typeof setAccountsCurrency;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
   'account-properties': typeof getAccountProperties;
@@ -97,15 +103,53 @@ async function updateAccount({
   name,
   last_reconciled,
   account_group_id,
+  currency,
 }: Pick<AccountEntity, 'id'> &
   Partial<
-    Pick<AccountEntity, 'name' | 'last_reconciled' | 'account_group_id'>
+    Pick<
+      AccountEntity,
+      'name' | 'last_reconciled' | 'account_group_id' | 'currency'
+    >
   >) {
+  // Callers often pass the whole account, so a currency it already has is
+  // left as it is
+  const isCurrencyChanged =
+    currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultipleCurrenciesEnabled();
+  }
   await db.update('accounts', {
     id,
     ...(name !== undefined && { name }),
     ...(last_reconciled && { last_reconciled }),
     ...(account_group_id !== undefined && { account_group_id }),
+    ...(isCurrencyChanged && { currency }),
+  });
+  return {};
+}
+
+// Gives several accounts the same currency as one change. Every account is
+// checked first, so either all of them change or none does.
+async function setAccountsCurrency({
+  ids,
+  currency,
+}: {
+  ids: Array<AccountEntity['id']>;
+  currency: AccountEntity['currency'];
+}) {
+  const changedIds: Array<AccountEntity['id']> = [];
+  for (const id of ids) {
+    if (await checkAccountCurrencyChange(id, currency)) {
+      changedIds.push(id);
+    }
+  }
+  if (changedIds.length > 0) {
+    checkMultipleCurrenciesEnabled();
+  }
+  await batchMessages(async () => {
+    for (const id of changedIds) {
+      await db.update('accounts', { id, currency });
+    }
   });
   return {};
 }
@@ -135,6 +179,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         last_sync: dbAccount.last_sync ?? null,
         bank_sync_status: dbAccount.bank_sync_status ?? null,
         account_group_id: dbAccount.account_group_id ?? null,
+        currency: dbAccount.currency ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -559,16 +604,23 @@ async function createAccount({
   balance = 0,
   offBudget = false,
   closed = false,
+  currency = null,
 }: {
   name: string;
   balance?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  currency?: AccountEntity['currency'] | undefined;
 }) {
+  accountModel.validateCurrency(currency);
+  if (currency) {
+    checkMultipleCurrenciesEnabled();
+  }
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    ...(currency && { currency }),
   });
 
   await db.insertPayee({
@@ -1793,6 +1845,7 @@ async function unlinkAccount({ id }: { id: AccountEntity['id'] }) {
 export const app = createApp<AccountHandlers>();
 
 app.method('account-update', mutator(undoable(updateAccount)));
+app.method('accounts-set-currency', mutator(undoable(setAccountsCurrency)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
 app.method('account-properties', getAccountProperties);

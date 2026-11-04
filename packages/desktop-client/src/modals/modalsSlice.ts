@@ -66,6 +66,12 @@ export type Modal =
       };
     }
   | {
+      name: 'account-settings';
+      options: {
+        accountId: AccountEntity['id'];
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;
@@ -585,6 +591,23 @@ export type Modal =
         onConfirm: () => void;
         onCancel?: () => void;
         confirmReason: ConfirmTransactionEditReason;
+      };
+    }
+  | {
+      name: 'transfer-amount';
+      options: {
+        // The side of the transfer being saved, with its signed amount
+        accountId: AccountEntity['id'];
+        transferAccountId: AccountEntity['id'];
+        amount: IntegerAmount;
+        date: string;
+        // The amount on the other side, in that account's currency
+        onConfirm: (amount: IntegerAmount) => void;
+        // Closed without an amount, or gone without being closed (e.g. on
+        // navigation): the other side is converted with the exchange rate
+        // of the day. Also called after onConfirm; only the first of the
+        // two counts
+        onClose: () => void;
       };
     }
   | {

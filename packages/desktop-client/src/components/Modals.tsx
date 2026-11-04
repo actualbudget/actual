@@ -16,6 +16,7 @@ import { AccountAutocompleteModal } from './modals/AccountAutocompleteModal';
 import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
+import { AccountSettingsModal } from './modals/AccountSettingsModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
 import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
@@ -81,6 +82,7 @@ import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
 import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal';
 import { TransactionTableColumnsModal } from './modals/TransactionTableColumnsModal';
+import { TransferAmountModal } from './modals/TransferAmountModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
 import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomationsModal';
@@ -141,6 +143,9 @@ export function Modals() {
         case 'account-groups':
           return <AccountGroupsModal key={key} {...modal.options} />;
 
+        case 'account-settings':
+          return <AccountSettingsModal key={key} {...modal.options} />;
+
         case 'close-account':
           return <CloseAccountModal key={key} {...modal.options} />;
 
@@ -158,6 +163,9 @@ export function Modals() {
 
         case 'confirm-transaction-edit':
           return <ConfirmTransactionEditModal key={key} {...modal.options} />;
+
+        case 'transfer-amount':
+          return <TransferAmountModal key={key} {...modal.options} />;
 
         case 'transaction-table-columns':
           return <TransactionTableColumnsModal key={key} {...modal.options} />;
