@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import * as fs from '#platform/server/fs';
@@ -298,26 +299,26 @@ describe('dashboard metadata validation', () => {
   });
 
   it('normalizes markdown-card metadata without content during dashboard import', async () => {
-    const importPath = '/tmp/test-dashboard-import.json';
-    await fs.writeFile(
-      importPath,
-      JSON.stringify({
-        version: 1,
-        widgets: [
-          {
-            type: 'markdown-card',
-            x: 0,
-            y: 0,
-            width: 4,
-            height: 2,
-            dashboard_page_id: 'dashboard-page-id',
-            meta: {},
-          },
-        ],
-      }),
-    );
-
+    const importPath = `/tmp/test-dashboard-import-${uuidv4()}.json`;
     try {
+      await fs.writeFile(
+        importPath,
+        JSON.stringify({
+          version: 1,
+          widgets: [
+            {
+              type: 'markdown-card',
+              x: 0,
+              y: 0,
+              width: 4,
+              height: 2,
+              dashboard_page_id: 'dashboard-page-id',
+              meta: {},
+            },
+          ],
+        }),
+      );
+
       await db.insertWithSchema('dashboard_pages', {
         id: 'dashboard-page-id',
         name: 'Dashboard',
