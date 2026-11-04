@@ -1,8 +1,31 @@
 // @ts-strict-ignore
+import type * as Platform from '@actual-app/core/shared/platform';
+import { App as CapacitorApp } from '@capacitor/app';
 import { renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useOnVisible } from './useOnVisible';
+
+const { platform, removeListener } = vi.hoisted(() => ({
+  platform: { isNativeMobileApp: false },
+  removeListener: vi.fn(),
+}));
+
+vi.mock('@actual-app/core/shared/platform', async importOriginal => ({
+  ...(await importOriginal<typeof Platform>()),
+  get isNativeMobileApp() {
+    return platform.isNativeMobileApp;
+  },
+}));
+vi.mock('@capacitor/app', () => ({
+  App: { addListener: vi.fn(async () => ({ remove: removeListener })) },
+}));
+
+function dispatchAppStateChange(isActive: boolean) {
+  const [, listener] = vi.mocked(CapacitorApp.addListener).mock
+    .calls[0] as unknown as [string, (state: { isActive: boolean }) => void];
+  listener({ isActive });
+}
 
 function setVisibilityState(value: DocumentVisibilityState) {
   Object.defineProperty(document, 'visibilityState', {
@@ -105,5 +128,35 @@ describe('useOnVisible', () => {
     dispatchVisibilityChange();
 
     expect(callback).toHaveBeenCalledTimes(1);
+  });
+
+  describe('in the native app', () => {
+    beforeEach(() => {
+      platform.isNativeMobileApp = true;
+    });
+
+    afterEach(() => {
+      platform.isNativeMobileApp = false;
+    });
+
+    it('invokes callback when the app becomes active', () => {
+      const callback = vi.fn();
+      renderHook(() => useOnVisible(callback));
+
+      dispatchAppStateChange(false);
+      expect(callback).not.toHaveBeenCalled();
+
+      dispatchAppStateChange(true);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('removes the app state listener on unmount', async () => {
+      const { unmount } = renderHook(() => useOnVisible(vi.fn()));
+
+      unmount();
+      await Promise.resolve();
+
+      expect(removeListener).toHaveBeenCalledTimes(1);
+    });
   });
 });
