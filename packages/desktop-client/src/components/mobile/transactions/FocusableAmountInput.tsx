@@ -167,7 +167,8 @@ const AmountInput = memo(function AmountInput({
         // The Text below draws the amount; the input only handles
         // selection, caret and editing.
         color: 'transparent',
-        caretColor: theme.pageText,
+        // An empty input would put the caret mid-box next to the Text's "0.00"
+        caretColor: inputValue === '' ? 'transparent' : theme.pageText,
       }}
     />
   );
