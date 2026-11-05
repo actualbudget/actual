@@ -94,19 +94,20 @@ function runQuery<T>(
         }
         rows.push(row as T);
       }
-      if (!isReadOnly(statement)) {
-        notifyWrite(database);
-      }
       return rows;
     }
 
     statement.step();
-    notifyWrite(database);
     return { changes: database.changes() };
   } catch (error) {
     logger.log(sql);
     throw error;
   } finally {
+    // Told even after a failure: a statement can leave changes behind
+    // (OR FAIL keeps the rows inserted before the conflict)
+    if (!fetchAll || !isReadOnly(statement)) {
+      notifyWrite(database);
+    }
     // Statements live in the wasm heap until finalized. Cached statements
     // are reset instead, with their bindings cleared for the next call.
     if (typeof source === 'string') {
@@ -119,8 +120,12 @@ function runQuery<T>(
 
 function execQuery(db: Database, sql: string) {
   const database = asWasm(db);
-  database.exec(sql);
-  notifyWrite(database);
+  try {
+    database.exec(sql);
+  } finally {
+    // A script can fail after its earlier statements were committed
+    notifyWrite(database);
+  }
 }
 
 async function openDatabase(

@@ -335,6 +335,66 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(db);
   });
 
+  it('persists what a failing statement left behind', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    const before = await vi.waitFor(async () => {
+      const bytes = await rowBytes(PATH);
+      expect(bytes).not.toBeNull();
+      return bytes as Uint8Array;
+    });
+
+    // OR FAIL keeps the first row when the second conflicts
+    expect(() =>
+      runQuery(
+        db,
+        "INSERT OR FAIL INTO t (id, v) VALUES (1, 'kept'), (1, 'dup')",
+        [],
+        false,
+      ),
+    ).toThrow(/constraint/i);
+    const after = await vi.waitFor(async () => {
+      const bytes = (await rowBytes(PATH)) as Uint8Array;
+      expect(Buffer.from(bytes).equals(Buffer.from(before))).toBe(false);
+      return bytes;
+    });
+    const copy = await openDatabase(after);
+    expect(runQuery(copy, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'kept' },
+    ]);
+    closeDatabase(copy);
+    closeDatabase(db);
+  });
+
+  it('persists what a failing script left behind', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    const before = await vi.waitFor(async () => {
+      const bytes = await rowBytes(PATH);
+      expect(bytes).not.toBeNull();
+      return bytes as Uint8Array;
+    });
+
+    // The first statement is committed before the second fails
+    expect(() =>
+      execQuery(
+        db,
+        "INSERT INTO t (v) VALUES ('kept'); INSERT INTO nope VALUES (1);",
+      ),
+    ).toThrow(/no such table/i);
+    const after = await vi.waitFor(async () => {
+      const bytes = (await rowBytes(PATH)) as Uint8Array;
+      expect(Buffer.from(bytes).equals(Buffer.from(before))).toBe(false);
+      return bytes;
+    });
+    const copy = await openDatabase(after);
+    expect(runQuery(copy, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'kept' },
+    ]);
+    closeDatabase(copy);
+    closeDatabase(db);
+  });
+
   it('refuses a database held in OPFS rather than shadow it', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
     await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
