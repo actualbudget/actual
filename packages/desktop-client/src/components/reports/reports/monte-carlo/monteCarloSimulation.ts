@@ -2279,11 +2279,13 @@ export function runMonteCarloSimulation(
         // zero-spend phase takes nothing. Like the phase amounts it's in
         // today's money, so it rises with this replay's inflation path.
         // It is a floor on spending, so income counts towards it and the
-        // pots only top the year up to it
+        // pots only top the year up to it. It never lifts spending above
+        // the plan itself: a floor sized for full retirement must not
+        // inflate a cheaper phase, such as part-time years before it
         const minimumThisYear = minimumSpending * cumulativeInflation;
-        const minimumFromPots = Math.max(
-          0,
-          minimumThisYear - incomeTowardsSpending,
+        const minimumFromPots = Math.min(
+          planned,
+          Math.max(0, minimumThisYear - incomeTowardsSpending),
         );
         if (
           rule.type !== 'none' &&
@@ -2707,7 +2709,10 @@ export function runMonteCarloSimulation(
         ) {
           tailAdjustedPlan = Math.max(
             tailAdjustedPlan,
-            minimumSpending * cumulativeInflation - tailIncomeTowardsSpending,
+            Math.min(
+              tailPotFundedPlan,
+              minimumSpending * cumulativeInflation - tailIncomeTowardsSpending,
+            ),
           );
         }
         runDetail.push({

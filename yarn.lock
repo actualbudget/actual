@@ -120,6 +120,7 @@ __metadata:
     "@jlongster/sql.js": "npm:^1.6.7"
     "@rschedule/core": "npm:^1.5.0"
     "@rschedule/standard-date-adapter": "npm:^1.5.0"
+    "@sqlite.org/sqlite-wasm": "npm:3.54.1-build1"
     "@types/better-sqlite3": "npm:^9.6.0"
     "@types/jlongster__sql.js": "npm:@types/sql.js@latest"
     "@types/node": "npm:^22.20.5"
@@ -239,6 +240,7 @@ __metadata:
     "@actual-app/components": "workspace:*"
     "@actual-app/core": "workspace:*"
     "@babel/core": "npm:^8.0.7"
+    "@capacitor/app": "npm:^8.1.2"
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/haptics": "npm:^8.0.2"
     "@codemirror/autocomplete": "npm:^6.20.3"
@@ -2091,6 +2093,15 @@ __metadata:
   peerDependencies:
     "@capacitor/core": ^8.4.0
   checksum: 10/931b319de1f33e9d0d9e8dbd8b594059567d8348ca33f3b3fb225165fa8f63e7ed8a346b4f6f5e5f91ccf8d6e633cc82cda271f3fb29796d0f3e470b59d61cc6
+  languageName: node
+  linkType: hard
+
+"@capacitor/app@npm:^8.1.2":
+  version: 8.1.2
+  resolution: "@capacitor/app@npm:8.1.2"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/5f967fba3e74939f95b07e0fa66950a8aec79678825f5ca1327d3c98c23df416c610ae588e7ce7422d65a1ca4a56b8e7020a68cef695403cf8c1dfed14282490
   languageName: node
   linkType: hard
 
@@ -7785,6 +7796,13 @@ __metadata:
     color: "npm:^5.0.2"
     text-hex: "npm:1.0.x"
   checksum: 10/fc3285e5cb9a458d255aa678d9453174ca40689a4c692f1617907996ab8eb78839542439604ced484c4f674a5297f7ba8b0e63fcfe901174f43c3d9c3c881b52
+  languageName: node
+  linkType: hard
+
+"@sqlite.org/sqlite-wasm@npm:3.54.1-build1":
+  version: 3.54.1-build1
+  resolution: "@sqlite.org/sqlite-wasm@npm:3.54.1-build1"
+  checksum: 10/f7260015e3ecb56f5213eea2280d9adb81802d92578db24b9fc6cc55726a213e65a39ff02c7993aa94685710761e9286645f4b2511cd064719638297aaf6e0f7
   languageName: node
   linkType: hard
 
@@ -18010,15 +18028,15 @@ __metadata:
   linkType: hard
 
 "joi@npm:^17.9.2":
-  version: 17.13.8
-  resolution: "joi@npm:17.13.8"
+  version: 17.13.9
+  resolution: "joi@npm:17.13.9"
   dependencies:
     "@hapi/hoek": "npm:^9.3.0"
     "@hapi/topo": "npm:^5.1.0"
     "@sideway/address": "npm:^4.1.5"
     "@sideway/formula": "npm:^3.0.1"
     "@sideway/pinpoint": "npm:^2.0.0"
-  checksum: 10/7d8ccb06cee958516748519cb46430b1bf5b732f54428a5daf8f8630290c928be1abb7d3c3c2506d68ba76d1c1abe480e087255c34b839aae47b2ee2c76f587d
+  checksum: 10/879e9664049463d8fd9387be3813c5c8a29987de82b045688b1b3a69473cb3895200e4fe76d9b329f3522228722f94c5e9117fa45094e3d7443b0a501b161764
   languageName: node
   linkType: hard
 
@@ -20251,6 +20269,7 @@ __metadata:
   dependencies:
     "@actual-app/web": "workspace:*"
     "@capacitor/android": "npm:^8.4.3"
+    "@capacitor/app": "npm:^8.1.2"
     "@capacitor/cli": "npm:^8.4.2"
     "@capacitor/core": "npm:^8.4.2"
     "@capacitor/haptics": "npm:^8.0.2"
