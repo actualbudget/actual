@@ -80,4 +80,18 @@ describe('FocusableAmountInput', () => {
     expect(input.value).toBe('12,934');
     expect(input.selectionStart).toBe(4);
   });
+
+  it('leaves a paste over part of the amount to the browser', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    render(<FocusableAmountInput value={1234} focused />);
+
+    const input = screen.getByTestId<HTMLInputElement>('amount-input');
+    const clipboardData = { getData: () => '5' };
+
+    input.setSelectionRange(1, 3);
+    expect(fireEvent.paste(input, { clipboardData })).toBe(true);
+
+    input.setSelectionRange(0, input.value.length);
+    expect(fireEvent.paste(input, { clipboardData })).toBe(false);
+  });
 });

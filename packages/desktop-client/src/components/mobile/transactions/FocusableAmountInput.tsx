@@ -173,7 +173,15 @@ const AmountInput = memo(function AmountInput({
   };
 
   const onPaste: HTMLProps<HTMLInputElement>['onPaste'] = e => {
-    // A pasted number is an amount, not keypad digits ("12" is 12, not 0.12)
+    // Only a full replacement is an amount ("12" is 12, not 0.12); with a
+    // partial selection the browser inserts the text and onChange reformats.
+    const input = e.currentTarget;
+    if (
+      input.selectionStart !== 0 ||
+      input.selectionEnd !== input.value.length
+    ) {
+      return;
+    }
     e.preventDefault();
     const amount = currencyToAmount(e.clipboardData.getData('text'));
     if (amount === null) return;
