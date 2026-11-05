@@ -143,6 +143,15 @@ function fakeSqlite3(
   return api as unknown as Sqlite3Static & { execLog: string[] };
 }
 
+// A previous-release tab's absurd-sql connection, which never closes
+function holdStubbornConnection(name: string): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name, 2);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 function neverLock() {
   const error = new Error('timed out');
   error.name = 'AbortError';
@@ -567,6 +576,87 @@ describe('OPFS pool store', () => {
 
     expect(await store.readFile(PATH)).toEqual(new Uint8Array([1]));
     expect(sqlite3.execLog).toContain('PRAGMA schema_version');
+  });
+
+  it('prefers an absurd-sql copy over a pooled file nothing claims', async () => {
+    const bytes = await budgetBytes('kept editing in legacy');
+    await seedLegacyDatabase(legacyDatabaseName(PATH), bytes);
+    const pool = fakePool(new Map([['/db.sqlite', new Uint8Array([1])]]));
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const db = await store.open(PATH);
+    const pooled = pool.files.get('/db.sqlite');
+    expect(pooled && Buffer.from(pooled).equals(Buffer.from(bytes))).toBe(true);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    store.close(PATH, db);
+  });
+
+  it('refuses the cutover when a tab reopens the legacy copy during the move', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('kept'));
+    const pool = fakePool();
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    let other: IDBDatabase | undefined;
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      other = await holdStubbornConnection(name);
+      return realImport(fileName, data);
+    });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    try {
+      await expect(store.open(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      other?.close();
+    }
+    // Nothing of the move is left, and the copy with its edits is intact
+    expect(pool.files.size).toBe(0);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('keeps an open waiting while a write replaces the file', async () => {
+    const pool = fakePool();
+    const sqlite3 = fakeSqlite3(pool);
+    const store = createOpfsStore({
+      sqlite3: () => sqlite3,
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    let finishImport = () => undefined as void;
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      await new Promise<void>(resolve => {
+        finishImport = resolve;
+      });
+      return realImport(fileName, data);
+    });
+
+    const writing = store.writeFile(PATH, await budgetBytes('written'));
+    const opening = store.open(PATH);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    // No connection yet: the open waits for the import
+    const hasOpened = () =>
+      sqlite3.execLog.some(sql => sql.includes('locking_mode'));
+    expect(hasOpened()).toBe(false);
+    finishImport();
+    await writing;
+    const db = await opening;
+    expect(hasOpened()).toBe(true);
+    store.close(PATH, db);
   });
 
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {

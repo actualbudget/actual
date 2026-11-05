@@ -8,6 +8,16 @@ import * as idb from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
 import { _getModule } from '#platform/server/sqlite';
 import type { SqlJsModule } from '#platform/server/sqlite';
+import {
+  BudgetInUseError,
+  StorageUnavailableError,
+} from '#platform/server/sqlite/storage/errors';
+import { getSqliteFileRow } from '#platform/server/sqlite/storage/files-store';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from '#platform/server/sqlite/storage/locks';
 
 import { _setDocumentDir as _setDocumentDirShared } from './shared';
 import { pathToId } from './web-paths';
@@ -380,7 +390,7 @@ export const size = async function (filepath) {
   return attrs.size;
 };
 
-export const copyFile = async function (
+const _copyFile = async function (
   frompath: string,
   topath: string,
 ): Promise<boolean> {
@@ -423,12 +433,66 @@ export async function readFile(
   return _readFile(filepath, { encoding });
 }
 
+// A budget another worker moved to the new storage is out of bounds for
+// this engine: its row marks the move
+async function assertNotMoved(filepath: string) {
+  if ((await getSqliteFileRow(filepath))?.storage) {
+    throw new StorageUnavailableError(
+      `${filepath} has moved to the new storage; reload to use it`,
+    );
+  }
+}
+
+// Changes to a database happen under the shared budget lock, so a move
+// cannot land midway, and only while the budget is still this engine's
+async function guardDatabase<T>(
+  filepath: string,
+  operation: () => Promise<T>,
+): Promise<T> {
+  if (!filepath.endsWith('.sqlite')) {
+    return operation();
+  }
+  const releaseLock = await acquireWebLock(
+    budgetLockName(filepath),
+    BUDGET_LOCK_TIMEOUT_MS,
+    'shared',
+  ).catch(() => {
+    throw new BudgetInUseError(filepath);
+  });
+  try {
+    await assertNotMoved(filepath);
+    return await operation();
+  } finally {
+    releaseLock();
+  }
+}
+
+async function listDatabases(dirpath: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (const file of await listDir(dirpath)) {
+    const fullpath = join(dirpath, file);
+    if (FS.isDir(FS.stat(fullpath, true).mode)) {
+      paths.push(...(await listDatabases(fullpath)));
+    } else if (fullpath.endsWith('.sqlite')) {
+      paths.push(fullpath);
+    }
+  }
+  return paths;
+}
+
+export const copyFile = async function (
+  frompath: string,
+  topath: string,
+): Promise<boolean> {
+  return guardDatabase(topath, () => _copyFile(frompath, topath));
+};
+
 export const writeFile = async function (filepath: string, contents) {
-  return _writeFile(filepath, contents);
+  return guardDatabase(filepath, () => _writeFile(filepath, contents));
 };
 
 export const removeFile = async function (filepath: string) {
-  return _removeFile(filepath);
+  return guardDatabase(filepath, () => _removeFile(filepath));
 };
 
 export const removeDir = async function (filepath) {
@@ -437,6 +501,11 @@ export const removeDir = async function (filepath) {
 
 export const removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
+    // Refused as a whole when any database in it has moved, never half
+    // deleted
+    for (const path of await listDatabases(dirpath)) {
+      await assertNotMoved(path);
+    }
     for (const file of await listDir(dirpath)) {
       const fullpath = join(dirpath, file);
       // `true` here means to not follow symlinks

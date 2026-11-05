@@ -257,16 +257,19 @@ export function createOpfsStore({
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
       verifyImported(pool, fileName);
-      // Fails only on the marker write, and then leaves nothing of the
+      // A refused cutover or a failed marker write leaves nothing of the
       // move behind, so the next open redoes it
       await completeMigration(
         { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
+        row?.rev ?? 0,
         onMigrationProgress,
       );
     } catch (error) {
       discardImport(pool, fileName);
       onMigrationProgress?.('failed');
-      throw new StorageMigrationError(path, error);
+      throw error instanceof BudgetInUseError
+        ? error
+        : new StorageMigrationError(path, error);
     }
     return true;
   }
@@ -313,7 +316,10 @@ export function createOpfsStore({
   // row is what the app last used, so it wins over a pooled file an
   // interrupted promotion left and over an absurd-sql copy its own
   // migration could not delete; a row that says OPFS with no pooled file
-  // means the pool lost it, which is never stood in for.
+  // means the pool lost it, which is never stood in for. With no row to
+  // say, an absurd-sql copy wins over a pooled file: a crash between an
+  // import and its marker leaves such a file, and the copy is what the
+  // legacy engine kept editing since.
   async function importExisting(
     pool: Pool,
     path: string,
@@ -332,7 +338,34 @@ export function createOpfsStore({
     if (await promoteFallbackRow(pool, path, fileName, row)) {
       return true;
     }
-    return pooled || migrateLegacy(pool, path, fileName, row);
+    return (await migrateLegacy(pool, path, fileName, row)) || pooled;
+  }
+
+  // A write replacing a file is kept apart from opens and reads of that
+  // path: a connection must never be created on a file mid-import
+  const replacing = new Map<string, Promise<void>>();
+
+  async function replaceFile(path: string, bytes: Uint8Array): Promise<void> {
+    const { dirId, fileName } = splitSqlitePath(path);
+    await opening.get(path)?.catch(() => undefined);
+    const pool = await acquire(dirId, path);
+    try {
+      // Under the pool, where no open can land in between
+      if (pool.open.has(fileName)) {
+        throw new Error(`cannot overwrite an open database: ${path}`);
+      }
+      unlinkJournal(pool, fileName);
+      await pool.util.importDb(fileName, bytes);
+      const row = await getSqliteFileRow(path);
+      await putSqliteFileRow({
+        filepath: path,
+        contents: '',
+        storage: 'opfs',
+        rev: row?.rev,
+      });
+    } finally {
+      release(pool);
+    }
   }
 
   // Concurrent opens of one file share the whole operation, so a budget is
@@ -355,6 +388,7 @@ export function createOpfsStore({
 
   async function openOnce(path: string): Promise<WasmDatabase> {
     const { dirId, fileName } = splitSqlitePath(path);
+    await replacing.get(path)?.catch(() => undefined);
     const pool = await acquire(dirId, path);
     let db: WasmDatabase | undefined;
     try {
@@ -429,6 +463,7 @@ export function createOpfsStore({
       if (open) {
         return exportBytes(open);
       }
+      await replacing.get(path)?.catch(() => undefined);
       const pool = await acquire(dirId, path);
       try {
         if (!(await importExisting(pool, path, fileName))) {
@@ -452,25 +487,14 @@ export function createOpfsStore({
       }
     },
 
-    async writeFile(path, bytes) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      if (opening.has(path) || pools.get(dirId)?.open.has(fileName)) {
-        throw new Error(`cannot overwrite an open database: ${path}`);
-      }
-      const pool = await acquire(dirId, path);
-      try {
-        unlinkJournal(pool, fileName);
-        await pool.util.importDb(fileName, bytes);
-        const row = await getSqliteFileRow(path);
-        await putSqliteFileRow({
-          filepath: path,
-          contents: '',
-          storage: 'opfs',
-          rev: row?.rev,
-        });
-      } finally {
-        release(pool);
-      }
+    writeFile(path, bytes) {
+      const promise = replaceFile(path, bytes).finally(() => {
+        if (replacing.get(path) === promise) {
+          replacing.delete(path);
+        }
+      });
+      replacing.set(path, promise);
+      return promise;
     },
 
     removeFile(path) {
@@ -482,8 +506,10 @@ export function createOpfsStore({
     async removeFiles(paths) {
       for (const path of paths) {
         // An open in flight ends with the database registered, so it is
-        // closed here rather than unlinked under it
+        // closed here rather than unlinked under it; a write in flight
+        // ends first too
         await opening.get(path)?.catch(() => undefined);
+        await replacing.get(path)?.catch(() => undefined);
       }
       const held = new Map<string, Pool>();
       try {

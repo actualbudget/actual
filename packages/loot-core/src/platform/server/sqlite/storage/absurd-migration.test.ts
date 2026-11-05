@@ -10,11 +10,13 @@ import {
 } from '#platform/server/sqlite';
 
 import {
+  completeMigration,
   deleteLegacyDatabase,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
 import { BudgetInUseError, StorageMigrationError } from './errors';
+import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { legacyDatabaseName } from './paths';
 import {
   initWasmEngine,
@@ -198,6 +200,35 @@ describe('absurd-sql migration helpers', () => {
     } finally {
       other.close();
     }
+  });
+
+  it('refuses the cutover when a connection to the copy appeared meanwhile', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const other = await holdLegacyConnection(NAME, { stubborn: true });
+    try {
+      await expect(
+        completeMigration({ filepath: PATH, contents: '', storage: 'opfs' }, 0),
+      ).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      other.close();
+    }
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).toContain(NAME);
+  });
+
+  it('refuses the cutover when another worker moved the budget first', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: new Uint8Array([1]),
+      storage: 'memory-idb',
+      rev: 1,
+    });
+    await expect(
+      completeMigration({ filepath: PATH, contents: '', storage: 'opfs' }, 0),
+    ).rejects.toBeInstanceOf(BudgetInUseError);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('memory-idb');
+    expect(await listIndexedDbNames()).toContain(NAME);
   });
 
   it('fails without touching the legacy data when the header is not sqlite', async () => {

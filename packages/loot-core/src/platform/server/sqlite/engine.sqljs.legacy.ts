@@ -180,15 +180,14 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
         ).catch(() => {
           throw new BudgetInUseError(path);
         });
-        // Another worker may have moved the budget to the new storage while
-        // this one waited: the copy here is then gone or stale
-        if ((await getSqliteFileRow(path))?.storage) {
-          releaseLock();
-          throw new StorageUnavailableError(
-            `${path} has moved to the new storage; reload to open it`,
-          );
-        }
         try {
+          // Another worker may have moved the budget to the new storage
+          // while this one waited: the copy here is then gone or stale
+          if ((await getSqliteFileRow(path))?.storage) {
+            throw new StorageUnavailableError(
+              `${path} has moved to the new storage; reload to open it`,
+            );
+          }
           if (typeof SharedArrayBuffer === 'undefined') {
             const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
             await stream.node.contents.readIfFallback();

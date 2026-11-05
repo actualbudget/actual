@@ -166,6 +166,8 @@ describe('IndexedDB in-memory store', () => {
     await vi.waitFor(() =>
       expect(sendMock).toHaveBeenCalledWith('fallback-write-error'),
     );
+    // A refused snapshot is not durable either
+    await expect(getSqliteStore().flush()).rejects.toThrow(/not written/);
     const persisted = await openDatabase((await rowBytes(PATH)) as Uint8Array);
     expect(
       runQuery(persisted, 'SELECT count(*) AS n FROM t', [], true),
@@ -200,8 +202,11 @@ describe('IndexedDB in-memory store', () => {
 
   it('keeps a snapshot whose write on close failed for the next open', async () => {
     await strandSnapshot('rescued');
-    // Nothing landed in the row
+    // Nothing landed in the row, and the failure was reported
     expect(await rowBytes(PATH)).toBeNull();
+    expect(sendMock).toHaveBeenCalledWith('storage-write-failed', {
+      path: PATH,
+    });
 
     // The next open continues from the snapshot and writes it
     const reopened = await openDatabase(PATH);
@@ -534,6 +539,71 @@ describe('IndexedDB in-memory store', () => {
     ]);
     closeDatabase(copy);
     closeDatabase(db);
+  });
+
+  it('drops a stranded snapshot the row has moved past', async () => {
+    await strandSnapshot('stranded');
+    // Another worker wrote the file meanwhile
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from elsewhere')");
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: await exportDatabase(source),
+      storage: 'memory-idb',
+      rev: 9,
+    });
+    closeDatabase(source);
+
+    const reopened = await openDatabase(PATH);
+    expect(runQuery(reopened, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(reopened);
+  });
+
+  it('refuses a new file another worker created meanwhile', async () => {
+    const lookup = vi
+      .spyOn(absurdMigration, 'readLegacyDatabaseBytes')
+      .mockImplementation(async () => {
+        // Lands between this worker's row read and its marker write
+        await putSqliteFileRow({
+          filepath: PATH,
+          contents: new Uint8Array([1]),
+          storage: 'memory-idb',
+          rev: 1,
+        });
+        return null;
+      });
+    try {
+      await expect(openDatabase(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      lookup.mockRestore();
+    }
+    expect((await getSqliteFileRow(PATH))?.rev).toBe(1);
+  });
+
+  it('reports a write that failed for good', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValue(new Error('quota exceeded'));
+    try {
+      runQuery(db, "INSERT INTO t (v) VALUES ('lost')");
+      // Not on the first failure, which gets a retry, but on the second
+      await vi.waitFor(() =>
+        expect(sendMock).toHaveBeenCalledWith('storage-write-failed', {
+          path: PATH,
+        }),
+      );
+      expect(setSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      setSpy.mockRestore();
+    }
+    closeDatabase(db);
+    await sleep(10);
   });
 
   it('refuses a database held in OPFS rather than shadow or take it over', async () => {

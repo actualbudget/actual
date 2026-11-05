@@ -142,12 +142,18 @@ export function createMemoryIdbStore({
         logger.error('sqlite storage: failed to persist', entry.path, error);
         entry.dirty = true;
         entry.failed = true;
+        if (byDb.get(entry.db) !== entry) {
+          // Closed meanwhile: the close's own write reports for it
+          return;
+        }
         // One retry after the usual delay, then wait for the next write: a
         // steady retry would only repeat a quota failure, alert and all
-        if (!entry.retried && byDb.get(entry.db) === entry) {
+        if (!entry.retried) {
           entry.retried = true;
           entry.firstDirtyAt = Date.now();
           schedule(entry);
+        } else {
+          connection.send('storage-write-failed', { path: entry.path });
         }
       })
       .finally(() => {
@@ -204,6 +210,7 @@ export function createMemoryIdbStore({
     }
     await completeMigration(
       { filepath: path, contents: bytes, storage: 'memory-idb', rev: rev + 1 },
+      rev,
       onMigrationProgress,
     );
     return { bytes, rev: rev + 1 };
@@ -241,9 +248,16 @@ export function createMemoryIdbStore({
     await pendingWrites.get(path);
     const releaseLock = await lockBudget(path);
     try {
-      const stranded = unsaved.get(path);
-      const { bytes, rev } =
-        stranded ?? (await loadBytes(path, await getSqliteFileRow(path)));
+      const row = await getSqliteFileRow(path);
+      assertNotInOpfs(path, row);
+      // A snapshot stranded by a failed close is only current while the
+      // row is still at the revision it was taken from
+      let stranded = unsaved.get(path);
+      if (stranded && (row?.rev ?? 0) !== stranded.rev) {
+        unsaved.delete(path);
+        stranded = undefined;
+      }
+      const { bytes, rev } = stranded ?? (await loadBytes(path, row));
       const db = openMemoryDatabase(bytes ?? undefined);
       const entry: Entry = {
         path,
@@ -259,13 +273,21 @@ export function createMemoryIdbStore({
         releaseLock,
       };
       if (bytes == null) {
-        // A brand new file: record it so the filesystem lists it
-        await putSqliteFileRow({
-          filepath: path,
-          contents: new Uint8Array(0),
-          storage: 'memory-idb',
+        // A brand new file: record it so the filesystem lists it, unless
+        // another worker got there first
+        const written = await putSqliteFileRowIfRev(
+          {
+            filepath: path,
+            contents: new Uint8Array(0),
+            storage: 'memory-idb',
+            rev,
+          },
           rev,
-        });
+        );
+        if (!written) {
+          db.close();
+          throw new BudgetInUseError(path);
+        }
       }
       if (bytes == null || stranded) {
         unsaved.delete(path);
@@ -327,6 +349,7 @@ export function createMemoryIdbStore({
           );
           if (bytes) {
             unsaved.set(path, { bytes, rev: entry.rev });
+            connection.send('storage-write-failed', { path });
           }
         })
         .finally(() => entry.releaseLock());
@@ -452,7 +475,7 @@ export function createMemoryIdbStore({
         ...pendingWrites.values(),
       ]);
       const notWritten = [...entries.values()]
-        .filter(entry => entry.failed)
+        .filter(entry => entry.failed || entry.conflicted)
         .map(entry => entry.path)
         .concat([...unsaved.keys()]);
       if (notWritten.length > 0) {

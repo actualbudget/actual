@@ -4,6 +4,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
+import { StorageUnavailableError } from '#platform/server/sqlite/storage/errors';
 
 import {
   _setDocumentDir,
@@ -12,6 +13,8 @@ import {
   join,
   pathToId,
   readFile,
+  removeDirRecursively,
+  removeFile,
   writeFile,
 } from './index';
 
@@ -30,6 +33,39 @@ afterEach(() => {
 });
 
 describe('web filesystem', () => {
+  test('refuses to change a database another worker moved', async () => {
+    const dir = '/documents/Actual/moved';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+    // Another worker moves the budget to the new storage after this one
+    // started on the legacy engine
+    const { store: later } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(later, {
+      filepath: dir + '/db.sqlite',
+      contents: '',
+      storage: 'opfs',
+    });
+
+    await expect(
+      writeFile(dir + '/db.sqlite', new Uint8Array([1])),
+    ).rejects.toBeInstanceOf(StorageUnavailableError);
+    await expect(removeFile(dir + '/db.sqlite')).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    // The directory is refused as a whole, nothing half deleted
+    await expect(removeDirRecursively(dir)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect(await exists(dir + '/metadata.json')).toBe(true);
+    const { store: after } = idb.getStore(await idb.openDatabase(), 'files');
+    expect((await idb.get(after, dir + '/db.sqlite'))?.storage).toBe('opfs');
+    // The connection is shared across tests: leave no marker behind
+    await idb.del(after, dir + '/db.sqlite');
+  });
+
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();

@@ -3,7 +3,7 @@ import { logger } from '#platform/server/log';
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 
 import { BudgetInUseError, StorageMigrationError } from './errors';
-import { putSqliteFileRow } from './files-store';
+import { putSqliteFileRowIfRev } from './files-store';
 import { legacyDatabaseName } from './paths';
 import type { MigrationProgress } from './types';
 
@@ -261,17 +261,25 @@ export function verifyMigratedDatabase(db: WasmDatabase) {
 }
 
 // Records that the file now lives in the new storage, then drops the
-// absurd-sql copy. The marker goes first so a crash in between can never
-// make the budget look empty on the next start. Only the marker write can
-// throw: once it is in the move is complete, and a copy that cannot be
-// deleted is just logged.
+// absurd-sql copy. The cutover is refused, as a budget in use, when a
+// connection to the copy appeared since the snapshot or another worker
+// moved the budget first, so edits made meanwhile are never discarded.
+// The marker goes before the copy is deleted so a crash in between can
+// never make the budget look empty on the next start, and nothing after
+// the marker throws: once it is in the move is complete, and a copy that
+// cannot be deleted is just logged.
 export async function completeMigration(
   marker: Data,
+  expectedRev: number,
   onProgress?: MigrationProgress,
 ) {
   onProgress?.('cleanup');
-  await putSqliteFileRow(marker);
-  if (!(await deleteLegacyDatabase(legacyDatabaseName(marker.filepath)))) {
+  const name = legacyDatabaseName(marker.filepath);
+  await evictLegacyConnections(name, marker.filepath);
+  if (!(await putSqliteFileRowIfRev(marker, expectedRev))) {
+    throw new BudgetInUseError(marker.filepath);
+  }
+  if (!(await deleteLegacyDatabase(name))) {
     logger.warn(
       'sqlite storage: the absurd-sql copy could not be deleted',
       marker.filepath,

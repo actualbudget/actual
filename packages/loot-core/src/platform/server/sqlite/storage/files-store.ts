@@ -38,21 +38,22 @@ export async function putSqliteFileRowIfRev(
   expectedRev: number,
 ): Promise<boolean> {
   const { trans, store } = idb.getStore(await idb.openDatabase(), 'files');
-  const done = committed(trans);
-  const written = await new Promise<boolean>((resolve, reject) => {
-    const request = store.get(row.filepath);
-    request.onsuccess = () => {
-      const current = request.result as Data | undefined;
-      if ((current?.rev ?? 0) !== expectedRev) {
-        resolve(false);
-        return;
-      }
-      // Issued inside the callback, so it joins the checking transaction
-      idb.set(store, row).then(() => resolve(true), reject);
-    };
-    request.onerror = () => reject(request.error);
-  });
-  await done;
+  const [written] = await Promise.all([
+    new Promise<boolean>((resolve, reject) => {
+      const request = store.get(row.filepath);
+      request.onsuccess = () => {
+        const current = request.result as Data | undefined;
+        if ((current?.rev ?? 0) !== expectedRev) {
+          resolve(false);
+          return;
+        }
+        // Issued inside the callback, so it joins the checking transaction
+        idb.set(store, row).then(() => resolve(true), reject);
+      };
+      request.onerror = () => reject(request.error);
+    }),
+    committed(trans),
+  ]);
   return written;
 }
 
