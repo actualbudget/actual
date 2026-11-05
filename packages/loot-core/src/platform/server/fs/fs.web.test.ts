@@ -245,7 +245,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
 
   it('treats the temporary copy a backup makes as a database', async () => {
     const dir = '/documents/Actual/backed';
-    await init({ storage: 'memory-idb' });
+    await init();
     await mkdir(dir);
     await mkdir(dir + '/backups');
     await writeFile(dir + '/db.sqlite', await databaseBytes());
