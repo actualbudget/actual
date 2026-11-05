@@ -119,7 +119,9 @@ export function AccountSyncCheck() {
 
       if (acc.account_id) {
         if (acc.account_sync_source === 'enableBanking') {
-          void authorizeEnableBanking(dispatch);
+          // Enable Banking hands out new account ids on every authorization,
+          // so pass the account along to have its link replaced in place.
+          void authorizeEnableBanking(dispatch, acc.id);
         } else if (acc.account_sync_source === 'goCardless') {
           void authorizeGoCardless(dispatch);
         }

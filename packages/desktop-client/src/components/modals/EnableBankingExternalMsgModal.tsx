@@ -39,12 +39,14 @@ function useAvailableBanks(
   const [banks, setBanks] = useState<BankOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
     let cancelled = false;
 
     async function fetch() {
       setIsError(false);
+      setErrorMessage(undefined);
 
       if (!country) {
         if (!cancelled) {
@@ -63,8 +65,13 @@ function useAvailableBanks(
 
       if (cancelled) return;
 
-      if (error) {
+      // A failed Enable Banking request still resolves, carrying the reason
+      // in `data.error` instead of a list of banks.
+      if (error || data?.error) {
         setIsError(true);
+        setErrorMessage(
+          typeof data?.error === 'string' ? data.error : undefined,
+        );
         setBanks([]);
       } else {
         const aspsps: EnableBankingAspsp[] = data?.aspsps ?? [];
@@ -90,6 +97,7 @@ function useAvailableBanks(
     data: banks,
     isLoading,
     isError,
+    errorMessage,
   };
 }
 
@@ -151,6 +159,7 @@ export function EnableBankingExternalMsgModal({
     data: bankOptions,
     isLoading: isBankOptionsLoading,
     isError: isBankOptionError,
+    errorMessage: bankOptionErrorMessage,
   } = useAvailableBanks(country, isEnableBankingSetupComplete);
   const {
     configuredEnableBanking: isConfigured,
@@ -292,6 +301,13 @@ export function EnableBankingExternalMsgModal({
               </Link>{' '}
               again.
             </Trans>
+            {bankOptionErrorMessage && (
+              <View style={{ marginTop: 5 }}>
+                {t('Enable Banking reported: {{ message }}', {
+                  message: bankOptionErrorMessage,
+                })}
+              </View>
+            )}
           </Error>
         ) : (
           country &&

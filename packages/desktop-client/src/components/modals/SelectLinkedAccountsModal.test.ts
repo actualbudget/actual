@@ -112,6 +112,35 @@ describe('computeInitialLinkState', () => {
 
     expect(initiallyChosenAccounts).toEqual({ 'ext-1': 'local-1' });
   });
+
+  it('preselects a reauthorized account whose previous link is no longer returned by the provider', () => {
+    // Enable Banking issues new account ids on every authorization, so the
+    // stored id of the account being reauthorized never matches a returned one.
+    const localAccounts = [
+      makeLocalAccount({
+        id: 'local-1',
+        account_id: 'expired-ext-1',
+        account_sync_source: 'enableBanking',
+      }),
+      makeLocalAccount({
+        id: 'local-2',
+        account_id: 'other-ext',
+        account_sync_source: 'simpleFin',
+      }),
+    ];
+    const externalAccounts = [makeExternalAccount('new-ext-1')];
+
+    const { initialDraftLinkAccounts, initiallyChosenAccounts } =
+      computeInitialLinkState(localAccounts, externalAccounts, 'local-1');
+
+    expect(initiallyChosenAccounts['new-ext-1']).toBe('local-1');
+    expect(initialDraftLinkAccounts.get('new-ext-1')).toBe('linking');
+    // Every previously linked account stays chosen, so confirming the modal
+    // does not unlink any of them.
+    expect(Object.values(initiallyChosenAccounts)).toEqual(
+      expect.arrayContaining(['local-1', 'local-2']),
+    );
+  });
 });
 
 describe('getSelectableAccountOptions', () => {

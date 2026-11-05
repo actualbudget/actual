@@ -119,6 +119,10 @@ function isNewAccountOption(
  * preselected. If there's more than one unmatched external account, guessing
  * would risk claiming the wrong row (and hiding the account from every other
  * row's picker), so it's left for the user to pick manually.
+ *
+ * An upgrading account that is still linked to an id the provider no longer
+ * returns (a reauthorization: Enable Banking issues new account ids for every
+ * session) is preselected too, so its link is replaced in place.
  */
 export function computeInitialLinkState(
   localAccounts: AccountEntity[],
@@ -149,7 +153,10 @@ export function computeInitialLinkState(
   if (
     upgradingAccountId &&
     unmatchedExternalAccounts.length === 1 &&
-    !Object.values(initiallyChosenAccounts).includes(upgradingAccountId)
+    !externalAccounts.some(
+      account =>
+        initiallyChosenAccounts[account.account_id] === upgradingAccountId,
+    )
   ) {
     initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
       upgradingAccountId;

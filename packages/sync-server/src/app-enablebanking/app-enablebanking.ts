@@ -245,7 +245,13 @@ app.post(
       return;
     }
 
-    const { applicationId, secretKey } = req.body || {};
+    const { secretKey } = req.body || {};
+    // A copy-pasted id often carries stray whitespace, which Enable Banking
+    // rejects as an unknown application.
+    const applicationId =
+      typeof req.body?.applicationId === 'string'
+        ? req.body.applicationId.trim()
+        : '';
 
     if (!applicationId || !secretKey) {
       res.send({
