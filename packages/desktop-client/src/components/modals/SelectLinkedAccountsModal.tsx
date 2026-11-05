@@ -122,7 +122,10 @@ function isNewAccountOption(
  *
  * An upgrading account that is still linked to an id the provider no longer
  * returns (a reauthorization: Enable Banking issues new account ids for every
- * session) is preselected too, so its link is replaced in place.
+ * session) is preselected too, so its link is replaced in place. It already
+ * belongs to a bank account, so this only happens when the provider reports
+ * the name it had when it was linked; otherwise a different account at the
+ * same bank could be linked into it.
  */
 export function computeInitialLinkState(
   localAccounts: AccountEntity[],
@@ -150,13 +153,19 @@ export function computeInitialLinkState(
     account => initiallyChosenAccounts[account.account_id] == null,
   );
 
+  const upgradingAccount = localAccounts.find(
+    acc => acc.id === upgradingAccountId,
+  );
+
   if (
     upgradingAccountId &&
     unmatchedExternalAccounts.length === 1 &&
     !externalAccounts.some(
       account =>
         initiallyChosenAccounts[account.account_id] === upgradingAccountId,
-    )
+    ) &&
+    (!upgradingAccount?.account_id ||
+      upgradingAccount.official_name === unmatchedExternalAccounts[0].name)
   ) {
     initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
       upgradingAccountId;

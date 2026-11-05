@@ -39,8 +39,11 @@ function makeLocalAccount(
   };
 }
 
-function makeExternalAccount(accountId: string): SyncServerSimpleFinAccount {
-  return { account_id: accountId, name: accountId, balance: 0 };
+function makeExternalAccount(
+  accountId: string,
+  name = accountId,
+): SyncServerSimpleFinAccount {
+  return { account_id: accountId, name, balance: 0 };
 }
 
 const addOnBudgetAccountOption = {
@@ -122,6 +125,7 @@ describe('computeInitialLinkState', () => {
         id: 'local-1',
         account_id: 'expired-ext-1',
         account_sync_source: 'enableBanking',
+        official_name: 'Current Account',
       }),
       makeLocalAccount({
         id: 'local-2',
@@ -129,7 +133,9 @@ describe('computeInitialLinkState', () => {
         account_sync_source: 'simpleFin',
       }),
     ];
-    const externalAccounts = [makeExternalAccount('new-ext-1')];
+    const externalAccounts = [
+      makeExternalAccount('new-ext-1', 'Current Account'),
+    ];
 
     const { initialDraftLinkAccounts, initiallyChosenAccounts } =
       computeInitialLinkState(localAccounts, externalAccounts, 'local-1');
@@ -144,6 +150,28 @@ describe('computeInitialLinkState', () => {
     expect(Object.values(initiallyChosenAccounts)).toEqual(
       expect.arrayContaining(['local-1', 'local-2']),
     );
+  });
+
+  it('does not preselect a reauthorized account for a bank account with a different name', () => {
+    // The only returned account may be another one at the same bank. Linking
+    // it would pull its transactions into the reauthorized account.
+    const localAccounts = [
+      makeLocalAccount({
+        id: 'local-1',
+        account_id: 'expired-ext-1',
+        account_sync_source: 'enableBanking',
+        official_name: 'Current Account',
+      }),
+    ];
+    const externalAccounts = [
+      makeExternalAccount('new-ext-1', 'Savings Account'),
+    ];
+
+    const { initialDraftLinkAccounts, initiallyChosenAccounts } =
+      computeInitialLinkState(localAccounts, externalAccounts, 'local-1');
+
+    expect(initiallyChosenAccounts).toEqual({ 'expired-ext-1': 'local-1' });
+    expect(initialDraftLinkAccounts.size).toBe(0);
   });
 });
 
