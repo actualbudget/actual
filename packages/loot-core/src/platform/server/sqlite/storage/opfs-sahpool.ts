@@ -180,7 +180,12 @@ export function createOpfsStore({
   // A hold on the pool for the length of an operation, given back with
   // `release`, so that no operation can pause the handles another is using
   async function acquire(dirId: string, path: string): Promise<Pool> {
-    const pool = await lockPool(dirId, path);
+    let pool = await lockPool(dirId, path);
+    // A close in the same tick can settle the pool before this continues,
+    // so make sure the lock is still held
+    while (!pool.releaseLock) {
+      pool = await lockPool(dirId, path);
+    }
     pool.holders += 1;
     return pool;
   }

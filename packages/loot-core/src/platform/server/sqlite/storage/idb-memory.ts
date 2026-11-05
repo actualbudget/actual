@@ -337,6 +337,12 @@ export function createMemoryIdbStore({
     },
 
     async readFile(path) {
+      // A database being opened is read from it once it is, like an open
+      // one, rather than loaded a second time
+      const inFlight = opening.get(path);
+      if (inFlight) {
+        return exportBytes(await inFlight);
+      }
       await pendingWrites.get(path);
       const entry = entries.get(path);
       if (entry) {
@@ -361,6 +367,9 @@ export function createMemoryIdbStore({
     },
 
     async writeFile(path, bytes) {
+      // An open in flight ends with the database open, which is then
+      // refused below as usual
+      await opening.get(path)?.catch(() => undefined);
       await pendingWrites.get(path);
       if (entries.has(path)) {
         throw new Error(`cannot overwrite an open database: ${path}`);
@@ -384,6 +393,9 @@ export function createMemoryIdbStore({
     },
 
     async removeFile(path) {
+      // An open in flight ends with the database open, so it is closed
+      // below rather than removed under it
+      await opening.get(path)?.catch(() => undefined);
       await pendingWrites.get(path);
       const entry = entries.get(path);
       if (entry) {
@@ -405,7 +417,10 @@ export function createMemoryIdbStore({
     },
 
     async flush() {
-      await Promise.all([...entries.values()].map(flushEntry));
+      await Promise.all([
+        ...[...entries.values()].map(flushEntry),
+        ...pendingWrites.values(),
+      ]);
     },
 
     onWrite(db) {

@@ -490,6 +490,25 @@ describe('OPFS pool store', () => {
     expect(await getSqliteFileRow(PATH)).toBeUndefined();
   });
 
+  it('takes the lock again when a close settled the pool meanwhile', async () => {
+    const pool = fakePool(new Map([['/other.sqlite', new Uint8Array([1])]]));
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const db = await store.open(PATH);
+
+    // The read finds the pool held, then the close settles it before the
+    // read continues
+    const reading = store.readFile('/documents/Actual/budget-one/other.sqlite');
+    store.close(PATH, db);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
+    expect(await reading).toEqual(new Uint8Array([1]));
+    expect(pool.unpauseVfs).toHaveBeenCalledTimes(1);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(2);
+  });
+
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {
     const pool = fakePool(
       new Map([

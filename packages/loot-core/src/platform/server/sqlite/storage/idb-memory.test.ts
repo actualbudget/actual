@@ -11,6 +11,7 @@ import {
   transaction,
 } from '#platform/server/sqlite';
 
+import * as absurdMigration from './absurd-migration';
 import { BudgetInUseError, StorageUnavailableError } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { createMemoryIdbStore, isByteContents } from './idb-memory';
@@ -430,6 +431,51 @@ describe('IndexedDB in-memory store', () => {
     ]);
     closeDatabase(copy);
     closeDatabase(db);
+  });
+
+  it('flushes close writes still in flight', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    runQuery(db, "INSERT INTO t (v) VALUES ('closing')");
+    closeDatabase(db);
+    await getSqliteStore().flush();
+    expect(await rowBytes(PATH)).not.toBeNull();
+  });
+
+  it('coordinates reads, writes and removals with an open in flight', async () => {
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from legacy')");
+    const bytes = await exportDatabase(source);
+    closeDatabase(source);
+    await seedLegacyDatabase(legacyDatabaseName(PATH), bytes);
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const store = getSqliteStore();
+
+    // A read during the migrating open comes from the opened database
+    const readLegacy = vi.spyOn(absurdMigration, 'readLegacyDatabaseBytes');
+    try {
+      const opening = store.open(PATH);
+      const read = await openDatabase(await store.readFile(PATH));
+      expect(runQuery(read, 'SELECT v FROM t', [], true)).toEqual([
+        { v: 'from legacy' },
+      ]);
+      closeDatabase(read);
+      expect(readLegacy).toHaveBeenCalledTimes(1);
+      store.close(PATH, await opening);
+    } finally {
+      readLegacy.mockRestore();
+    }
+
+    // A write waits for an open in flight and then refuses as for any open
+    // database; a removal waits and then closes and removes it
+    const reopening = store.open(PATH);
+    await expect(store.writeFile(PATH, bytes)).rejects.toThrow(/open database/);
+    store.close(PATH, await reopening);
+    const third = store.open(PATH);
+    await store.removeFile(PATH);
+    await third;
+    await expect(store.readFile(PATH)).rejects.toThrow(/does not exist/);
   });
 
   it('refuses a database held in OPFS rather than shadow or take it over', async () => {
