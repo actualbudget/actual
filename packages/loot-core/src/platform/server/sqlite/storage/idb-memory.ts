@@ -207,6 +207,10 @@ export function createMemoryIdbStore({
     return { bytes, rev: rev + 1 };
   }
 
+  async function assertRemovable(path: string) {
+    assertNotInOpfs(path, await getSqliteFileRow(path));
+  }
+
   function lockBudget(path: string): Promise<() => void> {
     return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
       throw new BudgetInUseError(path);
@@ -404,7 +408,7 @@ export function createMemoryIdbStore({
       }
       const releaseLock = await lockBudget(path);
       try {
-        assertNotInOpfs(path, await getSqliteFileRow(path));
+        await assertRemovable(path);
         await deleteSqliteFileRow(path);
         unsaved.delete(path);
       } finally {
@@ -412,6 +416,8 @@ export function createMemoryIdbStore({
       }
       await deleteLegacyDatabase(legacyDatabaseName(path));
     },
+
+    assertRemovable,
 
     async exists(path) {
       return (await getSqliteFileRow(path)) != null;

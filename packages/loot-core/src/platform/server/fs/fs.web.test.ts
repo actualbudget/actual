@@ -185,17 +185,17 @@ describe('web filesystem (sqlite-wasm storage)', () => {
     }
   });
 
-  it('leaves a budget directory intact when its database cannot be removed', async () => {
+  it('leaves a budget directory intact when any database in it cannot be removed', async () => {
     const dir = '/documents/Actual/held';
     await init({ storage: 'memory-idb' });
     await mkdir(dir);
     await writeFile(dir + '/metadata.json', '{}');
+    await writeFile(dir + '/db.sqlite', await databaseBytes());
     await mkdir(dir + '/backups');
-    await writeFile(dir + '/backups/old.sqlite', await databaseBytes());
-    // Owned by OPFS, which this session cannot reach
+    // A backup owned by OPFS, which this session cannot reach
     const { store } = idb.getStore(await idb.openDatabase(), 'files');
     await idb.set(store, {
-      filepath: dir + '/db.sqlite',
+      filepath: dir + '/backups/old.sqlite',
       contents: '',
       storage: 'opfs',
     });
@@ -203,6 +203,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
 
     await expect(removeDirRecursively(dir)).rejects.toThrow(/stored in OPFS/);
     expect(await exists(dir + '/metadata.json')).toBe(true);
+    expect(await exists(dir + '/db.sqlite')).toBe(true);
     expect(await exists(dir + '/backups/old.sqlite')).toBe(true);
   });
 

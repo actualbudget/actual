@@ -289,23 +289,42 @@ export const removeDir = async function (filepath: string) {
   memfs.rmdir(filepath);
 };
 
+async function listFiles(dirpath: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (const file of await listDir(dirpath)) {
+    const fullpath = join(dirpath, file);
+    if (memfs.isDirectory(fullpath)) {
+      paths.push(...(await listFiles(fullpath)));
+    } else {
+      paths.push(fullpath);
+    }
+  }
+  return paths;
+}
+
+async function removeTree(dirpath: string) {
+  for (const file of await listDir(dirpath)) {
+    const fullpath = join(dirpath, file);
+    if (memfs.isDirectory(fullpath)) {
+      await removeTree(fullpath);
+    } else {
+      await removeFile(fullpath);
+    }
+  }
+  await removeDir(dirpath);
+}
+
 export const removeDirRecursively = async function (dirpath: string) {
   if (await exists(dirpath)) {
-    // Databases first: the sqlite storage refuses one it does not own, and
-    // that must leave the rest of the directory, backups included, as it was
-    const files = (await listDir(dirpath)).sort(
-      (a, b) => Number(isSqlitePath(b)) - Number(isSqlitePath(a)),
-    );
-    for (const file of files) {
-      const fullpath = join(dirpath, file);
-      if (memfs.isDirectory(fullpath)) {
-        await removeDirRecursively(fullpath);
-      } else {
-        await removeFile(fullpath);
+    // The sqlite storage refuses databases it does not own: check every one
+    // in the tree first, so a refusal leaves all of it, backups included,
+    // as it was
+    for (const path of await listFiles(dirpath)) {
+      if (isSqlitePath(path)) {
+        await getSqliteStore().assertRemovable?.(path);
       }
     }
-
-    await removeDir(dirpath);
+    await removeTree(dirpath);
   }
 };
 

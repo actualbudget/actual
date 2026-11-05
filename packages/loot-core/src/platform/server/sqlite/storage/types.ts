@@ -18,6 +18,9 @@ export type SqliteFileStore = {
   readFile(path: string): Promise<Uint8Array>;
   writeFile(path: string, bytes: Uint8Array): Promise<void>;
   removeFile(path: string): Promise<void>;
+  // Throws where `removeFile` would refuse, so a directory can be checked
+  // before any of it is deleted
+  assertRemovable?(path: string): Promise<void>;
   exists(path: string): Promise<boolean>;
   // Persist anything pending (the fallback store writes lazily)
   flush(): Promise<void>;
