@@ -39,7 +39,8 @@ vulnerability:
   For some providers (for example SimpleFIN and Akahu) the global credential is
   tied to the bank connections of the person who set it up. Every user on the
   server can then read the accounts and transactions behind it. Admins who do
-  not want that should use per-budget credentials instead.
+  not want that should use per-budget credentials where the provider supports
+  them, or not set up global credentials for that provider.
 
 - Issues that need a malicious user who already has an account on the server,
   where the impact is limited to data or features of that same server.
