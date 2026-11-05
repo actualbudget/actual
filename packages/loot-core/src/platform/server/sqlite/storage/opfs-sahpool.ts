@@ -260,6 +260,7 @@ export function createOpfsStore({
       if (already) {
         return already;
       }
+      let db: WasmDatabase | undefined;
       try {
         const present =
           pool.util.getFileNames().includes(fileName) ||
@@ -267,7 +268,7 @@ export function createOpfsStore({
         if (!present) {
           logger.warn('sqlite storage: creating missing database', path);
         }
-        const db = new (sqlite3().oo1.DB)({
+        db = new (sqlite3().oo1.DB)({
           filename: fileName,
           flags: 'c',
           vfs: pool.util.vfsName,
@@ -283,6 +284,10 @@ export function createOpfsStore({
         }
         return db;
       } catch (error) {
+        if (db) {
+          db.close();
+          pool.open.delete(fileName);
+        }
         release(pool);
         throw error;
       }

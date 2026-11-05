@@ -84,7 +84,7 @@ function fakePool(files = new Map<string, Uint8Array>()) {
 // are real in-memory databases loaded from the fake pool's bytes.
 function fakeSqlite3(
   pool: ReturnType<typeof fakePool>,
-  { failInstalls = 0 } = {},
+  { failInstalls = 0, failExec = false } = {},
 ) {
   let installs = 0;
   const execLog: string[] = [];
@@ -97,6 +97,9 @@ function fakeSqlite3(
       }
     }
     exec(sql: string) {
+      if (failExec) {
+        throw new Error('disk I/O error');
+      }
       execLog.push(sql);
     }
     selectValue(sql: string) {
@@ -205,6 +208,20 @@ describe('OPFS pool store', () => {
     });
     await expect(store.open(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
     expect(sqlite3.installOpfsSAHPoolVfs).not.toHaveBeenCalled();
+  });
+
+  it('releases the pool when an open fails after the handle was created', async () => {
+    const pool = fakePool();
+    const { acquire, releases } = trackingLock();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool, { failExec: true }),
+      acquireLock: acquire,
+      sleep: noSleep,
+    });
+
+    await expect(store.open(PATH)).rejects.toThrow(/disk I\/O/);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
+    expect(releases).toEqual(['actual-budget:documents-Actual-budget-one']);
   });
 
   it('pauses the pool and releases the lock when the last database closes', async () => {

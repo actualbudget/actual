@@ -14,10 +14,6 @@ import type { MigrationProgress } from './types';
 // storage, and finish the move the same way for both stores.
 
 const LEGACY_STORE = 'data';
-// Opening at a higher version than absurd-sql's (2) makes its connections
-// in other tabs close (they listen for `versionchange`), so nothing writes
-// during a copy
-const MIGRATION_VERSION = 3;
 const BLOCKS_PER_CHUNK = 256;
 const DELETE_TIMEOUT_MS = 5000;
 const SQLITE_HEADER = 'SQLite format 3\0';
@@ -26,20 +22,18 @@ type LegacyMeta = { size: number };
 
 // Resolves null when no absurd-sql database exists under this name. A
 // missing database would be created by the open; aborting the upgrade
-// that creates it leaves nothing behind.
+// that creates it leaves nothing behind. An existing one is opened at its
+// own version: absurd-sql opens by version number, so bumping it would
+// lock the old engine out should the migration fail.
 function openLegacyDatabase(name: string): Promise<IDBDatabase | null> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(name, MIGRATION_VERSION);
+    const request = indexedDB.open(name);
     let missing = false;
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
         missing = true;
         request.transaction?.abort();
       }
-    };
-    request.onblocked = () => {
-      // Another tab still holds the old version; its `versionchange`
-      // handler closes it and the request then proceeds
     };
     request.onsuccess = () => {
       const database = request.result;

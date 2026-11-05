@@ -120,6 +120,10 @@ describe('absurd-sql migration helpers', () => {
     await expect(readLegacyDatabaseBytes(PATH)).rejects.toBeInstanceOf(
       StorageMigrationError,
     );
-    expect(await listIndexedDbNames()).toContain(NAME);
+    // Still there, at the version absurd-sql opens it with
+    const legacy = (await indexedDB.databases()).find(
+      database => database.name === NAME,
+    );
+    expect(legacy?.version).toBe(2);
   });
 });
