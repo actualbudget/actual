@@ -5,8 +5,9 @@ import { logger } from '#platform/server/log';
 type BridgeMessage = { type?: string; [key: string]: unknown };
 
 // How long a leaving leader waits for the backend to let go of its storage
-// before the worker is terminated regardless
-const STORAGE_RELEASE_TIMEOUT_MS = 300;
+// before the worker is terminated regardless. The IndexedDB fallback writes
+// a large budget whole here, which can take a good part of a second.
+const STORAGE_RELEASE_TIMEOUT_MS = 3000;
 const STORAGE_RELEASE_REQUEST_ID = '__storage-release';
 const RESTORE_REQUEST_ID = '__restore-budget';
 

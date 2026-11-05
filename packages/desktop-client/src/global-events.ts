@@ -157,6 +157,24 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
+  // The IndexedDB fallback could not store the budget, retry included; the
+  // id keeps one notification up however many writes fail
+  const unlistenStorageWriteFailed = listen('storage-write-failed', () => {
+    store.dispatch(
+      addNotification({
+        notification: {
+          id: 'storage-write-failed',
+          type: 'error',
+          title: t('Unable to save changes'),
+          sticky: true,
+          message: t(
+            'Your latest changes could not be stored in this browser, which may be out of space. They are kept in memory for now: free up space, or export your budget before closing this tab.',
+          ),
+        },
+      }),
+    );
+  });
+
   const unlistenIndexeddbQuotaError = listen('indexeddb-quota-error', () => {
     alert(
       t(
@@ -239,6 +257,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenSync();
     unlistenUndo();
     unlistenFallbackWriteError();
+    unlistenStorageWriteFailed();
     unlistenIndexeddbQuotaError();
     unlistenStartLoad();
     unlistenFinishLoad();
