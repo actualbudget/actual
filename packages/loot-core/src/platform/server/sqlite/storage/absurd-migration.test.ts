@@ -12,6 +12,7 @@ import {
 import {
   completeMigration,
   deleteLegacyDatabase,
+  legacySnapshot,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
@@ -203,11 +204,16 @@ describe('absurd-sql migration helpers', () => {
   });
 
   it('refuses the cutover when a connection to the copy appeared meanwhile', async () => {
-    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const bytes = await makeDatabaseBytes(5);
+    await seedLegacyDatabase(NAME, bytes);
     const other = await holdLegacyConnection(NAME, { stubborn: true });
     try {
       await expect(
-        completeMigration({ filepath: PATH, contents: '', storage: 'opfs' }, 0),
+        completeMigration(
+          { filepath: PATH, contents: '', storage: 'opfs' },
+          0,
+          legacySnapshot(bytes),
+        ),
       ).rejects.toBeInstanceOf(BudgetInUseError);
     } finally {
       other.close();
@@ -217,7 +223,8 @@ describe('absurd-sql migration helpers', () => {
   });
 
   it('refuses the cutover when another worker moved the budget first', async () => {
-    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const bytes = await makeDatabaseBytes(5);
+    await seedLegacyDatabase(NAME, bytes);
     await putSqliteFileRow({
       filepath: PATH,
       contents: new Uint8Array([1]),
@@ -225,10 +232,47 @@ describe('absurd-sql migration helpers', () => {
       rev: 1,
     });
     await expect(
-      completeMigration({ filepath: PATH, contents: '', storage: 'opfs' }, 0),
+      completeMigration(
+        { filepath: PATH, contents: '', storage: 'opfs' },
+        0,
+        legacySnapshot(bytes),
+      ),
     ).rejects.toBeInstanceOf(BudgetInUseError);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('memory-idb');
     expect(await listIndexedDbNames()).toContain(NAME);
+  });
+
+  it('refuses the cutover when the copy changed after the snapshot', async () => {
+    const bytes = await makeDatabaseBytes(5);
+    await seedLegacyDatabase(NAME, bytes);
+    const snapshot = legacySnapshot(bytes);
+    // A tab on the previous release reopens the copy and writes, which
+    // moves the file change counter in the header
+    const other = await holdLegacyConnection(NAME);
+    await new Promise<void>((resolve, reject) => {
+      const transaction = other.transaction('data', 'readwrite');
+      const store = transaction.objectStore('data');
+      const request = store.get(0);
+      request.onsuccess = () => {
+        const block = new Uint8Array(request.result as ArrayBuffer);
+        block[27] += 1;
+        store.put(block.buffer, 0);
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    other.close();
+
+    await expect(
+      completeMigration(
+        { filepath: PATH, contents: '', storage: 'opfs' },
+        0,
+        snapshot,
+      ),
+    ).rejects.toBeInstanceOf(BudgetInUseError);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).toContain(NAME);
+    expect(await legacyVersion(NAME)).toBe(2);
   });
 
   it('fails without touching the legacy data when the header is not sqlite', async () => {

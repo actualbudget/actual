@@ -262,6 +262,7 @@ export function createOpfsStore({
       await completeMigration(
         { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
         row?.rev ?? 0,
+        contents.snapshot,
         onMigrationProgress,
       );
     } catch (error) {

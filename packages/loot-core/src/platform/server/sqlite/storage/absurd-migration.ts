@@ -20,32 +20,81 @@ const BLOCKS_PER_CHUNK = 256;
 const DELETE_TIMEOUT_MS = 5000;
 const EVICT_TIMEOUT_MS = 1000;
 const SQLITE_HEADER = 'SQLite format 3\0';
+// The sqlite file header, whose change counter moves on every write
+const HEADER_BYTES = 100;
 
 type LegacyMeta = { size: number };
 
+// What a copy was taken from, for the cutover to check nothing changed
+export type LegacySnapshot = { header: Uint8Array; size: number };
+
+export function legacySnapshot(bytes: Uint8Array): LegacySnapshot {
+  return { header: bytes.slice(0, HEADER_BYTES), size: bytes.length };
+}
+
+function matchesSnapshot(
+  snapshot: LegacySnapshot,
+  firstBlock: ArrayBuffer | undefined,
+  meta: LegacyMeta | undefined,
+): boolean {
+  if (firstBlock == null || meta?.size !== snapshot.size) {
+    return false;
+  }
+  const header = new Uint8Array(firstBlock, 0, HEADER_BYTES);
+  return header.every((byte, index) => byte === snapshot.header[index]);
+}
+
 // Asks every other connection to the absurd-sql database to close, which
-// its engine does on `versionchange`, so a tab still on the previous
-// release, or one without Web Locks, writes nothing more while the copy
-// is made. The upgrade itself is abandoned: the version never changes, so
-// the legacy engine can still open the database should the move fail,
-// and a missing database is not created. Resolves whether the database
-// exists; rejects when a connection will not close.
-function evictLegacyConnections(name: string, path: string): Promise<boolean> {
+// its engine does on `versionchange`, and looks at the store while no
+// connection is open. The upgrade itself is abandoned: the version never
+// changes, so the legacy engine can still open the database should the
+// move fail, and a missing database is not created. Given the snapshot a
+// copy was taken from, rejects as a budget in use when the store no
+// longer matches it: absurd-sql reopens its database on the next
+// operation, so a tab on the previous release can write between the copy
+// and the cutover. Resolves whether the database exists, and rejects when
+// a connection will not close.
+function evictLegacyConnections(
+  name: string,
+  path: string,
+  snapshot?: LegacySnapshot,
+): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, LEGACY_VERSION + 1);
     let exists = true;
+    let changed = false;
     const timer = setTimeout(
       () => reject(new BudgetInUseError(path)),
       EVICT_TIMEOUT_MS,
     );
     request.onupgradeneeded = event => {
       exists = event.oldVersion !== 0;
-      request.transaction?.abort();
+      const transaction = request.transaction;
+      if (!exists || !snapshot || !transaction) {
+        transaction?.abort();
+        return;
+      }
+      try {
+        const store = transaction.objectStore(LEGACY_STORE);
+        const firstBlock = store.get(0);
+        const meta = store.get(-1);
+        // Requests complete in order, so both results are in by then
+        meta.onsuccess = () => {
+          changed = !matchesSnapshot(snapshot, firstBlock.result, meta.result);
+          transaction.abort();
+        };
+      } catch {
+        transaction.abort();
+      }
     };
     // The abandoned upgrade fails the request: the normal way out
     request.onerror = () => {
       clearTimeout(timer);
-      resolve(exists);
+      if (changed) {
+        reject(new BudgetInUseError(path));
+      } else {
+        resolve(exists);
+      }
     };
     request.onsuccess = () => {
       clearTimeout(timer);
@@ -192,6 +241,7 @@ export type LegacyDatabaseContents = {
   // Feeds the file in chunks, for `importDb`; undefined at the end
   read: () => Promise<Uint8Array | undefined>;
   size: number;
+  snapshot: LegacySnapshot;
 };
 
 // A snapshot of the absurd-sql database of a sqlite path. Resolves null
@@ -220,7 +270,11 @@ export async function openLegacyDatabaseContents(
     }
     onProgress?.(0);
     const chunks = await readAllBlocks(database, meta.size, onProgress);
-    return { read: async () => chunks.shift(), size: meta.size };
+    const snapshot = {
+      header: chunks[0].slice(0, HEADER_BYTES),
+      size: meta.size,
+    };
+    return { read: async () => chunks.shift(), size: meta.size, snapshot };
   } catch (error) {
     throw new StorageMigrationError(path, error);
   } finally {
@@ -271,11 +325,12 @@ export function verifyMigratedDatabase(db: WasmDatabase) {
 export async function completeMigration(
   marker: Data,
   expectedRev: number,
+  snapshot: LegacySnapshot,
   onProgress?: MigrationProgress,
 ) {
   onProgress?.('cleanup');
   const name = legacyDatabaseName(marker.filepath);
-  await evictLegacyConnections(name, marker.filepath);
+  await evictLegacyConnections(name, marker.filepath, snapshot);
   if (!(await putSqliteFileRowIfRev(marker, expectedRev))) {
     throw new BudgetInUseError(marker.filepath);
   }

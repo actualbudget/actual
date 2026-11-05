@@ -443,9 +443,7 @@ async function assertNotMoved(filepath: string) {
   }
 }
 
-// The shared budget lock, which a move cannot take while held; shared
-// holds stack, so one taken for a whole directory and one for a file in
-// it do not conflict
+// The shared budget lock, which a move cannot take while held
 function lockBudget(filepath: string): Promise<() => void> {
   return acquireWebLock(
     budgetLockName(filepath),
@@ -506,6 +504,23 @@ export const removeDir = async function (filepath) {
   FS.rmdir(filepath);
 };
 
+// The walk under `removeDirRecursively`, which holds every budget's lock
+// and has checked every database. No lock is taken again in here: a
+// request queued behind an exclusive one that waits on our hold would
+// never be granted
+async function removeTreeUnlocked(dirpath: string) {
+  for (const file of await listDir(dirpath)) {
+    const fullpath = join(dirpath, file);
+    // `true` here means to not follow symlinks
+    if (FS.isDir(FS.stat(fullpath, true).mode)) {
+      await removeTreeUnlocked(fullpath);
+    } else {
+      await _removeFile(fullpath);
+    }
+  }
+  await removeDir(dirpath);
+}
+
 export const removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
     // Every budget in the tree is held for the whole removal, so a move
@@ -524,19 +539,7 @@ export const removeDirRecursively = async function (dirpath) {
       for (const path of databases) {
         await assertNotMoved(path);
       }
-      for (const file of await listDir(dirpath)) {
-        const fullpath = join(dirpath, file);
-        // `true` here means to not follow symlinks
-        const attr = FS.stat(fullpath, true);
-
-        if (FS.isDir(attr.mode)) {
-          await removeDirRecursively(fullpath);
-        } else {
-          await removeFile(fullpath);
-        }
-      }
-
-      await removeDir(dirpath);
+      await removeTreeUnlocked(dirpath);
     } finally {
       for (const release of releases) {
         release();

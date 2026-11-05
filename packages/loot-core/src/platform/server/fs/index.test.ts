@@ -105,6 +105,12 @@ describe('web filesystem', () => {
     expect(request.mock.invocationCallOrder[budgetLock]).toBeLessThan(
       delSpy.mock.invocationCallOrder[0],
     );
+    // And taken once: the walk underneath requests no lock of its own
+    expect(
+      request.mock.calls.filter(
+        call => call[0] === 'actual-budget:documents-Actual-held',
+      ),
+    ).toHaveLength(1);
     delSpy.mockRestore();
   });
 

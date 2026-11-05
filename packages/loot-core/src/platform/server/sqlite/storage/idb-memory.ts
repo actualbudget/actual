@@ -11,6 +11,7 @@ import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 import {
   completeMigration,
   deleteLegacyDatabase,
+  legacySnapshot,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
 } from './absurd-migration';
@@ -211,6 +212,7 @@ export function createMemoryIdbStore({
     await completeMigration(
       { filepath: path, contents: bytes, storage: 'memory-idb', rev: rev + 1 },
       rev,
+      legacySnapshot(bytes),
       onMigrationProgress,
     );
     return { bytes, rev: rev + 1 };
