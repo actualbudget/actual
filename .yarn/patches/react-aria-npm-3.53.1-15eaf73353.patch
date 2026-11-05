@@ -1,0 +1,39 @@
+diff --git a/dist/private/utils/useDescription.cjs b/dist/private/utils/useDescription.cjs
+index 3e16d14fd7ae4611e0771d3e60d72d9195f36b58..620673d714837a1996d36b125acb3daf98648328 100644
+--- a/dist/private/utils/useDescription.cjs
++++ b/dist/private/utils/useDescription.cjs
+@@ -22,7 +22,7 @@ $parcel$export(module.exports, "useDescription", function () { return $2205bbfaf
+ let $2205bbfafbd0b5cd$var$descriptionId = 0;
+ const $2205bbfafbd0b5cd$var$descriptionNodes = new Map();
+ function $2205bbfafbd0b5cd$export$f8aeda7b10753fa1(description) {
+-    let [id, setId] = (0, $5Ri4i$react.useState)();
++    let [id, setId] = (0, $5Ri4i$react.useState)(()=>description ? $2205bbfafbd0b5cd$var$descriptionNodes.get(description)?.element.id : undefined);
+     (0, $429333cab433657c$exports.useLayoutEffect)(()=>{
+         if (!description) return;
+         let desc = $2205bbfafbd0b5cd$var$descriptionNodes.get(description);
+diff --git a/dist/private/utils/useDescription.js b/dist/private/utils/useDescription.js
+index 454865868aac34d100e6f6699990618369e86e65..80a2ead9eca4f5b12fdd28847c58537fb88734fc 100644
+--- a/dist/private/utils/useDescription.js
++++ b/dist/private/utils/useDescription.js
+@@ -16,7 +16,7 @@ import {useState as $3FiqG$useState} from "react";
+ let $fe0741815591a8ca$var$descriptionId = 0;
+ const $fe0741815591a8ca$var$descriptionNodes = new Map();
+ function $fe0741815591a8ca$export$f8aeda7b10753fa1(description) {
+-    let [id, setId] = (0, $3FiqG$useState)();
++    let [id, setId] = (0, $3FiqG$useState)(()=>description ? $fe0741815591a8ca$var$descriptionNodes.get(description)?.element.id : undefined);
+     (0, $53fed047b798be36$export$e5c5a5f917a5871c)(()=>{
+         if (!description) return;
+         let desc = $fe0741815591a8ca$var$descriptionNodes.get(description);
+diff --git a/dist/private/utils/useDescription.mjs b/dist/private/utils/useDescription.mjs
+index 4dc418e66c9a78a66de1ae0594e86f22a032c8ce..f03a528e5a062d2f8b8991f1675eca0ac15078aa 100644
+--- a/dist/private/utils/useDescription.mjs
++++ b/dist/private/utils/useDescription.mjs
+@@ -16,7 +16,7 @@ import {useState as $4UXHm$useState} from "react";
+ let $121970af65029459$var$descriptionId = 0;
+ const $121970af65029459$var$descriptionNodes = new Map();
+ function $121970af65029459$export$f8aeda7b10753fa1(description) {
+-    let [id, setId] = (0, $4UXHm$useState)();
++    let [id, setId] = (0, $4UXHm$useState)(()=>description ? $121970af65029459$var$descriptionNodes.get(description)?.element.id : undefined);
+     (0, $c4867b2f328c2698$export$e5c5a5f917a5871c)(()=>{
+         if (!description) return;
+         let desc = $121970af65029459$var$descriptionNodes.get(description);
