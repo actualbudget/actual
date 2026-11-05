@@ -64,6 +64,8 @@ function readLegacyKey<T>(database: IDBDatabase, key: number): Promise<T> {
   return requestToPromise(store.get(key)) as Promise<T>;
 }
 
+// The page size of a sqlite file, or null when the header is not one or
+// the size is not a power of two from 512 to 65536
 export function pageSizeFromHeader(header: Uint8Array): number | null {
   const text = new TextDecoder().decode(header.slice(0, SQLITE_HEADER.length));
   if (text !== SQLITE_HEADER) {
@@ -71,7 +73,9 @@ export function pageSizeFromHeader(header: Uint8Array): number | null {
   }
   const raw = (header[16] << 8) | header[17];
   // 1 encodes the maximum page size
-  return raw === 1 ? 65536 : raw;
+  const size = raw === 1 ? 65536 : raw;
+  const isPowerOfTwo = (size & (size - 1)) === 0;
+  return size >= 512 && size <= 65536 && isPowerOfTwo ? size : null;
 }
 
 // Reads every block in one read-only transaction, so a legacy writer in
@@ -136,7 +140,7 @@ function readAllBlocks(
       }
       const blockSize = pageSizeFromHeader(new Uint8Array(header));
       if (blockSize == null) {
-        fail('legacy database does not start with a sqlite header');
+        fail('legacy database has no valid sqlite header');
         return;
       }
       readChunk(0, blockSize);

@@ -268,53 +268,73 @@ export function createOpfsStore({
     );
   }
 
+  // Concurrent opens of one file share the whole operation, so a budget is
+  // migrated into the pool once rather than by each caller
+  const opening = new Map<string, Promise<WasmDatabase>>();
+
+  function open(path: string): Promise<WasmDatabase> {
+    const inFlight = opening.get(path);
+    if (inFlight) {
+      return inFlight;
+    }
+    const promise = openOnce(path).finally(() => {
+      if (opening.get(path) === promise) {
+        opening.delete(path);
+      }
+    });
+    opening.set(path, promise);
+    return promise;
+  }
+
+  async function openOnce(path: string): Promise<WasmDatabase> {
+    const { dirId, fileName } = splitSqlitePath(path);
+    const pool = await acquire(dirId, path);
+    const already = pool.open.get(fileName);
+    if (already) {
+      return already;
+    }
+    let db: WasmDatabase | undefined;
+    try {
+      const present =
+        pool.util.getFileNames().includes(fileName) ||
+        (await importExisting(pool, path, fileName));
+      // Another call may have opened the file while that ran
+      const opened = pool.open.get(fileName);
+      if (opened) {
+        return opened;
+      }
+      if (!present) {
+        logger.warn('sqlite storage: creating missing database', path);
+      }
+      db = new (sqlite3().oo1.DB)({
+        filename: fileName,
+        flags: 'c',
+        vfs: pool.util.vfsName,
+      });
+      applyFilePragmas(db);
+      pool.open.set(fileName, db);
+      if (!present) {
+        await putSqliteFileRow({
+          filepath: path,
+          contents: '',
+          storage: 'opfs',
+        });
+      }
+      return db;
+    } catch (error) {
+      if (db) {
+        db.close();
+        pool.open.delete(fileName);
+      }
+      release(pool);
+      throw error;
+    }
+  }
+
   const store: SqliteFileStore = {
     kind: 'opfs',
 
-    async open(path) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      const pool = await acquire(dirId, path);
-      const already = pool.open.get(fileName);
-      if (already) {
-        return already;
-      }
-      let db: WasmDatabase | undefined;
-      try {
-        const present =
-          pool.util.getFileNames().includes(fileName) ||
-          (await importExisting(pool, path, fileName));
-        // Another call may have opened the file while that ran
-        const opened = pool.open.get(fileName);
-        if (opened) {
-          return opened;
-        }
-        if (!present) {
-          logger.warn('sqlite storage: creating missing database', path);
-        }
-        db = new (sqlite3().oo1.DB)({
-          filename: fileName,
-          flags: 'c',
-          vfs: pool.util.vfsName,
-        });
-        applyFilePragmas(db);
-        pool.open.set(fileName, db);
-        if (!present) {
-          await putSqliteFileRow({
-            filepath: path,
-            contents: '',
-            storage: 'opfs',
-          });
-        }
-        return db;
-      } catch (error) {
-        if (db) {
-          db.close();
-          pool.open.delete(fileName);
-        }
-        release(pool);
-        throw error;
-      }
-    },
+    open,
 
     close(path, db) {
       const { dirId, fileName } = splitSqlitePath(path);

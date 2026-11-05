@@ -61,6 +61,13 @@ describe('absurd-sql migration helpers', () => {
       pageSizeFromHeader(bytes),
     );
     expect(pageSizeFromHeader(new TextEncoder().encode('nope'))).toBe(null);
+    // The right magic bytes with an impossible page size
+    const broken = bytes.slice(0, 100);
+    broken[16] = 0;
+    broken[17] = 0;
+    expect(pageSizeFromHeader(broken)).toBe(null);
+    broken[17] = 3;
+    expect(pageSizeFromHeader(broken)).toBe(null);
   });
 
   it('reads a legacy database back byte for byte across several chunks', async () => {

@@ -210,7 +210,11 @@ describe('OPFS pool store', () => {
     expect(sqlite3.installOpfsSAHPoolVfs).not.toHaveBeenCalled();
   });
 
-  it('hands two concurrent opens of one file the same handle', async () => {
+  it('hands two concurrent opens of one file the same handle and migrates once', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('once'),
+    );
     const pool = fakePool();
     const store = createOpfsStore({
       sqlite3: () => fakeSqlite3(pool),
@@ -223,6 +227,7 @@ describe('OPFS pool store', () => {
       store.open(PATH),
     ]);
     expect(second).toBe(first);
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
   });
 
   it('releases the pool when an open fails after the handle was created', async () => {
