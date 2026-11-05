@@ -578,7 +578,8 @@ export function createOpfsStore({
           db.close();
         }
         pool.open.clear();
-        release(pool);
+        // Nothing of ours is held here: settle rather than give a hold back
+        settle(pool);
       }
     },
   };

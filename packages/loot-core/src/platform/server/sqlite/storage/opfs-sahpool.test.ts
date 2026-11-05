@@ -659,6 +659,33 @@ describe('OPFS pool store', () => {
     store.close(PATH, db);
   });
 
+  it('releases every pool for a hand-over and keeps holds balanced', async () => {
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await store.open(PATH);
+    expect(store.isOpen(PATH)).toBe(true);
+    await store.releaseAll();
+    expect(store.isOpen(PATH)).toBe(false);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
+
+    // Afterwards an overlap still keeps the pool live: a read ends while
+    // another file of the directory is being opened
+    const other = '/documents/Actual/budget-one/other.sqlite';
+    await seedLegacyDatabase(
+      legacyDatabaseName(other),
+      await budgetBytes('slow'),
+    );
+    const opening = store.open(other);
+    await store.readFile(PATH);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
+    store.close(other, await opening);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(2);
+  });
+
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {
     const pool = fakePool(
       new Map([
