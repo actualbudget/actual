@@ -44,6 +44,16 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// These routes only require a valid session; they deliberately do NOT check
+// the user's role. Actual is a single-user, self-hosted product. Admins may
+// configure server-wide (global) bank-sync credentials, and every user on
+// that server is allowed to use them - this is a supported feature, and it
+// stays even where per-budget credentials are available. Multi-user (OpenID)
+// setups are meant for sharing one server with trusted people (e.g. family);
+// running Actual as a managed service for untrusted users is not supported.
+// So "a non-admin user can use the admin's global credentials" is out of
+// scope for security reports.
 app.use(validateSessionMiddleware);
 
 app.post(
