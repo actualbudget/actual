@@ -378,6 +378,26 @@ describe('normalizeTransaction without a bank-provided id', () => {
     ).toBe(normalizeTransaction(feeWithoutId).transactionId);
   });
 
+  it('keeps the id when a pending transaction is booked on a later date', () => {
+    // While pending there is no booking date yet; the date of the purchase
+    // itself is the one that stays the same.
+    const pending = {
+      ...feeWithoutId,
+      status: 'PDNG' as const,
+      booking_date: undefined,
+      transaction_date: '2026-08-25',
+    };
+    const booked = {
+      ...feeWithoutId,
+      booking_date: '2026-08-26',
+      transaction_date: '2026-08-25',
+    };
+
+    expect(normalizeTransaction(pending).transactionId).toBe(
+      normalizeTransaction(booked).transactionId,
+    );
+  });
+
   it('gives identical transactions in one response distinct, repeatable ids', () => {
     // Two genuinely separate postings (e.g. two identical tolls on one day).
     const sync = () => {
