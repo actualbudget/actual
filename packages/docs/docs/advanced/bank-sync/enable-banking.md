@@ -45,9 +45,9 @@ The access you give to your bank lasts for 90 days at most, and some banks allow
 
 1. Click the message and choose **Reauthorize**.
 2. Select your country and bank again, click **Link bank in browser** and approve the access with your bank.
-3. In the **Link Accounts** window, check that your existing account is selected under **Account in Actual**, then click **Link accounts**.
+3. In the **Link Accounts** window, click **Set up bank sync** next to each bank account and pick your existing account under **Account in Actual**, then click **Link accounts**.
 
-If your bank returns a single account with the same name as when you first linked it, Actual selects your existing account for you. Otherwise, pick the matching Actual account for each bank account. Your existing transactions are kept.
+Take care to pick the Actual account that belongs to each bank account. Your existing transactions are kept.
 
 ## Using a Reverse Proxy
 

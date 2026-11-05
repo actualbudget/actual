@@ -8,7 +8,6 @@ import {
   computeInitialLinkState,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
-  removeChosenAccount,
   resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
@@ -39,11 +38,8 @@ function makeLocalAccount(
   };
 }
 
-function makeExternalAccount(
-  accountId: string,
-  name = accountId,
-): SyncServerSimpleFinAccount {
-  return { account_id: accountId, name, balance: 0 };
+function makeExternalAccount(accountId: string): SyncServerSimpleFinAccount {
+  return { account_id: accountId, name: accountId, balance: 0 };
 }
 
 const addOnBudgetAccountOption = {
@@ -115,103 +111,6 @@ describe('computeInitialLinkState', () => {
     );
 
     expect(initiallyChosenAccounts).toEqual({ 'ext-1': 'local-1' });
-  });
-
-  it('preselects a reauthorized account whose previous link is no longer returned by the provider', () => {
-    // Enable Banking issues new account ids on every authorization, so the
-    // stored id of the account being reauthorized never matches a returned one.
-    const localAccounts = [
-      makeLocalAccount({
-        id: 'local-1',
-        account_id: 'expired-ext-1',
-        account_sync_source: 'enableBanking',
-        official_name: 'Current Account',
-      }),
-      makeLocalAccount({
-        id: 'local-2',
-        account_id: 'other-ext',
-        account_sync_source: 'simpleFin',
-      }),
-    ];
-    const externalAccounts = [
-      makeExternalAccount('new-ext-1', 'Current Account'),
-    ];
-
-    const { initialDraftLinkAccounts, initiallyChosenAccounts } =
-      computeInitialLinkState(localAccounts, externalAccounts, 'local-1');
-
-    expect(initiallyChosenAccounts['new-ext-1']).toBe('local-1');
-    expect(initialDraftLinkAccounts.get('new-ext-1')).toBe('linking');
-    // The expired link is kept, so picking a different account for the row
-    // leaves the reauthorized account linked instead of silently unlinking it.
-    expect(initiallyChosenAccounts['expired-ext-1']).toBe('local-1');
-    // Every previously linked account stays chosen, so confirming the modal
-    // does not unlink any of them.
-    expect(Object.values(initiallyChosenAccounts)).toEqual(
-      expect.arrayContaining(['local-1', 'local-2']),
-    );
-  });
-
-  it('does not preselect a reauthorized account for a bank account with a different name', () => {
-    // The only returned account may be another one at the same bank. Linking
-    // it would pull its transactions into the reauthorized account.
-    const localAccounts = [
-      makeLocalAccount({
-        id: 'local-1',
-        account_id: 'expired-ext-1',
-        account_sync_source: 'enableBanking',
-        official_name: 'Current Account',
-      }),
-    ];
-    const externalAccounts = [
-      makeExternalAccount('new-ext-1', 'Savings Account'),
-    ];
-
-    const { initialDraftLinkAccounts, initiallyChosenAccounts } =
-      computeInitialLinkState(localAccounts, externalAccounts, 'local-1');
-
-    expect(initiallyChosenAccounts).toEqual({ 'expired-ext-1': 'local-1' });
-    expect(initialDraftLinkAccounts.size).toBe(0);
-  });
-});
-
-describe('removeChosenAccount', () => {
-  const visibleExternalAccountIds = new Set(['new-ext-1']);
-
-  it('drops the expired link of the reauthorized account, so confirming unlinks it', () => {
-    const chosenAccounts = {
-      'expired-ext-1': 'local-1',
-      'new-ext-1': 'local-1',
-      'other-ext': 'local-2',
-    };
-
-    expect(
-      removeChosenAccount(
-        chosenAccounts,
-        'new-ext-1',
-        visibleExternalAccountIds,
-        'local-1',
-      ),
-    ).toEqual({ 'other-ext': 'local-2' });
-  });
-
-  it('keeps the other link of an account that is not being reauthorized', () => {
-    // local-2 is linked to another bank of the same provider. Picking it for
-    // this row by mistake and removing it again must not unlink it there.
-    const chosenAccounts = {
-      'expired-ext-1': 'local-1',
-      'other-ext': 'local-2',
-      'new-ext-1': 'local-2',
-    };
-
-    expect(
-      removeChosenAccount(
-        chosenAccounts,
-        'new-ext-1',
-        visibleExternalAccountIds,
-        'local-1',
-      ),
-    ).toEqual({ 'expired-ext-1': 'local-1', 'other-ext': 'local-2' });
   });
 });
 
