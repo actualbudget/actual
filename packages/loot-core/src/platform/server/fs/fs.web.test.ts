@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
@@ -160,6 +160,29 @@ describe('web filesystem (sqlite-wasm storage)', () => {
       'db.sqlite',
       'file',
     ]);
+  });
+
+  it('retries a bundled file whose fetch failed instead of caching the error', async () => {
+    const bytes = new Uint8Array([1, 2, 3]);
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response('default-db.sqlite\n'))
+      .mockResolvedValueOnce(new Response('not here', { status: 404 }))
+      .mockResolvedValueOnce(new Response(bytes));
+    const environment = process.env.NODE_ENV;
+    // The bundled files are only registered outside the test environment
+    process.env.NODE_ENV = 'development';
+    try {
+      await init({ storage: 'memory-idb' });
+      await expect(readFile('/default-db.sqlite', 'binary')).rejects.toThrow(
+        /404/,
+      );
+      expect(await readFile('/default-db.sqlite', 'binary')).toEqual(bytes);
+      expect(fetchSpy).toHaveBeenCalledTimes(3);
+    } finally {
+      process.env.NODE_ENV = environment;
+      fetchSpy.mockRestore();
+    }
   });
 
   it('persists files under a custom document dir', async () => {

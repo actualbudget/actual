@@ -167,11 +167,21 @@ async function _removeFile(filepath: string) {
   memfs.unlink(path);
 }
 
+// A failed fetch throws rather than hand back its error page as the
+// file, so a lazy file stays registered and the next read tries again
+async function fetchBundled(url: string): Promise<Response> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`fetching ${url} failed: ${response.status}`);
+  }
+  return response;
+}
+
 // Register the bundled files (migrations, default database). They are
 // fetched when first read rather than all at startup.
 async function populateDefaultFilesystem() {
   const index = await (
-    await fetch(process.env.PUBLIC_URL + 'data-file-index.txt')
+    await fetchBundled(process.env.PUBLIC_URL + 'data-file-index.txt')
   ).text();
   const files = index
     .split('\n')
@@ -187,7 +197,7 @@ async function populateDefaultFilesystem() {
     const url = process.env.PUBLIC_URL + 'data/' + file;
     lazyFiles.set(
       path,
-      async () => new Uint8Array(await (await fetch(url)).arrayBuffer()),
+      async () => new Uint8Array(await (await fetchBundled(url)).arrayBuffer()),
     );
     memfs.writeFile(path, null);
   }
