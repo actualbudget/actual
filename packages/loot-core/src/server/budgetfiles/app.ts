@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   StorageMigrationError,
+  StorageUnavailableError,
 } from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
@@ -599,7 +600,8 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'out-of-sync-data'
     | 'opening-budget'
     | 'budget-in-use'
-    | 'storage-migration-failed';
+    | 'storage-migration-failed'
+    | 'storage-unavailable';
 }> {
   let dir: string;
   try {
@@ -632,6 +634,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
     if (e instanceof StorageMigrationError) {
       logger.error('Storage migration failed', e);
       return { error: 'storage-migration-failed' };
+    }
+    if (e instanceof StorageUnavailableError) {
+      logger.error('Storage unavailable', e);
+      return { error: 'storage-unavailable' };
     }
     captureException(e);
     return { error: 'opening-budget' };

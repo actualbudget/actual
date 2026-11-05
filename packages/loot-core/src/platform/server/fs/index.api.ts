@@ -99,9 +99,7 @@ export const readFile: typeof T.readFile = (
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
   const data =
-    contents instanceof ArrayBuffer
-      ? new Uint8Array(contents)
-      : (contents as string | NodeJS.ArrayBufferView);
+    contents instanceof ArrayBuffer ? new Uint8Array(contents) : contents;
   await atomicWriteFile(filepath, data);
   return undefined;
 };

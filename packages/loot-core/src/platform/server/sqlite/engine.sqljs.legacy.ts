@@ -227,9 +227,12 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
 }
 
 export function closeDatabase(db: Database) {
-  db.close();
-  budgetLocks.get(db)?.();
-  budgetLocks.delete(db);
+  try {
+    db.close();
+  } finally {
+    budgetLocks.get(db)?.();
+    budgetLocks.delete(db);
+  }
 }
 
 export async function exportDatabase(db: Database) {

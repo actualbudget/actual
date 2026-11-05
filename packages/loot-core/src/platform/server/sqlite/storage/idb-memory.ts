@@ -193,60 +193,81 @@ export function createMemoryIdbStore({
     return { bytes, rev: rev + 1 };
   }
 
+  function lockBudget(path: string): Promise<() => void> {
+    return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
+      throw new BudgetInUseError(path);
+    });
+  }
+
+  // Concurrent opens of one path share the whole operation, so the lock
+  // is taken and the row loaded once
+  const opening = new Map<string, Promise<WasmDatabase>>();
+
+  function open(path: string): Promise<WasmDatabase> {
+    const inFlight = opening.get(path);
+    if (inFlight) {
+      return inFlight;
+    }
+    const promise = openOnce(path).finally(() => {
+      if (opening.get(path) === promise) {
+        opening.delete(path);
+      }
+    });
+    opening.set(path, promise);
+    return promise;
+  }
+
+  async function openOnce(path: string): Promise<WasmDatabase> {
+    const existing = entries.get(path);
+    if (existing) {
+      return existing.db;
+    }
+    await pendingWrites.get(path);
+    const releaseLock = await lockBudget(path);
+    try {
+      const stranded = unsaved.get(path);
+      const { bytes, rev } =
+        stranded ?? (await loadBytes(path, await getSqliteFileRow(path)));
+      const db = openMemoryDatabase(bytes ?? undefined);
+      const entry: Entry = {
+        path,
+        db,
+        rev,
+        dirty: false,
+        conflicted: false,
+        firstDirtyAt: null,
+        timer: null,
+        pending: null,
+        releaseLock,
+      };
+      if (bytes == null) {
+        // A brand new file: record it so the filesystem lists it
+        await putSqliteFileRow({
+          filepath: path,
+          contents: new Uint8Array(0),
+          storage: 'memory-idb',
+          rev,
+        });
+      }
+      if (bytes == null || stranded) {
+        unsaved.delete(path);
+        entry.dirty = true;
+        entry.firstDirtyAt = Date.now();
+        schedule(entry);
+      }
+      entries.set(path, entry);
+      byDb.set(db, entry);
+      return db;
+    } catch (error) {
+      releaseLock();
+      throw error;
+    }
+  }
+
   const store: SqliteFileStore = {
     kind: 'memory-idb',
 
-    async open(path) {
-      const existing = entries.get(path);
-      if (existing) {
-        return existing.db;
-      }
-      await pendingWrites.get(path);
-      const releaseLock = await acquireWebLock(
-        budgetLockName(path),
-        lockTimeoutMs,
-      ).catch(() => {
-        throw new BudgetInUseError(path);
-      });
-      try {
-        const stranded = unsaved.get(path);
-        const { bytes, rev } =
-          stranded ?? (await loadBytes(path, await getSqliteFileRow(path)));
-        const db = openMemoryDatabase(bytes ?? undefined);
-        const entry: Entry = {
-          path,
-          db,
-          rev,
-          dirty: false,
-          conflicted: false,
-          firstDirtyAt: null,
-          timer: null,
-          pending: null,
-          releaseLock,
-        };
-        if (bytes == null) {
-          // A brand new file: record it so the filesystem lists it
-          await putSqliteFileRow({
-            filepath: path,
-            contents: new Uint8Array(0),
-            storage: 'memory-idb',
-            rev,
-          });
-        }
-        if (bytes == null || stranded) {
-          unsaved.delete(path);
-          entry.dirty = true;
-          entry.firstDirtyAt = Date.now();
-          schedule(entry);
-        }
-        entries.set(path, entry);
-        byDb.set(db, entry);
-        return db;
-      } catch (error) {
-        releaseLock();
-        throw error;
-      }
-    },
+    open,
 
     close(path, db) {
       const entry = entries.get(path);
@@ -257,6 +278,11 @@ export function createMemoryIdbStore({
       if (entry.timer) {
         clearTimeout(entry.timer);
         entry.timer = null;
+      }
+      // Closing discards an open transaction, as sqlite would; never
+      // snapshot half of one
+      if (inTransaction(db)) {
+        db.exec('ROLLBACK');
       }
       // Snapshot while the database is open: changes not written yet, or a
       // write still in flight, which marks the entry dirty again should it
@@ -301,13 +327,22 @@ export function createMemoryIdbStore({
       if (entry) {
         return exportBytes(entry.db);
       }
-      const { bytes } =
-        unsaved.get(path) ??
-        (await loadBytes(path, await getSqliteFileRow(path)));
-      if (bytes == null) {
-        throw new Error('File does not exist: ' + path);
+      const stranded = unsaved.get(path);
+      if (stranded) {
+        return stranded.bytes;
       }
-      return bytes;
+      // Loading may migrate the absurd-sql copy, so hold the budget lock
+      // as an open does
+      const releaseLock = await lockBudget(path);
+      try {
+        const { bytes } = await loadBytes(path, await getSqliteFileRow(path));
+        if (bytes == null) {
+          throw new Error('File does not exist: ' + path);
+        }
+        return bytes;
+      } finally {
+        releaseLock();
+      }
     },
 
     async writeFile(path, bytes) {

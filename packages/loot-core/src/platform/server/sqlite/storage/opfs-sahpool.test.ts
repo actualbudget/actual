@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import type { Sqlite3Static } from '@sqlite.org/sqlite-wasm';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import * as idb from '#platform/server/indexeddb';
 import {
   closeDatabase,
   execQuery,
@@ -26,8 +27,12 @@ const noSleep = () => Promise.resolve();
 const PATH = '/documents/Actual/budget-one/db.sqlite';
 
 // A pool that keeps files in memory and records every call
-function fakePool(files = new Map<string, Uint8Array>()) {
+function fakePool(
+  files = new Map<string, Uint8Array>(),
+  { failUnpauses = 0 } = {},
+) {
   let paused = false;
+  let unpauses = 0;
   const util = {
     vfsName: 'actual-test',
     files,
@@ -39,6 +44,10 @@ function fakePool(files = new Map<string, Uint8Array>()) {
       return util;
     }),
     unpauseVfs: vi.fn(async () => {
+      unpauses++;
+      if (unpauses <= failUnpauses) {
+        throw new Error('NoModificationAllowedError: handles are locked');
+      }
       paused = false;
       return util;
     }),
@@ -264,6 +273,45 @@ describe('OPFS pool store', () => {
     await store.open(PATH);
     expect(pool.unpauseVfs).toHaveBeenCalledTimes(1);
     expect(sqlite3.installOpfsSAHPoolVfs).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries unpausing a pool whose handles are still held', async () => {
+    const pool = fakePool(new Map(), { failUnpauses: 1 });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const db = await store.open(PATH);
+    store.close(PATH, db);
+    await store.open(PATH);
+    expect(pool.unpauseVfs).toHaveBeenCalledTimes(2);
+  });
+
+  it('writes the marker on a later open when the first failed after importing', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('kept'),
+    );
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValueOnce(new Error('quota exceeded'));
+    await expect(store.open(PATH)).rejects.toThrow(/quota/);
+    setSpy.mockRestore();
+    // The file is in the pool, with no row to say so
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+
+    const db = await store.open(PATH);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    store.close(PATH, db);
   });
 
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {

@@ -31,9 +31,9 @@ import type { MigrationProgress, SqliteFileStore } from './types';
 // explicit instead of a failed install.
 
 export const POOL_ROOT = 'actual/pools';
-// A terminated worker releases its access handles asynchronously, so an
-// install right after a tab hand-over can fail; retry with backoff
-const INSTALL_DELAYS_MS = [0, 100, 250, 500, 1000, 2000, 3000];
+// A terminated worker releases its access handles asynchronously, so
+// taking them right after a tab hand-over can fail; retry with backoff
+const RETRY_DELAYS_MS = [0, 100, 250, 500, 1000, 2000, 3000];
 
 // The package's types trail the runtime by one option
 type PoolOptions = Parameters<Sqlite3Static['installOpfsSAHPoolVfs']>[0] & {
@@ -76,29 +76,34 @@ export function createOpfsStore({
 }: Partial<OpfsStoreDependencies> = {}): SqliteFileStore {
   const pools = new Map<string, Pool>();
 
-  async function installPool(dirId: string): Promise<SAHPoolUtil> {
+  // Installing a pool and unpausing one both take the access handles
+  async function withHandleRetries<T>(attempt: () => Promise<T>): Promise<T> {
     let lastError: unknown;
-    for (const delay of INSTALL_DELAYS_MS) {
+    for (const delay of RETRY_DELAYS_MS) {
       if (delay > 0) {
         await sleep(delay);
       }
-      const options: PoolOptions = {
-        name: `actual-${dirId}`,
-        directory: `${POOL_ROOT}/${dirId}`,
-        initialCapacity: 6,
-        clearOnInit: false,
-        // Keep the directory when an install fails, and retry for real
-        // instead of replaying a failure the library cached earlier
-        preserveOnInitFailure: true,
-        forceReinitIfPreviouslyFailed: true,
-      };
       try {
-        return await sqlite3().installOpfsSAHPoolVfs(options);
+        return await attempt();
       } catch (error) {
         lastError = error;
       }
     }
     throw lastError;
+  }
+
+  function installPool(dirId: string): Promise<SAHPoolUtil> {
+    const options: PoolOptions = {
+      name: `actual-${dirId}`,
+      directory: `${POOL_ROOT}/${dirId}`,
+      initialCapacity: 6,
+      clearOnInit: false,
+      // Keep the directory when an install fails, and retry for real
+      // instead of replaying a failure the library cached earlier
+      preserveOnInitFailure: true,
+      forceReinitIfPreviouslyFailed: true,
+    };
+    return withHandleRetries(() => sqlite3().installOpfsSAHPoolVfs(options));
   }
 
   // Holds the lock and live handles for a pool until `release`. Concurrent
@@ -136,7 +141,7 @@ export function createOpfsStore({
     try {
       if (existing) {
         if (existing.util.isPaused()) {
-          await existing.util.unpauseVfs();
+          await withHandleRetries(() => existing.util.unpauseVfs());
         }
         existing.releaseLock = releaseLock;
         return existing;
@@ -318,11 +323,16 @@ export function createOpfsStore({
       });
       applyFilePragmas(db);
       pool.open.set(fileName, db);
-      if (!present) {
+      // The marker can be missing although the file is in the pool, when
+      // an earlier open failed after creating it, so check rather than
+      // trust `present`
+      const row = await getSqliteFileRow(path);
+      if (row?.storage !== 'opfs') {
         await putSqliteFileRow({
           filepath: path,
           contents: '',
           storage: 'opfs',
+          rev: row?.rev,
         });
       }
       return db;

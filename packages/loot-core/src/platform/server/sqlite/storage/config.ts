@@ -30,10 +30,13 @@ export async function detectOpfsSyncAccess(): Promise<boolean> {
     });
     const probeName = `.probe-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const file = await directory.getFileHandle(probeName, { create: true });
-    const handle = await file.createSyncAccessHandle();
-    handle.close();
-    await directory.removeEntry(probeName);
-    return true;
+    try {
+      const handle = await file.createSyncAccessHandle();
+      handle.close();
+      return true;
+    } finally {
+      await directory.removeEntry(probeName).catch(() => undefined);
+    }
   } catch (error) {
     logger.warn('sqlite storage: OPFS unavailable', error);
     return false;

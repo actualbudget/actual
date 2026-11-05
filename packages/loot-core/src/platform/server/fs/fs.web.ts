@@ -116,10 +116,7 @@ async function _readFile(
     }
     if (opts?.encoding === 'utf8' && ArrayBuffer.isView(item.contents)) {
       // Matches the legacy filesystem: binary rows read as text are UTF-16
-      return String.fromCharCode.apply(
-        null,
-        Array.from(new Uint16Array(item.contents.buffer)),
-      );
+      return new TextDecoder('utf-16le').decode(item.contents);
     }
     return item.contents;
   }

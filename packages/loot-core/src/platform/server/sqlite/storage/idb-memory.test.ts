@@ -11,7 +11,7 @@ import {
   transaction,
 } from '#platform/server/sqlite';
 
-import { StorageUnavailableError } from './errors';
+import { BudgetInUseError, StorageUnavailableError } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { legacyDatabaseName } from './paths';
@@ -65,9 +65,7 @@ describe('IndexedDB in-memory store', () => {
     runQuery(db, "INSERT INTO t (v) VALUES ('hello')");
     expect(await rowBytes(PATH)).toBeNull();
 
-    await sleep(80);
-    const persisted = await rowBytes(PATH);
-    expect(persisted).not.toBeNull();
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
     expect((await getSqliteFileRow(PATH))?.storage).toBe('memory-idb');
     closeDatabase(db);
 
@@ -95,21 +93,28 @@ describe('IndexedDB in-memory store', () => {
   it('does not snapshot in the middle of a transaction', async () => {
     const db = await openDatabase(PATH);
     execQuery(db, SCHEMA);
-    await sleep(60);
-    const before = await rowBytes(PATH);
+    const before = await vi.waitFor(async () => {
+      const bytes = await rowBytes(PATH);
+      expect(bytes).not.toBeNull();
+      return bytes as Uint8Array;
+    });
 
     execQuery(db, 'BEGIN');
     runQuery(db, "INSERT INTO t (v) VALUES ('uncommitted')");
+    // Well past the debounce: still the pre-transaction snapshot
     await sleep(80);
-    // Still the pre-transaction snapshot
     expect(
       Buffer.from((await rowBytes(PATH)) as Uint8Array).equals(
-        Buffer.from(before as Uint8Array),
+        Buffer.from(before),
       ),
     ).toBe(true);
     execQuery(db, 'COMMIT');
-    await sleep(80);
-    const after = await openDatabase((await rowBytes(PATH)) as Uint8Array);
+    const committed = await vi.waitFor(async () => {
+      const bytes = (await rowBytes(PATH)) as Uint8Array;
+      expect(Buffer.from(bytes).equals(Buffer.from(before))).toBe(false);
+      return bytes;
+    });
+    const after = await openDatabase(committed);
     expect(runQuery(after, 'SELECT count(*) AS n FROM t', [], true)).toEqual([
       { n: 1 },
     ]);
@@ -146,15 +151,16 @@ describe('IndexedDB in-memory store', () => {
   it('stops persisting and reports when another tab wrote the file', async () => {
     const db = await openDatabase(PATH);
     execQuery(db, SCHEMA);
-    await sleep(60);
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
 
     // Another tab bumps the revision
     const row = await getSqliteFileRow(PATH);
     await putSqliteFileRow({ ...row!, rev: (row?.rev ?? 0) + 5 });
 
     runQuery(db, "INSERT INTO t (v) VALUES ('conflict')");
-    await sleep(80);
-    expect(sendMock).toHaveBeenCalledWith('fallback-write-error');
+    await vi.waitFor(() =>
+      expect(sendMock).toHaveBeenCalledWith('fallback-write-error'),
+    );
     const persisted = await openDatabase((await rowBytes(PATH)) as Uint8Array);
     expect(
       runQuery(persisted, 'SELECT count(*) AS n FROM t', [], true),
@@ -197,8 +203,7 @@ describe('IndexedDB in-memory store', () => {
     expect(runQuery(reopened, 'SELECT v FROM t', [], true)).toEqual([
       { v: 'rescued' },
     ]);
-    await sleep(80);
-    expect(await rowBytes(PATH)).not.toBeNull();
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
     closeDatabase(reopened);
   });
 
@@ -212,9 +217,8 @@ describe('IndexedDB in-memory store', () => {
     // Start the write, then close before it lands
     void getSqliteStore().flush();
     closeDatabase(db);
-    await sleep(30);
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
     setSpy.mockRestore();
-    expect(await rowBytes(PATH)).not.toBeNull();
 
     const reopened = await openDatabase(PATH);
     expect(runQuery(reopened, 'SELECT v FROM t', [], true)).toEqual([
@@ -250,6 +254,55 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(reopened);
     // Let its first write land before the next test resets the store
     await sleep(10);
+  });
+
+  it('hands two concurrent opens of one path the same database', async () => {
+    const store = getSqliteStore();
+    const [first, second] = await Promise.all([
+      store.open(PATH),
+      store.open(PATH),
+    ]);
+    expect(second).toBe(first);
+    store.close(PATH, first);
+    await sleep(10);
+  });
+
+  it('holds the budget lock while reading a file it may have to migrate', async () => {
+    // The legacy filesystem's marker row, so the read looks for absurd-sql
+    // data
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const request = vi.fn(() =>
+      Promise.reject(new DOMException('aborted', 'AbortError')),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      await expect(getSqliteStore().readFile(PATH)).rejects.toBeInstanceOf(
+        BudgetInUseError,
+      );
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
+  it('discards an open transaction when the database closes', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    execQuery(db, 'BEGIN');
+    runQuery(db, "INSERT INTO t (v) VALUES ('uncommitted')");
+    closeDatabase(db);
+    await sleep(10);
+
+    const reopened = await openDatabase(PATH);
+    expect(runQuery(reopened, 'SELECT count(*) AS n FROM t', [], true)).toEqual(
+      [{ n: 0 }],
+    );
+    closeDatabase(reopened);
   });
 
   it('refuses a database held in OPFS rather than shadow it', async () => {

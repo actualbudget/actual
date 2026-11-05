@@ -23,7 +23,11 @@ export type {
   StorageBackend,
   TransactionOptions,
 } from './types';
-export { BudgetInUseError, StorageMigrationError } from './storage/errors';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 
 // Callers hold the opaque handles from `./types`; the native module is the
 // only place that knows they are better-sqlite3 objects

@@ -23,7 +23,11 @@ export type {
   StorageBackend,
   TransactionOptions,
 } from './types';
-export { BudgetInUseError, StorageMigrationError } from './storage/errors';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 // Used by the legacy filesystem layer and its tests
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';
