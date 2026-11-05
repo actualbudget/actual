@@ -34,7 +34,8 @@ vulnerability:
 - **Shared bank-sync credentials.** An admin can configure server-wide (global)
   credentials for bank-sync providers (GoCardless, Enable Banking, SimpleFIN,
   Pluggy.ai, Akahu and others). Any signed-in user on that server can use them.
-  This stays the case when per-budget credentials are also available.
+  This feature will remain alongside per-budget credentials; a budget that has
+  its own credentials uses those instead of the global ones.
 
   For some providers (for example SimpleFIN and Akahu) the global credential is
   tied to the bank connections of the person who set it up. Every user on the

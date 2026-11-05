@@ -24,10 +24,11 @@ export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
 // SECURITY NOTE (intended behaviour - not a vulnerability):
-// These routes only require a valid session; they deliberately do NOT check
-// the user's role. An admin can configure server-wide (global) bank-sync
-// credentials, and every signed-in user on that server may use them. This is
-// a supported feature and stays even where per-budget credentials exist.
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
