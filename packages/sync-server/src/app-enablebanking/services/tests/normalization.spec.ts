@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import type { EnableBankingTransaction } from '#app-enablebanking/services/enablebanking-service';
 import {
   isImportableTransaction,
   normalizeAccount,
@@ -165,7 +166,7 @@ describe('normalizeTransaction', () => {
   it('should handle minimal transaction with empty payee', () => {
     const result = normalizeTransaction(mockTransactionMinimal);
     expect(result.payeeName).toBe('');
-    expect(result.transactionId).toMatch(/^derived-/);
+    expect(result.transactionId).toBe('');
     expect(result.bookingDate).toBe('');
     expect(result.booked).toBe(true);
   });
@@ -336,7 +337,7 @@ describe('normalizeTransaction shape for bank-sync mapping', () => {
   });
 });
 
-describe('normalizeTransaction without a bank-provided id', () => {
+describe('normalizeTransactions without a bank-provided id', () => {
   // Shape reported for an ABN AMRO fee: an empty entry_reference and no
   // transaction_id.
   const feeWithoutId = {
@@ -349,16 +350,15 @@ describe('normalizeTransaction without a bank-provided id', () => {
     remittance_information: ['BasisPakket Betalen 4,30', 'Betaalpas 1,50'],
   };
 
+  const idOf = (tx: EnableBankingTransaction) =>
+    normalizeTransactions([tx])[0].transactionId;
+
   it('derives an id instead of leaving it empty', () => {
-    expect(normalizeTransaction(feeWithoutId).transactionId).toMatch(
-      /^derived-[0-9a-f]+$/,
-    );
+    expect(idOf(feeWithoutId)).toMatch(/^derived-[0-9a-f]+$/);
   });
 
   it('derives the same id for the same transaction on a later sync', () => {
-    expect(normalizeTransaction(feeWithoutId).transactionId).toBe(
-      normalizeTransaction({ ...feeWithoutId }).transactionId,
-    );
+    expect(idOf(feeWithoutId)).toBe(idOf({ ...feeWithoutId }));
   });
 
   it.each([
@@ -368,15 +368,11 @@ describe('normalizeTransaction without a bank-provided id', () => {
     ['counterparty', { creditor: { name: 'Another Bank' } }],
     ['remittance text', { remittance_information: ['Something else'] }],
   ])('derives a different id when the %s differs', (_field, change) => {
-    expect(
-      normalizeTransaction({ ...feeWithoutId, ...change }).transactionId,
-    ).not.toBe(normalizeTransaction(feeWithoutId).transactionId);
+    expect(idOf({ ...feeWithoutId, ...change })).not.toBe(idOf(feeWithoutId));
   });
 
   it('keeps the id when a pending transaction becomes booked', () => {
-    expect(
-      normalizeTransaction({ ...feeWithoutId, status: 'PDNG' }).transactionId,
-    ).toBe(normalizeTransaction(feeWithoutId).transactionId);
+    expect(idOf({ ...feeWithoutId, status: 'PDNG' })).toBe(idOf(feeWithoutId));
   });
 
   it('keeps the id when a pending transaction is booked on a later date', () => {
@@ -394,9 +390,7 @@ describe('normalizeTransaction without a bank-provided id', () => {
       transaction_date: '2026-08-25',
     };
 
-    expect(normalizeTransaction(pending).transactionId).toBe(
-      normalizeTransaction(booked).transactionId,
-    );
+    expect(idOf(pending)).toBe(idOf(booked));
   });
 
   it('gives identical transactions in one response distinct, repeatable ids', () => {
@@ -427,6 +421,21 @@ describe('normalizeTransaction without a bank-provided id', () => {
 
     expect(bookedId).toBe(bookedAloneId);
     expect(pendingId).not.toBe(bookedId);
+  });
+
+  it('does not let a transaction that cannot be imported take a number', () => {
+    // The first entry is dropped later for its unusable date. If it took the
+    // first number, the valid entry would change id once it is gone.
+    const valid = { ...feeWithoutId, transaction_date: '2026-08-25' };
+    const unimportable = { ...valid, booking_date: '26/08/2026' };
+
+    const [unimportableId, validId] = normalizeTransactions([
+      unimportable,
+      valid,
+    ]).map(tx => tx.transactionId);
+
+    expect(validId).toBe(idOf(valid));
+    expect(unimportableId).toBe('');
   });
 
   it('keeps transactions in the order the bank sent them', () => {

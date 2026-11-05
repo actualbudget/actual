@@ -228,8 +228,7 @@ function cleanRemittanceArray(arr: string[]): string[] {
 // suffix. Nothing the bank sends tells them apart, so only their number
 // matters: if one of them stops being returned, the rest are renumbered and
 // the last transaction in Actual is the one left without a match, exactly as
-// if that had been the one to go. `normalizeTransactions` numbers booked
-// postings first, so a pending one coming or going never renumbers them.
+// if that had been the one to go.
 function deriveTransactionId(
   tx: EnableBankingTransaction,
   derivedIdCounts: Map<string, number>,
@@ -250,35 +249,35 @@ function deriveTransactionId(
   return count === 0 ? base : `${base}-${count}`;
 }
 
-// Normalizes one response. Ids are derived for booked postings before pending
-// ones (see `deriveTransactionId`); the order of the result is the bank's.
+// Normalizes one response, in the bank's order, and derives the ids the bank
+// did not send (see `deriveTransactionId`). Booked postings are numbered
+// before pending ones, and postings Actual cannot import are left without an
+// id so they never take a number.
 export function normalizeTransactions(
   transactions: EnableBankingTransaction[],
 ): BankSyncTransaction[] {
+  const normalized = transactions.map(normalizeTransaction);
   const derivedIdCounts = new Map<string, number>();
-  const normalized = new Array<BankSyncTransaction>(transactions.length);
 
-  for (const isPending of [false, true]) {
-    transactions.forEach((tx, index) => {
-      if ((tx.status === 'PDNG') === isPending) {
-        normalized[index] = normalizeTransaction(tx, derivedIdCounts);
+  for (const isBooked of [true, false]) {
+    for (const tx of normalized) {
+      if (
+        !tx.transactionId &&
+        tx.booked === isBooked &&
+        isImportableTransaction(tx)
+      ) {
+        tx.transactionId = deriveTransactionId(tx, derivedIdCounts);
       }
-    });
+    }
   }
 
   return normalized;
 }
 
-// `derivedIdCounts` must be shared by all transactions of one response; use
-// `normalizeTransactions` for a whole response.
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
-  derivedIdCounts: Map<string, number> = new Map(),
 ): BankSyncTransaction {
-  const transactionId =
-    tx.entry_reference ||
-    tx.transaction_id ||
-    deriveTransactionId(tx, derivedIdCounts);
+  const transactionId = tx.entry_reference || tx.transaction_id || '';
   const bookingDate =
     tx.booking_date || tx.value_date || tx.transaction_date || '';
   const valueDate = tx.value_date;
