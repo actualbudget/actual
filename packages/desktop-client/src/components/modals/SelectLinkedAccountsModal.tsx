@@ -158,15 +158,6 @@ export function computeInitialLinkState(
         initiallyChosenAccounts[account.account_id] === upgradingAccountId,
     )
   ) {
-    // Drop the link being replaced, so removing the preselected row unlinks
-    // the account instead of leaving it on the old id.
-    for (const [externalId, localId] of Object.entries(
-      initiallyChosenAccounts,
-    )) {
-      if (localId === upgradingAccountId) {
-        delete initiallyChosenAccounts[externalId];
-      }
-    }
     initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
       upgradingAccountId;
     initialDraftLinkAccounts.set(
@@ -176,6 +167,35 @@ export function computeInitialLinkState(
   }
 
   return { initialDraftLinkAccounts, initiallyChosenAccounts };
+}
+
+/**
+ * Clears the account chosen for a row. Removing the account that is being
+ * reauthorized also drops its previous link (an id the provider no longer
+ * returns), so confirming the modal unlinks it instead of leaving it on that
+ * id. Any other account keeps the links it has outside the visible rows, e.g.
+ * to another bank of the same provider.
+ */
+export function removeChosenAccount(
+  chosenAccounts: Record<string, string>,
+  externalAccountId: string,
+  visibleExternalAccountIds: ReadonlySet<string>,
+  upgradingAccountId: string | undefined,
+): Record<string, string> {
+  const { [externalAccountId]: removedLocalAccountId, ...remaining } =
+    chosenAccounts;
+
+  if (!upgradingAccountId || removedLocalAccountId !== upgradingAccountId) {
+    return remaining;
+  }
+
+  return Object.fromEntries(
+    Object.entries(remaining).filter(
+      ([id, localAccountId]) =>
+        localAccountId !== upgradingAccountId ||
+        visibleExternalAccountIds.has(id),
+    ),
+  );
 }
 
 export type SelectLinkedAccountsModalProps =
@@ -439,21 +459,22 @@ export function SelectLinkedAccountsModal({
     localAccountId: string | null | undefined,
   ) {
     setChosenAccounts(accounts => {
-      const updatedAccounts = { ...accounts };
-
       if (localAccountId) {
-        updatedAccounts[externalAccount.account_id] = localAccountId;
         setDraftLinkAccounts(prev =>
           new Map(prev).set(externalAccount.account_id, 'linking'),
         );
-      } else {
-        delete updatedAccounts[externalAccount.account_id];
-        setDraftLinkAccounts(prev =>
-          new Map(prev).set(externalAccount.account_id, 'unlinking'),
-        );
+        return { ...accounts, [externalAccount.account_id]: localAccountId };
       }
 
-      return updatedAccounts;
+      setDraftLinkAccounts(prev =>
+        new Map(prev).set(externalAccount.account_id, 'unlinking'),
+      );
+      return removeChosenAccount(
+        accounts,
+        externalAccount.account_id,
+        currentExternalAccountIds,
+        upgradingAccountId,
+      );
     });
   }
 

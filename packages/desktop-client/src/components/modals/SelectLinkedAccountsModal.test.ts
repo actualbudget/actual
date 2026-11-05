@@ -8,6 +8,7 @@ import {
   computeInitialLinkState,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
+  removeChosenAccount,
   resolveStartingSettings,
 } from './SelectLinkedAccountsModal';
 
@@ -135,14 +136,54 @@ describe('computeInitialLinkState', () => {
 
     expect(initiallyChosenAccounts['new-ext-1']).toBe('local-1');
     expect(initialDraftLinkAccounts.get('new-ext-1')).toBe('linking');
-    // The replaced link is gone, so removing the preselected row leaves the
-    // account unchosen and confirming the modal unlinks it.
-    expect(initiallyChosenAccounts).not.toHaveProperty('expired-ext-1');
+    // The expired link is kept, so picking a different account for the row
+    // leaves the reauthorized account linked instead of silently unlinking it.
+    expect(initiallyChosenAccounts['expired-ext-1']).toBe('local-1');
     // Every previously linked account stays chosen, so confirming the modal
     // does not unlink any of them.
     expect(Object.values(initiallyChosenAccounts)).toEqual(
       expect.arrayContaining(['local-1', 'local-2']),
     );
+  });
+});
+
+describe('removeChosenAccount', () => {
+  const visibleExternalAccountIds = new Set(['new-ext-1']);
+
+  it('drops the expired link of the reauthorized account, so confirming unlinks it', () => {
+    const chosenAccounts = {
+      'expired-ext-1': 'local-1',
+      'new-ext-1': 'local-1',
+      'other-ext': 'local-2',
+    };
+
+    expect(
+      removeChosenAccount(
+        chosenAccounts,
+        'new-ext-1',
+        visibleExternalAccountIds,
+        'local-1',
+      ),
+    ).toEqual({ 'other-ext': 'local-2' });
+  });
+
+  it('keeps the other link of an account that is not being reauthorized', () => {
+    // local-2 is linked to another bank of the same provider. Picking it for
+    // this row by mistake and removing it again must not unlink it there.
+    const chosenAccounts = {
+      'expired-ext-1': 'local-1',
+      'other-ext': 'local-2',
+      'new-ext-1': 'local-2',
+    };
+
+    expect(
+      removeChosenAccount(
+        chosenAccounts,
+        'new-ext-1',
+        visibleExternalAccountIds,
+        'local-1',
+      ),
+    ).toEqual({ 'expired-ext-1': 'local-1', 'other-ext': 'local-2' });
   });
 });
 
