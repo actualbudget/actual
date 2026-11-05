@@ -66,6 +66,48 @@ describe('web filesystem', () => {
     await idb.del(after, dir + '/db.sqlite');
   });
 
+  test('holds every budget in a directory before removing any of it', async () => {
+    const dir = '/documents/Actual/held';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await idb.set(store, {
+      filepath: dir + '/backups/old.sqlite',
+      contents: '',
+    });
+    await sqlite.init();
+    await init();
+    // A Web Locks API that grants and records
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback(),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    const delSpy = vi.spyOn(idb, 'del');
+    try {
+      await removeDirRecursively(dir);
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    expect(await exists(dir)).toBe(false);
+    // The budget's own lock was taken before the first row went, not only
+    // when its database's turn came in the walk
+    const budgetLock = request.mock.calls.findIndex(
+      call => call[0] === 'actual-budget:documents-Actual-held',
+    );
+    expect(budgetLock).toBeGreaterThanOrEqual(0);
+    expect(request.mock.invocationCallOrder[budgetLock]).toBeLessThan(
+      delSpy.mock.invocationCallOrder[0],
+    );
+    delSpy.mockRestore();
+  });
+
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();
