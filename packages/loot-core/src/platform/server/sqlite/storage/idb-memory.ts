@@ -258,17 +258,23 @@ export function createMemoryIdbStore({
         clearTimeout(entry.timer);
         entry.timer = null;
       }
-      let bytes: Uint8Array | null = null;
-      if (entry.dirty && !entry.conflicted) {
-        bytes = exportBytes(db);
-        entry.dirty = false;
-      }
+      // Snapshot while the database is open: changes not written yet, or a
+      // write still in flight, which marks the entry dirty again should it
+      // fail, so the chain below only writes the snapshot when it must
+      const bytes =
+        !entry.conflicted && (entry.dirty || entry.pending != null)
+          ? exportBytes(db)
+          : null;
       db.close();
       entries.delete(path);
       byDb.delete(db);
       const previous = entry.pending ?? Promise.resolve();
       entry.pending = previous
-        .then(() => (bytes ? persist(entry, bytes) : undefined))
+        .then(() =>
+          bytes && entry.dirty && !entry.conflicted
+            ? persist(entry, bytes)
+            : undefined,
+        )
         .catch(error => {
           logger.error(
             'sqlite storage: failed to persist on close',
@@ -316,6 +322,7 @@ export function createMemoryIdbStore({
         storage: 'memory-idb',
         rev: (row?.rev ?? 0) + 1,
       });
+      unsaved.delete(path);
     },
 
     async removeFile(path) {
@@ -326,6 +333,7 @@ export function createMemoryIdbStore({
         await pendingWrites.get(path);
       }
       await deleteSqliteFileRow(path);
+      unsaved.delete(path);
       await deleteLegacyDatabase(legacyDatabaseName(path));
     },
 
