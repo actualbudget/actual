@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import * as idb from '#platform/server/indexeddb';
 import {
   closeDatabase,
   execQuery,
@@ -171,6 +172,29 @@ describe('IndexedDB in-memory store', () => {
     const row = await getSqliteFileRow(PATH);
     expect(row?.storage).toBe('memory-idb');
     expect(ArrayBuffer.isView(row?.contents)).toBe(true);
+  });
+
+  it('keeps a snapshot whose write on close failed for the next open', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    runQuery(db, "INSERT INTO t (v) VALUES ('rescued')");
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValueOnce(new Error('quota exceeded'));
+    closeDatabase(db);
+    await sleep(10);
+    setSpy.mockRestore();
+    // Nothing landed in the row
+    expect(await rowBytes(PATH)).toBeNull();
+
+    // The next open continues from the snapshot and writes it
+    const reopened = await openDatabase(PATH);
+    expect(runQuery(reopened, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'rescued' },
+    ]);
+    await sleep(80);
+    expect(await rowBytes(PATH)).not.toBeNull();
+    closeDatabase(reopened);
   });
 
   it('refuses a database held in OPFS rather than shadow it', async () => {

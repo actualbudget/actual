@@ -255,19 +255,21 @@ export function createOpfsStore({
       storage: 'opfs',
       rev: row.rev,
     });
+    await deleteLegacyDatabase(legacyDatabaseName(path));
     return true;
   }
 
-  // Whatever already holds this database: absurd-sql's layout, or the
-  // fallback store's row
+  // Whatever already holds this database. The fallback store's row is what
+  // the app last used, so it wins over an absurd-sql copy its own migration
+  // could not delete.
   async function importExisting(
     pool: Pool,
     path: string,
     fileName: string,
   ): Promise<boolean> {
     return (
-      (await migrateLegacy(pool, path, fileName)) ||
-      (await promoteFallbackRow(pool, path, fileName))
+      (await promoteFallbackRow(pool, path, fileName)) ||
+      (await migrateLegacy(pool, path, fileName))
     );
   }
 

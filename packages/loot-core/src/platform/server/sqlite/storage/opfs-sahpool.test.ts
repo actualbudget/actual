@@ -319,6 +319,32 @@ describe('OPFS pool store', () => {
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
   });
 
+  it('prefers the fallback row over a stale absurd-sql copy', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('stale'));
+    const current = await budgetBytes('current');
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: current,
+      storage: 'memory-idb',
+      rev: 2,
+    });
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH);
+    const imported = pool.files.get('/db.sqlite');
+    expect(imported && Buffer.from(imported).equals(Buffer.from(current))).toBe(
+      true,
+    );
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
   it('adopts a database the fallback store persisted', async () => {
     // The browser gained sync access handles since the fallback stored
     // this budget whole in its row

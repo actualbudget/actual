@@ -15,14 +15,24 @@ export async function getSqliteFileRow(
   return idb.get(store, path);
 }
 
+// A request can succeed and its transaction still abort (quota, mostly),
+// so writes resolve only once the transaction has committed
+function committed(transaction: IDBTransaction): Promise<void> {
+  return new Promise((resolve, reject) => {
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
 export async function putSqliteFileRow(row: Data): Promise<void> {
-  const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  await idb.set(store, row);
+  const { trans, store } = idb.getStore(await idb.openDatabase(), 'files');
+  await Promise.all([idb.set(store, row), committed(trans)]);
 }
 
 export async function deleteSqliteFileRow(path: string): Promise<void> {
-  const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  await idb.del(store, path);
+  const { trans, store } = idb.getStore(await idb.openDatabase(), 'files');
+  await Promise.all([idb.del(store, path), committed(trans)]);
 }
 
 // Whether any sqlite file already moved off absurd-sql. Used at startup:

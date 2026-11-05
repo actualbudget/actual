@@ -300,6 +300,33 @@ describe('legacy sql.js engine', () => {
 
   itBehavesLikeSqlite();
 
+  it('releases the shared budget lock when the open fails', async () => {
+    let released = false;
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback().then(() => {
+          released = true;
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      // No such file in the legacy filesystem, so the open fails after
+      // the lock was taken
+      await expect(
+        openDatabase('/documents/Actual/missing/db.sqlite'),
+      ).rejects.toThrow();
+      await vi.waitFor(() => expect(released).toBe(true));
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
   it('shares the budget lock and reports a budget in use when it is held', async () => {
     // A fake Web Locks API that times out, as it does while another
     // worker holds the budget exclusively

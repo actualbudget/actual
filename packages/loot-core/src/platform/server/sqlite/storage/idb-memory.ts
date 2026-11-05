@@ -75,6 +75,9 @@ export function createMemoryIdbStore({
   const byDb = new Map<WasmDatabase, Entry>();
   // Writes still in flight for closed databases, keyed by path
   const pendingWrites = new Map<string, Promise<void>>();
+  // Snapshots whose write on close failed, kept so the next open of the
+  // path continues from them instead of the stale row, and writes again
+  const unsaved = new Map<string, { bytes: Uint8Array; rev: number }>();
 
   function inTransaction(db: WasmDatabase): boolean {
     const { capi } = getSqlite3();
@@ -206,10 +209,9 @@ export function createMemoryIdbStore({
         throw new BudgetInUseError(path);
       });
       try {
-        const { bytes, rev } = await loadBytes(
-          path,
-          await getSqliteFileRow(path),
-        );
+        const stranded = unsaved.get(path);
+        const { bytes, rev } =
+          stranded ?? (await loadBytes(path, await getSqliteFileRow(path)));
         const db = openMemoryDatabase(bytes ?? undefined);
         const entry: Entry = {
           path,
@@ -230,6 +232,9 @@ export function createMemoryIdbStore({
             storage: 'memory-idb',
             rev,
           });
+        }
+        if (bytes == null || stranded) {
+          unsaved.delete(path);
           entry.dirty = true;
           entry.firstDirtyAt = Date.now();
           schedule(entry);
@@ -264,13 +269,16 @@ export function createMemoryIdbStore({
       const previous = entry.pending ?? Promise.resolve();
       entry.pending = previous
         .then(() => (bytes ? persist(entry, bytes) : undefined))
-        .catch(error =>
+        .catch(error => {
           logger.error(
             'sqlite storage: failed to persist on close',
             path,
             error,
-          ),
-        )
+          );
+          if (bytes) {
+            unsaved.set(path, { bytes, rev: entry.rev });
+          }
+        })
         .finally(() => entry.releaseLock());
       // Keep the write reachable for readFile/removeFile until it lands
       pendingWrites.set(path, entry.pending);
@@ -287,7 +295,9 @@ export function createMemoryIdbStore({
       if (entry) {
         return exportBytes(entry.db);
       }
-      const { bytes } = await loadBytes(path, await getSqliteFileRow(path));
+      const { bytes } =
+        unsaved.get(path) ??
+        (await loadBytes(path, await getSqliteFileRow(path)));
       if (bytes == null) {
         throw new Error('File does not exist: ' + path);
       }
