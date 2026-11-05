@@ -305,6 +305,36 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(reopened);
   });
 
+  it('persists a write that returns rows', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    const before = await vi.waitFor(async () => {
+      const bytes = await rowBytes(PATH);
+      expect(bytes).not.toBeNull();
+      return bytes as Uint8Array;
+    });
+
+    expect(
+      runQuery(
+        db,
+        "INSERT INTO t (v) VALUES ('returned') RETURNING id",
+        [],
+        true,
+      ),
+    ).toEqual([{ id: 1 }]);
+    const after = await vi.waitFor(async () => {
+      const bytes = (await rowBytes(PATH)) as Uint8Array;
+      expect(Buffer.from(bytes).equals(Buffer.from(before))).toBe(false);
+      return bytes;
+    });
+    const copy = await openDatabase(after);
+    expect(runQuery(copy, 'SELECT count(*) AS n FROM t', [], true)).toEqual([
+      { n: 1 },
+    ]);
+    closeDatabase(copy);
+    closeDatabase(db);
+  });
+
   it('refuses a database held in OPFS rather than shadow it', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
     await expect(openDatabase(PATH)).rejects.toBeInstanceOf(

@@ -4,6 +4,7 @@ import { getSqliteStore } from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
+  getSqlite3,
   initSqlite3,
   installUserFunctions,
   openMemoryDatabase,
@@ -33,6 +34,15 @@ const openPaths = new Map<WasmDatabase, string>();
 
 function notifyWrite(db: WasmDatabase) {
   getSqliteStore().onWrite?.(db);
+}
+
+// Writes can return rows too (RETURNING, pragmas that set a value), so a
+// fetch tells the store unless sqlite says the statement is read-only
+function isReadOnly(statement: PreparedStatement): boolean {
+  return (
+    statement.pointer != null &&
+    getSqlite3().capi.sqlite3_stmt_readonly(statement.pointer) !== 0
+  );
 }
 
 function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
@@ -83,6 +93,9 @@ function runQuery<T>(
           row[columns[index]] = values[index];
         }
         rows.push(row as T);
+      }
+      if (!isReadOnly(statement)) {
+        notifyWrite(database);
       }
       return rows;
     }
