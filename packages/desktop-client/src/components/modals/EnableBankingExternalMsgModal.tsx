@@ -66,11 +66,12 @@ function useAvailableBanks(
       if (cancelled) return;
 
       // A failed Enable Banking request still resolves, carrying the reason
-      // in `data.error` instead of a list of banks.
+      // in `data.error` instead of a list of banks. A request that never
+      // reached Enable Banking carries it in `error.message`.
       if (error || data?.error) {
         setIsError(true);
         setErrorMessage(
-          typeof data?.error === 'string' ? data.error : undefined,
+          typeof data?.error === 'string' ? data.error : error?.message,
         );
         setBanks([]);
       } else {
@@ -303,7 +304,7 @@ export function EnableBankingExternalMsgModal({
             </Trans>
             {bankOptionErrorMessage && (
               <View style={{ marginTop: 5 }}>
-                {t('Enable Banking reported: {{ message }}', {
+                {t('Details: {{ message }}', {
                   message: bankOptionErrorMessage,
                 })}
               </View>

@@ -158,6 +158,15 @@ export function computeInitialLinkState(
         initiallyChosenAccounts[account.account_id] === upgradingAccountId,
     )
   ) {
+    // Drop the link being replaced, so removing the preselected row unlinks
+    // the account instead of leaving it on the old id.
+    for (const [externalId, localId] of Object.entries(
+      initiallyChosenAccounts,
+    )) {
+      if (localId === upgradingAccountId) {
+        delete initiallyChosenAccounts[externalId];
+      }
+    }
     initiallyChosenAccounts[unmatchedExternalAccounts[0].account_id] =
       upgradingAccountId;
     initialDraftLinkAccounts.set(

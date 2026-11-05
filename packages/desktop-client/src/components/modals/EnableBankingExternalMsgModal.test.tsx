@@ -43,9 +43,28 @@ it('shows the reason when Enable Banking refuses to list banks', async () => {
   );
 
   expect(
-    await screen.findByText(
-      'Enable Banking reported: Application is not active',
-    ),
+    await screen.findByText('Details: Application is not active'),
   ).toBeInTheDocument();
   expect(screen.queryByLabelText('Choose your bank:')).not.toBeInTheDocument();
+});
+
+it('shows the reason when the request for the bank list fails', async () => {
+  vi.mocked(sendCatch).mockResolvedValue({
+    data: undefined,
+    error: { type: 'ServerError', message: 'network-failure' },
+  });
+
+  render(
+    <TestProviders>
+      <EnableBankingExternalMsgModal
+        onMoveExternal={vi.fn()}
+        onSuccess={vi.fn()}
+        onClose={vi.fn()}
+      />
+    </TestProviders>,
+  );
+
+  expect(
+    await screen.findByText('Details: network-failure'),
+  ).toBeInTheDocument();
 });

@@ -135,6 +135,9 @@ describe('computeInitialLinkState', () => {
 
     expect(initiallyChosenAccounts['new-ext-1']).toBe('local-1');
     expect(initialDraftLinkAccounts.get('new-ext-1')).toBe('linking');
+    // The replaced link is gone, so removing the preselected row leaves the
+    // account unchosen and confirming the modal unlinks it.
+    expect(initiallyChosenAccounts).not.toHaveProperty('expired-ext-1');
     // Every previously linked account stays chosen, so confirming the modal
     // does not unlink any of them.
     expect(Object.values(initiallyChosenAccounts)).toEqual(
