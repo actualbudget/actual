@@ -4,6 +4,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
 import { BudgetInUseError } from '#platform/server/sqlite/storage/errors';
+import { getSqliteFileRow } from '#platform/server/sqlite/storage/files-store';
 import {
   initWasmEngine,
   resetIndexedDb,
@@ -240,6 +241,25 @@ describe('web filesystem (sqlite-wasm storage)', () => {
     expect(await exists(dir + '/backups/old.sqlite')).toBe(true);
     expect(await exists(dir + '/db.sqlite')).toBe(true);
     expect(await exists(dir + '/metadata.json')).toBe(true);
+  });
+
+  it('treats the temporary copy a backup makes as a database', async () => {
+    const dir = '/documents/Actual/backed';
+    await init({ storage: 'memory-idb' });
+    await mkdir(dir);
+    await mkdir(dir + '/backups');
+    await writeFile(dir + '/db.sqlite', await databaseBytes());
+    const temporary = dir + '/backups/db.1.sqlite.tmp';
+    await copyFile(dir + '/db.sqlite', temporary);
+    // Held by the sqlite storage, so the engine opens the copy itself
+    expect((await getSqliteFileRow(temporary))?.storage).toBe('memory-idb');
+    const copy = await sqlite.openDatabase(temporary);
+    expect(sqlite.runQuery(copy, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'x' },
+    ]);
+    sqlite.closeDatabase(copy);
+    await removeFile(temporary);
+    expect(await exists(temporary)).toBe(false);
   });
 
   it('persists files under a custom document dir', async () => {

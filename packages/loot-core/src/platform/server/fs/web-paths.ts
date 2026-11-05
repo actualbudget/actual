@@ -27,8 +27,9 @@ export function filename(filepath: string): string {
   return parts[parts.length - 1];
 }
 
+// Backups copy the database to a `.sqlite.tmp` path and open that copy
 export function isSqlitePath(filepath: string): boolean {
-  return filepath.endsWith('.sqlite');
+  return filepath.endsWith('.sqlite') || filepath.endsWith('.sqlite.tmp');
 }
 
 // The storage identifier of a path, also the name absurd-sql used for

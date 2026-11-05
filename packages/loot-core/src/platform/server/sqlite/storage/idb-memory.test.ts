@@ -13,7 +13,11 @@ import {
 
 import * as absurdMigration from './absurd-migration';
 import { BudgetInUseError, StorageUnavailableError } from './errors';
-import { getSqliteFileRow, putSqliteFileRow } from './files-store';
+import {
+  getSqliteFileRow,
+  putSqliteFileRow,
+  putSqliteFileRowIfRev,
+} from './files-store';
 import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { legacyDatabaseName } from './paths';
 import {
@@ -498,6 +502,38 @@ describe('IndexedDB in-memory store', () => {
     await store.removeFiles([PATH, other]);
     expect(await store.exists(PATH)).toBe(false);
     expect(await store.exists(other)).toBe(false);
+  });
+
+  it('writes a row only at the revision it expects', async () => {
+    await putSqliteFileRow({ filepath: PATH, contents: '', rev: 1 });
+    const next = { filepath: PATH, contents: new Uint8Array([1]), rev: 2 };
+    expect(await putSqliteFileRowIfRev(next, 1)).toBe(true);
+    expect(await putSqliteFileRowIfRev({ ...next, rev: 3 }, 1)).toBe(false);
+    expect((await getSqliteFileRow(PATH))?.rev).toBe(2);
+  });
+
+  it('reports files it could not write when flushed', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    await vi.waitFor(async () => expect(await rowBytes(PATH)).not.toBeNull());
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValue(new Error('quota exceeded'));
+    const store = getSqliteStore();
+    try {
+      runQuery(db, "INSERT INTO t (v) VALUES ('stuck')");
+      await expect(store.flush()).rejects.toThrow(/not written/);
+    } finally {
+      setSpy.mockRestore();
+    }
+
+    await store.flush();
+    const copy = await openDatabase((await rowBytes(PATH)) as Uint8Array);
+    expect(runQuery(copy, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'stuck' },
+    ]);
+    closeDatabase(copy);
+    closeDatabase(db);
   });
 
   it('refuses a database held in OPFS rather than shadow or take it over', async () => {

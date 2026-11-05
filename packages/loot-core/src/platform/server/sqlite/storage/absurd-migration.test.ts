@@ -14,7 +14,7 @@ import {
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
-import { StorageMigrationError } from './errors';
+import { BudgetInUseError, StorageMigrationError } from './errors';
 import { legacyDatabaseName } from './paths';
 import {
   initWasmEngine,
@@ -43,6 +43,30 @@ async function makeDatabaseBytes(
   const bytes = await exportDatabase(db);
   closeDatabase(db);
   return bytes;
+}
+
+// Another tab's absurd-sql connection, which closes on a version change
+// unless told to stay
+function holdLegacyConnection(
+  name: string,
+  { stubborn = false } = {},
+): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name, 2);
+    request.onsuccess = () => {
+      const database = request.result;
+      if (!stubborn) {
+        database.onversionchange = () => database.close();
+      }
+      resolve(database);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function legacyVersion(name: string): Promise<number | undefined> {
+  return (await indexedDB.databases()).find(database => database.name === name)
+    ?.version;
 }
 
 beforeAll(() => initWasmEngine());
@@ -124,6 +148,56 @@ describe('absurd-sql migration helpers', () => {
     expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
     // The empty one is cleaned up
     expect(await listIndexedDbNames()).not.toContain(NAME);
+  });
+
+  it('keeps a legacy database whose size metadata is damaged', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const database = await holdLegacyConnection(NAME);
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction('data', 'readwrite');
+      transaction.objectStore('data').delete(-1);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    database.close();
+
+    await expect(readLegacyDatabaseBytes(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    expect(await listIndexedDbNames()).toContain(NAME);
+  });
+
+  it('closes other connections to the legacy database before copying it', async () => {
+    const bytes = await makeDatabaseBytes(5);
+    await seedLegacyDatabase(NAME, bytes);
+    const other = await holdLegacyConnection(NAME);
+    let closed = false;
+    other.addEventListener('close', () => {
+      closed = true;
+    });
+    const previous = other.onversionchange;
+    other.onversionchange = event => {
+      closed = true;
+      previous?.call(other, event);
+    };
+
+    expect((await readLegacyDatabaseBytes(PATH))?.length).toBe(bytes.length);
+    expect(closed).toBe(true);
+    // The version never moved, so the legacy engine could still open it
+    expect(await legacyVersion(NAME)).toBe(2);
+  });
+
+  it('reports the budget in use when a connection will not close', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const other = await holdLegacyConnection(NAME, { stubborn: true });
+    try {
+      await expect(readLegacyDatabaseBytes(PATH)).rejects.toBeInstanceOf(
+        BudgetInUseError,
+      );
+      expect(await legacyVersion(NAME)).toBe(2);
+    } finally {
+      other.close();
+    }
   });
 
   it('fails without touching the legacy data when the header is not sqlite', async () => {

@@ -2,7 +2,7 @@ import type { Data } from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 
-import { StorageMigrationError } from './errors';
+import { BudgetInUseError, StorageMigrationError } from './errors';
 import { putSqliteFileRow } from './files-store';
 import { legacyDatabaseName } from './paths';
 import type { MigrationProgress } from './types';
@@ -14,39 +14,63 @@ import type { MigrationProgress } from './types';
 // storage, and finish the move the same way for both stores.
 
 const LEGACY_STORE = 'data';
+// absurd-sql opens its databases at this version
+const LEGACY_VERSION = 2;
 const BLOCKS_PER_CHUNK = 256;
 const DELETE_TIMEOUT_MS = 5000;
+const EVICT_TIMEOUT_MS = 1000;
 const SQLITE_HEADER = 'SQLite format 3\0';
 
 type LegacyMeta = { size: number };
 
-// Resolves null when no absurd-sql database exists under this name. A
-// missing database would be created by the open; aborting the upgrade
-// that creates it leaves nothing behind. An existing one is opened at its
-// own version: absurd-sql opens by version number, so bumping it would
-// lock the old engine out should the migration fail.
-function openLegacyDatabase(name: string): Promise<IDBDatabase | null> {
+// Asks every other connection to the absurd-sql database to close, which
+// its engine does on `versionchange`, so a tab still on the previous
+// release, or one without Web Locks, writes nothing more while the copy
+// is made. The upgrade itself is abandoned: the version never changes, so
+// the legacy engine can still open the database should the move fail,
+// and a missing database is not created. Resolves whether the database
+// exists; rejects when a connection will not close.
+function evictLegacyConnections(name: string, path: string): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name, LEGACY_VERSION + 1);
+    let exists = true;
+    const timer = setTimeout(
+      () => reject(new BudgetInUseError(path)),
+      EVICT_TIMEOUT_MS,
+    );
+    request.onupgradeneeded = event => {
+      exists = event.oldVersion !== 0;
+      request.transaction?.abort();
+    };
+    // The abandoned upgrade fails the request: the normal way out
+    request.onerror = () => {
+      clearTimeout(timer);
+      resolve(exists);
+    };
+    request.onsuccess = () => {
+      clearTimeout(timer);
+      request.result.close();
+      resolve(true);
+    };
+  });
+}
+
+// Resolves null when no absurd-sql database exists under this name
+async function openLegacyDatabase(
+  name: string,
+  path: string,
+): Promise<IDBDatabase | null> {
+  if (!(await evictLegacyConnections(name, path))) {
+    return null;
+  }
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name);
-    let missing = false;
-    request.onupgradeneeded = () => {
-      if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
-        missing = true;
-        request.transaction?.abort();
-      }
-    };
     request.onsuccess = () => {
       const database = request.result;
       database.onversionchange = () => database.close();
       resolve(database);
     };
-    request.onerror = () => {
-      if (missing) {
-        resolve(null);
-      } else {
-        reject(request.error);
-      }
-    };
+    request.onerror = () => reject(request.error);
   });
 }
 
@@ -178,13 +202,18 @@ export async function openLegacyDatabaseContents(
   onProgress?: (percent: number) => void,
 ): Promise<LegacyDatabaseContents | null> {
   const name = legacyDatabaseName(path);
-  const database = await openLegacyDatabase(name);
+  const database = await openLegacyDatabase(name, path);
   if (database == null) {
     return null;
   }
   try {
     const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
     if (typeof meta?.size !== 'number' || meta.size <= 0) {
+      // Only a store with no blocks at all is a database absurd-sql
+      // created before its first write; anything else is damage, kept
+      if ((await readLegacyKey(database, 0)) != null) {
+        throw new Error('legacy database has blocks but no valid size');
+      }
       database.close();
       await deleteLegacyDatabase(name);
       return null;

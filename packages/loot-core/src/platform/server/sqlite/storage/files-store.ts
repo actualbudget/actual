@@ -30,6 +30,32 @@ export async function putSqliteFileRow(row: Data): Promise<void> {
   await Promise.all([idb.set(store, row), committed(trans)]);
 }
 
+// Writes the row only while the stored one is still at `expectedRev`, in
+// the transaction that checks it, so two workers without Web Locks cannot
+// both pass the check. Resolves whether it was written.
+export async function putSqliteFileRowIfRev(
+  row: Data,
+  expectedRev: number,
+): Promise<boolean> {
+  const { trans, store } = idb.getStore(await idb.openDatabase(), 'files');
+  const done = committed(trans);
+  const written = await new Promise<boolean>((resolve, reject) => {
+    const request = store.get(row.filepath);
+    request.onsuccess = () => {
+      const current = request.result as Data | undefined;
+      if ((current?.rev ?? 0) !== expectedRev) {
+        resolve(false);
+        return;
+      }
+      // Issued inside the callback, so it joins the checking transaction
+      idb.set(store, row).then(() => resolve(true), reject);
+    };
+    request.onerror = () => reject(request.error);
+  });
+  await done;
+  return written;
+}
+
 export async function deleteSqliteFileRow(path: string): Promise<void> {
   const { trans, store } = idb.getStore(await idb.openDatabase(), 'files');
   await Promise.all([idb.del(store, path), committed(trans)]);

@@ -6,7 +6,8 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
-import { BudgetInUseError } from './storage/errors';
+import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { getSqliteFileRow } from './storage/files-store';
 import {
   acquireWebLock,
   BUDGET_LOCK_TIMEOUT_MS,
@@ -179,6 +180,14 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
         ).catch(() => {
           throw new BudgetInUseError(path);
         });
+        // Another worker may have moved the budget to the new storage while
+        // this one waited: the copy here is then gone or stale
+        if ((await getSqliteFileRow(path))?.storage) {
+          releaseLock();
+          throw new StorageUnavailableError(
+            `${path} has moved to the new storage; reload to open it`,
+          );
+        }
         try {
           if (typeof SharedArrayBuffer === 'undefined') {
             const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');

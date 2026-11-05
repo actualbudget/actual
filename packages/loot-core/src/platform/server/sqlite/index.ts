@@ -5,7 +5,7 @@ import type {
 
 import * as legacy from './engine.sqljs.legacy';
 import { wasmEngine } from './engine.wasm';
-import { initSqliteStorage } from './storage';
+import { getSqliteStore, initSqliteStorage } from './storage';
 import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
@@ -105,6 +105,14 @@ export async function init({
   activeEngine = wasmEngine;
   await wasmEngine.init({ baseURL, wasmBinary });
   return initSqliteStorage(requested);
+}
+
+// Persist anything pending (the IndexedDB fallback writes lazily); rejects
+// when a file could not be written
+export async function flushSqliteStorage(): Promise<void> {
+  if (activeEngine === wasmEngine) {
+    await getSqliteStore().flush();
+  }
 }
 
 export function prepare(db: Database, sql: string): Statement {

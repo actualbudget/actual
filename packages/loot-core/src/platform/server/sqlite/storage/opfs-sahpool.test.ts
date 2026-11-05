@@ -121,6 +121,7 @@ function fakeSqlite3(
       execLog.push(sql);
     }
     selectValue(sql: string) {
+      execLog.push(sql);
       if (sql.includes('quick_check')) return 'ok';
       return 1;
     }
@@ -529,6 +530,45 @@ describe('OPFS pool store', () => {
     expect(pool.files.has('/db.sqlite')).toBe(true);
   });
 
+  it('prefers the fallback row over a pooled file an interrupted promotion left', async () => {
+    const newer = await budgetBytes('newer');
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: newer,
+      storage: 'memory-idb',
+      rev: 3,
+    });
+    const pool = fakePool(new Map([['/db.sqlite', new Uint8Array([1])]]));
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const db = await store.open(PATH);
+    const pooled = pool.files.get('/db.sqlite');
+    expect(pooled && Buffer.from(pooled).equals(Buffer.from(newer))).toBe(true);
+    expect(await getSqliteFileRow(PATH)).toMatchObject({
+      storage: 'opfs',
+      rev: 3,
+    });
+    store.close(PATH, db);
+  });
+
+  it('recovers a closed file through a connection before exporting it', async () => {
+    const pool = fakePool(new Map([['/db.sqlite', new Uint8Array([1])]]));
+    const sqlite3 = fakeSqlite3(pool);
+    const store = createOpfsStore({
+      sqlite3: () => sqlite3,
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+
+    expect(await store.readFile(PATH)).toEqual(new Uint8Array([1]));
+    expect(sqlite3.execLog).toContain('PRAGMA schema_version');
+  });
+
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {
     const pool = fakePool(
       new Map([
@@ -547,12 +587,18 @@ describe('OPFS pool store', () => {
       '/documents/Actual/other/db.sqlite',
       new Uint8Array([9]),
     );
+    const delSpy = vi.spyOn(idb, 'del');
     await store.removeFile(PATH);
     expect(pool.unlink).toHaveBeenCalledWith('/db.sqlite');
     expect(pool.unlink).toHaveBeenCalledWith('/db.sqlite-journal');
     expect(pool.wipeFiles).toHaveBeenCalled();
     expect(pool.removeVfs).not.toHaveBeenCalled();
     expect(pool.pauseVfs).toHaveBeenCalled();
+    // The marker goes while the budget is still held
+    expect(delSpy.mock.invocationCallOrder[0]).toBeLessThan(
+      pool.pauseVfs.mock.invocationCallOrder.at(-1) as number,
+    );
+    delSpy.mockRestore();
   });
 
   it('imports an absurd-sql database into the pool and verifies it', async () => {

@@ -3,7 +3,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
 
-import { BudgetInUseError } from './storage/errors';
+import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { putSqliteFileRow } from './storage/files-store';
 import { initWasmEngine } from './storage/test-helpers';
 import type { Database } from './types';
 
@@ -352,6 +353,14 @@ describe('legacy sql.js engine', () => {
         configurable: true,
       });
     }
+  });
+
+  it('refuses a budget that moved to the new storage while it waited', async () => {
+    const path = '/documents/Actual/moved/db.sqlite';
+    await putSqliteFileRow({ filepath: path, contents: '', storage: 'opfs' });
+    await expect(openDatabase(path)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
   });
 
   it('frees the statements it prepares', async () => {

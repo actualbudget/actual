@@ -23,6 +23,7 @@ import {
   deleteSqliteFileRow,
   getSqliteFileRow,
   putSqliteFileRow,
+  putSqliteFileRowIfRev,
 } from './files-store';
 import { acquireWebLock, budgetLockName } from './locks';
 import { legacyDatabaseName } from './paths';
@@ -58,6 +59,8 @@ type Entry = {
   pending: Promise<void> | null;
   // Whether the current run of failed writes has had its retry
   retried: boolean;
+  // Whether the last write failed, for `flush` to report
+  failed: boolean;
   releaseLock: () => void;
 };
 
@@ -87,8 +90,12 @@ export function createMemoryIdbStore({
   }
 
   async function persist(entry: Entry, bytes: Uint8Array): Promise<void> {
-    const current = await getSqliteFileRow(entry.path);
-    if ((current?.rev ?? 0) !== entry.rev) {
+    const rev = entry.rev + 1;
+    const written = await putSqliteFileRowIfRev(
+      { filepath: entry.path, contents: bytes, storage: 'memory-idb', rev },
+      entry.rev,
+    );
+    if (!written) {
       // Someone else wrote this file since we loaded it. Keep working in
       // memory but stop overwriting their data.
       entry.conflicted = true;
@@ -96,15 +103,9 @@ export function createMemoryIdbStore({
       connection.send('fallback-write-error');
       return;
     }
-    const rev = entry.rev + 1;
-    await putSqliteFileRow({
-      filepath: entry.path,
-      contents: bytes,
-      storage: 'memory-idb',
-      rev,
-    });
     entry.rev = rev;
     entry.retried = false;
+    entry.failed = false;
   }
 
   function schedule(entry: Entry) {
@@ -140,6 +141,7 @@ export function createMemoryIdbStore({
       .catch(error => {
         logger.error('sqlite storage: failed to persist', entry.path, error);
         entry.dirty = true;
+        entry.failed = true;
         // One retry after the usual delay, then wait for the next write: a
         // steady retry would only repeat a quota failure, alert and all
         if (!entry.retried && byDb.get(entry.db) === entry) {
@@ -253,6 +255,7 @@ export function createMemoryIdbStore({
         timer: null,
         pending: null,
         retried: false,
+        failed: false,
         releaseLock,
       };
       if (bytes == null) {
@@ -441,11 +444,22 @@ export function createMemoryIdbStore({
       return (await getSqliteFileRow(path)) != null;
     },
 
+    // Rejects when a file could not be written, so callers never take a
+    // flush for durability it did not deliver
     async flush() {
       await Promise.all([
         ...[...entries.values()].map(flushEntry),
         ...pendingWrites.values(),
       ]);
+      const notWritten = [...entries.values()]
+        .filter(entry => entry.failed)
+        .map(entry => entry.path)
+        .concat([...unsaved.keys()]);
+      if (notWritten.length > 0) {
+        throw new Error(
+          'sqlite storage: not written: ' + notWritten.join(', '),
+        );
+      }
     },
 
     onWrite(db) {

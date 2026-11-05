@@ -308,25 +308,31 @@ export function createOpfsStore({
     return true;
   }
 
-  // Whatever already holds this database. The fallback store's row is what
-  // the app last used, so it wins over an absurd-sql copy its own migration
-  // could not delete. A row that says OPFS means the pool has lost the
-  // file: never stand in a stale copy or an empty database for it.
+  // Puts whatever already holds this database into the pool, and resolves
+  // whether there is one. The row says who owns the bytes: the fallback's
+  // row is what the app last used, so it wins over a pooled file an
+  // interrupted promotion left and over an absurd-sql copy its own
+  // migration could not delete; a row that says OPFS with no pooled file
+  // means the pool lost it, which is never stood in for.
   async function importExisting(
     pool: Pool,
     path: string,
     fileName: string,
   ): Promise<boolean> {
     const row = await getSqliteFileRow(path);
+    const pooled = pool.util.getFileNames().includes(fileName);
     if (row?.storage === 'opfs') {
-      throw new StorageUnavailableError(
-        `${path} is missing from its OPFS pool`,
-      );
+      if (!pooled) {
+        throw new StorageUnavailableError(
+          `${path} is missing from its OPFS pool`,
+        );
+      }
+      return true;
     }
-    return (
-      (await promoteFallbackRow(pool, path, fileName, row)) ||
-      (await migrateLegacy(pool, path, fileName, row))
-    );
+    if (await promoteFallbackRow(pool, path, fileName, row)) {
+      return true;
+    }
+    return pooled || migrateLegacy(pool, path, fileName, row);
   }
 
   // Concurrent opens of one file share the whole operation, so a budget is
@@ -356,9 +362,7 @@ export function createOpfsStore({
       if (already) {
         return already;
       }
-      const present =
-        pool.util.getFileNames().includes(fileName) ||
-        (await importExisting(pool, path, fileName));
+      const present = await importExisting(pool, path, fileName);
       // Another call may have opened the file while that ran
       const opened = pool.open.get(fileName);
       if (opened) {
@@ -427,11 +431,20 @@ export function createOpfsStore({
       }
       const pool = await acquire(dirId, path);
       try {
-        if (
-          !pool.util.getFileNames().includes(fileName) &&
-          !(await importExisting(pool, path, fileName))
-        ) {
+        if (!(await importExisting(pool, path, fileName))) {
           throw new Error('File does not exist: ' + path);
+        }
+        // A journal left by a crash is rolled back by a connection's first
+        // read, so the raw file is consistent by the time it is exported
+        const db = new (sqlite3().oo1.DB)({
+          filename: fileName,
+          flags: 'w',
+          vfs: pool.util.vfsName,
+        });
+        try {
+          db.selectValue('PRAGMA schema_version');
+        } finally {
+          db.close();
         }
         return pool.util.exportFile(fileName);
       } finally {
@@ -502,14 +515,16 @@ export function createOpfsStore({
             await pool.util.wipeFiles();
           }
         }
+        // While the budgets are still held: a waiting worker could
+        // otherwise write a replacement whose marker this would delete
+        for (const path of paths) {
+          await deleteSqliteFileRow(path);
+          await deleteLegacyDatabase(legacyDatabaseName(path));
+        }
       } finally {
         for (const pool of held.values()) {
           release(pool);
         }
-      }
-      for (const path of paths) {
-        await deleteSqliteFileRow(path);
-        await deleteLegacyDatabase(legacyDatabaseName(path));
       }
     },
 
