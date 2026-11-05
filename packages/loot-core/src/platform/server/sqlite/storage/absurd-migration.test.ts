@@ -68,6 +68,10 @@ describe('absurd-sql migration helpers', () => {
     expect(pageSizeFromHeader(broken)).toBe(null);
     broken[17] = 3;
     expect(pageSizeFromHeader(broken)).toBe(null);
+    // In range but not a power of two (1000)
+    broken[16] = 0x03;
+    broken[17] = 0xe8;
+    expect(pageSizeFromHeader(broken)).toBe(null);
   });
 
   it('reads a legacy database back byte for byte across several chunks', async () => {

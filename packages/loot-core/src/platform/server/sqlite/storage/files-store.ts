@@ -1,8 +1,6 @@
 import * as idb from '#platform/server/indexeddb';
 import type { Data } from '#platform/server/indexeddb';
 
-import type { FileStoreKind } from './types';
-
 // The IndexedDB `files` store keeps one row per persisted path. For a
 // sqlite path the row is the marker the filesystem rebuilds its hierarchy
 // from, records which store holds the bytes, and for the IndexedDB
@@ -27,27 +25,26 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await idb.del(store, path);
 }
 
-// Any sqlite file already moved off absurd-sql. Used at startup: once data
-// lives in the new storage the legacy engine must not be chosen, whatever
-// the flag says. Walks the rows with a cursor and stops at the first
+// Whether any sqlite file already moved off absurd-sql. Used at startup:
+// once data lives in the new storage the legacy engine must not be chosen,
+// whatever the flag says. One store then serves every budget: one still in
+// absurd-sql's layout is migrated when opened, and the OPFS store adopts
+// the fallback's rows. Walks the rows with a cursor and stops at the first
 // marked one, so the fallback's whole-file rows are not all read into
 // memory.
-export async function findMigratedStorageKind(): Promise<FileStoreKind | null> {
+export async function hasMigratedSqliteFiles(): Promise<boolean> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
   return new Promise((resolve, reject) => {
     const request = store.openCursor();
     request.onsuccess = () => {
       const cursor = request.result;
       if (!cursor) {
-        resolve(null);
-        return;
+        resolve(false);
+      } else if ((cursor.value as Data).storage) {
+        resolve(true);
+      } else {
+        cursor.continue();
       }
-      const { storage } = cursor.value as Data;
-      if (storage) {
-        resolve(storage);
-        return;
-      }
-      cursor.continue();
     };
     request.onerror = () => reject(request.error);
   });

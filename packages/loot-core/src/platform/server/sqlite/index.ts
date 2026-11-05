@@ -6,7 +6,7 @@ import type {
 import * as legacy from './engine.sqljs.legacy';
 import { wasmEngine } from './engine.wasm';
 import { initSqliteStorage } from './storage';
-import { findMigratedStorageKind } from './storage/files-store';
+import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
   SqliteEngine,
@@ -88,10 +88,11 @@ export async function init({
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
+  // Only the OPFS store can read its pools, and it adopts the fallback's
+  // rows, so any migrated data means asking for OPFS (which itself falls
+  // back where sync access handles are missing)
   const requested =
-    storage === 'legacy'
-      ? ((await findMigratedStorageKind()) ?? 'legacy')
-      : storage;
+    storage === 'legacy' && (await hasMigratedSqliteFiles()) ? 'opfs' : storage;
   if (requested === 'legacy') {
     activeEngine = legacyEngine;
     await legacyEngine.init({ baseURL, wasmBinary });
