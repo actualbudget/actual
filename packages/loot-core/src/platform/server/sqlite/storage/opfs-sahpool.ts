@@ -16,7 +16,11 @@ import {
   getSqliteFileRow,
   putSqliteFileRow,
 } from './files-store';
-import { acquireWebLock } from './locks';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './locks';
 import { legacyDatabaseName, splitSqlitePath } from './paths';
 import type { MigrationProgress, SqliteFileStore } from './types';
 
@@ -27,7 +31,6 @@ import type { MigrationProgress, SqliteFileStore } from './types';
 // explicit instead of a failed install.
 
 export const POOL_ROOT = 'actual/pools';
-const LOCK_TIMEOUT_MS = 10_000;
 // A terminated worker releases its access handles asynchronously, so an
 // install right after a tab hand-over can fail; retry with backoff
 const INSTALL_DELAYS_MS = [0, 100, 250, 500, 1000, 2000, 3000];
@@ -125,8 +128,8 @@ export function createOpfsStore({
     existing: Pool | undefined,
   ): Promise<Pool> {
     const releaseLock = await acquireLock(
-      'actual-budget:' + dirId,
-      LOCK_TIMEOUT_MS,
+      budgetLockName(path),
+      BUDGET_LOCK_TIMEOUT_MS,
     ).catch(() => {
       throw new BudgetInUseError(path);
     });

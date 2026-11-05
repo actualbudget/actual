@@ -24,7 +24,7 @@ import {
   getSqliteFileRow,
   putSqliteFileRow,
 } from './files-store';
-import { acquireWebLock } from './locks';
+import { acquireWebLock, budgetLockName } from './locks';
 import { legacyDatabaseName } from './paths';
 import type { MigrationProgress, SqliteFileStore } from './types';
 
@@ -200,7 +200,7 @@ export function createMemoryIdbStore({
       }
       await pendingWrites.get(path);
       const releaseLock = await acquireWebLock(
-        'actual-budget:' + path,
+        budgetLockName(path),
         lockTimeoutMs,
       ).catch(() => {
         throw new BudgetInUseError(path);

@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
 
+import { BudgetInUseError } from './storage/errors';
 import { initWasmEngine } from './storage/test-helpers';
 import type { Database } from './types';
 
@@ -298,6 +299,33 @@ describe('legacy sql.js engine', () => {
   });
 
   itBehavesLikeSqlite();
+
+  it('shares the budget lock and reports a budget in use when it is held', async () => {
+    // A fake Web Locks API that times out, as it does while another
+    // worker holds the budget exclusively
+    const request = vi.fn(() =>
+      Promise.reject(new DOMException('aborted', 'AbortError')),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      await expect(
+        openDatabase('/documents/Actual/budget-one/db.sqlite'),
+      ).rejects.toBeInstanceOf(BudgetInUseError);
+      expect(request).toHaveBeenCalledWith(
+        'actual-budget:documents-Actual-budget-one',
+        expect.objectContaining({ mode: 'shared' }),
+        expect.any(Function),
+      );
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
 
   it('frees the statements it prepares', async () => {
     const db = await openWithSchema();

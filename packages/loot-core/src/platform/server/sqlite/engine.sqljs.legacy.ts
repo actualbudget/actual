@@ -6,6 +6,12 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
+import { BudgetInUseError } from './storage/errors';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './storage/locks';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -38,6 +44,12 @@ export type SqlJsModule = SqlJsStatic & {
 };
 
 let SQL: SqlJsModule | null = null;
+
+// The budget lock held while a file database is open. Shared, so other
+// legacy connections are unaffected; the sqlite-wasm storage waits for it
+// before migrating the file, and a legacy open waits while that storage
+// holds the budget.
+const budgetLocks = new Map<Database, () => void>();
 
 // Opt-in: when set, the wasm is instantiated from these bytes instead of being
 // fetched via `locateFile`. The browser build of `@actual-app/api` uses this to
@@ -160,6 +172,13 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
     } else {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
+        const releaseLock = await acquireWebLock(
+          budgetLockName(path),
+          BUDGET_LOCK_TIMEOUT_MS,
+          'shared',
+        ).catch(() => {
+          throw new BudgetInUseError(path);
+        });
         if (typeof SharedArrayBuffer === 'undefined') {
           const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
           await stream.node.contents.readIfFallback();
@@ -179,6 +198,7 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
           PRAGMA journal_mode=MEMORY;
           PRAGMA cache_size=-64000;
         `);
+        budgetLocks.set(db, releaseLock);
       }
     }
   }
@@ -203,6 +223,8 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
 
 export function closeDatabase(db: Database) {
   db.close();
+  budgetLocks.get(db)?.();
+  budgetLocks.delete(db);
 }
 
 export async function exportDatabase(db: Database) {
