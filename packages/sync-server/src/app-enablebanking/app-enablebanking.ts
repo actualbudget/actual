@@ -21,7 +21,7 @@ import {
   isImportableTransaction,
   normalizeAccount,
   normalizeBalance,
-  normalizeTransaction,
+  normalizeTransactions,
 } from './services/enablebanking-service';
 import { EnableBankingError } from './utils/errors';
 
@@ -580,15 +580,11 @@ app.post(
         psuHeaders,
       );
 
-      const all: ReturnType<typeof normalizeTransaction>[] = [];
-      const booked: ReturnType<typeof normalizeTransaction>[] = [];
-      const pending: ReturnType<typeof normalizeTransaction>[] = [];
+      const all: ReturnType<typeof normalizeTransactions> = [];
+      const booked: ReturnType<typeof normalizeTransactions> = [];
+      const pending: ReturnType<typeof normalizeTransactions> = [];
 
-      const derivedIdCounts = new Map<string, number>();
-
-      for (const tx of rawTransactions) {
-        const normalized = normalizeTransaction(tx, derivedIdCounts);
-
+      for (const normalized of normalizeTransactions(rawTransactions)) {
         // Drop records Actual's client can't insert (empty/non-ISO date or
         // non-numeric amount) — one of them would otherwise abort the entire
         // account sync. Pending transactions that carry a date are unaffected.

@@ -5,6 +5,7 @@ import {
   normalizeAccount,
   normalizeBalance,
   normalizeTransaction,
+  normalizeTransactions,
 } from '#app-enablebanking/services/enablebanking-service';
 
 import {
@@ -400,16 +401,40 @@ describe('normalizeTransaction without a bank-provided id', () => {
 
   it('gives identical transactions in one response distinct, repeatable ids', () => {
     // Two genuinely separate postings (e.g. two identical tolls on one day).
-    const sync = () => {
-      const derivedIdCounts = new Map<string, number>();
-      return [feeWithoutId, feeWithoutId].map(
-        tx => normalizeTransaction(tx, derivedIdCounts).transactionId,
+    const sync = () =>
+      normalizeTransactions([feeWithoutId, feeWithoutId]).map(
+        tx => tx.transactionId,
       );
-    };
 
     const [first, second] = sync();
     expect(first).not.toBe(second);
     expect(sync()).toEqual([first, second]);
+  });
+
+  it('numbers a booked transaction before an identical pending one', () => {
+    // A pending entry can still disappear or be booked. Numbering it first
+    // would hand its id to the booked entry afterwards, and the sync would
+    // then update the wrong transaction.
+    const pending = { ...feeWithoutId, status: 'PDNG' as const };
+
+    const [pendingId, bookedId] = normalizeTransactions([
+      pending,
+      feeWithoutId,
+    ]).map(tx => tx.transactionId);
+    const [bookedAloneId] = normalizeTransactions([feeWithoutId]).map(
+      tx => tx.transactionId,
+    );
+
+    expect(bookedId).toBe(bookedAloneId);
+    expect(pendingId).not.toBe(bookedId);
+  });
+
+  it('keeps transactions in the order the bank sent them', () => {
+    const pending = { ...feeWithoutId, status: 'PDNG' as const };
+
+    expect(
+      normalizeTransactions([pending, feeWithoutId]).map(tx => tx.booked),
+    ).toEqual([false, true]);
   });
 });
 

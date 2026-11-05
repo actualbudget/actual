@@ -225,8 +225,11 @@ function cleanRemittanceArray(arr: string[]): string[] {
 //
 // Two identical postings on one day are genuinely separate (two tolls, two
 // tickets), so repeats of the same content within one response get a counter
-// suffix. They are interchangeable, so only their number matters, not their
-// order.
+// suffix. Nothing the bank sends tells them apart, so only their number
+// matters: if one of them stops being returned, the rest are renumbered and
+// the last transaction in Actual is the one left without a match, exactly as
+// if that had been the one to go. `normalizeTransactions` numbers booked
+// postings first, so a pending one coming or going never renumbers them.
 function deriveTransactionId(
   tx: EnableBankingTransaction,
   derivedIdCounts: Map<string, number>,
@@ -247,8 +250,27 @@ function deriveTransactionId(
   return count === 0 ? base : `${base}-${count}`;
 }
 
-// `derivedIdCounts` must be shared by all transactions of one response; see
-// `deriveTransactionId`.
+// Normalizes one response. Ids are derived for booked postings before pending
+// ones (see `deriveTransactionId`); the order of the result is the bank's.
+export function normalizeTransactions(
+  transactions: EnableBankingTransaction[],
+): BankSyncTransaction[] {
+  const derivedIdCounts = new Map<string, number>();
+  const normalized = new Array<BankSyncTransaction>(transactions.length);
+
+  for (const isPending of [false, true]) {
+    transactions.forEach((tx, index) => {
+      if ((tx.status === 'PDNG') === isPending) {
+        normalized[index] = normalizeTransaction(tx, derivedIdCounts);
+      }
+    });
+  }
+
+  return normalized;
+}
+
+// `derivedIdCounts` must be shared by all transactions of one response; use
+// `normalizeTransactions` for a whole response.
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
   derivedIdCounts: Map<string, number> = new Map(),
