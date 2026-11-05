@@ -519,12 +519,16 @@ export function createOpfsStore({
         // otherwise write a replacement whose marker this would delete
         for (const path of paths) {
           await deleteSqliteFileRow(path);
-          await deleteLegacyDatabase(legacyDatabaseName(path));
         }
       } finally {
         for (const pool of held.values()) {
           release(pool);
         }
+      }
+      // The absurd-sql copy is nobody's by now, and deleting it can wait
+      // on another connection, so not under the locks
+      for (const path of paths) {
+        await deleteLegacyDatabase(legacyDatabaseName(path));
       }
     },
 
