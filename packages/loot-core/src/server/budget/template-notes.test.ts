@@ -431,6 +431,7 @@ describe('unparse/parse round-trip', () => {
     // average
     '#template average 6 months',
     '#template-5 average 12 months',
+    '#template-2 average 4 weeks on friday [increase 10%]',
     // copy
     '#template copy from 3 months ago',
     '#template copy from 6 months ago',

@@ -188,6 +188,14 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
   }
 });
 
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
 
 // --- Poll/complete-auth coordination ---
