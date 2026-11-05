@@ -486,7 +486,10 @@ describe('IndexedDB in-memory store', () => {
     await expect(
       getSqliteStore().writeFile(PATH, new Uint8Array([1])),
     ).rejects.toBeInstanceOf(StorageUnavailableError);
-    // Nothing was written over the marker
+    await expect(getSqliteStore().removeFile(PATH)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    // Nothing was written over the marker, and it is still there
     expect(await getSqliteFileRow(PATH)).toMatchObject({
       storage: 'opfs',
       contents: '',

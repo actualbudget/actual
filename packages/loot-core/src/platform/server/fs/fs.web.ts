@@ -291,7 +291,12 @@ export const removeDir = async function (filepath: string) {
 
 export const removeDirRecursively = async function (dirpath: string) {
   if (await exists(dirpath)) {
-    for (const file of await listDir(dirpath)) {
+    // Databases first: the sqlite storage refuses one it does not own, and
+    // that must leave the rest of the directory, backups included, as it was
+    const files = (await listDir(dirpath)).sort(
+      (a, b) => Number(isSqlitePath(b)) - Number(isSqlitePath(a)),
+    );
+    for (const file of files) {
       const fullpath = join(dirpath, file);
       if (memfs.isDirectory(fullpath)) {
         await removeDirRecursively(fullpath);

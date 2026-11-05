@@ -404,6 +404,7 @@ export function createMemoryIdbStore({
       }
       const releaseLock = await lockBudget(path);
       try {
+        assertNotInOpfs(path, await getSqliteFileRow(path));
         await deleteSqliteFileRow(path);
         unsaved.delete(path);
       } finally {
