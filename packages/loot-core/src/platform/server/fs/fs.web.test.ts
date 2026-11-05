@@ -175,7 +175,7 @@ describe('web filesystem (sqlite-wasm storage)', () => {
     // The bundled files are only registered outside the test environment
     process.env.NODE_ENV = 'development';
     try {
-      await init({ storage: 'memory-idb' });
+      await init();
       await expect(readFile('/default-db.sqlite', 'binary')).rejects.toThrow(
         /404/,
       );
