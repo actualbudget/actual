@@ -11,7 +11,7 @@ import {
   runQuery,
 } from '#platform/server/sqlite';
 
-import { BudgetInUseError } from './errors';
+import { BudgetInUseError, StorageUnavailableError } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
@@ -101,8 +101,12 @@ function fakeSqlite3(
     name: string;
     constructor(options: { filename: string; flags: string; vfs: string }) {
       this.name = options.filename;
-      if (!pool.files.has(options.filename) && !options.flags.includes('c')) {
-        throw new Error('SQLITE_CANTOPEN');
+      if (!pool.files.has(options.filename)) {
+        if (!options.flags.includes('c')) {
+          throw new Error('SQLITE_CANTOPEN');
+        }
+        // As the real VFS does, creating a database adds its file to the pool
+        pool.files.set(options.filename, new Uint8Array(0));
       }
     }
     exec(sql: string) {
@@ -312,6 +316,28 @@ describe('OPFS pool store', () => {
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
     expect(pool.importDb).toHaveBeenCalledTimes(1);
     store.close(PATH, db);
+  });
+
+  it('refuses to replace a database the pool has lost', async () => {
+    // Marked as living in OPFS, with a stale absurd-sql copy still around
+    await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('stale'));
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect(pool.importDb).not.toHaveBeenCalled();
+    expect(pool.files.size).toBe(0);
+    // The marker and the copy are left as they were
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).toContain(name);
   });
 
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {

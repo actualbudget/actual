@@ -1,5 +1,6 @@
 import type { SAHPoolUtil, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
 
+import type { Data } from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
 import { exportBytes, getSqlite3 } from '#platform/server/sqlite/wasm';
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
@@ -10,7 +11,11 @@ import {
   openLegacyDatabaseContents,
   verifyMigratedDatabase,
 } from './absurd-migration';
-import { BudgetInUseError, StorageMigrationError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './errors';
 import {
   deleteSqliteFileRow,
   getSqliteFileRow,
@@ -203,6 +208,7 @@ export function createOpfsStore({
     pool: Pool,
     path: string,
     fileName: string,
+    row: Data | undefined,
   ): Promise<boolean> {
     const contents = await openLegacyDatabaseContents(path, percent =>
       onMigrationProgress?.('copy', percent),
@@ -219,7 +225,6 @@ export function createOpfsStore({
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
     }
-    const row = await getSqliteFileRow(path);
     await completeMigration(
       { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
       onMigrationProgress,
@@ -234,8 +239,8 @@ export function createOpfsStore({
     pool: Pool,
     path: string,
     fileName: string,
+    row: Data | undefined,
   ): Promise<boolean> {
-    const row = await getSqliteFileRow(path);
     if (
       row?.storage !== 'memory-idb' ||
       !ArrayBuffer.isView(row.contents) ||
@@ -266,15 +271,22 @@ export function createOpfsStore({
 
   // Whatever already holds this database. The fallback store's row is what
   // the app last used, so it wins over an absurd-sql copy its own migration
-  // could not delete.
+  // could not delete. A row that says OPFS means the pool has lost the
+  // file: never stand in a stale copy or an empty database for it.
   async function importExisting(
     pool: Pool,
     path: string,
     fileName: string,
   ): Promise<boolean> {
+    const row = await getSqliteFileRow(path);
+    if (row?.storage === 'opfs') {
+      throw new StorageUnavailableError(
+        `${path} is missing from its OPFS pool`,
+      );
+    }
     return (
-      (await promoteFallbackRow(pool, path, fileName)) ||
-      (await migrateLegacy(pool, path, fileName))
+      (await promoteFallbackRow(pool, path, fileName, row)) ||
+      (await migrateLegacy(pool, path, fileName, row))
     );
   }
 
