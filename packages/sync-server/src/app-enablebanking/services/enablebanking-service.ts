@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import createDebug from 'debug';
 import { fetch } from 'undici';
 import type { RequestInit, Response } from 'undici';
@@ -208,12 +210,52 @@ function cleanRemittanceArray(arr: string[]): string[] {
   return arr.map(stripSepaPrefix).filter(Boolean);
 }
 
+// Some banks send neither `entry_reference` nor `transaction_id`. Without an
+// id Actual can only recognise a transaction by amount and date, so a deleted
+// one is imported again on every sync. Derive an id from the transaction's own
+// content instead.
+//
+// Only raw bank fields go into it, so changes to our own payee/notes
+// normalization never change the id. `status` is left out so the id survives
+// a pending transaction becoming booked.
+//
+// Two identical postings on one day are genuinely separate (two tolls, two
+// tickets), so repeats of the same content within one response get a counter
+// suffix. They are interchangeable, so only their number matters, not their
+// order.
+function deriveTransactionId(
+  tx: EnableBankingTransaction,
+  bookingDate: string,
+  derivedIdCounts: Map<string, number>,
+): string {
+  const content = JSON.stringify([
+    bookingDate,
+    tx.transaction_amount.amount,
+    tx.transaction_amount.currency,
+    tx.credit_debit_indicator ?? '',
+    tx.creditor?.name ?? '',
+    tx.debtor?.name ?? '',
+    tx.remittance_information ?? [],
+  ]);
+  const base = `derived-${createHash('sha256').update(content).digest('hex').slice(0, 32)}`;
+
+  const count = derivedIdCounts.get(base) ?? 0;
+  derivedIdCounts.set(base, count + 1);
+  return count === 0 ? base : `${base}-${count}`;
+}
+
+// `derivedIdCounts` must be shared by all transactions of one response; see
+// `deriveTransactionId`.
 export function normalizeTransaction(
   tx: EnableBankingTransaction,
+  derivedIdCounts: Map<string, number> = new Map(),
 ): BankSyncTransaction {
-  const transactionId = tx.entry_reference || tx.transaction_id || '';
   const bookingDate =
     tx.booking_date || tx.value_date || tx.transaction_date || '';
+  const transactionId =
+    tx.entry_reference ||
+    tx.transaction_id ||
+    deriveTransactionId(tx, bookingDate, derivedIdCounts);
   const valueDate = tx.value_date;
 
   let payeeName = '';

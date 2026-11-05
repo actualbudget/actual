@@ -164,7 +164,7 @@ describe('normalizeTransaction', () => {
   it('should handle minimal transaction with empty payee', () => {
     const result = normalizeTransaction(mockTransactionMinimal);
     expect(result.payeeName).toBe('');
-    expect(result.transactionId).toBe('');
+    expect(result.transactionId).toMatch(/^derived-/);
     expect(result.bookingDate).toBe('');
     expect(result.booked).toBe(true);
   });
@@ -332,6 +332,64 @@ describe('normalizeTransaction shape for bank-sync mapping', () => {
     expect(out.entry_reference).toBe('ref-raw-1');
     expect(out.creditor).toEqual({ name: 'Acme' });
     expect(out.credit_debit_indicator).toBe('DBIT');
+  });
+});
+
+describe('normalizeTransaction without a bank-provided id', () => {
+  // Shape reported for an ABN AMRO fee: an empty entry_reference and no
+  // transaction_id.
+  const feeWithoutId = {
+    entry_reference: '',
+    transaction_amount: { currency: 'EUR', amount: '8.35' },
+    creditor: { name: 'ABN AMRO Bank N.V.' },
+    credit_debit_indicator: 'DBIT' as const,
+    status: 'BOOK' as const,
+    booking_date: '2026-08-26',
+    remittance_information: ['BasisPakket Betalen 4,30', 'Betaalpas 1,50'],
+  };
+
+  it('derives an id instead of leaving it empty', () => {
+    expect(normalizeTransaction(feeWithoutId).transactionId).toMatch(
+      /^derived-[0-9a-f]+$/,
+    );
+  });
+
+  it('derives the same id for the same transaction on a later sync', () => {
+    expect(normalizeTransaction(feeWithoutId).transactionId).toBe(
+      normalizeTransaction({ ...feeWithoutId }).transactionId,
+    );
+  });
+
+  it.each([
+    ['date', { booking_date: '2026-08-27' }],
+    ['amount', { transaction_amount: { currency: 'EUR', amount: '8.36' } }],
+    ['direction', { credit_debit_indicator: 'CRDT' as const }],
+    ['counterparty', { creditor: { name: 'Another Bank' } }],
+    ['remittance text', { remittance_information: ['Something else'] }],
+  ])('derives a different id when the %s differs', (_field, change) => {
+    expect(
+      normalizeTransaction({ ...feeWithoutId, ...change }).transactionId,
+    ).not.toBe(normalizeTransaction(feeWithoutId).transactionId);
+  });
+
+  it('keeps the id when a pending transaction becomes booked', () => {
+    expect(
+      normalizeTransaction({ ...feeWithoutId, status: 'PDNG' }).transactionId,
+    ).toBe(normalizeTransaction(feeWithoutId).transactionId);
+  });
+
+  it('gives identical transactions in one response distinct, repeatable ids', () => {
+    // Two genuinely separate postings (e.g. two identical tolls on one day).
+    const sync = () => {
+      const derivedIdCounts = new Map<string, number>();
+      return [feeWithoutId, feeWithoutId].map(
+        tx => normalizeTransaction(tx, derivedIdCounts).transactionId,
+      );
+    };
+
+    const [first, second] = sync();
+    expect(first).not.toBe(second);
+    expect(sync()).toEqual([first, second]);
   });
 });
 

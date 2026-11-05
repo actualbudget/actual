@@ -584,8 +584,10 @@ app.post(
       const booked: ReturnType<typeof normalizeTransaction>[] = [];
       const pending: ReturnType<typeof normalizeTransaction>[] = [];
 
+      const derivedIdCounts = new Map<string, number>();
+
       for (const tx of rawTransactions) {
-        const normalized = normalizeTransaction(tx);
+        const normalized = normalizeTransaction(tx, derivedIdCounts);
 
         // Drop records Actual's client can't insert (empty/non-ISO date or
         // non-numeric amount) — one of them would otherwise abort the entire
