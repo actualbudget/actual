@@ -3,6 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
+import { BudgetInUseError } from '#platform/server/sqlite/storage/errors';
 import {
   initWasmEngine,
   resetIndexedDb,
@@ -205,6 +206,40 @@ describe('web filesystem (sqlite-wasm storage)', () => {
     expect(await exists(dir + '/metadata.json')).toBe(true);
     expect(await exists(dir + '/db.sqlite')).toBe(true);
     expect(await exists(dir + '/backups/old.sqlite')).toBe(true);
+  });
+
+  it('leaves a budget directory intact when the budget is open elsewhere', async () => {
+    const dir = '/documents/Actual/held';
+    await init({ storage: 'memory-idb' });
+    await mkdir(dir);
+    await writeFile(dir + '/metadata.json', '{}');
+    await writeFile(dir + '/db.sqlite', await databaseBytes());
+    await mkdir(dir + '/backups');
+    await writeFile(dir + '/backups/old.sqlite', await databaseBytes());
+    // Another tab holds the budget's lock, though not the one of its backups
+    const request = vi.fn(
+      (name: string, _options: unknown, callback: () => Promise<void>) =>
+        name === 'actual-budget:documents-Actual-held'
+          ? Promise.reject(new DOMException('aborted', 'AbortError'))
+          : callback(),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      await expect(removeDirRecursively(dir)).rejects.toBeInstanceOf(
+        BudgetInUseError,
+      );
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    expect(await exists(dir + '/backups/old.sqlite')).toBe(true);
+    expect(await exists(dir + '/db.sqlite')).toBe(true);
+    expect(await exists(dir + '/metadata.json')).toBe(true);
   });
 
   it('persists files under a custom document dir', async () => {

@@ -207,10 +207,6 @@ export function createMemoryIdbStore({
     return { bytes, rev: rev + 1 };
   }
 
-  async function assertRemovable(path: string) {
-    assertNotInOpfs(path, await getSqliteFileRow(path));
-  }
-
   function lockBudget(path: string): Promise<() => void> {
     return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
       throw new BudgetInUseError(path);
@@ -396,28 +392,50 @@ export function createMemoryIdbStore({
       }
     },
 
-    async removeFile(path) {
-      // An open in flight ends with the database open, so it is closed
-      // below rather than removed under it
-      await opening.get(path)?.catch(() => undefined);
-      await pendingWrites.get(path);
-      const entry = entries.get(path);
-      if (entry) {
-        store.close(path, entry.db);
-        await pendingWrites.get(path);
-      }
-      const releaseLock = await lockBudget(path);
-      try {
-        await assertRemovable(path);
-        await deleteSqliteFileRow(path);
-        unsaved.delete(path);
-      } finally {
-        releaseLock();
-      }
-      await deleteLegacyDatabase(legacyDatabaseName(path));
+    removeFile(path) {
+      return store.removeFiles([path]);
     },
 
-    assertRemovable,
+    // All or nothing: every budget involved is locked and checked before
+    // the first row goes, so a refusal leaves them all as they were
+    async removeFiles(paths) {
+      for (const path of paths) {
+        // An open in flight ends with the database open, so it is closed
+        // here rather than removed under it
+        await opening.get(path)?.catch(() => undefined);
+        await pendingWrites.get(path);
+        const entry = entries.get(path);
+        if (entry) {
+          store.close(path, entry.db);
+          await pendingWrites.get(path);
+        }
+      }
+      const releases: (() => void)[] = [];
+      try {
+        const locked = new Set<string>();
+        for (const path of paths) {
+          const name = budgetLockName(path);
+          if (!locked.has(name)) {
+            locked.add(name);
+            releases.push(await lockBudget(path));
+          }
+        }
+        for (const path of paths) {
+          assertNotInOpfs(path, await getSqliteFileRow(path));
+        }
+        for (const path of paths) {
+          await deleteSqliteFileRow(path);
+          unsaved.delete(path);
+        }
+      } finally {
+        for (const release of releases) {
+          release();
+        }
+      }
+      for (const path of paths) {
+        await deleteLegacyDatabase(legacyDatabaseName(path));
+      }
+    },
 
     async exists(path) {
       return (await getSqliteFileRow(path)) != null;

@@ -478,6 +478,28 @@ describe('IndexedDB in-memory store', () => {
     await expect(store.readFile(PATH)).rejects.toThrow(/does not exist/);
   });
 
+  it('removes several files together, or none of them', async () => {
+    const other = '/documents/Actual/budget-two/db.sqlite';
+    const store = getSqliteStore();
+    await store.writeFile(PATH, new Uint8Array([1]));
+    await putSqliteFileRow({ filepath: other, contents: '', storage: 'opfs' });
+    await expect(store.removeFiles([PATH, other])).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect(await store.exists(PATH)).toBe(true);
+
+    // Once the other budget is ours too, both go
+    await putSqliteFileRow({
+      filepath: other,
+      contents: new Uint8Array([2]),
+      storage: 'memory-idb',
+      rev: 1,
+    });
+    await store.removeFiles([PATH, other]);
+    expect(await store.exists(PATH)).toBe(false);
+    expect(await store.exists(other)).toBe(false);
+  });
+
   it('refuses a database held in OPFS rather than shadow or take it over', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
     await expect(openDatabase(PATH)).rejects.toBeInstanceOf(

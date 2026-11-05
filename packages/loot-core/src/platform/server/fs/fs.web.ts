@@ -302,11 +302,15 @@ async function listFiles(dirpath: string): Promise<string[]> {
   return paths;
 }
 
-async function removeTree(dirpath: string) {
+// Removes what is left once the databases are gone from the sqlite
+// storage: their entries, and every other file
+async function removeTree(dirpath: string, removed: Set<string>) {
   for (const file of await listDir(dirpath)) {
     const fullpath = join(dirpath, file);
     if (memfs.isDirectory(fullpath)) {
-      await removeTree(fullpath);
+      await removeTree(fullpath, removed);
+    } else if (removed.has(fullpath)) {
+      memfs.unlink(fullpath);
     } else {
       await removeFile(fullpath);
     }
@@ -316,15 +320,14 @@ async function removeTree(dirpath: string) {
 
 export const removeDirRecursively = async function (dirpath: string) {
   if (await exists(dirpath)) {
-    // The sqlite storage refuses databases it does not own: check every one
-    // in the tree first, so a refusal leaves all of it, backups included,
-    // as it was
-    for (const path of await listFiles(dirpath)) {
-      if (isSqlitePath(path)) {
-        await getSqliteStore().assertRemovable?.(path);
-      }
-    }
-    await removeTree(dirpath);
+    // The databases go first and together: the sqlite storage locks and
+    // checks every budget involved before deleting any, so a refusal or a
+    // budget open elsewhere leaves the tree, backups included, as it was
+    const databases = (await listFiles(dirpath)).filter(
+      path => isPersistedPath(path) && isSqlitePath(path),
+    );
+    await getSqliteStore().removeFiles(databases);
+    await removeTree(dirpath, new Set(databases));
   }
 };
 

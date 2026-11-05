@@ -460,32 +460,57 @@ export function createOpfsStore({
       }
     },
 
-    async removeFile(path) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      // An open in flight ends with the database registered, so it is
-      // closed below rather than unlinked under it
-      await opening.get(path)?.catch(() => undefined);
-      const pool = await acquire(dirId, path);
+    removeFile(path) {
+      return store.removeFiles([path]);
+    },
+
+    // All or nothing: every pool involved is taken before the first file
+    // goes, so a budget open elsewhere leaves them all as they were
+    async removeFiles(paths) {
+      for (const path of paths) {
+        // An open in flight ends with the database registered, so it is
+        // closed here rather than unlinked under it
+        await opening.get(path)?.catch(() => undefined);
+      }
+      const held = new Map<string, Pool>();
       try {
-        const open = pool.open.get(fileName);
-        if (open) {
-          open.close();
-          pool.open.delete(fileName);
+        const files: { pool: Pool; fileName: string }[] = [];
+        for (const path of paths) {
+          const { dirId, fileName } = splitSqlitePath(path);
+          let pool = held.get(dirId);
+          if (!pool) {
+            pool = await acquire(dirId, path);
+            held.set(dirId, pool);
+          }
+          files.push({ pool, fileName });
         }
-        unlinkJournal(pool, fileName);
-        if (pool.util.getFileNames().includes(fileName)) {
-          pool.util.unlink(fileName);
+        for (const { pool, fileName } of files) {
+          const open = pool.open.get(fileName);
+          if (open) {
+            open.close();
+            pool.open.delete(fileName);
+          }
+          unlinkJournal(pool, fileName);
+          if (pool.util.getFileNames().includes(fileName)) {
+            pool.util.unlink(fileName);
+          }
         }
-        if (pool.util.getFileCount() === 0) {
-          // `unlink` only frees the slot; the bytes stay in the OPFS file
-          // until the pool truncates its spare slots
-          await pool.util.wipeFiles();
+        for (const pool of held.values()) {
+          if (pool.util.getFileCount() === 0) {
+            // `unlink` only frees the slot; the bytes stay in the OPFS file
+            // until the pool truncates its spare slots
+            await pool.util.wipeFiles();
+          }
         }
       } finally {
-        release(pool);
+        for (const pool of held.values()) {
+          release(pool);
+        }
       }
-      await deleteSqliteFileRow(path);
-      await deleteLegacyDatabase(legacyDatabaseName(path));
+      for (const path of paths) {
+        await deleteSqliteFileRow(path);
+        await deleteLegacyDatabase(legacyDatabaseName(path));
+      }
     },
 
     async exists(path) {

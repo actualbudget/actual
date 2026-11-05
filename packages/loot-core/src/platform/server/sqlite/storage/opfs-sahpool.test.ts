@@ -509,6 +509,26 @@ describe('OPFS pool store', () => {
     expect(pool.pauseVfs).toHaveBeenCalledTimes(2);
   });
 
+  it('removes several files under their pools together, or none of them', async () => {
+    const pool = fakePool(new Map([['/db.sqlite', new Uint8Array([1])]]));
+    const refuse = neverLock();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      // The second budget is open elsewhere
+      acquireLock: name =>
+        name.endsWith('budget-one')
+          ? Promise.resolve(() => undefined)
+          : refuse(),
+      sleep: noSleep,
+    });
+
+    await expect(
+      store.removeFiles([PATH, '/documents/Actual/budget-two/db.sqlite']),
+    ).rejects.toBeInstanceOf(BudgetInUseError);
+    expect(pool.unlink).not.toHaveBeenCalled();
+    expect(pool.files.has('/db.sqlite')).toBe(true);
+  });
+
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {
     const pool = fakePool(
       new Map([
