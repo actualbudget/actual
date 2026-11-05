@@ -1,17 +1,23 @@
 import { setNumberFormat } from '@actual-app/core/shared/util';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FocusableAmountInput } from './FocusableAmountInput';
 
+const mockPrefs = vi.hoisted(() => ({ currencyCode: 'JPY' }));
+
 vi.mock('#hooks/useSyncedPref', () => ({
   useSyncedPref: (name: string) => [
-    name === 'defaultCurrencyCode' ? 'JPY' : undefined,
+    name === 'defaultCurrencyCode' ? mockPrefs.currencyCode : undefined,
     vi.fn(),
   ],
 }));
 
 describe('FocusableAmountInput', () => {
+  beforeEach(() => {
+    mockPrefs.currencyCode = 'JPY';
+  });
+
   it('takes typed digits as whole units in a currency without decimals', () => {
     setNumberFormat({ format: 'comma-dot', hideFraction: false });
     render(<FocusableAmountInput value={0} focused />);
@@ -51,5 +57,27 @@ describe('FocusableAmountInput', () => {
     // Empty so typed digits aren't appended to a "0".
     expect(screen.getByTestId<HTMLInputElement>('amount-input').value).toBe('');
     expect(screen.getByTestId('amount-input-text').textContent).toBe('0');
+  });
+
+  it('treats a pasted number as an amount in a currency with decimals', () => {
+    mockPrefs.currencyCode = '';
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    render(<FocusableAmountInput value={0} focused />);
+
+    const input = screen.getByTestId<HTMLInputElement>('amount-input');
+    fireEvent.paste(input, { clipboardData: { getData: () => '12' } });
+    expect(input.value).toBe('12.00');
+  });
+
+  it('keeps the caret in place when a digit is inserted mid-number', () => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+    render(<FocusableAmountInput value={1234} focused />);
+
+    const input = screen.getByTestId<HTMLInputElement>('amount-input');
+    fireEvent.change(input, {
+      target: { value: '1,2934', selectionStart: 4, selectionEnd: 4 },
+    });
+    expect(input.value).toBe('12,934');
+    expect(input.selectionStart).toBe(4);
   });
 });

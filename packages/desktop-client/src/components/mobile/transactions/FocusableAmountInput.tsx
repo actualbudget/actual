@@ -1,4 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type {
   ComponentPropsWithRef,
   CSSProperties,
@@ -49,6 +55,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const caretFromEnd = useRef<number | null>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
   const format = useFormat();
 
@@ -74,6 +81,23 @@ const AmountInput = memo(function AmountInput({
     setText('');
     setValue(initialValue);
   }, [initialValue]);
+
+  // Reformatting moves the caret to the end; put it back before the same
+  // number of digits it had in front of it.
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    const digitsAfterCaret = caretFromEnd.current;
+    caretFromEnd.current = null;
+    if (!input || digitsAfterCaret === null) return;
+
+    let caret = input.value.length;
+    let digits = 0;
+    while (caret > 0 && digits < digitsAfterCaret) {
+      caret--;
+      if (/\d/.test(input.value[caret])) digits++;
+    }
+    input.setSelectionRange(caret, caret);
+  }, [text]);
 
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
@@ -126,7 +150,16 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const onChangeText = (text: string) => {
+  const updateText = (text: string) => {
+    setEditing(true);
+    setText(text);
+    props.onChangeValue?.(text);
+  };
+
+  const onChangeText = (rawText: string, caret: number | null) => {
+    caretFromEnd.current =
+      caret === null ? null : rawText.slice(caret).replace(/\D/g, '').length;
+    let text = rawText;
     if (format.currency.decimalPlaces === 0) {
       // Typed digits are whole units, whatever the hideFraction setting
       text = format.forEdit(amountToInteger(Number(text.replace(/\D/g, ''))));
@@ -136,9 +169,15 @@ const AmountInput = memo(function AmountInput({
         String(hideFraction) === 'true',
       );
     }
-    setEditing(true);
-    setText(text);
-    props.onChangeValue?.(text);
+    updateText(text);
+  };
+
+  const onPaste: HTMLProps<HTMLInputElement>['onPaste'] = e => {
+    // A pasted number is an amount, not keypad digits ("12" is 12, not 0.12)
+    e.preventDefault();
+    const amount = currencyToAmount(e.clipboardData.getData('text'));
+    if (amount === null) return;
+    updateText(format.forEdit(amountToInteger(Math.abs(amount))));
   };
 
   const input = (
@@ -148,7 +187,8 @@ const AmountInput = memo(function AmountInput({
       value={inputValue}
       inputMode="decimal"
       autoCapitalize="none"
-      onChange={e => onChangeText(e.target.value)}
+      onChange={e => onChangeText(e.target.value, e.target.selectionEnd)}
+      onPaste={onPaste}
       onFocus={onFocus}
       onBlur={onBlur}
       onKeyUp={onKeyUp}
