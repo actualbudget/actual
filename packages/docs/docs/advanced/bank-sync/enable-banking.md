@@ -2,6 +2,10 @@
 
 <ExperimentalFeatureWarning issueId="7799" />
 
+:::warning
+All functionality described here may not be available in the latest stable release. See [Experimental Features](../../experimental/index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
+:::
+
 ## Before You Start
 
 - **Turn on the experimental feature.** Go to **Settings → Experimental** and tick **Enable Banking sync (EU banks)**. The option only shows up when Actual is connected to a server. See [Experimental Features](../../experimental/index.md) for more details.
