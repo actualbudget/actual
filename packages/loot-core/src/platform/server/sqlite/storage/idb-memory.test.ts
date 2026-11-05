@@ -267,8 +267,8 @@ describe('IndexedDB in-memory store', () => {
     await sleep(10);
   });
 
-  it('holds the budget lock while reading a file it may have to migrate', async () => {
-    // The legacy filesystem's marker row, so the read looks for absurd-sql
+  it('holds the budget lock for reads, writes and removals of closed files', async () => {
+    // The legacy filesystem's marker row, so a read looks for absurd-sql
     // data
     await putSqliteFileRow({ filepath: PATH, contents: '' });
     const request = vi.fn(() =>
@@ -279,9 +279,18 @@ describe('IndexedDB in-memory store', () => {
       configurable: true,
     });
     try {
-      await expect(getSqliteStore().readFile(PATH)).rejects.toBeInstanceOf(
+      const store = getSqliteStore();
+      await expect(store.readFile(PATH)).rejects.toBeInstanceOf(
         BudgetInUseError,
       );
+      await expect(
+        store.writeFile(PATH, new Uint8Array([1])),
+      ).rejects.toBeInstanceOf(BudgetInUseError);
+      await expect(store.removeFile(PATH)).rejects.toBeInstanceOf(
+        BudgetInUseError,
+      );
+      // The row was not touched
+      expect((await getSqliteFileRow(PATH))?.contents).toBe('');
     } finally {
       Object.defineProperty(navigator, 'locks', {
         value: undefined,

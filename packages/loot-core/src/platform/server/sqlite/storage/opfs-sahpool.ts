@@ -220,15 +220,17 @@ export function createOpfsStore({
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
       verifyImported(pool, fileName);
+      // Fails only on the marker write, and then leaves nothing of the
+      // move behind, so the next open redoes it
+      await completeMigration(
+        { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
+        onMigrationProgress,
+      );
     } catch (error) {
       discardImport(pool, fileName);
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
     }
-    await completeMigration(
-      { filepath: path, contents: '', storage: 'opfs', rev: row?.rev },
-      onMigrationProgress,
-    );
     return true;
   }
 
@@ -255,16 +257,16 @@ export function createOpfsStore({
         new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength),
       );
       verifyImported(pool, fileName);
+      await putSqliteFileRow({
+        filepath: path,
+        contents: '',
+        storage: 'opfs',
+        rev: row.rev,
+      });
     } catch (error) {
       discardImport(pool, fileName);
       throw new StorageMigrationError(path, error);
     }
-    await putSqliteFileRow({
-      filepath: path,
-      contents: '',
-      storage: 'opfs',
-      rev: row.rev,
-    });
     await deleteLegacyDatabase(legacyDatabaseName(path));
     return true;
   }

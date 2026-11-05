@@ -11,7 +11,11 @@ import {
   runQuery,
 } from '#platform/server/sqlite';
 
-import { BudgetInUseError, StorageUnavailableError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
@@ -293,11 +297,7 @@ describe('OPFS pool store', () => {
     expect(pool.unpauseVfs).toHaveBeenCalledTimes(2);
   });
 
-  it('writes the marker on a later open when the first failed after importing', async () => {
-    await seedLegacyDatabase(
-      legacyDatabaseName(PATH),
-      await budgetBytes('kept'),
-    );
+  it('writes the marker on a later open when the first failed after creating the file', async () => {
     const pool = fakePool();
     const store = createOpfsStore({
       sqlite3: () => fakeSqlite3(pool),
@@ -310,11 +310,70 @@ describe('OPFS pool store', () => {
     await expect(store.open(PATH)).rejects.toThrow(/quota/);
     setSpy.mockRestore();
     // The file is in the pool, with no row to say so
+    expect(pool.files.size).toBe(1);
     expect(await getSqliteFileRow(PATH)).toBeUndefined();
 
     const db = await store.open(PATH);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
-    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    store.close(PATH, db);
+  });
+
+  it('imports the absurd-sql copy again when the marker write failed', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('kept'));
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValueOnce(new Error('quota exceeded'));
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    setSpy.mockRestore();
+    // Nothing of the failed move is left, and the copy is intact
+    expect(pool.files.size).toBe(0);
+    expect(await listIndexedDbNames()).toContain(name);
+
+    const db = await store.open(PATH);
+    expect(pool.importDb).toHaveBeenCalledTimes(2);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+    store.close(PATH, db);
+  });
+
+  it('discards an adopted fallback row when the marker write fails', async () => {
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: await budgetBytes('from fallback'),
+      storage: 'memory-idb',
+      rev: 7,
+    });
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValueOnce(new Error('quota exceeded'));
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    setSpy.mockRestore();
+    expect(pool.files.size).toBe(0);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('memory-idb');
+
+    const db = await store.open(PATH);
+    expect(pool.importDb).toHaveBeenCalledTimes(2);
+    expect(await getSqliteFileRow(PATH)).toMatchObject({
+      storage: 'opfs',
+      rev: 7,
+    });
     store.close(PATH, db);
   });
 

@@ -233,7 +233,9 @@ export function verifyMigratedDatabase(db: WasmDatabase) {
 
 // Records that the file now lives in the new storage, then drops the
 // absurd-sql copy. The marker goes first so a crash in between can never
-// make the budget look empty on the next start.
+// make the budget look empty on the next start. Only the marker write can
+// throw: once it is in the move is complete, and a copy that cannot be
+// deleted is just logged.
 export async function completeMigration(
   marker: Data,
   onProgress?: MigrationProgress,

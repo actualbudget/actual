@@ -350,14 +350,21 @@ export function createMemoryIdbStore({
       if (entries.has(path)) {
         throw new Error(`cannot overwrite an open database: ${path}`);
       }
-      const row = await getSqliteFileRow(path);
-      await putSqliteFileRow({
-        filepath: path,
-        contents: bytes,
-        storage: 'memory-idb',
-        rev: (row?.rev ?? 0) + 1,
-      });
-      unsaved.delete(path);
+      // The row is the file, so it changes only under the budget lock, as
+      // the OPFS store's files do
+      const releaseLock = await lockBudget(path);
+      try {
+        const row = await getSqliteFileRow(path);
+        await putSqliteFileRow({
+          filepath: path,
+          contents: bytes,
+          storage: 'memory-idb',
+          rev: (row?.rev ?? 0) + 1,
+        });
+        unsaved.delete(path);
+      } finally {
+        releaseLock();
+      }
     },
 
     async removeFile(path) {
@@ -367,8 +374,13 @@ export function createMemoryIdbStore({
         store.close(path, entry.db);
         await pendingWrites.get(path);
       }
-      await deleteSqliteFileRow(path);
-      unsaved.delete(path);
+      const releaseLock = await lockBudget(path);
+      try {
+        await deleteSqliteFileRow(path);
+        unsaved.delete(path);
+      } finally {
+        releaseLock();
+      }
       await deleteLegacyDatabase(legacyDatabaseName(path));
     },
 
