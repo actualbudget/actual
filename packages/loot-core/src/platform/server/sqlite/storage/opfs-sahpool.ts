@@ -50,6 +50,8 @@ type Pool = {
   util: SAHPoolUtil;
   open: Map<string, WasmDatabase>;
   releaseLock: (() => void) | null;
+  // Operations in progress, which keep the pool live as open databases do
+  holders: number;
 };
 
 export type OpfsStoreDependencies = {
@@ -111,12 +113,12 @@ export function createOpfsStore({
     return withHandleRetries(() => sqlite3().installOpfsSAHPoolVfs(options));
   }
 
-  // Holds the lock and live handles for a pool until `release`. Concurrent
-  // callers share one acquisition: the lock is exclusive, so a second
-  // request for it would wait on the first and time out.
+  // Takes the lock and live handles of a pool. Concurrent callers share
+  // one acquisition: the lock is exclusive, so a second request for it
+  // would wait on the first and time out.
   const acquiring = new Map<string, Promise<Pool>>();
 
-  function acquire(dirId: string, path: string): Promise<Pool> {
+  function lockPool(dirId: string, path: string): Promise<Pool> {
     const existing = pools.get(dirId);
     if (existing?.releaseLock) {
       return Promise.resolve(existing);
@@ -152,7 +154,13 @@ export function createOpfsStore({
         return existing;
       }
       const util = await installPool(dirId);
-      const pool: Pool = { dirId, util, open: new Map(), releaseLock };
+      const pool: Pool = {
+        dirId,
+        util,
+        open: new Map(),
+        releaseLock,
+        holders: 0,
+      };
       pools.set(dirId, pool);
       return pool;
     } catch (error) {
@@ -169,8 +177,22 @@ export function createOpfsStore({
     }
   }
 
+  // A hold on the pool for the length of an operation, given back with
+  // `release`, so that no operation can pause the handles another is using
+  async function acquire(dirId: string, path: string): Promise<Pool> {
+    const pool = await lockPool(dirId, path);
+    pool.holders += 1;
+    return pool;
+  }
+
   function release(pool: Pool) {
-    if (pool.open.size > 0 || !pool.releaseLock) {
+    pool.holders -= 1;
+    settle(pool);
+  }
+
+  // Pauses the pool and gives up the lock once nothing uses it
+  function settle(pool: Pool) {
+    if (pool.holders > 0 || pool.open.size > 0 || !pool.releaseLock) {
       return;
     }
     try {
@@ -192,6 +214,16 @@ export function createOpfsStore({
       verifyMigratedDatabase(db);
     } finally {
       db.close();
+    }
+  }
+
+  // A journal left by a crash would be rolled back into whatever database
+  // is opened under that name next, so it goes before the file is
+  // replaced or removed
+  function unlinkJournal(pool: Pool, fileName: string) {
+    const journal = `${fileName}-journal`;
+    if (pool.util.getFileNames().includes(journal)) {
+      pool.util.unlink(journal);
     }
   }
 
@@ -313,12 +345,12 @@ export function createOpfsStore({
   async function openOnce(path: string): Promise<WasmDatabase> {
     const { dirId, fileName } = splitSqlitePath(path);
     const pool = await acquire(dirId, path);
-    const already = pool.open.get(fileName);
-    if (already) {
-      return already;
-    }
     let db: WasmDatabase | undefined;
     try {
+      const already = pool.open.get(fileName);
+      if (already) {
+        return already;
+      }
       const present =
         pool.util.getFileNames().includes(fileName) ||
         (await importExisting(pool, path, fileName));
@@ -355,8 +387,9 @@ export function createOpfsStore({
         db.close();
         pool.open.delete(fileName);
       }
-      release(pool);
       throw error;
+    } finally {
+      release(pool);
     }
   }
 
@@ -371,12 +404,18 @@ export function createOpfsStore({
       db.close();
       if (pool && pool.open.get(fileName) === db) {
         pool.open.delete(fileName);
-        release(pool);
+        settle(pool);
       }
     },
 
     async readFile(path) {
       const { dirId, fileName } = splitSqlitePath(path);
+      // A database being opened is read from its handle once it is, like
+      // an open one, rather than imported a second time
+      const inFlight = opening.get(path);
+      if (inFlight) {
+        return exportBytes(await inFlight);
+      }
       const open = pools.get(dirId)?.open.get(fileName);
       if (open) {
         return exportBytes(open);
@@ -397,11 +436,12 @@ export function createOpfsStore({
 
     async writeFile(path, bytes) {
       const { dirId, fileName } = splitSqlitePath(path);
-      if (pools.get(dirId)?.open.has(fileName)) {
+      if (opening.has(path) || pools.get(dirId)?.open.has(fileName)) {
         throw new Error(`cannot overwrite an open database: ${path}`);
       }
       const pool = await acquire(dirId, path);
       try {
+        unlinkJournal(pool, fileName);
         await pool.util.importDb(fileName, bytes);
         const row = await getSqliteFileRow(path);
         await putSqliteFileRow({
@@ -417,6 +457,9 @@ export function createOpfsStore({
 
     async removeFile(path) {
       const { dirId, fileName } = splitSqlitePath(path);
+      // An open in flight ends with the database registered, so it is
+      // closed below rather than unlinked under it
+      await opening.get(path)?.catch(() => undefined);
       const pool = await acquire(dirId, path);
       try {
         const open = pool.open.get(fileName);
@@ -424,10 +467,9 @@ export function createOpfsStore({
           open.close();
           pool.open.delete(fileName);
         }
-        for (const name of [fileName, `${fileName}-journal`]) {
-          if (pool.util.getFileNames().includes(name)) {
-            pool.util.unlink(name);
-          }
+        unlinkJournal(pool, fileName);
+        if (pool.util.getFileNames().includes(fileName)) {
+          pool.util.unlink(fileName);
         }
         if (pool.util.getFileCount() === 0) {
           // `unlink` only frees the slot; the bytes stay in the OPFS file

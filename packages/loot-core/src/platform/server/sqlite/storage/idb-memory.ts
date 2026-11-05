@@ -56,6 +56,8 @@ type Entry = {
   firstDirtyAt: number | null;
   timer: ReturnType<typeof setTimeout> | null;
   pending: Promise<void> | null;
+  // Whether the current run of failed writes has had its retry
+  retried: boolean;
   releaseLock: () => void;
 };
 
@@ -102,6 +104,7 @@ export function createMemoryIdbStore({
       rev,
     });
     entry.rev = rev;
+    entry.retried = false;
   }
 
   function schedule(entry: Entry) {
@@ -137,6 +140,13 @@ export function createMemoryIdbStore({
       .catch(error => {
         logger.error('sqlite storage: failed to persist', entry.path, error);
         entry.dirty = true;
+        // One retry after the usual delay, then wait for the next write: a
+        // steady retry would only repeat a quota failure, alert and all
+        if (!entry.retried && byDb.get(entry.db) === entry) {
+          entry.retried = true;
+          entry.firstDirtyAt = Date.now();
+          schedule(entry);
+        }
       })
       .finally(() => {
         if (entry.pending === pending) {
@@ -242,6 +252,7 @@ export function createMemoryIdbStore({
         firstDirtyAt: null,
         timer: null,
         pending: null,
+        retried: false,
         releaseLock,
       };
       if (bytes == null) {

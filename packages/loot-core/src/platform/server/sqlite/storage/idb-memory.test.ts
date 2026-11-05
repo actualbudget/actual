@@ -314,6 +314,34 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(reopened);
   });
 
+  it('retries a failed write once without another write', async () => {
+    const db = await openDatabase(PATH);
+    execQuery(db, SCHEMA);
+    const before = await vi.waitFor(async () => {
+      const bytes = await rowBytes(PATH);
+      expect(bytes).not.toBeNull();
+      return bytes as Uint8Array;
+    });
+
+    const setSpy = vi
+      .spyOn(idb, 'set')
+      .mockRejectedValueOnce(new Error('transient'));
+    runQuery(db, "INSERT INTO t (v) VALUES ('retried')");
+    const after = await vi.waitFor(async () => {
+      const bytes = (await rowBytes(PATH)) as Uint8Array;
+      expect(Buffer.from(bytes).equals(Buffer.from(before))).toBe(false);
+      return bytes;
+    });
+    expect(setSpy).toHaveBeenCalledTimes(2);
+    setSpy.mockRestore();
+    const copy = await openDatabase(after);
+    expect(runQuery(copy, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'retried' },
+    ]);
+    closeDatabase(copy);
+    closeDatabase(db);
+  });
+
   it('persists a write that returns rows', async () => {
     const db = await openDatabase(PATH);
     execQuery(db, SCHEMA);

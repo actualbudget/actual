@@ -10,6 +10,7 @@ import {
   openDatabase,
   runQuery,
 } from '#platform/server/sqlite';
+import * as wasm from '#platform/server/sqlite/wasm';
 
 import {
   BudgetInUseError,
@@ -397,6 +398,96 @@ describe('OPFS pool store', () => {
     // The marker and the copy are left as they were
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
     expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('drops a leftover journal before a file is replaced', async () => {
+    const pool = fakePool(
+      new Map([
+        ['/db.sqlite', new Uint8Array([1])],
+        ['/db.sqlite-journal', new Uint8Array([2])],
+      ]),
+    );
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.writeFile(PATH, await budgetBytes('restored'));
+    expect(pool.files.has('/db.sqlite-journal')).toBe(false);
+    expect(pool.unlink.mock.invocationCallOrder[0]).toBeLessThan(
+      pool.importDb.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('keeps the pool live while operations overlap', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('slow'),
+    );
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    // A write to another file of the directory ends while the open is
+    // still importing
+    const opening = store.open(PATH);
+    await store.writeFile(
+      '/documents/Actual/budget-one/other.sqlite',
+      new Uint8Array([1]),
+    );
+    expect(pool.pauseVfs).not.toHaveBeenCalled();
+    const db = await opening;
+    expect(pool.pauseVfs).not.toHaveBeenCalled();
+    store.close(PATH, db);
+    expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads a database being opened from its handle', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('slow'),
+    );
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const exportSpy = vi
+      .spyOn(wasm, 'exportBytes')
+      .mockReturnValue(new Uint8Array([7]));
+    try {
+      const opening = store.open(PATH);
+      expect(await store.readFile(PATH)).toEqual(new Uint8Array([7]));
+      expect(exportSpy).toHaveBeenCalledWith(await opening);
+      expect(pool.importDb).toHaveBeenCalledTimes(1);
+    } finally {
+      exportSpy.mockRestore();
+    }
+  });
+
+  it('waits for an open in flight before removing its file', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('slow'),
+    );
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const opening = store.open(PATH);
+    await store.removeFile(PATH);
+    await opening;
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect(pool.files.size).toBe(0);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
   });
 
   it('deletes with unlink and wipeFiles, never removeVfs', async () => {
