@@ -8,170 +8,276 @@ set -e
 # those images are handed over to that user first.
 #####################################################
 
-# Prints the data directories the server will use, one per line (so paths with
-# spaces stay intact): the ones set through the environment, plus any set in
-# config.json, which the server reads after this script has dropped privileges.
-configured_dirs() {
-  echo "${ACTUAL_DATA_DIR:-/data}"
-  echo "${ACTUAL_SERVER_FILES:-}"
-  echo "${ACTUAL_USER_FILES:-}"
-  config="${ACTUAL_CONFIG_PATH:-}"
-  if [ -z "$config" ]; then
-    for candidate in /app/config.json "${ACTUAL_DATA_DIR:-/data}/config.json"; do
-      if [ -f "$candidate" ]; then
-        config="$candidate"
-        break
-      fi
-    done
-  fi
-  # The environment beats config.json, as in the server. A config the server
-  # can't parse is left for the server to report.
-  if [ -f "$config" ]; then
-    node -e '
-      const env = {
-        dataDir: "ACTUAL_DATA_DIR",
-        serverFiles: "ACTUAL_SERVER_FILES",
-        userFiles: "ACTUAL_USER_FILES",
-      };
+# Node works out what the server will use, the same way load-config.js does, as
+# the server only reads config.json after this script has dropped privileges.
+# It prints one "kind value" line each:
+#   dir     a data folder, as a real path
+#   file    a file the server only reads (a missing one is left for the server)
+#   unsafe  a data folder or file setting that can't be used, and why
+#   port    the port
+# A config the server can't parse is left for the server to report.
+# shellcheck disable=SC2016 # JavaScript, not shell expansions
+settings=$(node -e '
+  const fs = require("fs");
+  const path = require("path");
+  const { env } = process;
+  const lines = new Set();
+
+  let configPath = env.ACTUAL_CONFIG_PATH;
+  if (!configPath) {
+    configPath = "/app/config.json";
+    if (!fs.existsSync(configPath)) {
+      const dataDir = env.ACTUAL_DATA_DIR || (fs.existsSync("/data") ? "/data" : "/app");
+      configPath = path.join(dataDir, "config.json");
+    }
+  }
+  let config = {};
+  try {
+    config = JSON.parse(fs.readFileSync(configPath, "utf8")) ?? {};
+  } catch {}
+
+  // The environment beats config.json, even when it is set to an empty value.
+  const setting = (name, value) => (name in env ? env[name] : value);
+  const hasBadCharacter = value => /[\n\0]/.test(value);
+  // Root can be locked out of a share the run user owns (e.g. root squash), so
+  // only the run user can tell what is in there.
+  const isRootLockedOut = error => error.code === "EACCES" && process.getuid() === 0;
+
+  function addDir(label, value) {
+    if (typeof value !== "string") return;
+    const unsafe = why => lines.add(`unsafe ${label} is ${value || "empty"}, ${why}`.replace(/[\n\0]/g, " "));
+    if (hasBadCharacter(value)) return unsafe("which has a line break or NUL character");
+    let real = path.resolve(value);
+    try {
+      real = fs.realpathSync(real);
+      if (!fs.statSync(real).isDirectory()) return unsafe("which is not a folder");
+    } catch (error) {
+      if (error.code !== "ENOENT" && !isRootLockedOut(error)) return unsafe(`which can not be used as a folder (${error.code})`);
+    }
+    // Handing over the app folder would let the server change its own code.
+    // Only root hands anything over.
+    if (process.getuid() === 0 && !path.relative(real, "/app").startsWith("..")) {
+      return unsafe("which is or contains the server app folder (/app)");
+    }
+    lines.add(`dir ${real}`);
+  }
+
+  function addFile(label, file) {
+    if (hasBadCharacter(file)) {
+      lines.add(`unsafe ${label} has a line break or NUL character in its path`);
+      return;
+    }
+    try {
+      fs.statSync(file);
+    } catch (error) {
+      if (error.code === "ENOENT" || isRootLockedOut(error)) return;
+    }
+    lines.add(`file ${file}`);
+  }
+
+  if (!env.ACTUAL_DATA_DIR) addDir("the default data folder", "/data");
+  for (const [name, key] of [
+    ["ACTUAL_DATA_DIR", "dataDir"],
+    ["ACTUAL_SERVER_FILES", "serverFiles"],
+    ["ACTUAL_USER_FILES", "userFiles"],
+  ]) {
+    addDir(name in env ? name : `${key} in ${configPath}`, setting(name, config[key]));
+  }
+
+  addFile("ACTUAL_CONFIG_PATH", configPath);
+  // The server only uses HTTPS when both are set; either may be inline PEM.
+  const httpsKey = setting("ACTUAL_HTTPS_KEY", config.https?.key);
+  const httpsCert = setting("ACTUAL_HTTPS_CERT", config.https?.cert);
+  if (httpsKey && httpsCert) {
+    for (const [label, value] of [["the HTTPS key", httpsKey], ["the HTTPS certificate", httpsCert]]) {
+      if (typeof value === "string" && !value.startsWith("-----BEGIN")) addFile(label, value);
+    }
+  }
+  for (const name of Object.keys(env)) {
+    if (/^ACTUAL_\w+_FILE$/.test(name) && env[name]) addFile(name, env[name]);
+  }
+
+  lines.add(`port ${Number(env.ACTUAL_PORT || config.port || env.PORT || 5006) || 0}`);
+  process.stdout.write([...lines].join("\n"));
+')
+
+list() {
+  printf '%s\n' "$settings" | sed -n "s/^$1 //p"
+}
+
+# Every list below has one entry per line, so paths with spaces stay intact.
+IFS='
+'
+set -f
+data_dirs=$(list dir)
+read_files=$(list file)
+unsafe=$(list unsafe)
+port=$(list port)
+uid=$(id -u)
+
+# Runs a command as the user the server will run as.
+if [ "$uid" = 0 ]; then
+  run_uid="${PUID:-$(id -u actual)}"
+  run_gid="${PGID:-$(id -g actual)}"
+  run_as() {
+    setpriv --reuid="$run_uid" --regid="$run_gid" --clear-groups "$@"
+  }
+else
+  run_as() {
+    "$@"
+  }
+fi
+
+can_read() {
+  # shellcheck disable=SC2016 # expanded by the inner shell
+  run_as sh -c 'cat -- "$1" > /dev/null' sh "$1" 2>/dev/null
+}
+
+# Succeeds if the data folder $1, created if need be, can be written and
+# everything in it is usable, including what links in it lead to, which may have
+# stayed out of reach. Writes a real file rather than using `test -w`: busybox's
+# `test -w` only checks permission bits, so it misses read-only and root-squashed
+# mounts. The files the server only reads, such as config.json or a certificate,
+# may be read-only, and are checked on their own. A dangling link or a loop
+# doesn't get in the way, as the server doesn't rely on one.
+data_dir_usable() {
+  run_as mkdir -p -- "$1" 2>/dev/null || return 1
+  # shellcheck disable=SC2016 # expanded by the inner shell
+  run_as sh -c 'probe=$(mktemp "$1/.actual-write-test.XXXXXX") && rm -f "$probe"' \
+    sh "$1" 2>/dev/null || return 1
+  # shellcheck disable=SC2016 # JavaScript, not shell expansions
+  run_as node -e '
+    const fs = require("fs");
+    const path = require("path");
+    const { R_OK, W_OK, X_OK } = fs.constants;
+    // The same file can be at several paths, through a mount or a hard link.
+    const stat = file => fs.statSync(file, { bigint: true });
+    const identity = ({ dev, ino }) => `${dev}:${ino}`;
+    const readOnly = new Set();
+    for (const file of process.argv[2].split("\n")) {
       try {
-        const config = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
-        for (const key of Object.keys(env)) {
-          if (typeof config[key] === "string" && !process.env[env[key]]) {
-            console.log(config[key]);
-          }
-        }
+        readOnly.add(identity(stat(file)));
       } catch {}
-    ' "$config" 2>/dev/null || true
+    }
+    const seen = new Set();
+    const pending = [process.argv[1]];
+    while (pending.length > 0) {
+      const entry = pending.pop();
+      try {
+        const real = fs.realpathSync.native(entry);
+        if (seen.has(real)) continue;
+        seen.add(real);
+        const stats = stat(real);
+        if (readOnly.has(identity(stats))) continue;
+        if (stats.isDirectory()) {
+          fs.accessSync(real, R_OK | W_OK | X_OK);
+          for (const name of fs.readdirSync(real)) pending.push(path.join(real, name));
+        } else {
+          fs.accessSync(real, R_OK | W_OK);
+        }
+      } catch (error) {
+        if (!["ENOENT", "ENOTDIR", "ELOOP"].includes(error.code)) process.exit(1);
+      }
+    }
+  ' "$1" "$read_files" 2>/dev/null
+}
+
+# Docker creates a directory when a bind-mount source is missing on the host,
+# and the server can't start with one in place of a file, whoever it runs as.
+for file in $read_files; do
+  if [ -d "$file" ]; then
+    printf '%s\n' "Error: $file is a directory, not a file." >&2
+    printf '%s\n' "If it's bind-mounted, check that the source file exists on the host." >&2
+    exit 1
   fi
-}
-
-data_dirs="$(configured_dirs)"
-
-# Succeeds if every file and directory under $1 is usable: readable and
-# writable, and searchable for directories. Symlinks are followed, so a link to
-# a directory elsewhere is checked too. The rest of the arguments are a command
-# prefix to run the check as another user (none to run it as is). This catches
-# data that stays out of reach after a failed ownership handover (e.g. a
-# root-squashed mount, or a link to a root-only folder) and files the user owns
-# but can't write, none of which the write probe on the data folder itself
-# detects.
-tree_accessible() {
-  dir=$1
-  shift
-  "$@" find -L "$dir" \! -type l -exec sh -c '
-    for entry; do
-      [ -r "$entry" ] && [ -w "$entry" ] || exit 1
-      if [ -d "$entry" ] && [ ! -x "$entry" ]; then exit 1; fi
-    done
-  ' sh {} + >/dev/null 2>&1
-}
+done
 
 # Started as a non-root user (e.g. `docker run --user`), so nothing can be
 # handed over. Fail early if the data is still root-owned: otherwise the server
 # starts and passes its health check, but every sign-in fails with
-# SQLITE_READONLY. Write a real file rather than using `test -w`: busybox's
-# `test -w` only checks permission bits, so it misses read-only and
-# root-squashed mounts.
-if [ "$(id -u)" != "0" ]; then
-  while IFS= read -r dir; do
-    if [ -d "$dir" ] && ! { (touch "$dir/.actual-write-test" && rm -f "$dir/.actual-write-test") 2>/dev/null && tree_accessible "$dir"; }; then
-      echo "Error: uid $(id -u) can't write to $dir or something in it." >&2
-      echo "Data from older images is owned by root. Start the container without --user once" >&2
-      echo "to hand it over automatically, or run: chown -R $(id -u):$(id -g) <your data folder>" >&2
+# SQLITE_READONLY.
+if [ "$uid" != 0 ]; then
+  for problem in $unsafe; do
+    printf '%s\n' "Error: $problem." >&2
+  done
+  if [ -n "$unsafe" ]; then exit 1; fi
+  for dir in $data_dirs; do
+    if ! data_dir_usable "$dir"; then
+      printf '%s\n' "Error: uid $uid can't write to $dir or something in it." >&2
+      printf '%s\n' "Data from older images is owned by root. Start the container without --user once" >&2
+      printf '%s\n' "to hand it over automatically, or run: chown -R $uid:$(id -g) <your data folder>" >&2
       exit 1
     fi
-  done <<DIRS
-$data_dirs
-DIRS
+  done
+  for file in $read_files; do
+    if ! can_read "$file"; then
+      printf '%s\n' "Error: uid $uid can't read $file." >&2
+      printf '%s\n' "Give uid $uid read access to $file, or start the container without --user." >&2
+      exit 1
+    fi
+  done
   exec "$@"
 fi
-
-run_uid="${PUID:-$(id -u actual)}"
-run_gid="${PGID:-$(id -g actual)}"
-
-run_as() {
-  setpriv --reuid="$run_uid" --regid="$run_gid" --clear-groups "$@"
-}
 
 # Prints why the server is staying root; the caller then runs it unchanged.
 warn_staying_root() {
-  echo "Warning: $1, so the server is still running as root." >&2
-  echo "$2, or start the container with --user $run_uid:$run_gid." >&2
+  printf '%s\n' "Warning: $1, so the server is still running as root." >&2
+  printf '%s\n' "$2, or start the container with --user $run_uid:$run_gid." >&2
 }
 
-# A failed switch usually means the container was started with capabilities
-# dropped (e.g. --cap-drop ALL), which also rules out changing file owners.
-if ! run_as true 2>/dev/null; then
-  warn_staying_root "can't switch to uid $run_uid" \
-    "Allow the SETUID, SETGID and CHOWN capabilities"
+for problem in $unsafe; do
+  warn_staying_root "$problem" "Set it to a usable path, such as a folder in your data volume"
+done
+if [ -n "$unsafe" ]; then exec "$@"; fi
+
+# Ports below ip_unprivileged_port_start need NET_BIND_SERVICE (e.g. 443 with
+# --network host). Docker usually sets it to 0 inside the container, so the
+# capability is only requested when it's needed.
+unprivileged_start="$(cat /proc/sys/net/ipv4/ip_unprivileged_port_start 2>/dev/null || true)"
+caps=""
+if [ "$port" -gt 0 ] 2>/dev/null && [ "$port" -lt "${unprivileged_start:-1024}" ]; then
+  caps="--inh-caps=+net_bind_service
+--ambient-caps=+net_bind_service"
+fi
+
+# Try the exact switch first. It fails if the container was started with
+# capabilities dropped (e.g. --cap-drop ALL), which also rules out changing
+# file owners.
+# shellcheck disable=SC2086 # $caps is intentionally split into flags
+if ! run_as $caps true 2>/dev/null; then
+  warn_staying_root "can't switch to uid $run_uid for port $port" \
+    "Allow the SETUID, SETGID, CHOWN and, below port ${unprivileged_start:-1024}, NET_BIND_SERVICE capabilities"
   exec "$@"
 fi
 
-while IFS= read -r dir; do
-  if [ -d "$dir" ]; then
-    # Only touch files the run user doesn't already own, so restarts are cheap.
-    # -h changes symlinks themselves, never what they point to outside the data dir.
-    find "$dir" \( \! -user "$run_uid" -o \! -group "$run_gid" \) \
-      -exec chown -h "$run_uid:$run_gid" {} + 2>/dev/null ||
-      echo "Warning: could not change the owner of every file in $dir" >&2
-  fi
-done <<DIRS
-$data_dirs
-DIRS
+# The server creates its data folders, but not their parents, and the run user
+# can't create anything under a root-owned parent (e.g. ACTUAL_SERVER_FILES set
+# to /opt/actual/server-files). So create them now, while still root.
+for dir in $data_dirs; do
+  mkdir -p -- "$dir" 2>/dev/null || true
+  # Only touch files the run user doesn't already own, so restarts are cheap.
+  # -h changes symlinks themselves, never what they point to outside the data dir.
+  # A folder or file that can't be created or handed over (e.g. a read-only
+  # mounted one) only matters if the checks below find it's unusable.
+  find "$dir" \( \! -user "$run_uid" -o \! -group "$run_gid" \) \
+    -exec chown -h "$run_uid:$run_gid" {} + 2>/dev/null || true
+done
 
-# Same real-file probe as above, run as the target user.
-can_write() {
-  run_as sh -c 'probe="$1/.actual-write-test" && touch "$probe" && rm -f "$probe"' sh "$1" 2>/dev/null
-}
-
-can_read() {
-  run_as sh -c 'cat "$1" > /dev/null' sh "$1" 2>/dev/null
-}
-
-while IFS= read -r dir; do
-  if [ -d "$dir" ] && ! { can_write "$dir" && tree_accessible "$dir" run_as; }; then
+for dir in $data_dirs; do
+  if ! data_dir_usable "$dir"; then
     warn_staying_root "uid $run_uid can't write to $dir or something in it" \
       "Give uid $run_uid write access to $dir"
     exec "$@"
   fi
-done <<DIRS
-$data_dirs
-DIRS
+done
 
-# Files the server reads from outside the data dirs, such as mounted TLS
-# certificates or secrets, may only be readable by root.
-# Checked one path at a time: a joined string would split paths with spaces.
-unreadable_file() {
-  [ -f "$1" ] && ! can_read "$1"
-}
-
-for file in "${ACTUAL_CONFIG_PATH:-}" "${ACTUAL_HTTPS_KEY:-}" "${ACTUAL_HTTPS_CERT:-}"; do
-  case "$file" in
-    '' | -----BEGIN*) continue ;;
-  esac
-  if unreadable_file "$file"; then
+for file in $read_files; do
+  if ! can_read "$file"; then
     warn_staying_root "uid $run_uid can't read $file" \
       "Give uid $run_uid read access to $file"
     exec "$@"
   fi
 done
-
-for name in $(env | sed -n 's/^\(ACTUAL_[A-Z0-9_]*_FILE\)=.*/\1/p'); do
-  file="$(printenv "$name")"
-  if unreadable_file "$file"; then
-    warn_staying_root "uid $run_uid can't read $file" \
-      "Give uid $run_uid read access to $file"
-    exec "$@"
-  fi
-done
-
-# Ports below 1024 need NET_BIND_SERVICE when the host doesn't let
-# unprivileged users bind them (e.g. --network host).
-port="${ACTUAL_PORT:-${PORT:-5006}}"
-caps=""
-if [ "$port" -lt 1024 ] 2>/dev/null; then
-  caps="--inh-caps=+net_bind_service --ambient-caps=+net_bind_service"
-fi
 
 # root's HOME isn't readable by the run user.
 export HOME=/tmp

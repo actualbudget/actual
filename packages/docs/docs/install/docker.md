@@ -103,15 +103,21 @@ services:
       - PGID=1000
 ```
 
-Alternatively, start the container as that user with `--user 1000:1000` (or `user: '1000:1000'` in Docker Compose). In that case the container doesn't change any owners, so the user needs write access to the data folder already. If it doesn't, the container stops at startup with an error explaining how to fix it. For data from an older image, start it once without `--user` (with `PUID` and `PGID` set) to hand the folder over, then switch to `--user`.
+Alternatively, start the container as that user with `--user 1000:1000` (or `user: '1000:1000'` in Docker Compose). In that case the container doesn't change any owners, so the user needs write access to the data folder already, and read access to `config.json`, any TLS key and certificate files, and any secrets passed with a `_FILE` variable. If it's missing any of these, the container stops at startup with an error explaining how to fix it. For data from an older image, start it once without `--user` (with `PUID` and `PGID` set) to hand the folder over, then switch to `--user`.
+
+Whether or not you use `--user`, the container stops at startup if `config.json`, a TLS key or certificate, or a file passed with a `_FILE` variable is a folder instead of a file. This usually happens when the file is bind-mounted but doesn't exist on the host, because Docker then creates an empty folder in its place. Check that the file exists on the host and that the path is spelled correctly.
+
+The server only reads `config.json`, TLS keys and certificates, and files passed with a `_FILE` variable, so these can be read-only, even inside the data folder (for example, mounted with `:ro`).
 
 On Kubernetes, set `runAsUser: 1001`, `runAsGroup: 1001` and `fsGroup: 1001` in the pod's `securityContext`.
 
 The server keeps running as root, and logs a warning explaining why, if:
 
 - the user can't write to the data folder, for example on a network share that doesn't allow changing file owners,
-- the user can't read a file the server needs from outside the data folder, such as a TLS certificate or a secret passed with a `_FILE` variable, or
-- the container was started without the capabilities needed to switch users, for example with `--cap-drop ALL`.
+- the user can't read a file the server needs, such as `config.json`, a TLS certificate or a secret passed with a `_FILE` variable,
+- a data folder setting can't be used: it points to something that isn't a folder, or to the app folder inside the container (`/app`) or a folder that contains it, such as `/`. Handing the app folder over would let the server change its own code. A folder inside it, such as `/app/data`, is fine,
+- the container was started without the capabilities needed to switch users, for example with `--cap-drop ALL`, or
+- the server listens on a port that only root can use (one below the system's unprivileged port threshold, usually 1024), and the container was started without the `NET_BIND_SERVICE` capability.
 
 ## Test connection within local network
 
