@@ -404,13 +404,19 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(db);
   });
 
-  it('refuses a database held in OPFS rather than shadow it', async () => {
+  it('refuses a database held in OPFS rather than shadow or take it over', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
     await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
       StorageUnavailableError,
     );
+    await expect(
+      getSqliteStore().writeFile(PATH, new Uint8Array([1])),
+    ).rejects.toBeInstanceOf(StorageUnavailableError);
     // Nothing was written over the marker
-    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await getSqliteFileRow(PATH)).toMatchObject({
+      storage: 'opfs',
+      contents: '',
+    });
   });
 
   it('keeps transactions working through the facade on file databases', async () => {

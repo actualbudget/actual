@@ -147,19 +147,23 @@ export function createMemoryIdbStore({
     return pending;
   }
 
+  // The bytes of such a row live in an OPFS pool this session cannot
+  // reach: never shadow them with an empty database, or take them over
+  function assertNotInOpfs(path: string, row: Data | undefined) {
+    if (row?.storage === 'opfs') {
+      throw new StorageUnavailableError(
+        `${path} is stored in OPFS, which is not available here`,
+      );
+    }
+  }
+
   // The stored bytes of a path (null for a database that does not exist
   // yet) and the row revision to continue from
   async function loadBytes(
     path: string,
     row: Data | undefined,
   ): Promise<{ bytes: Uint8Array | null; rev: number }> {
-    if (row?.storage === 'opfs') {
-      // The bytes live in an OPFS pool this session cannot reach; never
-      // shadow them with an empty database
-      throw new StorageUnavailableError(
-        `${path} is stored in OPFS, which is not available here`,
-      );
-    }
+    assertNotInOpfs(path, row);
     const rev = row?.rev ?? 0;
     if (row && isByteContents(row.contents)) {
       return { bytes: row.contents, rev };
@@ -355,6 +359,7 @@ export function createMemoryIdbStore({
       const releaseLock = await lockBudget(path);
       try {
         const row = await getSqliteFileRow(path);
+        assertNotInOpfs(path, row);
         await putSqliteFileRow({
           filepath: path,
           contents: bytes,
