@@ -98,12 +98,32 @@ export function createOpfsStore({
     throw lastError;
   }
 
-  // Holds the lock and live handles for a pool until `release`
-  async function acquire(dirId: string, path: string): Promise<Pool> {
+  // Holds the lock and live handles for a pool until `release`. Concurrent
+  // callers share one acquisition: the lock is exclusive, so a second
+  // request for it would wait on the first and time out.
+  const acquiring = new Map<string, Promise<Pool>>();
+
+  function acquire(dirId: string, path: string): Promise<Pool> {
     const existing = pools.get(dirId);
     if (existing?.releaseLock) {
-      return existing;
+      return Promise.resolve(existing);
     }
+    const inFlight = acquiring.get(dirId);
+    if (inFlight) {
+      return inFlight;
+    }
+    const promise = takePool(dirId, path, existing).finally(() =>
+      acquiring.delete(dirId),
+    );
+    acquiring.set(dirId, promise);
+    return promise;
+  }
+
+  async function takePool(
+    dirId: string,
+    path: string,
+    existing: Pool | undefined,
+  ): Promise<Pool> {
     const releaseLock = await acquireLock(
       'actual-budget:' + dirId,
       LOCK_TIMEOUT_MS,
@@ -190,8 +210,6 @@ export function createOpfsStore({
       discardImport(pool, fileName);
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
-    } finally {
-      contents.close();
     }
     const row = await getSqliteFileRow(path);
     await completeMigration(
@@ -265,6 +283,11 @@ export function createOpfsStore({
         const present =
           pool.util.getFileNames().includes(fileName) ||
           (await importExisting(pool, path, fileName));
+        // Another call may have opened the file while that ran
+        const opened = pool.open.get(fileName);
+        if (opened) {
+          return opened;
+        }
         if (!present) {
           logger.warn('sqlite storage: creating missing database', path);
         }

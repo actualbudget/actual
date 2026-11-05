@@ -210,6 +210,21 @@ describe('OPFS pool store', () => {
     expect(sqlite3.installOpfsSAHPoolVfs).not.toHaveBeenCalled();
   });
 
+  it('hands two concurrent opens of one file the same handle', async () => {
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const [first, second] = await Promise.all([
+      store.open(PATH),
+      store.open(PATH),
+    ]);
+    expect(second).toBe(first);
+  });
+
   it('releases the pool when an open fails after the handle was created', async () => {
     const pool = fakePool();
     const { acquire, releases } = trackingLock();

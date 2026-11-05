@@ -74,56 +74,74 @@ export function pageSizeFromHeader(header: Uint8Array): number | null {
   return raw === 1 ? 65536 : raw;
 }
 
-// Reads the blocks in order, in short IndexedDB transactions, filling gaps
-// with zeros and cutting the last block to the file size. Resolves with
-// undefined at the end of the file.
-async function createBlockReader(
+// Reads every block in one read-only transaction, so a legacy writer in
+// another tab waits until the copy is done rather than changing the file
+// part-way through. Gaps are zero-filled and the last block is cut to the
+// file size. Resolves with the file in chunks.
+function readAllBlocks(
   database: IDBDatabase,
   size: number,
   onProgress?: (percent: number) => void,
-): Promise<() => Promise<Uint8Array | undefined>> {
-  const first = await readLegacyKey<ArrayBuffer | undefined>(database, 0);
-  if (first == null) {
-    throw new Error('legacy database has no first block');
-  }
-  const blockSize = pageSizeFromHeader(new Uint8Array(first));
-  if (blockSize == null) {
-    throw new Error('legacy database does not start with a sqlite header');
-  }
-  const totalBlocks = Math.ceil(size / blockSize);
-  let nextBlock = 0;
+): Promise<Uint8Array[]> {
+  return new Promise((resolve, reject) => {
+    const transaction = database.transaction([LEGACY_STORE], 'readonly');
+    const store = transaction.objectStore(LEGACY_STORE);
+    const chunks: Uint8Array[] = [];
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+    transaction.oncomplete = () => resolve(chunks);
 
-  return async function next() {
-    if (nextBlock >= totalBlocks) {
-      return undefined;
-    }
-    const lastBlock = Math.min(nextBlock + BLOCKS_PER_CHUNK, totalBlocks) - 1;
-    const store = database
-      .transaction([LEGACY_STORE], 'readonly')
-      .objectStore(LEGACY_STORE);
-    const range = IDBKeyRange.bound(nextBlock, lastBlock);
-    const [keys, values] = await Promise.all([
-      requestToPromise(store.getAllKeys(range)),
-      requestToPromise(store.getAll(range)),
-    ]);
-
-    const chunkStart = nextBlock * blockSize;
-    const chunkEnd = Math.min((lastBlock + 1) * blockSize, size);
-    const chunk = new Uint8Array(chunkEnd - chunkStart);
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index] as number;
-      const block = new Uint8Array(values[index] as ArrayBuffer);
-      const offset = key * blockSize - chunkStart;
-      chunk.set(
-        block.subarray(0, Math.min(block.length, chunk.length - offset)),
-        offset,
-      );
+    function fail(message: string) {
+      reject(new Error(message));
+      transaction.abort();
     }
 
-    nextBlock = lastBlock + 1;
-    onProgress?.(Math.round((100 * nextBlock) / totalBlocks));
-    return chunk;
-  };
+    // Requests complete in order, so the keys are in by the time the
+    // values arrive; issuing the next pair from there keeps the
+    // transaction alive
+    function readChunk(fromBlock: number, blockSize: number) {
+      const totalBlocks = Math.ceil(size / blockSize);
+      if (fromBlock >= totalBlocks) {
+        return;
+      }
+      const lastBlock = Math.min(fromBlock + BLOCKS_PER_CHUNK, totalBlocks) - 1;
+      const range = IDBKeyRange.bound(fromBlock, lastBlock);
+      const keysRequest = store.getAllKeys(range);
+      const valuesRequest = store.getAll(range);
+      valuesRequest.onsuccess = () => {
+        const chunkStart = fromBlock * blockSize;
+        const chunkEnd = Math.min((lastBlock + 1) * blockSize, size);
+        const chunk = new Uint8Array(chunkEnd - chunkStart);
+        valuesRequest.result.forEach((value, index) => {
+          const key = keysRequest.result[index] as number;
+          const block = new Uint8Array(value as ArrayBuffer);
+          const offset = key * blockSize - chunkStart;
+          chunk.set(
+            block.subarray(0, Math.min(block.length, chunk.length - offset)),
+            offset,
+          );
+        });
+        chunks.push(chunk);
+        onProgress?.(Math.round((100 * (lastBlock + 1)) / totalBlocks));
+        readChunk(lastBlock + 1, blockSize);
+      };
+    }
+
+    const first = store.get(0);
+    first.onsuccess = () => {
+      const header = first.result as ArrayBuffer | undefined;
+      if (header == null) {
+        fail('legacy database has no first block');
+        return;
+      }
+      const blockSize = pageSizeFromHeader(new Uint8Array(header));
+      if (blockSize == null) {
+        fail('legacy database does not start with a sqlite header');
+        return;
+      }
+      readChunk(0, blockSize);
+    };
+  });
 }
 
 // Resolves false when the database is still open elsewhere after a while
@@ -143,14 +161,13 @@ export function deleteLegacyDatabase(name: string): Promise<boolean> {
 }
 
 export type LegacyDatabaseContents = {
-  // Feeds the file in chunks, for `importDb`
+  // Feeds the file in chunks, for `importDb`; undefined at the end
   read: () => Promise<Uint8Array | undefined>;
   size: number;
-  close: () => void;
 };
 
-// Opens the absurd-sql database of a sqlite path for reading. Resolves
-// null when there is none, or when it is empty (absurd-sql created the
+// A snapshot of the absurd-sql database of a sqlite path. Resolves null
+// when there is none, or when it is empty (absurd-sql created the
 // IndexedDB database before the first write).
 export async function openLegacyDatabaseContents(
   path: string,
@@ -168,12 +185,13 @@ export async function openLegacyDatabaseContents(
       await deleteLegacyDatabase(name);
       return null;
     }
-    const read = await createBlockReader(database, meta.size, onProgress);
     onProgress?.(0);
-    return { read, size: meta.size, close: () => database.close() };
+    const chunks = await readAllBlocks(database, meta.size, onProgress);
+    return { read: async () => chunks.shift(), size: meta.size };
   } catch (error) {
-    database.close();
     throw new StorageMigrationError(path, error);
+  } finally {
+    database.close();
   }
 }
 
@@ -186,23 +204,17 @@ export async function readLegacyDatabaseBytes(
   if (contents == null) {
     return null;
   }
-  try {
-    const bytes = new Uint8Array(contents.size);
-    let offset = 0;
-    for (;;) {
-      const chunk = await contents.read();
-      if (chunk == null) {
-        break;
-      }
-      bytes.set(chunk, offset);
-      offset += chunk.length;
-    }
-    return bytes;
-  } catch (error) {
-    throw new StorageMigrationError(path, error);
-  } finally {
-    contents.close();
+  const bytes = new Uint8Array(contents.size);
+  let offset = 0;
+  for (
+    let chunk = await contents.read();
+    chunk;
+    chunk = await contents.read()
+  ) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
   }
+  return bytes;
 }
 
 // What both stores check on a freshly copied database before trusting
