@@ -114,6 +114,56 @@ describe('web filesystem', () => {
     delSpy.mockRestore();
   });
 
+  test('checks a database that appears during the removal walk', async () => {
+    const dir = '/documents/Actual/late';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/a-first.json', contents: '{}' });
+    await idb.set(store, {
+      filepath: dir + '/backups/old.sqlite',
+      contents: '',
+    });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback(),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    const originalDel = idb.del;
+    const late = dir + '/backups/late.sqlite';
+    const delSpy = vi
+      .spyOn(idb, 'del')
+      .mockImplementationOnce(async (target, key) => {
+        // The real delete goes first, while its transaction is still live
+        const deleted = originalDel(target, key);
+        // While the first file goes, a database appears further down the
+        // tree, and another worker moves it to the new storage
+        await writeFile(late, new Uint8Array([1]));
+        const { store: rows } = idb.getStore(await idb.openDatabase(), 'files');
+        await idb.set(rows, { filepath: late, contents: '', storage: 'opfs' });
+        return deleted;
+      });
+    try {
+      await expect(removeDirRecursively(dir)).rejects.toBeInstanceOf(
+        StorageUnavailableError,
+      );
+    } finally {
+      delSpy.mockRestore();
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    const { store: after } = idb.getStore(await idb.openDatabase(), 'files');
+    expect((await idb.get(after, late))?.storage).toBe('opfs');
+    // The connection is shared across tests: leave no marker behind
+    await idb.del(after, late);
+  });
+
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();

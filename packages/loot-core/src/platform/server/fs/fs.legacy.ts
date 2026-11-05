@@ -504,17 +504,23 @@ export const removeDir = async function (filepath) {
   FS.rmdir(filepath);
 };
 
-// The walk under `removeDirRecursively`, which holds every budget's lock
-// and has checked every database. No lock is taken again in here: a
-// request queued behind an exclusive one that waits on our hold would
-// never be granted
-async function removeTreeUnlocked(dirpath: string) {
+// The walk under `removeDirRecursively`: every database it meets goes
+// through the removal's hold, which covers the ones found before anything
+// was deleted and never requests a lock it already has, since a request
+// queued behind an exclusive one waiting on that hold would not be granted
+async function removeTree(
+  dirpath: string,
+  hold: (path: string) => Promise<void>,
+) {
   for (const file of await listDir(dirpath)) {
     const fullpath = join(dirpath, file);
     // `true` here means to not follow symlinks
     if (FS.isDir(FS.stat(fullpath, true).mode)) {
-      await removeTreeUnlocked(fullpath);
+      await removeTree(fullpath, hold);
     } else {
+      if (fullpath.endsWith('.sqlite')) {
+        await hold(fullpath);
+      }
       await _removeFile(fullpath);
     }
   }
@@ -524,22 +530,29 @@ async function removeTreeUnlocked(dirpath: string) {
 export const removeDirRecursively = async function (dirpath) {
   if (await exists(dirpath)) {
     // Every budget in the tree is held for the whole removal, so a move
-    // cannot land midway, and checked first, so a moved one is refused as
-    // a whole rather than half deleted
+    // cannot land midway, and every database is checked before the first
+    // file goes, so a moved one is refused as a whole rather than half
+    // deleted. A database that appears during the walk gets the same.
     const releases: (() => void)[] = [];
+    const locked = new Set<string>();
+    const checked = new Set<string>();
+    const hold = async (path: string) => {
+      if (checked.has(path)) {
+        return;
+      }
+      const name = budgetLockName(path);
+      if (!locked.has(name)) {
+        locked.add(name);
+        releases.push(await lockBudget(path));
+      }
+      await assertNotMoved(path);
+      checked.add(path);
+    };
     try {
-      const databases = await listDatabases(dirpath);
-      const locked = new Set<string>();
-      for (const path of databases) {
-        if (!locked.has(budgetLockName(path))) {
-          locked.add(budgetLockName(path));
-          releases.push(await lockBudget(path));
-        }
+      for (const path of await listDatabases(dirpath)) {
+        await hold(path);
       }
-      for (const path of databases) {
-        await assertNotMoved(path);
-      }
-      await removeTreeUnlocked(dirpath);
+      await removeTree(dirpath, hold);
     } finally {
       for (const release of releases) {
         release();
