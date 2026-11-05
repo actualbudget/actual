@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+import { logger } from '#platform/server/log';
 import * as aql from '#server/aql';
 import * as db from '#server/db';
 import type { DbCategory } from '#server/db';
@@ -11,6 +12,7 @@ import {
   applyMultipleCategoryTemplates,
   applyTemplate,
   dryRunCategoryTemplate,
+  storeTemplates,
 } from './goal-template';
 import * as statements from './statements';
 
@@ -25,6 +27,7 @@ vi.mock('./actions', () => ({
 vi.mock('#server/db', () => ({
   getCategories: vi.fn(),
   first: vi.fn(),
+  updateWithSchema: vi.fn(),
 }));
 
 vi.mock('#server/aql', () => ({
@@ -216,7 +219,12 @@ describe('dryRunCategoryTemplate', () => {
       categoryId: 'missing',
       templates,
     });
-    expect(result).toEqual({ budgeted: 0, perTemplate: [0] });
+    expect(result).toEqual({
+      budgeted: 0,
+      perTemplate: [0],
+      goal: null,
+      longGoal: false,
+    });
   });
 
   it('shows full demand even when To Budget cannot cover it', async () => {
@@ -252,6 +260,117 @@ describe('dryRunCategoryTemplate', () => {
     });
     expect(result.budgeted).toBe(500000);
     expect(result.perTemplate).toEqual([180000, 320000]);
+  });
+});
+
+describe('storeTemplates with a month', () => {
+  const monthly: Template = {
+    type: 'periodic',
+    amount: 100,
+    period: { period: 'month', amount: 1 },
+    starting: '2024-01-01',
+    directive: 'template',
+    priority: 1,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(statements.getActiveSchedules).mockResolvedValue([]);
+    vi.mocked(db.getCategories).mockResolvedValue([]);
+    setupAqlForCategoryLookup(category);
+  });
+
+  it('records the goal without changing what is budgeted', async () => {
+    setupSheetMock({ 'to-budget': 100000, [`budget-${category.id}`]: 3000 });
+
+    await storeTemplates({
+      categoriesWithTemplates: [{ id: category.id, templates: [monthly] }],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(db.updateWithSchema).toHaveBeenCalledWith(
+      'categories',
+      expect.objectContaining({ id: category.id }),
+    );
+    expect(actions.setGoal).toHaveBeenCalledWith({
+      month: '2024-01',
+      category: category.id,
+      goal: 10000,
+      long_goal: null,
+    });
+    expect(actions.setBudget).not.toHaveBeenCalled();
+  });
+
+  it('records a long-term goal', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+
+    await storeTemplates({
+      categoriesWithTemplates: [
+        {
+          id: category.id,
+          templates: [{ type: 'goal', amount: 1500, directive: 'goal' }],
+        },
+      ],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(actions.setGoal).toHaveBeenCalledWith({
+      month: '2024-01',
+      category: category.id,
+      goal: 150000,
+      long_goal: 1,
+    });
+  });
+
+  it('clears the goal when every automation is removed', async () => {
+    setupSheetMock({});
+
+    await storeTemplates({
+      categoriesWithTemplates: [{ id: category.id, templates: [] }],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(actions.setGoal).toHaveBeenCalledWith({
+      month: '2024-01',
+      category: category.id,
+      goal: null,
+      long_goal: null,
+    });
+  });
+
+  it('clears the goal instead of failing the save when it cannot be worked out', async () => {
+    vi.mocked(actions.getSheetValue).mockRejectedValue(new Error('no sheet'));
+    const warn = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+    await storeTemplates({
+      categoriesWithTemplates: [{ id: category.id, templates: [monthly] }],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(db.updateWithSchema).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalled();
+    expect(actions.setGoal).toHaveBeenCalledWith({
+      month: '2024-01',
+      category: category.id,
+      goal: null,
+      long_goal: null,
+    });
+  });
+
+  it('leaves goals alone without a month', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+
+    await storeTemplates({
+      categoriesWithTemplates: [{ id: category.id, templates: [monthly] }],
+      source: 'notes',
+    });
+
+    expect(db.updateWithSchema).toHaveBeenCalled();
+    expect(actions.setGoal).not.toHaveBeenCalled();
   });
 });
 

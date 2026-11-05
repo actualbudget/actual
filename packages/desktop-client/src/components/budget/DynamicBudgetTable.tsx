@@ -1,9 +1,8 @@
 // @ts-strict-ignore
-import React, { useEffect } from 'react';
 import type { ComponentProps } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useHotkeys } from 'react-hotkeys-hook';
-import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -15,6 +14,7 @@ import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
+import { clampMonth } from './MonthsContext';
 
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
@@ -63,21 +63,38 @@ const DynamicBudgetTable = ({
   const numMonths = Math.min(numPossible, maxMonths);
   const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
 
+  // Every displayed column must stay inside the bounds, so the first
+  // column can go no later than `numMonths - 1` months before the end.
+  const latestStartMonth = monthUtils.subMonths(monthBounds.end, numMonths - 1);
+
+  function getValidMonth(month: string) {
+    return clampMonth(month, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
+  }
+
+  // Keep the last column in range when the bounds change (e.g. switching
+  // budget type) or more columns fit on screen.
+  useEffect(() => {
+    const validMonth = clampMonth(startMonth, {
+      start: monthBounds.start,
+      end: latestStartMonth,
+    });
+    if (validMonth !== startMonth) {
+      onMonthSelect(validMonth, numMonths);
+    }
+  }, [
+    monthBounds.start,
+    latestStartMonth,
+    numMonths,
+    onMonthSelect,
+    startMonth,
+  ]);
+
   useEffect(() => {
     setDisplayMax(numPossible);
   }, [setDisplayMax, numPossible]);
-
-  function getValidMonth(month) {
-    const start = monthBounds.start;
-    const end = monthUtils.subMonths(monthBounds.end, numMonths - 1);
-
-    if (month < start) {
-      return start;
-    } else if (month > end) {
-      return end;
-    }
-    return month;
-  }
 
   function _onMonthSelect(month) {
     onMonthSelect(getValidMonth(month), numMonths);
@@ -181,16 +198,42 @@ type AutoSizingBudgetTableProps = Omit<
 };
 
 export const AutoSizingBudgetTable = (props: AutoSizingBudgetTableProps) => {
-  return (
-    <AutoSizer
-      renderProp={({ width = 0, height = 0 }) => {
-        if (width === 0 || height === 0) {
-          return null;
-        }
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
-        return <DynamicBudgetTable width={width} height={height} {...props} />;
-      }}
-    />
+  // Measure before the first paint (AutoSizer measures after it)
+  useLayoutEffect(() => {
+    const parent = ref.current?.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    function measure() {
+      const { width, height } = parent.getBoundingClientRect();
+      setSize(prev =>
+        prev.width === width && prev.height === height
+          ? prev
+          : { width, height },
+      );
+    }
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    // Zero-size wrapper so the table doesn't affect the measured parent
+    <div ref={ref} style={{ width: 0, height: 0, overflow: 'visible' }}>
+      {size.width > 0 && size.height > 0 && (
+        <DynamicBudgetTable
+          width={size.width}
+          height={size.height}
+          {...props}
+        />
+      )}
+    </div>
   );
 };
 

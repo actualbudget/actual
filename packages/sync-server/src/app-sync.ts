@@ -29,6 +29,7 @@ import { config } from './load-config';
 import { SecretName, secretsService } from './services/secrets-service';
 import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
+import { atomicWriteFile } from './util/atomic-write';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
@@ -189,7 +190,12 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
+  const result = simpleSync.sync(messages, since, groupId);
+  if (result.error) {
+    res.status(400).send(result.error);
+    return;
+  }
+  const { trie, newMessages } = result;
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),
@@ -365,7 +371,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   try {
-    await fs.writeFile(getPathForUserFile(fileId), req.body);
+    await atomicWriteFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });

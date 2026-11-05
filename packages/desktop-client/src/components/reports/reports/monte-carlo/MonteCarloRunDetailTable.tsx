@@ -767,7 +767,7 @@ export function MonteCarloRunDetailTable({
                             <PrivacyFilter>
                               <FinancialText as="span">
                                 {t(
-                                  'Raised to the minimum spending: {{amount}}.',
+                                  'Lifted by the minimum spending floor to {{amount}}.',
                                   {
                                     amount: format(
                                       row.plannedSpending,

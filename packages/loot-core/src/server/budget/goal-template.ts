@@ -1,3 +1,4 @@
+import { logger } from '#platform/server/log';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { batchMessages } from '#server/sync';
@@ -38,6 +39,7 @@ export function distributeRemainder(
 export async function storeTemplates({
   categoriesWithTemplates,
   source,
+  month,
 }: {
   categoriesWithTemplates: {
     id: string;
@@ -45,6 +47,8 @@ export async function storeTemplates({
     cleanup?: CleanupTemplate[];
   }[];
   source: 'notes' | 'ui';
+  /** Also record each category's goal for this month, without budgeting it */
+  month?: string;
 }): Promise<void> {
   let touchedCleanup = false;
   await batchMessages(async () => {
@@ -65,6 +69,13 @@ export async function storeTemplates({
   });
   if (touchedCleanup) {
     await tombstoneOrphanCleanupGroups();
+  }
+  if (month) {
+    const goals: TemplateGoal[] = [];
+    for (const { id, templates } of categoriesWithTemplates) {
+      goals.push(await getMonthGoal(month, id, templates));
+    }
+    await setGoals(month, goals);
   }
 }
 
@@ -356,6 +367,8 @@ async function processTemplate(
 export type DryRunCategoryResult = {
   budgeted: number;
   perTemplate: number[];
+  goal: number | null;
+  longGoal: boolean;
 };
 
 export async function dryRunCategoryTemplate({
@@ -370,12 +383,16 @@ export async function dryRunCategoryTemplate({
   // The projection answers "how much do these templates demand" — it
   // skips the priority clamp so future months (where To Budget is empty)
   // still show the templates' intended amount instead of 0.
+  const empty: DryRunCategoryResult = {
+    budgeted: 0,
+    perTemplate: templates.map(() => 0),
+    goal: null,
+    longGoal: false,
+  };
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: categoryId }).select('*'),
   );
-  if (categoryData.length === 0) {
-    return { budgeted: 0, perTemplate: templates.map(() => 0) };
-  }
+  if (categoryData.length === 0) return empty;
   const { contexts } = await computeTemplates(
     month,
     true,
@@ -384,10 +401,34 @@ export async function dryRunCategoryTemplate({
     true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) return { budgeted: 0, perTemplate: templates.map(() => 0) };
+  if (!ctx) return empty;
   const values = ctx.getValues();
   return {
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
+    goal: values.goal,
+    longGoal: !!values.longGoal,
   };
+}
+
+// Records the goal the automations editor projects for the month, so it
+// shows up without running the templates
+async function getMonthGoal(
+  month: string,
+  categoryId: CategoryEntity['id'],
+  templates: Template[],
+): Promise<TemplateGoal> {
+  const noGoal = { category: categoryId, goal: null, longGoal: null };
+  if (templates.length === 0) return noGoal;
+  try {
+    const { goal, longGoal } = await dryRunCategoryTemplate({
+      month,
+      categoryId,
+      templates,
+    });
+    return { category: categoryId, goal, longGoal: longGoal ? 1 : null };
+  } catch (e) {
+    logger.warn(`Could not work out the goal for category ${categoryId}`, e);
+    return noGoal;
+  }
 }
