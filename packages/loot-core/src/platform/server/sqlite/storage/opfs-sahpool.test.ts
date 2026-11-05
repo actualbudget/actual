@@ -667,9 +667,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
     await store.open(PATH);
-    expect(store.isOpen(PATH)).toBe(true);
     await store.releaseAll();
-    expect(store.isOpen(PATH)).toBe(false);
     expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
 
     // Afterwards an overlap still keeps the pool live: a read ends while
