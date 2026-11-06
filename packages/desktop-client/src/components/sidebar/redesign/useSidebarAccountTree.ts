@@ -75,6 +75,38 @@ export function buildAccountSide(
   };
 }
 
+function filterSide(side: SidebarAccountSide, query: string) {
+  return {
+    ...side,
+    buckets: side.buckets
+      .map(bucket => ({
+        ...bucket,
+        accounts: bucket.accounts.filter(account =>
+          `${bucket.group?.name ?? ''} ${account.name}`
+            .toLowerCase()
+            .includes(query),
+        ),
+      }))
+      .filter(bucket => bucket.accounts.length > 0),
+  };
+}
+
+export function filterSidebarTree(
+  tree: SidebarAccountTree,
+  query: string,
+): SidebarAccountTree {
+  if (!query) {
+    return tree;
+  }
+  return {
+    onBudget: filterSide(tree.onBudget, query),
+    offBudget: filterSide(tree.offBudget, query),
+    closed: tree.closed.filter(account =>
+      account.name.toLowerCase().includes(query),
+    ),
+  };
+}
+
 export function useSidebarAccountTree(): SidebarAccountTree {
   const { data: groups = [] } = useAccountGroups();
   const { data: onBudgetAccounts = [] } = useOnBudgetAccounts();

@@ -1,5 +1,15 @@
 import type { RuleConditionEntity } from './rule';
 
+export type CustomReportTagScope =
+  | { mode: 'all' }
+  | { mode: 'selected'; tagIds: string[] };
+
+export type CustomReportMetadata = Record<string, unknown>;
+
+type CustomReportStoredMetadata = CustomReportMetadata & {
+  tagScope?: CustomReportTagScope;
+};
+
 export type CustomReportEntity = {
   id: string;
   name: string;
@@ -9,6 +19,7 @@ export type CustomReportEntity = {
   dateRange: string;
   mode: string;
   groupBy: string;
+  tagScope?: CustomReportTagScope;
   interval: string;
   balanceType: string;
   sortBy?: sortByOpType;
@@ -22,7 +33,7 @@ export type CustomReportEntity = {
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
-  metadata?: GroupedEntity;
+  metadata?: CustomReportMetadata;
   tombstone?: boolean;
 };
 
@@ -88,6 +99,7 @@ export type DataEntity = {
   netDebts: number;
   totalTotals: number;
   totalBudgeted: number;
+  scopeTagNames?: string[];
 };
 
 export type LegendEntity = {
@@ -96,6 +108,7 @@ export type LegendEntity = {
   color: string;
   dataKey: string; // Uses id for unique data lookup when categories have same name
   uncategorizedId?: 'off_budget' | 'transfer' | 'other' | 'all';
+  bucketTagNames?: string[];
 };
 
 export type IntervalEntity = {
@@ -124,6 +137,7 @@ export type GroupedEntity = {
   netDebts: number;
   totalBudgeted: number;
   categories?: GroupedEntity[];
+  bucketTagNames?: string[];
 };
 
 export type Interval = {
@@ -151,7 +165,7 @@ export type CustomReportData = {
   graph_type: string;
   conditions?: RuleConditionEntity[];
   conditions_op: 'and' | 'or';
-  metadata?: GroupedEntity;
+  metadata?: CustomReportStoredMetadata;
   interval: string;
   color_scheme?: string;
 };

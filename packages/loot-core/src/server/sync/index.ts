@@ -18,14 +18,14 @@ import {
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
 import { app } from '#server/main-app';
-import { runMutator } from '#server/mutators';
+import { flushRunningMutators, runMutator } from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import * as undo from '#server/undo';
-import { once, sequential } from '#shared/async';
+import { sequential } from '#shared/async';
 import { isMissingSchemaError } from '#shared/errors';
 import { getIn, setIn } from '#shared/util';
 import type { MetadataPrefs } from '#types/prefs';
@@ -399,7 +399,7 @@ export type Message = {
   value: string | number | null | UnknownFormatValue;
 };
 
-async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
+async function _applyMessages(messages: Message[], isReceived = false) {
   if (checkSyncingMode('import')) {
     applyMessagesForImport(messages);
     return undefined;
@@ -436,7 +436,11 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
   // a transaction is a separate lock/commit cycle against IndexedDB. We
   // avoid any side effects to in-memory objects, and apply them after
   // this succeeds.
-  db.transaction(() => {
+  //
+  // `immediate` takes the write lock before the reads below. Reading
+  // first and upgrading the lock later trips an absurd-sql bug on the
+  // web (a cursor kept across the upgrade) that stalls the backend.
+  const applyInTransaction = () => {
     if (checkSyncingMode('enabled')) {
       // Compare the messages with the existing crdt. This filters out
       // already applied messages and determines if a message is old or
@@ -480,7 +484,9 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
         const applied = apply(
           msg,
           getIn(oldData, [dataset, row]) || added.has(dataset + row),
-          deferUnknownSchema,
+          // Inbound messages may come from a newer version of the app, so
+          // unknown-schema errors defer instead of failing the batch
+          isReceived,
         );
 
         if (applied) {
@@ -538,7 +544,12 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     }
 
     newData = fetchData(idsPerTable);
-  });
+  };
+  if (isReceived) {
+    receiveInTransaction(messages, applyInTransaction);
+  } else {
+    db.transaction(applyInTransaction, { immediate: true });
+  }
 
   // The transaction succeeded, so we can update in-memory objects now
   undo.appendMessages(messages, oldData);
@@ -569,20 +580,29 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
     // Transfers insert the source row in one sync batch and the counterparty in
     // a second. triggerDatabaseChanges should dirty aggregate query cells, but
     // explicitly recompute global account totals so the second batch always
-    // refreshes sidebar "All accounts" / On budget / etc. (see bindings.ts).
+    // refreshes sidebar "All accounts" / On budget / account group subtotals /
+    // etc. (see bindings.ts).
     if (idsPerTable.transactions?.length) {
       const s = sheet.get();
-      const globalAggregateCells = [
-        'accounts-balance',
-        'onbudget-accounts-balance',
-        'offbudget-accounts-balance',
-        'closed-accounts-balance',
-      ] as const;
-      for (const cellName of globalAggregateCells) {
-        const fullName = resolveName('__global', cellName);
-        if (s.hasCell(fullName)) {
-          s.recompute(fullName);
-        }
+      const globalAggregateCells = new Set(
+        [
+          'accounts-balance',
+          'onbudget-accounts-balance',
+          'offbudget-accounts-balance',
+          'closed-accounts-balance',
+        ].map(cellName => resolveName('__global', cellName)),
+      );
+      const accountGroupCellPrefix = resolveName(
+        '__global',
+        'account-group-balance-',
+      );
+      const cellsToRecompute = [...s.getNodes().keys()].filter(
+        name =>
+          globalAggregateCells.has(name) ||
+          name.startsWith(accountGroupCellPrefix),
+      );
+      for (const name of cellsToRecompute) {
+        s.recompute(name);
       }
     }
 
@@ -620,34 +640,54 @@ async function _applyMessages(messages: Message[], deferUnknownSchema = false) {
 
 export const applyMessages = sequential(_applyMessages);
 
-export function receiveMessages(messages: Message[]): Promise<Message[]> {
+// Receiving the batch's latest timestamp inside the transaction advances
+// the clock once per batch and includes it in the saved `messages_clock`
+// row. If the transaction fails, the clock is restored along with it.
+function receiveInTransaction(
+  messages: Message[],
+  applyInTransaction: () => void,
+) {
+  let latest: Timestamp | null = null;
+  for (const { timestamp } of messages) {
+    if (
+      latest === null ||
+      timestamp.millis() > latest.millis() ||
+      (timestamp.millis() === latest.millis() &&
+        timestamp.counter() > latest.counter())
+    ) {
+      latest = timestamp;
+    }
+  }
+
+  const clock = getClock();
+  const savedMillis = clock.timestamp.millis();
+  const savedCounter = clock.timestamp.counter();
   try {
-    // Receiving the latest timestamp preserves the clock and drift check while
-    // advancing the counter once per batch.
-    let latest = null;
-    for (const { timestamp } of messages) {
-      if (
-        latest === null ||
-        timestamp.millis() > latest.millis() ||
-        (timestamp.millis() === latest.millis() &&
-          timestamp.counter() > latest.counter())
-      ) {
-        latest = timestamp;
-      }
-    }
-    if (latest !== null) {
-      Timestamp.recv(latest);
-    }
+    db.transaction(
+      () => {
+        if (latest !== null) {
+          Timestamp.recv(latest);
+        }
+        applyInTransaction();
+      },
+      { immediate: true },
+    );
+  } catch (e) {
+    clock.timestamp.setMillis(savedMillis);
+    clock.timestamp.setCounter(savedCounter);
+    throw e;
+  }
+}
+
+export async function receiveMessages(messages: Message[]): Promise<Message[]> {
+  try {
+    return await runMutator(() => applyMessages(messages, true));
   } catch (e) {
     if (e instanceof Timestamp.ClockDriftError) {
       throw new SyncError('clock-drift');
     }
     throw e;
   }
-
-  // Inbound messages may come from a newer version of the app, so
-  // unknown-schema errors defer instead of failing the batch
-  return runMutator(() => applyMessages(messages, true));
 }
 
 async function errorHandler(e: Error) {
@@ -785,10 +825,36 @@ export async function initialFullSync(): Promise<{
   return {};
 }
 
-export const fullSync = once(async function (): Promise<
+type FullSyncResult =
   | { messages: Message[] }
-  | { error: { message: string; reason: string; meta: unknown } }
-> {
+  | { error: { message: string; reason: string; meta: unknown } };
+
+let runningFullSync: Promise<FullSyncResult> | null = null;
+let isFullSyncStopped = false;
+export function fullSync(): Promise<FullSyncResult> {
+  if (isFullSyncStopped) {
+    return Promise.resolve({ messages: [] });
+  }
+  runningFullSync ??= runFullSync().finally(() => {
+    runningFullSync = null;
+  });
+  return runningFullSync;
+}
+
+// Stops new syncs, then waits for the running sync and all queued mutators so
+// the budget can be closed.
+export async function stopFullSync(): Promise<void> {
+  isFullSyncStopped = true;
+  clearFullSyncTimeout();
+  await Promise.allSettled([runningFullSync]);
+  await flushRunningMutators();
+}
+
+export function resumeFullSync(): void {
+  isFullSyncStopped = false;
+}
+
+async function runFullSync(): Promise<FullSyncResult> {
   app.events.emit('sync', { type: 'start' });
   let messages;
 
@@ -859,7 +925,7 @@ export const fullSync = once(async function (): Promise<
     syncDisabled: checkSyncingMode('disabled'),
   });
   return { messages };
-});
+}
 
 async function _fullSync(
   sinceTimestamp: string,

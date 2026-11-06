@@ -14,26 +14,29 @@ Depending on your usage, savings accounts can be on or off the budget. If you're
 
 ## Adding a new account
 
-You can add an account to your budget at any time, however when you first install Actual you can use the `Add Account` button in the middle of the screen.
+You can add an account to your budget at any time, however when you first install Actual you can use the `Add account` button in the middle of the screen.
 
-![](/img/add-account/AddAccount.webp)
+![A new, empty budget with the Add account button in the middle of the accounts page](/img/accounts/accounts-add-account@2x.webp)
 
 You can also add an account using the `+ Add account` button in the sidebar.
 
-Two successive screens will appear with boxes asking you to fill in a few options
+Two successive screens will appear with boxes asking you to fill in a few options.
 
-- Create a Local Account or Link to a supported bank syncing provider (See [Connecting Your Bank](https://actualbudget.org/docs/advanced/bank-sync))
-- Give your account a name
-- Is the account on budget or off budget
-- The current account balance
+First, choose **Create a local account**, or **Set up bank sync** to link to a supported bank syncing provider (See [Connecting Your Bank](https://actualbudget.org/docs/advanced/bank-sync)).
+
+<img width="520" alt="The Add account dialog with the Create a local account button highlighted" src="/img/accounts/accounts-add-account-dialog@2x.webp" />
+
+Then fill in the details of the account:
+
+<img width="532" alt="The Create Local Account dialog with its fields labeled" src="/img/accounts/accounts-create-local-account@2x.webp" />
+
+- **A. Name.** Give your account a name.
+- **B. Off budget.** Whether the account is on budget or off budget.
+- **C. Balance.** The current account balance.
 
 :::note
 Off budget means that the balance is not reflected when you assign money to categories in your budget register
 :::
-
-![](/img/add-account/CreateAccount1.webp)
-
-![](/img/add-account/CreateAccount@2x.webp)
 
 Here you can see how that looks when the options are completed.
 
@@ -41,7 +44,7 @@ Here you can see how that looks when the options are completed.
 If you select the Off budget checkbox then change the account type, the Off budget checkbox will reset and will need to be re-selected each time the account type is changed.
 :::
 
-![](/img/add-account/NewBudget.webp)
+![The new Checking account with its starting balance, listed in the sidebar](/img/accounts/accounts-new-account@2x.webp)
 
 You can now see the account in the sidebar of Actual
 
@@ -61,11 +64,13 @@ You can still access this account under **Closed Accounts** in the sidebar, and 
 
 Click the account name in the sidebar of Actual
 
-![](/img/add-account/SidebarAccountList@2x.webp)
+<img width="252" alt="The accounts list in the sidebar with the Checking account highlighted" src="/img/accounts/accounts-sidebar-list@2x.webp" />
 
 Hovering your cursor close to the account name at the top will reveal two icons.
-The page icon allows you to write a note about this account, and the pencil icon allows you to rename the account.
+
+<img width="216" alt="The account name with the notes and rename icons labeled" src="/img/accounts/accounts-name-notes@2x.webp" />
+
+- **A. Notes.** Write a note about this account.
+- **B. Rename.** Change the name of the account.
 
 After editing a note for the account or its name, hit 'Enter' to save your changes.
-
-![](/img/add-account/AccountNameEdit.webp)

@@ -163,8 +163,8 @@ export function OpenIdForm({
       >
         {!submitButtonDisabled && t('The OpenID provider URL.')}{' '}
         <Text
+          size="small"
           style={{
-            ...styles.verySmallText,
             color: theme.pageTextLight,
           }}
         >

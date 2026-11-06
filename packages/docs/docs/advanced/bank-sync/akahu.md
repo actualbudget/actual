@@ -1,11 +1,5 @@
 # Akahu Setup
 
-<ExperimentalFeatureWarning issueId="8020" />
-
-:::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](../../experimental/index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
-:::
-
 ### Set up Akahu account
 
 To set up Akahu Bank Sync, start by creating and signing in to your Akahu account: https://my.akahu.nz/

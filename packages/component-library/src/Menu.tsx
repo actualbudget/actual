@@ -84,16 +84,26 @@ export function Menu<const NameType = string>({
   const currentIndex = filteredItems.indexOf(items[hoveredIndex || 0]);
   const transformIndex = (idx: number) => items.indexOf(filteredItems[idx]);
 
+  // Keyboard navigation starts on the first selectable item, so a leading
+  // heading or line is never hovered
   function hoverPrevious() {
+    if (filteredItems.length === 0) {
+      return;
+    }
     setHoveredIndex(
-      hoveredIndex === null ? 0 : transformIndex(Math.max(currentIndex - 1, 0)),
+      hoveredIndex === null
+        ? transformIndex(0)
+        : transformIndex(Math.max(currentIndex - 1, 0)),
     );
   }
 
   function hoverNext() {
+    if (filteredItems.length === 0) {
+      return;
+    }
     setHoveredIndex(
       hoveredIndex === null
-        ? 0
+        ? transformIndex(0)
         : transformIndex(Math.min(currentIndex + 1, filteredItems.length - 1)),
     );
   }

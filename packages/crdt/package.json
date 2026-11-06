@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/crdt",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "description": "CRDT layer of Actual",
   "license": "MIT",
   "repository": {
@@ -39,15 +39,15 @@
     "typecheck": "tsgo -b"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.12.1",
+    "@bufbuild/protobuf": "^2.16.0",
     "murmurhash": "^2.0.1",
-    "uuid": "^14.0.2"
+    "uuid": "^14.0.3"
   },
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.12.1",
+    "@bufbuild/protoc-gen-es": "^2.16.0",
     "@typescript/native-preview": "beta",
-    "rollup-plugin-visualizer": "^7.0.1",
-    "vite": "^8.1.5",
-    "vitest": "^5.0.0"
+    "rollup-plugin-visualizer": "^7.1.1",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   }
 }

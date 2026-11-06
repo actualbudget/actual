@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getSqlWasmUrl } from './index';
+import { getSqlWasmUrl } from './engine.sqljs.legacy';
 
 describe('sql.js wasm URL', () => {
   it('resolves the wasm beside the app assets for an arbitrary base path', () => {

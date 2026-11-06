@@ -12,6 +12,12 @@ import { css, cx } from '@emotion/css';
 import { useResponsive } from './hooks/useResponsive';
 import { styles } from './styles';
 import { theme } from './theme';
+import {
+  componentSizeControl,
+  componentSizeText,
+  sizeResponsiveStyles,
+  type ComponentSize,
+} from './tokens';
 
 export const baseInputStyle = {
   outline: 0,
@@ -23,24 +29,82 @@ export const baseInputStyle = {
   border: '1px solid ' + theme.formInputBorder,
 };
 
-export const defaultInputClassName = css({
-  ...baseInputStyle,
-  color: theme.formInputText,
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  flexShrink: 0,
-  '&[data-focused]': {
-    border: '1px solid ' + theme.formInputBorderSelected,
-    boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
-  },
-  '&[data-disabled]': {
-    color: theme.formInputTextPlaceholder,
-  },
-  '::placeholder': { color: theme.formInputTextPlaceholder },
-  ...styles.smallText,
-});
+// Builds the padding/typography overrides for an explicit `size`,
+// varying by breakpoint via media queries (no hooks). Inputs use a
+// uniform padding on all sides, like today's default.
+const getInputSizeStyles = (size: ComponentSize): Record<string, unknown> => {
+  const control = componentSizeControl[size];
+  const text = componentSizeText[size];
 
-export type InputProps = ComponentPropsWithRef<typeof ReactAriaInput> & {
+  const getGroupStyles = (group: keyof typeof control) => {
+    const { paddingY, minHeight } = control[group];
+    const { fontSize, lineHeight } = text[group];
+
+    return {
+      padding: paddingY,
+      ...(minHeight != null ? { minHeight } : null),
+      fontSize,
+      // Medium matches today's default look, which inherits line-height;
+      // only the other sizes force their scale line-height.
+      ...(size === 'medium' ? {} : { lineHeight }),
+    };
+  };
+
+  return sizeResponsiveStyles({
+    narrow: getGroupStyles('narrow'),
+    small: getGroupStyles('small'),
+    medium: getGroupStyles('medium'),
+    wide: getGroupStyles('wide'),
+  });
+};
+
+const inputSizeStyles = {
+  small: getInputSizeStyles('small'),
+  medium: getInputSizeStyles('medium'),
+  large: getInputSizeStyles('large'),
+  'extra-large': getInputSizeStyles('extra-large'),
+} satisfies Record<ComponentSize, Record<string, unknown>>;
+
+// Single source of truth for input class composition: base chrome, then
+// either the default typography (styles.smallText) or the explicit size
+// overrides, then any extra overrides — all in one css() call so there
+// is never a cross-class specificity race.
+const buildInputClassName = (
+  size?: ComponentSize,
+  overrides?: Record<string, unknown>,
+) =>
+  css({
+    ...baseInputStyle,
+    color: theme.formInputText,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    flexShrink: 0,
+    '&[data-focused]': {
+      border: '1px solid ' + theme.formInputBorderSelected,
+      boxShadow: '0 1px 1px ' + theme.formInputShadowSelected,
+    },
+    '&[data-disabled]': {
+      color: theme.formInputTextPlaceholder,
+    },
+    '::placeholder': { color: theme.formInputTextPlaceholder },
+    ...(size ? inputSizeStyles[size] : styles.smallText),
+    ...overrides,
+  });
+
+export const defaultInputClassName = buildInputClassName();
+
+const inputSizeClassNames = {
+  small: buildInputClassName('small'),
+  medium: buildInputClassName('medium'),
+  large: buildInputClassName('large'),
+  'extra-large': buildInputClassName('extra-large'),
+} satisfies Record<ComponentSize, string>;
+
+export type InputProps = Omit<
+  ComponentPropsWithRef<typeof ReactAriaInput>,
+  'size'
+> & {
+  size?: ComponentSize;
   onEnter?: (value: string, event: KeyboardEvent<HTMLInputElement>) => void;
   onEscape?: (value: string, event: KeyboardEvent<HTMLInputElement>) => void;
   onChangeValue?: (
@@ -57,15 +121,20 @@ export function Input({
   onChangeValue,
   onUpdate,
   className,
+  size,
   ...props
 }: InputProps) {
+  const baseClassName = size
+    ? inputSizeClassNames[size]
+    : defaultInputClassName;
+
   return (
     <ReactAriaInput
       ref={ref}
       className={
         typeof className === 'function'
-          ? renderProps => cx(defaultInputClassName, className(renderProps))
-          : cx(defaultInputClassName, className)
+          ? renderProps => cx(baseClassName, className(renderProps))
+          : cx(baseClassName, className)
       }
       {...props}
       onKeyUp={e => {
@@ -91,22 +160,40 @@ export function Input({
   );
 }
 
-const defaultBigInputClassName = css({
-  padding: 10,
-  fontSize: 15,
+// BigInput chrome: borderless with the ambient shadow instead. The
+// legacy look (size omitted) keeps today's exact values (padding 10,
+// fontSize 15); an explicit size swaps in the size tokens.
+const bigInputChrome: Record<string, unknown> = {
   border: 'none',
   ...styles.shadow,
   '&[data-focused]': { border: 'none', ...styles.shadow },
+};
+
+const defaultBigInputClassName = buildInputClassName(undefined, {
+  padding: 10,
+  fontSize: 15,
+  ...bigInputChrome,
 });
 
-export function BigInput({ className, ...props }: InputProps) {
+const bigInputSizeClassNames = {
+  small: buildInputClassName('small', bigInputChrome),
+  medium: buildInputClassName('medium', bigInputChrome),
+  large: buildInputClassName('large', bigInputChrome),
+  'extra-large': buildInputClassName('extra-large', bigInputChrome),
+} satisfies Record<ComponentSize, string>;
+
+export function BigInput({ size, className, ...props }: InputProps) {
+  const baseClassName = size
+    ? bigInputSizeClassNames[size]
+    : defaultBigInputClassName;
+
   return (
     <Input
       {...props}
       className={
         typeof className === 'function'
-          ? renderProps => cx(defaultBigInputClassName, className(renderProps))
-          : cx(defaultBigInputClassName, className)
+          ? renderProps => cx(baseClassName, className(renderProps))
+          : cx(baseClassName, className)
       }
     />
   );

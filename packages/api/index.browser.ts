@@ -8,6 +8,7 @@ export * from './methods';
 export * as utils from './utils';
 
 let worker: Worker | null = null;
+let ownsSession = false;
 
 export async function init(
   config: InitConfig = {},
@@ -16,6 +17,7 @@ export async function init(
 
   try {
     await startBackendWorker(worker, config);
+    ownsSession = Boolean(config.serverURL && config.password);
   } catch (error) {
     worker.terminate();
     worker = null;
@@ -35,8 +37,15 @@ export async function shutdown() {
     try {
       await send('close-budget');
     } finally {
-      worker.terminate();
-      worker = null;
+      try {
+        if (ownsSession) {
+          await send('subscribe-sign-out');
+        }
+      } finally {
+        ownsSession = false;
+        worker.terminate();
+        worker = null;
+      }
     }
   }
 }

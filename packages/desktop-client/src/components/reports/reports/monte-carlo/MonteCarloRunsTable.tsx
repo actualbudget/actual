@@ -9,7 +9,6 @@ import { View } from '@actual-app/components/view';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
-import { rankSimulationsWorstFirst } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
 import { GROUP_HEADING_STYLE } from '#components/reports/reports/monte-carlo/monteCarloStyles';
 import { useFormat } from '#hooks/useFormat';
 
@@ -35,6 +34,8 @@ export function getRunPercentileOptions(
 }
 
 type MonteCarloRunsTableProps = {
+  /** Every run's index, worst outcome first (ranked once by the parent) */
+  rankedIndices: number[];
   endingBalances: Float64Array;
   depletionYearBySimulation: Int32Array;
   totalWithdrawnBySimulation: Float64Array;
@@ -43,6 +44,7 @@ type MonteCarloRunsTableProps = {
 };
 
 export function MonteCarloRunsTable({
+  rankedIndices,
   endingBalances,
   depletionYearBySimulation,
   totalWithdrawnBySimulation,
@@ -56,7 +58,7 @@ export function MonteCarloRunsTable({
   const [page, setPage] = useState(0);
   const [highlightedRank, setHighlightedRank] = useState<number | null>(null);
 
-  const simulationCount = endingBalances.length;
+  const simulationCount = rankedIndices.length;
 
   // Jump straight to a given percentile of the ranked outcomes (0 = worst,
   // 1 = best), landing on its page and highlighting the exact run
@@ -70,18 +72,20 @@ export function MonteCarloRunsTable({
     setHighlightedRank(rank);
   }
 
-  const rankedIndices = rankSimulationsWorstFirst(
-    endingBalances,
-    depletionYearBySimulation,
-  );
-  if (sortOrder === 'best-first') {
-    rankedIndices.reverse();
-  }
-
   const pageCount = Math.max(1, Math.ceil(simulationCount / PAGE_SIZE));
   const currentPage = Math.min(page, pageCount - 1);
   const pageStart = currentPage * PAGE_SIZE;
-  const pageIndices = rankedIndices.slice(pageStart, pageStart + PAGE_SIZE);
+  // Best-first reads the same ranking from the other end, so no copy of
+  // the full list is made for either order
+  const pageIndices = Array.from(
+    { length: Math.max(0, Math.min(PAGE_SIZE, simulationCount - pageStart)) },
+    (_, offset) => {
+      const rank = pageStart + offset;
+      return rankedIndices[
+        sortOrder === 'best-first' ? simulationCount - 1 - rank : rank
+      ];
+    },
+  );
 
   return (
     <View>

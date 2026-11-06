@@ -10,9 +10,9 @@ import { css } from '@emotion/css';
 import { Link } from '#components/common/Link';
 import type { Binding } from '#spreadsheet';
 
+import { AccountTree } from './AccountTree';
 import { CollapseChevron } from './CollapseChevron';
 import { CountPill } from './CountPill';
-import { SidebarAccountGroup } from './SidebarAccountGroup';
 import { SidebarBalance } from './SidebarBalance';
 import { sectionLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
@@ -30,6 +30,7 @@ type SideGroupProps = {
   balanceTestId: string;
   isOpen: boolean;
   onToggle: () => void;
+  isDragDisabled: boolean;
   isBucketOpen: (bucket: GroupBucket) => boolean;
   onToggleBucket: (bucket: GroupBucket) => void;
 };
@@ -43,6 +44,7 @@ export function SideGroup({
   balanceTestId,
   isOpen,
   onToggle,
+  isDragDisabled,
   isBucketOpen,
   onToggleBucket,
 }: SideGroupProps) {
@@ -109,17 +111,17 @@ export function SideGroup({
           />
         </Link>
       </View>
-      {isOpen &&
-        sideData.buckets.map(bucket => (
-          <SidebarAccountGroup
-            key={bucket.group?.id ?? 'ungrouped'}
-            bucket={bucket}
-            side={side}
-            showSyncDot={showSyncDot}
-            isOpen={isBucketOpen(bucket)}
-            onToggle={() => onToggleBucket(bucket)}
-          />
-        ))}
+      {isOpen && (
+        <AccountTree
+          label={label}
+          side={side}
+          buckets={sideData.buckets}
+          showSyncDot={showSyncDot}
+          isDragDisabled={isDragDisabled}
+          isBucketOpen={isBucketOpen}
+          onToggleBucket={onToggleBucket}
+        />
+      )}
     </View>
   );
 }

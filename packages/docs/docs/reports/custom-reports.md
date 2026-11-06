@@ -8,7 +8,7 @@ Custom reports allow analyzing transaction data by using charts or a data table 
 4. Area Graph
 5. Donut Graph
 
-![Custom Report examples](/img/reports/cr-fancy-example.webp)
+![A dashboard with four saved custom reports: a donut graph, a stacked bar graph, a line graph and an area graph](/img/reports/custom-reports-examples@2x.webp)
 
 ## Left Menu
 
@@ -22,7 +22,12 @@ This sum can be **Split** by Category, Group, Payee, Account or Month.
 Note that Split by Account shows sum of transactions from on budget account, not periodic balance.
 Monthly breakdowns are provided by changing Mode from Total to Time.
 
-![Custom report left side with display and date filters](/img/reports/cr-left-menu.webp)
+<img width="254" alt="The left side of a custom report with its display and date controls labeled" src="/img/reports/custom-reports-left-menu@2x.webp" />
+
+- **A. Mode.** **Total** shows one sum for the whole period. **Time** breaks it down over time, for example by month.
+- **B. Split.** What the sum is split by.
+- **C. Type.** Payment, Deposit or Net.
+- **D. Date filters.** **Live** or **Static** dates, and the **Range** they cover.
 
 ### Date Filters
 
@@ -46,17 +51,22 @@ Grayed out options in dropdown menus are not yet available for the chosen report
 
 Icons in the first group of the center menu are used to select the displayed report, the second group is used to show graph legends, summary and labels. The funnel icon can be used to [filter transactions](../transactions/filters.md). Finally, the menu on the right-hand side is used to Save a Custom Report to the Reports page.
 
-![Custom reports center menu](/img/reports/cr-center-menu.webp)
+<img width="623" alt="The custom report toolbar with its button groups labeled" src="/img/reports/custom-reports-center-menu@2x.webp" />
+
+- **A. Report type.** Data Table, Bar Graph, Line Graph, Area Graph and Donut Graph.
+- **B. Legend, summary and labels.** Show or hide each of them.
+- **C. Filter.** Filter the transactions in the report.
+- **D. Save menu.** Save, update or reset the report.
 
 ## Saving a Report
 
-A custom report can be saved by using the menu on the right-hand side. If a saved report is modified it is possible to either overwrite the existing report or save the changes as a new report. The same menu can be used to reset to default if you'd like to quickly return to your saved version. Otherwise if no action is taken, the changes will be automatically discarded when leaving the current report.
+A custom report can be saved by using the menu on the right-hand side. If a saved report is modified it is possible to either overwrite the existing report or save the changes as a new report. The same menu can be used to **Revert changes** if you'd like to quickly return to your saved version. Otherwise if no action is taken, the changes will be automatically discarded when leaving the current report.
 
-![Saving custom report dialog](/img/reports/cr-save.webp)
+<img width="251" alt="The save menu of a saved report that has been changed" src="/img/reports/custom-reports-save@2x.webp" />
 
 Saved reports will be shown in the Report page in alphabetical order.
 
-![Report page with custom report](/img/reports/cr-page.webp)
+<img width="1172" alt="A saved custom report shown as a card on the Reports dashboard" src="/img/reports/custom-reports-dashboard-card@2x.webp" />
 
 ## Example
 
@@ -69,4 +79,4 @@ Custom Reports are really powerful and can provide unique insights. We now highl
 - Click on the Filter icon, select Payee is not "Movies"
 - Enable the legend, summary and label.
 
-![Sample custom report](/img/reports/cr-example.webp)
+![A stacked bar graph of spending by group for the year to date, with Savings unchecked, a filter for payee is not Movies, and the legend, summary and labels shown](/img/reports/custom-reports-example@2x.webp)

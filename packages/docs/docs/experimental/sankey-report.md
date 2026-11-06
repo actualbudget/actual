@@ -8,7 +8,7 @@ The Sankey Chart visualizes flows of money between buckets in your budget — fo
 
 The chart has two main view modes. **Spent** shows how income flows into accounts and how they are spent. **Budgeted** shows the money available to budget, and how it is allocated across categories.
 
-![Example image of Sankey chart](/img/experimental/sankey/sankey-overview.webp)
+![The Sankey report in Spent view, showing income flowing through accounts into category groups and categories](/img/experimental/sankey/sankey-report-overview@2x.webp)
 
 ## Display options
 

@@ -68,8 +68,8 @@ export function CleanupListRow({
       </View>
       <View style={{ minWidth: 0, flex: 1 }}>
         <Text
+          size="small"
           style={{
-            fontSize: 12,
             fontWeight: 600,
             color: theme.pageText,
             display: 'block',

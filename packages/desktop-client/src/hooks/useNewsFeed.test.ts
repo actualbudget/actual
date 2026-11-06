@@ -74,4 +74,48 @@ describe('useNewsFeed', () => {
     expect(result.current.entries).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  // The feed query retries once before reporting a failure.
+  const afterRetry = { timeout: 5000 };
+
+  it('reports an unavailable feed when it cannot be downloaded', async () => {
+    fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+    const { result } = renderHook(() => useNewsFeed(), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(
+      () => expect(result.current.errorKind).toBe('unavailable'),
+      afterRetry,
+    );
+    expect(result.current.entries).toEqual([]);
+
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve(newsFeedFixture),
+    });
+    result.current.retry();
+
+    await waitFor(() => expect(result.current.entries).toHaveLength(2));
+    expect(result.current.errorKind).toBeUndefined();
+  });
+
+  it('reports an unsupported feed when the format is not understood', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ ...newsFeedFixture, schemaVersion: 2 }),
+    });
+
+    const { result } = renderHook(() => useNewsFeed(), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(
+      () => expect(result.current.errorKind).toBe('unsupported'),
+      afterRetry,
+    );
+  });
 });

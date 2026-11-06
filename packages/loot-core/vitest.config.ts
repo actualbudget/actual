@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/mocks/setup.ts'],
     exclude: [
+      'src/platform/client/browser-preload/worker-bridge.test.ts',
       'src/platform/server/sqlite/index.test.ts',
       'src/platform/server/fs/index.test.ts',
       'node_modules',

@@ -72,11 +72,11 @@ function formatCsv(data: unknown): string {
   if (!Array.isArray(data)) {
     if (data && typeof data === 'object') {
       const entries = Object.entries(data);
-      const header = entries.map(([k]) => escapeCsv(k)).join(',');
+      const header = entries.map(([k]) => formatCsvCell('', k)).join(',');
       const values = entries.map(([k, v]) => formatCsvCell(k, v)).join(',');
       return header + '\n' + values;
     }
-    return String(data);
+    return typeof data === 'string' ? formatCsvCell('', data) : String(data);
   }
 
   if (data.length === 0) {
@@ -84,7 +84,7 @@ function formatCsv(data: unknown): string {
   }
 
   const keys = Object.keys(data[0] as Record<string, unknown>);
-  const header = keys.map(k => escapeCsv(k)).join(',');
+  const header = keys.map(k => formatCsvCell('', k)).join(',');
   const rows = data.map(row => {
     const r = row as Record<string, unknown>;
     return keys.map(k => formatCsvCell(k, r[k])).join(',');
@@ -93,7 +93,7 @@ function formatCsv(data: unknown): string {
   return [header, ...rows].join('\n');
 }
 
-const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
+const FORMULA_TRIGGERS = /^\uFEFF*[=+\-@\t\r]/;
 
 function formatCsvCell(key: string, value: unknown): string {
   let formatted = formatCellValue(key, value);

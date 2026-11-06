@@ -5,11 +5,13 @@ import * as db from '#server/db';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
+import { q } from '#shared/query';
 
 import * as encoder from './encoder';
 import { isError } from './utils';
 
 import {
+  addSyncListener,
   applyMessages,
   fullSync,
   receiveMessages,
@@ -187,7 +189,7 @@ describe('Sync', () => {
     expect(getClock().timestamp.toString() > latest).toBe(true);
   });
 
-  it('should reject a batch holding a far-future timestamp', () => {
+  it('should reject a batch holding a far-future timestamp', async () => {
     // `toISOString` writes years above 9999 as `+010000-…`, which sorts below
     // every normal timestamp. The batch maximum must not rank it last, which
     // would let it skip the clock drift check.
@@ -201,12 +203,66 @@ describe('Sync', () => {
       ),
     });
 
-    expect(() =>
+    await expect(
       receiveMessages([
         message(Date.parse('1970-01-02T00:00:00.000Z')),
         message(253402300800000),
       ]),
-    ).toThrow(expect.objectContaining({ reason: 'clock-drift' }));
+    ).rejects.toMatchObject({ reason: 'clock-drift' });
+  });
+});
+
+describe('receiveMessages', () => {
+  function conflictingMessages() {
+    const timestamp = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
+    // Duplicate timestamps make the batch fail inside the database transaction.
+    return ['foo', 'bar'].map(row => ({
+      dataset: 'transactions',
+      row,
+      column: 'amount',
+      value: 3200,
+      timestamp,
+    }));
+  }
+
+  it('discards failed clock advances before receiving the next queued batch', async () => {
+    const messages = conflictingMessages();
+    const failedBatch = receiveMessages(messages);
+    const nextBatch = receiveMessages([
+      {
+        ...messages[0],
+        timestamp: new Timestamp(Date.now() + 1000, 0, '0000000000000002'),
+      },
+    ]);
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    await expect(nextBatch).resolves.toHaveLength(1);
+    expect(getClock().timestamp.millis()).toBe(Date.now() + 1000);
+    expect(getClock().timestamp.counter()).toBe(1);
+  });
+
+  it('does not reuse timestamps issued while a failed receive is pending', async () => {
+    const failedBatch = receiveMessages(conflictingMessages());
+    const issued = Timestamp.send();
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    expect(Timestamp.send().toString() > issued.toString()).toBe(true);
+  });
+
+  it('keeps the received clock when a step after the commit fails', async () => {
+    const [message] = conflictingMessages();
+    const removeListener = addSyncListener(() => {
+      throw new Error('listener failed');
+    });
+
+    try {
+      await expect(receiveMessages([message])).rejects.toThrow(
+        'listener failed',
+      );
+    } finally {
+      removeListener();
+    }
+    expect(getClock().timestamp.millis()).toBe(message.timestamp.millis());
   });
 });
 
@@ -403,5 +459,53 @@ describe('Sync projections', () => {
 
     // Apply the messages that deletes it
     await applyMessages(secondMessages);
+  });
+});
+
+describe('Sync account balance cells', () => {
+  test('recomputes account totals and group subtotals when transactions sync', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+    await sheet.loadSpreadsheet(db);
+
+    const spreadsheet = sheet.get();
+    function sumOf(filter: Record<string, unknown>) {
+      return q('transactions')
+        .filter(filter)
+        .calculate({ $sum: '$amount' })
+        .serialize();
+    }
+    spreadsheet.createQuery(
+      '__global',
+      'onbudget-accounts-balance',
+      sumOf({ 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'account-group-balance-g1-on',
+      sumOf({ 'account.account_group_id': 'g1', 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'balance-acct1',
+      sumOf({ account: 'acct1' }),
+    );
+    await sheet.waitOnSpreadsheet();
+
+    const recompute = vi.spyOn(spreadsheet, 'recompute');
+    await applyMessages([
+      global.stepForwardInTime() || {
+        dataset: 'transactions',
+        row: 'foo',
+        column: 'amount',
+        value: 3200,
+        timestamp: Timestamp.send(),
+      },
+    ]);
+
+    const recomputed = recompute.mock.calls.map(([name]) => name);
+    expect(recomputed).toContain('__global!onbudget-accounts-balance');
+    expect(recomputed).toContain('__global!account-group-balance-g1-on');
+    expect(recomputed).not.toContain('__global!balance-acct1');
   });
 });

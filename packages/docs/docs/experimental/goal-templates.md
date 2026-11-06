@@ -30,7 +30,7 @@ Create a template by adding a note to a category and adding a line that contains
 The example below shows the most basic template syntax `#template 72.99`.
 This will budget $ 72.99 when templates are run without having to manually type in the amount.
 
-![How to add a template](/img/goal-template/goal-template-1.webp)
+<img width="724" alt="A category note with the line #template 72.99" src="/img/experimental/goal-templates-note@2x.webp" />
 
 ### How to apply the templates
 
@@ -38,7 +38,7 @@ This will budget $ 72.99 when templates are run without having to manually type 
 
 In the budget month menu you will see the following options:
 
-![Apply options on month level](/img/goal-template/goal-template-2.webp)
+<img width="506" alt="The month menu with the template options highlighted" src="/img/experimental/goal-templates-month-menu@2x.webp" />
 
 - **Check templates** will test all `#template and #goal` lines for proper syntax.
 
@@ -55,26 +55,26 @@ You can also apply selections of templates if you want.
 - **Single Category**: Use the "Overwrite with template" option shown below from the budget field drop-down menu to apply templates to just that category.
   This will overwrite any existing budgeted amount.
 
-![Apply templates to single category](/img/goal-template/apply-template-category.png)
+<img width="724" alt="The budget cell menu with Overwrite with template highlighted" src="/img/experimental/goal-templates-category-menu@2x.webp" />
 
 - **Apply templates to a single category group**: Use the "Overwrite with templates" option shown below from the category group drop-down menu to apply all templates to categories in a specific group.
   It will apply to the month furthest to the left in your budget view if viewing multiple months.
   This will overwrite any existing budgets in the categories in the group.
 
-![Apply templates to a group of categories](/img/goal-template/apply-template-group.png)
+<img width="724" alt="The category group menu with Overwrite with templates highlighted" src="/img/experimental/goal-templates-group-menu@2x.webp" />
 
 ### Goal Indicators
 
-After having run the templates in a given month and category, the status of a respective category goal will be indicated as a text color of the category balance.
-The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met(green), goal not met(orange), and a negative balance(red).
+After having run the templates in a given month and category, the status of a respective category goal will be indicated as a text color of the category balance. A category whose goal is not yet met also shows a small ring beside its balance, which fills as the goal is funded. On desktop, hover over the ring to see how much of the goal is funded.
+The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met (green), goal not met (yellow, with a partly filled ring), and a negative balance (red).
 
-![Goal indicator colors example](/img/goal-template/templates-colors.webp)
+<img width="724" alt="Category balances in the normal, empty, goal met, goal not met with a partly filled ring, and negative states" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
 
 This goal value is based on the maximum amount that the templates in a category request to be budgeted.
 
 #### Goal Indicator Information
 
-If you hover over the balance value in a templated category, a tooltip will appear with info on the status of that category with respect to its templates.
+Click the balance value in a templated category to see its goal status at the top of the balance menu. It shows the status of that category with respect to its templates, including a progress bar.
 
 #### Long term goals
 
@@ -83,7 +83,7 @@ By default, the goal information displayed in the goal indicator is shown on a m
 If you would like the goal and associated indication color to be based on the category `Balance` instead of the budgeted amount, see the [Goal Directive option](#goal-directive).
 This is a special template that overrides the goal amount and bases the goal indicator on category balance.
 
-![Goal indicator information tooltip](/img/goal-template/goal-indicator.webp)
+<img width="228" alt="The balance menu showing the goal status for a long-term goal" src="/img/experimental/goal-templates-goal-tooltip@2x.webp" />
 
 ### Multiple Template Lines
 
@@ -446,6 +446,28 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [decrease 10%]` |      \$ 45      |
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
+
+#### Weekly averages
+
+Often spending follows the week rather than the month, like a weekly grocery shop or a commute. This means the amount needed per month varies, depending on how the weeks fall. The weekly average template averages your spending per week, then budgets that amount once for every occurrence of a chosen weekday in the month.
+
+| Syntax                                                                                  | Description                                                                                                      |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `#template average {number} weeks on {weekday}`                                         | Budget the average weekly spend over the last `{number}` complete weeks, once for every `{weekday}` in the month |
+| `#template average {number} weeks on {weekday} [{increase/decrease} {number\|number%}]` | Same as above, with an adjustment applied to the weekly amount before it is multiplied by the number of weekdays |
+
+The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` for a November 2026 budget, averages spending from 2026-10-04 through 2026-10-31. Weeks before the category's first transaction are left out of the average.
+
+For averages calculated in future months, the window uses yesterday as the cut-off point for full 7-day weeks. This ensures averages take into account recent spending.
+
+As an example, assume you spent an average of \$ 50 per week over the last 4 weeks. October 2026 has five Fridays and four Mondays.
+
+| Template line                                        | Budgeted Amount (October 2026) |
+| ---------------------------------------------------- | :----------------------------: |
+| `#template average 4 weeks on friday`                |             \$ 250             |
+| `#template average 4 weeks on monday`                |             \$ 200             |
+| `#template average 4 weeks on friday [increase 10%]` |             \$ 275             |
+| `#template average 4 weeks on monday [increase 5]`   |             \$ 220             |
 
 ### Copy Type
 

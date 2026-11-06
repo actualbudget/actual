@@ -17,7 +17,13 @@ RUN ln -s /app/.yarn/releases/yarn-*.cjs /usr/local/bin/yarn
 RUN if [ "$(uname -m)" = "armv7l" ]; then yarn config set taskPoolConcurrency 2; yarn config set networkConcurrency 5; fi
 
 # Focus the workspaces in production mode
-RUN if [ "$(uname -m)" = "armv7l" ]; then npm_config_build_from_source=true yarn workspaces focus @actual-app/sync-server --production; else yarn workspaces focus @actual-app/sync-server --production; fi
+RUN yarn workspaces focus @actual-app/sync-server --production
+
+# better-sqlite3 only ships prebuilt binaries for x64 and arm64, so compile it
+# on any other architecture (armv6/armv7 images).
+RUN if [ "$(node node_modules/better-sqlite3/lib/binding.js)" = "0" ]; then \
+      cd node_modules/better-sqlite3 && node ../node-gyp/bin/node-gyp.js rebuild --release; \
+    fi
 
 # Dereference yarn's workspace:* symlinks so the prod stage can copy just node_modules.
 RUN cp -RL node_modules node_modules.real \

@@ -33,38 +33,42 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
 6. Back in Actual, click on "+ Add account" at the bottom of the sidebar.
 
-   ![Actual sidebar with accounts](/img/connecting-your-bank/connecting-your-bank-02.webp)
+   <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-7. Click "Set-up GoCardless for bank-sync."
+7. Click **Set up bank sync**. This opens the **Bank Sync** page in Settings.
 
-   ![Add account dialog](/img/connecting-your-bank/connecting-your-bank-gocardless-05.webp)
+   <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-8. You will be asked to enter your GoCardless secret ID and secret key. These values will be saved on the server, so you will only need to enter them once.
+8. Under **Providers**, click **Set up** on the GoCardless card.
 
-   ![Set-up GoCardless dialoag](/img/connecting-your-bank/connecting-your-bank-gocardless-06.webp)
+   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the GoCardless card highlighted" src="/img/advanced/bank-sync/gocardless-set-up@2x.webp" />
+
+9. You will be asked to enter your GoCardless secret ID and secret key. These values will be saved on the server, so you will only need to enter them once.
+
+   <img width="510" alt="The Set up GoCardless dialog with empty Secret ID and Secret Key fields" src="/img/advanced/bank-sync/gocardless-setup-modal@2x.webp" />
 
 ### Link Accounts with GoCardless
 
 1. Add the link to your accounts in actual (Existing or New).
-   - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link Account_**
+   - **_For an existing account, click on that account, select the ... (kebab menu) in the top right, and choose Link account_**
 
-     ![Linking an existing account to GoCardless](/img/connecting-your-bank/connecting-your-bank-01.webp)
+     <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom_**
+   - **_To create a new account with bank syncing click on the '+ Add account' link in the left menu at the bottom, then click Set up bank sync_**
 
-     ![Actual sidebar with accounts](/img/connecting-your-bank/connecting-your-bank-02.webp)
+     <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Select the Link your bank account button.
+2. Click the **Link bank account** button on the GoCardless card.
 
-   ![Add account dialog](/img/connecting-your-bank/connecting-your-bank-03.webp)
+   <img width="662" alt="The Link account dialog with Link bank account on the GoCardless card highlighted" src="/img/advanced/bank-sync/gocardless-link-bank-account@2x.webp" />
 
 3. Select your country and bank from the list and click the Link bank in browser button.
 
-   ![Link your bank dialog](/img/connecting-your-bank/connecting-your-bank-04.webp)
+   <img width="510" alt="The Link Your Bank dialog with a country and a bank chosen and the Link bank in browser button" src="/img/advanced/bank-sync/gocardless-link-your-bank@2x.webp" />
 
 4. Clicking Link bank in browser will redirect you to a new tab to grant access to your bank for GoCardless.
 
-   ![Link you bank feedback](/img/connecting-your-bank/connecting-your-bank-05.webp)
+   <img width="510" alt="The Link Your Bank dialog saying Waiting on GoCardless" src="/img/advanced/bank-sync/gocardless-waiting@2x.webp" />
 
 5. Select **I agree** to continue with setting up the connection.
 
@@ -72,27 +76,29 @@ From July 2025 onwards, GoCardless has stopped accepting new Bank Account Data a
 
 6. If your connection was a success, you will be able to click on the continue button which allows GoCardless to connect.
 
-   ![Feedback for successful linking to your bank](/img/connecting-your-bank/connecting-your-bank-07.webp)
+   <img width="510" alt="The Link Your Bank dialog with the Success! Click to continue button" src="/img/advanced/bank-sync/gocardless-success@2x.webp" />
 
 7. A progress indicator will display while GoCardless connects to your bank to get a list of your accounts.
 
-   ![Dialog saying please wait while we finish linking your account(s).](/img/connecting-your-bank/connecting-your-bank-08.webp)
+   <img width="510" alt="The Link Your Bank dialog saying Loading accounts" src="/img/advanced/bank-sync/gocardless-loading-accounts@2x.webp" />
 
 8. Once the connection has been made, there will be a list of your accounts that you can choose from.
 
-   ![Select bank account you want to link](/img/connecting-your-bank/connecting-your-bank-09.webp)
+   <img width="988" alt="The Link Accounts dialog listing three bank accounts, each with a Set up bank sync button" src="/img/advanced/bank-sync/gocardless-link-accounts@2x.webp" />
 
-9. The final step is to select the account you want to sync and click Link account.
+9. The final step is to click **Set up bank sync** next to the account you want to sync, choose the Actual account to link it to, and click **Link accounts**.
 
-   ![Dialog for linking accounts you want to sync](/img/connecting-your-bank/connecting-your-bank-10.webp)
+   <img width="988" alt="The Link Accounts dialog with one bank account linked to Capital One Checking and the Link accounts button highlighted" src="/img/advanced/bank-sync/gocardless-link-accounts-chosen@2x.webp" />
+   - **1.** The bank account and the Actual account it will sync with.
+   - **2. Link accounts.** Saves the link and closes the dialog.
 
 ### Frequently Asked Questions
 
 **Does Actual sync automatically with your Bank?**
 
-At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Accounts" and pressing "Sync".
+At this moment, it is not yet possible for Actual to automatically sync with your bank. You need to do this manually by going to "All Accounts" and pressing "Bank Sync".
 
-![Image showing where in the GUI you can sync your bank accounts](/img/connecting-your-bank/syncing-with-your-bank.webp)
+<img width="765" alt="The All Accounts page with the Bank Sync button highlighted" src="/img/advanced/bank-sync/gocardless-sync-all@2x.webp" />
 
 **The best way to start from scratch in Actual with GoCardless?**
 

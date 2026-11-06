@@ -100,7 +100,7 @@ async function resolvePrNumber(dir, name, historyRef = 'HEAD') {
 
 export function formatNotes(notes) {
   return Object.entries(notes)
-    .filter(([_, values]) => values.length > 0)
+    .filter(([, values]) => values.length > 0)
     .map(([category, values]) => `#### ${category}\n\n${values.join('\n')}`)
     .join('\n\n');
 }

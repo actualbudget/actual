@@ -33,7 +33,7 @@ export function NotificationsButton() {
       : t('Notifications');
   const displayedCount =
     unseenCount > MAX_DISPLAYED_COUNT
-      ? `${MAX_DISPLAYED_COUNT}+`
+      ? t('{{max}}+', { max: MAX_DISPLAYED_COUNT })
       : String(unseenCount);
 
   return (

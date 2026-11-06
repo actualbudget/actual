@@ -54,15 +54,11 @@ jobs:
       - name: Set up environment
         uses: ./.github/actions/setup
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        name: Setup Flatpak dependencies
+        name: Validate Flathub metainfo
         run: |
           sudo apt-get update
           sudo apt-get install flatpak -y
-          sudo apt-get install flatpak-builder -y
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install org.freedesktop.Sdk//24.08 -y
-          sudo flatpak install org.freedesktop.Platform//24.08 -y
-          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
           sudo flatpak install org.flatpak.Builder -y
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"
@@ -95,13 +91,6 @@ jobs:
           name: Actual-linux-arm64.AppImage
           if-no-files-found: ignore
           path: packages/desktop-electron/dist/Actual-linux-arm64.AppImage
-
-      - name: Upload Linux x64 flatpak
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: Actual-linux-x86_64.flatpak
-          if-no-files-found: ignore
-          path: packages/desktop-electron/dist/Actual-linux-x86_64.flatpak
 
       - name: Upload Windows x32 exe
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -34,6 +34,8 @@ const initialState: PrefsState = {
   server: {},
 };
 
+let globalPrefsSaveCount = 0;
+
 export const loadPrefs = createAppAsyncThunk(
   `${sliceName}/loadPrefs`,
   async (_, { dispatch, getState }) => {
@@ -45,10 +47,16 @@ export const loadPrefs = createAppAsyncThunk(
       dispatch(closeModal());
     }
 
-    const [globalPrefs, syncedPrefs] = await Promise.all([
-      send('load-global-prefs'),
-      send('preferences/get'),
-    ]);
+    let savesBeforeLoad: number;
+    let globalPrefs: GlobalPrefs;
+    let syncedPrefs: SyncedPrefs;
+    do {
+      savesBeforeLoad = globalPrefsSaveCount;
+      [globalPrefs, syncedPrefs] = await Promise.all([
+        send('load-global-prefs'),
+        send('preferences/get'),
+      ]);
+    } while (savesBeforeLoad !== globalPrefsSaveCount);
 
     dispatch(
       setPrefs({ local: prefs, global: globalPrefs, synced: syncedPrefs }),
@@ -84,7 +92,13 @@ export const savePrefs = createAppAsyncThunk(
 export const loadGlobalPrefs = createAppAsyncThunk(
   `${sliceName}/loadGlobalPrefs`,
   async (_, { dispatch, getState }) => {
-    const globalPrefs = await send('load-global-prefs');
+    let savesBeforeLoad: number;
+    let globalPrefs: GlobalPrefs;
+    do {
+      savesBeforeLoad = globalPrefsSaveCount;
+      globalPrefs = await send('load-global-prefs');
+    } while (savesBeforeLoad !== globalPrefsSaveCount);
+
     dispatch(
       setPrefs({
         local: getState().prefs.local,
@@ -108,6 +122,7 @@ export const saveGlobalPrefs = createAppAsyncThunk(
     { dispatch },
   ) => {
     await send('save-global-prefs', prefs);
+    globalPrefsSaveCount++;
     dispatch(mergeGlobalPrefs(prefs));
     onSaveGlobalPrefs?.();
   },

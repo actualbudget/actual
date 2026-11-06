@@ -18,6 +18,11 @@ const intervalOptions = [
     defaultRange: 'Last 6 months',
   },
   {
+    description: t('Quarterly'),
+    key: 'Quarterly',
+    defaultRange: 'Last 12 months',
+  },
+  {
     description: t('Yearly'),
     key: 'Yearly',
     defaultRange: 'Year to date',
@@ -103,7 +108,14 @@ const totalGraphOptions: graphOptions[] = [
   {
     description: 'AreaGraph',
     // CategoryGroup is only valid for DonutGraph
-    disabledSplit: ['Category', 'Group', 'CategoryGroup', 'Payee', 'Account'],
+    disabledSplit: [
+      'Category',
+      'Group',
+      'CategoryGroup',
+      'Payee',
+      'Account',
+      'Tag',
+    ],
     defaultSplit: 'Interval',
     disabledType: [],
     defaultType: 'Payment',
@@ -212,11 +224,9 @@ export function disabledLegendLabel(
   return disableLegendLabel[type];
 }
 
-export function defaultsGraphList(
-  item: string,
-  newGraph: string,
-  type: 'defaultSplit' | 'defaultType' | 'defaultSort',
-) {
+export function defaultsGraphList<
+  K extends 'defaultSplit' | 'defaultType' | 'defaultSort',
+>(item: string, newGraph: string, type: K) {
   const graphList = modeOptions.find(d => d.description === item);
   if (!graphList) {
     return '';

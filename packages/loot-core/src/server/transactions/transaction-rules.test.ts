@@ -3,8 +3,10 @@ import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 // @ts-strict-ignore
 import { q } from '#shared/query';
+import { extractTagsFromText, makeExactTagSetQueryFilter } from '#shared/tags';
 
 import {
+  actionsReferenceBalance,
   conditionsToAQL,
   deleteRule,
   getProbableCategory,
@@ -404,6 +406,74 @@ describe('Transaction rules', () => {
     });
   });
 
+  test('"payee is nothing" matches a transaction without a payee field', async () => {
+    await loadRules();
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: null }],
+      actions: [{ op: 'set', field: 'notes', value: 'no payee' }],
+    });
+
+    // Bank sync leaves `payee` out entirely when the import has no payee
+    expect(
+      await runRules({
+        imported_payee: 'kroger',
+        date: '2020-08-11',
+        amount: 50,
+      }),
+    ).toEqual({
+      imported_payee: 'kroger',
+      date: '2020-08-11',
+      amount: 50,
+      notes: 'no payee',
+    });
+
+    // A payee set by a rule action is kept
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'payee', value: null }],
+      actions: [{ op: 'set', field: 'payee', value: 'kroger' }],
+    });
+    expect(
+      await runRules({
+        imported_payee: 'kroger',
+        date: '2020-08-11',
+        amount: 50,
+      }),
+    ).toEqual({
+      imported_payee: 'kroger',
+      date: '2020-08-11',
+      amount: 50,
+      payee: 'kroger',
+      notes: 'no payee',
+    });
+  });
+
+  test('"category is nothing" matches a transaction without a category field', async () => {
+    await loadRules();
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'is', field: 'category', value: null }],
+      actions: [{ op: 'set', field: 'notes', value: 'no category' }],
+    });
+
+    expect(
+      await runRules({
+        payee: 'kroger',
+        date: '2020-08-11',
+        amount: 50,
+      }),
+    ).toEqual({
+      payee: 'kroger',
+      date: '2020-08-11',
+      amount: 50,
+      notes: 'no category',
+    });
+  });
+
   test('category_group condition matches categories in that group (live)', async () => {
     await loadRules();
     const billsGroupId = await db.insertCategoryGroup({ name: 'Bills' });
@@ -666,6 +736,146 @@ describe('Transaction rules', () => {
     expect(transactions.map(t => t.id)).toEqual(['2']);
   });
 
+  test('exact tag drill-down agrees with tag extraction at hashtag and regex boundaries', async () => {
+    const account = await db.insertAccount({ name: 'bank' });
+    const scope = ['red', 'circle', '$splurge', 'a.b', 'a+b', 'Red'];
+    const notes = [
+      '#red#circle',
+      '##red',
+      '#red##circle',
+      '#redder',
+      'text#red',
+      '#Red',
+      '#red #red',
+      '#$splurge',
+      '#a.b',
+      '#axb',
+      '#a+b',
+      '#red\n#circle',
+      null,
+    ];
+    for (const [index, note] of notes.entries()) {
+      await db.insertTransaction({
+        id: String(index),
+        date: '2026-01-01',
+        account,
+        notes: note,
+        amount: 100,
+      });
+    }
+
+    for (const note of notes) {
+      const bucket = extractTagsFromText(note ?? '')
+        .filter(tag => scope.includes(tag))
+        .sort();
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter(makeExactTagSetQueryFilter(bucket, scope))
+          .select('id'),
+      );
+      const expectedIds = notes.flatMap((candidate, index) => {
+        const tags = extractTagsFromText(candidate ?? '')
+          .filter(tag => scope.includes(tag))
+          .sort();
+        return JSON.stringify(tags) === JSON.stringify(bucket)
+          ? [String(index)]
+          : [];
+      });
+      expect(data.map(row => row.id).sort()).toEqual(expectedIds.sort());
+    }
+
+    const { data } = await aqlQuery(
+      q('transactions').filter(makeExactTagSetQueryFilter([], [])).select('id'),
+    );
+    expect(data).toHaveLength(notes.length);
+  });
+
+  test('transactions can be queried by their exact tag set within a scope', async () => {
+    const account = await db.insertAccount({ name: 'bank' });
+    const payee = await db.insertPayee({ name: 'payee' });
+    const notes = [
+      '#red',
+      '#circle #red',
+      '#red #blue',
+      '#redder',
+      null,
+      '#blue',
+    ];
+
+    await Promise.all(
+      notes.map((note, index) =>
+        db.insertTransaction({
+          id: String(index + 1),
+          date: '2020-10-01',
+          account,
+          payee,
+          notes: note,
+          amount: 123,
+        }),
+      ),
+    );
+
+    async function query(tagNames: string[], scopeTagNames: string[]) {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter(makeExactTagSetQueryFilter(tagNames, scopeTagNames))
+          .select('id'),
+      );
+      return data.map(transaction => transaction.id);
+    }
+
+    await expect(
+      query(
+        ['circle', 'red'],
+        [
+          'mortgage',
+          'circle',
+          'red',
+          'groceries',
+          '$splurge',
+          'online-shopping',
+          'subscription',
+          'utilities',
+        ],
+      ),
+    ).resolves.toEqual(['2']);
+    await expect(query(['red'], ['circle', 'red'])).resolves.toEqual([
+      '1',
+      '3',
+    ]);
+    await expect(query([], ['circle', 'red'])).resolves.toEqual([
+      '4',
+      '5',
+      '6',
+    ]);
+  });
+
+  test('transactions can be queried by a notes regex that is still being typed', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+
+    await db.insertTransaction({
+      id: '1',
+      date: '2020-10-01',
+      account,
+      notes: 'Invoice #123',
+      amount: 123,
+    });
+
+    // An incomplete pattern matches nothing instead of failing the query
+    for (const value of ['#\\', '#[', '#\\d+(']) {
+      const transactions = await getMatchingTransactions([
+        { field: 'notes', op: 'matches', value },
+      ]);
+      expect(transactions).toEqual([]);
+    }
+
+    const transactions = await getMatchingTransactions([
+      { field: 'notes', op: 'matches', value: '#\\d+' },
+    ]);
+    expect(transactions.map(t => t.id)).toEqual(['1']);
+  });
+
   test('transactions can be queried by hasTags if no "#" is included', async () => {
     await loadRules();
     const account = await db.insertAccount({ name: 'bank' });
@@ -852,7 +1062,7 @@ describe('Learning categories', () => {
     expect(rule.actions[0].value).toBe(category);
   }
 
-  async function insertTransaction(
+  async function expectRuleAfterInsert(
     transaction,
     expectedCategory,
     expectedRuleCount = 1,
@@ -916,7 +1126,7 @@ describe('Learning categories', () => {
   test('creates rule when inserting transactions', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -928,7 +1138,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -940,7 +1150,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -955,7 +1165,7 @@ describe('Learning categories', () => {
   test('leaves existing rule alone if probable category is ambiguous', async () => {
     await loadData();
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -967,7 +1177,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -979,7 +1189,7 @@ describe('Learning categories', () => {
       0,
     );
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1000,7 +1210,7 @@ describe('Learning categories', () => {
 
     // Even though the system couldn't figure out the category to set,
     // it should leave the existing rule alone
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-01',
@@ -1023,7 +1233,7 @@ describe('Learning categories', () => {
       actions: [{ op: 'set', field: 'category', value: 'beer' }],
     });
 
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'one',
         date: '2016-12-01',
@@ -1034,7 +1244,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'two',
         date: '2016-12-01',
@@ -1045,7 +1255,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-01',
@@ -1069,7 +1279,7 @@ describe('Learning categories', () => {
     });
 
     // Use a new payee, so the category should be remembered
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'three',
         date: '2016-12-03',
@@ -1080,7 +1290,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'four',
         date: '2016-12-03',
@@ -1091,7 +1301,7 @@ describe('Learning categories', () => {
       'beer',
       1,
     );
-    await insertTransaction(
+    await expectRuleAfterInsert(
       {
         id: 'five',
         date: '2016-12-03',
@@ -1103,6 +1313,56 @@ describe('Learning categories', () => {
       2,
       'bar',
     );
+  });
+
+  test('does not create a rule if a "one of" rule already sets the category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'food' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(1);
+    expect(getRules()[0].conditions[0].op).toBe('oneOf');
+  });
+
+  test('creates a rule if a "one of" rule sets a different category', async () => {
+    await loadData();
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [{ op: 'oneOf', field: 'payee', value: ['foo', 'bar'] }],
+      actions: [{ op: 'set', field: 'category', value: 'beer' }],
+    });
+
+    const trans = {
+      date: '2016-12-01',
+      account: 'acct',
+      payee: 'foo',
+      category: 'food',
+    };
+    await db.insertTransaction({ ...trans, id: 'one' });
+    await db.insertTransaction({ ...trans, id: 'two' });
+    await db.insertTransaction({ ...trans, id: 'three' });
+    await updateCategoryRules([{ ...trans, id: 'three' }]);
+
+    expect(getRules().length).toBe(2);
+    expectCategoryRule(getRules()[1], 'food', 'foo');
   });
 
   test('updates rules correctly even if multiple rules exist', async () => {
@@ -1306,4 +1566,161 @@ describe('Learning categories', () => {
   });
 
   // TODO: write tests for split transactions
+});
+
+// Counts prepared statements that aggregate amounts, which is what the
+// running-balance query does and nothing else in `runRules` does
+function countRunningBalanceQueries() {
+  const rawDb = db.getDatabase() as unknown as {
+    prepare: (sql: string) => unknown;
+  };
+  const originalPrepare = rawDb.prepare.bind(rawDb);
+  let count = 0;
+  rawDb.prepare = (sql: string) => {
+    if (/SUM\(/i.test(sql)) {
+      count++;
+    }
+    return originalPrepare(sql);
+  };
+  return () => count;
+}
+
+describe('Running balance for rules', () => {
+  test('actionsReferenceBalance only flags templates and formulas that use it', () => {
+    expect(
+      actionsReferenceBalance([
+        { options: { template: 'Balance: {{balance}}' } },
+      ]),
+    ).toBe(true);
+    expect(
+      actionsReferenceBalance([
+        { options: { template: '{{add balance amount}}' } },
+      ]),
+    ).toBe(true);
+    expect(
+      actionsReferenceBalance([{ options: { formula: '=balance * 2' } }]),
+    ).toBe(true);
+
+    expect(actionsReferenceBalance([])).toBe(false);
+    expect(actionsReferenceBalance([{}])).toBe(false);
+    expect(
+      actionsReferenceBalance([{ options: { template: 'well balanced' } }]),
+    ).toBe(false);
+    expect(
+      actionsReferenceBalance([
+        { options: { formula: '=BALANCE_OF("Savings") * 2' } },
+      ]),
+    ).toBe(false);
+  });
+
+  test('a template that uses the balance still sees the running balance', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-02',
+      amount: 2500,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'kroger' },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: '',
+          options: { template: 'Balance: {{balance}}' },
+        },
+      ],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBe('Balance: 3500');
+    expect(transaction).not.toHaveProperty('balance');
+    expect(queries()).toBe(1);
+  });
+
+  test('a rule that uses the balance but does not match runs no query', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'walmart' },
+      ],
+      actions: [
+        {
+          op: 'set',
+          field: 'notes',
+          value: '',
+          options: { template: 'Balance: {{balance}}' },
+        },
+      ],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBeUndefined();
+    expect(queries()).toBe(0);
+  });
+
+  test('rules that do not use the balance still apply normally', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    await db.insertTransaction({
+      account,
+      date: '2020-01-01',
+      amount: 1000,
+    });
+
+    await insertRule({
+      stage: null,
+      conditionsOp: 'and',
+      conditions: [
+        { op: 'contains', field: 'imported_payee', value: 'kroger' },
+      ],
+      actions: [{ op: 'set', field: 'notes', value: 'plain' }],
+    });
+
+    const queries = countRunningBalanceQueries();
+    const transaction = await runRules({
+      imported_payee: 'kroger',
+      account,
+      date: '2020-01-03',
+      amount: 50,
+    });
+
+    expect(transaction.notes).toBe('plain');
+    expect(transaction).not.toHaveProperty('balance');
+    expect(queries()).toBe(0);
+  });
 });

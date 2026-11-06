@@ -91,13 +91,7 @@ function AccountHeader<SheetFieldName extends SheetFields<'account'>>({
       ])}
     >
       <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row' }}>
-        <Text
-          style={{
-            ...styles.text,
-            fontSize: 17,
-          }}
-          data-testid="name"
-        >
+        <Text size="extra-large" data-testid="name">
           {name}
         </Text>
         <Cheveron

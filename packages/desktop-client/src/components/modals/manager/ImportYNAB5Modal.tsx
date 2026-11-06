@@ -12,6 +12,7 @@ import { View } from '@actual-app/components/view';
 import { importBudget } from '#budgetfiles/budgetfilesSlice';
 import { Link } from '#components/common/Link';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { ImportProgress } from '#components/modals/manager/ImportProgress';
 import { useNavigate } from '#hooks/useNavigate';
 import { useDispatch } from '#redux';
 
@@ -60,12 +61,18 @@ export function ImportYNAB5Modal() {
   }
 
   return (
-    <Modal name="import-ynab5" containerProps={{ style: { width: 400 } }}>
+    <Modal
+      name="import-ynab5"
+      isDismissable={!importing}
+      containerProps={{ style: { width: 400 } }}
+    >
       {({ state }) => (
         <>
           <ModalHeader
             title={t('Import from nYNAB')}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+            rightContent={
+              !importing && <ModalCloseButton onPress={() => state.close()} />
+            }
           />
           <View style={{ ...styles.smallText, lineHeight: 1.5, marginTop: 20 }}>
             {error && (
@@ -101,16 +108,18 @@ export function ImportYNAB5Modal() {
                   fix up any problems.
                 </Trans>
               </Paragraph>
-              <View>
-                <ButtonWithLoading
-                  variant="primary"
-                  autoFocus
-                  isLoading={importing}
-                  onPress={onImport}
-                >
-                  <Trans>Select file...</Trans>
-                </ButtonWithLoading>
-              </View>
+              {!importing && (
+                <View>
+                  <ButtonWithLoading
+                    variant="primary"
+                    autoFocus
+                    onPress={onImport}
+                  >
+                    <Trans>Select file...</Trans>
+                  </ButtonWithLoading>
+                </View>
+              )}
+              <ImportProgress />
             </View>
           </View>
         </>

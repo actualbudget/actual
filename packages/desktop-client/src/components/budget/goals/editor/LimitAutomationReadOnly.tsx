@@ -15,10 +15,7 @@ export const LimitAutomationReadOnly = ({
   const format = useFormat();
 
   const period = template.period;
-  const amount = format(
-    amountToInteger(template.amount, format.currency.decimalPlaces),
-    'financial',
-  );
+  const amount = format(amountToInteger(template.amount), 'financial');
   const hold = template.hold;
 
   switch (period) {

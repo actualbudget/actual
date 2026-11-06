@@ -119,7 +119,7 @@ Situation: I am using Actual to keep track of my budget and finances, but I shar
 
 Each month you will add a transfer of your share to the joint account from one of your on budget accounts. You don't need a category for your contribution since it is just a transfer from one of your accounts to another.
 
-![Screenshot of joint accounts in a personal Actual Budget file](/img/joint-accounts/jointaccount-2.webp)
+<img width="860" alt="The monthly contribution transferred from Bank of America in the Joint Checking register" src="/img/budgeting/joint-accounts-contribution@2x.webp" />
 
 #### Partner contribution
 
@@ -127,13 +127,13 @@ Each month you will add a transfer of your share to the joint account from one o
 
 When your partner makes a contribution to the joint account, use the **Income Category** you created as the category. By having a separate category for this contribution, it will be easier to filter out when doing reports later since this isn't true income, though it is income to the budget.
 
-![Screenshot of joint accounts in a personal Actual Budget file - option 1](/img/joint-accounts/jointaccount-3.webp)
+<img width="860" alt="The partner deposit in the Joint Checking register, categorized as Partner contribution" src="/img/budgeting/joint-accounts-partner-income@2x.webp" />
 
 ##### Option 2
 
 If option 1 doesn't seem right to you, the same result could be achieved by treating the new income like a return to a store. In this case, you can assign your partners deposit directly to the shared categories. The deposit should be made into the **Joint Account** ledger. As you can see, you can fund each shared category using the **split transaction** option.
 
-![Screenshot of joint accounts in a personal Actual Budget file - option 2](/img/joint-accounts/jointaccount-5.webp)
+<img width="860" alt="The partner deposit split between the Rent, Groceries, Electricity and Water categories" src="/img/budgeting/joint-accounts-partner-split@2x.webp" />
 
 ### Budgeting
 
@@ -141,10 +141,16 @@ If option 1 doesn't seem right to you, the same result could be achieved by trea
 
 If you are entering the data for the joint account according to option 1, budget the whole amount for the bill. The total budgeted of the shared expenses category group should equal the total amount available in the joint account. The joint account and category group are loosely connected in this scenario. There is no safeguard to prevent over budgeting for that account so you will need to monitor the balance of the account and the balance of the category group to be sure they are the same.
 
-![Screenshot of budgeting with personal Actual Account file - option 1](/img/joint-accounts/jointaccount-1.webp)
+![The budget with the Shared expenses group fully budgeted and its balance matching the Joint Checking balance](/img/budgeting/joint-accounts-budget-full@2x.webp)
+
+- **A. Joint Checking balance.** The money in the joint account.
+- **B. Shared expenses balance.** The money available in the shared categories. It should match the joint account balance.
 
 #### Option 2
 
 If you've decided to fund the categories directly with the deposit, you only need to fund the budget categories for your portion of the shared expense. As you can see, each of the budget categories is still funded to the same level but in this case there is no **income** that will show in reports. The Joint account balance and budgeted amount should still be the same.
 
-![Screenshot of budgeting with personal Actual Account file - option 2](/img/joint-accounts/jointaccount-4.webp)
+![The budget with only your portion budgeted in Shared expenses and the partner deposit shown as spending](/img/budgeting/joint-accounts-budget-portion@2x.webp)
+
+- **A. Joint Checking balance.** The money in the joint account.
+- **B. Shared expenses balance.** Your budgeted portion plus your partner's deposit. It still matches the joint account balance.

@@ -252,6 +252,33 @@ describe('accountsBankSync', () => {
     expect(account!.bank_sync_status).toBe('timed-out');
   });
 
+  it('persists server-down status when the bank sync provider is down', async () => {
+    insertBank({ id: 'bank1', bank_id: 'sfin-bank', name: 'SimpleFin' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'simpleFin',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'There was an error communicating with SimpleFIN.',
+      category: 'SERVER_DOWN',
+      code: 'SERVER_DOWN',
+      message: 'There was an error communicating with SimpleFIN.',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('server-down');
+  });
+
   it('persists failed status after an operational sync error', async () => {
     insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
     await db.insertAccount({
@@ -273,6 +300,33 @@ describe('accountsBankSync', () => {
       ['acct1'],
     );
     expect(account!.bank_sync_status).toBe('failed');
+  });
+
+  it('persists not-configured status after a missing credentials error', async () => {
+    insertBank({ id: 'bank1', bank_id: 'gc-bank', name: 'GoCardless' });
+    await db.insertAccount({
+      id: 'acct1',
+      name: 'Checking',
+      bank: 'bank1',
+      account_id: 'ext-1',
+      account_sync_source: 'goCardless',
+    });
+
+    vi.mocked(bankSync.syncAccount).mockRejectedValue({
+      type: 'BankSyncError',
+      reason: 'credentials missing',
+      category: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+      message: 'GoCardless credentials are missing',
+    });
+
+    await accountsBankSyncHandler({ ids: ['acct1'] });
+
+    const account = await db.first<db.DbAccount>(
+      'SELECT * FROM accounts WHERE id = ?',
+      ['acct1'],
+    );
+    expect(account!.bank_sync_status).toBe('not-configured');
   });
 });
 

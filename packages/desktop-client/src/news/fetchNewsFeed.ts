@@ -6,6 +6,12 @@ import type { NewsEntry, NewsFeed } from './types';
 
 // Released builds read the file committed on `master`, the same way the custom
 // theme catalog is fetched (hooks/useThemeCatalog.ts).
+/**
+ * Message of the error thrown when the feed loaded but isn't in a format this
+ * version understands, so callers can tell it apart from a failed download.
+ */
+export const UNSUPPORTED_NEWS_FEED_FORMAT = 'Unsupported news feed format';
+
 const REPO_NEWS_FEED_URL =
   'https://raw.githubusercontent.com/actualbudget/actual/master/packages/desktop-client/src/data/news.json';
 
@@ -78,7 +84,7 @@ export async function fetchNewsFeed(): Promise<NewsFeed> {
 
   const json: unknown = await response.json();
   if (!isNewsFeed(json)) {
-    throw new Error('Unsupported news feed format');
+    throw new Error(UNSUPPORTED_NEWS_FEED_FORMAT);
   }
   return json;
 }

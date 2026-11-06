@@ -105,8 +105,11 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        filters={filters}
         balanceTypeOp={balanceTypeOp}
         viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
         showTooltip={showTooltip}
       />
     );

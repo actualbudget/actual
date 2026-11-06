@@ -190,8 +190,11 @@ export function CashFlowGraph({
             onMouseLeave={() => setYAxisIsHovered(false)}
           />
           <Tooltip
-            labelFormatter={x => {
-              return d.format(x, isConcise ? "MMM ''yy" : 'MMM d', {
+            labelFormatter={label => {
+              if (typeof label !== 'string') {
+                return label;
+              }
+              return d.format(label, isConcise ? "MMM ''yy" : 'MMM d', {
                 locale,
               });
             }}

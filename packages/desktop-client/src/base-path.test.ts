@@ -19,6 +19,8 @@ describe('base path', () => {
       '/finances/static/app.js',
     );
     expect(withBasePath('/', '/static/app.js')).toBe('/static/app.js');
+    expect(withBasePath('/', '/')).toBe('/');
+    expect(withBasePath('/finances/', '/')).toBe('/finances/');
   });
 
   it('builds current-domain server URLs under the configured base path', () => {

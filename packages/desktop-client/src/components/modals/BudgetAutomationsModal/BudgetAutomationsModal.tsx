@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { AnimatedLoading } from '@actual-app/components/icons/AnimatedLoading';
@@ -39,9 +39,13 @@ export function BudgetAutomationsModal({
   );
   const effectiveMonth = month ?? currentMonth();
 
-  const onLoaded = (result: Record<string, Template[]>) => {
-    setParsedTemplates(result[categoryId] ?? []);
-  };
+  const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+  const onLoaded = useCallback(
+    (result: Record<string, Template[]>) => {
+      setParsedTemplates(result[categoryId] ?? []);
+    },
+    [categoryId],
+  );
 
   const { data: currentCategory } = useCategory(categoryId);
   // default to 'ui' while the category is still resolving so we don't fire a
@@ -58,7 +62,7 @@ export function BudgetAutomationsModal({
   });
 
   const { schedules, isLoading: schedulesLoading } = useSchedules({
-    query: q('schedules').select('*'),
+    query: schedulesQuery,
   });
 
   const categories = useBudgetAutomationCategories();

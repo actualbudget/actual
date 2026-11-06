@@ -38,9 +38,9 @@ vi.mock('../../utils/jwt', () => ({
   getJWT: vi.fn(() => 'mock-jwt-token'),
 }));
 
-// Mock global fetch
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+// Mock provider requests
+const mockFetch = vi.hoisted(() => vi.fn());
+vi.mock('undici', () => ({ fetch: mockFetch }));
 
 function mockFetchResponse(data: unknown, ok = true, status = 200) {
   mockFetch.mockResolvedValueOnce({
@@ -496,7 +496,7 @@ describe('enableBankingService', () => {
         continuation_key: 'stuck-key',
       });
       mockFetchResponse({
-        transactions: [mockDebitTransaction],
+        transactions: [mockCreditTransaction],
         continuation_key: 'stuck-key',
       });
 
@@ -507,7 +507,7 @@ describe('enableBankingService', () => {
       );
 
       expect(mockFetch).toHaveBeenCalledTimes(2);
-      expect(result).toHaveLength(2);
+      expect(result).toEqual([mockCreditTransaction]);
     });
   });
 

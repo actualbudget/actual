@@ -19,6 +19,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { usePayees } from '#hooks/usePayees';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTags } from '#hooks/useTags';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateReportMutation } from '#reports/mutations';
@@ -74,11 +75,14 @@ function CustomReportListCardsInner({
   const { data: payees = [] } = usePayees();
   const { data: accounts = [] } = useAccounts();
   const { data: categories = { list: [], grouped: [] } } = useCategories();
+  const { data: tags = [] } = useTags();
 
   const hasWarning = calculateHasWarning(report.conditions ?? [], {
     categories: categories.list,
     payees,
     accounts,
+    tags,
+    tagScope: report.groupBy === 'Tag' ? report.tagScope : undefined,
   });
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
@@ -165,6 +169,7 @@ function CustomReportListCardsInner({
           payees={payees}
           accounts={accounts}
           categories={categories}
+          tags={tags}
           earliestTransaction={earliestTransaction}
           latestTransaction={latestTransaction}
           firstDayOfWeekIdx={firstDayOfWeekIdx}
@@ -175,7 +180,7 @@ function CustomReportListCardsInner({
         <View style={{ padding: 5, position: 'absolute', bottom: 0 }}>
           <Tooltip
             content={t(
-              'The widget is configured to use a non-existing filter value (i.e. category/account/payee). Edit the filters used in this report widget to remove the warning.',
+              'The widget is configured to use a non-existing filter or tag value. Edit this report to remove the warning.',
             )}
             placement="bottom start"
             style={{ ...styles.tooltip, maxWidth: 300 }}

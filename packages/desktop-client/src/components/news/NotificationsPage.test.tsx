@@ -10,9 +10,10 @@ import type { NewsEntry } from '#news/types';
 import { NotificationsPage } from './NotificationsPage';
 
 const mockMarkAllSeen = vi.fn();
+const mockRetry = vi.fn();
 let mockEntries: NewsEntry[] = [];
 let mockIsLoading = false;
-let mockError: Error | null = null;
+let mockErrorKind: 'unavailable' | 'unsupported' | undefined = undefined;
 let mockLastSeenNewsDate: string | undefined = undefined;
 
 vi.mock('#hooks/useNewsFeed', () => ({
@@ -23,12 +24,13 @@ vi.mock('#hooks/useNewsFeed', () => ({
     lastSeenNewsDate: mockLastSeenNewsDate,
     markAllSeen: mockMarkAllSeen,
     isLoading: mockIsLoading,
-    error: mockError,
+    errorKind: mockErrorKind,
+    retry: mockRetry,
   }),
 }));
 
 vi.mock('#hooks/useDateFormat', () => ({
-  useDateFormat: () => 'yyyy-MM-dd',
+  useDateFormat: () => 'dd.MM.yyyy',
 }));
 
 vi.mock('#hooks/useGlobalPref', () => ({
@@ -70,7 +72,7 @@ describe('NotificationsPage', () => {
     vi.clearAllMocks();
     mockEntries = [];
     mockIsLoading = false;
-    mockError = null;
+    mockErrorKind = undefined;
     mockLastSeenNewsDate = undefined;
   });
 
@@ -79,9 +81,16 @@ describe('NotificationsPage', () => {
     mockLastSeenNewsDate = '2026-07-15';
     renderPage();
 
-    expect(screen.getByText('Release 26.8.1')).toBeInTheDocument();
-    expect(screen.getByText('Hello world')).toBeInTheDocument();
-    expect(screen.getByText('2026-08-07')).toBeInTheDocument();
+    // The pill already says "Release", so the title is just the version.
+    expect(screen.getByRole('heading', { name: '26.8.1' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Hello world' }),
+    ).toBeInTheDocument();
+    // Dates follow the format chosen in Settings.
+    expect(screen.getByText('07.08.2026')).toHaveAttribute(
+      'datetime',
+      '2026-08-07',
+    );
     expect(screen.getByText('freezes')).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'View on actualbudget.org' }),
@@ -101,10 +110,17 @@ describe('NotificationsPage', () => {
       screen.getByText('Plain quote.').closest('blockquote'),
     ).not.toBeNull();
 
-    // Full changelog is collapsed until requested.
-    expect(screen.queryByText('Bugfixes')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByText('Show all changes'));
-    expect(screen.getByText('Bugfixes')).toBeInTheDocument();
+    // Each category of changes is collapsed, with its count, until requested.
+    const bugfixes = screen.getByRole('button', { name: 'Bugfixes (1)' });
+    expect(bugfixes).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.queryByRole('link', { name: '#8628' }),
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(bugfixes);
+
+    expect(bugfixes).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('link', { name: '#8628' })).toBeInTheDocument();
 
     expect(mockMarkAllSeen).toHaveBeenCalled();
   });
@@ -119,22 +135,38 @@ describe('NotificationsPage', () => {
     expect(mockMarkAllSeen).not.toHaveBeenCalled();
   });
 
-  it('shows a friendly offline message when the feed cannot be loaded', () => {
-    mockError = new Error('offline');
+  it('shows a calm notice with a retry when the feed cannot be loaded', async () => {
+    mockErrorKind = 'unavailable';
     renderPage();
 
-    expect(screen.getByTestId('notifications-offline')).toHaveTextContent(
-      "The latest news isn't available right now",
-    );
-    expect(screen.getByTestId('notifications-offline')).toHaveTextContent(
-      /usually means you're offline/,
-    );
+    expect(
+      screen.getByText("Notifications aren't available right now."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/usually means you're offline/),
+    ).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(mockRetry).toHaveBeenCalled();
+
     expect(
       screen.getByRole('link', { name: 'All release notes' }),
     ).toHaveAttribute('href', 'https://actualbudget.org/docs/releases');
     expect(
       screen.getByRole('link', { name: 'Community (Discord)' }),
     ).toHaveAttribute('href', 'https://discord.gg/pRYNYr4W5A');
+  });
+
+  it('asks the user to update when the feed format is not understood', () => {
+    mockErrorKind = 'unsupported';
+    renderPage();
+
+    expect(
+      screen.getByText('Update Actual to see the latest notifications.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Try again' }),
+    ).not.toBeInTheDocument();
   });
 
   it('shows an empty state when there are no entries', () => {

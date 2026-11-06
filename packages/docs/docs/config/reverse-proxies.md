@@ -13,6 +13,18 @@ In our examples, the Actual Server should be published under the domain **budget
 The **basic configurations** provided here are only suggestions for implementing a reverse proxy configuration. Additional security mechanisms should then be activated/implemented for the tool selected in each case.
 :::
 
+## Hosting below a URL path
+
+Actual defaults to the domain root (`/`). To host a source-built deployment at a path such as `https://budget.example.org/actual/`, build the web client with the same prefix that the sync server uses:
+
+```bash
+ACTUAL_BASE_PATH=/actual yarn build:server
+```
+
+Set `ACTUAL_BASE_PATH=/actual` when starting the server, or set `"basePath": "/actual"` in its JSON configuration. The browser prefix is fixed at build time; changing only the server setting does not update an existing web build. Leave both settings unset to keep root hosting.
+
+Configure the reverse proxy to preserve `/actual` in requests forwarded to the server. The server redirects `/actual` to `/actual/` and serves the UI, API, and assets below that prefix. Use the full URL, including `/actual`, when connecting desktop or API clients, and update any configured authentication callback URLs to include the prefix.
+
 ## CADDY
 
 Below is an example `Caddyfile` that you can use to configure Caddy and Actual Server using Docker. Caddy is an easy reverse proxy to use since it automatically obtains and renews SSL certificates for you.

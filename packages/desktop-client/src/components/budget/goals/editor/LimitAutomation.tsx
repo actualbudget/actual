@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import {
   dayFromDate,
   firstDayOfMonth,
@@ -40,14 +42,11 @@ export const LimitAutomation = ({
   const daysOfWeek = useDaysOfWeek();
 
   const period = template.period;
-  const amount = amountToInteger(
-    template.amount,
-    format.currency.decimalPlaces,
+  const amount = amountToInteger(template.amount);
+  const [currentMonthStart] = useState(() =>
+    dayFromDate(firstDayOfMonth(new Date())),
   );
-  const start =
-    template.start ??
-    defaultWeeklyStart ??
-    dayFromDate(firstDayOfMonth(new Date()));
+  const start = template.start ?? defaultWeeklyStart ?? currentMonthStart;
   const dayOfWeek = getDay(parseDate(start));
   const hold = template.hold;
 
@@ -89,7 +88,7 @@ export const LimitAutomation = ({
           dispatch(
             updateTemplate({
               type: 'limit',
-              amount: integerToAmount(value, format.currency.decimalPlaces),
+              amount: integerToAmount(value),
             }),
           )
         }
@@ -129,11 +128,11 @@ export const LimitAutomation = ({
       </SpaceBetween>
 
       <Text
+        size="small"
         style={{
-          fontSize: 12,
           color: theme.pageTextLight,
           display: 'block',
-          marginTop: 8,
+          marginTop: spacing.sm,
         }}
       >
         <Trans>
@@ -141,24 +140,15 @@ export const LimitAutomation = ({
           the month, so the effective monthly cap changes with each month. For
           example, a{' '}
           {{
-            weekly: format(
-              amountToInteger(50, format.currency.decimalPlaces),
-              'financial-no-decimals',
-            ),
+            weekly: format(amountToInteger(50), 'financial-no-decimals'),
           }}
           /week cap caps the balance at{' '}
           {{
-            fourWeeks: format(
-              amountToInteger(200, format.currency.decimalPlaces),
-              'financial-no-decimals',
-            ),
+            fourWeeks: format(amountToInteger(200), 'financial-no-decimals'),
           }}{' '}
           in months with 4 weeks and{' '}
           {{
-            fiveWeeks: format(
-              amountToInteger(250, format.currency.decimalPlaces),
-              'financial-no-decimals',
-            ),
+            fiveWeeks: format(amountToInteger(250), 'financial-no-decimals'),
           }}{' '}
           in months with 5.
         </Trans>

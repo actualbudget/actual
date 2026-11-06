@@ -2,27 +2,24 @@
 
 This view lets you manage your transactions for an account. Consult [Accounts & Transactions](../accounts/index.md) for detailed information on how to work with this view.
 
-![Account register overview](/img/a-tour-of-actual/tour-account-register-overview.webp)
+![The account register for Bank of America](/img/a-tour-of-actual/tour-accounts-register@2x.webp)
 
 ## The Account Header
 
 To rename the account, click on the pencil icon that appears when you hover over the account name. Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note.
 
-Below the account name, you'll see the current balance. Green indicates a positive account balance, and red indicates a negative balance. A chevron will appear if you hover over the balance with the cursor. Clicking on this will reveal the values for both cleared and uncleared totals. See [Reconciliation](../accounts/reconciliation.md) for more information.
+<img width="860" alt="The account header with the balance, the Import, Add New and Filter buttons, the search box and the account menu labeled" src="/img/a-tour-of-actual/tour-accounts-header@2x.webp" />
 
-The top section also gives you access to several functions like importing transactions, manually adding new transactions, and filtering what transactions you see. On the right side you'll find the _Search_ field which lets you quickly search all fields.
-
-It is possible to split a transaction into more than one category. By clicking on the expand/contract arrows, seen in the yellow box, you will be able to show or hide split transactions.
-
-The three horizontal dots, shown in the blue box, will allow you to perform various manipulations on the account. These range from reconciling and exporting your account to closing or [Connecting Your Bank](../advanced/bank-sync.md) for transaction syncing. You can show or hide the account's running balance, previously reconciled transactions and the cleared checkbox column to the far right of the transaction's row.
-
-![Account register header](/img/a-tour-of-actual/tour-account-register-header.webp)
+- **A. Balance.** Below the account name, you'll see the current balance. Green indicates a positive account balance, and red indicates a negative balance. A chevron will appear if you hover over the balance with the cursor. Clicking on this will reveal the values for both cleared and uncleared totals. See [Reconciliation](../accounts/reconciliation.md) for more information.
+- **B. Import, Add New and Filter.** The top section also gives you access to several functions like importing transactions, manually adding new transactions, and filtering what transactions you see.
+- **C. Search.** On the right side you'll find the _Search_ field which lets you quickly search all fields.
+- **D. Split transactions and account menu.** It is possible to split a transaction into more than one category. By clicking on the expand/contract arrows, you will be able to show or hide split transactions. The three horizontal dots will allow you to perform various manipulations on the account. These range from reconciling and exporting your account to closing or [Connecting Your Bank](../advanced/bank-sync.md) for transaction syncing. You can show or hide the account's running balance, previously reconciled transactions and the cleared checkbox column to the far right of the transaction's row.
 
 Clicking on **Import** will let you [import transactions](../transactions/importing.md) from CSV, QIF, OFX, QFX or CAMT files.
 
 Manually add transactions by clicking on **Add New**. The Payee and the Category fields will provide a dropdown menu of available options. You can add new payees directly from this view, but if you need to add a new category, you can only do so from the [Budget View](./budget.md).
 
-![Adding a transaction](/img/a-tour-of-actual/tour-account-register-adding-transaction.webp)
+<img width="860" alt="A new transaction being added, with the list of payees open" src="/img/a-tour-of-actual/tour-accounts-add-transaction@2x.webp" />
 
 ## Filtering on transactions
 
@@ -32,14 +29,21 @@ If you are filtering for the same things over and over, you can save your filter
 
 Consult [Filtering Transactions](../transactions/filters.md) for more information.
 
-![Filtering transactions](/img/a-tour-of-actual/tour-account-register-filter.webp)
+![The account register filtered to Kroger transactions in the Food category, with the filter controls labeled](/img/a-tour-of-actual/tour-accounts-filter@2x.webp)
+
+- **A. Filter.** Opens the list of fields you can filter on.
+- **B. Filters.** The filters in use, here Payee is _Kroger_ and Category is _Food_. Click the × to remove a filter.
+- **C. Unsaved filter.** Saves the current filters under a name.
 
 ## Working on selected transactions
 
 You can select transactions by clicking on the checkbox - just to the left of the date field. When transactions are selected, you'll see the balance of the selected transactions to the right of the account's balance.
 
-The number of selected transactions is shown in the red box. If you click on this dropdown, you can perform various commands on these transactions.
+The number of selected transactions is shown next to the search box. If you click on this dropdown, you can perform various commands on these transactions.
 
 Another powerful feature allows you to perform [Bulk Actions](../transactions/bulk-editing.md).
 
-![Selecting transactions](/img/a-tour-of-actual/tour-account-register-selected-transactions.webp)
+![Three selected transactions with the bulk actions menu open](/img/a-tour-of-actual/tour-accounts-selected@2x.webp)
+
+- **A. Selected balance.** The balance of the selected transactions.
+- **B. Selected transactions.** The number of selected transactions. Click it to open the menu of actions.

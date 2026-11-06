@@ -536,17 +536,37 @@ export function useTransactionBatchActions() {
         );
         const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
 
+        // Only clear the category when the transfer is between two accounts
+        // of the same budget type (both on-budget or both off-budget),
+        // because the category is not relevant for such transfers. A transfer
+        // between an on-budget and an off-budget account represents money
+        // entering/leaving the budget, so the category must be preserved.
+        // This matches the server-side logic in clearCategory (transfer.ts).
+        const { data: accounts } = await aqlQuery(
+          q('accounts')
+            .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
+            .select(['id', 'offbudget']),
+        );
+        const fromAccount = accounts.find(
+          (a: { id: string; offbudget?: boolean }) =>
+            a.id === fromTrans.account,
+        );
+        const toAccount = accounts.find(
+          (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
+        );
+        const clearCategory = fromAccount?.offbudget === toAccount?.offbudget;
+
         const changes = {
           updated: [
             {
               ...fromTrans,
-              category: null,
+              ...(clearCategory ? { category: null } : {}),
               payee: toPayee?.id,
               transfer_id: toTrans.id,
             },
             {
               ...toTrans,
-              category: null,
+              ...(clearCategory ? { category: null } : {}),
               payee: fromPayee?.id,
               transfer_id: fromTrans.id,
             },

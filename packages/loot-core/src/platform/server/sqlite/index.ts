@@ -1,92 +1,111 @@
-// @ts-strict-ignore
-import initSqlJS from '@jlongster/sql.js';
-import type { Database, SqlJsStatic, Statement } from '@jlongster/sql.js';
+import type {
+  Database as SqlJsDatabase,
+  Statement as SqlJsStatement,
+} from '@jlongster/sql.js';
 
-import { logger } from '#platform/server/log';
+import * as legacy from './engine.sqljs.legacy';
+import type {
+  Database,
+  SqliteEngine,
+  SqlParam,
+  Statement,
+  TransactionOptions,
+} from './types';
 
-import { normalise } from './normalise';
-import type { SqlParam } from './types';
-import { unicodeLike } from './unicodeLike';
+export type {
+  Database,
+  SqlParam,
+  SqliteEngine,
+  Statement,
+  TransactionOptions,
+} from './types';
+// Used by the legacy filesystem layer and its tests
+export { _getModule } from './engine.sqljs.legacy';
+export type { SqlJsModule } from './engine.sqljs.legacy';
 
-export type { SqlParam } from './types';
+// The web sqlite module is a facade over an engine. The legacy sql.js
+// build over absurd-sql is built in and the default; other engines (the
+// official sqlite-wasm build) are registered by whichever entry point
+// wants them, so a build that never imports one does not bundle it.
+// Callers only see the opaque `Database` and `Statement` handles.
 
-// Types exported from sql.js (and Emscripten) are incomplete, so we need to redefine them here
-type FSStream = (typeof FS)['FSStream'] & {
-  node: (typeof FS)['FSNode'] & {
-    contents: {
-      readIfFallback: () => Promise<unknown>;
-    };
-  };
-};
-type FS = Omit<typeof FS, 'lookupPath' | 'open' | 'close'> & {
-  lookupPath: (
-    path: string,
-    opts?: { follow?: boolean },
-  ) => { node: (typeof FS)['FSNode'] & { link?: string } };
-  open: (path: string, flags: string, mode?: number) => FSStream;
-  close: (stream: FSStream) => void;
-};
-export type SqlJsModule = SqlJsStatic & {
-  FS: FS;
-  reset_filesystem: () => void;
-  register_for_idb: (idb: IDBDatabase) => void;
-};
-
-let SQL: SqlJsModule | null = null;
-
-// Opt-in: when set, the wasm is instantiated from these bytes instead of being
-// fetched via `locateFile`. The browser build of `@actual-app/api` uses this to
-// ship a fully self-contained worker (no `sql-wasm.wasm` request). Dormant for
-// every other consumer (web app and Node build never call `setWasmBinary`).
-let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
-
-export function getSqlWasmUrl(baseURL: string, file = 'sql-wasm.wasm') {
-  return `${baseURL.replace(/\/?$/, '/')}${file}`;
+function asSqlJs(db: Database): SqlJsDatabase {
+  return db as unknown as SqlJsDatabase;
 }
 
+function asSqlJsStatement(sql: string | Statement): string | SqlJsStatement {
+  return sql as unknown as string | SqlJsStatement;
+}
+
+const legacyEngine: SqliteEngine = {
+  init: async options => {
+    await legacy.init(options);
+  },
+  setWasmBinary: binary => legacy.setWasmBinary(binary),
+  prepare: (db, sql) =>
+    legacy.prepare(asSqlJs(db), sql) as unknown as Statement,
+  finalizeStatement: statement =>
+    (statement as unknown as SqlJsStatement).free(),
+  runQuery: <T>(
+    db: Database,
+    sql: string | Statement,
+    params: SqlParam[],
+    fetchAll: boolean,
+  ) =>
+    fetchAll
+      ? legacy.runQuery<T>(asSqlJs(db), asSqlJsStatement(sql), params, true)
+      : legacy.runQuery(asSqlJs(db), asSqlJsStatement(sql), params, false),
+  execQuery: (db, sql) => legacy.execQuery(asSqlJs(db), sql),
+  openDatabase: async pathOrBuffer =>
+    (await legacy.openDatabase(pathOrBuffer)) as unknown as Database,
+  closeDatabase: db => legacy.closeDatabase(asSqlJs(db)),
+  exportDatabase: db => legacy.exportDatabase(asSqlJs(db)),
+};
+
+export type EngineName = 'legacy' | 'wasm';
+
+const engines: Partial<Record<EngineName, SqliteEngine>> = {
+  legacy: legacyEngine,
+};
+
+let activeEngine: SqliteEngine = legacyEngine;
+
+export function registerEngine(name: EngineName, engine: SqliteEngine) {
+  engines[name] = engine;
+}
+
+// The browser build of `@actual-app/api` embeds sql.js's wasm; the
+// sqlite-wasm engine fetches its own file.
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  wasmBinaryOverride = binary;
+  legacyEngine.setWasmBinary(binary);
 }
 
 export async function init({
-  baseURL = process.env.PUBLIC_URL,
-  wasmBinary = wasmBinaryOverride,
-}: { baseURL?: string; wasmBinary?: ArrayBuffer | Uint8Array } = {}) {
-  // `initSqlJS` doesn't actually return a real promise, so make sure
-  // we're returning a real one for correct semantics
-  return new Promise((resolve, reject) => {
-    initSqlJS({
-      locateFile: file => getSqlWasmUrl(baseURL, file),
-      ...(wasmBinary ? { wasmBinary: wasmBinary as ArrayBuffer } : {}),
-    }).then(
-      sql => {
-        SQL = sql as SqlJsModule;
-        resolve(undefined);
-      },
-      err => {
-        reject(err);
-      },
-    );
-  });
-}
-
-export function _getModule() {
-  if (SQL == null) {
-    throw new Error('_getModule: sql.js must be initialized first');
+  baseURL,
+  wasmBinary,
+  engine = 'legacy',
+}: {
+  baseURL?: string;
+  wasmBinary?: ArrayBuffer | Uint8Array;
+  engine?: EngineName;
+} = {}): Promise<void> {
+  const selected = engines[engine];
+  if (selected == null) {
+    throw new Error(`sqlite engine "${engine}" has not been registered`);
   }
-  return SQL;
+  activeEngine = selected;
+  await activeEngine.init({ baseURL, wasmBinary });
 }
 
-function verifyParamTypes(sql: string | Statement, arr: SqlParam[] = []) {
-  arr.forEach(val => {
-    if (typeof val !== 'string' && typeof val !== 'number' && val !== null) {
-      throw new Error('Invalid field type ' + val + ' for sql ' + sql);
-    }
-  });
+export function prepare(db: Database, sql: string): Statement {
+  return activeEngine.prepare(db, sql);
 }
 
-export function prepare(db: Database, sql: string) {
-  return db.prepare(sql);
+// Frees a prepared statement that is no longer needed (for example when
+// it is evicted from a statement cache). Closing the database also frees
+// its statements, so this is only an optimisation for long sessions.
+export function finalizeStatement(statement: Statement) {
+  activeEngine.finalizeStatement(statement);
 }
 
 export function runQuery(
@@ -107,51 +126,27 @@ export function runQuery<T>(
   params: SqlParam[] = [],
   fetchAll = false,
 ): T[] | { changes: unknown } {
-  if (params) {
-    verifyParamTypes(sql, params);
-  }
-
-  const stmt = typeof sql === 'string' ? db.prepare(sql) : sql;
-
-  if (fetchAll) {
-    try {
-      stmt.bind(params);
-      const rows = [];
-
-      while (stmt.step()) {
-        rows.push(stmt.getAsObject());
-      }
-
-      if (typeof sql === 'string') {
-        stmt.free();
-      } else {
-        stmt.reset();
-      }
-      return rows;
-    } catch (e) {
-      logger.log(sql);
-      throw e;
-    }
-  } else {
-    stmt.run(params);
-    return { changes: db.getRowsModified() };
-  }
+  return activeEngine.runQuery<T>(db, sql, params, fetchAll);
 }
 
 export function execQuery(db: Database, sql: string) {
-  db.exec(sql);
+  activeEngine.execQuery(db, sql);
 }
 
 let transactionDepth = 0;
 
-export function transaction(db: Database, fn: () => void) {
+export function transaction(
+  db: Database,
+  fn: () => void,
+  { immediate = false }: TransactionOptions = {},
+) {
   let before, after, undo;
   if (transactionDepth > 0) {
     before = 'SAVEPOINT __actual_sp';
     after = 'RELEASE __actual_sp';
     undo = 'ROLLBACK TO __actual_sp';
   } else {
-    before = 'BEGIN';
+    before = immediate ? 'BEGIN IMMEDIATE' : 'BEGIN';
     after = 'COMMIT';
     undo = 'ROLLBACK';
   }
@@ -175,13 +170,13 @@ export function transaction(db: Database, fn: () => void) {
   }
 }
 
-// See the comment about this function in index.electron.js. You
+// See the comment about this function in index.electron.ts. You
 // shouldn't normally use this. I'd like to get rid of it.
 export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   // Support nested transactions by "coalescing" them into the parent
   // one if one is already started
   if (transactionDepth === 0) {
-    db.exec('BEGIN TRANSACTION');
+    execQuery(db, 'BEGIN TRANSACTION');
   }
   transactionDepth++;
 
@@ -194,68 +189,21 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
     // lost. Right now we are only using transactions for speed
     // purposes unfortunately
     if (transactionDepth === 0) {
-      db.exec('COMMIT');
+      execQuery(db, 'COMMIT');
     }
   }
 }
 
-function regexp(regex: string, text: string) {
-  return new RegExp(regex).test(text || '') ? 1 : 0;
-}
-
-export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
-  let db = null;
-  if (pathOrBuffer) {
-    if (typeof pathOrBuffer !== 'string') {
-      db = new SQL.Database(pathOrBuffer);
-    } else {
-      const path = pathOrBuffer;
-      if (path !== ':memory:') {
-        if (typeof SharedArrayBuffer === 'undefined') {
-          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-          await stream.node.contents.readIfFallback();
-          SQL.FS.close(stream);
-        }
-
-        db = new SQL.Database(
-          path.includes('/blocked') ? path : SQL.FS.readlink(path),
-          // @ts-expect-error 2nd argument missed in sql.js types
-          { filename: true },
-        );
-        // absurd-sql serves every page cache miss with a synchronous
-        // round trip to IndexedDB, so allow the cache to hold a whole
-        // large budget file. SQLite allocates cache pages lazily, so
-        // small files don't pay for the ceiling. The value is in KiB.
-        db.exec(`
-          PRAGMA journal_mode=MEMORY;
-          PRAGMA cache_size=-64000;
-        `);
-      }
-    }
-  }
-
-  if (db === null) {
-    db = new SQL.Database();
-  }
-
-  // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
-  // This is necessary because sql.js uses SQLite build without ICU support.
-  //
-  // Note that this function should ideally be created with a deterministic flag
-  // to allow SQLite to better optimize calls to it by factoring them out of inner loops
-  // but SQL.js does not support this: https://github.com/sql-js/sql.js/issues/551
-  db.create_function('UNICODE_LOWER', arg => arg?.toLowerCase());
-  db.create_function('UNICODE_UPPER', arg => arg?.toUpperCase());
-  db.create_function('UNICODE_LIKE', unicodeLike);
-  db.create_function('REGEXP', regexp);
-  db.create_function('NORMALISE', normalise);
-  return db;
+export async function openDatabase(
+  pathOrBuffer?: string | Uint8Array,
+): Promise<Database> {
+  return activeEngine.openDatabase(pathOrBuffer);
 }
 
 export function closeDatabase(db: Database) {
-  db.close();
+  activeEngine.closeDatabase(db);
 }
 
-export async function exportDatabase(db: Database) {
-  return db.export();
+export async function exportDatabase(db: Database): Promise<Uint8Array> {
+  return activeEngine.exportDatabase(db);
 }

@@ -11,6 +11,8 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
+import { useAuth } from '#auth/AuthProvider';
+import { Permissions } from '#auth/types';
 import { withBasePath } from '#base-path';
 import { Error as ErrorAlert } from '#components/alerts';
 import { Link } from '#components/common/Link';
@@ -33,6 +35,8 @@ export function EnableBankingInitialiseModal({
   onSuccess,
 }: EnableBankingInitialiseProps) {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  const isAdmin = hasPermission(Permissions.ADMINISTRATOR);
   const [applicationId, setApplicationId] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [isValid, setIsValid] = useState(true);
@@ -60,6 +64,7 @@ export function EnableBankingInitialiseModal({
   }
 
   async function onSubmit(close: () => void) {
+    if (!isAdmin) return;
     if (!applicationId || !secretKey) {
       setIsValid(false);
       setError(
@@ -122,6 +127,13 @@ export function EnableBankingInitialiseModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ display: 'flex', gap: 10 }}>
+            {!isAdmin && (
+              <ErrorAlert>
+                <Trans>
+                  Only an administrator can configure Enable Banking.
+                </Trans>
+              </ErrorAlert>
+            )}
             <Text>
               <Trans>
                 In order to enable bank sync via Enable Banking (for EU banks)
@@ -168,6 +180,7 @@ export function EnableBankingInitialiseModal({
               />
               <InitialFocus>
                 <Input
+                  disabled={!isAdmin}
                   id="application-id-field"
                   type="text"
                   value={applicationId}
@@ -185,6 +198,7 @@ export function EnableBankingInitialiseModal({
                 htmlFor="secret-key-field"
               />
               <input
+                disabled={!isAdmin}
                 id="secret-key-field"
                 type="file"
                 accept=".pem,.key"
@@ -203,7 +217,7 @@ export function EnableBankingInitialiseModal({
                 <SvgCheckCircle1
                   style={{ width: 14, height: 14, color: theme.noticeText }}
                 />
-                <Text style={{ fontSize: 12, color: theme.pageTextSubdued }}>
+                <Text size="small" style={{ color: theme.pageTextSubdued }}>
                   {keyFileName}
                 </Text>
               </View>
@@ -216,6 +230,7 @@ export function EnableBankingInitialiseModal({
             <ButtonWithLoading
               variant="primary"
               isLoading={isLoading}
+              isDisabled={!isAdmin}
               onPress={() => {
                 void onSubmit(() => state.close());
               }}

@@ -5,7 +5,6 @@ export class BudgetMenuModal {
   readonly locator: Locator;
   readonly heading: Locator;
   readonly budgetAmountInput: Locator;
-  readonly actionsButton: Locator;
   readonly copyLastMonthBudgetButton: Locator;
   readonly setTo3MonthAverageButton: Locator;
   readonly setTo6MonthAverageButton: Locator;
@@ -18,9 +17,6 @@ export class BudgetMenuModal {
 
     this.heading = locator.getByRole('heading');
     this.budgetAmountInput = locator.getByTestId('amount-input');
-    this.actionsButton = locator.getByRole('button', {
-      name: 'Actions',
-    });
     this.copyLastMonthBudgetButton = locator.getByRole('button', {
       name: "Copy last month's budget",
     });
@@ -39,41 +35,37 @@ export class BudgetMenuModal {
   }
 
   async close() {
-    await this.heading.getByRole('button', { name: 'Close' }).click();
-  }
-
-  async showActions() {
-    await this.actionsButton.click();
+    await this.page.keyboard.press('Escape');
   }
 
   async setBudgetAmount(newAmount: string) {
+    if (!(await this.budgetAmountInput.isVisible())) {
+      await this.locator
+        .getByRole('button', { name: /^-?[\d,]+\.\d{2}$/ })
+        .click();
+    }
     await this.budgetAmountInput.fill(newAmount);
     await this.budgetAmountInput.blur();
     await this.close();
   }
 
   async copyLastMonthBudget() {
-    await this.showActions();
     await this.copyLastMonthBudgetButton.click();
   }
 
   async setTo3MonthAverage() {
-    await this.showActions();
     await this.setTo3MonthAverageButton.click();
   }
 
   async setTo6MonthAverage() {
-    await this.showActions();
     await this.setTo6MonthAverageButton.click();
   }
 
   async setToYearlyAverage() {
-    await this.showActions();
     await this.setToYearlyAverageButton.click();
   }
 
   async applyBudgetTemplate() {
-    await this.showActions();
     await this.applyBudgetTemplateButton.click();
   }
 }
