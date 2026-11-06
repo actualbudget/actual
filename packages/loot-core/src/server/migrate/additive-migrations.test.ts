@@ -1,9 +1,9 @@
 import * as nativeFs from 'fs';
 import * as path from 'path';
 
-import type { Database } from '@jlongster/sql.js';
 import { describe, expect, it } from 'vitest';
 
+import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 
 import {

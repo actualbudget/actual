@@ -81,7 +81,6 @@ Content contained on external links is not managed or maintained by the Actual B
   - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)
 - [UnRAID SSL Setup](https://discord.com/channels/937901803608096828/1158941114603155477) - this guide is found at our Discord
 - Arch Linux AUR packages:
-  - [actual-appimage](https://aur.archlinux.org/packages/actual-appimage) - Desktop App, based on GitHub AppImage release.
   - [actual-bin](https://aur.archlinux.org/packages/actual-bin) - Desktop App, based on GitHub AppImage release but run with a system-wide electron install (v30) instead of the bundled version.
   - [actual-server](https://aur.archlinux.org/packages/actual-server) - Server and Web Client, based on `@actual-app/sync-server` NPM package, provides a systemd unit file to run the server.
 
