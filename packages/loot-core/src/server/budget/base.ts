@@ -425,18 +425,39 @@ export async function createBudget(months) {
   );
   const categories = groups.flatMap(group => group.categories);
 
-  sheet.startTransaction();
   const meta = sheet.get().meta();
   meta.createdMonths = meta.createdMonths || new Set();
-
   const budgetType = getBudgetType();
+
+  // Only months that don't already exist need to be created and seeded.
+  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
+
+  // Moving an envelope budget's blank sheet clears it, so if the range moves
+  // back past it, that month loses the values `loadUserBudgets` set from the
+  // database. Read its rows now and set them again once it's created.
+  const blankMonth =
+    budgetType === 'envelope' && meta.blankSheet
+      ? `${meta.blankSheet.slice(6, 10)}-${meta.blankSheet.slice(10)}`
+      : null;
+  const blankMonthRows =
+    blankMonth && monthsToCreate.includes(blankMonth)
+      ? {
+          budgets: await db.all<db.DbZeroBudget>(
+            'SELECT * FROM zero_budgets WHERE month = ?',
+            [parseInt(blankMonth.replace('-', ''))],
+          ),
+          month: await db.first<db.DbZeroBudgetMonth>(
+            'SELECT * FROM zero_budget_months WHERE id = ?',
+            [blankMonth],
+          ),
+        }
+      : null;
+
+  sheet.startTransaction();
 
   if (budgetType === 'envelope') {
     envelopeBudget.createBudget(meta, categories, months);
   }
-
-  // Only months that don't already exist need to be created and seeded.
-  const monthsToCreate = months.filter(month => !meta.createdMonths.has(month));
 
   // Spend totals for every category in the months being created, computed
   // once via a single grouped query and used to seed the `sum-amount` cells so
@@ -495,6 +516,13 @@ export async function createBudget(months) {
 
     meta.createdMonths.add(month);
   });
+
+  if (blankMonthRows) {
+    blankMonthRows.budgets.forEach(handleBudgetChange);
+    if (blankMonthRows.month) {
+      handleBudgetMonthChange(blankMonthRows.month);
+    }
+  }
 
   sheet.get().setMeta(meta);
   sheet.endTransaction();
