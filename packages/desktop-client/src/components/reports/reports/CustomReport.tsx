@@ -117,7 +117,7 @@ function useSelectedCategories(
 
 const BUDGETED_SUPPORTED_CONDITION_FIELDS = new Set<
   RuleConditionEntity['field']
->(['category']);
+>(['category', 'category_group']);
 
 export function CustomReport() {
   const params = useParams();
@@ -506,25 +506,20 @@ function CustomReportInner({
     tagScope: groupBy === 'Tag' ? tagScope : undefined,
   });
 
-  useEffect(() => {
-    if (balanceTypeOp !== 'totalBudgeted') {
-      return;
-    }
-
-    const supportedConditions = conditions.filter(cond =>
-      BUDGETED_SUPPORTED_CONDITION_FIELDS.has(cond.field),
-    );
-
-    if (supportedConditions.length === conditions.length) {
-      return;
-    }
-
-    setSessionReport('conditions', supportedConditions);
-    onApplyFilter(null);
-    supportedConditions.forEach(condition => {
-      onApplyFilter(condition);
-    });
-  }, [balanceTypeOp, conditions, onApplyFilter]);
+  // Budgeted amounts come from category budgets rather than from transactions,
+  // so only category-level conditions can be applied to them. Unsupported
+  // conditions are left out of the query instead of being removed from the
+  // report, so they still apply to the other balance types and are not lost
+  // when the report is saved.
+  const queryConditions = useMemo(
+    () =>
+      balanceTypeOp === 'totalBudgeted'
+        ? conditions.filter(cond =>
+            BUDGETED_SUPPORTED_CONDITION_FIELDS.has(cond.field),
+          )
+        : conditions,
+    [balanceTypeOp, conditions],
+  );
 
   const getGroupData = useMemo(() => {
     return createGroupedSpreadsheet({
@@ -533,7 +528,7 @@ function CustomReportInner({
       interval,
       categories,
       budgetType,
-      conditions,
+      conditions: queryConditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -551,7 +546,7 @@ function CustomReportInner({
     budgetType,
     balanceTypeOp,
     categories,
-    conditions,
+    queryConditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
@@ -569,7 +564,7 @@ function CustomReportInner({
       interval,
       categories,
       budgetType,
-      conditions,
+      conditions: queryConditions,
       conditionsOp,
       showEmpty,
       showOffBudget,
@@ -599,7 +594,7 @@ function CustomReportInner({
     accounts,
     tags,
     tagScope,
-    conditions,
+    queryConditions,
     conditionsOp,
     showEmpty,
     showOffBudget,
