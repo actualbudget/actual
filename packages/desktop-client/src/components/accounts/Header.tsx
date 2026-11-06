@@ -54,6 +54,7 @@ import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
+import { QuickAddTransactionInput } from './QuickAddTransactionInput';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
 
 type AccountHeaderProps = {
@@ -81,6 +82,7 @@ type AccountHeaderProps = {
   filterConditionsOp: 'and' | 'or';
   onSearch: (newSearch: string) => void;
   onAddTransaction: () => void;
+  onQuickAddTransaction: () => void;
   onShowTransactions: ComponentProps<
     typeof SelectedTransactionsButton
   >['onShow'];
@@ -153,6 +155,7 @@ export function AccountHeader({
   filterConditionsOp,
   onSearch,
   onAddTransaction,
+  onQuickAddTransaction,
   onShowTransactions,
   onDoneReconciling,
   onCreateReconciliationTransaction,
@@ -366,6 +369,12 @@ export function AccountHeader({
               <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
               <Trans>Add New</Trans>
             </Button>
+          )}
+          {!showEmptyMessage && !account?.closed && (
+            <QuickAddTransactionInput
+              accountId={account?.id ?? null}
+              onAdded={onQuickAddTransaction}
+            />
           )}
           <View style={{ flexShrink: 0 }}>
             {/* @ts-expect-error fix me */}
