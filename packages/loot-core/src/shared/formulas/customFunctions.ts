@@ -169,6 +169,14 @@ function getCurrencySymbolPositionFromArg(
   return value === 'before' || value === 'after' ? value : fallback;
 }
 
+function regexExtractMatch(result: RegExpMatchArray | null): string | string[] {
+  if (!result || result.length === 0) return '';
+  if (result.length === 1) return result[0] ?? '';
+  if (result.length === 2) return result[1] ?? '';
+
+  return result.slice(1).map(match => match ?? '');
+}
+
 export class CustomFunctionsPlugin extends FunctionPlugin {
   private getCustomFunctionsContext(): CustomFunctionsContext | undefined {
     return this.config.context as CustomFunctionsContext | undefined;
@@ -452,6 +460,73 @@ export class CustomFunctionsPlugin extends FunctionPlugin {
       },
     );
   }
+
+  regexExtract(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXEXTRACT'),
+      (text: string, regex: string, flags: string = '') => {
+        try {
+          const regexp = new RegExp(regex, flags);
+
+          if (regexp.global) {
+            const allMatches = [...text.matchAll(regexp)];
+
+            if (allMatches.length === 0) return '';
+            return SimpleRangeValue.onlyValues(
+              allMatches.map(match => {
+                return [regexExtractMatch(match)].flat();
+              }),
+            );
+          } else {
+            const match = text.match(new RegExp(regex, flags));
+            const result = regexExtractMatch(match);
+            if (typeof result === 'string') return result;
+            return SimpleRangeValue.onlyValues([result]);
+          }
+        } catch {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
+
+  regexMatch(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXMATCH'),
+      (text: string, regex: string, flags: string = '') => {
+        try {
+          const match = text.match(new RegExp(regex, flags));
+          return match !== null;
+        } catch {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
+
+  regexReplace(ast: ProcedureAst, state: InterpreterState) {
+    return this.runFunction(
+      ast.args,
+      state,
+      this.metadata('REGEXREPLACE'),
+      (
+        text: string,
+        regex: string,
+        replacement: string,
+        flags: string = '',
+      ) => {
+        try {
+          return text.replace(new RegExp(regex, flags), replacement);
+        } catch {
+          return new CellError(ErrorType.VALUE, 'Invalid regex');
+        }
+      },
+    );
+  }
 }
 
 CustomFunctionsPlugin.implementedFunctions = {
@@ -568,6 +643,57 @@ CustomFunctionsPlugin.implementedFunctions = {
       },
     ],
   },
+  REGEXEXTRACT: {
+    method: 'regexExtract',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
+  REGEXMATCH: {
+    method: 'regexMatch',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+    ],
+  },
+  REGEXREPLACE: {
+    method: 'regexReplace',
+    parameters: [
+      // Text
+      { argumentType: FunctionArgumentType.STRING },
+      // Regex
+      { argumentType: FunctionArgumentType.STRING },
+      // Replacement
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: '',
+      },
+      // Flags
+      {
+        argumentType: FunctionArgumentType.STRING,
+        optionalArg: true,
+        defaultValue: 'g',
+      },
+    ],
+  },
 };
 
 export const customFunctionsTranslations = {
@@ -583,5 +709,8 @@ export const customFunctionsTranslations = {
     BUDGET_QUERY: 'BUDGET_QUERY',
     FORMATNUMBER: 'FORMATNUMBER',
     FORMATCURRENCY: 'FORMATCURRENCY',
+    REGEXEXTRACT: 'REGEXEXTRACT',
+    REGEXMATCH: 'REGEXMATCH',
+    REGEXREPLACE: 'REGEXREPLACE',
   },
 };
