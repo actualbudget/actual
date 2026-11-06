@@ -183,8 +183,6 @@ export async function loadSpreadsheet(
       );
     if (isOutdated) {
       logger.log('Spreadsheet cache is outdated, rebuilding');
-      setCacheStatus(mainDb, cacheDb, { clean: false });
-      sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
       cachedRows = null;
     }
   }
@@ -198,7 +196,22 @@ export async function loadSpreadsheet(
     }
   } else {
     logger.log('Loading fresh spreadsheet');
+    if (cacheEnabled) {
+      // Drop whatever the cache still holds. The rebuild marks the cache
+      // clean after each computation pass, so a cell from before the
+      // rebuild that it hasn't rewritten yet would be trusted by the next
+      // open if this one stopped early. Cells the rebuild hasn't reached
+      // are recomputed on the next open instead. The barrier keeps the
+      // cache dirty until every input is loaded: a load that fails
+      // part-way has set some cells, and the pass that saves them would
+      // otherwise mark the cache clean without the rest.
+      sheet.startCacheBarrier();
+      sqlite.runQuery(cacheDb, 'DELETE FROM kvcache');
+    }
     await loadUserBudgets(db);
+    if (cacheEnabled) {
+      sheet.endCacheBarrier();
+    }
   }
 
   captureBreadcrumb({
@@ -238,9 +251,6 @@ export async function reloadSpreadsheet(db): Promise<Spreadsheet> {
 
 export async function loadUserBudgets(db: typeof DbModule): Promise<void> {
   const sheet = globalSheet;
-
-  // TODO: Clear out the cache here so make sure future loads of the app
-  // don't load any extra values that aren't set here
 
   const { value: budgetType = 'envelope' } =
     (await db.first<Pick<DbPreference, 'value'>>(

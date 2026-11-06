@@ -170,6 +170,73 @@ describe('Budgets', () => {
     log.mockRestore();
   });
 
+  test('recomputes legacy rollover outside a dirty cache rebuild range on reopen', async () => {
+    global.currentMonth = '2028-01';
+    await createTestBudget('default-budget-template');
+    await db.openDatabase('test-budget');
+    db.runQuery('DELETE FROM transactions');
+    await runHandler(handlers['load-budget'], { id: 'test-budget' });
+    try {
+      global.stepForwardInTime(getClock().timestamp.millis());
+      const food = (await db.getCategories()).find(c => c.name === 'Food');
+      const [account] = await db.getAccounts();
+      await runMutator(async () => {
+        await budgetActions.setCategoryCarryover({
+          startMonth: '2028-01',
+          category: food.id,
+          flag: false,
+        });
+        await db.insertTransaction({
+          account: account.id,
+          category: food.id,
+          date: '2028-01-02',
+          amount: -2000,
+        });
+      });
+      vi.stubEnv('NODE_ENV', 'development');
+      await sheet.reloadSpreadsheet(db);
+      await budget.createAllBudgets();
+      sheet.unloadSpreadsheet();
+
+      // A legacy runtime committed the peer flag, then stopped before updating
+      // its cached effective rollover. Unknown stored/chain cells were retained.
+      db.runQuery(
+        'UPDATE zero_budgets SET carryover = 1 WHERE month = 202801 AND category = ?',
+        [food.id],
+      );
+      const cache = await sqlite.openDatabase(
+        db.getDatabasePath().replace(/db.sqlite$/, 'cache.sqlite'),
+      );
+      sqlite.runQuery(cache, 'DELETE FROM kvcache_key');
+      sqlite.closeDatabase(cache);
+
+      // The first upgraded open only builds through January 2027. Loading all
+      // saved inputs must not make the old January 2028 effective value trusted.
+      global.currentMonth = '2026-01';
+      await sheet.loadSpreadsheet(db);
+      await budget.createAllBudgets();
+      sheet.unloadSpreadsheet();
+      global.currentMonth = '2028-01';
+      await sheet.loadSpreadsheet(db);
+      await budget.createAllBudgets();
+      const january = await handlers['envelope-budget-month']({
+        month: '2028-01',
+      });
+      const february = await handlers['api/budget-month']({ month: '2028-02' });
+      expect({
+        rollover: january.find(
+          c => c.name === 'budget202801!carryover-' + food.id,
+        ).value,
+        balance: february.categoryGroups
+          .flatMap(g => g.categories)
+          .find(c => c.id === food.id).balance,
+      }).toEqual({ rollover: true, balance: -2000 });
+    } finally {
+      vi.unstubAllEnvs();
+      global.resetTime();
+    }
+  }, 20_000);
+
   test('rebuilds cached boolean rollover inputs before opening a budget', async () => {
     global.currentMonth = '2026-01';
     await createTestBudget('default-budget-template');
