@@ -835,6 +835,28 @@ describe('Transactions', () => {
     expect(onTransactionsChange).not.toHaveBeenCalled();
   });
 
+  test('a note with leading and trailing whitespace is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = '  a note with spaces  ';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('  a note with spaces  ');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
   test('editing a note with line breaks saves them as spaces', async () => {
     const transactions = generateTransactions(5);
     transactions[2].notes = 'To 1. Main\nEndToEndID: FRI';

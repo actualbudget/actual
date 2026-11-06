@@ -2343,7 +2343,6 @@ function NotesCell({
       focused={focused}
       exposed={focused}
       onExpose={onExpose}
-      onUpdate={onUpdate}
       onKeyDown={onKeyDown}
       onBlur={() => onUpdateNote(inputValue)}
       unexposedContent={props => (
