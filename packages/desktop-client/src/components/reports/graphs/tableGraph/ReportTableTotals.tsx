@@ -82,6 +82,7 @@ export function ReportTableTotals({
     netDebts: data.netDebts,
     totalTotals: data.totalTotals,
     totalBudgeted: data.totalBudgeted,
+    comparison: data.comparison,
   };
 
   const totalsStyle: CSSProperties = {

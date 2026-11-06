@@ -31,6 +31,15 @@ import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { ChooseGraph } from '#components/reports/ChooseGraph';
 import {
+  canShowComparisonChanges,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonShift,
+  getComparisonSortAmount,
+  isBudgetedComparison,
+  isOffsetComparison,
+} from '#components/reports/comparisonRange';
+import {
   defaultsGraphList,
   defaultsList,
   disabledGraphList,
@@ -51,6 +60,10 @@ import { ReportSummary } from '#components/reports/ReportSummary';
 import { ReportTopbar } from '#components/reports/ReportTopbar';
 import type { SavedStatus } from '#components/reports/SaveReportMenu';
 import { setSessionReport } from '#components/reports/setSessionReport';
+import {
+  createComparisonGroupedSpreadsheet,
+  createComparisonSpreadsheet,
+} from '#components/reports/spreadsheets/comparison-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { normalizeTagScope } from '#components/reports/tagScope';
@@ -59,6 +72,7 @@ import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
@@ -297,6 +311,10 @@ function CustomReportInner({
     loadReport.showTrendLines,
   );
   const [graphType, setGraphType] = useState(loadReport.graphType);
+  const [comparison, setComparison] = useState(
+    loadReport.comparison ?? defaultComparison,
+  );
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
 
   const [dateRange, setDateRange] = useState(loadReport.dateRange);
   const dateRangeLine =
@@ -526,8 +544,32 @@ function CustomReportInner({
     });
   }, [balanceTypeOp, conditions, onApplyFilter]);
 
+  // Live comparisons are resolved again so saved dates don't go stale
+  const [comparisonStartDate, comparisonEndDate] = getComparisonRange(
+    comparison,
+    earliestTransactionDate,
+    latestTransactionDate,
+    firstDayOfWeekIdx,
+    { range: [startDate, endDate], interval },
+  );
+  const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
+  // Kept as plain values, so the spreadsheets only rebuild when they change
+  const comparisonShift = isOffsetComparison(comparison)
+    ? getComparisonShift(comparison, interval, [startDate, endDate])
+    : undefined;
+  const offsetShiftUnit = comparisonShift?.unit;
+  const offsetShiftCount = comparisonShift?.count ?? 0;
+  const compareDailyAverage = !!comparison.compareDailyAverage;
+  const projectToFullPeriod = comparison.projectToFullPeriod;
+  const budgetedComparison = isBudgetedComparison(comparison, groupBy);
+  // Amounts are drawn with the comparison unless changes are asked for
+  const showAmounts = !(
+    comparison.showChanges && canShowComparisonChanges(graphType)
+  );
+  const sortAmount = getComparisonSortAmount(comparison, showAmounts);
+
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -543,8 +585,37 @@ function CustomReportInner({
       balanceTypeOp,
       sortByOp,
       firstDayOfWeekIdx,
-    });
+    };
+    return isComparisonEnabled
+      ? createComparisonGroupedSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
+          projectToFullPeriod,
+          showAmounts,
+          sortAmount,
+          budgeted: budgetedComparison,
+          offset:
+            offsetShiftUnit === undefined
+              ? undefined
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction: earliestTransactionDate,
+                  compareDailyAverage,
+                },
+        })
+      : createGroupedSpreadsheet(props);
   }, [
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
+    projectToFullPeriod,
+    showAmounts,
+    sortAmount,
+    budgetedComparison,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
+    earliestTransactionDate,
     startDate,
     endDate,
     interval,
@@ -563,7 +634,7 @@ function CustomReportInner({
   ]);
 
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval,
@@ -586,8 +657,37 @@ function CustomReportInner({
       graphType,
       firstDayOfWeekIdx,
       dateFormat,
-    });
+    };
+    return isComparisonEnabled
+      ? createComparisonSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
+          projectToFullPeriod,
+          showAmounts,
+          sortAmount,
+          budgeted: budgetedComparison,
+          offset:
+            offsetShiftUnit === undefined
+              ? undefined
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction: earliestTransactionDate,
+                  compareDailyAverage,
+                },
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
+    projectToFullPeriod,
+    showAmounts,
+    sortAmount,
+    budgetedComparison,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
+    earliestTransactionDate,
     startDate,
     endDate,
     interval,
@@ -639,6 +739,7 @@ function CustomReportInner({
     showUncategorized,
     trimIntervals,
     showTrendLines,
+    comparison,
     graphType,
     conditions,
     conditionsOp,
@@ -788,6 +889,7 @@ function CustomReportInner({
     setShowUncategorized(input.showUncategorized);
     setTrimIntervals(input.trimIntervals);
     setShowTrendLines(input.showTrendLines);
+    setComparison(input.comparison ?? defaultComparison);
     setGraphType(input.graphType);
     onApplyFilter(null);
     (input.conditions || []).forEach(condition => {
@@ -935,6 +1037,7 @@ function CustomReportInner({
             setShowUncategorized={setShowUncategorized}
             setTrimIntervals={setTrimIntervals}
             setShowTrendLines={setShowTrendLines}
+            setComparison={setComparison}
             setSelectedCategories={setSelectedCategories}
             onChangeDates={onChangeDates}
             onReportChange={onReportChange}
@@ -1052,7 +1155,19 @@ function CustomReportInner({
                     }}
                   >
                     <AlignedText
-                      left={<Block>{balanceType}:</Block>}
+                      left={
+                        <Block>
+                          {isComparisonEnabled
+                            ? budgetedComparison
+                              ? t('{{balanceType}} vs budgeted:', {
+                                  balanceType,
+                                })
+                              : t('{{balanceType}} vs comparison:', {
+                                  balanceType,
+                                })
+                            : `${balanceType}:`}
+                        </Block>
+                      }
                       right={
                         <FinancialText>
                           <PrivacyFilter>
@@ -1080,6 +1195,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
+                    showAmounts={showAmounts}
                     intervalsCount={intervals.length}
                   />
                 ) : (

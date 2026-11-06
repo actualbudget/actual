@@ -9,7 +9,11 @@ import { app as dashboardApp } from '#server/dashboard/app';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { runMutator } from '#server/mutators';
-import type { CustomReportEntity, CustomReportTagScope } from '#types/models';
+import type {
+  CustomReportComparison,
+  CustomReportEntity,
+  CustomReportTagScope,
+} from '#types/models';
 
 import { app as reportApp, reportModel } from './app';
 
@@ -177,4 +181,66 @@ describe('custom report tag scope mapping', () => {
       expect(importedReport.tagScope).toEqual(tagScope);
     },
   );
+});
+
+describe('custom report comparison', () => {
+  const comparison = {
+    enabled: true,
+    dateRange: 'Last 6 months',
+    isDateStatic: false,
+    startDate: '2026-04-01',
+    endDate: '2026-09-30',
+    includeCurrentInterval: false,
+    projectToFullPeriod: true,
+    showChanges: true,
+    sortAmount: 'comparison',
+    source: 'budgeted',
+  } satisfies CustomReportComparison;
+
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+  });
+
+  afterEach(async () => {
+    if (await fs.exists(dashboardImportPath)) {
+      await fs.removeFile(dashboardImportPath);
+    }
+  });
+
+  it('stores the comparison alongside other metadata', async () => {
+    await db.insertWithSchema(
+      'custom_reports',
+      reportModel.fromJS({
+        ...report,
+        comparison,
+        metadata: { presentation: 'compact' },
+      }),
+    );
+
+    const [loadedReport] = await reportApp.handlers['report/get']();
+    expect(loadedReport.comparison).toEqual(comparison);
+    expect(loadedReport.metadata).toEqual({ presentation: 'compact' });
+  });
+
+  it.each([
+    { comparison: null },
+    { comparison: { ...comparison, dateRange: 3 } },
+    { comparison: { ...comparison, enabled: 'yes' } },
+    { comparison: { ...comparison, showChanges: 'yes' } },
+    { comparison: { ...comparison, sortAmount: 'average' } },
+    { comparison: { ...comparison, source: 'forecast' } },
+  ])('rejects invalid imported comparisons: %j', async invalid => {
+    await writeDashboardReport({ ...report, ...invalid });
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-import']({
+          filePath: dashboardImportPath,
+          dashboardPageId: 'dashboard-page-id',
+        }),
+      ),
+    ).rejects.toMatchObject({ cause: 'validation-error' });
+    expect(await reportApp.handlers['report/get']()).toEqual([]);
+  });
 });

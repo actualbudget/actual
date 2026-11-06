@@ -18,13 +18,27 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import { ChooseGraph } from '#components/reports/ChooseGraph';
+import {
+  canShowComparisonChanges,
+  defaultComparison,
+  getComparisonRange,
+  getComparisonShift,
+  getComparisonSortAmount,
+  isBudgetedComparison,
+  isOffsetComparison,
+} from '#components/reports/comparisonRange';
 import { getLiveRange } from '#components/reports/getLiveRange';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportOptions } from '#components/reports/ReportOptions';
+import {
+  createComparisonGroupedSpreadsheet,
+  createComparisonSpreadsheet,
+} from '#components/reports/spreadsheets/comparison-spreadsheet';
 import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom-spreadsheet';
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 function ErrorFallback() {
@@ -114,6 +128,31 @@ export function GetCardData({
     endDate = dateEnd || report.endDate;
   }
 
+  const reportComparisonEnabled = useFeatureFlag('reportComparison');
+  const comparison = report.comparison ?? defaultComparison;
+  const [comparisonStartDate, comparisonEndDate] = getComparisonRange(
+    comparison,
+    earliestTransaction,
+    latestTransaction,
+    firstDayOfWeekIdx,
+    { range: [startDate, endDate], interval: report.interval },
+  );
+  const isComparisonEnabled = reportComparisonEnabled && comparison.enabled;
+  // Kept as plain values, so the spreadsheets only rebuild when they change
+  const comparisonShift = isOffsetComparison(comparison)
+    ? getComparisonShift(comparison, report.interval, [startDate, endDate])
+    : undefined;
+  const offsetShiftUnit = comparisonShift?.unit;
+  const offsetShiftCount = comparisonShift?.count ?? 0;
+  const compareDailyAverage = !!comparison.compareDailyAverage;
+  const projectToFullPeriod = comparison.projectToFullPeriod;
+  const budgetedComparison = isBudgetedComparison(comparison, report.groupBy);
+  // Amounts are drawn with the comparison unless changes are asked for
+  const showAmounts = !(
+    comparison.showChanges && canShowComparisonChanges(report.graphType)
+  );
+  const sortAmount = getComparisonSortAmount(comparison, showAmounts);
+
   const fromDate = convertFromDate(report.interval);
   const rangeInclusive = convertRangeInclusive(report.interval);
 
@@ -135,7 +174,7 @@ export function GetCardData({
   }
 
   const getGroupData = useMemo(() => {
-    return createGroupedSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -151,10 +190,46 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
-    });
-  }, [report, categories, startDate, endDate, firstDayOfWeekIdx, budgetType]);
+    };
+    return isComparisonEnabled
+      ? createComparisonGroupedSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
+          projectToFullPeriod,
+          showAmounts,
+          sortAmount,
+          budgeted: budgetedComparison,
+          offset:
+            offsetShiftUnit === undefined
+              ? undefined
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction,
+                  compareDailyAverage,
+                },
+        })
+      : createGroupedSpreadsheet(props);
+  }, [
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
+    projectToFullPeriod,
+    showAmounts,
+    sortAmount,
+    budgetedComparison,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
+    earliestTransaction,
+    report,
+    categories,
+    startDate,
+    endDate,
+    firstDayOfWeekIdx,
+    budgetType,
+  ]);
   const getGraphData = useMemo(() => {
-    return createCustomSpreadsheet({
+    const props = {
       startDate,
       endDate,
       interval: report.interval,
@@ -177,8 +252,37 @@ export function GetCardData({
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
       dateFormat,
-    });
+    };
+    return isComparisonEnabled
+      ? createComparisonSpreadsheet(props, {
+          startDate: comparisonStartDate,
+          endDate: comparisonEndDate,
+          projectToFullPeriod,
+          showAmounts,
+          sortAmount,
+          budgeted: budgetedComparison,
+          offset:
+            offsetShiftUnit === undefined
+              ? undefined
+              : {
+                  shift: { unit: offsetShiftUnit, count: offsetShiftCount },
+                  earliestTransaction,
+                  compareDailyAverage,
+                },
+        })
+      : createCustomSpreadsheet(props);
   }, [
+    isComparisonEnabled,
+    comparisonStartDate,
+    comparisonEndDate,
+    projectToFullPeriod,
+    showAmounts,
+    sortAmount,
+    budgetedComparison,
+    offsetShiftUnit,
+    offsetShiftCount,
+    compareDailyAverage,
+    earliestTransaction,
     report,
     categories,
     payees,
@@ -211,6 +315,7 @@ export function GetCardData({
         style={{ height: 'auto', flex: 1 }}
         intervalsCount={intervals.length}
         showTrendLines={report.showTrendLines}
+        showAmounts={showAmounts}
         showTooltip={!isNarrowWidth && showTooltip}
       />
     </ErrorBoundary>

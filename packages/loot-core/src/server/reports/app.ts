@@ -8,7 +8,20 @@ import { requiredFields } from '#server/models';
 import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
 import { q } from '#shared/query';
-import type { CustomReportData, CustomReportEntity } from '#types/models';
+import type {
+  CustomReportComparisonOffsetUnit,
+  CustomReportData,
+  CustomReportEntity,
+} from '#types/models';
+
+const OFFSET_UNITS: unknown[] = [
+  'days',
+  'weeks',
+  'months',
+  'years',
+  'intervals',
+  'ranges',
+] satisfies CustomReportComparisonOffsetUnit[];
 
 export const reportModel = {
   validate(
@@ -41,11 +54,45 @@ export const reportModel = {
       throw new ValidationError('Invalid report tag scope.');
     }
 
+    const comparison = report.comparison;
+    if (
+      comparison !== undefined &&
+      (comparison === null ||
+        typeof comparison.enabled !== 'boolean' ||
+        typeof comparison.dateRange !== 'string' ||
+        typeof comparison.startDate !== 'string' ||
+        typeof comparison.endDate !== 'string' ||
+        typeof comparison.isDateStatic !== 'boolean' ||
+        typeof comparison.includeCurrentInterval !== 'boolean' ||
+        typeof comparison.projectToFullPeriod !== 'boolean' ||
+        (comparison.showChanges !== undefined &&
+          typeof comparison.showChanges !== 'boolean') ||
+        (comparison.sortAmount !== undefined &&
+          comparison.sortAmount !== 'current' &&
+          comparison.sortAmount !== 'comparison' &&
+          comparison.sortAmount !== 'change') ||
+        (comparison.source !== undefined &&
+          comparison.source !== 'actual' &&
+          comparison.source !== 'budgeted') ||
+        (comparison.mode !== undefined &&
+          comparison.mode !== 'range' &&
+          comparison.mode !== 'offset') ||
+        (comparison.offsetCount !== undefined &&
+          (!Number.isInteger(comparison.offsetCount) ||
+            comparison.offsetCount < 1)) ||
+        (comparison.offsetUnit !== undefined &&
+          !OFFSET_UNITS.includes(comparison.offsetUnit)) ||
+        (comparison.compareDailyAverage !== undefined &&
+          typeof comparison.compareDailyAverage !== 'boolean'))
+    ) {
+      throw new ValidationError('Invalid report comparison.');
+    }
+
     return report;
   },
 
   toJS(row: CustomReportData): CustomReportEntity {
-    const { tagScope, ...metadata } = row.metadata ?? {};
+    const { tagScope, comparison, ...metadata } = row.metadata ?? {};
 
     return {
       id: row.id,
@@ -57,6 +104,7 @@ export const reportModel = {
       mode: row.mode,
       groupBy: row.group_by,
       tagScope,
+      comparison,
       sortBy: row.sort_by,
       interval: row.interval,
       balanceType: row.balance_type,
@@ -97,7 +145,11 @@ export const reportModel = {
       graph_type: report.graphType,
       conditions: report.conditions,
       conditions_op: report.conditionsOp,
-      metadata: { ...report.metadata, tagScope: report.tagScope },
+      metadata: {
+        ...report.metadata,
+        tagScope: report.tagScope,
+        comparison: report.comparison,
+      },
     };
   },
 };

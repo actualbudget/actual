@@ -7,12 +7,12 @@ import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
+  ComparisonBreakdown,
   DataEntity,
   GroupedEntity,
   IntervalEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { css } from '@emotion/css';
 import {
   Bar,
   BarChart,
@@ -28,6 +28,10 @@ import type { BarShapeProps } from 'recharts';
 
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
+import {
+  getComparisonDrilldownDates,
+  isIntervalInProgress,
+} from '#components/reports/comparisonRange';
 import { Container } from '#components/reports/Container';
 import { getCustomTick } from '#components/reports/getCustomTick';
 import { numberFormatterTooltip } from '#components/reports/numberFormatter';
@@ -39,8 +43,12 @@ import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
+import { ComparisonBar } from './ComparisonBar';
+import { ComparisonTooltip } from './ComparisonTooltip';
+import { getSpendingSign } from './getSpendingSign';
 import { renderCustomLabel } from './renderCustomLabel';
 import { showActivity } from './showActivity';
+import { TooltipCard } from './TooltipCard';
 
 type PayloadChild = {
   props: {
@@ -52,6 +60,9 @@ type PayloadChild = {
 type PayloadItem = {
   payload: {
     name: string;
+    comparison?: ComparisonBreakdown;
+    comparisonStartDate?: string;
+    comparisonEndDate?: string;
     totalAssets: number;
     totalDebts: number;
     netAssets: number;
@@ -81,98 +92,99 @@ const CustomTooltip = ({
 }: CustomTooltipProps) => {
   const { t } = useTranslation();
 
+  const row = payload?.[0]?.payload;
+  if (active && row?.comparison) {
+    return (
+      <ComparisonTooltip
+        title={row[yAxis]}
+        breakdown={row.comparison}
+        balanceTypeOp={balanceTypeOp}
+        format={format}
+        // Interval bars carry their own window; category bars cover them all
+        comparisonStartDate={row.comparisonStartDate}
+        comparisonEndDate={row.comparisonEndDate}
+      />
+    );
+  }
+
   if (active && payload && payload.length) {
     return (
-      <div
-        className={css({
-          zIndex: 1000,
-          pointerEvents: 'none',
-          borderRadius: 2,
-          boxShadow: '0 1px 6px rgba(0, 0, 0, .20)',
-          backgroundColor: theme.menuBackground,
-          color: theme.menuItemText,
-          padding: 10,
-        })}
-      >
-        <div>
-          <div style={{ marginBottom: 10 }}>
-            <strong>{payload[0].payload[yAxis]}</strong>
-          </div>
-          <div style={{ lineHeight: 1.5 }}>
-            {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
-              balanceTypeOp,
-            ) && (
-              <AlignedText
-                left={t('Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.totalDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netAssets'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Assets:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netAssets, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['netDebts'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={t('Net Debts:')}
-                right={
-                  <FinancialText>
-                    {format(payload[0].payload.netDebts, 'financial')}
-                  </FinancialText>
-                }
-              />
-            )}
-            {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
-              <AlignedText
-                left={
-                  balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
-                }
-                right={
-                  <FinancialText as="strong">
-                    {format(
-                      balanceTypeOp === 'totalBudgeted'
-                        ? payload[0].payload.totalBudgeted
-                        : payload[0].payload.totalTotals,
-                      'financial',
-                    )}
-                  </FinancialText>
-                }
-              />
-            )}
-          </div>
-        </div>
-      </div>
+      <TooltipCard title={payload[0].payload[yAxis]}>
+        {['totalAssets', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalDebts', 'totalTotals', 'totalBudgeted'].includes(
+          balanceTypeOp,
+        ) && (
+          <AlignedText
+            left={t('Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.totalDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netAssets'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Assets:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netAssets, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['netDebts'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={t('Net Debts:')}
+            right={
+              <FinancialText>
+                {format(payload[0].payload.netDebts, 'financial')}
+              </FinancialText>
+            }
+          />
+        )}
+        {['totalTotals', 'totalBudgeted'].includes(balanceTypeOp) && (
+          <AlignedText
+            left={
+              balanceTypeOp === 'totalBudgeted' ? t('Budgeted:') : t('Net:')
+            }
+            right={
+              <FinancialText as="strong">
+                {format(
+                  balanceTypeOp === 'totalBudgeted'
+                    ? payload[0].payload.totalBudgeted
+                    : payload[0].payload.totalTotals,
+                  'financial',
+                )}
+              </FinancialText>
+            }
+          />
+        )}
+      </TooltipCard>
     );
   }
 };
 
-const customLabel = (props, typeOp, format) => {
+// Comparison bars label their change above the bar, whichever way it goes,
+// with spending's change flipped to match the bar's positive amounts
+const customLabel = (props, typeOp, format, isAbove = false) => {
   const calcX = props.x + props.width / 2;
-  const calcY = props.y - (props.value > 0 ? 15 : -15);
+  const calcY = props.y - (isAbove || props.value > 0 ? 15 : -15);
   const textAnchor = 'middle';
+  const shown = isAbove ? getSpendingSign(typeOp) * props.value : props.value;
   const display =
-    props.value !== 0 && `${format(props.value, 'financial-no-decimals')}`;
+    props.value !== 0 && `${format(shown, 'financial-no-decimals')}`;
   const textSize = adjustTextSize({
     sized: props.width,
     type:
@@ -216,6 +228,7 @@ type BarGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTooltip?: boolean;
+  showAmounts?: boolean;
 };
 
 export function BarGraph({
@@ -229,6 +242,7 @@ export function BarGraph({
   showHiddenCategories,
   showOffBudget,
   showTooltip = true,
+  showAmounts = false,
 }: BarGraphProps) {
   const animationProps = useRechartsAnimation();
   const navigate = useNavigate();
@@ -239,24 +253,88 @@ export function BarGraph({
 
   const [pointer, setPointer] = useState('');
 
+  const canShowActivity = !compact || showTooltip;
+  // Interval bars drill down by their own date range instead of a field
+  const getDrilldown = (payload: unknown, id: string | undefined) => {
+    const intervalPayload = hasIntervalDates(payload) ? payload : undefined;
+    const itemPayload = hasUncategorizedId(payload) ? payload : undefined;
+    return groupBy === 'Interval'
+      ? {
+          startDate: intervalPayload?.intervalStartDate ?? data.startDate,
+          endDate: intervalPayload?.intervalEndDate ?? data.endDate,
+        }
+      : {
+          startDate: data.startDate,
+          endDate: data.endDate,
+          field: groupBy.toLowerCase(),
+          id,
+          uncategorizedId: itemPayload?.uncategorizedId,
+        };
+  };
+  const showTotals = (
+    drilldown: ReturnType<typeof getDrilldown>,
+    bucketTagNames: string[] | undefined,
+  ) =>
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp,
+      filters,
+      showHiddenCategories,
+      showOffBudget,
+      type: 'totals',
+      ...drilldown,
+      bucketTagNames,
+      scopeTagNames: data.scopeTagNames,
+    });
+
   const yAxis = groupBy === 'Interval' ? 'date' : 'name';
   const splitData = groupBy === 'Interval' ? 'intervalData' : 'data';
   const labelsMargin = viewLabels ? 30 : 0;
 
   const getVal = obj => {
-    if (['totalDebts', 'netDebts'].includes(balanceTypeOp)) {
+    // Spending is flipped so it points up, but comparison changes are already
+    // signed and point the same way as their numbers
+    if (
+      !data.comparison &&
+      ['totalDebts', 'netDebts'].includes(balanceTypeOp)
+    ) {
       return -1 * obj[balanceTypeOp];
     }
 
     return obj[balanceTypeOp];
   };
 
+  // Comparison bars show amounts rather than changes, so spending is flipped to
+  // point up like other spending charts
+  const isComparisonBars = showAmounts && !!data.comparison;
+  const sign = getSpendingSign(balanceTypeOp);
+  const getComparisonValues = (breakdown: ComparisonBreakdown) => ({
+    comparison: sign * breakdown.expected[balanceTypeOp],
+    amount: sign * (breakdown.projected ?? breakdown.actual)[balanceTypeOp],
+  });
+
+  // Comparison bars span everything drawn in them, so their shape can place
+  // each part along the same scale
+  const getComparisonRange = (
+    breakdown: ComparisonBreakdown,
+  ): [number, number] => {
+    const { comparison, amount } = getComparisonValues(breakdown);
+    return [Math.min(0, comparison, amount), Math.max(0, comparison, amount)];
+  };
+
+  const getBarValue = (obj: GroupedEntity | IntervalEntity) =>
+    isComparisonBars && obj.comparison
+      ? getComparisonRange(obj.comparison)
+      : getVal(obj);
+
   const longestLabelLength = data[splitData]
     .map(c => c[yAxis])
     .reduce((acc, cur) => (cur.length > acc ? cur.length : acc), 0);
 
   const largestValue = data[splitData]
-    .map(c => c[balanceTypeOp])
+    .flatMap(c => getBarValue(c))
     .reduce((acc, cur) => (Math.abs(cur) > Math.abs(acc) ? cur : acc), 0);
 
   const leftMargin = Math.abs(largestValue) > 1000000 ? 20 : 0;
@@ -325,68 +403,74 @@ export function BarGraph({
               )}
               {!compact && <ReferenceLine y={0} stroke={theme.pageTextLight} />}
               <Bar
-                dataKey={val => getVal(val)}
-                stackId="a"
+                dataKey={getBarValue}
+                // Recharts can't stack range bars
+                stackId={isComparisonBars ? undefined : 'a'}
                 {...animationProps}
                 onMouseLeave={() => setPointer('')}
                 onMouseEnter={() => setPointer('pointer')}
                 onClick={item => {
-                  if (compact && !showTooltip) {
-                    return;
+                  if (canShowActivity) {
+                    showTotals(
+                      getDrilldown(item.payload, item.id),
+                      item.payload.bucketTagNames,
+                    );
+                  }
+                }}
+                shape={(props: BarShapeProps) => {
+                  const fill =
+                    data.legend[props.index]?.color ?? props.fill ?? undefined;
+                  const breakdown = props.payload?.comparison;
+                  // An interval in progress is faded, since its amount is
+                  // only part of what it will be
+                  const opacity =
+                    breakdown && isIntervalInProgress(props.payload) ? 0.5 : 1;
+                  if (isComparisonBars && breakdown) {
+                    const comparisonDates = getComparisonDrilldownDates(
+                      data,
+                      breakdown,
+                      groupBy === 'Interval' ? props.payload : undefined,
+                    );
+                    return (
+                      <ComparisonBar
+                        opacity={opacity}
+                        x={props.x}
+                        y={props.y}
+                        width={props.width}
+                        height={props.height}
+                        range={getComparisonRange(breakdown)}
+                        {...getComparisonValues(breakdown)}
+                        fill={fill}
+                        onComparisonClick={
+                          canShowActivity && comparisonDates
+                            ? () =>
+                                showTotals(
+                                  {
+                                    ...getDrilldown(
+                                      props.payload,
+                                      props.payload?.id,
+                                    ),
+                                    ...comparisonDates,
+                                  },
+                                  props.payload?.bucketTagNames,
+                                )
+                            : undefined
+                        }
+                      />
+                    );
                   }
 
-                  const intervalPayload = hasIntervalDates(item.payload)
-                    ? item.payload
-                    : undefined;
-                  const itemPayload = hasUncategorizedId(item.payload)
-                    ? item.payload
-                    : undefined;
-
-                  // Interval bars drill down by their own date range instead of a field
-                  const drilldown =
-                    groupBy === 'Interval'
-                      ? {
-                          startDate:
-                            intervalPayload?.intervalStartDate ??
-                            data.startDate,
-                          endDate:
-                            intervalPayload?.intervalEndDate ?? data.endDate,
-                        }
-                      : {
-                          startDate: data.startDate,
-                          endDate: data.endDate,
-                          field: groupBy.toLowerCase(),
-                          id: item.id,
-                          uncategorizedId: itemPayload?.uncategorizedId,
-                        };
-
-                  showActivity({
-                    navigate,
-                    categories,
-                    accounts,
-                    balanceTypeOp,
-                    filters,
-                    showHiddenCategories,
-                    showOffBudget,
-                    type: 'totals',
-                    ...drilldown,
-                    bucketTagNames: item.payload.bucketTagNames,
-                    scopeTagNames: data.scopeTagNames,
-                  });
+                  return (
+                    <Rectangle {...props} fill={fill} fillOpacity={opacity} />
+                  );
                 }}
-                shape={(props: BarShapeProps) => (
-                  <Rectangle
-                    {...props}
-                    fill={
-                      data.legend[props.index]?.color ?? props.fill ?? undefined
-                    }
-                  />
-                )}
               >
                 {viewLabels && !compact && (
                   <LabelList
                     dataKey={val => getVal(val)}
-                    content={e => customLabel(e, balanceTypeOp, format)}
+                    content={e =>
+                      customLabel(e, balanceTypeOp, format, isComparisonBars)
+                    }
                   />
                 )}
               </Bar>

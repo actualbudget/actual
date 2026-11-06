@@ -10,6 +10,7 @@ type ModeButtonProps = {
   selected: boolean;
   children: ReactNode;
   style?: CSSProperties;
+  isDisabled?: boolean;
   onSelect: () => void;
 };
 
@@ -17,6 +18,7 @@ export function ModeButton({
   selected,
   children,
   style,
+  isDisabled,
   onSelect,
 }: ModeButtonProps) {
   return (
@@ -36,6 +38,7 @@ export function ModeButton({
           },
         }),
       })}
+      isDisabled={isDisabled}
       onPress={onSelect}
     >
       {children}

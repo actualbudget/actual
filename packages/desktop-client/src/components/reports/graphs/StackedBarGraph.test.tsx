@@ -11,13 +11,13 @@ type TooltipEntry = {
   name: string;
   value: number;
   color: string;
-  payload: { name: string; color: string };
 };
 
 // The tooltip is only reachable through recharts, which cannot measure or
 // hover a chart in jsdom. Stubbing the chart primitives renders the tooltip
-// content directly with the payload recharts would have handed it.
-let tooltipPayload: TooltipEntry[] = [];
+// content directly with the payload recharts would have handed it, which
+// carries the hovered interval.
+let tooltipPayload: Array<{ payload: Record<string, unknown> }> = [];
 
 vi.mock('recharts', () => ({
   Bar: () => null,
@@ -32,7 +32,7 @@ vi.mock('recharts', () => ({
     content: ReactElement<{
       active?: boolean;
       label?: string;
-      payload?: TooltipEntry[];
+      payload?: typeof tooltipPayload;
     }>;
   }) =>
     cloneElement(content, {
@@ -58,13 +58,18 @@ window.matchMedia = (query: string): MediaQueryList => ({
 const { StackedBarGraph } = await import('./StackedBarGraph');
 
 function makeEntry(name: string, value: number): TooltipEntry {
-  return { name, value, color: 'red', payload: { name, color: 'red' } };
+  return { name, value, color: 'red' };
 }
 
-// recharts hands the payload over in reverse order, and the tooltip reverses
-// it back, so the payload here is written last-category-first
 function renderTooltip(entries: TooltipEntry[], { compact = true } = {}) {
-  tooltipPayload = entries.slice(0).reverse();
+  tooltipPayload = [
+    {
+      payload: {
+        date: 'Jan 2024',
+        ...Object.fromEntries(entries.map(entry => [entry.name, entry.value])),
+      },
+    },
+  ];
 
   render(
     <TestProviders>
