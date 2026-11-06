@@ -5,7 +5,9 @@ import { theme } from '@actual-app/components/theme';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import {
+  amountToInteger,
   currencyToAmount,
+  getNumberFormat,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -68,19 +70,89 @@ export function makeAmountGrey(value: number | string | null): CSSProperties {
     : null;
 }
 
+// Converts an integer currency value to a normalized decimal amount.
+// First converts the integer to currency format, then to a decimal amount.
+// Uses integerToCurrency to display the value correctly according to user prefs
+// and the currency's decimal places.
+function normalizeIntegerValue(
+  val: number | null | undefined,
+  decimalPlaces = 2,
+) {
+  if (typeof val !== 'number') {
+    return 0;
+  }
+  // Round to the currency's digits when it shows fewer than the stored two
+  const formatter =
+    decimalPlaces < 2
+      ? getNumberFormat({ decimalPlaces }).formatter
+      : undefined;
+  return currencyToAmount(integerToCurrency(val, formatter));
+}
+
+/**
+ * How far what a category has towards its goal is from the goal, as the
+ * amounts are displayed: negative when short of it, 0 when they match and
+ * positive when over it. With hidden decimals, amounts that round to the same
+ * number count as equal.
+ */
+export function getGoalDifference(
+  have: number | null | undefined,
+  goalValue: number,
+  decimalPlaces = 2,
+): number {
+  return amountToInteger(
+    normalizeIntegerValue(have, decimalPlaces) -
+      normalizeIntegerValue(goalValue, decimalPlaces),
+  );
+}
+
+/**
+ * How much of the goal is funded, as a whole percentage from 0 to 100.
+ * Rounded down while underfunded so it only reads 100 once the goal is met.
+ */
+export function getGoalProgress(
+  have: number | null | undefined,
+  goalValue: number,
+  decimalPlaces = 2,
+): number {
+  if (getGoalDifference(have, goalValue, decimalPlaces) >= 0) {
+    return 100;
+  }
+  if (goalValue <= 0) {
+    return 0;
+  }
+  const ratio = Math.max(0, (have ?? 0) / goalValue);
+  return Math.min(99, Math.floor(ratio * 100));
+}
+
+/**
+ * The progress to draw in the ring beside a balance, or null when no ring is
+ * drawn: without a goal, when overspent (the red amount already says so) or
+ * once the goal is funded (nothing left to do). Amounts compare as displayed.
+ */
+export function getGoalRingProgress(
+  balance: number,
+  goalValue: number | null | undefined,
+  have: number | null | undefined,
+  decimalPlaces = 2,
+): number | null {
+  if (
+    goalValue == null ||
+    normalizeIntegerValue(balance, decimalPlaces) < 0 ||
+    getGoalDifference(have, goalValue, decimalPlaces) >= 0
+  ) {
+    return null;
+  }
+  return getGoalProgress(have, goalValue, decimalPlaces);
+}
+
 export function makeBalanceAmountStyle(
   value: number,
   goalValue?: number | null,
   budgetedValue?: number | null,
+  decimalPlaces = 2,
 ) {
-  // Converts an integer currency value to a normalized decimal amount.
-  // First converts the integer to currency format, then to a decimal amount.
-  // Uses integerToCurrency to display the value correctly according to user prefs.
-
-  const normalizeIntegerValue = (val: number | null | undefined) =>
-    typeof val === 'number' ? currencyToAmount(integerToCurrency(val)) : 0;
-
-  const currencyValue = normalizeIntegerValue(value);
+  const currencyValue = normalizeIntegerValue(value, decimalPlaces);
 
   if (currencyValue < 0) {
     return { color: theme.budgetNumberNegative };
@@ -93,10 +165,7 @@ export function makeBalanceAmountStyle(
     }
     return { color: theme.budgetNumberPositive };
   } else {
-    const budgetedAmount = normalizeIntegerValue(budgetedValue);
-    const goalAmount = normalizeIntegerValue(goalValue);
-
-    if (budgetedAmount < goalAmount) {
+    if (getGoalDifference(budgetedValue, goalValue, decimalPlaces) < 0) {
       return { color: theme.templateNumberUnderFunded };
     }
     return { color: theme.templateNumberFunded };

@@ -6,6 +6,7 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type {
   AverageTemplate,
   ScheduleTemplate,
+  WeeklyAverageTemplate,
 } from '@actual-app/core/types/models/templates';
 
 import { updateTemplate } from '#components/budget/goals/actions';
@@ -13,9 +14,11 @@ import type { Action } from '#components/budget/goals/actions';
 import { FormField, FormLabel } from '#components/forms';
 import { AmountInput } from '#components/util/AmountInput';
 import { PercentInput } from '#components/util/PercentInput';
-import { useFormat } from '#hooks/useFormat';
 
-type AdjustableTemplate = ScheduleTemplate | AverageTemplate;
+type AdjustableTemplate =
+  | ScheduleTemplate
+  | AverageTemplate
+  | WeeklyAverageTemplate;
 type AdjustmentType = 'percent' | 'fixed';
 type UnitOption = 'none' | AdjustmentType;
 type Direction = 'increase' | 'decrease';
@@ -31,7 +34,7 @@ type AmountAdjustmentProps = {
 };
 
 // Editor for the optional increase/decrease modifier on schedule and average
-// templates. `adjustment` is stored as a single signed number. The unit
+// (monthly or weekly) templates. `adjustment` is stored as a single signed number. The unit
 // dropdown turns the adjustment on and off and picks percentage vs fixed
 // amount. A percentage uses an increase/decrease selector for the direction;
 // a fixed amount uses AmountInput, whose own sign is the direction.
@@ -40,7 +43,6 @@ export const AmountAdjustment = ({
   dispatch,
 }: AmountAdjustmentProps) => {
   const { t } = useTranslation();
-  const format = useFormat();
 
   const enabled = template.adjustment !== undefined;
   const adjustmentType: AdjustmentType = template.adjustmentType ?? 'percent';
@@ -52,23 +54,13 @@ export const AmountAdjustment = ({
     next: number | undefined,
     type: AdjustmentType | undefined,
   ) => {
-    if (template.type === 'schedule') {
-      dispatch(
-        updateTemplate({
-          type: 'schedule',
-          adjustment: next,
-          adjustmentType: type,
-        }),
-      );
-    } else {
-      dispatch(
-        updateTemplate({
-          type: 'average',
-          adjustment: next,
-          adjustmentType: type,
-        }),
-      );
-    }
+    dispatch(
+      updateTemplate({
+        type: template.type,
+        adjustment: next,
+        adjustmentType: type,
+      }),
+    );
   };
 
   const changeUnit = (unit: UnitOption) => {
@@ -88,7 +80,16 @@ export const AmountAdjustment = ({
   return (
     <SpaceBetween gap={50} style={{ marginTop: 10 }}>
       <FormField style={{ flex: 1 }}>
-        <FormLabel title={t('Adjustment')} htmlFor="adjustment-unit-field" />
+        <FormLabel
+          title={
+            // Weekly averages add a fixed adjustment once per week, so the
+            // month moves by 4-5x the entered amount.
+            template.type === 'weeklyAverage'
+              ? t('Adjustment per week')
+              : t('Adjustment')
+          }
+          htmlFor="adjustment-unit-field"
+        />
         <SpaceBetween align="center" gap={12}>
           <Select
             id="adjustment-unit-field"
@@ -106,16 +107,8 @@ export const AmountAdjustment = ({
               <AmountInput
                 id="adjustment-amount-field"
                 zeroSign="+"
-                value={amountToInteger(
-                  adjustment,
-                  format.currency.decimalPlaces,
-                )}
-                onUpdate={next =>
-                  apply(
-                    integerToAmount(next, format.currency.decimalPlaces),
-                    'fixed',
-                  )
-                }
+                value={amountToInteger(adjustment)}
+                onUpdate={next => apply(integerToAmount(next), 'fixed')}
                 style={{ flex: 'none', width: 140 }}
               />
             ) : (

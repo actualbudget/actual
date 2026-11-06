@@ -1037,6 +1037,8 @@ export type MonteCarloRuleExplanation =
       rule: 'guardrails' | 'ratcheting' | 'boundaries';
       /** The running adjustment factor after this year's decision */
       factor: number;
+      /** The factor before it - what a cut or raise moved spending from */
+      previousFactor: number;
       /** The year's planned spending, in minor units (display-deflated) */
       planned: number;
       /** planned x factor - the rule's result before any minimum floor */
@@ -2195,6 +2197,7 @@ export function runMonteCarloSimulation(
             accessibleStartByYear[year] > 0
           ) {
             const currentRate = (planned * adjustmentFactor) / accessibleTotal;
+            const factorBeforeDecision = adjustmentFactor;
             let ruleAction: 'cut' | 'raise' | 'none' = 'none';
             if (rule.type === 'guardrails') {
               // Drift is measured against the planned spending path, not
@@ -2249,6 +2252,7 @@ export function runMonteCarloSimulation(
                 kind: 'factor',
                 rule: rule.type,
                 factor: adjustmentFactor,
+                previousFactor: factorBeforeDecision,
                 planned: toSafeAmount(Math.round(planned * startDeflator)),
                 adjusted: toSafeAmount(
                   Math.round(planned * adjustmentFactor * startDeflator),
@@ -2275,11 +2279,13 @@ export function runMonteCarloSimulation(
         // zero-spend phase takes nothing. Like the phase amounts it's in
         // today's money, so it rises with this replay's inflation path.
         // It is a floor on spending, so income counts towards it and the
-        // pots only top the year up to it
+        // pots only top the year up to it. It never lifts spending above
+        // the plan itself: a floor sized for full retirement must not
+        // inflate a cheaper phase, such as part-time years before it
         const minimumThisYear = minimumSpending * cumulativeInflation;
-        const minimumFromPots = Math.max(
-          0,
-          minimumThisYear - incomeTowardsSpending,
+        const minimumFromPots = Math.min(
+          planned,
+          Math.max(0, minimumThisYear - incomeTowardsSpending),
         );
         if (
           rule.type !== 'none' &&
@@ -2703,7 +2709,10 @@ export function runMonteCarloSimulation(
         ) {
           tailAdjustedPlan = Math.max(
             tailAdjustedPlan,
-            minimumSpending * cumulativeInflation - tailIncomeTowardsSpending,
+            Math.min(
+              tailPotFundedPlan,
+              minimumSpending * cumulativeInflation - tailIncomeTowardsSpending,
+            ),
           );
         }
         runDetail.push({

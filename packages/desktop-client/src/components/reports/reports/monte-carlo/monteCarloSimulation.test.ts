@@ -1318,6 +1318,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'boundaries',
       factor: 1,
+      previousFactor: 1,
       planned: 40_000,
       adjusted: 40_000,
       action: 'none',
@@ -1362,6 +1363,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'ratcheting',
       factor: 1,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 10_000,
       action: 'none',
@@ -1371,6 +1373,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'ratcheting',
       factor: 1.05,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 10_500,
       action: 'raise',
@@ -1444,6 +1447,38 @@ describe('runMonteCarloSimulation', () => {
     expect(tailRows.map(row => row.plannedSpending)).toEqual(
       tailRows.map(() => 1_800),
     );
+  });
+
+  it('never lifts a cheaper phase above its plan to reach the floor', () => {
+    // A staged retirement: 10,000 a year of part-time spending for three
+    // years, then 100,000 in full retirement. A 75,000 floor sized for
+    // the second phase must leave the first phase at its 10,000 plan
+    const result = runMonteCarloSimulation(
+      makeParams(
+        {
+          horizonYears: 5,
+          inflationMean: null,
+          spendingPhases: [
+            {
+              id: 'part-time',
+              name: '',
+              fromAge: null,
+              annualWithdrawal: 10_000,
+            },
+            { id: 'retired', name: '', fromAge: 63, annualWithdrawal: 100_000 },
+          ],
+          withdrawalRule: { ...WITHDRAWAL_RULE_DEFAULTS, type: 'guardrails' },
+          minimumSpending: 75_000,
+          captureRunDetail: 0,
+        },
+        { startingBalance: 1_000_000, expectedReturnMean: 0, returnStdDev: 0 },
+      ),
+    );
+    const rows = result.runDetail!;
+    expect(rows.map(row => row.plannedSpending)).toEqual([
+      10_000, 10_000, 10_000, 100_000, 100_000,
+    ]);
+    expect(rows.some(row => row.minimumApplied)).toBe(false);
   });
 
   it('minimum spending floor neutralizes rule cuts', () => {
@@ -1531,6 +1566,7 @@ describe('runMonteCarloSimulation', () => {
       kind: 'factor',
       rule: 'guardrails',
       factor: 0.5,
+      previousFactor: 1,
       planned: 10_000,
       adjusted: 5_000,
       action: 'cut',

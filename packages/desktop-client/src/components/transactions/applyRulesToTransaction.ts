@@ -1,3 +1,4 @@
+import { groupTransaction } from '@actual-app/core/shared/transactions';
 import { getChangedValues } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
@@ -7,6 +8,28 @@ import {
   shouldApplyRuleChange,
 } from './table/utils';
 import type { ClearedFieldsByTransaction } from './table/utils';
+
+/**
+ * Builds the transaction shape expected by `rules-run` from a flat list
+ * (parent followed by children), matching how the desktop table groups
+ * splits before applying rules.
+ *
+ * Mobile keeps splits ungrouped in state. Re-running a split rule against a
+ * parent without its children recreates new child ids and corrupts later
+ * edits (notes/account) — see #9189.
+ */
+export function transactionForRulesFromList(
+  transactions: readonly TransactionEntity[],
+  transaction: TransactionEntity,
+): TransactionEntity {
+  const children = transactions.filter(
+    t => t.is_child && t.parent_id === transaction.id,
+  );
+  if (transaction.is_parent || children.length > 0) {
+    return groupTransaction([transaction, ...children]);
+  }
+  return transaction;
+}
 
 /**
  * Merges the result of a rules run back into a transaction that is being

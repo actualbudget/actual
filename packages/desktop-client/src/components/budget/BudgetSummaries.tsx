@@ -35,6 +35,7 @@ export function BudgetSummaries() {
     useCallback(rect => {
       setWidthState(rect.width);
     }, []),
+    { measureOnAttach: true },
   );
 
   const prevMonth0 = useRef(firstMonth);

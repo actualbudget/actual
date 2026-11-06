@@ -1,5 +1,8 @@
 // @ts-strict-ignore
-import type { ImportTransactionsResult } from '#server/accounts/app';
+import type {
+  ImportTransactionsResult,
+  SyncResponse,
+} from '#server/accounts/app';
 import type { PayeeNameNormalization } from '#server/accounts/sync';
 import type {
   APIAccountEntity,
@@ -152,7 +155,7 @@ export type ApiHandlers = {
 
   'api/bank-sync': (arg?: {
     accountId: APIAccountEntity['id'];
-  }) => Promise<void>;
+  }) => Promise<SyncResponse>;
 
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 

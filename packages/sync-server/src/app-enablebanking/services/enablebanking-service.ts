@@ -1,4 +1,6 @@
 import createDebug from 'debug';
+import { fetch } from 'undici';
+import type { RequestInit, Response } from 'undici';
 
 import {
   EnableBankingError,

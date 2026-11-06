@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Menu } from '@actual-app/components/menu';
 import type { MenuItemObject } from '@actual-app/components/menu';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { getGoalDifference } from '#components/budget/util';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useFormat } from '#hooks/useFormat';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
 import { useEnvelopeSheetValue } from './EnvelopeBudgetComponents';
@@ -14,6 +18,7 @@ export type BalanceMenuActions = {
   onTransfer?: () => void;
   onCarryover?: (carryOver: boolean) => void;
   onCover?: () => void;
+  onFundGoal?: (amount: IntegerAmount) => void;
 };
 
 export function useBalanceMenu({
@@ -21,14 +26,33 @@ export function useBalanceMenu({
   onTransfer,
   onCarryover,
   onCover,
+  onFundGoal,
 }: BalanceMenuActions) {
   const { t } = useTranslation();
+  const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const format = useFormat();
 
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
   const balance =
     useEnvelopeSheetValue(envelopeBudget.catBalance(categoryId)) ?? 0;
+  const goal = useEnvelopeSheetValue(envelopeBudget.catGoal(categoryId));
+  const longGoal = useEnvelopeSheetValue(
+    envelopeBudget.catLongGoal(categoryId),
+  );
+  const budgeted =
+    useEnvelopeSheetValue(envelopeBudget.catBudgeted(categoryId)) ?? 0;
+  const toBudget = useEnvelopeSheetValue(envelopeBudget.toBudget) ?? 0;
+
+  const fundAmount =
+    isGoalTemplatesEnabled &&
+    onFundGoal &&
+    goal != null &&
+    longGoal !== 1 &&
+    getGoalDifference(budgeted, goal, format.currency.decimalPlaces) < 0
+      ? Math.min(goal - budgeted, toBudget)
+      : 0;
 
   const onMenuSelect = (name: string) => {
     switch (name) {
@@ -40,6 +64,9 @@ export function useBalanceMenu({
         break;
       case 'cover':
         onCover?.();
+        break;
+      case 'fund-goal':
+        onFundGoal?.(fundAmount);
         break;
       default:
         throw new Error(`Unrecognized menu option: ${name}`);
@@ -60,6 +87,14 @@ export function useBalanceMenu({
           {
             name: 'cover',
             text: t('Cover overspending'),
+          },
+        ]
+      : []),
+    ...(fundAmount > 0
+      ? [
+          {
+            name: 'fund-goal',
+            text: t('Fund goal from To Budget'),
           },
         ]
       : []),
@@ -85,6 +120,7 @@ export function BalanceMenu({
   onTransfer,
   onCarryover,
   onCover,
+  onFundGoal,
   ...props
 }: BalanceMenuProps) {
   const { items, onMenuSelect } = useBalanceMenu({
@@ -92,6 +128,7 @@ export function BalanceMenu({
     onTransfer,
     onCarryover,
     onCover,
+    onFundGoal,
   });
 
   return <Menu {...props} onMenuSelect={onMenuSelect} items={items} />;

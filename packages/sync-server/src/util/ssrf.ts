@@ -2,6 +2,7 @@ import dns from 'dns';
 import { promisify } from 'util';
 
 import ipaddr from 'ipaddr.js';
+import { Agent } from 'undici';
 
 const dnsLookup = promisify(dns.lookup);
 const NAT64_PREFIX = ipaddr.IPv6.parseCIDR('64:ff9b::/96');
@@ -19,9 +20,10 @@ const PRIVATE_IP_RANGES = [
 
 type SsrfOptions = {
   // Allow requests to private/loopback/unique-local/CGNAT addresses. Defaults to
-  // false (strict). Set by callers like the SimpleFIN integration whose
-  // upstream may be a self-hosted server on the local network.
+  // false (strict). Use allowedNetworks for administrator-approved exceptions.
   allowPrivateNetwork?: boolean;
+  // Only private classes may be exempted; always-blocked ranges stay blocked.
+  allowedNetworks?: string[];
 };
 
 /**
@@ -32,7 +34,7 @@ type SsrfOptions = {
  */
 export function isBlockedIp(
   address: string,
-  { allowPrivateNetwork = false }: SsrfOptions = {},
+  { allowPrivateNetwork = false, allowedNetworks = [] }: SsrfOptions = {},
 ): boolean {
   if (!ipaddr.isValid(address)) {
     return false;
@@ -51,7 +53,16 @@ export function isBlockedIp(
 
   return (
     range !== 'unicast' &&
-    !(allowPrivateNetwork && PRIVATE_IP_RANGES.includes(range))
+    !(
+      PRIVATE_IP_RANGES.includes(range) &&
+      (allowPrivateNetwork ||
+        allowedNetworks.some(network => {
+          const [subnet, prefix] = parseAllowedNetwork(network);
+          return (
+            parsed.kind() === subnet.kind() && parsed.match(subnet, prefix)
+          );
+        }))
+    )
   );
 }
 
@@ -61,8 +72,7 @@ export function isBlockedIp(
  * via DNS so that hostnames pointing at private/local/link-local addresses are
  * rejected as well as literal IPs. Throws if the URL is not allowed.
  *
- * Pass { allowPrivateNetwork: true } for callers (e.g. SimpleFIN) whose
- * upstream may legitimately be a self-hosted server on the local network; the
+ * Use allowedNetworks for specific private IPs or CIDR ranges; the
  * other address classes (including transition, multicast and link-local) remain blocked
  * regardless.
  */
@@ -112,4 +122,42 @@ export async function assertUrlAllowed(
       );
     }
   }
+}
+
+// Validate configuration at startup as well as when matching addresses.
+export function parseAllowedNetwork(network: string) {
+  if (network.includes('/')) {
+    return ipaddr.parseCIDR(network);
+  }
+  const address = ipaddr.parse(network);
+  return [address, address.kind() === 'ipv4' ? 32 : 128] as const;
+}
+
+// Validate the addresses used by the socket, avoiding a second unchecked DNS
+// resolution after assertUrlAllowed. Literal IPs are checked by assertUrlAllowed.
+export function createSsrfDispatcher(options: SsrfOptions) {
+  return new Agent({
+    connect: {
+      lookup(hostname, lookupOptions, callback) {
+        dns.lookup(
+          hostname,
+          { ...lookupOptions, all: true },
+          (error, addresses) => {
+            if (error) {
+              callback(error, []);
+            } else if (
+              !addresses.length ||
+              addresses.some(({ address }) => isBlockedIp(address, options))
+            ) {
+              callback(new Error('Blocked request to private/local IP'), []);
+            } else if (lookupOptions.all) {
+              callback(null, addresses);
+            } else {
+              callback(null, addresses[0].address, addresses[0].family);
+            }
+          },
+        );
+      },
+    },
+  });
 }

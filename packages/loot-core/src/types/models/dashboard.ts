@@ -1,10 +1,11 @@
-import type { ForecastSource } from './forecast';
+import type { ForecastSeries, ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: boolean;
 };
 
@@ -491,6 +492,8 @@ export type BalanceForecastWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
+    yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
+    series?: ForecastSeries[];
   } | null
 >;

@@ -54,6 +54,11 @@ export async function getLatestVersion(): Promise<string | 'unknown'> {
   if (Platform.isPlaywright || import.meta.env.REACT_APP_REVIEW_ID) {
     return Promise.resolve('v99.9.9');
   }
+  // The native mobile apps update through the app stores, so a newer GitHub
+  // release is nothing the user can act on. Skip the request entirely.
+  if (Platform.isNativeMobileApp) {
+    return Promise.resolve('unknown');
+  }
 
   try {
     const response = await fetch(

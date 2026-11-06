@@ -47,9 +47,9 @@ vi.mock('../../app-gocardless/util/handle-error', () => ({
     },
 }));
 
-// Mock fetch globally
-const mockFetch = vi.fn();
-vi.stubGlobal('fetch', mockFetch);
+// Mock provider requests
+const mockFetch = vi.hoisted(() => vi.fn());
+vi.mock('undici', () => ({ fetch: mockFetch }));
 
 // We need to dynamically import the handlers after mocks are set up
 const { handlers } = await import('../app-enablebanking');

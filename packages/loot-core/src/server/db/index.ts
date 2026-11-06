@@ -7,11 +7,11 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
+import type { Database, Statement } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 import {
   convertForInsert,
@@ -146,7 +146,16 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, Statement>({ max: 100 });
+function createQueryCache() {
+  return new LRUCache<string, Statement>({
+    max: 100,
+    // Free statements as they are evicted so they do not pile up in the
+    // sqlite heap over a long session
+    dispose: statement => sqlite.finalizeStatement(statement),
+  });
+}
+
+let _queryCache = createQueryCache();
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -159,7 +168,7 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, Statement>({ max: 100 });
+  _queryCache = createQueryCache();
 }
 
 export function transaction(
@@ -394,20 +403,25 @@ export async function insertCategoryGroup(
 }
 
 export async function updateCategoryGroup(
-  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'name' | 'is_income'>,
+  group: WithRequired<Partial<DbCategoryGroup>, 'id' | 'is_income'>,
 ) {
-  const existingGroup = await first<
-    Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
-  >(
-    `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
-    [group.name.toUpperCase(), group.id],
-  );
-  if (existingGroup) {
-    throw new Error(
-      `A ${
-        existingGroup.hidden ? 'hidden ' : ''
-      }'${existingGroup.name}' category group already exists.`,
+  // An update that does not touch the name cannot introduce a duplicate, and
+  // `name` is genuinely absent on one: api/category-group-update forwards the
+  // caller's Partial, and update() writes only the keys it is given (#8857).
+  if (group.name !== undefined) {
+    const existingGroup = await first<
+      Pick<DbCategoryGroup, 'id' | 'name' | 'hidden'>
+    >(
+      `SELECT id, name, hidden FROM category_groups WHERE UPPER(name) = ? AND id != ? AND tombstone = 0 LIMIT 1`,
+      [group.name.toUpperCase(), group.id],
     );
+    if (existingGroup) {
+      throw new Error(
+        `A ${
+          existingGroup.hidden ? 'hidden ' : ''
+        }'${existingGroup.name}' category group already exists.`,
+      );
+    }
   }
   group = categoryGroupModel.validate(group, { update: true });
   return update('category_groups', group);

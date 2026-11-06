@@ -52,6 +52,7 @@ export function CurrencySettings() {
         ['MKD', t('Macedonian Denar')],
         ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
+        ['NOK', t('Norwegian Krone')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
