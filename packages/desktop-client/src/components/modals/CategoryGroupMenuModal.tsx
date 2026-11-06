@@ -10,6 +10,7 @@ import { useCategoryGroup } from '#hooks/useCategoryGroup';
 import { useDeleteCategoryFlow } from '#hooks/useDeleteCategoryFlow';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNotes } from '#hooks/useNotes';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useUndo } from '#hooks/useUndo';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
@@ -39,6 +40,7 @@ export function CategoryGroupMenuModal({
   const notes = useNotes(groupId);
   const { showUndoNotification } = useUndo();
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
+  const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const categories = group?.categories ?? [];
   const deleteFlow = useDeleteCategoryFlow({
     categoryIds: categories.map(c => c.id),
@@ -50,8 +52,11 @@ export function CategoryGroupMenuModal({
   }
 
   const hasMultipleCategories = categories.length > 1;
-  const hasBudgetSection = isGoalTemplatesEnabled || hasMultipleCategories;
   const isIncome = Boolean(group.is_income);
+  // Envelope budgets don't apply templates to income categories
+  const canApplyTemplates =
+    isGoalTemplatesEnabled && !(isIncome && budgetType !== 'tracking');
+  const hasBudgetSection = canApplyTemplates || hasMultipleCategories;
   const transferGroups = categoryGroups.filter(
     g => g.id !== group.id && Boolean(g.is_income) === isIncome,
   );
@@ -83,7 +88,7 @@ export function CategoryGroupMenuModal({
 
             {hasBudgetSection && (
               <MobileSheetSection title={t('Budget')}>
-                {isGoalTemplatesEnabled && (
+                {canApplyTemplates && (
                   <MobileSheetRow
                     label={t('Overwrite with templates')}
                     onPress={() => {

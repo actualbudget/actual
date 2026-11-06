@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ComponentProps, ComponentType, CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink } from 'react-router';
+import { NavLink, useLocation } from 'react-router';
 import { animated, config, useSpring } from 'react-spring';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
@@ -86,6 +86,14 @@ export function MobileNavTabs() {
     },
     [api, isTestEnv],
   );
+
+  // The same route element serves every settings page (/settings/*), so the
+  // navbar isn't remounted when navigating between them. Reset it on every
+  // route change so a navbar hidden by scrolling doesn't stay hidden.
+  const { pathname } = useLocation();
+  useEffect(() => {
+    openDefault();
+  }, [pathname, openDefault]);
 
   const navTabs = [
     {

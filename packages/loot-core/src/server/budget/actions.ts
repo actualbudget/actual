@@ -46,7 +46,7 @@ function calcBufferedAmount(
 
 type BudgetTable = 'reflect_budgets' | 'zero_budgets';
 
-function getBudgetTable(): BudgetTable {
+export function getBudgetTable(): BudgetTable {
   return isTrackingBudget() ? 'reflect_budgets' : 'zero_budgets';
 }
 
