@@ -125,24 +125,27 @@ test.describe('Settings', () => {
       if (width === 375) {
         await expect(page.getByRole('navigation')).toBeVisible();
       }
-      await indicator.scrollIntoViewIfNeeded();
+      // Resizing can remount the controls after the debounced layout update.
+      await expect(async () => {
+        await indicator.scrollIntoViewIfNeeded();
+        const indicatorBounds = await indicator.boundingBox();
+        const lightBounds = await page
+          .getByRole('button', { name: 'Light', exact: true })
+          .boundingBox();
+        if (!indicatorBounds || !lightBounds) {
+          throw new Error('Missing theme controls');
+        }
+        const overlapsLightSelector =
+          indicatorBounds.x < lightBounds.x + lightBounds.width &&
+          indicatorBounds.x + indicatorBounds.width > lightBounds.x &&
+          indicatorBounds.y < lightBounds.y + lightBounds.height &&
+          indicatorBounds.y + indicatorBounds.height > lightBounds.y;
+        expect(overlapsLightSelector).toBe(false);
+        await expect(indicator).toBeInViewport();
+      }).toPass({ timeout: 10000 });
       await page.screenshot({
         path: test.info().outputPath(`system-default-${width}.png`),
       });
-      const indicatorBounds = await indicator.boundingBox();
-      const lightBounds = await page
-        .getByRole('button', { name: 'Light', exact: true })
-        .boundingBox();
-      if (!indicatorBounds || !lightBounds) {
-        throw new Error('Missing theme controls');
-      }
-      const overlapsLightSelector =
-        indicatorBounds.x < lightBounds.x + lightBounds.width &&
-        indicatorBounds.x + indicatorBounds.width > lightBounds.x &&
-        indicatorBounds.y < lightBounds.y + lightBounds.height &&
-        indicatorBounds.y + indicatorBounds.height > lightBounds.y;
-      expect(overlapsLightSelector).toBe(false);
-      await expect(indicator).toBeInViewport();
     }
     await indicator.focus();
     await page.keyboard.press('Enter');
