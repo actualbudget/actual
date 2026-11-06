@@ -133,7 +133,7 @@ Valid categories:
 
 - `Features`: New features
 - `Enhancements`: Improvements to existing features
-- `Bugfix`: Bug fixes
+- `Bugfixes`: Bug fixes
 - `Maintenance`: Internal changes that don't directly affect users
 
 The `authors` key should be an array with the GitHub usernames of the people who contributed to the PR. In most cases, this should just be you but you can add multiple people if needed.
