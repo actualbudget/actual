@@ -195,6 +195,7 @@ type StackedBarGraphProps = {
   balanceTypeOp: balanceTypeOpType;
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
+  showUncategorized?: boolean;
   showTooltip?: boolean;
   interval?: string;
 };
@@ -209,6 +210,7 @@ export function StackedBarGraph({
   balanceTypeOp,
   showHiddenCategories,
   showOffBudget,
+  showUncategorized,
   showTooltip = true,
   interval,
 }: StackedBarGraphProps) {
@@ -314,6 +316,7 @@ export function StackedBarGraph({
                         filters,
                         showHiddenCategories,
                         showOffBudget,
+                        showUncategorized,
                         type: 'time',
                         startDate: e.payload?.intervalStartDate,
                         endDate: e.payload?.intervalEndDate,
