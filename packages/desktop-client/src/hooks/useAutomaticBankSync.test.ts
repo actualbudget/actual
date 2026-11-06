@@ -1,9 +1,29 @@
 import type { AccountEntity } from '@actual-app/core/types/models';
+import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
+
+import { useAccounts } from '#hooks/useAccounts';
+import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import {
   isAutomaticSyncDue,
   parseBankSyncInterval,
+  useAutomaticBankSync,
 } from './useAutomaticBankSync';
+
+const mutate = vi.fn();
+
+vi.mock('#accounts', () => ({
+  useSyncAndDownloadMutation: () => ({ mutate }),
+}));
+vi.mock('#hooks/useAccounts', () => ({ useAccounts: vi.fn() }));
+vi.mock('#hooks/useLocalPref', () => ({
+  useLocalPref: () => [undefined, vi.fn()],
+}));
+vi.mock('#hooks/useSyncedPref', () => ({ useSyncedPref: () => ['60'] }));
+vi.mock('#hooks/useSyncServerStatus', () => ({
+  useSyncServerStatus: vi.fn(),
+}));
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * 60 * 1000;
@@ -203,5 +223,43 @@ describe('isAutomaticSyncDue', () => {
         lastAutomaticRun: NOW - HOUR,
       }),
     ).toBe(true);
+  });
+});
+
+describe('useAutomaticBankSync', () => {
+  function mockAccounts(accounts: AccountEntity[]) {
+    vi.mocked(useAccounts).mockReturnValue({
+      data: accounts,
+    } as unknown as ReturnType<typeof useAccounts>);
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useSyncServerStatus).mockReturnValue('online');
+  });
+
+  it('syncs as soon as the accounts finish loading', () => {
+    // The accounts query starts with an empty placeholder, so the check on
+    // mount never finds a linked account. Waiting for the next timer tick is
+    // not an option in the mobile apps: the web view is suspended in the
+    // background, so the timer may never fire.
+    mockAccounts([]);
+    const { rerender } = renderHook(() => useAutomaticBankSync());
+    expect(mutate).not.toHaveBeenCalled();
+
+    mockAccounts([account()]);
+    rerender();
+    expect(mutate).toHaveBeenCalledTimes(1);
+  });
+
+  it('syncs once the server becomes reachable', () => {
+    mockAccounts([account()]);
+    vi.mocked(useSyncServerStatus).mockReturnValue('offline');
+    const { rerender } = renderHook(() => useAutomaticBankSync());
+    expect(mutate).not.toHaveBeenCalled();
+
+    vi.mocked(useSyncServerStatus).mockReturnValue('online');
+    rerender();
+    expect(mutate).toHaveBeenCalledTimes(1);
   });
 });
