@@ -74,45 +74,9 @@ export class ReportsPage {
   }
 
   async goToBalanceForecastPage() {
-    const gridItems = this.pageContent.locator('.react-grid-item');
-    const count = await gridItems.count();
+    const cardNavigateButton =
+      await this.scrollDashboardCardIntoView(/^Balance Forecast/i);
 
-    let targetItem: Locator | null = null;
-    for (let i = count - 1; i >= 0; i--) {
-      const item = gridItems.nth(i);
-      await item.scrollIntoViewIfNeeded();
-      const heading = item.getByRole('heading', { name: /^Balance Forecast/i });
-      if (await heading.isVisible()) {
-        targetItem = item;
-        break;
-      }
-    }
-
-    if (!targetItem) {
-      await this.page.evaluate(() => {
-        window.scrollTo(0, document.documentElement.scrollHeight);
-      });
-      const refreshedCount = await gridItems.count();
-      for (let i = refreshedCount - 1; i >= 0; i--) {
-        const item = gridItems.nth(i);
-        await item.scrollIntoViewIfNeeded();
-        const heading = item.getByRole('heading', {
-          name: /^Balance Forecast/i,
-        });
-        if (await heading.isVisible()) {
-          targetItem = item;
-          break;
-        }
-      }
-    }
-
-    if (!targetItem) {
-      throw new Error('No Balance Forecast dashboard card found in the grid');
-    }
-
-    const cardNavigateButton = targetItem.getByRole('button', {
-      name: /^Balance Forecast/i,
-    });
     await Promise.all([
       this.page.waitForURL(/\/reports\/forecast\//),
       cardNavigateButton.click(),
