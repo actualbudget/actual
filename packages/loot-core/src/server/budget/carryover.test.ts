@@ -131,6 +131,39 @@ it('keeps rollover on when a budget opens after its last created month', async (
   expect(await getSheetBoolean('budget202801', 'carryover-card')).toBe(true);
 });
 
+it('keeps a peer rollover starting in the former blank month', async () => {
+  global.currentMonth = '2026-05';
+  await setup('envelope');
+  await createAllBudgets();
+  // January is initially the blank month, before the first created month.
+  setSyncingMode('enabled');
+  await receiveMessages(
+    Object.entries({ month: 202601, category: 'card', carryover: 2 }).map(
+      ([column, value], i) => ({
+        dataset: 'zero_budgets',
+        row: '202601-card',
+        column,
+        value,
+        timestamp: new Timestamp(Date.now() - 60000 + i, 0, '000000000000000a'),
+      }),
+    ),
+  );
+  await createAllBudgets();
+  await db.insertTransaction({
+    date: '2026-01-15',
+    amount: -2000,
+    account: 'account',
+    category: 'card',
+  });
+  await sheet.waitOnSpreadsheet();
+
+  expect({
+    januaryRollover: await getSheetBoolean('budget202601', 'carryover-card'),
+    mayRollover: await getSheetBoolean('budget202605', 'carryover-card'),
+    mayBalance: await getSheetValue('budget202605', 'leftover-card'),
+  }).toEqual({ januaryRollover: true, mayRollover: true, mayBalance: -2000 });
+});
+
 it('preserves a peer flag regardless of delivery order or batching', async () => {
   setSyncingMode('enabled');
   let time = Date.now() - 60000;
