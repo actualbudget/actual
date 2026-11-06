@@ -238,6 +238,7 @@ type ComputedTemplates = {
   contexts: CategoryTemplateContext[];
   errors: string[];
   orphanGoals: TemplateGoal[];
+  warnings: string[];
 };
 
 async function computeTemplates(
@@ -263,6 +264,8 @@ async function computeTemplates(
   const prioritiesSet = new Set<number>();
   const errors: string[] = [];
   const orphanGoals: TemplateGoal[] = [];
+  const warnings: string[] = [];
+  const currentMonth = monthUtils.currentMonth();
   for (const category of categories) {
     const { id } = category;
     const sheetName = monthUtils.sheetForMonth(month);
@@ -280,6 +283,21 @@ async function computeTemplates(
           budgeted,
           skipAvailableClamp,
         );
+        // budgeting ahead of a target that hasn't passed yet isn't worth a nudge
+        templateContext
+          .getExpiredTemplates()
+          .filter(t => CategoryTemplateContext.isExpired(t, currentMonth))
+          .forEach(t => {
+            warnings.push(
+              `${category.name}: Ignoring ${t.amount} by ${t.month} because the target month has passed. You can remove it.`,
+            );
+          });
+        if (templateContext.hasOnlyExpiredTemplates()) {
+          if (existingGoal !== null) {
+            orphanGoals.push({ category: id, goal: null, longGoal: null });
+          }
+          continue;
+        }
         // don't use the funds that are not from templates
         if (!templateContext.isGoalOnly()) {
           availBudget += budgeted;
@@ -302,7 +320,7 @@ async function computeTemplates(
   }
 
   if (errors.length > 0) {
-    return { contexts: templateContexts, errors, orphanGoals };
+    return { contexts: templateContexts, errors, orphanGoals, warnings };
   }
 
   const priorities = new Int32Array([...prioritiesSet]).sort((a, b) => a - b);
@@ -321,7 +339,7 @@ async function computeTemplates(
 
   distributeRemainder(templateContexts, availBudget);
 
-  return { contexts: templateContexts, errors, orphanGoals };
+  return { contexts: templateContexts, errors, orphanGoals, warnings };
 }
 
 async function processTemplate(
@@ -330,19 +348,23 @@ async function processTemplate(
   categoryTemplates: Record<CategoryEntity['id'], Template[]>,
   categories: CategoryEntity[] = [],
 ): Promise<TemplateNotification> {
-  const { contexts, errors, orphanGoals } = await computeTemplates(
+  const { contexts, errors, orphanGoals, warnings } = await computeTemplates(
     month,
     force,
     categoryTemplates,
     categories,
   );
+  const notice: Pick<TemplateNotification, 'type' | 'sticky' | 'pre'> =
+    warnings.length > 0
+      ? { type: 'warning', sticky: true, pre: warnings.join(`\n\n`) }
+      : { type: 'message' };
 
   if (contexts.length === 0 && errors.length === 0) {
     if (orphanGoals.length > 0) {
       await setGoals(month, orphanGoals);
     }
     return {
-      type: 'message',
+      ...notice,
       message: 'templates-up-to-date',
     };
   }
@@ -372,7 +394,7 @@ async function processTemplate(
   await setGoals(month, goalList);
 
   return {
-    type: 'message',
+    ...notice,
     message: 'templates-applied',
     count: contexts.length,
   };
