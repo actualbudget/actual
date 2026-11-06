@@ -49,6 +49,7 @@ import {
 import type {
   Graph,
   GraphLayer,
+  SankeyNodeDrilldown,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -56,6 +57,7 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
+import { usePayees } from '#hooks/usePayees';
 import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -580,6 +582,27 @@ function SankeyInner({ widget }: SankeyInnerProps) {
   const { data: { grouped: groupedCategories = [] } = { grouped: [] } } =
     useCategories();
 
+  const { data: payees = [] } = usePayees();
+  // Every account has an auto-created "transfer payee" whose transfer_acct
+  // points back to it; a transfer transaction on one account uses the other
+  // account's transfer payee. Used below to restrict an account -> account
+  // link's drilldown to just the transfer transactions between those two
+  // accounts.
+  const transferPayeeIdsByAccount = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const payee of payees) {
+      if (payee.transfer_acct) {
+        const existing = map.get(payee.transfer_acct);
+        if (existing) {
+          existing.push(payee.id);
+        } else {
+          map.set(payee.transfer_acct, [payee.id]);
+        }
+      }
+    }
+    return map;
+  }, [payees]);
+
   const baseGraphParams = useMemo(() => {
     if (!datesInitialized) {
       return null;
@@ -702,6 +725,171 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     setStart(start);
     setEnd(end);
     setTimeFrameMode(mode);
+  }
+
+  // An aggregated "Other" bucket's drilldown lists every original node it
+  // absorbed (see SankeyNodeDrilldown.ids) instead of a single id.
+  function drilldownIds(drilldown: SankeyNodeDrilldown): string[] {
+    return drilldown.ids && drilldown.ids.length > 0
+      ? drilldown.ids
+      : [drilldown.id];
+  }
+
+  // Turns a single drilldown into an id filter condition, "is" for a real
+  // entity or "oneOf" for an aggregated "Other" bucket.
+  function buildSingleIdCondition(
+    drilldown: SankeyNodeDrilldown,
+  ): RuleConditionEntity {
+    const resolvedField =
+      drilldown.field === 'group' ? 'category_group' : drilldown.field;
+    const ids = drilldownIds(drilldown);
+    return ids.length > 1
+      ? ({
+          field: resolvedField,
+          op: 'oneOf',
+          value: ids,
+          type: 'id',
+        } satisfies RuleConditionEntity)
+      : ({
+          field: resolvedField,
+          op: 'is',
+          value: ids[0],
+          type: 'id',
+        } satisfies RuleConditionEntity);
+  }
+
+  // Turns one or two drilldowns (a node has one; a link has one per
+  // endpoint) into id filter conditions. Two drilldowns on different
+  // fields (e.g. a category -> account link) go together with "and". Two
+  // on the *same* "account" field (an account -> account transfer link)
+  // match only the source account's own ledger row for the transfer -
+  // a transfer is stored as one linked row per account, so showing both
+  // would just be the same transfer's two mirrored entries rather than
+  // two different transactions.
+  function buildIdConditions(
+    drilldowns: SankeyNodeDrilldown[],
+  ): RuleConditionEntity[] {
+    if (
+      drilldowns.length === 2 &&
+      drilldowns[0].field === drilldowns[1].field &&
+      drilldowns[0].field === 'account'
+    ) {
+      const [source, target] = drilldowns;
+      const targetPayeeIds = drilldownIds(target).flatMap(
+        id => transferPayeeIdsByAccount.get(id) ?? [],
+      );
+
+      const idCondition = buildSingleIdCondition(source);
+
+      if (targetPayeeIds.length === 0) {
+        return [idCondition];
+      }
+
+      return [
+        idCondition,
+        {
+          field: 'payee',
+          op: 'oneOf',
+          value: targetPayeeIds,
+          type: 'id',
+        } satisfies RuleConditionEntity,
+      ];
+    }
+
+    if (
+      drilldowns.length === 2 &&
+      drilldowns[0].field === drilldowns[1].field
+    ) {
+      const { field } = drilldowns[0];
+      return [
+        {
+          field: field === 'group' ? 'category_group' : field,
+          op: 'oneOf',
+          value: drilldowns.flatMap(drilldownIds),
+          type: 'id',
+        } satisfies RuleConditionEntity,
+      ];
+    }
+
+    return drilldowns.map(buildSingleIdCondition);
+  }
+
+  // Filters the accounts page down to the transactions behind a clicked
+  // node or link.
+  async function onDrilldownClick(drilldowns: SankeyNodeDrilldown[]) {
+    const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
+      earliestTransaction,
+      latestTransaction,
+      start,
+      end,
+    );
+
+    const drilldownConditions = [
+      ...buildIdConditions(drilldowns),
+      {
+        field: 'date',
+        op: 'gte',
+        value: monthUtils.firstDayOfMonth(boundedStart),
+        type: 'date',
+      } satisfies RuleConditionEntity,
+      {
+        field: 'date',
+        op: 'lte',
+        value: monthUtils.lastDayOfMonth(boundedEnd),
+        type: 'date',
+      } satisfies RuleConditionEntity,
+      // The chart's own totals only count on-budget accounts (see
+      // fetchCategoryData/fetchTransferData), so every drilldown needs the
+      // same restriction or it'll show more than the node/link it came from.
+      {
+        field: 'account',
+        op: 'onBudget',
+        value: '',
+        type: 'id',
+      } satisfies RuleConditionEntity,
+    ];
+
+    // The report's own conditions are "or"'d together as a single group.
+    // Flattening them into one list alongside the drilldown/date
+    // conditions - which always have to hold - and applying a single
+    // top-level "or" to everything would incorrectly let a drilldown match
+    // outside the clicked date range. Fold the report conditions into one
+    // composite condition first so the rest can always be "and"'d.
+    if (conditionsOp === 'or' && conditions.length > 1) {
+      const { filters: reportQueryFilters } = await send(
+        'make-filters-from-conditions',
+        { conditions },
+      );
+
+      const combinedReportCondition = {
+        field: 'date',
+        op: 'gte',
+        value: monthUtils.firstDayOfMonth(boundedStart),
+        type: 'date',
+        customName: t('Report filters'),
+        queryFilter: { $or: reportQueryFilters },
+      } satisfies RuleConditionEntity;
+
+      void navigate('/accounts', {
+        state: {
+          goBack: true,
+          filterConditions: [combinedReportCondition, ...drilldownConditions],
+          filterConditionsOp: 'and',
+        },
+      });
+      return;
+    }
+
+    // Even with zero or one report condition, the drilldown's own id/amount/
+    // date conditions are always multiple and must be "and"'d together, so
+    // "or" can never be passed through as the top-level op here.
+    void navigate('/accounts', {
+      state: {
+        goBack: true,
+        filterConditions: [...conditions, ...drilldownConditions],
+        filterConditionsOp: conditionsOp === 'or' ? 'and' : conditionsOp,
+      },
+    });
   }
 
   const updateDashboardWidgetMutation = useUpdateDashboardWidgetMutation();
@@ -956,9 +1144,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     }}
                   >
                     <SankeyGraph
-                      style={{ flexGrow: 1 }}
+                      style={{ flexGrow: 1, minHeight: 500 }}
                       data={displayData}
                       showPercentages={showPercentages}
+                      onDrilldownClick={
+                        graphMode === 'spent' ? onDrilldownClick : undefined
+                      }
                     />
                   </View>
                 ) : (
