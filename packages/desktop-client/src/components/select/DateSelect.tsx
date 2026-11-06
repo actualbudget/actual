@@ -304,6 +304,7 @@ type DateSelectProps = {
   value: string;
   isOpen?: boolean;
   embedded?: boolean;
+  autoFocus?: boolean;
   dateFormat: string;
   openOnFocus?: boolean;
   ref?: Ref<HTMLInputElement>;
@@ -322,6 +323,7 @@ function DateSelectDesktop({
   value: defaultValue,
   isOpen,
   embedded,
+  autoFocus,
   dateFormat = 'yyyy-MM-dd',
   openOnFocus = true,
   ref,
@@ -466,6 +468,7 @@ function DateSelectDesktop({
   return (
     <View {...containerProps}>
       <Input
+        autoFocus={autoFocus}
         id={id}
         {...inputProps}
         ref={mergedRef}
@@ -538,6 +541,7 @@ function DateSelectDesktop({
             attached={!!onTransferDateSyncChange}
             embedded={embedded}
             onUpdate={date => {
+              if (embedded) setValue(format(date, dateFormat));
               setSelectedValue(format(date, dateFormat));
               onUpdate?.(format(date, 'yyyy-MM-dd'));
             }}
@@ -578,6 +582,7 @@ function DateSelectMobile(props: DateSelectProps) {
         id={props.id}
         type="date"
         value={props.value ?? ''}
+        autoFocus={props.autoFocus}
         onChange={event => {
           props.onSelect(event.target.value);
         }}
