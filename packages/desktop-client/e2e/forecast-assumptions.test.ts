@@ -176,3 +176,97 @@ test('compares forecast assumptions and persists them in a widget', async ({
     await page.close();
   }
 });
+
+test('colors positive purchasing power independently of a negative baseline', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.goto('/');
+  await new ConfigurationPage(page).createTestFile();
+  const navigation = new Navigation(page);
+  const settings = await navigation.goToSettingsPage();
+  await settings.enableExperimentalFeature('Balance Forecast Report');
+  const reports = await navigation.goToReportsPage();
+  await reports.waitToLoad();
+  await reports.addWidget('Balance forecast');
+  await reports.goToBalanceForecastPage();
+  const forecast = await page.evaluate(async () => {
+    const accountId = await window.$send('account-create', {
+      name: 'Salary comparison',
+    });
+    await window.$send('transaction-add', {
+      id: crypto.randomUUID(),
+      account: accountId,
+      date: '2016-12-31',
+      amount: 200000,
+    });
+    const scheduleIds = [];
+    for (const [name, amount] of [
+      ['Salary', 100000],
+      ['Expenses', -110000],
+    ] as const) {
+      scheduleIds.push(
+        await window.$send('schedule/create', {
+          schedule: { name, posts_transaction: false },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: amount },
+            {
+              op: 'is',
+              field: 'date',
+              value: { start: '2017-01-01', frequency: 'monthly' },
+            },
+          ],
+        }),
+      );
+    }
+    const assumptions = {
+      anchorDate: '2016-01-01',
+      inflationRate: 0.03,
+      salaryGrowthRate: 1,
+      incomeScheduleIds: [scheduleIds[0]],
+    };
+    const widgetId = window.location.pathname.split('/').at(-1);
+    if (!widgetId) throw new Error('Forecast widget missing');
+    await window.$send('dashboard-update-widget', {
+      id: widgetId,
+      meta: {
+        accounts: [accountId],
+        source: 'schedules',
+        granularity: 'Monthly',
+        assumptions,
+        timeFrame: { start: '2017-01', end: '2018-12', mode: 'static' },
+      },
+    });
+    return window.$send('forecast/generate', {
+      accountIds: [accountId],
+      startDate: '2017-01-01',
+      endDate: '2018-12-31',
+      assumptions,
+    });
+  });
+  expect(forecast.dataPoints.some(point => point.balance < 0)).toBe(true);
+  expect(forecast.scenario?.dataPoints.every(point => point.balance > 0)).toBe(
+    true,
+  );
+  await page.reload();
+  const reportChart = page.locator('.recharts-wrapper');
+  await expect(
+    page.locator('#balance-forecast-line-gradient stop'),
+  ).toHaveAttribute('stop-color', 'var(--color-reportsChartFill)');
+  await expect(
+    reportChart.locator('line[stroke="var(--color-pageTextSubdued)"]'),
+  ).toHaveCount(1);
+  await expect(reportChart).toMatchThemeScreenshots();
+
+  await navigation.goToReportsPage();
+  const card = reports.pageContent.locator('.react-grid-item').last();
+  await card.scrollIntoViewIfNeeded();
+  await expect(
+    card.locator('[id^="balance-forecast-card-line-gradient-"] stop'),
+  ).toHaveAttribute('stop-color', 'var(--color-reportsChartFill)');
+  await expect(
+    card.locator('line[stroke="var(--color-pageTextSubdued)"]'),
+  ).toHaveCount(1);
+  await expect(card).toMatchThemeScreenshots();
+});

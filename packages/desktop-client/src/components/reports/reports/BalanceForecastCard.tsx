@@ -320,7 +320,7 @@ export function BalanceForecastCard({
                           <stop
                             offset="0%"
                             stopColor={
-                              hasNegativeBalance
+                              chartData.some(point => point.balance < 0)
                                 ? theme.reportsNumberNegative
                                 : theme.reportsChartFill
                             }
