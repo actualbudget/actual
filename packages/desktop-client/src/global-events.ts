@@ -6,7 +6,7 @@ import { t } from 'i18next';
 
 import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
-import { withBasePath } from './base-path';
+import { stripBasePath } from './base-path';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
@@ -129,9 +129,12 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
 
           if (
             window.location.href.replace(window.location.origin, '') !==
-            withBasePath(import.meta.env.BASE_URL, tagged.url)
+            tagged.url
           ) {
-            void window.__navigate(tagged.url);
+            const url = new URL(tagged.url, window.location.origin);
+            void window.__navigate(
+              `${stripBasePath(import.meta.env.BASE_URL, url.pathname)}${url.search}${url.hash}`,
+            );
             // This stops propagation of the undo event, which is
             // important because if we are changing URLs any existing
             // undo listeners on the current page don't need to be run
