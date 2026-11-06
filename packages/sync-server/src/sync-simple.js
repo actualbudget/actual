@@ -1,18 +1,11 @@
 import { existsSync } from 'node:fs';
-
-import {
-  create,
-  merkle,
-  MessageEnvelopeSchema,
-  Timestamp,
-} from '@actual-app/crdt';
+import fs from 'node:fs/promises';
 
 import { openDatabase } from './db';
-import messagesSql from './sql/messages.sql?raw';
+import { messagesSql, syncGroup } from './sync-core';
 import { getPathForGroupFile } from './util/paths';
 
-// Matches the client's Timestamp maxDrift; later messages break sync on other devices
-const MAX_FUTURE_DRIFT_MS = 5 * 60 * 1000;
+// Node storage for sync groups: one SQLite file per group in `userFiles`.
 
 function getGroupDb(groupId) {
   const path = getPathForGroupFile(groupId);
@@ -27,94 +20,15 @@ function getGroupDb(groupId) {
   return db;
 }
 
-function addMessages(db, messages) {
-  let returnValue;
-  db.transaction(() => {
-    let trie = getMerkle(db);
-
-    if (messages.length > 0) {
-      for (const msg of messages) {
-        const info = db.mutate(
-          `INSERT OR IGNORE INTO messages_binary (timestamp, is_encrypted, content)
-             VALUES (?, ?, ?)`,
-          [msg.timestamp, msg.isEncrypted ? 1 : 0, Buffer.from(msg.content)],
-        );
-
-        if (info.changes > 0) {
-          const timestamp = Timestamp.parse(msg.timestamp);
-          const error = getTimestampError(timestamp);
-          if (error) {
-            // Throwing rolls back the transaction
-            throw Object.assign(new Error(error), { rejectedReason: error });
-          }
-          trie = merkle.insert(trie, timestamp);
-        }
-      }
-    }
-
-    trie = merkle.prune(trie);
-
-    db.mutate(
-      'INSERT INTO messages_merkles (id, merkle) VALUES (1, ?) ON CONFLICT (id) DO UPDATE SET merkle = ?',
-      [JSON.stringify(trie), JSON.stringify(trie)],
-    );
-
-    returnValue = trie;
-  });
-
-  return returnValue;
-}
-
-function getTimestampError(timestamp) {
-  if (!timestamp) {
-    return 'invalid-timestamp';
-  }
-  if (timestamp.millis() - Date.now() > MAX_FUTURE_DRIFT_MS) {
-    return 'clock-drift';
-  }
-  return null;
-}
-
-function getMerkle(db) {
-  const rows = db.all('SELECT * FROM messages_merkles');
-
-  if (rows.length > 0) {
-    return JSON.parse(rows[0].merkle);
-  } else {
-    // No merkle trie exists yet (first sync of the app), so create a
-    // default one.
-    return {};
-  }
-}
-
 export function sync(messages, since, groupId) {
   const db = getGroupDb(groupId);
   try {
-    const newMessages = db.all(
-      `SELECT * FROM messages_binary
-           WHERE timestamp > ?
-           ORDER BY timestamp`,
-      [since],
-    );
-
-    const trie = addMessages(db, messages);
-
-    return {
-      trie,
-      newMessages: newMessages.map(msg =>
-        create(MessageEnvelopeSchema, {
-          timestamp: msg.timestamp,
-          isEncrypted: msg.is_encrypted === 1,
-          content: msg.content,
-        }),
-      ),
-    };
-  } catch (e) {
-    if (e.rejectedReason) {
-      return { error: e.rejectedReason };
-    }
-    throw e;
+    return syncGroup(db, messages, since);
   } finally {
     db.close();
   }
+}
+
+export async function deleteGroup(groupId) {
+  await fs.unlink(getPathForGroupFile(groupId));
 }

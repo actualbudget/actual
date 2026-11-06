@@ -51,8 +51,10 @@ const validateSessionMiddleware = async (
 };
 
 const requestLoggerMiddleware = expressWinston.logger({
+  // The formatter below builds the log line. A constant callback avoids
+  // template compilation for this message, which has no placeholders.
+  msg: () => 'HTTP request',
   transports: [new winston.transports.Console()],
-  msg: 'HTTP request',
   requestWhitelist: ['method', 'path'],
   responseWhitelist: ['statusCode'],
   requestFilter: (req, key) =>
