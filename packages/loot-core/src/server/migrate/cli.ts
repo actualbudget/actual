@@ -74,7 +74,7 @@ void withMigrationsDir(argv.m || getMigrationsDir(), async () => {
         path.join(__dirname, '../../../src/server/sql/init.sql'),
         'utf8',
       );
-      (await getDatabase()).exec(initSql);
+      sqlite.execQuery(await getDatabase(), initSql);
       break;
     case 'migrate':
       const applied = await migrate(await getDatabase());

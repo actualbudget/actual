@@ -19,6 +19,7 @@ import * as statements from './statements';
 // Mock getSheetValue and getCategories
 vi.mock('./actions', () => ({
   getCategoryAverage: vi.fn(),
+  getCategoryWeeklyAverage: vi.fn(),
   getSheetValue: vi.fn(),
   getSheetBoolean: vi.fn(),
   isTrackingBudget: vi.fn(),
@@ -675,6 +676,29 @@ describe('CategoryTemplateContext', () => {
     afterEach(() => {
       global.currentMonth = originalCurrentMonth;
     });
+
+    // January 2024 has five Mondays but only four Fridays.
+    it.each([
+      ['monday', 1250],
+      ['friday', 1000],
+    ] as const)(
+      'budgets a weekly average for every %s in the month',
+      async (weekday, expected) => {
+        vi.mocked(actions.getCategoryWeeklyAverage).mockResolvedValue(-250);
+
+        const result = await CategoryTemplateContext.runAverage(
+          {
+            type: 'weeklyAverage',
+            numWeeks: 4,
+            weekday,
+            directive: 'template',
+            priority: 1,
+          },
+          instance,
+        );
+        expect(result).toBe(expected);
+      },
+    );
 
     it('should calculate average of 3 months', async () => {
       const template: Template = {

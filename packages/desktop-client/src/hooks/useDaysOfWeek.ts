@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 export function useDaysOfWeek() {
   const { t } = useTranslation();
 
-  const daysOfWeek = {
+  const daysOfWeek: Record<number, string> = {
     0: t('Sunday'),
     1: t('Monday'),
     2: t('Tuesday'),
@@ -12,7 +12,7 @@ export function useDaysOfWeek() {
     4: t('Thursday'),
     5: t('Friday'),
     6: t('Saturday'),
-  } satisfies Record<number, string>;
+  };
 
   return daysOfWeek;
 }

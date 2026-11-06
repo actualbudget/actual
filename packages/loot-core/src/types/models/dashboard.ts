@@ -5,6 +5,7 @@ import type { RuleConditionEntity } from './rule';
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: boolean;
 };
 
@@ -494,5 +495,7 @@ export type BalanceForecastWidget = AbstractWidget<
     yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
     series?: ForecastSeries[];
+    // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
+    monthsFromToday?: number;
   } | null
 >;
