@@ -34,10 +34,10 @@ export function ForecastAssumptionsControls({
     assumptions?.anchorDate ?? currentDay(),
   );
   const [inflation, setInflation] = useState(
-    String((assumptions?.inflationRate ?? 0) * 100),
+    String(Number(((assumptions?.inflationRate ?? 0) * 100).toFixed(4))),
   );
   const [salaryGrowth, setSalaryGrowth] = useState(
-    String((assumptions?.salaryGrowthRate ?? 0) * 100),
+    String(Number(((assumptions?.salaryGrowthRate ?? 0) * 100).toFixed(4))),
   );
   const [selectedIds, setSelectedIds] = useState(
     assumptions?.incomeScheduleIds ?? [],
