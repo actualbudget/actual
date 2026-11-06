@@ -12,6 +12,8 @@ test.describe('Onboarding', () => {
   });
 
   test('checks the page visuals', async ({ electronPage }) => {
+    // Electron windows share the system pointer; keep it off the Start button.
+    await electronPage.mouse.move(0, 0);
     await expect(electronPage).toHaveScreenshot();
     await configurationPage.clickOnNoServer();
     await expect(electronPage).toHaveScreenshot();
