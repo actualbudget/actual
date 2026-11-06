@@ -1,3 +1,4 @@
+import type { BudgetType } from '@actual-app/core/server/prefs';
 import { integerToAmount } from '@actual-app/core/shared/util';
 // Use the browser ESM build: the default `csv-stringify/sync` entry pulls in
 // the Node build (which imports `stream`), breaking the lazy-loaded reports
@@ -5,31 +6,37 @@ import { integerToAmount } from '@actual-app/core/shared/util';
 import { stringify as csvStringify } from 'csv-stringify/browser/esm/sync';
 import { t } from 'i18next';
 
-type IntervalRow = {
-  date: string;
-  budgeted: number;
-  spent: number;
-  balance: number;
-  overspendingAdjustment: number;
-};
+import type { BudgetAnalysisIntervalData } from './budget-analysis-spreadsheet';
 
 const FORMULA_TRIGGERS = /^[=+\-@\t\r]/;
 
-export function buildBudgetAnalysisCsv(rows: IntervalRow[]): string {
-  const month = t('Month');
-  const budgeted = t('Budgeted');
-  const spent = t('Spent');
-  const overspendingAdjustment = t('Overspending Adjustment');
-  const balance = t('Balance');
+export function buildBudgetAnalysisCsv(
+  rows: BudgetAnalysisIntervalData[],
+  budgetType: BudgetType,
+): string {
+  const isTracking = budgetType === 'tracking';
 
-  const columns = [month, budgeted, spent, overspendingAdjustment, balance];
+  const columns = [
+    t('Month'),
+    t('Budgeted'),
+    t('Spent'),
+    ...(isTracking
+      ? [t('Variance'), t('Cumulative Variance')]
+      : [t('Overspending Adjustment')]),
+    t('Balance'),
+  ];
 
   return csvStringify(
     rows.map(row => [
       row.date,
       integerToAmount(row.budgeted),
       integerToAmount(row.spent),
-      integerToAmount(row.overspendingAdjustment),
+      ...(isTracking
+        ? [
+            integerToAmount(row.variance),
+            integerToAmount(row.cumulativeVariance),
+          ]
+        : [integerToAmount(row.overspendingAdjustment)]),
       integerToAmount(row.balance),
     ]),
     {

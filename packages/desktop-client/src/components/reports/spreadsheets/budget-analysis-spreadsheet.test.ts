@@ -1,9 +1,10 @@
+import type { BudgetType } from '@actual-app/core/server/prefs';
 import { rangeInclusive } from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import {
+  calculateBudgetAnalysis,
   getLastSelectableMonth,
-  getNextRunningBalance,
   isBaseCategory,
   summarizeMonthCategories,
 } from './budget-analysis-spreadsheet';
@@ -135,7 +136,7 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       })) as BudgetMonthCell[];
 
     it('reports no budget data when every cell is empty', () => {
-      const result = summarizeMonthCategories([], [visibleExpense]);
+      const result = summarizeMonthCategories([], [visibleExpense], 'envelope');
 
       expect(result).toEqual({
         budgeted: 0,
@@ -147,10 +148,10 @@ describe('createBudgetAnalysisSpreadsheet', () => {
     });
 
     it('reports no budget data for a never-budgeted month', () => {
-      // `envelope-budget-month` emits a cell for every category in every
-      // month, so an untouched future month arrives as present-but-zero
-      // cells rather than as missing ones. Presence alone cannot distinguish
-      // it from a real month.
+      // Both `envelope-budget-month` and `tracking-budget-month` emit a cell
+      // for every category in every month, so an untouched future month
+      // arrives as present-but-zero cells rather than as missing ones.
+      // Presence alone cannot distinguish it from a real month.
       const result = summarizeMonthCategories(
         cells({
           'budget-c1': 0,
@@ -159,56 +160,110 @@ describe('createBudgetAnalysisSpreadsheet', () => {
           'carryover-c1': false,
         }),
         [visibleExpense],
+        'envelope',
       );
 
       expect(result.hasBudgetData).toBe(false);
     });
 
-    it('carries a positive balance to the next month', () => {
+    it('treats a null cell value as zero', () => {
       const result = summarizeMonthCategories(
-        cells({
-          'budget-c1': 10000,
-          'sum-amount-c1': -4000,
-          'leftover-c1': 6000,
-          'carryover-c1': false,
-        }),
+        [
+          { name: 'budget202601!leftover-c1', value: null },
+        ] as unknown as BudgetMonthCell[],
         [visibleExpense],
+        'tracking',
       );
 
-      expect(result.carryoverToNextMonth).toBe(6000);
-      expect(result.overspendingThisMonth).toBe(0);
-      expect(result.hasBudgetData).toBe(true);
+      expect(result.carryoverToNextMonth).toBe(0);
+      expect(result.hasBudgetData).toBe(false);
     });
 
-    it('treats an overspend without carryover as an overspending adjustment', () => {
+    it('carries a positive balance without carryover only under envelope budgeting', () => {
+      const values = cells({
+        'budget-c1': 10000,
+        'sum-amount-c1': -4000,
+        'leftover-c1': 6000,
+        'carryover-c1': false,
+      });
+
+      expect(
+        summarizeMonthCategories(values, [visibleExpense], 'envelope')
+          .carryoverToNextMonth,
+      ).toBe(6000);
+      expect(
+        summarizeMonthCategories(values, [visibleExpense], 'tracking')
+          .carryoverToNextMonth,
+      ).toBe(0);
+    });
+
+    it.each(['envelope', 'tracking'] as const)(
+      'carries a negative balance when carryover is enabled (%s)',
+      budgetType => {
+        const result = summarizeMonthCategories(
+          cells({ 'leftover-c1': -10000, 'carryover-c1': true }),
+          [visibleExpense],
+          budgetType,
+        );
+
+        expect(result.carryoverToNextMonth).toBe(-10000);
+        expect(result.overspendingThisMonth).toBe(0);
+      },
+    );
+
+    it('does not match a cell for another category with the same suffix', () => {
       const result = summarizeMonthCategories(
-        cells({
-          'budget-c1': 0,
-          'sum-amount-c1': -10000,
-          'leftover-c1': -10000,
-          'carryover-c1': false,
-        }),
+        cells({ 'group-budget-c1': 999, 'leftover-pos-c1': 999 }),
         [visibleExpense],
+        'envelope',
+      );
+
+      expect(result.budgeted).toBe(0);
+      expect(result.carryoverToNextMonth).toBe(0);
+    });
+
+    it('treats an overspend without carryover as an overspending adjustment under envelope budgeting', () => {
+      const result = summarizeMonthCategories(
+        cells({ 'leftover-c1': -10000, 'carryover-c1': false }),
+        [visibleExpense],
+        'envelope',
       );
 
       expect(result.carryoverToNextMonth).toBe(0);
       expect(result.overspendingThisMonth).toBe(-10000);
-      expect(result.hasBudgetData).toBe(true);
     });
 
-    it('carries a negative balance forward when carryover is enabled', () => {
+    it('has no overspending adjustment under tracking budgeting', () => {
       const result = summarizeMonthCategories(
-        cells({
-          'budget-c1': 0,
-          'sum-amount-c1': -10000,
-          'leftover-c1': -10000,
-          'carryover-c1': true,
-        }),
+        cells({ 'leftover-c1': -10000, 'carryover-c1': false }),
         [visibleExpense],
+        'tracking',
       );
 
-      expect(result.carryoverToNextMonth).toBe(-10000);
+      expect(result.carryoverToNextMonth).toBe(0);
       expect(result.overspendingThisMonth).toBe(0);
+    });
+
+    it('does not count an overspend with carryover enabled as an adjustment', () => {
+      const result = summarizeMonthCategories(
+        cells({ 'leftover-c1': -10000, 'carryover-c1': true }),
+        [visibleExpense],
+        'envelope',
+      );
+
+      expect(result.overspendingThisMonth).toBe(0);
+    });
+
+    it('does not count a zero or positive balance as an overspend', () => {
+      for (const leftover of [0, 5000]) {
+        const result = summarizeMonthCategories(
+          cells({ 'leftover-c1': leftover, 'carryover-c1': false }),
+          [visibleExpense],
+          'envelope',
+        );
+
+        expect(result.overspendingThisMonth).toBe(0);
+      }
     });
 
     it('only counts the categories it is given', () => {
@@ -220,76 +275,244 @@ describe('createBudgetAnalysisSpreadsheet', () => {
           'leftover-c2': 5000,
         }),
         [visibleExpense],
+        'envelope',
       );
 
       expect(result.budgeted).toBe(10000);
       expect(result.carryoverToNextMonth).toBe(10000);
     });
   });
+});
 
-  describe('getNextRunningBalance', () => {
-    it('hands off only what carries over when the month has data', () => {
-      expect(
-        getNextRunningBalance({
-          hasBudgetData: true,
-          carryoverToNextMonth: 6000,
-          runningBalance: 20000,
-        }),
-      ).toBe(6000);
+describe('calculateBudgetAnalysis', () => {
+  type CategoryValues = {
+    budgeted?: number;
+    spent?: number;
+    balance?: number;
+    carryover?: boolean;
+  };
+
+  function categoryCells(
+    id: string,
+    { budgeted = 0, spent = 0, balance = 0, carryover = false }: CategoryValues,
+  ) {
+    return [
+      { name: `budget202601!budget-${id}`, value: budgeted },
+      { name: `budget202601!sum-amount-${id}`, value: spent },
+      { name: `budget202601!leftover-${id}`, value: balance },
+      { name: `budget202601!carryover-${id}`, value: carryover },
+    ] as BudgetMonthCell[];
+  }
+
+  const food = makeCategory({ id: 'food', name: 'Food' });
+  const rent = makeCategory({ id: 'rent', name: 'Rent' });
+
+  function calculateFrom(
+    budgetType: BudgetType,
+    previous: CategoryValues,
+    ...months: CategoryValues[]
+  ) {
+    return calculateBudgetAnalysis({
+      budgetType,
+      categories: [food],
+      previousMonthCells: categoryCells('food', previous),
+      months: months.map((values, index) => ({
+        date: `2026-0${index + 1}`,
+        cells: categoryCells('food', values),
+      })),
+    });
+  }
+
+  function calculate(budgetType: BudgetType, ...months: CategoryValues[]) {
+    return calculateFrom(budgetType, {}, ...months);
+  }
+
+  describe.each(['envelope', 'tracking'] as const)('%s budgets', budgetType => {
+    it('passes a carried balance through months with no budget data', () => {
+      const { intervalData } = calculate(
+        budgetType,
+        { budgeted: 100, spent: -50, balance: 50, carryover: true },
+        {},
+        {},
+      );
+
+      expect(intervalData.map(month => month.balance)).toEqual([50, 50, 50]);
     });
 
-    it('resets a non-carryover overspend instead of dragging it forward', () => {
-      // The overspend surfaces as next month's overspending adjustment, so it
-      // must not also reduce the running balance.
-      expect(
-        getNextRunningBalance({
-          hasBudgetData: true,
-          carryoverToNextMonth: 0,
-          runningBalance: 20000,
-        }),
-      ).toBe(0);
+    it('passes a carried balance into a period that starts with no budget data', () => {
+      const { intervalData } = calculateFrom(
+        budgetType,
+        { balance: 75, carryover: true },
+        {},
+      );
+
+      expect(intervalData[0].balance).toBe(75);
     });
 
-    it('passes the running balance through months with no budget data', () => {
-      expect(
-        getNextRunningBalance({
-          hasBudgetData: false,
-          carryoverToNextMonth: 0,
-          runningBalance: 20000,
-        }),
-      ).toBe(20000);
+    it('resets an overspend without carryover in an inactive month', () => {
+      const { intervalData } = calculate(
+        budgetType,
+        { budgeted: 100, spent: -150, balance: -50 },
+        {},
+      );
+
+      expect(intervalData.map(month => month.balance)).toEqual([-50, 0]);
     });
 
-    it('preserves a balance across a run of empty future months', () => {
-      let runningBalance = 15000;
-      for (let i = 0; i < 6; i++) {
-        runningBalance = getNextRunningBalance({
-          hasBudgetData: false,
-          carryoverToNextMonth: 0,
-          runningBalance,
-        });
-      }
+    it('reports a zero balance for a period with no budget data', () => {
+      const { intervalData } = calculate(budgetType, {}, {});
 
-      expect(runningBalance).toBe(15000);
+      expect(intervalData.map(month => month.balance)).toEqual([0, 0]);
     });
 
-    it('does not carry a non-carryover overspend into later empty months', () => {
-      // Overspend of -10000 in a category without carryover enabled.
-      let runningBalance = getNextRunningBalance({
-        hasBudgetData: true,
-        carryoverToNextMonth: 0,
-        runningBalance: 0,
+    it('sums balances across categories with different carryover settings', () => {
+      const { intervalData } = calculateBudgetAnalysis({
+        budgetType,
+        categories: [food, rent],
+        previousMonthCells: [
+          ...categoryCells('food', { balance: 30, carryover: true }),
+          ...categoryCells('rent', { balance: -70, carryover: false }),
+        ],
+        months: [
+          {
+            date: '2026-01',
+            cells: [
+              ...categoryCells('food', {
+                budgeted: 100,
+                spent: -100,
+                balance: 30,
+              }),
+              ...categoryCells('rent', { budgeted: 100, spent: -100 }),
+            ],
+          },
+        ],
       });
 
-      for (let i = 0; i < 3; i++) {
-        runningBalance = getNextRunningBalance({
-          hasBudgetData: false,
-          carryoverToNextMonth: 0,
-          runningBalance,
-        });
-      }
-
-      expect(runningBalance).toBe(0);
+      expect(intervalData[0].balance).toBe(30);
     });
+
+    it('reports variance for each month and as a running total', () => {
+      const data = calculate(
+        budgetType,
+        { budgeted: 100, spent: -130, balance: -30 },
+        { budgeted: 100, spent: -60, balance: 40 },
+        { budgeted: 100, spent: -100, balance: 0 },
+      );
+
+      expect(data.intervalData.map(month => month.variance)).toEqual([
+        -30, 40, 0,
+      ]);
+      expect(data.intervalData.map(month => month.cumulativeVariance)).toEqual([
+        -30, 10, 10,
+      ]);
+      expect(data.totalVariance).toBe(10);
+    });
+
+    it('leaves a balance carried in from before the period out of the variance', () => {
+      const { totalVariance, intervalData } = calculateFrom(
+        budgetType,
+        { balance: 500, carryover: true },
+        { budgeted: 100, spent: -100, balance: 500 },
+      );
+
+      expect(intervalData[0].balance).toBe(500);
+      expect(totalVariance).toBe(0);
+    });
+
+    it('treats a spending refund as favourable', () => {
+      const { totalVariance } = calculate(budgetType, {
+        budgeted: 0,
+        spent: 25,
+        balance: 25,
+      });
+
+      expect(totalVariance).toBe(25);
+    });
+
+    it('keeps the running variance flat through months with no budget data', () => {
+      const { intervalData } = calculate(
+        budgetType,
+        { budgeted: 100, spent: -150, balance: -50 },
+        {},
+      );
+
+      expect(intervalData.map(month => month.cumulativeVariance)).toEqual([
+        -50, -50,
+      ]);
+    });
+
+    it('returns zero totals for an empty period', () => {
+      const data = calculate(budgetType);
+
+      expect(data.intervalData).toEqual([]);
+      expect(data.totalVariance).toBe(0);
+      expect(data.budgetType).toBe(budgetType);
+    });
+  });
+
+  it('resets a positive tracking balance in an inactive month when carryover is off', () => {
+    const { intervalData } = calculate(
+      'tracking',
+      { budgeted: 100, spent: -50, balance: 50 },
+      {},
+    );
+
+    expect(intervalData.map(month => month.balance)).toEqual([50, 0]);
+  });
+
+  it('matches the balance a tracking budget computes for each month', () => {
+    // leftover[m] = budget[m] + spent[m] + (carryover[m-1] ? leftover[m-1] : 0)
+    const months = [
+      { budgeted: 500, spent: -300, carryover: true },
+      { budgeted: 500, spent: -900, carryover: false },
+      { budgeted: 500, spent: -500, carryover: true },
+      { budgeted: 0, spent: -25, carryover: false },
+    ];
+    let carried = 0;
+    const withLeftovers = months.map(month => {
+      const balance = month.budgeted + month.spent + carried;
+      carried = month.carryover ? balance : 0;
+      return { ...month, balance };
+    });
+
+    const { intervalData } = calculate('tracking', ...withLeftovers);
+
+    expect(intervalData.map(month => month.balance)).toEqual(
+      withLeftovers.map(month => month.balance),
+    );
+  });
+
+  it('carries a positive envelope balance forward without carryover', () => {
+    const { intervalData } = calculate(
+      'envelope',
+      { budgeted: 100, spent: -60, balance: 40 },
+      { budgeted: 0, spent: -10, balance: 30 },
+    );
+
+    expect(intervalData.map(month => month.balance)).toEqual([40, 30]);
+  });
+
+  it('surfaces an envelope overspend as the next month adjustment', () => {
+    const data = calculate(
+      'envelope',
+      { budgeted: 100, spent: -150, balance: -50 },
+      { budgeted: 100, spent: -100, balance: 0 },
+    );
+
+    expect(data.intervalData[0].overspendingAdjustment).toBe(0);
+    expect(data.intervalData[1].overspendingAdjustment).toBe(50);
+    expect(data.intervalData[1].balance).toBe(0);
+    expect(data.totalOverspendingAdjustment).toBe(50);
+  });
+
+  it('has no overspending adjustment on tracking budgets', () => {
+    const data = calculate(
+      'tracking',
+      { budgeted: 100, spent: -150, balance: -50 },
+      { budgeted: 100, spent: -100, balance: 0 },
+    );
+
+    expect(data.intervalData[1].overspendingAdjustment).toBe(0);
+    expect(data.totalOverspendingAdjustment).toBe(0);
   });
 });
