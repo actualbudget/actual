@@ -5,6 +5,7 @@ import type {
   MonteCarloIncomeStreamMeta,
   MonteCarloInvestmentPhaseMeta,
   MonteCarloInvestmentTransition,
+  MonteCarloLumpSumMeta,
   MonteCarloPotMeta,
   MonteCarloReturnModel,
   MonteCarloSpendingPhaseMeta,
@@ -515,6 +516,52 @@ export function createMonteCarloIncomeStream(
   };
 }
 
+/**
+ * One single withdrawal taken at an age on top of that year's spending -
+ * a house deposit, a car, a pension's tax-free lump sum. The amount is
+ * what you receive, net of tax, and the lump sum carries its own tax
+ * treatment rather than the pot's, so a tax-free slice of a taxable
+ * pension can be modelled. It is extra money the year must deliver: the
+ * withdrawal rules and the minimum spending floor never touch it.
+ */
+export type MonteCarloLumpSum = {
+  id: string;
+  name: string;
+  /** Age the money is taken; the year is age - currentAge + 1 */
+  age: number;
+  /** Net amount received in minor units, in today's money */
+  amount: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation: boolean;
+  /**
+   * Pot drawn first (if accessible that year); the rest, or all of it
+   * with null, follows the withdrawal order
+   */
+  sourcePotId: string | null;
+  /** Flat tax model: effective tax rate on the lump sum (decimal fraction) */
+  taxRate: number;
+  /** Bands tax model: share of the lump sum that counts as taxable */
+  taxableFraction: number;
+};
+
+export function createMonteCarloLumpSum(
+  id: string,
+  age: number,
+): MonteCarloLumpSum {
+  return {
+    id,
+    name: '',
+    age,
+    amount: 1_000_000, // 10,000.00 in minor units
+    adjustsWithInflation: true,
+    sourcePotId: null,
+    // Untaxed until the user says otherwise: the one-offs people reach
+    // for first (pension tax-free cash, ISA money, savings) carry no tax
+    taxRate: 0,
+    taxableFraction: 0,
+  };
+}
+
 /** One invested pot with its own balance and return assumptions */
 /** The fields that describe what a pot is invested in and what it costs */
 export type MonteCarloInvestmentFields = Pick<
@@ -766,6 +813,8 @@ export type MonteCarloConfig = {
   contributions: MonteCarloContribution[];
   /** Recurring yearly income that pays for spending before the pots */
   incomeStreams: MonteCarloIncomeStream[];
+  /** Single withdrawals taken at an age on top of the spending */
+  lumpSums: MonteCarloLumpSum[];
   /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
   inflationMean: number | null;
   /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
@@ -792,6 +841,7 @@ export const MONTE_CARLO_DEFAULTS: MonteCarloConfig = {
   spendingPhases: [createMonteCarloSpendingPhase('phase-1')],
   contributions: [],
   incomeStreams: [],
+  lumpSums: [],
   inflationMean: 0.025,
   inflationStdDev: 0.02,
   taxModel: 'flat',
@@ -948,6 +998,32 @@ function incomeStreamFromMeta(
   };
 }
 
+function hasLumpSumAge(
+  lumpSumMeta: MonteCarloLumpSumMeta,
+): lumpSumMeta is MonteCarloLumpSumMeta & { age: number } {
+  return Number.isFinite(lumpSumMeta.age);
+}
+
+function lumpSumFromMeta(
+  lumpSumMeta: MonteCarloLumpSumMeta & { age: number },
+  index: number,
+): MonteCarloLumpSum {
+  const defaults = createMonteCarloLumpSum(
+    lumpSumMeta.id || `lump-sum-${index + 1}`,
+    lumpSumMeta.age,
+  );
+  return {
+    ...defaults,
+    name: lumpSumMeta.name ?? defaults.name,
+    amount: lumpSumMeta.amount ?? defaults.amount,
+    adjustsWithInflation:
+      lumpSumMeta.adjustsWithInflation ?? defaults.adjustsWithInflation,
+    sourcePotId: lumpSumMeta.sourcePotId ?? null,
+    taxRate: lumpSumMeta.taxRate ?? defaults.taxRate,
+    taxableFraction: lumpSumMeta.taxableFraction ?? defaults.taxableFraction,
+  };
+}
+
 export function monteCarloConfigFromMeta(
   meta: MonteCarloWidget['meta'] | undefined,
 ): MonteCarloConfig {
@@ -970,6 +1046,9 @@ export function monteCarloConfigFromMeta(
     incomeStreams: meta?.incomeStreams?.length
       ? meta.incomeStreams.map(incomeStreamFromMeta)
       : [],
+    // A lump sum without an age has no year to land in, so it is dropped
+    // rather than guessed
+    lumpSums: (meta?.lumpSums ?? []).filter(hasLumpSumAge).map(lumpSumFromMeta),
     inflationMean:
       meta?.inflationMean !== undefined
         ? meta.inflationMean
@@ -1100,8 +1179,8 @@ export type MonteCarloRunDetailRow = {
   unspentIncome: number;
   /**
    * Unspent income saved into the surplus pot this year. Part of the
-   * balance chain: start + contributions + surplusSaved - withdrawal +
-   * growth - fees = end. 0 without a surplus pot
+   * balance chain: start + contributions + surplusSaved - withdrawal -
+   * lumpSumWithdrawal + growth - fees = end. 0 without a surplus pot
    */
   surplusSaved: number;
   /** Contributions paid in at the start of this year */
@@ -1128,6 +1207,23 @@ export type MonteCarloRunDetailRow = {
   potTaxables: number[];
   /** Tax paid out of this year's gross withdrawal (0 with no tax model) */
   taxPaid: number;
+  /**
+   * Gross taken for the year's one-off withdrawals, on top of the
+   * withdrawal above (0 when none fell in this year). Part of the balance
+   * chain: start + contributions + surplusSaved - withdrawal -
+   * lumpSumWithdrawal + growth - fees = end
+   */
+  lumpSumWithdrawal: number;
+  /** Tax paid out of that gross */
+  lumpSumTax: number;
+  /**
+   * The net amount each configured lump sum called for this year, in the
+   * order the lump sums are configured (zero outside its year). On a
+   * failure year this is what was asked for, not what was delivered
+   */
+  lumpSumAmounts: number[];
+  /** How much of the one-off gross each pot funded, same order as pots */
+  potLumpSums: number[];
   /** Management fees charged at the end of this year */
   feesPaid: number;
   /** Fee each pot was charged at the end of the year, same order as pots */
@@ -1361,11 +1457,16 @@ export function runMonteCarloSimulation(
   if (taxBands.length === 0 || taxBands[0].from > 0) {
     taxBands.unshift({ from: 0, rate: 0 });
   }
-  const hasTax =
-    taxModel === 'bands'
-      ? taxBands.some(band => band.rate > 0) &&
-        potTaxableFractions.some(fraction => fraction > 0)
-      : potTaxRates.some(rate => rate > 0);
+  const hasBandTax = taxBands.some(band => band.rate > 0);
+  // Whether a group of flows (pots, income streams, lump sums) can owe
+  // tax: under the bands model some band must charge and some flow be
+  // taxable; under the flat model some flow needs a rate
+  function hasAnyTax(rates: number[], taxableFractions: number[]) {
+    return taxModel === 'bands'
+      ? hasBandTax && taxableFractions.some(fraction => fraction > 0)
+      : rates.some(rate => rate > 0);
+  }
+  const hasTax = hasAnyTax(potTaxRates, potTaxableFractions);
 
   // Income streams are taxed the same two ways as pots. Under the bands
   // model their taxable income fills the lower bands first, so the year's
@@ -1378,11 +1479,7 @@ export function runMonteCarloSimulation(
   const incomeTaxableFractions = incomeStreams.map(incomeStream =>
     clamp(incomeStream.taxableFraction, 0, 1),
   );
-  const hasIncomeTax =
-    taxModel === 'bands'
-      ? taxBands.some(band => band.rate > 0) &&
-        incomeTaxableFractions.some(fraction => fraction > 0)
-      : incomeTaxRates.some(rate => rate > 0);
+  const hasIncomeTax = hasAnyTax(incomeTaxRates, incomeTaxableFractions);
 
   // Worst-case share of a gross withdrawal lost to tax; used to skip the
   // per-year shortfall precheck when capacity is comfortably sufficient
@@ -1410,11 +1507,42 @@ export function runMonteCarloSimulation(
     return tax;
   }
 
-  // Tax due on the takes currently in potTakes. Band thresholds are in
-  // today's money, so taxable income is deflated by the replay's inflation
-  // path before banding (thresholds effectively rise with inflation).
-  // Under the bands model the year's income has already used up the
-  // lower bands, so the takes are taxed as the slice above it.
+  // Band tax on a nominal taxable slice taken on top of `taxableBase`
+  // (nominal taxable income already in the bands this year). Band
+  // thresholds are in today's money, so both are deflated by the replay's
+  // inflation path before banding (thresholds effectively rise with
+  // inflation) and the tax is reinflated
+  function bandTaxOnSlice(
+    taxableSlice: number,
+    taxableBase: number,
+    cumulativeInflationNow: number,
+  ) {
+    const baseToday = taxableBase / cumulativeInflationNow;
+    return (
+      (bandTax(baseToday + taxableSlice / cumulativeInflationNow) -
+        bandTax(baseToday)) *
+      cumulativeInflationNow
+    );
+  }
+
+  // Solves the gross that delivers `net` after tax: g = net + tax(g).
+  // Tax is piecewise linear in g with marginal rates < 1, so this fixed
+  // point converges geometrically
+  function solveGross(net: number, taxForGross: (gross: number) => number) {
+    let gross = net;
+    for (let iteration = 0; iteration < 40; iteration++) {
+      const next = net + taxForGross(gross);
+      if (Math.abs(next - gross) <= 1e-7 * Math.max(1, next)) {
+        return next;
+      }
+      gross = next;
+    }
+    return gross;
+  }
+
+  // Tax due on the takes currently in potTakes. Under the bands model the
+  // year's income has already used up the lower bands, so the takes are
+  // taxed as the slice above it.
   function taxForTakes(
     cumulativeInflationNow: number,
     taxableIncomeBase: number,
@@ -1433,12 +1561,7 @@ export function runMonteCarloSimulation(
     for (let potIndex = 0; potIndex < potCount; potIndex++) {
       taxable += potTakes[potIndex] * potTaxableFractions[potIndex];
     }
-    const baseToday = taxableIncomeBase / cumulativeInflationNow;
-    return (
-      (bandTax(baseToday + taxable / cumulativeInflationNow) -
-        bandTax(baseToday)) *
-      cumulativeInflationNow
-    );
+    return bandTaxOnSlice(taxable, taxableIncomeBase, cumulativeInflationNow);
   }
 
   // The slice of each pot's take (currently in potTakes) that was assessed
@@ -1784,6 +1907,142 @@ export function runMonteCarloSimulation(
       contributionSchedule.adjustedByYear[year].some(amount => amount > 0),
   );
   const incomeSchedule = scheduleByYear(incomeStreams);
+
+  // --- One-off withdrawals ----------------------------------------------
+  // Settled each year before the regular withdrawal: the chosen pot first,
+  // then the withdrawal order, grossed up for the lump sum's own tax
+  // treatment. A lump sum is extra money the year must deliver - the
+  // rules, the floor and the planned spending never see it.
+  const lumpSums = params.lumpSums ?? [];
+  const lumpSumCount = lumpSums.length;
+  // Unknown pots (e.g. a deleted one) fall back to the withdrawal order
+  const lumpSumSourcePotIndex = lumpSums.map(lumpSum =>
+    lumpSum.sourcePotId == null
+      ? -1
+      : pots.findIndex(pot => pot.id === lumpSum.sourcePotId),
+  );
+  const lumpSumTaxRates = lumpSums.map(lumpSum =>
+    clamp(lumpSum.taxRate, 0, MAX_WITHDRAWAL_TAX_RATE),
+  );
+  const lumpSumTaxableFractions = lumpSums.map(lumpSum =>
+    clamp(lumpSum.taxableFraction, 0, 1),
+  );
+  const hasLumpSumTax = hasAnyTax(lumpSumTaxRates, lumpSumTaxableFractions);
+  // A lump sum is a one-year window; the age is rounded like access ages
+  // so a typed fraction still lands on a year
+  const lumpSumSchedule = scheduleByYear(
+    lumpSums.map(lumpSum => ({
+      fromAge: Math.round(lumpSum.age),
+      toAge: Math.round(lumpSum.age),
+      annualAmount: lumpSum.amount,
+      adjustsWithInflation: lumpSum.adjustsWithInflation,
+    })),
+  );
+  const hasLumpSumByYear = lumpSumSchedule.flatByYear.map(
+    (flat, year) =>
+      flat.some(amount => amount > 0) ||
+      lumpSumSchedule.adjustedByYear[year].some(amount => amount > 0),
+  );
+  const hasLumpSums = hasLumpSumByYear.some(Boolean);
+  // Scratch: the year's requested net per lump sum, and the gross each
+  // pot funded of the year's lump sums
+  const yearLumpSumNets = new Float64Array(lumpSumCount);
+  const lumpSumTakes = new Float64Array(potCount);
+
+  // Fills yearLumpSumNets for the year at the given price level and
+  // returns the total net requested
+  function settleLumpSumNets(year: number, cumulativeInflationNow: number) {
+    const flat = lumpSumSchedule.flatByYear[year];
+    const adjusted = lumpSumSchedule.adjustedByYear[year];
+    let totalNet = 0;
+    for (let lumpSumIndex = 0; lumpSumIndex < lumpSumCount; lumpSumIndex++) {
+      const net =
+        flat[lumpSumIndex] + adjusted[lumpSumIndex] * cumulativeInflationNow;
+      yearLumpSumNets[lumpSumIndex] = net;
+      totalNet += net;
+    }
+    return totalNet;
+  }
+
+  // Tax on a lump sum's gross taken on top of `taxableBase` (nominal
+  // taxable income already in the bands this year), under the lump sum's
+  // own tax setting rather than any pot's
+  function taxOnLumpSumGross(
+    gross: number,
+    lumpSumIndex: number,
+    cumulativeInflationNow: number,
+    taxableBase: number,
+  ) {
+    if (!hasLumpSumTax) {
+      return 0;
+    }
+    if (taxModel === 'flat') {
+      return gross * lumpSumTaxRates[lumpSumIndex];
+    }
+    const taxableFraction = lumpSumTaxableFractions[lumpSumIndex];
+    if (taxableFraction <= 0) {
+      return 0;
+    }
+    return bandTaxOnSlice(
+      gross * taxableFraction,
+      taxableBase,
+      cumulativeInflationNow,
+    );
+  }
+
+  // The gross that delivers `net` for this lump sum: closed form under the
+  // flat model, the same fixed point as the regular withdrawal under bands
+  function grossUpLumpSum(
+    net: number,
+    lumpSumIndex: number,
+    cumulativeInflationNow: number,
+    taxableBase: number,
+  ) {
+    if (!hasLumpSumTax) {
+      return net;
+    }
+    if (taxModel === 'flat') {
+      return net / (1 - lumpSumTaxRates[lumpSumIndex]);
+    }
+    return solveGross(net, gross =>
+      taxOnLumpSumGross(
+        gross,
+        lumpSumIndex,
+        cumulativeInflationNow,
+        taxableBase,
+      ),
+    );
+  }
+
+  // Takes `gross` out of the pots for a lump sum: the chosen pot first
+  // (only when it can be drained this year - unlocked and not the surplus
+  // pot), the rest by the normal order over what is left. Deducts from
+  // potBalances as it goes and accumulates into lumpSumTakes.
+  // `accessibleRemaining` is what every accessible pot holds at the time
+  // of the call. Leaves potTakes clobbered; every later use recomputes it
+  function allocateLumpSumTakes(
+    gross: number,
+    year: number,
+    sourcePotIndex: number,
+    accessibleRemaining: number,
+  ) {
+    let remaining = gross;
+    let remainingAccessible = accessibleRemaining;
+    if (sourcePotIndex !== -1 && canDrain(sourcePotIndex, year)) {
+      const take = Math.min(potBalances[sourcePotIndex], remaining);
+      potBalances[sourcePotIndex] -= take;
+      lumpSumTakes[sourcePotIndex] += take;
+      remaining -= take;
+      remainingAccessible -= take;
+    }
+    if (remaining > 0 && remainingAccessible > 0) {
+      computeTakes(remaining, year, remainingAccessible);
+      for (let potIndex = 0; potIndex < potCount; potIndex++) {
+        potBalances[potIndex] -= potTakes[potIndex];
+        lumpSumTakes[potIndex] += potTakes[potIndex];
+      }
+    }
+  }
 
   // Scratch space for settleYearFlows: the year's realized amount per
   // contribution and gross income per stream (reused across every
@@ -2341,17 +2600,91 @@ export function runMonteCarloSimulation(
           ? (preContributionPotBalances ?? Array.from(potBalances))
           : null;
 
+        // One-off withdrawals come out first, in config order. Under the
+        // bands model each one's taxable slice stacks on the income's and
+        // the regular withdrawal is then taxed above all of it. A lump sum
+        // the accessible pots can't fund takes what is there and fails the
+        // year, like unfunded spending
+        let lumpSumGrossThisYear = 0;
+        let lumpSumTaxThisYear = 0;
+        let lumpSumTaxableSlice = 0;
+        let lumpSumShortfall = false;
+        let accessibleAfterLumpSums = accessibleTotal;
+        const capturedLumpSumNets = capturedPotReturns
+          ? new Array<number>(lumpSumCount).fill(0)
+          : null;
+        const capturedPotLumpSums = capturedPotReturns
+          ? new Array<number>(potCount).fill(0)
+          : null;
+        if (hasLumpSums && hasLumpSumByYear[year]) {
+          lumpSumTakes.fill(0);
+          settleLumpSumNets(year, cumulativeInflation);
+          for (
+            let lumpSumIndex = 0;
+            lumpSumIndex < lumpSumCount;
+            lumpSumIndex++
+          ) {
+            const net = yearLumpSumNets[lumpSumIndex];
+            if (capturedLumpSumNets) {
+              capturedLumpSumNets[lumpSumIndex] = net;
+            }
+            if (net <= 0) {
+              continue;
+            }
+            const taxableBase = taxableIncomeBase + lumpSumTaxableSlice;
+            let gross = grossUpLumpSum(
+              net,
+              lumpSumIndex,
+              cumulativeInflation,
+              taxableBase,
+            );
+            if (gross > accessibleAfterLumpSums) {
+              gross = accessibleAfterLumpSums;
+              lumpSumShortfall = true;
+            }
+            const tax = taxOnLumpSumGross(
+              gross,
+              lumpSumIndex,
+              cumulativeInflation,
+              taxableBase,
+            );
+            allocateLumpSumTakes(
+              gross,
+              year,
+              lumpSumSourcePotIndex[lumpSumIndex],
+              accessibleAfterLumpSums,
+            );
+            accessibleAfterLumpSums -= gross;
+            lumpSumGrossThisYear += gross;
+            lumpSumTaxThisYear += tax;
+            if (taxModel === 'bands') {
+              lumpSumTaxableSlice +=
+                gross * lumpSumTaxableFractions[lumpSumIndex];
+            }
+          }
+          withdrawnSum = toSafeAmount(
+            withdrawnSum + lumpSumGrossThisYear * startDeflator,
+          );
+          if (capturedPotLumpSums) {
+            for (let potIndex = 0; potIndex < potCount; potIndex++) {
+              capturedPotLumpSums[potIndex] = lumpSumTakes[potIndex];
+            }
+          }
+        }
+        const taxableBaseForWithdrawal =
+          taxableIncomeBase + lumpSumTaxableSlice;
+
         // Net capacity: what withdrawing every accessible penny would
         // actually deliver after tax. The full-drain split is only worth
         // computing when a shortfall is actually possible - even taxed at
         // the highest marginal rate, capacity above the requirement means
         // the plan funds this year
-        let accessibleNetCapacity = accessibleTotal;
-        if (hasTax && accessibleTotal * minNetFactor <= netRequired) {
-          computeTakes(accessibleTotal, year, accessibleTotal);
+        let accessibleNetCapacity = accessibleAfterLumpSums;
+        if (hasTax && accessibleAfterLumpSums * minNetFactor <= netRequired) {
+          computeTakes(accessibleAfterLumpSums, year, accessibleAfterLumpSums);
           accessibleNetCapacity =
-            accessibleTotal -
-            taxForTakes(cumulativeInflation, taxableIncomeBase);
+            accessibleAfterLumpSums -
+            taxForTakes(cumulativeInflation, taxableBaseForWithdrawal);
         }
 
         // A shortfall needs an actual requirement: a zero-spend year with
@@ -2359,15 +2692,18 @@ export function runMonteCarloSimulation(
         // while every pot is still locked) is not a failure. Exactly enough
         // is enough - a pot emptied to the penny funded the year, and next
         // year's income or contributions may refill it
-        if (netRequired > 0 && accessibleNetCapacity < netRequired) {
+        if (
+          lumpSumShortfall ||
+          (netRequired > 0 && accessibleNetCapacity < netRequired)
+        ) {
           fundingShortfall = true;
           // The accessible pots can't cover this year's spending (locked
           // pots may still hold money, but the plan failed to fund it);
           // they get emptied for whatever net they can deliver
           withdrawnSum = toSafeAmount(
-            withdrawnSum + accessibleTotal * startDeflator,
+            withdrawnSum + accessibleAfterLumpSums * startDeflator,
           );
-          withdrawalTaken = accessibleTotal;
+          withdrawalTaken = accessibleAfterLumpSums;
           netDelivered = Math.max(0, accessibleNetCapacity);
           if (runDetail && simulationIndex === captureIndex) {
             failurePotSnapshot = Array.from(potBalances, (balance, potIndex) =>
@@ -2385,7 +2721,7 @@ export function runMonteCarloSimulation(
               // potTakes still holds the everything-accessible split from
               // the net-capacity check above
               attributeTaxToPots(
-                accessibleTotal - netDelivered,
+                accessibleAfterLumpSums - netDelivered,
                 capturedPotTaxes,
               );
             }
@@ -2399,26 +2735,23 @@ export function runMonteCarloSimulation(
           simulationDepletionYear = year;
           depletionCounts[year]++;
         } else {
-          // Solve the gross withdrawal that delivers the net requirement:
-          // g = net + tax(takes(g)). Tax is piecewise linear in g with
-          // marginal rates < 1, so this fixed point converges geometrically
+          // Solve the gross withdrawal that delivers the net requirement,
+          // taxed on the pot split it would be taken as
           let grossTotal = netRequired;
           if (hasTax) {
-            for (let iteration = 0; iteration < 40; iteration++) {
-              computeTakes(grossTotal, year, accessibleTotal);
-              const next =
-                netRequired +
-                taxForTakes(cumulativeInflation, taxableIncomeBase);
-              if (Math.abs(next - grossTotal) <= 1e-7 * Math.max(1, next)) {
-                grossTotal = next;
-                break;
-              }
-              grossTotal = next;
-            }
-            grossTotal = Math.min(grossTotal, accessibleTotal);
+            grossTotal = Math.min(
+              solveGross(netRequired, gross => {
+                computeTakes(gross, year, accessibleAfterLumpSums);
+                return taxForTakes(
+                  cumulativeInflation,
+                  taxableBaseForWithdrawal,
+                );
+              }),
+              accessibleAfterLumpSums,
+            );
           }
 
-          computeTakes(grossTotal, year, accessibleTotal);
+          computeTakes(grossTotal, year, accessibleAfterLumpSums);
           for (let potIndex = 0; potIndex < potCount; potIndex++) {
             potBalances[potIndex] -= potTakes[potIndex];
           }
@@ -2574,6 +2907,8 @@ export function runMonteCarloSimulation(
           );
           const contributions = emit(contributionsThisYear, startDeflator);
           const withdrawal = emit(withdrawalTaken, startDeflator);
+          const lumpSumWithdrawal = emit(lumpSumGrossThisYear, startDeflator);
+          const lumpSumTax = emit(lumpSumTaxThisYear, startDeflator);
           const taxPaid = emit(withdrawalTaken - netDelivered, startDeflator);
           const income = emit(grossIncomeThisYear, startDeflator);
           const base = {
@@ -2611,6 +2946,21 @@ export function runMonteCarloSimulation(
               withdrawal,
             ),
             potTaxes: emitParts(capturedPotTaxes, startDeflator, taxPaid),
+            lumpSumWithdrawal,
+            lumpSumTax,
+            // The requested nets reconcile with gross - tax on a funded
+            // year; on a failure year they exceed it and emitParts falls
+            // back to rounding each on its own
+            lumpSumAmounts: emitParts(
+              capturedLumpSumNets,
+              startDeflator,
+              lumpSumWithdrawal - lumpSumTax,
+            ),
+            potLumpSums: emitParts(
+              capturedPotLumpSums,
+              startDeflator,
+              lumpSumWithdrawal,
+            ),
             // No displayed total to reconcile against
             potTaxables: (capturedPotTaxables ?? []).map(taxable =>
               emit(taxable, startDeflator),
@@ -2626,7 +2976,7 @@ export function runMonteCarloSimulation(
             // balance was locked in pots not yet accessible, not lost to
             // markets. Accessible pots gave up everything they had.
             const locked = emit(
-              yearStartTotal - withdrawalTaken,
+              yearStartTotal - lumpSumGrossThisYear - withdrawalTaken,
               startDeflator,
             );
             runDetail.push({
@@ -2653,7 +3003,10 @@ export function runMonteCarloSimulation(
               growth: toSafeAmount(
                 Math.round(
                   (total + feesThisYear) * endDeflator -
-                    (yearStartTotal - withdrawalTaken + surplusSavedThisYear) *
+                    (yearStartTotal -
+                      withdrawalTaken -
+                      lumpSumGrossThisYear +
+                      surplusSavedThisYear) *
                       startDeflator,
                 ),
               ),
@@ -2698,6 +3051,11 @@ export function runMonteCarloSimulation(
           tailTotalPlanned,
         );
         const tailIncome = emitFrozen(tailGrossIncome);
+        // The one-offs the plan still called for, charted unfunded like
+        // the spending
+        if (hasLumpSums) {
+          settleLumpSumNets(year, cumulativeInflation);
+        }
         // The pot-funded part of the plan, with the rule's adjustment and
         // the spending floor applied exactly as in a funded year
         const tailPotFundedPlan = tailTotalPlanned - tailIncomeTowardsSpending;
@@ -2746,6 +3104,12 @@ export function runMonteCarloSimulation(
           potTaxes: new Array<number>(potCount).fill(0),
           potTaxables: new Array<number>(potCount).fill(0),
           taxPaid: 0,
+          lumpSumWithdrawal: 0,
+          lumpSumTax: 0,
+          lumpSumAmounts: hasLumpSums
+            ? Array.from(yearLumpSumNets, net => emitFrozen(net))
+            : new Array<number>(lumpSumCount).fill(0),
+          potLumpSums: new Array<number>(potCount).fill(0),
           feesPaid: 0,
           potFees: new Array<number>(potCount).fill(0),
           potReturns: new Array<number | null>(potCount).fill(null),

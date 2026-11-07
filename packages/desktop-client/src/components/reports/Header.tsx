@@ -45,6 +45,7 @@ type HeaderProps = {
   // Granularities the picker offers; defaults to month-only. In day mode the
   // picker emits `yyyy-MM-dd` start/end.
   granularities?: DateRangeGranularity[];
+  dateRangePresets?: DateRangePreset[];
   children?: ReactNode;
   inlineContent?: ReactNode;
   // no separate category filter; use main filters instead
@@ -90,6 +91,7 @@ export function Header({
   onDeleteFilter,
   onConditionsOpChange,
   granularities,
+  dateRangePresets,
   children,
   inlineContent,
   filterExclude,
@@ -176,7 +178,7 @@ export function Header({
               year: t('Year'),
               dateRange: t('Date range'),
             }}
-            presets={presets}
+            presets={dateRangePresets ?? presets}
             onChangeDates={(newStart, newEnd) =>
               onChangeDates(newStart, newEnd, 'static')
             }
