@@ -14,6 +14,8 @@ import { exportQueryToCSV, exportToCSV } from './export-to-csv';
 const UTF8_BOM = '\uFEFF';
 
 function parseCsv(csv: string) {
+  // columns: true produces string-keyed records with string values (no casting).
+  // The parser returns unknown[], so satisfies cannot narrow the result.
   return csvParse(csv, { columns: true, bom: true }) as Array<
     Record<string, string>
   >;
