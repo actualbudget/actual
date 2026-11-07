@@ -57,6 +57,43 @@ describe('utility functions', () => {
     expect(looselyParseAmount('−3,45')).toBe(-3.45);
   });
 
+  test('looseParseAmount works with scientific notation', () => {
+    // Regression test for #9415: "E-06" used to be read as a 2-digit decimal
+    // marker, concatenating the exponent digits into a huge number that
+    // overflowed safeNumber during CSV import.
+    expect(looselyParseAmount('-1.26313799999993E-06')).toBeCloseTo(
+      -1.26313799999993e-6,
+      15,
+    );
+    expect(looselyParseAmount('-1.69622000000036E-04')).toBeCloseTo(
+      -1.69622000000036e-4,
+      15,
+    );
+    expect(looselyParseAmount('(1.26E-06)')).toBeCloseTo(-1.26e-6, 15);
+    // A three-digit fraction is still a decimal inside scientific notation,
+    // not a thousands group.
+    expect(looselyParseAmount('1.234e2')).toBeCloseTo(123.4, 10);
+    expect(looselyParseAmount('1,234E+02')).toBeCloseTo(123.4, 10);
+    expect(looselyParseAmount('-2.500E+03')).toBeCloseTo(-2500, 10);
+    // The mantissa can be tiny or large in absolute terms while the final
+    // amount is ordinary; only the scaled result may be range-checked.
+    expect(looselyParseAmount('0.0000001e8')).toBe(10);
+    expect(looselyParseAmount('1000000000000000e-14')).toBe(10);
+  });
+
+  test('looseParseAmount works with more than 9 decimal places', () => {
+    // The same CSV export also carries amounts with up to 16 decimal
+    // digits; previously they fell back to returning null.
+    expect(looselyParseAmount('-12039.958653084400')).toBeCloseTo(
+      -12039.9586530844,
+      10,
+    );
+    expect(looselyParseAmount('-1.1148430000001800')).toBeCloseTo(
+      -1.11484300000018,
+      15,
+    );
+  });
+
   test('looseParseAmount works with parentheses (negative)', () => {
     expect(looselyParseAmount('(3.45)')).toBe(-3.45);
     expect(looselyParseAmount('(3)')).toBe(-3);
