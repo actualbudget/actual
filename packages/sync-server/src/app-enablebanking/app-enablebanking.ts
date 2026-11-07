@@ -582,8 +582,9 @@ app.post(
         );
       }
 
-      // Determine starting balance, preferring CLAV balance type
-      let startingBalance = 0;
+      // Determine starting balance, preferring CLAV balance type. `null`
+      // when the bank reported none, so the client does not treat it as 0.
+      let startingBalance: number | null = null;
       if (balances.length > 0) {
         const preferredBalance =
           balances.find(b => b.balanceType === 'CLAV') ?? balances[0];

@@ -482,7 +482,7 @@ describe('Enable Banking Express routes', () => {
       expect(mockFetch).toHaveBeenCalledTimes(3);
     });
 
-    it('returns startingBalance 0 when no balances available', async () => {
+    it('returns a null startingBalance when no balances are reported', async () => {
       mockFetchResponse({ balances: [] });
       mockFetchResponse({ transactions: [] });
 
@@ -490,7 +490,7 @@ describe('Enable Banking Express routes', () => {
         .post('/transactions')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
-      expect(res.body.data.startingBalance).toBe(0);
+      expect(res.body.data.startingBalance).toBeNull();
     });
 
     it('handles API error gracefully', async () => {

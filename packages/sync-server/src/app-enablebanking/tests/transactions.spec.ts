@@ -131,7 +131,7 @@ describe('POST /transactions', () => {
     expect(res.body.status).toBe('ok');
     expect(ids(res.body.data.transactions.all)).toEqual(['ref-002']);
     expect(res.body.data.balances).toEqual([]);
-    expect(res.body.data.startingBalance).toBe(0);
+    expect(res.body.data.startingBalance).toBeNull();
   });
 
   it('sends an IPv4-mapped client address to the bank as plain IPv4', async () => {
