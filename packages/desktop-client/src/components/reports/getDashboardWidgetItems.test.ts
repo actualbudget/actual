@@ -14,7 +14,6 @@ describe('getDashboardWidgetItems', () => {
       customReports: [],
       formulaMode: false,
       crossoverReportEnabled: false,
-      budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: false,
     });
 
@@ -23,12 +22,23 @@ describe('getDashboardWidgetItems', () => {
       customReports: [],
       formulaMode: false,
       crossoverReportEnabled: false,
-      budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: true,
     });
 
     expect(getNames(disabled)).not.toContain('balance-forecast-card');
     expect(getNames(enabled)).toContain('balance-forecast-card');
+  });
+
+  it('always includes the budget analysis card', () => {
+    const items = getDashboardWidgetItems({
+      t: value => value,
+      customReports: [],
+      formulaMode: false,
+      crossoverReportEnabled: false,
+      balanceForecastReportEnabled: false,
+    });
+
+    expect(getNames(items)).toContain('budget-analysis-card');
   });
 
   it('keeps custom report entries after a divider', () => {
@@ -37,7 +47,6 @@ describe('getDashboardWidgetItems', () => {
       customReports: [{ id: 'abc', name: 'Custom Budget Review' }],
       formulaMode: false,
       crossoverReportEnabled: false,
-      budgetAnalysisReportEnabled: false,
       balanceForecastReportEnabled: false,
     });
 

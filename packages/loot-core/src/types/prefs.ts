@@ -7,7 +7,6 @@ export type FeatureFlag =
   | 'currency'
   | 'balanceForecastReport'
   | 'customThemes'
-  | 'budgetAnalysisReport'
   | 'enableBanking'
   | 'sankeyReport'
   | 'mobileCalculator'

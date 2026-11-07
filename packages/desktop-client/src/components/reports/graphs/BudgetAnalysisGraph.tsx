@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AlignedText } from '@actual-app/components/aligned-text';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
+import type { BudgetType } from '@actual-app/core/server/prefs';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { css } from '@emotion/css';
 import {
@@ -19,44 +20,29 @@ import {
 
 import { FinancialText } from '#components/FinancialText';
 import { Container } from '#components/reports/Container';
+import type { BudgetAnalysisIntervalData } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
+import { SeriesLabel } from './SeriesLabel';
 import { computePadding } from './util/computePadding';
 
-/**
- * Interval data for the Budget Analysis graph.
- * @property date - A date string in format 'YYYY-MM' for monthly intervals
- *                  or 'YYYY-MM-DD' for daily intervals, compatible with monthUtils.format
- */
-type BudgetAnalysisIntervalData = {
-  date: string;
-  budgeted: number;
-  spent: number;
-  balance: number;
-  overspendingAdjustment: number;
-};
-
 type PayloadItem = {
-  payload: {
-    date: string;
-    budgeted: number;
-    spent: number;
-    balance: number;
-    overspendingAdjustment: number;
-  };
+  payload: BudgetAnalysisIntervalData;
 };
 
 type BudgetAnalysisGraphProps = {
   style?: CSSProperties;
   data: {
+    budgetType: BudgetType;
     intervalData: BudgetAnalysisIntervalData[];
   };
   graphType?: 'Line' | 'Bar';
   showBalance?: boolean;
   balanceOnly?: boolean;
+  showCumulativeVariance?: boolean;
   isConcise?: boolean;
 };
 
@@ -67,6 +53,8 @@ type CustomTooltipProps = {
   format: (value: unknown, type?: FormatType) => string;
   showBalance: boolean;
   balanceOnly: boolean;
+  isTracking: boolean;
+  showCumulativeVariance: boolean;
 };
 
 function CustomTooltip({
@@ -76,6 +64,8 @@ function CustomTooltip({
   format,
   showBalance,
   balanceOnly,
+  isTracking,
+  showCumulativeVariance,
 }: CustomTooltipProps) {
   const locale = useLocale();
   const { t } = useTranslation();
@@ -111,17 +101,9 @@ function CustomTooltip({
           {!balanceOnly && (
             <AlignedText
               left={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: theme.reportsNumberPositive,
-                      display: 'inline-block',
-                    }}
-                  />
+                <SeriesLabel color={theme.reportsNumberPositive}>
                   <Trans>Budgeted:</Trans>
-                </span>
+                </SeriesLabel>
               }
               right={
                 <FinancialText>
@@ -133,37 +115,21 @@ function CustomTooltip({
           {!balanceOnly && (
             <AlignedText
               left={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: theme.reportsNumberNegative,
-                      display: 'inline-block',
-                    }}
-                  />
+                <SeriesLabel color={theme.reportsNumberNegative}>
                   <Trans>Spent:</Trans>
-                </span>
+                </SeriesLabel>
               }
               right={
                 <FinancialText>{format(data.spent, 'financial')}</FinancialText>
               }
             />
           )}
-          {!balanceOnly && (
+          {!balanceOnly && !isTracking && (
             <AlignedText
               left={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: theme.templateNumberUnderFunded,
-                      display: 'inline-block',
-                    }}
-                  />
+                <SeriesLabel color={theme.templateNumberUnderFunded}>
                   {t('Overspending Adjustment:')}
-                </span>
+                </SeriesLabel>
               }
               right={
                 <FinancialText>
@@ -175,21 +141,39 @@ function CustomTooltip({
           {(showBalance || balanceOnly) && (
             <AlignedText
               left={
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span
-                    style={{
-                      width: 10,
-                      height: 10,
-                      backgroundColor: theme.reportsGray,
-                      display: 'inline-block',
-                    }}
-                  />
+                <SeriesLabel color={theme.reportsGray}>
                   <Trans>Balance:</Trans>
-                </span>
+                </SeriesLabel>
               }
               right={
                 <FinancialText>
                   <strong>{format(data.balance, 'financial')}</strong>
+                </FinancialText>
+              }
+            />
+          )}
+          {isTracking && (
+            <AlignedText
+              left={<Trans>Variance:</Trans>}
+              right={
+                <FinancialText>
+                  {format(data.variance, 'financial')}
+                </FinancialText>
+              }
+            />
+          )}
+          {showCumulativeVariance && (
+            <AlignedText
+              left={
+                <SeriesLabel color={theme.reportsBlue}>
+                  <Trans>Cumulative Variance:</Trans>
+                </SeriesLabel>
+              }
+              right={
+                <FinancialText>
+                  <strong>
+                    {format(data.cumulativeVariance, 'financial')}
+                  </strong>
                 </FinancialText>
               }
             />
@@ -206,6 +190,7 @@ export function BudgetAnalysisGraph({
   graphType = 'Line',
   showBalance = true,
   balanceOnly = false,
+  showCumulativeVariance = true,
   isConcise = true,
 }: BudgetAnalysisGraphProps) {
   const { t } = useTranslation();
@@ -219,6 +204,12 @@ export function BudgetAnalysisGraph({
   const spentLabel = t('Spent');
   const balanceLabel = t('Balance');
   const overspendingLabel = t('Overspending Adjustment');
+  const cumulativeVarianceLabel = t('Cumulative Variance');
+
+  // Tracking budgets have no overspending adjustment, and variance is how they
+  // measure performance against the plan.
+  const isTracking = data.budgetType === 'tracking';
+  const drawCumulativeVariance = isTracking && showCumulativeVariance;
 
   const graphData = data.intervalData;
 
@@ -236,6 +227,7 @@ export function BudgetAnalysisGraph({
     item.spent,
     item.balance,
     item.overspendingAdjustment,
+    ...(drawCumulativeVariance ? [item.cumulativeVariance] : []),
   ]);
 
   const leftPadding = computePadding(allValues, value =>
@@ -283,11 +275,25 @@ export function BudgetAnalysisGraph({
                   format={format}
                   showBalance={showBalance}
                   balanceOnly={balanceOnly}
+                  isTracking={isTracking}
+                  showCumulativeVariance={drawCumulativeVariance}
                 />
               }
               isAnimationActive={false}
             />
           </>
+        );
+
+        const cumulativeVarianceLine = drawCumulativeVariance && (
+          <Line
+            type="monotone"
+            dataKey="cumulativeVariance"
+            stroke={theme.reportsBlue}
+            strokeWidth={2}
+            name={cumulativeVarianceLabel}
+            dot={false}
+            animationDuration={1000}
+          />
         );
 
         return graphType === 'Bar' && !balanceOnly ? (
@@ -305,12 +311,14 @@ export function BudgetAnalysisGraph({
               name={spentLabel}
               animationDuration={1000}
             />
-            <Bar
-              dataKey="overspendingAdjustment"
-              fill={theme.templateNumberUnderFunded}
-              name={overspendingLabel}
-              animationDuration={1000}
-            />
+            {!isTracking && (
+              <Bar
+                dataKey="overspendingAdjustment"
+                fill={theme.templateNumberUnderFunded}
+                name={overspendingLabel}
+                animationDuration={1000}
+              />
+            )}
             {showBalance && (
               <Line
                 type="monotone"
@@ -322,6 +330,7 @@ export function BudgetAnalysisGraph({
                 animationDuration={1000}
               />
             )}
+            {cumulativeVarianceLine}
           </ComposedChart>
         ) : (
           <LineChart {...chartProps}>
@@ -348,7 +357,7 @@ export function BudgetAnalysisGraph({
                 animationDuration={1000}
               />
             )}
-            {!balanceOnly && (
+            {!balanceOnly && !isTracking && (
               <Line
                 type="monotone"
                 dataKey="overspendingAdjustment"
@@ -370,6 +379,7 @@ export function BudgetAnalysisGraph({
                 animationDuration={1000}
               />
             )}
+            {cumulativeVarianceLine}
           </LineChart>
         );
       }}
