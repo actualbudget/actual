@@ -106,7 +106,6 @@ export function Overview({ dashboard }: OverviewProps) {
   const dispatch = useDispatch();
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-  const budgetAnalysisReportEnabled = useFeatureFlag('budgetAnalysisReport');
   const balanceForecastReportEnabled = useFeatureFlag('balanceForecastReport');
   const monteCarloReportEnabled = useFeatureFlag('monteCarloReport');
 
@@ -602,14 +601,10 @@ export function Overview({ dashboard }: OverviewProps) {
                               name: 'spending-card' as const,
                               text: t('Spending analysis'),
                             },
-                            ...(budgetAnalysisReportEnabled
-                              ? [
-                                  {
-                                    name: 'budget-analysis-card' as const,
-                                    text: t('Budget analysis'),
-                                  },
-                                ]
-                              : []),
+                            {
+                              name: 'budget-analysis-card' as const,
+                              text: t('Budget analysis'),
+                            },
                             ...(balanceForecastReportEnabled
                               ? [
                                   {
@@ -852,8 +847,7 @@ export function Overview({ dashboard }: OverviewProps) {
                               onMetaChange(item, newMeta)
                             }
                           />
-                        ) : widget.type === 'budget-analysis-card' &&
-                          budgetAnalysisReportEnabled ? (
+                        ) : widget.type === 'budget-analysis-card' ? (
                           <BudgetAnalysisCard
                             widgetId={item.i}
                             isEditing={isEditing}

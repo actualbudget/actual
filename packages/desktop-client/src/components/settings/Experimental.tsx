@@ -262,12 +262,6 @@ export function ExperimentalFeatures() {
         <Trans>Balance Forecast Report</Trans>
       </FeatureToggle>
       <FeatureToggle
-        flag="budgetAnalysisReport"
-        feedbackLink="https://github.com/actualbudget/actual/issues/6742"
-      >
-        <Trans>Budget Analysis Report</Trans>
-      </FeatureToggle>
-      <FeatureToggle
         flag="monteCarloReport"
         feedbackLink="https://github.com/actualbudget/actual/issues/8571"
       >
