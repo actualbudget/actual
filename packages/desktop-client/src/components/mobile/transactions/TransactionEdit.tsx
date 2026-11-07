@@ -13,6 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { Chip } from '@actual-app/components/chip';
 import { SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
@@ -296,6 +297,7 @@ function Footer({
       {isFuture && (
         <Button
           variant="normal"
+          size="touch"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onSchedule}
@@ -314,6 +316,7 @@ function Footer({
       {transaction.error?.type === 'SplitTransactionError' ? (
         <Button
           variant="primary"
+          size="touch"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onClickRemainingSplit}
@@ -354,6 +357,7 @@ function Footer({
       ) : !transaction.account ? (
         <Button
           variant="primary"
+          size="touch"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={() => onEditField(transaction.id, 'account')}
@@ -371,6 +375,7 @@ function Footer({
       ) : isAdding ? (
         <Button
           variant="primary"
+          size="touch"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onAdd}
@@ -388,6 +393,7 @@ function Footer({
       ) : (
         <Button
           variant="primary"
+          size="touch"
           style={{ height: styles.mobileMinHeight }}
           isDisabled={!!editingField}
           onPress={onSave}
@@ -1291,71 +1297,32 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
               rightContent={
                 shouldShowSaveLocation ? (
-                  <Button
-                    variant="bare"
-                    onPress={onSaveLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onSaveLocation}>
                     <Trans>Save</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : nearestPayee && !transaction.payee ? (
-                  <Button
-                    variant="bare"
-                    onPress={onSelectNearestPayee}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onSelectNearestPayee}>
                     <Trans>Nearby</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : onRequestLocation && !transaction.payee ? (
-                  <Button
-                    variant="bare"
-                    onPress={onRequestLocation}
-                    style={{
-                      backgroundColor: theme.buttonNormalBackground,
-                      border: `1px solid ${theme.buttonNormalBorder}`,
-                      color: theme.buttonNormalText,
-                      fontSize: '11px',
-                      padding: '4px 8px',
-                      borderRadius: 3,
-                      height: 'auto',
-                      minHeight: 'auto',
-                    }}
-                  >
+                  <Chip onPress={onRequestLocation}>
                     <Trans>Request Location</Trans>
                     <SvgLocation
                       width={10}
                       height={10}
                       style={{ marginLeft: 4 }}
                     />
-                  </Button>
+                  </Chip>
                 ) : (
                   dropdownChevron
                 )
@@ -2047,6 +2014,7 @@ function TransactionEditUnconnected({
           </Text>
           <Button
             variant="primary"
+            size="touch"
             onPress={() => {
               dispatch(
                 pushModal({
@@ -2098,6 +2066,7 @@ function TransactionEditUnconnected({
           </Text>
           <Button
             variant="primary"
+            size="touch"
             onPress={() => {
               void navigate('/budget');
             }}
@@ -2178,6 +2147,7 @@ function FillRemainingButton({
   return (
     <Button
       variant="primary"
+      size="touch"
       style={{ height: styles.mobileMinHeight }}
       onPress={onPress}
       isDisabled={remaining === 0}

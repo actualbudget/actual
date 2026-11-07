@@ -75,8 +75,8 @@ export function HoldBufferModal({ onSubmit }: HoldBufferModalProps) {
           >
             <Button
               variant="primary"
+              size="touch"
               style={{
-                height: styles.mobileMinHeight,
                 marginLeft: styles.mobileEditingPadding,
                 marginRight: styles.mobileEditingPadding,
               }}

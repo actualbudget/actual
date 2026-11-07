@@ -63,6 +63,7 @@ const inputSizeStyles = {
   medium: getInputSizeStyles('medium'),
   large: getInputSizeStyles('large'),
   'extra-large': getInputSizeStyles('extra-large'),
+  touch: getInputSizeStyles('touch'),
 } satisfies Record<ComponentSize, Record<string, unknown>>;
 
 // Single source of truth for input class composition: base chrome, then
@@ -98,6 +99,7 @@ const inputSizeClassNames = {
   medium: buildInputClassName('medium'),
   large: buildInputClassName('large'),
   'extra-large': buildInputClassName('extra-large'),
+  touch: buildInputClassName('touch'),
 } satisfies Record<ComponentSize, string>;
 
 export type InputProps = Omit<
@@ -180,6 +182,7 @@ const bigInputSizeClassNames = {
   medium: buildInputClassName('medium', bigInputChrome),
   large: buildInputClassName('large', bigInputChrome),
   'extra-large': buildInputClassName('extra-large', bigInputChrome),
+  touch: buildInputClassName('touch', bigInputChrome),
 } satisfies Record<ComponentSize, string>;
 
 export function BigInput({ size, className, ...props }: InputProps) {
