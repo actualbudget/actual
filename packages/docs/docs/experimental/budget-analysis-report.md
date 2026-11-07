@@ -17,6 +17,15 @@ It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustme
   - If **Rollover overspending** is enabled for a category, negative balances carry forward.
   - If **Rollover overspending** is disabled, negative balances for that category are zeroed and recorded as an **Overspending Adjustment** (aggregated and shown as its own series).
 
+## Tracking Budgets
+
+The report follows the rules of your budget type. On a tracking budget it works differently from the description above:
+
+- A category's balance, positive or negative, only carries into the next month if rollover is enabled for that category. Otherwise it starts over, so there is no **Overspending Adjustment** series.
+- **Variance** shows how far over or under budget you were for the selected period. It is your budgeted amount plus your spending, so a negative amount means you are over budget.
+- **Ending balance** only covers the last month of the period if your categories do not roll over, so it can differ a lot from the **Variance**. Both are shown in the summary, and the report card on your dashboard shows the **Variance**.
+- The **Cumulative Variance** line shows how the variance builds up month by month. The current month counts as under budget until you finish spending in it.
+
 ## Display options
 
 - **Live / Static**: toggle a rolling window (auto-updates) or a fixed date range.
@@ -25,6 +34,7 @@ It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustme
 - **Filters**: use the Filter button → choose _Category_ to include/exclude categories; active filters appear as editable chips.
 - **Graph type**: toggle Line ↔ Bar via the header icon.
 - **Show/Hide balance**: toggle the running balance series.
+- **Show/Hide cumulative variance**: toggle the cumulative variance series on tracking budgets.
 
 ## Quick troubleshooting
 

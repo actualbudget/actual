@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
@@ -18,6 +18,7 @@ import { ReportCardName } from '#components/reports/ReportCardName';
 import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createBudgetAnalysisSpreadsheet } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { useBudgetType } from '#hooks/useBudgetType';
 import { useFormat } from '#hooks/useFormat';
 
 type BudgetAnalysisCardProps = {
@@ -39,6 +40,8 @@ export function BudgetAnalysisCard({
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
 
+  const budgetType = useBudgetType();
+
   const timeFrame = meta?.timeFrame ?? {
     start: monthUtils.subMonths(monthUtils.currentMonth(), 5),
     end: monthUtils.currentMonth(),
@@ -58,6 +61,7 @@ export function BudgetAnalysisCard({
       startDate,
       endDate,
       showHiddenCategories: meta?.showHiddenCategories ?? false,
+      budgetType,
     });
   }, [
     meta?.conditions,
@@ -65,6 +69,7 @@ export function BudgetAnalysisCard({
     meta?.showHiddenCategories,
     startDate,
     endDate,
+    budgetType,
   ]);
 
   const data = useReport('default', getGraphData);
@@ -73,7 +78,12 @@ export function BudgetAnalysisCard({
     data && data.intervalData.length > 0
       ? data.intervalData[data.intervalData.length - 1]
       : undefined;
-  const balance = latestInterval?.balance ?? 0;
+  const isTracking = data?.budgetType === 'tracking';
+  // Without rollover a tracking budget's ending balance only reflects the last
+  // month, so the card leads with how the whole period compares to the plan.
+  const headline = isTracking
+    ? data.totalVariance
+    : (latestInterval?.balance ?? 0);
   return (
     <ReportCard
       widgetId={widgetId}
@@ -113,15 +123,23 @@ export function BudgetAnalysisCard({
                   ...styles.mediumText,
                   fontWeight: 500,
                   marginBottom: 5,
-                  color: balance >= 0 ? theme.noticeTextLight : theme.errorText,
+                  color:
+                    headline >= 0 ? theme.noticeTextLight : theme.errorText,
                 }}
               >
                 <FinancialText>
                   <PrivacyFilter activationFilters={[!isCardHovered]}>
-                    {format(balance, 'financial')}
+                    {format(headline, 'financial')}
                   </PrivacyFilter>
                 </FinancialText>
               </Block>
+              {isTracking && (
+                <Block
+                  style={{ ...styles.smallText, color: theme.pageTextLight }}
+                >
+                  <Trans>Variance</Trans>
+                </Block>
+              )}
             </View>
           )}
         </View>
@@ -132,6 +150,7 @@ export function BudgetAnalysisCard({
             graphType={meta?.graphType || 'Bar'}
             showBalance={meta?.showBalance ?? true}
             balanceOnly={meta?.balanceOnly ?? false}
+            showCumulativeVariance={meta?.showCumulativeVariance ?? true}
           />
         ) : (
           <LoadingIndicator />
