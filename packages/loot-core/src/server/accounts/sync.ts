@@ -393,7 +393,9 @@ async function downloadEnableBankingTransactions(
   return {
     transactions: all,
     accountBalance: balances,
-    startingBalance,
+    // `null` when the bank reported no balance. Normalize a missing field to
+    // the same, so the strict null checks downstream cover both.
+    startingBalance: startingBalance ?? null,
   };
 }
 
