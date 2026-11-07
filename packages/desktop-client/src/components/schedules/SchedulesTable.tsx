@@ -25,6 +25,7 @@ import { useContextMenu } from '#hooks/useContextMenu';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { usePayees } from '#hooks/usePayees';
+import { getSkipScheduleText } from '#util/schedule';
 
 import { StatusBadge } from './StatusBadge';
 type SchedulesTableProps = {
@@ -188,7 +189,7 @@ function ScheduleRow({
           },
           {
             name: 'skip',
-            text: t('Skip next scheduled date'),
+            text: getSkipScheduleText(schedule.next_date),
             onClick: () => onAction('skip', schedule.id),
             hidden: status === 'completed',
           },

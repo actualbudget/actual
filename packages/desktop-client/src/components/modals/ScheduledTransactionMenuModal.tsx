@@ -19,6 +19,7 @@ import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useLocale } from '#hooks/useLocale';
 import { useSchedules } from '#hooks/useSchedules';
 import type { Modal as ModalType } from '#modals/modalsSlice';
+import { getSkipScheduleText } from '#util/schedule';
 
 type ScheduledTransactionMenuModalProps = Extract<
   ModalType,
@@ -92,7 +93,7 @@ export function ScheduledTransactionMenuModal({
         />
         {canBeSkipped && (
           <MobileSheetRow
-            label={t('Skip next scheduled date')}
+            label={getSkipScheduleText(schedule.next_date)}
             onPress={() => onSkip(transactionId)}
           />
         )}
