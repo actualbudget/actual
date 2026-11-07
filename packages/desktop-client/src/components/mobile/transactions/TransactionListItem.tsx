@@ -18,7 +18,6 @@ import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isPreviewId } from '@actual-app/core/shared/transactions';
-import { integerToCurrency } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -33,12 +32,16 @@ import {
 import { makeAmountFullStyle } from '#components/budget/util';
 import { TransferDirectionIcon } from '#components/common/TransferDirectionIcon';
 import { useAccount } from '#hooks/useAccount';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCachedSchedules } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDisplayPayee } from '#hooks/useDisplayPayee';
+import { ExchangeCounterpartLabel } from '#hooks/useExchangeCounterparts';
+import { useFormat } from '#hooks/useFormat';
 import { usePayee } from '#hooks/usePayee';
 import { NotesTagFormatter } from '#notes/NotesTagFormatter';
 import { useSelector } from '#redux';
+import { nativeLine } from '#util/foreign-details';
 
 import { lookupName, Status } from './TransactionEdit';
 
@@ -87,6 +90,7 @@ export function TransactionListItem({
   ...itemProps
 }: TransactionListItemProps) {
   const { t } = useTranslation();
+  const format = useFormat(useAmountPrecision());
   const { data: { list: categories } = { list: [] } } = useCategories();
 
   const { data: payee } = usePayee(transaction?.payee);
@@ -121,6 +125,9 @@ export function TransactionListItem({
   if (!transaction) {
     return null;
   }
+
+  // Lists in the budget currency show a foreign row's native amount too.
+  const native = nativeLine(transaction, account);
 
   const {
     id,
@@ -231,6 +238,7 @@ export function TransactionListItem({
                 >
                   {displayPayee || t('(No payee)')}
                 </TextOneLine>
+                <ExchangeCounterpartLabel transactionId={transaction.id} />
               </View>
               {isPreview ? (
                 <Status status={previewStatus} isSplit={isParent || isChild} />
@@ -319,8 +327,19 @@ export function TransactionListItem({
                   ...textStyle,
                 }}
               >
-                {integerToCurrency(amount)}
+                {format(amount, 'financial')}
               </Text>
+              {native && (
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: theme.pageTextSubdued,
+                    ...styles.tnum,
+                  }}
+                >
+                  {native}
+                </Text>
+              )}
               {showRunningBalance && runningBalance !== undefined && (
                 <Text
                   style={{
@@ -334,7 +353,7 @@ export function TransactionListItem({
                     }),
                   }}
                 >
-                  {integerToCurrency(runningBalance)}
+                  {format(runningBalance, 'financial')}
                 </Text>
               )}
             </View>

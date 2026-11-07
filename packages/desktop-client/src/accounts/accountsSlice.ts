@@ -10,7 +10,7 @@ const sliceName = 'account';
 
 type AccountState = {
   failedAccounts: {
-    [key: AccountEntity['id']]: { type: string; code: string };
+    [key: AccountEntity['id']]: FailedSync;
   };
   accountsSyncing: Array<AccountEntity['id']>;
   updatedAccounts: Array<AccountEntity['id']>;
@@ -26,10 +26,18 @@ type SetAccountsSyncingPayload = {
   ids: Array<AccountEntity['id']>;
 };
 
+/** A missing exchange rate keeps the details needed to add one. */
+export type FailedSync = {
+  type: string;
+  code: string;
+  rate?: { currencyCode: string; dates: string[] };
+};
+
 type MarkAccountFailedPayload = {
   id: AccountEntity['id'];
   errorType: string;
   errorCode: string;
+  rate?: FailedSync['rate'];
 };
 
 type MarkAccountSuccessPayload = {
@@ -58,6 +66,7 @@ const accountsSlice = createSlice({
       state.failedAccounts[action.payload.id] = {
         type: action.payload.errorType,
         code: action.payload.errorCode,
+        ...(action.payload.rate && { rate: action.payload.rate }),
       };
     },
     markAccountSuccess(

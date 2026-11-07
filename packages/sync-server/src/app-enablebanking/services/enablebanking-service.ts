@@ -29,6 +29,7 @@ export type EnableBankingTransaction = {
   value_date?: string;
   transaction_date?: string;
   remittance_information?: string[];
+  balance_after_transaction?: { currency: string; amount: string };
 };
 
 type EnableBankingBalance = {
@@ -74,10 +75,14 @@ type BankSyncTransaction = EnableBankingTransaction & {
   notes?: string;
   remittanceInformationUnstructured?: string;
   booked: boolean;
+  balanceAfterTransaction?: {
+    balanceType: string;
+    balanceAmount: { currency: string; amount: string };
+  };
 };
 
 type BankSyncBalance = {
-  balanceAmount: { amount: number; currency: string };
+  balanceAmount: { amount: string; currency: string };
   balanceType: string;
   referenceDate?: string;
 };
@@ -262,6 +267,13 @@ export function normalizeTransaction(
     notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
     booked: tx.status !== 'PDNG',
+    // Shared shape, so an opening balance can come from the oldest row.
+    ...(tx.balance_after_transaction && {
+      balanceAfterTransaction: {
+        balanceType: 'interimBooked',
+        balanceAmount: { ...tx.balance_after_transaction },
+      },
+    }),
   };
 }
 
@@ -286,7 +298,15 @@ export function isImportableTransaction(tx: BankSyncTransaction): boolean {
 }
 
 export function normalizeBalance(bal: EnableBankingBalance): BankSyncBalance {
-  const amount = Math.round(parseFloat(bal.balance_amount.amount) * 100);
+  const amount = bal.balance_amount?.amount;
+  if (
+    typeof amount !== 'string' ||
+    amount.length > 32 ||
+    !/^-?\d+(?:\.\d+)?$/.test(amount) ||
+    (amount.split('.')[1]?.length ?? 0) > 15
+  ) {
+    throw new Error('Invalid Enable Banking balance');
+  }
   return {
     balanceAmount: {
       amount,

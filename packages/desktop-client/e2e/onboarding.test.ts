@@ -58,6 +58,8 @@ test.describe('Onboarding', () => {
     await expect(budgetPage.budgetTable).toBeVisible({ timeout: 30000 });
 
     const accountPage = await navigation.goToAccountPage('Checking');
+    // The import records the YNAB currency for its precision. Without
+    // Currency support on, amounts show no symbol.
     await expect(accountPage.accountBalance).toHaveText('2,600.00');
 
     await navigation.goToAccountPage('Saving');

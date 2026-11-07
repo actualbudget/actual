@@ -186,6 +186,8 @@ export function ExperimentalFeatures() {
   );
   const isUsingServer = useSyncServerStatus() !== 'no-server';
 
+  const currencyEnabled = useFeatureFlag('currency');
+
   const showServerPrefs =
     localStorage.getItem('devEnableServerPrefs') === 'true';
 
@@ -234,6 +236,22 @@ export function ExperimentalFeatures() {
       <FeatureToggle
         flag="currency"
         feedbackLink="https://github.com/actualbudget/actual/issues/5191"
+        subFeatures={
+          currencyEnabled && (
+            <FeatureToggle
+              flag="multicurrency"
+              note={
+                <Trans>
+                  Experimental preview. Requires a budget currency. Accounts in
+                  other currencies are not available yet.
+                </Trans>
+              }
+              isSubFeature
+            >
+              <Trans>Multiple currencies</Trans>
+            </FeatureToggle>
+          )
+        }
       >
         <Trans>Currency support</Trans>
       </FeatureToggle>

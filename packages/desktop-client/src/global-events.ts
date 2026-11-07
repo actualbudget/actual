@@ -49,6 +49,41 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
+  // Foreign and exchange schedule occurrences wait for a rate, or for
+  // amounts when an exchange estimate rounds to zero, instead of posting.
+  const unlistenSchedulesRateUnavailable = listen(
+    'schedules-rate-unavailable',
+    ({ schedules }) => {
+      store.dispatch(
+        addNotification({
+          notification: {
+            type: 'warning',
+            sticky: true,
+            message: t(
+              'Some scheduled transactions were not posted: {{schedules}}. Post them from the schedules page to enter a rate or the amounts.',
+              {
+                schedules: schedules
+                  .map(({ name, date, currency, estimateUnusable }) =>
+                    estimateUnusable
+                      ? t(
+                          '{{name}} ({{date}}, the estimated amount rounds to zero; enter the amounts)',
+                          { name: name ?? t('Unnamed schedule'), date },
+                        )
+                      : t('{{name}} ({{date}}, no saved {{currency}} rate)', {
+                          name: name ?? t('Unnamed schedule'),
+                          currency,
+                          date,
+                        }),
+                  )
+                  .join(', '),
+              },
+            ),
+          },
+        }),
+      );
+    },
+  );
+
   const unlistenSync = syncEvents.listenForSyncEvent(store, queryClient);
 
   const unlistenUndo = listen('undo-event', undoState => {
@@ -199,6 +234,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenServerError();
     unlistenOrphanedPayees();
     unlistenSchedulesOffline();
+    unlistenSchedulesRateUnavailable();
     unlistenSync();
     unlistenUndo();
     unlistenFallbackWriteError();

@@ -7,6 +7,7 @@ import { batchMessages } from '#server/sync';
 import type { Diff } from '#shared/util';
 import type { PayeeEntity, TransactionEntity } from '#types/models';
 
+import { preflightTransactionWrites, queuedAccount } from './foreign-guard';
 import * as rules from './transaction-rules';
 import * as transfer from './transfer';
 
@@ -37,6 +38,16 @@ async function getTransactionsByIds(
   );
 }
 
+/** Off-budget account transactions and split parents have no category. */
+export function clearDisallowedCategory(
+  transaction: Pick<TransactionEntity, 'category' | 'is_parent'>,
+  account: Pick<db.DbAccount, 'offbudget'> | null | undefined,
+) {
+  if (transaction.is_parent || account?.offbudget === 1) {
+    transaction.category = null;
+  }
+}
+
 export async function batchUpdateTransactions({
   added,
   deleted,
@@ -44,11 +55,47 @@ export async function batchUpdateTransactions({
   learnCategories = false,
   detectOrphanPayees = true,
   runTransfers = true,
+  exchangeReplacements,
 }: Partial<Diff<TransactionEntity>> & {
   learnCategories?: boolean;
   detectOrphanPayees?: boolean;
   runTransfers?: boolean;
+  /** Exchange legs whose amount an import replaces. */
+  exchangeReplacements?: ReadonlySet<string>;
 }) {
+  // A tombstoning update is a deletion, so it gets the same child and
+  // transfer cleanup.
+  const tombstoned = updated?.filter(update => update.tombstone) ?? [];
+  if (tombstoned.length > 0) {
+    updated = updated.filter(update => !update.tombstone);
+    deleted = [...(deleted ?? []), ...tombstoned.map(({ id }) => ({ id }))];
+  }
+
+  // An update to a row added in the same batch is part of that row, so the
+  // row is written and gets its transfer hook once, in its final state.
+  if (added?.length && updated?.length) {
+    const addedIds = new Set(added.map(row => row.id));
+    added = added.map(row =>
+      updated
+        .filter(patch => patch.id === row.id)
+        .reduce<TransactionEntity>(
+          (merged, patch) => ({ ...merged, ...patch }),
+          row,
+        ),
+    );
+    updated = updated.filter(patch => !addedIds.has(patch.id));
+  }
+
+  // Reject the whole batch before any write or side effect, including the
+  // counterparts its new foreign transfers will get.
+  await preflightTransactionWrites(
+    { added, updated, deleted },
+    { runTransfers, exchangeReplacements },
+  );
+  if (runTransfers) {
+    await transfer.preflightNewForeignTransfers(added ?? [], updated ?? []);
+  }
+
   // Track the ids of each type of transaction change (see below for why)
   let addedIds = [];
   const updatedIds = updated ? updated.map(u => u.id) : [];
@@ -87,12 +134,14 @@ export async function batchUpdateTransactions({
     if (added) {
       addedIds = await Promise.all(
         added.map(async t => {
-          // Offbudget account transactions and parent transactions should not have categories.
-          const account = accounts.find(acct => acct.id === t.account);
-          if (t.is_parent || account?.offbudget === 1) {
-            t.category = null;
-          }
-          return db.insertTransaction(t);
+          // An account linked in the same batch is not stored yet.
+          clearDisallowedCategory(
+            t,
+            accounts.find(acct => acct.id === t.account) ??
+              queuedAccount(t.account),
+          );
+          // Preflight validated the whole request, transfer links included.
+          return db.insertTransaction(t, { validatedTransfer: true });
         }),
       );
     }
@@ -113,15 +162,17 @@ export async function batchUpdateTransactions({
       await Promise.all(
         updated.map(async t => {
           if (t.account) {
-            // Moving transactions off budget should always clear the
-            // category. Parent transactions should not have categories.
-            const account = accounts.find(acct => acct.id === t.account);
-            if (t.is_parent || account?.offbudget === 1) {
-              t.category = null;
-            }
+            // Moving transactions off budget always clears the category.
+            clearDisallowedCategory(
+              t,
+              accounts.find(acct => acct.id === t.account),
+            );
           }
 
-          await db.updateTransaction(t);
+          await db.updateTransaction(t, {
+            validatedTransfer: true,
+            exchangeReplacements,
+          });
         }),
       );
     }
@@ -146,7 +197,13 @@ export async function batchUpdateTransactions({
       .filter((transaction): transaction is TransactionEntity =>
         Boolean(transaction),
       );
-  const allAdded = pickTransactions(addedIds);
+  // Inside an enclosing batch (bank sync) new rows are still queued, so
+  // their transfers are built from the rows as written.
+  const allAdded = addedIds
+    .map((id, index) => changedById.get(id) ?? { ...added[index], id })
+    .filter((transaction): transaction is TransactionEntity =>
+      Boolean(transaction),
+    );
   const allUpdated = pickTransactions(updatedIds);
   const allDeleted = pickTransactions(deletedIds);
 

@@ -26,6 +26,8 @@ function createBlankMonth(categories, sheetName, months) {
   sheet.get().createStatic(sheetName, 'is-blank', true);
   sheet.get().createStatic(sheetName, 'to-budget', 0);
   sheet.get().createStatic(sheetName, 'buffered', 0);
+  sheet.get().createStatic(sheetName, 'fx-changes', 0);
+  sheet.get().createStatic(sheetName, 'fx-incomplete', false);
 
   categories.forEach(cat => createBlankCategory(cat, months));
 }
@@ -44,6 +46,10 @@ export function createCategory(cat, sheetName, prevSheetName) {
     }
 
     sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
+    // What the category's base lanes carry in by their own rules, beyond the
+    // single rule below (MC-10, base-slots.ts); 0 unless its base slot holds
+    // retired or later-generation lanes.
+    sheet.get().createStatic(sheetName, `carry-adjust-${cat.id}`, 0);
 
     sheet.get().createDynamic(sheetName, `leftover-${cat.id}`, {
       initialValue: 0,
@@ -53,12 +59,21 @@ export function createCategory(cat, sheetName, prevSheetName) {
         `${prevSheetName}!carryover-${cat.id}`,
         `${prevSheetName}!leftover-${cat.id}`,
         `${prevSheetName}!leftover-pos-${cat.id}`,
+        `carry-adjust-${cat.id}`,
       ],
-      run: (budgeted, spent, prevCarryover, prevLeftover, prevLeftoverPos) => {
+      run: (
+        budgeted,
+        spent,
+        prevCarryover,
+        prevLeftover,
+        prevLeftoverPos,
+        carryAdjust,
+      ) => {
         return safeNumber(
           number(budgeted) +
             number(spent) +
-            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)),
+            (prevCarryover ? number(prevLeftover) : number(prevLeftoverPos)) +
+            number(carryAdjust),
         );
       },
     });
@@ -119,22 +134,41 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
     run: amount => amount,
   });
 
+  // The month's change in the market value of on-budget holdings in other
+  // currencies (MC-8.1), written by the valuation bridge. Through
+  // available-funds it reaches To Budget once and rolls forward with it.
+  sheet.get().createStatic(sheetName, 'fx-changes', 0);
+  sheet.get().createStatic(sheetName, 'fx-incomplete', false);
+  // The month's change in the reservation of currency pockets that To
+  // Budget includes (MC-10), written by the same refresh. Foreign pocket
+  // assignments and spending reach To Budget only through it.
+  sheet.get().createStatic(sheetName, 'reservation-changes', 0);
+  sheet.get().createStatic(sheetName, 'reservation-incomplete', false);
+
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: ['total-income', 'from-last-month'],
-    run: (income, fromLastMonth) =>
-      safeNumber(number(income) + number(fromLastMonth)),
+    dependencies: ['total-income', 'from-last-month', 'fx-changes'],
+    run: (income, fromLastMonth, fxChanges) =>
+      safeNumber(number(income) + number(fromLastMonth) + number(fxChanges)),
   });
+
+  // The sum of every category's carry adjustment: overspending that base
+  // lanes reset by their own rules, which To Budget covers (MC-10).
+  sheet.get().createStatic(sheetName, 'carry-adjust-total', 0);
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {
     initialValue: 0,
-    dependencies: flatten2(
-      expenseCategories.map(cat => [
-        `${prevSheetName}!leftover-${cat.id}`,
-        `${prevSheetName}!carryover-${cat.id}`,
-      ]),
-    ),
-    run: (...data) => {
+    // The adjustment comes first: category changes append leftover pairs.
+    dependencies: [
+      'carry-adjust-total',
+      ...flatten2(
+        expenseCategories.map(cat => [
+          `${prevSheetName}!leftover-${cat.id}`,
+          `${prevSheetName}!carryover-${cat.id}`,
+        ]),
+      ),
+    ],
+    run: (carryAdjust, ...data) => {
       data = unflatten2(data);
       return safeNumber(
         data.reduce((total, [leftover, carryover]) => {
@@ -142,7 +176,7 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
             return total;
           }
           return total + Math.min(0, number(leftover));
-        }, 0),
+        }, 0) - number(carryAdjust),
       );
     },
   });
@@ -197,13 +231,15 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
       'last-month-overspent',
       'total-budgeted',
       'buffered-selected',
+      'reservation-changes',
     ],
-    run: (available, lastOverspent, totalBudgeted, buffered) => {
+    run: (available, lastOverspent, totalBudgeted, buffered, reserved) => {
       return safeNumber(
         number(available) +
           number(lastOverspent) +
           number(totalBudgeted) -
-          number(buffered),
+          number(buffered) -
+          number(reserved),
       );
     },
   });

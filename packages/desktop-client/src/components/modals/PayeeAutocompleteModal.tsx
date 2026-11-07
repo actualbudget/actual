@@ -27,6 +27,9 @@ export function PayeeAutocompleteModal({
   onSelect,
   showNoneOption,
   onClose,
+  deferNewPayee = false,
+  hideTransferPayees = false,
+  excludeTransferAccounts,
 }: PayeeAutocompleteModalProps) {
   const { t } = useTranslation();
   const { data: payees = [] } = usePayees();
@@ -75,15 +78,21 @@ export function PayeeAutocompleteModal({
           <View>
             <View style={{ flex: 1 }}>
               <PayeeAutocomplete
-                payees={payees}
+                payees={payees.filter(
+                  payee =>
+                    !payee.transfer_acct ||
+                    (!hideTransferPayees &&
+                      !excludeTransferAccounts?.includes(payee.transfer_acct)),
+                )}
                 accounts={accounts}
                 focused
                 embedded
                 closeOnBlur={false}
+                clearOnBlur={!deferNewPayee}
                 onClose={() => state.close()}
                 onManagePayees={onManagePayees}
                 showManagePayees={!isNarrowWidth}
-                showMakeTransfer={!isNarrowWidth}
+                showMakeTransfer={!isNarrowWidth && !hideTransferPayees}
                 {...defaultAutocompleteProps}
                 onSelect={onSelect}
                 value={null}

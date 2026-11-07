@@ -4,6 +4,7 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
@@ -11,6 +12,7 @@ import type { Handlers } from '#types/handlers';
 import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { app as adminApp } from './admin/app';
+import { app as amountEncodingApp } from './amount-encoding/app';
 import { installAPI } from './api';
 import { aqlQuery } from './aql';
 import { app as authApp } from './auth/app';
@@ -21,6 +23,7 @@ import * as db from './db';
 import * as encryption from './encryption';
 import { app as encryptionApp } from './encryption/app';
 import { DocumentDirError, withErrorCode } from './errors';
+import { app as exchangeRatesApp } from './exchange-rates/app';
 import { app as filtersApp } from './filters/app';
 import { app as forecastApp } from './forecast/app';
 import { app as formulasApp } from './formulas/app';
@@ -61,8 +64,9 @@ handlers['redo'] = mutator(function () {
 handlers['make-filters-from-conditions'] = async function ({
   conditions,
   applySpecialCases,
+  amountField,
 }) {
-  return rules.conditionsToAQL(conditions, { applySpecialCases });
+  return rules.conditionsToAQL(conditions, { applySpecialCases, amountField });
 };
 
 handlers['query'] = async function (query) {
@@ -98,6 +102,7 @@ handlers['get-server-url'] = async function () {
 handlers['set-server-url'] = async function ({ url, validate = true }) {
   if (url == null) {
     await asyncStorage.removeItem('user-token');
+    await notifyFxContextChanged('session');
   } else {
     url = url.replace(/\/+$/, '');
 
@@ -130,6 +135,7 @@ handlers = installAPI(handlers) as Handlers;
 // A hack for now until we clean up everything
 app.handlers = handlers;
 app.combine(
+  amountEncodingApp,
   authApp,
   schedulesApp,
   budgetApp,
@@ -151,6 +157,7 @@ app.combine(
   syncApp,
   budgetFilesApp,
   encryptionApp,
+  exchangeRatesApp,
   tagsApp,
 );
 
@@ -238,6 +245,7 @@ export async function initApp(isDev, socketName) {
 
   if (!url) {
     await asyncStorage.removeItem('user-token');
+    await notifyFxContextChanged('session');
   }
   setServer(url);
 

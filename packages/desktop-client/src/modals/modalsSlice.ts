@@ -19,7 +19,7 @@ import type {
 } from '@actual-app/core/types/models';
 import type { CleanupTemplate } from '@actual-app/core/types/models/cleanup-templates';
 import type { Template } from '@actual-app/core/types/models/templates';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, nanoid } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
@@ -28,6 +28,7 @@ import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLi
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
+import type { ForeignAmountEdit } from '#util/foreign-edit';
 
 const sliceName = 'modals';
 
@@ -311,6 +312,8 @@ export type Modal =
         onSelect: (accountId: string, accountName: string) => void;
         includeClosedAccounts?: boolean;
         hiddenAccounts?: AccountEntity['id'][];
+        /** Accounts in another currency, listed last for a move. */
+        otherCurrencyAccounts?: AccountEntity['id'][];
         onClose?: () => void;
       };
     }
@@ -320,6 +323,15 @@ export type Modal =
         onSelect: (payeeId: string | null) => void;
         showNoneOption?: boolean;
         onClose?: () => void;
+        /**
+         * Returns a typed new payee as `new:<name>` instead of creating it,
+         * for entries that create the payee only when they post.
+         */
+        deferNewPayee?: boolean;
+        /** Offer no transfer payees, for entries that cannot transfer. */
+        hideTransferPayees?: boolean;
+        /** Offer no transfers to these accounts (another currency). */
+        excludeTransferAccounts?: string[];
       };
     }
   | {
@@ -501,6 +513,26 @@ export type Modal =
       };
     }
   | {
+      name: 'fx-valuation';
+      options: { month: string };
+    }
+  | {
+      name: 'category-pocket';
+      options: {
+        categoryId: CategoryEntity['id'];
+        pocketId: string;
+        month: string;
+      };
+    }
+  | {
+      name: 'base-slot';
+      options: { categoryId: CategoryEntity['id']; month: string };
+    }
+  | {
+      name: 'add-currency';
+      options: { categoryId: CategoryEntity['id']; categoryName: string };
+    }
+  | {
       name: 'tracking-balance-menu';
       options: {
         categoryId: CategoryEntity['id'];
@@ -580,6 +612,89 @@ export type Modal =
       };
     }
   | {
+      name: 'add-exchange-rate';
+      options: {
+        accountId: AccountEntity['id'];
+        currencyCode: string;
+        dates: string[];
+      };
+    }
+  | {
+      name: 'exchange-transfer';
+      options:
+        | {
+            /** A scheduled exchange occurrence that has no estimate. */
+            occurrence: {
+              schedule: string;
+              account: string;
+              other: string;
+              date: string;
+              /** In the schedule account's encoding, signed. */
+              amount: number;
+              notes: string | null;
+              cleared: boolean;
+              category: string | null;
+            };
+            edit?: undefined;
+          }
+        | {
+            occurrence?: undefined;
+            /** Edits the exchange family holding this row. */
+            edit: { id: string; onSaved?: () => void };
+          };
+    }
+  | {
+      name: 'foreign-amount';
+      options: {
+        /**
+         * A new foreign draft, or an edited row, with its native amount in
+         * transaction_amount.
+         */
+        transaction: Omit<
+          TransactionEntity,
+          'amount' | 'transaction_amount'
+        > & {
+          transaction_amount: number;
+        };
+        currencyCode: string;
+        nativePrecision: number;
+        /** A schedule draft that already ran its rules. */
+        rulesApplied?: boolean;
+        /** Saves an existing row instead of posting a new one. */
+        edit?: ForeignAmountEdit;
+        onPosted: () => void;
+      };
+    }
+  | {
+      name: 'currency-correction';
+      options: { accountId: string };
+    }
+  | {
+      name: 'stale-encoding-repair';
+      options: {
+        accountId: string;
+        /** Called after a repair that wrote rows. */
+        onRepaired?: () => void;
+      };
+    }
+  | {
+      name: 'foreign-move';
+      options: {
+        /** A single row moving to an account in another currency. */
+        id: string;
+        account: string;
+        onSaved?: () => void;
+      };
+    }
+  | {
+      name: 'foreign-split';
+      options: {
+        /** The foreign transaction or split parent being split. */
+        id: string;
+        onSaved?: () => void;
+      };
+    }
+  | {
       name: 'confirm-transaction-edit';
       options: {
         onConfirm: () => void;
@@ -605,6 +720,10 @@ export type Modal =
         daysUntilTransaction?: number;
         upcomingDays?: number;
       };
+    }
+  | {
+      name: 'amount-encoding';
+      options: { currencyCode: string; required?: boolean };
     }
   | {
       name: 'confirm-delete';
@@ -726,8 +845,11 @@ export const openAccountCloseModal = createAppAsyncThunk(
   },
 );
 
+/** A stack entry; the id keeps its rendered dialog stable as others close. */
+export type ModalInstance = Modal & { id?: string };
+
 type ModalsState = {
-  modalStack: Modal[];
+  modalStack: ModalInstance[];
   isHidden: boolean;
 };
 
@@ -752,19 +874,27 @@ const modalsSlice = createSlice({
   name: sliceName,
   initialState,
   reducers: {
-    pushModal(state, action: PayloadAction<PushModalPayload>) {
-      const modal = action.payload.modal;
-      // special case: don't show the keyboard shortcuts modal if there's already a modal open
-      if (
-        modal.name.endsWith('keyboard-shortcuts') &&
-        (state.modalStack.length > 0 ||
-          window.document.querySelector(
-            'div[data-testid="filters-menu-tooltip"]',
-          ) !== null)
-      ) {
-        return state;
-      }
-      state.modalStack = [...state.modalStack, modal];
+    pushModal: {
+      prepare: (payload: PushModalPayload) => ({
+        payload: { ...payload, id: nanoid() },
+      }),
+      reducer: (
+        state,
+        action: PayloadAction<PushModalPayload & { id: string }>,
+      ) => {
+        const modal = { ...action.payload.modal, id: action.payload.id };
+        // special case: don't show the keyboard shortcuts modal if there's already a modal open
+        if (
+          modal.name.endsWith('keyboard-shortcuts') &&
+          (state.modalStack.length > 0 ||
+            window.document.querySelector(
+              'div[data-testid="filters-menu-tooltip"]',
+            ) !== null)
+        ) {
+          return state;
+        }
+        state.modalStack = [...state.modalStack, modal];
+      },
     },
     replaceModal(state, action: PayloadAction<ReplaceModalPayload>) {
       const modal = action.payload.modal;
@@ -775,6 +905,15 @@ const modalsSlice = createSlice({
     },
     closeModal(state) {
       state.modalStack = [];
+    },
+    /** Removes only the topmost modal with this name, keeping any above it. */
+    removeModal(state, action: PayloadAction<{ name: Modal['name'] }>) {
+      const idx = state.modalStack
+        .map(m => m.name)
+        .lastIndexOf(action.payload.name);
+      if (idx >= 0) {
+        state.modalStack.splice(idx, 1);
+      }
     },
     collapseModals(state, action: PayloadAction<CollapseModalPayload>) {
       const idx = state.modalStack.findIndex(
@@ -787,6 +926,11 @@ const modalsSlice = createSlice({
   extraReducers: builder => {
     builder.addCase(setAppState, (state, action) => {
       state.isHidden = action.payload.loadingText !== null;
+      if (state.isHidden) {
+        state.modalStack = state.modalStack.filter(
+          modal => modal.name !== 'fx-valuation',
+        );
+      }
     });
     builder.addCase(signOut.fulfilled, () => initialState);
     builder.addCase(resetApp, () => initialState);
@@ -800,5 +944,11 @@ export const actions = {
   openAccountCloseModal,
 };
 
-export const { pushModal, closeModal, collapseModals, popModal, replaceModal } =
-  actions;
+export const {
+  pushModal,
+  closeModal,
+  collapseModals,
+  popModal,
+  replaceModal,
+  removeModal,
+} = actions;

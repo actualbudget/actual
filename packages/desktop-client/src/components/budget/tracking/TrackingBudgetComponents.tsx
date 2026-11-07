@@ -25,6 +25,7 @@ import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, SheetCell } from '#components/table';
 import type { SheetCellProps } from '#components/table';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useCategoryScheduleGoalTemplateIndicator } from '#hooks/useCategoryScheduleGoalTemplateIndicator';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
@@ -203,7 +204,7 @@ export const CategoryMonth = memo(function CategoryMonth({
 }: CategoryMonthProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
-  const format = useFormat();
+  const format = useFormat(useAmountPrecision());
 
   const [balanceMenuOpen, setBalanceMenuOpen] = useState(false);
   const triggerBalanceMenuRef = useRef(null);
@@ -367,6 +368,7 @@ export const CategoryMonth = memo(function CategoryMonth({
         )}
         <TrackingSheetCell
           name="budget"
+          formatter={value => format(value, 'financial')}
           exposed={editing}
           focused={editing}
           width="flex"

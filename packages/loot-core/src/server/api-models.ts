@@ -1,16 +1,24 @@
+import type { Money } from '#shared/money';
 import type { Budget } from '#types/budget';
 import type {
   AccountEntity,
   AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
+  ImportTransactionEntity,
   NewRuleEntity,
   PayeeEntity,
   RuleEntity,
   ScheduleEntity,
   TagEntity,
+  TransactionEntity,
 } from '#types/models';
 
+import type {
+  CategoryPocketsMonth,
+  PocketLaneMonth,
+  PocketMonth,
+} from './budget/pocket-readers';
 import type { RemoteFile } from './cloud-storage';
 import * as models from './models';
 
@@ -19,12 +27,154 @@ export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   closed?: boolean;
   balance_current?: number | null;
   account_group_id?: string | null;
+  /** Effective currency code; inherited accounts report the budget currency. */
+  currency: string;
+};
+
+/** Omit currency or pass null to inherit the budget currency. */
+export type APIAccountCreateEntity = Omit<
+  APIAccountEntity,
+  'id' | 'currency'
+> & {
+  currency?: string | null;
+};
+
+export type APIAccountUpdateFields = Partial<
+  Omit<APIAccountEntity, 'id' | 'currency'>
+> & {
+  currency?: string | null;
+};
+
+/**
+ * Raw integers remain the default during dual support. Raw-integer support
+ * will be removed 12 months after Money support ships.
+ */
+export type AmountFormat = 'raw' | 'money';
+export type AmountFormatOptions = { amountFormat?: AmountFormat };
+export type AmountInput = number | Money;
+
+/**
+ * `amount` is the budget-base integer (or Money in the budget currency);
+ * `transaction_amount` is the account-native integer (or Money in the
+ * account currency) and is required for foreign-currency accounts. For
+ * those accounts `amount` may be omitted: it is then converted at the saved
+ * rate for the transaction's date, and the import fails listing any dates
+ * without a rate.
+ */
+export type APIImportTransactionInput = Omit<
+  ImportTransactionEntity,
+  'amount' | 'transaction_amount' | 'subtransactions'
+> & {
+  amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
+  subtransactions?: Array<
+    Omit<
+      NonNullable<ImportTransactionEntity['subtransactions']>[number],
+      'amount'
+    > & {
+      amount: AmountInput;
+      transaction_amount?: AmountInput | null;
+    }
+  >;
+};
+
+export type APITransactionUpdateFields = Omit<
+  Partial<TransactionEntity>,
+  'amount' | 'transaction_amount' | 'subtransactions'
+> & {
+  amount?: AmountInput;
+  transaction_amount?: AmountInput | null;
+  subtransactions?: Array<
+    Omit<TransactionEntity, 'amount' | 'transaction_amount'> & {
+      amount: AmountInput;
+      transaction_amount?: AmountInput | null;
+    }
+  >;
+};
+
+export type APIMoneyTransactionEntity = Omit<
+  TransactionEntity,
+  'amount' | 'transaction_amount' | 'subtransactions'
+> & {
+  /** Budget currency. */
+  amount: Money;
+  /** Account currency, foreign-currency accounts only. */
+  transaction_amount?: Money | null;
+  subtransactions?: APIMoneyTransactionEntity[];
+};
+
+/** Replaces amount fields with raw integers or Money; null stays null. */
+type Amounts<T, K extends keyof T, A> = Omit<T, K> & { [P in K]: A | null };
+
+type LaneAmount =
+  | 'budgeted'
+  | 'budgetedBase'
+  | 'spent'
+  | 'spentBase'
+  | 'balance'
+  | 'balanceBase';
+
+export type APIPocketLaneMonth<A extends number | Money = number> = Amounts<
+  PocketLaneMonth,
+  LaneAmount,
+  A
+>;
+
+/**
+ * A currency pocket's month. Native fields (`budgeted`, `spent`, `balance`)
+ * are integers at `precision`, or Money in `currency`; the rest are in the
+ * budget currency.
+ */
+export type APIPocketMonth<A extends number | Money = number> = Amounts<
+  Omit<PocketMonth, 'lanes'>,
+  LaneAmount | 'fxContribution' | 'carryIn' | 'reset',
+  A
+> & { lanes: Array<APIPocketLaneMonth<A>> };
+
+/**
+ * Fields of a category with currency pockets: slot totals in the budget
+ * currency, the balance valued, null with a reason in `incomplete`.
+ */
+export type APICategoryPockets<A extends number | Money = number> = Amounts<
+  Omit<CategoryPocketsMonth, 'base' | 'pockets'>,
+  'budgeted' | 'spent' | 'balance' | 'carryIn' | 'reset' | 'fxContribution',
+  A
+> & {
+  base: {
+    budgeted: A;
+    spent: A;
+    balance: A;
+    carryIn: A;
+    reset: A;
+    carryover: boolean;
+  };
+  pockets: Array<APIPocketMonth<A>>;
+};
+
+export type APIBudgetMonth<A extends number | Money = number> = {
+  month: string;
+  incomeAvailable: A;
+  lastMonthOverspent: A;
+  forNextMonth: A;
+  totalBudgeted: A;
+  toBudget: A;
+
+  fromLastMonth: A;
+  totalIncome: A;
+  totalSpent: A;
+  totalBalance: A;
+  categoryGroups: Array<
+    Record<string, unknown> & { categories?: Record<string, unknown>[] }
+  >;
 };
 
 export const accountModel = {
   ...models.accountModel,
 
-  toExternal(account: AccountEntity): APIAccountEntity {
+  toExternal(
+    account: AccountEntity,
+    budgetCurrencyCode: string,
+  ): APIAccountEntity {
     return {
       id: account.id,
       name: account.name,
@@ -32,10 +182,11 @@ export const accountModel = {
       closed: account.closed ? true : false,
       balance_current: account.balance_current ?? null,
       account_group_id: account.account_group_id ?? null,
+      currency: account.currency || budgetCurrencyCode,
     };
   },
 
-  fromExternal(account: APIAccountEntity) {
+  fromExternal(account: APIAccountUpdateFields) {
     const result = { ...account } as unknown as AccountEntity;
     if ('offbudget' in account) {
       result.offbudget = account.offbudget ? 1 : 0;

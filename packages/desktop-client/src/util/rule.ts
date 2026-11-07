@@ -40,17 +40,19 @@ export function mapField(field, opts?) {
       return t('imported payee');
     case 'payee_name':
       return t('payee (name)');
+    // `base` labels filters in a foreign register, which compare the
+    // stored base amounts rather than the native amounts it shows.
     case 'amount':
       if (opts.inflow) {
-        return t('amount (inflow)');
+        return opts.base ? t('base amount (inflow)') : t('amount (inflow)');
       } else if (opts.outflow) {
-        return t('amount (outflow)');
+        return opts.base ? t('base amount (outflow)') : t('amount (outflow)');
       }
-      return t('amount');
+      return opts.base ? t('base amount') : t('amount');
     case 'amount-inflow':
-      return t('amount (inflow)');
+      return opts.base ? t('base amount (inflow)') : t('amount (inflow)');
     case 'amount-outflow':
-      return t('amount (outflow)');
+      return opts.base ? t('base amount (outflow)') : t('amount (outflow)');
     case 'account':
       return t('account');
     case 'date':

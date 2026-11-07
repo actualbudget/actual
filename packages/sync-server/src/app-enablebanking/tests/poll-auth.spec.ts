@@ -229,6 +229,45 @@ describe('Enable Banking Express routes', () => {
       expect(res.body.data.accounts[0].account_id).toBe('account-uid-1');
       expect(res.body.data.accounts[0].name).toBe('Current Account');
       expect(res.body.data.accounts[0].institution).toBe('Nordea');
+      expect(res.body.data.accounts[0].balance).toBe('1000.00');
+    });
+
+    it("shows a balance only in the account's currency", async () => {
+      mockFetchResponse({
+        session_id: 'session-123',
+        accounts: [
+          { uid: 'yen', name: 'Yen', currency: 'JPY' },
+          { uid: 'mixed', name: 'Mixed', currency: 'SEK' },
+        ],
+        aspsp: { name: 'TestBank' },
+      });
+      mockFetchResponse({
+        balances: [
+          {
+            balance_amount: { currency: 'USD', amount: '20.00' },
+            balance_type: 'CLAV',
+          },
+          {
+            balance_amount: { currency: 'JPY', amount: '10000' },
+            balance_type: 'ITAV',
+          },
+        ],
+      });
+      mockFetchResponse({
+        balances: [
+          {
+            balance_amount: { currency: 'USD', amount: '20.00' },
+            balance_type: 'CLAV',
+          },
+        ],
+      });
+
+      const res = await request(app)
+        .post('/complete-auth')
+        .send({ code: 'auth-code' });
+
+      expect(res.body.data.accounts[0].balance).toBe('10000');
+      expect(res.body.data.accounts[1].balance).toBeNull();
     });
 
     it('handles balance fetch failure gracefully per account', async () => {
@@ -266,6 +305,7 @@ describe('Enable Banking Express routes', () => {
       expect(res.body.data.accounts).toHaveLength(2);
       expect(res.body.data.accounts[0].balances).toHaveLength(1);
       expect(res.body.data.accounts[1].balances).toHaveLength(0);
+      expect(res.body.data.accounts[1].balance).toBe('0');
     });
   });
 
@@ -441,9 +481,10 @@ describe('Enable Banking Express routes', () => {
       expect(data.transactions.pending[0].date).toBe('2026-03-02');
 
       expect(data.balances).toHaveLength(1);
-      expect(data.balances[0].balanceAmount.amount).toBe(123456);
+      expect(data.balances[0].balanceAmount.amount).toBe('1234.56');
 
-      expect(data.startingBalance).toBe(123456);
+      expect(data.startingBalance).toBe('1234.56');
+      expect(data.startingBalanceCurrency).toBe('EUR');
     });
 
     it('handles pagination via continuation_key', async () => {
@@ -490,7 +531,7 @@ describe('Enable Banking Express routes', () => {
         .post('/transactions')
         .send({ accountId: 'uid-1', startDate: '2026-01-01' });
 
-      expect(res.body.data.startingBalance).toBe(0);
+      expect(res.body.data.startingBalance).toBe('0');
     });
 
     it('handles API error gracefully', async () => {
