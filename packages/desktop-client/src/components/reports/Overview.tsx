@@ -655,7 +655,13 @@ export function Overview({ dashboard }: OverviewProps) {
         onMetaChange({ i: widget.id }, meta);
         return;
       }
-      const dateKeys = ['timeFrame', 'compare', 'compareTo', 'isLive'];
+      const dateKeys = [
+        'timeFrame',
+        'compare',
+        'compareTo',
+        'isLive',
+        'monthsFromToday',
+      ];
       const originalMeta = (widget.meta ?? {}) as Record<string, unknown>;
       const persistedMeta = Object.fromEntries(
         Object.entries(meta).filter(([key]) => !dateKeys.includes(key)),
