@@ -14,7 +14,7 @@ const sqliteWasmPath = require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm');
 // Library builds inline every imported asset, so the sqlite wasm is
 // emitted as a sibling of the worker bundle instead. It is served from the
 // same `kcab/` directory and precached with it; the engine fetches it from
-// `kcab/sqlite3.wasm` (see src/platform/server/sqlite/engine.wasm.ts).
+// `kcab/sqlite3.wasm` (see src/platform/server/sqlite/wasm.ts).
 //
 // The glue locates its wasm with `new URL('sqlite3.wasm', import.meta.url)`,
 // which Vite would otherwise inline as a 1.2 MB base64 copy next to the

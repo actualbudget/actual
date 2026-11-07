@@ -1,11 +1,11 @@
-import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-
+import 'fake-indexeddb/auto';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
 
-import { wasmEngine } from './engine.wasm';
+import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { putSqliteFileRow } from './storage/files-store';
+import { initWasmEngine } from './storage/test-helpers';
 import type { Database } from './types';
 
 import {
@@ -15,12 +15,9 @@ import {
   init,
   openDatabase,
   prepare,
-  registerEngine,
   runQuery,
   transaction,
 } from './index';
-
-const require = createRequire(import.meta.url);
 
 const initSQL = `
 CREATE TABLE numbers (id TEXT PRIMARY KEY, number INTEGER);
@@ -304,6 +301,68 @@ describe('legacy sql.js engine', () => {
 
   itBehavesLikeSqlite();
 
+  it('releases the shared budget lock when the open fails', async () => {
+    let released = false;
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback().then(() => {
+          released = true;
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      // No such file in the legacy filesystem, so the open fails after
+      // the lock was taken
+      await expect(
+        openDatabase('/documents/Actual/missing/db.sqlite'),
+      ).rejects.toThrow();
+      await vi.waitFor(() => expect(released).toBe(true));
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
+  it('shares the budget lock and reports a budget in use when it is held', async () => {
+    // A fake Web Locks API that times out, as it does while another
+    // worker holds the budget exclusively
+    const request = vi.fn(() =>
+      Promise.reject(new DOMException('aborted', 'AbortError')),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      await expect(
+        openDatabase('/documents/Actual/budget-one/db.sqlite'),
+      ).rejects.toBeInstanceOf(BudgetInUseError);
+      expect(request).toHaveBeenCalledWith(
+        'actual-budget:documents-Actual-budget-one',
+        expect.objectContaining({ mode: 'shared' }),
+        expect.any(Function),
+      );
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
+  it('refuses a budget that moved to the new storage while it waited', async () => {
+    const path = '/documents/Actual/moved/db.sqlite';
+    await putSqliteFileRow({ filepath: path, contents: '', storage: 'opfs' });
+    await expect(openDatabase(path)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+  });
+
   it('frees the statements it prepares', async () => {
     const db = await openWithSchema();
     // The facade hands out an opaque handle; the legacy engine's statements
@@ -328,14 +387,7 @@ describe('legacy sql.js engine', () => {
 });
 
 describe('sqlite-wasm engine', () => {
-  beforeAll(() => {
-    // No fetch in tests: hand the engine the wasm bytes directly
-    const wasmBinary = readFileSync(
-      require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm'),
-    );
-    registerEngine('wasm', wasmEngine);
-    return init({ engine: 'wasm', wasmBinary });
-  });
+  beforeAll(() => initWasmEngine());
 
   itBehavesLikeSqlite();
 
@@ -351,6 +403,23 @@ describe('sqlite-wasm engine', () => {
       db as unknown as { openStatementCount: () => number }
     ).openStatementCount();
     expect(openStatements).toBe(0);
+    closeDatabase(db);
+  });
+
+  it('does not log a warning when a statement fails', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => null);
+    try {
+      expectConstraintFailure(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      );
+      // The oo1 API warns before it throws; sync applies messages as
+      // insert-then-update, so that would flood the console
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
     closeDatabase(db);
   });
 });

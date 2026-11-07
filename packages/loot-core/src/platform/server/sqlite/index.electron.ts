@@ -11,6 +11,7 @@ import type {
   Database,
   SqlParam,
   Statement,
+  StorageBackend,
   TransactionOptions,
 } from './types';
 import { unicodeLike } from './unicodeLike';
@@ -19,8 +20,14 @@ export type {
   Database,
   SqlParam,
   Statement,
+  StorageBackend,
   TransactionOptions,
 } from './types';
+export {
+  BudgetInUseError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from './storage/errors';
 
 // Callers hold the opaque handles from `./types`; the native module is the
 // only place that knows they are better-sqlite3 objects
@@ -37,8 +44,18 @@ function verifyParamTypes(sql, arr) {
   });
 }
 
-export async function init() {
-  // No need to initialise on electron
+export async function init(_options?: {
+  baseURL?: string;
+  wasmBinary?: ArrayBuffer | Uint8Array;
+  storage?: StorageBackend;
+}): Promise<StorageBackend> {
+  // No need to initialise on electron; the storage backend only exists on
+  // the web, so report the native build as `legacy`
+  return 'legacy';
+}
+
+export async function flushSqliteStorage(): Promise<void> {
+  // Native sqlite writes through to disk
 }
 
 // Parity with the browser sqlite backend (which instantiates sql.js from an
