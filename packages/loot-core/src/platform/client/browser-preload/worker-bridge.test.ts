@@ -1,6 +1,83 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { WorkerBridge } from './worker-bridge';
+import { releaseStorageThenTerminate, WorkerBridge } from './worker-bridge';
+import type { TerminatableWorker } from './worker-bridge';
+
+type FakeWorker = TerminatableWorker & {
+  posted: unknown[];
+  reply: (message: unknown) => void;
+};
+
+function fakeWorker(): FakeWorker {
+  const listeners: Array<(event: MessageEvent) => void> = [];
+  const worker: FakeWorker = {
+    onmessage: () => {
+      // Replaced by the bridge before the worker is released
+    },
+    posted: [],
+    postMessage: message => worker.posted.push(message),
+    addEventListener: (_type, handler) => listeners.push(handler),
+    terminate: vi.fn<() => void>(),
+    reply: message => {
+      for (const listener of listeners) {
+        listener({ data: message } as MessageEvent);
+      }
+    },
+  };
+  return worker;
+}
+
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('releaseStorageThenTerminate', () => {
+  it('asks the backend to release its storage and terminates on the reply', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+
+    expect(worker.onmessage).toBeNull();
+    expect(worker.posted).toEqual([
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+    expect(worker.terminate).not.toHaveBeenCalled();
+
+    const request = worker.posted[0] as { id: string };
+    worker.reply({ type: 'reply', id: request.id, result: 'ok' });
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+
+    // The timeout must not terminate a second time
+    vi.advanceTimersByTime(1000);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('terminates anyway when the backend does not answer in time', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+
+    vi.advanceTimersByTime(299);
+    expect(worker.terminate).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+
+    // A late reply changes nothing
+    const request = worker.posted[0] as { id: string };
+    worker.reply({ type: 'reply', id: request.id, result: 'ok' });
+    expect(worker.terminate).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores unrelated messages while waiting', () => {
+    const worker = fakeWorker();
+    releaseStorageThenTerminate(worker, 300);
+    worker.reply({ type: 'push', name: 'sync-event' });
+    worker.reply({ type: 'reply', id: 'something-else' });
+    expect(worker.terminate).not.toHaveBeenCalled();
+  });
+});
 
 describe('WorkerBridge takeover', () => {
   class FakeBackendWorker {

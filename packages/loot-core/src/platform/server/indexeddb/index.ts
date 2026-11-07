@@ -58,7 +58,14 @@ function _openDatabase() {
   });
 }
 
-type Data = { filepath: string; contents: string };
+export type Data = {
+  filepath: string;
+  contents: string | Uint8Array;
+  // Set on sqlite files held by the sqlite-wasm storage: which store has
+  // the bytes, and a revision the fallback bumps on every write
+  storage?: 'opfs' | 'memory-idb';
+  rev?: number;
+};
 
 export const getStore = function (db: IDBDatabase, name: string) {
   const trans = db.transaction([name], 'readwrite');
@@ -69,7 +76,7 @@ export const get = async function (
   store: IDBObjectStore,
   key: IDBValidKey | IDBKeyRange,
 ) {
-  return new Promise<Data>((resolve, reject) => {
+  return new Promise<Data | undefined>((resolve, reject) => {
     const req = store.get(key);
     req.onsuccess = () => {
       resolve(req.result);

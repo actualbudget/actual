@@ -4,7 +4,61 @@ import { logger } from '#platform/server/log';
 
 type BridgeMessage = { type?: string; [key: string]: unknown };
 
+// How long a leaving leader waits for the backend to let go of its storage
+// before the worker is terminated regardless. The IndexedDB fallback writes
+// a large budget whole here, which can take a good part of a second.
+const STORAGE_RELEASE_TIMEOUT_MS = 3000;
+const STORAGE_RELEASE_REQUEST_ID = '__storage-release';
 const RESTORE_REQUEST_ID = '__restore-budget';
+
+/** The part of a Worker the release step needs; fakes stand in for tests. */
+export type TerminatableWorker = {
+  onmessage: ((event: MessageEvent) => void) | null;
+  postMessage: (message: unknown) => void;
+  addEventListener: (
+    type: 'message',
+    handler: (event: MessageEvent) => void,
+  ) => void;
+  terminate: () => void;
+};
+
+/**
+ * Asks the backend to let go of its storage before the worker is
+ * terminated: the IndexedDB fallback persists its pending write, the OPFS
+ * store closes its access handles and releases the budget lock. A worker
+ * terminated outright releases access handles asynchronously, which makes
+ * the next leader's pool install retry. Terminates after a short timeout
+ * either way, so a hung backend cannot block the handover.
+ */
+export function releaseStorageThenTerminate(
+  worker: TerminatableWorker,
+  timeoutMs = STORAGE_RELEASE_TIMEOUT_MS,
+) {
+  // Nothing else may hear from this worker now: its messages would reach a
+  // coordinator that no longer routes for it
+  worker.onmessage = null;
+  let isTerminated = false;
+  const terminate = () => {
+    if (!isTerminated) {
+      isTerminated = true;
+      clearTimeout(timer);
+      worker.terminate();
+    }
+  };
+  const timer = setTimeout(terminate, timeoutMs);
+  worker.addEventListener('message', event => {
+    const message = event.data as BridgeMessage | null;
+    if (message?.id === STORAGE_RELEASE_REQUEST_ID) {
+      terminate();
+    }
+  });
+  worker.postMessage({
+    id: STORAGE_RELEASE_REQUEST_ID,
+    name: 'storage-release',
+    args: undefined,
+    catchErrors: true,
+  });
+}
 
 /** The Worker-like surface the connection layer interacts with. */
 export type WorkerLike = {
@@ -98,10 +152,11 @@ export class WorkerBridge {
   }
 
   _terminateLocalBackendWorker() {
+    const worker = this.localBackendWorker;
     this._heldRequests = null;
-    if (this.localBackendWorker) {
-      this.localBackendWorker.terminate();
+    if (worker) {
       this.localBackendWorker = null;
+      releaseStorageThenTerminate(worker);
     }
   }
 
