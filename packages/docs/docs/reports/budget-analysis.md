@@ -1,13 +1,11 @@
 # Budget Analysis Report
 
-<ExperimentalFeatureWarning issueId="6742" />
-
 ## What it is
 
 The Budget Analysis is a financial planning tool, that tracks the balance of your budget over time.
 It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustment**, and the cumulative **Balance**.
 
-![The Budget Analysis report for the Usual Expenses categories over six months, with budgeted, spent and overspending bars and the balance line](/img/experimental/budget-analysis/budget-analysis-report-overview@2x.webp)
+![The Budget Analysis report for the Usual Expenses categories over six months, with budgeted, spent and overspending bars and the balance line](/img/reports/reports-budget-analysis@2x.webp)
 
 ## Important information
 
@@ -32,7 +30,7 @@ The report follows the rules of your budget type. On a tracking budget it works 
 - **Start / End**: pick start and end months.
 - **Quick ranges**: 1, 3, 6 months, 1 year, Year-to-date, Previous year-to-date, All time.
 - **Filters**: use the Filter button → choose _Category_ to include/exclude categories; active filters appear as editable chips.
-- **Graph type**: toggle Line ↔ Bar via the header icon.
+- **Graph type**: in the **Options** menu, turn **Bar chart** on for bars or off for a line.
 - **Show/Hide balance**: toggle the running balance series.
 - **Show/Hide cumulative variance**: toggle the cumulative variance series on tracking budgets.
 
@@ -44,4 +42,4 @@ The report follows the rules of your budget type. On a tracking budget it works 
 ## Related
 
 - [Budget page](../tour/budget.md) — configure budgets and rollover settings.
-- [Reports index](../reports/index.md) — other report types and tips.
+- [Reports index](./index.md) — other report types and tips.

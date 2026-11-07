@@ -215,6 +215,10 @@ module.exports = {
             from: '/docs/actual-server-repo-move',
             to: '/docs/install/',
           },
+          {
+            from: '/docs/experimental/budget-analysis-report',
+            to: '/docs/reports/budget-analysis',
+          },
         ],
       },
     ],

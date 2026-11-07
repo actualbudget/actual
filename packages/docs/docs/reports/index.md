@@ -22,10 +22,10 @@ Currently, Actual comes with the following built-in widgets and reports:
 - [Text widget](#text-widget)
 - [Custom Reports](./custom-reports.md)
 - [Crossover Point](#crossover-point)
+- [Budget Analysis report](./budget-analysis.md)
 
 The following are available as experimental features:
 
-- [Budget Analysis report](../experimental/budget-analysis-report.md)
 - [Balance Forecast report](../experimental/balance-forecast-report.md)
 - [Sankey report](../experimental/sankey-report.md)
 - [Monte Carlo Analysis](../experimental/monte-carlo-analysis.md)
