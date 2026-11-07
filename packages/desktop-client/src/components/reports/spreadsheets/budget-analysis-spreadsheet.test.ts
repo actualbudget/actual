@@ -1,9 +1,11 @@
+import { send } from '@actual-app/core/platform/client/connection';
 import type { BudgetType } from '@actual-app/core/server/prefs';
 import { rangeInclusive } from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import {
   calculateBudgetAnalysis,
+  createBudgetAnalysisSpreadsheet,
   getLastSelectableMonth,
   isBaseCategory,
   summarizeMonthCategories,
@@ -314,11 +316,18 @@ describe('calculateBudgetAnalysis', () => {
   ) {
     return calculateBudgetAnalysis({
       budgetType,
-      categories: [food],
-      previousMonthCells: categoryCells('food', previous),
+      previousMonth: summarizeMonthCategories(
+        categoryCells('food', previous),
+        [food],
+        budgetType,
+      ),
       months: months.map((values, index) => ({
         date: `2026-0${index + 1}`,
-        cells: categoryCells('food', values),
+        ...summarizeMonthCategories(
+          categoryCells('food', values),
+          [food],
+          budgetType,
+        ),
       })),
     });
   }
@@ -366,24 +375,32 @@ describe('calculateBudgetAnalysis', () => {
     });
 
     it('sums balances across categories with different carryover settings', () => {
+      const categories = [food, rent];
       const { intervalData } = calculateBudgetAnalysis({
         budgetType,
-        categories: [food, rent],
-        previousMonthCells: [
-          ...categoryCells('food', { balance: 30, carryover: true }),
-          ...categoryCells('rent', { balance: -70, carryover: false }),
-        ],
+        previousMonth: summarizeMonthCategories(
+          [
+            ...categoryCells('food', { balance: 30, carryover: true }),
+            ...categoryCells('rent', { balance: -70, carryover: false }),
+          ],
+          categories,
+          budgetType,
+        ),
         months: [
           {
             date: '2026-01',
-            cells: [
-              ...categoryCells('food', {
-                budgeted: 100,
-                spent: -100,
-                balance: 30,
-              }),
-              ...categoryCells('rent', { budgeted: 100, spent: -100 }),
-            ],
+            ...summarizeMonthCategories(
+              [
+                ...categoryCells('food', {
+                  budgeted: 100,
+                  spent: -100,
+                  balance: 30,
+                }),
+                ...categoryCells('rent', { budgeted: 100, spent: -100 }),
+              ],
+              categories,
+              budgetType,
+            ),
           },
         ],
       });
@@ -515,4 +532,56 @@ describe('calculateBudgetAnalysis', () => {
     expect(data.intervalData[1].overspendingAdjustment).toBe(0);
     expect(data.totalOverspendingAdjustment).toBe(0);
   });
+});
+
+vi.mock('@actual-app/core/platform/client/connection', () => ({
+  send: vi.fn(),
+}));
+
+describe('createBudgetAnalysisSpreadsheet fetching', () => {
+  const food = makeCategory({ id: 'food', name: 'Food' });
+
+  it.each([
+    ['envelope', 'envelope-budget-month'],
+    ['tracking', 'tracking-budget-month'],
+  ] as const)(
+    'requests %s months one at a time and in order',
+    async (budgetType, endpoint) => {
+      const requests: Array<[string, string]> = [];
+      let inFlight = 0;
+      let maxInFlight = 0;
+
+      vi.mocked(send).mockImplementation((async (
+        name: string,
+        args: { month: string },
+      ) => {
+        if (name === 'get-categories') {
+          return { list: [food], grouped: [] };
+        }
+        requests.push([name, args.month]);
+        inFlight++;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        await new Promise(resolve => setTimeout(resolve, 0));
+        inFlight--;
+        return [{ name: `sheet!leftover-food`, value: 100 }];
+      }) as never);
+
+      const setData = vi.fn();
+      await createBudgetAnalysisSpreadsheet({
+        startDate: '2026-01-01',
+        endDate: '2026-03-31',
+        budgetType,
+      })(null as never, setData);
+
+      expect(maxInFlight).toBe(1);
+      expect(requests).toEqual([
+        [endpoint, '2025-12'],
+        [endpoint, '2026-01'],
+        [endpoint, '2026-02'],
+        [endpoint, '2026-03'],
+      ]);
+      expect(setData.mock.calls[0][0].budgetType).toBe(budgetType);
+      expect(setData.mock.calls[0][0].intervalData).toHaveLength(3);
+    },
+  );
 });

@@ -148,14 +148,12 @@ export function summarizeMonthCategories(
 
 export function calculateBudgetAnalysis({
   budgetType,
-  categories,
-  previousMonthCells,
+  previousMonth,
   months,
 }: {
   budgetType: BudgetType;
-  categories: CategoryEntity[];
-  previousMonthCells: BudgetMonthCell[];
-  months: Array<{ date: string; cells: BudgetMonthCell[] }>;
+  previousMonth: MonthCategoryTotals;
+  months: Array<MonthCategoryTotals & { date: string }>;
 }): BudgetAnalysisData {
   const intervalData: BudgetAnalysisIntervalData[] = [];
 
@@ -164,24 +162,19 @@ export function calculateBudgetAnalysis({
   let totalOverspendingAdjustment = 0;
 
   // Seed the balance with what carries in from before the period
-  let runningBalance = summarizeMonthCategories(
-    previousMonthCells,
-    categories,
-    budgetType,
-  ).carryoverToNextMonth;
+  let runningBalance = previousMonth.carryoverToNextMonth;
 
   // Track overspending from previous month to apply in next month
   let overspendingFromPrevMonth = 0;
 
-  for (const { date, cells } of months) {
-    const {
-      budgeted,
-      spent,
-      carryoverToNextMonth,
-      overspendingThisMonth,
-      hasBudgetData,
-    } = summarizeMonthCategories(cells, categories, budgetType);
-
+  for (const {
+    date,
+    budgeted,
+    spent,
+    carryoverToNextMonth,
+    overspendingThisMonth,
+    hasBudgetData,
+  } of months) {
     const overspendingAdjustment = Math.abs(overspendingFromPrevMonth);
 
     totalBudgeted += budgeted;
@@ -352,25 +345,25 @@ export function createBudgetAnalysisSpreadsheet({
         ? 'tracking-budget-month'
         : 'envelope-budget-month';
 
-    const [previousMonthCells, months] = await Promise.all([
-      send(budgetMonthEndpoint, {
-        month: monthUtils.subMonths(monthUtils.getMonth(startDate), 1),
-      }),
-      Promise.all(
-        intervals.map(async date => ({
-          date,
-          cells: await send(budgetMonthEndpoint, { month: date }),
-        })),
-      ),
-    ]);
-
-    setData(
-      calculateBudgetAnalysis({
+    // Fetch one month at a time and keep only its totals, so a long period
+    // neither floods the backend nor holds every month's cells in memory.
+    async function fetchMonthTotals(month: string) {
+      return summarizeMonthCategories(
+        await send(budgetMonthEndpoint, { month }),
+        categoriesToInclude,
         budgetType,
-        categories: categoriesToInclude,
-        previousMonthCells,
-        months,
-      }),
+      );
+    }
+
+    const previousMonth = await fetchMonthTotals(
+      monthUtils.subMonths(monthUtils.getMonth(startDate), 1),
     );
+
+    const months: Array<MonthCategoryTotals & { date: string }> = [];
+    for (const date of intervals) {
+      months.push({ date, ...(await fetchMonthTotals(date)) });
+    }
+
+    setData(calculateBudgetAnalysis({ budgetType, previousMonth, months }));
   };
 }
