@@ -113,7 +113,7 @@ export function validateAutomation(
       const targetMonth = template.month;
       const startOfTodayMonth = monthUtils.monthFromDate(today);
       // Pass bare YYYY-MM strings, matching the server-side check in
-      // CategoryTemplateContext.checkByAndScheduleAndSpend and avoiding the
+      // CategoryTemplateContext.isExpired and avoiding the
       // local-vs-UTC parsing footgun called out in shared/months.ts:_parse.
       const monthsRemaining = monthUtils.differenceInCalendarMonths(
         targetMonth,
@@ -122,7 +122,7 @@ export function validateAutomation(
       // Recurring goals (annual/repeat) anchored on a past month are
       // legitimate — the engine rolls them forward by the period. Only flag
       // the past-target case for one-shot goals. Mirrors the server check in
-      // CategoryTemplateContext.checkByAndScheduleAndSpend.
+      // CategoryTemplateContext.isExpired.
       if (monthsRemaining < 0 && !template.annual && !template.repeat) {
         return { kind: 'by-target-past', month: targetMonth };
       }
@@ -158,7 +158,7 @@ export function validatePercentageAllocation(
     : null;
 }
 
-// The engine (CategoryTemplateContext.checkByAndScheduleAndSpend) requires
+// The engine (CategoryTemplateContext.checkByAndSchedule) requires
 // every schedule and by-date template in a category to share one priority; if
 // they don't, none of them budget. Surface that as a conflict so it can't be
 // saved.

@@ -78,10 +78,18 @@ export class CategoryTemplateContext {
       fromLastMonth = 0;
     }
 
+    // expired targets are set aside first so they can't fail any checks
+    const expiredTemplates = templates.filter(t =>
+      CategoryTemplateContext.isExpired(t, month),
+    );
+    const activeTemplates = templates.filter(
+      t => !CategoryTemplateContext.isExpired(t, month),
+    );
+
     // run all checks
-    CategoryTemplateContext.checkPeriodicInterval(templates);
-    await CategoryTemplateContext.checkByAndScheduleAndSpend(templates, month);
-    await CategoryTemplateContext.checkPercentage(templates);
+    CategoryTemplateContext.checkPeriodicInterval(activeTemplates);
+    await CategoryTemplateContext.checkByAndSchedule(activeTemplates);
+    await CategoryTemplateContext.checkPercentage(activeTemplates);
 
     const hideDecimal = await aqlQuery(
       q('preferences').filter({ id: 'hideFraction' }).select('*'),
@@ -89,7 +97,7 @@ export class CategoryTemplateContext {
 
     // call the private constructor
     return new CategoryTemplateContext(
-      templates,
+      activeTemplates,
       category,
       month,
       fromLastMonth,
@@ -98,6 +106,21 @@ export class CategoryTemplateContext {
         ? hideDecimal.data[0].value === 'true'
         : false,
       skipAvailableClamp,
+      expiredTemplates,
+    );
+  }
+
+  // A one-off target stops applying after its month. Repeating targets roll
+  // forward instead, so they never expire.
+  static isExpired(
+    template: Template,
+    month: string,
+  ): template is ByTemplate | SpendTemplate {
+    return (
+      (template.type === 'by' || template.type === 'spend') &&
+      !template.repeat &&
+      !template.annual &&
+      monthUtils.differenceInCalendarMonths(`${template.month}`, month) < 0
     );
   }
 
@@ -108,6 +131,19 @@ export class CategoryTemplateContext {
       this.remainder.length === 0 &&
       this.goals.length > 0
     );
+  }
+  // with nothing left to run, the category is treated as having no templates
+  hasOnlyExpiredTemplates(): boolean {
+    return (
+      this.expiredTemplates.length > 0 &&
+      this.templates.length === 0 &&
+      this.remainder.length === 0 &&
+      this.goals.length === 0 &&
+      !this.limitCheck
+    );
+  }
+  getExpiredTemplates(): (ByTemplate | SpendTemplate)[] {
+    return this.expiredTemplates;
   }
   getPriorities(): number[] {
     return Array.from(this.priorities);
@@ -225,6 +261,14 @@ export class CategoryTemplateContext {
         default: {
           break;
         }
+      }
+
+      // money left over from an expired target isn't pulled back out
+      if (
+        (template.type === 'by' || template.type === 'spend') &&
+        this.expiredTemplates.length > 0
+      ) {
+        newBudget = Math.max(0, newBudget);
       }
 
       available = available - newBudget;
@@ -383,6 +427,7 @@ export class CategoryTemplateContext {
   private templates: Template[] = [];
   private remainder: RemainderTemplate[] = [];
   private goals: GoalTemplate[] = [];
+  private expiredTemplates: (ByTemplate | SpendTemplate)[] = [];
   private priorities: Set<number> = new Set();
   readonly hideDecimal: boolean = false;
   readonly skipAvailableClamp: boolean = false;
@@ -408,6 +453,7 @@ export class CategoryTemplateContext {
     budgeted: number,
     hideDecimal: boolean = false,
     skipAvailableClamp: boolean = false,
+    expiredTemplates: (ByTemplate | SpendTemplate)[] = [],
   ) {
     this.category = category;
     this.month = month;
@@ -415,6 +461,7 @@ export class CategoryTemplateContext {
     this.previouslyBudgeted = budgeted;
     this.hideDecimal = hideDecimal;
     this.skipAvailableClamp = skipAvailableClamp;
+    this.expiredTemplates = expiredTemplates;
     // sort the template lines into regular template, goals, and remainder templates
     if (templates) {
       templates.forEach(t => {
@@ -464,10 +511,7 @@ export class CategoryTemplateContext {
       });
   }
 
-  static async checkByAndScheduleAndSpend(
-    templates: Template[],
-    month: string,
-  ) {
+  static async checkByAndSchedule(templates: Template[]) {
     if (
       templates.filter(t => t.type === 'schedule' || t.type === 'by').length ===
       0
@@ -512,20 +556,6 @@ export class CategoryTemplateContext {
             `Schedule and By templates must be the same priority level. Fix by setting all Schedule and By templates to priority level ${lowestPriority}`,
           );
           //t.priority = lowestPriority;
-        }
-      });
-    // check if the target date is past and not repeating
-    templates
-      .filter(t => t.type === 'by' || t.type === 'spend')
-      .forEach(t => {
-        const range = monthUtils.differenceInCalendarMonths(
-          `${t.month}`,
-          month,
-        );
-        if (range < 0 && !(t.repeat || t.annual)) {
-          throw new Error(
-            `Target month has passed, remove or update the target month`,
-          );
         }
       });
   }
