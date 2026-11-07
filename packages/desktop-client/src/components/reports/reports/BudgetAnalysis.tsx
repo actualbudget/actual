@@ -145,12 +145,12 @@ function OptionsButton({
 
 export function BudgetAnalysis() {
   const params = useParams();
-  const { data: widget, isPending } = useDashboardWidget<BudgetAnalysisWidget>({
+  const { data: widget, isLoading } = useDashboardWidget<BudgetAnalysisWidget>({
     id: params.id,
     type: 'budget-analysis-card',
   });
 
-  if (isPending) {
+  if (isLoading) {
     return <LoadingIndicator />;
   }
 

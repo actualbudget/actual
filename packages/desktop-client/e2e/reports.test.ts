@@ -113,6 +113,17 @@ test.describe('Reports', () => {
         page.getByRole('button', { name: 'Save widget', exact: true }),
       ).toBeVisible();
     });
+
+    test('opens with default settings when there is no saved widget', async () => {
+      await page.goto('/reports/budget-analysis');
+
+      await expect(
+        page.getByRole('button', { name: 'Export as CSV', exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Save widget', exact: true }),
+      ).toHaveCount(0);
+    });
   });
 
   test.describe('balance forecast', () => {
