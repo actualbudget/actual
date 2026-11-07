@@ -216,12 +216,14 @@ function cleanRemittanceArray(arr: string[]): string[] {
 // content instead.
 //
 // Only raw bank fields go into it, so changes to our own payee/notes
-// normalization never change the id. `status` is left out, and the date of
-// the transaction itself is preferred over the booking date, so the id
-// survives a pending transaction becoming booked on a later day. A bank that
-// sends no `transaction_date` and changes the other dates on booking still
-// gets a new id then, like banks that change their own ids on booking; the
-// booked entry is matched to the pending one by amount and date instead.
+// normalization never change the id. `status` is left out, and the booking
+// date is used last: it only appears once a transaction is booked, so hashing
+// it whenever it exists would give every pending transaction a new id on
+// booking. The date of the transaction itself and the value date are there
+// while pending and normally stay the same. A bank that changes them on
+// booking still gives a new id then, like banks that change their own ids on
+// booking; the booked entry is matched to the pending one by amount and date
+// instead.
 //
 // Two identical postings on one day are genuinely separate (two tolls, two
 // tickets), so repeats of the same content within one response get a counter
@@ -234,7 +236,7 @@ function deriveTransactionId(
   derivedIdCounts: Map<string, number>,
 ): string {
   const content = JSON.stringify([
-    tx.transaction_date || tx.booking_date || tx.value_date || '',
+    tx.transaction_date || tx.value_date || tx.booking_date || '',
     tx.transaction_amount.amount,
     tx.transaction_amount.currency,
     tx.credit_debit_indicator ?? '',

@@ -393,6 +393,24 @@ describe('normalizeTransactions without a bank-provided id', () => {
     expect(idOf(pending)).toBe(idOf(booked));
   });
 
+  it('keeps the id when a pending transaction with only a value date is booked on a later date', () => {
+    // Some banks send no transaction_date at all. The value date is then the
+    // only date the pending entry has, and it stays the same once booked.
+    const pending = {
+      ...feeWithoutId,
+      status: 'PDNG' as const,
+      booking_date: undefined,
+      value_date: '2026-08-25',
+    };
+    const booked = {
+      ...feeWithoutId,
+      booking_date: '2026-08-26',
+      value_date: '2026-08-25',
+    };
+
+    expect(idOf(pending)).toBe(idOf(booked));
+  });
+
   it('gives identical transactions in one response distinct, repeatable ids', () => {
     // Two genuinely separate postings (e.g. two identical tolls on one day).
     const sync = () =>
