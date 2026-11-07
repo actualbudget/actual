@@ -55,14 +55,10 @@ const parseColor = (color: string): { r: number; g: number; b: number } => {
   match = /^hsla?\(([^)]+)\)$/i.exec(color);
   if (match) {
     const parts = match[1].split(/[\s,/]+/).filter(Boolean);
-    const hue = /^(-?[\d.]+)(deg|grad|rad|turn)?$/i.exec(parts[0] ?? '');
+    const hue = /^([+-]?[\d.]+)(deg|grad|rad|turn)?$/i.exec(parts[0] ?? '');
     const parseChannel = (value?: string) => {
-      const num =
-        value == null
-          ? NaN
-          : value.endsWith('%')
-            ? parseFloat(value)
-            : parseFloat(value) * 100;
+      // CSS saturation/lightness: unitless values share the 0-100 scale with %.
+      const num = value == null ? NaN : parseFloat(value);
       return Number.isFinite(num) ? num : null;
     };
     const saturation = parseChannel(parts[1]);

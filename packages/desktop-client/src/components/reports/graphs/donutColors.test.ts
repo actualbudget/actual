@@ -73,6 +73,36 @@ describe('buildColorMap', () => {
     expect(deg.get('c1')).toBe('rgb(109, 116, 253)');
   });
 
+  it('treats unitless hsl saturation and lightness as percentages', () => {
+    const percent = buildColorMap(
+      [group('g1', ['c1', 'c2', 'c3'])],
+      [legend('g1', 'hsl(237 98% 66%)')],
+    );
+    const unitless = buildColorMap(
+      [group('g1', ['c1', 'c2', 'c3'])],
+      [legend('g1', 'hsl(237 98 66)')],
+    );
+    // group color passes through verbatim, so only the parsed shades compare
+    expect(unitless.get('g1')).toBe('hsl(237 98 66)');
+    expect(unitless.get('c1')).toBe(percent.get('c1'));
+    expect(unitless.get('c2')).toBe(percent.get('c2'));
+    expect(unitless.get('c3')).toBe(percent.get('c3'));
+  });
+
+  it('accepts a plus-signed hsl hue', () => {
+    const plain = buildColorMap(
+      [group('g1', ['c1', 'c2', 'c3'])],
+      [legend('g1', 'hsl(237, 98%, 66%)')],
+    );
+    const plus = buildColorMap(
+      [group('g1', ['c1', 'c2', 'c3'])],
+      [legend('g1', 'hsl(+237, 98%, 66%)')],
+    );
+    expect(plus.get('c1')).toBe(plain.get('c1'));
+    expect(plus.get('c2')).toBe(plain.get('c2'));
+    expect(plus.get('c3')).toBe(plain.get('c3'));
+  });
+
   it('shades an rgb group color in comma and space syntax, ignoring alpha', () => {
     const comma = buildColorMap(
       [group('g1', ['c1'])],
