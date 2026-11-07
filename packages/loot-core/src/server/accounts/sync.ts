@@ -1157,7 +1157,7 @@ async function processBankSyncDownload(
       balanceToUse = Math.round(previousBalance);
     } else if (
       acctRow.account_sync_source === 'enableBanking' &&
-      currentBalance != null
+      currentBalance !== null
     ) {
       const importPending = await aqlQuery(
         q('preferences')
@@ -1199,7 +1199,7 @@ async function processBankSyncDownload(
       // Enable Banking reports no balance when the bank refuses the request;
       // there is then nothing to derive an opening balance from.
       const initialId =
-        balanceToUse == null
+        balanceToUse === null
           ? null
           : await db.insertTransaction({
               account: id,
@@ -1218,7 +1218,7 @@ async function processBankSyncDownload(
       });
       return {
         ...result,
-        added: initialId == null ? result.added : [initialId, ...result.added],
+        added: initialId === null ? result.added : [initialId, ...result.added],
       };
     });
   }
