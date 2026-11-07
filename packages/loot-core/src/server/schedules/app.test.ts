@@ -1114,6 +1114,67 @@ describe('schedule app', () => {
       }
     });
 
+    it('advances a paid recurring schedule that has no account', async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          conditions: [
+            {
+              op: 'is',
+              field: 'amount',
+              value: -10000,
+            },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-05',
+                frequency: 'weekly',
+                interval: 2,
+                patterns: [],
+              },
+            },
+          ],
+        });
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161205,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161205,
+          base_next_date_ts: Date.now(),
+        });
+        await db.insertTransaction({
+          account: accountId,
+          amount: -10000,
+          date: '2016-12-05',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2017-01-02');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
     it('auto-posts one-time schedules that are due', async () => {
       MockDate.set(new Date(2016, 11, 31, 12));
       schedulesApp.startServices();
