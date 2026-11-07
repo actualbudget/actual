@@ -683,7 +683,10 @@ export async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')
-      .filter({ completed: false, '_account.closed': false })
+      .filter({
+        completed: false,
+        $or: [{ '_account.closed': false }, { _account: null }],
+      })
       .select('*'),
   );
 
