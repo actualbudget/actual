@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+
 import createDebug from 'debug';
 import { fetch } from 'undici';
 import type { RequestInit, Response } from 'undici';
@@ -206,6 +208,72 @@ function stripSepaPrefix(s: string): string {
 
 function cleanRemittanceArray(arr: string[]): string[] {
   return arr.map(stripSepaPrefix).filter(Boolean);
+}
+
+// Some banks send neither `entry_reference` nor `transaction_id`. Without an
+// id Actual can only recognise a transaction by amount and date, so a deleted
+// one is imported again on every sync. Derive an id from the transaction's own
+// content instead.
+//
+// Only raw bank fields go into it, so changes to our own payee/notes
+// normalization never change the id. `status` is left out, and the booking
+// date is used last: it only appears once a transaction is booked, so hashing
+// it whenever it exists would give every pending transaction a new id on
+// booking. The date of the transaction itself and the value date are there
+// while pending and normally stay the same. A bank that changes them on
+// booking still gives a new id then, like banks that change their own ids on
+// booking; the booked entry is matched to the pending one by amount and date
+// instead.
+//
+// Two identical postings on one day are genuinely separate (two tolls, two
+// tickets), so repeats of the same content within one response get a counter
+// suffix. Nothing the bank sends tells them apart, so only their number
+// matters: if one of them stops being returned, the rest are renumbered and
+// the last transaction in Actual is the one left without a match, exactly as
+// if that had been the one to go.
+function deriveTransactionId(
+  tx: EnableBankingTransaction,
+  derivedIdCounts: Map<string, number>,
+): string {
+  const content = JSON.stringify([
+    tx.transaction_date || tx.value_date || tx.booking_date || '',
+    tx.transaction_amount.amount,
+    tx.transaction_amount.currency,
+    tx.credit_debit_indicator ?? '',
+    tx.creditor?.name ?? '',
+    tx.debtor?.name ?? '',
+    tx.remittance_information ?? [],
+  ]);
+  const base = `derived-${createHash('sha256').update(content).digest('hex').slice(0, 32)}`;
+
+  const count = derivedIdCounts.get(base) ?? 0;
+  derivedIdCounts.set(base, count + 1);
+  return count === 0 ? base : `${base}-${count}`;
+}
+
+// Normalizes one response, in the bank's order, and derives the ids the bank
+// did not send (see `deriveTransactionId`). Booked postings are numbered
+// before pending ones, and postings Actual cannot import are left without an
+// id so they never take a number.
+export function normalizeTransactions(
+  transactions: EnableBankingTransaction[],
+): BankSyncTransaction[] {
+  const normalized = transactions.map(normalizeTransaction);
+  const derivedIdCounts = new Map<string, number>();
+
+  for (const isBooked of [true, false]) {
+    for (const tx of normalized) {
+      if (
+        !tx.transactionId &&
+        tx.booked === isBooked &&
+        isImportableTransaction(tx)
+      ) {
+        tx.transactionId = deriveTransactionId(tx, derivedIdCounts);
+      }
+    }
+  }
+
+  return normalized;
 }
 
 export function normalizeTransaction(

@@ -2,7 +2,7 @@ import dns from 'dns';
 import { promisify } from 'util';
 
 import ipaddr from 'ipaddr.js';
-import { Agent } from 'undici';
+import { EnvHttpProxyAgent } from 'undici';
 
 const dnsLookup = promisify(dns.lookup);
 const NAT64_PREFIX = ipaddr.IPv6.parseCIDR('64:ff9b::/96');
@@ -133,10 +133,12 @@ export function parseAllowedNetwork(network: string) {
   return [address, address.kind() === 'ipv4' ? 32 : 128] as const;
 }
 
-// Validate the addresses used by the socket, avoiding a second unchecked DNS
-// resolution after assertUrlAllowed. Literal IPs are checked by assertUrlAllowed.
+// Validate connection-time DNS answers for direct requests, including NO_PROXY.
+// For proxied requests, the administrator-configured proxy is responsible for
+// validating the destination addresses it resolves.
+// Literal IPs are checked by assertUrlAllowed.
 export function createSsrfDispatcher(options: SsrfOptions) {
-  return new Agent({
+  return new EnvHttpProxyAgent({
     connect: {
       lookup(hostname, lookupOptions, callback) {
         dns.lookup(

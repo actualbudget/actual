@@ -114,6 +114,23 @@ describe('POST /transactions', () => {
     expect(ids(res.body.data.transactions.all)).toEqual(['ref-002', 'tx-003']);
   });
 
+  it('gives two identical transactions without a bank id distinct ids', async () => {
+    const withoutId = { ...mockDebitTransaction, entry_reference: undefined };
+    vi.spyOn(enableBankingService, 'getAllTransactions').mockResolvedValue([
+      withoutId,
+      withoutId,
+    ]);
+
+    const res = await request(app)
+      .post('/transactions')
+      .send({ accountId: 'acc-1', startDate: '2026-03-01' });
+
+    const [first, second] = ids(res.body.data.transactions.all);
+    expect(first).toBeTruthy();
+    expect(second).toBeTruthy();
+    expect(first).not.toBe(second);
+  });
+
   it('still imports transactions when the balance request fails', async () => {
     // Some banks reject the balances call outright. That must not stop the
     // transactions from being fetched.
