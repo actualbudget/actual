@@ -1,6 +1,7 @@
 import createDebug from 'debug';
 import type { Request, Response } from 'express';
 import express from 'express';
+import ipaddr from 'ipaddr.js';
 import { v4 as uuidv4 } from 'uuid';
 
 import { isAdmin } from '#account-db';
@@ -37,7 +38,12 @@ app.use(express.json());
 // --- Shared helpers ---
 
 function extractPsuHeaders(req: Request): PsuHeaders {
-  const ip = req.ip;
+  // Node reports an IPv4 client on a dual-stack socket as `::ffff:1.2.3.4`,
+  // and some banks reject the PSU address in that form. Send plain IPv4.
+  const ip =
+    req.ip && ipaddr.isValid(req.ip)
+      ? ipaddr.process(req.ip).toString()
+      : req.ip;
   const ua =
     typeof req.headers['user-agent'] === 'string'
       ? req.headers['user-agent']
@@ -557,15 +563,28 @@ app.post(
         extractPsuHeaders(req),
       );
 
-      // Fetch balances
-      const balanceResult = await enableBankingService.getBalances(
-        accountId,
-        psuHeaders,
-      );
-      const balances = balanceResult.balances.map(normalizeBalance);
+      // Some banks reject the balances call outright. Carry on without a
+      // balance rather than giving up on the transactions, as account
+      // discovery already does.
+      let balances: ReturnType<typeof normalizeBalance>[] = [];
+      try {
+        const balanceResult = await enableBankingService.getBalances(
+          accountId,
+          psuHeaders,
+        );
+        balances = balanceResult.balances.map(normalizeBalance);
+      } catch (err) {
+        debug('Failed to fetch account balances');
+        debugSensitive(
+          'Failed to fetch balances for account %s: %O',
+          accountId,
+          err,
+        );
+      }
 
-      // Determine starting balance, preferring CLAV balance type
-      let startingBalance = 0;
+      // Determine starting balance, preferring CLAV balance type. `null`
+      // when the bank reported none, so the client does not treat it as 0.
+      let startingBalance: number | null = null;
       if (balances.length > 0) {
         const preferredBalance =
           balances.find(b => b.balanceType === 'CLAV') ?? balances[0];
