@@ -47,6 +47,17 @@ export const Tooltip = ({
     }, triggerProps.closeDelay ?? 0);
   }, [triggerProps.closeDelay]);
 
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Force closing the tooltip whenever the disablement state changes
   useEffect(() => {
     setIsHover(false);

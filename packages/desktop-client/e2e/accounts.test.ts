@@ -538,6 +538,104 @@ test.describe('Accounts', () => {
       await expect(importButton).not.toBeVisible();
     }
 
+    test('imports an XLSX workbook with header detection and required-column filtering', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(join(__dirname, 'data/xlsx-import.xlsx'));
+
+      const dialog = page.getByRole('dialog');
+      await expect(dialog.getByText('Checking', { exact: true })).toBeVisible();
+      await expect(dialog.getByLabel('Header row:')).toHaveAttribute(
+        'placeholder',
+        '3',
+      );
+      await dialog
+        .getByRole('checkbox', { name: 'Amount', exact: true })
+        .check();
+      await expect(
+        dialog.getByText(/Rows excluded for missing values: 1/),
+      ).toBeVisible();
+      await dialog
+        .getByRole('button', { name: 'Import 2 transactions', exact: true })
+        .click();
+      await expect(dialog).not.toBeVisible();
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Sample Grocer' }),
+      ).toContainText('42.50');
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Sample Employer' }),
+      ).toContainText('2,500.00');
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: 'Missing amount' }),
+      ).toHaveCount(0);
+    });
+
+    test('recovers from an invalid XLSX worksheet and clears empty previews', async () => {
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles(
+        join(__dirname, 'data/xlsx-worksheet-recovery.xlsx'),
+      );
+
+      const dialog = page.getByRole('dialog');
+      await expect(
+        dialog.getByText(
+          'Select a worksheet with at most 256 columns and 10,000 data rows.',
+        ),
+      ).toBeVisible();
+      await dialog.getByLabel('Worksheet:').click();
+      await page
+        .getByRole('menu')
+        .getByRole('button', { name: 'Transactions', exact: true })
+        .click();
+      const importButton = dialog.getByRole('button', {
+        name: 'Import 1 transactions',
+        exact: true,
+      });
+      await expect(importButton).toBeEnabled();
+      await expect(
+        dialog.getByText('Recovery Shop', { exact: true }),
+      ).toBeVisible();
+
+      await dialog
+        .getByRole('checkbox', { name: 'Reference', exact: true })
+        .check();
+      await expect(
+        dialog.getByText(/Rows excluded for missing values: 1/),
+      ).toBeVisible();
+      await expect(
+        dialog.getByText('Recovery Shop', { exact: true }),
+      ).not.toBeVisible();
+      await expect(
+        dialog.getByRole('button', {
+          name: 'Import 0 transactions',
+          exact: true,
+        }),
+      ).toBeDisabled();
+
+      await dialog
+        .getByRole('checkbox', { name: 'Reference', exact: true })
+        .uncheck();
+      await expect(importButton).toBeEnabled();
+      await dialog.getByLabel('Worksheet:').click();
+      await page
+        .getByRole('menu')
+        .getByRole('button', { name: 'Empty', exact: true })
+        .click();
+      await expect(dialog.getByText('No transactions found')).toBeVisible();
+      await expect(
+        dialog.getByText('Recovery Shop', { exact: true }),
+      ).not.toBeVisible();
+      await expect(
+        dialog.getByRole('button', {
+          name: 'Import 0 transactions',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
     test('imports transactions from a CSV file', async () => {
       await importCsv(true);
     });

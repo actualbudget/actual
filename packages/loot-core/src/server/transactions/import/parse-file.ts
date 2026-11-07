@@ -7,6 +7,7 @@ import { looselyParseAmount } from '#shared/util';
 
 import { ofx2json } from './ofx2json';
 import { qif2json } from './qif2json';
+import type { XlsxImportMetadata, XlsxImportOptions } from './xlsx';
 import { xmlCAMT2json } from './xmlcamt2json';
 
 /**
@@ -87,10 +88,11 @@ type Transaction = StructuredTransaction | CsvTransaction;
 type ParseError = { message: string; internal: string };
 export type ParseFileResult = {
   errors: ParseError[];
+  xlsx?: XlsxImportMetadata;
   transactions?: Transaction[];
 };
 
-export type ParseFileOptions = {
+export type ParseFileOptions = XlsxImportOptions & {
   hasHeaderRow?: boolean;
   delimiter?: string;
   fallbackMissingPayeeToMemo?: boolean;
@@ -112,6 +114,8 @@ export async function parseFile(
     const ext = m[0];
 
     switch (ext.toLowerCase()) {
+      case '.xlsx':
+        return parseXLSX(filepath, options);
       case '.qif':
         return parseQIF(filepath, options);
       case '.csv':
@@ -131,6 +135,21 @@ export async function parseFile(
     internal: '',
   });
   return { errors, transactions: [] };
+}
+
+async function parseXLSX(
+  filepath: string,
+  options: ParseFileOptions,
+): Promise<ParseFileResult> {
+  try {
+    const { parseXlsx } = await import('./xlsx');
+    const bytes = await fs.readFile(filepath, 'binary');
+    return { errors: [], ...parseXlsx(bytes, options) };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Invalid XLSX file';
+    return { errors: [{ message, internal: message }], transactions: [] };
+  }
 }
 
 async function parseCSV(
