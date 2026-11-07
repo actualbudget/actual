@@ -8,8 +8,10 @@ import { styles } from '@actual-app/components/styles';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
 // In privacy mode the amount renders in the redaction font, with the same
 // reveal affordance as PrivacyFilter: squiggles at rest, readable while
@@ -41,7 +43,11 @@ export function FinancialInput({
   className,
   ...restProps
 }: FinancialInputProps) {
-  const format = useFormat();
+  const precision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
+  const format = useFormat(encoding ? precision : undefined);
+  const parse = (text: string) =>
+    text.trim() === '' ? 0 : format.fromEdit(text);
   const privacyMode = usePrivacyMode();
   // Like PrivacyFilter, redaction is desktop-only for now
   const { isNarrowWidth } = useResponsive();
@@ -103,22 +109,29 @@ export function FinancialInput({
 
   // Untouched text can be rounded (hidden decimals); keep the exact amount
   const parseEdit = (stringValue: string) =>
-    isEdited.current ? (format.fromEdit(stringValue, 0) ?? 0) : integerValue;
+    isEdited.current ? parse(stringValue) : integerValue;
 
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
     const finalInteger = parseEdit(internalValue);
     // Only report a real change: tabbing through an untouched field is
     // not an update, and callers may do expensive work on one
-    if (finalInteger !== integerValue) {
+    if (finalInteger !== null && finalInteger !== integerValue) {
       onUpdate?.(finalInteger);
     }
-    setInternalValue(format(finalInteger, 'financial'));
+    setInternalValue(format(finalInteger ?? integerValue, 'financial'));
     onBlur?.(e);
   };
 
   const handleEnter = (stringValue: string) => {
     const finalInteger = parseEdit(stringValue);
+    if (finalInteger === null) {
+      // The restored text can hide fraction digits. Leave the field
+      // unedited so a later blur keeps the stored amount.
+      isEdited.current = false;
+      setInternalValue(format(integerValue, 'financial'));
+      return;
+    }
     if (finalInteger !== integerValue) {
       onUpdate?.(finalInteger);
     }
@@ -130,8 +143,8 @@ export function FinancialInput({
     isEdited.current = true;
 
     if (onChangeValue) {
-      const newInteger = format.fromEdit(stringValue, 0) ?? 0;
-      onChangeValue(newInteger);
+      const newInteger = parse(stringValue);
+      if (newInteger !== null) onChangeValue(newInteger);
     }
   };
 

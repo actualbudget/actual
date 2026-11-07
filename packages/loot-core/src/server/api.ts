@@ -3,6 +3,7 @@ import { getClock } from '@actual-app/crdt';
 
 import * as connection from '#platform/server/connection';
 import { logger } from '#platform/server/log';
+import { initializeImportedAmountEncoding } from '#server/util/currency';
 import {
   getBankSyncError,
   getDownloadError,
@@ -52,6 +53,7 @@ import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
 import * as sheet from './sheet';
 import { batchMessages, setSyncingMode } from './sync';
+import { getRecordedAmountPrecision } from './util/currency';
 
 let IMPORT_MODE = false;
 
@@ -385,12 +387,14 @@ handlers['api/bank-sync'] = async function (args) {
   return { newTransactions, matchedTransactions, updatedAccounts };
 };
 
-handlers['api/start-import'] = async function ({ budgetName }) {
+handlers['api/start-import'] = async function ({ budgetName, currencyCode }) {
   // Notify UI to close budget
   await handlers['close-budget']();
 
   // Create the budget
   await handlers['create-budget']({ budgetName, avoidUpload: true });
+
+  await initializeImportedAmountEncoding(currencyCode ?? '');
 
   // Clear out the default expense categories
   db.runQuery('DELETE FROM categories WHERE is_income = 0');
@@ -693,13 +697,17 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (initialBalance != null && !Number.isSafeInteger(initialBalance)) {
+    throw new Error('Invalid initial balance');
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
-    // Current the API expects an amount but it really should expect
-    // an integer
-    balance: initialBalance != null ? integerToAmount(initialBalance) : null,
+    balance:
+      initialBalance != null
+        ? integerToAmount(initialBalance, getRecordedAmountPrecision())
+        : null,
   });
 });
 

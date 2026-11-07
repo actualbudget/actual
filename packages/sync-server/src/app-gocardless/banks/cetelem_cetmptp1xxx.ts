@@ -1,3 +1,5 @@
+import { subtractDecimalAmounts } from '#app-gocardless/utils';
+
 import type { IBank } from './bank.interface';
 import Fallback from './integration-bank';
 
@@ -15,7 +17,9 @@ export default {
     transaction.transactionAmount = {
       // Flip transaction amount sign
       ...transaction.transactionAmount,
-      amount: (-parseFloat(transaction.transactionAmount.amount)).toString(),
+      amount: subtractDecimalAmounts('0', [
+        transaction.transactionAmount.amount,
+      ]),
     };
 
     return Fallback.normalizeTransaction(transaction, booked, editedTrans);

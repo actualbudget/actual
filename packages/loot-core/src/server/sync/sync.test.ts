@@ -2,10 +2,12 @@
 import { getClock, Timestamp } from '@actual-app/crdt';
 
 import * as db from '#server/db';
+import { app } from '#server/main-app';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
 import { q } from '#shared/query';
+import type { ServerEvents } from '#types/server-events';
 
 import * as encoder from './encoder';
 import { isError } from './utils';
@@ -14,6 +16,7 @@ import {
   addSyncListener,
   applyMessages,
   fullSync,
+  initialFullSync,
   receiveMessages,
   sendMessages,
   setSyncingMode,
@@ -509,3 +512,67 @@ describe('Sync account balance cells', () => {
     expect(recomputed).not.toContain('__global!balance-acct1');
   });
 });
+
+it('blocks sync without success or an open failure while a precision transition is pending', async () => {
+  await prefs.loadPrefs();
+  await prefs.savePrefs({ groupId: 'group', cloudFileId: 'cloud' });
+  setSyncingMode('offline');
+  await sendMessages([
+    {
+      dataset: 'transactions',
+      row: 'pending-row',
+      column: 'amount',
+      value: 3200,
+      timestamp: Timestamp.send(),
+    },
+  ]);
+  await prefs.savePrefs({
+    amountEncodingTransition: {
+      id: 'transition',
+      sourceGroupId: 'group',
+      sourceEncoding: null,
+      targetEncoding: '{"version":1,"currencyCode":"JPY","precision":0}',
+      targetCurrencyCode: 'JPY',
+    },
+  });
+  setSyncingMode('enabled');
+  const events: ServerEvents['sync-event'][] = [];
+  const listener = (event: ServerEvents['sync-event']) => {
+    events.push(event);
+  };
+  app.events.on('sync', listener);
+  try {
+    expect(await fullSync()).toEqual({ messages: [], pendingTransition: true });
+    expect(events).toContainEqual({ type: 'pending-transition' });
+    expect(
+      events.some(event => event.type === 'success' || event.type === 'error'),
+    ).toBe(false);
+    expect(mockSyncServer.getMessages()).toHaveLength(0);
+    expect(await initialFullSync()).toEqual({});
+    await prefs.savePrefs({ amountEncodingTransition: undefined });
+    const resumed = await fullSync();
+    expect(isError(resumed)).toBe(false);
+    expect(events.some(event => event.type === 'success')).toBe(true);
+    expect(mockSyncServer.getMessages()).toHaveLength(1);
+  } finally {
+    app.events.off('sync', listener);
+  }
+});
+
+it.each(['disabled', 'offline'] as const)(
+  'preserves %s sync while a transition is pending',
+  async mode => {
+    await prefs.loadPrefs();
+    await prefs.savePrefs({
+      amountEncodingTransition: {
+        id: 'transition',
+        sourceGroupId: 'group',
+        sourceEncoding: null,
+        targetEncoding: '{"version":1,"currencyCode":"JPY","precision":0}',
+        targetCurrencyCode: 'JPY',
+      },
+    });
+    setSyncingMode(mode);
+    expect(await fullSync()).toEqual({ messages: [] });
+  },
+);
