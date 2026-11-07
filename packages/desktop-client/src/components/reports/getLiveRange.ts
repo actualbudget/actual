@@ -94,11 +94,15 @@ export function getLiveRange(
     }
     default:
       if (typeof rangeName === 'number') {
+        // "Last month" ends before the current month starts, so the
+        // "Include current Month" toggle is disabled for it and a stored
+        // `includeCurrentInterval` must not stretch it into the current month.
+        const includeCurrent = includeCurrentInterval && cond !== 'Last month';
         [dateStart, dateEnd] = getSpecificRange(
           rangeName,
           ['This month', 'This week'].includes(cond)
             ? null
-            : rangeName - (includeCurrentInterval ? 0 : 1),
+            : rangeName - (includeCurrent ? 0 : 1),
           ReportOptions.dateRangeType.get(cond),
           firstDayOfWeekIdx,
         );
