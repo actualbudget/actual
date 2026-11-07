@@ -96,7 +96,7 @@ export function Schedules() {
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <ManagePage
         actions={
-          <Button variant="bare" onPress={onAdd}>
+          <Button variant="primary" onPress={onAdd}>
             <SvgAdd
               width={10}
               height={10}

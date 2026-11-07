@@ -311,7 +311,7 @@ export function ManageRules({
           </>
         }
         actions={
-          <Button variant="bare" onPress={onCreateRule}>
+          <Button variant="primary" onPress={onCreateRule}>
             <SvgAdd
               width={10}
               height={10}

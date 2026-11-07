@@ -51,7 +51,7 @@ export function ManageTags() {
     <SelectedProvider instance={selectedInst}>
       <ManagePage
         actions={
-          <Button variant="bare" onPress={() => setCreate(true)}>
+          <Button variant="primary" onPress={() => setCreate(true)}>
             <SvgAdd
               width={10}
               height={10}
