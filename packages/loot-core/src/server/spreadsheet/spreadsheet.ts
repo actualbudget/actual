@@ -30,6 +30,8 @@ export class Spreadsheet {
   _meta: {
     createdMonths: Set<string>;
     budgetType: BudgetType;
+    // The envelope budget's sheet for the month before the first one
+    blankSheet?: string;
   };
   cacheBarrier;
   computeQueue;

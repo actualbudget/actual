@@ -3,7 +3,7 @@ import * as db from '#server/db';
 import * as monthUtils from '#shared/months';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 
-import { getSheetValue, setBudget, setGoal } from './actions';
+import { getSheetBoolean, getSheetValue, setBudget, setGoal } from './actions';
 import { storeNoteCleanups } from './cleanup-template-notes';
 import type { TemplateNotification } from './template-notification';
 
@@ -26,7 +26,6 @@ async function applyGroupCleanups(
 ) {
   const sheetName = monthUtils.sheetForMonth(month);
   const warnings = [];
-  const db_month = parseInt(month.replace('-', ''));
   let groupLength = sourceGroups.length;
   while (groupLength > 0) {
     //function for each unique group
@@ -88,20 +87,16 @@ async function applyGroupCleanups(
         );
         const to_budget = budgeted + Math.abs(balance);
         const categoryId = overspendGroup[ii].category;
-        let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-          `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-          [db_month, categoryId],
+        const carryover = await getSheetBoolean(
+          sheetName,
+          `carryover-${categoryId}`,
         );
-
-        if (carryover === null) {
-          carryover = { carryover: 0 };
-        }
 
         if (
           // We have enough to fully cover the overspent.
           balance < 0 &&
           Math.abs(balance) <= available_amount &&
-          carryover.carryover === 0
+          !carryover
         ) {
           await setBudget({
             category: categoryId,
@@ -112,7 +107,7 @@ async function applyGroupCleanups(
         } else if (
           // We can only cover this category partially.
           balance < 0 &&
-          carryover.carryover === 0 &&
+          !carryover &&
           Math.abs(balance) > available_amount
         ) {
           await setBudget({
@@ -160,7 +155,6 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     weight: number;
   };
   const sinkCategory: SinkCategoryRow[] = [];
-  const db_month = parseInt(month.replace('-', ''));
 
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE tombstone = 0',
@@ -249,20 +243,16 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     const budgeted = await getSheetValue(sheetName, `budget-${category.id}`);
     const to_budget = budgeted + Math.abs(balance);
     const categoryId = category.id;
-    let carryover = await db.first<Pick<db.DbZeroBudget, 'carryover'>>(
-      `SELECT carryover FROM zero_budgets WHERE month = ? and category = ?`,
-      [db_month, categoryId],
+    const carryover = await getSheetBoolean(
+      sheetName,
+      `carryover-${categoryId}`,
     );
-
-    if (carryover === null) {
-      carryover = { carryover: 0 };
-    }
 
     if (
       balance < 0 &&
       Math.abs(balance) <= budgetAvailable &&
       !category.is_income &&
-      carryover.carryover === 0
+      !carryover
     ) {
       await setBudget({
         category: category.id,
@@ -272,7 +262,7 @@ async function processCleanup(month: string): Promise<TemplateNotification> {
     } else if (
       balance < 0 &&
       !category.is_income &&
-      carryover.carryover === 0 &&
+      !carryover &&
       Math.abs(balance) > budgetAvailable
     ) {
       await setBudget({

@@ -189,7 +189,11 @@ function undoMessage(message, oldData) {
         message.dataset === 'reflect_budgets'
       ) {
         // Only these fields are reversable
-        if (['buffered', 'amount', 'carryover'].includes(message.column)) {
+        if (message.column === 'carryover') {
+          // The created row goes back to continuing the previous month's rollover
+          return { ...message, value: null };
+        }
+        if (['buffered', 'amount'].includes(message.column)) {
           return { ...message, value: 0 };
         }
         if (['goal', 'long_goal'].includes(message.column)) {
