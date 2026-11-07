@@ -59,6 +59,9 @@ const exportModel = {
         'Invalid dashboard.widgets data type: it must be an array of widgets.',
       );
     }
+    if (dashboard.version !== 1) {
+      throw new ValidationError('Unsupported dashboard export version.');
+    }
 
     dashboard.widgets.forEach((widget, idx) => {
       requiredFields(`Dashboard widget #${idx}`, widget, [
@@ -69,7 +72,6 @@ const exportModel = {
         'height',
         ...(isExportedCustomReportWidget(widget) ? ['meta' as const] : []),
       ]);
-
       if (!Number.isInteger(widget.x)) {
         throw new ValidationError(
           `Invalid widget.${idx}.x data-type for value ${widget.x}.`,
@@ -223,7 +225,7 @@ async function addDashboardWidget(
 
   const { dashboard_page_id, ...widgetWithoutDashboardPageId } = widget;
 
-  await db.insertWithSchema('dashboard', {
+  return await db.insertWithSchema('dashboard', {
     ...widgetWithoutDashboardPageId,
     dashboard_page_id,
   });
@@ -283,6 +285,8 @@ async function importDashboard({
     const parsedContent: ExportImportDashboard = JSON.parse(content);
 
     exportModel.validate(parsedContent);
+    const importedWidgets: ExportImportDashboardWidget[] =
+      parsedContent.widgets;
 
     const customReportIds = await db.all<Pick<db.DbCustomReport, 'id'>>(
       'SELECT id from custom_reports',
@@ -301,7 +305,7 @@ async function importDashboard({
         ...existingWidgets.map(({ id }) => db.delete_('dashboard', id)),
 
         // Insert new widgets
-        ...parsedContent.widgets.map(widget =>
+        ...importedWidgets.map(widget =>
           db.insertWithSchema('dashboard', {
             type: widget.type,
             width: widget.width,
@@ -316,7 +320,7 @@ async function importDashboard({
         ),
 
         // Insert new custom reports
-        ...parsedContent.widgets
+        ...importedWidgets
           .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => !customReportIdSet.has(meta.id))
           .map(({ meta }) =>
@@ -324,7 +328,7 @@ async function importDashboard({
           ),
 
         // Update existing reports
-        ...parsedContent.widgets
+        ...importedWidgets
           .filter(isExportedCustomReportWidget)
           .filter(({ meta }) => customReportIdSet.has(meta.id))
           .map(({ meta }) =>

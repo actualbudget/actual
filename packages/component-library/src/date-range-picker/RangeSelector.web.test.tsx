@@ -29,4 +29,33 @@ describe('RangeSelector', () => {
     rerender(<RangeSelector {...defaultProps} start="2024-05" end="2025-03" />);
     expect(screen.getByText('2025')).toBeTruthy();
   });
+
+  it('marks an external reference month as current', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-05-15T12:00:00Z'));
+    try {
+      render(
+        <RangeSelector
+          {...defaultProps}
+          start="2026-05"
+          end="2026-05"
+          referenceMonth="2026-08"
+        />,
+      );
+
+      expect(
+        screen
+          .getByRole('button', { name: 'August 2026' })
+          .getAttribute('aria-current'),
+      ).toBe('date');
+
+      expect(
+        screen
+          .getByRole('button', { name: 'May 2026' })
+          .getAttribute('aria-current'),
+      ).toBe('date');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

@@ -55,9 +55,14 @@ import { createCustomSpreadsheet } from '#components/reports/spreadsheets/custom
 import { createGroupedSpreadsheet } from '#components/reports/spreadsheets/grouped-spreadsheet';
 import { normalizeTagScope } from '#components/reports/tagScope';
 import { useReport } from '#components/reports/useReport';
-import { calculateHasWarning, fromDateRepr } from '#components/reports/util';
+import {
+  calculateHasWarning,
+  fromDateRepr,
+  normalizeCustomReportDateRange,
+} from '#components/reports/util';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -192,6 +197,12 @@ function CustomReportInner({
     ...combine,
     ...session,
   };
+  const {
+    dashboardScope,
+    hasDashboardContext,
+    isUsingDashboardRange,
+    setUseDashboardDateRange,
+  } = useDashboardReportTimeRange();
 
   const [allIntervals, setAllIntervals] = useState<
     Array<{
@@ -321,6 +332,51 @@ function CustomReportInner({
         : 'new',
   );
 
+  useEffect(() => {
+    if (!dashboardScope) {
+      return;
+    }
+    if (isUsingDashboardRange) {
+      const [nextStart, nextEnd] = normalizeCustomReportDateRange(
+        interval,
+        dashboardScope.start,
+        dashboardScope.end,
+      );
+      setStartDate(nextStart);
+      setEndDate(nextEnd);
+      setIsDateStatic(true);
+      return;
+    }
+    setIsDateStatic(loadReport.isDateStatic);
+    if (!loadReport.isDateStatic) {
+      const [nextStart, nextEnd] = getLiveRange(
+        loadReport.dateRange,
+        earliestTransactionDate || monthUtils.currentDay(),
+        latestTransactionDate || monthUtils.currentDay(),
+        loadReport.includeCurrentInterval,
+        firstDayOfWeekIdx,
+        dashboardScope.end,
+      );
+      setStartDate(nextStart);
+      setEndDate(nextEnd);
+    } else {
+      setStartDate(loadReport.startDate);
+      setEndDate(loadReport.endDate);
+    }
+  }, [
+    dashboardScope,
+    earliestTransactionDate,
+    firstDayOfWeekIdx,
+    interval,
+    isUsingDashboardRange,
+    latestTransactionDate,
+    loadReport.dateRange,
+    loadReport.endDate,
+    loadReport.includeCurrentInterval,
+    loadReport.isDateStatic,
+    loadReport.startDate,
+  ]);
+
   const onApplyFilterConditions = useEffectEvent(
     (
       currentConditions?: RuleConditionEntity[],
@@ -420,13 +476,14 @@ function CustomReportInner({
       isDateStatic: CustomReportEntity['isDateStatic'],
       includeCurrentInterval: CustomReportEntity['includeCurrentInterval'],
     ) => {
-      if (!isDateStatic) {
+      if (!isDateStatic && !isUsingDashboardRange) {
         const [dateStart, dateEnd] = getLiveRange(
           dateRange,
           earliestTransactionDate,
           latestTransactionDate,
           includeCurrentInterval,
           firstDayOfWeekIdx,
+          dashboardScope?.end,
         );
         setStartDate(dateStart);
         setEndDate(dateEnd);
@@ -505,7 +562,6 @@ function CustomReportInner({
     tags,
     tagScope: groupBy === 'Tag' ? tagScope : undefined,
   });
-
   useEffect(() => {
     if (balanceTypeOp !== 'totalBudgeted') {
       return;
@@ -643,6 +699,16 @@ function CustomReportInner({
     conditions,
     conditionsOp,
   };
+  const savedCustomReportItems = isUsingDashboardRange
+    ? {
+        ...customReportItems,
+        startDate: loadReport.startDate,
+        endDate: loadReport.endDate,
+        isDateStatic: loadReport.isDateStatic,
+        dateRange: loadReport.dateRange,
+        includeCurrentInterval: loadReport.includeCurrentInterval,
+      }
+    : customReportItems;
 
   const navigate = useNavigate();
   const [, setScrollWidth] = useState(0);
@@ -944,7 +1010,12 @@ function CustomReportInner({
             earliestTransaction={earliestTransactionDate}
             latestTransaction={latestTransactionDate}
             firstDayOfWeekIdx={firstDayOfWeekIdx}
+            referenceDate={dashboardScope?.end}
             isComplexCategoryCondition={isComplexCategoryCondition}
+            useDashboardDateRange={isUsingDashboardRange}
+            onUseDashboardDateRangeChange={
+              hasDashboardContext ? setUseDashboardDateRange : undefined
+            }
           />
         )}
         <View
@@ -954,7 +1025,7 @@ function CustomReportInner({
         >
           {!isNarrowWidth && (
             <ReportTopbar
-              customReportItems={customReportItems}
+              customReportItems={savedCustomReportItems}
               report={report}
               savedStatus={savedStatus}
               setGraphType={setGraphType}
