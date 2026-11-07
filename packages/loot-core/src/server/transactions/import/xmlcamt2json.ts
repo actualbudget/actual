@@ -1,6 +1,9 @@
 // @ts-strict-ignore
 import { parseStringPromise } from 'xml2js';
 
+import { createAccountHint } from './account-hint';
+import type { ImportAccountHint } from './account-hint';
+
 type DateRef = { DtTm: string } | { Dt: string };
 type Amt = { _: string };
 
@@ -117,9 +120,31 @@ function decodeXmlContent(content: Uint8Array): string {
   return utf8Decoder.decode(content);
 }
 
+type AcctId = { IBAN?: string; Othr?: { Id?: string } | { Id?: string }[] };
+
+// Only the first statement's account is used.
+function getAccountHint(data: object): ImportAccountHint | null {
+  const [acct] = findKeys(data, 'Acct') as { Id?: AcctId }[];
+  const id = acct?.Id;
+  if (!id) {
+    return null;
+  }
+  const other = Array.isArray(id.Othr) ? id.Othr[0] : id.Othr;
+  return createAccountHint('camt', id.IBAN ?? other?.Id);
+}
+
 export async function xmlCAMT2json(
   content: string | Uint8Array,
 ): Promise<TransactionCAMT[]> {
+  return (await xmlCAMT2jsonWithAccount(content)).transactions;
+}
+
+export async function xmlCAMT2jsonWithAccount(
+  content: string | Uint8Array,
+): Promise<{
+  transactions: TransactionCAMT[];
+  account: ImportAccountHint | null;
+}> {
   const data = await parseStringPromise(
     content instanceof Uint8Array ? decodeXmlContent(content) : content,
     { explicitArray: false },
@@ -187,7 +212,10 @@ export async function xmlCAMT2json(
       transactions.push(transaction);
     }
   }
-  return transactions.filter(
-    trans => trans.date != null && trans.amount != null,
-  );
+  return {
+    transactions: transactions.filter(
+      trans => trans.date != null && trans.amount != null,
+    ),
+    account: getAccountHint(data),
+  };
 }

@@ -86,6 +86,11 @@ export const schema = {
     sort_order: f('float'),
     tombstone: f('boolean'),
   },
+  account_import_refs: {
+    id: f('id'),
+    account: f('id', { ref: 'accounts' }),
+    tombstone: f('boolean'),
+  },
   categories: {
     id: f('id'),
     name: f('string'),
