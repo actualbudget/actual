@@ -1,4 +1,7 @@
-import { startBrowserBackend } from '@actual-app/core/platform/client/browser-preload';
+import {
+  resolveStorageBackend,
+  startBrowserBackend,
+} from '@actual-app/core/platform/client/browser-preload';
 import * as Platform from '@actual-app/core/shared/platform';
 import { registerSW } from 'virtual:pwa-register';
 
@@ -36,6 +39,11 @@ const isOpenIdCallback = window.location.pathname
   .replace(/\/+$/, '')
   .endsWith('/openid-cb');
 
+// Which engine the backend uses for budget files: `?storage=opfs` once, or
+// the choice stored by the experimental setting. Resolved on the main
+// thread because the worker needs it in its init message.
+const storageBackend = resolveStorageBackend();
+
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), the direct
@@ -50,6 +58,7 @@ const worker = startBrowserBackend({
     isDev: IS_DEV,
     publicUrl: import.meta.env.BASE_URL.slice(0, -1),
     hash: import.meta.env.REACT_APP_BACKEND_WORKER_HASH,
+    storageBackend,
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),

@@ -4,6 +4,7 @@ import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger, setVerboseMode } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
+import type { StorageBackend } from '#platform/server/sqlite';
 import { q } from '#shared/query';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
@@ -36,6 +37,7 @@ import { app as rulesApp } from './rules/app';
 import { app as schedulesApp } from './schedules/app';
 import { getServer, setServer } from './server-config';
 import { app as spreadsheetApp } from './spreadsheet/app';
+import { app as storageApp } from './storage/app';
 import { fullSync, setSyncingMode } from './sync';
 import { app as syncApp } from './sync/app';
 import { app as tagsApp } from './tags/app';
@@ -152,6 +154,7 @@ app.combine(
   budgetFilesApp,
   encryptionApp,
   tagsApp,
+  storageApp,
 );
 
 export function getDefaultDocumentDir() {
@@ -211,10 +214,14 @@ async function ensureUsable(dir) {
   await fs.removeDir(probeDir);
 }
 
-export async function initApp(isDev, socketName) {
-  await sqlite.init();
+export async function initApp(
+  isDev,
+  socketName,
+  { storageBackend = 'legacy' }: { storageBackend?: StorageBackend } = {},
+) {
+  const storage = await sqlite.init({ storage: storageBackend });
   asyncStorage.init();
-  await fs.init();
+  await fs.init({ storage });
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -308,9 +315,9 @@ export async function init(config: InitConfig) {
     serverURL = process.env.ACTUAL_SERVER_URL;
   }
 
-  await sqlite.init();
+  const storage = await sqlite.init();
   asyncStorage.init({ persist: false });
-  await fs.init();
+  await fs.init({ storage });
   fs._setDocumentDir(dataDir || process.cwd());
 
   if (serverURL) {
