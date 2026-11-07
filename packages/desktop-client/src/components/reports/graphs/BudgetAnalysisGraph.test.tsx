@@ -8,6 +8,7 @@ import { TestProviders } from '#mocks';
 import { BudgetAnalysisGraph } from './BudgetAnalysisGraph';
 
 const sampleData = {
+  budgetType: 'envelope' as const,
   intervalData: [
     {
       date: '2024-01',
@@ -15,6 +16,8 @@ const sampleData = {
       spent: -30000,
       balance: 20000,
       overspendingAdjustment: 0,
+      variance: 0,
+      cumulativeVariance: 0,
     },
     {
       date: '2024-02',
@@ -22,6 +25,8 @@ const sampleData = {
       spent: -40000,
       balance: 30000,
       overspendingAdjustment: 0,
+      variance: 0,
+      cumulativeVariance: 0,
     },
   ],
 };

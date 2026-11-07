@@ -39,6 +39,7 @@ import {
 } from '#components/reports/spreadsheets/budget-analysis-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useBudgetType } from '#hooks/useBudgetType';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -56,6 +57,9 @@ type OptionsButtonProps = {
   onToggleShowBalance: () => void;
   showCategories: boolean;
   onToggleShowCategories: () => void;
+  isTracking: boolean;
+  showCumulativeVariance: boolean;
+  onToggleShowCumulativeVariance: () => void;
   showHiddenCategories: boolean;
   onToggleShowHiddenCategories: () => void;
 };
@@ -67,6 +71,9 @@ function OptionsButton({
   onToggleShowBalance,
   showCategories,
   onToggleShowCategories,
+  isTracking,
+  showCumulativeVariance,
+  onToggleShowCumulativeVariance,
   showHiddenCategories,
   onToggleShowHiddenCategories,
 }: OptionsButtonProps) {
@@ -90,6 +97,9 @@ function OptionsButton({
             if (item === 'graph-type') onToggleGraphType();
             if (item === 'show-balance') onToggleShowBalance();
             if (item === 'show-categories') onToggleShowCategories();
+            if (item === 'show-cumulative-variance') {
+              onToggleShowCumulativeVariance();
+            }
             if (item === 'show-hidden-categories') {
               onToggleShowHiddenCategories();
             }
@@ -106,6 +116,15 @@ function OptionsButton({
               text: t('Show balance'),
               toggle: showBalance,
             },
+            ...(isTracking
+              ? [
+                  {
+                    name: 'show-cumulative-variance',
+                    text: t('Show cumulative variance'),
+                    toggle: showCumulativeVariance,
+                  },
+                ]
+              : []),
             {
               name: 'show-categories',
               text: t('Show categories'),
@@ -177,6 +196,9 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
   const [showCategories, setShowCategories] = useState(
     !(widget?.meta?.balanceOnly ?? false),
   );
+  const [showCumulativeVariance, setShowCumulativeVariance] = useState(
+    widget?.meta?.showCumulativeVariance ?? true,
+  );
   const [showHiddenCategories, setShowHiddenCategories] = useState(
     widget?.meta?.showHiddenCategories ?? false,
   );
@@ -187,6 +209,8 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
+
+  const budgetType = useBudgetType();
 
   // Normalize in case a persisted timeFrame still holds `yyyy-MM-dd` values.
   const calculateIsConcise = (start: string, end: string) => {
@@ -279,8 +303,16 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
         startDate,
         endDate,
         showHiddenCategories,
+        budgetType,
       }),
-    [conditions, conditionsOp, startDate, endDate, showHiddenCategories],
+    [
+      conditions,
+      conditionsOp,
+      startDate,
+      endDate,
+      showHiddenCategories,
+      budgetType,
+    ],
   );
 
   const data = useReport('default', getGraphData);
@@ -322,6 +354,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
             graphType,
             showBalance,
             balanceOnly: !showCategories,
+            showCumulativeVariance,
             showHiddenCategories,
           },
         },
@@ -343,7 +376,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
 
   const onExportCsv = async () => {
     if (!data) return;
-    const csv = buildBudgetAnalysisCsv(data.intervalData);
+    const csv = buildBudgetAnalysisCsv(data.intervalData, data.budgetType);
     const reportName = (widget?.meta?.name || t('Budget Analysis'))
       .replace(/[^a-z0-9]/gi, '-')
       .toLowerCase();
@@ -369,6 +402,7 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     return <LoadingIndicator />;
   }
 
+  const isTracking = data.budgetType === 'tracking';
   const latestInterval = data.intervalData[data.intervalData.length - 1];
   const endingBalance = latestInterval?.balance ?? 0;
 
@@ -445,6 +479,11 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
           onToggleShowBalance={() => setShowBalance(v => !v)}
           showCategories={showCategories}
           onToggleShowCategories={() => setShowCategories(v => !v)}
+          isTracking={isTracking}
+          showCumulativeVariance={showCumulativeVariance}
+          onToggleShowCumulativeVariance={() =>
+            setShowCumulativeVariance(v => !v)
+          }
           showHiddenCategories={showHiddenCategories}
           onToggleShowHiddenCategories={() => setShowHiddenCategories(v => !v)}
         />
@@ -545,15 +584,23 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                           style={{ marginBottom: 5, minWidth: 210 }}
                           left={
                             <Block>
-                              <Trans>Overspending adj:</Trans>
+                              {isTracking ? (
+                                <Trans>Variance:</Trans>
+                              ) : (
+                                <Trans>Overspending adj:</Trans>
+                              )}
                             </Block>
                           }
                           right={
                             <FinancialText style={{ fontWeight: 600 }}>
                               <PrivacyFilter>
-                                {format(
-                                  data.totalOverspendingAdjustment,
-                                  'financial',
+                                {isTracking ? (
+                                  <Change amount={data.totalVariance} />
+                                ) : (
+                                  format(
+                                    data.totalOverspendingAdjustment,
+                                    'financial',
+                                  )
                                 )}
                               </PrivacyFilter>
                             </FinancialText>
@@ -585,36 +632,70 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
                 graphType={graphType}
                 showBalance={showBalance}
                 balanceOnly={!showCategories}
+                showCumulativeVariance={showCumulativeVariance}
                 isConcise={isConcise}
               />
               <View style={{ marginTop: 30 }}>
-                <Trans>
-                  <Paragraph>
-                    <strong>Understanding the Chart</strong>
-                    <br />• <strong>Budgeted:</strong> The amount you allocated
-                    each month
-                    <br />• <strong>Spent:</strong> Your actual spending
-                    <br />• <strong>Overspending Adjustment:</strong> Amounts
-                    from categories without rollover that were reset
-                    <br />• <strong>Balance:</strong> Your cumulative budget
-                    performance, starting with any prior balance. Respects
-                    category rollover settings from your budget.
-                  </Paragraph>
-                  <Paragraph>
-                    <strong>Understanding the Budget Summary</strong>
-                    <br />
-                    The balance starts from the month before your selected
-                    period. Budgeted, spent, and overspending adjustments show
-                    totals over the period. Ending balance shows the final
-                    balance at period end. You can filter by categories to track
-                    changes in a specific area.
-                  </Paragraph>
-                  <Paragraph>
-                    Use the <strong>Options</strong> button to switch between
-                    line and bar chart, toggle balance and category series
-                    visibility, and include hidden budget categories.
-                  </Paragraph>
-                </Trans>
+                {isTracking ? (
+                  <Trans>
+                    <Paragraph>
+                      <strong>Understanding the Chart</strong>
+                      <br />• <strong>Budgeted:</strong> The amount you planned
+                      to spend each month
+                      <br />• <strong>Spent:</strong> Your actual spending
+                      <br />• <strong>Balance:</strong> The month's category
+                      balances. A balance only carries into the next month for
+                      categories with rollover enabled, otherwise it starts
+                      over.
+                      <br />• <strong>Cumulative Variance:</strong> How far over
+                      or under budget you are so far in the selected period.
+                    </Paragraph>
+                    <Paragraph>
+                      <strong>Understanding the Budget Summary</strong>
+                      <br />
+                      Budgeted, spent and variance show totals over the period.
+                      Variance is budgeted plus spent, so a negative amount
+                      means you are over budget. Ending balance shows the
+                      balance of the last month only, so without rollover it can
+                      differ from the variance. You can filter by categories to
+                      track changes in a specific area.
+                    </Paragraph>
+                    <Paragraph>
+                      Use the <strong>Options</strong> button to switch between
+                      line and bar chart, toggle the balance, cumulative
+                      variance and category series, and include hidden budget
+                      categories.
+                    </Paragraph>
+                  </Trans>
+                ) : (
+                  <Trans>
+                    <Paragraph>
+                      <strong>Understanding the Chart</strong>
+                      <br />• <strong>Budgeted:</strong> The amount you
+                      allocated each month
+                      <br />• <strong>Spent:</strong> Your actual spending
+                      <br />• <strong>Overspending Adjustment:</strong> Amounts
+                      from categories without rollover that were reset
+                      <br />• <strong>Balance:</strong> Your cumulative budget
+                      performance, starting with any prior balance. Respects
+                      category rollover settings from your budget.
+                    </Paragraph>
+                    <Paragraph>
+                      <strong>Understanding the Budget Summary</strong>
+                      <br />
+                      The balance starts from the month before your selected
+                      period. Budgeted, spent, and overspending adjustments show
+                      totals over the period. Ending balance shows the final
+                      balance at period end. You can filter by categories to
+                      track changes in a specific area.
+                    </Paragraph>
+                    <Paragraph>
+                      Use the <strong>Options</strong> button to switch between
+                      line and bar chart, toggle balance and category series
+                      visibility, and include hidden budget categories.
+                    </Paragraph>
+                  </Trans>
+                )}
               </View>
             </View>
           </View>
