@@ -43,6 +43,9 @@ export type SyncedPrefs = Partial<
     | `show-group-${string}`
     | 'sidebar-menu-items'
     | 'sidebar-start-page'
+    // Id of the dashboard page that /reports opens. When unset, or when that
+    // dashboard no longer exists, /reports opens the first dashboard.
+    | 'reports-default-dashboard'
     | 'sync-transfer-date'
     // Number of minutes between automatic bank syncs. '0' (or unset) disables
     // automatic syncing.
