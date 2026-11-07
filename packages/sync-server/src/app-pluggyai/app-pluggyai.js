@@ -1,6 +1,5 @@
 import express from 'express';
 
-import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
@@ -16,11 +15,15 @@ const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
-
-function canAccessFile(fileId, userId) {
-  return isAdmin(userId) || UserService.countUserAccess(fileId, userId) > 0;
-}
 
 app.post(
   '/status',
@@ -36,7 +39,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -72,7 +75,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -140,7 +143,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',

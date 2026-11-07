@@ -1,4 +1,5 @@
 import { q } from '@actual-app/core/shared/query';
+import type { ObjectExpression } from '@actual-app/core/shared/query';
 
 import { ReportOptions } from '#components/reports/ReportOptions';
 
@@ -9,9 +10,12 @@ export function makeQuery(
   interval: string,
   conditionsOpKey: string,
   filters: unknown[],
+  groupBy?: string,
 ) {
+  // Weekly and Quarterly have no AQL date transform, so they are queried at a
+  // finer grain (days and months) and rolled up by the spreadsheets.
   const intervalGroup =
-    interval === 'Monthly'
+    interval === 'Monthly' || interval === 'Quarterly'
       ? { $month: '$date' }
       : interval === 'Yearly'
         ? { $year: '$date' }
@@ -19,7 +23,10 @@ export function makeQuery(
   const intervalFilter =
     interval === 'Weekly'
       ? '$day'
-      : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() || 'month';
+      : interval === 'Quarterly'
+        ? '$month'
+        : '$' + ReportOptions.intervalMap.get(interval)?.toLowerCase() ||
+          'month';
 
   const query = q('transactions')
     //Apply filters and split by "Group By"
@@ -38,25 +45,31 @@ export function makeQuery(
       name === 'assets' ? { amount: { $gt: 0 } } : { amount: { $lt: 0 } },
     );
 
-  return query
-    .groupBy([
-      intervalGroup,
-      { $id: '$account' },
-      { $id: '$payee' },
-      { $id: '$category' },
-      { $id: '$payee.transfer_acct.id' },
-    ])
-    .select([
-      { date: intervalGroup },
-      { category: { $id: '$category.id' } },
-      { categoryHidden: { $id: '$category.hidden' } },
-      { categoryIncome: { $id: '$category.is_income' } },
-      { categoryGroup: { $id: '$category.group.id' } },
-      { categoryGroupHidden: { $id: '$category.group.hidden' } },
-      { account: { $id: '$account.id' } },
-      { accountOffBudget: { $id: '$account.offbudget' } },
-      { payee: { $id: '$payee.id' } },
-      { transferAccount: { $id: '$payee.transfer_acct.id' } },
-      { amount: { $sum: '$amount' } },
-    ]);
+  const groupByFields: Array<ObjectExpression | string> = [
+    intervalGroup,
+    { $id: '$account' },
+    { $id: '$payee' },
+    { $id: '$category' },
+    { $id: '$payee.transfer_acct.id' },
+  ];
+  const selectedFields: Array<ObjectExpression | string> = [
+    { date: intervalGroup },
+    { category: { $id: '$category.id' } },
+    { categoryHidden: { $id: '$category.hidden' } },
+    { categoryIncome: { $id: '$category.is_income' } },
+    { categoryGroup: { $id: '$category.group.id' } },
+    { categoryGroupHidden: { $id: '$category.group.hidden' } },
+    { account: { $id: '$account.id' } },
+    { accountOffBudget: { $id: '$account.offbudget' } },
+    { payee: { $id: '$payee.id' } },
+    { transferAccount: { $id: '$payee.transfer_acct.id' } },
+    { amount: { $sum: '$amount' } },
+  ];
+
+  if (groupBy === 'Tag') {
+    groupByFields.push('notes');
+    selectedFields.push('notes');
+  }
+
+  return query.groupBy(groupByFields).select(selectedFields);
 }

@@ -38,6 +38,7 @@ type ReportTableRowProps = {
   handleScroll?: UIEventHandler<HTMLDivElement>;
   height?: number;
   colorized?: boolean;
+  scopeTagNames?: string[];
 };
 
 const getAmountColor = (amount: number) => {
@@ -66,6 +67,7 @@ export const ReportTableRow = memo(
     height,
     interval,
     colorized,
+    scopeTagNames,
   }: ReportTableRowProps) => {
     const average = Math.round(item[balanceTypeOp] / intervalsCount);
     const groupByItem = groupBy === 'Interval' ? 'date' : 'name';
@@ -80,8 +82,23 @@ export const ReportTableRow = memo(
       item.uncategorizedId === 'all' ||
       categories.grouped.some(g => g.id === item.id);
     const drilldownField = isGroupRow ? 'group' : groupBy.toLowerCase();
-    const canShowActivity =
-      !isNarrowWidth && groupBy !== 'Interval' && !compact;
+    // Interval rows drill down by the date range of their intervals (a single
+    // interval, or all of them for the totals row) instead of a field
+    const firstInterval = item.intervalData[0];
+    const lastInterval = item.intervalData[item.intervalData.length - 1];
+    const drilldown =
+      groupBy === 'Interval'
+        ? {
+            startDate: firstInterval?.intervalStartDate ?? startDate,
+            endDate: lastInterval?.intervalEndDate ?? endDate,
+          }
+        : {
+            startDate,
+            endDate,
+            field: drilldownField,
+            id: item.id,
+          };
+    const canShowActivity = !isNarrowWidth && !compact;
 
     const pointer = canShowActivity ? 'pointer' : 'inherit';
 
@@ -96,6 +113,7 @@ export const ReportTableRow = memo(
     return (
       <Row
         key={item.id}
+        data-testid={`report-row-${item.name}`}
         height={height}
         collapsed
         style={{
@@ -174,6 +192,8 @@ export const ReportTableRow = memo(
                         id: item.id,
                         uncategorizedId: item.uncategorizedId,
                         interval,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                     width="flex"
@@ -223,11 +243,10 @@ export const ReportTableRow = memo(
                         showHiddenCategories,
                         showOffBudget,
                         type: 'assets',
-                        startDate,
-                        endDate,
-                        field: drilldownField,
-                        id: item.id,
+                        ...drilldown,
                         uncategorizedId: item.uncategorizedId,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                   />
@@ -271,11 +290,10 @@ export const ReportTableRow = memo(
                         showHiddenCategories,
                         showOffBudget,
                         type: 'debts',
-                        startDate,
-                        endDate,
-                        field: drilldownField,
-                        id: item.id,
+                        ...drilldown,
                         uncategorizedId: item.uncategorizedId,
+                        bucketTagNames: item.bucketTagNames,
+                        scopeTagNames,
                       })
                     }
                   />
@@ -318,11 +336,10 @@ export const ReportTableRow = memo(
                 showHiddenCategories,
                 showOffBudget,
                 type: 'totals',
-                startDate,
-                endDate,
-                field: drilldownField,
-                id: item.id,
+                ...drilldown,
                 uncategorizedId: item.uncategorizedId,
+                bucketTagNames: item.bucketTagNames,
+                scopeTagNames,
               })
             }
             width="flex"

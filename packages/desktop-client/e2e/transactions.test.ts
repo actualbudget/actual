@@ -205,6 +205,23 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('tabs from a date picked with the mouse to the payee', async () => {
+    await accountPage.addNewTransactionButton.click();
+
+    await page
+      .getByTestId('date-select-tooltip')
+      .getByText('15', { exact: true })
+      .click();
+    await expect(
+      accountPage.newTransactionRow.getByTestId('date').locator('input'),
+    ).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(
+      accountPage.newTransactionRow.getByTestId('payee').locator('input'),
+    ).toBeFocused();
+  });
+
   test('creates a split test transaction', async () => {
     await accountPage.createSplitTransaction([
       {
@@ -304,8 +321,13 @@ test.describe('Transactions', () => {
         notes: 'short note',
       });
 
-      const truncatedNotes = accountPage.getNthTransaction(1).notes;
-      const shortNotes = accountPage.getNthTransaction(0).notes;
+      const truncatedTransaction = accountPage.getNthTransaction(1);
+      const shortTransaction = accountPage.getNthTransaction(0);
+      await expect(truncatedTransaction.payee).toHaveText('Home Depot');
+      await expect(shortTransaction.payee).toHaveText('Kroger');
+
+      const truncatedNotes = truncatedTransaction.notes;
+      const shortNotes = shortTransaction.notes;
 
       // A short note that fits in the column never shows a tooltip, even
       // after waiting past the tooltip's hover delay.

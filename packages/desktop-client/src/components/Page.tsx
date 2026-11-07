@@ -58,7 +58,10 @@ export function MobilePageHeader({
         alignItems: 'center',
         flexDirection: 'row',
         flexShrink: 0,
-        height: HEADER_HEIGHT,
+        // Extend under the status bar / notch (non-zero only in the native
+        // mobile app, where the web view covers the whole screen).
+        height: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`,
+        paddingTop: 'env(safe-area-inset-top)',
         backgroundColor: theme.mobileHeaderBackground,
         '& *': {
           color: theme.mobileHeaderText,
@@ -144,7 +147,7 @@ export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
       ref={slotRef ?? undefined}
       style={{
         flexShrink: 0,
-        minHeight: HEADER_HEIGHT,
+        minHeight: `calc(${HEADER_HEIGHT}px + env(safe-area-inset-top))`,
         backgroundColor: theme.mobileHeaderBackground,
         ...style,
       }}

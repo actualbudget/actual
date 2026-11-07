@@ -31,6 +31,6 @@ export class BalanceMenuModal {
   }
 
   async close() {
-    await this.heading.getByRole('button', { name: 'Close' }).click();
+    await this.page.keyboard.press('Escape');
   }
 }

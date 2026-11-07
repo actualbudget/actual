@@ -213,3 +213,29 @@ export const PasswordInput: Story = {
     },
   },
 };
+
+export const Sizes: Story = {
+  render: () => (
+    <View style={{ gap: 10 }}>
+      <Input size="small" placeholder="Small" />
+      <Input size="medium" placeholder="Medium" />
+      <Input size="large" placeholder="Large" />
+      <Input size="extra-large" placeholder="Extra Large" />
+    </View>
+  ),
+  decorators: [
+    Story => (
+      <View style={{ width: 250 }}>
+        <Story />
+      </View>
+    ),
+  ],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The standard size vocabulary. Values adapt to the viewport: resize the story canvas below 512px, 730px and 1100px to see the responsive steps.',
+      },
+    },
+  },
+};

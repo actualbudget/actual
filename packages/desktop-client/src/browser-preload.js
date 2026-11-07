@@ -6,6 +6,7 @@ import { registerSW } from 'virtual:pwa-register';
 import packageJson from '../package.json';
 
 import SharedBrowserServerWorker from './shared-browser-server.ts?sharedworker';
+import { computeClientVersion } from './util/versions';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 
@@ -15,11 +16,12 @@ const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
 // everything else.
 
 const IS_DEV = import.meta.env.DEV;
-const ACTUAL_VERSION = Platform.isPlaywright
-  ? '99.9.9'
-  : import.meta.env.REACT_APP_REVIEW_ID
-    ? '.preview'
-    : packageJson.version;
+const ACTUAL_VERSION = computeClientVersion({
+  isPlaywright: Platform.isPlaywright,
+  reviewId: import.meta.env.REACT_APP_REVIEW_ID,
+  commitRef: import.meta.env.REACT_APP_COMMIT_REF,
+  packageVersion: packageJson.version,
+});
 
 // The OIDC callback (/openid-cb) is reached via a full-page navigation back
 // from the OpenID provider. Routing it through the SharedWorker coordinator is
@@ -86,16 +88,17 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
   };
 });
 // Skip SW registration in dev so stale cached assets don't override edits
-// between page loads. Plugin code that needs a SW can register one itself.
-// In dev there is no SW to install, so applyAppUpdate() can't rely on the
-// SW lifecycle to swap the page — fall back to a plain reload so callers
-// don't hang on the never-resolving promise inside applyAppUpdate.
-const updateSW = IS_DEV
-  ? () => window.location.reload()
-  : registerSW({
-      immediate: true,
-      onNeedRefresh: markUpdateReadyForDownload,
-    });
+// between page loads, and in the native mobile apps, whose assets ship in the
+// app bundle and update via the app stores. Plugin code that needs a SW can
+// register one itself. Without a SW, applyAppUpdate() falls back to a plain
+// reload so callers don't hang on its never-resolving promise.
+const updateSW =
+  IS_DEV || Platform.isNativeMobileApp
+    ? () => window.location.reload()
+    : registerSW({
+        immediate: true,
+        onNeedRefresh: markUpdateReadyForDownload,
+      });
 
 global.Actual = {
   IS_DEV,

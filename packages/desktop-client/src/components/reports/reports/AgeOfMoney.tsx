@@ -324,6 +324,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       >
         <View
           style={{
+            alignItems: 'flex-end',
             textAlign: 'right',
             paddingTop: 20,
           }}

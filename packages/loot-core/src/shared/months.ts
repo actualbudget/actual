@@ -4,6 +4,7 @@ import type { Locale } from 'date-fns';
 
 import { memoizeOne } from '#shared/memoize';
 import * as Platform from '#shared/platform';
+import type { Weekday } from '#types/models/templates';
 import type { SyncedPrefs } from '#types/prefs';
 
 type DateLike = string | Date;
@@ -249,11 +250,17 @@ export function isAfter(month1: DateLike, month2: DateLike): boolean {
 }
 
 export function isCurrentMonth(month: DateLike): boolean {
-  return month === currentMonth();
+  const isValid =
+    typeof month === 'string'
+      ? isValidYearMonth(month) || isValidYearMonthDay(month)
+      : d.isValid(month);
+  return isValid && monthFromDate(month) === currentMonth();
 }
 
 export function isCurrentDay(day: DateLike): boolean {
-  return day === currentDay();
+  const isValid =
+    typeof day === 'string' ? isValidYearMonthDay(day) : d.isValid(day);
+  return isValid && dayFromDate(day) === currentDay();
 }
 
 // TODO: This doesn't really fit in this module anymore, should
@@ -394,6 +401,31 @@ export function getDay(day: string): number {
   return Number(d.format(_parse(day), 'dd'));
 }
 
+// Weekday names ordered to match `Date.prototype.getDay()` (0 = Sunday).
+export const WEEKDAYS = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+] as const satisfies readonly Weekday[];
+
+// How many times a day of the week (0 = Sunday, as `Date.getDay()`) falls in
+// `month`. Always 4 or 5.
+export function countDayOfWeekInMonth(
+  month: DateLike,
+  dayOfWeek: number,
+): number {
+  const start = _parse(firstDayOfMonth(month));
+  // Days from the 1st to the first occurrence of `dayOfWeek`.
+  const offset = (dayOfWeek - d.getDay(start) + 7) % 7;
+  // Every month has 4 full weeks (28 days); the extra 0-3 days decide whether
+  // the day appears a fifth time.
+  return offset < d.getDaysInMonth(start) - 28 ? 5 : 4;
+}
+
 export function getMonthEnd(day: string): string {
   return subDays(nextMonth(day.slice(0, 7)) + '-01', 1);
 }
@@ -429,6 +461,29 @@ export function getQuarterStart(month: string): string {
 export function getQuarterEnd(month: string): string {
   const endMonth = getQuarter(month) * 3;
   return getYear(month) + '-' + String(endMonth).padStart(2, '0');
+}
+
+// Quarters are keyed by their first month, e.g. Q2 2024 is '2024-04'.
+export function quarterFromDate(date: DateLike): string {
+  return getQuarterStart(monthFromDate(date));
+}
+
+export function currentQuarter(): string {
+  return getQuarterStart(currentMonth());
+}
+
+export function quarterRangeInclusive(
+  start: DateLike,
+  end: DateLike,
+): string[] {
+  const quarters: string[] = [];
+  let quarter = quarterFromDate(start);
+  const endQuarter = quarterFromDate(end);
+  while (quarter <= endQuarter) {
+    quarters.push(quarter);
+    quarter = addMonths(quarter, 3);
+  }
+  return quarters;
 }
 
 export function sheetForMonth(month: string): string {

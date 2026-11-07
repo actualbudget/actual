@@ -22,14 +22,18 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloIncomeStreams } from '#components/reports/reports/monte-carlo/MonteCarloIncomeStreams';
+import { MonteCarloLumpSums } from '#components/reports/reports/monte-carlo/MonteCarloLumpSums';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
 import {
   createMonteCarloPot,
   createMonteCarloSurplusPot,
+  DEFAULT_HISTORICAL_BLOCK_LENGTH,
   getMonteCarloPotLabel,
+  MAX_HISTORICAL_BLOCK_LENGTH,
   MAX_SIMULATION_COUNT,
+  MIN_HISTORICAL_BLOCK_LENGTH,
   MIN_SIMULATION_COUNT,
   MONTE_CARLO_DEFAULTS,
 } from '#components/reports/reports/monte-carlo/monteCarloSimulation';
@@ -216,7 +220,7 @@ export function MonteCarloConfiguration({
                     )
                   : activeTab === 'withdrawals'
                     ? t(
-                        'How much you take out each year, and optional rules that adjust it as markets move.',
+                        'How much you take out each year, optional rules that adjust it as markets move, and any one-off withdrawals on top.',
                       )
                     : t(
                         'How withdrawals are taxed - your spending is what you keep after tax.',
@@ -346,6 +350,12 @@ export function MonteCarloConfiguration({
                       (1928 onwards) in random order.
                       <br />
                       <br />
+                      Historical, in blocks: strings together runs of
+                      consecutive real years, so a crash keeps the years that
+                      followed it, while every scenario is still a different mix
+                      of history.
+                      <br />
+                      <br />
                       Historical sequences: replays real market history, one
                       scenario per starting year. Pots with a Custom allocation
                       always use their own return and volatility.
@@ -362,6 +372,10 @@ export function MonteCarloConfiguration({
                   options={[
                     ['normal', t('Random (normal distribution)')],
                     ['historical-bootstrap', t('Historical returns, shuffled')],
+                    [
+                      'historical-block-bootstrap',
+                      t('Historical returns, in blocks'),
+                    ],
                     ['historical-sequence', t('Historical sequences (replay)')],
                   ]}
                 />
@@ -395,6 +409,43 @@ export function MonteCarloConfiguration({
                   }
                 />
               </View>
+
+              {config.returnModel === 'historical-block-bootstrap' && (
+                <View style={FIELD_STYLE}>
+                  <View style={FIELD_LABEL_ROW_STYLE}>
+                    <Text style={FIELD_LABEL_STYLE}>
+                      <Trans>Block length (years)</Trans>
+                    </Text>
+                    <MonteCarloHelpTooltip>
+                      <Trans>
+                        How many consecutive real years are replayed, on
+                        average, before the scenario jumps to a different point
+                        in history. Longer blocks keep more of history&apos;s
+                        multi-year patterns, such as a crash and its recovery;
+                        shorter blocks mix history up more.
+                        <br />
+                        <br />
+                        Around 10 years is a common choice. 1 behaves like the
+                        shuffled model.
+                      </Trans>
+                    </MonteCarloHelpTooltip>
+                  </View>
+                  <MonteCarloNumberInput
+                    value={config.historicalBlockLength}
+                    aria-label={t('Block length (years)')}
+                    roundToInteger
+                    min={MIN_HISTORICAL_BLOCK_LENGTH}
+                    max={MAX_HISTORICAL_BLOCK_LENGTH}
+                    step={1}
+                    onCommit={newValue =>
+                      onConfigChange({
+                        historicalBlockLength:
+                          newValue ?? DEFAULT_HISTORICAL_BLOCK_LENGTH,
+                      })
+                    }
+                  />
+                </View>
+              )}
             </View>
           </View>
 
@@ -596,6 +647,8 @@ export function MonteCarloConfiguration({
                     // The surplus pot is managed by the Manage surplus toggle
                     canRemove={ordinaryPotCount > 1 && !pot.isSurplus}
                     usesHistoricalReturns={config.returnModel !== 'normal'}
+                    currentAge={config.currentAge}
+                    targetAge={config.targetAge}
                     usesTaxBands={config.taxModel === 'bands'}
                     onPotChange={changes => onPotChange(pot.id, changes)}
                     onRemove={() =>
@@ -604,6 +657,12 @@ export function MonteCarloConfiguration({
                         // A removed pot takes its contributions with it
                         contributions: config.contributions.filter(
                           contribution => contribution.potId !== pot.id,
+                        ),
+                        // Lump sums drawn from it fall back to the order
+                        lumpSums: config.lumpSums.map(lumpSum =>
+                          lumpSum.sourcePotId === pot.id
+                            ? { ...lumpSum, sourcePotId: null }
+                            : lumpSum,
                         ),
                       })
                     }
@@ -726,6 +785,14 @@ export function MonteCarloConfiguration({
             onMinimumSpendingChange={value =>
               onConfigChange({ minimumSpending: value })
             }
+          />
+          <MonteCarloLumpSums
+            lumpSums={config.lumpSums}
+            pots={config.pots}
+            usesTaxBands={config.taxModel === 'bands'}
+            currentAge={config.currentAge}
+            targetAge={config.targetAge}
+            onConfigChange={onConfigChange}
           />
         </View>
       )}

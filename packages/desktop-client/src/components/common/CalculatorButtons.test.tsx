@@ -1,7 +1,13 @@
 import React, { useRef, useState } from 'react';
 
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
-import { fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 
 import { CalculatorButtons } from './CalculatorButtons';
 
@@ -31,6 +37,161 @@ function TestCalculator({ initialValue = '' }: { initialValue?: string }) {
 }
 
 describe('CalculatorButtons', () => {
+  describe('holding backspace', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+    afterEach(() => {
+      cleanup();
+      vi.useRealTimers();
+    });
+
+    const setup = () => {
+      const result = render(<TestCalculator initialValue="123456789" />);
+      const input = screen.getByLabelText('Expression');
+      if (!(input instanceof HTMLInputElement)) {
+        throw new Error('Expected expression to be an input');
+      }
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+      return {
+        ...result,
+        input,
+        backspace: screen.getByRole('button', { name: '\u232B' }),
+      };
+    };
+
+    it('deletes once on a short press', async () => {
+      const { input, backspace } = setup();
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      await act(() => vi.advanceTimersByTime(300));
+      expect(input).toHaveValue('123456789');
+      fireEvent.pointerUp(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+      });
+      fireEvent.click(backspace);
+      expect(input).toHaveValue('12345678');
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('12345678');
+    });
+
+    it('repeats during a hold and stops without an extra deletion on release', async () => {
+      const { input, backspace } = setup();
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      await act(() => vi.advanceTimersByTime(600));
+      expect(input).toHaveValue('123456');
+      expect(input).toHaveFocus();
+      expect(input.selectionStart).toBe(6);
+      fireEvent.pointerUp(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+      });
+      fireEvent.click(backspace);
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('123456');
+    });
+
+    it('deletes the selection first, then continues at the caret', async () => {
+      const { input, backspace } = setup();
+      input.setSelectionRange(3, 6);
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      await act(() => vi.advanceTimersByTime(400));
+      expect(input).toHaveValue('123789');
+      await act(() => vi.advanceTimersByTime(100));
+      expect(input).toHaveValue('12789');
+      fireEvent.pointerUp(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+      });
+      fireEvent.click(backspace);
+    });
+
+    it('stops when the pointer leaves the button', async () => {
+      const { input, backspace } = setup();
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      await act(() => vi.advanceTimersByTime(400));
+      fireEvent.pointerLeave(backspace, { pointerId: 1, pointerType: 'mouse' });
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('12345678');
+      fireEvent.pointerUp(input, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+      });
+    });
+
+    it('stops on window blur and clears the timer when unmounted', async () => {
+      const { input, backspace, unmount } = setup();
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      await act(() => vi.advanceTimersByTime(400));
+      fireEvent.blur(window);
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('12345678');
+      fireEvent.pointerUp(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+      });
+      fireEvent.click(backspace);
+      fireEvent.pointerDown(backspace, {
+        pointerId: 1,
+        pointerType: 'mouse',
+        button: 0,
+        width: 10,
+        height: 10,
+      });
+      unmount();
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('12345678');
+    });
+
+    it('keeps keyboard activation as a single deletion', async () => {
+      const { input, backspace } = setup();
+      await act(async () => {
+        backspace.focus();
+      });
+      fireEvent.keyDown(backspace, { key: ' ' });
+      await act(() => vi.advanceTimersByTime(1000));
+      expect(input).toHaveValue('123456789');
+      fireEvent.keyUp(backspace, { key: ' ' });
+      expect(input).toHaveValue('12345678');
+    });
+  });
+
   it('updates a controlled external input from keypad actions', () => {
     render(<TestCalculator />);
 

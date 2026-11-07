@@ -1,34 +1,14 @@
-// @ts-strict-ignore
-import React, { useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import {
-  SvgChartPie,
-  SvgDotsHorizontalTriple,
-  SvgTrash,
-} from '@actual-app/components/icons/v1';
-import {
-  SvgNotesPaper,
-  SvgViewHide,
-  SvgViewShow,
-} from '@actual-app/components/icons/v2';
-import { Menu } from '@actual-app/components/menu';
-import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
-
-import {
-  Modal,
-  ModalCloseButton,
-  ModalHeader,
-  ModalTitle,
-} from '#components/common/Modal';
-import { Notes } from '#components/Notes';
+import { MobileSheet } from '#components/mobile/MobileSheet';
+import { MobileSheetDeleteConfirm } from '#components/mobile/MobileSheetDeleteConfirm';
+import { MobileSheetNotes } from '#components/mobile/MobileSheetNotes';
+import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
+import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
+import { useCategories } from '#hooks/useCategories';
 import { useCategory } from '#hooks/useCategory';
 import { useCategoryGroup } from '#hooks/useCategoryGroup';
+import { useDeleteCategoryFlow } from '#hooks/useDeleteCategoryFlow';
 import { useNotes } from '#hooks/useNotes';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
@@ -42,208 +22,92 @@ export function CategoryMenuModal({
   onSave,
   onEditNotes,
   onDelete,
-  onToggleVisibility,
   onEditAutomations,
   onClose,
 }: CategoryMenuModalProps) {
   const { t } = useTranslation();
   const { data: category } = useCategory(categoryId);
   const { data: categoryGroup } = useCategoryGroup(category?.group);
-  const originalNotes = useNotes(category.id);
-
-  const onRename = newName => {
-    if (newName && newName !== category.name) {
-      onSave?.({
-        ...category,
-        name: newName,
-      });
-    }
-  };
-
-  const _onToggleVisibility = () => {
-    onToggleVisibility?.(category.id);
-  };
-
-  const _onEditNotes = () => {
-    onEditNotes?.(category.id);
-  };
-
-  const _onDelete = () => {
-    onDelete?.(category.id);
-  };
-
-  const _onEditAutomations = () => {
-    onEditAutomations?.(category.id);
-  };
-
-  const buttonStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-    color: theme.formLabelText,
-    // Adjust based on desired number of buttons per row.
-    flexBasis: '100%',
-  };
-
-  return (
-    <Modal
-      name="category-menu"
-      onClose={onClose}
-      containerProps={{
-        style: { height: '45vh' },
-      }}
-    >
-      {({ state }) => (
-        <>
-          <ModalHeader
-            leftContent={
-              <AdditionalCategoryMenu
-                category={category}
-                categoryGroup={categoryGroup}
-                onDelete={_onDelete}
-                onToggleVisibility={_onToggleVisibility}
-              />
-            }
-            title={
-              <ModalTitle
-                isEditable
-                title={category.name}
-                onTitleUpdate={onRename}
-              />
-            }
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
-          />
-          <View
-            style={{
-              flex: 1,
-              flexDirection: 'column',
-            }}
-          >
-            <View
-              style={{
-                overflowY: 'auto',
-                flex: 1,
-              }}
-            >
-              <Notes
-                notes={
-                  originalNotes?.length > 0 ? originalNotes : t('No notes')
-                }
-                editable={false}
-                focused={false}
-                getStyle={() => ({
-                  borderRadius: 6,
-                  ...((!originalNotes || originalNotes.length === 0) && {
-                    justifySelf: 'center',
-                    alignSelf: 'center',
-                    color: theme.pageTextSubdued,
-                  }),
-                })}
-              />
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                justifyContent: 'space-between',
-                alignContent: 'space-between',
-                gap: 8,
-                paddingTop: 10,
-              }}
-            >
-              <Button style={buttonStyle} onPress={_onEditNotes}>
-                <SvgNotesPaper
-                  width={20}
-                  height={20}
-                  style={{ paddingRight: 5 }}
-                />
-                <Trans>Edit notes</Trans>
-              </Button>
-              {onEditAutomations && (
-                <Button style={buttonStyle} onPress={_onEditAutomations}>
-                  <SvgChartPie
-                    width={20}
-                    height={20}
-                    style={{ paddingRight: 5 }}
-                  />
-                  <Trans>Budget automations</Trans>
-                </Button>
-              )}
-            </View>
-          </View>
-        </>
-      )}
-    </Modal>
-  );
-}
-
-function AdditionalCategoryMenu({
-  category,
-  categoryGroup,
-  onDelete,
-  onToggleVisibility,
-}) {
-  const { t } = useTranslation();
-  const triggerRef = useRef(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const itemStyle: CSSProperties = {
-    ...styles.mediumText,
-    height: styles.mobileMinHeight,
-  };
-
-  const getItemStyle = item => ({
-    ...itemStyle,
-    ...(item.name === 'delete' && { color: theme.errorTextMenu }),
+  const {
+    data: { grouped: categoryGroups, list: categories } = {
+      grouped: [],
+      list: [],
+    },
+  } = useCategories();
+  const notes = useNotes(categoryId);
+  const deleteFlow = useDeleteCategoryFlow({
+    categoryIds: [categoryId],
+    onDelete: transferCategoryId => onDelete(categoryId, transferCategoryId),
   });
 
+  if (!category) {
+    return null;
+  }
+
+  const isIncome = Boolean(category.is_income);
+  const transferGroups = categoryGroups
+    .filter(group => Boolean(group.is_income) === isIncome)
+    .map(group => ({
+      ...group,
+      categories: (group.categories ?? []).filter(c => c.id !== categoryId),
+    }));
+  const transferName = categories.find(
+    c => c.id === deleteFlow.transferId,
+  )?.name;
+
   return (
-    <View>
-      <Button
-        ref={triggerRef}
-        variant="bare"
-        aria-label={t('Menu')}
-        onPress={() => {
-          setMenuOpen(true);
-        }}
-      >
-        <SvgDotsHorizontalTriple
-          width={17}
-          height={17}
-          style={{ color: 'currentColor' }}
-        />
-        <Popover
-          triggerRef={triggerRef}
-          isOpen={menuOpen}
-          placement="bottom start"
-          onOpenChange={() => setMenuOpen(false)}
-        >
-          <Menu
-            getItemStyle={getItemStyle}
-            items={[
-              !categoryGroup?.hidden && {
-                name: 'toggleVisibility',
-                text: category.hidden ? t('Show') : t('Hide'),
-                icon: category.hidden ? SvgViewShow : SvgViewHide,
-                iconSize: 16,
-              },
-              !categoryGroup?.hidden && Menu.line,
-              {
-                name: 'delete',
-                text: t('Delete'),
-                icon: SvgTrash,
-                iconSize: 15,
-              },
-            ]}
-            onMenuSelect={itemName => {
-              setMenuOpen(false);
-              if (itemName === 'delete') {
-                onDelete();
-              } else if (itemName === 'toggleVisibility') {
-                onToggleVisibility();
-              }
-            }}
+    <MobileSheet
+      name="category-menu"
+      title={category.name}
+      onTitleUpdate={newName => {
+        onSave({ ...category, name: newName });
+        return undefined;
+      }}
+      onClose={onClose}
+    >
+      {({ editTitle, isEditingTitle }) =>
+        deleteFlow.step ? (
+          <MobileSheetDeleteConfirm
+            flow={deleteFlow}
+            category={category}
+            transferGroups={transferGroups}
+            transferName={transferName}
           />
-        </Popover>
-      </Button>
-    </View>
+        ) : (
+          <>
+            {notes && <MobileSheetNotes notes={notes} />}
+
+            <MobileSheetSection>
+              {!isEditingTitle && (
+                <MobileSheetRow label={t('Rename')} onPress={editTitle} />
+              )}
+              <MobileSheetRow
+                label={t('Edit notes')}
+                onPress={() => onEditNotes(category.id)}
+              />
+              {onEditAutomations && (
+                <MobileSheetRow
+                  label={t('Budget automations')}
+                  onPress={() => onEditAutomations(category.id)}
+                />
+              )}
+              {!categoryGroup?.hidden && (
+                <MobileSheetRow
+                  label={category.hidden ? t('Show') : t('Hide')}
+                  onPress={() =>
+                    onSave({ ...category, hidden: !category.hidden })
+                  }
+                />
+              )}
+              <MobileSheetRow
+                label={t('Delete')}
+                isDestructive
+                onPress={() => void deleteFlow.start()}
+              />
+            </MobileSheetSection>
+          </>
+        )
+      }
+    </MobileSheet>
   );
 }

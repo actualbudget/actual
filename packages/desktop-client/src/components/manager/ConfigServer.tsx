@@ -10,6 +10,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
+import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
@@ -286,12 +287,14 @@ export function ConfigServer() {
   const navigate = useNavigate();
   const location = useLocation();
   const userData = useSelector(state => state.user.data);
-  const [url, setUrl] = useState('');
   const currentUrl = useServerURL();
   const setServerUrl = useSetServerURL();
-  useEffect(() => {
+  const [url, setUrl] = useState(currentUrl);
+  const [prevCurrentUrl, setPrevCurrentUrl] = useState(currentUrl);
+  if (currentUrl !== prevCurrentUrl) {
+    setPrevCurrentUrl(currentUrl);
     setUrl(currentUrl);
-  }, [currentUrl]);
+  }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -429,7 +432,7 @@ export function ConfigServer() {
               </Trans>
             )}
           </Text>
-          {!currentUrl && (
+          {!currentUrl && !Platform.isNativeMobileApp && (
             <Text
               style={{
                 fontSize: 16,
@@ -455,11 +458,11 @@ export function ConfigServer() {
           {error && (
             <>
               <Text
+                size="large"
                 style={{
                   marginTop: 20,
                   color: theme.errorText,
                   borderRadius: 4,
-                  fontSize: 15,
                 }}
               >
                 {getErrorMessage(error)}
@@ -473,10 +476,10 @@ export function ConfigServer() {
                   }}
                 >
                   <Text
+                    size="large"
                     style={{
                       color: theme.errorText,
                       borderRadius: 4,
-                      fontSize: 15,
                     }}
                   >
                     <Trans>
@@ -532,7 +535,7 @@ export function ConfigServer() {
               </Button>
             ) : (
               <>
-                {!isElectron() && (
+                {!isElectron() && !Platform.isNativeMobileApp && (
                   <Button
                     variant="bare"
                     style={{ color: theme.pageTextLink }}

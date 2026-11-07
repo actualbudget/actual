@@ -9,10 +9,13 @@ export * as utils from './utils';
 /** @deprecated Please use return value of `init` instead */
 export let internal: typeof lib | null = null;
 
+let ownsSession = false;
+
 export async function init(config: InitConfig = {}) {
   validateNodeVersion();
 
   internal = await initLootCore(config);
+  ownsSession = Boolean(config.serverURL && config.password);
   return internal;
 }
 
@@ -24,7 +27,17 @@ export async function shutdown() {
       // most likely that no budget is loaded, so the sync failed
     }
 
-    await internal.send('close-budget');
-    internal = null;
+    try {
+      await internal.send('close-budget');
+    } finally {
+      try {
+        if (ownsSession) {
+          await internal.send('subscribe-sign-out');
+        }
+      } finally {
+        ownsSession = false;
+        internal = null;
+      }
+    }
   }
 }

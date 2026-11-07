@@ -338,18 +338,11 @@ export class FixedSizeList extends PureComponent<
       case 'end':
         return minOffset;
       case 'center': {
-        // "Centered" offset is usually the average of the min and max.
-        // But near the edges of the list, this doesn't hold true.
-        const middleOffset = Math.round(
-          minOffset + (maxOffset - minOffset) / 2,
+        // Items near either end can't be centered, so clamp to the list
+        const centeredOffset = Math.round(
+          index * this.props.itemSize - (size - this.props.itemSize) / 2,
         );
-        if (middleOffset < Math.ceil(size / 2)) {
-          return 0; // near the beginning
-        } else if (middleOffset > lastItemOffset + Math.floor(size / 2)) {
-          return lastItemOffset; // near the end
-        } else {
-          return middleOffset;
-        }
+        return Math.min(lastItemOffset, Math.max(0, centeredOffset));
       }
       case 'auto':
       default:
@@ -469,7 +462,10 @@ export class FixedSizeList extends PureComponent<
     return style;
   };
 
-  _getItemStyleCache = memoizeOne((_, __, ___) => ({}));
+  _getItemStyleCache = memoizeOne<
+    [itemSize: number, layout?: unknown, direction?: unknown],
+    Record<number, CSSProperties>
+  >(() => ({}));
 
   _getRangeToRender() {
     const { itemCount, overscanCount } = this.props;
@@ -565,7 +561,6 @@ export class FixedSizeList extends PureComponent<
     this.setState({ isScrolling: false }, () => {
       // Clear style cache after state update has been committed.
       // This way we don't break pure sCU for items that don't use isScrolling param.
-      // @ts-expect-error fix me
       this._getItemStyleCache(-1, null);
     });
   };

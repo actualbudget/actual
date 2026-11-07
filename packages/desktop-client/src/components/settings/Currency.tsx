@@ -1,17 +1,16 @@
 import React, { useMemo } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Select } from '@actual-app/components/select';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { currencies, getCurrency } from '@actual-app/core/shared/currencies';
 import { css } from '@emotion/css';
 
 import { Checkbox } from '#components/forms';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import { Column, Setting } from './UI';
+import { SettingsGroup } from './SettingsGroup';
+import { SettingsRow } from './SettingsRow';
 
 export function CurrencySettings() {
   const { t } = useTranslation();
@@ -23,6 +22,7 @@ export function CurrencySettings() {
         ['AED', t('UAE Dirham')],
         ['ARS', t('Argentinian Peso')],
         ['AUD', t('Australian Dollar')],
+        ['BDT', t('Bangladeshi Taka')],
         ['BRL', t('Brazilian Real')],
         ['BYN', t('Belarusian Ruble')],
         ['CAD', t('Canadian Dollar')],
@@ -52,6 +52,7 @@ export function CurrencySettings() {
         ['MKD', t('Macedonian Denar')],
         ['MXN', t('Mexican Peso')],
         ['MYR', t('Malaysian Ringgit')],
+        ['NOK', t('Norwegian Krone')],
         ['PEN', t('Peruvian Sol')],
         ['PHP', t('Philippine Peso')],
         ['PKR', t('Pakistani Rupee')],
@@ -66,10 +67,12 @@ export function CurrencySettings() {
         ['THB', t('Thai Baht')],
         ['TRY', t('Turkish Lira')],
         ['TWD', t('New Taiwan Dollar')],
+        ['TZS', t('Tanzanian Shilling')],
         ['UAH', t('Ukrainian Hryvnia')],
         ['USD', t('US Dollar')],
         ['UYU', t('Uruguayan Peso')],
         ['UZS', t('Uzbek Soum')],
+        ['ZAR', t('South African Rand')],
       ]),
     [t],
   );
@@ -112,7 +115,9 @@ export function CurrencySettings() {
       const cur = getCurrency(code);
       setNumberFormatPref(cur.numberFormat);
       setHideFractionPref(cur.decimalPlaces === 0 ? 'true' : 'false');
-      setSpaceEnabledPref(cur.symbolFirst ? 'false' : 'true');
+      // A currency code used as the symbol (e.g. "CHF 100") needs a space
+      const isSpaceEnabled = !cur.symbolFirst || cur.symbol === cur.code;
+      setSpaceEnabledPref(isSpaceEnabled ? 'true' : 'false');
       setSymbolPositionPref(cur.symbolFirst ? 'before' : 'after');
     }
   };
@@ -135,79 +140,54 @@ export function CurrencySettings() {
   }, [selectedCurrencyCode, spaceEnabled, t]);
 
   return (
-    <Setting
-      primaryAction={
-        <View
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5em',
-            width: '100%',
-          }}
-        >
-          <View style={{ display: 'flex', flexDirection: 'row', gap: '1.5em' }}>
-            <Column title={t('Default Currency')}>
-              <Select
-                value={selectedCurrencyCode}
-                onChange={handleCurrencyChange}
-                options={currencyOptions}
-                className={selectButtonClassName}
-                style={{ width: '100%' }}
-              />
-            </Column>
-
-            <Column
-              title={t('Symbol Position')}
-              style={{
-                visibility: selectedCurrencyCode === '' ? 'hidden' : 'visible',
-              }}
-            >
-              <Select
-                value={symbolPosition || 'before'}
-                onChange={value => setSymbolPositionPref(value)}
-                options={symbolPositionOptions.map(f => [f.value, f.label])}
-                className={selectButtonClassName}
-                style={{ width: '100%' }}
-                disabled={selectedCurrencyCode === ''}
-              />
-            </Column>
-          </View>
-
-          {selectedCurrencyCode !== '' && (
-            <View
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-              }}
-            >
-              <Checkbox
-                id="settings-spaceEnabled"
-                checked={spaceEnabled === 'true'}
-                onChange={e =>
-                  setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
-                }
-              />
-              <label
-                htmlFor="settings-spaceEnabled"
-                style={{ marginLeft: '0.5em' }}
-              >
-                <Trans>Add space between amount and symbol</Trans>
-              </label>
-            </View>
-          )}
-        </View>
-      }
+    <SettingsGroup
+      title={t('Currency')}
+      description={t(
+        'Currency settings affect how amounts are displayed throughout the application. Changing the currency also updates the number format, symbol position and whether decimal places are shown. These can be adjusted after the currency is set.',
+      )}
     >
-      <Text>
-        <Trans>
-          <strong>Currency settings</strong> affect how amounts are displayed
-          throughout the application. Changing the currency will affect the
-          number format, symbol position, and whether fractions are shown. These
-          can be adjusted after the currency is set.
-        </Trans>
-      </Text>
-    </Setting>
+      <SettingsRow
+        title={t('Default currency')}
+        control={
+          <Select
+            value={selectedCurrencyCode}
+            onChange={handleCurrencyChange}
+            options={currencyOptions}
+            className={selectButtonClassName}
+            style={{ maxWidth: '100%' }}
+          />
+        }
+      />
+      {selectedCurrencyCode !== '' && (
+        <SettingsRow
+          title={t('Symbol position')}
+          control={
+            <Select
+              value={symbolPosition || 'before'}
+              onChange={value => setSymbolPositionPref(value)}
+              options={symbolPositionOptions.map(f => [f.value, f.label])}
+              className={selectButtonClassName}
+              style={{ maxWidth: '100%' }}
+            />
+          }
+        />
+      )}
+      {selectedCurrencyCode !== '' && (
+        <SettingsRow
+          htmlFor="settings-spaceEnabled"
+          title={t('Add space between amount and symbol')}
+          control={
+            <Checkbox
+              id="settings-spaceEnabled"
+              checked={spaceEnabled === 'true'}
+              onChange={e =>
+                setSpaceEnabledPref(e.target.checked ? 'true' : 'false')
+              }
+              style={{ marginRight: 0 }}
+            />
+          }
+        />
+      )}
+    </SettingsGroup>
   );
 }

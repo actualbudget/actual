@@ -545,6 +545,12 @@ export function AccountHeader({
                             : t('Show balance chart'),
                         },
                         {
+                          name: 'toggle-reconciled',
+                          text: showReconciled
+                            ? t('Hide reconciled transactions')
+                            : t('Show reconciled transactions'),
+                        },
+                        {
                           name: 'manage-columns',
                           text: t('Manage table columns'),
                         },

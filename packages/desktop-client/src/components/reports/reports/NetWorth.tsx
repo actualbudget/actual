@@ -122,6 +122,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     [widget?.meta?.interval, getDefaultIntervalForMode],
   );
 
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
@@ -294,8 +295,6 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
     });
   };
 
-  const [earliestTransaction, setEarliestTransaction] = useState('');
-
   if (!allMonths || !data) {
     return null;
   }
@@ -368,6 +367,7 @@ function NetWorthInner({ widget }: NetWorthInnerProps) {
       >
         <View
           style={{
+            alignItems: 'flex-end',
             textAlign: 'right',
             paddingTop: 20,
           }}

@@ -115,7 +115,7 @@ export function ConfirmTransactionEditModal({
                 }}
                 onPress={() => {
                   state.close();
-                  onCancel();
+                  onCancel?.();
                 }}
               >
                 <Trans>Cancel</Trans>

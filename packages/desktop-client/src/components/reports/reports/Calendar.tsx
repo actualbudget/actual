@@ -105,7 +105,8 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   const [end, setEnd] = useState(monthUtils.currentDay());
   const [mode, setMode] = useState<TimeFrame['mode']>('full');
   const [query, setQuery] = useState<Query | undefined>(undefined);
-  const [dirty, setDirty] = useState(false);
+  const [refetchKey, setRefetchKey] = useState(0);
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const {
@@ -174,19 +175,19 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     }
   }, [widget?.meta?.conditions, onApplyFilter, parameters]);
 
-  const params = useMemo(() => {
-    if (dirty === true) {
-      setDirty(false);
-    }
-
-    return calendarSpreadsheet(
-      start,
-      end,
-      conditions,
-      conditionsOp,
-      firstDayOfWeekIdx,
-    );
-  }, [start, end, conditions, conditionsOp, firstDayOfWeekIdx, dirty]);
+  const report = useMemo(
+    () => ({
+      refetchKey,
+      getData: calendarSpreadsheet(
+        start,
+        end,
+        conditions,
+        conditionsOp,
+        firstDayOfWeekIdx,
+      ),
+    }),
+    [start, end, conditions, conditionsOp, firstDayOfWeekIdx, refetchKey],
+  );
 
   const [sortField, setSortField] = useState('');
   const [ascDesc, setAscDesc] = useState<'asc' | 'desc'>('desc');
@@ -239,7 +240,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     scrollbarContainer,
   ) as Ref<HTMLDivElement>;
 
-  const data = useReport('calendar', params);
+  const data = useReport('calendar', report.getData);
 
   const [allMonths, setAllMonths] = useState<
     Array<{
@@ -432,6 +433,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
   );
 
   const refContainer = useRef<HTMLDivElement>(null);
+  const [totalHeight, setTotalHeight] = useState(0);
 
   useEffect(() => {
     if (refContainer.current) {
@@ -439,7 +441,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     }
   }, [query]);
 
-  const [totalHeight, setTotalHeight] = useState(0);
   const closeY = useRef(3000);
 
   const openY = 0;
@@ -517,8 +518,6 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       rubberband: true,
     },
   );
-
-  const [earliestTransaction, setEarliestTransaction] = useState('');
 
   return (
     <Page
@@ -685,7 +684,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
                     sortField={sortField}
                     ascDesc={ascDesc}
                     onChange={() => {}}
-                    onRefetch={() => setDirty(true)}
+                    onRefetch={() => setRefetchKey(key => key + 1)}
                     onCloseAddTransaction={() => {}}
                     onCreatePayee={async () => null}
                     onApplyFilter={() => {}}

@@ -1,9 +1,18 @@
+import { format } from 'node:util';
+
+import createDebug from 'debug';
 import request from 'supertest';
+import * as undici from 'undici';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { handlers as app, clearAllowlistCache } from './app-cors-proxy';
 import { config } from './load-config';
 import { validateSession } from './util/validate-user';
+
+vi.mock('undici', async importOriginal => ({
+  ...(await importOriginal()),
+  fetch: vi.fn(),
+}));
 
 vi.mock('./load-config', () => ({
   config: {
@@ -22,8 +31,6 @@ vi.mock('./util/validate-user', () => ({
 vi.mock('express-rate-limit', () => ({
   default: vi.fn(() => (req, res, next) => next()),
 }));
-
-global.fetch = vi.fn();
 
 describe('app-cors-proxy', () => {
   const defaultAllowlistedRepos = [
@@ -151,9 +158,11 @@ describe('app-cors-proxy', () => {
   };
 
   beforeAll(() => {
-    global.fetch = createFetchMock({
-      proxyResponses: comprehensiveProxyResponses,
-    });
+    vi.mocked(undici.fetch).mockImplementation(
+      createFetchMock({
+        proxyResponses: comprehensiveProxyResponses,
+      }),
+    );
   });
 
   beforeEach(() => {
@@ -280,8 +289,7 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(403);
       expect(res.body.error).toBe('URL not allowed');
       expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://api.github.com/repos/user/repo1-private/contents/.env',
+        'Blocked request to unauthorized URL',
       );
     });
 
@@ -301,18 +309,37 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(200);
     });
 
-    it('should block non-allowlisted URLs', async () => {
-      const res = await request(app)
-        .get('/')
-        .query({ url: 'https://malicious.com/evil' });
-
-      expect(res.statusCode).toBe(403);
-      expect(res.body.error).toBe('URL not allowed');
-      expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://malicious.com/evil',
-      );
-    });
+    it.each(['', 'actual:*', 'actual-sensitive:cors-proxy'])(
+      'keeps rejected URL details behind sensitive debugging (%s)',
+      async namespaces => {
+        const previous = createDebug.disable();
+        createDebug.enable(namespaces);
+        const log = vi
+          .spyOn(createDebug, 'log')
+          .mockImplementation(() => undefined);
+        const secret = 'private-download-token';
+        try {
+          const res = await request(app)
+            .get('/')
+            .query({
+              url: `https://malicious.com/evil?token=${secret}`,
+            });
+          expect(res.statusCode).toBe(403);
+          expect(res.body.error).toBe('URL not allowed');
+          expect(console.warn).toHaveBeenCalledWith(
+            'Blocked request to unauthorized URL',
+          );
+          expect(JSON.stringify(console.warn.mock.calls)).not.toContain(secret);
+          const output = log.mock.calls.map(args => format(...args)).join('\n');
+          expect(output.includes(secret)).toBe(
+            namespaces === 'actual-sensitive:cors-proxy',
+          );
+        } finally {
+          log.mockRestore();
+          createDebug.enable(previous);
+        }
+      },
+    );
   });
 
   describe('Allowlist fetching and caching', () => {
@@ -325,16 +352,18 @@ describe('app-cors-proxy', () => {
         .get('/')
         .query({ url: 'https://github.com/user/repo1' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(undici.fetch).toHaveBeenCalledWith(
         'https://raw.githubusercontent.com/actualbudget/plugin-store/refs/heads/main/plugins.json',
       );
     });
 
     it('should handle allowlist fetch failure gracefully', async () => {
-      global.fetch = createFetchMock({
-        allowlistFetchFails: true,
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      vi.mocked(undici.fetch).mockImplementation(
+        createFetchMock({
+          allowlistFetchFails: true,
+          proxyResponses: comprehensiveProxyResponses,
+        }),
+      );
 
       const res = await request(app)
         .get('/')
@@ -346,16 +375,20 @@ describe('app-cors-proxy', () => {
         expect.any(Error),
       );
 
-      global.fetch = createFetchMock({
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      vi.mocked(undici.fetch).mockImplementation(
+        createFetchMock({
+          proxyResponses: comprehensiveProxyResponses,
+        }),
+      );
     });
 
     it('should handle allowlist fetch HTTP error', async () => {
-      global.fetch = createFetchMock({
-        allowlistHttpError: true,
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      vi.mocked(undici.fetch).mockImplementation(
+        createFetchMock({
+          allowlistHttpError: true,
+          proxyResponses: comprehensiveProxyResponses,
+        }),
+      );
 
       const res = await request(app)
         .get('/')
@@ -367,9 +400,11 @@ describe('app-cors-proxy', () => {
         expect.any(Error),
       );
 
-      global.fetch = createFetchMock({
-        proxyResponses: comprehensiveProxyResponses,
-      });
+      vi.mocked(undici.fetch).mockImplementation(
+        createFetchMock({
+          proxyResponses: comprehensiveProxyResponses,
+        }),
+      );
     });
   });
 
@@ -417,7 +452,7 @@ describe('app-cors-proxy', () => {
     });
 
     it('should reject non-string method (array bypass)', async () => {
-      global.fetch.mockClear();
+      undici.fetch.mockClear();
 
       const res = await request(app)
         .get('/')
@@ -427,14 +462,14 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('Invalid method parameter');
 
-      const proxyCalls = global.fetch.mock.calls.filter(
+      const proxyCalls = undici.fetch.mock.calls.filter(
         ([url]) => url === 'https://api.github.com/repos/user/repo1',
       );
       expect(proxyCalls).toHaveLength(0);
     });
 
     it('should reject non-string method (object bypass)', async () => {
-      global.fetch.mockClear();
+      undici.fetch.mockClear();
 
       const res = await request(app)
         .get('/')
@@ -444,21 +479,21 @@ describe('app-cors-proxy', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.error).toBe('Invalid method parameter');
 
-      const proxyCalls = global.fetch.mock.calls.filter(
+      const proxyCalls = undici.fetch.mock.calls.filter(
         ([url]) => url === 'https://github.com/user/repo1',
       );
       expect(proxyCalls).toHaveLength(0);
     });
 
     it('should forward the validated method to fetch, not the raw input', async () => {
-      global.fetch.mockClear();
+      undici.fetch.mockClear();
 
       await request(app)
         .get('/')
         .send({ method: 'get' })
         .query({ url: 'https://github.com/user/repo1' });
 
-      const proxyCall = global.fetch.mock.calls.find(
+      const proxyCall = undici.fetch.mock.calls.find(
         ([url]) => url === 'https://github.com/user/repo1',
       );
       expect(proxyCall).toBeDefined();
@@ -478,7 +513,7 @@ describe('app-cors-proxy', () => {
         .get('/')
         .query({ url: 'https://api.github.com/repos/user/repo1' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(undici.fetch).toHaveBeenCalledWith(
         'https://api.github.com/repos/user/repo1',
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -496,7 +531,7 @@ describe('app-cors-proxy', () => {
         url: 'https://raw.githubusercontent.com/user/repo1/main/file.txt',
       });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(undici.fetch).toHaveBeenCalledWith(
         'https://raw.githubusercontent.com/user/repo1/main/file.txt',
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -514,7 +549,7 @@ describe('app-cors-proxy', () => {
         .get('/')
         .query({ url: 'https://api.github.com/repos/user/repo1' });
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect(undici.fetch).toHaveBeenCalledWith(
         'https://api.github.com/repos/user/repo1',
         expect.objectContaining({
           headers: expect.not.objectContaining({
@@ -606,7 +641,7 @@ describe('app-cors-proxy', () => {
     });
 
     it('should handle invalid repository URLs in allowlist', async () => {
-      global.fetch.mockResolvedValueOnce({
+      undici.fetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve([{ url: 'invalid-url' }]),
       });
@@ -617,8 +652,7 @@ describe('app-cors-proxy', () => {
 
       expect(res.statusCode).toBe(403);
       expect(console.warn).toHaveBeenCalledWith(
-        'Blocked request to unauthorized URL:',
-        'https://example.com/',
+        'Blocked request to unauthorized URL',
       );
     });
   });

@@ -3,6 +3,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -31,7 +32,6 @@ import {
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { Toggle } from '@actual-app/components/toggle';
 import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 import { DEFAULT_MAX_DISTANCE_METERS } from '@actual-app/core/shared/constants';
@@ -82,7 +82,15 @@ import {
 } from '#components/mobile/MobileForms';
 import { getPrettyPayee } from '#components/mobile/utils';
 import { MobilePageHeader, Page } from '#components/Page';
-import { shouldApplyRuleChange } from '#components/transactions/table/utils';
+import {
+  propagateRuleChangeToSubtransactions,
+  transactionForRulesFromList,
+} from '#components/transactions/applyRulesToTransaction';
+import {
+  getClearedFieldNames,
+  shouldApplyRuleChange,
+  trackClearedField,
+} from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -790,7 +798,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           onConfirmSave();
         }
       }
-    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions, t]);
+    }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
 
     const onSchedule = useCallback(async () => {
       const [unserializedTransaction] = unserializedTransactions;
@@ -917,6 +925,29 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [onClearActiveEdit, onUpdate],
     );
 
+    const onUnlockReconciledInner = useCallback(
+      (serializedTransaction: TransactionEntity) => {
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-transaction-edit',
+              options: {
+                confirmReason: 'unlockReconciled',
+                onConfirm: () => {
+                  void onUpdateInner(
+                    serializedTransaction,
+                    'reconciled',
+                    false,
+                  );
+                },
+              },
+            },
+          }),
+        );
+      },
+      [dispatch, onUpdateInner],
+    );
+
     const onTotalAmountUpdate = useCallback(
       (value: number) => {
         if (transaction.amount !== value) {
@@ -994,6 +1025,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   modal: {
                     name: 'payee-autocomplete',
                     options: {
+                      showNoneOption: !!transactionToEdit.payee,
                       onSelect: payeeId => {
                         void onUpdateInner(transactionToEdit, name, payeeId);
                       },
@@ -1161,7 +1193,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       transferAccount: getTransferAccount(transaction),
     });
 
-    const transactionDate = parseDate(transaction.date, dateFormat, new Date());
+    const [referenceDate] = useState(() => new Date());
+    const transactionDate = parseDate(
+      transaction.date,
+      dateFormat,
+      referenceDate,
+    );
     const dateDefaultValue = monthUtils.dayFromDate(transactionDate);
 
     const remaining = transaction.error?.difference ?? 0;
@@ -1471,7 +1508,11 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             {transaction.reconciled ? (
               <View style={{ alignItems: 'center' }}>
                 <FieldLabel title={t('Reconciled')} />
-                <Toggle id="Reconciled" isOn isDisabled />
+                <ToggleField
+                  id="reconciled"
+                  isOn
+                  onToggle={() => onUnlockReconciledInner(transaction)}
+                />
               </View>
             ) : (
               <View style={{ alignItems: 'center' }}>
@@ -1575,8 +1616,14 @@ function TransactionEditUnconnected({
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
   >([]);
+  const transactionsRef = useRef(transactions);
+  useLayoutEffect(() => {
+    transactionsRef.current = transactions;
+  }, [transactions]);
   const isAdding = useRef(false);
   const isDeleted = useRef(false);
+  const [learnCategories = 'true'] = useSyncedPref('learn-categories');
+  const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1682,6 +1729,12 @@ function TransactionEditUnconnected({
     searchParams,
   ]);
 
+  // Fields the user explicitly emptied while entering the new transaction,
+  // tracked per transaction row so a clear on one split row doesn't affect
+  // its siblings. Rules re-run on every field commit, and they may not
+  // re-fill these (e.g. a cleared pre-assigned category must stay cleared).
+  const clearedFields = useRef(new Map<TransactionEntity['id'], Set<string>>());
+
   const onUpdate = useCallback(
     async (
       serializedTransaction: TransactionEntity,
@@ -1698,10 +1751,25 @@ function TransactionEditUnconnected({
       const newTransaction = { ...transaction };
       const changedFields = new Set<keyof TransactionEntity>([updatedField]);
       if (isTemporary(newTransaction)) {
+        trackClearedField(clearedFields.current, newTransaction, updatedField);
+        const clearedOnThisRow = getClearedFieldNames(
+          clearedFields.current,
+          newTransaction.id,
+        );
+
+        // Mobile keeps splits as a flat parent+children list. Group them
+        // before rules-run so an already-applied split rule sees existing
+        // children (same as desktop). Otherwise re-running the rule creates
+        // new child ids and later parent edits (notes/account) fail (#9189).
+        const transactionForRules = transactionForRulesFromList(
+          transactionsRef.current,
+          newTransaction,
+        );
+
         const afterRules = await send('rules-run', {
-          transaction: newTransaction,
+          transaction: transactionForRules,
         });
-        const diff = getChangedValues(newTransaction, afterRules);
+        const diff = getChangedValues(transactionForRules, afterRules);
 
         if (diff) {
           Object.keys(diff).forEach(key => {
@@ -1710,29 +1778,45 @@ function TransactionEditUnconnected({
             // (see shouldApplyRuleChange).
             // Or update all fields if the payee changes (assists location-based entry by
             // applying rules to prefill category, notes, etc. based on the selected payee)
+            // — except fields the user explicitly cleared, which must stay empty.
             if (
-              updatedField === 'payee' ||
-              shouldApplyRuleChange(field, newTransaction[field], diff[field])
+              !clearedOnThisRow.includes(field) &&
+              (updatedField === 'payee' ||
+                shouldApplyRuleChange(
+                  field,
+                  Reflect.get(transactionForRules, field),
+                  diff[field],
+                ))
             ) {
               (newTransaction as Record<string, unknown>)[field] = diff[field];
               changedFields.add(field);
             }
           });
 
-          // When a rule updates a parent transaction, overwrite all changes to the current field in subtransactions.
-          if (
-            newTransaction.is_parent &&
-            diff.subtransactions !== undefined &&
-            updatedField !== null
+          const parentForPropagate: TransactionEntity = {
+            ...transactionForRules,
+            ...newTransaction,
+          };
+          const subtransactions = propagateRuleChangeToSubtransactions(
+            parentForPropagate,
+            diff.subtransactions,
+            updatedField,
+            clearedFields.current,
+          );
+          if (subtransactions) {
+            newTransaction.subtransactions = subtransactions;
+            changedFields.add('subtransactions');
+          } else if (
+            diff.subtransactions &&
+            (updatedField === 'payee' ||
+              shouldApplyRuleChange(
+                'subtransactions',
+                transactionForRules.subtransactions,
+                diff.subtransactions,
+              ))
           ) {
-            newTransaction.subtransactions = diff.subtransactions.map(
-              (st, idx) => ({
-                ...(newTransaction.subtransactions?.[idx] || st),
-                ...(st[updatedField] != null && {
-                  [updatedField]: st[updatedField],
-                }),
-              }),
-            );
+            // First time a split rule converts this row into a parent.
+            newTransaction.subtransactions = diff.subtransactions;
             changedFields.add('subtransactions');
           }
         }
@@ -1753,6 +1837,37 @@ function TransactionEditUnconnected({
         for (const field of changedFields) {
           (merged as Record<string, unknown>)[field] = newTransaction[field];
         }
+
+        // When editing a split parent without a fresh subtransactions payload
+        // from rules, re-attach the latest children so updateTransaction keeps
+        // the existing split structure.
+        if (
+          !merged.subtransactions &&
+          (merged.is_parent || latestTransaction.is_parent)
+        ) {
+          const children = prevTransactions.filter(
+            t => t.is_child && t.parent_id === merged.id,
+          );
+          merged.subtransactions = children;
+          merged.is_parent = true;
+
+          const updated = updateTransaction(prevTransactions, merged).data;
+          // updateTransaction → makeChild clears child.error; restore any that
+          // were already on the flat list so split-error UI stays correct.
+          const childErrors = new Map(
+            children
+              .filter(c => c.error != null)
+              .map(c => [c.id, c.error!] as const),
+          );
+          if (childErrors.size === 0) {
+            return updated;
+          }
+          return updated.map(t => {
+            const error = childErrors.get(t.id);
+            return error !== undefined ? { ...t, error } : t;
+          });
+        }
+
         return updateTransaction(prevTransactions, merged).data;
       });
 
@@ -1800,6 +1915,7 @@ function TransactionEditUnconnected({
           added: changes.added,
           deleted: changes.deleted,
           updated: changes.updated,
+          learnCategories: isLearnCategoriesEnabled,
         });
 
         // if (onTransactionsChange) {
@@ -1816,7 +1932,7 @@ function TransactionEditUnconnected({
         dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
     },
-    [dispatch, fetchedTransactions],
+    [dispatch, fetchedTransactions, isLearnCategoriesEnabled],
   );
 
   const onDelete = useCallback(
@@ -2030,12 +2146,7 @@ function TransactionEditUnconnected({
   );
 }
 
-type TransactionEditProps = Omit<
-  TransactionEditUnconnectedProps,
-  'categories' | 'accounts' | 'payees' | 'lastTransaction' | 'dateFormat'
->;
-
-export const TransactionEdit = (props: TransactionEditProps) => {
+export const TransactionEdit = () => {
   const { data: { list: categories } = { list: [] } } = useCategories();
   const { data: payees = [] } = usePayees();
   const lastTransaction = useSelector(
@@ -2047,7 +2158,6 @@ export const TransactionEdit = (props: TransactionEditProps) => {
   return (
     <SingleActiveEditFormProvider formName="mobile-transaction">
       <TransactionEditUnconnected
-        {...props}
         categories={categories}
         payees={payees}
         lastTransaction={lastTransaction}

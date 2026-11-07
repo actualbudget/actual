@@ -1,6 +1,9 @@
+import createDebug from 'debug';
 import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '#services/secrets-service';
+
+const debugSensitive = createDebug('actual-sensitive:pluggy');
 
 const pluggyClients = new Map();
 
@@ -84,7 +87,8 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching accounts: ${error.message}`);
+      console.error('Error fetching accounts');
+      debugSensitive('Error fetching accounts: %O', error);
       throw error;
     }
   },
@@ -98,7 +102,8 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching account: ${error.message}`);
+      console.error('Error fetching account');
+      debugSensitive('Error fetching account: %O', error);
       throw error;
     }
   },
@@ -134,7 +139,8 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching transactions: ${error.message}`);
+      console.error('Error fetching transactions');
+      debugSensitive('Error fetching transactions: %O', error);
       throw error;
     }
   },

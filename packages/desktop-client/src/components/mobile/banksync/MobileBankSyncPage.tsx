@@ -7,6 +7,7 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
+import { AutomaticSyncSettings } from '#components/banksync/AutomaticSyncSettings';
 import {
   getGroupedBankSyncEntries,
   getSyncSourceReadable,
@@ -17,6 +18,7 @@ import { BuiltInProviders } from '#components/banksync/BuiltInProviders';
 import { useBuiltInBankSyncProviders } from '#components/banksync/useBuiltInBankSyncProviders';
 import { Search } from '#components/common/Search';
 import { MobilePageHeader, Page } from '#components/Page';
+import { SettingsBackButton } from '#components/settings/SettingsBackButton';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -47,6 +49,8 @@ export function MobileBankSyncPage() {
     () => groupBankSyncAccounts(openAccounts),
     [openAccounts],
   );
+
+  const hasLinkedAccounts = openAccounts.some(account => !!account.bank);
 
   const filteredGroupedAccounts = useMemo(() => {
     if (!filter) return groupedAccounts;
@@ -98,7 +102,15 @@ export function MobileBankSyncPage() {
   }, []);
 
   return (
-    <Page header={<MobilePageHeader title={t('Bank Sync')} />} padding={0}>
+    <Page
+      header={
+        <MobilePageHeader
+          title={t('Bank Sync')}
+          leftContent={<SettingsBackButton />}
+        />
+      }
+      padding={0}
+    >
       <View style={{ padding: 15, flexShrink: 0 }}>
         <BuiltInProviders
           providers={providers}
@@ -108,6 +120,11 @@ export function MobileBankSyncPage() {
           onToggleCollapse={() => setProvidersCollapsed(!providersCollapsed)}
         />
       </View>
+      {hasLinkedAccounts && (
+        <View style={{ padding: '0 15px 15px', flexShrink: 0 }}>
+          <AutomaticSyncSettings />
+        </View>
+      )}
       {openAccounts.length > 0 && (
         <View
           style={{

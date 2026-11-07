@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 export function useRefEventListener<
@@ -18,17 +18,26 @@ export function useRefEventListener<
   callbackRef.current = callback;
 
   // Mutating `ref.current` doesn't re-run effects, so the element can't go in
-  // a dependency array. Re-resolve it after every render and mirror it into
-  // state; `setTarget` bails out when the element hasn't moved.
-  const [target, setTarget] = useState<EventTarget | null>(null);
-  // oxlint-disable-next-line react-hooks/exhaustive-deps -- must run every render; the bail-out stops the update chain
-  useEffect(() => {
-    setTarget(
-      ref instanceof Document || ref instanceof Window ? ref : ref.current,
-    );
-  });
+  // a dependency array. Re-resolve it after every render and only rebind the
+  // native listener when the element or `event` has actually changed.
+  const bindingRef = useRef<{
+    target: EventTarget;
+    event: EventType;
+    listener: EventListener;
+  } | null>(null);
 
   useEffect(() => {
+    const target =
+      ref instanceof Document || ref instanceof Window ? ref : ref.current;
+    const binding = bindingRef.current;
+    if (binding && binding.target === target && binding.event === event) {
+      return;
+    }
+
+    if (binding) {
+      binding.target.removeEventListener(binding.event, binding.listener);
+      bindingRef.current = null;
+    }
     if (!target) return;
 
     const listener: EventListener = e =>
@@ -37,8 +46,16 @@ export function useRefEventListener<
         e as HTMLElementEventMap[EventType],
       );
     target.addEventListener(event, listener);
+    bindingRef.current = { target, event, listener };
+  });
+
+  useEffect(() => {
     return () => {
-      target.removeEventListener(event, listener);
+      const binding = bindingRef.current;
+      if (binding) {
+        binding.target.removeEventListener(binding.event, binding.listener);
+        bindingRef.current = null;
+      }
     };
-  }, [target, event]);
+  }, []);
 }

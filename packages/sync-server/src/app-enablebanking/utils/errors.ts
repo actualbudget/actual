@@ -1,5 +1,7 @@
 import createDebug from 'debug';
 
+const debugSensitive = createDebug('actual-sensitive:enable-banking');
+
 const debug = createDebug('actual:enable-banking:errors');
 
 export class EnableBankingError extends Error {
@@ -20,7 +22,12 @@ export function handleEnableBankingError(
 ): EnableBankingError {
   const bodyStr =
     typeof body === 'string' ? body : JSON.stringify(body ?? 'unknown');
-  debug('Enable Banking API error: status=%d body=%s', statusCode, bodyStr);
+  debug('Enable Banking API error: status=%d', statusCode);
+  debugSensitive(
+    'Enable Banking API error: status=%d body=%s',
+    statusCode,
+    bodyStr,
+  );
 
   const parsed: Record<string, unknown> =
     typeof body === 'object' && body !== null

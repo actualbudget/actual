@@ -50,6 +50,6 @@ describe('Change', () => {
     const el = screen.getByText('+10.00');
     const computed = getComputedStyle(el);
     expect(computed.color).toBe(theme.reportsNumberPositive);
-    expect(computed.fontWeight).toBe('bold');
+    expect(computed.fontWeight).toBe('700');
   });
 });

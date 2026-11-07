@@ -26,7 +26,7 @@ export function MobilePayeeEditPage() {
   const location = useLocation();
   const dispatch = useDispatch();
   // Carries the payees list filter so it survives the round trip.
-  const payeesListPath = `/payees${location.search}`;
+  const payeesListPath = `/settings/payees${location.search}`;
   const { showUndoNotification } = useUndo();
   const { data: payees = [] } = usePayees();
 

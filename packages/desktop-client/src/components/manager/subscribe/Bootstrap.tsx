@@ -89,11 +89,11 @@ export function Bootstrap() {
 
       {error && (
         <Text
+          size="large"
           style={{
             marginTop: 20,
             color: theme.errorText,
             borderRadius: 4,
-            fontSize: 15,
           }}
         >
           {getErrorMessage(error)}

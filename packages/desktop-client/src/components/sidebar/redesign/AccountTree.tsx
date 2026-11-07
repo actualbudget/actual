@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Tree } from 'react-aria-components';
 import type { Key } from 'react-aria-components';
 
@@ -5,6 +6,7 @@ import { css } from '@emotion/css';
 
 import { AccountGroupHeader } from './AccountGroupHeader';
 import { AccountRow } from './AccountRow';
+import { TreeItemEditingContext } from './treeItemEditing';
 import { treeKeys } from './treeKeys';
 import { useAccountTreeDragAndDrop } from './useAccountTreeDragAndDrop';
 import type { AccountTreeSide } from './useAccountTreeDragAndDrop';
@@ -31,6 +33,7 @@ export function AccountTree({
 }: AccountTreeProps) {
   const { dragAndDropHooks, isGroupDropZoneActive, isDraggingGroup } =
     useAccountTreeDragAndDrop({ side, buckets, isDisabled: isDragDisabled });
+  const [editingKey, setEditingKey] = useState<Key | null>(null);
 
   const groupBuckets = buckets.filter(bucket => bucket.group != null);
   const expandedKeys = new Set<Key>(
@@ -49,36 +52,41 @@ export function AccountTree({
   };
 
   return (
-    <Tree
-      aria-label={label}
-      selectionMode="none"
-      expandedKeys={expandedKeys}
-      onExpandedChange={onExpandedChange}
-      dragAndDropHooks={dragAndDropHooks}
-      className={css({ outline: 'none' })}
-    >
-      {buckets.map(bucket =>
-        bucket.group == null ? (
-          bucket.accounts.map(account => (
-            <AccountRow
-              key={treeKeys.account(account.id)}
-              account={account}
-              isClosed={side === 'closed'}
+    <TreeItemEditingContext.Provider value={{ editingKey, setEditingKey }}>
+      <Tree
+        aria-label={label}
+        selectionMode="none"
+        // In "arrow" mode, rows capture Left/Right to move focus between their
+        // children, which pulls focus out of the rename input and ends editing.
+        keyboardNavigationBehavior={editingKey == null ? 'arrow' : 'tab'}
+        expandedKeys={expandedKeys}
+        onExpandedChange={onExpandedChange}
+        dragAndDropHooks={dragAndDropHooks}
+        className={css({ outline: 'none' })}
+      >
+        {buckets.map(bucket =>
+          bucket.group == null ? (
+            bucket.accounts.map(account => (
+              <AccountRow
+                key={treeKeys.account(account.id)}
+                account={account}
+                isClosed={side === 'closed'}
+                showSyncDot={showSyncDot}
+              />
+            ))
+          ) : (
+            <AccountGroupHeader
+              key={treeKeys.group(bucket.group.id)}
+              group={bucket.group}
+              side={side === 'off' ? 'off' : 'on'}
+              accounts={bucket.accounts}
+              failedCount={bucket.failedCount}
               showSyncDot={showSyncDot}
+              isDropZoneActive={isGroupDropZoneActive(bucket.group.id)}
             />
-          ))
-        ) : (
-          <AccountGroupHeader
-            key={treeKeys.group(bucket.group.id)}
-            group={bucket.group}
-            side={side === 'off' ? 'off' : 'on'}
-            accounts={bucket.accounts}
-            failedCount={bucket.failedCount}
-            showSyncDot={showSyncDot}
-            isDropZoneActive={isGroupDropZoneActive(bucket.group.id)}
-          />
-        ),
-      )}
-    </Tree>
+          ),
+        )}
+      </Tree>
+    </TreeItemEditingContext.Provider>
   );
 }

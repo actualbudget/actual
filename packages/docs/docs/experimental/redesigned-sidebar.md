@@ -10,7 +10,7 @@ The redesigned sidebar replaces the navigation panel on the left of the screen. 
 - Collapsible sections and groups
 - Bank sync status for each account
 
-![The redesigned sidebar next to the budget page](/img/experimental/redesigned-sidebar/redesigned-sidebar-overview@2x.png)
+![The redesigned sidebar next to the budget page](/img/experimental/redesigned-sidebar/redesigned-sidebar-overview@2x.webp)
 
 ## Turning On the Redesigned Sidebar
 
@@ -27,14 +27,14 @@ To switch back to the classic sidebar, untick the same setting. Your account gro
 
 The screenshot at the top of this page is labeled with the four parts of the sidebar:
 
-- **A. Budget name and sync status.** Click the budget name to rename the budget, open Settings, load a backup or switch to another budget file. The line underneath tells you whether the budget is synced, syncing, offline, or kept on this device only.
-- **B. Navigation.** Links to every page, including Payees, Rules and Tags.
+- **A. Budget name and sync status.** Hover over the budget name and click the pencil to rename the budget. Click the Actual logo to switch to another budget file. The line underneath tells you whether the budget is synced, syncing, offline, or kept on this device only.
+- **B. Navigation.** Links to the Budget, Reports and Schedules pages. Payees, Rules, Tags and Bank Sync are in Settings.
 - **C. Accounts.** Your accounts, their balances and your account groups.
 - **D. Settings.** A shortcut to the Settings page, always at the bottom of the sidebar.
 
 ## The Accounts List
 
-<img width="270" alt="The top of the accounts list with its buttons labeled" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-accounts-header@2x.png" />
+<img width="270" alt="The top of the accounts list with its buttons labeled" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-accounts-header@2x.webp" />
 
 The **Accounts** heading has a few buttons next to it:
 
@@ -55,7 +55,7 @@ Click an account to open it. Right-click an account to rename it, close it (or r
 
 Click the arrow next to a section or group to collapse it. A collapsed section or group still shows its balance, along with the number of accounts in it.
 
-<img width="270" alt="The accounts list with the Checking and Property groups collapsed" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-collapsed-groups@2x.png" />
+<img width="270" alt="The accounts list with the Checking and Property groups collapsed" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-collapsed-groups@2x.webp" />
 
 Which sections and groups are collapsed is saved separately on each device.
 
@@ -71,12 +71,12 @@ Account groups list related accounts together under a name you choose, for examp
 
 1. Right-click the account in the sidebar and choose **Set account group**. You can also choose **Set account group** from the menu on the account's own page.
 
-   <img width="340" alt="The right-click menu for an account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-account-menu@2x.png" />
+   <img width="340" alt="The right-click menu for an account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-account-menu@2x.webp" />
 
 2. In the dialog that opens, click the group you want to put the account in.
 3. To create a new group instead, type its name into the **Find or create a group** box and choose **Create** from the list.
 
-   <img width="512" alt="Creating a new group called Credit cards" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-create-group@2x.png" />
+   <img width="512" alt="Creating a new group called Credit cards" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-create-group@2x.webp" />
 
 To take an account out of its group, open the same dialog and choose **None**. You can also [drag the account](#rearranging-accounts-and-groups) to where you want it.
 
@@ -84,7 +84,7 @@ To take an account out of its group, open the same dialog and choose **None**. Y
 
 The **Account group** dialog also lets you manage your groups:
 
-<img width="512" alt="The Account group dialog with its controls labeled" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-account-group-dialog@2x.png" />
+<img width="512" alt="The Account group dialog with its controls labeled" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-account-group-dialog@2x.webp" />
 
 - **A. Rename** a group.
 - **B. Move** a group up or down. Groups appear in the sidebar in this order.
@@ -93,7 +93,7 @@ The **Account group** dialog also lets you manage your groups:
 
 You can also rename or delete a group directly from the sidebar by right-clicking its name.
 
-<img width="340" alt="The right-click menu for a group" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-group-menu@2x.png" />
+<img width="340" alt="The right-click menu for a group" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-group-menu@2x.webp" />
 
 Deleting a group doesn't delete its accounts. They become ungrouped.
 
@@ -106,7 +106,7 @@ Accounts and groups can be reordered by dragging them:
 - **Take an account out of a group** by dropping it among the ungrouped accounts at the top of the section.
 - **Reorder groups** by dragging a group by its name. All groups are collapsed while a group is being dragged.
 
-<img width="262" alt="An account being dragged into the Checking group" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-drag-and-drop@2x.png" />
+<img width="262" alt="An account being dragged into the Checking group" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-drag-and-drop@2x.webp" />
 
 Accounts can't be dragged between the on budget, off budget and closed sections. Dragging is turned off while searching.
 
@@ -118,7 +118,7 @@ Accounts and groups can also be moved with the keyboard. Move the focus to an ac
 
 Click the magnifying glass next to the **Accounts** heading and type part of an account or group name. The list shows only the matching accounts.
 
-<img width="270" alt="A search that matches the Savings group and the Ally Savings account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-search@2x.png" />
+<img width="270" alt="A search that matches the Savings group and the Ally Savings account" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-search@2x.webp" />
 
 All groups are expanded while searching. Click the **×** at the end of the search box to close it and show the full list again.
 

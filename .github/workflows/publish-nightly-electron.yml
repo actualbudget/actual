@@ -56,15 +56,11 @@ jobs:
           cache: 'false'
 
       - if: ${{ startsWith(matrix.os, 'ubuntu') }}
-        name: Setup Flatpak dependencies
+        name: Validate Flathub metainfo
         run: |
           sudo apt-get update
           sudo apt-get install flatpak -y
-          sudo apt-get install flatpak-builder -y
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-          sudo flatpak install org.freedesktop.Sdk//24.08 -y
-          sudo flatpak install org.freedesktop.Platform//24.08 -y
-          sudo flatpak install org.electronjs.Electron2.BaseApp//24.08 -y
           sudo flatpak install org.flatpak.Builder -y
 
           METAINFO_FILE="packages/desktop-electron/extra-resources/linux/com.actualbudget.actual.metainfo.xml"

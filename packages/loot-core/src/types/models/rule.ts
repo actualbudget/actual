@@ -1,3 +1,5 @@
+import type { ObjectExpression } from '#shared/query';
+
 import type { RecurConfig, ScheduleEntity } from './schedule';
 
 export type NewRuleEntity = {
@@ -51,7 +53,7 @@ type BaseConditionEntity<
   conditionsOp?: 'and' | 'or';
   type?: 'id' | 'boolean' | 'date' | 'number' | 'string';
   customName?: string;
-  queryFilter?: Record<string, { $oneof: string[] }>;
+  queryFilter?: ObjectExpression;
 };
 
 export type RuleConditionEntity =

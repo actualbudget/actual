@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { View } from '@actual-app/components/view';
@@ -37,7 +37,6 @@ export function FormulaCard({
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const themeColors = useThemeColors();
-  const containerRef = useRef<HTMLDivElement>(null);
   const dashboardScope = useDashboardDateScope();
   // Not `const { data: accounts = [] }` — a default inside a destructuring
   // pattern makes React Compiler bail out of the whole component, which leaves
@@ -45,7 +44,6 @@ export function FormulaCard({
   const accounts = useAccounts().data ?? EMPTY_ACCOUNTS;
 
   const formula = meta?.formula || '=SUM(1, 2, 3)';
-  const fontSize = meta?.fontSize;
   const fontSizeMode = meta?.fontSizeMode || 'dynamic';
   const staticFontSize = meta?.staticFontSize || 32;
   const showTitle = meta?.showTitle ?? true;
@@ -120,7 +118,6 @@ export function FormulaCard({
           </View>
         )}
         <View
-          ref={containerRef}
           style={{
             justifyContent: 'center',
             alignItems: 'center',
@@ -135,18 +132,9 @@ export function FormulaCard({
             // a refresh should leave the previous value in place rather than
             // blanking the card.
             loading={isLoading && result === null && !error}
-            initialFontSize={fontSize}
-            fontSizeChanged={newSize => {
-              onMetaChange({
-                ...(meta ?? {}),
-                fontSize: newSize,
-              });
-            }}
             fontSizeMode={fontSizeMode}
             staticFontSize={staticFontSize}
             customColor={customColor}
-            animate={isEditing ?? false}
-            containerRef={containerRef}
           />
         </View>
       </View>
