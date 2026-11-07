@@ -494,6 +494,9 @@ describe('Enable Banking Express routes', () => {
     });
 
     it('handles API error gracefully', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Session expired' }, false, 401);
 
       const res = await request(app)
@@ -506,6 +509,9 @@ describe('Enable Banking Express routes', () => {
     });
 
     it('returns structured error for rate limit (429)', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Rate limit exceeded' }, false, 429);
 
       const res = await request(app)
@@ -518,6 +524,9 @@ describe('Enable Banking Express routes', () => {
     });
 
     it('maps 404 to INVALID_INPUT category in error_type', async () => {
+      // A balance failure is tolerated, so the error has to come from the
+      // transactions call.
+      mockFetchResponse({ balances: [] });
       mockFetchResponse({ message: 'Account not found' }, false, 404);
 
       const res = await request(app)
