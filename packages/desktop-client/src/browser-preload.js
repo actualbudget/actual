@@ -5,10 +5,12 @@ import { registerSW } from 'virtual:pwa-register';
 // oxlint-disable-next-line typescript-paths/absolute-parent-import
 import packageJson from '../package.json';
 
+import { withBasePath } from './base-path';
 import SharedBrowserServerWorker from './shared-browser-server.ts?sharedworker';
 import { computeClientVersion } from './util/versions';
 
 const backendWorkerUrl = new URL('./browser-server.js', import.meta.url);
+const basePath = withBasePath(import.meta.env.BASE_URL, '/');
 
 // This file installs global variables that the app expects.
 // Normally these are already provided by electron, but in a real
@@ -118,7 +120,7 @@ global.Actual = {
     // Unregister the service worker handling routing and then reload. This should force the reload
     // to query the actual server rather than delegating to the worker
     return window.navigator.serviceWorker
-      .getRegistration('/')
+      .getRegistration(basePath)
       .then(registration => {
         if (registration == null) return;
         return registration.unregister();
