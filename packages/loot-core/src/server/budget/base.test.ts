@@ -587,6 +587,46 @@ describe('Base budget', () => {
     expect(sheet.getCellValue(jan, `leftover-${foodId}`)).toBe(-1500);
   });
 
+  it("Keeps the blank month's budget when the range moves back past it (Envelope Budget)", async () => {
+    global.currentMonth = '2026-05';
+    await sheet.loadSpreadsheet(db);
+    sheet.get().meta().budgetType = 'envelope';
+    await db.insertCategoryGroup({ id: 'group1', name: 'Expenses' });
+    await db.insertCategoryGroup({
+      id: 'group2',
+      name: 'Income',
+      is_income: 1,
+    });
+    const billsId = await db.insertCategory({
+      name: 'Bills',
+      cat_group: 'group1',
+    });
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+
+    // The first transaction is in May, so the range starts in February and
+    // the budgeted January is the blank sheet
+    await setBudget({ category: billsId, month: '2026-01', amount: 10000 });
+    await db.insertTransaction({
+      date: '2026-05-10',
+      amount: 20000,
+      account: 'account1',
+      category: billsId,
+    });
+    await createAllBudgets();
+    expect(sheet.get().meta().blankSheet).toBe('budget202601');
+
+    await db.insertTransaction({
+      date: '2025-12-10',
+      amount: 0,
+      account: 'account1',
+      category: billsId,
+    });
+    await createAllBudgets();
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue('budget202601', `budget-${billsId}`)).toBe(10000);
+    global.currentMonth = null;
+  });
+
   it('Seeds sum-amount across all months on a cold build (Tracking Budget)', async () => {
     await sheet.loadSpreadsheet(db);
     sheet.get().meta().budgetType = 'tracking';

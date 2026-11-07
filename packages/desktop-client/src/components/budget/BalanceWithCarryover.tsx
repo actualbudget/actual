@@ -85,6 +85,8 @@ type BalanceWithCarryoverProps = Omit<
    * ignore any goal left on one
    */
   isIncome?: boolean;
+  // Leaves the arrow out even while the flag is on, for months that ignore it
+  isCarryoverHidden?: boolean;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
@@ -97,6 +99,7 @@ export function BalanceWithCarryover({
   longGoal,
   isDisabled,
   isIncome,
+  isCarryoverHidden = false,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
@@ -191,7 +194,7 @@ export function BalanceWithCarryover({
               />
             )}
 
-            {carryoverValue && (
+            {carryoverValue && !isCarryoverHidden && (
               <CarryoverIndicatorComponent
                 style={getBalanceAmountStyle(balanceValue)}
               />

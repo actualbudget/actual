@@ -471,7 +471,7 @@ handlers['api/budget-month'] = async function ({ month }) {
     month,
     incomeAvailable: value('available-funds') as number,
     lastMonthOverspent: value('last-month-overspent') as number,
-    forNextMonth: value('buffered') as number,
+    forNextMonth: value('buffered-selected') as number,
     totalBudgeted: value('total-budgeted') as number,
     toBudget: value('to-budget') as number,
 
