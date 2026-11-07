@@ -489,6 +489,7 @@ function getActionFields() {
     'payee',
     'payee_name',
     'notes',
+    'number',
     'cleared',
     'account',
     'date',
@@ -1067,6 +1068,7 @@ const conditionFields = [
   'date',
   'payee',
   'notes',
+  'number',
   'amount',
 ]
   .map(field => [field, mapField(field)])

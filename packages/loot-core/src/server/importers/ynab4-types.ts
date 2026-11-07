@@ -109,6 +109,7 @@ export type Transaction = {
   accepted: boolean;
   isTombstone?: boolean;
   memo?: string;
+  checkNumber?: string;
   dateEnteredFromSchedule?: string;
   // speculative:
   subTransactions?: SubTransaction[];

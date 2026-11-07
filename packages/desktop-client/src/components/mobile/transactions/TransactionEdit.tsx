@@ -13,7 +13,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
-import { SvgSplit } from '@actual-app/components/icons/v0';
+import { SvgHash, SvgSplit } from '@actual-app/components/icons/v0';
 import {
   SvgAdd,
   SvgCalendar,
@@ -570,6 +570,23 @@ const ChildTransactionEdit = forwardRef<
             onUpdate={value => onUpdate(transaction, 'notes', value)}
           />
           <NoteTagAutocomplete inputRef={noteRef} />
+        </View>
+
+        <View>
+          <FieldLabel title={t('Number')} />
+          <InputField
+            iconStart={<SvgHash width={17} height={17} />}
+            placeholder={t('Add a number (optional)')}
+            disabled={
+              !!editingField &&
+              editingField !== getFieldName(transaction.id, 'number')
+            }
+            defaultValue={transaction.number ?? ''}
+            onFocus={() =>
+              onRequestActiveEdit(getFieldName(transaction.id, 'number'))
+            }
+            onUpdate={value => onUpdate(transaction, 'number', value)}
+          />
         </View>
 
         <View style={{ alignItems: 'center' }}>
@@ -1547,6 +1564,26 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               }
             />
             <NoteTagAutocomplete inputRef={noteRef} />
+          </View>
+
+          <View>
+            <FieldLabel title={t('Number')} />
+            <InputField
+              iconStart={<SvgHash width={17} height={17} />}
+              placeholder={t('Add a number (optional)')}
+              disabled={
+                !!editingField &&
+                editingField !== getFieldName(transaction.id, 'number')
+              }
+              defaultValue={transaction.number ?? ''}
+              onFocus={() => {
+                onRequestActiveEdit(getFieldName(transaction.id, 'number'));
+              }}
+              onBlur={() => onClearActiveEdit()}
+              onChange={event =>
+                onUpdateInner(transaction, 'number', event.target.value)
+              }
+            />
           </View>
 
           {!isAdding && (

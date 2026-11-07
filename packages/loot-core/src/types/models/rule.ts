@@ -23,6 +23,7 @@ export type FieldValueTypes = {
   category_group: string;
   date: string | RecurConfig;
   notes: string;
+  number: string;
   payee: string;
   payee_name: string;
   imported_payee: string;
@@ -106,6 +107,10 @@ export type RuleConditionEntity =
       | 'matches'
       | 'hasTags'
       | 'hasAnyTag'
+    >
+  | BaseConditionEntity<
+      'number',
+      'is' | 'isNot' | 'contains' | 'doesNotContain' | 'matches'
     >
   | BaseConditionEntity<
       'payee',
