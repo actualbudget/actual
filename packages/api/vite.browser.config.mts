@@ -32,6 +32,35 @@ function embeddedAssets(): Plugin {
   };
 }
 
+// The worker is an IIFE, where Rolldown replaces `import.meta` with `{}`.
+// The sqlite-wasm glue (pulled in by the storage layer) reads
+// `import.meta.url` to locate its script, and inside a blob-URL worker
+// `self.location.href` is that script. Rewriting it before Vite's own
+// analysis also stops Vite from inlining a base64 copy of the wasm and
+// from bundling the glue's helper workers (the Worker1 API and the
+// SharedArrayBuffer OPFS proxy), which Actual never starts; anything still
+// emitted for them is dropped so the package stays a single file.
+function sqliteWasmInWorker(): Plugin {
+  return {
+    name: 'actual-sqlite-wasm-in-worker',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!/@sqlite\.org\/sqlite-wasm\//.test(id)) return undefined;
+      return {
+        code: code.replace(/\bimport\.meta\.url\b/g, 'self.location.href'),
+        map: null,
+      };
+    },
+    generateBundle(_options, bundle) {
+      for (const fileName of Object.keys(bundle)) {
+        if (/sqlite3-(worker1|opfs-async-proxy)/.test(fileName)) {
+          delete bundle[fileName];
+        }
+      }
+    },
+  };
+}
+
 // Main-thread facade bundle. The worker (browser-worker.ts) is imported with
 // `?worker&inline`, so Vite builds it as an IIFE sub-bundle and inlines it as a
 // Blob URL inside browser.js — consumer bundlers never see a worker entry to
@@ -64,7 +93,7 @@ export default defineConfig({
   ],
   worker: {
     format: 'iife',
-    plugins: () => [embeddedAssets(), peggyLoader()],
+    plugins: () => [sqliteWasmInWorker(), embeddedAssets(), peggyLoader()],
   },
   build: {
     target: 'esnext',
