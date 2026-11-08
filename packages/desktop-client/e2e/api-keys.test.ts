@@ -83,19 +83,20 @@ for (const width of [1280, 375]) {
     const settings = await navigation.goToSettingsPage();
     if (width < 512) await settings.goToSection('General');
     await expect(page.getByRole('alert')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: 'Add key', exact: true }),
+    ).toBeDisabled();
     await page.getByRole('button', { name: 'Retry', exact: true }).click();
     await expect(
-      page.getByText('You have no API keys for this budget.'),
+      page.getByText('No API keys found for this budget.'),
     ).toBeVisible();
     await expect(
       page.getByRole('button', { name: 'Retry', exact: true }),
     ).toHaveCount(0);
+    await expect(page.getByRole('alert')).toHaveCount(0);
     const section = page
       .getByRole('heading', { name: 'Security', exact: true })
       .locator('../..');
-    await section.screenshot({
-      path: test.info().outputPath(`api-keys-list-${width}.png`),
-    });
     await page.getByRole('button', { name: 'Add key', exact: true }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toHaveAccessibleName('Add API key');
@@ -112,23 +113,14 @@ for (const width of [1280, 375]) {
       )
       .toBe('actual_example-only-not-a-real-key');
     await expect(dialog).toMatchThemeScreenshots();
-    await dialog.screenshot({
-      path: test.info().outputPath(`api-keys-create-${width}.png`),
-    });
     await secret.press('Enter');
     await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
     await dialog.getByRole('button', { name: 'Done', exact: true }).click();
     await expect(dialog).toHaveCount(0);
     await expect(section.getByText(key.name, { exact: true })).toBeVisible();
     await expect(section).toMatchThemeScreenshots();
-    await section.screenshot({
-      path: test.info().outputPath(`api-keys-populated-${width}.png`),
-    });
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
     await expect(dialog).toHaveAccessibleName('Revoke API key');
-    await dialog.screenshot({
-      path: test.info().outputPath(`api-keys-revoke-${width}.png`),
-    });
     await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
     await expect(section.getByText(key.name, { exact: true })).toBeVisible();
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
@@ -142,7 +134,7 @@ for (const width of [1280, 375]) {
       .click();
     await expect(dialog).toHaveCount(0);
     await expect(
-      page.getByText('You have no API keys for this budget.'),
+      page.getByText('No API keys found for this budget.'),
     ).toBeVisible();
     await expect(section.getByText(key.name, { exact: true })).toHaveCount(0);
     expect(createRequests).toBe(1);
