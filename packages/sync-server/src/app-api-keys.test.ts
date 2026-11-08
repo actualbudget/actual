@@ -3,7 +3,8 @@ import { createHash, randomUUID } from 'node:crypto';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { getAccountDb } from './account-db';
+import { disableOpenID, enableOpenID, getAccountDb } from './account-db';
+import { bootstrapPassword, changePassword } from './accounts/password';
 import { handlers as accountApp } from './app-account';
 import { handlers as app } from './app-api-keys';
 import { handlers as syncApp } from './app-sync';
@@ -145,6 +146,57 @@ describe('API key lifecycle', () => {
         created.body.data.id,
       ]),
     ).toEqual([]);
+  });
+
+  describe('authentication changes', () => {
+    beforeEach(async () => {
+      db.exec('SAVEPOINT auth_change');
+      await bootstrapPassword('old password');
+    });
+
+    afterEach(() => {
+      db.exec('ROLLBACK TO auth_change; RELEASE auth_change');
+    });
+
+    it.each(['password', 'enable-openid', 'disable-openid'])(
+      'revokes keys only after a successful %s change',
+      async action => {
+        const created = await createKey();
+        expect(created.status).toBe(201);
+        // Keep the account when disabling OpenID so its deletion cannot
+        // mask a missing key revocation.
+        db.mutate('UPDATE users SET user_name = ? WHERE id = ?', ['', userId]);
+        const change = async (valid: boolean) => {
+          if (action === 'password') {
+            return changePassword(
+              'new password',
+              valid ? 'old password' : 'wrong',
+            );
+          }
+          if (action === 'disable-openid') {
+            return disableOpenID({
+              password: valid ? 'old password' : 'wrong',
+            });
+          }
+          return enableOpenID({
+            openId: valid
+              ? {
+                  issuer: { name: 'https://identity.example' },
+                  client_id: 'client',
+                  client_secret: 'secret',
+                  server_hostname: 'https://actual.example',
+                }
+              : {},
+          });
+        };
+        expect(await change(false)).toHaveProperty('error');
+        expect(db.all('SELECT id FROM api_keys')).toEqual([
+          { id: created.body.data.id },
+        ]);
+        expect((await change(true))?.error).toBeUndefined();
+        expect(db.all('SELECT id FROM api_keys')).toEqual([]);
+      },
+    );
   });
 
   it('rejects inaccessible, missing, and deleted budgets', async () => {

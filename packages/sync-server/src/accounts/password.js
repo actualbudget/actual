@@ -189,6 +189,7 @@ export async function changePassword(newPassword, currentPassword) {
       return { error: 'no-password-method' };
     }
     accountDb.mutate("DELETE FROM sessions WHERE auth_method = 'password'");
+    accountDb.mutate('DELETE FROM api_keys');
     return {};
   });
 }
