@@ -7,7 +7,9 @@ import { apiTokenService } from '#services/api-token-service';
 import { handlers as app } from './app-akahu';
 
 describe('/akahu API token access', () => {
-  let userId, sessionToken, fileId;
+  let userId = '';
+  let sessionToken = '';
+  let fileId = '';
 
   beforeEach(() => {
     userId = uuidv4();
@@ -40,15 +42,29 @@ describe('/akahu API token access', () => {
     getAccountDb().mutate('DELETE FROM users WHERE id = ?', [userId]);
   });
 
-  it('rejects API tokens on bank-sync endpoints', async () => {
+  it.each(['/status', '/accounts'])('rejects API tokens on %s', async route => {
     const { token } = await apiTokenService.createToken(userId, 'script', [
       fileId,
     ]);
 
-    const res = await request(app).post('/status').set('x-actual-token', token);
+    const res = await request(app).post(route).set('x-actual-token', token);
 
     expect(res.statusCode).toEqual(403);
     expect(res.body.reason).toEqual('forbidden-auth-method');
+  });
+
+  it('allows API tokens on /transactions', async () => {
+    const { token } = await apiTokenService.createToken(userId, 'script', [
+      fileId,
+    ]);
+
+    const res = await request(app)
+      .post('/transactions')
+      .set('x-actual-token', token)
+      .send({});
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.error).toEqual('accountId and startDate are required');
   });
 
   it('allows password sessions', async () => {

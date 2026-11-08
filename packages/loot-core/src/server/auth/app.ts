@@ -141,7 +141,6 @@ async function getLoginMethods() {
         error: err.reason || 'network-failure',
       };
     }
-
     throw err;
   }
 
