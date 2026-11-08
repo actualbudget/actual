@@ -383,6 +383,7 @@ export type DryRunCategoryResult = {
   perTemplate: number[];
   goal: number | null;
   longGoal: boolean;
+  errors: string[];
 };
 
 export async function dryRunCategoryTemplate({
@@ -402,12 +403,13 @@ export async function dryRunCategoryTemplate({
     perTemplate: templates.map(() => 0),
     goal: null,
     longGoal: false,
+    errors: [],
   };
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: categoryId }).select('*'),
   );
   if (categoryData.length === 0) return empty;
-  const { contexts } = await computeTemplates(
+  const { contexts, errors } = await computeTemplates(
     month,
     true,
     { [categoryId]: templates },
@@ -415,13 +417,14 @@ export async function dryRunCategoryTemplate({
     true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) return empty;
+  if (!ctx) return { ...empty, errors };
   const values = ctx.getValues();
   return {
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
     goal: values.goal,
     longGoal: !!values.longGoal,
+    errors,
   };
 }
 
