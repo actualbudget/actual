@@ -762,6 +762,54 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
+// Upper bound on the estimated size of the messages in one sync request.
+// Well below the server's default 20MB limit to leave room for encoding
+// and encryption overhead.
+export const SYNC_BATCH_MAX_BYTES = 4 * 1024 * 1024;
+
+// Rough per-message overhead on the wire: timestamp, protobuf framing
+// and the encryption envelope (iv + auth tag) when the file is encrypted
+const SYNC_MESSAGE_OVERHEAD_BYTES = 100;
+
+function estimateMessageSize(msg: Message): number {
+  const value = msg.value == null ? '' : String(msg.value);
+  return (
+    msg.dataset.length +
+    msg.row.length +
+    msg.column.length +
+    value.length +
+    SYNC_MESSAGE_OVERHEAD_BYTES
+  );
+}
+
+/**
+ * Split messages into batches small enough for a single sync request.
+ * Always returns at least one batch, so a sync with nothing to send still
+ * makes one request to fetch the server's messages.
+ */
+export function splitIntoSyncBatches(
+  messages: Message[],
+  maxBytes: number = SYNC_BATCH_MAX_BYTES,
+): Message[][] {
+  const batches: Message[][] = [];
+  let current: Message[] = [];
+  let currentSize = 0;
+
+  for (const msg of messages) {
+    const size = estimateMessageSize(msg);
+    if (current.length > 0 && currentSize + size > maxBytes) {
+      batches.push(current);
+      current = [];
+      currentSize = 0;
+    }
+    current.push(msg);
+    currentSize += size;
+  }
+
+  batches.push(current);
+  return batches;
+}
+
 export function getMessagesSince(since: string): Message[] {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
@@ -969,27 +1017,55 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  const buffer = await encoder.encode(groupId, cloudFileId, since, messages);
+  // The server caps the size of a sync request (20MB by default), so a
+  // large backlog of messages (e.g. a budget imported into a fresh
+  // server, which has to upload its whole history) is sent in batches.
+  // The first batch asks for everything the server has since `since`;
+  // later batches only ask for what is newer than our clock, since the
+  // older messages already came back with the first batch. Anything
+  // missed in between is caught by the merkle diff below.
+  const batches = splitIntoSyncBatches(messages);
+  const serverMessages = new Map<string, Message>();
+  let res: Awaited<ReturnType<typeof encoder.decode>>;
 
-  // TODO: There a limit on how many messages we can send because of
-  // the payload size. Right now it's at 20MB on the server. We should
-  // check the worst case here and make multiple requests if it's
-  // really large.
-  const resBuffer = await postBinary(
-    getServer().SYNC_SERVER + '/sync',
-    buffer,
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  for (let i = 0; i < batches.length; i++) {
+    const batchSince = i === 0 ? since : currentTime;
+    const buffer = await encoder.encode(
+      groupId,
+      cloudFileId,
+      batchSince,
+      batches[i],
+    );
 
-  // Abort if the file is either no longer loaded, the group id has
-  // changed because of a sync reset
-  if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
-    return [];
+    if (batches.length > 1) {
+      logger.info(
+        `Sending sync batch ${i + 1}/${batches.length}`,
+        batches[i].length,
+      );
+    }
+
+    const resBuffer = await postBinary(
+      getServer().SYNC_SERVER + '/sync',
+      buffer,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    // Abort if the file is either no longer loaded, the group id has
+    // changed because of a sync reset
+    if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
+      return [];
+    }
+
+    res = await encoder.decode(resBuffer);
+
+    for (const msg of res.messages) {
+      serverMessages.set(msg.timestamp.toString(), msg);
+    }
   }
 
-  const res = await encoder.decode(resBuffer);
+  res = { ...res, messages: [...serverMessages.values()] };
 
   logger.info('Got messages from server', res.messages.length);
 

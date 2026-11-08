@@ -17,6 +17,8 @@ import {
   receiveMessages,
   sendMessages,
   setSyncingMode,
+  splitIntoSyncBatches,
+  SYNC_BATCH_MAX_BYTES,
 } from './index';
 
 beforeEach(() => {
@@ -106,6 +108,72 @@ describe('Sync', () => {
     if (isError(result)) throw result.error;
     expect(result.messages.length).toBe(0);
     expect(mockSyncServer.getMessages().length).toBe(2);
+  });
+
+  it('should send a large backlog to the server in batches', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    // Another client already synced a message to the server
+    await mockSyncServer.handlers['/sync/sync'](
+      await encoder.encode('group', 'client', Timestamp.zero, [
+        {
+          dataset: 'transactions',
+          row: 'other',
+          column: 'amount',
+          value: 'N:100',
+          timestamp: Timestamp.parse(
+            '2018-11-13T13:00:00.000Z-0000-0000testinguuid2',
+          ),
+        },
+      ]),
+    );
+
+    global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
+
+    // Each message is ~1.5MB, so together they exceed a single request
+    const bigValue = 'x'.repeat(1.5 * 1024 * 1024);
+    const local = [];
+    for (let i = 0; i < 6; i++) {
+      global.stepForwardInTime();
+      local.push({
+        dataset: 'notes',
+        row: `note-${i}`,
+        column: 'note',
+        value: bigValue,
+        timestamp: Timestamp.send(),
+      });
+    }
+    await applyMessages(local);
+
+    // Like a budget imported into a fresh server: nothing is sent
+    // automatically, the whole history goes out via the merkle diff
+    void prefs.savePrefs({
+      lastSyncedTimestamp: getClock().timestamp.toString(),
+    });
+
+    const originalHandler = mockSyncServer.handlers['/sync/sync'];
+    const requestSizes: number[] = [];
+    mockSyncServer.handlers['/sync/sync'] = (data: Uint8Array) => {
+      requestSizes.push(data.length);
+      return originalHandler(data);
+    };
+
+    try {
+      const result = await fullSync();
+      if (isError(result)) throw result.error;
+
+      expect(result.messages.map(msg => msg.row)).toEqual(['other']);
+    } finally {
+      mockSyncServer.handlers['/sync/sync'] = originalHandler;
+    }
+
+    expect(mockSyncServer.getMessages().length).toBe(7);
+    expect(mockSyncServer.getClock().merkle.hash).toBe(getClock().merkle.hash);
+    expect(requestSizes.length).toBeGreaterThan(2);
+    for (const size of requestSizes) {
+      expect(size).toBeLessThan(SYNC_BATCH_MAX_BYTES + 1024 * 1024);
+    }
   });
 
   it('should sync multiple clients', async () => {
@@ -507,5 +575,45 @@ describe('Sync account balance cells', () => {
     expect(recomputed).toContain('__global!onbudget-accounts-balance');
     expect(recomputed).toContain('__global!account-group-balance-g1-on');
     expect(recomputed).not.toContain('__global!balance-acct1');
+  });
+});
+
+describe('splitIntoSyncBatches', () => {
+  function message(value: string) {
+    return {
+      dataset: 'notes',
+      row: 'row',
+      column: 'note',
+      value,
+      timestamp: Timestamp.zero,
+    };
+  }
+
+  it('returns one empty batch when there is nothing to send', () => {
+    expect(splitIntoSyncBatches([])).toEqual([[]]);
+  });
+
+  it('keeps small syncs in a single batch', () => {
+    const messages = [message('S:a'), message('S:b'), message('S:c')];
+    expect(splitIntoSyncBatches(messages)).toEqual([messages]);
+  });
+
+  it('splits messages once a batch reaches the size limit', () => {
+    const messages = [
+      message('S:' + 'a'.repeat(400)),
+      message('S:' + 'b'.repeat(400)),
+      message('S:' + 'c'.repeat(400)),
+    ];
+    // ~500 bytes each with overhead, so two fit in 1200 bytes but not three
+    const batches = splitIntoSyncBatches(messages, 1200);
+
+    expect(batches).toEqual([[messages[0], messages[1]], [messages[2]]]);
+  });
+
+  it('puts a message larger than the limit in a batch of its own', () => {
+    const messages = [message('S:small'), message('S:' + 'x'.repeat(2000))];
+    const batches = splitIntoSyncBatches(messages, 1000);
+
+    expect(batches).toEqual([[messages[0]], [messages[1]]]);
   });
 });
