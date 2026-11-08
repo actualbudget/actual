@@ -1,4 +1,5 @@
 import * as monthUtils from '@actual-app/core/shared/months';
+import { isTemplateExpired } from '@actual-app/core/shared/templates';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 import type { Template } from '@actual-app/core/types/models/templates';
 
@@ -28,6 +29,14 @@ function isAdjustmentOutOfRange(template: Template): boolean {
     return template.adjustment <= -100 || template.adjustment > 1000;
   }
   return false;
+}
+
+// A passed target doesn't stop the engine, which skips it in later months, so
+// it's shown as a warning without blocking save.
+export function isBlockingAutomationError(
+  error: AutomationErrorKind | null,
+): boolean {
+  return error !== null && error.kind !== 'by-target-past';
 }
 
 export type GlobalConflictKind =
@@ -111,19 +120,9 @@ export function validateAutomation(
         return { kind: 'by-no-month' };
       }
       const targetMonth = template.month;
-      const startOfTodayMonth = monthUtils.monthFromDate(today);
-      // Pass bare YYYY-MM strings, matching the server-side check in
-      // CategoryTemplateContext.isExpired and avoiding the
-      // local-vs-UTC parsing footgun called out in shared/months.ts:_parse.
-      const monthsRemaining = monthUtils.differenceInCalendarMonths(
-        targetMonth,
-        startOfTodayMonth,
-      );
-      // Recurring goals (annual/repeat) anchored on a past month are
-      // legitimate — the engine rolls them forward by the period. Only flag
-      // the past-target case for one-shot goals. Mirrors the server check in
-      // CategoryTemplateContext.isExpired.
-      if (monthsRemaining < 0 && !template.annual && !template.repeat) {
+      // Uses the same rule the engine uses to skip expired targets, measured
+      // from today like the engine's warning after a template run.
+      if (isTemplateExpired(template, monthUtils.monthFromDate(today))) {
         return { kind: 'by-target-past', month: targetMonth };
       }
       if (template.type === 'spend') {
@@ -161,13 +160,18 @@ export function validatePercentageAllocation(
 // The engine (CategoryTemplateContext.checkByAndSchedule) requires
 // every schedule and by-date template in a category to share one priority; if
 // they don't, none of them budget. Surface that as a conflict so it can't be
-// saved.
+// saved. Expired targets are skipped, as the engine skips them.
 export function validateSchedulePriorities(
   templates: readonly Template[],
+  today: Date,
 ): GlobalConflictKind | null {
+  const month = monthUtils.monthFromDate(today);
   const priorities = new Set<number>();
   for (const t of templates) {
-    if (t.type === 'schedule' || t.type === 'by') {
+    if (
+      (t.type === 'schedule' || t.type === 'by') &&
+      !isTemplateExpired(t, month)
+    ) {
       priorities.add(t.priority);
     }
   }

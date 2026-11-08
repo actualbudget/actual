@@ -28,7 +28,7 @@ export function AutomationErrorTitle({
     case 'by-no-month':
       return <Trans>Target month missing</Trans>;
     case 'by-target-past':
-      return <Trans>Target is in the past</Trans>;
+      return <Trans>Target month has passed</Trans>;
     case 'spend-no-from':
       return <Trans>Early-spending month missing</Trans>;
     case 'spend-from-after-target':
@@ -71,7 +71,8 @@ export function AutomationErrorShort({
     case 'by-target-past':
       return (
         <Trans>
-          {{ month: formatMonthLabel(error.month, locale) }} has already passed
+          {{ month: formatMonthLabel(error.month, locale) }} has passed and is
+          no longer funded
         </Trans>
       );
     case 'spend-no-from':
@@ -134,8 +135,9 @@ export function AutomationErrorDetail({
     case 'by-target-past':
       return (
         <Trans>
-          Pick a future month, or switch to a recurring annual goal to keep
-          saving.
+          This target isn&rsquo;t funded in later months. Delete it once
+          you&rsquo;re done with it, or pick a future month or make it repeat to
+          keep saving.
         </Trans>
       );
     case 'spend-no-from':

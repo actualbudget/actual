@@ -2,6 +2,7 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { isTemplateExpired } from '#shared/templates';
 import { amountToInteger, integerToAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 import type {
@@ -79,12 +80,10 @@ export class CategoryTemplateContext {
     }
 
     // expired targets are set aside first so they can't fail any checks
-    const expiredTemplates = templates.filter(t =>
-      CategoryTemplateContext.isExpired(t, month),
+    const expiredTemplates = templates.filter(
+      (t): t is ByTemplate | SpendTemplate => isTemplateExpired(t, month),
     );
-    const activeTemplates = templates.filter(
-      t => !CategoryTemplateContext.isExpired(t, month),
-    );
+    const activeTemplates = templates.filter(t => !isTemplateExpired(t, month));
 
     // run all checks
     CategoryTemplateContext.checkPeriodicInterval(activeTemplates);
@@ -107,20 +106,6 @@ export class CategoryTemplateContext {
         : false,
       skipAvailableClamp,
       expiredTemplates,
-    );
-  }
-
-  // A one-off target stops applying after its month. Repeating targets roll
-  // forward instead, so they never expire.
-  static isExpired(
-    template: Template,
-    month: string,
-  ): template is ByTemplate | SpendTemplate {
-    return (
-      (template.type === 'by' || template.type === 'spend') &&
-      !template.repeat &&
-      !template.annual &&
-      monthUtils.differenceInCalendarMonths(`${template.month}`, month) < 0
     );
   }
 

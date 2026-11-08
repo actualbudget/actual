@@ -5,6 +5,7 @@ import { batchMessages } from '#server/sync';
 // @ts-strict-ignore
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { isTemplateExpired } from '#shared/templates';
 import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
 import type { CleanupTemplate } from '#types/models/cleanup-templates';
 import type { Template } from '#types/models/templates';
@@ -286,7 +287,7 @@ async function computeTemplates(
         // budgeting ahead of a target that hasn't passed yet isn't worth a nudge
         templateContext
           .getExpiredTemplates()
-          .filter(t => CategoryTemplateContext.isExpired(t, currentMonth))
+          .filter(t => isTemplateExpired(t, currentMonth))
           .forEach(t => {
             warnings.push(
               `${category.name}: Ignoring ${t.amount} by ${t.month} because the target month has passed. You can remove it.`,

@@ -3,6 +3,7 @@ import type { Template } from '@actual-app/core/types/models/templates';
 import { describe, expect, it } from 'vitest';
 
 import {
+  isBlockingAutomationError,
   validateAutomation,
   validatePercentageAllocation,
   validateSchedulePriorities,
@@ -214,51 +215,104 @@ describe('validateAutomation adjustment range', () => {
 });
 
 describe('validateSchedulePriorities', () => {
+  const today = new Date(2026, 5, 15);
   function scheduleAt(name: string, priority: number): Template {
     return { type: 'schedule', name, directive: 'template', priority };
   }
-  function byAt(priority: number): Template {
+  function byAt(priority: number, month = '2026-12'): Template {
     return {
       type: 'by',
       amount: 100,
-      month: '2026-12',
+      month,
       directive: 'template',
       priority,
     };
   }
 
   it('returns null when there are no schedule or by templates', () => {
-    expect(validateSchedulePriorities([])).toBeNull();
+    expect(validateSchedulePriorities([], today)).toBeNull();
   });
 
   it('returns null for a single schedule', () => {
-    expect(validateSchedulePriorities([scheduleAt('Rent', 1)])).toBeNull();
+    expect(
+      validateSchedulePriorities([scheduleAt('Rent', 1)], today),
+    ).toBeNull();
   });
 
   it('returns null when all schedules share a priority', () => {
     expect(
-      validateSchedulePriorities([scheduleAt('Rent', 2), scheduleAt('Gym', 2)]),
+      validateSchedulePriorities(
+        [scheduleAt('Rent', 2), scheduleAt('Gym', 2)],
+        today,
+      ),
     ).toBeNull();
   });
 
   it('flags schedules with mismatched priorities', () => {
     expect(
-      validateSchedulePriorities([scheduleAt('Rent', 1), scheduleAt('Gym', 2)]),
+      validateSchedulePriorities(
+        [scheduleAt('Rent', 1), scheduleAt('Gym', 2)],
+        today,
+      ),
     ).toEqual({ kind: 'schedule-priority-mismatch' });
   });
 
   it('flags a schedule and a by-date with mismatched priorities', () => {
     expect(
-      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2)]),
+      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2)], today),
     ).toEqual({ kind: 'schedule-priority-mismatch' });
+  });
+
+  it('ignores the priority of an expired by-date', () => {
+    expect(
+      validateSchedulePriorities(
+        [scheduleAt('Rent', 1), byAt(2, '2026-05')],
+        today,
+      ),
+    ).toBeNull();
   });
 
   it('ignores priorities of other automation types', () => {
     expect(
-      validateSchedulePriorities([
-        scheduleAt('Rent', 1),
-        percent('Salary', 10),
-      ]),
+      validateSchedulePriorities(
+        [scheduleAt('Rent', 1), percent('Salary', 10)],
+        today,
+      ),
     ).toBeNull();
+  });
+});
+
+describe('validateAutomation past targets', () => {
+  const today = new Date(2026, 10, 15);
+  const by: Template = {
+    type: 'by',
+    amount: 100,
+    month: '2026-10',
+    directive: 'template',
+    priority: 1,
+  };
+
+  it('flags a one-off target whose month has passed without blocking save', () => {
+    const error = validateAutomation(by, 'by', [by], [], today);
+
+    expect(error).toEqual({ kind: 'by-target-past', month: '2026-10' });
+    expect(isBlockingAutomationError(error)).toBe(false);
+  });
+
+  it('accepts a target in the current month', () => {
+    expect(
+      validateAutomation({ ...by, month: '2026-11' }, 'by', [], [], today),
+    ).toBeNull();
+  });
+
+  it('accepts a past target that repeats', () => {
+    expect(
+      validateAutomation({ ...by, annual: true }, 'by', [], [], today),
+    ).toBeNull();
+  });
+
+  it('still blocks save for other errors', () => {
+    expect(isBlockingAutomationError({ kind: 'by-no-month' })).toBe(true);
+    expect(isBlockingAutomationError(null)).toBe(false);
   });
 });
