@@ -161,8 +161,13 @@ describe('API key lifecycle', () => {
     it.each(['password', 'enable-openid', 'disable-openid'])(
       'revokes keys only after a successful %s change',
       async action => {
-        const created = await createKey();
-        expect(created.status).toBe(201);
+        await createKey().expect(201);
+        db.mutate('UPDATE files SET owner = ? WHERE id = ?', [
+          otherUserId,
+          fileId,
+        ]);
+        const other = await createKey(otherSession).expect(201);
+        const keys = db.all('SELECT id FROM api_keys');
         // Keep the account when disabling OpenID so its deletion cannot
         // mask a missing key revocation.
         db.mutate('UPDATE users SET user_name = ? WHERE id = ?', ['', userId]);
@@ -190,11 +195,11 @@ describe('API key lifecycle', () => {
           });
         };
         expect(await change(false)).toHaveProperty('error');
-        expect(db.all('SELECT id FROM api_keys')).toEqual([
-          { id: created.body.data.id },
-        ]);
+        expect(db.all('SELECT id FROM api_keys')).toEqual(keys);
         expect((await change(true))?.error).toBeUndefined();
-        expect(db.all('SELECT id FROM api_keys')).toEqual([]);
+        expect(db.all('SELECT id FROM api_keys')).toEqual(
+          action === 'password' ? [{ id: other.body.data.id }] : [],
+        );
       },
     );
   });
