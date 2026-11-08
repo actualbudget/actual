@@ -206,6 +206,10 @@ export function ImportTransactionsModal({
   filename: originalFileName,
   accountId,
   onImported,
+}: {
+  filename: string;
+  accountId: string;
+  onImported?: (didChange: boolean) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
