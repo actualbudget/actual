@@ -41,12 +41,8 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
     } catch {
       setError(
         apiKey
-          ? t(
-              'Could not revoke the API key. Check your connection and try again.',
-            )
-          : t(
-              'Could not create the API key. Check your connection and try again.',
-            ),
+          ? t('Could not revoke the API key. Please try again.')
+          : t('Could not create the API key. Please try again.'),
       );
     } finally {
       setBusy(false);

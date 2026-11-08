@@ -76,8 +76,8 @@ export function ChangePassword() {
         }}
       >
         <Trans>
-          This will change the password for this server instance. Sessions and
-          API keys created using the server password will be revoked.
+          Changing the server password will sign out everyone using it and
+          revoke their API keys.
         </Trans>
       </Text>
 

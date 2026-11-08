@@ -76,16 +76,14 @@ Heads up! You probably don't want to hard-code the passwords like that, especial
 
 ### API Keys
 
-For scripts and integrations, you can create a key with read and write access to selected existing budgets. A key remains valid until you revoke it or your account is disabled or deleted. If you lose access to a budget, the key also loses access to that budget.
+For even more security, you can generate budget-scoped API keys rather than providing your password.
 
-1. Open the budget in Actual and make sure it has synced to your server.
-2. Go to **Settings → General → Security → API keys** and select **Add key**.
-3. Enter a name that identifies the integration, then select **Create key**.
-4. Copy the key to your integration's secret storage before selecting **Done**. You cannot view it again.
+1. In your budget, go to **Settings → General → Security → API keys** and select **Add key**.
+2. Enter a name for your API key and select **Create key**.
+3. Copy the generated key (it will not be displayed again).
+4. The key will appear in the **API keys** section in case you need to revoke it later.
 
-Keys created in Settings grant access to the current budget. To create a key for multiple budgets, use a normal user session to send `POST /api-keys` with `{ "name": "My integration", "fileIds": ["file-id-1", "file-id-2"] }`. Use the server file IDs returned by `/sync/list-user-files`, not the Sync IDs. Revoking a key removes its access to all selected budgets.
-
-Pass the key through `sessionToken` instead of `password`:
+Pass the key as `sessionToken` when connecting:
 
 ```js
 await api.init({
@@ -94,14 +92,6 @@ await api.init({
   sessionToken: process.env.ACTUAL_API_KEY,
 });
 ```
-
-Then call `downloadBudget` with the budget's Sync ID as shown above. If you enabled end-to-end encryption, you still need the encryption password.
-
-The [CLI](cli.md) accepts the key through its existing session-token options. For example, set `ACTUAL_SESSION_TOKEN_FILE` to a file containing the key, alongside your server URL and Sync ID. There are no CLI commands for creating or revoking keys.
-
-Keys support downloading a budget and syncing data changes. They do not support bank sync, server administration, full budget uploads or replacement, server budget deletion, or changes to encryption settings. Periodic full-file snapshot uploads are also unavailable; ordinary data synchronisation still works.
-
-To stop an integration's server access, return to **API keys**, select **Revoke** beside its name, and confirm. Revocation does not erase previously downloaded data. Use a separate local data directory for each integration if you do not want it to access other cached budgets.
 
 ### Self-Signed Https Certificates
 

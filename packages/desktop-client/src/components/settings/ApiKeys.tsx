@@ -59,17 +59,14 @@ export function ApiKeys({ fileId }: { fileId: string }) {
     <SettingsRow
       title={t('API keys')}
       description={t(
-        'Give an integration read and write access to this budget without sharing your login. Bank sync and server administration are not available through API keys.',
+        'Generate budget-scoped credentials for use in the API/CLI.',
       )}
       control={addButton}
     >
       {failed ? (
         <View style={{ gap: spacing.sm }}>
           <Text role="alert" style={{ color: theme.errorText }}>
-            <Trans>
-              Could not load API keys. Check your connection and that your
-              server supports API keys, then try again.
-            </Trans>
+            <Trans>Failed to load API keys. Please try again.</Trans>
           </Text>
           <Button onPress={() => setReload(value => value + 1)}>
             <Trans>Retry</Trans>
@@ -80,7 +77,7 @@ export function ApiKeys({ fileId }: { fileId: string }) {
           <View style={{ gap: spacing.xs }}>
             {keys.length === 0 && (
               <Text>
-                <Trans>You have no API keys for this budget.</Trans>
+                <Trans>No API keys found for this budget.</Trans>
               </Text>
             )}
             {keys.map(key => (
