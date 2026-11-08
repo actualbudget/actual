@@ -265,8 +265,8 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
           deferredTransactionUrls.delete(url);
         } else {
           // Let the user pick the target account — the import modal itself
-          // has no account switcher. Only mark handled after a selection so
-          // dismissing the picker can still retry the same document.
+          // has no account switcher. Dismiss cancels this document (no reopen);
+          // other queued opens can still proceed.
           const allowedIds = new Set(importAccounts.map(a => a.id));
           let accountChosen = false;
           awaitingAccountChoiceUrls.add(url);
@@ -297,8 +297,15 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
                           return;
                         }
                         awaitingAccountChoiceUrls.delete(url);
-                        deferredTransactionUrls.add(url);
-                        retryWithActiveHandler(url);
+                        deferredTransactionUrls.delete(url);
+                        // Treat close as cancel for this document only.
+                        handledOpenUrls.add(url);
+                        for (const next of [
+                          ...deferredTransactionUrls,
+                          ...deferredBudgetUrls,
+                        ]) {
+                          retryWithActiveHandler(next);
+                        }
                       }, 0);
                     });
                   },
