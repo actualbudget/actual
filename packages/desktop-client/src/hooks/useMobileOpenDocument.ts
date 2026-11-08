@@ -298,6 +298,7 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
                         }
                         awaitingAccountChoiceUrls.delete(url);
                         deferredTransactionUrls.add(url);
+                        retryWithActiveHandler(url);
                       }, 0);
                     });
                   },
