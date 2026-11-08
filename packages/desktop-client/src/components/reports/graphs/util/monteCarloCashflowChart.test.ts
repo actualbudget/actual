@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import type {
   MonteCarloContribution,
   MonteCarloIncomeStream,
+  MonteCarloLumpSum,
   MonteCarloPot,
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
@@ -101,6 +102,10 @@ function makeRow(
     potTaxes: [],
     potTaxables: [],
     taxPaid: 0,
+    lumpSumWithdrawal: 0,
+    lumpSumTax: 0,
+    lumpSumAmounts: [],
+    potLumpSums: [],
     feesPaid: 0,
     potFees: [],
     potReturns: [],
@@ -138,6 +143,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions,
       incomeStreams,
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -198,6 +204,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams: [],
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -219,6 +226,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions,
       incomeStreams,
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -244,6 +252,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams,
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -264,6 +273,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams: [],
       spendingPhases: [],
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -282,6 +292,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams: [],
       spendingPhases: [makePhase('late', 70), makePhase('early', null)],
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -308,6 +319,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams,
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -337,6 +349,7 @@ describe('buildMonteCarloCashflowChart', () => {
       contributions: [],
       incomeStreams: [],
       spendingPhases: phases,
+      lumpSums: [],
       startAge: 60,
       translate,
     });
@@ -346,5 +359,89 @@ describe('buildMonteCarloCashflowChart', () => {
       true,
     ]);
     expect(chart.data.map(point => point.unspentIncome)).toEqual([250, 0]);
+  });
+
+  it('shows one-off withdrawals as their own outflow, their gross inside the pot bars', () => {
+    const lumpSums: MonteCarloLumpSum[] = [
+      {
+        id: 'deposit',
+        name: 'House deposit',
+        age: 61,
+        amount: 50_000,
+        adjustsWithInflation: false,
+        sourcePotId: 'pot-1',
+        taxRate: 0.2,
+        taxableFraction: 0,
+      },
+      {
+        id: 'never',
+        name: '',
+        age: 90,
+        amount: 1_000,
+        adjustsWithInflation: false,
+        sourcePotId: null,
+        taxRate: 0,
+        taxableFraction: 0,
+      },
+    ];
+    const rows = [
+      makeRow({
+        year: 1,
+        potWithdrawals: [10_000, 0],
+        plannedSpending: 10_000,
+      }),
+      makeRow({
+        year: 2,
+        potWithdrawals: [10_000, 0],
+        plannedSpending: 10_000,
+        // 50,000 net at 20% is 62,500 gross, all from the first pot
+        lumpSumWithdrawal: 62_500,
+        lumpSumTax: 12_500,
+        lumpSumAmounts: [50_000, 0],
+        potLumpSums: [62_500, 0],
+      }),
+    ];
+    const chart = buildMonteCarloCashflowChart({
+      rows,
+      pots,
+      contributions: [],
+      incomeStreams: [],
+      spendingPhases: [phases[0]],
+      lumpSums,
+      startAge: 60,
+      translate,
+    });
+
+    // The second one-off never lands in this run, so no series
+    expect(
+      chart.outflowSeries.map(series => [series.kind, series.label]),
+    ).toEqual([
+      ['phase', 'Early'],
+      ['tax', 'Tax'],
+      ['lumpSum', 'House deposit'],
+    ]);
+    expect(chart.tooltipGroups.map(group => group.key)).toEqual([
+      'withdrawals',
+      'tax',
+      'spending',
+      'lumpSums',
+    ]);
+    expect(chart.data[0].amounts).toEqual({
+      pot0: 10_000,
+      pot1: 0,
+      phase0: -10_000,
+      tax0: 0,
+      lumpSum0: 0,
+    });
+    expect(chart.data[1].amounts).toEqual({
+      pot0: 72_500,
+      pot1: 0,
+      phase0: -10_000,
+      tax0: -12_500,
+      lumpSum0: -50_000,
+    });
+    // Both sides of the year balance: gross in equals spending, tax and
+    // the one-off received
+    expect(chart.stackExtents).toEqual([10_000, -10_000, 72_500, -72_500]);
   });
 });

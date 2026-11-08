@@ -6,8 +6,6 @@ import type {
   PendingTransaction,
   Transaction,
 } from 'akahu';
-// For some reason this is not provided in the provided index.d.ts file
-import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -46,6 +44,14 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
 
 app.post(
@@ -320,11 +326,7 @@ function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-type AnyTransaction =
-  | Transaction
-  | EnrichedTransaction
-  | PendingTransaction
-  | EnrichedPendingTransaction;
+type AnyTransaction = Transaction | EnrichedTransaction | PendingTransaction;
 
 function getPayeeName(trans: AnyTransaction): string {
   return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
@@ -345,7 +347,7 @@ function getOtherAccount(trans: AnyTransaction): string | undefined {
 }
 
 function processPendingTransaction(
-  trans: PendingTransaction | EnrichedPendingTransaction,
+  trans: PendingTransaction,
   account: Account,
 ): AkahuTransaction {
   const transactionDate = new Date(trans.date);

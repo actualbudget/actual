@@ -77,7 +77,7 @@ describe('parseSidebarMenuItems', () => {
     expect(items.find(item => item.id === 'payees')?.hidden).toBe(true);
   });
 
-  it('always keeps budget and reports in the sidebar', () => {
+  it('always keeps budget in the sidebar', () => {
     const items = parseSidebarMenuItems(
       JSON.stringify(
         getDefaultSidebarMenuItems().map(item => ({ ...item, hidden: true })),
@@ -86,8 +86,8 @@ describe('parseSidebarMenuItems', () => {
 
     expect(items.filter(item => !item.hidden)).toEqual([
       { id: 'budget', hidden: false },
-      { id: 'reports', hidden: false },
     ]);
+    expect(items.find(item => item.id === 'reports')?.hidden).toBe(true);
   });
 });
 
