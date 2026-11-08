@@ -51,7 +51,7 @@ const createMockRes = () => {
 };
 
 describe('validateSession', () => {
-  describe('Authorization header parsing', () => {
+  describe('API token validation', () => {
     let userId, apiToken;
 
     beforeEach(async () => {
@@ -65,10 +65,10 @@ describe('validateSession', () => {
       deleteUser(userId);
     });
 
-    it('should accept standard "Bearer token" format', async () => {
+    it('should accept API token from x-actual-token header', async () => {
       const req = {
         body: {},
-        headers: { authorization: `Bearer ${apiToken}` },
+        headers: { 'x-actual-token': apiToken },
       };
       const res = createMockRes();
 
@@ -79,10 +79,10 @@ describe('validateSession', () => {
       expect(result.auth_method).toBe('api_token');
     });
 
-    it('should accept lowercase "bearer token" format', async () => {
+    it('should accept API token from body', async () => {
       const req = {
-        body: {},
-        headers: { authorization: `bearer ${apiToken}` },
+        body: { token: apiToken },
+        headers: {},
       };
       const res = createMockRes();
 
@@ -92,76 +92,23 @@ describe('validateSession', () => {
       expect(result.user_id).toBe(userId);
     });
 
-    it('should accept uppercase "BEARER token" format', async () => {
+    it('should ignore the Authorization header', async () => {
       const req = {
         body: {},
-        headers: { authorization: `BEARER ${apiToken}` },
+        headers: { authorization: `Bearer ${apiToken}` },
       };
       const res = createMockRes();
 
       const result = await validateSession(req, res);
 
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
-    });
-
-    it('should accept mixed case "BeArEr token" format', async () => {
-      const req = {
-        body: {},
-        headers: { authorization: `BeArEr ${apiToken}` },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
-    });
-
-    it('should handle leading/trailing whitespace in header', async () => {
-      const req = {
-        body: {},
-        headers: { authorization: `  Bearer ${apiToken}  ` },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
-    });
-
-    it('should handle extra whitespace after Bearer', async () => {
-      const req = {
-        body: {},
-        headers: { authorization: `Bearer  ${apiToken}` },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
-    });
-
-    it('should ignore non-string authorization header (array)', async () => {
-      const req = {
-        body: {},
-        headers: { authorization: [`Bearer ${apiToken}`, 'Bearer other'] },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      // Should fail because array is ignored
       expect(result).toBeNull();
       expect(res.statusCode).toBe(401);
     });
 
-    it('should reject invalid token after parsing', async () => {
+    it('should reject an invalid API token', async () => {
       const req = {
         body: {},
-        headers: { authorization: 'Bearer act_invalidtoken12345678901234' },
+        headers: { 'x-actual-token': 'act_invalidtoken12345678901234' },
       };
       const res = createMockRes();
 
@@ -170,43 +117,6 @@ describe('validateSession', () => {
       expect(result).toBeNull();
       expect(res.statusCode).toBe(401);
       expect(res.body.details).toBe('invalid-api-token');
-    });
-
-    it('should prefer x-actual-token header over Authorization', async () => {
-      // When both x-actual-token and Authorization are present,
-      // x-actual-token should be used first
-      const req = {
-        body: {},
-        headers: {
-          'x-actual-token': apiToken,
-          authorization: 'Bearer invalid-token',
-        },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      // Should use x-actual-token (valid API token), not Authorization (invalid)
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
-    });
-
-    it('should prefer body token over headers', async () => {
-      // When body.token and Authorization are both present,
-      // body.token should be used first
-      const req = {
-        body: { token: apiToken },
-        headers: {
-          authorization: 'Bearer invalid-token',
-        },
-      };
-      const res = createMockRes();
-
-      const result = await validateSession(req, res);
-
-      // Should use body token (valid API token), not Authorization (invalid)
-      expect(result).not.toBeNull();
-      expect(result.user_id).toBe(userId);
     });
   });
 

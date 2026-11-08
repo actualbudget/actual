@@ -15,18 +15,6 @@ export async function validateSession(req: Request, res: Response) {
     token = req.headers['x-actual-token'];
   }
 
-  // Also check Authorization header for Bearer tokens
-  if (!token) {
-    const authHeader = req.headers['authorization'];
-    if (typeof authHeader === 'string') {
-      const trimmed = authHeader.trim();
-      // RFC 7235: Auth scheme is case-insensitive
-      if (trimmed.toLowerCase().startsWith('bearer ')) {
-        token = trimmed.slice(7).trim();
-      }
-    }
-  }
-
   // Check if this is an API token
   if (typeof token === 'string' && token.startsWith(TOKEN_PREFIX)) {
     return await validateApiToken(token, res);
