@@ -9,10 +9,7 @@ import { theme } from '@actual-app/components/theme';
 import { tokens } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { currentDay, dayFromDate } from '@actual-app/core/shared/months';
-import {
-  amountToInteger,
-  currencyToInteger,
-} from '@actual-app/core/shared/util';
+import { amountToInteger } from '@actual-app/core/shared/util';
 import { format as formatDate, parse as parseDate, parseISO } from 'date-fns';
 
 import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
@@ -22,7 +19,9 @@ import { SectionLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { InputField } from '#components/mobile/MobileForms';
 import { DateSelect } from '#components/select/DateSelect';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFormat } from '#hooks/useFormat';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 const itemStyle: CSSProperties = {
@@ -55,6 +54,8 @@ export function EditFieldModal({
 }: EditFieldModalProps) {
   const { t } = useTranslation();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+  const precision = useAmountPrecision();
+  const format = useFormat(precision);
   const noteInputRef = useRef<HTMLInputElement | null>(null);
   const noteReplaceInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -64,24 +65,30 @@ export function EditFieldModal({
     }
   }
 
-  function onSelect(value: string | number) {
+  function onSelect(value: string | number): boolean {
     if (value != null) {
       // Process the value if needed
       if (name === 'amount') {
         if (typeof value === 'string') {
-          const parsed = currencyToInteger(value);
+          const parsed = format.fromEdit(value);
           if (parsed === null) {
             alert(t('Invalid amount value'));
-            return;
+            return false;
           }
           value = parsed;
         } else if (typeof value === 'number') {
-          value = amountToInteger(value);
+          value = amountToInteger(value, precision);
+          if (!Number.isSafeInteger(value)) {
+            alert(t('Invalid amount value'));
+            return false;
+          }
         }
       }
 
       onSubmit(name, value);
+      return true;
     }
+    return false;
   }
 
   const { isNarrowWidth } = useResponsive();
@@ -270,8 +277,9 @@ export function EditFieldModal({
       editor = ({ close }) => (
         <Input
           onEnter={value => {
-            onSelect(value);
-            close();
+            if (onSelect(value)) {
+              close();
+            }
           }}
           style={inputStyle}
         />

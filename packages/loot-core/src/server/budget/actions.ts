@@ -4,9 +4,10 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { batchMessages } from '#server/sync';
+import { getRecordedAmountPrecision } from '#server/util/currency';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
-import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
+import { getNumberFormat, integerToCurrency, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
@@ -577,7 +578,6 @@ export async function coverOverspending({
   to,
   from,
   amount,
-  currencyCode,
 }: {
   month: string;
   to: CategoryEntity['id'] | 'to-budget';
@@ -627,7 +627,6 @@ export async function coverOverspending({
       amount: coverableAmount,
       to,
       from,
-      currencyCode,
     });
   });
 }
@@ -653,7 +652,6 @@ export async function coverOverbudgeted({
   month,
   category,
   amount,
-  currencyCode,
 }: {
   month: string;
   category: string;
@@ -692,7 +690,6 @@ export async function coverOverbudgeted({
       amount: coverableAmount,
       from: category,
       to: 'overbudgeted',
-      currencyCode,
     });
   });
 }
@@ -702,7 +699,6 @@ export async function transferCategory({
   amount,
   from,
   to,
-  currencyCode,
 }: {
   month: string;
   amount: number;
@@ -728,7 +724,6 @@ export async function transferCategory({
       amount,
       to,
       from,
-      currencyCode,
     });
   });
 }
@@ -786,15 +781,18 @@ async function addMovementNotes({
   amount,
   to,
   from,
-  currencyCode,
 }: {
   month: string;
   amount: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
   from: CategoryEntity['id'] | 'to-budget';
-  currencyCode: string;
 }) {
-  const displayAmount = integerToCurrencyWithDecimal(amount, currencyCode);
+  const precision = getRecordedAmountPrecision();
+  const displayAmount = integerToCurrency(
+    amount,
+    getNumberFormat({ decimalPlaces: precision }).formatter,
+    precision,
+  );
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(

@@ -24,7 +24,7 @@ type AkahuTransaction = {
   category?: string;
   transactionId?: string;
   sortOrder: number;
-  transactionAmount: { amount: number; currency: string };
+  transactionAmount: { amount: string; currency: string };
   merchant?: {
     name: string;
     website?: string;
@@ -192,7 +192,7 @@ app.post(
           ? new Date(account.refreshed.balance)
           : new Date(),
       );
-      const currentBalance = convertToCents(account.balance.current);
+      const currentBalance = decimalAmount(account.balance.current);
 
       const balances = [
         {
@@ -205,10 +205,10 @@ app.post(
         },
       ];
 
-      if (account.balance.available) {
+      if (account.balance.available != null) {
         balances.push({
           balanceAmount: {
-            amount: convertToCents(account.balance.available),
+            amount: decimalAmount(account.balance.available),
             currency: account.balance.currency,
           },
           balanceType: 'interimAvailable',
@@ -322,8 +322,15 @@ const dateTimeFormatNZ = new Intl.DateTimeFormat('en-US', {
   day: '2-digit',
 });
 
-function convertToCents(amount: number): number {
-  return Math.round(amount * 100);
+function decimalAmount(amount: number): string {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) {
+    throw new Error('Invalid Akahu amount');
+  }
+  const decimal = String(amount);
+  if (!/^-?\d+(?:\.\d+)?$/.test(decimal)) {
+    throw new Error('Invalid Akahu amount');
+  }
+  return decimal;
 }
 
 type AnyTransaction = Transaction | EnrichedTransaction | PendingTransaction;
@@ -363,7 +370,7 @@ function processPendingTransaction(
     notes: trans.description,
     sortOrder: transactionDate.getTime(),
     transactionAmount: {
-      amount: Math.round(trans.amount * 100) / 100,
+      amount: decimalAmount(trans.amount),
       currency: account.balance?.currency ?? 'NZD',
     },
   };

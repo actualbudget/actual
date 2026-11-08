@@ -40,6 +40,9 @@ type SyncEvent = {
       type: 'start';
     }
   | {
+      type: 'pending-transition';
+    }
+  | {
       type: 'unauthorized';
     }
   | {

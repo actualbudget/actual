@@ -1,9 +1,9 @@
 import * as d from 'date-fns';
 
 import {
-  amountToInteger,
   printIban,
   sortByBookingDateOrValueDate,
+  startingBalanceFromTransactions,
 } from '#app-gocardless/utils';
 import { formatPayeeName } from '#util/payee-name';
 
@@ -88,11 +88,9 @@ export default {
           SORTED_BALANCE_TYPE_LIST.indexOf(a.balanceType) -
           SORTED_BALANCE_TYPE_LIST.indexOf(b.balanceType),
       )[0];
-    return sortedTransactions.reduce(
-      (total, trans) => {
-        return total - amountToInteger(trans.transactionAmount.amount);
-      },
-      amountToInteger(currentBalance?.balanceAmount.amount || 0),
+    return startingBalanceFromTransactions(
+      currentBalance?.balanceAmount.amount ?? '0',
+      sortedTransactions,
     );
   },
 } satisfies IBank;

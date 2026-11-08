@@ -58,5 +58,5 @@ export type IBank = {
   calculateStartingBalance: (
     sortedTransactions: Transaction[],
     balances: Balance[],
-  ) => number;
+  ) => string;
 };

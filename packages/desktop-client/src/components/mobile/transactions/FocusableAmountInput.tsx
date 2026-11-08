@@ -18,16 +18,19 @@ import type { CSSProperties as EmotionCSSProperties } from '@actual-app/componen
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { getCurrency } from '@actual-app/core/shared/currencies';
 import {
   amountToInteger,
   appendDecimals,
   currencyToAmount,
+  getNumberFormat,
+  MAX_SAFE_NUMBER,
   reapplyThousandSeparators,
 } from '@actual-app/core/shared/util';
 import { css } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
-import { useFormat } from '#hooks/useFormat';
+import { useAmountPrecision } from '#hooks/useAmountPrecision';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
@@ -51,13 +54,21 @@ const AmountInput = memo(function AmountInput({
   textStyle,
   ...props
 }: AmountInputProps) {
+  const precision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
+  const [currencyCode] = useSyncedPref('defaultCurrencyCode');
+  const displayPrecision = encoding
+    ? precision
+    : getCurrency(currencyCode || '').decimalPlaces;
+  const formatter = getNumberFormat({
+    decimalPlaces: displayPrecision,
+  }).formatter;
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const caretFromEnd = useRef<number | null>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
-  const format = useFormat();
 
   const mergedInputRef = useMergedRefs<HTMLInputElement>(
     props.inputRef,
@@ -65,7 +76,7 @@ const AmountInput = memo(function AmountInput({
   );
 
   const initialValue = Math.abs(props.value);
-  const formattedValue = format.forEdit(amountToInteger(value));
+  const formattedValue = formatter.format(value);
   // Show the real amount in the input so it can be selected and copied.
   // Zero stays empty so typed digits don't get appended to "0.00".
   const inputValue = editing ? text : value === 0 ? '' : formattedValue;
@@ -80,7 +91,7 @@ const AmountInput = memo(function AmountInput({
     setEditing(false);
     setText('');
     setValue(initialValue);
-  }, [initialValue]);
+  }, [initialValue, precision]);
 
   // Reformatting moves the caret to the end; put it back before the same
   // number of digits it had in front of it.
@@ -115,9 +126,16 @@ const AmountInput = memo(function AmountInput({
   // can see stale `text=''` and save 0 instead of the typed amount.
   const applyText = (rawInput?: string) => {
     const domText = rawInput ?? inputRef.current?.value ?? text;
-    const parsed = currencyToAmount(domText) || 0;
+    const parsed =
+      currencyToAmount(domText, getNumberFormat().thousandsSeparator) || 0;
     const hasPendingInput = editing || domText !== inputValue;
     const newValue = hasPendingInput ? parsed : value;
+    const integer = amountToInteger(newValue, precision);
+    if (!Number.isSafeInteger(integer) || Math.abs(integer) > MAX_SAFE_NUMBER) {
+      setEditing(false);
+      setText('');
+      return null;
+    }
 
     setValue(Math.abs(newValue));
     setEditing(false);
@@ -137,7 +155,7 @@ const AmountInput = memo(function AmountInput({
   const onUpdate = (value: string) => {
     const originalAmount = Math.abs(props.value);
     const amount = applyText(value);
-    if (amount !== originalAmount) {
+    if (amount !== null && amount !== originalAmount) {
       props.onUpdate?.(value);
       props.onUpdateAmount?.(amount);
     }
@@ -159,22 +177,18 @@ const AmountInput = memo(function AmountInput({
   const onChangeText = (rawText: string, caret: number | null) => {
     caretFromEnd.current =
       caret === null ? null : rawText.slice(caret).replace(/\D/g, '').length;
-    let text = rawText;
-    if (format.currency.decimalPlaces === 0) {
-      // Typed digits are whole units, whatever the hideFraction setting
-      text = format.forEdit(amountToInteger(Number(text.replace(/\D/g, ''))));
-    } else {
-      text = appendDecimals(
-        reapplyThousandSeparators(text),
-        String(hideFraction) === 'true',
-      );
-    }
+    const text =
+      displayPrecision === 0
+        ? formatter.format(Number(rawText.replace(/\D/g, '')))
+        : appendDecimals(
+            reapplyThousandSeparators(rawText),
+            String(hideFraction) === 'true',
+            displayPrecision,
+          );
     updateText(text);
   };
 
   const onPaste: HTMLProps<HTMLInputElement>['onPaste'] = e => {
-    // Only a full replacement is an amount ("12" is 12, not 0.12); with a
-    // partial selection the browser inserts the text and onChange reformats.
     const input = e.currentTarget;
     if (
       input.selectionStart !== 0 ||
@@ -183,9 +197,12 @@ const AmountInput = memo(function AmountInput({
       return;
     }
     e.preventDefault();
-    const amount = currencyToAmount(e.clipboardData.getData('text'));
+    const amount = currencyToAmount(
+      e.clipboardData.getData('text'),
+      getNumberFormat().thousandsSeparator,
+    );
     if (amount === null) return;
-    updateText(format.forEdit(amountToInteger(Math.abs(amount))));
+    updateText(formatter.format(Math.abs(amount)));
   };
 
   const input = (
@@ -242,7 +259,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing ? text || format.forEdit(0) : formattedValue}
+        {editing ? text || formatter.format(0) : formattedValue}
       </Text>
     </View>
   );
@@ -275,7 +292,15 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   onChangeValue,
   ...props
 }: FocusableAmountInputProps) {
-  const format = useFormat();
+  const precision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
+  const [currencyCode] = useSyncedPref('defaultCurrencyCode');
+  const displayPrecision = encoding
+    ? precision
+    : getCurrency(currencyCode || '').decimalPlaces;
+  const formatter = getNumberFormat({
+    decimalPlaces: displayPrecision,
+  }).formatter;
   const [isNegative, setIsNegative] = useState(true);
   const [liveValue, setLiveValue] = useState(Math.abs(value));
   const [prevValue, setPrevValue] = useState(value);
@@ -294,7 +319,9 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
   };
 
   const handleChangeValue = (text: string) => {
-    setLiveValue(currencyToAmount(text) || 0);
+    setLiveValue(
+      currencyToAmount(text, getNumberFormat().thousandsSeparator) || 0,
+    );
     onChangeValue?.(text);
   };
 
@@ -391,7 +418,7 @@ export const FocusableAmountInput = memo(function FocusableAmountInput({
                 ...textStyle,
               }}
             >
-              {format.forEdit(amountToInteger(Math.abs(value)))}
+              {formatter.format(Math.abs(value))}
             </Text>
           </View>
         </Button>

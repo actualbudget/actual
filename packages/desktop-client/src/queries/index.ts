@@ -10,6 +10,8 @@ import type { Query } from '@actual-app/core/shared/query';
 import {
   amountToInteger,
   currencyToAmount,
+  getNumberFormat,
+  MAX_SAFE_NUMBER,
 } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
@@ -86,6 +88,7 @@ export function transactionsSearch(
   search: string,
   dateFormat: SyncedPrefs['dateFormat'],
   currencySymbol: string,
+  precision = 2,
 ) {
   // currencyToAmount ignores letters, so "35mm" would match the amount 35.
   // Letters make a search text-only, except a leading or trailing currency
@@ -100,9 +103,46 @@ export function transactionsSearch(
         '$1',
       )
     : search;
-  const amount = /\p{L}/u.test(amountSearch)
-    ? null
-    : currencyToAmount(amountSearch.trim());
+  const textOnly = /\p{L}/u.test(amountSearch);
+  const thousandsSeparator = getNumberFormat().thousandsSeparator;
+  const parseStoredAmount = (text: string) => {
+    const major = currencyToAmount(text, thousandsSeparator);
+    if (major === null) return null;
+    const scaled = major * 10 ** precision;
+    const stored = amountToInteger(major, precision);
+    return Number.isSafeInteger(stored) &&
+      Math.abs(stored) <= MAX_SAFE_NUMBER &&
+      Math.abs(scaled - stored) < 1e-7
+      ? stored
+      : null;
+  };
+  const comparison = search.match(
+    /^\s*(<=|>=|<|>|=)\s*(-?\d+(?:[.,]\d+)?)\s*$/,
+  );
+  const range = search.match(
+    /^\s*(-?\d+(?:[.,]\d+)?)\s*\.\.\s*(-?\d+(?:[.,]\d+)?)\s*$/,
+  );
+  const comparisonAmount = comparison ? parseStoredAmount(comparison[2]) : null;
+  const rangeStart = range ? parseStoredAmount(range[1]) : null;
+  const rangeEnd = range ? parseStoredAmount(range[2]) : null;
+  const plainAmount =
+    !comparison && !range && !textOnly ? amountSearch.trim() : null;
+  const amount = plainAmount !== null ? parseStoredAmount(plainAmount) : null;
+  const majorAmount =
+    plainAmount !== null
+      ? currencyToAmount(plainAmount, thousandsSeparator)
+      : null;
+  const comparisonOperator =
+    comparison &&
+    (
+      {
+        '>': '$gt',
+        '>=': '$gte',
+        '<': '$lt',
+        '<=': '$lte',
+        '=': '$eq',
+      } as const
+    )[comparison[1]];
   const escapedSearch = search.replace(/[\\%?]/g, '\\$&');
 
   // Support various date formats
@@ -124,14 +164,27 @@ export function transactionsSearch(
       'account.name': { $like: `%${escapedSearch}%` },
       $or: [
         isDateValid(parsedDate) && { date: dayFromDate(parsedDate) },
+        comparisonAmount != null &&
+          comparisonOperator && {
+            amount: { [comparisonOperator]: comparisonAmount },
+          },
+        rangeStart != null &&
+          rangeEnd != null &&
+          rangeStart <= rangeEnd && {
+            $and: [
+              { amount: { $gte: rangeStart } },
+              { amount: { $lte: rangeEnd } },
+            ],
+          },
         amount != null && {
-          amount: { $transform: '$abs', $eq: amountToInteger(amount) },
+          amount: { $transform: '$abs', $eq: Math.abs(amount) },
         },
         amount != null &&
-          Number.isInteger(amount) && {
+          majorAmount != null &&
+          Number.isInteger(majorAmount) && {
             amount: {
-              $transform: { $abs: { $idiv: ['$', 100] } },
-              $eq: amount,
+              $transform: { $abs: { $idiv: ['$', 10 ** precision] } },
+              $eq: Math.abs(majorAmount),
             },
           },
       ].filter(Boolean),

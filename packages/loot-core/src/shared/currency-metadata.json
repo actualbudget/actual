@@ -1,0 +1,7 @@
+{
+  "source": "https://raw.githubusercontent.com/unicode-org/cldr-json/49.0.0/cldr-json/cldr-core/supplemental/currencyData.json",
+  "cldrVersion": "49",
+  "unicodeVersion": "16.0.0",
+  "reviewedOn": "2026-11-02",
+  "sourceJsonSha256": "16cad82689a3bb8428189b3eb85fa46c63e4de4bba48b758fdaa1fe9482485af"
+}

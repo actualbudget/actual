@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { captureBreadcrumb, captureException } from '#platform/exceptions';
+import * as prefs from '#server/prefs';
 import { sequential } from '#shared/async';
 import type { HandlerFunctions, Handlers } from '#types/handlers';
 
@@ -52,6 +53,13 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   if (mutatingMethods.has(handler)) {
+    if (
+      prefs.getPrefs()?.amountEncodingTransition &&
+      name !== 'amount-encoding/transition' &&
+      name !== 'amount-encoding/retry'
+    ) {
+      throw new Error('amount-encoding-transition-pending');
+    }
     return runMutator(() => handler(args), { undoTag }) as Promise<
       ReturnType<T>
     >;
