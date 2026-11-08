@@ -16,6 +16,7 @@ import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useMobileOpenDocument } from '#hooks/useMobileOpenDocument';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNewsNotification } from '#hooks/useNewsNotification';
 import { ScrollProvider } from '#hooks/useScrollListener';
@@ -119,6 +120,7 @@ export function FinancesApp() {
 
   useAutomaticBankSync();
   useNewsNotification();
+  useMobileOpenDocument({ budgetOpen: true });
 
   const init = useEffectEvent(() => {
     // Wait a little bit to make sure the sync button will get the

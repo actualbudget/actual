@@ -31,6 +31,112 @@
 			</array>
 		</dict>
 	</array>
+	<!-- Lets Files / Mail offer “Open in Actual” for common import formats. -->
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Actual Import</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.comma-separated-values-text</string>
+				<string>public.tab-separated-values-text</string>
+				<string>public.zip-archive</string>
+				<string>public.xml</string>
+				<string>public.data</string>
+				<string>com.intuit.qfx</string>
+				<string>com.intuit.ofx</string>
+				<string>org.actualbudget.ofx</string>
+				<string>org.actualbudget.qfx</string>
+				<string>org.actualbudget.qif</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>csv</string>
+				<string>tsv</string>
+				<string>zip</string>
+				<string>ofx</string>
+				<string>qfx</string>
+				<string>qif</string>
+				<string>xml</string>
+				<string>blob</string>
+			</array>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.actualbudget.ofx</string>
+			<key>UTTypeDescription</key>
+			<string>Open Financial Exchange</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>ofx</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/x-ofx</string>
+					<string>application/ofx</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.actualbudget.qfx</string>
+			<key>UTTypeDescription</key>
+			<string>Quicken Financial Exchange</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>qfx</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/vnd.intu.qfx</string>
+					<string>application/x-qfx</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.actualbudget.qif</string>
+			<key>UTTypeDescription</key>
+			<string>Quicken Interchange Format</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.text</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>qif</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/qif</string>
+					<string>application/x-qif</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
