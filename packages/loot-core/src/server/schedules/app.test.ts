@@ -1314,6 +1314,135 @@ describe('schedule app', () => {
         await schedulesApp.stopServices();
       }
     });
+
+    it('advances a recurring schedule without an account when paid', async () => {
+      MockDate.set(new Date(2016, 11, 6, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: false },
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-05',
+                frequency: 'weekly',
+                interval: 2,
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161205,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161205,
+          base_next_date_ts: Date.now(),
+        });
+
+        await db.insertTransaction({
+          account: accountId,
+          amount: -10000,
+          date: '2016-12-05',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2016-12-19');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
+    it('does not advance a recurring schedule for a closed account when paid', async () => {
+      MockDate.set(new Date(2016, 11, 6, 12));
+      schedulesApp.startServices();
+
+      try {
+        const openAccountId = await db.insertAccount({
+          name: 'Open Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const closedAccountId = await db.insertAccount({
+          name: 'Closed Checking',
+          offbudget: 0,
+          closed: 1,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: false },
+          conditions: [
+            {
+              op: 'is',
+              field: 'account',
+              value: closedAccountId,
+            },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-05',
+                frequency: 'weekly',
+                interval: 2,
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161205,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161205,
+          base_next_date_ts: Date.now(),
+        });
+
+        await db.insertTransaction({
+          account: openAccountId,
+          amount: -10000,
+          date: '2016-12-05',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2016-12-05');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
   });
 
   describe('schedule advancement failures', () => {
