@@ -29,8 +29,23 @@ const pendingOpenUrls = new Set<string>();
  * finished loading. Replayed once both are ready (warm opens are not re-emitted).
  */
 const deferredTransactionUrls = new Set<string>();
+/** Budget ZIP opens interrupted by effect teardown — not transaction-deferred. */
+const deferredBudgetUrls = new Set<string>();
 /** Multi-account picker is open for this URL — block deferred replay until chosen. */
 const awaitingAccountChoiceUrls = new Set<string>();
+
+/**
+ * Latest mounted handler. Cancelled async work can hand the URL back to the
+ * active effect after `pendingOpenUrls` is cleared (the replacement effect may
+ * already have finished its initial drain).
+ */
+let activeHandleUrl: ((url: string) => Promise<void>) | null = null;
+
+function retryWithActiveHandler(url: string) {
+  void Promise.resolve().then(() => {
+    void activeHandleUrl?.(url);
+  });
+}
 
 async function readOpenDocument(url: string): Promise<ArrayBuffer> {
   // convertFileSrc turns a native file:// (or Capacitor) URL into something
@@ -133,10 +148,19 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
         if (BUDGET_IMPORT_EXTENSIONS.has(extension)) {
           const contents = await readOpenDocument(url);
           if (cancelled) {
+            deferredBudgetUrls.add(url);
+            retryWithActiveHandler(url);
             return;
           }
 
           await window.__actionsForMenu.uploadFile(uploadName, contents);
+          if (cancelled) {
+            // Do not importBudget after unmount — hand off to the new effect.
+            deferredBudgetUrls.add(url);
+            retryWithActiveHandler(url);
+            return;
+          }
+
           await dispatch(
             importBudget({
               filepath: `/uploads/${uploadName}`,
@@ -144,6 +168,7 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
             }),
           );
           handledOpenUrls.add(url);
+          deferredBudgetUrls.delete(url);
           return;
         }
 
@@ -206,11 +231,18 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
 
         const contents = await readOpenDocument(url);
         if (cancelled) {
-          // Leave URL in deferredTransactionUrls so the next effect can retry.
+          deferredTransactionUrls.add(url);
+          retryWithActiveHandler(url);
           return;
         }
 
         await window.__actionsForMenu.uploadFile(uploadName, contents);
+        if (cancelled) {
+          deferredTransactionUrls.add(url);
+          retryWithActiveHandler(url);
+          return;
+        }
+
         const filepath = `/uploads/${uploadName}`;
 
         const openImportForAccount = (accountId: string) => {
@@ -286,10 +318,12 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
         }
       } catch (error) {
         handledOpenUrls.delete(url);
-        // Re-queue transaction opens for a later ready pass; budget zips should
-        // not enter the transaction deferral set.
+        // Re-queue transaction opens for a later ready pass; budget zips go to
+        // the budget deferral set instead.
         if (TRANSACTION_IMPORT_EXTENSIONS.has(extension)) {
           deferredTransactionUrls.add(url);
+        } else if (BUDGET_IMPORT_EXTENSIONS.has(extension)) {
+          deferredBudgetUrls.add(url);
         }
         dispatch(
           addNotification({
@@ -307,6 +341,8 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
       }
     }
 
+    activeHandleUrl = handleUrl;
+
     const listener = CapacitorApp.addListener('appUrlOpen', ({ url }) => {
       void handleUrl(url);
     });
@@ -323,6 +359,9 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
 
     // Do not remove from the set before handleUrl finishes — a cancelled or
     // failed attempt must leave the URL queued for the next ready pass.
+    for (const url of [...deferredBudgetUrls]) {
+      void handleUrl(url);
+    }
     if (budgetOpen && accountsReady && deferredTransactionUrls.size > 0) {
       for (const url of [...deferredTransactionUrls]) {
         void handleUrl(url);
@@ -331,6 +370,9 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
 
     return () => {
       cancelled = true;
+      if (activeHandleUrl === handleUrl) {
+        activeHandleUrl = null;
+      }
       void listener.then(handle => handle.remove());
     };
   }, [accountsReady, budgetOpen, dispatch, t]);
