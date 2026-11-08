@@ -1,5 +1,4 @@
 import React from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { Route, Routes, useLocation } from 'react-router';
 
@@ -26,6 +25,7 @@ import { css } from '@emotion/css';
 import { sync } from '#app/appSlice';
 import { SharedArrayBufferWarning } from '#components/SharedArrayBufferWarning';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';

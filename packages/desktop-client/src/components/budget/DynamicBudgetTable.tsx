@@ -2,7 +2,6 @@
 import type { ComponentProps } from 'react';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { useHotkeys } from 'react-hotkeys-hook';
 
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -10,6 +9,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useHotkeys } from '#hooks/useHotkeys';
 
 import { useBudgetMonthCount } from './BudgetMonthCountContext';
 import { BudgetPageHeader } from './BudgetPageHeader';

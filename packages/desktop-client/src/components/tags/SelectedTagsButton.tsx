@@ -1,10 +1,10 @@
-import { useHotkeys } from 'react-hotkeys-hook';
 import { useTranslation } from 'react-i18next';
 
 import type { MenuItemObject } from '@actual-app/components/menu';
 import type { TagEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { useSelectedDispatch, useSelectedItems } from '#hooks/useSelected';
 import {
   useDeleteTagsMutation,

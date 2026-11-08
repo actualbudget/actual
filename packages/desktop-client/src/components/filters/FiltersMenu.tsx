@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { FocusScope } from 'react-aria';
 import { Form } from 'react-aria-components';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -40,6 +39,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { usePayees } from '#hooks/usePayees';
 import { useTransactionFilters } from '#hooks/useTransactionFilters';
 import { mapField } from '#util/rule';
