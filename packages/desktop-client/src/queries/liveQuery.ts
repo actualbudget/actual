@@ -137,15 +137,12 @@ export class LiveQuery<TResponse = unknown> {
   protected subscribe = () => {
     if (this._unsubscribeSyncEvent == null) {
       this._unsubscribeSyncEvent = listen('sync-event', event => {
-        // If the user is doing optimistic updates, they don't want to
-        // always refetch whenever something changes because it would
-        // refetch all data after they've already updated the UI. This
-        // voids the perf benefits of optimistic updates. Allow querys
-        // to only react to remote syncs. By default, queries will
-        // always update to all changes.
+        // Optimistic updates should not trigger redundant refetches.
+        // Changes originating from another tab must still be fetched.
         if (
           (event.type === 'applied' || event.type === 'success') &&
-          this._supportedSyncTypes.has(event.type)
+          (this._supportedSyncTypes.has(event.type) ||
+            (event.type === 'applied' && event.fromAnotherTab === true))
         ) {
           this.onUpdate(event.tables);
         }

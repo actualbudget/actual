@@ -18,7 +18,11 @@ import {
 import * as db from '#server/db';
 import { PostError, SyncError } from '#server/errors';
 import { app } from '#server/main-app';
-import { flushRunningMutators, runMutator } from '#server/mutators';
+import {
+  flushRunningMutators,
+  getCurrentMutatorRequestId,
+  runMutator,
+} from '#server/mutators';
 import { postBinary } from '#server/post';
 import * as prefs from '#server/prefs';
 import { getServer } from '#server/server-config';
@@ -618,11 +622,16 @@ async function _applyMessages(messages: Message[], isReceived = false) {
   const tables = getTablesFromMessages(
     messages.filter(msg => !msg.old && !deferredMessages.has(msg)),
   );
+
+  // Remote messages do not originate from a local tab request.
+  const requestId = isReceived ? undefined : getCurrentMutatorRequestId();
+
   app.events.emit('sync', {
     type: 'applied',
     tables,
     data: newData,
     prevData: oldData,
+    ...(requestId ? { requestId } : {}),
   });
 
   if (deferredMessages.size > 0) {

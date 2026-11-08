@@ -54,7 +54,7 @@ export const init: T.Init = function (serverChn, handlers) {
       const { id, name, args, undoTag, catchErrors } = msg;
 
       if (handlers[name]) {
-        runHandler(handlers[name], args, { undoTag, name }).then(
+        runHandler(handlers[name], args, { undoTag, name, requestId: id }).then(
           result => {
             post({
               type: 'reply',

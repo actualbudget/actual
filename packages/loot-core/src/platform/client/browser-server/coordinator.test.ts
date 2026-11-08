@@ -662,6 +662,255 @@ describe('SharedWorker coordinator', () => {
       );
     });
 
+    it('marks applied changes from another tab', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      leader.postMessage.mockClear();
+      follower.postMessage.mockClear();
+
+      // A transaction is edited in the leader tab.
+      sendMsg(leader, {
+        id: 'edit-leader',
+        name: 'transactions-batch-update',
+        args: { updated: [] },
+      });
+
+      const syncEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+          requestId: 'edit-leader',
+        },
+      };
+
+      // Backend publishes the change.
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: syncEvent,
+      });
+
+      // Originating tab keeps the original event.
+      expect(leader.postMessage).toHaveBeenCalledWith(syncEvent);
+
+      // Other tabs must know this change came from elsewhere.
+      expect(follower.postMessage).toHaveBeenCalledWith({
+        ...syncEvent,
+        args: {
+          ...syncEvent.args,
+          fromAnotherTab: true,
+        },
+      });
+    });
+
+    it('marks follower edits as remote for the leader', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      leader.postMessage.mockClear();
+      follower.postMessage.mockClear();
+
+      sendMsg(follower, {
+        id: 'edit-follower',
+        name: 'transactions-batch-update',
+        args: { updated: [] },
+      });
+
+      const syncEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+          requestId: 'edit-follower',
+        },
+      };
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: syncEvent,
+      });
+
+      expect(follower.postMessage).toHaveBeenCalledWith(syncEvent);
+
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        ...syncEvent,
+        args: {
+          ...syncEvent.args,
+          fromAnotherTab: true,
+        },
+      });
+    });
+
+    it('routes overlapping edits to their correct originating tabs', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-overlap-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      leader.postMessage.mockClear();
+      follower.postMessage.mockClear();
+
+      // Both tabs submit edits before either request finishes.
+      sendMsg(leader, {
+        id: 'overlap-leader',
+        name: 'transactions-batch-update',
+        args: { updated: [] },
+      });
+      sendMsg(follower, {
+        id: 'overlap-follower',
+        name: 'transactions-batch-update',
+        args: { updated: [] },
+      });
+
+      // Follower's event arrives first.
+      const followerEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+          requestId: 'overlap-follower',
+        },
+      };
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: followerEvent,
+      });
+
+      expect(follower.postMessage).toHaveBeenCalledWith(followerEvent);
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        ...followerEvent,
+        args: { ...followerEvent.args, fromAnotherTab: true },
+      });
+
+      leader.postMessage.mockClear();
+      follower.postMessage.mockClear();
+
+      // Leader's event arrives second.
+      const leaderEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+          requestId: 'overlap-leader',
+        },
+      };
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: leaderEvent,
+      });
+
+      expect(leader.postMessage).toHaveBeenCalledWith(leaderEvent);
+      expect(follower.postMessage).toHaveBeenCalledWith({
+        ...leaderEvent,
+        args: { ...leaderEvent.args, fromAnotherTab: true },
+      });
+    });
+
+    it('marks events from a disconnected originating tab as remote', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      const follower = connectTab(coordinator);
+
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      sendMsg(follower, {
+        id: 'edit-before-close',
+        name: 'transactions-batch-update',
+        args: { updated: [] },
+      });
+
+      // Originating tab closes while its edit is still in flight.
+      sendMsg(follower, { type: 'tab-closing' });
+
+      leader.postMessage.mockClear();
+
+      const syncEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+          requestId: 'edit-before-close',
+        },
+      };
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: syncEvent,
+      });
+
+      // Remaining tabs must refetch after the edit.
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        ...syncEvent,
+        args: {
+          ...syncEvent.args,
+          fromAnotherTab: true,
+        },
+      });
+    });
+
+    it('preserves broadcasts for applied events without a request ID', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'load-follower',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+
+      leader.postMessage.mockClear();
+      follower.postMessage.mockClear();
+
+      const syncEvent = {
+        type: 'push',
+        name: 'sync-event',
+        args: {
+          type: 'applied',
+          tables: ['transactions'],
+        },
+      };
+
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: syncEvent,
+      });
+
+      expect(leader.postMessage).toHaveBeenCalledWith(syncEvent);
+      expect(follower.postMessage).toHaveBeenCalledWith(syncEvent);
+    });
+
     it('broadcasts connect to entire group and unassigned ports', () => {
       const leader = connectTab(coordinator);
       sendInit(leader);

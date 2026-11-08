@@ -131,6 +131,31 @@ describe('liveQuery', () => {
     expect(await p).toEqual('wait(100)');
   });
 
+  it('refetches applied events from another tab (onlySync: true)', async () => {
+    mockBasicServer();
+    tracer.start();
+
+    const query = q('transactions').select('*');
+
+    liveQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
+    });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+
+    // Simulate a transaction edit originating in another tab.
+    mockPublishEvent('sync-event', {
+      type: 'applied',
+      tables: ['transactions'],
+      fromAnotherTab: true,
+    });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+  });
+
   it(`runs and updates with sync events (onlySync: true)`, async () => {
     mockBasicServer();
     tracer.start();
