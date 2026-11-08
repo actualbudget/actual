@@ -147,6 +147,10 @@
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },
+  "dependencies": {
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3"
+  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",

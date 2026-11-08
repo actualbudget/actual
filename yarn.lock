@@ -235,7 +235,9 @@ __metadata:
     "@babel/core": "npm:^8.0.7"
     "@capacitor/app": "npm:^8.1.2"
     "@capacitor/core": "npm:^8.4.2"
+    "@capacitor/filesystem": "npm:^8.1.5"
     "@capacitor/haptics": "npm:^8.0.2"
+    "@capacitor/share": "npm:^8.0.3"
     "@codemirror/autocomplete": "npm:^6.20.3"
     "@codemirror/language": "npm:^6.13.1"
     "@codemirror/state": "npm:^6.7.6"
@@ -2135,6 +2137,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@capacitor/filesystem@npm:^8.1.5":
+  version: 8.1.5
+  resolution: "@capacitor/filesystem@npm:8.1.5"
+  dependencies:
+    "@capacitor/synapse": "npm:^1.0.4"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/de7bb152177de26161a983c11d01e3dc4f028ee5dd00699f7742c5de5d882f7c9680b3dcf436a9e6b9c39264989c61f63a486fb8ed8a84ecfdfe9996f4d78534
+  languageName: node
+  linkType: hard
+
 "@capacitor/haptics@npm:^8.0.2":
   version: 8.0.2
   resolution: "@capacitor/haptics@npm:8.0.2"
@@ -2153,12 +2166,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@capacitor/share@npm:^8.0.3":
+  version: 8.0.3
+  resolution: "@capacitor/share@npm:8.0.3"
+  peerDependencies:
+    "@capacitor/core": ">=8.0.0"
+  checksum: 10/e011def2941ee91a4f83481f1bcbc9d4b9f81b9dec9c80c87e6a6675bb3d164a0df1a863b10dc84bd099367be5e4a9a1770bc73dbf673edf4e1e7a5dda2580d5
+  languageName: node
+  linkType: hard
+
 "@capacitor/splash-screen@npm:^8.0.2":
   version: 8.0.2
   resolution: "@capacitor/splash-screen@npm:8.0.2"
   peerDependencies:
     "@capacitor/core": ">=8.0.0"
   checksum: 10/eb46860c78e4f9aac7c0d8ac3915776f4e099cff02548deb69f395f643a65ab66e29addad400e43aba6beaa973954886e4efa8c8b128ea87c4a56a8cc5e9d125
+  languageName: node
+  linkType: hard
+
+"@capacitor/synapse@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@capacitor/synapse@npm:1.0.4"
+  checksum: 10/1e7d4e4abb7ad0890e37544062523eb4ab1ec4478aaccd1d9d4550033ab67c126f50de622cfc202f0bad1c38aaee686505c248196873c81fa4175158214cafaa
   languageName: node
   linkType: hard
 
@@ -20225,8 +20254,10 @@ __metadata:
     "@capacitor/app": "npm:^8.1.2"
     "@capacitor/cli": "npm:^8.4.2"
     "@capacitor/core": "npm:^8.4.2"
+    "@capacitor/filesystem": "npm:^8.1.5"
     "@capacitor/haptics": "npm:^8.0.2"
     "@capacitor/ios": "npm:^8.5.3"
+    "@capacitor/share": "npm:^8.0.3"
     "@capacitor/splash-screen": "npm:^8.0.2"
   languageName: unknown
   linkType: soft
