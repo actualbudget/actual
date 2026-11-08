@@ -14,6 +14,39 @@
       "idiom": "universal",
       "filename": "splash-2732x2732.png",
       "scale": "3x"
+    },
+    {
+      "idiom": "universal",
+      "filename": "splash-dark-1x.png",
+      "scale": "1x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "idiom": "universal",
+      "filename": "splash-dark-2x.png",
+      "scale": "2x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
+    },
+    {
+      "idiom": "universal",
+      "filename": "splash-dark-3x.png",
+      "scale": "3x",
+      "appearances": [
+        {
+          "appearance": "luminosity",
+          "value": "dark"
+        }
+      ]
     }
   ],
   "info": {

@@ -48,6 +48,9 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   private _pageCount: number;
   private _fetchDataPromise: Promise<void> | null;
   private _totalCount: number;
+  // The fetch up to a row in progress. A refresh meanwhile, e.g. from a
+  // sync, makes it fetch again instead of replacing its rows with fewer.
+  private _upToRow: { isStale: boolean } | null = null;
 
   get hasNext() {
     return !this._hasReachedEnd;
@@ -79,6 +82,10 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
   };
 
   run = () => {
+    if (this._upToRow) {
+      this._upToRow.isStale = true;
+      return this._fetchDataPromise;
+    }
     this.subscribe();
 
     this._fetchDataPromise = this.fetchData(async () => {
@@ -87,18 +94,23 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       // Also fetch the total count
       void this.fetchCount();
 
-      // If data is null, we haven't fetched anything yet so just
-      // fetch the first page
-      return aqlQuery(
-        this.query.limit(
-          this.data == null
-            ? this._pageCount
-            : Math.max(this.data.length, this._pageCount),
-        ),
-      );
+      return this.fetchLoaded();
     });
 
     return this._fetchDataPromise;
+  };
+
+  // Refetches the rows loaded so far
+  private fetchLoaded = () => {
+    // If data is null, we haven't fetched anything yet so just
+    // fetch the first page
+    return aqlQuery(
+      this.query.limit(
+        this.data == null
+          ? this._pageCount
+          : Math.max(this.data.length, this._pageCount),
+      ),
+    );
   };
 
   static runPagedQuery = <TResponse>(
@@ -119,8 +131,22 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
     return pagedQuery;
   };
 
+  // Resolves once the rows up to it, as of the latest refresh, are loaded
   refetchUpToRow = async (id, defaultOrderBy) => {
-    this._fetchDataPromise = this.fetchData(async () => {
+    const upToRow = { isStale: false };
+    this._upToRow = upToRow;
+    do {
+      upToRow.isStale = false;
+      this._fetchDataPromise = this.fetchUpToRow(id, defaultOrderBy);
+      await this._fetchDataPromise;
+    } while (upToRow.isStale && this._upToRow === upToRow);
+    if (this._upToRow === upToRow) {
+      this._upToRow = null;
+    }
+  };
+
+  private fetchUpToRow = (id, defaultOrderBy) => {
+    return this.fetchData(async () => {
       this._hasReachedEnd = false;
 
       // Also fetch the total count
@@ -137,8 +163,8 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
       if (result.data.length === 0) {
         // This row is not part of this set anymore, we can't do
         // this. We stop early to avoid possibly pulling in a ton of
-        // data that we don't need
-        return;
+        // data that we don't need, and refetch what's loaded instead
+        return this.fetchLoaded();
       }
       const fullRow = result.data[0];
 
@@ -168,8 +194,6 @@ export class PagedQuery<TResponse = unknown> extends LiveQuery<TResponse> {
         dependencies: result.dependencies,
       };
     });
-
-    return this._fetchDataPromise;
   };
 
   private onPageData = (data: Data<TResponse>) => {

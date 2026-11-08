@@ -1,0 +1,51 @@
+name: Publish to App Store Connect
+description: Uploads a signed .ipa or .pkg, releases it to the external TestFlight group and optionally submits it for App Store review
+
+inputs:
+  path:
+    description: Glob of the .ipa or .pkg to upload
+    required: true
+  platform:
+    description: IOS or MAC_OS
+    required: true
+  submit-for-review:
+    description: Also submit the build for App Store review, releasing it after approval
+    required: false
+    default: 'false'
+  key-id:
+    description: App Store Connect API key ID
+    required: true
+  issuer-id:
+    description: App Store Connect API issuer ID
+    required: true
+  private-key:
+    description: App Store Connect API private key (.p8 contents)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Upload
+      shell: bash
+      env:
+        APP_STORE_CONNECT_KEY_IDENTIFIER: ${{ inputs.key-id }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ inputs.issuer-id }}
+        APP_STORE_CONNECT_PRIVATE_KEY: ${{ inputs.private-key }}
+        ARTIFACT_PATH: ${{ inputs.path }}
+        PLATFORM: ${{ inputs.platform }}
+        SUBMIT_FOR_REVIEW: ${{ inputs.submit-for-review }}
+      run: |
+        EXTRA_ARGS=()
+        if [ "$SUBMIT_FOR_REVIEW" = 'true' ]; then
+          EXTRA_ARGS=(--app-store --release-type AFTER_APPROVAL)
+        fi
+        # Every build goes to the external "Beta testers" TestFlight group, which
+        # needs Beta App Review; the previous build still waiting in that review
+        # is expired so nightlies do not pile up. Apple can take a while to list
+        # and then process a build before it can be submitted.
+        pipx run --spec codemagic-cli-tools==0.70.0 app-store-connect publish \
+          --path "$ARTIFACT_PATH" --platform "$PLATFORM" \
+          --max-find-build-wait 45 --max-build-processing-wait 45 \
+          --testflight --beta-group 'Beta testers' --expire-build-submitted-for-review \
+          --whats-new 'Full release notes: https://actualbudget.org/docs/releases' \
+          "${EXTRA_ARGS[@]}"

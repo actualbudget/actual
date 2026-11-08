@@ -884,7 +884,7 @@ export function createTransactionsGraph(
             graph,
             entry.categoryId + SpecialNodeKeys.NegativeSuffix,
             GraphLayers.CategoryGroup,
-            entry.payeeName ?? entry.category,
+            entry.payeeName || entry.category,
             undefined,
             true,
           );
@@ -948,7 +948,7 @@ export function createTransactionsGraph(
             graph,
             entry.categoryId + SpecialNodeKeys.NegativeSuffix,
             GraphLayers.IncomeCategory,
-            entry.payeeName ?? entry.category,
+            entry.payeeName || entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
           addValueToLink(
