@@ -25,10 +25,12 @@ const handledOpenUrls = new Set<string>();
 /** URLs currently mid-read/upload so getLaunchUrl + appUrlOpen cannot double-fire. */
 const pendingOpenUrls = new Set<string>();
 /**
- * Transaction file opens that arrived before accounts finished loading.
- * Replayed once accountsReady flips true (warm opens are not re-emitted).
+ * Transaction file opens that arrived before a budget was open / accounts
+ * finished loading. Replayed once both are ready (warm opens are not re-emitted).
  */
 const deferredTransactionUrls = new Set<string>();
+/** Multi-account picker is open for this URL — block deferred replay until chosen. */
+const awaitingAccountChoiceUrls = new Set<string>();
 
 async function readOpenDocument(url: string): Promise<ArrayBuffer> {
   // convertFileSrc turns a native file:// (or Capacitor) URL into something
@@ -39,6 +41,12 @@ async function readOpenDocument(url: string): Promise<ArrayBuffer> {
     throw new Error(`Failed to read opened file (${response.status})`);
   }
   return response.arrayBuffer();
+}
+
+function uniqueUploadName(extension: string): string {
+  // Keep the extension for the import parser; uniquify so two CSVs cannot
+  // overwrite the same `/uploads/file.csv` while both modals are open.
+  return `open-${crypto.randomUUID()}.${extension}`;
 }
 
 /**
@@ -54,10 +62,18 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
   const dispatch = useDispatch();
   // Only fetch accounts when a budget is open — ManagementApp must not call
   // accounts-get during onboarding / file selection.
-  const { data: accounts = [], isSuccess: accountsReady } = useQuery({
+  // placeholderData: [] makes isSuccess true before the real fetch finishes;
+  // wait until placeholder data is gone so we do not treat "no accounts yet"
+  // as "user has zero accounts".
+  const {
+    data: accounts = [],
+    isSuccess,
+    isPlaceholderData,
+  } = useQuery({
     ...accountQueries.list(),
     enabled: budgetOpen,
   });
+  const accountsReady = isSuccess && !isPlaceholderData;
   const accountsRef = useRef(accounts);
   const accountsReadyRef = useRef(accountsReady);
   const budgetOpenRef = useRef(budgetOpen);
@@ -85,7 +101,8 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
       if (
         !isFileOpenUrl(url) ||
         handledOpenUrls.has(url) ||
-        pendingOpenUrls.has(url)
+        pendingOpenUrls.has(url) ||
+        awaitingAccountChoiceUrls.has(url)
       ) {
         return;
       }
@@ -108,8 +125,7 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
         return;
       }
 
-      // Match browser-preload: normalize to file.<ext> inside /uploads.
-      const uploadName = `file.${extension}`;
+      const uploadName = uniqueUploadName(extension);
 
       pendingOpenUrls.add(url);
 
@@ -147,8 +163,9 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
         }
 
         if (!budgetOpenRef.current) {
-          // Do not mark handled — FinancesApp should pick this up after a
-          // budget is opened (same launch URL via getLaunchUrl).
+          // Queue until FinancesApp mounts with a budget; getLaunchUrl only
+          // keeps the latest URL so earlier opens would otherwise be lost.
+          deferredTransactionUrls.add(url);
           dispatch(
             addNotification({
               notification: {
@@ -189,44 +206,91 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
 
         const contents = await readOpenDocument(url);
         if (cancelled) {
+          // Leave URL in deferredTransactionUrls so the next effect can retry.
           return;
         }
 
         await window.__actionsForMenu.uploadFile(uploadName, contents);
         const filepath = `/uploads/${uploadName}`;
 
-        // Prefer an on-budget account; otherwise fall back to any open account
-        // and tell the user they can switch from the import UI.
-        const account = importAccounts[0];
-        dispatch(
-          pushModal({
-            modal: {
-              name: 'import-transactions',
-              options: {
-                accountId: account.id,
-                filename: filepath,
+        const openImportForAccount = (accountId: string) => {
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'import-transactions',
+                options: {
+                  accountId,
+                  filename: filepath,
+                },
               },
-            },
-          }),
-        );
-        handledOpenUrls.add(url);
-        deferredTransactionUrls.delete(url);
+            }),
+          );
+        };
 
-        if (importAccounts.length > 1) {
+        if (importAccounts.length === 1) {
+          openImportForAccount(importAccounts[0].id);
+          handledOpenUrls.add(url);
+          deferredTransactionUrls.delete(url);
+        } else {
+          // Let the user pick the target account — the import modal itself
+          // has no account switcher. Only mark handled after a selection so
+          // dismissing the picker can still retry the same document.
+          const allowedIds = new Set(importAccounts.map(a => a.id));
+          let accountChosen = false;
+          awaitingAccountChoiceUrls.add(url);
+          deferredTransactionUrls.delete(url);
+          dispatch(
+            pushModal({
+              modal: {
+                name: 'account-autocomplete',
+                options: {
+                  includeClosedAccounts: false,
+                  hiddenAccounts: accountsRef.current
+                    .filter(a => !allowedIds.has(a.id))
+                    .map(a => a.id),
+                  onSelect: accountId => {
+                    accountChosen = true;
+                    awaitingAccountChoiceUrls.delete(url);
+                    deferredTransactionUrls.delete(url);
+                    handledOpenUrls.add(url);
+                    openImportForAccount(accountId);
+                  },
+                  onClose: () => {
+                    // Autocomplete closes before onSelect (also setTimeout 0).
+                    // Schedule dismiss after that macrotask so a real selection
+                    // can set accountChosen first.
+                    void Promise.resolve().then(() => {
+                      setTimeout(() => {
+                        if (accountChosen || handledOpenUrls.has(url)) {
+                          return;
+                        }
+                        awaitingAccountChoiceUrls.delete(url);
+                        deferredTransactionUrls.add(url);
+                      }, 0);
+                    });
+                  },
+                },
+              },
+            }),
+          );
           dispatch(
             addNotification({
               notification: {
                 type: 'message',
-                message: t(
-                  'Importing {{name}} into {{account}}. Open Import from another account if that is not right.',
-                  { name: originalName, account: account.name },
-                ),
+                message: t('Choose an account to import {{name}} into.', {
+                  name: originalName,
+                }),
               },
             }),
           );
         }
       } catch (error) {
         handledOpenUrls.delete(url);
+        // Re-queue transaction opens for a later ready pass; budget zips should
+        // not enter the transaction deferral set.
+        if (TRANSACTION_IMPORT_EXTENSIONS.has(extension)) {
+          deferredTransactionUrls.add(url);
+        }
         dispatch(
           addNotification({
             notification: {
@@ -257,9 +321,10 @@ export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
         // getLaunchUrl rejects when the app was not launched from a URL.
       });
 
+    // Do not remove from the set before handleUrl finishes — a cancelled or
+    // failed attempt must leave the URL queued for the next ready pass.
     if (budgetOpen && accountsReady && deferredTransactionUrls.size > 0) {
       for (const url of [...deferredTransactionUrls]) {
-        deferredTransactionUrls.delete(url);
         void handleUrl(url);
       }
     }
