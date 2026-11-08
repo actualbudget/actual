@@ -54,7 +54,8 @@ function matchesSnapshot(
 // longer matches it: absurd-sql reopens its database on the next
 // operation, so a tab on the previous release can write between the copy
 // and the cutover. Resolves whether the database exists, and rejects when
-// a connection will not close.
+// a connection will not close. Only a `blocked` event starts the clock: a
+// cold open of a fresh database can be slow without anything holding it.
 function evictLegacyConnections(
   name: string,
   path: string,
@@ -64,16 +65,19 @@ function evictLegacyConnections(
     const request = indexedDB.open(name, LEGACY_VERSION + 1);
     let exists = true;
     let changed = false;
-    const timer = setTimeout(
-      () =>
-        reject(
-          new BudgetInUseError(
-            path,
-            'a connection to the absurd-sql copy would not close',
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    request.onblocked = () => {
+      timer = setTimeout(
+        () =>
+          reject(
+            new BudgetInUseError(
+              path,
+              'a connection to the absurd-sql copy would not close',
+            ),
           ),
-        ),
-      EVICT_TIMEOUT_MS,
-    );
+        EVICT_TIMEOUT_MS,
+      );
+    };
     request.onupgradeneeded = event => {
       exists = event.oldVersion !== 0;
       const transaction = request.transaction;
