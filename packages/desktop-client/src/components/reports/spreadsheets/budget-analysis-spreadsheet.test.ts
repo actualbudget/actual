@@ -1,7 +1,9 @@
+import { send } from '@actual-app/core/platform/client/connection';
 import { rangeInclusive } from '@actual-app/core/shared/months';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import {
+  createBudgetAnalysisSpreadsheet,
   getLastSelectableMonth,
   getNextRunningBalance,
   isBaseCategory,
@@ -41,8 +43,11 @@ const all = [visibleExpense, hiddenExpense, incomeCategory, hiddenIncome];
 function filterBaseCategories(
   categories: CategoryEntity[],
   showHiddenCategories: boolean,
+  hiddenGroupIds: ReadonlySet<string> = new Set(),
 ): CategoryEntity[] {
-  return categories.filter(cat => isBaseCategory(cat, showHiddenCategories));
+  return categories.filter(cat =>
+    isBaseCategory(cat, showHiddenCategories, hiddenGroupIds),
+  );
 }
 
 describe('createBudgetAnalysisSpreadsheet', () => {
@@ -79,6 +84,63 @@ describe('createBudgetAnalysisSpreadsheet', () => {
       expect(result).toHaveLength(2);
       expect(result).toContain(visibleExpense);
       expect(result).toContain(hiddenExpense);
+    });
+
+    describe('hidden category groups', () => {
+      const inHiddenGroup = makeCategory({
+        id: 'c5',
+        name: 'Boat',
+        group: 'hiddenGroup',
+      });
+      const hiddenGroupIds = new Set(['hiddenGroup']);
+
+      it('excludes a visible category in a hidden group when showHiddenCategories is false', () => {
+        expect(
+          filterBaseCategories(
+            [visibleExpense, inHiddenGroup],
+            false,
+            hiddenGroupIds,
+          ),
+        ).toEqual([visibleExpense]);
+      });
+
+      it('includes a visible category in a hidden group when showHiddenCategories is true', () => {
+        expect(
+          filterBaseCategories(
+            [visibleExpense, inHiddenGroup],
+            true,
+            hiddenGroupIds,
+          ),
+        ).toEqual([visibleExpense, inHiddenGroup]);
+      });
+
+      it('never includes an income category in a hidden group', () => {
+        const income = { ...inHiddenGroup, is_income: true };
+
+        expect(filterBaseCategories([income], false, hiddenGroupIds)).toEqual(
+          [],
+        );
+        expect(filterBaseCategories([income], true, hiddenGroupIds)).toEqual(
+          [],
+        );
+      });
+
+      it.each([
+        ['unknown', 'no-such-group'],
+        ['null', null],
+        ['undefined', undefined],
+        ['empty', ''],
+      ])('keeps a category whose group id is %s', (_label, group) => {
+        const orphan = makeCategory({
+          id: 'c6',
+          name: 'Orphan',
+          group: group as string,
+        });
+
+        expect(filterBaseCategories([orphan], false, hiddenGroupIds)).toEqual([
+          orphan,
+        ]);
+      });
     });
   });
 
@@ -291,5 +353,268 @@ describe('createBudgetAnalysisSpreadsheet', () => {
 
       expect(runningBalance).toBe(0);
     });
+  });
+});
+
+vi.mock('@actual-app/core/platform/client/connection', () => ({
+  send: vi.fn(),
+}));
+
+type SpreadsheetProps = Parameters<typeof createBudgetAnalysisSpreadsheet>[0];
+
+async function runSpreadsheet(
+  props: Partial<SpreadsheetProps>,
+  sendImpl: (name: string, args: { month: string }) => unknown,
+) {
+  vi.mocked(send).mockImplementation((async (
+    name: string,
+    args: { month: string },
+  ) => sendImpl(name, args)) as never);
+
+  const setData = vi.fn();
+  await createBudgetAnalysisSpreadsheet({
+    startDate: '2026-01-01',
+    endDate: '2026-01-31',
+    ...props,
+  })(null as never, setData);
+
+  return setData.mock.calls[0][0];
+}
+
+describe('createBudgetAnalysisSpreadsheet categories', () => {
+  const visibleGroup = { id: 'visible', name: 'Bills', hidden: false };
+  const hiddenGroup = { id: 'hidden', name: 'Old Stuff', hidden: true };
+
+  const rent = makeCategory({ id: 'rent', name: 'Rent', group: 'visible' });
+  const gym = makeCategory({
+    id: 'gym',
+    name: 'Gym',
+    group: 'visible',
+    hidden: true,
+  });
+  const boat = makeCategory({ id: 'boat', name: 'Boat', group: 'hidden' });
+
+  // Budgeted amounts are distinct powers of ten so a total names exactly which
+  // categories it counted.
+  const budgetedById: Record<string, number> = {
+    rent: 100,
+    gym: 1000,
+    boat: 10000,
+  };
+
+  function run({
+    list = [rent, gym, boat],
+    grouped = [visibleGroup, hiddenGroup],
+    ...props
+  }: Partial<SpreadsheetProps> & {
+    list?: CategoryEntity[];
+    grouped?: Array<{ id: string; name: string; hidden?: boolean }>;
+  } = {}) {
+    return runSpreadsheet(props, name =>
+      name === 'get-categories'
+        ? { list, grouped }
+        : list.map(cat => ({
+            name: `sheet!budget-${cat.id}`,
+            value: budgetedById[cat.id] ?? 0,
+          })),
+    );
+  }
+
+  function conditions(field: string, op: string, value: string) {
+    return [{ field, op, value }] as SpreadsheetProps['conditions'];
+  }
+
+  it('excludes hidden categories and categories in hidden groups by default', async () => {
+    expect((await run()).totalBudgeted).toBe(100);
+  });
+
+  it('includes them when showHiddenCategories is true', async () => {
+    const data = await run({ showHiddenCategories: true });
+
+    expect(data.totalBudgeted).toBe(11100);
+  });
+
+  it('reports zero when a category filter only matches a category in a hidden group', async () => {
+    const filter = conditions('category', 'is', 'boat');
+
+    expect((await run({ conditions: filter })).totalBudgeted).toBe(0);
+    expect(
+      (await run({ conditions: filter, showHiddenCategories: true }))
+        .totalBudgeted,
+    ).toBe(10000);
+  });
+
+  it('reports zero when a group filter targets a hidden group', async () => {
+    const filter = conditions('category_group', 'is', 'hidden');
+
+    expect((await run({ conditions: filter })).totalBudgeted).toBe(0);
+    expect(
+      (await run({ conditions: filter, showHiddenCategories: true }))
+        .totalBudgeted,
+    ).toBe(10000);
+  });
+
+  it('keeps hidden group categories out of a negated filter', async () => {
+    const filter = conditions('category_group', 'isNot', 'other');
+
+    expect((await run({ conditions: filter })).totalBudgeted).toBe(100);
+  });
+
+  it('matches a hidden group by name only when showHiddenCategories is true', async () => {
+    const filter = conditions('category_group', 'contains', 'old');
+
+    expect((await run({ conditions: filter })).totalBudgeted).toBe(0);
+    expect(
+      (await run({ conditions: filter, showHiddenCategories: true }))
+        .totalBudgeted,
+    ).toBe(10000);
+  });
+
+  it('keeps a filter on a visible group working', async () => {
+    const filter = conditions('category_group', 'is', 'visible');
+
+    expect((await run({ conditions: filter })).totalBudgeted).toBe(100);
+    expect(
+      (await run({ conditions: filter, showHiddenCategories: true }))
+        .totalBudgeted,
+    ).toBe(1100);
+  });
+
+  it('keeps categories whose group is unknown or missing', async () => {
+    const list = [
+      makeCategory({ id: 'rent', name: 'Rent', group: 'no-such-group' }),
+      makeCategory({ id: 'gym', name: 'Gym', group: null as never }),
+      boat,
+    ];
+
+    expect((await run({ list })).totalBudgeted).toBe(1100);
+    expect((await run({ list, grouped: [] })).totalBudgeted).toBe(11100);
+  });
+
+  it('treats a group without a hidden flag as visible', async () => {
+    const data = await run({
+      list: [boat],
+      grouped: [{ id: 'hidden', name: 'Old Stuff' }],
+    });
+
+    expect(data.totalBudgeted).toBe(10000);
+  });
+});
+
+describe('createBudgetAnalysisSpreadsheet overspending before the period', () => {
+  const food = makeCategory({ id: 'food', name: 'Food', group: 'g' });
+  const rent = makeCategory({ id: 'rent', name: 'Rent', group: 'g' });
+
+  type Values = Record<string, number | boolean>;
+
+  // `cellsByMonth` holds raw cells, keyed by month and then by cell name.
+  function run(
+    cellsByMonth: Record<string, Values>,
+    { endDate = '2026-02-28', categories = [food, rent] } = {},
+  ) {
+    return runSpreadsheet({ endDate }, (name, args) =>
+      name === 'get-categories'
+        ? { list: categories, grouped: [{ id: 'g', name: 'G' }] }
+        : Object.entries(cellsByMonth[args.month] ?? {}).map(
+            ([cell, value]) => ({ name: `sheet!${cell}`, value }),
+          ),
+    );
+  }
+
+  function adjustments(data: {
+    intervalData: Array<{ overspendingAdjustment: number }>;
+  }) {
+    return data.intervalData.map(month => month.overspendingAdjustment);
+  }
+
+  it('surfaces as the first month adjustment and in the total', async () => {
+    const data = await run({ '2025-12': { 'leftover-food': -50 } });
+
+    expect(adjustments(data)).toEqual([50, 0]);
+    expect(data.totalOverspendingAdjustment).toBe(50);
+  });
+
+  it('adds to later adjustments in the total', async () => {
+    const data = await run({
+      '2025-12': { 'leftover-food': -50 },
+      '2026-01': { 'leftover-food': -30 },
+    });
+
+    expect(adjustments(data)).toEqual([50, 30]);
+    expect(data.totalOverspendingAdjustment).toBe(80);
+  });
+
+  it('leaves the overspend of the final month out of the total', async () => {
+    const data = await run(
+      {
+        '2025-12': { 'leftover-food': -50 },
+        '2026-01': { 'leftover-food': -30 },
+      },
+      { endDate: '2026-01-31' },
+    );
+
+    expect(data.totalOverspendingAdjustment).toBe(50);
+    expect(data.finalOverspendingAdjustment).toBe(-30);
+  });
+
+  it('skips categories with carryover or a surplus', async () => {
+    const data = await run({
+      '2025-12': {
+        'leftover-food': -50,
+        'leftover-rent': -70,
+        'carryover-rent': true,
+      },
+    });
+
+    expect(adjustments(data)).toEqual([50, 0]);
+  });
+
+  it.each([
+    ['carryover on', { 'leftover-food': -50, 'carryover-food': true }],
+    ['a zero balance', { 'leftover-food': 0 }],
+    ['a positive balance', { 'leftover-food': 25 }],
+    ['no budget data', {}],
+  ])('stays at 0 with %s', async (_label, previous: Values) => {
+    const data = await run({ '2025-12': previous });
+
+    expect(adjustments(data)).toEqual([0, 0]);
+    expect(data.totalOverspendingAdjustment).toBe(0);
+  });
+
+  it('does not change the balance, budgeted or spent figures', async () => {
+    const months = {
+      '2026-01': {
+        'budget-food': 100,
+        'sum-amount-food': -60,
+        'leftover-food': 40,
+      },
+    };
+    const withOverspend = await run({
+      ...months,
+      '2025-12': { 'leftover-food': -50 },
+    });
+    const withoutOverspend = await run(months);
+
+    expect(withOverspend.intervalData[0].balance).toBe(40);
+    expect(
+      withOverspend.intervalData.map(
+        (month: { balance: number }) => month.balance,
+      ),
+    ).toEqual(
+      withoutOverspend.intervalData.map(
+        (month: { balance: number }) => month.balance,
+      ),
+    );
+    expect(withOverspend.totalBudgeted).toBe(withoutOverspend.totalBudgeted);
+    expect(withOverspend.totalSpent).toBe(withoutOverspend.totalSpent);
+  });
+
+  it('only counts categories in the report', async () => {
+    const data = await run(
+      { '2025-12': { 'leftover-food': -50, 'leftover-rent': -7000 } },
+      { categories: [food] },
+    );
+
+    expect(adjustments(data)).toEqual([50, 0]);
   });
 });
