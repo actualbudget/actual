@@ -5,6 +5,7 @@ import {
   resolveStorageBackend,
   setStoredStorageBackend,
   STORAGE_BACKEND_KEY,
+  STORAGE_PREFS_KEY,
 } from './storage-backend';
 
 afterEach(() => {
@@ -38,6 +39,13 @@ describe('storage backend flag', () => {
     expect(window.location.pathname).toBe('/budget');
     // Later loads keep the stored choice
     expect(resolveStorageBackend()).toBe('opfs');
+  });
+
+  it('reveals the engine setting when the URL flag is used', () => {
+    expect(localStorage.getItem(STORAGE_PREFS_KEY)).toBeNull();
+    window.history.replaceState(null, '', '/?storage=opfs');
+    resolveStorageBackend();
+    expect(localStorage.getItem(STORAGE_PREFS_KEY)).toBe('true');
   });
 
   it('drops an unknown URL parameter without changing the stored choice', () => {

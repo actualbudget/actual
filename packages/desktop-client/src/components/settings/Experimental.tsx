@@ -5,6 +5,7 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
+import { STORAGE_PREFS_KEY } from '@actual-app/core/platform/client/browser-preload';
 import { isElectron } from '@actual-app/core/shared/environment';
 import type { FeatureFlag, ServerPrefs } from '@actual-app/core/types/prefs';
 
@@ -192,7 +193,7 @@ export function ExperimentalFeatures() {
     localStorage.getItem('devEnableServerPrefs') === 'true';
   // The browser storage engine is hidden until it is ready for testers
   const showStoragePrefs =
-    !isElectron() && localStorage.getItem('devEnableStoragePrefs') === 'true';
+    !isElectron() && localStorage.getItem(STORAGE_PREFS_KEY) === 'true';
 
   return (
     <SettingsGroup
