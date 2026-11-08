@@ -106,6 +106,15 @@ export function OpenIDEnableModal({
               title={t('The current password will be disabled')}
             />
 
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.warningText,
+              }}
+              title={t(
+                'Switching authentication methods will also revoke all API keys.',
+              )}
+            />
             {error && <Error>{error}</Error>}
           </View>
         </>

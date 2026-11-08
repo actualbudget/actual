@@ -131,6 +131,15 @@ export function PasswordEnableModal({
               }}
               title={t('After disabling OpenID all sessions will be closed')}
             />
+            <Label
+              style={{
+                ...styles.verySmallText,
+                color: theme.warningText,
+              }}
+              title={t(
+                'Switching authentication methods will also revoke all API keys.',
+              )}
+            />
             {multiuserEnabled && (
               <Label
                 style={{
