@@ -27,6 +27,7 @@ function getDisplayTypeFromTemplate(template: Template): DisplayTemplateType {
     case 'refill':
       return 'refill';
     case 'average':
+    case 'weeklyAverage':
     case 'copy':
       return 'historical';
     case 'by':

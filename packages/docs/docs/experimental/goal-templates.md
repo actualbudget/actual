@@ -65,10 +65,10 @@ You can also apply selections of templates if you want.
 
 ### Goal Indicators
 
-After having run the templates in a given month and category, the status of a respective category goal will be indicated as a text color of the category balance.
-The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met(green), goal not met(orange), and a negative balance(red).
+After having run the templates in a given month and category, the status of a respective category goal will be indicated as a text color of the category balance. A category whose goal is not yet met also shows a small ring beside its balance, which fills as the goal is funded. On desktop, hover over the ring to see how much of the goal is funded.
+The image below shows an example of categories in the following states: normal (no goal set), empty (no goal set), goal met (green), goal not met (yellow, with a partly filled ring), and a negative balance (red).
 
-<img width="724" alt="Category balances in the normal, empty, goal met, goal not met and negative states" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
+<img width="724" alt="Category balances in the normal, empty, goal met, goal not met with a partly filled ring, and negative states" src="/img/experimental/goal-templates-indicator-colors@2x.webp" />
 
 This goal value is based on the maximum amount that the templates in a category request to be budgeted.
 
@@ -446,6 +446,28 @@ As an example, assume the spend for the category was [\$40, \$50, \$60] for the 
 | `#template average 3 months [decrease 10%]` |      \$ 45      |
 | `#template average 3 months [increase 11]`  |      \$ 61      |
 | `#template average 3 months [decrease 1]`   |      \$ 49      |
+
+#### Weekly averages
+
+Often spending follows the week rather than the month, like a weekly grocery shop or a commute. This means the amount needed per month varies, depending on how the weeks fall. The weekly average template averages your spending per week, then budgets that amount once for every occurrence of a chosen weekday in the month.
+
+| Syntax                                                                                  | Description                                                                                                      |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `#template average {number} weeks on {weekday}`                                         | Budget the average weekly spend over the last `{number}` complete weeks, once for every `{weekday}` in the month |
+| `#template average {number} weeks on {weekday} [{increase/decrease} {number\|number%}]` | Same as above, with an adjustment applied to the weekly amount before it is multiplied by the number of weekdays |
+
+The averaging window is the `{number}` full 7-day weeks that end the day before the budget month starts. For example, `#template average 4 weeks on friday` for a November 2026 budget, averages spending from 2026-10-04 through 2026-10-31. Weeks before the category's first transaction are left out of the average.
+
+For averages calculated in future months, the window uses yesterday as the cut-off point for full 7-day weeks. This ensures averages take into account recent spending.
+
+As an example, assume you spent an average of \$ 50 per week over the last 4 weeks. October 2026 has five Fridays and four Mondays.
+
+| Template line                                        | Budgeted Amount (October 2026) |
+| ---------------------------------------------------- | :----------------------------: |
+| `#template average 4 weeks on friday`                |             \$ 250             |
+| `#template average 4 weeks on monday`                |             \$ 200             |
+| `#template average 4 weeks on friday [increase 10%]` |             \$ 275             |
+| `#template average 4 weeks on monday [increase 5]`   |             \$ 220             |
 
 ### Copy Type
 

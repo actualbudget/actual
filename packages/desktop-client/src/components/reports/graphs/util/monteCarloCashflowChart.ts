@@ -11,6 +11,7 @@ import {
 import type {
   MonteCarloContribution,
   MonteCarloIncomeStream,
+  MonteCarloLumpSum,
   MonteCarloPot,
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
@@ -32,7 +33,8 @@ export type MonteCarloCashflowSeriesKind =
   | 'phase'
   | 'tax'
   | 'contribution'
-  | 'surplus';
+  | 'surplus'
+  | 'lumpSum';
 
 /** One stacked bar series of the cashflow chart */
 export type MonteCarloCashflowSeries = {
@@ -72,8 +74,8 @@ export type MonteCarloCashflowChart = {
   /** Series stacked above zero: pot withdrawals, then income streams */
   inflowSeries: MonteCarloCashflowSeries[];
   /**
-   * Series stacked below zero: planned spending by phase, tax, then
-   * contributions
+   * Series stacked below zero: planned spending by phase, tax,
+   * contributions, money saved, then one-off withdrawals
    */
   outflowSeries: MonteCarloCashflowSeries[];
   tooltipGroups: MonteCarloCashflowTooltipGroup[];
@@ -88,6 +90,7 @@ type BuildMonteCarloCashflowChartInput = {
   contributions: MonteCarloContribution[];
   incomeStreams: MonteCarloIncomeStream[];
   spendingPhases: MonteCarloSpendingPhase[];
+  lumpSums: MonteCarloLumpSum[];
   /** The user's current age; a row's age is startAge + year - 1 */
   startAge: number;
   translate: TFunction;
@@ -100,13 +103,14 @@ function seriesKey(kind: MonteCarloCashflowSeriesKind, index: number) {
 /**
  * Turns a captured run into the cashflow chart's series and data - the
  * household's yearly cashflow. Money in above zero: each pot's gross
- * withdrawal and each income stream's gross. Money out below zero: the
- * planned spending (coloured by its spending phase), tax on withdrawals
- * and income, each contribution paid into a pot, and money saved into
- * the surplus pot. Spending shows the
- * plan rather than the delivered amount, so in a shortfall year the
- * inflows visibly fall short of the spending bar. Fees stay out - they
- * never pass through the user's hands.
+ * withdrawal (regular and one-off together) and each income stream's
+ * gross. Money out below zero: the planned spending (coloured by its
+ * spending phase), tax on withdrawals, one-offs and income, each
+ * contribution paid into a pot, money saved into the surplus pot, and
+ * each one-off withdrawal received. Spending and one-offs show the plan
+ * rather than the delivered amount, so in a shortfall year the inflows
+ * visibly fall short of the bars below. Fees stay out - they never pass
+ * through the user's hands.
  */
 export function buildMonteCarloCashflowChart({
   rows,
@@ -114,12 +118,15 @@ export function buildMonteCarloCashflowChart({
   contributions,
   incomeStreams,
   spendingPhases,
+  lumpSums,
   startAge,
   translate,
 }: BuildMonteCarloCashflowChartInput): MonteCarloCashflowChart {
   const colorScale = getColorScale('qualitative');
   const phases = resolveSpendingPhases(spendingPhases);
-  const hasTax = rows.some(row => row.taxPaid !== 0 || row.incomeTax !== 0);
+  const hasTax = rows.some(
+    row => row.taxPaid !== 0 || row.incomeTax !== 0 || row.lumpSumTax !== 0,
+  );
 
   // Inflows take colours from the start of the scale and outflows from
   // the end, so the two sides of the zero line only share a colour once
@@ -203,12 +210,33 @@ export function buildMonteCarloCashflowChart({
     color: outflowColor(phases.length + contributions.length),
   };
 
+  // Only one-offs the run called for get a series (an unfunded one still
+  // shows, dimmed, like the spending after a failure)
+  const lumpSumSeries: MonteCarloCashflowSeries[] = lumpSums.flatMap(
+    (lumpSum, lumpSumIndex) =>
+      rows.some(row => (row.lumpSumAmounts[lumpSumIndex] ?? 0) !== 0)
+        ? [
+            {
+              key: seriesKey('lumpSum', lumpSumIndex),
+              kind: 'lumpSum',
+              label:
+                lumpSum.name ||
+                translate('One-off {{number}}', { number: lumpSumIndex + 1 }),
+              color: outflowColor(
+                phases.length + contributions.length + 1 + lumpSumIndex,
+              ),
+            } satisfies MonteCarloCashflowSeries,
+          ]
+        : [],
+  );
+
   const inflowSeries = [...potSeries, ...incomeSeries];
   const outflowSeries = [
     ...phaseSeries,
     ...(hasTax ? [taxSeries] : []),
     ...contributionSeries,
     ...(hasSurplus ? [surplusSeries] : []),
+    ...lumpSumSeries,
   ];
 
   // Tax sits between the inflows and Spending so the deduction chain
@@ -266,13 +294,24 @@ export function buildMonteCarloCashflowChart({
           },
         ]
       : []),
+    ...(lumpSumSeries.length > 0
+      ? [
+          {
+            key: 'lumpSums',
+            heading: translate('One-off withdrawals'),
+            series: lumpSumSeries,
+            listMembers: true,
+          },
+        ]
+      : []),
   ];
 
   const data = rows.map((row): MonteCarloCashflowDataPoint => {
     const age = startAge + row.year - 1;
     const amounts: Record<string, number> = {};
     potSeries.forEach((series, potIndex) => {
-      amounts[series.key] = row.potWithdrawals[potIndex] ?? 0;
+      amounts[series.key] =
+        (row.potWithdrawals[potIndex] ?? 0) + (row.potLumpSums[potIndex] ?? 0);
     });
     incomeStreams.forEach((_, incomeIndex) => {
       amounts[seriesKey('income', incomeIndex)] =
@@ -285,7 +324,9 @@ export function buildMonteCarloCashflowChart({
         phases[phaseIndex] === activePhase ? -row.plannedSpending : 0;
     });
     if (hasTax) {
-      amounts[taxSeries.key] = -(row.taxPaid + row.incomeTax);
+      const tax = row.taxPaid + row.incomeTax + row.lumpSumTax;
+      // Stacked below zero; a plain 0 (not -0) in an untaxed year
+      amounts[taxSeries.key] = tax > 0 ? -tax : 0;
     }
     contributions.forEach((_, contributionIndex) => {
       const deposited = row.contributionAmounts[contributionIndex] ?? 0;
@@ -296,6 +337,11 @@ export function buildMonteCarloCashflowChart({
     if (hasSurplus) {
       amounts[surplusSeries.key] = row.surplusSaved > 0 ? -row.surplusSaved : 0;
     }
+    lumpSumSeries.forEach(series => {
+      const lumpSumIndex = Number(series.key.slice('lumpSum'.length));
+      const received = row.lumpSumAmounts[lumpSumIndex] ?? 0;
+      amounts[series.key] = received > 0 ? -received : 0;
+    });
     return {
       year: row.year,
       age,

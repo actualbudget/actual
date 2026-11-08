@@ -1,7 +1,10 @@
+import { matchPath, useLocation } from 'react-router';
+
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
 import {
   getSidebarMenuItemPath,
+  isSettingsSection,
   parseSidebarMenuItems,
   parseSidebarStartPage,
 } from '#components/sidebar/sidebarMenu';
@@ -28,8 +31,17 @@ export function useSidebarMenu() {
 
   const items = parseSidebarMenuItems(itemsPref);
   const availableItems = items.filter(item => isItemAvailable(item.id));
-  const sidebarItems = availableItems.filter(item => !item.hidden);
-  const settingsItems = availableItems.filter(item => item.hidden);
+  // A hidden page with no settings page stays in the sidebar while it is open
+  const { pathname } = useLocation();
+  const isItemOpen = (id: SidebarMenuItemId) =>
+    matchPath(`/${id}/*`, pathname) !== null;
+  const sidebarItems = availableItems.filter(
+    item =>
+      !item.hidden || (!isSettingsSection(item.id) && isItemOpen(item.id)),
+  );
+  const settingsItems = availableItems.filter(
+    item => item.hidden && isSettingsSection(item.id),
+  );
 
   const startPage = parseSidebarStartPage(startPagePref, availableItems);
   const startPath = getSidebarMenuItemPath(

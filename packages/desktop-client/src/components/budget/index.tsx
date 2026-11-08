@@ -1,6 +1,6 @@
 // @ts-strict-ignore
-import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 import type { ComponentType } from 'react';
+import React, { useEffect, useEffectEvent, useMemo, useState } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { View } from '@actual-app/components/view';
@@ -47,11 +47,7 @@ export function Budget() {
   );
   const [startMonthPref, setStartMonthPref] = useLocalPref('budget.startMonth');
   const startMonth = startMonthPref || currentMonth;
-  const { data: loadedBounds } = useQuery(budgetBoundsQueries.bounds());
-  const bounds = loadedBounds ?? {
-    start: startMonth,
-    end: startMonth,
-  };
+  const { data: bounds } = useQuery(budgetBoundsQueries.bounds());
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const [maxMonthsPref] = useGlobalPref('maxMonths');
   const maxMonths = maxMonthsPref || 1;
@@ -61,26 +57,28 @@ export function Budget() {
 
   // Re-runs whenever the bounds change so newly available months get warmed.
   const init = useEffectEvent(
-    (type: typeof budgetType, monthBounds: typeof loadedBounds) => {
+    (type: typeof budgetType, monthBounds: typeof bounds) => {
       async function run() {
         if (!monthBounds) {
           return;
         }
 
-        await prewarmAllMonths(
-          type,
-          spreadsheet,
-          monthBounds,
-          clampMonth(startMonth, monthBounds),
-        );
-
-        setInitialized(true);
+        try {
+          await prewarmAllMonths(
+            type,
+            spreadsheet,
+            monthBounds,
+            clampMonth(startMonth, monthBounds),
+          );
+        } finally {
+          setInitialized(true);
+        }
       }
 
       void run();
     },
   );
-  useEffect(() => init(budgetType, loadedBounds), [budgetType, loadedBounds]);
+  useEffect(() => init(budgetType, bounds), [budgetType, bounds]);
 
   const onMonthSelect = async (month, numDisplayed) => {
     setStartMonthPref(month);
@@ -173,7 +171,7 @@ export function Budget() {
     applyBudgetAction.mutate({ month, type, args });
   };
 
-  if (!initialized || !categoryGroups) {
+  if (!initialized || !bounds || !categoryGroups) {
     return null;
   }
 

@@ -71,8 +71,18 @@ export async function storeTemplates({
     await tombstoneOrphanCleanupGroups();
   }
   if (month) {
+    const isTracking = isTrackingBudget();
+    const { data: categories }: { data: CategoryEntity[] } = await aqlQuery(
+      q('categories')
+        .filter({ id: { $oneof: categoriesWithTemplates.map(({ id }) => id) } })
+        .select('*'),
+    );
+    const skippedIds = new Set(
+      categories.filter(c => !acceptsTemplates(c, isTracking)).map(c => c.id),
+    );
     const goals: TemplateGoal[] = [];
     for (const { id, templates } of categoriesWithTemplates) {
+      if (skippedIds.has(id)) continue;
       goals.push(await getMonthGoal(month, id, templates));
     }
     await setGoals(month, goals);
@@ -147,6 +157,11 @@ export async function applySingleCategoryTemplate({
 
 export function runCheckTemplates() {
   return checkTemplateNotes();
+}
+
+// Income categories only take templates in tracking budgets
+function acceptsTemplates(category: CategoryEntity, isTracking: boolean) {
+  return isTracking || !category.is_income;
 }
 
 async function getCategories(): Promise<CategoryEntity[]> {
@@ -235,10 +250,9 @@ async function computeTemplates(
   // setup categories
   const isTracking = isTrackingBudget();
   if (!categories.length) {
-    categories = (await getCategories()).filter(
-      c => isTracking || !c.is_income,
-    );
+    categories = await getCategories();
   }
+  categories = categories.filter(c => acceptsTemplates(c, isTracking));
 
   // setup categories to process
   const templateContexts: CategoryTemplateContext[] = [];
@@ -369,6 +383,7 @@ export type DryRunCategoryResult = {
   perTemplate: number[];
   goal: number | null;
   longGoal: boolean;
+  errors: string[];
 };
 
 export async function dryRunCategoryTemplate({
@@ -388,12 +403,13 @@ export async function dryRunCategoryTemplate({
     perTemplate: templates.map(() => 0),
     goal: null,
     longGoal: false,
+    errors: [],
   };
   const { data: categoryData }: { data: CategoryEntity[] } = await aqlQuery(
     q('categories').filter({ id: categoryId }).select('*'),
   );
   if (categoryData.length === 0) return empty;
-  const { contexts } = await computeTemplates(
+  const { contexts, errors } = await computeTemplates(
     month,
     true,
     { [categoryId]: templates },
@@ -401,13 +417,14 @@ export async function dryRunCategoryTemplate({
     true,
   );
   const ctx = contexts.find(c => c.category.id === categoryId);
-  if (!ctx) return empty;
+  if (!ctx) return { ...empty, errors };
   const values = ctx.getValues();
   return {
     budgeted: values.budgeted,
     perTemplate: templates.map(t => values.perTemplateContribution.get(t) ?? 0),
     goal: values.goal,
     longGoal: !!values.longGoal,
+    errors,
   };
 }
 

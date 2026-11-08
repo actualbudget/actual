@@ -32,7 +32,7 @@ export function isSettingsSection(
 }
 
 export function isSidebarMenuItemLocked(id: SidebarMenuItemId): boolean {
-  return !isSettingsSection(id);
+  return id === 'budget';
 }
 
 export function isSettingsSectionOnMobile(id: SettingsSectionId): boolean {
