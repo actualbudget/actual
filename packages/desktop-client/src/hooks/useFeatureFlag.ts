@@ -14,6 +14,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   budgetAnalysisReport: false,
   enableBanking: false,
   sankeyReport: false,
+  trueLayerBankSync: false,
   mobileCalculator: false,
   monteCarloReport: false,
 };

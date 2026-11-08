@@ -37,6 +37,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerTrueLayerAccount,
   TransactionEntity,
 } from '#types/models';
 
@@ -62,6 +63,7 @@ export type AccountHandlers = {
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'akahu-accounts-link': typeof linkAkahuAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
+  'truelayer-accounts-link': typeof linkTrueLayerAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -81,6 +83,11 @@ export type AccountHandlers = {
   'enablebanking-poll-auth': typeof enableBankingPollAuth;
   'enablebanking-poll-auth-stop': typeof stopEnableBankingPollAuth;
   'enablebanking-configure': typeof enableBankingConfigure;
+  'truelayer-status': typeof trueLayerStatus;
+  'truelayer-configure': typeof trueLayerConfigure;
+  'truelayer-start-auth': typeof trueLayerStartAuth;
+  'truelayer-poll-auth': typeof trueLayerPollAuth;
+  'truelayer-poll-auth-stop': typeof stopTrueLayerPollAuth;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'akahu-accounts': typeof akahuAccounts;
@@ -469,14 +476,16 @@ async function linkAkahuAccount({
   return 'ok';
 }
 
-async function linkEnableBankingAccount({
+async function linkPerAccountBank({
   externalAccount,
+  syncSource,
   upgradingId,
   offBudget = false,
   startingDate,
   startingBalance,
 }: LinkAccountBaseParams & {
-  externalAccount: SyncServerEnableBankingAccount;
+  externalAccount: SyncServerEnableBankingAccount | SyncServerTrueLayerAccount;
+  syncSource: 'enableBanking' | 'trueLayer';
 }) {
   let id: string | undefined;
 
@@ -487,9 +496,9 @@ async function linkEnableBankingAccount({
     name: externalAccount.institution ?? null,
   };
 
-  // Enable Banking uses a session-per-account model, so we use the
+  // Enable Banking and TrueLayer link consent per account, so we use the
   // account-level identifier (account_id) rather than institution-level
-  // IDs. This creates one bank entry per Enable Banking account, unlike
+  // IDs. This creates one bank entry per linked account, unlike
   // GoCardless (requisitionId) or SimpleFin/PluggyAi (orgDomain/orgId).
   const bank = await link.findOrCreateBank(
     institution,
@@ -511,7 +520,7 @@ async function linkEnableBankingAccount({
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
-      account_sync_source: 'enableBanking',
+      account_sync_source: syncSource,
     });
   } else {
     id = uuidv4();
@@ -522,7 +531,7 @@ async function linkEnableBankingAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'enableBanking',
+      account_sync_source: syncSource,
     });
     await db.insertPayee({
       name: '',
@@ -531,7 +540,7 @@ async function linkEnableBankingAccount({
   }
 
   if (id == null) {
-    throw new Error('id was not assigned in linkEnableBankingAccount');
+    throw new Error(`id was not assigned when linking a ${syncSource} account`);
   }
 
   const syncRes = await bankSync.syncAccount(
@@ -552,6 +561,22 @@ async function linkEnableBankingAccount({
   });
 
   return 'ok';
+}
+
+async function linkEnableBankingAccount(
+  params: LinkAccountBaseParams & {
+    externalAccount: SyncServerEnableBankingAccount;
+  },
+) {
+  return linkPerAccountBank({ ...params, syncSource: 'enableBanking' });
+}
+
+async function linkTrueLayerAccount(
+  params: LinkAccountBaseParams & {
+    externalAccount: SyncServerTrueLayerAccount;
+  },
+) {
+  return linkPerAccountBank({ ...params, syncSource: 'trueLayer' });
 }
 
 async function createAccount({
@@ -1228,6 +1253,78 @@ async function enableBankingConfigure(config: {
   });
 }
 
+async function postTrueLayer(
+  path: string,
+  body: unknown,
+  timeout?: number,
+  signal?: AbortSignal,
+) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.TRUELAYER_SERVER + path,
+    body,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    timeout,
+    signal,
+  );
+}
+
+async function trueLayerStatus() {
+  return postTrueLayer('/status', {});
+}
+
+async function trueLayerConfigure(config: {
+  clientId: string;
+  clientSecret: string;
+}) {
+  return postTrueLayer('/configure', config);
+}
+
+async function trueLayerStartAuth({ redirectUrl }: { redirectUrl: string }) {
+  return postTrueLayer('/start-auth', { redirectUrl });
+}
+
+const trueLayerPollControllers = new Map<string, AbortController>();
+
+async function trueLayerPollAuth({ state }: { state: string }) {
+  const controller = new AbortController();
+  trueLayerPollControllers.set(state, controller);
+
+  try {
+    return await postTrueLayer(
+      '/poll-auth',
+      { state },
+      310000,
+      controller.signal,
+    );
+  } finally {
+    if (trueLayerPollControllers.get(state) === controller) {
+      trueLayerPollControllers.delete(state);
+    }
+  }
+}
+
+async function stopTrueLayerPollAuth({ state }: { state: string }) {
+  const controller = trueLayerPollControllers.get(state);
+  if (controller) {
+    controller.abort();
+    trueLayerPollControllers.delete(state);
+  }
+  return 'ok';
+}
+
 async function getGoCardlessBanks(country: string) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1801,6 +1898,7 @@ app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('akahu-accounts-link', linkAkahuAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
+app.method('truelayer-accounts-link', linkTrueLayerAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1820,6 +1918,11 @@ app.method('enablebanking-complete-auth', enableBankingCompleteAuth);
 app.method('enablebanking-poll-auth', enableBankingPollAuth);
 app.method('enablebanking-poll-auth-stop', stopEnableBankingPollAuth);
 app.method('enablebanking-configure', enableBankingConfigure);
+app.method('truelayer-status', trueLayerStatus);
+app.method('truelayer-configure', trueLayerConfigure);
+app.method('truelayer-start-auth', trueLayerStartAuth);
+app.method('truelayer-poll-auth', trueLayerPollAuth);
+app.method('truelayer-poll-auth-stop', stopTrueLayerPollAuth);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('akahu-accounts', akahuAccounts);
