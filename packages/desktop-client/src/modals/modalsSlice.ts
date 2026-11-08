@@ -47,7 +47,7 @@ export type Modal =
         accountId: string;
         filename: string;
         categories?: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
-        onImported: (didChange: boolean) => void;
+        onImported?: (didChange: boolean) => void;
       };
     }
   | {

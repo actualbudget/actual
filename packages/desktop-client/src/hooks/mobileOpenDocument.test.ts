@@ -23,12 +23,10 @@ describe('mobileOpenDocument helpers', () => {
 
   test('detects file open URLs and ignores openid callbacks', () => {
     expect(isFileOpenUrl('file:///tmp/data.csv')).toBe(true);
-    expect(
-      isFileOpenUrl('actualbudget://localhost/openid-cb?code=abc'),
-    ).toBe(false);
-    expect(isFileOpenUrl('actualbudget://localhost/inbox/data.qfx')).toBe(
-      true,
+    expect(isFileOpenUrl('actualbudget://localhost/openid-cb?code=abc')).toBe(
+      false,
     );
+    expect(isFileOpenUrl('actualbudget://localhost/inbox/data.qfx')).toBe(true);
     expect(isFileOpenUrl('https://example.com/file.csv')).toBe(false);
   });
 

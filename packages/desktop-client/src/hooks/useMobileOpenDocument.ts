@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import * as Platform from '@actual-app/core/shared/platform';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { useQuery } from '@tanstack/react-query';
 
+import { accountQueries } from '#accounts';
 import { importBudget } from '#budgetfiles/budgetfilesSlice';
-import { useAccounts } from '#hooks/useAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -19,8 +20,15 @@ import {
   TRANSACTION_IMPORT_EXTENSIONS,
 } from './mobileOpenDocument';
 
-/** Avoid re-importing the same cold-start / share URL if the effect rebinds. */
+/** URLs already finished (success or permanent error). */
 const handledOpenUrls = new Set<string>();
+/** URLs currently mid-read/upload so getLaunchUrl + appUrlOpen cannot double-fire. */
+const pendingOpenUrls = new Set<string>();
+/**
+ * Transaction file opens that arrived before accounts finished loading.
+ * Replayed once accountsReady flips true (warm opens are not re-emitted).
+ */
+const deferredTransactionUrls = new Set<string>();
 
 async function readOpenDocument(url: string): Promise<ArrayBuffer> {
   // convertFileSrc turns a native file:// (or Capacitor) URL into something
@@ -35,49 +43,75 @@ async function readOpenDocument(url: string): Promise<ArrayBuffer> {
 
 /**
  * Handles iOS/Android “Open in Actual” for OFX/QFX/CSV/ZIP (and related)
- * documents declared in Info.plist / the Android intent filter.
+ * documents declared in Info.plist.
  *
  * Capacitor delivers the path via `appUrlOpen` (and `getLaunchUrl` on cold
  * start). We upload into the in-memory `/uploads` tree the same way the web
  * file picker does, then route to budget import or transaction import.
  */
-export function useMobileOpenDocument({
-  budgetOpen,
-}: {
-  budgetOpen: boolean;
-}) {
+export function useMobileOpenDocument({ budgetOpen }: { budgetOpen: boolean }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { data: accounts = [], isSuccess: accountsReady } = useAccounts();
+  // Only fetch accounts when a budget is open — ManagementApp must not call
+  // accounts-get during onboarding / file selection.
+  const { data: accounts = [], isSuccess: accountsReady } = useQuery({
+    ...accountQueries.list(),
+    enabled: budgetOpen,
+  });
   const accountsRef = useRef(accounts);
-  accountsRef.current = accounts;
+  const accountsReadyRef = useRef(accountsReady);
+  const budgetOpenRef = useRef(budgetOpen);
+
+  useEffect(() => {
+    accountsRef.current = accounts;
+  }, [accounts]);
+
+  useEffect(() => {
+    accountsReadyRef.current = accountsReady;
+  }, [accountsReady]);
+
+  useEffect(() => {
+    budgetOpenRef.current = budgetOpen;
+  }, [budgetOpen]);
 
   useEffect(() => {
     if (!Platform.isNativeMobileApp) {
       return;
     }
 
-    // Transaction import needs the account list; wait until it has loaded when
-    // a budget is open so we do not flash a false “create an account” error.
-    if (budgetOpen && !accountsReady) {
-      return;
-    }
-
     let cancelled = false;
 
     async function handleUrl(url: string) {
-      if (!isFileOpenUrl(url) || handledOpenUrls.has(url)) {
+      if (
+        !isFileOpenUrl(url) ||
+        handledOpenUrls.has(url) ||
+        pendingOpenUrls.has(url)
+      ) {
         return;
       }
 
       const extension = getExtensionFromUrl(url);
+      const originalName = getFilenameFromUrl(url);
+
       if (!extension) {
+        handledOpenUrls.add(url);
+        dispatch(
+          addNotification({
+            notification: {
+              type: 'error',
+              message: t('Unsupported file type: {{name}}', {
+                name: originalName,
+              }),
+            },
+          }),
+        );
         return;
       }
 
-      const originalName = getFilenameFromUrl(url);
       // Match browser-preload: normalize to file.<ext> inside /uploads.
       const uploadName = `file.${extension}`;
+
+      pendingOpenUrls.add(url);
 
       try {
         if (BUDGET_IMPORT_EXTENSIONS.has(extension)) {
@@ -86,11 +120,14 @@ export function useMobileOpenDocument({
             return;
           }
 
-          handledOpenUrls.add(url);
           await window.__actionsForMenu.uploadFile(uploadName, contents);
           await dispatch(
-            importBudget({ filepath: `/uploads/${uploadName}`, type: 'actual' }),
+            importBudget({
+              filepath: `/uploads/${uploadName}`,
+              type: 'actual',
+            }),
           );
+          handledOpenUrls.add(url);
           return;
         }
 
@@ -109,7 +146,7 @@ export function useMobileOpenDocument({
           return;
         }
 
-        if (!budgetOpen) {
+        if (!budgetOpenRef.current) {
           // Do not mark handled — FinancesApp should pick this up after a
           // budget is opened (same launch URL via getLaunchUrl).
           dispatch(
@@ -117,7 +154,7 @@ export function useMobileOpenDocument({
               notification: {
                 type: 'message',
                 message: t(
-                  'Open a budget, then use Open in Actual again to import transactions.',
+                  'Open a budget to finish importing these transactions.',
                 ),
               },
             }),
@@ -125,16 +162,25 @@ export function useMobileOpenDocument({
           return;
         }
 
-        const onBudgetAccounts = accountsRef.current.filter(a => !a.closed);
-        if (onBudgetAccounts.length === 0) {
+        // Keep the listener mounted while accounts load; queue warm opens and
+        // replay them once accountsReady is true.
+        if (!accountsReadyRef.current) {
+          deferredTransactionUrls.add(url);
+          return;
+        }
+
+        const openAccounts = accountsRef.current.filter(a => !a.closed);
+        const onBudgetAccounts = openAccounts.filter(a => !a.offbudget);
+        const importAccounts =
+          onBudgetAccounts.length > 0 ? onBudgetAccounts : openAccounts;
+
+        if (importAccounts.length === 0) {
           handledOpenUrls.add(url);
           dispatch(
             addNotification({
               notification: {
                 type: 'error',
-                message: t(
-                  'Create an account before importing transactions.',
-                ),
+                message: t('Create an account before importing transactions.'),
               },
             }),
           );
@@ -146,13 +192,12 @@ export function useMobileOpenDocument({
           return;
         }
 
-        handledOpenUrls.add(url);
         await window.__actionsForMenu.uploadFile(uploadName, contents);
         const filepath = `/uploads/${uploadName}`;
 
-        // Prefer a single on-budget account; otherwise import into the first and
-        // tell the user they can change account from the import UI.
-        const account = onBudgetAccounts[0];
+        // Prefer an on-budget account; otherwise fall back to any open account
+        // and tell the user they can switch from the import UI.
+        const account = importAccounts[0];
         dispatch(
           pushModal({
             modal: {
@@ -160,13 +205,14 @@ export function useMobileOpenDocument({
               options: {
                 accountId: account.id,
                 filename: filepath,
-                onImported: () => {},
               },
             },
           }),
         );
+        handledOpenUrls.add(url);
+        deferredTransactionUrls.delete(url);
 
-        if (onBudgetAccounts.length > 1) {
+        if (importAccounts.length > 1) {
           dispatch(
             addNotification({
               notification: {
@@ -192,6 +238,8 @@ export function useMobileOpenDocument({
             },
           }),
         );
+      } finally {
+        pendingOpenUrls.delete(url);
       }
     }
 
@@ -208,6 +256,13 @@ export function useMobileOpenDocument({
       .catch(() => {
         // getLaunchUrl rejects when the app was not launched from a URL.
       });
+
+    if (budgetOpen && accountsReady && deferredTransactionUrls.size > 0) {
+      for (const url of [...deferredTransactionUrls]) {
+        deferredTransactionUrls.delete(url);
+        void handleUrl(url);
+      }
+    }
 
     return () => {
       cancelled = true;
