@@ -33,6 +33,7 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import { useModalState } from '#hooks/useModalState';
 import { useReducedMotion } from '#hooks/useReducedMotion';
 import { useSwipeToDismiss } from '#hooks/useSwipeToDismiss';
+import { useVisualViewport } from '#hooks/useVisualViewport';
 import { collapseModals } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -118,6 +119,7 @@ export const Modal = ({
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isSheet = presentation === 'sheet' && isNarrowWidth;
+  const viewport = useVisualViewport();
   const { enableScope, disableScope } = useHotkeysContext();
 
   // This deactivates any key handlers in the "app" scope
@@ -204,6 +206,10 @@ export const Modal = ({
         <View
           style={{
             display: 'flex',
+            // React Aria's height removes pinch zoom scaling. Safari page zoom
+            // needs CSS pixels, including keyboard resizing while zoomed.
+            '--visual-viewport-height': `${viewport.height}px`,
+            top: viewport.offsetTop,
             ...(isSheet
               ? { alignItems: 'stretch', justifyContent: 'flex-end' }
               : { alignItems: 'center', justifyContent: 'center' }),
