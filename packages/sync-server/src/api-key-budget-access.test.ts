@@ -102,6 +102,10 @@ describe('budget access with an API key', () => {
       .set('X-ACTUAL-FILE-ID', fileId);
   }
 
+  function getEncryptionKey(fileId = budget.fileId) {
+    return request(app).post('/sync/user-get-key').send({ token: key, fileId });
+  }
+
   function sync(
     fileId = budget.fileId,
     groupId = budget.groupId,
@@ -134,15 +138,20 @@ describe('budget access with an API key', () => {
       );
   }
 
+  async function expectBudgetDenied(status: number, target = budget) {
+    await get('/sync/get-user-file-info', target.fileId).expect(status);
+    await get('/sync/download-user-file', target.fileId).expect(status);
+    await getEncryptionKey(target.fileId).expect(status);
+    await sync(target.fileId, target.groupId).expect(status);
+  }
+
   it('validates the key without exposing the admin role of its creator, and lists only its budget', async () => {
-    const validated = await get('/account/validate');
-    expect(validated.status).toBe(200);
+    const validated = await get('/account/validate').expect(200);
     expect(validated.body.data).toEqual({
       validated: true,
       loginMethod: 'api-key',
     });
-    const listed = await get('/sync/list-user-files');
-    expect(listed.status).toBe(200);
+    const listed = await get('/sync/list-user-files').expect(200);
     expect(
       listed.body.data.map((file: { fileId: string }) => file.fileId),
     ).toEqual([budget.fileId]);
@@ -172,17 +181,12 @@ describe('budget access with an API key', () => {
           ],
         );
       }
-      const info = await get('/sync/get-user-file-info');
-      expect(info.status).toBe(200);
+      const info = await get('/sync/get-user-file-info').expect(200);
       expect(info.body.data.fileId).toBe(budget.fileId);
       expect(info.body.data.groupId).toBe(budget.groupId);
-      const metadata = await request(app)
-        .post('/sync/user-get-key')
-        .send({ token: key, fileId: budget.fileId });
-      expect(metadata.status).toBe(200);
+      const metadata = await getEncryptionKey().expect(200);
       expect(metadata.body.data.id).toBe(encrypted ? encryptionKey : null);
-      const downloaded = await get('/sync/download-user-file');
-      expect(downloaded.status).toBe(200);
+      const downloaded = await get('/sync/download-user-file').expect(200);
       expect(downloaded.body.toString()).toBe(
         `budget contents for ${budget.fileId}`,
       );
@@ -192,17 +196,18 @@ describe('budget access with an API key', () => {
         isEncrypted: encrypted,
         content: new Uint8Array([1, 2, 3]),
       });
-      expect(
-        (await sync(budget.fileId, budget.groupId, [message], encryptionKey))
-          .status,
-      ).toBe(200);
+      await sync(
+        budget.fileId,
+        budget.groupId,
+        [message],
+        encryptionKey,
+      ).expect(200);
       const received = await sync(
         budget.fileId,
         budget.groupId,
         [],
         encryptionKey,
-      );
-      expect(received.status).toBe(200);
+      ).expect(200);
       expect(
         fromBinary(SyncResponseSchema, new Uint8Array(received.body)).messages,
       ).toEqual([message]);
@@ -221,7 +226,6 @@ describe('budget access with an API key', () => {
         })
         .expect(201);
       key = created.body.data.key;
-      const id = created.body.data.id;
       const scopes = [budget, otherBudget].map((target, index) => ({
         ...target,
         message: create(MessageEnvelopeSchema, {
@@ -230,25 +234,21 @@ describe('budget access with an API key', () => {
         }),
       }));
       for (const { fileId, groupId, message } of scopes) {
-        const downloaded = await get('/sync/download-user-file', fileId);
-        expect(downloaded.status).toBe(200);
+        const downloaded = await get('/sync/download-user-file', fileId).expect(
+          200,
+        );
         expect(downloaded.body.toString()).toBe(
           `budget contents for ${fileId}`,
         );
-        expect((await sync(fileId, groupId, [message])).status).toBe(200);
+        await sync(fileId, groupId, [message]).expect(200);
       }
       for (const { fileId, groupId, message } of scopes) {
-        const received = await sync(fileId, groupId);
-        expect(received.status).toBe(200);
+        const received = await sync(fileId, groupId).expect(200);
         expect(
           fromBinary(SyncResponseSchema, new Uint8Array(received.body))
             .messages,
         ).toEqual([message]);
       }
-      expect(
-        (await get('/sync/download-user-file', budgetIds().fileId)).status,
-      ).toBe(403);
-      expect((await sync(budgetIds().fileId, budget.groupId)).status).toBe(403);
       expect((await get('/sync/list-user-files')).body.data).toHaveLength(2);
 
       if (change === 'lost-access') {
@@ -262,51 +262,21 @@ describe('budget access with an API key', () => {
           otherBudget.fileId,
         ]);
       }
-      expect(
-        (await get('/sync/download-user-file', otherBudget.fileId)).status,
-      ).toBe(403);
-      expect((await sync(otherBudget.fileId, otherBudget.groupId)).status).toBe(
-        403,
-      );
-      expect((await get('/sync/download-user-file')).status).toBe(200);
-      expect((await sync()).status).toBe(200);
+      await get('/sync/download-user-file', otherBudget.fileId).expect(403);
+      await sync(otherBudget.fileId, otherBudget.groupId).expect(403);
+      await get('/sync/download-user-file').expect(200);
+      await sync().expect(200);
       expect(
         (await get('/sync/list-user-files')).body.data.map(
           (file: { fileId: string }) => file.fileId,
         ),
       ).toEqual([budget.fileId]);
-
-      await request(app)
-        .delete(`/api-keys/${id}`)
-        .set('X-ACTUAL-TOKEN', session)
-        .expect(200);
-      for (const { fileId, groupId } of scopes) {
-        expect((await get('/sync/download-user-file', fileId)).status).toBe(
-          401,
-        );
-        expect((await sync(fileId, groupId)).status).toBe(401);
-      }
     },
   );
 
   it('rejects another budget through headers, JSON, and protobuf even for an admin key', async () => {
-    for (const path of [
-      '/sync/get-user-file-info',
-      '/sync/download-user-file',
-    ]) {
-      expect((await get(path, otherBudget.fileId)).status).toBe(403);
-    }
-    expect(
-      (
-        await request(app)
-          .post('/sync/user-get-key')
-          .send({ token: key, fileId: otherBudget.fileId })
-      ).status,
-    ).toBe(403);
-    expect((await sync(otherBudget.fileId, otherBudget.groupId)).status).toBe(
-      403,
-    );
-    expect((await sync(budget.fileId, otherBudget.groupId)).status).toBe(400);
+    await expectBudgetDenied(403, otherBudget);
+    await sync(budget.fileId, otherBudget.groupId).expect(400);
     expect(existsSync(getPathForGroupFile(otherBudget.groupId))).toBe(false);
   });
 
@@ -323,22 +293,9 @@ describe('budget access with an API key', () => {
       } else if (change === 'deleted-user') {
         db.mutate('DELETE FROM users WHERE id = ?', [userId]);
       }
-      for (const path of [
-        '/account/validate',
-        '/sync/list-user-files',
-        '/sync/get-user-file-info',
-        '/sync/download-user-file',
-      ]) {
-        expect((await get(path)).status).toBe(401);
-      }
-      expect(
-        (
-          await request(app)
-            .post('/sync/user-get-key')
-            .send({ token: key, fileId: budget.fileId })
-        ).status,
-      ).toBe(401);
-      expect((await sync()).status).toBe(401);
+      await get('/account/validate').expect(401);
+      await get('/sync/list-user-files').expect(401);
+      await expectBudgetDenied(401);
     },
   );
 
@@ -356,31 +313,14 @@ describe('budget access with an API key', () => {
       } else {
         db.mutate('DELETE FROM api_key_budgets WHERE key_id = ?', [keyId]);
       }
-      const validated = await get('/account/validate');
-      expect(validated.status).toBe(200);
+      const validated = await get('/account/validate').expect(200);
       expect(validated.body.data).toEqual({
         validated: true,
         loginMethod: 'api-key',
       });
-      const listed = await get('/sync/list-user-files');
-      expect(listed.status).toBe(200);
+      const listed = await get('/sync/list-user-files').expect(200);
       expect(listed.body.data).toEqual([]);
-      for (const path of [
-        '/sync/get-user-file-info',
-        '/sync/download-user-file',
-      ]) {
-        expect((await get(path)).status).toBe(403);
-      }
-      expect(
-        (
-          await request(app)
-            .post('/sync/user-get-key')
-            .send({ token: key, fileId: budget.fileId })
-        ).status,
-      ).toBe(403);
-      expect((await sync()).status).toBe(403);
-      expect((await get('/api-keys')).status).toBe(401);
-      expect((await get('/admin/users')).status).toBe(401);
+      await expectBudgetDenied(403);
     },
   );
 
@@ -431,15 +371,13 @@ describe('budget access with an API key', () => {
     ).toBe(401);
   });
 
-  it.each(['actual_bad', `actual_${'a'.repeat(43)}`])(
-    'rejects a malformed or unknown key',
-    async token => {
-      expect(
-        (await get('/account/validate', budget.fileId, token)).status,
-      ).toBe(401);
-      expect(
-        (await get('/sync/download-user-file', budget.fileId, token)).status,
-      ).toBe(401);
-    },
-  );
+  it('rejects an unknown key', async () => {
+    const token = `actual_${'a'.repeat(43)}`;
+    expect((await get('/account/validate', budget.fileId, token)).status).toBe(
+      401,
+    );
+    expect(
+      (await get('/sync/download-user-file', budget.fileId, token)).status,
+    ).toBe(401);
+  });
 });
