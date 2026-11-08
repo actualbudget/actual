@@ -75,7 +75,7 @@ export function StorageBackendToggle() {
       : activeBackend === 'memory-idb'
         ? t('in memory, saved to IndexedDB')
         : activeBackend === 'legacy'
-          ? t('IndexedDB blocks (current engine)')
+          ? t('absurd-sql, IndexedDB blocks (current engine)')
           : null;
 
   return (
