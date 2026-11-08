@@ -220,7 +220,7 @@ export function createMemoryIdbStore({
 
   function lockBudget(path: string): Promise<() => void> {
     return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
-      throw new BudgetInUseError(path);
+      throw new BudgetInUseError(path, 'the storage lock could not be taken');
     });
   }
 
@@ -288,7 +288,10 @@ export function createMemoryIdbStore({
         );
         if (!written) {
           db.close();
-          throw new BudgetInUseError(path);
+          throw new BudgetInUseError(
+            path,
+            'another worker created it meanwhile',
+          );
         }
       }
       if (bytes == null || stranded) {

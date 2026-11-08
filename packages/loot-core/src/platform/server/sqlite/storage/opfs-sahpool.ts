@@ -143,7 +143,7 @@ export function createOpfsStore({
       budgetLockName(path),
       BUDGET_LOCK_TIMEOUT_MS,
     ).catch(() => {
-      throw new BudgetInUseError(path);
+      throw new BudgetInUseError(path, 'the storage lock could not be taken');
     });
     try {
       if (existing) {
@@ -171,7 +171,10 @@ export function createOpfsStore({
         error instanceof Error &&
         /lock|NoModificationAllowed/i.test(error.name + error.message)
       ) {
-        throw new BudgetInUseError(path);
+        throw new BudgetInUseError(
+          path,
+          'its access handles are still held by another worker',
+        );
       }
       throw error;
     }

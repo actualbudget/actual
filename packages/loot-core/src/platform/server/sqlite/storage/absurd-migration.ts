@@ -65,7 +65,13 @@ function evictLegacyConnections(
     let exists = true;
     let changed = false;
     const timer = setTimeout(
-      () => reject(new BudgetInUseError(path)),
+      () =>
+        reject(
+          new BudgetInUseError(
+            path,
+            'a connection to the absurd-sql copy would not close',
+          ),
+        ),
       EVICT_TIMEOUT_MS,
     );
     request.onupgradeneeded = event => {
@@ -92,7 +98,12 @@ function evictLegacyConnections(
     request.onerror = () => {
       clearTimeout(timer);
       if (changed) {
-        reject(new BudgetInUseError(path));
+        reject(
+          new BudgetInUseError(
+            path,
+            'the absurd-sql copy changed during the move',
+          ),
+        );
       } else {
         resolve(exists);
       }
@@ -374,7 +385,10 @@ export async function completeMigration(
   const name = legacyDatabaseName(marker.filepath);
   await evictLegacyConnections(name, marker.filepath, snapshot);
   if (!(await putSqliteFileRowIfRev(marker, expectedRev))) {
-    throw new BudgetInUseError(marker.filepath);
+    throw new BudgetInUseError(
+      marker.filepath,
+      'another worker moved it first',
+    );
   }
   if (!(await deleteLegacyDatabase(name))) {
     logger.warn(

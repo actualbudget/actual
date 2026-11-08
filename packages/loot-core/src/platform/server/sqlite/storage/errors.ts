@@ -1,11 +1,17 @@
+import { logger } from '#platform/server/log';
+
 // Errors the storage layer raises while opening a budget's database. The
 // budget loader maps them to user-facing error codes. Kept free of wasm
 // imports so every platform module can re-export them.
 
+// The user sees one generic message for every cause, so the cause is
+// logged here, where the error is raised, for the console to tell them
+// apart
 export class BudgetInUseError extends Error {
-  constructor(path: string) {
-    super(`The database at ${path} is open in another tab or window`);
+  constructor(path: string, reason: string) {
+    super(`The database at ${path} is in use: ${reason}`);
     this.name = 'BudgetInUseError';
+    logger.warn('sqlite storage: budget in use', path, reason);
   }
 }
 

@@ -178,7 +178,10 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
           BUDGET_LOCK_TIMEOUT_MS,
           'shared',
         ).catch(() => {
-          throw new BudgetInUseError(path);
+          throw new BudgetInUseError(
+            path,
+            'the storage lock is held exclusively elsewhere',
+          );
         });
         try {
           // Another worker may have moved the budget to the new storage
