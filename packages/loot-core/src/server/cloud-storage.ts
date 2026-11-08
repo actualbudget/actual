@@ -7,6 +7,12 @@ import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as memory from '#platform/server/memory';
 import * as sqlite from '#platform/server/sqlite';
+import {
+  databaseEntries,
+  PROTECTED_DATABASE,
+  readDatabaseEntries,
+} from '#server/amount-encoding/files';
+import { notifyFxContextChanged } from '#server/exchange-rates/context';
 import * as monthUtils from '#shared/months';
 
 import * as encryption from './encryption';
@@ -58,6 +64,7 @@ async function checkHTTPStatus(res) {
       const error = res.status === 403 ? body.data : body;
       if (getServerErrorReason(error) === 'token-expired') {
         await asyncStorage.removeItem('user-token');
+        await notifyFxContextChanged('session');
       }
     } catch {
       // Preserve the original HTTP error when the response is not JSON.
@@ -101,16 +108,37 @@ export async function checkKey(): Promise<{
   };
 }
 
+export async function supportsAmountEncoding(): Promise<boolean> {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken || !getServer()?.SYNC_SERVER) return false;
+  try {
+    const response = await fetchJSON(
+      getServer().SYNC_SERVER + '/amount-encoding-capabilities',
+      { headers: { 'X-ACTUAL-TOKEN': userToken } },
+    );
+    return response.data?.amountEncodingVersion === 1;
+  } catch {
+    return false;
+  }
+}
+
 export async function resetSyncState(newKeyState) {
   const userToken = await asyncStorage.getItem('user-token');
 
   const { cloudFileId } = prefs.getPrefs();
 
   try {
-    await post(getServer().SYNC_SERVER + '/reset-user-file', {
-      token: userToken,
-      fileId: cloudFileId,
-    });
+    await post(
+      getServer().SYNC_SERVER + '/reset-user-file',
+      {
+        token: userToken,
+        fileId: cloudFileId,
+      },
+      {
+        'X-ACTUAL-AMOUNT-ENCODING': '1',
+        'X-ACTUAL-GROUP-ID': prefs.getPrefs().groupId,
+      },
+    );
   } catch (e) {
     if (e instanceof PostError) {
       return {
@@ -124,13 +152,20 @@ export async function resetSyncState(newKeyState) {
 
   if (newKeyState) {
     try {
-      await post(getServer().SYNC_SERVER + '/user-create-key', {
-        token: userToken,
-        fileId: cloudFileId,
-        keyId: newKeyState.key.getId(),
-        keySalt: newKeyState.salt,
-        testContent: newKeyState.testContent,
-      });
+      await post(
+        getServer().SYNC_SERVER + '/user-create-key',
+        {
+          token: userToken,
+          fileId: cloudFileId,
+          keyId: newKeyState.key.getId(),
+          keySalt: newKeyState.salt,
+          testContent: newKeyState.testContent,
+        },
+        {
+          'X-ACTUAL-AMOUNT-ENCODING': '1',
+          'X-ACTUAL-GROUP-ID': prefs.getPrefs().groupId,
+        },
+      );
     } catch (e) {
       if (e instanceof PostError) {
         return { error: { reason: 'network' } };
@@ -142,7 +177,13 @@ export async function resetSyncState(newKeyState) {
   return {};
 }
 
-export async function exportBuffer() {
+export async function exportBuffer({
+  omitAmountEncodingTransition = false,
+  alreadyMutating = false,
+}: {
+  omitAmountEncodingTransition?: boolean;
+  alreadyMutating?: boolean;
+} = {}) {
   const { id, budgetName } = prefs.getPrefs();
   if (!budgetName) {
     return null;
@@ -154,9 +195,9 @@ export async function exportBuffer() {
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
-  const { zipped, entries } = await runMutator(async () => {
+  const createSnapshot = async () => {
     const rawDbContent = await fs.readFile(
-      fs.join(budgetDir, 'db.sqlite'),
+      fs.join(fs.getBudgetDir(id), 'db.sqlite'),
       'binary',
     );
 
@@ -181,17 +222,26 @@ export async function exportBuffer() {
     const meta = JSON.parse(
       await fs.readFile(fs.join(budgetDir, 'metadata.json')),
     );
+    if (omitAmountEncodingTransition) {
+      delete meta.amountEncodingTransition;
+    }
 
     meta.resetClock = true;
     const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
 
     const entries = {
-      'db.sqlite': Buffer.from(dbContent),
+      ...databaseEntries(
+        Buffer.from(dbContent),
+        Boolean(prefs.getPrefs().amountEncoding),
+      ),
       'metadata.json': metaContent,
     };
 
     return { zipped: safeZip(entries), entries };
-  });
+  };
+  const { zipped, entries } = alreadyMutating
+    ? await createSnapshot()
+    : await runMutator(createSnapshot);
 
   const warnings: string[] = [];
   if (exceedsSafeUnzipLimits(zipped, entries)) {
@@ -201,7 +251,8 @@ export async function exportBuffer() {
   const availableMemory = memory.getAvailableMemory();
   if (
     availableMemory != null &&
-    entries['db.sqlite'].length > availableMemory
+    (entries[PROTECTED_DATABASE] ?? entries['db.sqlite']).length >
+      availableMemory
   ) {
     warnings.push('may-exceed-available-memory');
   }
@@ -240,16 +291,23 @@ export async function importBuffer(fileData, buffer, localId?: string) {
     throw FileDownloadError('invalid-zip-file');
   }
 
-  const entryName = dir + 'db.sqlite';
   const metaEntryName = dir + 'metadata.json';
-
-  const dbContent = Buffer.from(entries[entryName]);
+  let databaseEntry;
+  try {
+    databaseEntry = readDatabaseEntries(entries, dir);
+  } catch {
+    throw FileDownloadError('invalid-zip-file');
+  }
+  const dbContent = Buffer.from(databaseEntry.content);
   const metaContent = Buffer.from(entries[metaEntryName]);
 
   let meta;
   try {
     meta = JSON.parse(metaContent.toString('utf8'));
   } catch {
+    throw FileDownloadError('invalid-meta-file');
+  }
+  if (databaseEntry.isProtected !== Boolean(meta.amountEncoding)) {
     throw FileDownloadError('invalid-meta-file');
   }
 
@@ -289,13 +347,19 @@ export async function importBuffer(fileData, buffer, localId?: string) {
     await fs.mkdir(budgetDir);
   }
 
-  await fs.writeFile(fs.join(budgetDir, 'db.sqlite'), dbContent);
+  await fs.writeFile(
+    fs.join(budgetDir, 'db.sqlite'),
+    new Uint8Array(dbContent),
+  );
   await fs.writeFile(fs.join(budgetDir, 'metadata.json'), JSON.stringify(meta));
 
   return { id: meta.id };
 }
 
 export async function upload() {
+  if (prefs.getPrefs()?.amountEncodingTransition) {
+    throw FileUploadError('amount-encoding-transition-pending');
+  }
   const userToken = await asyncStorage.getItem('user-token');
   if (!userToken) {
     throw FileUploadError('unauthorized');
@@ -313,6 +377,7 @@ export async function upload() {
     budgetName,
     cloudFileId: originalCloudFileId,
     encryptKeyId,
+    amountEncoding,
   } = prefs.getPrefs();
   let cloudFileId = originalCloudFileId;
   let uploadContent = zipContent;
@@ -349,6 +414,8 @@ export async function upload() {
         'X-ACTUAL-FILE-ID': cloudFileId,
         'X-ACTUAL-NAME': encodeURIComponent(budgetName),
         'X-ACTUAL-FORMAT': '2',
+        'X-ACTUAL-AMOUNT-ENCODING': '1',
+        'X-ACTUAL-TARGET-ENCODING': amountEncoding ? '1' : '0',
         ...(uploadMeta
           ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(uploadMeta) }
           : null),
@@ -386,6 +453,54 @@ export async function upload() {
   }
 }
 
+export async function publishAmountEncodingTransition(): Promise<string> {
+  const userToken = await asyncStorage.getItem('user-token');
+  const transition = prefs.getPrefs()?.amountEncodingTransition;
+  const { budgetName, cloudFileId, encryptKeyId } = prefs.getPrefs() || {};
+  if (!userToken || !transition || !cloudFileId || !budgetName) {
+    throw FileUploadError('amount-encoding-transition-invalid');
+  }
+  const exported = await exportBuffer({
+    omitAmountEncodingTransition: true,
+    alreadyMutating: true,
+  });
+  if (!exported) throw FileUploadError('amount-encoding-transition-invalid');
+  let content = exported.data;
+  let encryptMeta = null;
+  if (encryptKeyId) {
+    const encrypted = await encryption.encrypt(content, encryptKeyId);
+    content = encrypted.value;
+    encryptMeta = encrypted.meta;
+  }
+  const target = transition.targetEncoding ? '1' : '0';
+  const response = await fetchJSON(
+    getServer().SYNC_SERVER + '/amount-encoding-transition',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Length': String(content.length),
+        'Content-Type': 'application/encrypted-file',
+        'X-ACTUAL-TOKEN': userToken,
+        'X-ACTUAL-FILE-ID': cloudFileId,
+        'X-ACTUAL-GROUP-ID': transition.sourceGroupId,
+        'X-ACTUAL-NAME': encodeURIComponent(budgetName),
+        'X-ACTUAL-FORMAT': '2',
+        'X-ACTUAL-AMOUNT-ENCODING': '1',
+        'X-ACTUAL-TARGET-ENCODING': target,
+        'X-ACTUAL-TRANSITION-ID': transition.id,
+        ...(encryptMeta
+          ? { 'X-ACTUAL-ENCRYPT-META': JSON.stringify(encryptMeta) }
+          : null),
+      },
+      body: content,
+    },
+  );
+  if (response.status !== 'ok' || typeof response.groupId !== 'string') {
+    throw FileUploadError('amount-encoding-transition-invalid');
+  }
+  return response.groupId;
+}
+
 export async function possiblyUpload() {
   const { cloudFileId, groupId, lastUploaded } = prefs.getPrefs();
 
@@ -413,10 +528,14 @@ export async function possiblyUpload() {
 export async function removeFile(fileId) {
   const userToken = await asyncStorage.getItem('user-token');
 
-  await post(getServer().SYNC_SERVER + '/delete-user-file', {
-    token: userToken,
-    fileId,
-  });
+  await post(
+    getServer().SYNC_SERVER + '/delete-user-file',
+    {
+      token: userToken,
+      fileId,
+    },
+    { 'X-ACTUAL-AMOUNT-ENCODING': '1' },
+  );
 }
 
 export async function listRemoteFiles(): Promise<RemoteFile[]> {
@@ -458,6 +577,7 @@ export async function download(cloudFileId, localId?: string) {
     headers: {
       'X-ACTUAL-TOKEN': userToken,
       'X-ACTUAL-FILE-ID': cloudFileId,
+      'X-ACTUAL-AMOUNT-ENCODING': '1',
     },
   })
     .then(checkHTTPStatus)
@@ -476,6 +596,7 @@ export async function download(cloudFileId, localId?: string) {
     headers: {
       'X-ACTUAL-TOKEN': userToken,
       'X-ACTUAL-FILE-ID': cloudFileId,
+      'X-ACTUAL-AMOUNT-ENCODING': '1',
     },
   }).catch(err => {
     logger.log('Error fetching file info', err);

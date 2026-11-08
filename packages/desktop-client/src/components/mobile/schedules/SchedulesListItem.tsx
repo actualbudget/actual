@@ -17,6 +17,8 @@ import type { WithRequired } from '@actual-app/core/types/util';
 import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { DisplayId } from '#components/util/DisplayId';
+import { AccountCurrencyFormat } from '#hooks/currencyFormatContext';
+import { useAccount } from '#hooks/useAccount';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormat } from '#hooks/useFormat';
 
@@ -33,16 +35,9 @@ export function SchedulesListItem({
   ...props
 }: SchedulesListItemProps) {
   const { t } = useTranslation();
-  const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-
-  const amount = getScheduledAmount(schedule._amount);
-  const amountStr =
-    (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
-      ? '~'
-      : '') +
-    (amount > 0 ? '+' : '') +
-    format(Math.abs(amount || 0), 'financial');
+  // A foreign schedule's amount is in its account's currency.
+  const scheduleAccount = useAccount(schedule._account ?? '');
 
   return (
     <ActionableGridListItem
@@ -111,7 +106,9 @@ export function SchedulesListItem({
                 <Trans>Amount:</Trans>
               </Text>
               <Text style={{ ...styles.tnum, color: theme.pageText }}>
-                {amountStr}
+                <AccountCurrencyFormat account={scheduleAccount}>
+                  <ScheduleAmountText schedule={schedule} />
+                </AccountCurrencyFormat>
               </Text>
             </SpaceBetween>
             {schedule.next_date && (
@@ -133,5 +130,21 @@ export function SchedulesListItem({
         </View>
       </SpaceBetween>
     </ActionableGridListItem>
+  );
+}
+
+function ScheduleAmountText({
+  schedule,
+}: {
+  schedule: Pick<ScheduleEntity, '_amount' | '_amountOp'>;
+}) {
+  const format = useFormat();
+  const amount = getScheduledAmount(schedule._amount);
+  return (
+    (schedule._amountOp === 'isapprox' || schedule._amountOp === 'isbetween'
+      ? '~'
+      : '') +
+    (amount > 0 ? '+' : '') +
+    format(Math.abs(amount || 0), 'financial')
   );
 }

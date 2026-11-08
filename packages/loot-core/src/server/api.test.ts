@@ -8,6 +8,7 @@ import { app as accountGroupsApp } from './account-groups/app';
 import { app as accountsApp } from './accounts/app';
 import { installAPI } from './api';
 import { createBudget } from './budget/base';
+import { runMutator } from './mutators';
 import * as prefs from './prefs';
 
 vi.mock('#shared/errors', () => ({
@@ -222,6 +223,54 @@ describe('API handlers', () => {
     });
   });
 
+  describe('api/account-create', () => {
+    beforeEach(global.emptyDatabase());
+    beforeEach(() => prefs.loadPrefs());
+
+    it.each([
+      [undefined, 1234],
+      [0, -1234],
+      [2, 1234],
+      [3, 1234],
+    ])(
+      'passes raw integer input through at recorded precision %s',
+      async (precision, initialBalance) => {
+        if (precision !== undefined) {
+          await prefs.savePrefs({
+            amountEncoding: JSON.stringify({
+              version: 1,
+              currencyCode: 'USD',
+              precision,
+            }),
+          });
+        }
+        handlers['account-create'] = vi.fn().mockResolvedValue('account-id');
+
+        await handlers['api/account-create']({
+          account: { name: 'Checking' },
+          initialBalance,
+        });
+
+        expect(handlers['account-create']).toHaveBeenCalledWith({
+          name: 'Checking',
+          offBudget: undefined,
+          closed: undefined,
+          currency: undefined,
+          balanceInteger: initialBalance,
+        });
+      },
+    );
+
+    it('rejects noninteger API balances', async () => {
+      await expect(
+        handlers['api/account-create']({
+          account: { name: 'Checking' },
+          initialBalance: 1.5,
+        }),
+      ).rejects.toThrow('Invalid initial balance');
+    });
+  });
+
   describe('api/budget-month', () => {
     beforeEach(global.emptyDatabase());
 
@@ -304,6 +353,113 @@ describe('API handlers', () => {
       expect(group?.categories?.[0]).toHaveProperty('balance', 1000);
       expect(group?.categories?.[0]).toHaveProperty('carryover', false);
     });
+
+    it('validates the month inside the queue for Money reads', async () => {
+      let release: (() => void) | undefined;
+      const blocker = runMutator(
+        () => new Promise<void>(resolve => (release = resolve)),
+      );
+      const read = handlers['api/budget-month']({
+        month: '2026-03',
+        options: { amountFormat: 'money' },
+      });
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(handlers['get-budget-bounds']).not.toHaveBeenCalled();
+      release?.();
+      await blocker;
+      await read;
+      expect(handlers['get-budget-bounds']).toHaveBeenCalled();
+    });
+
+    it.each(['envelope', 'tracking'] as const)(
+      '%s budget: wraps every amount in Money when asked',
+      async budgetType => {
+        await db.update('preferences', {
+          id: 'defaultCurrencyCode',
+          value: 'KWD',
+        });
+        if (budgetType === 'tracking') {
+          sheet.get().meta().budgetType = 'tracking';
+          await db.update('preferences', {
+            id: 'budgetType',
+            value: 'tracking',
+          });
+        }
+        await db.insertCategoryGroup({ id: 'expense-group', name: 'Bills' });
+        await db.insertCategory({
+          id: 'expense-cat',
+          name: 'Rent',
+          cat_group: 'expense-group',
+        });
+        await createBudget(['2026-02', '2026-03']);
+        sheet.get().set('budget202603!budget-expense-cat', 3000);
+        await db.insertTransaction({
+          id: 'tx1',
+          date: '2026-03-15',
+          account: 'acct1',
+          amount: 5000,
+          category: 'income-cat',
+        });
+        await db.insertTransaction({
+          id: 'tx2',
+          date: '2026-03-16',
+          account: 'acct1',
+          amount: -1250,
+          category: 'expense-cat',
+        });
+        await sheet.waitOnSpreadsheet();
+
+        const raw = await handlers['api/budget-month']({ month: '2026-03' });
+        const money = await handlers['api/budget-month']({
+          month: '2026-03',
+          options: { amountFormat: 'money' },
+        });
+
+        const wrap = (value: unknown) => ({
+          amount: value ?? 0,
+          currencyCode: 'KWD',
+        });
+        for (const key of [
+          'incomeAvailable',
+          'lastMonthOverspent',
+          'forNextMonth',
+          'totalBudgeted',
+          'toBudget',
+          'fromLastMonth',
+          'totalIncome',
+          'totalSpent',
+          'totalBalance',
+        ] as const) {
+          expect(money[key]).toEqual(wrap(raw[key]));
+        }
+        raw.categoryGroups.forEach((group, i) => {
+          const moneyGroup = money.categoryGroups[i];
+          for (const key of ['budgeted', 'spent', 'received', 'balance']) {
+            if (key in group) {
+              expect(moneyGroup[key]).toEqual(wrap(group[key]));
+            }
+          }
+          group.categories?.forEach((cat, j) => {
+            const moneyCat = moneyGroup.categories?.[j];
+            for (const key of ['budgeted', 'spent', 'received', 'balance']) {
+              if (key in cat) {
+                expect(moneyCat?.[key]).toEqual(wrap(cat[key]));
+              }
+            }
+            if ('carryover' in cat) {
+              expect(moneyCat?.carryover).toBe(cat.carryover);
+            }
+          });
+        });
+        const expense = money.categoryGroups.find(
+          g => g.id === 'expense-group',
+        );
+        expect(expense?.categories?.[0]).toMatchObject({
+          budgeted: { amount: 3000, currencyCode: 'KWD' },
+          spent: { amount: -1250, currencyCode: 'KWD' },
+        });
+      },
+    );
   });
 
   describe('api/rule-create', () => {

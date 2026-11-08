@@ -1,5 +1,5 @@
 // Value types SQLite accepts as bound query parameters
-export type SqlParam = string | number | null;
+export type SqlParam = string | number | Uint8Array | null;
 
 // Opaque handles for an open database and a prepared statement. Each
 // platform module (web wasm, web legacy sql.js, electron better-sqlite3)

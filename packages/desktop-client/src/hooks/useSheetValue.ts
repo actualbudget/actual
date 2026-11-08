@@ -66,6 +66,9 @@ export function useSheetValue<
       }
 
       if (newResult.value !== latestValue.current) {
+        // Track the value now: several changes can arrive before a render,
+        // and a later one may return to the rendered value.
+        latestValue.current = newCastedResult.value;
         setResult(newCastedResult);
       }
     });

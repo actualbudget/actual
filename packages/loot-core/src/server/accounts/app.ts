@@ -12,13 +12,26 @@ import {
   PostError,
   TransactionError,
 } from '#server/errors';
+import { computeEntryPair } from '#server/exchange-rates/app';
 import { app as mainApp } from '#server/main-app';
-import { mutator } from '#server/mutators';
+import { mutator, runMutator } from '#server/mutators';
 import { del, get, post } from '#server/post';
 import { getPrefs } from '#server/prefs';
 import { getServer } from '#server/server-config';
 import { batchMessages } from '#server/sync';
+import { isForeignAccount } from '#server/transactions/foreign-guard';
 import { undoable, withUndo } from '#server/undo';
+import {
+  accountCurrencyFields,
+  getDefaultCurrencyCode,
+  getRecordedAmountPrecision,
+  isMulticurrencyAvailable,
+  resolveAccountCurrencyInput,
+} from '#server/util/currency';
+import {
+  isReviewedCurrency,
+  reviewedAmountEncoding,
+} from '#shared/amount-encoding';
 import { isNonProductionEnvironment } from '#shared/environment';
 import { dayFromDate } from '#shared/months';
 import * as monthUtils from '#shared/months';
@@ -40,6 +53,14 @@ import type {
   TransactionEntity,
 } from '#types/models';
 
+import {
+  correctAccountCurrency,
+  previewCurrencyCorrection,
+  previewStaleEncodingRepair,
+  repairStaleEncoding,
+  staleEncodingRows,
+} from './currency-correction';
+import { getCurrentEstimates } from './current-estimates';
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
@@ -56,6 +77,12 @@ export type AccountHandlers = {
   'account-update': typeof updateAccount;
   'accounts-get': typeof getAccounts;
   'account-balance': typeof getAccountBalance;
+  'accounts/current-estimates': typeof getCurrentEstimates;
+  'accounts/currency-correction-preview': typeof previewCurrencyCorrection;
+  'accounts/correct-currency': typeof correctAccountCurrency;
+  'accounts/stale-encoding': typeof staleEncodingRows;
+  'accounts/stale-encoding-preview': typeof previewStaleEncodingRepair;
+  'accounts/repair-stale-encoding': typeof repairStaleEncoding;
   'account-properties': typeof getAccountProperties;
   'gocardless-accounts-link': typeof linkGoCardlessAccount;
   'simplefin-accounts-link': typeof linkSimpleFinAccount;
@@ -97,15 +124,24 @@ async function updateAccount({
   name,
   last_reconciled,
   account_group_id,
+  currency,
 }: Pick<AccountEntity, 'id'> &
   Partial<
-    Pick<AccountEntity, 'name' | 'last_reconciled' | 'account_group_id'>
+    Pick<
+      AccountEntity,
+      'name' | 'last_reconciled' | 'account_group_id' | 'currency'
+    >
   >) {
-  await db.update('accounts', {
-    id,
-    ...(name !== undefined && { name }),
-    ...(last_reconciled && { last_reconciled }),
-    ...(account_group_id !== undefined && { account_group_id }),
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency, id);
+  await batchMessages(async () => {
+    await db.update('accounts', {
+      id,
+      ...(name !== undefined && { name }),
+      ...(last_reconciled && { last_reconciled }),
+      ...(account_group_id !== undefined && { account_group_id }),
+      ...(resolvedCurrency !== undefined &&
+        (await accountCurrencyFields(resolvedCurrency))),
+    });
   });
   return {};
 }
@@ -135,6 +171,8 @@ async function getAccounts(): Promise<AccountEntity[]> {
         last_sync: dbAccount.last_sync ?? null,
         bank_sync_status: dbAccount.bank_sync_status ?? null,
         account_group_id: dbAccount.account_group_id ?? null,
+        currency: dbAccount.currency ?? null,
+        currency_precision: dbAccount.currency_precision ?? null,
       }) satisfies AccountEntity,
   );
 }
@@ -146,16 +184,19 @@ async function getAccountBalance({
   id: string;
   cutoff: string | Date;
 }) {
+  // Foreign accounts report native units; base totals use amount.
+  const column = (await isForeignAccount(id)) ? 'transaction_amount' : 'amount';
   const result = await db.first<{ balance: number }>(
-    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?',
+    `SELECT sum(${column}) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0 AND date <= ?`,
     [id, db.toDateRepr(dayFromDate(cutoff))],
   );
   return result?.balance ? result.balance : 0;
 }
 
 async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
+  const column = (await isForeignAccount(id)) ? 'transaction_amount' : 'amount';
   const balanceResult = await db.first<{ balance: number }>(
-    'SELECT sum(amount) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0',
+    `SELECT sum(${column}) as balance FROM transactions WHERE acct = ? AND isParent = 0 AND tombstone = 0`,
     [id],
   );
   const countResult = await db.first<{ count: number }>(
@@ -169,406 +210,371 @@ async function getAccountProperties({ id }: { id: AccountEntity['id'] }) {
   };
 }
 
-async function linkGoCardlessAccount({
-  requisitionId,
+export type LinkAccountResult =
+  | {
+      type: 'ok';
+      /** Downloaded rows skipped because they are in another currency. */
+      currencyMismatches: number;
+    }
+  | { type: 'rate-unavailable'; currency: string; dates: string[] }
+  | { type: 'balance-unavailable' };
+
+type ProviderAccount = {
+  account_id: string;
+  name: string;
+  official_name?: string | null;
+  mask?: string | null;
+  currency?: string | null;
+};
+
+/**
+ * The currency an account linked to this provider account will hold (null
+ * for the budget currency), or a rejection before any write.
+ */
+async function linkDestinationCurrency(
+  providerCurrency: string | null | undefined,
+  upgradingId: AccountEntity['id'] | undefined,
+): Promise<string | null> {
+  const available = await isMulticurrencyAvailable();
+  const budgetCurrency = await getDefaultCurrencyCode();
+  const known = providerCurrency || null;
+  if (upgradingId) {
+    const account = await db.first<Pick<db.DbAccount, 'currency'>>(
+      'SELECT currency FROM accounts WHERE id = ?',
+      [upgradingId],
+    );
+    if (!account) {
+      throw new Error(`Account with ID ${upgradingId} not found.`);
+    }
+    const destination = account.currency ?? null;
+    // An unknown provider currency only links to base accounts.
+    if (
+      (available || destination !== null) &&
+      (destination !== null || known !== null) &&
+      (destination ?? budgetCurrency) !== known
+    ) {
+      throw new PostError('bank-account-currency-mismatch');
+    }
+    return destination;
+  }
+  if (!available || known === null || known === budgetCurrency) {
+    return null;
+  }
+  if (!isReviewedCurrency(known)) {
+    throw new PostError('bank-account-currency-unsupported');
+  }
+  return known;
+}
+
+/** A first link's typed failure, or null for other errors. */
+function linkFailure(
+  err: unknown,
+  currency: string,
+): Exclude<LinkAccountResult, { type: 'ok' }> | null {
+  const dates = bankSync.rateUnavailableDates(err);
+  if (dates) {
+    return { type: 'rate-unavailable', currency, dates };
+  }
+  if (
+    err instanceof TransactionError &&
+    err.message === 'balance-unavailable'
+  ) {
+    return { type: 'balance-unavailable' };
+  }
+  return null;
+}
+
+async function linkBankAccount({
+  syncSource,
+  institution,
+  bankId,
   account,
   upgradingId,
   offBudget = false,
   startingDate,
   startingBalance,
+  fileId,
+  tables = ['transactions', 'accounts'],
+}: LinkAccountBaseParams & {
+  syncSource: NonNullable<AccountEntity['account_sync_source']>;
+  institution: { name: string | null } | string;
+  bankId: string | undefined;
+  account: ProviderAccount;
+  fileId?: string;
+  tables?: string[];
+}): Promise<LinkAccountResult> {
+  const currency = await linkDestinationCurrency(account.currency, upgradingId);
+  const id = upgradingId ?? uuidv4();
+
+  const writeLink = async () => {
+    const bank = await link.findOrCreateBank(institution, bankId);
+    if (upgradingId) {
+      await db.update('accounts', {
+        id,
+        account_id: account.account_id,
+        bank: bank.id,
+        account_sync_source: syncSource,
+      });
+    } else {
+      await db.insertWithUUID('accounts', {
+        id,
+        account_id: account.account_id,
+        ...(account.mask != null && { mask: account.mask }),
+        name: account.name,
+        official_name: account.official_name ?? account.name,
+        bank: bank.id,
+        offbudget: offBudget ? 1 : 0,
+        account_sync_source: syncSource,
+        ...(await accountCurrencyFields(currency)),
+      });
+      await db.insertPayee({
+        name: '',
+        transfer_acct: id,
+      });
+    }
+    return bank;
+  };
+
+  let currencyMismatches = 0;
+  if (currency === null) {
+    // Base accounts link first, then sync. The link writes hold the mutator
+    // so they never join another link's open batch.
+    const bank = await runMutator(writeLink);
+    const syncRes = await bankSync.syncAccount(
+      undefined,
+      undefined,
+      id,
+      account.account_id,
+      bank.bank_id,
+      startingDate,
+      startingBalance,
+      fileId,
+    );
+    await runMutator(() => handleSyncResponse(syncRes, id));
+  } else {
+    // A foreign link downloads and validates first, then writes the bank,
+    // account, payees and transactions in one batch, or nothing.
+    const { download, newAccount } = await bankSync.downloadBankSyncAccount(
+      syncSource,
+      {
+        userId: undefined,
+        userKey: undefined,
+        id,
+        acctId: account.account_id,
+        bankId,
+        customStartingDate: startingDate,
+        fileId,
+      },
+    );
+    try {
+      // One mutator and one batch for the whole link, so concurrent links
+      // and syncs cannot share or commit its queued writes.
+      await runMutator(() =>
+        batchMessages(async () => {
+          // Earlier links may have changed the destination meanwhile.
+          if (
+            (await linkDestinationCurrency(account.currency, upgradingId)) !==
+            currency
+          ) {
+            throw new PostError('bank-account-currency-mismatch');
+          }
+          await writeLink();
+          const acctRow = upgradingId
+            ? {
+                ...(await db.select('accounts', id)),
+                account_sync_source: syncSource,
+              }
+            : {
+                id,
+                offbudget: offBudget ? 1 : 0,
+                account_sync_source: syncSource,
+              };
+          const syncRes = await bankSync.processBankSyncDownload(
+            download,
+            id,
+            acctRow,
+            newAccount,
+            startingBalance,
+            startingDate,
+            { inMutator: true },
+          );
+          const response = await handleSyncResponse(syncRes, id);
+          currencyMismatches = response.currencyMismatches ?? 0;
+        }),
+      );
+    } catch (err) {
+      const failure = linkFailure(err, currency);
+      if (failure) {
+        return failure;
+      }
+      throw err;
+    }
+  }
+
+  connection.send('sync-event', { type: 'success', tables });
+  return { type: 'ok', currencyMismatches };
+}
+
+async function linkGoCardlessAccount({
+  requisitionId,
+  account,
+  ...params
 }: LinkAccountBaseParams & {
   requisitionId: string;
   account: SyncServerGoCardlessAccount;
 }) {
-  let id;
-  const bank = await link.findOrCreateBank(account.institution, requisitionId);
-
-  if (upgradingId) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${upgradingId} not found.`);
-    }
-
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: account.account_id,
-      bank: bank.id,
-      account_sync_source: 'goCardless',
-    });
-  } else {
-    id = uuidv4();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: account.account_id,
-      mask: account.mask,
-      name: account.name,
-      official_name: account.official_name,
-      bank: bank.id,
-      offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'goCardless',
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  const syncRes = await bankSync.syncAccount(
-    undefined,
-    undefined,
-    id,
-    account.account_id,
-    bank.bank_id,
-    startingDate,
-    startingBalance,
-  );
-
-  await handleSyncResponse(syncRes, id);
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions', 'accounts'],
+  return linkBankAccount({
+    ...params,
+    syncSource: 'goCardless',
+    institution: account.institution,
+    bankId: requisitionId,
+    account,
   });
+}
 
-  return 'ok';
+/**
+ * Persist a null institution name when the provider doesn't report one, so
+ * the desktop-client can render a localized fallback instead of baking an
+ * English string into shared bank data.
+ */
+function providerInstitution(institution: string | null | undefined) {
+  return { name: institution ?? null };
 }
 
 async function linkSimpleFinAccount({
   externalAccount,
-  upgradingId,
-  offBudget = false,
-  startingDate,
-  startingBalance,
+  ...params
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerSimpleFinAccount;
 }) {
-  let id;
-
-  const institution = {
-    // Persist a null name when the provider doesn't report an institution, so
-    // the desktop-client can render a localized fallback instead of baking an
-    // English string into shared bank data.
-    name: externalAccount.institution ?? null,
-  };
-
-  const bank = await link.findOrCreateBank(
-    institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
-  );
-
-  if (upgradingId) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${upgradingId} not found.`);
-    }
-
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      bank: bank.id,
-      account_sync_source: 'simpleFin',
-    });
-  } else {
-    id = uuidv4();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      name: externalAccount.name,
-      official_name: externalAccount.name,
-      bank: bank.id,
-      offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'simpleFin',
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  const syncRes = await bankSync.syncAccount(
-    undefined,
-    undefined,
-    id,
-    externalAccount.account_id,
-    bank.bank_id,
-    startingDate,
-    startingBalance,
-    getPrefs()?.cloudFileId,
-  );
-
-  await handleSyncResponse(syncRes, id);
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions', 'accounts'],
+  return linkBankAccount({
+    ...params,
+    syncSource: 'simpleFin',
+    institution: providerInstitution(externalAccount.institution),
+    bankId: externalAccount.orgDomain ?? externalAccount.orgId,
+    account: externalAccount,
+    fileId: getPrefs()?.cloudFileId,
   });
-
-  return 'ok';
 }
 
 async function linkPluggyAiAccount({
   externalAccount,
-  upgradingId,
-  offBudget = false,
-  startingDate,
-  startingBalance,
+  ...params
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerPluggyAiAccount;
 }) {
-  let id;
-  const fileId = getPrefs()?.cloudFileId;
-
-  const institution = {
-    // Persist a null name when the provider doesn't report an institution, so
-    // the desktop-client can render a localized fallback instead of baking an
-    // English string into shared bank data.
-    name: externalAccount.institution ?? null,
-  };
-
-  const bank = await link.findOrCreateBank(
-    institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
-  );
-
-  if (upgradingId) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${upgradingId} not found.`);
-    }
-
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      bank: bank.id,
-      account_sync_source: 'pluggyai',
-    });
-  } else {
-    id = uuidv4();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      name: externalAccount.name,
-      official_name: externalAccount.name,
-      bank: bank.id,
-      offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'pluggyai',
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  const syncRes = await bankSync.syncAccount(
-    undefined,
-    undefined,
-    id,
-    externalAccount.account_id,
-    bank.bank_id,
-    startingDate,
-    startingBalance,
-    fileId,
-  );
-
-  await handleSyncResponse(syncRes, id);
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions', 'accounts'],
+  return linkBankAccount({
+    ...params,
+    syncSource: 'pluggyai',
+    institution: providerInstitution(externalAccount.institution),
+    bankId: externalAccount.orgDomain ?? externalAccount.orgId,
+    account: externalAccount,
+    fileId: getPrefs()?.cloudFileId,
   });
-
-  return 'ok';
 }
 
 async function linkAkahuAccount({
   externalAccount,
-  upgradingId,
-  offBudget = false,
-  startingDate,
-  startingBalance,
+  ...params
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerAkahuAccount;
 }) {
-  let id;
-
-  const institution = {
-    name: externalAccount.institution ?? null,
-  };
-
-  const bank = await link.findOrCreateBank(
-    institution,
-    externalAccount.orgDomain ?? externalAccount.orgId,
-  );
-
-  if (upgradingId) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${upgradingId} not found.`);
-    }
-
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      bank: bank.id,
-      account_sync_source: 'akahu',
-    });
-  } else {
-    id = uuidv4();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      name: externalAccount.name,
-      official_name: externalAccount.name,
-      bank: bank.id,
-      offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'akahu',
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  const syncRes = await bankSync.syncAccount(
-    undefined,
-    undefined,
-    id,
-    externalAccount.account_id,
-    bank.bank_id,
-    startingDate,
-    startingBalance,
-  );
-
-  await handleSyncResponse(syncRes, id);
-
-  connection.send('sync-event', {
-    type: 'success',
+  return linkBankAccount({
+    ...params,
+    syncSource: 'akahu',
+    institution: providerInstitution(externalAccount.institution),
+    bankId: externalAccount.orgDomain ?? externalAccount.orgId,
+    account: externalAccount,
     tables: ['transactions'],
   });
-
-  return 'ok';
 }
 
 async function linkEnableBankingAccount({
   externalAccount,
-  upgradingId,
-  offBudget = false,
-  startingDate,
-  startingBalance,
+  ...params
 }: LinkAccountBaseParams & {
   externalAccount: SyncServerEnableBankingAccount;
 }) {
-  let id: string | undefined;
-
-  const institution = {
-    // Persist a null name when the provider doesn't report an institution, so
-    // the desktop-client can render a localized fallback instead of baking an
-    // English string into shared bank data.
-    name: externalAccount.institution ?? null,
-  };
-
   // Enable Banking uses a session-per-account model, so we use the
   // account-level identifier (account_id) rather than institution-level
   // IDs. This creates one bank entry per Enable Banking account, unlike
   // GoCardless (requisitionId) or SimpleFin/PluggyAi (orgDomain/orgId).
-  const bank = await link.findOrCreateBank(
-    institution,
-    externalAccount.account_id,
-  );
-
-  if (upgradingId) {
-    const accRow = await db.first<db.DbAccount>(
-      'SELECT * FROM accounts WHERE id = ?',
-      [upgradingId],
-    );
-
-    if (!accRow) {
-      throw new Error(`Account with ID ${upgradingId} not found.`);
-    }
-
-    id = accRow.id;
-    await db.update('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      bank: bank.id,
-      account_sync_source: 'enableBanking',
-    });
-  } else {
-    id = uuidv4();
-    await db.insertWithUUID('accounts', {
-      id,
-      account_id: externalAccount.account_id,
-      name: externalAccount.name,
-      official_name: externalAccount.name,
-      bank: bank.id,
-      offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'enableBanking',
-    });
-    await db.insertPayee({
-      name: '',
-      transfer_acct: id,
-    });
-  }
-
-  if (id == null) {
-    throw new Error('id was not assigned in linkEnableBankingAccount');
-  }
-
-  const syncRes = await bankSync.syncAccount(
-    undefined,
-    undefined,
-    id,
-    externalAccount.account_id,
-    bank.bank_id,
-    startingDate,
-    startingBalance,
-  );
-
-  await handleSyncResponse(syncRes, id);
-
-  connection.send('sync-event', {
-    type: 'success',
-    tables: ['transactions', 'accounts'],
+  return linkBankAccount({
+    ...params,
+    syncSource: 'enableBanking',
+    institution: providerInstitution(externalAccount.institution),
+    bankId: externalAccount.account_id,
+    account: externalAccount,
   });
-
-  return 'ok';
 }
 
 async function createAccount({
   name,
-  balance = 0,
+  balance,
+  balanceInteger,
   offBudget = false,
   closed = false,
+  currency,
+  startingBalanceBase,
 }: {
   name: string;
-  balance?: number | undefined;
+  /**
+   * Major units, parsed by the UI at the account's precision (the recorded
+   * budget precision, or the currency's for a foreign account).
+   */
+  balance?: number | null | undefined;
+  /** Already-encoded minor units; persisted without a floating-point trip. */
+  balanceInteger?: number | undefined;
   offBudget?: boolean | undefined;
   closed?: boolean | undefined;
+  currency?: string | null | undefined;
+  /** Base amount for a foreign starting balance when no rate applies. */
+  startingBalanceBase?: number | undefined;
 }) {
+  if (balanceInteger !== undefined && balance != null) {
+    throw new Error('Supply either balance or balanceInteger');
+  }
+  const resolvedCurrency = await resolveAccountCurrencyInput(currency);
+  const nativePrecision = resolvedCurrency
+    ? reviewedAmountEncoding(resolvedCurrency).precision
+    : null;
+  const amount =
+    balanceInteger !== undefined
+      ? balanceInteger
+      : balance != null && balance !== 0
+        ? amountToInteger(
+            balance,
+            nativePrecision ?? getRecordedAmountPrecision(),
+          )
+        : 0;
+  if (!Number.isSafeInteger(amount)) {
+    throw new Error('Invalid starting balance');
+  }
+  // A foreign starting balance needs its base before anything is created.
+  let startingPair: { amount: number; transaction_amount: number } | null =
+    null;
+  if (resolvedCurrency && nativePrecision !== null && amount !== 0) {
+    const pair = await computeEntryPair({
+      quoteCurrency: resolvedCurrency,
+      nativePrecision,
+      date: monthUtils.currentDay(),
+      nativeAmount: amount,
+      baseAmount: startingBalanceBase,
+    });
+    if (pair.status !== 'ok') {
+      throw new Error(pair.status);
+    }
+    startingPair = {
+      amount: pair.baseAmount,
+      transaction_amount: pair.nativeAmount,
+    };
+  }
+
   const id: AccountEntity['id'] = await db.insertAccount({
     name,
     offbudget: offBudget ? 1 : 0,
     closed: closed ? 1 : 0,
+    ...(resolvedCurrency !== undefined && { currency: resolvedCurrency }),
   });
 
   await db.insertPayee({
@@ -576,12 +582,11 @@ async function createAccount({
     transfer_acct: id,
   });
 
-  if (balance != null && balance !== 0) {
+  if (amount !== 0) {
     const payee = await getStartingBalancePayee();
-
     await db.insertTransaction({
       account: id,
-      amount: amountToInteger(balance),
+      ...(startingPair ?? { amount }),
       category: offBudget ? null : payee.category,
       payee: payee.id,
       date: monthUtils.currentDay(),
@@ -591,6 +596,22 @@ async function createAccount({
   }
 
   return id;
+}
+
+/** Closing with a balance writes a transfer, unsupported for foreign accounts. */
+export async function assertClosureAllowed(
+  id: AccountEntity['id'],
+  transferAccountId?: AccountEntity['id'],
+) {
+  const { balance } = await getAccountProperties({ id });
+  if (
+    balance !== 0 &&
+    ((await isForeignAccount(id)) ||
+      (transferAccountId != null &&
+        (await isForeignAccount(transferAccountId))))
+  ) {
+    throw new Error('multicurrency-transfer-unavailable');
+  }
 }
 
 async function closeAccount({
@@ -604,6 +625,12 @@ async function closeAccount({
   categoryId?: CategoryEntity['id'] | undefined;
   forced?: boolean | undefined;
 }) {
+  // Preflight unsupported foreign closure transfers before any side effect,
+  // including unlinking.
+  if (!forced) {
+    await assertClosureAllowed(id, transferAccountId);
+  }
+
   // Unlink the account if it's linked. This makes sure to remove it from
   // bank-sync providers. (This should not be undo-able, as it mutates the
   // remote server and the user will have to link the account again)
@@ -651,20 +678,27 @@ async function closeAccount({
         // because another client could easily add new data that
         // should be marked as deleted.
 
-        rows.forEach(row => {
-          if (row.transfer_id) {
-            void db.updateTransaction({
-              id: row.transfer_id,
-              payee: null,
-              transfer_id: null,
-            });
-          }
+        // Awaited so guarded writes finish inside this batch and undo scope.
+        await Promise.all(
+          rows.map(async row => {
+            if (row.transfer_id) {
+              // Its counterpart is deleted in this same batch.
+              await db.updateTransaction(
+                {
+                  id: row.transfer_id,
+                  payee: null,
+                  transfer_id: null,
+                },
+                { transferCleanup: true },
+              );
+            }
 
-          void db.deleteTransaction({ id: row.id });
-        });
+            await db.deleteTransaction({ id: row.id });
+          }),
+        );
 
-        void db.deleteAccount({ id });
-        void db.deleteTransferPayee({ id: transferPayee.id });
+        await db.deleteAccount({ id });
+        await db.deleteTransferPayee({ id: transferPayee.id });
       });
     } else {
       if (balance !== 0 && transferAccountId == null) {
@@ -1288,16 +1322,19 @@ export type SyncResponse = {
   newTransactions: Array<TransactionEntity['id']>;
   matchedTransactions: Array<TransactionEntity['id']>;
   updatedAccounts: Array<AccountEntity['id']>;
+  /** Downloaded rows skipped because they are in another currency. */
+  currencyMismatches?: number;
 };
 
 async function handleSyncResponse(
   res: {
     added: Array<TransactionEntity['id']>;
     updated: Array<TransactionEntity['id']>;
+    currencyMismatches?: number;
   },
   acctId: string,
 ): Promise<SyncResponse> {
-  const { added, updated } = res;
+  const { added, updated, currencyMismatches = 0 } = res;
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
@@ -1320,10 +1357,18 @@ async function handleSyncResponse(
     newTransactions,
     matchedTransactions,
     updatedAccounts,
+    currencyMismatches,
   };
 }
 
 type SyncError =
+  | {
+      type: 'rate-unavailable';
+      accountId: AccountEntity['id'];
+      message: string;
+      currency: string;
+      dates: string[];
+    }
   | {
       type: 'SyncError';
       accountId: AccountEntity['id'];
@@ -1358,6 +1403,25 @@ function handleSyncError(
   err: Error | PostError | BankSyncError,
   acct: db.DbAccount,
 ): SyncError {
+  const dates = bankSync.rateUnavailableDates(err);
+  if (dates && acct.currency) {
+    return {
+      type: 'rate-unavailable',
+      accountId: acct.id,
+      message: `Failed syncing account "${acct.name}": an exchange rate is needed for ${dates.join(', ')}.`,
+      currency: acct.currency,
+      dates,
+    };
+  }
+  if (
+    err instanceof TransactionError &&
+    err.message === 'balance-unavailable'
+  ) {
+    return {
+      accountId: acct.id,
+      message: `Failed syncing account "${acct.name}": the bank did not report a starting balance in the account's currency.`,
+    };
+  }
   if (isBankSyncError(err)) {
     const syncError = {
       type: 'SyncError',
@@ -1440,14 +1504,17 @@ function getBankSyncStatusFromError(
   return 'failed';
 }
 
+/** Holds the mutator so the write never joins a foreign sync's open batch. */
 function persistBankSyncError(
   accountId: AccountEntity['id'],
   err: Error | PostError | BankSyncError,
 ) {
-  return db.update('accounts', {
-    id: accountId,
-    bank_sync_status: getBankSyncStatusFromError(err),
-  });
+  return runMutator(() =>
+    db.update('accounts', {
+      id: accountId,
+      bank_sync_status: getBankSyncStatusFromError(err),
+    }),
+  );
 }
 
 export type SyncResponseWithErrors = SyncResponse & {
@@ -1479,6 +1546,7 @@ async function accountsBankSync({
   const newTransactions: Array<TransactionEntity['id']> = [];
   const matchedTransactions: Array<TransactionEntity['id']> = [];
   const updatedAccounts: Array<AccountEntity['id']> = [];
+  let currencyMismatches = 0;
   const fileId = getPrefs()?.cloudFileId;
 
   for (const acct of accounts) {
@@ -1496,14 +1564,14 @@ async function accountsBankSync({
           fileId,
         );
 
-        const syncResponseData = await handleSyncResponse(
-          syncResponse,
-          acct.id,
+        const syncResponseData = await runMutator(() =>
+          handleSyncResponse(syncResponse, acct.id),
         );
 
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
+        currencyMismatches += syncResponseData.currencyMismatches ?? 0;
       } catch (err) {
         const error = err as Error;
         await persistBankSyncError(acct.id, error);
@@ -1525,7 +1593,13 @@ async function accountsBankSync({
     });
   }
 
-  return { errors, newTransactions, matchedTransactions, updatedAccounts };
+  return {
+    errors,
+    newTransactions,
+    matchedTransactions,
+    updatedAccounts,
+    currencyMismatches,
+  };
 }
 
 async function simpleFinBatchSync({
@@ -1550,12 +1624,7 @@ async function simpleFinBatchSync({
 
   const retVal: Array<{
     accountId: AccountEntity['id'];
-    res: {
-      errors: ReturnType<typeof handleSyncError>[];
-      newTransactions: Array<TransactionEntity['id']>;
-      matchedTransactions: Array<TransactionEntity['id']>;
-      updatedAccounts: Array<AccountEntity['id']>;
-    };
+    res: SyncResponseWithErrors;
   }> = [];
 
   logger.group('Bank Sync operation for all SimpleFin accounts');
@@ -1565,6 +1634,7 @@ async function simpleFinBatchSync({
       res: {
         error_code: string;
         error_type: string;
+        error?: TransactionError;
         added: Array<TransactionEntity['id']>;
         updated: Array<TransactionEntity['id']>;
       };
@@ -1588,8 +1658,12 @@ async function simpleFinBatchSync({
       const newTransactions: Array<TransactionEntity['id']> = [];
       const matchedTransactions: Array<TransactionEntity['id']> = [];
       const updatedAccounts: Array<AccountEntity['id']> = [];
+      let currencyMismatches = 0;
 
-      if (syncResponse.res?.error_code) {
+      if (syncResponse.res?.error) {
+        await persistBankSyncError(account.id, syncResponse.res.error);
+        errors.push(handleSyncError(syncResponse.res.error, account));
+      } else if (syncResponse.res?.error_code) {
         const bankSyncError = {
           type: 'BankSyncError',
           reason: 'Failed syncing account "' + account.name + '."',
@@ -1600,14 +1674,14 @@ async function simpleFinBatchSync({
         await persistBankSyncError(account.id, bankSyncError);
         errors.push(handleSyncError(bankSyncError, account));
       } else if (syncResponse.res) {
-        const syncResponseData = await handleSyncResponse(
-          syncResponse.res,
-          account.id,
+        const syncResponseData = await runMutator(() =>
+          handleSyncResponse(syncResponse.res, account.id),
         );
 
         newTransactions.push(...syncResponseData.newTransactions);
         matchedTransactions.push(...syncResponseData.matchedTransactions);
         updatedAccounts.push(...syncResponseData.updatedAccounts);
+        currencyMismatches += syncResponseData.currencyMismatches ?? 0;
       } else {
         const emptyResponseError = new Error(
           'Failed syncing account "' + account.name + '": empty response',
@@ -1618,7 +1692,13 @@ async function simpleFinBatchSync({
 
       retVal.push({
         accountId: syncResponse.accountId,
-        res: { errors, newTransactions, matchedTransactions, updatedAccounts },
+        res: {
+          errors,
+          newTransactions,
+          matchedTransactions,
+          updatedAccounts,
+          currencyMismatches,
+        },
       });
     }
   } catch (err) {
@@ -1690,11 +1770,21 @@ async function importTransactions({
         payeeNameNormalization,
       },
     );
+    const missingDates = [
+      ...new Set(reconciled.missingRates?.map(({ date }) => date)),
+    ].sort();
     return {
-      errors: [],
+      errors:
+        missingDates.length > 0
+          ? [{ message: `rate-unavailable: ${missingDates.join(', ')}` }]
+          : [],
       added: reconciled.added,
       updated: reconciled.updated,
       updatedPreview: reconciled.updatedPreview,
+      ...(reconciled.previewBases && {
+        previewBases: reconciled.previewBases,
+      }),
+      ...(missingDates.length > 0 && { missingRates: reconciled.missingRates }),
     };
   } catch (err) {
     if (err instanceof TransactionError) {
@@ -1795,6 +1885,12 @@ export const app = createApp<AccountHandlers>();
 app.method('account-update', mutator(undoable(updateAccount)));
 app.method('accounts-get', getAccounts);
 app.method('account-balance', getAccountBalance);
+app.method('accounts/current-estimates', getCurrentEstimates);
+app.method('accounts/currency-correction-preview', previewCurrencyCorrection);
+app.method('accounts/correct-currency', mutator(correctAccountCurrency));
+app.method('accounts/stale-encoding', staleEncodingRows);
+app.method('accounts/stale-encoding-preview', previewStaleEncodingRepair);
+app.method('accounts/repair-stale-encoding', mutator(repairStaleEncoding));
 app.method('account-properties', getAccountProperties);
 app.method('gocardless-accounts-link', linkGoCardlessAccount);
 app.method('simplefin-accounts-link', linkSimpleFinAccount);

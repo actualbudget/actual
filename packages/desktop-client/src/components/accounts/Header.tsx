@@ -43,18 +43,26 @@ import { FiltersStack } from '#components/filters/FiltersStack';
 import type { SavedFilter } from '#components/filters/SavedFilterMenuButton';
 import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
+import {
+  BaseAmountLabels,
+  BudgetCurrencyFormat,
+} from '#hooks/currencyFormatContext';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useMulticurrencyAvailable } from '#hooks/useMulticurrencyAvailable';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
+import { useStaleEncoding } from '#hooks/useStaleEncoding';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 
 import type { TableRef } from './Account';
 import { Balances } from './Balance';
 import { BalanceHistoryGraph } from './BalanceHistoryGraph';
+import { CurrentEstimateLines } from './CurrentEstimateLines';
 import { ReconcileMenu, ReconcilingMessage } from './Reconcile';
+import { StaleEncodingWarning } from './StaleEncodingWarning';
 
 type AccountHeaderProps = {
   tableRef: TableRef;
@@ -183,6 +191,7 @@ export function AccountHeader({
   onMergeTransactions,
 }: AccountHeaderProps) {
   const { t } = useTranslation();
+  const [budgetCurrency] = useSyncedPref('defaultCurrencyCode');
 
   const [reconcileOpen, setReconcileOpen] = useState(false);
   const searchInput = useRef<HTMLInputElement>(null);
@@ -318,17 +327,39 @@ export function AccountHeader({
               isFiltered={isFiltered}
               filteredAmount={filteredAmount}
             />
+            <CurrentEstimateLines account={account} accountId={accountId} />
+            <StaleEncodingWarning accountId={accountId} />
           </View>
 
-          <BalanceHistoryGraph
-            ref={graphRef}
-            accountId={accountId}
-            style={{
-              height: 'calc(5vh + 5vw)',
-              margin: 0,
-              display: showNetWorthChart ? 'flex' : 'none',
-            }}
-          />
+          {/* The history graph charts stored base amounts, and a foreign
+              account's native amounts beside them. */}
+          <BudgetCurrencyFormat>
+            <BalanceHistoryGraph
+              ref={graphRef}
+              accountId={accountId}
+              native={
+                account?.currency && account.currency_precision != null
+                  ? {
+                      currency: account.currency,
+                      precision: account.currency_precision,
+                    }
+                  : undefined
+              }
+              aria-label={
+                account?.currency
+                  ? t('Balance history in {{currency}} and {{base}} (base)', {
+                      currency: account.currency,
+                      base: budgetCurrency,
+                    })
+                  : undefined
+              }
+              style={{
+                height: 'calc(5vh + 5vw)',
+                margin: 0,
+                display: showNetWorthChart ? 'flex' : 'none',
+              }}
+            />
+          </BudgetCurrencyFormat>
         </View>
         <SpaceBetween gap={10} style={{ marginTop: 12 }}>
           {canSync && (
@@ -368,8 +399,13 @@ export function AccountHeader({
             </Button>
           )}
           <View style={{ flexShrink: 0 }}>
-            {/* @ts-expect-error fix me */}
-            <FilterButton onApply={onApplyFilter} />
+            {/* Filters match stored base amounts, so they use budget format. */}
+            <BudgetCurrencyFormat>
+              <BaseAmountLabels enabled={!!account?.currency}>
+                {/* @ts-expect-error fix me */}
+                <FilterButton onApply={onApplyFilter} />
+              </BaseAmountLabels>
+            </BudgetCurrencyFormat>
           </View>
           <View style={{ flex: 1 }} />
 
@@ -563,17 +599,21 @@ export function AccountHeader({
           )}
         </SpaceBetween>
         {filterConditions?.length > 0 && (
-          <FiltersStack
-            conditions={filterConditions}
-            conditionsOp={filterConditionsOp}
-            onUpdateFilter={onUpdateFilter}
-            onDeleteFilter={onDeleteFilter}
-            onClearFilters={onClearFilters}
-            onReloadSavedFilter={onReloadSavedFilter}
-            filterId={filterId}
-            savedFilters={savedFilters}
-            onConditionsOpChange={onConditionsOpChange}
-          />
+          <BudgetCurrencyFormat>
+            <BaseAmountLabels enabled={!!account?.currency}>
+              <FiltersStack
+                conditions={filterConditions}
+                conditionsOp={filterConditionsOp}
+                onUpdateFilter={onUpdateFilter}
+                onDeleteFilter={onDeleteFilter}
+                onClearFilters={onClearFilters}
+                onReloadSavedFilter={onReloadSavedFilter}
+                filterId={filterId}
+                savedFilters={savedFilters}
+                onConditionsOpChange={onConditionsOpChange}
+              />
+            </BaseAmountLabels>
+          </BudgetCurrencyFormat>
         )}
       </View>
       {reconcileAmount != null && (
@@ -740,7 +780,8 @@ type AccountMenuProps = {
       | 'toggle-reconciled'
       | 'toggle-net-worth-chart'
       | 'manage-columns'
-      | 'account-group',
+      | 'account-group'
+      | 'change-currency',
   ) => void;
 };
 
@@ -755,6 +796,9 @@ function AccountMenu({
   const { t } = useTranslation();
   const syncServerStatus = useSyncServerStatus();
   const newSidebarUIEnabled = useFeatureFlag('newSidebarUI');
+  const multicurrencyAvailable = useMulticurrencyAvailable();
+  // Rows from another device in an earlier currency are repaired first.
+  const stale = useStaleEncoding(account?.id);
 
   return (
     <Menu
@@ -814,6 +858,9 @@ function AccountMenu({
               : []
           : []),
 
+        ...(multicurrencyAvailable && !account.closed && stale.count === 0
+          ? [{ name: 'change-currency', text: t('Change currency…') } as const]
+          : []),
         ...(account.closed
           ? [{ name: 'reopen', text: t('Reopen account') } as const]
           : [{ name: 'close', text: t('Close account') } as const]),

@@ -1,20 +1,29 @@
 import { send } from '@actual-app/core/platform/client/connection';
 import type {
+  AmountFormat,
+  AmountFormatOptions,
+  AmountInput,
+  APIAccountCreateEntity,
   APIAccountEntity,
   APIAccountGroupEntity,
+  APIAccountUpdateFields,
+  APIBudgetMonth,
   APICategoryEntity,
   APICategoryGroupEntity,
   APIFileEntity,
+  APIImportTransactionInput,
+  APIMoneyTransactionEntity,
   APIPayeeEntity,
   APIRuleEntity,
   APIScheduleEntity,
   APITagEntity,
+  APITransactionUpdateFields,
 } from '@actual-app/core/server/api-models';
 import type { ImportableBudgetType } from '@actual-app/core/server/importers/index';
+import type { Money } from '@actual-app/core/shared/money';
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
 import type {
-  ImportTransactionEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
@@ -148,16 +157,123 @@ export function getBudgetMonths() {
   return send('api/budget-months');
 }
 
-export function getBudgetMonth(month: string) {
-  return send('api/budget-month', { month });
+/**
+ * Amounts are budget-currency integers. Pass `{ amountFormat: 'money' }` to
+ * receive Money values in the budget currency.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
+export function getBudgetMonth(
+  month: string,
+  options?: { amountFormat?: 'raw' },
+): Promise<APIBudgetMonth>;
+export function getBudgetMonth(
+  month: string,
+  options: { amountFormat: 'money' },
+): Promise<APIBudgetMonth<Money>>;
+export function getBudgetMonth(
+  month: string,
+  options?: AmountFormatOptions,
+): Promise<APIBudgetMonth | APIBudgetMonth<Money>>;
+export function getBudgetMonth(
+  month: string,
+  options?: { amountFormat?: AmountFormat },
+) {
+  return send('api/budget-month', { month, options });
 }
 
+/**
+ * `value` is a budget-currency integer or Money in the budget currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function setBudgetAmount(
   month: string,
   categoryId: APICategoryEntity['id'],
-  value: number,
+  value: AmountInput,
 ) {
   return send('api/budget-set-amount', { month, categoryId, amount: value });
+}
+
+/** Adds a currency pocket to an expense category, or returns its slot. */
+export function createPocket(
+  categoryId: APICategoryEntity['id'],
+  currency: string,
+) {
+  return send('api/pocket-create', { categoryId, currency });
+}
+
+/** Hides, shows or orders a currency slot; it changes no amount. */
+export function updatePocket(
+  id: string,
+  fields: { hidden?: boolean; sortOrder?: number | null },
+) {
+  return send('api/pocket-update', { id, ...fields });
+}
+
+/**
+ * Sets a currency slot's displayed budget for a month. `amount` is an
+ * integer at `encoding` (`CUR.precision`), such as the pocket's reported
+ * `currency` and `precision`; a different currency or an unsupported
+ * precision returns `{ status: 'encoding-mismatch' }` and writes nothing.
+ * `baseAmount` freezes the written cell's budget-currency equivalent.
+ */
+export function setPocketBudget(
+  month: string,
+  pocketId: string,
+  amount: number,
+  encoding: string,
+  baseAmount?: number,
+) {
+  return send('api/pocket-budget-set', {
+    month,
+    pocketId,
+    amount,
+    encoding,
+    ...(baseAmount !== undefined && { baseAmount }),
+  });
+}
+
+/**
+ * Finalizes pending budget-currency equivalents of named pocket cells, with
+ * a supplied base or the entry rate on each cell's capture date.
+ */
+export function finalizePockets(
+  cells: Array<{ month: string; laneId: string; baseAmount?: number }>,
+) {
+  return send('api/pockets-finalize', { cells });
+}
+
+/**
+ * Deletes a currency pocket. A pocket with history needs a destination
+ * category: its history moves to that category's pocket in the same
+ * currency, so no budget figure changes. An empty pocket is removed.
+ */
+export function deletePocket(id: string, transferCategoryId?: string) {
+  return send('api/pocket-delete', { id, transferCategoryId });
+}
+
+/**
+ * Deletes a category's budget-currency child. Its history moves to the
+ * destination category's base budget and the category keeps its currency
+ * pockets, with an empty new base budget.
+ */
+export function deleteBaseChild(
+  categoryId: APICategoryEntity['id'],
+  transferCategoryId?: APICategoryEntity['id'],
+) {
+  return send('api/base-child-delete', { categoryId, transferCategoryId });
+}
+
+/**
+ * Routes transactions to the budget pockets of their shown category, or of
+ * `categoryId`, as if they were entered there now.
+ */
+export function routeToPockets(
+  transactionIds: string[],
+  categoryId?: APICategoryEntity['id'],
+) {
+  return send('api/route-to-pockets', { transactionIds, categoryId });
 }
 
 export function setBudgetCarryover(
@@ -168,9 +284,16 @@ export function setBudgetCarryover(
   return send('api/budget-set-carryover', { month, categoryId, flag });
 }
 
+/**
+ * `amount` is a budget-base integer or Money in the budget currency.
+ * Foreign-currency accounts also require `transaction_amount`, an
+ * account-native integer or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function addTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: Omit<ImportTransactionEntity, 'account'>[],
+  transactions: Omit<APIImportTransactionInput, 'account'>[],
   {
     learnCategories = false,
     runTransfers = false,
@@ -184,9 +307,20 @@ export function addTransactions(
   });
 }
 
+/**
+ * `amount` is a budget-base integer or Money in the budget currency.
+ * Foreign-currency accounts also require `transaction_amount`, an
+ * account-native integer or Money in the account currency. For those
+ * accounts `amount` may be omitted: it is converted at the saved rate for
+ * each transaction's date, and the import fails listing any dates without a
+ * rate. A supplied `amount` is kept as given. Split transactions cannot be
+ * imported into foreign-currency accounts yet.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function importTransactions(
   accountId: APIAccountEntity['id'],
-  transactions: ImportTransactionEntity[],
+  transactions: APIImportTransactionInput[],
   opts: ImportTransactionsOpts = {
     defaultCleared: true,
     dryRun: false,
@@ -200,17 +334,55 @@ export function importTransactions(
   });
 }
 
+/**
+ * `amount` is a budget-base integer and `transaction_amount` an account-native
+ * integer (foreign-currency accounts only). Pass `{ amountFormat: 'money' }`
+ * to receive Money in the budget and account currency respectively.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
 export function getTransactions(
   accountId: APIAccountEntity['id'],
   startDate: string,
   endDate: string,
+  options?: { amountFormat?: 'raw' },
+): Promise<TransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options: { amountFormat: 'money' },
+): Promise<APIMoneyTransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options?: AmountFormatOptions,
+): Promise<TransactionEntity[] | APIMoneyTransactionEntity[]>;
+export function getTransactions(
+  accountId: APIAccountEntity['id'],
+  startDate: string,
+  endDate: string,
+  options?: { amountFormat?: AmountFormat },
 ) {
-  return send('api/transactions-get', { accountId, startDate, endDate });
+  return send('api/transactions-get', {
+    accountId,
+    startDate,
+    endDate,
+    options,
+  });
 }
 
+/**
+ * `amount` is a budget-base integer or Money in the budget currency;
+ * `transaction_amount` is account-native. Amounts of transactions in
+ * foreign-currency accounts cannot change yet; other fields can.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function updateTransaction(
   id: TransactionEntity['id'],
-  fields: Partial<TransactionEntity>,
+  fields: APITransactionUpdateFields,
 ) {
   return send('api/transaction-update', { id, fields });
 }
@@ -229,16 +401,22 @@ export function getAccounts() {
   return send('api/accounts-get');
 }
 
+/**
+ * Omit `currency` to inherit the budget currency. `initialBalance` is an
+ * account-native integer or Money in the account currency.
+ * Raw integers are accepted during dual support; raw-integer support will
+ * be removed 12 months after Money support ships.
+ */
 export function createAccount(
-  account: Omit<APIAccountEntity, 'id'>,
-  initialBalance?: number,
+  account: APIAccountCreateEntity,
+  initialBalance?: AmountInput,
 ) {
   return send('api/account-create', { account, initialBalance });
 }
 
 export function updateAccount(
   id: APIAccountEntity['id'],
-  fields: Partial<APIAccountEntity>,
+  fields: APIAccountUpdateFields,
 ) {
   return send('api/account-update', { id, fields });
 }
@@ -263,8 +441,33 @@ export function deleteAccount(id: APIAccountEntity['id']) {
   return send('api/account-delete', { id });
 }
 
-export function getAccountBalance(id: APIAccountEntity['id'], cutoff?: Date) {
-  return send('api/account-balance', { id, cutoff });
+/**
+ * The balance is an account-native integer. Pass `{ amountFormat: 'money' }`
+ * to receive Money in the account currency.
+ * Raw integers are the default during dual support; raw-integer responses
+ * will be removed 12 months after Money support ships.
+ */
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: { amountFormat?: 'raw' },
+): Promise<number>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff: Date | undefined,
+  options: { amountFormat: 'money' },
+): Promise<Money>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: AmountFormatOptions,
+): Promise<number | Money>;
+export function getAccountBalance(
+  id: APIAccountEntity['id'],
+  cutoff?: Date,
+  options?: { amountFormat?: AmountFormat },
+) {
+  return send('api/account-balance', { id, cutoff, options });
 }
 
 export function getAccountGroups() {

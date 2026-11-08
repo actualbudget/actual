@@ -6,10 +6,13 @@ import { parse as csvParse } from 'csv-parse/sync';
 
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import * as prefs from '#server/prefs';
 import { parseFile } from '#server/transactions/import/parse-file';
 import { q } from '#shared/query';
 
 import { exportQueryToCSV, exportToCSV } from './export-to-csv';
+
+beforeEach(() => prefs.loadPrefs());
 
 const UTF8_BOM = '\uFEFF';
 
@@ -77,6 +80,37 @@ describe('exportToCSV', () => {
   it('does not add a byte order mark to the string API consumers receive', async () => {
     const { csv } = await payeeCell('Optométriste');
     expect(csv.startsWith('Account,')).toBe(true);
+  });
+  it.each([
+    [undefined, '12.34'],
+    [0, '1234'],
+    [2, '12.34'],
+    [3, '1.234'],
+  ])('exports recorded precision %s', async (precision, expected) => {
+    if (precision !== undefined) {
+      await prefs.savePrefs({
+        amountEncoding: JSON.stringify({
+          version: 1,
+          currencyCode: 'USD',
+          precision,
+        }),
+      });
+    }
+
+    const { row } = await payeeCell('Acme', 1234);
+    expect(row.Amount).toBe(expected);
+  });
+
+  it('exports an empty transaction set', async () => {
+    const csv = await exportToCSV([], accounts, categoryGroups, []);
+    expect(csv).toBe('');
+  });
+
+  it('rejects invalid recorded encoding', async () => {
+    await prefs.savePrefs({ amountEncoding: '{"version":2}' });
+    await expect(payeeCell('Acme')).rejects.toThrow(
+      'amount-encoding-unsupported',
+    );
   });
 });
 
@@ -151,5 +185,34 @@ describe('exportQueryToCSV', () => {
     } finally {
       await rm(directory, { recursive: true });
     }
+  });
+  it('formats parent and child split rows at the recorded precision', async () => {
+    await prefs.savePrefs({
+      amountEncoding: JSON.stringify({
+        version: 1,
+        currencyCode: 'KWD',
+        precision: 3,
+      }),
+    });
+    await db.insertTransaction({
+      id: 'split-parent',
+      account: accountId,
+      amount: -1234,
+      date: '2026-01-15',
+      is_parent: true,
+    });
+    await db.insertTransaction({
+      id: 'split-child',
+      account: accountId,
+      amount: -1234,
+      date: '2026-01-15',
+      is_child: true,
+      parent_id: 'split-parent',
+    });
+    const rows = parseCsv(await exportAll());
+    const parent = rows.find(row => row.Notes.startsWith('(SPLIT INTO'));
+    const child = rows.find(row => row.Notes.startsWith('(SPLIT 1 OF'));
+    expect(parent).toMatchObject({ Amount: '0', Split_Amount: '-1.234' });
+    expect(child).toMatchObject({ Amount: '-1.234', Split_Amount: '0' });
   });
 });

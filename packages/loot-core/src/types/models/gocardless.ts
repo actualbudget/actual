@@ -75,6 +75,8 @@ export type GoCardlessTransaction = {
 };
 
 export type SyncServerGoCardlessAccount = {
+  /** ISO 4217 currency of the provider account, or null when unknown. */
+  currency?: string | null;
   balance: number;
   institution: string | { name: string };
   account_id: string;

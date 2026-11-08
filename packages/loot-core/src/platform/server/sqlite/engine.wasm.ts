@@ -47,9 +47,14 @@ function isReadOnly(statement: PreparedStatement): boolean {
 
 function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
   for (const value of params) {
+    // Byte arrays can come from another realm, including TextEncoder output.
     if (
       typeof value !== 'string' &&
       typeof value !== 'number' &&
+      !(
+        ArrayBuffer.isView(value) &&
+        Object.prototype.toString.call(value) === '[object Uint8Array]'
+      ) &&
       value !== null
     ) {
       throw new Error('Invalid field type ' + value + ' for sql ' + sql);
@@ -80,7 +85,14 @@ function runQuery<T>(
 
   try {
     if (params.length > 0) {
-      statement.bind(params);
+      // sqlite-wasm only binds this realm's byte arrays, so copy the others.
+      statement.bind(
+        params.map(value =>
+          ArrayBuffer.isView(value) && !(value instanceof Uint8Array)
+            ? Uint8Array.from(value)
+            : value,
+        ),
+      );
     }
 
     if (fetchAll) {

@@ -39,4 +39,18 @@ describe('validForMerge', () => {
     const transfer2 = { ...t2, transfer_id: 'transfer2', payee: 'account3' };
     expect(validForMerge(transfer1, transfer2)).toBe(true);
   });
+
+  it('lets an imported row confirm a transfer with another amount', () => {
+    // The server accepts this only for a scheduled exchange leg.
+    const transfer = { ...t1, transfer_id: 'transfer1', payee: 'account3' };
+    expect(validForMerge(transfer, { ...t2, amount: 13 })).toBe(true);
+    expect(
+      validForMerge(transfer, {
+        ...t2,
+        amount: 13,
+        transfer_id: 'transfer2',
+        payee: 'account3',
+      }),
+    ).toBe(false);
+  });
 });

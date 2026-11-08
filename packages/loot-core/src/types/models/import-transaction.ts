@@ -10,8 +10,15 @@ export type ImportTransactionEntity = {
   date: string;
 
   /** A currency amount as an integer representing the value without decimal places.
-   * For example, USD amount of $120.30 would be 12030 */
+   * For example, USD amount of $120.30 would be 12030. For an account in
+   * another currency this is the budget-currency (base) amount; omit it to
+   * convert `transaction_amount` at the saved rate for the transaction's date. */
   amount?: number;
+
+  /** For an account in another currency: the amount in the account's own
+   * currency, as an integer at its recorded precision. Required for those
+   * accounts. */
+  transaction_amount?: number | null;
 
   /** In a create/import request, this overrides payee_name.
    * Should be an existing payee ID */

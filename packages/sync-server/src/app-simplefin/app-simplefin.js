@@ -260,7 +260,14 @@ function getAccountResponse(results, accountId, startDate) {
     });
   }
 
-  const startingBalance = parseInt(account.balance.replace('.', ''));
+  if (typeof account.balance !== 'string') {
+    throw new Error('Invalid SimpleFIN balance');
+  }
+  const startingBalance = account.balance;
+  // A custom (non-ISO) currency is reported as unknown.
+  const accountCurrency = /^[A-Z]{3}$/.test(account.currency ?? '')
+    ? account.currency
+    : null;
   const date = getDate(new Date(account['balance-date'] * 1000));
 
   const balances = [
@@ -287,6 +294,9 @@ function getAccountResponse(results, accountId, startDate) {
   const pending = [];
 
   for (const trans of account.transactions) {
+    if (typeof trans.amount !== 'string') {
+      throw new Error('Invalid SimpleFIN transaction amount');
+    }
     const newTrans = {};
 
     let dateToUse = 0;
@@ -309,7 +319,11 @@ function getAccountResponse(results, accountId, startDate) {
     newTrans.date = getDate(transactionDate);
     newTrans.payeeName = trans.payee;
     newTrans.notes = trans.description;
-    newTrans.transactionAmount = { amount: trans.amount, currency: 'USD' };
+    // SimpleFIN transaction amounts are in the account's currency.
+    newTrans.transactionAmount = {
+      amount: trans.amount,
+      currency: accountCurrency,
+    };
     newTrans.transactionId = trans.id;
     newTrans.valueDate = newTrans.bookingDate;
 
@@ -338,6 +352,7 @@ function getAccountResponse(results, accountId, startDate) {
   return {
     balances,
     startingBalance,
+    startingBalanceCurrency: accountCurrency,
     transactions: {
       all: allSorted,
       booked: bookedSorted,

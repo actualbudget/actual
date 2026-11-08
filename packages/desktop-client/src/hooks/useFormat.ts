@@ -9,11 +9,15 @@ import {
   getNumberFormat,
   integerToAmount,
   integerToCurrency,
+  MAX_SAFE_NUMBER,
   parseNumberFormat,
   setNumberFormat,
 } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { useCurrencyFormatOverride } from './currencyFormatContext';
+import { useAmountPrecision } from './useAmountPrecision';
+import { useFeatureFlag } from './useFeatureFlag';
 import { useSyncedPref } from './useSyncedPref';
 
 export type FormatType =
@@ -32,6 +36,7 @@ export type UseFormatResult = {
     defaultValue?: number | null,
   ) => IntegerAmount | null;
   currency: Currency;
+  precision: number;
 };
 
 export type FormatResult = {
@@ -43,6 +48,7 @@ function format(
   value: unknown,
   type: FormatType,
   formatter: { format: (value: number) => string },
+  decimalPlaces: number,
 ): FormatResult {
   switch (type) {
     case 'string': {
@@ -94,7 +100,11 @@ function format(
 
       return {
         numericValue: localValue,
-        formattedString: integerToCurrency(localValue, formatter),
+        formattedString: integerToCurrency(
+          localValue,
+          formatter,
+          decimalPlaces,
+        ),
       };
     }
     default:
@@ -102,18 +112,27 @@ function format(
   }
 }
 
-export function useFormat(): UseFormatResult {
+export function useFormat(storedPrecision?: number): UseFormatResult {
+  const recordedPrecision = useAmountPrecision();
+  const [encoding] = useSyncedPref('amountEncoding');
   const [numberFormatPref] = useSyncedPref('numberFormat');
   const [hideFractionPref] = useSyncedPref('hideFraction');
   const [defaultCurrencyCodePref] = useSyncedPref('defaultCurrencyCode');
+  // A currency saved while Currency support was on shows no symbol once it
+  // is off; its recorded precision still applies.
+  const showCurrencySymbol = useFeatureFlag('currency');
   const [symbolPositionPref] = useSyncedPref('currencySymbolPosition');
   const [spaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
 
+  const override = useCurrencyFormatOverride();
   const activeCurrency = useMemo(() => {
-    return getCurrency(defaultCurrencyCodePref || '');
-  }, [defaultCurrencyCodePref]);
+    return getCurrency(
+      override?.currencyCode ?? (defaultCurrencyCodePref || ''),
+    );
+  }, [override?.currencyCode, defaultCurrencyCodePref]);
+  const precision = storedPrecision ?? recordedPrecision;
 
   const numberFormatConfig = useMemo(
     () =>
@@ -171,7 +190,11 @@ export function useFormat(): UseFormatResult {
         if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
           displayDecimalPlaces = 0;
         } else {
-          displayDecimalPlaces = activeCurrency.decimalPlaces;
+          displayDecimalPlaces =
+            storedPrecision ??
+            (encoding || override
+              ? recordedPrecision
+              : activeCurrency.decimalPlaces);
         }
       }
 
@@ -184,10 +207,16 @@ export function useFormat(): UseFormatResult {
         value,
         type,
         intlFormatter,
+        precision,
       );
 
       let styledValue = formattedString;
-      if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
+      if (
+        isFinancialType &&
+        showCurrencySymbol &&
+        activeCurrency &&
+        activeCurrency.code !== ''
+      ) {
         styledValue = applyCurrencyStyling(
           formattedString,
           activeCurrency.symbol,
@@ -205,30 +234,55 @@ export function useFormat(): UseFormatResult {
     },
     [
       activeCurrency,
+      showCurrencySymbol,
+      encoding,
+      override,
+      recordedPrecision,
+      precision,
+      storedPrecision,
       numberFormatConfig,
       applyCurrencyStyling,
       hideFractionPref,
     ],
   );
 
+  const toAmount = useCallback(
+    (value: number) => integerToAmount(value, precision),
+    [precision],
+  );
+
+  const fromAmount = useCallback(
+    (value: number) => amountToInteger(value, precision),
+    [precision],
+  );
+
   const forEdit = useCallback(
     (value: IntegerAmount) => {
-      const amount = integerToAmount(value);
-      // Show a stored fraction (¥1,500.50) so saving the text unedited
-      // doesn't round it away, unless fractions are hidden
+      const amount = toAmount(value);
       const decimalPlaces =
-        hideFractionPref === 'true'
-          ? 0
-          : value % 100 !== 0
-            ? 2
-            : activeCurrency.decimalPlaces;
+        storedPrecision !== undefined || encoding || override
+          ? precision
+          : hideFractionPref === 'true'
+            ? 0
+            : value % 100 !== 0
+              ? 2
+              : activeCurrency.decimalPlaces;
       const editFormatter = getNumberFormat({
         format: numberFormatConfig.format,
         decimalPlaces,
       }).formatter;
       return editFormatter.format(amount);
     },
-    [hideFractionPref, activeCurrency.decimalPlaces, numberFormatConfig.format],
+    [
+      toAmount,
+      precision,
+      storedPrecision,
+      encoding,
+      override,
+      hideFractionPref,
+      activeCurrency.decimalPlaces,
+      numberFormatConfig.format,
+    ],
   );
 
   const fromEdit = useCallback(
@@ -251,22 +305,37 @@ export function useFormat(): UseFormatResult {
         .replace(/\p{L}+/gu, '');
       let numericValue: number | null = evalArithmetic(normalized, null);
 
-      if (numericValue === null || isNaN(numericValue)) {
-        numericValue = currencyToAmount(normalized);
+      // Formatted amounts never contain these operators, so an expression
+      // that failed to evaluate (such as 1/0) is invalid, not "10".
+      if (
+        (numericValue === null || isNaN(numericValue)) &&
+        !/[*/^()]/.test(normalized)
+      ) {
+        numericValue = currencyToAmount(
+          normalized,
+          getNumberFormat(numberFormatConfig).thousandsSeparator,
+        );
       }
 
-      if (numericValue !== null && !isNaN(numericValue)) {
-        return amountToInteger(numericValue);
+      if (numericValue !== null && Number.isFinite(numericValue)) {
+        const amount = fromAmount(numericValue);
+        if (
+          Number.isSafeInteger(amount) &&
+          Math.abs(amount) <= MAX_SAFE_NUMBER
+        ) {
+          return amount;
+        }
       }
 
       return defaultValue;
     },
-    [],
+    [fromAmount, numberFormatConfig],
   );
 
   return Object.assign(formatDisplay, {
     forEdit,
     fromEdit,
     currency: activeCurrency,
+    precision,
   });
 }

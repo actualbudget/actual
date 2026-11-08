@@ -41,6 +41,7 @@ import { NarrowAlternate, WideComponent } from './responsive';
 import { useMultiuserEnabled } from './ServerContext';
 import {
   AdvancedSettings,
+  ExchangeRatesSettings,
   ExperimentalSettings,
   GeneralSettings,
   Settings,
@@ -459,6 +460,10 @@ export function FinancesApp() {
                             </ErrorBoundary>
                           </SidebarMenuRoute>
                         }
+                      />
+                      <Route
+                        path="exchange-rates"
+                        element={<ExchangeRatesSettings />}
                       />
                       <Route path="advanced" element={<AdvancedSettings />} />
                       <Route

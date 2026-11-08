@@ -33,6 +33,8 @@ function makeAccount(id: string): AccountEntity {
     last_sync: null,
     bank_sync_status: null,
     account_group_id: null,
+    currency: null,
+    currency_precision: null,
   };
 }
 
@@ -193,4 +195,28 @@ describe('inverseBasedOnAccount', () => {
     });
     expect(result.runningBalances).toBe(runningBalances);
   });
+});
+
+test('flips the native amount of a same-encoding foreign transfer', () => {
+  const result = inverseBasedOnAccount({
+    accountId: savings.id,
+    transactions: [
+      {
+        id: 'preview/yen',
+        account: checking.id,
+        amount: -1500,
+        transaction_amount: -1500,
+        date: '2026-08-15',
+        payee: 'to-savings',
+        schedule: 'yen',
+      },
+    ],
+    startingBalance: 0,
+    runningBalances: new Map(),
+    getPayeeByTransferAccount,
+    getTransferAccountByPayee,
+  });
+  expect(result.transactions).toEqual([
+    expect.objectContaining({ amount: 1500, transaction_amount: 1500 }),
+  ]);
 });

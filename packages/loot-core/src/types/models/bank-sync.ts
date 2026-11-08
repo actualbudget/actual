@@ -15,8 +15,10 @@ export type BankSyncResponse = {
     pending: BankSyncTransaction[];
   };
   balances: BankSyncBalance[];
-  // `null` when the provider could not report a balance.
-  startingBalance: number | null;
+  // Decimal major units, or null when the provider cannot report a balance.
+  startingBalance: string | null;
+  /** Currency of startingBalance, or null when unknown or mixed. */
+  startingBalanceCurrency?: string | null;
   error_type: string;
   error_code: string;
 };
