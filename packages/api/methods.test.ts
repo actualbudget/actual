@@ -1505,27 +1505,6 @@ describe('Dashboard and widget operations', () => {
       dashboard_page_id: pageId,
     });
 
-    // 5b. Validate required metadata for custom-report and markdown-card
-    await expect(
-      api.addDashboardWidget({
-        type: 'custom-report',
-        width: 4,
-        height: 2,
-        dashboard_page_id: pageId,
-        meta: null,
-      } as unknown as Parameters<typeof api.addDashboardWidget>[0]),
-    ).rejects.toThrow('custom-report widget requires meta.id');
-
-    await expect(
-      api.addDashboardWidget({
-        type: 'markdown-card',
-        width: 4,
-        height: 2,
-        dashboard_page_id: pageId,
-        meta: null,
-      } as unknown as Parameters<typeof api.addDashboardWidget>[0]),
-    ).rejects.toThrow('markdown-card widget requires meta.content');
-
     // 5c. Add custom-report widget with valid metadata
     await api.addDashboardWidget({
       type: 'custom-report',
@@ -1567,14 +1546,6 @@ describe('Dashboard and widget operations', () => {
       );
       expect(updatedCustomReport?.width).toBe(8);
       expect(updatedCustomReport?.meta).toEqual({ id: 'report-id-1' });
-
-      // 7c. Reject null metadata on custom-report update
-      await expect(
-        api.updateDashboardWidget({
-          id: customReport.id,
-          meta: null,
-        }),
-      ).rejects.toThrow('custom-report widget requires meta.id');
 
       // 8. Update dashboard layout batch with multiple widgets
       await api.updateDashboard([

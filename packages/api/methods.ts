@@ -24,8 +24,6 @@ import type {
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import type { EverythingButIdOptional } from '@actual-app/core/types/util';
 
-import { q } from './app/query';
-
 export { q } from './app/query';
 
 export async function runImport(
@@ -474,14 +472,8 @@ export function setPreference<T extends keyof SyncedPrefs>(
   return send('preferences/save', { id, value });
 }
 
-export async function getDashboardPages(): Promise<DashboardPageEntity[]> {
-  const result = (await aqlQuery(q('dashboard_pages').select('*'))) as {
-    data: DashboardPageEntity[];
-  };
-  return result.data.map(page => ({
-    ...page,
-    name: page.name ?? '',
-  }));
+export function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  return send('dashboard-get-pages');
 }
 
 export function createDashboardPage(name: string) {
@@ -500,23 +492,10 @@ export function resetDashboard(id: string) {
   return send('dashboard-reset', id);
 }
 
-export async function getDashboardWidgets(
+export function getDashboardWidgets(
   pageId?: string,
 ): Promise<DashboardWidgetEntity[]> {
-  let query = q('dashboard').select('*');
-  if (pageId) {
-    query = query.filter({ dashboard_page_id: pageId });
-  }
-  const result = (await aqlQuery(query)) as {
-    data: (DashboardWidgetEntity & {
-      meta?: string | Record<string, unknown>;
-    })[];
-  };
-  return result.data.map(widget => ({
-    ...widget,
-    meta:
-      typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
-  })) as DashboardWidgetEntity[];
+  return send('dashboard-get-widgets', { pageId });
 }
 
 type BaseAddDashboardWidgetInput<W extends DashboardWidgetEntity> = Omit<
@@ -534,42 +513,8 @@ export type AddDashboardWidgetInput = DashboardWidgetEntity extends infer W
     : never
   : never;
 
-export async function addDashboardWidget(widget: AddDashboardWidgetInput) {
-  let dashboardPageId = widget.dashboard_page_id;
-  if (!dashboardPageId) {
-    const pages = await getDashboardPages();
-    if (pages.length > 0) {
-      dashboardPageId = pages[0].id;
-    }
-  }
-  if (!dashboardPageId) {
-    throw new Error('No dashboard page found to add widget to');
-  }
-
-  if (widget.type === 'custom-report') {
-    const meta = widget.meta as { id?: unknown } | null | undefined;
-    if (
-      !meta ||
-      typeof meta !== 'object' ||
-      typeof meta.id !== 'string' ||
-      meta.id.trim() === ''
-    ) {
-      throw new Error('custom-report widget requires meta.id');
-    }
-  } else if (widget.type === 'markdown-card') {
-    const meta = widget.meta as { content?: unknown } | null | undefined;
-    if (!meta || typeof meta !== 'object' || typeof meta.content !== 'string') {
-      throw new Error('markdown-card widget requires meta.content');
-    }
-  }
-
-  const { meta = null, x, y, ...restWidget } = widget;
-  return send('dashboard-add-widget', {
-    ...restWidget,
-    ...(x !== undefined && y !== undefined ? { x, y } : {}),
-    meta,
-    dashboard_page_id: dashboardPageId,
-  });
+export function addDashboardWidget(widget: AddDashboardWidgetInput) {
+  return send('dashboard-add-widget', widget);
 }
 
 export function updateDashboardWidget(

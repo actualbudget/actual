@@ -15,6 +15,7 @@ import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -140,55 +141,36 @@ async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
 }
 
-function normalizeImportedWidgetMeta(
-  widget: ExportImportDashboardWidget,
-): DashboardWidgetEntity['meta'] {
-  if (isExportedCustomReportWidget(widget)) {
-    return { id: widget.meta.id };
-  }
-  if (widget.type === 'markdown-card') {
-    const meta = widget.meta as { content?: unknown } | null | undefined;
-    return {
-      ...(meta && typeof meta === 'object' ? meta : {}),
-      content:
-        meta && typeof meta === 'object' && typeof meta.content === 'string'
-          ? meta.content
-          : '',
-    };
-  }
-  return widget.meta;
+async function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  const { data } = await aqlQuery(q('dashboard_pages').select('*'));
+  return (data as DashboardPageEntity[]).map(page => ({
+    ...page,
+    name: page.name ?? '',
+  }));
 }
 
-function validateWidgetMeta(widget: { type: string; meta?: unknown }) {
-  if (widget.type === 'custom-report') {
-    const meta = widget.meta as { id?: unknown } | null | undefined;
-    if (
-      !meta ||
-      typeof meta !== 'object' ||
-      typeof meta.id !== 'string' ||
-      meta.id.trim() === ''
-    ) {
-      throw new ValidationError('custom-report widget requires meta.id');
-    }
-  } else if (widget.type === 'markdown-card') {
-    const meta = widget.meta as { content?: unknown } | null | undefined;
-    if (!meta || typeof meta !== 'object' || typeof meta.content !== 'string') {
-      throw new ValidationError('markdown-card widget requires meta.content');
-    }
+async function getDashboardWidgets({
+  pageId,
+}: { pageId?: string } = {}): Promise<DashboardWidgetEntity[]> {
+  let query = q('dashboard').select('*');
+  if (pageId) {
+    query = query.filter({ dashboard_page_id: pageId });
   }
+  const { data } = await aqlQuery(query);
+  return (
+    data as (DashboardWidgetEntity & {
+      meta?: string | Record<string, unknown>;
+    })[]
+  ).map(widget => ({
+    ...widget,
+    meta:
+      typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
+  })) as DashboardWidgetEntity[];
 }
 
 async function updateDashboard(
   widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
 ) {
-  const seenIds = new Set<string>();
-  for (const widget of widgets) {
-    if (seenIds.has(widget.id)) {
-      throw new ValidationError(`Duplicate widget id in batch: ${widget.id}`);
-    }
-    seenIds.add(widget.id);
-  }
-
   const { data: dbWidgets } = await aqlQuery(
     q('dashboard')
       .filter({ id: { $oneof: widgets.map(({ id }) => id) } })
@@ -197,27 +179,6 @@ async function updateDashboard(
   const dbWidgetMap = new Map(
     (dbWidgets as DashboardWidgetEntity[]).map(widget => [widget.id, widget]),
   );
-
-  for (const widget of widgets) {
-    const existing = dbWidgetMap.get(widget.id);
-    if (!existing) {
-      throw new Error(`Widget not found: ${widget.id}`);
-    }
-    const existingMeta =
-      typeof existing.meta === 'string'
-        ? JSON.parse(existing.meta || '{}')
-        : existing.meta;
-
-    const merged = {
-      ...existing,
-      ...widget,
-      meta: widget.meta !== undefined ? widget.meta : existingMeta,
-    };
-
-    if (widget.meta !== undefined || widget.type !== undefined) {
-      validateWidgetMeta(merged);
-    }
-  }
 
   await batchMessages(async () => {
     await Promise.all(
@@ -232,30 +193,6 @@ async function updateDashboard(
 async function updateDashboardWidget(
   widget: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>,
 ) {
-  const { data } = await aqlQuery(
-    q('dashboard').filter({ id: widget.id }).select('*'),
-  );
-  const existing = (data as DashboardWidgetEntity[])[0];
-
-  if (!existing) {
-    throw new Error(`Widget not found: ${widget.id}`);
-  }
-
-  const existingMeta =
-    typeof existing.meta === 'string'
-      ? JSON.parse(existing.meta || '{}')
-      : existing.meta;
-
-  const merged = {
-    ...existing,
-    ...widget,
-    meta: widget.meta !== undefined ? widget.meta : existingMeta,
-  };
-
-  if (widget.meta !== undefined || widget.type !== undefined) {
-    validateWidgetMeta(merged);
-  }
-
   await db.updateWithSchema('dashboard', widget);
 }
 
@@ -282,40 +219,49 @@ async function resetDashboard(id: string) {
 async function addDashboardWidget(
   widget: WithOptional<
     Omit<DashboardWidgetEntity, 'id' | 'tombstone'>,
-    'x' | 'y'
+    'x' | 'y' | 'dashboard_page_id' | 'meta'
   >,
 ) {
-  if (!isWidgetType(widget.type as string)) {
-    throw new ValidationError(
-      `Unsupported widget type: ${String(widget.type)}`,
-    );
+  let dashboardPageId = widget.dashboard_page_id;
+  if (!dashboardPageId) {
+    const pages = await getDashboardPages();
+    if (pages.length > 0) {
+      dashboardPageId = pages[0].id;
+    }
   }
-  validateWidgetMeta(widget);
+  if (!dashboardPageId) {
+    throw new Error('No dashboard page found to add widget to');
+  }
+
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
-  if (!('x' in widget) && !('y' in widget)) {
+  let x = widget.x;
+  let y = widget.y;
+  if (x === undefined && y === undefined) {
     const data = await db.first<
       Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
     >(
       'SELECT x, y, width, height FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
-      [widget.dashboard_page_id],
+      [dashboardPageId],
     );
 
     if (!data) {
-      widget.x = 0;
-      widget.y = 0;
+      x = 0;
+      y = 0;
     } else {
       const xBoundaryCheck = data.x + data.width + widget.width;
-      widget.x = xBoundaryCheck > 12 ? 0 : data.x + data.width;
-      widget.y = data.y + (xBoundaryCheck > 12 ? data.height : 0);
+      x = xBoundaryCheck > 12 ? 0 : data.x + data.width;
+      y = data.y + (xBoundaryCheck > 12 ? data.height : 0);
     }
   }
 
-  const { dashboard_page_id, ...widgetWithoutDashboardPageId } = widget;
+  const { dashboard_page_id: _, ...widgetWithoutDashboardPageId } = widget;
 
-  await db.insertWithSchema('dashboard', {
+  return db.insertWithSchema('dashboard', {
+    meta: null,
     ...widgetWithoutDashboardPageId,
-    dashboard_page_id,
+    ...(x !== undefined && y !== undefined ? { x, y } : {}),
+    dashboard_page_id: dashboardPageId,
   });
 }
 
@@ -399,7 +345,9 @@ async function importDashboard({
             x: widget.x,
             y: widget.y,
             dashboard_page_id: dashboardPageId,
-            meta: normalizeImportedWidgetMeta(widget),
+            meta: isExportedCustomReportWidget(widget)
+              ? { id: widget.meta.id }
+              : widget.meta,
           }),
         ),
 
@@ -450,6 +398,8 @@ async function importDashboard({
 }
 
 export type DashboardHandlers = {
+  'dashboard-get-pages': typeof getDashboardPages;
+  'dashboard-get-widgets': typeof getDashboardWidgets;
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
   'dashboard-rename': typeof renameDashboardPage;
@@ -464,6 +414,8 @@ export type DashboardHandlers = {
 
 export const app = createApp<DashboardHandlers>();
 
+app.method('dashboard-get-pages', getDashboardPages);
+app.method('dashboard-get-widgets', getDashboardWidgets);
 app.method('dashboard-create', mutator(undoable(createDashboardPage)));
 app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
 app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));
