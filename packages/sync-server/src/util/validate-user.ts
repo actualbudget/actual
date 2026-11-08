@@ -28,7 +28,7 @@ export async function validateSession(req: Request, res: Response) {
   }
 
   // Check if this is an API token
-  if (token && token.startsWith(TOKEN_PREFIX)) {
+  if (typeof token === 'string' && token.startsWith(TOKEN_PREFIX)) {
     return await validateApiToken(token, res);
   }
 

@@ -141,6 +141,7 @@ async function getLoginMethods() {
         error: err.reason || 'network-failure',
       };
     }
+
     throw err;
   }
 
@@ -509,7 +510,9 @@ async function revokeApiToken(params: {
     }
 
     await del(
-      serverConfig.BASE_SERVER + '/api-tokens/' + params.tokenId,
+      serverConfig.BASE_SERVER +
+        '/api-tokens/' +
+        encodeURIComponent(params.tokenId),
       undefined,
       {
         'X-ACTUAL-TOKEN': userToken,
@@ -541,7 +544,9 @@ async function updateApiToken(params: {
     }
 
     await patch(
-      serverConfig.BASE_SERVER + '/api-tokens/' + params.tokenId,
+      serverConfig.BASE_SERVER +
+        '/api-tokens/' +
+        encodeURIComponent(params.tokenId),
       { enabled: params.enabled },
       {
         'X-ACTUAL-TOKEN': userToken,

@@ -11,6 +11,7 @@ import express from 'express';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import {
+  rejectApiTokenMiddleware,
   requestLoggerMiddleware,
   validateSessionMiddleware,
 } from '#util/middlewares';
@@ -56,6 +57,7 @@ app.use(validateSessionMiddleware);
 
 app.post(
   '/status',
+  rejectApiTokenMiddleware,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
@@ -73,6 +75,7 @@ app.post(
 
 app.post(
   '/accounts',
+  rejectApiTokenMiddleware,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
