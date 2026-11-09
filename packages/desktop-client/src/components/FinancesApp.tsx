@@ -232,6 +232,13 @@ export function FinancesApp() {
               flex: 1,
               overflow: 'hidden',
               width: '100%',
+              // The wide layout has no header of its own to absorb the status
+              // bar in the mobile apps (zero elsewhere); the narrow layout's
+              // page header handles it.
+              ...(!isNarrowWidth && {
+                paddingTop: 'env(safe-area-inset-top)',
+                paddingRight: 'env(safe-area-inset-right)',
+              }),
             }}
           >
             <ScrollProvider
