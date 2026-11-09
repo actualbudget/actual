@@ -771,13 +771,35 @@ export const SYNC_BATCH_MAX_BYTES = 4 * 1024 * 1024;
 // and the encryption envelope (iv + auth tag) when the file is encrypted
 const SYNC_MESSAGE_OVERHEAD_BYTES = 100;
 
+// Number of bytes `str` takes when encoded as UTF-8, which is how the
+// strings go over the wire. Counted without allocating, since this runs
+// for every message of a sync.
+function utf8ByteLength(str: string): number {
+  let bytes = 0;
+  for (let i = 0; i < str.length; i++) {
+    const code = str.charCodeAt(i);
+    if (code < 0x80) {
+      bytes += 1;
+    } else if (code < 0x800) {
+      bytes += 2;
+    } else if (code >= 0xd800 && code < 0xdc00 && i + 1 < str.length) {
+      // A surrogate pair is one 4-byte character
+      bytes += 4;
+      i++;
+    } else {
+      bytes += 3;
+    }
+  }
+  return bytes;
+}
+
 function estimateMessageSize(msg: Message): number {
   const value = msg.value == null ? '' : String(msg.value);
   return (
-    msg.dataset.length +
-    msg.row.length +
-    msg.column.length +
-    value.length +
+    utf8ByteLength(msg.dataset) +
+    utf8ByteLength(msg.row) +
+    utf8ByteLength(msg.column) +
+    utf8ByteLength(value) +
     SYNC_MESSAGE_OVERHEAD_BYTES
   );
 }

@@ -610,6 +610,22 @@ describe('splitIntoSyncBatches', () => {
     expect(batches).toEqual([[messages[0], messages[1]], [messages[2]]]);
   });
 
+  it('measures the size of non-ASCII text in UTF-8 bytes', () => {
+    // 300 characters, but 900 bytes in UTF-8 (each is 3 bytes)
+    const wide = message('S:' + '€'.repeat(300));
+    // 300 emoji are 600 UTF-16 code units, but 1200 bytes in UTF-8
+    const emoji = message('S:' + '💰'.repeat(300));
+
+    expect(splitIntoSyncBatches([wide, wide], 1500)).toEqual([[wide], [wide]]);
+    expect(splitIntoSyncBatches([emoji, emoji], 2000)).toEqual([
+      [emoji],
+      [emoji],
+    ]);
+    expect(splitIntoSyncBatches([emoji, emoji], 3000)).toEqual([
+      [emoji, emoji],
+    ]);
+  });
+
   it('puts a message larger than the limit in a batch of its own', () => {
     const messages = [message('S:small'), message('S:' + 'x'.repeat(2000))];
     const batches = splitIntoSyncBatches(messages, 1000);
