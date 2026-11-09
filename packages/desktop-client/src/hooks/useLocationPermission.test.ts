@@ -10,10 +10,11 @@ vi.mock('@actual-app/components/hooks/useResponsive', () => ({
 }));
 
 vi.mock('#payees/location', () => ({
-  locationService: { getCurrentPosition: vi.fn() },
+  locationService: { getCurrentPosition: vi.fn(), reset: vi.fn() },
 }));
 
 const getCurrentPosition = vi.mocked(locationService.getCurrentPosition);
+const reset = vi.mocked(locationService.reset);
 const position = { latitude: 1, longitude: 2 };
 
 describe('useLocationPermission without a Permissions API', () => {
@@ -21,6 +22,7 @@ describe('useLocationPermission without a Permissions API', () => {
     vi.stubGlobal('navigator', { ...navigator, permissions: undefined });
     localStorage.clear();
     getCurrentPosition.mockReset();
+    reset.mockReset();
   });
 
   afterEach(() => {
@@ -58,6 +60,35 @@ describe('useLocationPermission without a Permissions API', () => {
     );
     expect(result.current.isGranted).toBe(false);
     expect(result.current.isPending).toBe(true);
+  });
+
+  it('checks access afresh instead of trusting a cached position', async () => {
+    localStorage.setItem('location-permission-granted', 'true');
+    getCurrentPosition.mockResolvedValue(position);
+
+    const { result } = renderHook(() => useLocationPermission());
+
+    await waitFor(() => expect(result.current.isGranted).toBe(true));
+    expect(reset).toHaveBeenCalled();
+    expect(reset.mock.invocationCallOrder[0]).toBeLessThan(
+      getCurrentPosition.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('keeps the stored grant when a restore fails after unmount', async () => {
+    localStorage.setItem('location-permission-granted', 'true');
+    let rejectRestore: ((error: Error) => void) | undefined;
+    getCurrentPosition.mockReturnValue(
+      new Promise((_, reject) => {
+        rejectRestore = reject;
+      }),
+    );
+
+    const { unmount } = renderHook(() => useLocationPermission());
+    unmount();
+    await act(async () => rejectRestore?.(new Error('stale')));
+
+    expect(localStorage.getItem('location-permission-granted')).toBe('true');
   });
 
   it('stops offering the request after it is refused', async () => {

@@ -65,6 +65,8 @@ export function useLocationPermission(): LocationPermission {
       if (!readGrantedFlag()) {
         return;
       }
+      // A cached position would skip the access check
+      locationService.reset();
       locationService.getCurrentPosition().then(
         () => {
           if (isMounted) {
@@ -72,7 +74,9 @@ export function useLocationPermission(): LocationPermission {
           }
         },
         () => {
-          writeGrantedFlag(false);
+          if (isMounted) {
+            writeGrantedFlag(false);
+          }
         },
       );
     };
