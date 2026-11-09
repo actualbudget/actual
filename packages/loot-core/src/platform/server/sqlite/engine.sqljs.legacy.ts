@@ -246,6 +246,19 @@ export function closeDatabase(db: Database) {
   }
 }
 
+// Gives up every budget lock while the databases stay open, for a page that
+// is leaving: the browser frees a destroyed worker's locks, but WebKit keeps
+// those of a worker whose page went into the back/forward cache, where they
+// would block the next page's open until the cached page is evicted. Such a
+// page relaunches when it is restored, so a lockless database is never
+// used again.
+export function releaseBudgetLocks() {
+  for (const release of budgetLocks.values()) {
+    release();
+  }
+  budgetLocks.clear();
+}
+
 export async function exportDatabase(db: Database) {
   return db.export();
 }

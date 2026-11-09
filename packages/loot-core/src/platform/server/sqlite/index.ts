@@ -135,9 +135,12 @@ export async function flushSqliteStorage(): Promise<void> {
   }
 }
 
-// Let go of storage handles and locks so another worker can take over
+// Let go of storage handles and locks, so another worker can take over or
+// so a page that is leaving holds nothing back
 export async function releaseSqliteStorage(): Promise<void> {
-  if (activeBackend !== 'legacy') {
+  if (activeBackend === 'legacy') {
+    legacy.releaseBudgetLocks();
+  } else {
     await getSqliteStore().releaseAll();
   }
 }

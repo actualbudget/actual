@@ -52,8 +52,16 @@ export function releaseStorageThenTerminate(
       terminate();
     }
   });
+  requestStorageRelease(worker);
+}
+
+/** Asks the backend to persist and let go of its storage; `id` names the reply. */
+export function requestStorageRelease(
+  worker: Pick<TerminatableWorker, 'postMessage'>,
+  id = STORAGE_RELEASE_REQUEST_ID,
+) {
   worker.postMessage({
-    id: STORAGE_RELEASE_REQUEST_ID,
+    id,
     name: 'storage-release',
     args: undefined,
     catchErrors: true,

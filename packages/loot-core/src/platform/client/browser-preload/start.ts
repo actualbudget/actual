@@ -4,7 +4,7 @@ import { logger } from '#platform/server/log';
 import type { StorageBackend } from '#platform/server/sqlite';
 import * as Platform from '#shared/platform';
 
-import { WorkerBridge } from './worker-bridge';
+import { requestStorageRelease, WorkerBridge } from './worker-bridge';
 
 export type StartBackendInit = {
   version: string;
@@ -37,6 +37,9 @@ export type StartBackendOptions = {
 };
 
 export type StartBackendHandle = Worker | WorkerBridge;
+
+const PAGE_RELEASE_REQUEST_ID = '__storage-release-page';
+let activeHandle: StartBackendHandle | null = null;
 
 export function startBrowserBackend(
   opts: StartBackendOptions,
@@ -94,6 +97,7 @@ export function startBrowserBackend(
         sharedPort.postMessage({ type: 'tab-closing' });
       });
 
+      activeHandle = bridge;
       return bridge;
     } catch (e) {
       logger.log('SharedWorker failed, falling back to Worker:', e);
@@ -119,5 +123,25 @@ export function startBrowserBackend(
     ),
   });
 
+  activeHandle = worker;
   return worker;
+}
+
+/**
+ * Asks the backend worker this page runs, if any, to let go of its storage,
+ * for a page that is leaving. The browser frees a destroyed worker's locks
+ * and access handles itself, but WebKit keeps those of a worker whose page
+ * went into the back/forward cache, where they would block the next page's
+ * open until the cached page is evicted. The request goes to this page's
+ * own worker, never through the coordinator, which would hand it to the
+ * leader; a follower runs no worker and has nothing to release.
+ */
+export function releaseBackendStorage() {
+  const worker =
+    activeHandle instanceof WorkerBridge
+      ? activeHandle.localBackendWorker
+      : activeHandle;
+  if (worker) {
+    requestStorageRelease(worker, PAGE_RELEASE_REQUEST_ID);
+  }
 }

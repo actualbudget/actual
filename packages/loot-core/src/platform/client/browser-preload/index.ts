@@ -1,5 +1,6 @@
 export { WorkerBridge, type WorkerLike } from './worker-bridge';
 export {
+  releaseBackendStorage,
   startBrowserBackend,
   type StartBackendOptions,
   type StartBackendInit,

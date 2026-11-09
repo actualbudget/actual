@@ -299,6 +299,45 @@ describe('web filesystem', () => {
     const { node } = FS.lookupPath('/custom/xyz/db.sqlite', {});
     expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
   });
+
+  test('releasing the storage gives up the budget lock and keeps the database open', async () => {
+    const dir = '/documents/Actual/leaving';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+
+    let isReleased = false;
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback().then(() => {
+          isReleased = true;
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      const db = await sqlite.openDatabase(dir + '/db.sqlite');
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(isReleased).toBe(false);
+
+      await sqlite.releaseSqliteStorage();
+      await vi.waitFor(() => expect(isReleased).toBe(true));
+      // The page relaunches if it comes back; until then the database works
+      expect(sqlite.runQuery(db, 'SELECT 1 AS one', [], true)).toEqual([
+        { one: 1 },
+      ]);
+      sqlite.closeDatabase(db);
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
 });
 
 describe('join', () => {

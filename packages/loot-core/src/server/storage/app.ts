@@ -29,8 +29,10 @@ async function flushStorage() {
 
 // Let go of storage handles and locks so a worker in another tab can take
 // the budget over. The tab bridge asks for this right before terminating
-// this worker, so only the storage matters; the app state dies with it.
-// A failed flush still lets go: the next worker must not wait on this one.
+// this worker, and a page that is leaving asks for it so that a frozen copy
+// of the page holds nothing back; only the storage matters, the app state
+// dies or relaunches with the page. A failed flush still lets go: the next
+// worker must not wait on this one.
 async function releaseStorage() {
   try {
     await sqlite.flushSqliteStorage();

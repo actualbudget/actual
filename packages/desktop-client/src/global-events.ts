@@ -1,4 +1,7 @@
-import { STORAGE_BACKEND_KEY } from '@actual-app/core/platform/client/browser-preload';
+import {
+  releaseBackendStorage,
+  STORAGE_BACKEND_KEY,
+} from '@actual-app/core/platform/client/browser-preload';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
@@ -237,7 +240,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   );
 
   // The IndexedDB fallback of the new storage persists lazily; ask for a
-  // flush whenever the tab may be about to go away
+  // flush whenever the tab is hidden
   const flushStorage = () => {
     send('storage-flush').catch(() => {
       // No backend to flush, or it is already gone
@@ -249,7 +252,23 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     }
   };
   document.addEventListener('visibilitychange', onVisibilityChange);
-  window.addEventListener('pagehide', flushStorage);
+
+  // A page that is leaving gives its budget up, flushing first: the browser
+  // frees a destroyed worker's locks and handles itself, but WebKit keeps
+  // those of a worker whose page went into the back/forward cache, where
+  // they would block the next page's open until the cached page is evicted.
+  // Restored from that cache, the page relaunches, as its worker no longer
+  // holds the budget
+  const onPageHide = () => {
+    releaseBackendStorage();
+  };
+  const onPageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) {
+      window.Actual.relaunch();
+    }
+  };
+  window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('pageshow', onPageShow);
 
   // The storage engine is one choice for the whole origin. When another tab
   // changes it, this tab relaunches into the same engine: a tab left on the
@@ -278,7 +297,8 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenApiFetchRedirected();
     unlistenStorageMigration();
     document.removeEventListener('visibilitychange', onVisibilityChange);
-    window.removeEventListener('pagehide', flushStorage);
+    window.removeEventListener('pagehide', onPageHide);
+    window.removeEventListener('pageshow', onPageShow);
     window.removeEventListener('storage', onStorageBackendChange);
   };
 }

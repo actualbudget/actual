@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { releaseBackendStorage, startBrowserBackend } from './start';
 import { releaseStorageThenTerminate, WorkerBridge } from './worker-bridge';
 import type { TerminatableWorker } from './worker-bridge';
 
@@ -79,33 +80,37 @@ describe('releaseStorageThenTerminate', () => {
   });
 });
 
-describe('WorkerBridge takeover', () => {
-  class FakeBackendWorker {
-    static created: FakeBackendWorker[] = [];
-    posted: unknown[] = [];
-    onmessage: ((event: MessageEvent) => void) | null = null;
-    constructor() {
-      FakeBackendWorker.created.push(this);
-    }
-    postMessage(message: unknown) {
-      this.posted.push(message);
-    }
-    addEventListener() {
-      // absurd-sql's main-thread helper listens here; nothing to do
-    }
-    terminate() {
-      // Nothing to release in the fake
-    }
+class FakeBackendWorker {
+  static created: FakeBackendWorker[] = [];
+  posted: unknown[] = [];
+  onmessage: ((event: MessageEvent) => void) | null = null;
+  constructor() {
+    FakeBackendWorker.created.push(this);
   }
+  postMessage(message: unknown) {
+    this.posted.push(message);
+  }
+  addEventListener() {
+    // absurd-sql's main-thread helper listens here; nothing to do
+  }
+  terminate() {
+    // Nothing to release in the fake
+  }
+}
 
+function fakeSharedPort() {
+  return {
+    postMessage: vi.fn(),
+    start: vi.fn(),
+    addEventListener: vi.fn(),
+  };
+}
+
+describe('WorkerBridge takeover', () => {
   function createBridge() {
     FakeBackendWorker.created = [];
     vi.stubGlobal('Worker', FakeBackendWorker);
-    const sharedPort = {
-      postMessage: vi.fn(),
-      start: vi.fn(),
-      addEventListener: vi.fn(),
-    };
+    const sharedPort = fakeSharedPort();
     const bridge = new WorkerBridge(
       sharedPort as unknown as MessagePort,
       new URL('http://localhost/worker.js'),
@@ -167,5 +172,66 @@ describe('WorkerBridge takeover', () => {
       { type: 'init' },
       { id: 'q1', name: 'query' },
     ]);
+  });
+});
+
+describe('releaseBackendStorage', () => {
+  const options = {
+    backendWorkerUrl: new URL('http://localhost/worker.js'),
+    initPayload: { version: 'test', isDev: false },
+  };
+
+  beforeEach(() => {
+    FakeBackendWorker.created = [];
+    vi.stubGlobal('Worker', FakeBackendWorker);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('asks the direct worker of the page to let go of its storage', () => {
+    const handle = startBrowserBackend({ ...options, forceDirectWorker: true });
+    expect(handle).toBe(FakeBackendWorker.created[0]);
+
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created[0].posted).toEqual([
+      expect.objectContaining({ type: 'init' }),
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+  });
+
+  it('asks the worker a leader runs, and never the coordinator', () => {
+    vi.stubGlobal('SharedWorker', class {});
+    const sharedPort = fakeSharedPort();
+    startBrowserBackend({
+      ...options,
+      createSharedWorker: () =>
+        ({ port: sharedPort }) as unknown as SharedWorker,
+    });
+    const postedToCoordinator = sharedPort.postMessage.mock.calls.length;
+
+    // A follower runs no worker, so there is nothing to release
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created).toEqual([]);
+
+    const onSharedMessage = sharedPort.addEventListener.mock.calls[0][1] as (
+      event: MessageEvent,
+    ) => void;
+    onSharedMessage({
+      data: {
+        type: '__become-leader',
+        initMsg: { type: 'init' },
+        budgetToRestore: null,
+        pendingMsg: null,
+      },
+    } as MessageEvent);
+
+    releaseBackendStorage();
+    expect(FakeBackendWorker.created[0].posted).toEqual([
+      { type: 'init' },
+      expect.objectContaining({ name: 'storage-release' }),
+    ]);
+    expect(sharedPort.postMessage).toHaveBeenCalledTimes(postedToCoordinator);
   });
 });
