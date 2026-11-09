@@ -5,7 +5,6 @@ import type { NextFunction, Request, Response } from 'express';
 import { getAccountDb } from '#account-db';
 import { canAccessActiveFile } from '#services/user-service';
 
-import { validateSessionMiddleware } from './middlewares';
 import { validateSession } from './validate-user';
 
 // Only call this on endpoints that explicitly support budget-scoped keys.
@@ -48,33 +47,27 @@ export function validateBudgetSession(req: Request, res: Response) {
 }
 
 // Bank-sync keys must name an accessible budget; session requests may omit it.
-export function validateBankSyncSession(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const session = validateBudgetSession(req, res);
-  if (!session) return;
-  if (
-    'apiKeyFileIds' in session &&
-    !session.apiKeyFileIds.includes(req.get('X-Actual-File-Id') ?? '')
-  ) {
-    res.status(403).send({ status: 'error', reason: 'file-access-denied' });
-    return;
-  }
-  res.locals = {
-    ...session,
-    allowGlobalBankSync:
-      !('apiKeyFileIds' in session) ||
-      (session.allowGlobalBankSync && isBankSyncRead(req)),
+export function validateBankSyncSession({
+  allowGlobalCredentials = false,
+} = {}) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const session = validateBudgetSession(req, res);
+    if (!session) return;
+    if (
+      'apiKeyFileIds' in session &&
+      !session.apiKeyFileIds.includes(req.get('X-Actual-File-Id') ?? '')
+    ) {
+      res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+      return;
+    }
+    res.locals = {
+      ...session,
+      allowGlobalBankSync:
+        !('apiKeyFileIds' in session) ||
+        (session.allowGlobalBankSync && allowGlobalCredentials),
+    };
+    next();
   };
-  next();
-}
-
-function isBankSyncRead(req: Request) {
-  return (
-    req.method === 'POST' && ['/status', '/transactions'].includes(req.path)
-  );
 }
 
 // Setup and connection management continue to require an ordinary session.
@@ -83,14 +76,6 @@ export function validateGlobalBankSyncSession(
   res: Response,
   next: NextFunction,
 ) {
-  const token = req.body?.token || req.headers['x-actual-token'];
-  if (
-    !isBankSyncRead(req) ||
-    typeof token !== 'string' ||
-    !token.startsWith('actual_')
-  ) {
-    return validateSessionMiddleware(req, res, next);
-  }
   const session = validateBudgetSession(req, res);
   if (!session) return;
   if ('apiKeyFileIds' in session && !session.allowGlobalBankSync) {

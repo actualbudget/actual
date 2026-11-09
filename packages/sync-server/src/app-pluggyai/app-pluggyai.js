@@ -22,10 +22,10 @@ app.use(express.json());
 // API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateBankSyncSession);
 
 app.post(
   '/status',
+  validateBankSyncSession({ allowGlobalCredentials: true }),
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
     if (!!fileId) {
@@ -65,6 +65,7 @@ app.post(
 
 app.post(
   '/accounts',
+  validateBankSyncSession(),
   handleError(async (req, res) => {
     const fileId = req.get('X-Actual-File-Id');
     if (!!fileId) {
@@ -139,6 +140,7 @@ app.post(
 
 app.post(
   '/transactions',
+  validateBankSyncSession({ allowGlobalCredentials: true }),
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
     const fileId = req.get('X-Actual-File-Id');

@@ -7,7 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
-import { requestLoggerMiddleware } from '#util/middlewares';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '#util/middlewares';
 import { isBlockedIp } from '#util/ssrf';
 import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
@@ -122,7 +125,7 @@ async function buildSessionResult(
   };
 }
 
-// Auth callback from bank redirect — must be before authentication middleware
+// The bank redirect callback does not require an Actual session.
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
@@ -201,7 +204,6 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateGlobalBankSyncSession);
 
 // --- Poll/complete-auth coordination ---
 
@@ -234,6 +236,7 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 app.post(
   '/status',
+  validateGlobalBankSyncSession,
   handleError(async (req: Request, res: Response) => {
     const configured = enableBankingService.isConfigured();
 
@@ -248,6 +251,7 @@ app.post(
 
 app.post(
   '/configure',
+  validateSessionMiddleware,
   handleError(async (req: Request, res: Response) => {
     if (!isAdmin(res.locals.user_id)) {
       res.status(403).send({
@@ -317,6 +321,7 @@ app.post(
 
 app.post(
   '/aspsps',
+  validateSessionMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { country } = req.body || {};
 
@@ -340,6 +345,7 @@ app.post(
 
 app.post(
   '/start-auth',
+  validateSessionMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { aspsp, redirectUrl, maxConsentValidity, psuType } = req.body || {};
 
@@ -386,6 +392,7 @@ app.post(
 
 app.post(
   '/complete-auth',
+  validateSessionMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { code, state } = req.body || {};
 
@@ -449,6 +456,7 @@ app.post(
 
 app.post(
   '/poll-auth',
+  validateSessionMiddleware,
   handleError(async (req: Request, res: Response) => {
     const { state } = req.body || {};
 
@@ -542,6 +550,7 @@ app.post(
 
 app.post(
   '/transactions',
+  validateGlobalBankSyncSession,
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName } = req.body || {};
 

@@ -5,6 +5,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GoCardlessRequisitionId } from './gocardless-node.types';
 import { mockInstitution } from './services/tests/fixtures';
 
+vi.mock('#util/validate-budget-session', () => ({
+  validateGlobalBankSyncSession: (
+    _req: unknown,
+    _res: unknown,
+    next: () => void,
+  ) => next(),
+}));
+
 vi.mock('#util/middlewares', () => ({
   requestLoggerMiddleware: (_req: unknown, _res: unknown, next: () => void) =>
     next(),

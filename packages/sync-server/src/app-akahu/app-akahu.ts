@@ -10,7 +10,10 @@ import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
-import { requestLoggerMiddleware } from '#util/middlewares';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '#util/middlewares';
 import { createMutex } from '#util/mutex';
 import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
@@ -51,10 +54,10 @@ app.use(requestLoggerMiddleware);
 // API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateGlobalBankSyncSession);
 
 app.post(
   '/status',
+  validateGlobalBankSyncSession,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
@@ -72,6 +75,7 @@ app.post(
 
 app.post(
   '/accounts',
+  validateSessionMiddleware,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
@@ -112,6 +116,7 @@ app.post(
 
 app.post(
   '/transactions',
+  validateGlobalBankSyncSession,
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
