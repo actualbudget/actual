@@ -10,7 +10,8 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 export type BudgetMenuActions = {
   onCopyLastMonthAverage: () => void;
   onSetMonthsAverage: (numberOfMonths: number) => void;
-  onApplyBudgetTemplate: () => void;
+  // Left out for currency lines, which have no templates
+  onApplyBudgetTemplate?: () => void;
 };
 
 export function useBudgetMenu({
@@ -60,7 +61,7 @@ export function useBudgetMenu({
       name: 'set-single-12-avg',
       text: t('Set to yearly average'),
     },
-    ...(isGoalTemplatesEnabled
+    ...(isGoalTemplatesEnabled && onApplyBudgetTemplate
       ? [
           {
             name: 'apply-single-category-template',

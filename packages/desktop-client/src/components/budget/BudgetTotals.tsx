@@ -15,6 +15,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
 import { RenderMonths } from './RenderMonths';
 import { getScrollbarWidth } from './util';
@@ -33,6 +36,8 @@ export const BudgetTotals = memo(function BudgetTotals({
   collapseAllCategories,
 }: BudgetTotalsProps) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -149,11 +154,13 @@ export const BudgetTotals = memo(function BudgetTotals({
           triggerRef={triggerRef}
           isOpen={menuOpen}
           onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
+          style={{ width: isMultiCurrencyEnabled ? 260 : 200 }}
         >
           <Menu
             onMenuSelect={type => {
-              if (type === 'toggle-visibility') {
+              if (type === 'currency-own-lines') {
+                dispatch(pushModal({ modal: { name: 'currency-own-lines' } }));
+              } else if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
               } else if (type === 'expandAllCategories') {
                 expandAllCategories();
@@ -175,6 +182,15 @@ export const BudgetTotals = memo(function BudgetTotals({
                 name: 'collapseAllCategories',
                 text: t('Collapse all'),
               },
+              ...(isMultiCurrencyEnabled
+                ? ([
+                    Menu.line,
+                    {
+                      name: 'currency-own-lines',
+                      text: t('Budget currencies on their own…'),
+                    },
+                  ] as const)
+                : []),
             ]}
           />
         </Popover>
