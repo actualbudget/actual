@@ -11,7 +11,9 @@ import APIList from './APIList';
 "setBudgetAmount",
 "setBudgetCarryover",
 "holdBudgetForNextMonth",
-"resetBudgetHold"
+"resetBudgetHold",
+"applyCategoryTemplate",
+"getCategoryTemplateAmount"
 ]} />
 
 <APIList title="Transactions" sections={[
@@ -163,6 +165,18 @@ These are types.
 #### `resetBudgetHold`
 
 <Method name="resetBudgetHold" args={[{ name: 'month', type: 'month' }]} returns="Promise<null>" />
+
+#### `applyCategoryTemplate`
+
+<Method name="applyCategoryTemplate" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<null>" />
+
+Budgets the category for the month from its [budget templates](../experimental/goal-templates.md), replacing the amount already budgeted. It fails when the category has no template or one of its templates has an error.
+
+#### `getCategoryTemplateAmount`
+
+<Method name="getCategoryTemplateAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<amount>" />
+
+Returns the amount the category's templates would budget for the month, without budgeting it. The amount ignores how much is available to budget, so it can be higher than what `applyCategoryTemplate` budgets. It fails when the category has no template.
 
 ## Transactions
 

@@ -1,3 +1,4 @@
+import type { MigrationPhase } from '#platform/server/sqlite/storage/types';
 import type { Backup } from '#server/budgetfiles/backups';
 import type { UndoState } from '#server/undo';
 
@@ -64,6 +65,8 @@ type CellsChangedEvent = Array<{
 }>;
 
 type FallbackWriteErrorEvent = undefined;
+// The IndexedDB fallback could not store a file, retry included
+type StorageWriteFailedEvent = { path: string };
 type FinishImportEvent = undefined;
 type FinishLoadEvent = undefined;
 type IndexeddbQuotaErrorEvent = undefined;
@@ -100,6 +103,10 @@ type ImportProgressEvent = {
 };
 
 type PrefsUpdatedEvent = undefined;
+
+// Progress while a budget's database is moved from absurd-sql's
+// IndexedDB blocks into the sqlite-wasm storage
+type StorageMigrationEvent = { phase: MigrationPhase; percent?: number };
 type SchedulesOfflineEvent = undefined;
 type ServerErrorEvent = undefined;
 type ShowBudgetsEvent = undefined;
@@ -111,6 +118,7 @@ export type ServerEvents = {
   'backups-updated': BackupUpdatedEvent;
   'cells-changed': CellsChangedEvent;
   'fallback-write-error': FallbackWriteErrorEvent;
+  'storage-write-failed': StorageWriteFailedEvent;
   'finish-import': FinishImportEvent;
   'finish-load': FinishLoadEvent;
   'import-progress': ImportProgressEvent;
@@ -122,6 +130,7 @@ export type ServerEvents = {
   'show-budgets': ShowBudgetsEvent;
   'start-import': StartImportEvent;
   'start-load': StartLoadEvent;
+  'storage-migration': StorageMigrationEvent;
   'sync-event': SyncEvent;
   'undo-event': UndoState;
   'api-fetch-redirected': ApiFetchRedirectedEvent;
