@@ -308,6 +308,8 @@ export type Modal =
         onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        // Balances of the categories' own budgets, when money moves on them
+        showOwnBalances?: boolean;
         showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
@@ -406,6 +408,9 @@ export type Modal =
       name: 'category-menu';
       options: {
         categoryId: CategoryEntity['id'];
+        // The month shown, whose spending converted from other currencies
+        // the menu mentions
+        month: string;
         onSave: (category: CategoryEntity) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (
@@ -424,7 +429,8 @@ export type Modal =
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
+        // Left out for currency lines, which have no templates
+        onApplyBudgetTemplate?: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
@@ -436,7 +442,8 @@ export type Modal =
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
+        // Left out for currency lines, which have no templates
+        onApplyBudgetTemplate?: () => void;
         onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };

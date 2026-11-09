@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SvgCheveronRight } from '@actual-app/components/icons/v1';
+import { SvgInformationCircle } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import type { CSSProperties } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -16,9 +17,11 @@ import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useCategoriesById } from '#hooks/useCategories';
+import { useConvertedSpending } from '#hooks/useCategoryCurrencies';
 import { useFormat } from '#hooks/useFormat';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSheetValue } from '#hooks/useSheetValue';
+import { useShownCategoryLines } from '#hooks/useShownCurrencyLines';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
@@ -29,22 +32,29 @@ import { BalanceCell } from './BalanceCell';
 import { BudgetCell } from './BudgetCell';
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
 import { SpentCell } from './SpentCell';
+import { TotalCell } from './TotalCell';
 
 type ExpenseCategoryNameProps = {
   category: CategoryEntity;
+  month: string;
   onEditCategory: (id: CategoryEntity['id']) => void;
   show3Columns: boolean;
 };
 
 function ExpenseCategoryName({
   category,
+  month,
   onEditCategory,
   show3Columns,
 }: ExpenseCategoryNameProps) {
+  const { t } = useTranslation();
   const sidebarColumnWidth = getColumnWidth({
     show3Columns,
     isSidebar: true,
   });
+  // Its menu tells what is converted from other currencies
+  const hasConvertedSpending =
+    useConvertedSpending(category.id, month).length > 0;
 
   return (
     <View
@@ -82,7 +92,9 @@ function ExpenseCategoryName({
           <Text
             style={{
               ...styles.lineClamp(2),
-              width: sidebarColumnWidth,
+              width: hasConvertedSpending
+                ? `calc(${sidebarColumnWidth} - 14px)`
+                : sidebarColumnWidth,
               textAlign: 'left',
               ...styles.smallText,
             }}
@@ -90,6 +102,14 @@ function ExpenseCategoryName({
           >
             {category.name}
           </Text>
+          {hasConvertedSpending && (
+            <SvgInformationCircle
+              aria-label={t('Spending converted from another currency')}
+              style={{ flexShrink: 0, color: theme.pageTextLight }}
+              width={12}
+              height={12}
+            />
+          )}
           <SvgCheveronRight
             style={{ flexShrink: 0, color: theme.tableTextSubdued }}
             width={14}
@@ -103,6 +123,10 @@ function ExpenseCategoryName({
 
 type ExpenseCategoryCellsProps = {
   category: CategoryEntity;
+  // The currency of a currency line, whose amounts are shown in it
+  currencyCode?: string;
+  // The total of a category with currency lines, which is only shown
+  showTotal?: boolean;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
   show3Columns: boolean;
@@ -113,6 +137,8 @@ type ExpenseCategoryCellsProps = {
 
 function ExpenseCategoryCells({
   category,
+  currencyCode,
+  showTotal = false,
   month,
   onBudgetAction,
   show3Columns,
@@ -142,6 +168,41 @@ function ExpenseCategoryCells({
       ? trackingBudget.catBalance(category.id)
       : envelopeBudget.catBalance(category.id);
 
+  if (showTotal) {
+    const bindings =
+      budgetType === 'tracking' ? trackingBudget : envelopeBudget;
+    return (
+      <View
+        style={{
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          flexDirection: 'row',
+        }}
+      >
+        <TotalCell
+          categoryId={category.id}
+          month={month}
+          binding={bindings.catBudgetedTotal(category.id)}
+          width={columnWidth}
+          hidden={!show3Columns && !showBudgetedColumn}
+        />
+        <TotalCell
+          categoryId={category.id}
+          month={month}
+          binding={bindings.catSumAmountTotal(category.id)}
+          width={columnWidth}
+          hidden={!show3Columns && showBudgetedColumn}
+        />
+        <TotalCell
+          categoryId={category.id}
+          month={month}
+          binding={bindings.catBalanceTotal(category.id)}
+          width={columnWidth}
+        />
+      </View>
+    );
+  }
+
   return (
     <View
       style={{
@@ -162,6 +223,7 @@ function ExpenseCategoryCells({
           binding={budgeted}
           type="financial"
           category={category}
+          currencyCode={currencyCode}
           month={month}
           onBudgetAction={onBudgetAction}
         />
@@ -177,6 +239,7 @@ function ExpenseCategoryCells({
         <SpentCell
           binding={spent}
           category={category}
+          currencyCode={currencyCode}
           month={month}
           show3Columns={show3Columns}
           onPress={onShowActivity}
@@ -192,6 +255,7 @@ function ExpenseCategoryCells({
         <BalanceCell
           binding={balance}
           category={category}
+          currencyCode={currencyCode}
           show3Columns={show3Columns}
           onPress={onOpenBalanceMenu}
           aria-label={t('Open balance menu for {{categoryName}} category', {
@@ -225,7 +289,100 @@ export function ExpenseCategoryListItem({
   ...props
 }: ExpenseCategoryListItemProps) {
   const { value: category } = props;
+  // A category budgeted in several currencies shows its total, then a line
+  // per currency that has something in the month
+  const { lines, probes } = useShownCategoryLines(category?.id, month);
+  const navigate = useNavigate();
+  const onShowActivity = useCallback(() => {
+    if (!category) {
+      return;
+    }
+    void navigate(`/categories/${category.id}?month=${month}`);
+  }, [category, month, navigate]);
 
+  if (!category) {
+    return null;
+  }
+
+  return (
+    <GridListItem
+      textValue={category.name}
+      data-testid="category-row"
+      {...props}
+    >
+      <View>
+        {probes}
+        <ExpenseCategoryRow
+          category={category}
+          month={month}
+          isHidden={isHidden}
+          showTotal={lines.length > 0}
+          onEditCategory={onEditCategory}
+          onBudgetAction={onBudgetAction}
+          onShowActivity={onShowActivity}
+          show3Columns={show3Columns}
+          showBudgetedColumn={showBudgetedColumn}
+        />
+        {lines.map(line => (
+          <ExpenseCategoryRow
+            key={line.id}
+            // Named after the category and its currency, the category's own
+            // budget too
+            category={{
+              ...category,
+              id: line.id,
+              name: `${category.name} (${line.currencyCode})`,
+            }}
+            label={line.currencyCode}
+            currencyCode={
+              line.id === category.id ? undefined : line.currencyCode
+            }
+            isEmpty={line.startMonth != null && month < line.startMonth}
+            month={month}
+            isHidden={isHidden}
+            onBudgetAction={onBudgetAction}
+            onShowActivity={onShowActivity}
+            show3Columns={show3Columns}
+            showBudgetedColumn={showBudgetedColumn}
+          />
+        ))}
+      </View>
+    </GridListItem>
+  );
+}
+
+type ExpenseCategoryRowProps = {
+  // The category, or one of its currency lines named after it
+  category: CategoryEntity;
+  // Shown instead of the name of a line of the category
+  label?: string;
+  currencyCode?: string;
+  showTotal?: boolean;
+  // A currency line before its first month
+  isEmpty?: boolean;
+  month: string;
+  isHidden: boolean;
+  show3Columns: boolean;
+  showBudgetedColumn: boolean;
+  onEditCategory?: (id: CategoryEntity['id']) => void;
+  onBudgetAction: (month: string, action: string, args: unknown) => void;
+  onShowActivity: () => void;
+};
+
+function ExpenseCategoryRow({
+  category,
+  label,
+  currencyCode,
+  showTotal = false,
+  isEmpty = false,
+  month,
+  isHidden,
+  show3Columns,
+  showBudgetedColumn,
+  onEditCategory,
+  onBudgetAction,
+  onShowActivity,
+}: ExpenseCategoryRowProps) {
   const { t } = useTranslation();
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
@@ -287,7 +444,7 @@ export function ExpenseCategoryListItem({
                 message: t(
                   'Transferred {{amount}} from {{fromCategoryName}} to {{toCategoryName}}.',
                   {
-                    amount: format(amount, 'financial'),
+                    amount: format(amount, 'financial', { currencyCode }),
                     fromCategoryName: category.name,
                     toCategoryName: categoriesById[toCategoryId].name,
                   },
@@ -308,6 +465,7 @@ export function ExpenseCategoryListItem({
     balanceMenuModalName,
     showUndoNotification,
     categoriesById,
+    currencyCode,
     format,
     t,
   ]);
@@ -337,7 +495,7 @@ export function ExpenseCategoryListItem({
                 message: t(
                   `Covered {{amount}} {{toCategoryName}} overspending from {{fromCategoryName}}.`,
                   {
-                    amount: format(amount, 'financial'),
+                    amount: format(amount, 'financial', { currencyCode }),
                     toCategoryName: category.name,
                     fromCategoryName: categoriesById[fromCategoryId].name,
                   },
@@ -358,6 +516,7 @@ export function ExpenseCategoryListItem({
     showUndoNotification,
     t,
     categoriesById,
+    currencyCode,
     format,
   ]);
 
@@ -373,7 +532,7 @@ export function ExpenseCategoryListItem({
       dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
       showUndoNotification({
         message: t('Transferred {{amount}} to {{categoryName}}', {
-          amount: format(amount, 'financial'),
+          amount: format(amount, 'financial', { currencyCode }),
           categoryName: category.name,
         }),
       });
@@ -386,6 +545,7 @@ export function ExpenseCategoryListItem({
       balanceMenuModalName,
       showUndoNotification,
       t,
+      currencyCode,
       format,
     ],
   );
@@ -435,48 +595,49 @@ export function ExpenseCategoryListItem({
     onFundGoal,
   ]);
 
-  const navigate = useNavigate();
-  const onShowActivity = useCallback(() => {
-    if (!category) {
-      return;
-    }
-    void navigate(`/categories/${category.id}?month=${month}`);
-  }, [category, month, navigate]);
-
-  if (!category) {
-    return null;
-  }
-
   return (
-    <GridListItem
-      textValue={category.name}
-      data-testid="category-row"
-      {...props}
+    <View
+      style={{
+        height: ROW_HEIGHT,
+        borderColor: theme.tableBorder,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingLeft: 5,
+        paddingRight: 5,
+        borderBottomWidth: 1,
+        opacity: isHidden ? 0.5 : undefined,
+        backgroundColor: monthUtils.isCurrentMonth(month)
+          ? theme.budgetCurrentMonth
+          : theme.budgetOtherMonth,
+      }}
     >
-      <View
-        style={{
-          height: ROW_HEIGHT,
-          borderColor: theme.tableBorder,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingLeft: 5,
-          paddingRight: 5,
-          borderBottomWidth: 1,
-          opacity: isHidden ? 0.5 : undefined,
-          backgroundColor: monthUtils.isCurrentMonth(month)
-            ? theme.budgetCurrentMonth
-            : theme.budgetOtherMonth,
-        }}
-      >
+      {label != null ? (
+        <Text
+          style={{
+            ...styles.smallText,
+            flex: 1,
+            paddingLeft: 20,
+            color: theme.pageTextSubdued,
+          }}
+          data-testid="category-currency-line"
+        >
+          {label}
+        </Text>
+      ) : (
         <ExpenseCategoryName
           category={category}
-          onEditCategory={onEditCategory}
+          month={month}
+          onEditCategory={id => onEditCategory?.(id)}
           show3Columns={show3Columns}
         />
+      )}
+      {!isEmpty && (
         <ExpenseCategoryCells
           key={`${category.id}-${show3Columns}-${showBudgetedColumn}`}
           category={category}
+          currencyCode={currencyCode}
+          showTotal={showTotal}
           month={month}
           onBudgetAction={onBudgetAction}
           show3Columns={show3Columns}
@@ -484,7 +645,7 @@ export function ExpenseCategoryListItem({
           onOpenBalanceMenu={onOpenBalanceMenu}
           onShowActivity={onShowActivity}
         />
-      </View>
-    </GridListItem>
+      )}
+    </View>
   );
 }

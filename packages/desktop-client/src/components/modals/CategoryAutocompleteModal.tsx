@@ -29,6 +29,7 @@ export function CategoryAutocompleteModal({
   onSelect,
   categoryGroups,
   showHiddenCategories,
+  showOwnBalances,
   showNoneOption,
   closeOnSelect,
   clearOnSelect,
@@ -100,6 +101,7 @@ export function CategoryAutocompleteModal({
                   onSelect={onSelect}
                   categoryGroups={categoryGroups}
                   showHiddenCategories={showHiddenCategories}
+                  showOwnBalances={showOwnBalances}
                   value={null}
                 />
               </SheetNameProvider>
