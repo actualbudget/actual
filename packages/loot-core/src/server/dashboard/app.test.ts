@@ -59,7 +59,6 @@ describe('dashboard-update', () => {
       height: 2,
       x,
       y: 0,
-      meta: { content: 'test content' },
       dashboard_page_id: 'dashboard-page-id',
     });
   }
@@ -142,6 +141,7 @@ describe('dashboard queries', () => {
         height: 3,
         x: 0,
         y: 0,
+        meta: null,
         dashboard_page_id: 'page-1',
       }),
     );

@@ -4,6 +4,5 @@ export type { SyncedPrefs as Preferences } from '@actual-app/core/types/prefs';
 export type {
   DashboardPageEntity,
   DashboardWidgetEntity,
-  NewDashboardWidgetEntity,
 } from '@actual-app/core/types/models';
 export type { AddDashboardWidgetInput } from './methods';

@@ -500,10 +500,9 @@ export function getDashboardWidgets(
 
 type BaseAddDashboardWidgetInput<W extends DashboardWidgetEntity> = Omit<
   W,
-  'id' | 'tombstone' | 'meta' | 'x' | 'y' | 'dashboard_page_id'
+  'id' | 'tombstone' | 'meta' | 'x' | 'y'
 > &
   ({ x: number; y: number } | { x?: never; y?: never }) & {
-    dashboard_page_id?: string;
     id?: string;
   } & (null extends W['meta'] ? { meta?: W['meta'] } : { meta: W['meta'] });
 
@@ -513,8 +512,13 @@ export type AddDashboardWidgetInput = DashboardWidgetEntity extends infer W
     : never
   : never;
 
-export function addDashboardWidget(widget: AddDashboardWidgetInput) {
-  return send('dashboard-add-widget', widget);
+export function addDashboardWidget(
+  widget: AddDashboardWidgetInput,
+): Promise<void> {
+  return send('dashboard-add-widget', {
+    meta: null,
+    ...widget,
+  });
 }
 
 export function updateDashboardWidget(

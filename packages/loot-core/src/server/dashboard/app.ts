@@ -142,8 +142,10 @@ async function renameDashboardPage({ id, name }: { id: string; name: string }) {
 }
 
 async function getDashboardPages(): Promise<DashboardPageEntity[]> {
-  const { data } = await aqlQuery(q('dashboard_pages').select('*'));
-  return (data as DashboardPageEntity[]).map(page => ({
+  const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
+    q('dashboard_pages').select('*'),
+  );
+  return data.map(page => ({
     ...page,
     name: page.name ?? '',
   }));
@@ -156,16 +158,18 @@ async function getDashboardWidgets({
   if (pageId) {
     query = query.filter({ dashboard_page_id: pageId });
   }
-  const { data } = await aqlQuery(query);
-  return (
-    data as (DashboardWidgetEntity & {
+  const {
+    data,
+  }: {
+    data: (DashboardWidgetEntity & {
       meta?: string | Record<string, unknown>;
-    })[]
-  ).map(widget => ({
+    })[];
+  } = await aqlQuery(query);
+  return data.map(widget => ({
     ...widget,
     meta:
       typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
-  })) as DashboardWidgetEntity[];
+  }));
 }
 
 async function updateDashboard(
@@ -219,49 +223,34 @@ async function resetDashboard(id: string) {
 async function addDashboardWidget(
   widget: WithOptional<
     Omit<DashboardWidgetEntity, 'id' | 'tombstone'>,
-    'x' | 'y' | 'dashboard_page_id' | 'meta'
+    'x' | 'y'
   >,
 ) {
-  let dashboardPageId = widget.dashboard_page_id;
-  if (!dashboardPageId) {
-    const pages = await getDashboardPages();
-    if (pages.length > 0) {
-      dashboardPageId = pages[0].id;
-    }
-  }
-  if (!dashboardPageId) {
-    throw new Error('No dashboard page found to add widget to');
-  }
-
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
-  let x = widget.x;
-  let y = widget.y;
-  if (x === undefined && y === undefined) {
+  if (!('x' in widget) && !('y' in widget)) {
     const data = await db.first<
       Pick<db.DbDashboard, 'x' | 'y' | 'width' | 'height'>
     >(
       'SELECT x, y, width, height FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0 ORDER BY y DESC, x DESC',
-      [dashboardPageId],
+      [widget.dashboard_page_id],
     );
 
     if (!data) {
-      x = 0;
-      y = 0;
+      widget.x = 0;
+      widget.y = 0;
     } else {
       const xBoundaryCheck = data.x + data.width + widget.width;
-      x = xBoundaryCheck > 12 ? 0 : data.x + data.width;
-      y = data.y + (xBoundaryCheck > 12 ? data.height : 0);
+      widget.x = xBoundaryCheck > 12 ? 0 : data.x + data.width;
+      widget.y = data.y + (xBoundaryCheck > 12 ? data.height : 0);
     }
   }
 
-  const { dashboard_page_id: _, ...widgetWithoutDashboardPageId } = widget;
+  const { dashboard_page_id, ...widgetWithoutDashboardPageId } = widget;
 
-  return db.insertWithSchema('dashboard', {
-    meta: null,
+  await db.insertWithSchema('dashboard', {
     ...widgetWithoutDashboardPageId,
-    ...(x !== undefined && y !== undefined ? { x, y } : {}),
-    dashboard_page_id: dashboardPageId,
+    dashboard_page_id,
   });
 }
 
