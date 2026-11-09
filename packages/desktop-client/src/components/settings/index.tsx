@@ -39,7 +39,6 @@ import { FormatSettings } from './Format';
 import { LanguageSettings } from './LanguageSettings';
 import { RepairTransactions } from './RepairTransactions';
 import { ResetCache, ResetSync } from './Reset';
-import { ServerVersionRequired } from './ServerVersionRequired';
 import { SettingsBackButton } from './SettingsBackButton';
 import { SettingsGroup } from './SettingsGroup';
 import { SettingsNav } from './SettingsNav';
@@ -290,14 +289,7 @@ export function GeneralSettings() {
         <SettingsGroup title={t('Security')}>
           <AuthSettings />
           <EncryptionSettings />
-          {fileId && (
-            <ServerVersionRequired
-              minimumVersion="26.12.0"
-              title={t('API keys')}
-            >
-              <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />
-            </ServerVersionRequired>
-          )}
+          {fileId && <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />}
         </SettingsGroup>
       )}
       <SettingsGroup title={t('Data')}>

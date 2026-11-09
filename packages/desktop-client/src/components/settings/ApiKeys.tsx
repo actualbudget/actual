@@ -12,6 +12,7 @@ import type { ApiKey } from '@actual-app/core/server/auth/api-keys';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
+import { ServerVersionError } from './ServerVersionError';
 import { SettingsRow } from './SettingsRow';
 
 export function ApiKeys({ fileId }: { fileId: string }) {
@@ -66,7 +67,9 @@ export function ApiKeys({ fileId }: { fileId: string }) {
       {failed ? (
         <View style={{ gap: spacing.sm }}>
           <Text role="alert" style={{ color: theme.errorText }}>
-            <Trans>Failed to load API keys. Please try again.</Trans>
+            <ServerVersionError minimumVersion="26.12.0">
+              <Trans>Failed to load API keys. Please try again.</Trans>
+            </ServerVersionError>
           </Text>
           <Button onPress={() => setReload(value => value + 1)}>
             <Trans>Retry</Trans>
