@@ -6,6 +6,13 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
+import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { getSqliteFileRow } from './storage/files-store';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './storage/locks';
 import type { SqlParam } from './types';
 import { unicodeLike } from './unicodeLike';
 
@@ -38,6 +45,12 @@ export type SqlJsModule = SqlJsStatic & {
 };
 
 let SQL: SqlJsModule | null = null;
+
+// The budget lock held while a file database is open. Shared, so other
+// legacy connections are unaffected; the sqlite-wasm storage waits for it
+// before migrating the file, and a legacy open waits while that storage
+// holds the budget.
+const budgetLocks = new Map<Database, () => void>();
 
 // Opt-in: when set, the wasm is instantiated from these bytes instead of being
 // fetched via `locateFile`. The browser build of `@actual-app/api` uses this to
@@ -160,25 +173,45 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
     } else {
       const path = pathOrBuffer;
       if (path !== ':memory:') {
-        if (typeof SharedArrayBuffer === 'undefined') {
-          const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
-          await stream.node.contents.readIfFallback();
-          SQL.FS.close(stream);
-        }
+        const releaseLock = await acquireWebLock(
+          budgetLockName(path),
+          BUDGET_LOCK_TIMEOUT_MS,
+          'shared',
+        ).catch(() => {
+          throw new BudgetInUseError(path);
+        });
+        try {
+          // Another worker may have moved the budget to the new storage
+          // while this one waited: the copy here is then gone or stale
+          if ((await getSqliteFileRow(path))?.storage) {
+            throw new StorageUnavailableError(
+              `${path} has moved to the new storage; reload to open it`,
+            );
+          }
+          if (typeof SharedArrayBuffer === 'undefined') {
+            const stream = SQL.FS.open(SQL.FS.readlink(path), 'a+');
+            await stream.node.contents.readIfFallback();
+            SQL.FS.close(stream);
+          }
 
-        db = new SQL.Database(
-          path.includes('/blocked') ? path : SQL.FS.readlink(path),
-          // @ts-expect-error 2nd argument missed in sql.js types
-          { filename: true },
-        );
-        // absurd-sql serves every page cache miss with a synchronous
-        // round trip to IndexedDB, so allow the cache to hold a whole
-        // large budget file. SQLite allocates cache pages lazily, so
-        // small files don't pay for the ceiling. The value is in KiB.
-        db.exec(`
-          PRAGMA journal_mode=MEMORY;
-          PRAGMA cache_size=-64000;
-        `);
+          db = new SQL.Database(
+            path.includes('/blocked') ? path : SQL.FS.readlink(path),
+            // @ts-expect-error 2nd argument missed in sql.js types
+            { filename: true },
+          );
+          // absurd-sql serves every page cache miss with a synchronous
+          // round trip to IndexedDB, so allow the cache to hold a whole
+          // large budget file. SQLite allocates cache pages lazily, so
+          // small files don't pay for the ceiling. The value is in KiB.
+          db.exec(`
+            PRAGMA journal_mode=MEMORY;
+            PRAGMA cache_size=-64000;
+          `);
+        } catch (error) {
+          releaseLock();
+          throw error;
+        }
+        budgetLocks.set(db, releaseLock);
       }
     }
   }
@@ -202,7 +235,12 @@ export async function openDatabase(pathOrBuffer?: string | Uint8Array) {
 }
 
 export function closeDatabase(db: Database) {
-  db.close();
+  try {
+    db.close();
+  } finally {
+    budgetLocks.get(db)?.();
+    budgetLocks.delete(db);
+  }
 }
 
 export async function exportDatabase(db: Database) {

@@ -628,16 +628,6 @@ async function getSchedule(id: string): Promise<ScheduleEntity | null> {
   return schedule ?? null;
 }
 
-export async function getCompletedScheduleRuleIds(): Promise<string[]> {
-  const { data } = await aqlQuery(
-    q('schedules').filter({ completed: true }).select(['rule']),
-  );
-
-  return data
-    .map(schedule => schedule.rule)
-    .filter((rule): rule is string => !!rule);
-}
-
 async function hasTransactionForSchedule(
   schedule: ScheduleEntity,
 ): Promise<boolean> {
@@ -683,7 +673,10 @@ export async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')
-      .filter({ completed: false, '_account.closed': false })
+      .filter({
+        completed: false,
+        $or: [{ '_account.closed': false }, { _account: null }],
+      })
       .select('*'),
   );
 

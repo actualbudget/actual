@@ -106,6 +106,68 @@ describe('Budgets', () => {
 
     spy.mockRestore();
   });
+
+  test('switching the budget type leaves no goals of the old type in the spreadsheet cache', async () => {
+    await createTestBudget('default-budget-template');
+    const { error } = await runHandler(handlers['load-budget'], {
+      id: 'test-budget',
+    });
+    expect(error).toBe(undefined);
+
+    const { id: incomeId } = await db.first<Pick<db.DbCategory, 'id'>>(
+      'SELECT id FROM categories WHERE is_income = 1 AND tombstone = 0',
+    );
+    const month = monthUtils.currentMonth();
+    const sheetName = monthUtils.sheetForMonth(month);
+    const dbMonth = parseInt(month.replace('-', ''));
+    const setBudgetType = (type: string) =>
+      db.runQuery(
+        "INSERT OR REPLACE INTO preferences (id, value) VALUES ('budgetType', ?)",
+        [type],
+      );
+
+    setBudgetType('tracking');
+    db.runQuery(
+      'INSERT INTO reflect_budgets (id, month, category, amount, goal) VALUES (?, ?, ?, ?, ?)',
+      [`${dbMonth}-${incomeId}`, dbMonth, incomeId, 0, 50000],
+    );
+
+    // Tests run without the spreadsheet cache, so reopen the budget's
+    // spreadsheet the way the app does, with the cache
+    const log = vi.spyOn(logger, 'log');
+    async function reopenSpreadsheet() {
+      vi.stubEnv('NODE_ENV', 'production');
+      try {
+        await sheet.reloadSpreadsheet(db);
+      } finally {
+        vi.unstubAllEnvs();
+      }
+      sheet.get().meta().budgetType = budgetActions.isTrackingBudget()
+        ? 'tracking'
+        : 'envelope';
+      await budget.createAllBudgets();
+    }
+
+    await reopenSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `goal-${incomeId}`)).toBe(50000);
+
+    // What a synced switch to envelope does
+    setBudgetType('envelope');
+    await budget.setType('envelope');
+    expect(sheet.get().getCellValueLoose(sheetName, `goal-${incomeId}`)).toBe(
+      null,
+    );
+
+    log.mockClear();
+    await reopenSpreadsheet();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('Loaded spreadsheet from cache'),
+    );
+    expect(sheet.get().getCellValueLoose(sheetName, `goal-${incomeId}`)).toBe(
+      null,
+    );
+    log.mockRestore();
+  });
 });
 
 describe('Accounts', () => {
@@ -561,7 +623,7 @@ describe('Budget shutdown', () => {
       });
     let savedPrefs;
     vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
-      const metadata = JSON.parse(contents);
+      const metadata = JSON.parse(contents as string);
       if (metadata.lastScheduleRun) {
         writeStarted.resolve();
         await writeGate.promise;
