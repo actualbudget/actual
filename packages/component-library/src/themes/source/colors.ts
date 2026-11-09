@@ -68,7 +68,7 @@ export const colors = {
     dark: { ref: 'tableText' },
     midnight: { ref: 'tableText' },
   },
-  tableTextSubdued: { light: 'navy100', dark: 'navy500', midnight: 'gray500' },
+  tableTextSubdued: { light: 'navy500', dark: 'navy300', midnight: 'gray300' },
   tableTextSelected: { light: 'navy700', dark: 'navy150', midnight: 'gray800' },
   tableTextInactive: { light: 'navy500', dark: 'navy500', midnight: 'gray400' },
   tableHeaderText: { light: 'navy600', dark: 'navy300', midnight: 'gray200' },
@@ -116,7 +116,7 @@ export const colors = {
 
   numberPositive: { light: 'green700', dark: 'green300', midnight: 'green300' },
   numberNegative: { light: 'red500', dark: 'red200', midnight: 'red200' },
-  numberNeutral: { light: 'navy100', dark: 'navy500', midnight: 'gray500' },
+  numberNeutral: { light: 'navy500', dark: 'navy300', midnight: 'gray300' },
   budgetNumberNegative: { all: { ref: 'numberNegative' } },
   budgetNumberZero: { all: { ref: 'tableTextSubdued' } },
   budgetNumberNeutral: { all: { ref: 'tableText' } },
