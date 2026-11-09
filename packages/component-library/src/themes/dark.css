@@ -1,6 +1,5 @@
 :root {
   --color-pageBackground: var(--palette-gray900);
-  --color-pageBackgroundModalActive: var(--palette-gray800);
   --color-pageBackgroundTopLeft: var(--palette-navy800);
   --color-pageBackgroundBottomRight: var(--palette-gray700);
   --color-pageBackgroundLineTop: var(--palette-purple400);
@@ -26,7 +25,6 @@
   --color-tableTextLight: var(--color-tableText);
   --color-tableTextSubdued: var(--palette-navy500);
   --color-tableTextSelected: var(--palette-navy150);
-  --color-tableTextHover: var(--palette-navy400);
   --color-tableTextInactive: var(--palette-navy500);
   --color-tableHeaderText: var(--palette-navy300);
   --color-tableHeaderBackground: var(--palette-navy700);
@@ -102,19 +100,19 @@
   );
 
   --color-menuBackground: var(--palette-navy800);
-  --color-menuItemBackground: var(--palette-navy800);
   --color-menuItemBackgroundHover: var(--palette-navy500);
   --color-menuItemText: var(--palette-navy100);
   --color-menuItemTextHover: var(--palette-navy50);
   --color-menuItemTextSelected: var(--palette-purple400);
   --color-menuItemTextHeader: var(--palette-purple200);
   --color-menuBorder: var(--palette-navy900);
-  --color-menuBorderHover: var(--palette-purple400);
   --color-menuKeybindingText: var(--palette-purple200);
   --color-menuAutoCompleteBackground: var(--palette-navy900);
   --color-menuAutoCompleteBackgroundHover: var(--palette-navy600);
   --color-menuAutoCompleteText: var(--palette-navy200);
+  --color-menuAutoCompleteTextHover: var(--palette-green150);
   --color-menuAutoCompleteTextHeader: var(--palette-purple200);
+  --color-menuAutoCompleteItemTextHover: var(--palette-navy50);
   --color-menuAutoCompleteItemText: var(--color-menuItemText);
 
   --color-modalBackground: var(--palette-gray800);
@@ -127,7 +125,6 @@
   --color-mobileNavBackground: var(--palette-navy800);
   --color-mobileNavItem: var(--palette-navy150);
   --color-mobileNavItemSelected: var(--palette-purple400);
-  --color-mobileAccountShadow: var(--color-cardShadow);
   --color-mobileAccountText: var(--palette-blue800);
   --color-mobileTransactionSelected: var(--palette-purple400);
 
@@ -192,7 +189,6 @@
 
   --color-noticeBackground: var(--palette-green800);
   --color-noticeBackgroundLight: var(--palette-green900);
-  --color-noticeBackgroundDark: var(--palette-green500);
   --color-noticeText: var(--palette-green300);
   --color-noticeTextLight: var(--palette-green500);
   --color-noticeTextDark: var(--palette-green150);
@@ -200,7 +196,6 @@
   --color-noticeBorder: var(--palette-green800);
   --color-warningBackground: var(--palette-orange800);
   --color-warningText: var(--palette-orange300);
-  --color-warningTextLight: var(--palette-orange500);
   --color-warningTextDark: var(--palette-orange100);
   --color-warningBorder: var(--palette-orange500);
   --color-errorBackground: var(--palette-red800);
@@ -211,7 +206,6 @@
   --color-errorBorder: var(--palette-red500);
   --color-upcomingBackground: var(--palette-purple700);
   --color-upcomingText: var(--palette-purple100);
-  --color-upcomingBorder: var(--color-tableBorder);
 
   --color-formLabelText: var(--palette-purple150);
   --color-formLabelBackground: var(--palette-blue900);
@@ -222,10 +216,8 @@
   --color-formInputTextReadOnlySelection: var(--palette-navy800);
   --color-formInputBorderSelected: var(--palette-purple400);
   --color-formInputText: var(--palette-navy150);
-  --color-formInputTextSelected: var(--palette-black);
   --color-formInputTextPlaceholder: var(--palette-navy150);
   --color-formInputTextPlaceholderSelected: var(--palette-navy100);
-  --color-formInputTextSelection: var(--palette-navy800);
   --color-formInputShadowSelected: var(--palette-purple200);
   --color-formInputTextHighlight: var(--palette-purple400);
   --color-checkboxText: var(--color-tableText);
@@ -245,7 +237,6 @@
   --color-pillBackgroundSelected: var(--palette-purple600);
   --color-pillTextSelected: var(--palette-navy150);
   --color-pillBorderSelected: var(--palette-purple400);
-  --color-pillTextSubdued: var(--palette-navy500);
 
   --color-reportsRed: var(--palette-red300);
   --color-reportsBlue: var(--palette-blue400);
@@ -260,7 +251,6 @@
 
   --color-noteTagBackground: var(--palette-purple700);
   --color-noteTagBackgroundHover: var(--palette-purple500);
-  --color-noteTagDefault: var(--palette-purple700);
   --color-noteTagText: var(--palette-purple100);
 
   --color-budgetOtherMonth: var(--palette-navy900);
