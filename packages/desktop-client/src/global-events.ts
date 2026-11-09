@@ -246,12 +246,11 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       // No backend to flush, or it is already gone
     });
   };
-  const onVisibilityChange = () => {
+  const unlistenVisibilityChange = listenOnDocument('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       flushStorage();
     }
-  };
-  document.addEventListener('visibilitychange', onVisibilityChange);
+  });
 
   // A page that is leaving gives its budget up, flushing first: the browser
   // frees a destroyed worker's locks and handles itself, but WebKit keeps
@@ -259,26 +258,23 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   // they would block the next page's open until the cached page is evicted.
   // Restored from that cache, the page relaunches, as its worker no longer
   // holds the budget
-  const onPageHide = () => {
+  const unlistenPageHide = listenOnWindow('pagehide', () => {
     releaseBackendStorage();
-  };
-  const onPageShow = (event: PageTransitionEvent) => {
+  });
+  const unlistenPageShow = listenOnWindow('pageshow', event => {
     if (event.persisted) {
       window.Actual.relaunch();
     }
-  };
-  window.addEventListener('pagehide', onPageHide);
-  window.addEventListener('pageshow', onPageShow);
+  });
 
   // The storage engine is one choice for the whole origin. When another tab
   // changes it, this tab relaunches into the same engine: a tab left on the
   // old one would keep the budgets there, or move them straight back
-  const onStorageBackendChange = (event: StorageEvent) => {
+  const unlistenStorageBackendChange = listenOnWindow('storage', event => {
     if (event.key === STORAGE_BACKEND_KEY) {
       window.Actual.relaunch();
     }
-  };
-  window.addEventListener('storage', onStorageBackendChange);
+  });
 
   return () => {
     unlistenServerError();
@@ -296,9 +292,27 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenShowBudgets();
     unlistenApiFetchRedirected();
     unlistenStorageMigration();
-    document.removeEventListener('visibilitychange', onVisibilityChange);
-    window.removeEventListener('pagehide', onPageHide);
-    window.removeEventListener('pageshow', onPageShow);
-    window.removeEventListener('storage', onStorageBackendChange);
+    unlistenVisibilityChange();
+    unlistenPageHide();
+    unlistenPageShow();
+    unlistenStorageBackendChange();
   };
+}
+
+// Browser events in the shape of the backend's `listen`: registering hands
+// back the remover
+function listenOnWindow<Type extends keyof WindowEventMap>(
+  type: Type,
+  handler: (event: WindowEventMap[Type]) => void,
+) {
+  window.addEventListener(type, handler);
+  return () => window.removeEventListener(type, handler);
+}
+
+function listenOnDocument<Type extends keyof DocumentEventMap>(
+  type: Type,
+  handler: (event: DocumentEventMap[Type]) => void,
+) {
+  document.addEventListener(type, handler);
+  return () => document.removeEventListener(type, handler);
 }
