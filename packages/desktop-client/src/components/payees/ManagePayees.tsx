@@ -223,6 +223,7 @@ export const ManagePayees = ({
         search={
           <Search
             placeholder={t('Filter payees…')}
+            width="100%"
             value={filter}
             onChange={applyFilter}
           />

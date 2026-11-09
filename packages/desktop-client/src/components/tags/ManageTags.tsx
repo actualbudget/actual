@@ -63,6 +63,7 @@ export function ManageTags() {
         search={
           <Search
             placeholder={t('Filter tags…')}
+            width="100%"
             value={filter}
             onChange={setFilter}
           />
