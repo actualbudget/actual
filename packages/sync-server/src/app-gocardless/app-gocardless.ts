@@ -100,8 +100,11 @@ app.use(express.json());
 // API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+app.use(bankSync);
+app.use(validateSessionMiddleware);
 
-app.post('/status', validateGlobalBankSyncSession, async (req, res) => {
+bankSync.post('/status', validateGlobalBankSyncSession, async (req, res) => {
   res.send({
     status: 'ok',
     data: {
@@ -131,7 +134,6 @@ const ensureConfigured = (
 
 app.post(
   '/create-web-token',
-  validateSessionMiddleware,
   handleError(async (req, res) => {
     const { institutionId: rawInstitutionId } = req.body || {};
     const institutionId = sanitizeId<GoCardlessInstitutionId>(rawInstitutionId);
@@ -154,7 +156,6 @@ app.post(
 
 app.post(
   '/get-accounts',
-  validateSessionMiddleware,
   handleError(async (req, res) => {
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
@@ -194,7 +195,6 @@ app.post(
 
 app.post(
   '/get-banks',
-  validateSessionMiddleware,
   handleError(async (req, res) => {
     const { country: rawCountry, showDemo = false } = req.body || {};
     const country = sanitizeId(rawCountry);
@@ -219,7 +219,6 @@ app.post(
 
 app.post(
   '/remove-account',
-  validateSessionMiddleware,
   handleError(async (req, res) => {
     const requisitionId = sanitizeId<GoCardlessRequisitionId>(
       (req.body || {}).requisitionId,
@@ -243,7 +242,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   validateGlobalBankSyncSession,
   ensureConfigured,

@@ -54,8 +54,11 @@ app.use(requestLoggerMiddleware);
 // API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+app.use(bankSync);
+app.use(validateSessionMiddleware);
 
-app.post(
+bankSync.post(
   '/status',
   validateGlobalBankSyncSession,
   handleError(async (_req, res) => {
@@ -75,7 +78,6 @@ app.post(
 
 app.post(
   '/accounts',
-  validateSessionMiddleware,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
@@ -114,7 +116,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   validateGlobalBankSyncSession,
   handleError(async (req, res) => {

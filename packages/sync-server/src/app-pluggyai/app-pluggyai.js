@@ -3,7 +3,10 @@ import express from 'express';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
-import { requestLoggerMiddleware } from '#util/middlewares';
+import {
+  requestLoggerMiddleware,
+  validateSessionMiddleware,
+} from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
 import { validateBankSyncSession } from '#util/validate-budget-session';
 
@@ -22,8 +25,11 @@ app.use(express.json());
 // API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+app.use(bankSync);
+app.use(validateSessionMiddleware);
 
-app.post(
+bankSync.post(
   '/status',
   validateBankSyncSession({ allowGlobalCredentials: true }),
   handleError(async (req, res) => {
@@ -63,7 +69,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/accounts',
   validateBankSyncSession(),
   handleError(async (req, res) => {
@@ -138,7 +144,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   validateBankSyncSession({ allowGlobalCredentials: true }),
   handleError(async (req, res) => {

@@ -252,6 +252,25 @@ it.each([
     );
   },
 );
+it.each([
+  ['simplefin', simplefinApp],
+  ['pluggyai', pluggyApp],
+  ['gocardless', gcApp],
+  ['akahu', akahuApp],
+  ['enablebanking', enableApp],
+])(
+  'defaults new %s routes to session-only access',
+  async (provider, router) => {
+    router.post('/session-only-test', (_req, res) => res.sendStatus(204));
+    const path = `/${provider}/session-only-test`;
+    const denied = await request(app)
+      .post(path)
+      .set('X-ACTUAL-TOKEN', sharedKey);
+    expect(denied.status).toBe(401);
+    await request(app).post(path).set('X-ACTUAL-TOKEN', session).expect(204);
+  },
+);
+
 it('lists shared permissions and removes them on revocation', async () => {
   const listed = await request(app)
     .get('/api-keys')
