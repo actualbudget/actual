@@ -28,6 +28,18 @@ function writeGrantedFlag(granted: boolean) {
   }
 }
 
+// GeolocationPositionError.PERMISSION_DENIED; other codes are transient
+const PERMISSION_DENIED = 1;
+
+function isPermissionDenied(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === PERMISSION_DENIED
+  );
+}
+
 type PermissionStatusState = PermissionState | 'unknown';
 
 export type LocationPermission = {
@@ -73,8 +85,8 @@ export function useLocationPermission(): LocationPermission {
             setState('granted');
           }
         },
-        () => {
-          if (isMounted) {
+        error => {
+          if (isMounted && isPermissionDenied(error)) {
             writeGrantedFlag(false);
           }
         },
@@ -137,8 +149,11 @@ export function useLocationPermission(): LocationPermission {
       await locationService.getCurrentPosition();
       writeGrantedFlag(true);
       setState('granted');
-    } catch {
-      writeGrantedFlag(false);
+    } catch (error) {
+      const denied = isPermissionDenied(error);
+      if (denied) {
+        writeGrantedFlag(false);
+      }
       // Re-query permissions state just in case
       try {
         const status = await navigator.permissions.query({
@@ -146,7 +161,9 @@ export function useLocationPermission(): LocationPermission {
         });
         setState(status.state);
       } catch {
-        setState('denied');
+        if (denied) {
+          setState('denied');
+        }
       }
     }
   };

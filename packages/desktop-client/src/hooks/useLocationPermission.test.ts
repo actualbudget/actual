@@ -16,6 +16,8 @@ vi.mock('#payees/location', () => ({
 const getCurrentPosition = vi.mocked(locationService.getCurrentPosition);
 const reset = vi.mocked(locationService.reset);
 const position = { latitude: 1, longitude: 2 };
+const permissionDenied = Object.assign(new Error('denied'), { code: 1 });
+const timeout = Object.assign(new Error('timeout'), { code: 3 });
 
 describe('useLocationPermission without a Permissions API', () => {
   beforeEach(() => {
@@ -51,13 +53,26 @@ describe('useLocationPermission without a Permissions API', () => {
 
   it('stops restoring once access no longer holds', async () => {
     localStorage.setItem('location-permission-granted', 'true');
-    getCurrentPosition.mockRejectedValue(new Error('denied'));
+    getCurrentPosition.mockRejectedValue(permissionDenied);
 
     const { result } = renderHook(() => useLocationPermission());
 
     await waitFor(() =>
       expect(localStorage.getItem('location-permission-granted')).toBeNull(),
     );
+    expect(result.current.isGranted).toBe(false);
+    expect(result.current.isPending).toBe(true);
+  });
+
+  it('keeps the stored grant when a restore fails for another reason', async () => {
+    localStorage.setItem('location-permission-granted', 'true');
+    getCurrentPosition.mockRejectedValue(timeout);
+
+    const { result } = renderHook(() => useLocationPermission());
+
+    await waitFor(() => expect(getCurrentPosition).toHaveBeenCalled());
+    await act(() => Promise.resolve());
+    expect(localStorage.getItem('location-permission-granted')).toBe('true');
     expect(result.current.isGranted).toBe(false);
     expect(result.current.isPending).toBe(true);
   });
@@ -92,12 +107,22 @@ describe('useLocationPermission without a Permissions API', () => {
   });
 
   it('stops offering the request after it is refused', async () => {
-    getCurrentPosition.mockRejectedValue(new Error('denied'));
+    getCurrentPosition.mockRejectedValue(permissionDenied);
     const { result } = renderHook(() => useLocationPermission());
 
     await act(() => result.current.requestPermission());
 
     expect(result.current.isGranted).toBe(false);
     expect(result.current.isPending).toBe(false);
+  });
+
+  it('keeps offering the request after a failure other than a refusal', async () => {
+    getCurrentPosition.mockRejectedValue(timeout);
+    const { result } = renderHook(() => useLocationPermission());
+
+    await act(() => result.current.requestPermission());
+
+    expect(result.current.isGranted).toBe(false);
+    expect(result.current.isPending).toBe(true);
   });
 });
