@@ -56,9 +56,11 @@ async function revertStorage(): Promise<
   if (sqlite.getStorageBackend() === 'legacy') {
     return { ok: true };
   }
-  // Closing forgets the last budget; keep it so the relaunch reopens it
+  // The budget this worker has open; `lastBudget` is whichever budget any
+  // tab opened last, kept only so the relaunch starts where the user was
+  const openBudgetId = prefs.getPrefs()?.id;
   const lastBudget = await asyncStorage.getItem('lastBudget');
-  if (prefs.getPrefs()) {
+  if (openBudgetId) {
     await runHandler(mainApp.handlers['close-budget'], undefined);
   }
   try {
@@ -66,8 +68,8 @@ async function revertStorage(): Promise<
     return { ok: true };
   } catch (error) {
     // The client still shows the budget this closed, so reopen it
-    if (lastBudget) {
-      await runHandler(mainApp.handlers['load-budget'], { id: lastBudget });
+    if (openBudgetId) {
+      await runHandler(mainApp.handlers['load-budget'], { id: openBudgetId });
     }
     if (error instanceof sqlite.BudgetInUseError) {
       return { error: 'budget-in-use' };

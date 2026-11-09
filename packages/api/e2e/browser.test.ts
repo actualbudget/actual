@@ -4,9 +4,10 @@ import type { Page } from '@playwright/test';
 // Structural view of the module harness.html loads from dist/browser.js
 // (`typeof import` would pull the whole loot-core type graph in here).
 type Api = {
-  init(config: { dataDir: string }): Promise<unknown>;
+  init(config: { dataDir: string; storageBackend?: string }): Promise<unknown>;
   shutdown(): Promise<void>;
-  getBudgets(): Promise<unknown[]>;
+  getBudgets(): Promise<Array<{ id: string }>>;
+  loadBudget(id: string): Promise<unknown>;
   getAccounts(): Promise<Array<{ id: string; name: string }>>;
   runImport(budgetName: string, func: () => Promise<void>): Promise<void>;
   createAccount(account: { name: string }, balance?: number): Promise<string>;
@@ -174,4 +175,82 @@ test('supports a custom dataDir and persists it', async ({ page }) => {
     return budgets.length;
   });
   expect(budgetCount).toBe(1);
+});
+
+// The fallback saves a budget whole to IndexedDB; its row revision moves on
+// every save
+async function readFallbackRevision(page: Page) {
+  return page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('actual');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    type FileRow = { storage?: string; rev?: number };
+    const rows = await new Promise<FileRow[]>((resolve, reject) => {
+      const request = db
+        .transaction(['files'], 'readonly')
+        .objectStore('files')
+        .getAll();
+      request.onsuccess = () => resolve(request.result as FileRow[]);
+      request.onerror = () => reject(request.error);
+    });
+    db.close();
+    return rows
+      .filter(row => row.storage === 'memory-idb')
+      .reduce((sum, row) => sum + (row.rev ?? 0), 0);
+  });
+}
+
+test('saves fallback changes when the page is hidden, so a reload without shutdown keeps them', async ({
+  page,
+}) => {
+  await page.goto('/e2e/harness.html');
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/documents', storageBackend: 'memory-idb' });
+    await api.runImport('e2e-fallback-budget', async () => {
+      await api.createAccount({ name: 'Checking' }, 0);
+    });
+  });
+  const saved = await readFallbackRevision(page);
+
+  // A change the fallback would save only after its debounce; hiding the
+  // page asks for the save at once
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    const [account] = await api.getAccounts();
+    await api.addTransactions(account.id, [
+      { date: '2024-02-01', amount: -4200, notes: 'hidden' },
+    ]);
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'hidden',
+      configurable: true,
+    });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await expect
+    .poll(() => readFallbackRevision(page), {
+      timeout: 600,
+      intervals: [25, 50, 100],
+    })
+    .toBeGreaterThan(saved);
+
+  // No shutdown(): the saved budget still has the change
+  await page.reload();
+  const amounts = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/documents', storageBackend: 'memory-idb' });
+    const [budget] = await api.getBudgets();
+    await api.loadBudget(budget.id);
+    const [account] = await api.getAccounts();
+    const transactions = await api.getTransactions(
+      account.id,
+      '2024-02-01',
+      '2024-02-01',
+    );
+    await api.shutdown();
+    return transactions.map(transaction => transaction.amount);
+  });
+  expect(amounts).toEqual([-4200]);
 });

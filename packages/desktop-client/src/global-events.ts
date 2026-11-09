@@ -218,10 +218,15 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   });
 
   // Progress while a budget is moved into the new browser storage; the
-  // budget loader shows it on the loading screen
+  // budget loader shows it on the loading screen. A move the worker starts
+  // by itself, such as reopening a budget after a failed revert, has no
+  // loading screen, and must not leave a stray one behind
   const unlistenStorageMigration = listen(
     'storage-migration',
     ({ phase, percent }) => {
+      if (store.getState().app.loadingText == null) {
+        return;
+      }
       let loadingText: string;
       if (phase === 'copy') {
         loadingText = t(

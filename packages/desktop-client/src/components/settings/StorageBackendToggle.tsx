@@ -59,7 +59,9 @@ export function StorageBackendToggle() {
               message:
                 result.error === 'budget-in-use'
                   ? t('Close Actual in your other tabs first, then try again.')
-                  : t('Switching back failed. Nothing was changed.'),
+                  : t(
+                      'Switching back failed. Your budgets stay on the new storage engine.',
+                    ),
             },
           }),
         );

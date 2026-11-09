@@ -119,6 +119,45 @@ describe('reverting to the legacy storage layout', () => {
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
   });
 
+  it('holds the budget lock from the read to the cutover', async () => {
+    await createBudget(PATH, 'one');
+    const name = legacyDatabaseName(PATH);
+    const held: string[] = [];
+    const releases: Promise<void>[] = [];
+    let copyExistedAtRelease: boolean | null = null;
+    const request = vi.fn(
+      (lockName: string, _options: unknown, callback: () => Promise<void>) => {
+        held.push(lockName);
+        // Looks at the store the moment the lock is given back
+        const released = callback().then(async () => {
+          copyExistedAtRelease = (await listIndexedDbNames()).includes(name);
+        });
+        releases.push(released);
+        return released;
+      },
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      await revertToLegacy();
+      await Promise.all(releases);
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    // One hold for the budget, still in place when its copy was complete
+    expect(
+      held.filter(
+        lockName => lockName === 'actual-budget:documents-Actual-budget-one',
+      ),
+    ).toHaveLength(1);
+    expect(copyExistedAtRelease).toBe(true);
+  });
+
   it('is a no-op without migrated budgets', async () => {
     await revertToLegacy();
     expect(await hasMigratedSqliteFiles()).toBe(false);

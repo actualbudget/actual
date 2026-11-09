@@ -9,6 +9,7 @@ export * as utils from './utils';
 
 let worker: Worker | null = null;
 let ownsSession = false;
+let unlistenPageLifecycle: (() => void) | null = null;
 
 export async function init(
   config: InitConfig = {},
@@ -24,10 +25,40 @@ export async function init(
     throw error;
   }
 
+  unlistenPageLifecycle?.();
+  unlistenPageLifecycle = listenForPageLifecycle();
   return { send };
 }
 
+// Where sync access handles are missing, the engine keeps the budget in
+// memory and saves it to IndexedDB a moment after each change. A page that
+// is hidden or leaving asks for that save at once, as the web client does,
+// so a reload right after a change does not lose it even without
+// `shutdown()`. Best effort: a page that unloads at once may not give the
+// worker the time to finish.
+function listenForPageLifecycle(): (() => void) | null {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return null;
+  }
+  const flush = () => {
+    void send('storage-flush').catch(() => undefined);
+  };
+  const onVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      flush();
+    }
+  };
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  return () => {
+    window.removeEventListener('pagehide', flush);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+  };
+}
+
 export async function shutdown() {
+  unlistenPageLifecycle?.();
+  unlistenPageLifecycle = null;
   if (worker) {
     try {
       await send('sync');

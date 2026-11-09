@@ -730,7 +730,7 @@ describe('OPFS pool store', () => {
     const name = legacyDatabaseName(PATH);
     await seedLegacyDatabase(name, new Uint8Array([1]));
 
-    await store.removeFile(PATH, { keepLegacyCopy: true });
+    await store.revertFile(PATH);
     expect(pool.files.has('/db.sqlite')).toBe(false);
     expect(await getSqliteFileRow(PATH)).toEqual({
       filepath: PATH,

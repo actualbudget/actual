@@ -515,7 +515,7 @@ describe('IndexedDB in-memory store', () => {
     const name = legacyDatabaseName(PATH);
     await seedLegacyDatabase(name, new Uint8Array([1]));
 
-    await store.removeFile(PATH, { keepLegacyCopy: true });
+    await store.revertFile(PATH);
     expect(await getSqliteFileRow(PATH)).toEqual({
       filepath: PATH,
       contents: '',

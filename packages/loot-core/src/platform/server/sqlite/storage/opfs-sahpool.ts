@@ -10,6 +10,7 @@ import {
   deleteLegacyDatabase,
   openLegacyDatabaseContents,
   verifyMigratedDatabase,
+  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import {
   BudgetInUseError,
@@ -233,6 +234,22 @@ export function createOpfsStore({
     if (pool.util.getFileNames().includes(journal)) {
       pool.util.unlink(journal);
     }
+  }
+
+  // A journal left by a crash is rolled back by a connection's first read,
+  // so the raw file is consistent by the time it is exported
+  function exportPooled(pool: Pool, fileName: string): Uint8Array {
+    const db = new (sqlite3().oo1.DB)({
+      filename: fileName,
+      flags: 'w',
+      vfs: pool.util.vfsName,
+    });
+    try {
+      db.selectValue('PRAGMA schema_version');
+    } finally {
+      db.close();
+    }
+    return pool.util.exportFile(fileName);
   }
 
   function discardImport(pool: Pool, fileName: string) {
@@ -473,19 +490,7 @@ export function createOpfsStore({
         if (!(await importExisting(pool, path, fileName))) {
           throw new Error('File does not exist: ' + path);
         }
-        // A journal left by a crash is rolled back by a connection's first
-        // read, so the raw file is consistent by the time it is exported
-        const db = new (sqlite3().oo1.DB)({
-          filename: fileName,
-          flags: 'w',
-          vfs: pool.util.vfsName,
-        });
-        try {
-          db.selectValue('PRAGMA schema_version');
-        } finally {
-          db.close();
-        }
-        return pool.util.exportFile(fileName);
+        return exportPooled(pool, fileName);
       } finally {
         release(pool);
       }
@@ -501,13 +506,13 @@ export function createOpfsStore({
       return promise;
     },
 
-    removeFile(path, options) {
-      return store.removeFiles([path], options);
+    removeFile(path) {
+      return store.removeFiles([path]);
     },
 
     // All or nothing: every pool involved is taken before the first file
     // goes, so a budget open elsewhere leaves them all as they were
-    async removeFiles(paths, options) {
+    async removeFiles(paths) {
       for (const path of paths) {
         // An open in flight ends with the database registered, so it is
         // closed here rather than unlinked under it; a write in flight
@@ -530,15 +535,9 @@ export function createOpfsStore({
         // The rows go first, while the budgets are held: a waiting worker
         // could otherwise write a replacement whose marker this would
         // delete, and a worker killed from here on leaves at worst a file
-        // nothing names, never a marker for a file that is gone. A file
-        // moving to its absurd-sql copy leaves the legacy filesystem's
-        // marker instead.
+        // nothing names, never a marker for a file that is gone.
         for (const path of paths) {
-          if (options?.keepLegacyCopy) {
-            await putSqliteFileRow({ filepath: path, contents: '' });
-          } else {
-            await deleteSqliteFileRow(path);
-          }
+          await deleteSqliteFileRow(path);
         }
         for (const { pool, fileName } of files) {
           const open = pool.open.get(fileName);
@@ -563,13 +562,59 @@ export function createOpfsStore({
           release(pool);
         }
       }
-      if (options?.keepLegacyCopy) {
-        return;
-      }
       // The absurd-sql copy is nobody's by now, and deleting it can wait
       // on another connection, so not under the locks
       for (const path of paths) {
         await deleteLegacyDatabase(legacyDatabaseName(path));
+      }
+    },
+
+    async revertFile(path) {
+      const { dirId, fileName } = splitSqlitePath(path);
+      await opening.get(path)?.catch(() => undefined);
+      await replacing.get(path)?.catch(() => undefined);
+      const pool = await acquire(dirId, path);
+      try {
+        if (pool.open.has(fileName)) {
+          throw new Error(`cannot revert an open database: ${path}`);
+        }
+        const row = await getSqliteFileRow(path);
+        const pooled = pool.util.getFileNames().includes(fileName);
+        if (row?.storage === 'opfs' && !pooled) {
+          throw new StorageUnavailableError(
+            `${path} is missing from its OPFS pool`,
+          );
+        }
+        // The fallback's whole-file row is what a session without sync
+        // access handles saved; an empty one was recorded but never saved
+        const stored = row?.contents;
+        const bytes = pooled
+          ? exportPooled(pool, fileName)
+          : ArrayBuffer.isView(stored) && stored.byteLength > 0
+            ? new Uint8Array(
+                stored.buffer,
+                stored.byteOffset,
+                stored.byteLength,
+              )
+            : null;
+        if (bytes == null) {
+          if (row) {
+            await deleteSqliteFileRow(path);
+          }
+          return;
+        }
+        await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
+        // The marker goes before the file, as in a removal
+        await putSqliteFileRow({ filepath: path, contents: '' });
+        if (pooled) {
+          unlinkJournal(pool, fileName);
+          pool.util.unlink(fileName);
+          if (pool.util.getFileCount() === 0) {
+            await pool.util.wipeFiles();
+          }
+        }
+      } finally {
+        release(pool);
       }
     },
 

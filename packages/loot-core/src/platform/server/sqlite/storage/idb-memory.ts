@@ -14,6 +14,7 @@ import {
   legacySnapshot,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
+  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import {
   BudgetInUseError,
@@ -423,13 +424,13 @@ export function createMemoryIdbStore({
       }
     },
 
-    removeFile(path, options) {
-      return store.removeFiles([path], options);
+    removeFile(path) {
+      return store.removeFiles([path]);
     },
 
     // All or nothing: every budget involved is locked and checked before
     // the first row goes, so a refusal leaves them all as they were
-    async removeFiles(paths, options) {
+    async removeFiles(paths) {
       for (const path of paths) {
         // An open in flight ends with the database open, so it is closed
         // here rather than removed under it
@@ -455,13 +456,7 @@ export function createMemoryIdbStore({
           assertNotInOpfs(path, await getSqliteFileRow(path));
         }
         for (const path of paths) {
-          // A file moving to its absurd-sql copy leaves the legacy
-          // filesystem's marker instead
-          if (options?.keepLegacyCopy) {
-            await putSqliteFileRow({ filepath: path, contents: '' });
-          } else {
-            await deleteSqliteFileRow(path);
-          }
+          await deleteSqliteFileRow(path);
           unsaved.delete(path);
         }
       } finally {
@@ -469,11 +464,38 @@ export function createMemoryIdbStore({
           release();
         }
       }
-      if (options?.keepLegacyCopy) {
-        return;
-      }
       for (const path of paths) {
         await deleteLegacyDatabase(legacyDatabaseName(path));
+      }
+    },
+
+    // Bytes a failed save left in memory count as the file's, as in a read
+    async revertFile(path) {
+      await opening.get(path)?.catch(() => undefined);
+      await pendingWrites.get(path);
+      if (entries.has(path)) {
+        throw new Error(`cannot revert an open database: ${path}`);
+      }
+      const releaseLock = await lockBudget(path);
+      try {
+        const row = await getSqliteFileRow(path);
+        assertNotInOpfs(path, row);
+        const stranded = unsaved.get(path);
+        const bytes =
+          stranded?.bytes ??
+          (row && isByteContents(row.contents) ? row.contents : null);
+        if (bytes == null) {
+          // Recorded but never saved: nothing to copy, the row just goes
+          if (row) {
+            await deleteSqliteFileRow(path);
+          }
+          return;
+        }
+        await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
+        await putSqliteFileRow({ filepath: path, contents: '' });
+        unsaved.delete(path);
+      } finally {
+        releaseLock();
       }
     },
 
