@@ -34,7 +34,10 @@ app.use(express.json());
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 const bankSync = express.Router();
-app.use(bankSync);
+bankSync.use(validateBankSyncSession({ allowGlobalCredentials: true }));
+const budgetAccounts = express.Router();
+budgetAccounts.use(validateBankSyncSession());
+app.use(bankSync, budgetAccounts);
 app.use(validateSessionMiddleware);
 
 function selectCredentials(req, res, next) {
@@ -64,7 +67,6 @@ function selectCredentials(req, res, next) {
 
 bankSync.post(
   '/status',
-  validateBankSyncSession({ allowGlobalCredentials: true }),
   selectCredentials,
   handleError(async (req, res) => {
     const token = secretsService.get(
@@ -87,9 +89,8 @@ bankSync.post(
   }),
 );
 
-bankSync.post(
+budgetAccounts.post(
   '/accounts',
-  validateBankSyncSession(),
   selectCredentials,
   handleError(async (req, res) => {
     let accessKey = secretsService.get(
@@ -159,7 +160,6 @@ bankSync.post(
 
 bankSync.post(
   '/transactions',
-  validateBankSyncSession({ allowGlobalCredentials: true }),
   selectCredentials,
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};

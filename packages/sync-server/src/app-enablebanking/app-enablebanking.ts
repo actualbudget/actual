@@ -205,6 +205,7 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
 app.use(bankSync);
 app.use(validateSessionMiddleware);
 
@@ -239,7 +240,6 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 bankSync.post(
   '/status',
-  validateGlobalBankSyncSession,
   handleError(async (req: Request, res: Response) => {
     const configured = enableBankingService.isConfigured();
 
@@ -548,7 +548,6 @@ app.post(
 
 bankSync.post(
   '/transactions',
-  validateGlobalBankSyncSession,
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName } = req.body || {};
 

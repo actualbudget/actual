@@ -101,10 +101,11 @@ app.use(express.json());
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
 app.use(bankSync);
 app.use(validateSessionMiddleware);
 
-bankSync.post('/status', validateGlobalBankSyncSession, async (req, res) => {
+bankSync.post('/status', async (req, res) => {
   res.send({
     status: 'ok',
     data: {
@@ -244,7 +245,6 @@ app.post(
 
 bankSync.post(
   '/transactions',
-  validateGlobalBankSyncSession,
   ensureConfigured,
   handleError(async (req, res) => {
     const {

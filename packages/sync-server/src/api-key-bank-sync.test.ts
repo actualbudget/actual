@@ -183,6 +183,7 @@ function sync(provider: string, token = key, fileId: string | null = budget) {
 it.each(['simplefin', 'pluggyai'])(
   'syncs %s with scoped credentials and rejects missing or ungranted budgets',
   async provider => {
+    await sync(provider, 'invalid-token').expect(401);
     const response = await sync(provider).expect(200);
     expect(response.body.data.transactions.all).toEqual([
       expect.objectContaining({ transactionId: 'transaction' }),
@@ -223,6 +224,7 @@ it('rejects Pluggy accounts outside the configured budget items', async () => {
 it.each(['gocardless', 'akahu', 'enablebanking'])(
   'requires explicit permission to sync global %s connections',
   async provider => {
+    await sync(provider, 'invalid-token').expect(401);
     await sync(provider).expect(403);
     const response = await sync(provider, sharedKey, null).expect(200);
     expect(response.body.data.transactions.all).toEqual([]);
@@ -265,6 +267,7 @@ it.each([
     const path = `/${provider}/session-only-test`;
     const denied = await request(app)
       .post(path)
+      .set('X-Actual-File-Id', budget)
       .set('X-ACTUAL-TOKEN', sharedKey);
     expect(denied.status).toBe(401);
     await request(app).post(path).set('X-ACTUAL-TOKEN', session).expect(204);

@@ -55,12 +55,12 @@ app.use(requestLoggerMiddleware);
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
 app.use(bankSync);
 app.use(validateSessionMiddleware);
 
 bankSync.post(
   '/status',
-  validateGlobalBankSyncSession,
   handleError(async (_req, res) => {
     const userToken = secretsService.get(SecretName.akahu_userToken);
     const appToken = secretsService.get(SecretName.akahu_appToken);
@@ -118,7 +118,6 @@ app.post(
 
 bankSync.post(
   '/transactions',
-  validateGlobalBankSyncSession,
   handleError(async (req, res) => {
     const { accountId, startDate } = req.body || {};
 
