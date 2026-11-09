@@ -7,11 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '#util/middlewares';
+import { requestLoggerMiddleware } from '#util/middlewares';
 import { isBlockedIp } from '#util/ssrf';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import type {
   EnableBankingSession,
@@ -124,7 +122,7 @@ async function buildSessionResult(
   };
 }
 
-// Auth callback from bank redirect — must be before validateSessionMiddleware
+// Auth callback from bank redirect — must be before authentication middleware
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
@@ -200,9 +198,10 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateSessionMiddleware);
+app.use(validateGlobalBankSyncSession);
 
 // --- Poll/complete-auth coordination ---
 

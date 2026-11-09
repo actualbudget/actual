@@ -59,9 +59,7 @@ export function ApiKeys({ fileId }: { fileId: string }) {
   return (
     <SettingsRow
       title={t('API keys')}
-      description={t(
-        'Generate budget-scoped credentials for use in the API/CLI.',
-      )}
+      description={t('Generate credentials for use in the API/CLI.')}
       control={addButton}
     >
       {failed ? (
@@ -96,16 +94,18 @@ export function ApiKeys({ fileId }: { fileId: string }) {
                   backgroundColor: theme.tableBackground,
                 }}
               >
-                <Text
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    overflowWrap: 'anywhere',
-                    color: theme.tableText,
-                  }}
-                >
-                  {key.name}
-                </Text>
+                <View style={{ flex: 1, minWidth: 0, gap: spacing.xs }}>
+                  <Text
+                    style={{ overflowWrap: 'anywhere', color: theme.tableText }}
+                  >
+                    {key.name}
+                  </Text>
+                  {key.permissions?.includes('bank-sync-global') && (
+                    <Text style={{ color: theme.pageTextLight }}>
+                      <Trans>Shared bank sync allowed</Trans>
+                    </Text>
+                  )}
+                </View>
                 <Button
                   aria-label={t('Revoke {{name}}', { name: key.name })}
                   onPress={() => openModal(key)}

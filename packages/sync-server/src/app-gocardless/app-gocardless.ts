@@ -3,10 +3,8 @@ import express from 'express';
 import type { Request, Response } from 'express';
 
 import { sha256String } from '#util/hash';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '#util/middlewares';
+import { requestLoggerMiddleware } from '#util/middlewares';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import {
   AccountNotLinkedToRequisition,
@@ -96,9 +94,10 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateSessionMiddleware);
+app.use(validateGlobalBankSyncSession);
 
 app.post('/status', async (req, res) => {
   res.send({

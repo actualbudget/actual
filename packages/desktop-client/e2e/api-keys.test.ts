@@ -11,6 +11,7 @@ for (const width of [1280, 375]) {
       name: 'Transaction importer',
       fileIds: ['budget'],
       createdAt: 1,
+      permissions: ['bank-sync-global'],
     };
     let createRequests = 0;
     let failLoad = true;
@@ -49,6 +50,7 @@ for (const width of [1280, 375]) {
           expect(request.postDataJSON()).toEqual({
             fileIds: ['budget'],
             name: key.name,
+            permissions: key.permissions,
           });
           keys = [key];
           data = { ...key, key: 'actual_example-only-not-a-real-key' };
@@ -101,6 +103,12 @@ for (const width of [1280, 375]) {
     const dialog = page.getByRole('dialog');
     await expect(dialog).toHaveAccessibleName('Add API key');
     await dialog.getByRole('textbox', { name: 'Key name' }).fill(key.name);
+    const shared = dialog.getByRole('checkbox', {
+      name: 'Allow bank sync using shared connections',
+    });
+    await expect(shared).not.toBeChecked();
+    await shared.check();
+    await expect(dialog).toMatchThemeScreenshots();
     await dialog.getByRole('button', { name: 'Create key' }).click();
     const secret = dialog.locator('#new-api-key');
     await expect(secret).toHaveValue('actual_example-only-not-a-real-key');
@@ -118,6 +126,7 @@ for (const width of [1280, 375]) {
     await dialog.getByRole('button', { name: 'Done', exact: true }).click();
     await expect(dialog).toHaveCount(0);
     await expect(section.getByText(key.name, { exact: true })).toBeVisible();
+    await expect(section.getByText('Shared bank sync allowed')).toBeVisible();
     await expect(section).toMatchThemeScreenshots();
     await page.getByRole('button', { name: `Revoke ${key.name}` }).click();
     await expect(dialog).toHaveAccessibleName('Revoke API key');

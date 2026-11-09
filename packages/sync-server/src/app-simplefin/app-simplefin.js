@@ -27,7 +27,7 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
-// API keys may only use credentials configured for an accessible budget.
+// API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateBankSyncSession);
@@ -49,7 +49,7 @@ app.use((req, res, next) => {
   // Falling back in that case could expose global accounts unexpectedly.
   res.locals.credentialFileId =
     fileId != null &&
-    (res.locals.apiKeyFileIds ||
+    (!res.locals.allowGlobalBankSync ||
       secretsService.exists(SecretName.simplefin_token, fileId) ||
       secretsService.exists(SecretName.simplefin_accessKey, fileId))
       ? fileId

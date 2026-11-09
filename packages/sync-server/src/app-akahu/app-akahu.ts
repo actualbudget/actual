@@ -10,11 +10,9 @@ import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '#util/middlewares';
+import { requestLoggerMiddleware } from '#util/middlewares';
 import { createMutex } from '#util/mutex';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 type AkahuTransaction = {
   booked: boolean;
@@ -50,9 +48,10 @@ app.use(requestLoggerMiddleware);
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
-app.use(validateSessionMiddleware);
+app.use(validateGlobalBankSyncSession);
 
 app.post(
   '/status',

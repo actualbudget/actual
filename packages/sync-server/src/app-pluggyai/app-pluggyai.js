@@ -19,7 +19,7 @@ app.use(express.json());
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
-// API keys may only use credentials configured for an accessible budget.
+// API keys need explicit permission to use shared credentials.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateBankSyncSession);
@@ -50,7 +50,7 @@ app.post(
 
     const source = pluggyaiService.getCredentialSource(
       fileId,
-      !res.locals.apiKeyFileIds,
+      res.locals.allowGlobalBankSync,
     );
 
     res.send({
@@ -90,7 +90,7 @@ app.post(
     try {
       const source = pluggyaiService.getCredentialSource(
         fileId,
-        !res.locals.apiKeyFileIds,
+        res.locals.allowGlobalBankSync,
       );
       if (!source) {
         res.status(400).send({
@@ -115,7 +115,7 @@ app.post(
         const partial = await pluggyaiService.getAccountsByItemId(
           item,
           fileId,
-          !res.locals.apiKeyFileIds,
+          res.locals.allowGlobalBankSync,
         );
         accounts = accounts.concat(partial.results);
       }
@@ -165,7 +165,7 @@ app.post(
     try {
       const source = pluggyaiService.getCredentialSource(
         fileId,
-        !res.locals.apiKeyFileIds,
+        res.locals.allowGlobalBankSync,
       );
       if (!source) {
         res.status(400).send({
@@ -179,11 +179,14 @@ app.post(
       const account = await pluggyaiService.getAccountById(
         accountId,
         fileId,
-        !res.locals.apiKeyFileIds,
+        res.locals.allowGlobalBankSync,
       );
       if (res.locals.apiKeyFileIds) {
         const itemIds = (
-          secretsService.get(SecretName.pluggyai_itemIds, fileId) ?? ''
+          secretsService.get(
+            SecretName.pluggyai_itemIds,
+            source === 'per-budget-file' ? fileId : null,
+          ) ?? ''
         )
           .split(',')
           .map(item => item.trim());
@@ -199,7 +202,7 @@ app.post(
         accountId,
         startDate,
         fileId,
-        !res.locals.apiKeyFileIds,
+        res.locals.allowGlobalBankSync,
       );
 
       let startingBalance = parseInt(

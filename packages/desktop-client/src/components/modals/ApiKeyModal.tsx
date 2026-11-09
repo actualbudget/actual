@@ -10,6 +10,7 @@ import { View } from '@actual-app/components/view';
 import { sendCatch } from '@actual-app/core/platform/client/connection';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
+import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type ApiKeyModalProps = Extract<ModalType, { name: 'api-key' }>['options'];
@@ -17,6 +18,7 @@ type ApiKeyModalProps = Extract<ModalType, { name: 'api-key' }>['options'];
 export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
+  const [sharedBankSync, setSharedBankSync] = useState(false);
   const [secret, setSecret] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +35,7 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
         const result = await sendCatch('api-keys-create', {
           fileIds: [fileId],
           name: name.trim(),
+          permissions: sharedBankSync ? ['bank-sync-global'] : [],
         });
         if (result.error) throw result.error;
         setSecret(result.data.key);
@@ -53,7 +56,7 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
     <Modal
       name="api-key"
       ariaLabelledBy="api-key-modal-title"
-      containerProps={{ style: { width: apiKey ? 600 : undefined } }}
+      containerProps={{ style: { width: 600 } }}
     >
       {({ state }) => (
         <>
@@ -114,6 +117,24 @@ export function ApiKeyModal({ fileId, apiKey, onChange }: ApiKeyModalProps) {
                     onChange={event => setName(event.target.value)}
                     placeholder={t('e.g. Transaction importer')}
                   />
+                  <View style={{ gap: spacing.xs }}>
+                    <LabeledCheckbox
+                      id="shared-bank-sync"
+                      checked={sharedBankSync}
+                      onChange={event =>
+                        setSharedBankSync(event.target.checked)
+                      }
+                    >
+                      <Trans>Allow bank sync using shared connections</Trans>
+                    </LabeledCheckbox>
+                    <Text style={{ color: theme.pageTextLight }}>
+                      <Trans>
+                        Allows access to all accounts available through the
+                        server's shared bank connections, including accounts
+                        outside this budget.
+                      </Trans>
+                    </Text>
+                  </View>
                 </>
               )}
               {error && (
