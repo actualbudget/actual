@@ -4,13 +4,25 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { batchMessages } from '#server/sync';
+import { convertAtMonthRate, getSqlDefaultCurrencyCode } from '#shared/fx/sql';
 import { getLocale } from '#shared/locale';
 import * as monthUtils from '#shared/months';
 import { integerToCurrencyWithDecimal, safeNumber } from '#shared/util';
 import type { IntegerAmount } from '#shared/util';
 import type { CategoryEntity } from '#types/models';
 
-import { getAmountSql } from './base';
+import { BUDGET_CATEGORY_JOIN } from './budget-category-join';
+import {
+  getAllCurrencyLines,
+  getCurrencyLine,
+  getCurrencyLines,
+  getLineCategory,
+  getLineCurrency,
+  getLineFilterSql,
+  getSpendingSql,
+  isLineStarted,
+  storeAutomaticLine,
+} from './category-currencies';
 import {
   getWeeklyAverageWindow,
   trimWeeklyAverageWindow,
@@ -92,7 +104,7 @@ function getBudgetData<T extends BudgetTable>(
     `
     SELECT b.*, c.is_income, c.hidden, g.hidden AS group_hidden
     FROM ${table} b
-    LEFT JOIN categories c ON b.category = c.id
+    ${BUDGET_CATEGORY_JOIN}
     LEFT JOIN category_groups g ON c.cat_group = g.id
     WHERE c.tombstone = 0 AND b.month = ?
   `,
@@ -140,6 +152,14 @@ export function setBudget({
   amount = safeNumber(typeof amount === 'number' ? amount : 0);
   const table = getBudgetTable();
 
+  // A currency line is budgeted from its first month on
+  if (!isLineStarted(category, month)) {
+    return Promise.resolve();
+  }
+  if (amount !== 0) {
+    void storeAutomaticLine(category);
+  }
+
   const existing = db.firstSync<
     Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
@@ -159,6 +179,9 @@ export function setBudget({
 
 export function setGoal({ month, category, goal, long_goal }): Promise<void> {
   const table = getBudgetTable();
+  if (goal != null || long_goal != null) {
+    void storeAutomaticLine(category);
+  }
   const existing = db.firstSync<
     Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
@@ -201,6 +224,9 @@ function setCarryover(
   month: string,
   flag: boolean,
 ): Promise<void> {
+  if (flag) {
+    void storeAutomaticLine(category);
+  }
   const existing = db.firstSync<
     Pick<db.DbZeroBudget | db.DbReflectBudget, 'id'>
   >(`SELECT id FROM ${table} WHERE month = ? AND category = ?`, [
@@ -273,9 +299,21 @@ export async function setZero({ month }: { month: string }): Promise<void> {
       if (cat.is_income === 1 && !isTrackingBudget()) {
         return;
       }
-      void setBudget({ category: cat.id, month, amount: 0 });
+      for (const id of getBudgetLineIds(cat.id, month)) {
+        void setBudget({ category: id, month, amount: 0 });
+      }
     });
   });
+}
+
+// A category and its currency lines that can be budgeted in `month`
+function getBudgetLineIds(categoryId: string, month: string): string[] {
+  return [
+    categoryId,
+    ...getCurrencyLines(categoryId)
+      .filter(line => isLineStarted(line.id, month))
+      .map(line => line.id),
+  ];
 }
 
 export async function set3MonthAvg({
@@ -298,17 +336,19 @@ export async function set3MonthAvg({
         continue;
       }
 
-      let avg = await getCategoryAverage({
-        month,
-        maxMonths: 3,
-        categoryId: cat.id,
-      });
+      for (const id of getBudgetLineIds(cat.id, month)) {
+        let avg = await getCategoryAverage({
+          month,
+          maxMonths: 3,
+          categoryId: id,
+        });
 
-      if (cat.is_income === 0) {
-        avg *= -1;
+        if (cat.is_income === 0) {
+          avg *= -1;
+        }
+
+        void setBudget({ category: id, month, amount: avg });
       }
-
-      void setBudget({ category: cat.id, month, amount: avg });
     }
   });
 }
@@ -332,7 +372,9 @@ export async function set12MonthAvg({
       if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
-      void setNMonthAvg({ month, N: 12, category: cat.id });
+      for (const id of getBudgetLineIds(cat.id, month)) {
+        void setNMonthAvg({ month, N: 12, category: id });
+      }
     }
   });
 }
@@ -356,7 +398,9 @@ export async function set6MonthAvg({
       if (cat.is_income === 1 && !isTrackingBudget()) {
         continue;
       }
-      void setNMonthAvg({ month, N: 6, category: cat.id });
+      for (const id of getBudgetLineIds(cat.id, month)) {
+        void setNMonthAvg({ month, N: 6, category: id });
+      }
     }
   });
 }
@@ -372,7 +416,7 @@ export async function setNMonthAvg({
 }): Promise<void> {
   const categoryFromDb = await db.first<Pick<db.DbViewCategory, 'is_income'>>(
     'SELECT is_income FROM v_categories WHERE id = ?',
-    [category],
+    [getLineCategory(category)],
   );
 
   let avg = await getCategoryAverage({
@@ -438,14 +482,18 @@ export async function getCategoryWeeklyAverage({
     today: monthUtils.currentDay(),
   });
 
+  // Same filters and conversion as the `sum-amount` cells so weekly and
+  // monthly averages agree on which transactions count, and for how much.
+  const { join, amount } = getSpendingSql();
   const firstActivity = await db.first<{ date: number | null }>(
     `SELECT MIN(t.date) AS date
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
-      WHERE t.category = ?
+       ${join}
+      WHERE ${getLineFilterSql(categoryId)}
         AND t.date <= ?
         AND a.offbudget = 0`,
-    [categoryId, db.toDateRepr(fullWindow.end)],
+    [db.toDateRepr(fullWindow.end)],
   );
   const window = trimWeeklyAverageWindow(
     fullWindow,
@@ -455,17 +503,16 @@ export async function getCategoryWeeklyAverage({
     return 0;
   }
 
-  // Same filters and conversion as the `sum-amount` cells so weekly and
-  // monthly averages agree on which transactions count, and for how much.
   const total = await db.first<{ amount: number | null }>(
-    `SELECT SUM(${getAmountSql()}) AS amount
+    `SELECT SUM(${amount}) AS amount
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
-      WHERE t.category = ?
+       ${join}
+      WHERE ${getLineFilterSql(categoryId)}
         AND t.date >= ?
         AND t.date <= ?
         AND a.offbudget = 0`,
-    [categoryId, db.toDateRepr(window.start), db.toDateRepr(window.end)],
+    [db.toDateRepr(window.start), db.toDateRepr(window.end)],
   );
 
   return safeNumber(total?.amount ?? 0) / window.numWeeks;
@@ -481,10 +528,18 @@ async function getAverageMonths({
   categoryId: string;
 }): Promise<string[]> {
   const firstMonth = getAverageStartMonth(month);
-  const firstActivityMonth = await getFirstActivityMonth({
+  let firstActivityMonth = await getFirstActivityMonth({
     categoryId,
     endMonth: firstMonth,
   });
+  // A currency line has nothing before its first month
+  const line = getCurrencyLine(categoryId);
+  if (line) {
+    const lineStart = monthFromDbMonth(line.startMonth);
+    if (firstActivityMonth == null || firstActivityMonth < lineStart) {
+      firstActivityMonth = lineStart;
+    }
+  }
   const months: string[] = [];
   let prevMonth = firstMonth;
 
@@ -519,6 +574,8 @@ async function getFirstActivityMonth({
 }): Promise<string | null> {
   const table = getBudgetTable();
   const endDbMonth = dbMonth(endMonth);
+  // Transactions count where the `sum-amount` cells count them
+  const { join } = getSpendingSql();
   const firstActivity = await db.first<{ month: number | null }>(
     `SELECT MIN(month) AS month
        FROM (
@@ -529,16 +586,33 @@ async function getFirstActivityMonth({
          SELECT CAST(t.date / 100 AS INTEGER) AS month
            FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
-          WHERE t.category = ?
+           ${join}
+          WHERE ${getLineFilterSql(categoryId)}
             AND CAST(t.date / 100 AS INTEGER) <= ?
             AND a.offbudget = 0
        )`,
-    [categoryId, endDbMonth, categoryId, endDbMonth],
+    [categoryId, endDbMonth, endDbMonth],
   );
 
   return firstActivity?.month == null
     ? null
     : monthFromDbMonth(firstActivity.month);
+}
+
+// An amount of `from` (a category, a currency line or To Budget) in the
+// currency of `to`, at the month's rate
+function convertBetweenLines(
+  amount: number,
+  from: string,
+  to: string,
+  month: string,
+): number {
+  return convertAtMonthRate(
+    amount,
+    getLineCurrency(from),
+    getLineCurrency(to),
+    month,
+  );
 }
 
 export async function holdForNextMonth({
@@ -593,7 +667,8 @@ export async function coverOverspending({
     from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
   );
 
-  // Cover provided amount (can be partial) or full overspending amount.
+  // Cover provided amount (can be partial) or full overspending amount, in
+  // the currency of the overspent category
   const amountToCover = amount
     ? // Covering in the app provides a positive amount to cover so we invert it here
       -amount
@@ -603,8 +678,19 @@ export async function coverOverspending({
     return;
   }
 
-  // Don't go over the leftover amount of the covering category
-  const coverableAmount = Math.min(Math.abs(amountToCover), leftoverFrom);
+  // Don't go over the leftover amount of the covering category, in its own
+  // currency
+  const neededFrom = convertBetweenLines(
+    Math.abs(amountToCover),
+    to,
+    from,
+    month,
+  );
+  const coverableFrom = Math.min(neededFrom, leftoverFrom);
+  const covered =
+    coverableFrom === neededFrom
+      ? Math.abs(amountToCover)
+      : convertBetweenLines(coverableFrom, from, to, month);
 
   await batchMessages(async () => {
     // If we are covering it from the to be budgeted amount, ignore this
@@ -613,19 +699,20 @@ export async function coverOverspending({
       await setBudget({
         category: from,
         month,
-        amount: fromBudgeted - coverableAmount,
+        amount: fromBudgeted - coverableFrom,
       });
     }
 
     await setBudget({
       category: to,
       month,
-      amount: toBudgeted + coverableAmount,
+      amount: toBudgeted + covered,
     });
 
     await addMovementNotes({
       month,
-      amount: coverableAmount,
+      amount: coverableFrom,
+      receivedAmount: covered,
       to,
       from,
       currencyCode,
@@ -646,8 +733,14 @@ export async function transferAvailable({
   const leftover = await getSheetValue(sheetName, 'to-budget');
   amount = Math.max(Math.min(amount, leftover), 0);
 
+  // To Budget is in the default currency
   const budgeted = await getSheetValue(sheetName, 'budget-' + category);
-  await setBudget({ category, month, amount: budgeted + amount });
+  await setBudget({
+    category,
+    month,
+    amount:
+      budgeted + convertBetweenLines(amount, 'to-budget', category, month),
+  });
 }
 
 export async function coverOverbudgeted({
@@ -678,8 +771,15 @@ export async function coverOverbudgeted({
     return;
   }
 
-  // Don't exceed the available balance of the covering category.
-  const coverableAmount = Math.min(Math.abs(amountToCover), categoryLeftover);
+  // Don't exceed the available balance of the covering category, in its own
+  // currency; To Budget is in the default one.
+  const neededAmount = convertBetweenLines(
+    Math.abs(amountToCover),
+    'to-budget',
+    category,
+    month,
+  );
+  const coverableAmount = Math.min(neededAmount, categoryLeftover);
 
   await batchMessages(async () => {
     await setBudget({
@@ -691,6 +791,10 @@ export async function coverOverbudgeted({
     await addMovementNotes({
       month,
       amount: coverableAmount,
+      receivedAmount:
+        coverableAmount === neededAmount
+          ? Math.abs(amountToCover)
+          : convertBetweenLines(coverableAmount, category, 'to-budget', month),
       from: category,
       to: 'overbudgeted',
       currencyCode,
@@ -717,16 +821,24 @@ export async function transferCategory({
   await batchMessages(async () => {
     await setBudget({ category: from, month, amount: fromBudgeted - amount });
 
+    // The amount is in the currency of `from`
+    const receivedAmount = convertBetweenLines(amount, from, to, month);
+
     // If we are simply moving it back into available cash to budget,
     // don't do anything else
     if (to !== 'to-budget') {
       const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
-      await setBudget({ category: to, month, amount: toBudgeted + amount });
+      await setBudget({
+        category: to,
+        month,
+        amount: toBudgeted + receivedAmount,
+      });
     }
 
     await addMovementNotes({
       month,
       amount,
+      receivedAmount,
       to,
       from,
       currencyCode,
@@ -782,20 +894,42 @@ function addNewLine(notes?: string) {
   return !notes ? '' : `${notes}\n`;
 }
 
+// A currency line's amounts start with its code, as amounts in another
+// currency are shown everywhere else
+function formatLineAmount(
+  amount: number,
+  line: string,
+  currencyCode: string,
+): string {
+  const lineCurrency = getCurrencyLine(line)?.currency;
+  return lineCurrency
+    ? `${lineCurrency} ${integerToCurrencyWithDecimal(amount, lineCurrency)}`
+    : integerToCurrencyWithDecimal(amount, currencyCode);
+}
+
 async function addMovementNotes({
   month,
   amount,
+  receivedAmount = amount,
   to,
   from,
   currencyCode,
 }: {
   month: string;
   amount: number;
+  // What `to` received, in its currency
+  receivedAmount?: number;
   to: CategoryEntity['id'] | 'to-budget' | 'overbudgeted';
   from: CategoryEntity['id'] | 'to-budget';
   currencyCode: string;
 }) {
-  const displayAmount = integerToCurrencyWithDecimal(amount, currencyCode);
+  const displayAmount = formatLineAmount(amount, from, currencyCode);
+  // Not a line, 'overbudgeted' is in the default currency
+  const toCurrency = getLineCurrency(to);
+  const displayReceived =
+    getLineCurrency(from) === toCurrency
+      ? ''
+      : ` (${formatLineAmount(receivedAmount, to, currencyCode)})`;
 
   const monthBudgetNotesId = `budget-${month}`;
   const existingMonthBudgetNotes = addNewLine(
@@ -812,22 +946,27 @@ async function addMovementNotes({
     locale,
   );
   const categories = await db.getCategories(
-    [from, to].filter(c => c !== 'to-budget' && c !== 'overbudgeted'),
+    [from, to]
+      .filter(c => c !== 'to-budget' && c !== 'overbudgeted')
+      .map(getLineCategory),
   );
+  // A currency line is named after its category and currency
+  const getName = (id: string) => {
+    const name = categories.find(c => c.id === getLineCategory(id))?.name;
+    const line = getCurrencyLine(id);
+    return line ? `${name} (${line.currency})` : name;
+  };
 
-  const fromCategoryName =
-    from === 'to-budget'
-      ? 'To Budget'
-      : categories.find(c => c.id === from)?.name;
+  const fromCategoryName = from === 'to-budget' ? 'To Budget' : getName(from);
 
   const toCategoryName =
     to === 'to-budget'
       ? 'To Budget'
       : to === 'overbudgeted'
         ? 'Overbudgeted'
-        : categories.find(c => c.id === to)?.name;
+        : getName(to);
 
-  const note = `Reassigned ${displayAmount} from ${fromCategoryName} → ${toCategoryName} on ${displayDay}`;
+  const note = `Reassigned ${displayAmount} from ${fromCategoryName} → ${toCategoryName}${displayReceived} on ${displayDay}`;
 
   await db.update('notes', {
     id: monthBudgetNotesId,
@@ -847,7 +986,96 @@ export async function resetIncomeCarryover({
 
   await batchMessages(async () => {
     for (const category of categories) {
-      await setCarryover(table, category.id, dbMonth(month).toString(), false);
+      for (const id of getBudgetLineIds(category.id, month)) {
+        await setCarryover(table, id, dbMonth(month).toString(), false);
+      }
+    }
+  });
+}
+
+// Removes a currency line from its category. Each month's budget moves into
+// the category at the month's rate, which is what To Budget counted for it,
+// and the line's spending counts in the category again. Both budget types
+// are updated, so switching type later finds no leftover amounts.
+export async function removeCurrencyLine({ id }: { id: string }) {
+  const line = getCurrencyLine(id);
+  if (!line) {
+    return;
+  }
+  const defaultCurrency = getSqlDefaultCurrencyCode();
+
+  await batchMessages(async () => {
+    for (const table of ['zero_budgets', 'reflect_budgets'] as const) {
+      const budgets = db.runQuery<
+        Pick<db.DbZeroBudget, 'id' | 'month' | 'amount' | 'carryover'>
+      >(
+        `SELECT id, month, amount, carryover FROM ${table} WHERE category = ?`,
+        [line.id],
+        true,
+      );
+      for (const budget of budgets) {
+        const month = monthFromDbMonth(budget.month);
+        if (budget.amount) {
+          const value = convertAtMonthRate(
+            budget.amount,
+            line.currency,
+            defaultCurrency,
+            month,
+          );
+          const own = db.firstSync<Pick<db.DbZeroBudget, 'id' | 'amount'>>(
+            `SELECT id, amount FROM ${table} WHERE month = ? AND category = ?`,
+            [budget.month, line.category],
+          );
+          if (own) {
+            await db.update(table, {
+              id: own.id,
+              amount: safeNumber((own.amount || 0) + value),
+            });
+          } else {
+            await db.insert(table, {
+              id: `${budget.month}-${line.category}`,
+              month: budget.month,
+              category: line.category,
+              amount: value,
+            });
+          }
+        }
+        if (budget.amount || budget.carryover) {
+          await db.update(table, { id: budget.id, amount: 0, carryover: 0 });
+        }
+      }
+    }
+    // A line that is only there for its currency's spending has no row
+    if (!line.automatic) {
+      await db.deleteCategoryCurrency({ id: line.id });
+    }
+  });
+}
+
+// Clears the budgets of every currency line of the given categories and
+// removes the lines, when the categories are deleted. Their budgets are
+// moved by the category transfer, if any.
+export async function clearCurrencyLinesOf(categoryIds: string[]) {
+  const ids = new Set(categoryIds);
+  await batchMessages(async () => {
+    for (const line of getAllCurrencyLines()) {
+      if (!ids.has(line.category)) {
+        continue;
+      }
+      for (const table of ['zero_budgets', 'reflect_budgets'] as const) {
+        const budgets = db.runQuery<Pick<db.DbZeroBudget, 'id'>>(
+          `SELECT id FROM ${table}
+            WHERE category = ? AND (amount != 0 OR carryover != 0)`,
+          [line.id],
+          true,
+        );
+        for (const budget of budgets) {
+          await db.update(table, { id: budget.id, amount: 0, carryover: 0 });
+        }
+      }
+      if (!line.automatic) {
+        await db.deleteCategoryCurrency({ id: line.id });
+      }
     }
   });
 }

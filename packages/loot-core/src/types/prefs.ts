@@ -41,6 +41,9 @@ export type SyncedPrefs = Partial<
     // everything at the most recent rate, 'historical' at the rate of the
     // date of each amount
     | 'currency-conversion-rate'
+    // The currencies budgeted on lines of their own, whose spending gets a
+    // line in its category automatically; see `shared/fx/ownLines.ts`
+    | 'currency-own-lines'
     | 'multi-currency-nudge-dismissed'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`

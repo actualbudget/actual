@@ -3,7 +3,10 @@ import * as db from '#server/db';
 import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import {
+  convertAtMonthRate,
+  convertBudgetAmount,
   getSqlDefaultCurrencyCode,
+  getSqlOwnLineStarts,
   isSqlConversionEnabled,
 } from '#shared/fx/sql';
 // @ts-strict-ignore
@@ -13,8 +16,20 @@ import { getChangedValues } from '#shared/util';
 import type { CategoryGroupEntity } from '#types/models';
 
 import * as budgetActions from './actions';
+import { BUDGET_CATEGORY_JOIN } from './budget-category-join';
+import {
+  getAllCurrencyLines,
+  getCategoriesWithCurrencyLines,
+  getCurrencyLine,
+  getCurrencyLines,
+  getLineFilterSql,
+  getSpendingSql,
+  loadCurrencyLines,
+} from './category-currencies';
+import type { CurrencyLine } from './category-currencies';
 import * as envelopeBudget from './envelope';
 import * as trackingBudget from './tracking';
+import { number, sumAmounts } from './util';
 
 // How far ahead budget months are available. Planning past the minimum
 // keeps a few empty months after the latest allocation, up to a hard cap
@@ -72,7 +87,7 @@ async function getLatestAllocatedMonth(): Promise<string | null> {
     getBudgetType() === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
   const row = await db.first<{ month: number | null }>(
     `SELECT MAX(b.month) AS month FROM ${table} b
-     JOIN categories c ON c.id = b.category
+     ${BUDGET_CATEGORY_JOIN}
      WHERE c.tombstone = 0 AND b.amount != 0`,
   );
   if (!row?.month) {
@@ -103,20 +118,6 @@ function getMonthSpanBounds(months: string[]) {
   };
 }
 
-// Category amounts of accounts in another currency count in the budget's
-// default currency at the rate of the transaction's date. Before a pair's
-// first rate its earliest later rate is used, so adding a rate re-values
-// the months that had no earlier one. While multiple currencies are off,
-// and for accounts without a currency or in the default one, amounts are
-// used as they are.
-export function getAmountSql() {
-  if (!isSqlConversionEnabled()) {
-    return 't.amount';
-  }
-  const defaultCurrency = getSqlDefaultCurrencyCode().replace(/'/g, "''");
-  return `CASE WHEN a.currency IS NULL OR a.currency = '${defaultCurrency}' THEN t.amount ELSE FX_CONVERT_ON_DATE(t.amount, a.currency, t.date) END`;
-}
-
 // Recomputes the category sums that include transactions of accounts with
 // a currency of their own. Only the transactions the sums count are looked
 // at: alive and in on-budget accounts.
@@ -145,10 +146,33 @@ function recomputeConvertedSums(months: Set<string>) {
   }
 }
 
+// The cells of a category's currency lines that hold its amounts in the
+// default currency, and the totals that add them to the category's own
+const LINE_VALUES = [
+  { total: 'budget-total-', own: 'budget-', value: 'budget-fx-' },
+  { total: 'sum-amount-total-', own: 'sum-amount-', value: 'sum-amount-fx-' },
+  { total: 'leftover-total-', own: 'leftover-', value: 'leftover-fx-' },
+] as const;
+
+// Recomputes what the amounts of every currency line are worth in the
+// default currency, e.g. after a rate changed
+function recomputeCurrencyLineValues(months: Iterable<string>) {
+  const lines = getAllCurrencyLines();
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    for (const line of lines) {
+      for (const { value } of LINE_VALUES) {
+        sheet.get().recompute(resolveName(sheetName, value + line.id));
+      }
+    }
+  }
+}
+
 const CONVERSION_PREFERENCES = new Set([
   'flags.currency',
   'flags.multiCurrency',
   'defaultCurrencyCode',
+  'currency-own-lines',
 ]);
 
 type RateRow = Pick<
@@ -199,6 +223,12 @@ function handleConversionChanges(months: Set<string>, oldValues, newValues) {
 
   if (isPreferenceChanged || isRateChanged) {
     recomputeConvertedSums(months);
+    recomputeCurrencyLineValues(months);
+  }
+  // Which spending counts in a currency line depends on the default currency
+  // and on multiple currencies being on
+  if (isPreferenceChanged) {
+    recomputeSpending(months, getCategoriesWithCurrencyLines());
   }
 }
 
@@ -207,22 +237,25 @@ function handleConversionChanges(months: Set<string>, oldValues, newValues) {
 // `sum-amount` cells on a cold build so we avoid running one
 // `SELECT SUM(amount)` query per category per month (which scales as
 // categories × months and dominates load time for budgets with many years
-// of data). The filters must match the per-cell query in `createCategory`
-// exactly so balances stay identical.
-function getSumAmountsByMonth(
+// of data). The filters must match the per-cell query in `getLineSpending`
+// exactly so balances stay identical. Currency lines are keyed by their id,
+// like categories.
+export function getSumAmountsByMonth(
   rangeStart: number,
   rangeEnd: number,
 ): Map<string, number> {
+  const { join, line, amount } = getSpendingSql();
   const rows = db.runQuery<{ month: number; category: string; amount: number }>(
-    `SELECT t.category AS category,
+    `SELECT ${line} AS category,
             t.date / 100 AS month,
-            SUM(${getAmountSql()}) AS amount
+            SUM(${amount}) AS amount
        FROM v_transactions_internal_alive t
        LEFT JOIN accounts a ON a.id = t.account
+       ${join}
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
         AND t.category IS NOT NULL
         AND a.offbudget = 0
-      GROUP BY t.category, t.date / 100`,
+      GROUP BY ${line}, t.date / 100`,
     [],
     true,
   );
@@ -250,22 +283,24 @@ export async function reseedSumAmounts(months: string[]): Promise<string[]> {
   const { data: groups }: { data: CategoryGroupEntity[] } = await aqlQuery(
     q('category_groups').select('*'),
   );
-  const categories = groups.flatMap(group => group.categories);
+  const lineIds = groups
+    .flatMap(group => group.categories)
+    .flatMap(cat => [cat.id, ...getCurrencyLines(cat.id).map(line => line.id)]);
 
   const seededCells: string[] = [];
   for (const month of months) {
     const sheetName = monthUtils.sheetForMonth(month);
     const dbMonth = parseInt(month.replace('-', ''));
 
-    for (const cat of categories) {
-      const name = resolveName(sheetName, `sum-amount-${cat.id}`);
+    for (const id of lineIds) {
+      const name = resolveName(sheetName, `sum-amount-${id}`);
       // A cell the spreadsheet doesn't have stays out of the seed set and is
       // left to be recomputed normally.
       if (!sheet.get().hasCell(name)) {
         continue;
       }
 
-      sheet.get().load(name, sums.get(`${dbMonth}-${cat.id}`) || 0);
+      sheet.get().load(name, sums.get(`${dbMonth}-${id}`) || 0);
       seededCells.push(name);
     }
   }
@@ -273,30 +308,101 @@ export async function reseedSumAmounts(months: string[]): Promise<string[]> {
   return seededCells;
 }
 
+// The spending of a category, or of one of its currency lines, between two
+// days (YYYYMMDD)
+export function getLineSpending(
+  lineId: string,
+  start: number,
+  end: number,
+): number {
+  const { join, amount } = getSpendingSql();
+  // Making this sync is faster!
+  const rows = db.runQuery<{ amount: number }>(
+    `SELECT SUM(${amount}) as amount
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+       ${join}
+     WHERE t.date >= ${start} AND t.date <= ${end}
+       AND ${getLineFilterSql(lineId)} AND a.offbudget = 0`,
+    [],
+    true,
+  );
+  const row = rows[0];
+  const amountValue = row ? row.amount : 0;
+  return amountValue || 0;
+}
+
 export function createCategory(cat, sheetName, prevSheetName, start, end) {
   sheet.get().createDynamic(sheetName, 'sum-amount-' + cat.id, {
     initialValue: 0,
-    run: () => {
-      // Making this sync is faster!
-      const rows = db.runQuery<{ amount: number }>(
-        `SELECT SUM(${getAmountSql()}) as amount
-           FROM v_transactions_internal_alive t
-           LEFT JOIN accounts a ON a.id = t.account
-         WHERE t.date >= ${start} AND t.date <= ${end}
-           AND category = '${cat.id}' AND a.offbudget = 0`,
-        [],
-        true,
-      );
-      const row = rows[0];
-      const amount = row ? row.amount : 0;
-      return amount || 0;
-    },
+    run: () => getLineSpending(cat.id, start, end),
   });
 
   if (getBudgetType() === 'envelope') {
     envelopeBudget.createCategory(cat, sheetName, prevSheetName);
   } else {
     void trackingBudget.createCategory(cat, sheetName, prevSheetName);
+  }
+}
+
+// The cells of a currency line in a month: its own amounts, in its
+// currency, like those of a category, and what they are worth in the
+// default currency at the month's rate
+function createCurrencyLine(line: CurrencyLine, month: string) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  const prevSheetName = monthUtils.sheetForMonth(monthUtils.prevMonth(month));
+  const { start, end } = monthUtils.bounds(month);
+
+  createCategory(
+    { id: line.id, is_income: line.isIncome ? 1 : 0 },
+    sheetName,
+    prevSheetName,
+    start,
+    end,
+  );
+
+  for (const { own, value } of LINE_VALUES) {
+    sheet.get().createDynamic(sheetName, value + line.id, {
+      initialValue: 0,
+      dependencies: [own + line.id],
+      run: amount => convertBudgetAmount(number(amount), line.currency, month),
+    });
+  }
+}
+
+// The totals of a category with currency lines, in the default currency
+function createCategoryTotals(
+  categoryId: string,
+  lines: CurrencyLine[],
+  sheetName: string,
+) {
+  for (const { total, own, value } of LINE_VALUES) {
+    const name = total + categoryId;
+    const dependencies = [
+      own + categoryId,
+      ...lines.map(line => value + line.id),
+    ];
+    if (sheet.get().getNode(resolveName(sheetName, name)).dynamic) {
+      sheet.get().addDependencies(sheetName, name, dependencies);
+    } else {
+      sheet.get().createDynamic(sheetName, name, {
+        initialValue: 0,
+        dependencies,
+        run: sumAmounts,
+      });
+    }
+  }
+}
+
+// The cells of all currency lines of a category in a month, e.g. when the
+// category comes back after being deleted
+export function createCurrencyLinesOf(categoryId: string, month: string) {
+  const lines = getCurrencyLines(categoryId);
+  for (const line of lines) {
+    createCurrencyLine(line, month);
+  }
+  if (lines.length > 0) {
+    createCategoryTotals(categoryId, lines, monthUtils.sheetForMonth(month));
   }
 }
 
@@ -316,15 +422,26 @@ function handleAccountChange(months, oldValue, newValue) {
       true,
     );
 
-    months.forEach(month => {
-      const sheetName = monthUtils.sheetForMonth(month);
+    recomputeSpending(
+      months,
+      rows.map(row => row.category),
+    );
+  }
+}
 
-      rows.forEach(row => {
-        sheet
-          .get()
-          .recompute(resolveName(sheetName, 'sum-amount-' + row.category));
-      });
-    });
+// Recomputes the spending of categories and of their currency lines
+function recomputeSpending(
+  months: Iterable<string>,
+  categoryIds: Iterable<string>,
+) {
+  for (const month of months) {
+    const sheetName = monthUtils.sheetForMonth(month);
+    for (const categoryId of categoryIds) {
+      sheet.get().recompute(resolveName(sheetName, 'sum-amount-' + categoryId));
+      for (const line of getCurrencyLines(categoryId)) {
+        sheet.get().recompute(resolveName(sheetName, 'sum-amount-' + line.id));
+      }
+    }
   }
 }
 
@@ -340,26 +457,180 @@ function handleTransactionChange(transaction, changedFields) {
     transaction.category
   ) {
     const month = monthUtils.monthFromDate(db.fromDateRepr(transaction.date));
-    const sheetName = monthUtils.sheetForMonth(month);
-
-    sheet
-      .get()
-      .recompute(resolveName(sheetName, 'sum-amount-' + transaction.category));
+    recomputeSpending([month], [transaction.category]);
   }
 }
 
 function handleCategoryMappingChange(months, oldValue, newValue) {
-  months.forEach(month => {
-    const sheetName = monthUtils.sheetForMonth(month);
-    if (oldValue) {
+  recomputeSpending(
+    months,
+    oldValue
+      ? [oldValue.transferId, newValue.transferId]
+      : [newValue.transferId],
+  );
+}
+
+function isActiveCurrencyLine(row): boolean {
+  return (
+    row != null &&
+    row.tombstone === 0 &&
+    row.category != null &&
+    row.currency != null &&
+    row.start_month != null
+  );
+}
+
+// A currency line added to or removed from a category, or moved to another
+// first month
+function handleCategoryCurrencyChange(months: Set<string>, oldValue, newValue) {
+  const wasActive = isActiveCurrencyLine(oldValue);
+  const isActive = isActiveCurrencyLine(newValue);
+  const categoryId = newValue.category ?? oldValue?.category;
+  const category =
+    categoryId &&
+    db.firstSync<
+      Pick<db.DbCategory, 'cat_group' | 'hidden' | 'is_income' | 'tombstone'>
+    >(
+      'SELECT cat_group, hidden, is_income, tombstone FROM categories WHERE id = ?',
+      [categoryId],
+    );
+  // Lines of a deleted category get their cells if it comes back, but lose
+  // them when they're removed along with it
+  if (!category || (category.tombstone === 1 && isActive)) {
+    return;
+  }
+
+  const line: CurrencyLine = {
+    id: newValue.id,
+    category: categoryId,
+    currency: newValue.currency ?? oldValue?.currency,
+    startMonth: newValue.start_month ?? oldValue?.start_month,
+    isIncome: category.is_income === 1,
+    automatic: false,
+  };
+  const budgetType = getBudgetType();
+
+  if (isActive && !wasActive) {
+    if (budgetType === 'envelope') {
+      envelopeBudget.createBlankCurrencyLine(line, [...months]);
+    }
+    for (const month of months) {
+      const sheetName = monthUtils.sheetForMonth(month);
+      createCurrencyLine(line, month);
+      createCategoryTotals(categoryId, getCurrencyLines(categoryId), sheetName);
+      if (budgetType === 'envelope') {
+        envelopeBudget.addCurrencyLineDependencies(
+          month,
+          category.cat_group,
+          line,
+        );
+      } else if (!category.hidden) {
+        trackingBudget.addCurrencyLineDependencies(
+          month,
+          category.cat_group,
+          line,
+        );
+      }
+    }
+  } else if (wasActive && !isActive) {
+    for (const month of months) {
+      const sheetName = monthUtils.sheetForMonth(month);
+      for (const { total, value } of LINE_VALUES) {
+        sheet
+          .get()
+          .removeDependencies(sheetName, total + categoryId, [value + line.id]);
+      }
+      if (budgetType === 'envelope') {
+        envelopeBudget.removeCurrencyLineDependencies(
+          month,
+          category.cat_group,
+          line,
+        );
+      } else {
+        trackingBudget.removeCurrencyLineDependencies(
+          month,
+          category.cat_group,
+          line,
+        );
+      }
+    }
+  }
+
+  if (
+    wasActive !== isActive ||
+    oldValue?.start_month !== newValue.start_month
+  ) {
+    recomputeSpending(months, [categoryId]);
+    // A removed line is no longer in the list, but keeps its cells
+    for (const month of months) {
       sheet
         .get()
-        .recompute(resolveName(sheetName, 'sum-amount-' + oldValue.transferId));
+        .recompute(
+          resolveName(monthUtils.sheetForMonth(month), 'sum-amount-' + line.id),
+        );
     }
-    sheet
-      .get()
-      .recompute(resolveName(sheetName, 'sum-amount-' + newValue.transferId));
-  });
+  }
+}
+
+// A currency line as a stored row would look, active or removed
+function lineRow(line: CurrencyLine, tombstone = 0) {
+  return {
+    id: line.id,
+    category: line.category,
+    currency: line.currency,
+    start_month: line.startMonth,
+    tombstone,
+  };
+}
+
+// The stored row of a line as the budget sees it: an automatic line counts
+// as present without a stored row
+function effectiveLineRow(row, line: CurrencyLine | undefined) {
+  return isActiveCurrencyLine(row) || !line ? row : lineRow(line);
+}
+
+// Tables whose changes can add or remove automatic lines, as these follow
+// the spending of each category in each currency
+const AUTOMATIC_LINE_TABLES = ['transactions', 'accounts', 'category_mapping'];
+
+function shouldReloadCurrencyLines(newValues: Map<string, unknown>): boolean {
+  return (
+    newValues.has('category_currencies') ||
+    newValues.has('categories') ||
+    newValues.has('preferences') ||
+    (getSqlOwnLineStarts() != null &&
+      AUTOMATIC_LINE_TABLES.some(table => newValues.has(table)))
+  );
+}
+
+// Gives cells to the lines that appeared since `previous` and takes them
+// out of the totals for those that went away, or moved to another first
+// month: automatic lines come and go with spending and with the currencies
+// budgeted on their own.
+// Lines whose stored row changed in this batch are handled with it.
+function handleCurrencyLineSetChange(
+  months: Set<string>,
+  previous: Map<string, CurrencyLine>,
+  changedRows: Map<string, unknown> | undefined,
+) {
+  const ids = new Set([
+    ...previous.keys(),
+    ...getAllCurrencyLines().map(line => line.id),
+  ]);
+  for (const id of ids) {
+    if (changedRows?.has(id)) {
+      continue;
+    }
+    const before = previous.get(id);
+    const after = getCurrencyLine(id);
+    if (before && !after) {
+      handleCategoryCurrencyChange(months, lineRow(before), lineRow(before, 1));
+    } else if (!before && after) {
+      handleCategoryCurrencyChange(months, undefined, lineRow(after));
+    } else if (before && after && before.startMonth !== after.startMonth) {
+      handleCategoryCurrencyChange(months, lineRow(before), lineRow(after));
+    }
+  }
 }
 
 function handleBudgetMonthChange(budget) {
@@ -396,6 +667,18 @@ export function triggerBudgetChanges(oldValues, newValues) {
   sheet.startTransaction();
 
   try {
+    const previousLines = new Map(
+      getAllCurrencyLines().map(line => [line.id, { ...line }]),
+    );
+    if (shouldReloadCurrencyLines(newValues)) {
+      loadCurrencyLines();
+    }
+    // Before anything recomputes the cells of lines, so new lines have them
+    handleCurrencyLineSetChange(
+      createdMonths,
+      previousLines,
+      newValues.get('category_currencies'),
+    );
     handleConversionChanges(createdMonths, oldValues, newValues);
 
     newValues.forEach((items, table) => {
@@ -451,6 +734,12 @@ export function triggerBudgetChanges(oldValues, newValues) {
           }
         } else if (table === 'accounts') {
           handleAccountChange(createdMonths, oldValue, newValue);
+        } else if (table === 'category_currencies') {
+          handleCategoryCurrencyChange(
+            createdMonths,
+            effectiveLineRow(oldValue, previousLines.get(newValue.id)),
+            effectiveLineRow(newValue, getCurrencyLine(newValue.id)),
+          );
         }
       });
     });
@@ -459,13 +748,28 @@ export function triggerBudgetChanges(oldValues, newValues) {
   }
 }
 
+// Moves the budgets of categories, and of their currency lines at each
+// month's rate, into `transferId`
 export async function doTransfer(categoryIds, transferId) {
   const { createdMonths: months } = sheet.get().meta();
+  const ids = categoryIds.flatMap(id => [
+    id,
+    ...getCurrencyLines(id).map(line => line.id),
+  ]);
 
   [...months].forEach(month => {
-    const totalValue = categoryIds
+    const totalValue = ids
       .map(id => {
-        return budgetActions.getBudget({ month, category: id });
+        const amount = budgetActions.getBudget({ month, category: id });
+        const line = getCurrencyLine(id);
+        return line && amount
+          ? convertAtMonthRate(
+              amount,
+              line.currency,
+              getSqlDefaultCurrencyCode(),
+              month,
+            )
+          : amount;
       })
       .reduce((total, value) => total + value, 0);
 
@@ -487,6 +791,7 @@ export async function createBudget(months) {
     q('category_groups').select('*'),
   );
   const categories = groups.flatMap(group => group.categories);
+  loadCurrencyLines();
 
   sheet.startTransaction();
   const meta = sheet.get().meta();
@@ -523,19 +828,30 @@ export async function createBudget(months) {
     const prevSheetName = monthUtils.sheetForMonth(prevMonth);
     const dbMonth = parseInt(month.replace('-', ''));
 
-    categories.forEach(cat => {
-      // Seed the spend total before creating the dynamic cell so the cell
-      // skips its per-category query. Only happens on a cold build, when
-      // the value hasn't been restored from cache.
-      const sumCell = `sum-amount-${cat.id}`;
+    // Seed the spend total before creating the dynamic cell so the cell
+    // skips its per-category query. Only happens on a cold build, when
+    // the value hasn't been restored from cache.
+    const seedSpending = (id: string) => {
+      const sumCell = `sum-amount-${id}`;
       if (sheet.get().getCellValueLoose(sheetName, sumCell) == null) {
         const name = resolveName(sheetName, sumCell);
-        sheet
-          .get()
-          .load(name, getSumAmounts().get(`${dbMonth}-${cat.id}`) || 0);
+        sheet.get().load(name, getSumAmounts().get(`${dbMonth}-${id}`) || 0);
         seededCells.push(name);
       }
+    };
+
+    categories.forEach(cat => {
+      seedSpending(cat.id);
       createCategory(cat, sheetName, prevSheetName, start, end);
+
+      const lines = getCurrencyLines(cat.id);
+      for (const line of lines) {
+        seedSpending(line.id);
+        createCurrencyLine(line, month);
+      }
+      if (lines.length > 0) {
+        createCategoryTotals(cat.id, lines, sheetName);
+      }
     });
     groups.forEach(group => {
       if (budgetType === 'envelope') {

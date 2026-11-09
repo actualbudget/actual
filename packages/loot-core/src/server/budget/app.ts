@@ -8,15 +8,37 @@ import * as sheet from '#server/sheet';
 import { resolveName } from '#server/spreadsheet/util';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
+import { isSupportedCurrencyCode } from '#shared/fx/currency';
+import { parseOwnLines, serializeOwnLines } from '#shared/fx/ownLines';
+import {
+  getSqlDefaultCurrencyCode,
+  isSqlConversionEnabled,
+} from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
-import type { CategoryEntity, CategoryGroupEntity } from '#types/models';
+import type {
+  CategoryCurrencyEntity,
+  CategoryEntity,
+  CategoryGroupEntity,
+} from '#types/models';
 
 import * as actions from './actions';
 import * as budget from './base';
+import { createMissingPreferences, editBudgets } from './budget-rows';
+import {
+  fromLineMonth,
+  getAllCurrencyLines,
+  getConvertedFilterSql,
+  getCurrencyLine,
+  getCurrencyLines,
+  getSpendingSql,
+  STORED_LINE_JOIN,
+  toLineMonth,
+} from './category-currencies';
 import * as cleanupGroupActions from './cleanup-groups';
 import * as cleanupActions from './cleanup-template';
 import { storeNoteCleanups } from './cleanup-template-notes';
+import { changeDefaultCurrency } from './default-currency';
 import * as goalActions from './goal-template';
 import { sortCategories } from './sort-categories';
 import * as goalNoteActions from './template-notes';
@@ -60,6 +82,13 @@ export type BudgetHandlers = {
   'category-group-move': typeof moveCategoryGroup;
   'category-group-delete': typeof deleteCategoryGroup;
   'must-category-transfer': typeof isCategoryTransferRequired;
+  'category-currencies-get': typeof getCategoryCurrencies;
+  'category-currency-earlier-spending': typeof getEarlierLineSpending;
+  'category-currency-converted-spending': typeof getConvertedLineSpending;
+  'category-currency-add': typeof addCategoryCurrency;
+  'category-currency-remove': typeof actions.removeCurrencyLine;
+  'currency-default-change': typeof changeDefaultCurrency;
+  'currency-own-lines-save': typeof saveOwnLines;
   'budget/get-category-automations': typeof goalActions.getTemplatesForCategory;
   'budget/set-category-automations': typeof goalActions.storeTemplates;
   'budget/dry-run-category-template': typeof goalActions.dryRunCategoryTemplate;
@@ -157,6 +186,16 @@ app.method('category-group-update', mutator(undoable(updateCategoryGroup)));
 app.method('category-group-move', mutator(undoable(moveCategoryGroup)));
 app.method('category-group-delete', mutator(undoable(deleteCategoryGroup)));
 app.method('must-category-transfer', isCategoryTransferRequired);
+app.method('category-currencies-get', getCategoryCurrencies);
+app.method('category-currency-earlier-spending', getEarlierLineSpending);
+app.method('category-currency-converted-spending', getConvertedLineSpending);
+app.method('category-currency-add', mutator(undoable(addCategoryCurrency)));
+app.method(
+  'category-currency-remove',
+  mutator(undoable(actions.removeCurrencyLine)),
+);
+app.method('currency-default-change', mutator(undoable(changeDefaultCurrency)));
+app.method('currency-own-lines-save', mutator(undoable(saveOwnLines)));
 
 app.method(
   'budget/get-category-automations',
@@ -236,6 +275,7 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
 
       for (const cat of categories) {
         values.push(value(`sum-amount-${cat.id}`));
+        values = values.concat(getCurrencyLineValues(cat.id, value));
       }
     } else {
       values = values.concat([
@@ -253,11 +293,34 @@ async function envelopeBudgetMonth({ month }: { month: string }) {
           value(`goal-${cat.id}`),
           value(`long-goal-${cat.id}`),
         ]);
+        values = values.concat(getCurrencyLineValues(cat.id, value));
       }
     }
   }
 
   return values;
+}
+
+// The cells of a category's currency lines, and its totals
+function getCurrencyLineValues<T>(
+  categoryId: CategoryEntity['id'],
+  value: (name: string) => T,
+): T[] {
+  const lines = getCurrencyLines(categoryId);
+  if (lines.length === 0) {
+    return [];
+  }
+  return [
+    value(`budget-total-${categoryId}`),
+    value(`sum-amount-total-${categoryId}`),
+    value(`leftover-total-${categoryId}`),
+    ...lines.flatMap(line => [
+      value(`budget-${line.id}`),
+      value(`sum-amount-${line.id}`),
+      value(`leftover-${line.id}`),
+      value(`carryover-${line.id}`),
+    ]),
+  ];
 }
 
 async function trackingBudgetMonth({ month }: { month: string }) {
@@ -300,6 +363,7 @@ async function trackingBudgetMonth({ month }: { month: string }) {
       if (!group.is_income) {
         values.push(value(`carryover-${cat.id}`));
       }
+      values = values.concat(getCurrencyLineValues(cat.id, value));
     }
   }
 
@@ -435,6 +499,7 @@ async function deleteCategory({
         await budget.doTransfer([id], transferId);
       }
     }
+    await actions.clearCurrencyLinesOf([id]);
 
     await db.deleteCategory({ id }, transferId);
   });
@@ -506,6 +571,7 @@ async function deleteCategoryGroup({
         transferId,
       );
     }
+    await actions.clearCurrencyLinesOf(groupCategories.map(c => c.id));
     await db.deleteCategoryGroup({ id }, transferId);
   });
 }
@@ -530,11 +596,213 @@ async function isCategoryTransferRequired({
   }
 
   // If there are any non-zero budget values, also force the user to
-  // transfer the category.
+  // transfer the category. Its currency lines count too.
+  const lineIds = [id, ...getCurrencyLines(id).map(line => line.id)];
   return [...(sheet.get().meta().createdMonths as Set<string>)].some(month => {
     const sheetName = monthUtils.sheetForMonth(month);
-    const value = sheet.get().getCellValue(sheetName, 'budget-' + id);
+    return lineIds.some(lineId => {
+      const value = sheet.get().getCellValue(sheetName, 'budget-' + lineId);
+      return value != null && value !== 0;
+    });
+  });
+}
 
-    return value != null && value !== 0;
+// YYYYMM to 'YYYY-MM'; 0, every month, to null
+function toEntityMonth(month: number): string | null {
+  return month ? fromLineMonth(month) : null;
+}
+
+// The currency lines of categories, the automatic ones included
+async function getCategoryCurrencies(): Promise<CategoryCurrencyEntity[]> {
+  const rows = await db.getCategoryCurrencies();
+  const stored = new Set(rows.map(row => row.id));
+  const alive = new Set((await db.getCategories()).map(row => row.id));
+  return [
+    ...rows.map(row => ({
+      id: row.id,
+      category: row.category,
+      currency: row.currency,
+      start_month: toEntityMonth(row.start_month),
+    })),
+    ...getAllCurrencyLines()
+      .filter(
+        line =>
+          line.automatic && !stored.has(line.id) && alive.has(line.category),
+      )
+      .map(line => ({
+        id: line.id,
+        category: line.category,
+        currency: line.currency,
+        start_month: toEntityMonth(line.startMonth),
+        automatic: true,
+      })),
+  ].sort(
+    (a, b) =>
+      a.category.localeCompare(b.category) ||
+      a.currency.localeCompare(b.currency),
+  );
+}
+
+// The currencies other than the default with spending before `month`
+// ('YYYY-MM') that isn't on a line yet: what budgeting a currency on its own
+// would move out of the earlier months when it starts in the first month
+async function getEarlierLineSpending({
+  month,
+}: {
+  month: string;
+}): Promise<string[]> {
+  if (!isSqlConversionEnabled() || !monthUtils.isValidYearMonth(month)) {
+    return [];
+  }
+  const rows = await db.all<{ currency: string }>(
+    `SELECT DISTINCT a.currency AS currency
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+       ${STORED_LINE_JOIN}
+      WHERE t.category IS NOT NULL
+        AND a.offbudget = 0
+        AND a.currency IS NOT NULL
+        AND a.currency <> ?
+        AND (cc.id IS NULL OR cc.start_month > t.date / 100)
+        AND t.date / 100 < ?
+      ORDER BY a.currency`,
+    [getSqlDefaultCurrencyCode(), toLineMonth(month)],
+  );
+  return rows.map(row => row.currency);
+}
+
+// The spending of each account in another currency that counts in its
+// category converted in `month` ('YYYY-MM'), as the category has no line in
+// that currency, in the account's currency
+async function getConvertedLineSpending({ month }: { month: string }): Promise<
+  Array<{
+    category: CategoryEntity['id'];
+    account: string;
+    currency: string;
+    amount: number;
+  }>
+> {
+  if (!isSqlConversionEnabled() || !monthUtils.isValidYearMonth(month)) {
+    return [];
+  }
+  const { join } = getSpendingSql();
+  const { start, end } = monthUtils.bounds(month);
+  return db.all(
+    `SELECT t.category AS category,
+            t.account AS account,
+            a.currency AS currency,
+            SUM(t.amount) AS amount
+       FROM v_transactions_internal_alive t
+       LEFT JOIN accounts a ON a.id = t.account
+       ${join}
+      WHERE t.date >= ? AND t.date <= ?
+        AND t.category IS NOT NULL
+        AND a.offbudget = 0
+        AND ${getConvertedFilterSql()}
+      GROUP BY t.category, t.account, a.currency
+     HAVING SUM(t.amount) <> 0
+      ORDER BY t.category, a.currency`,
+    [start, end],
+  );
+}
+
+// Budgets `currency` on its own line in a category from `startMonth`
+// ('YYYY-MM') on, or in every month without one. A line that starts later
+// starts from then.
+async function addCategoryCurrency({
+  category,
+  currency,
+  startMonth,
+}: {
+  category: CategoryEntity['id'];
+  currency: string;
+  startMonth?: string | null;
+}): Promise<CategoryCurrencyEntity['id']> {
+  if (!isSqlConversionEnabled()) {
+    throw APIError('Multiple currencies are not enabled');
+  }
+  if (!isSupportedCurrencyCode(currency)) {
+    throw APIError(`Unsupported currency: ${currency}`);
+  }
+  if (currency === getSqlDefaultCurrencyCode()) {
+    throw APIError('The default currency is budgeted on the category itself');
+  }
+  if (startMonth != null && !monthUtils.isValidYearMonth(startMonth)) {
+    throw APIError(`Invalid month: ${startMonth}`);
+  }
+  const row = await db.first<Pick<db.DbCategory, 'id'>>(
+    'SELECT id FROM categories WHERE id = ? AND tombstone = 0',
+    [category],
+  );
+  if (!row) {
+    throw APIError(`Category with id ${category} not found`);
+  }
+  const start = startMonth != null ? toLineMonth(startMonth) : 0;
+  const line = getCurrencyLine(db.getCategoryCurrencyId(category, currency));
+  if (line && line.startMonth <= start) {
+    throw APIError(`The category already has a ${currency} line`);
+  }
+
+  return await db.insertCategoryCurrency({
+    category,
+    currency,
+    start_month: start,
+  });
+}
+
+// Chooses the currencies budgeted on lines of their own, as the
+// `currency-own-lines` preference stores them. When the user moves earlier
+// spending in `moveEarlier` currencies into lines too, their stored lines
+// start in every month as well. The stored lines of `dropCurrencies`, which
+// are no longer budgeted on their own, go away when the user wants: their
+// budgets move into their categories at each month's rate, as removing a
+// line does, and their spending is converted there again.
+async function saveOwnLines({
+  value,
+  moveEarlier = [],
+  dropCurrencies = [],
+}: {
+  value: string;
+  moveEarlier?: string[];
+  dropCurrencies?: string[];
+}): Promise<void> {
+  const extended = moveEarlier.filter(isSupportedCurrencyCode);
+  const dropped = new Set(dropCurrencies);
+  const storedLines = await db.all<
+    Pick<db.DbCategoryCurrency, 'id' | 'category' | 'currency' | 'start_month'>
+  >(
+    `SELECT id, category, currency, start_month FROM category_currencies
+      WHERE tombstone = 0 AND start_month IS NOT NULL`,
+  );
+  const droppedLines = storedLines.filter(line => dropped.has(line.currency));
+  const defaultCurrency = getSqlDefaultCurrencyCode();
+  await createMissingPreferences(['currency-own-lines']);
+
+  await batchMessages(async () => {
+    await db.update('preferences', {
+      id: 'currency-own-lines',
+      value: serializeOwnLines(parseOwnLines(value)),
+    });
+    for (const line of storedLines) {
+      if (extended.includes(line.currency) && line.start_month > 0) {
+        await db.update('category_currencies', { id: line.id, start_month: 0 });
+      }
+    }
+    if (droppedLines.length === 0) {
+      return;
+    }
+    await editBudgets(rows => {
+      for (const line of droppedLines) {
+        rows.convertInto(
+          line.id,
+          line.category,
+          line.currency,
+          defaultCurrency,
+        );
+      }
+    });
+    for (const line of droppedLines) {
+      await db.deleteCategoryCurrency({ id: line.id });
+    }
   });
 }
