@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { getAccountDb } from '#account-db';
 import { canAccessActiveFile } from '#services/user-service';
@@ -40,4 +40,23 @@ export function validateBudgetSession(req: Request, res: Response) {
     .filter(fileId => canAccessActiveFile(fileId, key.user_id));
 
   return { user_id: key.user_id, apiKeyFileIds };
+}
+
+// Bank-sync keys must name an accessible budget; session requests may omit it.
+export function validateBankSyncSession(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const session = validateBudgetSession(req, res);
+  if (!session) return;
+  if (
+    'apiKeyFileIds' in session &&
+    !session.apiKeyFileIds.includes(req.get('X-Actual-File-Id') ?? '')
+  ) {
+    res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+    return;
+  }
+  res.locals = session;
+  next();
 }
