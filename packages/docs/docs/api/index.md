@@ -83,8 +83,6 @@ For even more security, you can generate budget-scoped API keys rather than prov
 3. Copy the generated key (it will not be displayed again).
 4. The key will appear in the **API keys** section in case you need to revoke it later.
 
-For bank sync, API keys support SimpleFIN and Pluggy credentials configured for the budget. Shared bank credentials and other providers are not supported with API keys.
-
 Pass the key as `sessionToken` when connecting:
 
 ```js
