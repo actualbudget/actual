@@ -546,20 +546,24 @@ describe('schedule app', () => {
         expect(result.schedule).toBe(id);
       });
 
-      it('keeps the transactions already linked to a completed schedule', async () => {
+      it('still runs the rule of a completed schedule for a transaction already linked to it', async () => {
         const { id, transaction } = await createMatchingSchedule();
-
-        const transactionId = await db.insertTransaction({
-          ...transaction,
-          schedule: id,
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id }).calculate('rule'),
+        );
+        await updateRule({
+          id: ruleId,
+          actions: [
+            { op: 'set', field: 'notes', value: 'Monthly rent' },
+            { op: 'link-schedule', value: id },
+          ],
         });
         await updateSchedule({ schedule: { id, completed: true } });
 
-        const { data } = await aqlQuery(
-          q('transactions').filter({ schedule: id }).select(['id']),
-        );
+        const result = await runRules({ ...transaction, schedule: id });
 
-        expect(data.map(({ id }) => id)).toEqual([transactionId]);
+        expect(result.schedule).toBe(id);
+        expect(result.notes).toBe('Monthly rent');
       });
     });
 
