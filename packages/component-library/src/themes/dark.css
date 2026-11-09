@@ -24,7 +24,7 @@
   --color-tableText: var(--palette-navy150);
   --color-tableTextItemAdded: var(--color-tableText);
   --color-tableTextLight: var(--color-tableText);
-  --color-tableTextSubdued: var(--palette-navy500);
+  --color-tableTextSubdued: var(--palette-navy300);
   --color-tableTextSelected: var(--palette-navy150);
   --color-tableTextHover: var(--palette-navy400);
   --color-tableTextInactive: var(--palette-navy500);
@@ -41,7 +41,7 @@
 
   --color-numberPositive: var(--palette-green300);
   --color-numberNegative: var(--palette-red200);
-  --color-numberNeutral: var(--palette-navy500);
+  --color-numberNeutral: var(--palette-navy300);
   --color-budgetNumberNegative: var(--color-numberNegative);
   --color-budgetNumberZero: var(--color-tableTextSubdued);
   --color-budgetNumberNeutral: var(--color-tableText);
