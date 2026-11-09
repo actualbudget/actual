@@ -760,6 +760,63 @@ describe('API CRUD operations', () => {
         notEnabled,
       );
     });
+
+    //apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
+    test('Budgets: budget a category in more than one currency', async () => {
+      await enableMultiCurrency();
+      const month = '2026-11';
+      global.currentMonth = month;
+      await api.createExchangeRate(usdToCad);
+      const groupId = await api.createCategoryGroup({ name: 'tests' });
+      const categoryId = await api.createCategory({
+        name: 'test-trips',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.setBudgetAmount(month, categoryId, 10000, 'USD'),
+      ).rejects.toThrow('The category has no USD line');
+      await api.internal?.send('category-currency-add', {
+        category: categoryId,
+        currency: 'USD',
+        startMonth: month,
+      });
+      await expect(
+        api.setBudgetAmount('2026-10', categoryId, 10000, 'USD'),
+      ).rejects.toThrow('The USD line of the category starts in 2026-11');
+
+      await api.setBudgetAmount(month, categoryId, 1000);
+      await api.setBudgetAmount(month, categoryId, 10000, 'USD');
+      await api.setBudgetCarryover(month, categoryId, true, 'USD');
+
+      const budgetMonth = await api.getBudgetMonth(month);
+      expect(budgetMonth.categoryGroups).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: groupId,
+            budgeted: 14800,
+            categories: [
+              expect.objectContaining({
+                id: categoryId,
+                budgeted: 14800,
+                currencies: [
+                  expect.objectContaining({
+                    currency: 'CAD',
+                    budgeted: 1000,
+                    carryover: false,
+                  }),
+                  expect.objectContaining({
+                    currency: 'USD',
+                    budgeted: 10000,
+                    carryover: true,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ]),
+      );
+    });
   });
 
   // apis: createPayee, getPayees, updatePayee, deletePayee

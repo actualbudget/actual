@@ -156,20 +156,34 @@ export function getBudgetMonth(month: string) {
   return send('api/budget-month', { month });
 }
 
+// `currency` names a currency budgeted on its own line in the category
 export function setBudgetAmount(
   month: string,
   categoryId: APICategoryEntity['id'],
   value: number,
+  currency?: string,
 ) {
-  return send('api/budget-set-amount', { month, categoryId, amount: value });
+  return send('api/budget-set-amount', {
+    month,
+    categoryId,
+    amount: value,
+    currency,
+  });
 }
 
+// `currency` names a currency budgeted on its own line in the category
 export function setBudgetCarryover(
   month: string,
   categoryId: APICategoryEntity['id'],
   flag: boolean,
+  currency?: string,
 ) {
-  return send('api/budget-set-carryover', { month, categoryId, flag });
+  return send('api/budget-set-carryover', {
+    month,
+    categoryId,
+    flag,
+    currency,
+  });
 }
 
 export function addTransactions(
