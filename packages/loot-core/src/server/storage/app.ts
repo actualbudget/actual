@@ -67,9 +67,25 @@ async function revertStorage(): Promise<
     await sqlite.revertSqliteStorageToLegacy();
     return { ok: true };
   } catch (error) {
-    // The client still shows the budget this closed, so reopen it
+    // The client still shows the budget this closed, so reopen it; a
+    // failure to is logged, and the revert's own error still answers
     if (openBudgetId) {
-      await runHandler(mainApp.handlers['load-budget'], { id: openBudgetId });
+      try {
+        const reopened = await runHandler(mainApp.handlers['load-budget'], {
+          id: openBudgetId,
+        });
+        if (reopened.error) {
+          logger.error(
+            'storage: could not reopen the budget after a failed revert',
+            reopened.error,
+          );
+        }
+      } catch (reopenError) {
+        logger.error(
+          'storage: could not reopen the budget after a failed revert',
+          reopenError,
+        );
+      }
     }
     if (error instanceof sqlite.BudgetInUseError) {
       return { error: 'budget-in-use' };

@@ -35,11 +35,15 @@ export function StorageBackendToggle() {
 
   useEffect(() => {
     let isCancelled = false;
-    void send('storage-info').then(info => {
-      if (!isCancelled) {
-        setActiveBackend(info.backend);
-      }
-    });
+    void send('storage-info')
+      .then(info => {
+        if (!isCancelled) {
+          setActiveBackend(info.backend);
+        }
+      })
+      .catch(() => {
+        // No answer from the backend: the stored choice decides
+      });
     return () => {
       isCancelled = true;
     };

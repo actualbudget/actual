@@ -585,18 +585,20 @@ export function createOpfsStore({
             `${path} is missing from its OPFS pool`,
           );
         }
-        // The fallback's whole-file row is what a session without sync
-        // access handles saved; an empty one was recorded but never saved
+        // The fallback's whole-file row is what the app last used, so as on
+        // open it wins over a pooled file an interrupted promotion left; an
+        // empty one was recorded but never saved
         const stored = row?.contents;
-        const bytes = pooled
-          ? exportPooled(pool, fileName)
-          : ArrayBuffer.isView(stored) && stored.byteLength > 0
+        const fallbackBytes =
+          ArrayBuffer.isView(stored) && stored.byteLength > 0
             ? new Uint8Array(
                 stored.buffer,
                 stored.byteOffset,
                 stored.byteLength,
               )
             : null;
+        const bytes =
+          fallbackBytes ?? (pooled ? exportPooled(pool, fileName) : null);
         if (bytes == null) {
           if (row) {
             await deleteSqliteFileRow(path);
