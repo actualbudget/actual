@@ -509,6 +509,25 @@ describe('IndexedDB in-memory store', () => {
     expect(await store.exists(other)).toBe(false);
   });
 
+  it('leaves the legacy marker and the absurd-sql copy when a file moves back', async () => {
+    const store = getSqliteStore();
+    await store.writeFile(PATH, new Uint8Array([1]));
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await store.removeFile(PATH, { keepLegacyCopy: true });
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+
+    // A plain removal takes the copy with it
+    await store.removeFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
   it('writes a row only at the revision it expects', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', rev: 1 });
     const next = { filepath: PATH, contents: new Uint8Array([1]), rev: 2 };

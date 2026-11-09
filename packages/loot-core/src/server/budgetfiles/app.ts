@@ -274,7 +274,29 @@ async function syncBudget() {
   return result;
 }
 
+// The load in progress: a second request for the same budget waits for it.
+// Prefs are set before the database opens, so the shortcut in
+// `loadBudgetOnce` would otherwise answer a tab that joins through the
+// coordinator while the storage is still moving the budget over
+let loading: {
+  id: Budget['id'];
+  result: ReturnType<typeof loadBudgetOnce>;
+} | null = null;
+
 async function loadBudget({ id }: { id: Budget['id'] }) {
+  if (loading?.id === id) {
+    return loading.result;
+  }
+  const result = loadBudgetOnce(id).finally(() => {
+    if (loading?.result === result) {
+      loading = null;
+    }
+  });
+  loading = { id, result };
+  return result;
+}
+
+async function loadBudgetOnce(id: Budget['id']) {
   const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -287,9 +309,7 @@ async function loadBudget({ id }: { id: Budget['id'] }) {
     }
   }
 
-  const res = await _loadBudget(id);
-
-  return res;
+  return _loadBudget(id);
 }
 
 async function createDemoBudget() {

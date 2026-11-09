@@ -45,6 +45,14 @@ function isReadOnly(statement: PreparedStatement): boolean {
   );
 }
 
+// The text of a statement, for the log: a cached one would otherwise be
+// logged as an object
+function sqlText(statement: PreparedStatement): string {
+  return statement.pointer == null
+    ? ''
+    : getSqlite3().capi.sqlite3_sql(statement.pointer);
+}
+
 function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
   for (const value of params) {
     if (
@@ -100,7 +108,11 @@ function runQuery<T>(
     statement.step();
     return { changes: database.changes() };
   } catch (error) {
-    logger.log(sql);
+    // Only failed reads are logged, as in the legacy engine: sync applies
+    // messages as insert-then-update, so failed writes are routine
+    if (fetchAll) {
+      logger.log(sqlText(statement));
+    }
     throw error;
   } finally {
     // Told even after a failure: a statement can leave changes behind

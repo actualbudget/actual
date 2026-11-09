@@ -455,7 +455,13 @@ export function createMemoryIdbStore({
           assertNotInOpfs(path, await getSqliteFileRow(path));
         }
         for (const path of paths) {
-          await deleteSqliteFileRow(path);
+          // A file moving to its absurd-sql copy leaves the legacy
+          // filesystem's marker instead
+          if (options?.keepLegacyCopy) {
+            await putSqliteFileRow({ filepath: path, contents: '' });
+          } else {
+            await deleteSqliteFileRow(path);
+          }
           unsaved.delete(path);
         }
       } finally {

@@ -5,7 +5,11 @@ import { patchFetchForSqlJS } from '#mocks/util';
 
 import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
 import { putSqliteFileRow } from './storage/files-store';
-import { initWasmEngine } from './storage/test-helpers';
+import {
+  initWasmEngine,
+  readSqliteWasm,
+  resetIndexedDb,
+} from './storage/test-helpers';
 import type { Database } from './types';
 
 import {
@@ -36,6 +40,28 @@ function expectConstraintFailure(fn: () => void) {
   const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
   expect(fn).toThrow(/constraint failed/i);
   consoleSpy.mockRestore();
+}
+
+// Satisfies the OPFS probe of `detectOpfsSyncAccess`, which jsdom cannot,
+// for the duration of `run`
+async function withOpfsSyncAccess(run: () => Promise<void>): Promise<void> {
+  const directory = {
+    getFileHandle: async () => ({
+      createSyncAccessHandle: async () => ({ close: () => undefined }),
+    }),
+    removeEntry: async () => undefined,
+  };
+  Object.defineProperty(navigator, 'storage', {
+    configurable: true,
+    value: {
+      getDirectory: async () => ({ getDirectoryHandle: async () => directory }),
+    },
+  });
+  try {
+    await run();
+  } finally {
+    Reflect.deleteProperty(navigator, 'storage');
+  }
 }
 
 // The same contract is expected of both web engines; each describe block
@@ -421,5 +447,51 @@ describe('sqlite-wasm engine', () => {
       warn.mockRestore();
     }
     closeDatabase(db);
+  });
+
+  it('logs the text of a failed read, and nothing for a failed write', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const log = vi.spyOn(console, 'log').mockImplementation(() => null);
+    try {
+      expect(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      ).toThrow(/constraint failed/i);
+      expect(log).not.toHaveBeenCalled();
+
+      // Fails when stepped rather than prepared, so it can be cached
+      const statement = prepare(db, 'SELECT abs(-9223372036854775808)');
+      expect(() => runQuery(db, statement, [], true)).toThrow(/overflow/i);
+      expect(log).toHaveBeenCalledWith('SELECT abs(-9223372036854775808)');
+    } finally {
+      log.mockRestore();
+    }
+    closeDatabase(db);
+  });
+
+  it('asks for OPFS when a fallback request meets data held in OPFS', async () => {
+    const wasmBinary = readSqliteWasm();
+    try {
+      await withOpfsSyncAccess(async () => {
+        await resetIndexedDb();
+        await putSqliteFileRow({
+          filepath: '/documents/Actual/a/db.sqlite',
+          contents: new Uint8Array(0),
+          storage: 'memory-idb',
+        });
+        expect(await init({ storage: 'memory-idb', wasmBinary })).toBe(
+          'memory-idb',
+        );
+        await putSqliteFileRow({
+          filepath: '/documents/Actual/b/db.sqlite',
+          contents: '',
+          storage: 'opfs',
+        });
+        expect(await init({ storage: 'memory-idb', wasmBinary })).toBe('opfs');
+        expect(await init({ storage: 'legacy', wasmBinary })).toBe('opfs');
+      });
+    } finally {
+      await initWasmEngine();
+    }
   });
 });

@@ -29,7 +29,9 @@ export function StorageBackendToggle() {
     null,
   );
   const [isSwitching, setIsSwitching] = useState(false);
-  const isEnabled = getStoredStorageBackend() !== 'legacy';
+  // The engine actually running decides, so the box agrees with the
+  // description and one click puts the stored choice right when they differ
+  const isEnabled = (activeBackend ?? getStoredStorageBackend()) !== 'legacy';
 
   useEffect(() => {
     let isCancelled = false;

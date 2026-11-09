@@ -527,6 +527,19 @@ export function createOpfsStore({
           }
           files.push({ pool, fileName });
         }
+        // The rows go first, while the budgets are held: a waiting worker
+        // could otherwise write a replacement whose marker this would
+        // delete, and a worker killed from here on leaves at worst a file
+        // nothing names, never a marker for a file that is gone. A file
+        // moving to its absurd-sql copy leaves the legacy filesystem's
+        // marker instead.
+        for (const path of paths) {
+          if (options?.keepLegacyCopy) {
+            await putSqliteFileRow({ filepath: path, contents: '' });
+          } else {
+            await deleteSqliteFileRow(path);
+          }
+        }
         for (const { pool, fileName } of files) {
           const open = pool.open.get(fileName);
           if (open) {
@@ -544,11 +557,6 @@ export function createOpfsStore({
             // until the pool truncates its spare slots
             await pool.util.wipeFiles();
           }
-        }
-        // While the budgets are still held: a waiting worker could
-        // otherwise write a replacement whose marker this would delete
-        for (const path of paths) {
-          await deleteSqliteFileRow(path);
         }
       } finally {
         for (const pool of held.values()) {

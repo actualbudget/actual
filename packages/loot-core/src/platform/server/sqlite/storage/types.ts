@@ -8,8 +8,9 @@ export type MigrationProgress = (
   percent?: number,
 ) => void;
 
-// A removal also drops the file's absurd-sql copy, unless that copy is
-// what the file is being moved to
+// A removal also drops the file's absurd-sql copy and its row, unless that
+// copy is what the file is being moved to: then the copy stays and the row
+// becomes the legacy filesystem's marker
 export type RemoveOptions = { keepLegacyCopy?: boolean };
 
 // Where the bytes of sqlite files live on the web. The sqlite engine opens

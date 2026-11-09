@@ -718,6 +718,27 @@ describe('OPFS pool store', () => {
     delSpy.mockRestore();
   });
 
+  it('leaves the legacy marker and the absurd-sql copy when a file moves back', async () => {
+    const pool = fakePool(new Map([['/db.sqlite', new Uint8Array([1])]]));
+    const sqlite3 = fakeSqlite3(pool);
+    const store = createOpfsStore({
+      sqlite3: () => sqlite3,
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await store.removeFile(PATH, { keepLegacyCopy: true });
+    expect(pool.files.has('/db.sqlite')).toBe(false);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
   it('imports an absurd-sql database into the pool and verifies it', async () => {
     const bytes = await budgetBytes('legacy');
     const name = legacyDatabaseName(PATH);

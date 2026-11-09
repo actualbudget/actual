@@ -2,7 +2,7 @@ import * as connection from '#platform/server/connection';
 
 import { writeLegacyDatabaseBytes } from './absurd-migration';
 import { detectOpfsSyncAccess } from './config';
-import { listSqliteFileRows, putSqliteFileRow } from './files-store';
+import { listSqliteFileRows } from './files-store';
 import { createMemoryIdbStore } from './idb-memory';
 import { createOpfsStore } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
@@ -47,10 +47,11 @@ export function setSqliteStore(next: SqliteFileStore | null) {
 // Move every budget back to absurd-sql's layout and clear the markers, so
 // the next start can pick the legacy engine (the opt-in phase's way back).
 // Budgets open in another tab hold the storage lock and make this throw.
-// The legacy copy is written before the store's file goes, so an
-// interruption at any point leaves the budget whole in one place or the
-// other; a copy left behind by a failure is ignored while the row still
-// names the store, and replaced by the next revert.
+// The legacy copy is written before the store's file goes, and the store
+// turns the row into the legacy marker in the same step as it drops the
+// file, so an interruption at any point leaves the budget whole in one
+// place or the other; a copy left behind by a failure is ignored while the
+// row still names the store, and replaced by the next revert.
 export async function revertToLegacy(): Promise<void> {
   const current = getSqliteStore();
   for (const row of await listSqliteFileRows()) {
@@ -61,12 +62,5 @@ export async function revertToLegacy(): Promise<void> {
     const bytes = await current.readFile(path);
     await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
     await current.removeFile(path, { keepLegacyCopy: true });
-    try {
-      // The legacy filesystem lists sqlite files from a marker row
-      await putSqliteFileRow({ filepath: path, contents: '' });
-    } catch (error) {
-      await current.writeFile(path, bytes);
-      throw error;
-    }
   }
 }

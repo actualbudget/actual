@@ -1,3 +1,4 @@
+import { STORAGE_BACKEND_KEY } from '@actual-app/core/platform/client/browser-preload';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
@@ -250,6 +251,16 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   document.addEventListener('visibilitychange', onVisibilityChange);
   window.addEventListener('pagehide', flushStorage);
 
+  // The storage engine is one choice for the whole origin. When another tab
+  // changes it, this tab relaunches into the same engine: a tab left on the
+  // old one would keep the budgets there, or move them straight back
+  const onStorageBackendChange = (event: StorageEvent) => {
+    if (event.key === STORAGE_BACKEND_KEY) {
+      window.Actual.relaunch();
+    }
+  };
+  window.addEventListener('storage', onStorageBackendChange);
+
   return () => {
     unlistenServerError();
     unlistenOrphanedPayees();
@@ -268,5 +279,6 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenStorageMigration();
     document.removeEventListener('visibilitychange', onVisibilityChange);
     window.removeEventListener('pagehide', flushStorage);
+    window.removeEventListener('storage', onStorageBackendChange);
   };
 }

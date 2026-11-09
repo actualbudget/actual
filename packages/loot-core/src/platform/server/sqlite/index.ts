@@ -85,8 +85,9 @@ export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
 
 // Starts the engine for the requested storage and resolves to the backend
 // actually in use: data already moved to the new storage wins over a
-// `legacy` request, so a cleared flag never shows an empty app, and `opfs`
-// falls back to `memory-idb` where sync access handles are unavailable.
+// `legacy` request and data held in OPFS over a `memory-idb` one, so a
+// cleared or stale flag never shows an empty app, and `opfs` falls back to
+// `memory-idb` where sync access handles are unavailable.
 export async function init({
   baseURL,
   wasmBinary,
@@ -96,11 +97,15 @@ export async function init({
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
-  // Only the OPFS store can read its pools, and it adopts the fallback's
-  // rows, so any migrated data means asking for OPFS (which itself falls
-  // back where sync access handles are missing)
+  // The legacy engine reads neither store's data and the fallback cannot
+  // read OPFS pools, while the OPFS store adopts the fallback's rows, so
+  // data the requested engine could not read means asking for OPFS instead
+  // (which itself falls back where sync access handles are missing)
   const requested =
-    storage === 'legacy' && (await hasMigratedSqliteFiles()) ? 'opfs' : storage;
+    (storage === 'legacy' && (await hasMigratedSqliteFiles())) ||
+    (storage === 'memory-idb' && (await hasMigratedSqliteFiles('opfs')))
+      ? 'opfs'
+      : storage;
   if (requested === 'legacy') {
     activeEngine = legacyEngine;
     await legacyEngine.init({

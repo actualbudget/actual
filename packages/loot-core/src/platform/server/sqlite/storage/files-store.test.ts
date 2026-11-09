@@ -27,6 +27,7 @@ describe('sqlite file rows', () => {
       storage: 'memory-idb',
     });
     expect(await hasMigratedSqliteFiles()).toBe(true);
+    expect(await hasMigratedSqliteFiles('opfs')).toBe(false);
   });
 
   it('reports migrated data when both kinds of rows exist', async () => {
@@ -41,6 +42,7 @@ describe('sqlite file rows', () => {
       storage: 'opfs',
     });
     expect(await hasMigratedSqliteFiles()).toBe(true);
+    expect(await hasMigratedSqliteFiles('opfs')).toBe(true);
     expect(
       (await listSqliteFileRows()).map(row => row.filepath).sort(),
     ).toEqual(['/documents/a/db.sqlite', '/documents/b/db.sqlite']);
