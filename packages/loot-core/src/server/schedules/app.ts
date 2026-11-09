@@ -628,16 +628,6 @@ async function getSchedule(id: string): Promise<ScheduleEntity | null> {
   return schedule ?? null;
 }
 
-export async function getCompletedScheduleRuleIds(): Promise<string[]> {
-  const { data } = await aqlQuery(
-    q('schedules').filter({ completed: true }).select(['rule']),
-  );
-
-  return data
-    .map(schedule => schedule.rule)
-    .filter((rule): rule is string => !!rule);
-}
-
 async function hasTransactionForSchedule(
   schedule: ScheduleEntity,
 ): Promise<boolean> {
