@@ -213,6 +213,83 @@ describe('validateAutomation adjustment range', () => {
   });
 });
 
+describe('validateAutomation schedule lookup', () => {
+  const today = new Date('2026-01-15');
+
+  // The budget engine keeps budgeting for a schedule that has completed
+  // (a one-time bill that posted still has to be covered), so a template
+  // pointing at one is valid.
+  function completedSchedule(name: string): ScheduleEntity {
+    return { ...schedule(name), completed: true };
+  }
+
+  it('accepts a template whose schedule has completed', () => {
+    expect(
+      validateAutomation(
+        scheduleTemplate('Dentist'),
+        'schedule',
+        [],
+        [completedSchedule('Dentist')],
+        today,
+      ),
+    ).toBeNull();
+  });
+
+  it('accepts a completed schedule referenced by id', () => {
+    expect(
+      validateAutomation(
+        {
+          type: 'schedule',
+          name: 'Dentist',
+          scheduleId: 'dentist-id',
+          directive: 'template',
+          priority: 1,
+        },
+        'schedule',
+        [],
+        [{ ...completedSchedule('Dentist'), id: 'dentist-id' }],
+        today,
+      ),
+    ).toBeNull();
+  });
+
+  it('still checks the adjustment on a completed schedule', () => {
+    expect(
+      validateAutomation(
+        scheduleTemplate('Dentist', 2000, 'percent'),
+        'schedule',
+        [],
+        [completedSchedule('Dentist')],
+        today,
+      ),
+    ).toEqual({ kind: 'adjustment-out-of-range' });
+  });
+
+  it('still reports a deleted schedule as not found', () => {
+    expect(
+      validateAutomation(
+        scheduleTemplate('Dentist'),
+        'schedule',
+        [],
+        [{ ...completedSchedule('Dentist'), tombstone: true }],
+        today,
+      ),
+    ).toEqual({ kind: 'schedule-not-found', name: 'Dentist' });
+  });
+
+  it('still reports an unknown schedule as not found', () => {
+    expect(
+      validateAutomation(
+        scheduleTemplate('Dentist'),
+        'schedule',
+        [],
+        [completedSchedule('Rent')],
+        today,
+      ),
+    ).toEqual({ kind: 'schedule-not-found', name: 'Dentist' });
+  });
+});
+
 describe('validateSchedulePriorities', () => {
   function scheduleAt(name: string, priority: number): Template {
     return { type: 'schedule', name, directive: 'template', priority };
