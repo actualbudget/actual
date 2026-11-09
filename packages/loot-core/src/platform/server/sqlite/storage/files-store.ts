@@ -62,15 +62,30 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await Promise.all([idb.del(store, path), committed(trans)]);
 }
 
-// Rows of sqlite files held by the sqlite-wasm storage
-export async function listSqliteFileRows(): Promise<Data[]> {
+// Rows of sqlite files held by the sqlite-wasm storage, without their
+// contents. Walks the rows with a cursor so the fallback's whole-file rows
+// are held one at a time rather than all at once.
+export async function listSqliteFileRows(): Promise<
+  Pick<Data, 'filepath' | 'storage'>[]
+> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  const rows = await new Promise<Data[]>((resolve, reject) => {
-    const request = store.getAll();
-    request.onsuccess = () => resolve(request.result as Data[]);
+  return new Promise((resolve, reject) => {
+    const rows: Pick<Data, 'filepath' | 'storage'>[] = [];
+    const request = store.openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) {
+        resolve(rows);
+        return;
+      }
+      const { filepath, storage } = cursor.value as Data;
+      if (storage != null) {
+        rows.push({ filepath, storage });
+      }
+      cursor.continue();
+    };
     request.onerror = () => reject(request.error);
   });
-  return rows.filter(row => row.storage != null);
 }
 
 // Whether any sqlite file already moved off absurd-sql. Used at startup:

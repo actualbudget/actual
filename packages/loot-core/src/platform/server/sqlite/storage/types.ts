@@ -8,6 +8,10 @@ export type MigrationProgress = (
   percent?: number,
 ) => void;
 
+// A removal also drops the file's absurd-sql copy, unless that copy is
+// what the file is being moved to
+export type RemoveOptions = { keepLegacyCopy?: boolean };
+
 // Where the bytes of sqlite files live on the web. The sqlite engine opens
 // and closes databases through it; the filesystem layer uses it for whole
 // file reads and writes (import, export, duplicate, delete).
@@ -17,10 +21,10 @@ export type SqliteFileStore = {
   close(path: string, db: WasmDatabase): void;
   readFile(path: string): Promise<Uint8Array>;
   writeFile(path: string, bytes: Uint8Array): Promise<void>;
-  removeFile(path: string): Promise<void>;
+  removeFile(path: string, options?: RemoveOptions): Promise<void>;
   // All or nothing: every budget involved is locked and checked before the
   // first file goes, so a directory never ends up half deleted
-  removeFiles(paths: string[]): Promise<void>;
+  removeFiles(paths: string[], options?: RemoveOptions): Promise<void>;
   exists(path: string): Promise<boolean>;
   isOpen(path: string): boolean;
   // Persist anything pending (the fallback store writes lazily)

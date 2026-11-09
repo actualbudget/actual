@@ -46,7 +46,9 @@ export function StorageBackendToggle() {
   async function toggle() {
     setIsSwitching(true);
     if (isEnabled) {
-      const result = await send('storage-revert');
+      const result = await send('storage-revert').catch(() => ({
+        error: 'revert-failed' as const,
+      }));
       if ('error' in result) {
         dispatch(
           addNotification({

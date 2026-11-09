@@ -501,13 +501,13 @@ export function createOpfsStore({
       return promise;
     },
 
-    removeFile(path) {
-      return store.removeFiles([path]);
+    removeFile(path, options) {
+      return store.removeFiles([path], options);
     },
 
     // All or nothing: every pool involved is taken before the first file
     // goes, so a budget open elsewhere leaves them all as they were
-    async removeFiles(paths) {
+    async removeFiles(paths, options) {
       for (const path of paths) {
         // An open in flight ends with the database registered, so it is
         // closed here rather than unlinked under it; a write in flight
@@ -554,6 +554,9 @@ export function createOpfsStore({
         for (const pool of held.values()) {
           release(pool);
         }
+      }
+      if (options?.keepLegacyCopy) {
+        return;
       }
       // The absurd-sql copy is nobody's by now, and deleting it can wait
       // on another connection, so not under the locks

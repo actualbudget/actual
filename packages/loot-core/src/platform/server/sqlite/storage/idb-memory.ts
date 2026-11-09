@@ -423,13 +423,13 @@ export function createMemoryIdbStore({
       }
     },
 
-    removeFile(path) {
-      return store.removeFiles([path]);
+    removeFile(path, options) {
+      return store.removeFiles([path], options);
     },
 
     // All or nothing: every budget involved is locked and checked before
     // the first row goes, so a refusal leaves them all as they were
-    async removeFiles(paths) {
+    async removeFiles(paths, options) {
       for (const path of paths) {
         // An open in flight ends with the database open, so it is closed
         // here rather than removed under it
@@ -462,6 +462,9 @@ export function createMemoryIdbStore({
         for (const release of releases) {
           release();
         }
+      }
+      if (options?.keepLegacyCopy) {
+        return;
       }
       for (const path of paths) {
         await deleteLegacyDatabase(legacyDatabaseName(path));

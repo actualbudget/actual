@@ -61,15 +61,20 @@ async function revertStorage(): Promise<
   }
   try {
     await sqlite.revertSqliteStorageToLegacy();
+    return { ok: true };
   } catch (error) {
+    // The client still shows the budget this closed, so reopen it
+    if (lastBudget) {
+      await runHandler(mainApp.handlers['load-budget'], { id: lastBudget });
+    }
     if (error instanceof sqlite.BudgetInUseError) {
       return { error: 'budget-in-use' };
     }
     logger.error('storage: revert to the legacy layout failed', error);
     return { error: 'revert-failed' };
+  } finally {
+    if (lastBudget) {
+      await asyncStorage.setItem('lastBudget', lastBudget);
+    }
   }
-  if (lastBudget) {
-    await asyncStorage.setItem('lastBudget', lastBudget);
-  }
-  return { ok: true };
 }

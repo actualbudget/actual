@@ -217,9 +217,25 @@ async function ensureUsable(dir) {
 export async function initApp(
   isDev,
   socketName,
-  { storageBackend = 'legacy' }: { storageBackend?: StorageBackend } = {},
+  {
+    storageBackend = 'legacy',
+    isSharedArrayBufferOverrideEnabled = false,
+  }: {
+    storageBackend?: StorageBackend;
+    isSharedArrayBufferOverrideEnabled?: boolean;
+  } = {},
 ) {
   const storage = await sqlite.init({ storage: storageBackend });
+  // Only the legacy engine (absurd-sql) needs SharedArrayBuffer, and
+  // whether it runs is known only now: data already moved to the new
+  // storage wins over the flag
+  if (
+    storage === 'legacy' &&
+    typeof SharedArrayBuffer === 'undefined' &&
+    !isSharedArrayBufferOverrideEnabled
+  ) {
+    throw new Error('shared-array-buffer-missing');
+  }
   asyncStorage.init();
   await fs.init({ storage });
   await setupDocumentsDir();

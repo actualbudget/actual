@@ -321,17 +321,20 @@ export async function readLegacyDatabaseBytes(
 }
 
 // Writes a sqlite file back into absurd-sql's layout so switching the
-// storage flag off again keeps the data.
+// storage flag off again keeps the data. Any previous contents are cleared
+// in the same transaction as the new blocks are written, so the store is
+// never left with a mix of the two.
 export async function writeLegacyDatabaseBytes(
   name: string,
   bytes: Uint8Array,
 ): Promise<void> {
   const blockSize = pageSizeFromHeader(bytes) ?? 4096;
-  await deleteLegacyDatabase(name);
   const database = await new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(name, LEGACY_VERSION);
     request.onupgradeneeded = () => {
-      request.result.createObjectStore(LEGACY_STORE);
+      if (!request.result.objectStoreNames.contains(LEGACY_STORE)) {
+        request.result.createObjectStore(LEGACY_STORE);
+      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
@@ -339,6 +342,7 @@ export async function writeLegacyDatabaseBytes(
   try {
     const transaction = database.transaction([LEGACY_STORE], 'readwrite');
     const store = transaction.objectStore(LEGACY_STORE);
+    store.clear();
     store.put({ size: bytes.length }, -1);
     for (
       let offset = 0, key = 0;
