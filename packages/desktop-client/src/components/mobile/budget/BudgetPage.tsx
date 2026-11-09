@@ -51,6 +51,7 @@ import { FinancialText } from '#components/FinancialText';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -99,6 +100,7 @@ export function BudgetPage() {
   };
   // const [editMode, setEditMode] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const { isLoading: isLoadingCurrencyLines } = useCategoryCurrencies();
   const [_numberFormat] = useSyncedPref('numberFormat');
   const numberFormat = _numberFormat || 'comma-dot';
   const [hideFraction] = useSyncedPref('hideFraction');
@@ -417,6 +419,7 @@ export function BudgetPage() {
             name: 'category-menu',
             options: {
               categoryId: category.id,
+              month: startMonth,
               onSave: onSaveCategory,
               onEditNotes: onOpenCategoryNotesModal,
               onDelete: onDeleteCategory,
@@ -519,7 +522,7 @@ export function BudgetPage() {
     onToggleHiddenCategories,
   ]);
 
-  if (!categoryGroups || !initialized) {
+  if (!categoryGroups || !initialized || isLoadingCurrencyLines) {
     return (
       <View
         style={{
