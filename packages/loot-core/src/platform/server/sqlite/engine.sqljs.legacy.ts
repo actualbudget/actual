@@ -246,17 +246,27 @@ export function closeDatabase(db: Database) {
   }
 }
 
-// Gives up every budget lock while the databases stay open, for a page that
-// is leaving: the browser frees a destroyed worker's locks, but WebKit keeps
-// those of a worker whose page went into the back/forward cache, where they
-// would block the next page's open until the cached page is evicted. Such a
-// page relaunches when it is restored, so a lockless database is never
-// used again.
-export function releaseBudgetLocks() {
-  for (const release of budgetLocks.values()) {
-    release();
+// Closes every database that holds a budget lock, for a page that is
+// leaving. The browser frees a destroyed worker's locks and connections
+// itself, but WebKit keeps those of a worker whose page went into the
+// back/forward cache, where they would block the next page's open until the
+// cached page is evicted. Releasing the lock alone is not enough: absurd-sql
+// keeps its IndexedDB connection in a worker that idles in `Atomics.wait`,
+// which never sees the version change the next page uses to close it, so
+// that page would wait forever. Closing the database makes absurd-sql close
+// the connection over its shared buffer, which works even then. Such a page
+// relaunches when it is restored, so a closed database is never used again.
+export function closeOpenDatabases() {
+  for (const db of Array.from(budgetLocks.keys())) {
+    try {
+      closeDatabase(db);
+    } catch (error) {
+      logger.warn(
+        'sqlite: could not close a database of a leaving page',
+        error,
+      );
+    }
   }
-  budgetLocks.clear();
 }
 
 export async function exportDatabase(db: Database) {

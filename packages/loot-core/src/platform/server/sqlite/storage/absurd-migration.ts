@@ -19,7 +19,10 @@ const LEGACY_STORE = 'data';
 const LEGACY_VERSION = 2;
 const BLOCKS_PER_CHUNK = 256;
 const DELETE_TIMEOUT_MS = 5000;
+// After `blocked`, how long a connection gets to close
 const EVICT_TIMEOUT_MS = 1000;
+// How long the version change gets when nothing answers it at all
+const EVICT_RESPONSE_TIMEOUT_MS = 5000;
 const SQLITE_HEADER = 'SQLite format 3\0';
 // The sqlite file header, whose change counter moves on every write
 const HEADER_BYTES = 100;
@@ -54,8 +57,13 @@ function matchesSnapshot(
 // longer matches it: absurd-sql reopens its database on the next
 // operation, so a tab on the previous release can write between the copy
 // and the cutover. Resolves whether the database exists, and rejects when
-// a connection will not close. Only a `blocked` event starts the clock: a
-// cold open of a fresh database can be slow without anything holding it.
+// a connection will not close, or when nothing answers: the browser reports
+// `blocked` only once every connection has seen the version change, and
+// absurd-sql's connection lives in a worker that idles in `Atomics.wait`,
+// which never sees it, whether its tab is frozen in the back/forward cache
+// or still running. So the request as a whole gets a generous bound, as a
+// cold open of a fresh database can be slow, and a `blocked` event a short
+// one.
 function evictLegacyConnections(
   name: string,
   path: string,
@@ -65,16 +73,15 @@ function evictLegacyConnections(
     const request = indexedDB.open(name, LEGACY_VERSION + 1);
     let exists = true;
     let changed = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const fail = (reason: string) => reject(new BudgetInUseError(path, reason));
+    let timer = setTimeout(
+      () => fail('a connection to the absurd-sql copy did not answer'),
+      EVICT_RESPONSE_TIMEOUT_MS,
+    );
     request.onblocked = () => {
+      clearTimeout(timer);
       timer = setTimeout(
-        () =>
-          reject(
-            new BudgetInUseError(
-              path,
-              'a connection to the absurd-sql copy would not close',
-            ),
-          ),
+        () => fail('a connection to the absurd-sql copy would not close'),
         EVICT_TIMEOUT_MS,
       );
     };
@@ -268,6 +275,7 @@ export async function openLegacyDatabaseContents(
   onProgress?: (percent: number) => void,
 ): Promise<LegacyDatabaseContents | null> {
   const name = legacyDatabaseName(path);
+  logger.info('sqlite storage: looking for an absurd-sql copy', path);
   const database = await openLegacyDatabase(name, path);
   if (database == null) {
     return null;

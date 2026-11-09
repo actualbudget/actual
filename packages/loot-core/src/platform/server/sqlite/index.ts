@@ -139,7 +139,7 @@ export async function flushSqliteStorage(): Promise<void> {
 // so a page that is leaving holds nothing back
 export async function releaseSqliteStorage(): Promise<void> {
   if (activeBackend === 'legacy') {
-    legacy.releaseBudgetLocks();
+    legacy.closeOpenDatabases();
   } else {
     await getSqliteStore().releaseAll();
   }

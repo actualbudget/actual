@@ -300,7 +300,7 @@ describe('web filesystem', () => {
     expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
   });
 
-  test('releasing the storage gives up the budget lock and keeps the database open', async () => {
+  test('releasing the storage closes the database and gives up its lock', async () => {
     const dir = '/documents/Actual/leaving';
     const { store } = idb.getStore(await idb.openDatabase(), 'files');
     await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
@@ -326,11 +326,9 @@ describe('web filesystem', () => {
 
       await sqlite.releaseSqliteStorage();
       await vi.waitFor(() => expect(isReleased).toBe(true));
-      // The page relaunches if it comes back; until then the database works
-      expect(sqlite.runQuery(db, 'SELECT 1 AS one', [], true)).toEqual([
-        { one: 1 },
-      ]);
-      sqlite.closeDatabase(db);
+      // Closed for good, so absurd-sql lets go of its IndexedDB connection
+      // too; the page relaunches if it comes back
+      expect(() => sqlite.runQuery(db, 'SELECT 1 AS one', [], true)).toThrow();
     } finally {
       Object.defineProperty(navigator, 'locks', {
         value: undefined,
