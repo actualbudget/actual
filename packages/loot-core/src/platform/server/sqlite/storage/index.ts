@@ -2,8 +2,8 @@ import * as connection from '#platform/server/connection';
 
 import { writeLegacyDatabaseBytes } from './absurd-migration';
 import { detectOpfsSyncAccess } from './config';
-import { listSqliteFileRows } from './files-store';
-import { createMemoryIdbStore } from './idb-memory';
+import { getSqliteFileRow, listSqliteFileRows } from './files-store';
+import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { createOpfsStore } from './opfs-sahpool';
 import { legacyDatabaseName } from './paths';
 import type { FileStoreKind, MigrationPhase, SqliteFileStore } from './types';
@@ -59,8 +59,33 @@ export async function revertToLegacy(): Promise<void> {
     if (current.isOpen(path)) {
       throw new Error(`cannot revert an open database: ${path}`);
     }
-    const bytes = await current.readFile(path);
+    const bytes = await readStoredBytes(current, path);
+    if (bytes == null) {
+      // Recorded but never saved: nothing to copy, the row just goes
+      await current.removeFile(path);
+      continue;
+    }
     await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
     await current.removeFile(path, { keepLegacyCopy: true });
+  }
+}
+
+// The bytes of a path, or null for a fallback row that never got any: the
+// fallback marks a new database before its first save, and a crash in
+// between leaves the mark. The store is asked first, as it still answers for
+// bytes it holds in memory after a failed save, which the row cannot show;
+// any other failure, such as an OPFS file missing from its pool, stands.
+async function readStoredBytes(
+  current: SqliteFileStore,
+  path: string,
+): Promise<Uint8Array | null> {
+  try {
+    return await current.readFile(path);
+  } catch (error) {
+    const row = await getSqliteFileRow(path);
+    if (row?.storage === 'memory-idb' && !isByteContents(row.contents)) {
+      return null;
+    }
+    throw error;
   }
 }

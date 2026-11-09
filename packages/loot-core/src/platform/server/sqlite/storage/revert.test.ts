@@ -9,7 +9,12 @@ import {
 } from '#platform/server/sqlite';
 
 import { readLegacyDatabaseBytes } from './absurd-migration';
-import { getSqliteFileRow, hasMigratedSqliteFiles } from './files-store';
+import { StorageUnavailableError } from './errors';
+import {
+  getSqliteFileRow,
+  hasMigratedSqliteFiles,
+  putSqliteFileRow,
+} from './files-store';
 import { createMemoryIdbStore } from './idb-memory';
 import { legacyDatabaseName } from './paths';
 import {
@@ -81,6 +86,37 @@ describe('reverting to the legacy storage layout', () => {
     await expect(revertToLegacy()).rejects.toThrow(/open database/);
     closeDatabase(db);
     expect(await listIndexedDbNames()).not.toContain(legacyDatabaseName(PATH));
+  });
+
+  it('drops a budget the fallback recorded but never saved', async () => {
+    // The mark a new database gets before its first save, left by a crash
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: new Uint8Array(0),
+      storage: 'memory-idb',
+      rev: 1,
+    });
+    await createBudget(OTHER, 'two');
+
+    await revertToLegacy();
+
+    expect(await hasMigratedSqliteFiles()).toBe(false);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).not.toContain(legacyDatabaseName(PATH));
+    // The budget with data still moved back
+    expect(await getSqliteFileRow(OTHER)).toEqual({
+      filepath: OTHER,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(legacyDatabaseName(OTHER));
+  });
+
+  it('still refuses a budget whose bytes are out of reach', async () => {
+    await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+    await expect(revertToLegacy()).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
   });
 
   it('is a no-op without migrated budgets', async () => {
