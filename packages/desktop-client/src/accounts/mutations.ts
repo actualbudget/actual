@@ -184,34 +184,6 @@ export function useUpdateAccountMutation() {
   });
 }
 
-type SetAccountsCurrencyPayload = {
-  ids: Array<AccountEntity['id']>;
-  currency: AccountEntity['currency'];
-};
-
-export function useSetAccountsCurrencyMutation() {
-  const queryClient = useQueryClient();
-  const dispatch = useDispatch();
-  const { t } = useTranslation();
-
-  return useMutation({
-    mutationFn: async ({ ids, currency }: SetAccountsCurrencyPayload) => {
-      await send('accounts-set-currency', { ids, currency });
-    },
-    onSuccess: () => invalidateQueries(queryClient),
-    onError: error => {
-      console.error('Error setting the currency of accounts:', error);
-      dispatchErrorNotification(
-        dispatch,
-        t(
-          'There was an error setting the currency of the accounts. Please try again.',
-        ),
-        error,
-      );
-    },
-  });
-}
-
 type MoveAccountPayload = {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;

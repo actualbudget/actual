@@ -625,6 +625,17 @@ export type Modal =
       };
     }
   | {
+      name: 'category-currency-add';
+      options: {
+        category: Pick<CategoryEntity, 'id' | 'name'>;
+        // The month on screen, the line's first month
+        month: string;
+      };
+    }
+  | {
+      name: 'currency-own-lines';
+    }
+  | {
       name: 'copy-widget-to-dashboard';
       options: {
         onSelect: (dashboardId: string) => void;
