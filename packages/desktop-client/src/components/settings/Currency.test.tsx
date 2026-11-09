@@ -1,19 +1,22 @@
 import type { ChangeEvent } from 'react';
 
+import { initServer } from '@actual-app/core/platform/client/connection';
 import type { AccountEntity } from '@actual-app/core/types/models';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestProviders } from '#mocks';
 
 import { CurrencySettings } from './Currency';
 
+vi.mock(
+  '@actual-app/core/platform/client/connection',
+  () => import('#mocks/connection'),
+);
+
 let mockPrefs: Record<string, string> = {};
 const mockSetPref = vi.fn();
 let mockAccounts: AccountEntity[] = [];
-// The accounts the transactions query finds
-let mockTransactionAccounts: Array<{ account: string }> | null = [];
-const mockMutate = vi.fn();
 
 vi.mock('#hooks/useSyncedPref', () => ({
   useSyncedPref: (name: string) => [
@@ -22,19 +25,15 @@ vi.mock('#hooks/useSyncedPref', () => ({
   ],
 }));
 
+// The preferences the server saved are read again
+const mockLoadPrefs = vi.fn(() => () => Promise.resolve());
+vi.mock('#prefs/prefsSlice', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  loadPrefs: () => mockLoadPrefs(),
+}));
+
 vi.mock('#hooks/useAccounts', () => ({
   useAccounts: () => ({ data: mockAccounts }),
-}));
-
-vi.mock('#hooks/useQuery', () => ({
-  useQuery: () => ({ data: mockTransactionAccounts, isLoading: false }),
-}));
-
-vi.mock('#accounts', () => ({
-  useSetAccountsCurrencyMutation: () => ({
-    mutate: mockMutate,
-    isPending: false,
-  }),
 }));
 
 // A native select, so a test can pick an option
@@ -118,90 +117,113 @@ describe('CurrencySettings', () => {
       defaultCurrencyCode: 'CAD',
     };
     mockSetPref.mockClear();
-    mockMutate.mockReset();
     mockAccounts = [
-      makeAccount('checking'),
-      makeAccount('old-savings', { closed: 1 }),
-      makeAccount('empty'),
+      makeAccount('checking', { currency: 'CAD' }),
       makeAccount('usd', { currency: 'USD' }),
-    ];
-    mockTransactionAccounts = [
-      { account: 'checking' },
-      { account: 'old-savings' },
     ];
   });
 
-  it('asks about the accounts with transactions that follow the default', async () => {
+  it('changes the default in one step once the user confirms', async () => {
+    const change = vi.fn(async () => undefined);
+    initServer({
+      'currency-default-change': change,
+    });
     renderSettings();
 
     chooseDefaultCurrency('EUR');
-
+    // CAD isn't budgeted on its own, so its budgets are converted
     expect(
-      screen.getByText(
-        'Accounts with transactions that follow the default currency (CAD): 2. Their amounts are not converted when the default changes.',
-      ),
+      screen.getByText(/amounts budgeted in CAD are converted/),
     ).toBeInTheDocument();
+    expect(change).not.toHaveBeenCalled();
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Change to EUR' }),
+    );
+    await waitFor(() =>
+      expect(change).toHaveBeenCalledWith({
+        currency: 'EUR',
+        format: {
+          numberFormat: 'dot-comma',
+          hideFraction: 'false',
+          currencySpaceBetweenAmountAndSymbol: 'true',
+          currencySymbolPosition: 'after',
+        },
+      }),
+    );
+    await waitFor(() => expect(mockLoadPrefs).toHaveBeenCalled());
+    // The server saves the default along with everything else
     expect(mockSetPref).not.toHaveBeenCalledWith(
       'defaultCurrencyCode',
       expect.anything(),
     );
-
-    await userEvent.click(screen.getByText('Keep them in CAD'));
-
-    expect(mockMutate).toHaveBeenCalledWith(
-      { ids: ['checking', 'old-savings'], currency: 'CAD' },
-      expect.anything(),
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Accounts keep their currency/),
+      ).not.toBeInTheDocument(),
     );
   });
 
-  it('changes the default only once the accounts are kept', async () => {
-    mockMutate.mockImplementation(
-      (_payload, { onSuccess }: { onSuccess: () => void }) => onSuccess(),
+  it('says when budgets in the old default keep their currency', () => {
+    mockPrefs['currency-own-lines'] = '*:0';
+    renderSettings();
+
+    chooseDefaultCurrency('EUR');
+    expect(
+      screen.getByText(/budgets in CAD move to CAD lines/),
+    ).toBeInTheDocument();
+  });
+
+  it('says from which month budgets in the old default keep their currency', () => {
+    mockPrefs['currency-own-lines'] = '*:202611';
+    renderSettings();
+
+    chooseDefaultCurrency('EUR');
+    expect(
+      screen.getByText(/CAD is budgeted on its own from November 2026/),
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the default when the change is cancelled', async () => {
+    const change = vi.fn(async () => undefined);
+    initServer({
+      'currency-default-change': change,
+    });
+    renderSettings();
+
+    chooseDefaultCurrency('JPY');
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(change).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText(/Accounts keep their currency/),
+    ).not.toBeInTheDocument();
+  });
+
+  it('gives accounts the first default currency without asking', async () => {
+    mockPrefs.defaultCurrencyCode = '';
+    const change = vi.fn(async () => undefined);
+    initServer({
+      'currency-default-change': change,
+    });
+    renderSettings();
+
+    chooseDefaultCurrency('JPY');
+    await waitFor(() =>
+      expect(change).toHaveBeenCalledWith({
+        currency: 'JPY',
+        format: expect.objectContaining({ hideFraction: 'true' }),
+      }),
     );
-    renderSettings();
-
-    chooseDefaultCurrency('EUR');
-    await userEvent.click(screen.getByText('Keep them in CAD'));
-
-    expect(mockSetPref).toHaveBeenCalledWith('defaultCurrencyCode', 'EUR');
   });
 
-  it('changes the default right away when no account that follows it has transactions', () => {
-    mockTransactionAccounts = [{ account: 'usd' }];
-    renderSettings();
-
-    chooseDefaultCurrency('EUR');
-
-    expect(mockSetPref).toHaveBeenCalledWith('defaultCurrencyCode', 'EUR');
-    expect(screen.queryByText('Keep them in CAD')).not.toBeInTheDocument();
-  });
-
-  it('asks while it is not known yet which accounts have transactions', () => {
-    mockTransactionAccounts = null;
-    renderSettings();
-
-    chooseDefaultCurrency('EUR');
-
-    expect(screen.getByText('Keep them in CAD')).toBeInTheDocument();
-  });
-
-  it('does not ask while multiple currencies are off', () => {
+  it('only changes the format while multiple currencies are off', () => {
     mockPrefs['flags.multiCurrency'] = 'false';
     renderSettings();
 
     chooseDefaultCurrency('EUR');
 
     expect(mockSetPref).toHaveBeenCalledWith('defaultCurrencyCode', 'EUR');
-  });
-
-  it('offers the same choices for a default currency without decimals', async () => {
-    renderSettings();
-
-    chooseDefaultCurrency('JPY');
-    expect(screen.getByText('Keep them in CAD')).toBeInTheDocument();
-    await userEvent.click(screen.getByText('Relabel them as JPY'));
-
-    expect(mockSetPref).toHaveBeenCalledWith('defaultCurrencyCode', 'JPY');
+    expect(mockSetPref).toHaveBeenCalledWith('numberFormat', 'dot-comma');
   });
 
   it.each([
@@ -218,4 +240,16 @@ describe('CurrencySettings', () => {
       ).toBeInTheDocument();
     },
   );
+
+  it.each([
+    ['', 'None: spending in other currencies is converted'],
+    ['*:0', 'Every currency'],
+    ['USD:0,COP:202611', 'COP, USD'],
+  ])('tells which currencies are budgeted on their own (%s)', (value, text) => {
+    mockPrefs['currency-own-lines'] = value;
+    renderSettings();
+
+    expect(screen.getByText(text)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Change' })).toBeInTheDocument();
+  });
 });

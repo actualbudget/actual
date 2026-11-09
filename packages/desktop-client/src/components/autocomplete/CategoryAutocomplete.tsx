@@ -28,6 +28,7 @@ import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudge
 import { makeAmountFullStyle } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
 import { useSheetValue } from '#hooks/useSheetValue';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
@@ -59,6 +60,7 @@ type CategoryListProps = {
   ) => ReactElement<typeof CategoryItem>;
   showHiddenItems?: boolean;
   showBalances?: boolean;
+  showOwnBalances?: boolean;
 };
 function CategoryList({
   items,
@@ -71,6 +73,7 @@ function CategoryList({
   renderCategoryItem = defaultRenderCategoryItem,
   showHiddenItems,
   showBalances,
+  showOwnBalances,
 }: CategoryListProps) {
   const { t } = useTranslation();
   const splitTransactionIndex = items.findIndex(item => item.id === 'split');
@@ -142,6 +145,7 @@ function CategoryList({
                     }),
                 },
                 showBalances,
+                showOwnBalances,
               })}
             </Fragment>
           );
@@ -157,6 +161,9 @@ type CategoryAutocompleteProps = ComponentProps<
 > & {
   categoryGroups?: Array<CategoryGroupEntity>;
   showBalances?: boolean;
+  // Balances of the categories' own budgets, without their other currencies:
+  // what moving money takes from or gives to a category
+  showOwnBalances?: boolean;
   showSplitOption?: boolean;
   renderSplitTransactionButton?: (
     props: ComponentPropsWithoutRef<typeof SplitTransactionButton>,
@@ -173,6 +180,7 @@ type CategoryAutocompleteProps = ComponentProps<
 export function CategoryAutocomplete({
   categoryGroups,
   showBalances = true,
+  showOwnBalances,
   showSplitOption,
   embedded,
   closeOnBlur,
@@ -244,6 +252,7 @@ export function CategoryAutocomplete({
           renderCategoryItem={renderCategoryItem}
           showHiddenItems={showHiddenCategories}
           showBalances={showBalances}
+          showOwnBalances={showOwnBalances}
         />
       )}
       {...props}
@@ -341,6 +350,7 @@ type CategoryItemProps = {
   highlighted?: boolean;
   embedded?: boolean;
   showBalances?: boolean;
+  showOwnBalances?: boolean;
 };
 
 function CategoryItem({
@@ -350,6 +360,7 @@ function CategoryItem({
   highlighted,
   embedded,
   showBalances,
+  showOwnBalances,
   ...props
 }: CategoryItemProps) {
   const { t } = useTranslation();
@@ -363,10 +374,14 @@ function CategoryItem({
     : {};
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
+  // A category budgeted in several currencies shows its total balance,
+  // unless the money moves on its own budget
+  const { getLines } = useCategoryCurrencies();
+  const bindings = budgetType === 'envelope' ? envelopeBudget : trackingBudget;
   const balanceBinding =
-    budgetType === 'envelope'
-      ? envelopeBudget.catBalance(item.id)
-      : trackingBudget.catBalance(item.id);
+    !showOwnBalances && getLines(item.id).length > 0
+      ? bindings.catBalanceTotal(item.id)
+      : bindings.catBalance(item.id);
   const balance = useSheetValue<
     'envelope-budget' | 'tracking-budget',
     typeof balanceBinding

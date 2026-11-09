@@ -12,7 +12,11 @@ import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
-import { exchangeRateQueries } from './currency/queries';
+import {
+  CATEGORY_CURRENCY_TABLES,
+  categoryCurrencyQueries,
+  exchangeRateQueries,
+} from './currency/queries';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import type { Modal } from './modals/modalsSlice';
 import {
@@ -95,6 +99,14 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       promises.push(
         queryClient.invalidateQueries({
           queryKey: exchangeRateQueries.lists(),
+        }),
+      );
+    }
+
+    if (tables.some(table => CATEGORY_CURRENCY_TABLES.includes(table))) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: categoryCurrencyQueries.lists(),
         }),
       );
     }

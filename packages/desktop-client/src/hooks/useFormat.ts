@@ -33,11 +33,14 @@ type FormatOptions = {
   // Format a financial value in this currency instead of the budget's
   // default one
   currencyCode?: string;
+  // Leave out the currency's symbol, e.g. where the currency is already
+  // named next to the amount
+  hideSymbol?: boolean;
 };
 
 export type UseFormatResult = {
   (value: unknown, type?: FormatType, options?: FormatOptions): string;
-  forEdit: (value: IntegerAmount) => string;
+  forEdit: (value: IntegerAmount, options?: FormatOptions) => string;
   fromEdit: (
     value: string,
     defaultValue?: number | null,
@@ -228,7 +231,7 @@ export function useFormat(): UseFormatResult {
       );
 
       let styledValue = formattedString;
-      if (isFinancialType && currency.code !== '') {
+      if (isFinancialType && currency.code !== '' && !options?.hideSymbol) {
         styledValue = applyCurrencyStyling(
           formattedString,
           getSymbol(currency),
@@ -254,23 +257,29 @@ export function useFormat(): UseFormatResult {
   );
 
   const forEdit = useCallback(
-    (value: IntegerAmount) => {
+    (value: IntegerAmount, options?: FormatOptions) => {
       const amount = integerToAmount(value);
+      const currency =
+        options?.currencyCode != null &&
+        options.currencyCode !== activeCurrency.code
+          ? getCurrency(options.currencyCode)
+          : activeCurrency;
       // Show a stored fraction (¥1,500.50) so saving the text unedited
-      // doesn't round it away, unless fractions are hidden
+      // doesn't round it away, unless fractions are hidden; hiding them is
+      // chosen for the default currency only
       const decimalPlaces =
-        hideFractionPref === 'true'
+        hideFractionPref === 'true' && currency === activeCurrency
           ? 0
           : value % 100 !== 0
             ? 2
-            : activeCurrency.decimalPlaces;
+            : currency.decimalPlaces;
       const editFormatter = getNumberFormat({
         format: numberFormatConfig.format,
         decimalPlaces,
       }).formatter;
       return editFormatter.format(amount);
     },
-    [hideFractionPref, activeCurrency.decimalPlaces, numberFormatConfig.format],
+    [hideFractionPref, activeCurrency, numberFormatConfig.format],
   );
 
   const fromEdit = useCallback(
