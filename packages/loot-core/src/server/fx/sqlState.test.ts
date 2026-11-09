@@ -2,7 +2,11 @@ import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import { app as fxApp } from '#server/fx/app';
-import { isSqlConversionEnabled, setSqlConversionState } from '#shared/fx/sql';
+import {
+  getSqlOwnLineStarts,
+  isSqlConversionEnabled,
+  setSqlConversionState,
+} from '#shared/fx/sql';
 import { q } from '#shared/query';
 
 import { loadSqlConversionState, updateSqlConversionState } from './sqlState';
@@ -96,6 +100,31 @@ describe('FX_CONVERT', () => {
     // ¥500 in the account that follows the default, and $100.00 worth
     // ¥15,000, every amount stored with two implied decimals
     expect(await convertedTotal()).toBe(50000 + 1500000);
+  });
+
+  it('knows which currencies get lines of their own, and from when', async () => {
+    await setPreference('flags.currency', 'true');
+    await setPreference('flags.multiCurrency', 'true');
+    await setPreference('defaultCurrencyCode', 'CAD');
+    loadSqlConversionState();
+    expect(getSqlOwnLineStarts()).toBe(null);
+
+    await setPreference('currency-own-lines', 'USD:202611,*:0');
+    expect([...(getSqlOwnLineStarts() ?? [])]).toEqual([
+      ['USD', 202611],
+      ['*', 0],
+    ]);
+    // The default currency is budgeted on the category itself, and entries
+    // that can't be read are skipped
+    await setPreference('currency-own-lines', 'CAD:0,usd:0,EUR:2026,JPY');
+    expect([...(getSqlOwnLineStarts() ?? [])]).toEqual([['JPY', 0]]);
+    await setPreference('currency-own-lines', '');
+    expect(getSqlOwnLineStarts()).toBe(null);
+
+    // Not while multiple currencies are off
+    await setPreference('currency-own-lines', '*:0');
+    await setPreference('flags.multiCurrency', 'false');
+    expect(getSqlOwnLineStarts()).toBe(null);
   });
 
   it('stays off with an unsupported default currency', async () => {

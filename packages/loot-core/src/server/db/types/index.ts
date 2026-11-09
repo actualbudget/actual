@@ -88,6 +88,15 @@ export type DbCategoryGroup = {
   tombstone: 1 | 0;
 };
 
+export type DbCategoryCurrency = {
+  id: string;
+  category: DbCategory['id'];
+  currency: string;
+  // YYYYMM, like the month of a budget amount
+  start_month: number;
+  tombstone: 1 | 0;
+};
+
 export type DbCleanupGroup = {
   id: string;
   name: string;

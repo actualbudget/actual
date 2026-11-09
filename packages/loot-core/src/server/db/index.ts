@@ -45,6 +45,7 @@ import type {
   DbAccountGroup,
   DbBank,
   DbCategory,
+  DbCategoryCurrency,
   DbCategoryGroup,
   DbCategoryMapping,
   DbClockMessage,
@@ -569,6 +570,72 @@ export async function deleteCategory(
   }
 
   return delete_('categories', category.id);
+}
+
+// Changes sync column by column, so a currency line can arrive partly
+// written; one without its category, currency or first month is left out
+const CATEGORY_CURRENCIES_SQL = `
+  SELECT cc.id, cc.category, cc.currency, cc.start_month, cc.tombstone
+    FROM category_currencies cc
+    JOIN categories c ON c.id = cc.category
+   WHERE cc.tombstone = 0
+     AND c.tombstone = 0
+     AND cc.currency IS NOT NULL
+     AND cc.start_month IS NOT NULL
+   ORDER BY cc.category, cc.currency`;
+
+// The currency lines of categories still in use
+export function getCategoryCurrencies() {
+  return all<DbCategoryCurrency>(CATEGORY_CURRENCIES_SQL);
+}
+
+// For the budget, which builds its cells synchronously. Lines of deleted
+// categories are included, so their cells can be taken out of the totals.
+export function getCategoryCurrenciesSync() {
+  return runQuery<DbCategoryCurrency & Pick<DbCategory, 'is_income'>>(
+    `SELECT cc.id, cc.category, cc.currency, cc.start_month, cc.tombstone,
+            COALESCE(c.is_income, 0) AS is_income
+       FROM category_currencies cc
+       LEFT JOIN categories c ON c.id = cc.category
+      WHERE cc.tombstone = 0
+        AND cc.category IS NOT NULL
+        AND cc.currency IS NOT NULL
+        AND cc.start_month IS NOT NULL
+      ORDER BY cc.category, cc.currency`,
+    [],
+    true,
+  );
+}
+
+// One line per currency and category, whichever device adds it
+export function getCategoryCurrencyId(
+  category: DbCategory['id'],
+  currency: string,
+): DbCategoryCurrency['id'] {
+  return `${category}-${currency}`;
+}
+
+// Adds the line, or brings a removed one back
+export async function insertCategoryCurrency({
+  category,
+  currency,
+  start_month,
+}: Pick<DbCategoryCurrency, 'category' | 'currency' | 'start_month'>): Promise<
+  DbCategoryCurrency['id']
+> {
+  const id = getCategoryCurrencyId(category, currency);
+  await insert('category_currencies', {
+    id,
+    category,
+    currency,
+    start_month,
+    tombstone: 0,
+  });
+  return id;
+}
+
+export function deleteCategoryCurrency({ id }: Pick<DbCategoryCurrency, 'id'>) {
+  return delete_('category_currencies', id);
 }
 
 export async function getPayee(id: DbPayee['id']) {

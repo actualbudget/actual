@@ -1,5 +1,6 @@
 import * as db from '#server/db';
 import { isSupportedCurrencyCode } from '#shared/fx/currency';
+import { parseOwnLines } from '#shared/fx/ownLines';
 import { setSqlConversionState } from '#shared/fx/sql';
 
 const PREFERENCE_IDS = [
@@ -7,11 +8,12 @@ const PREFERENCE_IDS = [
   'flags.multiCurrency',
   'defaultCurrencyCode',
   'currency-conversion-rate',
+  'currency-own-lines',
 ];
 
 // Synchronous so it can run straight after a change is applied, before any
 // query reads converted amounts
-function readSqlConversionState() {
+export function loadSqlConversionState() {
   const preferences = new Map(
     db
       .runQuery<Pick<db.DbPreference, 'id' | 'value'>>(
@@ -49,15 +51,13 @@ function readSqlConversionState() {
       preferences.get('currency-conversion-rate') === 'historical'
         ? 'historical'
         : 'latest',
+    ownLineStarts: parseOwnLines(preferences.get('currency-own-lines')),
     rates: rates.map(rate => ({
       ...rate,
       date: db.fromDateRepr(rate.date),
     })),
   });
 }
-
-// Loads the rates and settings the FX_CONVERT SQL functions use
-export const loadSqlConversionState = readSqlConversionState;
 
 // Called with every applied change, local or synced, before the budget and
 // any query reacts to it
@@ -72,6 +72,6 @@ export function updateSqlConversionState(changedTables: Map<string, unknown>) {
       PREFERENCE_IDS.includes(id),
     )
   ) {
-    readSqlConversionState();
+    loadSqlConversionState();
   }
 }
