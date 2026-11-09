@@ -117,6 +117,13 @@ export const schema = {
     sort_order: f('float'),
     tombstone: f('boolean'),
   },
+  category_currencies: {
+    id: f('id'),
+    category: f('id', { ref: 'categories', required: true }),
+    currency: f('string', { required: true }),
+    start_month: f('integer', { required: true }),
+    tombstone: f('boolean'),
+  },
   cleanup_groups: {
     id: f('id'),
     name: f('string'),
