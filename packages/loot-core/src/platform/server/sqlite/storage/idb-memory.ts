@@ -219,6 +219,18 @@ export function createMemoryIdbStore({
     return { bytes, rev: rev + 1 };
   }
 
+  // A snapshot stranded by a failed close is only current while the row is
+  // still at the revision it was taken from; a write by another worker
+  // since supersedes it
+  function currentStranded(path: string, row: Data | undefined) {
+    const stranded = unsaved.get(path);
+    if (stranded && (row?.rev ?? 0) !== stranded.rev) {
+      unsaved.delete(path);
+      return undefined;
+    }
+    return stranded;
+  }
+
   function lockBudget(path: string): Promise<() => void> {
     return acquireWebLock(budgetLockName(path), lockTimeoutMs).catch(() => {
       throw new BudgetInUseError(path, 'the storage lock could not be taken');
@@ -253,13 +265,7 @@ export function createMemoryIdbStore({
     try {
       const row = await getSqliteFileRow(path);
       assertNotInOpfs(path, row);
-      // A snapshot stranded by a failed close is only current while the
-      // row is still at the revision it was taken from
-      let stranded = unsaved.get(path);
-      if (stranded && (row?.rev ?? 0) !== stranded.rev) {
-        unsaved.delete(path);
-        stranded = undefined;
-      }
+      const stranded = currentStranded(path, row);
       const { bytes, rev } = stranded ?? (await loadBytes(path, row));
       const db = openMemoryDatabase(bytes ?? undefined);
       const entry: Entry = {
@@ -380,15 +386,17 @@ export function createMemoryIdbStore({
       if (entry) {
         return exportBytes(entry.db);
       }
-      const stranded = unsaved.get(path);
-      if (stranded) {
-        return stranded.bytes;
-      }
       // Loading may migrate the absurd-sql copy, so hold the budget lock
       // as an open does
       const releaseLock = await lockBudget(path);
       try {
-        const { bytes } = await loadBytes(path, await getSqliteFileRow(path));
+        const row = await getSqliteFileRow(path);
+        assertNotInOpfs(path, row);
+        const stranded = currentStranded(path, row);
+        if (stranded) {
+          return stranded.bytes;
+        }
+        const { bytes } = await loadBytes(path, row);
         if (bytes == null) {
           throw new Error('File does not exist: ' + path);
         }
@@ -480,7 +488,7 @@ export function createMemoryIdbStore({
       try {
         const row = await getSqliteFileRow(path);
         assertNotInOpfs(path, row);
-        const stranded = unsaved.get(path);
+        const stranded = currentStranded(path, row);
         const bytes =
           stranded?.bytes ??
           (row && isByteContents(row.contents) ? row.contents : null);

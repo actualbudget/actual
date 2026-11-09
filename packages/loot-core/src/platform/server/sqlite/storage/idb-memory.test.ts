@@ -581,6 +581,36 @@ describe('IndexedDB in-memory store', () => {
     closeDatabase(reopened);
   });
 
+  it('reads and moves back the row another worker wrote, not a snapshot it moved past', async () => {
+    await strandSnapshot('stranded');
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from elsewhere')");
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: await exportDatabase(source),
+      storage: 'memory-idb',
+      rev: 9,
+    });
+    closeDatabase(source);
+    const store = getSqliteStore();
+
+    const read = await openDatabase(await store.readFile(PATH));
+    expect(runQuery(read, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(read);
+
+    await store.revertFile(PATH);
+    const back = await openDatabase(
+      (await absurdMigration.readLegacyDatabaseBytes(PATH)) as Uint8Array,
+    );
+    expect(runQuery(back, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(back);
+  });
+
   it('refuses a new file another worker created meanwhile', async () => {
     const lookup = vi
       .spyOn(absurdMigration, 'readLegacyDatabaseBytes')
