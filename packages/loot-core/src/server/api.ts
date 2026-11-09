@@ -9,6 +9,7 @@ import {
   getSyncError,
   getTestKeyError,
 } from '#shared/errors';
+import { getSqlDefaultCurrencyCode } from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -20,6 +21,7 @@ import { integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
+  CategoryEntity,
   CategoryGroupEntity,
   RecurConfig,
   ScheduleEntity,
@@ -44,6 +46,12 @@ import {
 import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import {
+  fromLineMonth,
+  getCurrencyLine,
+  getCurrencyLines,
+  isLineStarted,
+} from './budget/category-currencies';
 import { getCategoriesWithTemplates } from './budget/template-notes';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
@@ -513,6 +521,41 @@ handlers['api/budget-month'] = async function ({ month }) {
     return v === '' ? 0 : v;
   }
 
+  // The values of a category, named after their cells. A category budgeted
+  // in several currencies reports its totals, in the default currency, and
+  // each currency in its own.
+  function categoryValues(
+    cat: CategoryEntity,
+    fields: Record<string, 'budget' | 'sum-amount' | 'leftover' | 'carryover'>,
+  ) {
+    const lines = getCurrencyLines(cat.id);
+    const valuesOf = (id: string, total: boolean) =>
+      Object.fromEntries(
+        Object.entries(fields).map(([field, cell]) => [
+          field,
+          value(
+            `${total && cell !== 'carryover' ? `${cell}-total` : cell}-${id}`,
+          ),
+        ]),
+      );
+    return {
+      ...categoryModel.toExternal(cat),
+      ...valuesOf(cat.id, lines.length > 0),
+      ...(lines.length > 0 && {
+        currencies: [
+          {
+            currency: getSqlDefaultCurrencyCode(),
+            ...valuesOf(cat.id, false),
+          },
+          ...lines.map(line => ({
+            currency: line.currency,
+            ...valuesOf(line.id, false),
+          })),
+        ],
+      }),
+    };
+  }
+
   // This is duplicated from main.js because the return format is
   // different (for now)
   return {
@@ -537,13 +580,14 @@ handlers['api/budget-month'] = async function ({ month }) {
             received: value(`group-sum-amount-${group.id}`),
             balance: value(`group-leftover-${group.id}`),
 
-            categories: group.categories.map(cat => ({
-              ...categoryModel.toExternal(cat),
-              budgeted: value(`budget-${cat.id}`),
-              received: value(`sum-amount-${cat.id}`),
-              balance: value(`leftover-${cat.id}`),
-              carryover: value(`carryover-${cat.id}`),
-            })),
+            categories: group.categories.map(cat =>
+              categoryValues(cat, {
+                budgeted: 'budget',
+                received: 'sum-amount',
+                balance: 'leftover',
+                carryover: 'carryover',
+              }),
+            ),
           };
         }
 
@@ -551,10 +595,9 @@ handlers['api/budget-month'] = async function ({ month }) {
           ...categoryGroupModel.toExternal(group),
           received: value('total-income'),
 
-          categories: group.categories.map(cat => ({
-            ...categoryModel.toExternal(cat),
-            received: value(`sum-amount-${cat.id}`),
-          })),
+          categories: group.categories.map(cat =>
+            categoryValues(cat, { received: 'sum-amount' }),
+          ),
         };
       }
 
@@ -564,27 +607,51 @@ handlers['api/budget-month'] = async function ({ month }) {
         spent: value(`group-sum-amount-${group.id}`),
         balance: value(`group-leftover-${group.id}`),
 
-        categories: group.categories.map(cat => ({
-          ...categoryModel.toExternal(cat),
-          budgeted: value(`budget-${cat.id}`),
-          spent: value(`sum-amount-${cat.id}`),
-          balance: value(`leftover-${cat.id}`),
-          carryover: value(`carryover-${cat.id}`),
-        })),
+        categories: group.categories.map(cat =>
+          categoryValues(cat, {
+            budgeted: 'budget',
+            spent: 'sum-amount',
+            balance: 'leftover',
+            carryover: 'carryover',
+          }),
+        ),
       };
     }),
   };
 };
 
+// The budget line of a category in `currency` in `month`: the category
+// itself for the default currency, or one of its currency lines
+function getBudgetLineId(
+  categoryId: string,
+  month: string,
+  currency?: string,
+): string {
+  if (currency == null || currency === getSqlDefaultCurrencyCode()) {
+    return categoryId;
+  }
+  const line = getCurrencyLine(db.getCategoryCurrencyId(categoryId, currency));
+  if (!line) {
+    throw APIError(`The category has no ${currency} line`);
+  }
+  if (!isLineStarted(line.id, month)) {
+    throw APIError(
+      `The ${currency} line of the category starts in ${fromLineMonth(line.startMonth)}`,
+    );
+  }
+  return line.id;
+}
+
 handlers['api/budget-set-amount'] = withMutation(async function ({
   month,
   categoryId,
   amount,
+  currency,
 }) {
   checkFileOpen();
   return handlers['budget/budget-amount']({
     month,
-    category: categoryId,
+    category: getBudgetLineId(categoryId, month, currency),
     amount,
   });
 });
@@ -593,13 +660,14 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   month,
   categoryId,
   flag,
+  currency,
 }) {
   checkFileOpen();
   await validateMonth(month);
   await validateExpenseCategory('budget-set-carryover', categoryId);
   return handlers['budget/set-carryover']({
     startMonth: month,
-    category: categoryId,
+    category: getBudgetLineId(categoryId, month, currency),
     flag,
   });
 });

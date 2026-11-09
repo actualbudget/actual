@@ -87,12 +87,18 @@ export type ApiHandlers = {
     month: string;
     categoryId: string;
     amount: number;
+    // A currency budgeted on its own line in the category; its default
+    // currency when omitted
+    currency?: string;
   }) => Promise<void>;
 
   'api/budget-set-carryover': (arg: {
     month: string;
     categoryId: string;
     flag: boolean;
+    // A currency budgeted on its own line in the category; its default
+    // currency when omitted
+    currency?: string;
   }) => Promise<void>;
 
   'api/budget-hold-for-next-month': (arg: {
