@@ -1,9 +1,7 @@
 import { Trans } from 'react-i18next';
 
 import { useFormat } from '#hooks/useFormat';
-import { useLocale } from '#hooks/useLocale';
 
-import { formatMonthLabel } from './formatMonthLabel';
 import type {
   AutomationErrorKind,
   GlobalConflictKind,
@@ -48,7 +46,6 @@ export function AutomationErrorShort({
 }: {
   error: AutomationErrorKind;
 }) {
-  const locale = useLocale();
   switch (error.kind) {
     case 'schedule-not-found':
       return error.name ? (
@@ -69,12 +66,7 @@ export function AutomationErrorShort({
     case 'by-no-month':
       return <Trans>Pick a target month</Trans>;
     case 'by-target-past':
-      return (
-        <Trans>
-          {{ month: formatMonthLabel(error.month, locale) }} has passed and is
-          no longer funded
-        </Trans>
-      );
+      return <Trans>Target month has passed</Trans>;
     case 'spend-no-from':
       return <Trans>Pick an early-spending start month</Trans>;
     case 'spend-from-after-target':
