@@ -253,6 +253,27 @@ describe('validateAutomation schedule lookup', () => {
     ).toBeNull();
   });
 
+  it('reports a completed schedule with no name as not found', () => {
+    // The engine only looks up named schedules, so applying the automation
+    // would fail even though the editor could find the schedule by id.
+    const { name: _name, ...unnamed } = completedSchedule('Dentist');
+    expect(
+      validateAutomation(
+        {
+          type: 'schedule',
+          name: 'Dentist',
+          scheduleId: 'dentist-id',
+          directive: 'template',
+          priority: 1,
+        },
+        'schedule',
+        [],
+        [{ ...unnamed, id: 'dentist-id' }],
+        today,
+      ),
+    ).toEqual({ kind: 'schedule-not-found', name: 'Dentist' });
+  });
+
   it('still checks the adjustment on a completed schedule', () => {
     expect(
       validateAutomation(

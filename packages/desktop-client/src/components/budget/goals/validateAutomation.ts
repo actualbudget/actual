@@ -60,8 +60,9 @@ export function validateAutomation(
       );
       // A completed schedule is still budgeted for (a one-time bill that
       // has posted still has to be covered), so only a missing or deleted
-      // schedule is an error.
-      if (!match || match.tombstone) {
+      // schedule is an error. The engine only looks up named schedules, so
+      // one without a name can't be applied either.
+      if (!match || match.tombstone || match.name == null) {
         return { kind: 'schedule-not-found', name: template.name ?? '' };
       }
       if (isAdjustmentOutOfRange(template)) {
