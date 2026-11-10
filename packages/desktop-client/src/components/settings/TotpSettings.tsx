@@ -24,9 +24,11 @@ export function TotpSettings() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
 
   const refreshStatus = useCallback(async () => {
-    const res = await send('totp-status');
-    if (!('error' in res)) {
-      setEnabled(res.enabled);
+    try {
+      const res = await send('totp-status');
+      setEnabled('error' in res ? null : res.enabled);
+    } catch {
+      setEnabled(null);
     }
   }, []);
 

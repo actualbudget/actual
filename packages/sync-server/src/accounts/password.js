@@ -222,6 +222,8 @@ export async function changePassword(newPassword, currentPassword) {
     accountDb.mutate(
       "DELETE FROM api_keys WHERE user_id IN (SELECT id FROM users WHERE user_name = '')",
     );
+    // A challenge issued under the old password must not mint a session.
+    accountDb.mutate('DELETE FROM pending_mfa_challenges');
     return {};
   });
 }

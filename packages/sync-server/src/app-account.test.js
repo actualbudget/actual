@@ -3,7 +3,11 @@ import request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 
 import { getAccountDb, getLoginMethod, getServerPrefs } from './account-db';
-import { bootstrapPassword, checkPassword } from './accounts/password';
+import {
+  bootstrapPassword,
+  changePassword,
+  checkPassword,
+} from './accounts/password';
 import { confirmTotpEnrollment, generateTotpSecret } from './accounts/totp';
 import {
   handlers as app,
@@ -525,6 +529,22 @@ describe('/login with TOTP enabled', () => {
     const second = await verifyCode(body.data.mfaToken, code);
     expect(second.statusCode).toEqual(400);
     expect(second.body).toHaveProperty('reason', 'mfa-challenge-expired');
+  });
+
+  it('invalidates an open challenge when the password changes', async () => {
+    await bootstrapPassword('testpassword');
+    const secret = enableTotp();
+
+    const { body } = await signInWithPassword();
+    await changePassword('newtestpassword');
+
+    const res = await verifyCode(
+      body.data.mfaToken,
+      totpCodeAt(secret, Date.now()),
+    );
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty('reason', 'mfa-challenge-expired');
   });
 
   it('does not require a code when TOTP is not enabled', async () => {

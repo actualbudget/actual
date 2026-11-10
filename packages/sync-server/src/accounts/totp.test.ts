@@ -1,4 +1,5 @@
 import { Secret, TOTP } from 'otpauth';
+import { vi } from 'vitest';
 
 import { getAccountDb } from '#account-db';
 
@@ -126,29 +127,47 @@ describe('verifyTotp', () => {
     const secret = enabledSecret();
     const code = codeAt(secret, NOW);
     const step = Math.floor(NOW / 1000 / 30);
-
-    expect(verifyTotp(code, NOW)).toBe(true);
-
-    // Simulate the read half of a racing caller having already happened: it
-    // read the pre-consumption row and considers the code fresh. The write
-    // must still refuse it.
-    getAccountDb().mutate(
-      'UPDATE auth_totp SET last_used_step = ? WHERE id = 1',
-      [step],
+    const db = getAccountDb();
+    const staleRow = db.first(
+      'SELECT secret, confirmed, last_used_step FROM auth_totp WHERE id = 1',
     );
-    expect(verifyTotp(code, NOW)).toBe(false);
+    db.mutate('UPDATE auth_totp SET last_used_step = ? WHERE id = 1', [step]);
+
+    // The read half of a racing caller already happened: it saw the
+    // pre-consumption row and considers the code fresh. The write must still
+    // refuse it.
+    const readSpy = vi.spyOn(db, 'first').mockReturnValueOnce(staleRow);
+    const writeSpy = vi.spyOn(db, 'mutate');
+    try {
+      expect(verifyTotp(code, NOW)).toBe(false);
+      expect(writeSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      readSpy.mockRestore();
+      writeSpy.mockRestore();
+    }
   });
 
   it('does not authenticate when the row is not confirmed', () => {
     const secret = enabledSecret();
     const code = codeAt(secret, NOW);
-
-    // Only the conditional write enforces this once the early check passes.
-    getAccountDb().mutate(
+    const db = getAccountDb();
+    const staleRow = db.first(
+      'SELECT secret, confirmed, last_used_step FROM auth_totp WHERE id = 1',
+    );
+    db.mutate(
       'UPDATE auth_totp SET confirmed = 0, last_used_step = NULL WHERE id = 1',
     );
 
-    expect(verifyTotp(code, NOW)).toBe(false);
+    // Only the conditional write enforces this once the early check passes.
+    const readSpy = vi.spyOn(db, 'first').mockReturnValueOnce(staleRow);
+    const writeSpy = vi.spyOn(db, 'mutate');
+    try {
+      expect(verifyTotp(code, NOW)).toBe(false);
+      expect(writeSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      readSpy.mockRestore();
+      writeSpy.mockRestore();
+    }
   });
 
   it('rejects a replayed code', () => {

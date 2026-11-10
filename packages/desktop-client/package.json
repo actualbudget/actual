@@ -147,9 +147,6 @@
     "playwright": "playwright",
     "typecheck": "tsgo -b && tsc-strict"
   },
-  "dependencies": {
-    "qrcode": "^1.5.4"
-  },
   "devDependencies": {
     "@actual-app/components": "workspace:*",
     "@actual-app/core": "workspace:*",
@@ -202,6 +199,7 @@
     "lru-cache": "^11.5.3",
     "mdast-util-newline-to-break": "^2.0.0",
     "plugins-service": "workspace:*",
+    "qrcode": "^1.5.4",
     "re-resizable": "^6.11.2",
     "react": "19.3.0",
     "react-aria": "^3.53.1",

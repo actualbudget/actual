@@ -434,7 +434,11 @@ async function totpStatus(): Promise<
       },
     });
 
-    const { data } = JSON.parse(res) || {};
+    const { status, reason, data } = JSON.parse(res) || {};
+
+    if (status !== 'ok') {
+      return { error: reason || 'internal' };
+    }
 
     return {
       enabled: Boolean(data?.enabled),
