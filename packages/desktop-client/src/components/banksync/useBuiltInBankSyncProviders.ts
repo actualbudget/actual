@@ -54,7 +54,7 @@ type PluggyAiAccount = {
 export type BuiltInBankSyncProviderState = {
   id: BankSyncProviders;
   displayName: string;
-  description: string;
+  region: string;
   isConfigured: boolean;
   credentialSource: BankSyncCredentialSource;
   supportsPerBudgetFile: boolean;
@@ -118,10 +118,19 @@ export function useBuiltInBankSyncProviders({
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
-  const { configuredGoCardless } = useGoCardlessStatus();
-  const { simpleFinStatus, setSimpleFinStatus } = useSimpleFinStatus();
-  const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
-  const { configuredAkahu } = useAkahuStatus();
+  const { configuredGoCardless, isLoading: isGoCardlessLoading } =
+    useGoCardlessStatus();
+  const {
+    simpleFinStatus,
+    setSimpleFinStatus,
+    isLoading: isSimpleFinLoading,
+  } = useSimpleFinStatus();
+  const {
+    pluggyAiStatus,
+    setPluggyAiStatus,
+    isLoading: isPluggyAiLoading,
+  } = usePluggyAiStatus();
+  const { configuredAkahu, isLoading: isAkahuLoading } = useAkahuStatus();
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
@@ -670,9 +679,7 @@ export function useBuiltInBankSyncProviders({
           return {
             id: providerId,
             displayName: 'GoCardless',
-            description: t(
-              'Link a European bank account to automatically download transactions.',
-            ),
+            region: t('European banks'),
             isConfigured: configuredProviders.goCardless,
             credentialSource: 'global',
             supportsPerBudgetFile: false,
@@ -687,9 +694,7 @@ export function useBuiltInBankSyncProviders({
           return {
             id: providerId,
             displayName: 'SimpleFIN',
-            description: t(
-              'Link a North American bank account to automatically download transactions.',
-            ),
+            region: t('US and Canadian banks'),
             isConfigured: configuredProviders.simpleFin,
             credentialSource: simpleFinStatus.source ?? 'global',
             supportsPerBudgetFile: true,
@@ -706,9 +711,7 @@ export function useBuiltInBankSyncProviders({
         return {
           id: providerId,
           displayName: 'Pluggy.ai',
-          description: t(
-            'Link a Brazilian bank account to automatically download transactions.',
-          ),
+          region: t('Brazilian banks'),
           isConfigured: configuredProviders.pluggyai,
           credentialSource: pluggyAiStatus.source ?? 'global',
           supportsPerBudgetFile: true,
@@ -724,9 +727,7 @@ export function useBuiltInBankSyncProviders({
     baseProviders.push({
       id: 'akahu',
       displayName: 'Akahu',
-      description: t(
-        'Link a New Zealand bank account to automatically download transactions.',
-      ),
+      region: t('New Zealand banks'),
       isConfigured: configuredProviders.akahu,
       credentialSource: 'global',
       supportsPerBudgetFile: false,
@@ -741,9 +742,7 @@ export function useBuiltInBankSyncProviders({
       baseProviders.push({
         id: 'enableBanking',
         displayName: 'Enable Banking',
-        description: t(
-          'Link a European bank account via Enable Banking, a free alternative to GoCardless for PSD2-supported banks.',
-        ),
+        region: t('European banks'),
         isConfigured: configuredProviders.enableBanking,
         credentialSource: 'global',
         supportsPerBudgetFile: false,
@@ -796,9 +795,19 @@ export function useBuiltInBankSyncProviders({
     isFileOwner,
   );
 
+  const isLoading =
+    syncServerStatus === 'online' &&
+    (configuredGoCardless === null ||
+      isGoCardlessLoading ||
+      isSimpleFinLoading ||
+      isPluggyAiLoading ||
+      isAkahuLoading ||
+      (enableBankingEnabled && isEnableBankingLoading));
+
   return {
     providers,
     syncServerStatus,
     permissionWarning,
+    isLoading,
   };
 }

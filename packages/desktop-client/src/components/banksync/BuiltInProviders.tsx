@@ -2,203 +2,140 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button, ButtonWithLoading } from '@actual-app/components/button';
-import {
-  SvgCheveronDown,
-  SvgCheveronRight,
-  SvgDotsHorizontalTriple,
-} from '@actual-app/components/icons/v1';
+import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
-import { Paragraph } from '@actual-app/components/paragraph';
 import { Popover } from '@actual-app/components/popover';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
-import { Warning } from '#components/alerts';
-import { Link } from '#components/common/Link';
-
+import { BankSyncPermissionWarning } from './BankSyncPermissionWarning';
+import { BankSyncServerRequired } from './BankSyncServerRequired';
+import { getProviderStatusText } from './bankSyncUtils';
 import type { BuiltInBankSyncProviderState } from './useBuiltInBankSyncProviders';
 
 type BuiltInProvidersProps = {
   providers: BuiltInBankSyncProviderState[];
   syncServerStatus: 'offline' | 'no-server' | 'online';
   permissionWarning: 'general' | 'file-owner' | null;
-  isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
-  hasHeading?: boolean;
 };
 
 export function BuiltInProviders({
   providers,
   syncServerStatus,
   permissionWarning,
-  isCollapsed = false,
-  onToggleCollapse,
-  hasHeading = true,
 }: BuiltInProvidersProps) {
   const { t } = useTranslation();
 
-  const Cheveron = isCollapsed ? SvgCheveronRight : SvgCheveronDown;
-  const title = (
-    <Text style={{ fontSize: 20, fontWeight: 600 }}>
-      <Trans>Providers</Trans>
-    </Text>
-  );
-
-  if (onToggleCollapse && isCollapsed) {
-    return (
-      <Button
-        variant="bare"
-        aria-expanded={false}
-        onPress={onToggleCollapse}
-        style={{ alignSelf: 'flex-start' }}
-      >
-        {title}
-        <Cheveron width={20} height={20} style={{ marginLeft: spacing.xs }} />
-      </Button>
-    );
+  if (syncServerStatus !== 'online') {
+    return <BankSyncServerRequired syncServerStatus={syncServerStatus} />;
   }
 
   return (
-    <View style={{ gap: spacing.md }}>
-      {hasHeading && (
-        <View style={{ gap: spacing.xs }}>
-          {onToggleCollapse ? (
-            <Button
-              variant="bare"
-              aria-expanded
-              onPress={onToggleCollapse}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              {title}
-              <Cheveron
-                width={20}
-                height={20}
-                style={{ marginLeft: spacing.xs }}
-              />
-            </Button>
-          ) : (
-            title
-          )}
-          <Paragraph style={{ fontSize: 15, color: theme.pageTextSubdued }}>
-            <Trans>
-              Set up a bank sync provider, then link new accounts or connect an
-              existing Actual account.
-            </Trans>
-          </Paragraph>
-        </View>
+    <View style={{ gap: spacing.md, flexShrink: 0 }}>
+      {permissionWarning && (
+        <BankSyncPermissionWarning permissionWarning={permissionWarning} />
       )}
 
-      {syncServerStatus !== 'online' ? (
-        <View
-          style={{
-            border: `1px solid ${theme.tableBorder}`,
-            borderRadius: 8,
-            padding: spacing.lg,
-            backgroundColor: theme.tableBackground,
-          }}
-        >
-          <Button isDisabled style={{ paddingBlock: spacing.sm, fontSize: 15 }}>
-            <Trans>Set up bank sync</Trans>
-          </Button>
-          <Paragraph style={{ fontSize: 15, marginTop: spacing.sm }}>
-            <Trans>
-              Connect to an Actual server to set up{' '}
-              <Link
-                variant="external"
-                to="https://actualbudget.org/docs/advanced/bank-sync"
-                linkColor="muted"
-              >
-                automatic syncing
-              </Link>
-              .
-            </Trans>
-          </Paragraph>
-        </View>
-      ) : (
-        <View
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: spacing.md,
-          }}
-        >
-          {providers.map(provider => (
+      <ul
+        // oxlint-disable-next-line jsx-a11y/no-redundant-roles -- list-style none drops list semantics in Safari
+        role="list"
+        aria-label={t('Providers')}
+        style={{
+          listStyle: 'none',
+          margin: 0,
+          padding: 0,
+          border: `1px solid ${theme.tableBorder}`,
+          borderRadius: 6,
+          backgroundColor: theme.tableBackground,
+          overflow: 'hidden',
+        }}
+      >
+        {providers.map((provider, index) => (
+          <li
+            key={provider.id}
+            data-testid={`bank-sync-provider-${provider.id}`}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              padding: `${spacing.sm}px ${spacing.md}px`,
+              gap: spacing.xs,
+              borderTop:
+                index === 0 ? undefined : `1px solid ${theme.tableBorder}`,
+            }}
+          >
             <View
-              key={provider.id}
-              data-testid={`bank-sync-provider-${provider.id}`}
               style={{
-                border: `1px solid ${theme.tableBorder}`,
-                borderRadius: 8,
-                padding: spacing.lg,
-                backgroundColor: theme.tableBackground,
-                gap: spacing.lg,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: spacing.sm,
               }}
             >
               <View
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: spacing.md,
+                  flex: '1 1 160px',
+                  minWidth: 0,
+                  gap: spacing.xxs,
                 }}
               >
-                <View
+                <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
+                  {provider.displayName}
+                </Text>
+                <Text
                   style={{
-                    gap: spacing.sm,
-                    flex: 1,
+                    ...styles.smallText,
+                    color: provider.isConfigured
+                      ? theme.noticeTextDark
+                      : theme.pageTextLight,
                   }}
                 >
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: spacing.sm,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <Text size="extra-large" style={{ fontWeight: 600 }}>
-                      {provider.displayName}
-                    </Text>
-                    {provider.isConfigured && provider.credentialSource && (
-                      <Text
-                        size="small"
-                        style={{
-                          alignSelf: 'flex-start',
-                          borderRadius: 999,
-                          backgroundColor: theme.buttonPrimaryBackground,
-                          color: theme.buttonPrimaryText,
-                          fontWeight: 500,
-                          paddingBlock: spacing.xxs,
-                          paddingInline: spacing.sm,
-                        }}
-                      >
-                        {provider.credentialSource === 'global' ? (
-                          <Trans>global</Trans>
-                        ) : (
-                          <Trans>this budget only</Trans>
-                        )}
-                      </Text>
-                    )}
-                  </View>
-                  <Text
-                    size="medium"
-                    style={{
-                      color: provider.isConfigured
-                        ? theme.noticeTextDark
-                        : theme.pageTextSubdued,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {provider.isConfigured ? (
-                      <Trans>Configured</Trans>
-                    ) : (
-                      <Trans>Not configured</Trans>
-                    )}
-                  </Text>
-                </View>
+                  {getProviderStatusText(provider, t)}
+                </Text>
+              </View>
 
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: spacing.sm,
+                }}
+              >
+                <Button
+                  variant={provider.isConfigured ? 'bare' : 'normal'}
+                  isDisabled={!provider.canConfigure}
+                  aria-label={
+                    provider.isConfigured
+                      ? t('Edit setup for {{provider}}', {
+                          provider: provider.displayName,
+                        })
+                      : t('Set up {{provider}}', {
+                          provider: provider.displayName,
+                        })
+                  }
+                  onPress={() => provider.onConfigure()}
+                >
+                  {provider.isConfigured ? (
+                    <Trans>Edit setup</Trans>
+                  ) : (
+                    <Trans>Set up</Trans>
+                  )}
+                </Button>
+                {provider.isConfigured && (
+                  <ButtonWithLoading
+                    isLoading={provider.isLoading}
+                    aria-label={t('Link bank account with {{provider}}', {
+                      provider: provider.displayName,
+                    })}
+                    onPress={() => provider.onLink()}
+                  >
+                    <Trans>Link bank account</Trans>
+                  </ButtonWithLoading>
+                )}
                 {provider.isConfigured && (
                   <DialogTrigger>
                     <Button
@@ -218,17 +155,12 @@ export function BuiltInProviders({
                       <Dialog>
                         <Menu
                           onMenuSelect={item => {
-                            if (item === 'reconfigure') {
+                            if (item === 'reset') {
                               void provider.onReset();
                             }
                           }}
                           items={[
-                            {
-                              name: 'reconfigure',
-                              text: t('Reset {{provider}} credentials', {
-                                provider: provider.displayName,
-                              }),
-                            },
+                            { name: 'reset', text: t('Reset credentials') },
                           ]}
                         />
                       </Dialog>
@@ -236,67 +168,22 @@ export function BuiltInProviders({
                   </DialogTrigger>
                 )}
               </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'flex-end',
-                  alignItems: 'center',
-                  gap: spacing.sm,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Button
-                  variant="bare"
-                  isDisabled={!provider.canConfigure}
-                  onPress={() => provider.onConfigure()}
-                >
-                  {provider.isConfigured ? (
-                    <Trans>Edit setup</Trans>
-                  ) : (
-                    <Trans>Set up</Trans>
-                  )}
-                </Button>
-                <ButtonWithLoading
-                  variant="primary"
-                  isDisabled={!provider.isConfigured}
-                  isLoading={provider.isLoading}
-                  onPress={() => provider.onLink()}
-                >
-                  <Trans>Link bank account</Trans>
-                </ButtonWithLoading>
-              </View>
-              {provider.supportsPerBudgetFile &&
-                provider.credentialSource === 'global' &&
-                !provider.canConfigure && (
-                  <Text size="medium" style={{ color: theme.pageTextSubdued }}>
-                    <Trans>
-                      Reset credentials before setting credentials for this
-                      budget file.
-                    </Trans>
-                  </Text>
-                )}
             </View>
-          ))}
-        </View>
-      )}
-
-      {permissionWarning && (
-        <Warning>
-          {permissionWarning === 'file-owner' ? (
-            <Trans>
-              You don&apos;t have the required permissions to configure all bank
-              sync providers. You can set up Pluggy.ai because you are the owner
-              of this budget file.
-            </Trans>
-          ) : (
-            <Trans>
-              You don&apos;t have the required permissions to configure bank
-              sync providers. Please contact an Admin.
-            </Trans>
-          )}
-        </Warning>
-      )}
+            {provider.supportsPerBudgetFile &&
+              provider.credentialSource === 'global' &&
+              !provider.canConfigure && (
+                <Text
+                  style={{ ...styles.smallText, color: theme.pageTextLight }}
+                >
+                  <Trans>
+                    Reset credentials before setting credentials for this budget
+                    file.
+                  </Trans>
+                </Text>
+              )}
+          </li>
+        ))}
+      </ul>
     </View>
   );
 }
