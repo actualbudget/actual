@@ -1,7 +1,11 @@
-import { Trans } from 'react-i18next';
+import { useId } from 'react';
+import { GridList } from 'react-aria-components';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
@@ -10,7 +14,6 @@ import type {
   SyncProviders,
 } from '#components/banksync/bankSyncUtils';
 import { getGroupedBankSyncEntries } from '#components/banksync/bankSyncUtils';
-import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
 
 import { BankSyncAccountsListItem } from './BankSyncAccountsListItem';
 
@@ -26,22 +29,20 @@ export function BankSyncAccountsList({
   onAction,
 }: BankSyncAccountsListProps) {
   const groupedAccountEntries = getGroupedBankSyncEntries(groupedAccounts);
-  const allAccounts = groupedAccountEntries.flatMap(([, accounts]) => accounts);
 
-  if (allAccounts.length === 0) {
+  if (groupedAccountEntries.length === 0) {
     return (
       <View
         style={{
-          flex: 1,
+          flexShrink: 0,
           alignItems: 'center',
-          justifyContent: 'center',
-          paddingHorizontal: 20,
+          padding: `${spacing.xl}px ${spacing.lg}px`,
         }}
       >
         <Text
           style={{
             fontSize: 16,
-            color: theme.pageTextSubdued,
+            color: theme.pageTextLight,
             textAlign: 'center',
           }}
         >
@@ -51,49 +52,75 @@ export function BankSyncAccountsList({
     );
   }
 
-  const shouldShowProviderHeaders = groupedAccountEntries.length > 1;
+  const hasProviderHeaders = groupedAccountEntries.length > 1;
 
   return (
-    <div
-      style={{ flex: 1, overflow: 'auto', paddingBottom: MOBILE_NAV_HEIGHT }}
-    >
+    <>
       {groupedAccountEntries.map(([provider, accounts]) => (
-        <div key={provider}>
-          {shouldShowProviderHeaders && (
-            <div
-              style={{
-                backgroundColor: theme.mobilePageBackground,
-                padding: '12px 16px',
-                borderBottom: `1px solid ${theme.tableBorder}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: 40,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: 600,
-                  color: theme.pageTextLight,
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5,
-                }}
-              >
-                {syncSourceReadable[provider]}
-              </Text>
-            </div>
-          )}
-          {accounts.map(account => (
-            <BankSyncAccountsListItem
-              key={account.id}
-              account={account}
-              onAction={onAction}
-              isLinked={!!account.account_sync_source}
-            />
-          ))}
-        </div>
+        <BankSyncAccountsGroup
+          key={provider}
+          title={hasProviderHeaders ? syncSourceReadable[provider] : null}
+          accounts={accounts}
+          onAction={onAction}
+        />
       ))}
-    </div>
+    </>
+  );
+}
+
+type BankSyncAccountsGroupProps = {
+  title: string | null;
+  accounts: AccountEntity[];
+  onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
+};
+
+function BankSyncAccountsGroup({
+  title,
+  accounts,
+  onAction,
+}: BankSyncAccountsGroupProps) {
+  const { t } = useTranslation();
+  const titleId = useId();
+
+  return (
+    <View style={{ flexShrink: 0 }}>
+      {title != null && (
+        <View
+          style={{
+            padding: `${spacing.md}px ${spacing.lg}px ${spacing.sm}px`,
+            borderBottom: `1px solid ${theme.tableBorder}`,
+          }}
+        >
+          <h2
+            id={titleId}
+            style={{
+              ...styles.smallText,
+              margin: 0,
+              fontWeight: 600,
+              color: theme.pageTextLight,
+            }}
+          >
+            {title}
+          </h2>
+        </View>
+      )}
+      <GridList
+        aria-label={title == null ? t('Accounts') : undefined}
+        aria-labelledby={title == null ? undefined : titleId}
+        items={accounts}
+      >
+        {account => (
+          <BankSyncAccountsListItem
+            value={account}
+            onAction={() =>
+              onAction(
+                account,
+                account.account_sync_source != null ? 'edit' : 'link',
+              )
+            }
+          />
+        )}
+      </GridList>
+    </View>
   );
 }

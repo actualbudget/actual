@@ -1,102 +1,123 @@
+import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
-import { View } from '@actual-app/components/view';
 import { tsToRelativeTime } from '@actual-app/core/shared/util';
 import type { AccountEntity } from '@actual-app/core/types/models';
+import type { WithRequired } from '@actual-app/core/types/util';
 
+import { formatLastSyncDateTime } from '#components/banksync/bankSyncUtils';
+import { ActionableGridListItem } from '#components/mobile/ActionableGridListItem';
 import { useLocale } from '#hooks/useLocale';
 
-type BankSyncAccountsListItemProps = {
-  account: AccountEntity;
-  onAction: (account: AccountEntity, action: 'link' | 'edit') => void;
-  isLinked: boolean;
-};
+type BankSyncAccountsListItemProps = WithRequired<
+  GridListItemProps<AccountEntity>,
+  'value'
+>;
 
 export function BankSyncAccountsListItem({
-  account,
-  onAction,
-  isLinked,
+  value: account,
+  ...props
 }: BankSyncAccountsListItemProps) {
   const { t } = useTranslation();
   const locale = useLocale();
 
-  const lastSyncString = isLinked
-    ? tsToRelativeTime(account.last_sync, locale, {
-        capitalize: true,
-      })
-    : null;
+  const isLinked = account.account_sync_source != null;
+  const bankName = account.bankName ?? t('Unknown');
+
+  let syncLine: string | null = null;
+  let label = t('{{name}}, link account', { name: account.name });
+  if (isLinked && account.last_sync != null) {
+    syncLine = t('Synced {{time}}', {
+      time: tsToRelativeTime(account.last_sync, locale),
+    });
+    label = t('{{name}}, {{bank}}, synced {{dateTime}}', {
+      name: account.name,
+      bank: bankName,
+      dateTime: formatLastSyncDateTime(account.last_sync, locale),
+    });
+  } else if (isLinked) {
+    syncLine = t('Not synced yet');
+    label = t('{{name}}, {{bank}}, not synced yet', {
+      name: account.name,
+      bank: bankName,
+    });
+  }
 
   return (
-    <View
+    <ActionableGridListItem
+      id={account.id}
+      value={account}
+      textValue={label}
       data-testid="bank-sync-account"
-      style={{
-        backgroundColor: theme.tableBackground,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.tableBorder,
-        borderBottomStyle: 'solid',
-        padding: spacing.lg,
-        width: '100%',
-        cursor: 'pointer',
-      }}
-      onClick={() => onAction(account, isLinked ? 'edit' : 'link')}
+      {...props}
     >
-      <SpaceBetween gap={spacing.lg}>
+      <SpaceBetween
+        gap={spacing.md}
+        style={{ flex: 1, alignItems: 'center', flexWrap: 'nowrap' }}
+      >
         <SpaceBetween
           direction="vertical"
-          gap={5}
-          style={{ flex: 1, alignItems: 'flex-start' }}
+          gap={spacing.xs}
+          style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }}
         >
-          <Text
-            size="large"
+          <span
             style={{
+              fontSize: 15,
               fontWeight: 500,
-              color: theme.tableText,
+              color: theme.pageText,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
             }}
+            title={account.name}
           >
             {account.name}
-          </Text>
-          {isLinked && (
-            <Text
-              size="medium"
-              style={{
-                color: theme.pageTextSubdued,
-              }}
-            >
-              {account.bankName ?? t('Unknown')}
-            </Text>
-          )}
-          {isLinked && lastSyncString && (
-            <Text
-              size="medium"
-              style={{
-                color: theme.pageTextSubdued,
-              }}
+          </span>
+          {syncLine != null && (
+            <span
+              data-testid="bank-sync-account-sync"
               data-vrt-mask
+              style={{ fontSize: 13, color: theme.pageTextLight }}
             >
-              <Trans>Last sync: {{ time: lastSyncString }}</Trans>
-            </Text>
+              {syncLine}
+            </span>
           )}
         </SpaceBetween>
 
-        <span
-          style={{
-            borderRadius: 4,
-            padding: '5px 10px',
-            backgroundColor: theme.noticeBackground,
-            border: '1px solid ' + theme.noticeBackground,
-            color: theme.noticeTextDark,
-            fontSize: 13,
-            fontWeight: 500,
-            flexShrink: 0,
-          }}
-        >
-          {isLinked ? <Trans>Edit</Trans> : <Trans>Link account</Trans>}
-        </span>
+        {isLinked ? (
+          <span
+            style={{
+              fontSize: 13,
+              color: theme.pageTextLight,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '40%',
+              flexShrink: 0,
+            }}
+          >
+            {bankName}
+          </span>
+        ) : (
+          <span
+            style={{
+              borderRadius: 4,
+              padding: '3px 6px',
+              backgroundColor: theme.noticeBackground,
+              border: '1px solid ' + theme.noticeBackground,
+              color: theme.noticeTextDark,
+              fontSize: 12,
+              flexShrink: 0,
+            }}
+          >
+            <Trans>Link account</Trans>
+          </span>
+        )}
       </SpaceBetween>
-    </View>
+    </ActionableGridListItem>
   );
 }

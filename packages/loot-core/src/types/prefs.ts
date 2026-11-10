@@ -111,7 +111,6 @@ export type LocalPrefs = Partial<{
   reportsViewLabel: boolean;
   sidebarWidth: number;
   'mobile.showSpentColumn': boolean;
-  'mobile.bankSyncProvidersCollapsed': boolean;
   /**
    * Timestamp (epoch ms) of the last automatic bank sync attempted by this
    * device. Tracked locally so a failing account can't cause repeated
