@@ -28,7 +28,6 @@ export type SqliteFileStore = {
   // just loses its row
   revertFile(path: string): Promise<void>;
   exists(path: string): Promise<boolean>;
-  isOpen(path: string): boolean;
   // Persist anything pending (the fallback store writes lazily)
   flush(): Promise<void>;
   // Let go of every handle and lock so another worker can take over

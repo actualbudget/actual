@@ -80,27 +80,46 @@ async function reopenBudget() {
   }
 }
 
+// Where the engine saves to IndexedDB, the worker holds the only copy of
+// whatever a save has not stored yet, and a save can fail, on a full disk
+// for one. The worker is not ended over such changes: the caller hears
+// about it and can try again.
+async function ensureStored() {
+  try {
+    await send('storage-flush');
+  } catch (cause) {
+    throw new Error(
+      "Could not save the last changes to the browser's storage, so the " +
+        'backend was left running with them. The storage is most likely ' +
+        'full: make room and call shutdown() again, loading the budget ' +
+        'again first if it is no longer open.',
+      { cause },
+    );
+  }
+}
+
 export async function shutdown() {
-  unlistenPageLifecycle?.();
-  unlistenPageLifecycle = null;
   if (worker) {
     try {
       await send('sync');
     } catch {
       // most likely that no budget is loaded, so the sync failed
     }
+    // Before closing, so that a budget whose changes cannot be stored
+    // stays open, and after, because closing saves once more
+    await ensureStored();
+    await send('close-budget');
+    await ensureStored();
     try {
-      await send('close-budget');
-    } finally {
-      try {
-        if (ownsSession) {
-          await send('subscribe-sign-out');
-        }
-      } finally {
-        ownsSession = false;
-        worker.terminate();
-        worker = null;
+      if (ownsSession) {
+        await send('subscribe-sign-out');
       }
+    } finally {
+      ownsSession = false;
+      worker.terminate();
+      worker = null;
+      unlistenPageLifecycle?.();
+      unlistenPageLifecycle = null;
     }
   }
 }

@@ -517,10 +517,6 @@ export function createMemoryIdbStore({
       return (await getSqliteFileRow(path)) != null;
     },
 
-    isOpen(path) {
-      return entries.has(path);
-    },
-
     // Rejects when a file could not be written, so callers never take a
     // flush for durability it did not deliver
     async flush() {

@@ -264,6 +264,94 @@ test('saves fallback changes when the page is hidden, so a reload without shutdo
   expect(amounts).toEqual([-4200]);
 });
 
+// Makes the backend's IndexedDB writes fail the way a full disk does: the
+// request is accepted, then its transaction aborts
+async function setBackendWritesFailing(page: Page, isFailing: boolean) {
+  const [backend] = page.workers();
+  await backend.evaluate(failing => {
+    const scope = globalThis as typeof globalThis & {
+      workingPut?: IDBObjectStore['put'];
+    };
+    scope.workingPut ??= IDBObjectStore.prototype.put;
+    const workingPut = scope.workingPut;
+    IDBObjectStore.prototype.put = failing
+      ? function failingPut(
+          this: IDBObjectStore,
+          ...args: Parameters<IDBObjectStore['put']>
+        ) {
+          const request = workingPut.apply(this, args);
+          this.transaction.abort();
+          return request;
+        }
+      : workingPut;
+  }, isFailing);
+}
+
+test('keeps the worker and the budget when the last changes cannot be saved, and shuts down once they can', async ({
+  page,
+}) => {
+  await page.goto('/e2e/harness.html');
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/documents', storageBackend: 'memory-idb' });
+    await api.runImport('e2e-unsaved-budget', async () => {
+      await api.createAccount({ name: 'Checking' }, 0);
+    });
+  });
+
+  await setBackendWritesFailing(page, true);
+  const failure = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    const [account] = await api.getAccounts();
+    await api.addTransactions(account.id, [
+      { date: '2024-04-01', amount: -900, notes: 'not saved yet' },
+    ]);
+    return api.shutdown().then(
+      () => null,
+      (error: Error) => error.message,
+    );
+  });
+  expect(failure).toContain('Could not save the last changes');
+
+  // Nothing was shut down: the worker is there, with the budget open and
+  // the change in it
+  async function readAmounts() {
+    return page.evaluate(async () => {
+      const api = await window.apiReady;
+      const [account] = await api.getAccounts();
+      const transactions = await api.getTransactions(
+        account.id,
+        '2024-04-01',
+        '2024-04-01',
+      );
+      return transactions.map(transaction => transaction.amount);
+    });
+  }
+  expect(page.workers()).toHaveLength(1);
+  expect(await readAmounts()).toEqual([-900]);
+
+  // With room again the same call saves the change and ends the worker
+  await setBackendWritesFailing(page, false);
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.shutdown();
+  });
+  await expect.poll(() => page.workers().length).toBe(0);
+
+  await page.reload();
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.init({ dataDir: '/documents', storageBackend: 'memory-idb' });
+    const [budget] = await api.getBudgets();
+    await api.loadBudget(budget.id);
+  });
+  expect(await readAmounts()).toEqual([-900]);
+  await page.evaluate(async () => {
+    const api = await window.apiReady;
+    await api.shutdown();
+  });
+});
+
 // The budget locks held anywhere in this origin, the API's worker included
 function countHeldBudgetLocks(page: Page) {
   return page.evaluate(async () => {

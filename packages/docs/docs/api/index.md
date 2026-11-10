@@ -241,6 +241,8 @@ You can find your budget id in the "Advanced" section of the settings page.
 
 Close the current budget file, and stop any other ongoing processes. It's recommended to call this before exiting your script.
 
+In the [browser build](#using-the-api-in-a-browser), `shutdown` fails when the last changes could not be saved to the browser's storage, for example because the storage is full. Nothing is shut down when that happens, so the changes are not lost. Make room in the storage and call `shutdown` again.
+
 #### `utils.amountToInteger`
 
 <Method name="utils.amountToInteger" args={[{ name: 'amount', type: 'number' }]} returns="number" />

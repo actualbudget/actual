@@ -623,11 +623,6 @@ export function createOpfsStore({
       return (await getSqliteFileRow(path)) != null;
     },
 
-    isOpen(path) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      return pools.get(dirId)?.open.has(fileName) ?? false;
-    },
-
     async flush() {
       // Writes go straight to the access handles and are flushed by sqlite
     },
