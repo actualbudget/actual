@@ -101,7 +101,7 @@ describe('useLocationPermission without a Permissions API', () => {
 
     const { unmount } = renderHook(() => useLocationPermission());
     unmount();
-    await act(async () => rejectRestore?.(new Error('stale')));
+    await act(async () => rejectRestore?.(permissionDenied));
 
     expect(localStorage.getItem('location-permission-granted')).toBe('true');
   });
