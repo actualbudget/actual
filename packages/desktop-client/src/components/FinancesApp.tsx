@@ -49,7 +49,6 @@ import {
 import { FloatableSidebar } from './sidebar';
 import { SidebarMenuRoute } from './sidebar/SidebarMenuRoute';
 import { StartPageRedirect } from './StartPageRedirect';
-import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 import { Tour } from './tour/Tour';
 import { TourAutoOffer } from './tour/TourAutoOffer';
@@ -358,10 +357,28 @@ export function FinancesApp() {
                       }
                     />
                     <Route
+                      path="/tags/:id"
+                      element={
+                        <ErrorBoundary
+                          FallbackComponent={FeatureErrorFallback}
+                          resetKeys={[location.pathname]}
+                        >
+                          <WideNotSupported redirectTo="/settings/tags">
+                            <NarrowAlternate name="TagEdit" />
+                          </WideNotSupported>
+                        </ErrorBoundary>
+                      }
+                    />
+                    <Route
                       path="/tags"
                       element={
                         <SidebarMenuRoute id="tags">
-                          <ManageTagsPage />
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Tags" />
+                          </ErrorBoundary>
                         </SidebarMenuRoute>
                       }
                     />
@@ -428,7 +445,12 @@ export function FinancesApp() {
                         path="tags"
                         element={
                           <SidebarMenuRoute id="tags" isInSettings>
-                            <ManageTagsPage />
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="Tags" />
+                            </ErrorBoundary>
                           </SidebarMenuRoute>
                         }
                       />
