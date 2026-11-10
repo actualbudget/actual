@@ -2,11 +2,10 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { Button } from '@actual-app/components/button';
-import { SvgExpandArrow, SvgSubtract } from '@actual-app/components/icons/v0';
-import { Popover } from '@actual-app/components/popover';
+import { SvgSubtract } from '@actual-app/components/icons/v0';
+import { SvgLightBulb } from '@actual-app/components/icons/v1';
+import { SvgViewHide, SvgViewShow } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { memoizeOne } from '@actual-app/core/shared/memoize';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
@@ -14,6 +13,9 @@ import { groupById } from '@actual-app/core/shared/util';
 import type { Diff } from '@actual-app/core/shared/util';
 import type { PayeeEntity } from '@actual-app/core/types/models';
 
+import { EmptyMessage } from '#components/common/EmptyMessage';
+import { ManagePage } from '#components/common/ManagePage';
+import { PageMenuButton } from '#components/common/PageMenuButton';
 import { Search } from '#components/common/Search';
 import { Cell, SelectCell, TableHeader } from '#components/table';
 import {
@@ -25,8 +27,8 @@ import {
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-import { PayeeMenu } from './PayeeMenu';
 import { PayeeTable } from './PayeeTable';
+import { SelectedPayeesButton } from './SelectedPayeesButton';
 
 const getPayeesById = memoizeOne((payees: PayeeEntity[]) => groupById(payees));
 
@@ -77,7 +79,6 @@ export const ManagePayees = ({
 }: ManagePayeesProps) => {
   const [filter, setFilter] = useState('');
   const table = useRef(null);
-  const triggerRef = useRef(null);
   const [orphanedOnly, setOrphanedOnly] = useState(false);
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -213,97 +214,70 @@ export const ManagePayees = ({
     dispatch(pushModal({ modal: { name: 'payee-category-learning' } }));
   }, [dispatch]);
 
-  const buttonsDisabled = selected.items.size === 0;
-
   const payeesById = getPayeesById(payees);
-
-  const [menuOpen, setMenuOpen] = useState(false);
+  const hasOrphanedPayees = orphanedOnly || orphanedPayees.length > 0;
 
   return (
-    <View style={{ height: '100%' }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          padding: '0 0 15px',
-        }}
+    <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
+      <ManagePage
+        search={
+          <Search
+            placeholder={t('Filter payees…')}
+            value={filter}
+            onChange={applyFilter}
+          />
+        }
+        selection={
+          <SelectedPayeesButton
+            payeesById={payeesById}
+            onDelete={onDelete}
+            onMerge={onMerge}
+            onFavorite={onFavorite}
+            onLearn={onLearn}
+          />
+        }
+        menu={
+          <PageMenuButton<'toggle-unused' | 'category-learning'>
+            items={[
+              ...(hasOrphanedPayees
+                ? [
+                    orphanedOnly
+                      ? {
+                          name: 'toggle-unused',
+                          text: t('Show all payees'),
+                          icon: SvgViewShow,
+                        }
+                      : {
+                          name: 'toggle-unused',
+                          text: t('Show {{count}} unused payees', {
+                            count: orphanedPayees.length,
+                          }),
+                          icon: SvgViewHide,
+                        },
+                  ]
+                : []),
+              {
+                name: 'category-learning',
+                text: t('Category learning settings'),
+                icon: SvgLightBulb,
+              },
+            ]}
+            onMenuSelect={name => {
+              if (name === 'toggle-unused') {
+                setOrphanedOnly(prev => !prev);
+              } else {
+                onChangeCategoryLearning();
+              }
+            }}
+          />
+        }
       >
-        <View style={{ flexShrink: 0 }}>
-          <Button
-            ref={triggerRef}
-            variant="bare"
-            style={{ marginRight: 10 }}
-            isDisabled={buttonsDisabled}
-            onPress={() => setMenuOpen(true)}
-          >
-            {buttonsDisabled
-              ? t('No payees selected')
-              : t('{{count}} payees', {
-                  count: selected.items.size,
-                })}
-            <SvgExpandArrow width={8} height={8} style={{ marginLeft: 5 }} />
-          </Button>
-
-          <Popover
-            triggerRef={triggerRef}
-            isOpen={menuOpen}
-            placement="bottom start"
-            style={{ width: 250 }}
-            onOpenChange={() => setMenuOpen(false)}
-          >
-            <PayeeMenu
-              payeesById={payeesById}
-              selectedPayees={selected.items}
-              onClose={() => setMenuOpen(false)}
-              onDelete={onDelete}
-              onMerge={onMerge}
-              onFavorite={onFavorite}
-              onLearn={onLearn}
-            />
-          </Popover>
-        </View>
-        <View
-          style={{
-            flexShrink: 0,
-          }}
-        >
-          {(orphanedOnly || (orphanedPayees && orphanedPayees.length > 0)) && (
-            <Button
-              variant="bare"
-              style={{ marginRight: 10 }}
-              onPress={() => setOrphanedOnly(prev => !prev)}
-            >
-              {orphanedOnly
-                ? t('Show all payees')
-                : t('Show {{count}} unused payees', {
-                    count: orphanedPayees.length,
-                  })}
-            </Button>
-          )}
-        </View>
-        <View style={{ flex: 1 }} />
-        <Search
-          placeholder={t('Filter payees...')}
-          value={filter}
-          onChange={applyFilter}
-        />
-      </View>
-
-      <SelectedProvider instance={selected} fetchAllIds={getSelectableIds}>
         <View style={styles.tableContainer}>
           <PayeeTableHeader />
           {filteredPayees.length === 0 ? (
-            <View
-              style={{
-                textAlign: 'center',
-                color: theme.pageTextSubdued,
-                fontStyle: 'italic',
-                fontSize: 13,
-                marginTop: 5,
-              }}
-            >
+            <EmptyMessage>
               <Trans>No payees</Trans>
-            </View>
+            </EmptyMessage>
           ) : (
             <PayeeTable
               ref={table}
@@ -316,32 +290,7 @@ export const ManagePayees = ({
             />
           )}
         </View>
-      </SelectedProvider>
-
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          margin: '20px 0',
-          flexShrink: 0,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: '1em',
-          }}
-        >
-          <Button
-            aria-label={t('Category learning settings')}
-            variant="normal"
-            onPress={onChangeCategoryLearning}
-          >
-            <Trans>Category learning settings</Trans>
-          </Button>
-        </View>
-      </View>
-    </View>
+      </ManagePage>
+    </SelectedProvider>
   );
 };

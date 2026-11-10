@@ -129,7 +129,9 @@ export function PasswordEnableModal({
                 color: theme.pageTextLight,
                 paddingTop: 5,
               }}
-              title={t('After disabling OpenID all sessions will be closed')}
+              title={t(
+                'After disabling OpenID all sessions will be closed and existing API keys will be revoked',
+              )}
             />
             {multiuserEnabled && (
               <Label
