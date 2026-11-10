@@ -17,7 +17,9 @@ import {
 import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
+import { dashboardQueries, reportQueries } from './reports';
 import * as syncEvents from './sync-events';
+import { tagQueries } from './tags';
 
 export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {
@@ -80,6 +82,30 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       promises.push(
         queryClient.invalidateQueries({
           queryKey: accountQueries.lists(),
+        }),
+      );
+    }
+
+    if (tables.includes('dashboard') || tables.includes('dashboard_pages')) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: dashboardQueries.lists(),
+        }),
+      );
+    }
+
+    if (tables.includes('custom_reports')) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: reportQueries.lists(),
+        }),
+      );
+    }
+
+    if (tables.includes('tags')) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: tagQueries.lists(),
         }),
       );
     }

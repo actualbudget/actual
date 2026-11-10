@@ -176,14 +176,14 @@ Once you have the JSON file, proceed to [Import the JSON File](#import-the-json-
 ## Import the JSON File
 
 1. Open Actual
-2. Select the drop-down menu and **Close File**
+2. Select the drop-down menu and **Switch file**
 3. Select **Import file**
 
-   ![](/img/migrating/actual-import-1.webp)
+   <img width="512" alt="The Import From dialog with the nYNAB option highlighted" src="/img/migrating/nynab-import-source@2x.webp" />
 
-4. Select **nYnab**
+4. Select **nYNAB**
 
-   ![](/img/migrating/actual-import-2.webp)
+   <img width="512" alt="The Import from nYNAB dialog with the Select file button highlighted" src="/img/migrating/nynab-import-select-file@2x.webp" />
 
 5. Choose the exported JSON file
 

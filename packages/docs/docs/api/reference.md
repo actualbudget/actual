@@ -11,7 +11,9 @@ import APIList from './APIList';
 "setBudgetAmount",
 "setBudgetCarryover",
 "holdBudgetForNextMonth",
-"resetBudgetHold"
+"resetBudgetHold",
+"applyCategoryTemplate",
+"getCategoryTemplateAmount"
 ]} />
 
 <APIList title="Transactions" sections={[
@@ -84,7 +86,8 @@ import APIList from './APIList';
 "getSchedules",
 "createSchedule",
 "updateSchedule",
-"deleteSchedule"
+"deleteSchedule",
+"getScheduleDates"
 ]} />
 
 <APIList title="Notes" sections={[
@@ -162,6 +165,18 @@ These are types.
 #### `resetBudgetHold`
 
 <Method name="resetBudgetHold" args={[{ name: 'month', type: 'month' }]} returns="Promise<null>" />
+
+#### `applyCategoryTemplate`
+
+<Method name="applyCategoryTemplate" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<null>" />
+
+Budgets the category for the month from its [budget templates](../experimental/goal-templates.md), replacing the amount already budgeted. It fails when the category has no template or one of its templates has an error.
+
+#### `getCategoryTemplateAmount`
+
+<Method name="getCategoryTemplateAmount" args={[{ name: 'month', type: 'month' }, { name: 'categoryId', type: 'id' }]} returns="Promise<amount>" />
+
+Returns the amount the category's templates would budget for the month, without budgeting it. The amount ignores how much is available to budget, so it can be higher than what `applyCategoryTemplate` budgets. It fails when the category has no template.
 
 ## Transactions
 
@@ -788,6 +803,44 @@ Update fields of a rule. `fields` can specify any field described in [`Schedule`
 
 <Method name="deleteSchedule" args={[{ name: 'id', type: 'id' }]} returns="Promise<null>" />
 
+#### `getScheduleDates`
+
+<Method name="getScheduleDates" args={[{ name: 'date', type: 'date | RecurConfig' }, { name: 'options', type: '{ start?: date, end?: date, count?: number }' }]} returns="Promise<date[]>" />
+
+Expands the `date` of a [`Schedule`](#schedule) into the dates it falls on, in ascending order. Pass a schedule's `date` field as returned by `getSchedules`, or any [`RecurConfig`](#recurconfig).
+
+Every recurrence setting is taken into account: `frequency`, `interval`, `patterns` (including the last day or the last weekday of the month), `endMode` and, when `skipWeekend` is set, the move to the Friday before or the Monday after the weekend (`weekendSolveMode`).
+
+- `start`: first date to include. Defaults to today.
+- `end`: last date to include.
+- `count`: maximum number of dates to return.
+
+The window applies to the dates after the weekend move, so the result matches the dates Actual shows for the schedule. A date that several occurrences move onto (a daily schedule's Saturday and Sunday both landing on Monday) is listed once, and `count` counts distinct dates. A recurrence that never ends needs an `end` or a `count`.
+
+```js
+const [rent] = await api.getSchedules();
+
+// Every date the schedule falls on in 2025
+await api.getScheduleDates(rent.date, {
+  start: '2025-01-01',
+  end: '2025-12-31',
+});
+
+// The next three dates from today
+await api.getScheduleDates(rent.date, { count: 3 });
+
+// The same helper works on a recurrence that is not saved yet
+await api.getScheduleDates(
+  {
+    frequency: 'monthly',
+    start: '2025-01-01',
+    patterns: [{ type: 'FR', value: -1 }],
+  },
+  { start: '2025-01-01', count: 2 },
+);
+// ['2025-01-31', '2025-02-28']
+```
+
 ## Notes
 
 Notes can be attached to any entity (categories, budget months, etc.) by ID. They are also used to define budget templates and savings goals (e.g. `#template 250`, `#goal 1000`).
@@ -836,9 +889,23 @@ Synchronizes the locally cached budget files with the server's copy.
 
 #### `runBankSync`
 
-<Method name="runBankSync" args={[{ properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<void>" />
+<Method name="runBankSync" args={[{ name: 'args?', properties: [{ name: 'accountId', type: 'string' }] }]} returns="Promise<{ newTransactions: string[]; matchedTransactions: string[]; updatedAccounts: string[] }>" />
 
 Run the 3rd party (GoCardless, SimpleFIN) bank sync operation. This will download the transactions and insert them into the ledger.
+
+Omit the argument to sync every linked account. If you pass the argument, include `accountId`.
+
+Resolves with what the sync reconciled, so a caller can tell an idle sync from one that imported something without querying the ledger:
+
+```js
+{
+  newTransactions: ['id', ...],     // transactions the sync added
+  matchedTransactions: ['id', ...], // existing transactions it updated
+  updatedAccounts: ['id', ...]      // accounts the sync added transactions to
+}
+```
+
+A sync that adds or updates nothing resolves with three empty arrays. Errors still reject, so a resolved promise always means the sync succeeded. When syncing every account, one failing account rejects the whole call, but transactions already imported for the other accounts stay in the ledger and are not reported. After a rejection, check the ledger instead of assuming nothing was imported.
 
 #### `runImport`
 
@@ -856,7 +923,9 @@ Returns a list of all budget files either locally cached or on the remote server
 
 <Method name="loadBudget" args={[{ properties: [{ name: 'syncId', type: 'string' }] }]} returns="Promise<void>" />
 
-Load a locally cached budget file.
+Load a locally cached budget file using its local `id` from `getBudgets()`. Downloaded budgets receive a local ID that can differ between devices; do not use the Budget ID from another device.
+
+To download and open a budget using its Sync ID, use `downloadBudget()`.
 
 #### `downloadBudget`
 

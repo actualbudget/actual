@@ -96,6 +96,7 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
   const [showBalance, setShowBalance] = useState(
     widget?.meta?.showBalance ?? true,
   );
+  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [latestTransaction, setLatestTransaction] = useState('');
 
   const [isConcise, setIsConcise] = useState(false);
@@ -241,7 +242,6 @@ function CashFlowInner({ widget }: CashFlowInnerProps) {
     });
   };
 
-  const [earliestTransaction, setEarliestTransaction] = useState('');
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
 

@@ -1,6 +1,9 @@
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
-import { applyRulesToTransaction } from './applyRulesToTransaction';
+import {
+  applyRulesToTransaction,
+  transactionForRulesFromList,
+} from './applyRulesToTransaction';
 import { trackClearedField } from './table/utils';
 
 const baseTransaction: TransactionEntity = {
@@ -151,6 +154,64 @@ describe('applyRulesToTransaction', () => {
       expect(result.subtransactions?.[0].notes).toBeUndefined();
       expect(result.subtransactions?.[1].notes).toBeUndefined();
     });
+  });
+});
+
+describe('transactionForRulesFromList', () => {
+  it('returns a non-split transaction unchanged', () => {
+    const transaction = { ...baseTransaction };
+    expect(transactionForRulesFromList([transaction], transaction)).toEqual(
+      transaction,
+    );
+  });
+
+  it('groups a split parent with its children from a flat list', () => {
+    const parent: TransactionEntity = {
+      ...baseTransaction,
+      is_parent: true,
+      category: undefined,
+    };
+    const child1: TransactionEntity = {
+      id: 'sub-1',
+      account: 'account-1',
+      amount: -600,
+      date: '2026-10-01',
+      is_child: true,
+      parent_id: parent.id,
+    };
+    const child2: TransactionEntity = {
+      id: 'sub-2',
+      account: 'account-1',
+      amount: -400,
+      date: '2026-10-01',
+      is_child: true,
+      parent_id: parent.id,
+    };
+
+    const grouped = transactionForRulesFromList(
+      [parent, child1, child2],
+      parent,
+    );
+
+    expect(grouped.is_parent).toBe(true);
+    expect(grouped.subtransactions).toEqual([child1, child2]);
+    expect(grouped.id).toBe(parent.id);
+  });
+
+  it('groups by parent_id even if is_parent is missing on the row', () => {
+    const parent: TransactionEntity = { ...baseTransaction };
+    const child: TransactionEntity = {
+      id: 'sub-1',
+      account: 'account-1',
+      amount: -1000,
+      date: '2026-10-01',
+      is_child: true,
+      parent_id: parent.id,
+    };
+
+    const grouped = transactionForRulesFromList([parent, child], parent);
+
+    expect(grouped.subtransactions).toEqual([child]);
   });
 });
 

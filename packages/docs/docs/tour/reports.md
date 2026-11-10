@@ -4,7 +4,7 @@ This view gives you access both to the built-in reports and also to your own cus
 
 All reports in this view are shown in their tiled version. Clicking on a tile will take you to a full-screen version of that report.
 
-![Reports overview](/img/a-tour-of-actual/tour-reports-overview.webp)
+![The reports dashboard with its report tiles](/img/a-tour-of-actual/tour-reports-overview@2x.webp)
 
 **Net worth** represents the overall balance of all your accounts over time. It is calculated by subtracting your debts from the total value of your cash and assets. This includes all investments. Essentially, your net worth is the amount you would have if you sold all of your assets and paid off all of your debts.
 
@@ -12,7 +12,7 @@ All reports in this view are shown in their tiled version. Clicking on a tile wi
 
 See the [Reports Dashboard](../reports/index.md) for more detail on these and the other built-in reports.
 
-![Cashflow report](/img/a-tour-of-actual/tour-reports-cashflow.webp)
+![The Cash Flow report](/img/a-tour-of-actual/tour-reports-cash-flow@2x.webp)
 
 ## Custom reports
 
@@ -20,6 +20,6 @@ Actual's custom reports will allow you to create reports giving in-depth analyse
 
 Below are examples of reports covering _Daily Expenses_ over the last six months. One report shows this as a graph, the other as a table. Note that the table version also shows the sum and average (over six months) for the various categories.
 
-![Custom report showing daily expenses as graph](/img/a-tour-of-actual/tour-reports-daily-expenses-graph.webp)
+![Custom report showing daily expenses as a stacked bar graph](/img/a-tour-of-actual/tour-reports-custom-graph@2x.webp)
 
-![Custom report showing daily expenses as table](/img/a-tour-of-actual/tour-reports-daily-expenses-table.webp)
+![Custom report showing daily expenses as a table with totals and averages](/img/a-tour-of-actual/tour-reports-custom-table@2x.webp)

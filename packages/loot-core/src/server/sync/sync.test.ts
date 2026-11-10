@@ -11,6 +11,7 @@ import * as encoder from './encoder';
 import { isError } from './utils';
 
 import {
+  addSyncListener,
   applyMessages,
   fullSync,
   receiveMessages,
@@ -188,7 +189,7 @@ describe('Sync', () => {
     expect(getClock().timestamp.toString() > latest).toBe(true);
   });
 
-  it('should reject a batch holding a far-future timestamp', () => {
+  it('should reject a batch holding a far-future timestamp', async () => {
     // `toISOString` writes years above 9999 as `+010000-…`, which sorts below
     // every normal timestamp. The batch maximum must not rank it last, which
     // would let it skip the clock drift check.
@@ -202,12 +203,66 @@ describe('Sync', () => {
       ),
     });
 
-    expect(() =>
+    await expect(
       receiveMessages([
         message(Date.parse('1970-01-02T00:00:00.000Z')),
         message(253402300800000),
       ]),
-    ).toThrow(expect.objectContaining({ reason: 'clock-drift' }));
+    ).rejects.toMatchObject({ reason: 'clock-drift' });
+  });
+});
+
+describe('receiveMessages', () => {
+  function conflictingMessages() {
+    const timestamp = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
+    // Duplicate timestamps make the batch fail inside the database transaction.
+    return ['foo', 'bar'].map(row => ({
+      dataset: 'transactions',
+      row,
+      column: 'amount',
+      value: 3200,
+      timestamp,
+    }));
+  }
+
+  it('discards failed clock advances before receiving the next queued batch', async () => {
+    const messages = conflictingMessages();
+    const failedBatch = receiveMessages(messages);
+    const nextBatch = receiveMessages([
+      {
+        ...messages[0],
+        timestamp: new Timestamp(Date.now() + 1000, 0, '0000000000000002'),
+      },
+    ]);
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    await expect(nextBatch).resolves.toHaveLength(1);
+    expect(getClock().timestamp.millis()).toBe(Date.now() + 1000);
+    expect(getClock().timestamp.counter()).toBe(1);
+  });
+
+  it('does not reuse timestamps issued while a failed receive is pending', async () => {
+    const failedBatch = receiveMessages(conflictingMessages());
+    const issued = Timestamp.send();
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    expect(Timestamp.send().toString() > issued.toString()).toBe(true);
+  });
+
+  it('keeps the received clock when a step after the commit fails', async () => {
+    const [message] = conflictingMessages();
+    const removeListener = addSyncListener(() => {
+      throw new Error('listener failed');
+    });
+
+    try {
+      await expect(receiveMessages([message])).rejects.toThrow(
+        'listener failed',
+      );
+    } finally {
+      removeListener();
+    }
+    expect(getClock().timestamp.millis()).toBe(message.timestamp.millis());
   });
 });
 

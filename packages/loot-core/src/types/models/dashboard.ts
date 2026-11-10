@@ -1,10 +1,11 @@
-import type { ForecastSource } from './forecast';
+import type { ForecastSeries, ForecastSource } from './forecast';
 import type { CustomReportEntity } from './reports';
 import type { RuleConditionEntity } from './rule';
 
 export type DashboardPageEntity = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: boolean;
 };
 
@@ -142,6 +143,7 @@ export type MonteCarloWithdrawalStrategy =
 export type MonteCarloReturnModel =
   | 'normal'
   | 'historical-bootstrap'
+  | 'historical-block-bootstrap'
   | 'historical-sequence';
 
 export type MonteCarloWithdrawalRuleType =
@@ -186,6 +188,35 @@ export type MonteCarloSpendingPhaseMeta = {
   annualWithdrawal?: number;
 };
 
+/** How a later investment phase takes over from the previous one */
+export type MonteCarloInvestmentTransition = 'at-once' | 'gradual';
+
+/**
+ * A change to what a pot is invested in from a given age: its allocation
+ * (or hand-typed return and volatility) and its fees. The pot's own
+ * fields are its settings until the first phase begins
+ */
+export type MonteCarloInvestmentPhaseMeta = {
+  id: string;
+  /** Age the phase takes effect (inclusive) */
+  fromAge?: number;
+  /**
+   * 'gradual' glides from the previous phase's settings, starting at that
+   * phase's own start age and arriving at fromAge; 'at-once' switches on
+   * the birthday
+   */
+  transition?: MonteCarloInvestmentTransition;
+  allocationPreset?: MonteCarloAllocationPreset;
+  allocationStocks?: number;
+  allocationBonds?: number;
+  allocationCash?: number;
+  expectedReturnMean?: number;
+  returnStdDev?: number;
+  annualFeeFixed?: number;
+  feeAdjustsWithInflation?: boolean;
+  annualFeeRate?: number;
+};
+
 export type MonteCarloPotMeta = {
   id: string;
   name?: string;
@@ -228,6 +259,8 @@ export type MonteCarloPotMeta = {
    * it is drawn on before any other pot. At most one pot is flagged.
    */
   isSurplus?: boolean;
+  /** Later changes to the pot's investment, by age */
+  investmentPhases?: MonteCarloInvestmentPhaseMeta[];
 };
 
 /** One recurring yearly contribution into a pot over an age window */
@@ -277,6 +310,28 @@ export type MonteCarloIncomeStreamMeta = {
   taxableFraction?: number;
 };
 
+/**
+ * One single withdrawal taken at an age on top of the year's spending
+ * (a house deposit, a pension's tax-free lump sum), with its own tax
+ * treatment and an optional pot to draw first
+ */
+export type MonteCarloLumpSumMeta = {
+  id: string;
+  name?: string;
+  /** Age the money is taken; the year is age - currentAge + 1 */
+  age?: number;
+  /** Net amount received in minor units, in today's money */
+  amount?: number;
+  /** Whether the amount rises with inflation */
+  adjustsWithInflation?: boolean;
+  /** Pot drawn first; null/absent = follow the withdrawal order */
+  sourcePotId?: string | null;
+  /** Flat tax model: effective tax rate on the lump sum (0.2 = 20%) */
+  taxRate?: number;
+  /** Bands tax model: share of the lump sum that counts as taxable */
+  taxableFraction?: number;
+};
+
 export type MonteCarloTaxModel = 'flat' | 'bands';
 
 /** One tax band: income from `from` upward taxed at `rate` */
@@ -303,6 +358,8 @@ export type MonteCarloWidget = AbstractWidget<
     contributions?: MonteCarloContributionMeta[];
     /** Recurring yearly income that pays for spending before the pots */
     incomeStreams?: MonteCarloIncomeStreamMeta[];
+    /** Single withdrawals taken at an age on top of the spending */
+    lumpSums?: MonteCarloLumpSumMeta[];
     /** Mean yearly inflation as a decimal fraction; null = flat withdrawals */
     inflationMean?: number | null;
     /** Yearly inflation volatility as a decimal fraction; 0 = fixed rate */
@@ -315,6 +372,8 @@ export type MonteCarloWidget = AbstractWidget<
     /** Age the pot must last to; the horizon is targetAge - currentAge */
     targetAge?: number;
     simulationCount?: number;
+    /** Block bootstrap model: average run of consecutive years */
+    historicalBlockLength?: number;
   } | null
 >;
 
@@ -457,6 +516,10 @@ export type BalanceForecastWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     granularity?: 'Daily' | 'Monthly';
+    yAxisBase?: 'Zero-Based' | 'Auto';
     source?: ForecastSource;
+    series?: ForecastSeries[];
+    // Opt-in rolling duration for schedules; absent means the saved timeFrame applies.
+    monthsFromToday?: number;
   } | null
 >;

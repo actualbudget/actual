@@ -21,6 +21,8 @@ type MonteCarloYearStoryInput = {
   /** How the surplus pot is labelled in the UI */
   surplusPotName: string;
   hasSurplusPot: boolean;
+  /** The configured one-off withdrawals, named as the editor lists them */
+  lumpSumNames: string[];
   format: (amount: number, type: 'financial') => string;
   translate: TFunction;
 };
@@ -37,6 +39,7 @@ export function buildMonteCarloYearStory({
   withdrawalRule,
   surplusPotName,
   hasSurplusPot,
+  lumpSumNames,
   format,
   translate,
 }: MonteCarloYearStoryInput): string[] {
@@ -72,6 +75,16 @@ export function buildMonteCarloYearStory({
 
   sentences.push(...getFundingSentences(row, format, translate));
 
+  const lumpSumSentence = getLumpSumSentence(
+    row,
+    lumpSumNames,
+    format,
+    translate,
+  );
+  if (lumpSumSentence != null) {
+    sentences.push(lumpSumSentence);
+  }
+
   const surplusSentence = getSurplusSentence(
     row,
     surplusPotName,
@@ -97,6 +110,34 @@ function getRuleName(
     return translate('Ratcheting');
   }
   return translate('Boundaries');
+}
+
+// Where the rule's result sits against the plan once earlier years'
+// changes are counted - only worth saying when there were some, since a
+// first change moves from the planned amount itself
+function getEarlierChangesSentence(
+  explanation: Extract<MonteCarloRuleExplanation, { kind: 'factor' }>,
+  previousFactor: number,
+  format: MonteCarloYearStoryInput['format'],
+  translate: TFunction,
+): string | null {
+  if (Math.abs(previousFactor - 1) < 1e-6) {
+    return null;
+  }
+  const planned = format(explanation.planned, 'financial');
+  if (explanation.adjusted < explanation.planned) {
+    return translate(
+      'With earlier changes included, that is below the {{planned}} planned.',
+      { planned },
+    );
+  }
+  if (explanation.adjusted > explanation.planned) {
+    return translate(
+      'With earlier changes included, that is above the {{planned}} planned.',
+      { planned },
+    );
+  }
+  return null;
 }
 
 // What the rule decided, with the reason in words; null when the rule
@@ -140,50 +181,76 @@ function getRuleDecisionSentence(
   const rule = getRuleName(explanation.rule, translate);
   const planned = format(explanation.planned, 'financial');
   const adjusted = format(explanation.adjusted, 'financial');
+  // A change steps the running factor, so spending moves from last
+  // year's adjusted level - the planned amount only when nothing had
+  // changed before. Rounded because amounts are whole minor units and
+  // the formatter rejects fractions
+  const from = format(
+    Math.round(explanation.planned * explanation.previousFactor),
+    'financial',
+  );
+  const earlierChanges = getEarlierChangesSentence(
+    explanation,
+    explanation.previousFactor,
+    format,
+    translate,
+  );
+  const withEarlierChanges = (sentence: string) =>
+    earlierChanges == null ? sentence : `${sentence} ${earlierChanges}`;
   if (explanation.action === 'cut') {
     if (explanation.rule === 'boundaries') {
-      return translate(
-        "{{rule}} cut this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate rose above {{upper}}.",
-        {
-          rule,
-          planned,
-          adjusted,
-          upper: formatRuleRate(withdrawalRule.upperRateThreshold),
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} cut this year's spending from {{from}} to {{adjusted}} because the withdrawal rate rose above {{upper}}.",
+          {
+            rule,
+            from,
+            adjusted,
+            upper: formatRuleRate(withdrawalRule.upperRateThreshold),
+          },
+        ),
       );
     }
-    return translate(
-      "{{rule}} cut this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate had climbed too far above the plan.",
-      { rule, planned, adjusted },
+    return withEarlierChanges(
+      translate(
+        "{{rule}} cut this year's spending from {{from}} to {{adjusted}} because the withdrawal rate had climbed too far above the plan.",
+        { rule, from, adjusted },
+      ),
     );
   }
   if (explanation.action === 'raise') {
     if (explanation.rule === 'boundaries') {
-      return translate(
-        "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate fell below {{lower}}.",
-        {
-          rule,
-          planned,
-          adjusted,
-          lower: formatRuleRate(withdrawalRule.lowerRateThreshold),
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the withdrawal rate fell below {{lower}}.",
+          {
+            rule,
+            from,
+            adjusted,
+            lower: formatRuleRate(withdrawalRule.lowerRateThreshold),
+          },
+        ),
       );
     }
     if (explanation.rule === 'ratcheting') {
-      return translate(
-        "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the balance had stayed above {{multiple}} its starting level for {{years}} years.",
-        {
-          rule,
-          planned,
-          adjusted,
-          multiple: `${Number(withdrawalRule.balanceThresholdMultiple.toFixed(2))}×`,
-          years: withdrawalRule.consecutiveYears,
-        },
+      return withEarlierChanges(
+        translate(
+          "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the balance had stayed above {{multiple}} its starting level for {{years}} years.",
+          {
+            rule,
+            from,
+            adjusted,
+            multiple: `${Number(withdrawalRule.balanceThresholdMultiple.toFixed(2))}×`,
+            years: withdrawalRule.consecutiveYears,
+          },
+        ),
       );
     }
-    return translate(
-      "{{rule}} raised this year's spending from {{planned}} to {{adjusted}} because the withdrawal rate had fallen well below the plan.",
-      { rule, planned, adjusted },
+    return withEarlierChanges(
+      translate(
+        "{{rule}} raised this year's spending from {{from}} to {{adjusted}} because the withdrawal rate had fallen well below the plan.",
+        { rule, from, adjusted },
+      ),
     );
   }
   if (explanation.factor !== 1) {
@@ -265,6 +332,80 @@ function getFundingSentences(
   return [
     translate('Spent {{spent}} as planned, funded from the pots.', { spent }),
   ];
+}
+
+// The one-off withdrawals the year called for, and whether the pots
+// could pay them; null when none fell in this year. Names are user text
+// and may be any phrase, so they are quoted rather than woven in
+function getLumpSumSentence(
+  row: MonteCarloRunDetailRow,
+  lumpSumNames: string[],
+  format: MonteCarloYearStoryInput['format'],
+  translate: TFunction,
+): string | null {
+  const requested = row.lumpSumAmounts
+    .map((amount, lumpSumIndex) => ({ amount, lumpSumIndex }))
+    .filter(({ amount }) => amount > 0);
+  if (requested.length === 0) {
+    return null;
+  }
+  const quotedNames = requested
+    .map(
+      ({ lumpSumIndex }) =>
+        `"${
+          lumpSumNames[lumpSumIndex] ||
+          translate('One-off {{number}}', { number: lumpSumIndex + 1 })
+        }"`,
+    )
+    .join(', ');
+  const amount = format(
+    requested.reduce((sum, { amount }) => sum + amount, 0),
+    'financial',
+  );
+  // A single one-off is named only when the user named it
+  const singleName =
+    requested.length === 1 ? lumpSumNames[requested[0].lumpSumIndex] : '';
+  // The gross the pots actually gave up, net of its tax, against what was
+  // asked for - short on a failure year or after the plan ran out
+  const received = row.lumpSumWithdrawal - row.lumpSumTax;
+  const isShort =
+    row.afterDepletion ||
+    received <
+      row.lumpSumAmounts.reduce(
+        (sum, requestedAmount) => sum + requestedAmount,
+        0,
+      );
+  if (isShort) {
+    if (requested.length > 1) {
+      return translate(
+        'The {{amount}} of one-off withdrawals ({{names}}) could not be fully funded.',
+        { amount, names: quotedNames },
+      );
+    }
+    return singleName
+      ? translate(
+          'The {{amount}} one-off withdrawal "{{name}}" could not be fully funded.',
+          { amount, name: singleName },
+        )
+      : translate(
+          'The {{amount}} one-off withdrawal could not be fully funded.',
+          { amount },
+        );
+  }
+  if (requested.length > 1) {
+    return translate(
+      'One-off withdrawals of {{amount}} ({{names}}) were taken from the pots.',
+      { amount, names: quotedNames },
+    );
+  }
+  return singleName
+    ? translate(
+        'A one-off withdrawal of {{amount}}, "{{name}}", was taken from the pots.',
+        { amount, name: singleName },
+      )
+    : translate('A one-off withdrawal of {{amount}} was taken from the pots.', {
+        amount,
+      });
 }
 
 // Where money the plan didn't spend ended up; null when there was none

@@ -1,5 +1,10 @@
-import type { DragItem } from 'react-aria';
-import { DropIndicator, GridList, useDragAndDrop } from 'react-aria-components';
+import {
+  DropIndicator,
+  GridList,
+  isTextDropItem,
+  useDragAndDrop,
+} from 'react-aria-components';
+import type { ItemDropTarget } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { theme } from '@actual-app/components/theme';
@@ -9,9 +14,14 @@ import type {
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { useMoveCategoryMutation } from '#budget';
+import { useReorderCategoryMutation } from '#budget';
+import { findSortDown } from '#components/budget/util';
 
 import { ExpenseCategoryListItem } from './ExpenseCategoryListItem';
+
+// A dedicated drag type keeps income categories and category groups out of
+// expense groups.
+const EXPENSE_CATEGORY_DRAG_TYPE = 'application/x-actual-expense-category';
 
 type ExpenseCategoryListProps = {
   categoryGroup: CategoryGroupEntity;
@@ -35,16 +45,29 @@ export function ExpenseCategoryList({
   shouldHideCategory,
 }: ExpenseCategoryListProps) {
   const { t } = useTranslation();
-  const moveCategory = useMoveCategoryMutation();
+  const reorderCategory = useReorderCategoryMutation();
+
+  // Moves a dragged category into this group, before or after the drop target.
+  // Handles drops from this group and from other expense groups.
+  const moveCategoryToTarget = (
+    categoryId: CategoryEntity['id'],
+    { key: targetKey, dropPosition }: ItemDropTarget,
+  ) => {
+    reorderCategory.mutate({
+      id: categoryId,
+      groupId: categoryGroup.id,
+      ...findSortDown(
+        categories,
+        dropPosition === 'before' ? 'top' : 'bottom',
+        String(targetKey),
+      ),
+    });
+  };
 
   const { dragAndDropHooks } = useDragAndDrop({
+    acceptedDragTypes: [EXPENSE_CATEGORY_DRAG_TYPE],
     getItems: keys =>
-      [...keys].map(
-        key =>
-          ({
-            'text/plain': key as CategoryEntity['id'],
-          }) as DragItem,
-      ),
+      [...keys].map(key => ({ [EXPENSE_CATEGORY_DRAG_TYPE]: String(key) })),
     renderDropIndicator: target => {
       return (
         <DropIndicator
@@ -62,53 +85,15 @@ export function ExpenseCategoryList({
     },
     onReorder: e => {
       const [key] = e.keys;
-      const categoryIdToMove = key as CategoryEntity['id'];
-      const categoryToMove = categories.find(c => c.id === categoryIdToMove);
-
-      if (!categoryToMove) {
-        throw new Error(
-          `Internal error: category with ID ${categoryIdToMove} not found.`,
-        );
+      moveCategoryToTarget(String(key), e.target);
+    },
+    onInsert: async e => {
+      const [item] = e.items;
+      if (!item || !isTextDropItem(item)) {
+        return;
       }
-
-      if (!categoryToMove.group) {
-        throw new Error(
-          `Internal error: category ${categoryIdToMove} is not in a group and cannot be moved.`,
-        );
-      }
-
-      const targetCategoryId = e.target.key as CategoryEntity['id'];
-
-      if (e.target.dropPosition === 'before') {
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          targetId: targetCategoryId,
-        });
-      } else if (e.target.dropPosition === 'after') {
-        const targetCategoryIndex = categories.findIndex(
-          c => c.id === targetCategoryId,
-        );
-
-        if (targetCategoryIndex === -1) {
-          throw new Error(
-            `Internal error: category with ID ${targetCategoryId} not found.`,
-          );
-        }
-
-        const nextToTargetCategory = categories[targetCategoryIndex + 1];
-
-        moveCategory.mutate({
-          id: categoryToMove.id,
-          groupId: categoryToMove.group,
-          // Due to the way `moveCategory` works, we use the category next to the
-          // actual target category here because `moveCategory` always shoves the
-          // category *before* the target category.
-          // On the other hand, using `null` as `targetId` moves the category
-          // to the end of the list.
-          targetId: nextToTargetCategory?.id || null,
-        });
-      }
+      const categoryId = await item.getText(EXPENSE_CATEGORY_DRAG_TYPE);
+      moveCategoryToTarget(categoryId, e.target);
     },
   });
 

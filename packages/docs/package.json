@@ -21,19 +21,19 @@
     "@docusaurus/preset-classic": "^3.10.2",
     "@docusaurus/theme-common": "^3.10.2",
     "@docusaurus/theme-mermaid": "^3.10.2",
-    "@easyops-cn/docusaurus-search-local": "^0.55.2",
+    "@easyops-cn/docusaurus-search-local": "^0.55.3",
     "@mdx-js/react": "^3.1.1",
-    "@r74tech/docusaurus-plugin-panzoom": "^2.4.2",
+    "@r74tech/docusaurus-plugin-panzoom": "^2.5.0",
     "prism-react-renderer": "^2.4.1",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "unist-util-visit-parents": "^6.0.2"
   },
   "devDependencies": {
     "@actual-app/ci-actions": "workspace:*",
     "@docusaurus/module-type-aliases": "^3.10.2",
     "@docusaurus/types": "^3.10.2",
-    "@types/react": "^19.2.17"
+    "@types/react": "^19.3.0"
   },
   "browserslist": {
     "production": [

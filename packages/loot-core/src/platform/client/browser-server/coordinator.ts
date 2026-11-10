@@ -173,38 +173,42 @@ export function createCoordinator({
     const wasTracked = isTrackedPort(port);
     const currentBudget = portToBudget.get(port);
     const currentGroup = currentBudget ? budgetGroups.get(currentBudget) : null;
-    const alreadyAttached =
-      !!normalizedBudgetId &&
-      currentBudget === normalizedBudgetId &&
-      !!currentGroup &&
-      isGroupMember(currentGroup, port);
     const alreadyUnassigned =
       !normalizedBudgetId &&
       !currentBudget &&
       wasTracked &&
       unassignedPorts.has(port);
-    const alreadyOnTemporaryGroup =
-      !normalizedBudgetId &&
-      !!currentBudget &&
-      !!currentGroup &&
-      currentBudget.startsWith('__') &&
-      isGroupMember(currentGroup, port);
 
     ensureTrackedPort(port);
     pendingPongs.delete(port);
 
-    if (alreadyAttached) {
-      logState(`Tab resumed on budget "${normalizedBudgetId}"`);
+    // A tab that is still a member of its group stays there, whatever its
+    // bridge reports. A bridge can lag behind (a role message it never
+    // saw); moving such a tab to unassigned would leave its group with a
+    // leader that no longer routes, and every tab served by that group
+    // would hang. Tell it its role again instead.
+    if (currentBudget && currentGroup && isGroupMember(currentGroup, port)) {
+      if (
+        currentBudget !== normalizedBudgetId &&
+        !currentBudget.startsWith('__')
+      ) {
+        const role = currentGroup.leaderPort === port ? 'LEADER' : 'FOLLOWER';
+        port.postMessage({
+          type: '__role-change',
+          role,
+          budgetId: currentBudget,
+        });
+        logState(
+          `Tab resumed on budget "${currentBudget}" as ${role.toLowerCase()} (role re-announced)`,
+        );
+      } else {
+        logState(`Tab resumed on budget "${currentBudget}"`);
+      }
       return;
     }
 
     if (alreadyUnassigned) {
       logState('Tab resume confirmed while unassigned');
-      return;
-    }
-
-    if (alreadyOnTemporaryGroup) {
-      logState(`Tab resumed on coordinator group "${currentBudget}"`);
       return;
     }
 
@@ -273,34 +277,8 @@ export function createCoordinator({
 
     const budgetId = portToBudget.get(port);
     portToBudget.delete(port);
-    if (!budgetId) return;
-
-    const group = budgetGroups.get(budgetId);
-    if (!group) return;
-
-    if (port === group.leaderPort) {
-      if (group.followers.size > 0) {
-        const candidate = group.followers.values().next()
-          .value as CoordinatorPort;
-        group.followers.delete(candidate);
-        logger.log(
-          `[SharedWorker] Leader left budget "${budgetId}" — promoting follower`,
-        );
-        electLeader(budgetId, candidate, budgetId);
-      } else {
-        logger.log(
-          `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
-        );
-        budgetGroups.delete(budgetId);
-      }
-    } else {
-      group.followers.delete(port);
-      for (const [id, p] of group.requestToPort) {
-        if (p === port) {
-          group.requestToPort.delete(id);
-          group.requestNames.delete(id);
-        }
-      }
+    if (budgetId) {
+      removePortFromGroup(port, budgetId);
     }
   }
 
@@ -376,9 +354,31 @@ export function createCoordinator({
     }
   }
 
+  // Takes a port out of a group. A leaving leader hands the group to one
+  // of its followers, or the group is dissolved when none remain, so a
+  // group never keeps a leader that no longer routes for it.
   function removePortFromGroup(port: CoordinatorPort, budgetId: string) {
     const group = budgetGroups.get(budgetId);
     if (!group) return;
+
+    if (port === group.leaderPort) {
+      if (group.followers.size > 0) {
+        const candidate = group.followers.values().next()
+          .value as CoordinatorPort;
+        group.followers.delete(candidate);
+        logger.log(
+          `[SharedWorker] Leader left budget "${budgetId}" — promoting follower`,
+        );
+        electLeader(budgetId, candidate, budgetId);
+      } else {
+        logger.log(
+          `[SharedWorker] Last tab left budget "${budgetId}" — removing group`,
+        );
+        budgetGroups.delete(budgetId);
+      }
+      return;
+    }
+
     group.followers.delete(port);
     for (const [id, p] of group.requestToPort) {
       if (p === port) {
@@ -448,6 +448,22 @@ export function createCoordinator({
         portToBudget.set(p, newBudgetId);
       }
 
+      // Bridges learn their budget from role changes. Without this a tab
+      // that resumes after being hidden reports its old (or no) budget and
+      // is moved to unassigned, which terminates the leader's Worker.
+      leaderPort.postMessage({
+        type: '__role-change',
+        role: 'LEADER',
+        budgetId: newBudgetId,
+      });
+      for (const p of oldGroup.followers) {
+        p.postMessage({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: newBudgetId,
+        });
+      }
+
       logger.log(
         `[SharedWorker] Budget loaded: "${newBudgetId}" (leader + ${oldGroup.followers.size} follower(s))`,
       );
@@ -476,14 +492,22 @@ export function createCoordinator({
       logState(`Budget "${budgetId}" closed (no tabs remain)`);
 
       // if it was the last group, re-establish a lobby so the tab can
-      // still route messages
+      // still route messages. Either way the bridge must learn that it no
+      // longer has this budget, or it will report it on its next resume.
       if (budgetGroups.size === 0) {
         unassignedPorts.delete(closingPort);
         const lobbyGroup = createBudgetGroup(closingPort);
         lobbyGroup.backendConnected = true;
         budgetGroups.set('__lobby', lobbyGroup);
         portToBudget.set(closingPort, '__lobby');
+        closingPort.postMessage({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        });
         logState('Re-established lobby after last budget closed');
+      } else {
+        closingPort.postMessage({ type: '__role-change', role: 'UNASSIGNED' });
       }
     }
   }
@@ -608,13 +632,18 @@ export function createCoordinator({
               if (workerMsg.type === 'reply' && name === 'close-budget') {
                 handleBudgetClosed(targetPort, portBudget!);
               }
+              // Prefs name the budget the leader's Worker actually has
+              // open. A group keyed by a placeholder (the lobby, a
+              // creation or deletion) or by a budget this leader has since
+              // replaced is re-keyed, so later tabs join it instead of
+              // electing a second leader for the same budget.
               if (
                 workerMsg.type === 'reply' &&
                 name === 'load-prefs' &&
                 portBudget &&
-                portBudget.startsWith('__creating-') &&
                 workerMsg.result &&
-                (workerMsg.result as Record<string, unknown>).id
+                (workerMsg.result as Record<string, unknown>).id &&
+                (workerMsg.result as Record<string, unknown>).id !== portBudget
               ) {
                 handleBudgetLoaded(
                   port,

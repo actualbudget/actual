@@ -72,10 +72,6 @@ Make Actual Budget accessible to more people by helping with the [Internationali
 <img src="https://hosted.weblate.org/widget/actualbudget/actual/287x66-grey.png" alt="Translation status" />
 </a>
 
-## Repo Activity
-
-![Alt](https://repobeats.axiom.co/api/embed/e20537dd8b74956f86736726ccfbc6f0565bec22.svg 'Repobeats analytics image')
-
 ## Sponsors
 
 Thanks to our wonderful sponsors who make Actual Budget possible!

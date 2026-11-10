@@ -7,6 +7,7 @@ import * as db from '#server/db';
 
 import {
   getAppliedMigrations,
+  getMigrationId,
   getMigrationList,
   getPending,
   migrate,
@@ -28,20 +29,17 @@ describe('Migrations', () => {
   });
 
   test('applied migrations are returned in order', async () => {
-    return withMigrationsDir(
-      __dirname + '/../../mocks/migrations',
-      async () => {
-        await migrate(db.getDatabase());
+    const migrationsDir = __dirname + '/../../mocks/migrations';
+    return withMigrationsDir(migrationsDir, async () => {
+      await migrate(db.getDatabase());
 
-        const migrations = await getAppliedMigrations(db.getDatabase());
-        const last = 0;
-        for (const migration of migrations) {
-          if (migration <= last) {
-            throw new Error('Found older migration out of order');
-          }
-        }
-      },
-    );
+      const migrations = await getAppliedMigrations(db.getDatabase());
+      const expected = (await getMigrationList(migrationsDir)).map(
+        getMigrationId,
+      );
+      expect(expected.length).toBeGreaterThan(0);
+      expect(migrations).toEqual(expected);
+    });
   });
 
   test('checks if there are unknown migrations', async () => {

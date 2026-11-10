@@ -21,10 +21,7 @@ export const BySaveAutomationReadOnly = ({
 }: BySaveAutomationReadOnlyProps) => {
   const format = useFormat();
   const locale = useLocale();
-  const amount = format(
-    amountToInteger(template.amount, format.currency.decimalPlaces),
-    'financial',
-  );
+  const amount = format(amountToInteger(template.amount), 'financial');
   const month = formatMonthLabel(template.month, locale);
   const repeat = template.repeat ?? 1;
   const from =

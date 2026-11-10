@@ -30,7 +30,7 @@ import {
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
   Graph,
-  GraphLayers,
+  GraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -110,11 +110,11 @@ export function SankeyCard({
   const topN = Math.min(configuredTopN, heightBasedTopN);
 
   const defaultLayerRange = getDefaultLayerRange(mode);
-  let layerFrom: GraphLayers;
-  let layerTo: GraphLayers;
+  let layerFrom: GraphLayer;
+  let layerTo: GraphLayer;
   if (isGraphLayer(meta?.layerFrom) && isGraphLayer(meta?.layerTo)) {
-    layerFrom = meta.layerFrom as GraphLayers;
-    layerTo = meta.layerTo as GraphLayers;
+    layerFrom = meta.layerFrom as GraphLayer;
+    layerTo = meta.layerTo as GraphLayer;
   } else {
     layerFrom = defaultLayerRange.from;
     layerTo = defaultLayerRange.to;

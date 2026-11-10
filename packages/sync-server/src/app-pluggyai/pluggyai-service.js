@@ -1,6 +1,9 @@
+import createDebug from 'debug';
 import { PluggyClient } from 'pluggy-sdk';
 
 import { SecretName, secretsService } from '#services/secrets-service';
+
+const debugSensitive = createDebug('actual-sensitive:pluggy');
 
 const pluggyClients = new Map();
 
@@ -12,12 +15,12 @@ function hasCredentials(fileId = null) {
   );
 }
 
-function getCredentialSource(fileId) {
+function getCredentialSource(fileId, allowGlobal = true) {
   if (!!fileId && hasCredentials(fileId)) {
     return 'per-budget-file';
   }
 
-  if (hasCredentials()) {
+  if (allowGlobal && hasCredentials()) {
     return 'global';
   }
 
@@ -45,8 +48,8 @@ function getCredentialsCacheEntry(credentialFileId) {
   };
 }
 
-function getPluggyClient(fileId) {
-  const credentialSource = getCredentialSource(fileId);
+function getPluggyClient(fileId, allowGlobal) {
+  const credentialSource = getCredentialSource(fileId, allowGlobal);
   if (!credentialSource) {
     throw new Error('Pluggy credentials are not configured');
   }
@@ -72,9 +75,9 @@ export const pluggyaiService = {
 
   getCredentialSource,
 
-  getAccountsByItemId: async (itemId, fileId) => {
+  getAccountsByItemId: async (itemId, fileId, allowGlobal = true) => {
     try {
-      const client = getPluggyClient(fileId);
+      const client = getPluggyClient(fileId, allowGlobal);
       const { results, total, ...rest } = await client.fetchAccounts(itemId);
       return {
         results,
@@ -84,13 +87,14 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching accounts: ${error.message}`);
+      console.error('Error fetching accounts');
+      debugSensitive('Error fetching accounts: %O', error);
       throw error;
     }
   },
-  getAccountById: async (accountId, fileId) => {
+  getAccountById: async (accountId, fileId, allowGlobal = true) => {
     try {
-      const client = getPluggyClient(fileId);
+      const client = getPluggyClient(fileId, allowGlobal);
       const account = await client.fetchAccount(accountId);
       return {
         ...account,
@@ -98,16 +102,26 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching account: ${error.message}`);
+      console.error('Error fetching account');
+      debugSensitive('Error fetching account: %O', error);
       throw error;
     }
   },
 
-  getTransactionsByAccountId: async (accountId, startDate, fileId) => {
+  getTransactionsByAccountId: async (
+    accountId,
+    startDate,
+    fileId,
+    allowGlobal = true,
+  ) => {
     try {
-      const client = getPluggyClient(fileId);
+      const client = getPluggyClient(fileId, allowGlobal);
 
-      const account = await pluggyaiService.getAccountById(accountId, fileId);
+      const account = await pluggyaiService.getAccountById(
+        accountId,
+        fileId,
+        allowGlobal,
+      );
 
       // the sandbox data doesn't move the dates automatically so the
       // transactions are often older than 90 days. The owner on one of the
@@ -134,7 +148,8 @@ export const pluggyaiService = {
         errors: {},
       };
     } catch (error) {
-      console.error(`Error fetching transactions: ${error.message}`);
+      console.error('Error fetching transactions');
+      debugSensitive('Error fetching transactions: %O', error);
       throw error;
     }
   },

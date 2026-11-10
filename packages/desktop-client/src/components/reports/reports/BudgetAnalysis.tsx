@@ -341,17 +341,28 @@ function BudgetAnalysisInternal({ widget }: BudgetAnalysisInternalProps) {
     );
   }
 
-  const onExportCsv = () => {
+  const onExportCsv = async () => {
     if (!data) return;
     const csv = buildBudgetAnalysisCsv(data.intervalData);
     const reportName = (widget?.meta?.name || t('Budget Analysis'))
       .replace(/[^a-z0-9]/gi, '-')
       .toLowerCase();
-    void window.Actual.saveFile(
-      csv,
-      `${reportName}-${start}-${end}.csv`,
-      t('Export budget analysis'),
-    );
+    try {
+      await window.Actual.saveFile(
+        csv,
+        `${reportName}-${start}-${end}.csv`,
+        t('Export budget analysis'),
+      );
+    } catch {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            message: t('Failed to export budget analysis.'),
+          },
+        }),
+      );
+    }
   };
 
   if (!data || !allMonths) {

@@ -91,6 +91,7 @@ type TransactionListProps = Pick<
   | 'balances'
   | 'categoryGroups'
   | 'dateFormat'
+  | 'focusedTransactionId'
   | 'hideFraction'
   | 'isAdding'
   | 'isMatched'
@@ -103,6 +104,7 @@ type TransactionListProps = Pick<
   | 'onCloseAddTransaction'
   | 'onCreatePayee'
   | 'onCreateRule'
+  | 'onFocusedTransactionShown'
   | 'onMakeAsNonSplitTransactions'
   | 'onSort'
   | 'onScheduleAction'
@@ -159,6 +161,8 @@ export function TransactionList({
   dateFormat,
   hideFraction,
   renderEmpty,
+  focusedTransactionId,
+  onFocusedTransactionShown,
   onSort,
   sortField,
   ascDesc,
@@ -296,7 +300,7 @@ export function TransactionList({
   const onManagePayees = useCallback(
     (id: PayeeEntity['id']) => {
       void navigate(
-        '/payees',
+        '/settings/payees',
         id ? { state: { selectedPayee: id } } : undefined,
       );
     },
@@ -304,8 +308,16 @@ export function TransactionList({
   );
 
   const onNavigateToTransferAccount = useCallback(
-    (accountId: AccountEntity['id']) => {
-      void navigate(`/accounts/${accountId}`);
+    (
+      accountId: AccountEntity['id'],
+      transactionId?: TransactionEntity['id'],
+    ) => {
+      void navigate(
+        `/accounts/${accountId}`,
+        transactionId
+          ? { state: { focusTransactionId: transactionId } }
+          : undefined,
+      );
     },
     [navigate],
   );
@@ -495,6 +507,8 @@ export function TransactionList({
       <TransactionTable
         ref={tableRef}
         transactions={allTransactions}
+        focusedTransactionId={focusedTransactionId}
+        onFocusedTransactionShown={onFocusedTransactionShown}
         loadMoreTransactions={loadMoreTransactions}
         accounts={accounts}
         categoryGroups={categoryGroups}

@@ -1,3 +1,4 @@
+import createDebug from 'debug';
 import express from 'express';
 import type { Request, Response } from 'express';
 
@@ -26,6 +27,8 @@ import { handleError } from './util/handle-error';
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
+
+const debugSensitive = createDebug('actual-sensitive:gocardless');
 
 const ELECTRON_APP_ORIGIN = 'app://actual';
 
@@ -87,6 +90,14 @@ app.get('/link', function (req, res) {
 
 export { app as handlers };
 app.use(express.json());
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
 
 app.post('/status', async (req, res) => {
@@ -350,14 +361,16 @@ app.post(
           });
           break;
         case error instanceof GenericGoCardlessError:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'SYNC_ERROR',
             error_code: 'NORDIGEN_ERROR',
           });
           break;
         default:
-          console.log('Something went wrong', errorMessage);
+          console.log('GoCardless synchronization failed');
+          debugSensitive('GoCardless synchronization failed: %s', errorMessage);
           sendErrorResponse({
             error_type: 'UNKNOWN',
             error_code: 'UNKNOWN',

@@ -15,7 +15,8 @@ export type BankSyncResponse = {
     pending: BankSyncTransaction[];
   };
   balances: BankSyncBalance[];
-  startingBalance: number;
+  // `null` when the provider could not report a balance.
+  startingBalance: number | null;
   error_type: string;
   error_code: string;
 };

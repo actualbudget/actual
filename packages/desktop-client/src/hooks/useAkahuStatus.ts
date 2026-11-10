@@ -4,14 +4,12 @@ import { send } from '@actual-app/core/platform/client/connection';
 
 import { useSyncServerStatus } from './useSyncServerStatus';
 
-export function useAkahuStatus(enabled = true) {
+export function useAkahuStatus() {
   const [configuredAkahu, setConfiguredAkahu] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const status = useSyncServerStatus();
 
   useEffect(() => {
-    if (!enabled) return;
-
     async function fetch() {
       setIsLoading(true);
 
@@ -24,7 +22,7 @@ export function useAkahuStatus(enabled = true) {
     if (status === 'online') {
       void fetch();
     }
-  }, [status, enabled]);
+  }, [status]);
 
   return {
     configuredAkahu,

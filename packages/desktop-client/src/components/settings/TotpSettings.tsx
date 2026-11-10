@@ -2,10 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 import { send } from '@actual-app/core/platform/client/connection';
 
 import { useLoginMethod, useTotpSupported } from '#components/ServerContext';
@@ -13,7 +11,7 @@ import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-import { Setting } from './UI';
+import { SettingsRow } from './SettingsRow';
 
 export function TotpSettings() {
   const { t } = useTranslation();
@@ -52,60 +50,52 @@ export function TotpSettings() {
   const isOffline = serverStatus === 'offline';
 
   return (
-    <Setting
-      primaryAction={
+    <SettingsRow
+      title={t('Two-factor authentication')}
+      description={
         <>
-          <label>
-            <Trans>Two-factor authentication is</Trans>{' '}
-            <label style={{ fontWeight: 'bold' }}>
-              {enabled ? t('enabled') : t('disabled')}
-            </label>
-          </label>
-          {isOffline && (
-            <View>
-              <Text style={{ paddingTop: 5, color: theme.warningText }}>
-                <Trans>
-                  Server is offline. Two-factor settings are unavailable.
-                </Trans>
-              </Text>
-            </View>
+          <Trans>
+            Ask for a code from your authenticator app in addition to the server
+            password.
+          </Trans>{' '}
+          {enabled ? (
+            <Trans>Two-factor authentication is enabled.</Trans>
+          ) : (
+            <Trans>
+              Two-factor authentication is disabled. You will need an
+              authenticator app on your phone.
+            </Trans>
           )}
-          <Button
-            style={{ marginTop: '10px' }}
-            variant="normal"
-            isDisabled={isOffline || enabled === null}
-            onPress={() =>
-              dispatch(
-                pushModal({
-                  modal: {
-                    name: enabled ? 'disable-totp' : 'enable-totp',
-                    options: { onSave: refreshStatus },
-                  },
-                }),
-              )
-            }
-          >
-            {enabled ? (
-              <Trans>Disable two-factor authentication</Trans>
-            ) : (
-              <Trans>Enable two-factor authentication</Trans>
-            )}
-          </Button>
-          {!enabled && (
-            <Label
-              style={{ paddingTop: 5 }}
-              title={t('You will need an authenticator app on your phone')}
-            />
+          {isOffline && (
+            <Text style={{ color: theme.warningText }}>
+              <Trans>
+                Server is offline. Two-factor settings are unavailable.
+              </Trans>
+            </Text>
           )}
         </>
       }
-    >
-      <Text>
-        <Trans>
-          <strong>Two-factor authentication</strong> asks for a code from your
-          authenticator app in addition to the server password.
-        </Trans>
-      </Text>
-    </Setting>
+      control={
+        <Button
+          isDisabled={isOffline || enabled === null}
+          onPress={() =>
+            dispatch(
+              pushModal({
+                modal: {
+                  name: enabled ? 'disable-totp' : 'enable-totp',
+                  options: { onSave: refreshStatus },
+                },
+              }),
+            )
+          }
+        >
+          {enabled ? (
+            <Trans>Disable two-factor authentication</Trans>
+          ) : (
+            <Trans>Enable two-factor authentication</Trans>
+          )}
+        </Button>
+      }
+    />
   );
 }

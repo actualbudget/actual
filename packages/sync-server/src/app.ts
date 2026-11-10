@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import cors from 'cors';
+import createDebug from 'debug';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 
@@ -10,6 +11,7 @@ import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
 import * as akahuApp from './app-akahu/app-akahu.js';
+import * as apiKeysApp from './app-api-keys';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
@@ -19,11 +21,15 @@ import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
+import { listen } from './util/server-listen';
+
+const debugSensitive = createDebug('actual-sensitive:server');
 
 const app = express();
 
 process.on('unhandledRejection', reason => {
-  console.log('Rejection:', reason);
+  console.log('Unhandled rejection');
+  debugSensitive('Unhandled rejection: %O', reason);
 });
 
 app.disable('x-powered-by');
@@ -58,6 +64,7 @@ app.use(
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/api-keys', apiKeysApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
@@ -177,21 +184,21 @@ if (isDev) {
   );
 }
 
-function parseHTTPSConfig(value: string) {
+export function parseHTTPSConfig(value: string) {
   if (value.startsWith('-----BEGIN')) {
-    return value;
+    // Values passed via environment variables may escape newlines as `\n`.
+    // Restore them so the PEM data is valid.
+    return value.replace(/\\n/g, '\n');
   }
   return fs.readFileSync(value);
 }
 
-function sendServerStartedMessage() {
+function sendServerStartedMessage(address: string) {
   // Signify to any parent process that the server has started. Used in electron desktop app
   // oxlint-disable-next-line typescript/ban-ts-comment
   // @ts-ignore-error electron types
   process.parentPort?.postMessage({ type: 'server-started' });
-  console.log(
-    'Listening on ' + config.get('hostname') + ':' + config.get('port') + '...',
-  );
+  console.log('Listening on ' + address + ':' + config.get('port') + '...');
 }
 
 export async function run() {
@@ -223,12 +230,14 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    https.createServer(httpsOptions, app).listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    listen(
+      https.createServer(httpsOptions, app),
+      port,
+      hostname,
+      sendServerStartedMessage,
+    );
   } else {
-    app.listen(port, hostname, () => {
-      sendServerStartedMessage();
-    });
+    const http = await import('node:http');
+    listen(http.createServer(app), port, hostname, sendServerStartedMessage);
   }
 }

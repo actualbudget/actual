@@ -13,9 +13,8 @@ app.on('web-contents-created', function (event, contents) {
     event.preventDefault();
   });
 
-  contents.on('will-navigate', event => {
-    event.preventDefault();
-  });
+  contents.on('will-navigate', event => event.preventDefault());
+  contents.on('will-redirect', event => event.preventDefault());
 });
 
 app.on('ready', function () {

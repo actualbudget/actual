@@ -118,6 +118,10 @@ export function getDownloadError({
       return t(
         'Downloaded file is invalid, sorry! Visit https://actualbudget.org/contact/ for support.',
       );
+    case 'mismatched-cloud-file':
+      return t(
+        'The selected local budget does not match this cloud file. It has not been replaced.',
+      );
     case 'zip-too-large': {
       const zipMeta = getUnsafeZipMeta(meta);
       if (zipMeta) {
@@ -190,6 +194,21 @@ export function getSyncError(error: string, id: string) {
   } else if (error === 'clock-drift') {
     return t(
       'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.',
+    );
+  } else if (error === 'budget-in-use') {
+    return t(
+      'Budget "{{id}}" is already open in another tab or window of this browser. Close it there and try again.',
+      { id },
+    );
+  } else if (error === 'storage-migration-failed') {
+    return t(
+      'Moving budget "{{id}}" to the new browser storage failed. Nothing was deleted; reload the page and try again.',
+      { id },
+    );
+  } else if (error === 'storage-unavailable') {
+    return t(
+      'Budget "{{id}}" is in storage this browser cannot reach right now. Nothing was deleted; reload the page and try again.',
+      { id },
     );
   } else {
     return t('We had an unknown problem opening "{{id}}".', { id });

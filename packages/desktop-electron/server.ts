@@ -1,3 +1,4 @@
+import { trustSelfSignedCertificate } from './certificates';
 import { retry as promiseRetry } from './retry';
 
 const BACKEND_IMPORT_MAX_RETRIES = 30;
@@ -107,6 +108,12 @@ const lazyLoadBackend = async (isDev: boolean) => {
 };
 
 const isDev = false;
+
+// Must happen before the backend bundle is loaded so that no TLS connection is
+// opened before the certificate is trusted.
+if (process.env.ACTUAL_SERVER_SELF_SIGNED_CERT) {
+  trustSelfSignedCertificate(process.env.ACTUAL_SERVER_SELF_SIGNED_CERT);
+}
 
 // Start the app
 void lazyLoadBackend(isDev);

@@ -7,7 +7,7 @@
 The Budget Analysis is a financial planning tool, that tracks the balance of your budget over time.
 It tracks four separate series: **Budgeted**, **Spent**, **Overspending Adjustment**, and the cumulative **Balance**.
 
-![Example image of Budget Analysis Report](/img/experimental/budget-analysis/budget-analysis-image.webp)
+![The Budget Analysis report for the Usual Expenses categories over six months, with budgeted, spent and overspending bars and the balance line](/img/experimental/budget-analysis/budget-analysis-report-overview@2x.webp)
 
 ## Important information
 

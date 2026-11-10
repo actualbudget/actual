@@ -1,10 +1,12 @@
 import type { Page } from '@playwright/test';
 
 import { expect, test } from './fixtures';
+import { AccountPage } from './page-models/account-page';
 import { ConfigurationPage } from './page-models/configuration-page';
 import type { CustomReportPage } from './page-models/custom-report-page';
 import { Navigation } from './page-models/navigation';
 import type { ReportsPage } from './page-models/reports-page';
+import { ScheduleEditModal } from './page-models/schedule-edit-modal';
 
 test.describe('Reports', () => {
   test.describe.configure({ mode: 'serial' });
@@ -15,7 +17,9 @@ test.describe('Reports', () => {
   let configurationPage: ConfigurationPage;
 
   test.beforeEach(async ({ browser }) => {
-    page = await browser.newPage();
+    // browser.newPage does not inherit the configured context's user agent.
+    // Use Actual's fixed demo dates so report screenshots remain reproducible.
+    page = await browser.newPage({ userAgent: 'playwright' });
     navigation = new Navigation(page);
     configurationPage = new ConfigurationPage(page);
 
@@ -45,6 +49,27 @@ test.describe('Reports', () => {
       '3-Month Average',
     ]);
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('resizes number cards with the viewport', async () => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+
+    const number = page.locator('[aria-label*="amount:"]').first();
+    await expect(number).toBeVisible();
+    const numberText = number.locator('span').first();
+    const initialFontSize = await numberText.evaluate(
+      element => getComputedStyle(element).fontSize,
+    );
+    await expect(number).toMatchThemeScreenshots();
+
+    await page.setViewportSize({ width: 900, height: 900 });
+    await expect(number).toMatchThemeScreenshots();
+
+    await expect
+      .poll(() =>
+        numberText.evaluate(element => getComputedStyle(element).fontSize),
+      )
+      .not.toBe(initialFontSize);
   });
 
   test('right clicking a report card opens context menu', async () => {
@@ -88,13 +113,335 @@ test.describe('Reports', () => {
     });
 
     test('loads balance forecast report with monthly granularity', async () => {
+      // monthly granularity, auto y axis
       await expect(page).toMatchThemeScreenshots();
     });
 
     test('switches to daily granularity', async () => {
+      // daily granularity, auto y-axis
       await reportsPage.selectForecastGranularity('Daily');
-
       await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('switches to Zero-Based Y-Axis', async () => {
+      // monthly granularity, zero-based y-axis
+      await reportsPage.selectYAxisBase('Zero-Based');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('switches to daily granularity and Zero-Based Y-Axis', async () => {
+      // daily granularity, zero-based y-axis
+      await reportsPage.selectForecastGranularity('Daily');
+      await reportsPage.selectYAxisBase('Zero-Based');
+      await expect(page).toMatchThemeScreenshots();
+    });
+
+    test('compares named forecast lines and saves them to the dashboard', async () => {
+      test.setTimeout(90_000);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(1);
+      await page
+        .getByRole('button', { name: 'Compare lines', exact: true })
+        .click();
+      await page
+        .getByRole('textbox', { name: 'Line 1 name', exact: true })
+        .fill('Checking');
+
+      async function selectAccounts(lineNumber: number, names: string[]) {
+        const group = page.getByRole('group', {
+          name: `Forecast line ${lineNumber}`,
+          exact: true,
+        });
+        await group
+          .getByRole('button', { name: 'Filter', exact: true })
+          .click();
+        await page
+          .getByRole('menu')
+          .getByRole('button', { name: 'Account', exact: true })
+          .click();
+        await page
+          .getByRole('textbox', { name: 'Account', exact: true })
+          .press('Escape');
+        await page.getByRole('button', { name: 'one of', exact: true }).click();
+        for (const name of names) {
+          await page
+            .getByRole('textbox', { name: 'Account', exact: true })
+            .click();
+          await page.getByRole('option', { name, exact: true }).click();
+        }
+        await page
+          .getByRole('textbox', { name: 'Account', exact: true })
+          .press('Escape');
+        await page.getByRole('button', { name: 'Apply', exact: true }).click();
+        await expect(
+          group.getByRole('button', { name: /account/ }),
+        ).toBeVisible();
+      }
+
+      await expect(page.getByTestId('forecast-contributors')).toHaveCount(0);
+      await selectAccounts(1, ['Capital One Checking']);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('textbox', { name: 'Line 2 name', exact: true })
+        .fill('Card');
+      await selectAccounts(2, ['HSBC']);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('textbox', { name: 'Line 3 name', exact: true })
+        .fill('Checking + card');
+      await selectAccounts(3, ['Capital One Checking', 'HSBC']);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await expect(
+        page.getByRole('button', { name: 'Add line', exact: true }),
+      ).toBeDisabled();
+      await page
+        .getByRole('button', { name: 'Remove line 4', exact: true })
+        .click();
+      await expect(
+        page.getByRole('button', { name: 'Add line', exact: true }),
+      ).toBeEnabled();
+      await page
+        .getByRole('button', { name: 'Save widget', exact: true })
+        .click();
+      await expect(
+        page.getByText('Dashboard widget successfully saved.', { exact: true }),
+      ).toBeVisible();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      const summary = page.getByRole('table');
+      const endingBalances = await summary
+        .locator('tbody tr td:first-of-type')
+        .allTextContents();
+      const [checking, cardBalance, combined] = endingBalances.map(value =>
+        Math.round(Number(value.replaceAll(',', '')) * 100),
+      );
+      expect(checking).not.toBe(cardBalance);
+      expect(combined).toBe(checking + cardBalance);
+      const beforeSave = await summary.innerText();
+      await page.reload();
+      await expect
+        .poll(() => page.getByRole('table').innerText())
+        .toBe(beforeSave);
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(3);
+      await expect(page.getByRole('main')).toMatchThemeScreenshots();
+      await page
+        .getByRole('button', { name: 'Edit lines', exact: true })
+        .click();
+      await expect(
+        page.locator('#forecast-series-editor'),
+      ).toMatchThemeScreenshots();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      const widgetUrl = page.url();
+      await navigation.goToReportsPage();
+      const card = page.getByRole('button').filter({
+        has: page.getByRole('heading', { name: /^Balance Forecast/ }),
+      });
+      await page.locator('.react-grid-item').last().scrollIntoViewIfNeeded();
+      await expect(
+        card.getByRole('rowheader', { name: 'Checking + card', exact: true }),
+      ).toBeVisible();
+      await expect(card.locator('.recharts-line-curve')).toHaveCount(3);
+      await expect(card).toMatchThemeScreenshots();
+      await page.goto(widgetUrl);
+      await page
+        .getByRole('button', { name: 'Edit lines', exact: true })
+        .click();
+      await expect(
+        page.getByRole('textbox', { name: 'Line 2 name', exact: true }),
+      ).toHaveValue('Card');
+    });
+
+    test('explains forecast contributors and refreshes after editing a schedule', async () => {
+      test.setTimeout(120_000);
+      const forecastUrl = page.url();
+      const schedulesPage = await navigation.goToSchedulesPage();
+      for (const [name, amount] of [
+        ['Insurance', 180],
+        ['Transport', 120],
+        ['Gym', 50],
+        ['Subscriptions', 20],
+      ] satisfies Array<[string, number]>) {
+        const modal = await schedulesPage.addNewSchedule();
+        await modal.fill({
+          scheduleName: name,
+          account: 'Capital One Checking',
+          amount,
+        });
+        await modal.add();
+        await expect(modal.locator).not.toBeVisible();
+      }
+      await page.goto(forecastUrl);
+
+      const breakdown = page.getByTestId('forecast-contributors');
+      const outflows = breakdown.getByRole('table', {
+        name: 'Scheduled outflows',
+      });
+      await expect(outflows.getByRole('button')).toHaveCount(5);
+      await expect(
+        outflows.getByRole('row').filter({ hasText: 'Wedding' }),
+      ).toContainText('No account assigned');
+      await expect(outflows).toContainText('Other 2 schedules');
+      await expect(breakdown).toMatchThemeScreenshots();
+
+      await breakdown
+        .getByRole('button', { name: 'Show all', exact: true })
+        .click();
+      await expect(outflows.getByRole('button')).toHaveCount(7);
+      await expect(
+        outflows.getByRole('button', { name: 'Subscriptions', exact: true }),
+      ).toBeVisible();
+      await breakdown.getByRole('button', { name: 'Show top five' }).click();
+
+      const wedding = outflows.getByRole('row').filter({ hasText: 'Wedding' });
+      const occurrenceCount = Number(
+        await wedding.getByRole('cell').nth(1).innerText(),
+      );
+      const originalTotal = await wedding.getByRole('cell').last().innerText();
+      await wedding
+        .getByRole('button', { name: 'Wedding', exact: true })
+        .click();
+      const editModal = new ScheduleEditModal(
+        page.getByTestId('schedule-edit-modal'),
+      );
+      await expect(editModal.scheduleNameInput).toHaveValue('Wedding');
+      await editModal.fill({ amount: 100 });
+      await editModal.save();
+      await expect(editModal.locator).not.toBeVisible();
+      await expect(wedding.getByRole('cell').last()).not.toHaveText(
+        originalTotal,
+      );
+      await expect(wedding.getByRole('cell').last()).toHaveText(
+        (-100 * occurrenceCount).toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }),
+      );
+    });
+
+    test('saves a forecast starting today in both display modes', async () => {
+      await page.getByTestId('date-range-picker-trigger').click();
+      await page.getByRole('button', { name: 'Next 6 months' }).click();
+      await page.keyboard.press('Escape');
+      const startToday = page.getByRole('button', {
+        name: 'Start today',
+        exact: true,
+      });
+      await expect(startToday).toHaveAttribute('aria-pressed', 'false');
+      await startToday.click();
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '01/01/2017',
+      );
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '06/30/2017',
+      );
+      await expect(page.getByText('Ending Balance: 2017-06-30')).toBeVisible();
+      await expect(
+        page.getByText('This range moves forward from today.', {
+          exact: false,
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByText('Current month', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole('main')).toMatchThemeScreenshots();
+
+      await reportsPage.selectForecastGranularity('Daily');
+      await expect(
+        page.getByText('Today · Jan 1', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole('main')).toMatchThemeScreenshots();
+      await page.getByRole('button', { name: 'Save widget' }).click();
+      const reportUrl = page.url();
+      reportsPage = await navigation.goToReportsPage();
+      await page
+        .getByTestId('reports-page')
+        .locator('.react-grid-item')
+        .last()
+        .scrollIntoViewIfNeeded();
+      const card = page.getByRole('button', { name: /^Balance Forecast/ });
+      await expect(card).toContainText('From today: 2017-01-01 – 2017-06-30');
+      await expect(card).toContainText('2017-06-30');
+      const todayMarker = card.locator(
+        '.recharts-reference-line-line[stroke-dasharray="4 4"]',
+      );
+      await expect(todayMarker).toHaveAttribute('x', '2017-01-01');
+      await expect
+        .poll(() =>
+          todayMarker.evaluate(marker => marker.getBoundingClientRect().height),
+        )
+        .toBeGreaterThan(0);
+      await card.click();
+      await expect(page).toHaveURL(reportUrl);
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(
+        page.getByRole('button', { name: 'Daily', exact: true }),
+      ).toBeVisible();
+
+      await page.getByTestId('date-range-picker-trigger').click();
+      await page.getByRole('button', { name: 'Next 3 months' }).click();
+      await page.keyboard.press('Escape');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '03/31/2017',
+      );
+      await page
+        .getByRole('button', { name: 'Compare lines', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Add line', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'Hide line editor', exact: true })
+        .click();
+      await page.getByTestId('date-range-picker-trigger').click();
+      await page
+        .getByRole('button', { name: 'Next 6 months', exact: true })
+        .click();
+      await page.keyboard.press('Escape');
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '06/30/2017',
+      );
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(2);
+      const savedNotification = page.getByText(
+        'Dashboard widget successfully saved.',
+        { exact: true },
+      );
+      if (await savedNotification.isVisible()) {
+        await page.getByRole('button', { name: 'Close', exact: true }).click();
+      }
+      await page
+        .getByRole('button', { name: 'Save widget', exact: true })
+        .click();
+      await expect(savedNotification).toBeVisible();
+      await page.reload();
+      await expect(startToday).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        '06/30/2017',
+      );
+      await expect(page.locator('.recharts-line-curve')).toHaveCount(2);
+      await startToday.click();
+      await expect(startToday).toHaveAttribute('aria-pressed', 'false');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        'Jan 2017',
+      );
+
+      await startToday.click();
+      await page.getByTestId('date-range-picker-trigger').click();
+      await page.getByRole('button', { name: 'Month', exact: true }).click();
+      await page
+        .getByRole('button', { name: 'February 2017', exact: true })
+        .click();
+      await page
+        .getByRole('button', { name: 'March 2017', exact: true })
+        .click();
+      await page.keyboard.press('Escape');
+      await expect(startToday).toHaveAttribute('aria-pressed', 'false');
+      await expect(page.getByTestId('date-range-picker-trigger')).toContainText(
+        'Feb 2017',
+      );
     });
 
     test('loads tracking budget forecast report', async () => {
@@ -114,6 +461,10 @@ test.describe('Reports', () => {
       await reportsPage.goToBalanceForecastPage();
       await reportsPage.selectForecastSource('Tracking budget');
 
+      await expect(
+        page.getByRole('button', { name: 'Start today', exact: true }),
+      ).toHaveCount(0);
+
       await expect(page).toMatchThemeScreenshots();
     });
   });
@@ -126,6 +477,141 @@ test.describe('Reports', () => {
       await page.addStyleTag({
         content: '[role="tooltip"] { display: none !important; }',
       });
+    });
+
+    test('splits transactions into exact tag buckets and scopes them', async () => {
+      test.setTimeout(90_000);
+      const settingsPage = await navigation.goToSettingsPage();
+      await settingsPage.goToSection('Tags');
+      await page
+        .getByRole('button', { name: 'Add new tag', exact: true })
+        .click();
+      for (const tag of ['red', 'circle']) {
+        await page.getByPlaceholder('New tag', { exact: true }).fill(tag);
+        await page.getByTestId('new-tag').getByTestId('add-button').click();
+        await expect(page.getByText(`#${tag}`, { exact: true })).toBeVisible();
+      }
+
+      const accountPage = await navigation.goToAccountPage(
+        'Capital One Checking',
+      );
+      await accountPage.createSingleTransaction({
+        debit: '10.00',
+        payee: 'Kroger',
+        notes: '#red',
+        category: 'Food',
+      });
+      await accountPage.createSingleTransaction({
+        debit: '20.00',
+        payee: 'Kroger',
+        notes: '#circle',
+        category: 'Food',
+      });
+      await accountPage.createSingleTransaction({
+        debit: '30.00',
+        payee: 'Kroger',
+        notes: '#red #circle',
+        category: 'Food',
+      });
+
+      reportsPage = await navigation.goToReportsPage();
+      await reportsPage.waitToLoad();
+      customReportPage = await reportsPage.goToCustomReportPage();
+
+      const splitRow = page.getByText('Split:', { exact: true }).locator('..');
+      await splitRow.getByRole('button').click();
+      await page.getByRole('button', { name: 'Tag', exact: true }).click();
+      await customReportPage.selectViz('Data Table');
+
+      await expect(page.getByText('#red', { exact: true })).toBeVisible();
+      await expect(page.getByText('#circle', { exact: true })).toBeVisible();
+      await expect(
+        page.getByText('#circle + #red', { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByTestId('report-row-#circle + #red')).toContainText(
+        '-30.00',
+      );
+
+      await page.getByRole('button', { name: 'Tag scope: All tags' }).click();
+      const tagScopePopover = page.locator('[data-popover]');
+      await expect(tagScopePopover).toMatchThemeScreenshots();
+      await page.keyboard.press('Escape');
+      const typeRow = page.getByText('Type:', { exact: true }).locator('..');
+      await expect(splitRow).toMatchThemeScreenshots();
+
+      await page
+        .getByTestId('report-row-#circle + #red')
+        .getByText('-30.00', { exact: true })
+        .click();
+      await page.waitForURL('**/accounts');
+
+      const drilldownAccountPage = new AccountPage(page);
+      await expect(
+        drilldownAccountPage.transactionTable
+          .getByTestId('notes')
+          .filter({ hasText: '#red #circle' }),
+      ).toHaveCount(1);
+      const visibleTagNotes = (
+        await drilldownAccountPage.transactionTable
+          .getByTestId('notes')
+          .allTextContents()
+      ).filter(note => note.includes('#'));
+      expect(visibleTagNotes).toEqual(['#red #circle']);
+
+      await page.goBack();
+      await page.getByTestId('reports-page').waitFor();
+      await splitRow.getByRole('button').click();
+      await page.getByRole('button', { name: 'Tag', exact: true }).click();
+      await customReportPage.selectViz('Data Table');
+      await page.getByRole('button', { name: 'Tag scope: All tags' }).click();
+      const scopedTagPopover = page.getByTestId('tag-scope-popover');
+      await scopedTagPopover
+        .getByRole('textbox', { name: 'Search tags' })
+        .fill('red');
+      await scopedTagPopover
+        .getByRole('button', { name: '#red', exact: true })
+        .click();
+      await expect(
+        scopedTagPopover.locator('button').filter({ hasText: '#red' }),
+      ).toBeVisible();
+      await scopedTagPopover.getByRole('button', { name: 'Apply' }).click();
+
+      await expect(
+        page.getByRole('button', { name: 'Tag scope: #red' }),
+      ).toBeVisible();
+      await expect(page.getByTestId('report-row-#red')).toContainText('-40.00');
+      await expect(
+        page.getByText('#circle + #red', { exact: true }),
+      ).not.toBeVisible();
+
+      await typeRow
+        .getByRole('button', { name: 'Payment', exact: true })
+        .click();
+      await page.getByRole('button', { name: 'Budgeted', exact: true }).click();
+      await expect(splitRow.getByRole('button')).toHaveText('Category');
+    });
+
+    test('warns about missing scoped tags without transaction filters', async () => {
+      await page.evaluate(() => {
+        sessionStorage.setItem('url', window.location.pathname);
+        sessionStorage.setItem(
+          'report',
+          JSON.stringify({
+            groupBy: 'Tag',
+            tagScope: { mode: 'selected', tagIds: ['deleted-tag-id'] },
+            conditions: [],
+          }),
+        );
+      });
+      await page.reload();
+
+      const warning = page.getByText(/non-existing filter or tag/);
+      await expect(warning).toBeVisible();
+
+      const splitRow = page.getByText('Split:', { exact: true }).locator('..');
+      await splitRow.getByRole('button', { name: 'Tag', exact: true }).click();
+      await page.getByRole('button', { name: 'Category', exact: true }).click();
+      await expect(warning).not.toBeVisible();
     });
 
     test('Switches to Data Table and checks the visuals', async () => {

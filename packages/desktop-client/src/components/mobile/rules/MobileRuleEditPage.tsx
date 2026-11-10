@@ -27,20 +27,21 @@ export function MobileRuleEditPage() {
   const dispatch = useDispatch();
   const { showUndoNotification } = useUndo();
   // Carries the rules list filter so it survives the round trip.
-  const rulesListPath = `/rules${location.search}`;
+  const rulesListPath = `/settings/rules${location.search}`;
 
   const [rule, setRule] = useState<RuleEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const ruleId = rule?.id;
   const { schedules = [] } = useSchedules({
     query: useMemo(
       () =>
-        rule?.id
+        ruleId
           ? q('schedules')
-              .filter({ rule: rule.id, completed: false })
+              .filter({ rule: ruleId, completed: false })
               .select('*')
           : q('schedules').filter({ id: null }).select('*'), // Return empty result when no rule
-      [rule?.id],
+      [ruleId],
     ),
   });
 

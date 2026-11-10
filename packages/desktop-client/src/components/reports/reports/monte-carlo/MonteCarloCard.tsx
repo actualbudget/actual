@@ -7,10 +7,12 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { MonteCarloWidget } from '@actual-app/core/types/models';
+import { useQuery } from '@tanstack/react-query';
 
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { MonteCarloGraph } from '#components/reports/graphs/MonteCarloGraph';
+import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import {
@@ -46,19 +48,34 @@ export function MonteCarloCard({
   // Memoised by hand so hovering the card (which toggles state) doesn't
   // re-run thousands of simulations
   const config = useMemo(() => monteCarloConfigFromMeta(meta), [meta]);
-  const resolvedConfig = useResolvedMonteCarloConfig(config);
-  const result = useMemo(
-    () =>
+  const { resolvedConfig, hasLiveBalances } =
+    useResolvedMonteCarloConfig(config);
+
+  // Thousands of simulations take a noticeable slice of a second, so they
+  // run as a query: after the dashboard has painted rather than inside
+  // render, only once every linked balance is in (each arrival would
+  // otherwise trigger a full re-run on stale numbers), and cached by
+  // config so coming back to the dashboard doesn't simulate again. The
+  // engine is deterministic, so a cached result never goes stale
+  const { data } = useQuery({
+    queryKey: ['monte-carlo-card', resolvedConfig],
+    queryFn: () =>
       runMonteCarloSimulation({
         ...resolvedConfig,
         horizonYears: getMonteCarloHorizonYears(resolvedConfig),
         deflateToTodaysMoney: true,
       }),
-    [resolvedConfig],
-  );
+    enabled: hasLiveBalances,
+    staleTime: Infinity,
+  });
+  // While the live balances are still loading the config holds the stored
+  // ones, and a result cached for those would flash a since-changed number
+  // before the live key replaces it
+  const result = hasLiveBalances ? (data ?? null) : null;
 
-  const endAge = config.currentAge + result.horizonYears;
-  const successPercent = Math.round(result.successRate * 1000) / 10;
+  const endAge = config.currentAge + getMonteCarloHorizonYears(config);
+  const successPercent =
+    result != null ? Math.round(result.successRate * 1000) / 10 : null;
 
   return (
     <ReportCard
@@ -97,7 +114,9 @@ export function MonteCarloCard({
               }}
             >
               <PrivacyFilter activationFilters={[!isCardHovered]}>
-                <FinancialText>{`${successPercent}%`}</FinancialText>
+                <FinancialText>
+                  {successPercent != null ? `${successPercent}%` : '…'}
+                </FinancialText>
               </PrivacyFilter>
             </Block>
             <Block
@@ -111,13 +130,17 @@ export function MonteCarloCard({
           </View>
         </View>
 
-        <MonteCarloGraph
-          percentileBands={result.percentileBands}
-          startAge={config.currentAge}
-          compact
-          showTooltip={!isEditing && !isNarrowWidth}
-          style={{ height: 'auto', flex: 1 }}
-        />
+        {result != null ? (
+          <MonteCarloGraph
+            percentileBands={result.percentileBands}
+            startAge={config.currentAge}
+            compact
+            showTooltip={!isEditing && !isNarrowWidth}
+            style={{ height: 'auto', flex: 1 }}
+          />
+        ) : (
+          <LoadingIndicator />
+        )}
       </View>
     </ReportCard>
   );

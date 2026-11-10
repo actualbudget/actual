@@ -14,11 +14,11 @@ Remember to [back up your budget](../backup-restore/backup.md) before making any
 
 ### Step 1: Delete All Transactions
 
-- Click on _All Accounts_ in the left sidebar.
-- Select all transactions by clicking the checkbox at the top of the list (or use the shortcut `Ctrl + A` on Windows or `Cmd + A` on Mac).
-- Click on the lilac dropdown menu at the top of the transaction list and select **Delete**.
+1. Click on _All Accounts_ in the left sidebar.
+2. Select all transactions by clicking the checkbox at the top of the list (or use the shortcut `Ctrl + A` on Windows or `Cmd + A` on Mac).
+3. Click on the lilac dropdown menu at the top of the transaction list and select **Delete**.
 
-![Steps for deleting all transactions](/img/accounts/account-delete-all-transactions.webp)
+![All accounts with every transaction selected and the selection menu open, numbered 1 to 3 for All accounts, the select-all checkbox and Delete](/img/advanced/restart-delete-all-transactions@2x.webp)
 
 ### Step 2: Set Starting Balances
 

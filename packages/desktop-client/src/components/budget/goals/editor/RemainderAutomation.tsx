@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Input } from '@actual-app/components/input';
@@ -25,9 +25,12 @@ export const RemainderAutomation = ({
   // Track the raw input so the user can clear and retype without the field
   // snapping back. Commit (and clamp) on blur.
   const [rawWeight, setRawWeight] = useState(String(committedWeight));
-  useEffect(() => {
+  const [prevCommittedWeight, setPrevCommittedWeight] =
+    useState(committedWeight);
+  if (committedWeight !== prevCommittedWeight) {
+    setPrevCommittedWeight(committedWeight);
     setRawWeight(String(committedWeight));
-  }, [committedWeight]);
+  }
 
   const commitWeight = () => {
     const parsed = Math.max(1, Math.trunc(Number(rawWeight)) || 1);
@@ -51,7 +54,7 @@ export const RemainderAutomation = ({
           onBlur={commitWeight}
         />
       </FormField>
-      <Text style={{ flex: 2, color: theme.pageTextLight, fontSize: 12 }}>
+      <Text size="small" style={{ flex: 2, color: theme.pageTextLight }}>
         <Trans>
           Categories with higher weights get a bigger share of the leftover To
           Budget.

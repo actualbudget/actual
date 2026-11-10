@@ -10,7 +10,7 @@ If one dashboard is not enough, you can make as many dashboards as you like, eac
 All of the available reports can be tuned with filters and live or static date ranges.
 This flexibility gives each user the tools they need to understand their finances in a very deep, very personal way.
 
-![Default Reports Dashboard](/img/reports/dashboard.webp)
+![The default Reports dashboard](/img/reports/reports-dashboard@2x.webp)
 
 Currently, Actual comes with the following built-in widgets and reports:
 
@@ -32,13 +32,13 @@ The following are available as experimental features:
 
 ## Cash Flow Graph
 
-![Cash Flow Graph](/img/reports/cash-flow.webp)
+![The Cash Flow report for the last six months](/img/reports/reports-cash-flow@2x.webp)
 
 Cash flow shows your spending over time. It only looks at budgeted accounts and shows their balance over time, and includes separate income and expense visualizations. It's a quick way to see how your income and expenses affected your available money over time. Your budgeted accounts are considered to be "cash on hand," so this gives you a picture of how available money fluctuates.
 
 ## Net Worth Graph
 
-![Net Worth Graph](/img/reports/net-worth.webp)
+![The Net Worth report in Trend mode](/img/reports/reports-net-worth@2x.webp)
 
 Net worth shows the balance of all accounts over time. Your net worth is all of your cash and assets minus any debts you owe. This includes all of your off budget accounts. Your "net worth" is considered to be the amount you would have left if you sold all your assets and paid off as much debt as possible.
 
@@ -47,35 +47,35 @@ Use **Trend** for the overall net-worth line over time.
 Use **Stacked** to separate balances by account over time (for example, savings and investment accounts).
 Stacked mode is harder to interpret when mixing positive-balance and negative-balance accounts.
 
-![Stacked Net Worth Graph](/img/reports/net-worth-stacked.webp)
+![The Net Worth report in Stacked mode, filtered to savings and investment accounts](/img/reports/reports-net-worth-stacked@2x.webp)
 
 ## Spending Analysis
 
-![Spending Analysis Report](/img/reports/spending-analysis.webp)
+![The Spending Analysis report comparing this month with last month](/img/reports/reports-spending-analysis@2x.webp)
 
 A spending analysis report tracks and compares expenses over a specified period, highlighting trends, fluctuations, and areas of overspending or savings.
 
 ## Text Widget
 
-![Text Widget](/img/reports/text-widget.webp)
+<img width="390" alt="A text widget with a heading and a bulleted list" src="/img/reports/reports-text-widget@2x.webp" />
 
 Use Markdown to generate a text box to use as report headings and organizational labels.
 
 ## Summary Card
 
-![Summary Card](/img/reports/summary-card.webp)
+<img width="390" alt="A summary card showing the net worth change over the last few months" src="/img/reports/reports-summary-card@2x.webp" />
 
 The summary card provides an overview of all transactions within a selected time period, offering options such as total sum or monthly average.
 
 ## Calendar Card
 
-![Calendar Card](/img/reports/calendar-card.webp)
+<img width="780" alt="A calendar card showing daily income and expenses for four months" src="/img/reports/reports-calendar-card@2x.webp" />
 
 The calendar card displays daily income and expenses in a calendar format for a specified time period.
 
 ## Crossover Point
 
-![Crossover Point](/img/reports/crossover-point-report/full-chart.webp)
+![The Crossover Point report projecting expenses and investment income](/img/reports/reports-crossover-point@2x.webp)
 
 The Crossover Point report is a financial planning tool inspired by the "Your Money or Your Life" methodology. This report helps users visualize when their passive income from investments will be sufficient to cover their projected expenses, marking the point where they achieve financial independence.
 

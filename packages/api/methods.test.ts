@@ -333,6 +333,140 @@ describe('API CRUD operations', () => {
     );
   });
 
+  test.each([
+    { invalidGroupId: null, label: 'null' },
+    { invalidGroupId: '', label: 'empty string' },
+  ])(
+    'Categories: reject invalid group_id ($label)',
+    async ({ invalidGroupId }) => {
+      const groupId = await api.createCategoryGroup({
+        name: 'test-valid-group',
+      });
+
+      const categoryId = await api.createCategory({
+        name: 'test-category',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.updateCategory(categoryId, {
+          // @ts-expect-error - Testing invalid runtime input
+          group_id: invalidGroupId,
+        }),
+      ).rejects.toThrow();
+
+      const categories = await api.getCategories();
+
+      expect(categories).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: categoryId,
+            group_id: groupId,
+          }),
+        ]),
+      );
+    },
+  );
+
+  test.each(['nope', '00000000-0000-4000-8000-000000000123'])(
+    'Categories: reject non-existent group_id (%s)',
+    async invalidGroupId => {
+      const groupId = await api.createCategoryGroup({
+        name: 'valid-group-for-invalid-id-test',
+      });
+
+      const categoryId = await api.createCategory({
+        name: 'category-with-valid-group',
+        group_id: groupId,
+      });
+
+      await expect(
+        api.updateCategory(categoryId, {
+          group_id: invalidGroupId,
+        }),
+      ).rejects.toThrow('category group does not exist');
+
+      const categories = await api.getCategories();
+
+      expect(categories).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: categoryId,
+            group_id: groupId,
+          }),
+        ]),
+      );
+    },
+  );
+
+  test('Categories: reject deleted category group', async () => {
+    const validGroupId = await api.createCategoryGroup({
+      name: 'valid-group-for-deleted-group-test',
+    });
+
+    const deletedGroupId = await api.createCategoryGroup({
+      name: 'group-to-be-deleted',
+    });
+
+    const categoryId = await api.createCategory({
+      name: 'category-to-preserve',
+      group_id: validGroupId,
+    });
+
+    await api.deleteCategoryGroup(deletedGroupId);
+
+    await expect(
+      api.updateCategory(categoryId, {
+        group_id: deletedGroupId,
+      }),
+    ).rejects.toThrow('category group does not exist');
+
+    const categories = await api.getCategories();
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          group_id: validGroupId,
+        }),
+      ]),
+    );
+  });
+
+  test('Categories: partial update preserves existing group', async () => {
+    const groupId = await api.createCategoryGroup({
+      name: 'partial-update-group',
+    });
+
+    const categoryId = await api.createCategory({
+      name: 'original-category',
+      group_id: groupId,
+    });
+
+    // Update the name without providing group_id
+    await api.updateCategory(categoryId, {
+      name: 'renamed-category',
+    });
+
+    // Update another field without providing group_id
+    await api.updateCategory(categoryId, {
+      hidden: true,
+    });
+
+    const categories = await api.getCategories();
+
+    expect(categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: categoryId,
+          name: 'renamed-category',
+          group_id: groupId,
+          hidden: true,
+        }),
+      ]),
+    );
+  });
+
   // apis: setBudgetAmount, setBudgetCarryover, getBudgetMonth
   test('Budgets: successfully update budgets', async () => {
     const month = '2023-10';
@@ -361,6 +495,78 @@ describe('API CRUD operations', () => {
               budgeted: 100,
               carryover: true,
             }),
+          ]),
+        }),
+      ]),
+    );
+  });
+
+  // apis: applyCategoryTemplate, getCategoryTemplateAmount
+  test('Budgets: successfully apply a category template', async () => {
+    const month = '2023-10';
+    global.currentMonth = month;
+
+    const groupId = await api.createCategoryGroup({
+      name: 'tests',
+    });
+    const categoryId = await api.createCategory({
+      name: 'test-template',
+      group_id: groupId,
+    });
+    const noTemplateId = await api.createCategory({
+      name: 'test-no-template',
+      group_id: groupId,
+    });
+    await api.updateNote(categoryId, '#template 50');
+
+    expect(await api.getCategoryTemplateAmount(month, categoryId)).toBe(5000);
+    // The preview parses the note without storing its templates.
+    const { data: previewed } = (await api.aqlQuery(
+      api.q('categories').filter({ id: categoryId }).select(['goal_def']),
+    )) as { data: Array<{ goal_def: string | null }> };
+    expect(previewed).toEqual([expect.objectContaining({ goal_def: null })]);
+
+    await api.setBudgetAmount(month, categoryId, 100);
+    await api.applyCategoryTemplate(month, categoryId);
+
+    const budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
+          ]),
+        }),
+      ]),
+    );
+
+    await expect(
+      api.applyCategoryTemplate(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+    await expect(
+      api.getCategoryTemplateAmount(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+
+    await api.updateNote(categoryId, '#goal 100\n#goal 200');
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('Only one #goal is allowed per category');
+
+    await api.updateNote(categoryId, '#template 70\n#template nonsense');
+    await expect(api.applyCategoryTemplate(month, categoryId)).rejects.toThrow(
+      '#template nonsense',
+    );
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('#template nonsense');
+    const unchangedMonth = await api.getBudgetMonth(month);
+    expect(unchangedMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
           ]),
         }),
       ]),
@@ -954,6 +1160,56 @@ describe('API CRUD operations', () => {
     expect(transactions).toHaveLength(1);
   });
 
+  test('Transactions: updating a split child keeps its other fields', async () => {
+    const accountId = await api.createAccount({ name: 'test-account' }, 0);
+    const groupId = await api.createCategoryGroup({ name: 'tests' });
+    const categoryId = await api.createCategory({
+      name: 'test-split',
+      group_id: groupId,
+    });
+
+    await api.addTransactions(accountId, [
+      {
+        date: '2023-11-03',
+        amount: 300,
+        subtransactions: [
+          { amount: 100, category: categoryId, notes: 'first' },
+          { amount: 200, category: categoryId, notes: 'second' },
+        ],
+      },
+    ]);
+
+    let [parent] = await api.getTransactions(
+      accountId,
+      '2023-11-01',
+      '2023-11-30',
+    );
+    const child = parent.subtransactions?.find(t => t.notes === 'first');
+    if (!child) {
+      throw new Error('split child not found');
+    }
+
+    await api.updateTransaction(child.id, { notes: 'updated' });
+
+    [parent] = await api.getTransactions(accountId, '2023-11-01', '2023-11-30');
+    expect(parent.subtransactions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: child.id,
+          notes: 'updated',
+          amount: 100,
+          category: categoryId,
+        }),
+        expect.objectContaining({
+          notes: 'second',
+          amount: 200,
+          category: categoryId,
+        }),
+      ]),
+    );
+    expect(parent.amount).toBe(300);
+  });
+
   // apis: mergeTransactions
   test('Transactions: successfully merge two transactions', async () => {
     const accountId = await api.createAccount({ name: 'test-account' }, 0);
@@ -1222,6 +1478,116 @@ test('Schedules: successfully complete schedules operations', async () => {
       expect.not.objectContaining({ id: ScheduleId2 }),
     ]),
   );
+});
+
+describe('API schedules: getScheduleDates', () => {
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  // apis: createSchedule, getSchedules, getScheduleDates
+  test('expands the date of a stored schedule', async () => {
+    const id = await api.createSchedule({
+      name: 'rent',
+      amount: -120000,
+      amountOp: 'is',
+      posts_transaction: false,
+      date: {
+        frequency: 'monthly',
+        start: '2024-06-01',
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+        endMode: 'never',
+      },
+    });
+    const [schedule] = (await api.getSchedules()).filter(s => s.id === id);
+
+    expect(
+      await api.getScheduleDates(schedule.date, {
+        start: '2024-06-01',
+        end: '2024-09-30',
+      }),
+    ).toEqual(['2024-06-03', '2024-07-01', '2024-08-01', '2024-09-02']);
+  });
+
+  // apis: createSchedule, getSchedules, getScheduleDates
+  test('starts at the next date the app shows and never repeats a date', async () => {
+    // Tests run with today pinned to Sunday 2017-01-01. The occurrences on
+    // Saturday 31 December and Sunday 1 January both move to Monday 2
+    // January, which must be listed once and match the stored next_date.
+    const id = await api.createSchedule({
+      name: 'daily weekdays',
+      amount: -500,
+      amountOp: 'is',
+      posts_transaction: false,
+      date: {
+        frequency: 'daily',
+        start: '2016-12-31',
+        skipWeekend: true,
+        weekendSolveMode: 'after',
+        endMode: 'never',
+      },
+    });
+    const [schedule] = (await api.getSchedules()).filter(s => s.id === id);
+
+    const dates = await api.getScheduleDates(schedule.date, { count: 3 });
+    expect(dates[0]).toEqual(schedule.next_date);
+    expect(dates).toEqual(['2017-01-02', '2017-01-03', '2017-01-04']);
+  });
+
+  // apis: getScheduleDates
+  test('expands a single date', async () => {
+    expect(
+      await api.getScheduleDates('2024-06-13', {
+        start: '2024-06-01',
+        end: '2024-06-30',
+      }),
+    ).toEqual(['2024-06-13']);
+  });
+
+  // apis: getScheduleDates
+  test('starts from today when no start is given', async () => {
+    // Tests run with today pinned to 2017-01-01.
+    expect(
+      await api.getScheduleDates(
+        { frequency: 'yearly', start: '2016-03-01' },
+        { count: 1 },
+      ),
+    ).toEqual(['2017-03-01']);
+  });
+
+  // apis: getScheduleDates
+  test('rejects invalid requests', async () => {
+    const daily = { frequency: 'daily', start: '2024-01-01' } as const;
+
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-13-01', count: 1 }),
+    ).rejects.toThrow('Invalid start date');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-02-01', end: '2024-01-01' }),
+    ).rejects.toThrow('is before start');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-01-01', count: -1 }),
+    ).rejects.toThrow('count must be a non-negative integer');
+    await expect(
+      api.getScheduleDates(daily, { start: '2024-01-01' }),
+    ).rejects.toThrow('needs an `end` date or a `count`');
+    await expect(
+      api.getScheduleDates(
+        { ...daily, endMode: 'after_n_occurrences', endOccurrences: 0 },
+        { start: '2024-01-01' },
+      ),
+    ).rejects.toThrow('endOccurrences must be a positive integer');
+    await expect(
+      api.getScheduleDates(
+        { ...daily, endMode: 'on_date', endDate: 'soon' },
+        { start: '2024-01-01' },
+      ),
+    ).rejects.toThrow('Invalid recurrence end date');
+    await expect(
+      api.getScheduleDates('06/13/2024', { start: '2024-01-01' }),
+    ).rejects.toThrow('Invalid schedule date');
+  });
 });
 
 // apis: getPreferences

@@ -21,7 +21,7 @@ runs:
     - name: Install node
       uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
       with:
-        node-version: 24
+        node-version-file: ${{ format('{0}/.nvmrc', inputs.working-directory) }}
         package-manager-cache: false
     - name: Install yarn
       run: npm install -g yarn
@@ -65,6 +65,11 @@ runs:
       run: yarn --immutable
       shell: bash
       if: steps.cache.outputs.cache-hit != 'true'
+    - name: Prune Lage cache
+      working-directory: ${{ inputs.working-directory }}
+      run: yarn lage cache --prune 7
+      shell: bash
+      if: ${{ inputs.cache == 'true' }}
     - name: Download translations
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:

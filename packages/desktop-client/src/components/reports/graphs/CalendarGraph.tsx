@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { Ref } from 'react';
 import { Trans } from 'react-i18next';
 
@@ -44,7 +44,7 @@ export function CalendarGraph({
 }: CalendarGraphProps) {
   const format = useFormat();
 
-  const startingDate = startOfWeek(new Date(), {
+  const startingDate = startOfWeek(start, {
     weekStartsOn:
       firstDayOfWeekIdx !== undefined &&
       !Number.isNaN(parseInt(firstDayOfWeekIdx)) &&
@@ -242,12 +242,6 @@ type DayButtonProps = {
   onPress: () => void;
 };
 function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
-  const [currentFontSize, setCurrentFontSize] = useState(fontSize);
-
-  useEffect(() => {
-    setCurrentFontSize(fontSize);
-  }, [fontSize]);
-
   return (
     <Button
       ref={resizeRef}
@@ -315,7 +309,7 @@ function DayButton({ day, onPress, fontSize, resizeRef }: DayButtonProps) {
       />
       <span
         style={{
-          fontSize: `${currentFontSize}px`,
+          fontSize: `${fontSize}px`,
           fontWeight: 500,
           position: 'relative',
         }}

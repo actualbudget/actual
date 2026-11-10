@@ -4,12 +4,20 @@ import {
   firstDayOfMonth,
   monthFromDate,
 } from '@actual-app/core/shared/months';
-import type { Template } from '@actual-app/core/types/models/templates';
+import type {
+  AverageTemplate,
+  CopyTemplate,
+  Template,
+  Weekday,
+  WeeklyAverageTemplate,
+} from '@actual-app/core/types/models/templates';
 
 import type { Action } from './actions';
 import type { DisplayTemplateType, ReducerState } from './constants';
 
 export const DEFAULT_PRIORITY = 1;
+const DEFAULT_WEEKLY_AVERAGE_WEEKS = 12;
+const DEFAULT_WEEKLY_AVERAGE_WEEKDAY: Weekday = 'monday';
 
 export const getInitialState = (template: Template | null): ReducerState => {
   if (!template) {
@@ -72,6 +80,7 @@ export const getInitialState = (template: Template | null): ReducerState => {
         displayType: 'refill',
       };
     case 'average':
+    case 'weeklyAverage':
     case 'copy':
       return {
         template,
@@ -172,7 +181,8 @@ const changeType = (
     case 'historical':
       if (
         prevState.template.type === 'copy' ||
-        prevState.template.type === 'average'
+        prevState.template.type === 'average' ||
+        prevState.template.type === 'weeklyAverage'
       ) {
         return prevState;
       }
@@ -238,45 +248,95 @@ const changeType = (
   }
 };
 
+type HistoricalTemplate =
+  | CopyTemplate
+  | AverageTemplate
+  | WeeklyAverageTemplate;
+type TemplateUpdate = Partial<Template> & Pick<Template, 'type'>;
+type HistoricalUpdate = Partial<Template> & Pick<HistoricalTemplate, 'type'>;
+
+function isHistoricalUpdate(
+  template: TemplateUpdate,
+): template is HistoricalUpdate {
+  return (
+    template.type === 'copy' ||
+    template.type === 'average' ||
+    template.type === 'weeklyAverage'
+  );
+}
+
+// Switches between the historical modes, keeping whatever carries over: the
+// month count between copy and average, a percentage adjustment between the
+// two averages, and the priority always. Fixed adjustments are dropped: the
+// monthly average adds them once per month but the weekly average once per
+// week, so carrying one over would silently change the budgeted amount.
+function convertHistoricalTemplate(
+  prev: HistoricalTemplate,
+  template: HistoricalUpdate,
+): HistoricalTemplate {
+  const months =
+    prev.type === 'average'
+      ? prev.numMonths
+      : prev.type === 'copy'
+        ? prev.lookBack
+        : undefined;
+  const adjustment =
+    prev.type !== 'copy' && prev.adjustmentType === 'percent'
+      ? { adjustment: prev.adjustment, adjustmentType: prev.adjustmentType }
+      : {};
+
+  switch (template.type) {
+    case 'copy':
+      return {
+        ...template,
+        directive: 'template',
+        type: 'copy',
+        lookBack: months ?? 1,
+        priority: prev.priority,
+      };
+    case 'average':
+      return {
+        ...template,
+        directive: 'template',
+        type: 'average',
+        numMonths: months ?? 3,
+        ...adjustment,
+        priority: prev.priority,
+      };
+    case 'weeklyAverage':
+      return {
+        ...template,
+        directive: 'template',
+        type: 'weeklyAverage',
+        numWeeks: DEFAULT_WEEKLY_AVERAGE_WEEKS,
+        weekday: DEFAULT_WEEKLY_AVERAGE_WEEKDAY,
+        ...adjustment,
+        priority: prev.priority,
+      };
+    default:
+      throw new Error(
+        `Unknown historical template: ${String(template satisfies never)}`,
+      );
+  }
+}
+
 function mapTemplateTypesForUpdate(
   state: ReducerState,
-  template: Partial<Template> & Pick<Template, 'type'>,
+  template: TemplateUpdate,
 ): ReducerState {
   switch (state.template.type) {
     case 'average':
-      switch (template.type) {
-        case 'copy':
-          return {
-            ...state,
-            displayType: 'historical',
-            template: {
-              ...template,
-              directive: 'template',
-              type: 'copy',
-              lookBack: state.template.numMonths,
-              priority: state.template.priority,
-            },
-          };
-        default:
-          break;
-      }
-      break;
     case 'copy':
-      switch (template.type) {
-        case 'average':
-          return {
-            ...state,
-            displayType: 'historical',
-            template: {
-              ...template,
-              directive: 'template',
-              type: 'average',
-              numMonths: state.template.lookBack,
-              priority: state.template.priority,
-            },
-          };
-        default:
-          break;
+    case 'weeklyAverage':
+      if (
+        isHistoricalUpdate(template) &&
+        template.type !== state.template.type
+      ) {
+        return {
+          ...state,
+          displayType: 'historical',
+          template: convertHistoricalTemplate(state.template, template),
+        };
       }
       break;
     case 'by':

@@ -26,8 +26,10 @@ import {
   validateUploadedFile,
 } from './app-sync/validation';
 import { config } from './load-config';
+import { SecretName, secretsService } from './services/secrets-service';
 import * as UserService from './services/user-service';
 import * as simpleSync from './sync-simple';
+import { atomicWriteFile } from './util/atomic-write';
 import {
   errorMiddleware,
   requestLoggerMiddleware,
@@ -40,9 +42,27 @@ import {
   isValidGroupId,
 } from './util/paths';
 import type { GroupId } from './util/paths';
+import { validateBudgetSession } from './util/validate-budget-session';
 
 const app = express();
-app.use(validateSessionMiddleware);
+app.use((req, res, next) => {
+  const supportsApiKey =
+    (req.method === 'GET' &&
+      [
+        '/list-user-files',
+        '/get-user-file-info',
+        '/download-user-file',
+      ].includes(req.path)) ||
+    (req.method === 'POST' && ['/sync', '/user-get-key'].includes(req.path));
+  if (!supportsApiKey) {
+    return validateSessionMiddleware(req, res, next);
+  }
+  const session = validateBudgetSession(req, res);
+  if (session) {
+    res.locals = session;
+    next();
+  }
+});
 app.use(errorMiddleware);
 app.use(requestLoggerMiddleware);
 app.use(
@@ -97,6 +117,10 @@ const verifyFileExists = (
   res: Response,
   errorObject: string | Record<string, unknown>,
 ) => {
+  if (res.locals.apiKeyFileIds && !res.locals.apiKeyFileIds.includes(fileId)) {
+    res.status(403).send('file-access-not-allowed');
+    return;
+  }
   if (typeof fileId !== 'string' || !isValidFileId(fileId)) {
     res.status(400).send('invalid fileId');
     return;
@@ -188,7 +212,12 @@ app.post('/sync', async (req, res): Promise<void> => {
     return;
   }
 
-  const { trie, newMessages } = simpleSync.sync(messages, since, groupId);
+  const result = simpleSync.sync(messages, since, groupId);
+  if (result.error) {
+    res.status(400).send(result.error);
+    return;
+  }
+  const { trie, newMessages } = result;
 
   const responsePb = create(SyncResponseSchema, {
     merkle: JSON.stringify(trie),
@@ -364,7 +393,7 @@ app.post('/upload-user-file', async (req, res) => {
   }
 
   try {
-    await fs.writeFile(getPathForUserFile(fileId), req.body);
+    await atomicWriteFile(getPathForUserFile(fileId), req.body);
   } catch (err) {
     console.log('Error writing file', err);
     res.status(500).send({ status: 'error' });
@@ -481,7 +510,12 @@ app.post('/update-user-filename', (req, res) => {
 
 app.get('/list-user-files', (req, res) => {
   const fileService = new FilesService(getAccountDb());
-  const rows = fileService.find({ userId: res.locals.user_id });
+  const rows = fileService
+    .find({ userId: res.locals.user_id })
+    .filter(
+      row =>
+        !res.locals.apiKeyFileIds || res.locals.apiKeyFileIds.includes(row.id),
+    );
   res.send({
     status: 'ok',
     data: rows.map(row => ({
@@ -557,7 +591,8 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  const filesService = new FilesService(getAccountDb());
+  const accountDb = getAccountDb();
+  const filesService = new FilesService(accountDb);
   const file = verifyFileExists(fileId, filesService, res, 'file-not-found');
   if (!file) {
     return;
@@ -570,7 +605,12 @@ app.post('/delete-user-file', (req, res) => {
     return;
   }
 
-  filesService.update(file.id, new FileUpdate({ deleted: true }));
+  accountDb.transaction(() => {
+    filesService.update(file.id, new FileUpdate({ deleted: true }));
+    for (const name of Object.values(SecretName)) {
+      secretsService.reset(name, file.id);
+    }
+  });
 
   res.send(OK_RESPONSE);
 });

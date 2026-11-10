@@ -864,6 +864,244 @@ describe('SharedWorker coordinator', () => {
       expect(state.budgetGroups.has('new-budget-123')).toBe(true);
       expect(state.portToBudget.get(creator)).toBe('new-budget-123');
     });
+
+    it('re-keys a lobby leader that created a budget when its prefs load', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+      leader.postMessage.mockClear();
+
+      // The lobby leader creates the demo budget in its own Worker, so no
+      // temp group is created for it
+      sendMsg(leader, { id: 'cdb-1', name: 'create-demo-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cdb-1', result: {} },
+      });
+      sendMsg(leader, { id: 'lp-1', name: 'load-prefs' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lp-1', result: { id: '_demo-budget' } },
+      });
+
+      const state = coordinator.getState();
+      expect(state.budgetGroups.has('__lobby')).toBe(false);
+      expect(state.portToBudget.get(leader)).toBe('_demo-budget');
+
+      // A second tab on that budget joins as a follower instead of
+      // starting a second Worker on the same database
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      follower.postMessage.mockClear();
+      sendMsg(follower, {
+        id: 'lb-2',
+        name: 'load-budget',
+        args: { id: '_demo-budget' },
+      });
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: '_demo-budget',
+        }),
+      );
+    });
+
+    it('tells a re-keyed leader its budget so resuming keeps it attached', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+      sendMsg(leader, { id: 'cdb-1', name: 'create-demo-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cdb-1', result: {} },
+      });
+      leader.postMessage.mockClear();
+      sendMsg(leader, { id: 'lp-1', name: 'load-prefs' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lp-1', result: { id: '_demo-budget' } },
+      });
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '_demo-budget',
+        }),
+      );
+
+      // The tab was hidden and comes back, reporting the budget it was told
+      leader.postMessage.mockClear();
+      sendMsg(leader, { type: '__resume-tab', budgetId: '_demo-budget' });
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'UNASSIGNED' }),
+      );
+      const state = coordinator.getState();
+      expect(state.budgetGroups.get('_demo-budget').leaderPort).toBe(leader);
+      expect(state.portToBudget.get(leader)).toBe('_demo-budget');
+    });
+
+    it('keeps a leader that resumes without a budget id and re-announces its role', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      leader.postMessage.mockClear();
+
+      sendMsg(leader, { type: '__resume-tab', budgetId: null });
+
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: 'budget-1',
+        }),
+      );
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ role: 'UNASSIGNED' }),
+      );
+      const state = coordinator.getState();
+      expect(state.budgetGroups.get('budget-1').leaderPort).toBe(leader);
+      expect(state.portToBudget.get(leader)).toBe('budget-1');
+      expect(state.unassignedPorts.has(leader)).toBe(false);
+    });
+
+    it('keeps a follower that resumes with a stale budget id', () => {
+      setupBudgetGroup(coordinator, 'budget-1');
+      const follower = connectTab(coordinator);
+      sendInit(follower);
+      sendMsg(follower, {
+        id: 'lb-2',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      follower.postMessage.mockClear();
+
+      sendMsg(follower, { type: '__resume-tab', budgetId: 'budget-old' });
+
+      expect(follower.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'FOLLOWER',
+          budgetId: 'budget-1',
+        }),
+      );
+      expect(coordinator.getState().budgetGroups.has('budget-old')).toBe(false);
+    });
+
+    it('answers a refreshed tab after the leader resumed without its budget id', () => {
+      // The creating tab's bridge may lag behind the coordinator (an older
+      // build never learned the budget); the coordinator must not strand it
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      simulateWorkerConnect(leader);
+      sendMsg(leader, { id: 'cdb-1', name: 'create-demo-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cdb-1', result: {} },
+      });
+      sendMsg(leader, { id: 'lp-1', name: 'load-prefs' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lp-1', result: { id: '_demo-budget' } },
+      });
+      sendMsg(leader, { type: '__resume-tab', budgetId: null });
+
+      // Another tab is refreshed: its first request must round-trip
+      const refreshed = connectTab(coordinator);
+      sendInit(refreshed);
+      refreshed.postMessage.mockClear();
+      sendMsg(refreshed, { id: 'gp-1', name: 'load-global-prefs' });
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__to-worker',
+          msg: expect.objectContaining({ id: 'gp-1' }),
+        }),
+      );
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'gp-1', result: {} },
+      });
+      expect(refreshed.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'gp-1' }),
+      );
+    });
+
+    it('does not strand the lobby when its leader resumes claiming another budget', () => {
+      // Tab 2 opened first and leads the lobby; tab 1 opens a budget and
+      // leads it; tab 2 then resumes reporting that budget, is refreshed,
+      // and the fresh tab's first request must be answered
+      const lobbyLeader = connectTab(coordinator);
+      sendInit(lobbyLeader);
+      simulateWorkerConnect(lobbyLeader);
+      const opener = connectTab(coordinator);
+      sendInit(opener);
+      sendMsg(opener, {
+        id: 'lb-1',
+        name: 'load-budget',
+        args: { id: 'budget-1' },
+      });
+      simulateWorkerConnect(opener);
+      sendMsg(opener, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lb-1', result: {} },
+      });
+
+      sendMsg(lobbyLeader, { type: '__resume-tab', budgetId: 'budget-1' });
+      sendMsg(lobbyLeader, { type: 'tab-closing' });
+
+      const refreshed = connectTab(coordinator);
+      sendInit(refreshed);
+      refreshed.postMessage.mockClear();
+      sendMsg(refreshed, { id: 'gp-1', name: 'load-global-prefs' });
+      expect(opener.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__to-worker',
+          msg: expect.objectContaining({ id: 'gp-1' }),
+        }),
+      );
+      sendMsg(opener, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'gp-1', result: {} },
+      });
+      expect(refreshed.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'gp-1' }),
+      );
+      // No group may keep a leader that is no longer connected
+      const state = coordinator.getState();
+      for (const [, group] of state.budgetGroups) {
+        expect(state.connectedPorts).toContain(group.leaderPort);
+      }
+    });
+
+    it('tells a leader it is back in the lobby when it closes the last budget', () => {
+      const leader = setupBudgetGroup(coordinator, 'budget-1');
+      leader.postMessage.mockClear();
+      sendMsg(leader, { id: 'cb-1', name: 'close-budget' });
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cb-1', result: 'ok' },
+      });
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: '__role-change',
+          role: 'LEADER',
+          budgetId: '__lobby',
+        }),
+      );
+    });
+
+    it('tells a leader it is unassigned when it closes a budget while others run', () => {
+      setupBudgetGroup(coordinator, 'budget-1');
+      const leader2 = setupBudgetGroup(coordinator, 'budget-2');
+      leader2.postMessage.mockClear();
+      sendMsg(leader2, { id: 'cb-2', name: 'close-budget' });
+      sendMsg(leader2, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'cb-2', result: 'ok' },
+      });
+      expect(leader2.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'UNASSIGNED' }),
+      );
+      expect(coordinator.getState().budgetGroups.has('budget-2')).toBe(false);
+    });
   });
 
   // ── Delete budget ───────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import { addTransactions } from '#server/accounts/sync';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { RuleError } from '#server/errors';
 import { toDateRepr } from '#server/models';
 import { mutator, runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
@@ -22,7 +23,7 @@ import {
 } from '#server/transactions/transaction-rules';
 import { undoable } from '#server/undo';
 import { RSchedule } from '#server/util/rschedule';
-import { currentDay, dayFromDate } from '#shared/months';
+import { currentDay, dayFromDate, parseDate, subDays } from '#shared/months';
 import { q } from '#shared/query';
 import {
   DEFAULT_UPCOMING_SCHEDULE_DAYS,
@@ -98,8 +99,10 @@ function areScheduleConditionsEqual(
     return left === right;
   }
 
-  const { type: _leftType, ...leftCondition } = left;
-  const { type: _rightType, ...rightCondition } = right;
+  // `type` is not always present, and `field` may use the public or internal
+  // name (`account` vs `acct`), so compare the remaining properties
+  const { type: _leftType, field: _leftField, ...leftCondition } = left;
+  const { type: _rightType, field: _rightField, ...rightCondition } = right;
 
   return areConditionValuesEqual(leftCondition, rightCondition);
 }
@@ -209,6 +212,20 @@ async function fixRuleForSchedule(id) {
   return getRules().find(rule => rule.id === newId);
 }
 
+// `getNextDate` only looks at occurrences from `today` on, before moving them
+// off the weekend, so it misses an earlier occurrence moved `after` the
+// weekend onto `today` or later. `getNextDateAfter` sees that one, and it is
+// only used when it comes first, so every other case keeps its next date.
+function getNextDateFrom(dateCond, today: Date) {
+  const nextDate = getNextDate(dateCond, today);
+  const movedOntoToday = getNextDateAfter(dateCond, subDays(today, 1));
+
+  return movedOntoToday != null &&
+    (nextDate == null || movedOntoToday < nextDate)
+    ? movedOntoToday
+    : nextDate;
+}
+
 export async function setNextDate({
   id,
   conditions,
@@ -223,7 +240,12 @@ export async function setNextDate({
   if (conditions == null) {
     const rule = await getRuleForSchedule(id);
     if (rule == null) {
-      throw new Error('No rule found for schedule');
+      // Corrupt rules are dropped when the rule cache loads, so this also
+      // covers them. A RuleError marks a rule problem, not an I/O failure.
+      throw new RuleError(
+        'schedule-rule-not-found',
+        'No rule found for schedule',
+      );
     }
     conditions = rule.serialize().conditions;
   }
@@ -238,7 +260,7 @@ export async function setNextDate({
   if (dateCond) {
     const newNextDate = advance
       ? getNextDateAfter(dateCond, nextDate)
-      : getNextDate(dateCond, new Date());
+      : getNextDateFrom(dateCond, new Date());
 
     if (newNextDate != null && newNextDate !== nextDate) {
       // Our `update` functon requires the id of the item and we don't
@@ -335,7 +357,7 @@ export async function createSchedule({
     throw new Error('Date is required');
   }
 
-  const nextDate = getNextDate(dateCond);
+  const nextDate = getNextDateFrom(dateCond, parseDate(currentDay()));
   const nextDateRepr = nextDate ? toDateRepr(nextDate) : null;
   const scheduleFields = schedule && {
     ...schedule,
@@ -444,12 +466,11 @@ export async function updateSchedule({
       // or date changed. We check account because we don't update
       // schedules automatically for closed account, and the user
       // might switch accounts from a closed one
+      const { account: oldAccountCond } = extractScheduleConds(oldConditions);
+      const { account: newAccountCond } = extractScheduleConds(newConditions);
       if (
         resetNextDate ||
-        !areScheduleConditionsEqual(
-          oldConditions.find(c => c.field === 'account'),
-          newConditions.find(c => c.field === 'account'),
-        ) ||
+        !areScheduleConditionsEqual(oldAccountCond, newAccountCond) ||
         !areConditionValuesEqual(
           stripType(oldConditions.find(c => c.field === 'date') || {}),
           stripType(newConditions.find(c => c.field === 'date') || {}),
@@ -607,16 +628,6 @@ async function getSchedule(id: string): Promise<ScheduleEntity | null> {
   return schedule ?? null;
 }
 
-export async function getCompletedScheduleRuleIds(): Promise<string[]> {
-  const { data } = await aqlQuery(
-    q('schedules').filter({ completed: true }).select(['rule']),
-  );
-
-  return data
-    .map(schedule => schedule.rule)
-    .filter((rule): rule is string => !!rule);
-}
-
 async function hasTransactionForSchedule(
   schedule: ScheduleEntity,
 ): Promise<boolean> {
@@ -642,12 +653,7 @@ async function advanceRecurringScheduleFromNextDate(
 
   const previousNextDate = schedule.next_date;
 
-  try {
-    await setNextDate({ id: schedule.id, advance: true });
-  } catch {
-    // This might error if the rule is corrupted and it can't find the rule.
-    return null;
-  }
+  await setNextDate({ id: schedule.id, advance: true });
 
   const updatedSchedule = await getSchedule(schedule.id);
 
@@ -667,7 +673,10 @@ export async function advanceSchedulesService(syncSuccess) {
   // Move all paid schedules
   const { data: schedules } = await aqlQuery(
     q('schedules')
-      .filter({ completed: false, '_account.closed': false })
+      .filter({
+        completed: false,
+        $or: [{ '_account.closed': false }, { _account: null }],
+      })
       .select('*'),
   );
 
@@ -679,6 +688,7 @@ export async function advanceSchedulesService(syncSuccess) {
   );
 
   const failedToPost = [];
+  const advancementErrors: Error[] = [];
   let didPost = false;
 
   const { data: upcomingLength } = await aqlQuery(
@@ -688,33 +698,72 @@ export async function advanceSchedulesService(syncSuccess) {
   );
 
   for (const schedule of schedules) {
-    const status = getStatus(
-      schedule.next_date,
-      schedule.completed,
-      hasTrans.has(schedule.id),
-      schedule.custom_upcoming_length ??
-        upcomingLength[0]?.value ??
-        DEFAULT_UPCOMING_SCHEDULE_DAYS,
-    );
+    try {
+      const status = getStatus(
+        schedule.next_date,
+        schedule.completed,
+        hasTrans.has(schedule.id),
+        schedule.custom_upcoming_length ??
+          upcomingLength[0]?.value ??
+          DEFAULT_UPCOMING_SCHEDULE_DAYS,
+      );
 
-    if (
-      schedule.posts_transaction &&
-      schedule._account &&
-      (status !== 'paid' || isRecurringSchedule(schedule)) &&
-      (status === 'paid' || status === 'due' || status === 'missed')
-    ) {
-      let currentSchedule = schedule;
-      let currentStatus = status;
-
-      while (
-        currentSchedule.posts_transaction &&
-        currentSchedule._account &&
-        (currentStatus === 'paid' ||
-          currentStatus === 'due' ||
-          currentStatus === 'missed')
+      if (
+        schedule.posts_transaction &&
+        schedule._account &&
+        (status !== 'paid' || isRecurringSchedule(schedule)) &&
+        (status === 'paid' || status === 'due' || status === 'missed')
       ) {
-        if (currentStatus === 'paid') {
-          if (currentSchedule.next_date === currentDay()) {
+        let currentSchedule = schedule;
+        let currentStatus = status;
+
+        while (
+          currentSchedule.posts_transaction &&
+          currentSchedule._account &&
+          (currentStatus === 'paid' ||
+            currentStatus === 'due' ||
+            currentStatus === 'missed')
+        ) {
+          if (currentStatus === 'paid') {
+            if (currentSchedule.next_date === currentDay()) {
+              break;
+            }
+
+            const updatedSchedule =
+              await advanceRecurringScheduleFromNextDate(currentSchedule);
+
+            if (updatedSchedule == null) {
+              break;
+            }
+
+            currentSchedule = updatedSchedule;
+            currentStatus = getStatus(
+              currentSchedule.next_date,
+              currentSchedule.completed,
+              await hasTransactionForSchedule(currentSchedule),
+              currentSchedule.custom_upcoming_length ??
+                upcomingLength[0]?.value ??
+                DEFAULT_UPCOMING_SCHEDULE_DAYS,
+            );
+            continue;
+          }
+
+          // Automatically create a transaction for due schedules.
+          if (syncSuccess) {
+            await postTransactionForSchedule({ id: currentSchedule.id });
+
+            didPost = true;
+          } else {
+            failedToPost.push(currentSchedule._payee);
+            break;
+          }
+
+          // do not skip schedules due today
+          if (currentStatus === 'due') {
+            break;
+          }
+
+          if (!isRecurringSchedule(currentSchedule)) {
             break;
           }
 
@@ -734,64 +783,35 @@ export async function advanceSchedulesService(syncSuccess) {
               upcomingLength[0]?.value ??
               DEFAULT_UPCOMING_SCHEDULE_DAYS,
           );
-          continue;
         }
-
-        // Automatically create a transaction for due schedules.
-        if (syncSuccess) {
-          await postTransactionForSchedule({ id: currentSchedule.id });
-
-          didPost = true;
-        } else {
-          failedToPost.push(currentSchedule._payee);
-          break;
-        }
-
-        // do not skip schedules due today
-        if (currentStatus === 'due') {
-          break;
-        }
-
-        if (!isRecurringSchedule(currentSchedule)) {
-          break;
-        }
-
-        const updatedSchedule =
-          await advanceRecurringScheduleFromNextDate(currentSchedule);
-
-        if (updatedSchedule == null) {
-          break;
-        }
-
-        currentSchedule = updatedSchedule;
-        currentStatus = getStatus(
-          currentSchedule.next_date,
-          currentSchedule.completed,
-          await hasTransactionForSchedule(currentSchedule),
-          currentSchedule.custom_upcoming_length ??
-            upcomingLength[0]?.value ??
-            DEFAULT_UPCOMING_SCHEDULE_DAYS,
-        );
-      }
-    } else if (status === 'paid') {
-      if (schedule._date) {
-        // Move forward recurring schedules
-        if (isRecurringSchedule(schedule)) {
-          try {
+      } else if (status === 'paid') {
+        if (schedule._date) {
+          // Move forward recurring schedules
+          if (isRecurringSchedule(schedule)) {
             await setNextDate({ id: schedule.id });
-          } catch {
-            // This might error if the rule is corrupted and it can't
-            // find the rule
-          }
-        } else {
-          if (schedule._date < currentDay()) {
-            // Complete any single schedules
-            await updateSchedule({
-              schedule: { id: schedule.id, completed: true },
-            });
+          } else {
+            if (schedule._date < currentDay()) {
+              // Complete any single schedules
+              await updateSchedule({
+                schedule: { id: schedule.id, completed: true },
+              });
+            }
           }
         }
       }
+    } catch (error) {
+      // A missing or corrupt rule is expected and should not block retries.
+      if (error instanceof RuleError) {
+        continue;
+      }
+
+      // Keep successful posts and next-date updates. A retry uses persisted
+      // paid occurrences to resume without posting them a second time.
+      advancementErrors.push(
+        new Error(`Failed to advance schedule ${schedule.id}`, {
+          cause: error,
+        }),
+      );
     }
   }
 
@@ -807,6 +827,10 @@ export async function advanceSchedulesService(syncSuccess) {
       tables: ['transactions'],
       syncDisabled: false,
     });
+  }
+
+  if (advancementErrors.length > 0) {
+    throw new AggregateError(advancementErrors, 'Failed to advance schedules');
   }
 }
 
@@ -843,7 +867,35 @@ app.method('schedule/get-upcoming-dates', getUpcomingDates);
 
 app.service(trackJSONPaths);
 
+// Failed schedule writes emit sync errors too. While a run is active, ignore
+// them so the retry waits for a later external sync instead of this run.
+let advancingAfterSync = false;
+
+async function advanceSchedulesAfterSync(syncSuccess: boolean) {
+  const runDay = currentDay();
+  // An earlier queued sync may have completed today's work already.
+  if (prefs.getPrefs().lastScheduleRun === runDay) {
+    return;
+  }
+
+  advancingAfterSync = true;
+  try {
+    await advanceSchedulesService(syncSuccess);
+
+    // Rejected or offline runs must remain retryable on a later sync.
+    if (syncSuccess) {
+      await prefs.savePrefs({ lastScheduleRun: runDay });
+    }
+  } finally {
+    advancingAfterSync = false;
+  }
+}
+
 app.events.on('sync', ({ type }) => {
+  if (advancingAfterSync) {
+    return;
+  }
+
   const completeEvent =
     type === 'success' || type === 'error' || type === 'unauthorized';
 
@@ -853,15 +905,12 @@ app.events.on('sync', ({ type }) => {
       return;
     }
 
-    const { lastScheduleRun } = prefs.getPrefs();
-    if (lastScheduleRun !== currentDay()) {
-      void runMutator(() => advanceSchedulesService(type === 'success'));
-
-      // Only mark the day as done when sync succeeded, so that
-      // schedule auto-posting is retried on subsequent successful syncs
-      if (type === 'success') {
-        void prefs.savePrefs({ lastScheduleRun: currentDay() });
-      }
+    if (prefs.getPrefs().lastScheduleRun !== currentDay()) {
+      runMutator(() => advanceSchedulesAfterSync(type === 'success')).catch(
+        error => {
+          logger.error('Failed to run schedule service after sync', error);
+        },
+      );
     }
   }
 });

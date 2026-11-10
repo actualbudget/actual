@@ -165,11 +165,13 @@ export async function enableOpenID(loginSettings) {
     return { error };
   }
 
-  // TOTP is a second factor for the server password only; with OpenID active
-  // MFA is the provider's job, so drop the secret rather than leave it orphaned.
-  disableTotp();
-
-  getAccountDb().mutate('DELETE FROM sessions');
+  getAccountDb().transaction(() => {
+    // TOTP is a second factor for the server password only; with OpenID active
+    // MFA is the provider's job, so drop the secret rather than leave it orphaned.
+    disableTotp();
+    getAccountDb().mutate('DELETE FROM sessions');
+    getAccountDb().mutate('DELETE FROM api_keys');
+  });
 }
 
 export async function disableOpenID(loginSettings) {
@@ -205,6 +207,7 @@ export async function disableOpenID(loginSettings) {
   try {
     accountDb.transaction(() => {
       accountDb.mutate('DELETE FROM sessions');
+      accountDb.mutate('DELETE FROM api_keys');
       accountDb.mutate(
         `DELETE FROM user_access
                               WHERE user_access.user_id IN (

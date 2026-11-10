@@ -52,7 +52,7 @@ To fetch new transactions manually:
 - To sync all accounts: click **All Accounts** in the sidebar, then click **Bank Sync**.
 - To sync a single account: open the account and click the Bank Sync button.
 
-  ![](/img/connecting-your-bank/connecting-your-bank-simplefin-10.webp)
+  <img width="192" alt="The Bank Sync button next to Import above a linked account's transactions" src="/img/advanced/bank-sync/bank-sync-account-buttons@2x.webp" />
 
 #### On Mobile
 

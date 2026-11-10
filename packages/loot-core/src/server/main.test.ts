@@ -5,20 +5,24 @@ import { v4 as uuidv4 } from 'uuid';
 import { expectSnapshotWithDiffer } from '#mocks/util';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
+import { logger } from '#platform/server/log';
 import * as monthUtils from '#shared/months';
 
 import * as budgetActions from './budget/actions';
 import * as budget from './budget/base';
 import * as db from './db';
-import { handlers } from './main';
+import { SyncError } from './errors';
+import { handlers, lib } from './main';
 import {
   disableGlobalMutations,
   enableGlobalMutations,
   runHandler,
   runMutator,
 } from './mutators';
+import * as post from './post';
 import * as prefs from './prefs';
 import * as sheet from './sheet';
+import { batchMessages, scheduleFullSync, setSyncingMode } from './sync';
 
 vi.mock('./post');
 
@@ -101,6 +105,68 @@ describe('Budgets', () => {
     expect(prefs.getPrefs()).toBe(null);
 
     spy.mockRestore();
+  });
+
+  test('switching the budget type leaves no goals of the old type in the spreadsheet cache', async () => {
+    await createTestBudget('default-budget-template');
+    const { error } = await runHandler(handlers['load-budget'], {
+      id: 'test-budget',
+    });
+    expect(error).toBe(undefined);
+
+    const { id: incomeId } = await db.first<Pick<db.DbCategory, 'id'>>(
+      'SELECT id FROM categories WHERE is_income = 1 AND tombstone = 0',
+    );
+    const month = monthUtils.currentMonth();
+    const sheetName = monthUtils.sheetForMonth(month);
+    const dbMonth = parseInt(month.replace('-', ''));
+    const setBudgetType = (type: string) =>
+      db.runQuery(
+        "INSERT OR REPLACE INTO preferences (id, value) VALUES ('budgetType', ?)",
+        [type],
+      );
+
+    setBudgetType('tracking');
+    db.runQuery(
+      'INSERT INTO reflect_budgets (id, month, category, amount, goal) VALUES (?, ?, ?, ?, ?)',
+      [`${dbMonth}-${incomeId}`, dbMonth, incomeId, 0, 50000],
+    );
+
+    // Tests run without the spreadsheet cache, so reopen the budget's
+    // spreadsheet the way the app does, with the cache
+    const log = vi.spyOn(logger, 'log');
+    async function reopenSpreadsheet() {
+      vi.stubEnv('NODE_ENV', 'production');
+      try {
+        await sheet.reloadSpreadsheet(db);
+      } finally {
+        vi.unstubAllEnvs();
+      }
+      sheet.get().meta().budgetType = budgetActions.isTrackingBudget()
+        ? 'tracking'
+        : 'envelope';
+      await budget.createAllBudgets();
+    }
+
+    await reopenSpreadsheet();
+    expect(sheet.getCellValue(sheetName, `goal-${incomeId}`)).toBe(50000);
+
+    // What a synced switch to envelope does
+    setBudgetType('envelope');
+    await budget.setType('envelope');
+    expect(sheet.get().getCellValueLoose(sheetName, `goal-${incomeId}`)).toBe(
+      null,
+    );
+
+    log.mockClear();
+    await reopenSpreadsheet();
+    expect(log).toHaveBeenCalledWith(
+      expect.stringContaining('Loaded spreadsheet from cache'),
+    );
+    expect(sheet.get().getCellValueLoose(sheetName, `goal-${incomeId}`)).toBe(
+      null,
+    );
+    log.mockRestore();
   });
 });
 
@@ -281,6 +347,77 @@ describe('Budget', () => {
       changed.sort((a, b) => (a > b ? 1 : a < b ? -1 : 0)),
     ).toMatchSnapshot();
   });
+
+  test('resetting the budget cache computes each cell at most once', async () => {
+    const spreadsheet = await sheet.loadSpreadsheet(db);
+
+    let catId;
+    await runMutator(async () => {
+      await db.insertCategoryGroup({
+        id: 'incomeGroup',
+        name: 'incomeGroup',
+        is_income: 1,
+      });
+      await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+      catId = await db.insertCategory({ name: 'foo', cat_group: 'group1' });
+      await db.insertCategory({ name: 'bar', cat_group: 'group1' });
+    });
+
+    // Creates the budget months, which is what populates `createdMonths`
+    await runHandler(handlers['get-budget-bounds']);
+
+    db.runQuery("INSERT INTO accounts (id, name) VALUES ('one', 'boa')");
+    await runHandler(handlers['transaction-add'], {
+      id: uuidv4(),
+      date: '2017-01-05',
+      amount: -3400,
+      account: 'one',
+      category: catId,
+    });
+    await runHandler(handlers['budget/budget-amount'], {
+      month: '2017-01',
+      category: catId,
+      amount: 5000,
+    });
+
+    await sheet.waitOnSpreadsheet();
+
+    const sheetName = monthUtils.sheetForMonth('2017-01');
+    const valuesOf = () =>
+      new Map(
+        [...spreadsheet.getNodes()].map(([name, node]) => [name, node.value]),
+      );
+    const before = valuesOf();
+    expect(before.get(`${sheetName}!sum-amount-${catId}`)).toBe(-3400);
+
+    let computed = [];
+    const remove = spreadsheet.addEventListener('change', ({ names }) => {
+      computed = computed.concat(names);
+    });
+    await runHandler(handlers['reset-budget-cache']);
+    remove();
+
+    // Resetting the cache recomputes values, it doesn't change them
+    expect(valuesOf()).toEqual(before);
+
+    // Spend totals are seeded from a single grouped query rather than each
+    // running its own `SELECT SUM(amount)`
+    expect(computed.filter(name => name.includes('!sum-amount-'))).toEqual([]);
+
+    // Everything downstream of the budget inputs used to be computed twice:
+    // once when `loadUserBudgets` closed its own transaction, and again for
+    // `recomputeAll`
+    const seen = new Set();
+    const computedTwice = computed.filter(name => {
+      const duplicate = seen.has(name);
+      seen.add(name);
+      return duplicate;
+    });
+    expect(computedTwice).toEqual([]);
+
+    // Everything else really was recomputed
+    expect(computed).toContain(`${sheetName}!to-budget`);
+  });
 });
 
 describe('Categories', () => {
@@ -441,5 +578,128 @@ describe('Categories', () => {
     // The deleted category should not leave any overspending behind
     expect(sheet.getCellValue(nextSheetName, 'last-month-overspent')).toBe(0);
     expect(sheet.getCellValue(nextSheetName, 'to-budget')).toBe(toBudget);
+  });
+});
+
+describe('Budget shutdown', () => {
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    await prefs.loadPrefs();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+    fs._setDocumentDir(null);
+    setSyncingMode('disabled');
+  });
+
+  function deferred() {
+    let resolve: () => void;
+    const promise = new Promise<void>(resolvePromise => {
+      resolve = resolvePromise;
+    });
+    return { promise, resolve };
+  }
+
+  test('finishes sync and schedule persistence before unloading, without admitting new syncs', async () => {
+    await prefs.savePrefs({ groupId: 'group' });
+    fs._setDocumentDir(__dirname);
+    setSyncingMode('enabled');
+    const syncGate = deferred();
+    const syncStarted = deferred();
+    const writeGate = deferred();
+    const writeStarted = deferred();
+    const sheetGate = deferred();
+    const sheetStarted = deferred();
+    const postBinary = post.postBinary;
+    const postSpy = vi
+      .spyOn(post, 'postBinary')
+      .mockImplementationOnce(async (...args) => {
+        syncStarted.resolve();
+        await syncGate.promise;
+        return postBinary(...args);
+      });
+    let savedPrefs;
+    vi.spyOn(fs, 'writeFile').mockImplementation(async (_path, contents) => {
+      const metadata = JSON.parse(contents as string);
+      if (metadata.lastScheduleRun) {
+        writeStarted.resolve();
+        await writeGate.promise;
+        savedPrefs = metadata;
+      }
+      return true;
+    });
+    await lib.send('app-focused');
+    await syncStarted.promise;
+    const closePromise = lib.send('close-budget');
+
+    try {
+      await vi.runAllTimersAsync();
+      expect(db.getDatabase()).not.toBeNull();
+
+      vi.stubEnv('NODE_ENV', 'production');
+      syncGate.resolve();
+      await writeStarted.promise;
+      await vi.runAllTimersAsync();
+      expect(db.getDatabase()).not.toBeNull();
+
+      vi.spyOn(sheet, 'waitOnSpreadsheet').mockImplementationOnce(async () => {
+        sheetStarted.resolve();
+        await sheetGate.promise;
+      });
+      writeGate.resolve();
+      await sheetStarted.promise;
+      await lib.send('app-focused');
+      void scheduleFullSync();
+      await vi.runAllTimersAsync();
+      expect(postSpy).toHaveBeenCalledTimes(1);
+
+      sheetGate.resolve();
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+      expect(savedPrefs).toMatchObject({
+        groupId: 'group',
+        lastScheduleRun: monthUtils.currentDay(),
+      });
+      expect(db.getDatabase()).toBeNull();
+    } finally {
+      syncGate.resolve();
+      writeGate.resolve();
+      sheetGate.resolve();
+      await vi.runAllTimersAsync();
+      await closePromise;
+    }
+  });
+
+  test('drains schedule work queued by a rejecting mutator during shutdown', async () => {
+    const errorLog = vi.spyOn(logger, 'error');
+    const gate = deferred();
+    const rejectingPromise = runMutator(() =>
+      batchMessages(async () => {
+        await gate.promise;
+        throw new SyncError('invalid-schema');
+      }),
+    );
+    const closePromise = lib.send('close-budget');
+
+    try {
+      await vi.runAllTimersAsync();
+      gate.resolve();
+      await expect(rejectingPromise).rejects.toThrow('invalid-schema');
+      await vi.runAllTimersAsync();
+      await expect(closePromise).resolves.toBe('ok');
+      expect(db.getDatabase()).toBeNull();
+      await runMutator(async () => undefined);
+      expect(errorLog).not.toHaveBeenCalledWith(
+        'Failed to run schedule service after sync',
+        expect.anything(),
+      );
+    } finally {
+      gate.resolve();
+      await vi.runAllTimersAsync();
+      await Promise.allSettled([rejectingPromise, closePromise]);
+    }
   });
 });

@@ -2,40 +2,40 @@
 
 This view lets you manage your budget. You'll find more information about envelope budgeting with Actual in [Budgeting](../budgeting/index.md).
 
-![Budget overview](/img/a-tour-of-actual/tour-budget-overview.webp)
+![The Budget page showing October and November side by side](/img/a-tour-of-actual/tour-budget-overview@2x.webp)
 
 The maximum number of months you can see at any one time is defined by the width of your screen.
 
 You can choose how many months to display by clicking on the corresponding number of calendar icons in the top left corner.
 
-![Budget calendar icons](/img/a-tour-of-actual/tour-budget-calendar.webp)
+<img width="92" alt="Four calendar icons, two of them highlighted to show two months" src="/img/a-tour-of-actual/tour-budget-month-count@2x.webp" />
 
 Based on this, you can then choose which months to show:
 
-![Budget months to show](/img/a-tour-of-actual/tour-budget-calendar-choose.webp)
+<img width="574" alt="The month picker with October and November selected" src="/img/a-tour-of-actual/tour-budget-month-picker@2x.webp" />
 
 ## The Month header
 
 At the top of each month, you have a couple of choices in the user interface.
 
-- Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note.
-- You can minimize the header by clicking on the chevrons (seen in the yellow box).
-- Clicking on the three vertical dots lets you execute the following functions on that month's budget categories:
+<img width="650" alt="The October and November headers with the note, minimize and menu buttons labeled" src="/img/a-tour-of-actual/tour-budget-header-expanded@2x.webp" />
+
+- **A. Notes.** Clicking on the note icon lets you add a note. Actual fully supports Markdown and the note will be rendered according to your Markdown when the cursor is hovering over the note.
+- **B. Minimize.** You can minimize the header by clicking on the chevrons, which appear when you hover over the month.
+- **C. Menu.** Clicking on the three vertical dots lets you execute the following functions on that month's budget categories:
   - Copy last month's budget.
   - Set budgets to zero.
   - Set budgets to 3 month average.
   - Set budgets to 6 month average.
   - Set budgets to 12 month average.
 
-![Budget header expanded](/img/a-tour-of-actual/tour-budget-top-expanded.webp)
-
 When the top is minimized, you can still access the same functionality as when the top section is expanded.
 
-![Budget header minimized](/img/a-tour-of-actual/tour-budget-top-minimized.webp)
+<img width="650" alt="The minimized October and November headers, showing only the amount to budget" src="/img/a-tour-of-actual/tour-budget-header-minimized@2x.webp" />
 
 Here's the rendered Markdown when you hover over the note.
 
-![Budget header note with Markdown](/img/a-tour-of-actual/tour-budget-top-note-hover.webp)
+<img width="413" alt="A month note with a heading, bold text and a bulleted list rendered from Markdown" src="/img/a-tour-of-actual/tour-budget-header-note@2x.webp" />
 
 ## The Budget Table
 
@@ -43,13 +43,11 @@ Here's the rendered Markdown when you hover over the note.
 
 The budget detail section lists all your categories and their grouping. The image below shows two expense category groups, _Usual Expenses_ and _Bills_, along with the income categories.
 
-Clicking on the three vertical dots (in the yellow box) allows you to toggle hidden categories, expand all or collapse all category groups.
+<img width="856" alt="The budget table with the category menu, the Bills group and the Internet category labeled" src="/img/a-tour-of-actual/tour-budget-table@2x.webp" />
 
-When you hover over a category group (outlined by the green box), you can add a new category to the group by clicking the + icon or add a note by clicking the note icon. All notes on the Budget page support full Markdown. The dropdown will allow you to toggle between hide or show the _category group_, rename or delete the group.
-
-Categories (as seen in the purple box) have the same functionality as groups: hide, rename and delete. You can also add a note here, with information specific to the category.
-
-![Budget table detail](/img/a-tour-of-actual/tour-budget-details.webp)
+- **A. Category menu.** Clicking on the three vertical dots allows you to toggle hidden categories, expand all or collapse all category groups.
+- **B. Category group.** When you hover over a category group, you can add a new category to the group by clicking the + icon or add a note by clicking the note icon. All notes on the Budget page support full Markdown. The dropdown will allow you to toggle between hide or show the _category group_, rename or delete the group.
+- **C. Category.** Categories have the same functionality as groups: hide, rename and delete. You can also add a note here, with information specific to the category.
 
 ### The middle - the budget section
 

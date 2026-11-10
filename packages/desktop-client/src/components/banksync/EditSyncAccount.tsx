@@ -214,7 +214,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
 
-          <Text style={{ fontSize: 15 }}>
+          <Text size="large">
             <Trans>Field mapping</Trans>
           </Text>
 
@@ -226,7 +226,7 @@ export function EditSyncAccount({ account }: EditSyncAccountProps) {
             setMapping={setMapping}
           />
 
-          <Text style={{ fontSize: 15, margin: '1em 0 .5em 0' }}>
+          <Text size="large" style={{ margin: '1em 0 .5em 0' }}>
             <Trans>Options</Trans>
           </Text>
 

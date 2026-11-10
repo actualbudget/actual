@@ -13,6 +13,7 @@ import type {
   CategoryGroupEntity,
   CustomReportEntity,
   PayeeEntity,
+  TagEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 
@@ -41,10 +42,12 @@ function ErrorFallback() {
 
 function convertFromDate(
   interval: string | undefined,
-): 'dayFromDate' | 'monthFromDate' | 'yearFromDate' {
+): 'dayFromDate' | 'monthFromDate' | 'quarterFromDate' | 'yearFromDate' {
   switch (interval) {
     case 'Monthly':
       return 'monthFromDate';
+    case 'Quarterly':
+      return 'quarterFromDate';
     case 'Yearly':
       return 'yearFromDate';
     default:
@@ -54,10 +57,16 @@ function convertFromDate(
 
 function convertRangeInclusive(
   interval: string | undefined,
-): 'dayRangeInclusive' | 'rangeInclusive' | 'yearRangeInclusive' {
+):
+  | 'dayRangeInclusive'
+  | 'rangeInclusive'
+  | 'quarterRangeInclusive'
+  | 'yearRangeInclusive' {
   switch (interval) {
     case 'Monthly':
       return 'rangeInclusive';
+    case 'Quarterly':
+      return 'quarterRangeInclusive';
     case 'Yearly':
       return 'yearRangeInclusive';
     default:
@@ -70,6 +79,7 @@ export function GetCardData({
   payees,
   accounts,
   categories,
+  tags,
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
@@ -79,6 +89,7 @@ export function GetCardData({
   payees: PayeeEntity[];
   accounts: AccountEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  tags: TagEntity[];
   earliestTransaction: string;
   latestTransaction: string;
   firstDayOfWeekIdx?: SyncedPrefs['firstDayOfWeekIdx'];
@@ -160,6 +171,8 @@ export function GetCardData({
       balanceTypeOp: ReportOptions.balanceTypeMap.get(report.balanceType),
       payees,
       accounts,
+      tags,
+      tagScope: report.tagScope,
       graphType: report.graphType,
       firstDayOfWeekIdx,
       sortByOp: report.sortBy,
@@ -170,6 +183,7 @@ export function GetCardData({
     categories,
     payees,
     accounts,
+    tags,
     startDate,
     endDate,
     firstDayOfWeekIdx,

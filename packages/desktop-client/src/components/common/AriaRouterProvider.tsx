@@ -12,6 +12,7 @@ export function AriaRouterProvider({ children }: AriaRouterProviderProps) {
   const navigate = useNavigate();
 
   return (
+    // oxlint-disable-next-line react/hooks
     <RouterProvider navigate={path => navigate(path)} useHref={useHref}>
       {children}
     </RouterProvider>

@@ -37,7 +37,7 @@ describe('getSpendingBudgetFilters', () => {
     ]);
   });
 
-  it('does not filter budgets when no category condition is present', () => {
+  it('excludes income categories when no category condition is present', () => {
     const result = getSpendingBudgetFilters({
       categories,
       categoryGroups,
@@ -50,7 +50,13 @@ describe('getSpendingBudgetFilters', () => {
       ] satisfies RuleConditionEntity[],
     });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual([
+      {
+        category: {
+          $oneof: ['cat-rent', 'cat-electric', 'cat-dining'],
+        },
+      },
+    ]);
   });
 
   it('filters budget categories by direct category IDs', () => {
@@ -68,6 +74,59 @@ describe('getSpendingBudgetFilters', () => {
 
     expect(result).toEqual([
       { category: { $oneof: ['cat-rent', 'cat-dining'] } },
+    ]);
+  });
+  it('excludes income categories when no category filter is selected', () => {
+    const result = getSpendingBudgetFilters({
+      categories: [
+        ...categories,
+        {
+          id: 'cat-income',
+          name: 'Salary',
+          group: 'group-income',
+          is_income: true,
+        },
+      ],
+      categoryGroups,
+      conditions: [],
+    });
+
+    expect(result).toEqual([
+      {
+        category: {
+          $oneof: ['cat-rent', 'cat-electric', 'cat-dining'],
+        },
+      },
+    ]);
+  });
+
+  it('excludes income categories even when explicitly selected', () => {
+    const result = getSpendingBudgetFilters({
+      categories: [
+        ...categories,
+        {
+          id: 'cat-income',
+          name: 'Salary',
+          group: 'group-income',
+          is_income: true,
+        },
+      ],
+      categoryGroups,
+      conditions: [
+        {
+          field: 'category',
+          op: 'oneOf',
+          value: ['cat-rent', 'cat-income'],
+        },
+      ] satisfies RuleConditionEntity[],
+    });
+
+    expect(result).toEqual([
+      {
+        category: {
+          $oneof: ['cat-rent'],
+        },
+      },
     ]);
   });
 });

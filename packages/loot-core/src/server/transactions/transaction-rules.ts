@@ -317,6 +317,16 @@ export async function getAllRuleIdsFromSchedules(
   return ruleIds;
 }
 
+export async function getCompletedScheduleRuleIds(): Promise<Set<string>> {
+  const rows = await db.all<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
+  );
+
+  return new Set(
+    rows.map(r => r.rule).filter((rule): rule is string => !!rule),
+  );
+}
+
 // Runner
 const NULLABLE_RULE_FIELDS = ['payee', 'category'] as const;
 
@@ -389,6 +399,10 @@ export async function runRules(
   const RuleIdsLinkedToSchedules =
     await getAllRuleIdsFromSchedules(scheduleRuleID);
 
+  // Completed schedules are kept around for reference, so their rules must
+  // not link new transactions that happen to match.
+  const completedScheduleRuleIds = await getCompletedScheduleRuleIds();
+
   const formulaStrings = rules.flatMap(rule =>
     collectFormulasFromActions(rule.actions),
   );
@@ -430,6 +444,9 @@ export async function runRules(
           lastCategoryIdForGroup,
         );
       }
+    } else if (completedScheduleRuleIds.has(rules[i].id)) {
+      // Completed schedules must not link new transactions.
+      continue;
     } else {
       // if there is no scheduleRuleID then just run all rules.
       if (rules[i].evalConditions(finalTrans)) {
@@ -1026,8 +1043,14 @@ export async function updateCategoryRules(transactions) {
             });
           }
         }
-      } else {
-        // No existing rules, so create one
+      } else if (
+        !getOneOfSetterRules(null, 'payee', 'category', {
+          condValue: payeeId,
+          actionValue: category,
+        }).next().value
+      ) {
+        // No existing rules (and no "one of" rule that already sets this
+        // category for the payee), so create one
         const newRule = new Rule({
           stage: null,
           conditionsOp: 'and',
@@ -1053,7 +1076,10 @@ export type TransactionForRules = TransactionEntity & {
   parent_imported_payee?: string;
   parent_payee?: string;
   parent_account?: string;
-  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  /**
+   * Prefetched integer balances for BALANCE_OF("…") in rule formulas; converted
+   * to amounts at the formula boundary in executeFormulaSync, cleared in finalize
+   */
   _balanceOfPrefetched?: Map<string, number>;
 };
 

@@ -63,6 +63,15 @@ export async function createSingleTimeScheduleFromTransaction(
     transaction.subtransactions.forEach((split, index) => {
       const splitIndex = index + 1;
 
+      actions.push({
+        op: 'set',
+        field: 'payee',
+        value: split.payee || null,
+        options: {
+          splitIndex,
+        },
+      });
+
       if (split.amount != null) {
         actions.push({
           op: 'set-split-amount',

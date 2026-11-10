@@ -20,6 +20,16 @@ export function getValidMonthBounds(
   };
 }
 
+export function clampMonth(month: string, bounds: MonthBounds) {
+  if (month < bounds.start) {
+    return bounds.start;
+  }
+  if (month > bounds.end) {
+    return bounds.end;
+  }
+  return month;
+}
+
 type MonthsContextProps = {
   months: string[];
   type: string;

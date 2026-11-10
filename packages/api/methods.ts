@@ -111,6 +111,12 @@ export async function sync() {
   return send('api/sync');
 }
 
+/**
+ * Run bank sync for one account, or for every linked account when no
+ * `accountId` is given. Resolves with the ids of the transactions the sync
+ * reconciled, so callers can tell an idle sync from one that imported
+ * something without querying the transaction table themselves.
+ */
 export async function runBankSync(args?: {
   accountId: APIAccountEntity['id'];
 }) {
@@ -409,6 +415,23 @@ export function resetBudgetHold(month: string) {
   return send('api/budget-reset-hold', { month });
 }
 
+export function applyCategoryTemplate(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-apply-category-template', { month, categoryId });
+}
+
+export function getCategoryTemplateAmount(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-get-category-template-amount', {
+    month,
+    categoryId,
+  });
+}
+
 export function createSchedule(schedule: Omit<APIScheduleEntity, 'id'>) {
   return send('api/schedule-create', schedule);
 }
@@ -431,6 +454,13 @@ export function deleteSchedule(scheduleId: APIScheduleEntity['id']) {
 
 export function getSchedules() {
   return send('api/schedules-get');
+}
+
+export function getScheduleDates(
+  date: APIScheduleEntity['date'],
+  options: { start?: string; end?: string; count?: number } = {},
+) {
+  return send('api/schedule-dates-get', { date, ...options });
 }
 
 export function getIDByName(

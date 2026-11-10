@@ -1,14 +1,15 @@
 import * as nativeFs from 'fs';
 import * as path from 'path';
 
-import type { Database } from '@jlongster/sql.js';
 import { describe, expect, it } from 'vitest';
 
+import type { Database } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 
 import {
   ADDITIVE_ONLY_CUTOFF,
   applyMigration,
+  getAppliedMigrations,
   getMigrationId,
   getMigrationList,
   migrate,
@@ -115,6 +116,9 @@ describe('migrations are additive-only', () => {
         ADDITIVE_ONLY_CUTOFF + 1,
       ]);
       await migrate(db);
+      expect(await getAppliedMigrations(db)).toContain(
+        ADDITIVE_ONLY_CUTOFF + 1,
+      );
     });
     sqlite.closeDatabase(db);
   });

@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path';
+import { join, resolve, sep } from 'node:path';
 
 import { config } from '#load-config';
 
@@ -18,7 +18,15 @@ export function isValidGroupId(id: string): id is GroupId {
 }
 
 export function getPathForUserFile(fileId: FileId) {
-  return join(resolve(config.get('userFiles')), `file-${fileId}.blob`);
+  const userFilesDir = resolve(config.get('userFiles'));
+  const filePath = resolve(userFilesDir, `file-${fileId}.blob`);
+  // isValidFileId already rules out traversal; this keeps the check where the
+  // path is built. Filesystem roots already end in sep.
+  const prefix = userFilesDir.endsWith(sep) ? userFilesDir : userFilesDir + sep;
+  if (!filePath.startsWith(prefix)) {
+    throw new Error('Invalid file id');
+  }
+  return filePath;
 }
 
 export function getPathForGroupFile(groupId: GroupId) {

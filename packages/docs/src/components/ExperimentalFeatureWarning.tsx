@@ -35,8 +35,8 @@ export function ExperimentalFeatureWarning({
           >
             open an issue
           </a>
-        )}{' '}
-        or post a message in the Discord.
+        )}
+        .
       </p>
       {children}
     </Admonition>

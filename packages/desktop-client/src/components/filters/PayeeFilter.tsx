@@ -51,9 +51,7 @@ export const PayeeFilter = ({ value, op, onChange }: PayeeFilterProps) => {
       openOnFocus
       value={coercedValue}
       inputProps={{ placeholder }}
-      onSelect={(payeeIdOrIds: string | string[], _: string) =>
-        onChange(payeeIdOrIds)
-      }
+      onSelect={(payeeIdOrIds: string | string[]) => onChange(payeeIdOrIds)}
     />
   );
 };

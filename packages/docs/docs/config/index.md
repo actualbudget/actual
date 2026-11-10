@@ -114,3 +114,17 @@ Updates the servers request forwarding trust to remove known proxy IPs from the 
 ## `trustedAuthProxies`
 
 Configure the clients that are allowed to authenticate with HTTP headers. This defaults to what is set in `trustedProxies`, but can be overridden independently. (environment variable: `ACTUAL_TRUSTED_AUTH_PROXIES`, comma separated string).
+
+## `ACTUAL_SIMPLEFIN_ALLOWED_NETWORKS` (config.json: `simplefinAllowedNetworks`)
+
+SimpleFIN connections to private networks and localhost are blocked by default. If you run a private SimpleFIN bridge, add its IP address or CIDR range to this setting and restart the Actual server. Public SimpleFIN bridges do not need this setting.
+
+Use a comma-separated list in the environment variable, for example `ACTUAL_SIMPLEFIN_ALLOWED_NETWORKS=192.168.1.20,fd12:3456::/64`, or an array in `config.json`:
+
+```json
+{
+  "simplefinAllowedNetworks": ["192.168.1.20", "fd12:3456::/64"]
+}
+```
+
+Prefer a single bridge IP over a whole subnet. Any user who can configure SimpleFIN can cause requests to these addresses, on any port. The setting applies to token claims, account requests, and redirects, including addresses resolved from hostnames. Link-local addresses (including cloud metadata), multicast, and reserved ranges remain blocked even if included in the list.

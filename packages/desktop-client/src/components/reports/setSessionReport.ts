@@ -1,18 +1,20 @@
-import type { RuleConditionEntity } from '@actual-app/core/types/models';
+import type { CustomReportEntity } from '@actual-app/core/types/models';
 
-export const setSessionReport = (
-  propName: string,
-  propValue: string | boolean | RuleConditionEntity[],
+type SessionReport = Partial<CustomReportEntity> & {
+  savedStatus?: 'saved' | 'modified';
+};
+
+export const setSessionReport = <K extends keyof SessionReport>(
+  propName: K,
+  propValue: SessionReport[K],
 ) => {
   const storedReport =
     sessionStorage.report && JSON.parse(sessionStorage.getItem('report') || '');
-  const result: Record<string, string | boolean | RuleConditionEntity[]> = {};
-  result[propName] = propValue;
   sessionStorage.setItem(
     'report',
     JSON.stringify({
       ...storedReport,
-      ...result,
+      [propName]: propValue,
     }),
   );
 };

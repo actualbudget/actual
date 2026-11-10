@@ -2,7 +2,7 @@
 
 :::note
 
-If your budget is very old, you may have trouble restoring large backups. If you're encountering this issue, click "Reset Sync" under 'Settings' > 'Show advanced settings' to reset sync, then make the export again. This should reduce the file size.
+If your budget is very old, you may have trouble restoring large backups. If you're encountering this issue, click "Reset Sync" under 'Settings' > 'Advanced' to reset sync, then make the export again. This should reduce the file size.
 
 :::
 
@@ -10,13 +10,13 @@ If your budget is very old, you may have trouble restoring large backups. If you
 
 You can export your data from Actual at any time. To do so:
 
-1. Login to your budget, click 'More' > 'Settings'
+1. Login to your budget, click 'Settings' in the sidebar
 
-   ![](/img/backup-restore/sidebar-settings@2x.webp)
+   <img width="240" alt="The sidebar with the Settings item highlighted" src="/img/backup-restore/backup-sidebar-settings@2x.webp" />
 
-2. Scroll down to the Export section and click Export Data
+2. Scroll down to the Data section and click Export data
 
-   ![](/img/backup-restore/settings-export.webp)
+   <img width="664" alt="The Data section of the settings with the Export data button" src="/img/settings/settings-export@2x.webp" />
 
 3. Save the file somewhere on your computer - that is it -- you're done.
 

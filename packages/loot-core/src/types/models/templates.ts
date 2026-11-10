@@ -76,6 +76,25 @@ export type AverageTemplate = {
   adjustmentType?: 'percent' | 'fixed';
 } & BaseTemplateWithPriority;
 
+export type Weekday =
+  | 'sunday'
+  | 'monday'
+  | 'tuesday'
+  | 'wednesday'
+  | 'thursday'
+  | 'friday'
+  | 'saturday';
+
+// Averages spending over the `numWeeks` complete weeks before the budget
+// month, then budgets that weekly amount once for every `weekday` in the month.
+export type WeeklyAverageTemplate = {
+  type: 'weeklyAverage';
+  numWeeks: number;
+  weekday: Weekday;
+  adjustment?: number;
+  adjustmentType?: 'percent' | 'fixed';
+} & BaseTemplateWithPriority;
+
 export type CopyTemplate = {
   type: 'copy';
   lookBack: number;
@@ -130,6 +149,7 @@ export type Template =
   | ScheduleTemplate
   | RemainderTemplate
   | AverageTemplate
+  | WeeklyAverageTemplate
   | GoalTemplate
   | CopyTemplate
   | RefillTemplate
