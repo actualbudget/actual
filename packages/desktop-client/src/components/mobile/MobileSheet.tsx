@@ -40,6 +40,7 @@ type MobileSheetProps = {
   title: string;
   onTitleUpdate?: (newTitle: string) => string | undefined;
   isLoading?: boolean;
+  hasWideDialogLabel?: boolean;
   wrapperStyle?: CSSProperties;
   onClose?: () => void;
   children: ReactNode | ((args: MobileSheetChildArgs) => ReactNode);
@@ -50,6 +51,7 @@ export function MobileSheet({
   title,
   onTitleUpdate,
   isLoading,
+  hasWideDialogLabel = false,
   wrapperStyle,
   onClose,
   children,
@@ -105,7 +107,12 @@ export function MobileSheet({
 
   if (!isNarrowWidth) {
     return (
-      <Modal name={name} isLoading={isLoading} onClose={onClose}>
+      <Modal
+        name={name}
+        ariaLabel={hasWideDialogLabel ? title : undefined}
+        isLoading={isLoading}
+        onClose={onClose}
+      >
         {({ state }) => (
           <>
             <ModalHeader
