@@ -195,4 +195,83 @@ test.describe('Browser storage', () => {
     await secondTab.close();
     await context.close();
   });
+
+  test('a change of engine in another tab does not reload a tab over changes it could not save', async ({
+    browser,
+  }) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    page = await browser.newPage();
+    // The IndexedDB fallback, which keeps a budget in memory between saves
+    await page.goto('/?storage=memory-idb');
+    await page.evaluate(
+      flag => sessionStorage.setItem(flag, '1'),
+      MANUAL_STORAGE_BACKEND_FLAG,
+    );
+    await new ConfigurationPage(page).createTestFile();
+    const accountPage = await openAllySavings(page);
+
+    await setBackendWritesFailing(page, true);
+    await accountPage.createSingleTransaction({
+      payee: '',
+      notes: 'only in memory',
+      debit: '10.00',
+    });
+    const unsavedTransaction = accountPage.transactionTableRow.filter({
+      hasText: 'only in memory',
+    });
+    await expect(unsavedTransaction).toBeVisible();
+    // The save and its one retry have failed, and the app has said so
+    await expect(page.getByText('Unable to save changes')).toBeVisible();
+
+    // The tab stays as it is, with the change still in it
+    await page.evaluate(() => {
+      document.body.dataset.sameDocument = 'true';
+    });
+    await announceEngineChange(page);
+    // Long enough for a relaunch that was not held back to have begun
+    await page.waitForTimeout(1500);
+    await expect(page.locator('body')).toHaveAttribute(
+      'data-same-document',
+      'true',
+    );
+    await expect(unsavedTransaction).toBeVisible();
+
+    // Once the change can be saved, the tab saves it and relaunches
+    await setBackendWritesFailing(page, false);
+    const relaunched = page.waitForEvent('load', { timeout: 60_000 });
+    await announceEngineChange(page);
+    await relaunched;
+    await expect(unsavedTransaction).toBeVisible({ timeout: 60_000 });
+  });
 });
+
+// Makes the backend's IndexedDB writes fail the way a full disk does: the
+// request is accepted, then its transaction aborts
+async function setBackendWritesFailing(page: Page, isFailing: boolean) {
+  const [backend] = page.workers();
+  await backend.evaluate(failing => {
+    const scope = globalThis as typeof globalThis & {
+      workingPut?: IDBObjectStore['put'];
+    };
+    scope.workingPut ??= IDBObjectStore.prototype.put;
+    const workingPut = scope.workingPut;
+    IDBObjectStore.prototype.put = failing
+      ? function failingPut(
+          this: IDBObjectStore,
+          ...args: Parameters<IDBObjectStore['put']>
+        ) {
+          const request = workingPut.apply(this, args);
+          this.transaction.abort();
+          return request;
+        }
+      : workingPut;
+  }, isFailing);
+}
+
+// What a tab hears when another one stores a different engine
+async function announceEngineChange(page: Page) {
+  await page.evaluate(key => {
+    window.dispatchEvent(new StorageEvent('storage', { key }));
+  }, STORAGE_BACKEND_KEY);
+}

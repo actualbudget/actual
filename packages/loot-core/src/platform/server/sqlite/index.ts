@@ -6,6 +6,7 @@ import type {
 import * as legacy from './engine.sqljs.legacy';
 import { wasmEngine } from './engine.wasm';
 import { getSqliteStore, initSqliteStorage, revertToLegacy } from './storage';
+import { StorageUnavailableError } from './storage/errors';
 import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
@@ -98,6 +99,7 @@ export async function init({
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
+  isReleased = false;
   // The legacy engine reads neither store's data and the fallback cannot
   // read OPFS pools, while the OPFS store adopts the fallback's rows, so
   // data the requested engine could not read means asking for OPFS instead
@@ -136,14 +138,32 @@ export async function flushSqliteStorage(): Promise<void> {
   }
 }
 
+// Set once the storage was let go of. A budget can be on its way in just
+// then; it would open its database afterwards and hold the budget from then
+// on, in a worker that is about to end or to be frozen along with its page.
+// So nothing stored is opened until `resumeSqliteStorage`
+let isReleased = false;
+
+function assertNotReleased() {
+  if (isReleased) {
+    throw new StorageUnavailableError('this worker has let go of its storage');
+  }
+}
+
 // Let go of storage handles and locks, so another worker can take over or
 // so a page that is leaving holds nothing back
 export async function releaseSqliteStorage(): Promise<void> {
+  isReleased = true;
   if (activeBackend === 'legacy') {
     legacy.closeOpenDatabases();
   } else {
     await getSqliteStore().releaseAll();
   }
+}
+
+// For a worker whose page came back out of the back/forward cache
+export function resumeSqliteStorage(): void {
+  isReleased = false;
 }
 
 // Move every budget back to absurd-sql's layout (the opt-in phase's way
@@ -254,7 +274,18 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<Database> {
-  return activeEngine.openDatabase(pathOrBuffer);
+  if (typeof pathOrBuffer !== 'string' || pathOrBuffer === ':memory:') {
+    // In memory, which holds no storage
+    return activeEngine.openDatabase(pathOrBuffer);
+  }
+  assertNotReleased();
+  const db = await activeEngine.openDatabase(pathOrBuffer);
+  if (isReleased) {
+    // Let go of while this database was being opened, so it goes back too
+    activeEngine.closeDatabase(db);
+  }
+  assertNotReleased();
+  return db;
 }
 
 export function closeDatabase(db: Database) {

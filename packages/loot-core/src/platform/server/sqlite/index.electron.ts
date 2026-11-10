@@ -67,6 +67,10 @@ export async function releaseSqliteStorage(): Promise<void> {
   // Nothing to release on native sqlite
 }
 
+export function resumeSqliteStorage(): void {
+  // Nothing was released on native sqlite
+}
+
 export async function revertSqliteStorageToLegacy(): Promise<void> {
   // Only the browser has a legacy storage layout
 }

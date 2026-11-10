@@ -171,8 +171,11 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   });
 
   // The IndexedDB fallback could not store the budget, retry included; the
-  // id keeps one notification up however many writes fail
+  // id keeps one notification up however many writes fail. From here on the
+  // latest changes may be in the backend's memory only
+  let hasUnsavedChanges = false;
   const unlistenStorageWriteFailed = listen('storage-write-failed', () => {
+    hasUnsavedChanges = true;
     store.dispatch(
       addNotification({
         notification: {
@@ -301,11 +304,24 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
 
   // The storage engine is one choice for the whole origin. When another tab
   // changes it, this tab relaunches into the same engine: a tab left on the
-  // old one would keep the budgets there, or move them straight back
+  // old one would keep the budgets there, or move them straight back. Not
+  // over changes it was told are only in memory, though: those are saved
+  // first, and the tab stays as it is for as long as they cannot be
   const unlistenStorageBackendChange = listenOnWindow('storage', event => {
-    if (event.key === STORAGE_BACKEND_KEY) {
-      window.Actual.relaunch();
+    if (event.key !== STORAGE_BACKEND_KEY) {
+      return;
     }
+    if (!hasUnsavedChanges) {
+      window.Actual.relaunch();
+      return;
+    }
+    void send('storage-flush', undefined, { catchErrors: true }).then(
+      ({ error }) => {
+        if (!error) {
+          window.Actual.relaunch();
+        }
+      },
+    );
   });
 
   return () => {

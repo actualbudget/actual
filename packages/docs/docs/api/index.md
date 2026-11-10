@@ -235,6 +235,8 @@ If no `serverURL` is provided, no network connections will be made, and you'll o
 
 You can find your budget id in the "Advanced" section of the settings page.
 
+In the [browser build](#using-the-api-in-a-browser), `init` fails while the API is already running. Call `shutdown` first.
+
 #### `shutdown`
 
 <Method name="shutdown" args={[]} returns="Promise<void>" />

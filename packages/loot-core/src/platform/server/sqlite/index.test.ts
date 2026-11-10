@@ -21,6 +21,8 @@ import {
   init,
   openDatabase,
   prepare,
+  releaseSqliteStorage,
+  resumeSqliteStorage,
   runQuery,
   transaction,
 } from './index';
@@ -557,6 +559,59 @@ describe('sqlite-wasm engine', () => {
     } finally {
       send.mockRestore();
       error.mockRestore();
+      await initWasmEngine();
+    }
+  });
+
+  it('opens no stored database once the storage is let go, until it is resumed', async () => {
+    await resetIndexedDb();
+    await initWasmEngine();
+    const path = '/documents/Actual/let-go/db.sqlite';
+    try {
+      await releaseSqliteStorage();
+      await expect(openDatabase(path)).rejects.toBeInstanceOf(
+        StorageUnavailableError,
+      );
+      // A database in memory holds no storage
+      closeDatabase(await openDatabase());
+
+      resumeSqliteStorage();
+      closeDatabase(await openDatabase(path));
+      // The new file's first save, so that it does not outlast the test
+      await storage.getSqliteStore().flush();
+    } finally {
+      await initWasmEngine();
+    }
+  });
+
+  it('gives back a database that was still being opened when the storage was let go', async () => {
+    await resetIndexedDb();
+    await initWasmEngine();
+    let heldLocks = 0;
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: {
+        request: (
+          _name: string,
+          _options: unknown,
+          hold: () => Promise<void>,
+        ) => {
+          heldLocks += 1;
+          return hold().then(() => {
+            heldLocks -= 1;
+          });
+        },
+      },
+    });
+    try {
+      const opening = openDatabase('/documents/Actual/on-its-way/db.sqlite');
+      await releaseSqliteStorage();
+      // Under way, with the budget's lock already taken
+      expect(heldLocks).toBe(1);
+      await expect(opening).rejects.toBeInstanceOf(StorageUnavailableError);
+      await vi.waitFor(() => expect(heldLocks).toBe(0));
+    } finally {
+      Reflect.deleteProperty(navigator, 'locks');
       await initWasmEngine();
     }
   });

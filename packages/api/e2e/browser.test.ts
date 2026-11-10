@@ -330,6 +330,20 @@ test('keeps the worker and the budget when the last changes cannot be saved, and
   expect(page.workers()).toHaveLength(1);
   expect(await readAmounts()).toEqual([-900]);
 
+  // Nor is it replaced: a second init is refused while it runs
+  const refusal = await page.evaluate(async () => {
+    const api = await window.apiReady;
+    return api
+      .init({ dataDir: '/documents', storageBackend: 'memory-idb' })
+      .then(
+        () => null,
+        (error: Error) => error.message,
+      );
+  });
+  expect(refusal).toContain('already running');
+  expect(page.workers()).toHaveLength(1);
+  expect(await readAmounts()).toEqual([-900]);
+
   // With room again the same call saves the change and ends the worker
   await setBackendWritesFailing(page, false);
   await page.evaluate(async () => {
@@ -388,31 +402,88 @@ for (const storageBackend of ['opfs', 'memory-idb']) {
     await expect.poll(() => countHeldBudgetLocks(page)).toBe(0);
 
     // And when it comes back out of it: the budget is open again, with
-    // what was saved before the page left
-    await page.evaluate(() => {
+    // what was saved before the page left. What was asked while the page
+    // was away, or is asked the moment it is back, waits for that instead
+    // of meeting the closed database
+    const answers = await page.evaluate(async () => {
+      const api = await window.apiReady;
+      const askedWhileAway = api.getAccounts();
       window.dispatchEvent(
         new PageTransitionEvent('pageshow', { persisted: true }),
       );
+      const askedOnReturn = api.getAccounts();
+      const [whileAway, onReturn] = await Promise.all([
+        askedWhileAway,
+        askedOnReturn,
+      ]);
+      const transactions = await api.getTransactions(
+        onReturn[0].id,
+        '2024-03-01',
+        '2024-03-01',
+      );
+      return {
+        whileAway: whileAway.map(account => account.name),
+        onReturn: onReturn.map(account => account.name),
+        amounts: transactions.map(transaction => transaction.amount),
+      };
     });
-    await expect
-      .poll(() =>
-        page.evaluate(async () => {
-          const api = await window.apiReady;
-          try {
-            const [account] = await api.getAccounts();
-            const transactions = await api.getTransactions(
-              account.id,
-              '2024-03-01',
-              '2024-03-01',
-            );
-            return transactions.map(transaction => transaction.amount);
-          } catch {
-            // Still reopening
-            return null;
-          }
-        }),
-      )
-      .toEqual([-700]);
+    expect(answers).toEqual({
+      whileAway: ['Checking'],
+      onReturn: ['Checking'],
+      amounts: [-700],
+    });
+    expect(await countHeldBudgetLocks(page)).toBe(1);
+
+    await page.evaluate(async () => {
+      const api = await window.apiReady;
+      await api.shutdown();
+    });
+  });
+
+  test(`holds nothing for a page that leaves while its budget is loading (${storageBackend})`, async ({
+    page,
+  }) => {
+    await page.goto('/e2e/harness.html');
+    const budgetId = await page.evaluate(async backend => {
+      const api = await window.apiReady;
+      await api.init({ dataDir: '/documents', storageBackend: backend });
+      await api.runImport('e2e-leaving-budget', async () => {
+        await api.createAccount({ name: 'Checking' }, 0);
+      });
+      const [budget] = await api.getBudgets();
+      // Start again with the budget closed
+      await api.shutdown();
+      await api.init({ dataDir: '/documents', storageBackend: backend });
+      return budget.id;
+    }, storageBackend);
+
+    // The load is cut short, rather than left to take the budget for a
+    // page that has gone
+    const interruption = await page.evaluate(async id => {
+      const api = await window.apiReady;
+      const loading = api.loadBudget(id).then(
+        () => null,
+        (error: { code?: string }) => error.code,
+      );
+      window.dispatchEvent(
+        new PageTransitionEvent('pagehide', { persisted: true }),
+      );
+      return loading;
+    }, budgetId);
+    expect(interruption).toBe('storage-unavailable');
+    await expect.poll(() => countHeldBudgetLocks(page)).toBe(0);
+
+    // Back out of the cache, the budget loads as usual
+    const accountNames = await page.evaluate(async id => {
+      const api = await window.apiReady;
+      window.dispatchEvent(
+        new PageTransitionEvent('pageshow', { persisted: true }),
+      );
+      await api.loadBudget(id);
+      const accounts = await api.getAccounts();
+      return accounts.map(account => account.name);
+    }, budgetId);
+    expect(accountNames).toEqual(['Checking']);
     expect(await countHeldBudgetLocks(page)).toBe(1);
 
     await page.evaluate(async () => {
