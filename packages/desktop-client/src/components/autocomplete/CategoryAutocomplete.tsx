@@ -310,6 +310,9 @@ export function CategoryAutocomplete({
   // intersection signature. Categories are always single-select here.
   type SelectHandler = (id: string, value: string) => void;
   const onSelectSingle = props.onSelect as SelectHandler | undefined;
+  const onUpdateSingle = props.onUpdate as
+    | ((id: string | null, value: string) => void)
+    | undefined;
 
   const handleSelect: SelectHandler = (id, value) => {
     if (isChoosingGroup) {
@@ -374,12 +377,20 @@ export function CategoryAutocomplete({
       return filtered;
     }
 
-    // Nothing to create when the typed name already exists.
-    const hasExactMatch = filtered.some(
-      item =>
-        item.id !== 'split' &&
-        getNormalisedString(item.name) === getNormalisedString(trimmedValue),
-    );
+    // Nothing to create when the typed name already exists. Hidden categories
+    // count too: they are not suggested, but the server rejects a duplicate.
+    const normalisedValue = getNormalisedString(trimmedValue);
+    const hasExactMatch =
+      filtered.some(
+        item =>
+          item.id !== 'split' &&
+          getNormalisedString(item.name) === normalisedValue,
+      ) ||
+      groups.some(group =>
+        group.categories?.some(
+          category => getNormalisedString(category.name) === normalisedValue,
+        ),
+      );
 
     return hasExactMatch ? filtered : [...filtered, createItem];
   };
@@ -390,6 +401,20 @@ export function CategoryAutocomplete({
   const autocompleteProps = {
     ...props,
     onSelect: handleSelect,
+    // The input reports whatever row is highlighted as the field's value, and
+    // the cell saves that on blur. The create row and the group rows are not
+    // categories, so report the unchanged value instead: leaving the field
+    // does nothing until a category is actually picked.
+    onUpdate: (id: string | null, value: string) => {
+      if (isChoosingGroup || id === 'new') {
+        onUpdateSingle?.(
+          typeof props.value === 'string' ? props.value : null,
+          value,
+        );
+        return;
+      }
+      onUpdateSingle?.(id, value);
+    },
   } as CategoryAutocompleteProps;
 
   return (

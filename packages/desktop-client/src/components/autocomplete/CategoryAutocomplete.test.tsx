@@ -30,6 +30,13 @@ const categoryGroups: CategoryGroupEntity[] = [
         is_income: false,
         hidden: false,
       },
+      {
+        id: 'cat-old-gym',
+        name: 'Old Gym',
+        group: 'group-food',
+        is_income: false,
+        hidden: true,
+      },
     ],
   },
   {
@@ -78,6 +85,7 @@ describe('CategoryAutocomplete create option', () => {
     ...props
   }: {
     onSelect: (id: string | null, value: string) => void;
+    onUpdate?: (id: string | null, value: string) => void;
     showCreateOption?: boolean;
   }) {
     const [value, setValue] = useState<string | null>(null);
@@ -103,18 +111,27 @@ describe('CategoryAutocomplete create option', () => {
 
   function renderAutocomplete(props?: { showCreateOption?: boolean }) {
     const onSelect = vi.fn();
+    const onUpdate = vi.fn();
 
     render(
       <TestProviders queryClient={queryClient}>
         <SpreadsheetProvider>
           <div data-testid="autocomplete-test">
-            <ControlledCategoryAutocomplete onSelect={onSelect} {...props} />
+            <ControlledCategoryAutocomplete
+              onSelect={onSelect}
+              onUpdate={onUpdate}
+              {...props}
+            />
           </div>
         </SpreadsheetProvider>
       </TestProviders>,
     );
 
-    return { onSelect, container: screen.getByTestId('autocomplete-test') };
+    return {
+      onSelect,
+      onUpdate,
+      container: screen.getByTestId('autocomplete-test'),
+    };
   }
 
   async function type(container: HTMLElement, text: string) {
@@ -339,5 +356,48 @@ describe('CategoryAutocomplete create option', () => {
     // The existing category must win, not a new one with the same name.
     expect(categoryCreate).not.toHaveBeenCalled();
     expect(onSelect).toHaveBeenCalledWith('cat-groceries', expect.anything());
+  });
+
+  it('does not offer to create a hidden category that already exists', async () => {
+    const { container } = renderAutocomplete({ showCreateOption: true });
+    await type(container, 'Old Gym');
+
+    expect(
+      screen.queryByTestId('create-category-button'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not report the create row as the field value', async () => {
+    const { container, onUpdate } = renderAutocomplete({
+      showCreateOption: true,
+    });
+    await type(container, 'Takeaway');
+
+    // Leaving the field now must not save anything, so the cell is told the
+    // value is still the original (empty) one.
+    expect(onUpdate).toHaveBeenCalled();
+    expect(onUpdate.mock.calls.map(([id]) => id)).not.toContain('new');
+    expect(onUpdate).toHaveBeenLastCalledWith(null, 'Takeaway');
+  });
+
+  it('does not report a group as the field value on the group step', async () => {
+    const { container, onUpdate, onSelect } = renderAutocomplete({
+      showCreateOption: true,
+    });
+    await type(container, 'Takeaway');
+    await userEvent.click(screen.getByTestId('create-category-button'));
+    await waitForAutocomplete();
+
+    const input = container.querySelector('input')!;
+    await userEvent.type(input, 'Foo');
+    await waitForAutocomplete();
+    await userEvent.tab();
+    await waitForAutocomplete();
+
+    const reported = onUpdate.mock.calls.map(([id]) => id);
+    expect(reported).not.toContain('group-food');
+    expect(reported).not.toContain('group-income');
+    expect(categoryCreate).not.toHaveBeenCalled();
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });
