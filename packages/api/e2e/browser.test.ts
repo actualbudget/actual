@@ -177,6 +177,9 @@ test('supports a custom dataDir and persists it', async ({ page }) => {
   expect(budgetCount).toBe(1);
 });
 
+// Left alone, the fallback saves this long after the last change
+const FALLBACK_DEBOUNCE_MS = 1000;
+
 // The fallback saves a budget whole to IndexedDB; its row revision moves on
 // every save
 async function readFallbackRevision(page: Page) {
@@ -217,9 +220,10 @@ test('saves fallback changes when the page is hidden, so a reload without shutdo
 
   // A change the fallback would save only after its debounce; hiding the
   // page asks for the save at once
-  await page.evaluate(async () => {
+  const changeStartedAt = await page.evaluate(async () => {
     const api = await window.apiReady;
     const [account] = await api.getAccounts();
+    const startedAt = Date.now();
     await api.addTransactions(account.id, [
       { date: '2024-02-01', amount: -4200, notes: 'hidden' },
     ]);
@@ -228,13 +232,18 @@ test('saves fallback changes when the page is hidden, so a reload without shutdo
       configurable: true,
     });
     document.dispatchEvent(new Event('visibilitychange'));
+    return startedAt;
   });
+  // Patient, for a loaded runner; what counts is how long the save took
   await expect
     .poll(() => readFallbackRevision(page), {
-      timeout: 600,
+      timeout: 5000,
       intervals: [25, 50, 100],
     })
     .toBeGreaterThan(saved);
+  // Counted from before the change, so a save the debounce made can never
+  // pass: that one lands a full interval after the change at the earliest
+  expect(Date.now() - changeStartedAt).toBeLessThan(FALLBACK_DEBOUNCE_MS);
 
   // No shutdown(): the saved budget still has the change
   await page.reload();
