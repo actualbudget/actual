@@ -74,6 +74,25 @@ let api = require('@actual-app/api');
 
 Heads up! You probably don't want to hard-code the passwords like that, especially if you'll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
+### API Keys
+
+For even more security, you can generate budget-scoped API keys rather than providing your password.
+
+1. In your budget, go to **Settings → General → Security → API keys** and select **Add key**.
+2. Enter a name for your API key and select **Create key**.
+3. Copy the generated key (it will not be displayed again).
+4. The key will appear in the **API keys** section in case you need to revoke it later.
+
+Pass the key as `sessionToken` when connecting:
+
+```js
+await api.init({
+  dataDir: '/some/path',
+  serverURL: 'https://actual.example.com',
+  sessionToken: process.env.ACTUAL_API_KEY,
+});
+```
+
 ### Self-Signed Https Certificates
 
 If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration will be needed for the connections to succeed.

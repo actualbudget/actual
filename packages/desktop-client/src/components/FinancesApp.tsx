@@ -386,9 +386,7 @@ export function FinancesApp() {
                             FallbackComponent={FeatureErrorFallback}
                             resetKeys={[location.pathname]}
                           >
-                            <View style={{ flexShrink: 0, paddingTop: 10 }}>
-                              <NarrowAlternate name="BankSync" />
-                            </View>
+                            <NarrowAlternate name="BankSync" />
                           </ErrorBoundary>
                         </SidebarMenuRoute>
                       }
