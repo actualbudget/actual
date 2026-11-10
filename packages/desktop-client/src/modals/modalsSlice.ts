@@ -25,6 +25,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';
+import type { BuiltInBankSyncProviderState } from '#components/banksync/useBuiltInBankSyncProviders';
 import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
@@ -691,6 +692,31 @@ export type Modal =
     }
   | {
       name: 'schedules-upcoming-length';
+    }
+  | {
+      name: 'bank-sync-providers';
+      options: {
+        onProvidersChange?: () => void;
+      };
+    }
+  | {
+      name: 'bank-sync-automatic-sync';
+    }
+  | {
+      name: 'bank-sync-menu';
+      options: {
+        hasProvidersItem: boolean;
+        hasAutomaticSyncItem: boolean;
+        onProvidersChange?: () => void;
+      };
+    }
+  | {
+      name: 'bank-sync-link-provider';
+      options: {
+        linkProviders: Array<
+          Pick<BuiltInBankSyncProviderState, 'id' | 'displayName' | 'onLink'>
+        >;
+      };
     }
   | {
       name: 'payee-category-learning';

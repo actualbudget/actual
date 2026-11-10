@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
+import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
 import { Paragraph } from '@actual-app/components/paragraph';
 import { Select } from '@actual-app/components/select';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
+import type { CSSProperties } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
@@ -24,7 +25,20 @@ const CUSTOM = 'custom';
 
 export function AutomaticSyncSettings() {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const [interval, setIntervalPref] = useSyncedPref('bank-sync-interval');
+  const touchSelectStyle = isNarrowWidth
+    ? {
+        ...styles.mediumText,
+        minHeight: styles.mobileMinHeight,
+        paddingInline: spacing.md,
+      }
+    : {};
+  const rowStyle: CSSProperties = {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  };
 
   const currentInterval = interval || '0';
 
@@ -94,37 +108,18 @@ export function AutomaticSyncSettings() {
   return (
     <View
       style={{
-        border: `1px solid ${theme.tableBorder}`,
-        borderRadius: 8,
-        padding: spacing.lg,
-        backgroundColor: theme.tableBackground,
         gap: spacing.md,
       }}
     >
-      <View style={{ gap: spacing.xs }}>
-        <Text style={{ ...styles.mediumText, fontWeight: 600 }}>
-          <Trans>Automatic syncing</Trans>
-        </Text>
-        <Paragraph
-          style={{ fontSize: 15, color: theme.pageTextSubdued, margin: 0 }}
-        >
-          <Trans>
-            Download new transactions from your linked accounts in the
-            background while Actual is open. A sync runs when any account hasn't
-            synced within the chosen interval, including syncs from other
-            devices.
-          </Trans>
-        </Paragraph>
-      </View>
+      <Paragraph style={{ color: theme.pageTextLight, margin: 0 }}>
+        <Trans>
+          Download new transactions from your linked accounts in the background
+          while Actual is open. A sync runs when any account hasn't synced
+          within the chosen interval, including syncs from other devices.
+        </Trans>
+      </Paragraph>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: spacing.sm,
-          flexWrap: 'wrap',
-        }}
-      >
+      <View style={rowStyle}>
         <label htmlFor="bank-sync-interval">
           <Trans>Sync accounts</Trans>
         </label>
@@ -133,39 +128,44 @@ export function AutomaticSyncSettings() {
           value={showCustom ? CUSTOM : currentInterval}
           onChange={onChangeInterval}
           options={intervals}
-          style={{ flexShrink: 0 }}
+          style={{ flexShrink: 0, ...touchSelectStyle }}
         />
-
-        {showCustom && (
-          <>
-            <label htmlFor="bank-sync-interval-value">
-              <Trans>every</Trans>
-            </label>
-            <Input
-              id="bank-sync-interval-value"
-              type="number"
-              min={
-                customParts.unit === 'minute' ? MIN_CUSTOM_INTERVAL_MINUTES : 1
-              }
-              style={{ width: 70, flexShrink: 0 }}
-              value={draft ?? String(customParts.value)}
-              onChangeValue={setDraft}
-              // Persist once the value is complete, not per keystroke.
-              onUpdate={commitDraft}
-              onEnter={commitDraft}
-            />
-            {/* Select drops unknown props, so this cannot carry an aria-label;
-                the button's own text ("minutes", "hours", …) names it. */}
-            <Select
-              id="bank-sync-interval-unit"
-              value={customParts.unit}
-              onChange={unit => onChangeCustom(customParts.value, unit)}
-              options={units}
-              style={{ flexShrink: 0 }}
-            />
-          </>
-        )}
       </View>
+
+      {showCustom && (
+        <View style={rowStyle}>
+          <label htmlFor="bank-sync-interval-value">
+            <Trans>every</Trans>
+          </label>
+          <Input
+            id="bank-sync-interval-value"
+            type="number"
+            size={isNarrowWidth ? 'extra-large' : undefined}
+            min={
+              customParts.unit === 'minute' ? MIN_CUSTOM_INTERVAL_MINUTES : 1
+            }
+            style={{
+              width: isNarrowWidth ? 90 : 70,
+              flexShrink: 0,
+              ...(isNarrowWidth && { height: styles.mobileMinHeight }),
+            }}
+            value={draft ?? String(customParts.value)}
+            onChangeValue={setDraft}
+            // Persist once the value is complete, not per keystroke.
+            onUpdate={commitDraft}
+            onEnter={commitDraft}
+          />
+          {/* Select drops unknown props, so this cannot carry an aria-label;
+              the button's own text ("minutes", "hours", …) names it. */}
+          <Select
+            id="bank-sync-interval-unit"
+            value={customParts.unit}
+            onChange={unit => onChangeCustom(customParts.value, unit)}
+            options={units}
+            style={{ flexShrink: 0, ...touchSelectStyle }}
+          />
+        </View>
+      )}
     </View>
   );
 }
