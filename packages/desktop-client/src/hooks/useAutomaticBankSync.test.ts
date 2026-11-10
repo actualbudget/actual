@@ -1,5 +1,6 @@
+import { send } from '@actual-app/core/platform/client/connection';
 import type { AccountEntity } from '@actual-app/core/types/models';
-import { renderHook } from '@testing-library/react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
 import { useAccounts } from '#hooks/useAccounts';
@@ -12,13 +13,23 @@ import {
 } from './useAutomaticBankSync';
 
 const mutate = vi.fn();
+const syncBudget = vi.fn();
+const setLastAutomaticRun = vi.fn();
+
+vi.mock('@actual-app/core/platform/client/connection', () => ({
+  send: vi.fn(),
+}));
+vi.mock('#app/appSlice', () => ({ sync: vi.fn() }));
+vi.mock('#redux', () => ({
+  useDispatch: () => () => ({ unwrap: syncBudget }),
+}));
 
 vi.mock('#accounts', () => ({
   useSyncAndDownloadMutation: () => ({ mutate }),
 }));
 vi.mock('#hooks/useAccounts', () => ({ useAccounts: vi.fn() }));
 vi.mock('#hooks/useLocalPref', () => ({
-  useLocalPref: () => [undefined, vi.fn()],
+  useLocalPref: () => [undefined, setLastAutomaticRun],
 }));
 vi.mock('#hooks/useSyncedPref', () => ({ useSyncedPref: () => ['60'] }));
 vi.mock('#hooks/useSyncServerStatus', () => ({
@@ -227,18 +238,27 @@ describe('isAutomaticSyncDue', () => {
 });
 
 describe('useAutomaticBankSync', () => {
-  function mockAccounts(accounts: AccountEntity[]) {
+  // `fresh` is what the budget holds once it has synced with the server.
+  function mockAccounts(accounts: AccountEntity[], fresh = accounts) {
     vi.mocked(useAccounts).mockReturnValue({
       data: accounts,
     } as unknown as ReturnType<typeof useAccounts>);
+    vi.mocked(send).mockResolvedValue(fresh);
+  }
+
+  // Lets the rest of the asynchronous check run before asserting on what it
+  // did not do.
+  function settle() {
+    return new Promise(resolve => setTimeout(resolve));
   }
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useSyncServerStatus).mockReturnValue('online');
+    syncBudget.mockResolvedValue({});
   });
 
-  it('syncs as soon as the accounts finish loading', () => {
+  it('syncs as soon as the accounts finish loading', async () => {
     // The accounts query starts with an empty placeholder, so the check on
     // mount never finds a linked account. Waiting for the next timer tick is
     // not an option in the mobile apps: the web view is suspended in the
@@ -249,10 +269,10 @@ describe('useAutomaticBankSync', () => {
 
     mockAccounts([account()]);
     rerender();
-    expect(mutate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mutate).toHaveBeenCalledTimes(1));
   });
 
-  it('syncs once the server becomes reachable', () => {
+  it('syncs once the server becomes reachable', async () => {
     mockAccounts([account()]);
     vi.mocked(useSyncServerStatus).mockReturnValue('offline');
     const { rerender } = renderHook(() => useAutomaticBankSync());
@@ -260,6 +280,35 @@ describe('useAutomaticBankSync', () => {
 
     vi.mocked(useSyncServerStatus).mockReturnValue('online');
     rerender();
-    expect(mutate).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mutate).toHaveBeenCalledTimes(1));
+  });
+
+  it('skips the bank when another device has synced since', async () => {
+    // Locally the account looks overdue, but only because this device has
+    // not caught up with the budget yet.
+    mockAccounts([account()], [account({ last_sync: String(Date.now()) })]);
+    renderHook(() => useAutomaticBankSync());
+
+    await waitFor(() => expect(send).toHaveBeenCalledWith('accounts-get'));
+    await settle();
+    expect(mutate).not.toHaveBeenCalled();
+    expect(setLastAutomaticRun).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'fails to sync',
+      () => syncBudget.mockResolvedValue({ error: { message: 'network' } }),
+    ],
+    ['sync throws', () => syncBudget.mockRejectedValue(new Error('lost'))],
+  ])('skips the bank when the budget %s', async (_, failBudgetSync) => {
+    mockAccounts([account()]);
+    failBudgetSync();
+    renderHook(() => useAutomaticBankSync());
+
+    // The attempt is recorded so it isn't retried on every check.
+    await waitFor(() => expect(setLastAutomaticRun).toHaveBeenCalledTimes(1));
+    expect(send).not.toHaveBeenCalled();
+    expect(mutate).not.toHaveBeenCalled();
   });
 });
