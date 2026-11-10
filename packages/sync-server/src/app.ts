@@ -1,4 +1,5 @@
 import fs, { readFileSync } from 'node:fs';
+import type { Server } from 'node:http';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,9 +22,11 @@ import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
 import { config } from './load-config';
+import { bootstrapPlugins, shutdownPlugins } from './plugins/plugins-bootstrap';
 import { listen } from './util/server-listen';
 
 const debugSensitive = createDebug('actual-sensitive:server');
+const shutdownTimeoutMs = 10_000;
 
 const app = express();
 
@@ -223,6 +226,10 @@ export async function run() {
     }
   }
 
+  await bootstrapPlugins();
+
+  let server: Server;
+
   if (config.get('https.key') && config.get('https.cert')) {
     const https = await import('node:https');
     const httpsOptions = {
@@ -230,14 +237,60 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    listen(
-      https.createServer(httpsOptions, app),
-      port,
-      hostname,
-      sendServerStartedMessage,
-    );
+    server = https.createServer(httpsOptions, app);
   } else {
     const http = await import('node:http');
-    listen(http.createServer(app), port, hostname, sendServerStartedMessage);
+    server = http.createServer(app);
   }
+
+  listen(server, port, hostname, sendServerStartedMessage);
+
+  let isShuttingDown = false;
+
+  async function onShutdown(signal: string) {
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
+    console.log(`${signal} received. Starting graceful shutdown...`);
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        let isClosed = false;
+        const timeout = setTimeout(() => {
+          if (isClosed) {
+            return;
+          }
+
+          isClosed = true;
+          console.warn('Forcing server shutdown after timeout.');
+          server.closeAllConnections();
+          resolve();
+        }, shutdownTimeoutMs);
+
+        server.close(error => {
+          if (isClosed) {
+            return;
+          }
+
+          isClosed = true;
+          clearTimeout(timeout);
+          if (error) {
+            reject(error);
+          } else {
+            resolve();
+          }
+        });
+      });
+      await shutdownPlugins();
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during shutdown:', error);
+      await shutdownPlugins();
+      process.exit(1);
+    }
+  }
+
+  process.on('SIGTERM', () => onShutdown('SIGTERM'));
+  process.on('SIGINT', () => onShutdown('SIGINT'));
 }

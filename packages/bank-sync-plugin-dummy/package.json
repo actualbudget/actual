@@ -1,0 +1,21 @@
+{
+  "name": "@actual-app/bank-sync-plugin-dummy",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Dummy bank sync plugin for validating the plugin MVP stack",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "yarn clean && yarn build:compile && yarn build:manifest && yarn package:zip",
+    "build:compile": "tsc -b",
+    "build:manifest": "node scripts/build-manifest.cjs",
+    "build:zip": "yarn build",
+    "clean": "rm -rf dist manifest.json",
+    "install:sync-server": "node scripts/install-sync-server.cjs",
+    "package:zip": "node scripts/build-zip.cjs"
+  },
+  "devDependencies": {
+    "fflate": "^0.8.3",
+    "typescript": "^6.0.3"
+  }
+}
