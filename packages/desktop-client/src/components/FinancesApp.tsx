@@ -48,6 +48,7 @@ import {
 } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarMenuRoute } from './sidebar/SidebarMenuRoute';
+import { useSidebar } from './sidebar/SidebarProvider';
 import { StartPageRedirect } from './StartPageRedirect';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
@@ -101,6 +102,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
+  const sidebar = useSidebar();
   useMetaThemeColor(theme.mobileViewTheme);
 
   const location = useLocation();
@@ -238,6 +240,11 @@ export function FinancesApp() {
               ...(!isNarrowWidth && {
                 paddingTop: 'env(safe-area-inset-top)',
                 paddingRight: 'env(safe-area-inset-right)',
+                // A floating sidebar overlays this pane instead of sitting
+                // beside it, so the pane itself reaches the left edge.
+                ...(sidebar.floating && {
+                  paddingLeft: 'env(safe-area-inset-left)',
+                }),
               }),
             }}
           >
