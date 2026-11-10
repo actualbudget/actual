@@ -81,7 +81,7 @@ With **Show balances of other currencies as**, you can choose how the balance of
 - **Converted to default currency**: `1,053.62`
 - **Both**: `USD$760.03 (1,053.62)`
 
-![The currency settings: default currency, how balances of other currencies are shown, which rate converts past amounts and the symbol for CAD amounts](/img/experimental/multi-currency/multi-currency-currency-settings@2x.webp)
+![The currency settings: default currency, how balances of other currencies are shown, which rate converts past amounts, the currencies budgeted on their own and the symbol for CAD amounts](/img/experimental/multi-currency/multi-currency-currency-settings@2x.webp)
 
 Converted amounts are never editable. An amount marked with ≈ is approximate: there is no exchange rate for it yet, or only one from a later date.
 
@@ -104,24 +104,72 @@ Because the budget uses the rate of each transaction's date, while account total
 
 ## Budgeting in More Than One Currency
 
-Any category can be budgeted in more than one currency, income ones too. For example, in a Canadian budget, Food can have CAD 400 for groceries at home and USD 150 for trips, and the USD 150 stays USD 150 whatever the exchange rate does.
-
-To add a currency, open the menu of a category and choose **Add currency**. Pick the currency, the currencies of your accounts come first, and the month it starts in. The category then shows its total in the default currency, followed by a line for its own budget and one for each currency you added.
-
-<img width="512" alt="Adding a currency to the General category: the currency, with those of your accounts first, and the month it starts in" src="/img/experimental/multi-currency/multi-currency-category-currency-add@2x.webp" />
+Any category, income ones too, can be budgeted in more than one currency. Each currency gets a line of its own under the category, budgeted and kept in that currency. For example, in a Canadian budget, Food can have CAD 400 for groceries at home and USD 150 for trips, and the USD 150 stays USD 150 whatever the exchange rate does.
 
 ![Food in a Canadian budget: its total in CAD, then CAD 400 budgeted for itself and USD 150 budgeted, spent and kept in US dollars](/img/experimental/multi-currency/multi-currency-category-currencies@2x.webp)
 
-- **Spending and income** of an account in the currency of a line show up in that line, in that currency, never converted: a salary paid in US dollars, or the starting balance of a US dollar account, shows up in the USD line of its category. Amounts in a currency without its own line show up in the category's own line, converted as before. Months before the first month of a line stay as they were.
-- **To Budget** stays in the default currency. Budgeting USD 150 takes its value from To Budget at that month's rate, and income received in US dollars adds its value at that rate: the latest rate on or before the last day of the month. The current and later months follow the latest rate; a past month keeps its last rate.
-- **The balance** of a line stays in its currency: budget USD 150, spend USD 45, and USD 105 is left. Overspending returns to To Budget at that month's rate, unless rollover is on for that line.
-- **Moving money** between a line and another category or To Budget, or covering overspending, converts it at the month's rate. You type the amount in the currency it comes from.
-- **Removing a currency** from the menu of its line moves its budget into the category, converted at each month's rate, so To Budget doesn't change. Its spending shows up in the category again.
-- **Reports**, formula cards and the category picker count the total of the category, in the default currency.
+A category with lines shows its total in the default currency, then a line for its own budget, then one line per currency. On a phone, the lines are rows under the category:
 
 <img width="320" alt="The same category on a phone, with a row for CAD and one for USD under it" src="/img/experimental/multi-currency/multi-currency-category-currencies-mobile@2x.webp" />
 
-Budget templates fill in the category's own budget only. While **Multiple currencies** is turned off, the lines are left out of the budget; turning it back on brings them back.
+On a phone, a line's amounts leave out the currency's symbol, as the row's label already names it.
+
+### Adding Lines
+
+Without lines, spending in another currency is converted into its category at the rate of each transaction's date. There are two ways to add lines:
+
+- **For the whole budget.** Choose **Budget currencies on their own…** in the budget's menu (the ⋮ next to **Category**, or the budget menu on a phone), or in **Settings → General → Currency**. Pick **None** (the default), **Every currency**, or only some currencies. A chosen currency gets a line by itself in every category where it is spent.
+- **For one category.** Open the category's menu and choose **Add a USD line**, offered for the currencies chosen for the whole budget, or **Add currency…** for any other, such as euros for a trip. The line starts in the month on screen, also a past one, and stays in the months after it, ready to budget again. Earlier months stay as they were budgeted.
+
+<img width="512" alt="Budget currencies on their own: only the currencies chosen below, with USD chosen and COP not" src="/img/experimental/multi-currency/multi-currency-own-lines@2x.webp" />
+
+<img width="172" alt="The menu of the Food category, with Add a USD line and Add currency" src="/img/experimental/multi-currency/multi-currency-category-currency-add@2x.webp" />
+
+When you choose a currency that already has spending in earlier months, Actual asks once what happens to those months:
+
+- **Keep earlier months** leaves them as they were budgeted, with that spending converted into its categories. The lines start in the current month.
+- **Move it into lines too** puts that spending in the lines in every month. A month with nothing budgeted in a line then shows it as overspent.
+
+Without earlier spending, the lines cover every month, so transactions you import later for earlier months land in them too.
+
+### Removing Lines
+
+**Remove currency**, in the menu of a line, moves the line's budget into its category, converted at each month's rate, so To Budget doesn't change. Its spending is converted into the category again, unless the currency is chosen for the whole budget: that choice covers every category, so the line comes back wherever there is spending in it.
+
+When a currency stops being chosen for the whole budget, its lines that only held spending go away by themselves. If some of its lines have budgets, Actual asks whether to move those budgets into their categories, converted at each month's rate, or keep the lines.
+
+### How Lines Count
+
+- **Spending and income** of an account in a line's currency count in that line, never converted: a salary paid in US dollars, or the starting balance of a US dollar account, lands in the USD line of its category.
+- **The balance** of a line stays in its currency: budget USD 150, spend USD 45, and USD 105 is left. Overspending returns to To Budget at that month's rate, unless rollover is on for that line.
+- **To Budget** stays in the default currency. Budgeting USD 150 takes its value from To Budget at that month's rate, and income in US dollars adds its value at that rate: the latest rate on or before the last day of the month. The current and later months follow the latest rate; a past month keeps its last rate.
+- **Moving money** between a line and another category or To Budget, or covering overspending, converts it at the month's rate. You type the amount in the currency it comes from.
+- **Reports**, formula cards and the category picker count the category's total, in the default currency.
+- **Budget templates** fill in the category's own budget only.
+
+### What You See
+
+- **Lines show where they matter.** A line shows in the months where it has a budget, spending or a balance, so quiet months stay clean. A line you added or budgeted in also shows from its first month on, or from the current month when it covers every month, so you can budget it ahead.
+- **Converted spending is pointed out.** When a category converts spending from a currency without a line, an information icon shows next to what it spent. It lists what was converted and from which account, with **Add a COP line** for each of those currencies and one button for all of them. On a phone, the icon sits next to the category's name, and the category's menu lists the same.
+
+<img width="568" alt="Food converts COP and USD spending in October: the information icon lists the amounts and their accounts, with Add a COP line, Add a USD line and Add COP and USD lines" src="/img/experimental/multi-currency/multi-currency-converted-spending@2x.webp" />
+
+While **Multiple currencies** is turned off, lines are left out of the budget and every amount counts 1:1, as before the feature existed. Turning it back on brings the lines back with everything they had.
+
+## Changing the Default Currency
+
+Moving to another country, or simply measuring your money in another currency, means changing the default currency in **Settings → General → Currency**. With multiple currencies on, only the point of reference changes. Actual tells you what will happen before it does it, and one undo brings everything back.
+
+- **Accounts keep their currency**, and their transactions are never converted: a chequing account in CAD stays in CAD.
+- **Budgets in the old default currency** follow the choice of currencies budgeted on their own:
+  - If it isn't chosen, they become budgets in the new default, converted at each month's rate so each month keeps its value. Spending in the old default is then converted into its category, and the information icon points it out.
+  - If it is chosen, for example with **Every currency**, its budgets move to lines in that currency from the month it's chosen from, and aren't converted. Earlier months are converted as above.
+- **Lines in the new default currency** become the categories' own budgets.
+- **To Budget** is in the new default in every month. Amounts held for next month are converted with it.
+
+<img width="622" alt="Changing the default currency from CAD to USD: accounts keep their currency and CAD budgets become USD budgets, converted at each month's rate" src="/img/experimental/multi-currency/multi-currency-default-currency-change@2x.webp" />
+
+Without multiple currencies, the default currency only changes how amounts are written.
 
 ## Transfers Between Currencies
 
@@ -145,5 +193,6 @@ Fees and spread aren't recorded as a separate expense. They are only there to te
 
 ## Known Limitations
 
+- Budget templates in category notes keep their amounts when the default currency changes, so they then count in the new default.
 - Amounts outside the transactions and balances of an account, such as in rules, schedules and filters, use the format of the default currency. In a budget in yen, an amount in dollars there shows without its cents until you edit it; it is always kept as you entered it.
 - Rates can't be fetched automatically yet.
