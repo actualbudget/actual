@@ -104,7 +104,16 @@ async function revertStorage(): Promise<
     return { error: 'revert-failed' };
   } finally {
     if (lastBudget) {
-      await asyncStorage.setItem('lastBudget', lastBudget);
+      try {
+        await asyncStorage.setItem('lastBudget', lastBudget);
+      } catch (restoreError) {
+        // It only decides where the next launch starts, so the result
+        // above stands
+        logger.error(
+          'storage: could not restore the last opened budget',
+          restoreError,
+        );
+      }
     }
   }
 }
