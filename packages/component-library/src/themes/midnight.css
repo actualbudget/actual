@@ -1,6 +1,5 @@
 :root {
   --color-pageBackground: var(--palette-gray600);
-  --color-pageBackgroundModalActive: var(--palette-gray700);
   --color-pageBackgroundTopLeft: var(--palette-gray800);
   --color-pageBackgroundBottomRight: var(--palette-gray700);
   --color-pageBackgroundLineTop: var(--palette-purple300);
@@ -26,7 +25,6 @@
   --color-tableTextLight: var(--color-tableText);
   --color-tableTextSubdued: var(--palette-gray500);
   --color-tableTextSelected: var(--palette-gray800);
-  --color-tableTextHover: var(--palette-gray400);
   --color-tableTextInactive: var(--palette-gray400);
   --color-tableHeaderText: var(--palette-gray200);
   --color-tableHeaderBackground: var(--palette-gray900);
@@ -102,14 +100,12 @@
   );
 
   --color-menuBackground: var(--palette-gray700);
-  --color-menuItemBackground: var(--palette-gray200);
   --color-menuItemBackgroundHover: var(--palette-gray500);
   --color-menuItemText: var(--palette-gray100);
   --color-menuItemTextHover: var(--palette-gray50);
   --color-menuItemTextSelected: var(--palette-purple400);
   --color-menuItemTextHeader: var(--palette-purple200);
   --color-menuBorder: var(--palette-gray800);
-  --color-menuBorderHover: var(--palette-purple300);
   --color-menuKeybindingText: var(--palette-purple200);
   --color-menuAutoCompleteBackground: var(--palette-gray600);
   --color-menuAutoCompleteBackgroundHover: var(--palette-gray500);
@@ -128,7 +124,6 @@
   --color-mobileNavBackground: var(--palette-gray600);
   --color-mobileNavItem: var(--palette-gray150);
   --color-mobileNavItemSelected: var(--palette-purple200);
-  --color-mobileAccountShadow: var(--color-cardShadow);
   --color-mobileAccountText: var(--palette-blue800);
   --color-mobileTransactionSelected: var(--palette-purple300);
 
@@ -193,16 +188,13 @@
 
   --color-noticeBackground: var(--palette-green600);
   --color-noticeBackgroundLight: var(--palette-green900);
-  --color-noticeBackgroundDark: var(--palette-green400);
   --color-noticeText: var(--palette-green300);
   --color-noticeTextLight: var(--palette-green400);
   --color-noticeTextDark: var(--palette-green150);
   --color-noticeTextMenu: var(--palette-green400);
-  --color-noticeTextMenuHover: var(--palette-green700);
   --color-noticeBorder: var(--palette-green800);
   --color-warningBackground: var(--palette-orange800);
   --color-warningText: var(--palette-orange200);
-  --color-warningTextLight: var(--palette-orange500);
   --color-warningTextDark: var(--palette-orange100);
   --color-warningBorder: var(--palette-orange500);
   --color-errorBackground: var(--palette-red800);
@@ -213,7 +205,6 @@
   --color-errorBorder: var(--palette-red500);
   --color-upcomingBackground: var(--palette-purple800);
   --color-upcomingText: var(--palette-purple200);
-  --color-upcomingBorder: var(--color-tableBorder);
 
   --color-formLabelText: var(--palette-purple150);
   --color-formLabelBackground: var(--palette-blue900);
@@ -224,10 +215,8 @@
   --color-formInputTextReadOnlySelection: var(--palette-gray800);
   --color-formInputBorderSelected: var(--palette-purple300);
   --color-formInputText: var(--palette-gray150);
-  --color-formInputTextSelected: var(--palette-black);
   --color-formInputTextPlaceholder: var(--palette-gray150);
   --color-formInputTextPlaceholderSelected: var(--palette-gray100);
-  --color-formInputTextSelection: var(--palette-gray800);
   --color-formInputShadowSelected: var(--palette-purple400);
   --color-formInputTextHighlight: var(--palette-purple200);
   --color-checkboxText: var(--color-tableText);
@@ -247,7 +236,6 @@
   --color-pillBackgroundSelected: var(--palette-purple600);
   --color-pillTextSelected: var(--palette-gray150);
   --color-pillBorderSelected: var(--palette-purple300);
-  --color-pillTextSubdued: var(--palette-gray500);
 
   --color-reportsRed: var(--palette-red300);
   --color-reportsBlue: var(--palette-blue400);
@@ -262,7 +250,6 @@
 
   --color-noteTagBackground: var(--palette-purple800);
   --color-noteTagBackgroundHover: var(--palette-purple600);
-  --color-noteTagDefault: var(--palette-purple700);
   --color-noteTagText: var(--palette-purple100);
 
   --color-budgetOtherMonth: var(--palette-gray700);

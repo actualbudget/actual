@@ -213,6 +213,9 @@ test.describe('Accounts', () => {
         notes: `range-${note}`,
         debit: '10.00',
       });
+      await expect(
+        accountPage.transactionTableRow.filter({ hasText: `range-${note}` }),
+      ).toBeVisible();
     }
 
     // Mark the middle transaction as cleared and lock it via
