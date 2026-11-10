@@ -1,6 +1,5 @@
 :root {
   --color-pageBackground: var(--palette-navy100);
-  --color-pageBackgroundModalActive: var(--palette-navy200);
   --color-pageBackgroundTopLeft: var(--palette-navy100);
   --color-pageBackgroundBottomRight: var(--palette-blue150);
   --color-pageBackgroundLineTop: var(--palette-white);
@@ -26,7 +25,6 @@
   --color-tableTextLight: var(--palette-navy400);
   --color-tableTextSubdued: var(--palette-navy100);
   --color-tableTextSelected: var(--palette-navy700);
-  --color-tableTextHover: var(--palette-navy900);
   --color-tableTextInactive: var(--palette-navy500);
   --color-tableHeaderText: var(--palette-navy600);
   --color-tableHeaderBackground: var(--palette-white);
@@ -100,14 +98,12 @@
   );
 
   --color-menuBackground: var(--palette-white);
-  --color-menuItemBackground: var(--palette-navy50);
   --color-menuItemBackgroundHover: var(--palette-navy100);
   --color-menuItemText: var(--palette-navy900);
   --color-menuItemTextHover: var(--color-menuItemText);
   --color-menuItemTextSelected: var(--palette-purple300);
   --color-menuItemTextHeader: var(--palette-navy400);
   --color-menuBorder: var(--palette-navy100);
-  --color-menuBorderHover: var(--palette-purple100);
   --color-menuKeybindingText: var(--palette-navy400);
   --color-menuAutoCompleteBackground: var(--palette-navy900);
   --color-menuAutoCompleteBackgroundHover: var(--palette-navy600);
@@ -127,7 +123,6 @@
   --color-mobileNavBackground: var(--palette-white);
   --color-mobileNavItem: var(--palette-gray300);
   --color-mobileNavItemSelected: var(--palette-purple500);
-  --color-mobileAccountShadow: var(--palette-navy300);
   --color-mobileAccountText: var(--palette-blue800);
   --color-mobileTransactionSelected: var(--palette-purple500);
 
@@ -190,7 +185,6 @@
 
   --color-noticeBackground: var(--palette-green150);
   --color-noticeBackgroundLight: var(--palette-green100);
-  --color-noticeBackgroundDark: var(--palette-green500);
   --color-noticeText: var(--palette-green700);
   --color-noticeTextLight: var(--palette-green500);
   --color-noticeTextDark: var(--palette-green900);
@@ -198,7 +192,6 @@
   --color-noticeBorder: var(--palette-green500);
   --color-warningBackground: var(--palette-orange200);
   --color-warningText: var(--palette-orange700);
-  --color-warningTextLight: var(--palette-orange500);
   --color-warningTextDark: var(--palette-orange900);
   --color-warningBorder: var(--palette-orange500);
   --color-errorBackground: var(--palette-red100);
@@ -209,7 +202,6 @@
   --color-errorBorder: var(--palette-red500);
   --color-upcomingBackground: var(--palette-purple100);
   --color-upcomingText: var(--palette-purple700);
-  --color-upcomingBorder: var(--palette-purple500);
 
   --color-formLabelText: var(--palette-blue600);
   --color-formLabelBackground: var(--palette-blue200);
@@ -220,10 +212,8 @@
   --color-formInputTextReadOnlySelection: var(--palette-navy50);
   --color-formInputBorderSelected: var(--palette-purple500);
   --color-formInputText: var(--palette-navy900);
-  --color-formInputTextSelected: var(--palette-navy50);
   --color-formInputTextPlaceholder: var(--palette-navy300);
   --color-formInputTextPlaceholderSelected: var(--palette-navy200);
-  --color-formInputTextSelection: var(--palette-navy100);
   --color-formInputShadowSelected: var(--palette-purple300);
   --color-formInputTextHighlight: var(--palette-purple200);
   --color-checkboxText: var(--color-tableBackground);
@@ -243,7 +233,6 @@
   --color-pillBackgroundSelected: var(--palette-blue150);
   --color-pillTextSelected: var(--palette-blue900);
   --color-pillBorderSelected: var(--palette-purple500);
-  --color-pillTextSubdued: var(--palette-navy200);
 
   --color-reportsRed: var(--palette-red300);
   --color-reportsBlue: var(--palette-blue400);
@@ -258,7 +247,6 @@
 
   --color-noteTagBackground: var(--palette-purple125);
   --color-noteTagBackgroundHover: var(--palette-purple150);
-  --color-noteTagDefault: var(--palette-purple125);
   --color-noteTagText: var(--palette-black);
 
   --color-budgetCurrentMonth: var(--color-tableBackground);
