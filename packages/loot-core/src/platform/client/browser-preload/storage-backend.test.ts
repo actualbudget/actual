@@ -41,6 +41,17 @@ describe('storage backend flag', () => {
     expect(resolveStorageBackend()).toBe('opfs');
   });
 
+  it('uses the URL choice for this load even when it cannot be stored', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('full', 'QuotaExceededError');
+    });
+    window.history.replaceState(null, '', '/?storage=opfs');
+    expect(resolveStorageBackend()).toBe('opfs');
+    expect(window.location.search).toBe('');
+    // Nothing was stored, so the next load is back on the default
+    expect(resolveStorageBackend()).toBe('legacy');
+  });
+
   it('reveals the engine setting when the URL flag is used', () => {
     expect(localStorage.getItem(STORAGE_PREFS_KEY)).toBeNull();
     window.history.replaceState(null, '', '/?storage=opfs');

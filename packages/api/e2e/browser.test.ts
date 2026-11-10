@@ -263,3 +263,73 @@ test('saves fallback changes when the page is hidden, so a reload without shutdo
   });
   expect(amounts).toEqual([-4200]);
 });
+
+// The budget locks held anywhere in this origin, the API's worker included
+function countHeldBudgetLocks(page: Page) {
+  return page.evaluate(async () => {
+    const { held = [] } = await navigator.locks.query();
+    return held.filter(lock => lock.name?.startsWith('actual-budget:')).length;
+  });
+}
+
+for (const storageBackend of ['opfs', 'memory-idb']) {
+  test(`gives the budget up when the page leaves and opens it again when it comes back (${storageBackend})`, async ({
+    page,
+  }) => {
+    await page.goto('/e2e/harness.html');
+    await page.evaluate(async backend => {
+      const api = await window.apiReady;
+      await api.init({ dataDir: '/documents', storageBackend: backend });
+      await api.runImport('e2e-lifecycle-budget', async () => {
+        const accountId = await api.createAccount({ name: 'Checking' }, 0);
+        await api.addTransactions(accountId, [
+          { date: '2024-03-01', amount: -700, notes: 'before leaving' },
+        ]);
+      });
+    }, storageBackend);
+    expect(await countHeldBudgetLocks(page)).toBe(1);
+
+    // What a browser fires when the page goes into its back/forward cache.
+    // WebKit keeps the worker of such a page, locks and all, so the lock
+    // has to go for the next page to open the same budget
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new PageTransitionEvent('pagehide', { persisted: true }),
+      );
+    });
+    await expect.poll(() => countHeldBudgetLocks(page)).toBe(0);
+
+    // And when it comes back out of it: the budget is open again, with
+    // what was saved before the page left
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new PageTransitionEvent('pageshow', { persisted: true }),
+      );
+    });
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const api = await window.apiReady;
+          try {
+            const [account] = await api.getAccounts();
+            const transactions = await api.getTransactions(
+              account.id,
+              '2024-03-01',
+              '2024-03-01',
+            );
+            return transactions.map(transaction => transaction.amount);
+          } catch {
+            // Still reopening
+            return null;
+          }
+        }),
+      )
+      .toEqual([-700]);
+    expect(await countHeldBudgetLocks(page)).toBe(1);
+
+    await page.evaluate(async () => {
+      const api = await window.apiReady;
+      await api.shutdown();
+    });
+  });
+}

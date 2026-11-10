@@ -737,6 +737,29 @@ describe('OPFS pool store', () => {
     expect(await listIndexedDbNames()).toContain(name);
   });
 
+  it('leaves alone a file another worker has already moved back', async () => {
+    // What a finished revert leaves: the legacy marker and its copy, with
+    // nothing in the pool. A second revert that listed the file earlier
+    // finds them once it has the pool
+    const pool = fakePool();
+    const sqlite3 = fakeSqlite3(pool);
+    const store = createOpfsStore({
+      sqlite3: () => sqlite3,
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await store.revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
   it('moves back the fallback row rather than a stale pooled file', async () => {
     // An interrupted promotion left a pooled file behind; the row is what
     // the app last used

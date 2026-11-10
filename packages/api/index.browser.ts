@@ -32,28 +32,52 @@ export async function init(
 
 // Where sync access handles are missing, the engine keeps the budget in
 // memory and saves it to IndexedDB a moment after each change. A page that
-// is hidden or leaving asks for that save at once, as the web client does,
-// so a reload right after a change does not lose it even without
-// `shutdown()`. Best effort: a page that unloads at once may not give the
-// worker the time to finish.
+// is hidden asks for that save at once, as the web client does, so a reload
+// right after a change does not lose it even without `shutdown()`.
+//
+// A page that is leaving gives the budget up altogether, saving first:
+// WebKit keeps the locks and file handles of a worker whose page went into
+// the back/forward cache, where they would keep the next page from opening
+// the same budget until the cached page is evicted. A page that comes back
+// out of that cache opens its budget again.
+//
+// Best effort: a page that unloads at once may not give the worker the time
+// to finish.
 function listenForPageLifecycle(): (() => void) | null {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return null;
   }
-  const flush = () => {
-    void send('storage-flush').catch(() => undefined);
-  };
   const onVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
-      flush();
+      void send('storage-flush').catch(() => undefined);
     }
   };
-  window.addEventListener('pagehide', flush);
+  const onPageHide = () => {
+    void send('storage-release').catch(() => undefined);
+  };
+  const onPageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) {
+      void reopenBudget().catch(() => undefined);
+    }
+  };
+  window.addEventListener('pagehide', onPageHide);
+  window.addEventListener('pageshow', onPageShow);
   document.addEventListener('visibilitychange', onVisibilityChange);
   return () => {
-    window.removeEventListener('pagehide', flush);
+    window.removeEventListener('pagehide', onPageHide);
+    window.removeEventListener('pageshow', onPageShow);
     document.removeEventListener('visibilitychange', onVisibilityChange);
   };
+}
+
+// The worker let go of its storage when the page left, so the budget it
+// still counts as open is closed and opened afresh
+async function reopenBudget() {
+  const loaded = await send('load-prefs');
+  if (loaded?.id) {
+    await send('close-budget');
+    await send('load-budget', { id: loaded.id });
+  }
 }
 
 export async function shutdown() {

@@ -528,6 +528,63 @@ describe('IndexedDB in-memory store', () => {
     expect(await listIndexedDbNames()).not.toContain(name);
   });
 
+  it('leaves alone a file another worker has already moved back', async () => {
+    // What a finished revert leaves: the legacy marker and its copy. A
+    // second revert that listed the file earlier finds them once it has
+    // the lock
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await getSqliteStore().revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('waits out a slow hand-over before it reports the budget in use', async () => {
+    // A lock that is never granted, and gives up only when told to
+    const request = vi.fn(
+      (_name: string, options: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          options.signal.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    vi.useFakeTimers();
+    try {
+      let outcome = 'waiting';
+      const opening = getSqliteStore().open(PATH);
+      opening.then(
+        () => {
+          outcome = 'opened';
+        },
+        () => {
+          outcome = 'refused';
+        },
+      );
+      // A leaving leader gets three seconds to save and let go
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(outcome).toBe('waiting');
+
+      await vi.advanceTimersByTimeAsync(7000);
+      await expect(opening).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
   it('writes a row only at the revision it expects', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', rev: 1 });
     const next = { filepath: PATH, contents: new Uint8Array([1]), rev: 2 };

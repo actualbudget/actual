@@ -577,14 +577,19 @@ export function createOpfsStore({
           throw new Error(`cannot revert an open database: ${path}`);
         }
         const row = await getSqliteFileRow(path);
+        // Another worker moved it back while this one waited for the pool,
+        // or it is gone: the legacy marker is not this store's to touch
+        if (row?.storage == null) {
+          return;
+        }
         const pooled = pool.util.getFileNames().includes(fileName);
-        if (row?.storage === 'opfs' && !pooled) {
+        if (row.storage === 'opfs' && !pooled) {
           throw new StorageLostError(path);
         }
         // The fallback's whole-file row is what the app last used, so as on
         // open it wins over a pooled file an interrupted promotion left; an
         // empty one was recorded but never saved
-        const stored = row?.contents;
+        const stored = row.contents;
         const fallbackBytes =
           ArrayBuffer.isView(stored) && stored.byteLength > 0
             ? new Uint8Array(
@@ -596,9 +601,7 @@ export function createOpfsStore({
         const bytes =
           fallbackBytes ?? (pooled ? exportPooled(pool, fileName) : null);
         if (bytes == null) {
-          if (row) {
-            await deleteSqliteFileRow(path);
-          }
+          await deleteSqliteFileRow(path);
           return;
         }
         await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);

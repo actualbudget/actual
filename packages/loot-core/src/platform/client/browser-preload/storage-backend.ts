@@ -60,5 +60,7 @@ export function resolveStorageBackend(): StorageBackend {
       // A stale parameter only matters for the next load
     }
   }
-  return getStoredStorageBackend();
+  // A valid link decides this load even where the choice could not be
+  // stored, with storage full or denied; it then just does not outlast it
+  return isStorageBackend(requested) ? requested : getStoredStorageBackend();
 }

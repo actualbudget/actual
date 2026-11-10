@@ -27,7 +27,11 @@ import {
   putSqliteFileRow,
   putSqliteFileRowIfRev,
 } from './files-store';
-import { acquireWebLock, budgetLockName } from './locks';
+import {
+  acquireWebLock,
+  BUDGET_LOCK_TIMEOUT_MS,
+  budgetLockName,
+} from './locks';
 import { legacyDatabaseName } from './paths';
 import type { MigrationProgress, SqliteFileStore } from './types';
 
@@ -41,7 +45,6 @@ import type { MigrationProgress, SqliteFileStore } from './types';
 
 const DEFAULT_DEBOUNCE_MS = 1000;
 const DEFAULT_MAX_DIRTY_MS = 5000;
-const DEFAULT_LOCK_TIMEOUT_MS = 2000;
 
 export type MemoryIdbStoreOptions = {
   onMigrationProgress?: MigrationProgress;
@@ -76,7 +79,7 @@ export function createMemoryIdbStore({
   onMigrationProgress,
   debounceMs = DEFAULT_DEBOUNCE_MS,
   maxDirtyMs = DEFAULT_MAX_DIRTY_MS,
-  lockTimeoutMs = DEFAULT_LOCK_TIMEOUT_MS,
+  lockTimeoutMs = BUDGET_LOCK_TIMEOUT_MS,
 }: MemoryIdbStoreOptions = {}): SqliteFileStore {
   const entries = new Map<string, Entry>();
   const byDb = new Map<WasmDatabase, Entry>();
@@ -487,16 +490,19 @@ export function createMemoryIdbStore({
       const releaseLock = await lockBudget(path);
       try {
         const row = await getSqliteFileRow(path);
+        // Another worker moved it back while this one waited for the lock,
+        // or it is gone: the legacy marker is not this store's to touch
+        if (row?.storage == null) {
+          return;
+        }
         assertNotInOpfs(path, row);
         const stranded = currentStranded(path, row);
         const bytes =
           stranded?.bytes ??
-          (row && isByteContents(row.contents) ? row.contents : null);
+          (isByteContents(row.contents) ? row.contents : null);
         if (bytes == null) {
           // Recorded but never saved: nothing to copy, the row just goes
-          if (row) {
-            await deleteSqliteFileRow(path);
-          }
+          await deleteSqliteFileRow(path);
           return;
         }
         await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
