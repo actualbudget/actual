@@ -513,6 +513,25 @@ describe('CategoryTemplateContext', () => {
       expect(result).toBe(60000);
     });
 
+    it('should not budget a negative amount when the target is over-funded', async () => {
+      const template: Template = {
+        type: 'spend',
+        amount: 1000,
+        from: '2023-11',
+        month: '2024-01',
+        directive: 'template',
+        priority: 1,
+      };
+
+      vi.mocked(actions.getSheetValue)
+        .mockResolvedValueOnce(-10000) // spent in Nov
+        .mockResolvedValueOnce(120000) // leftover in Nov
+        .mockResolvedValueOnce(10000); // budgeted in Dec
+
+      const result = await CategoryTemplateContext.runSpend(template, instance);
+      expect(result).toBe(0);
+    });
+
     it('should handle repeating spend template', async () => {
       const template: Template = {
         type: 'spend',
@@ -2100,7 +2119,7 @@ describe('CategoryTemplateContext', () => {
         expect(await context.runAll(1000000)).toBe(0);
       });
 
-      it('still pulls back a surplus when no target has expired', async () => {
+      it('does not pull back a surplus when no target has expired', async () => {
         mockBalance(100000);
         const context = await CategoryTemplateContext.init(
           [activeBy],
@@ -2109,7 +2128,7 @@ describe('CategoryTemplateContext', () => {
           0,
         );
 
-        expect(await context.runAll(1000000)).toBe(-20000);
+        expect(await context.runAll(1000000)).toBe(0);
       });
 
       it('does not treat a category with a goal as expired-only', async () => {

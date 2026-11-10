@@ -248,14 +248,6 @@ export class CategoryTemplateContext {
         }
       }
 
-      // money left over from an expired target isn't pulled back out
-      if (
-        (template.type === 'by' || template.type === 'spend') &&
-        this.expiredTemplates.length > 0
-      ) {
-        newBudget = Math.max(0, newBudget);
-      }
-
       available = available - newBudget;
       toBudget += newBudget;
       perTemplateLocal.set(
@@ -821,7 +813,11 @@ export class CategoryTemplateContext {
     if (numMonths < 0) {
       return 0;
     } else {
-      return Math.round((target - alreadyBudgeted) / (numMonths + 1));
+      // money already set aside beyond the target stays in the category
+      return Math.max(
+        0,
+        Math.round((target - alreadyBudgeted) / (numMonths + 1)),
+      );
     }
   }
 
@@ -986,8 +982,12 @@ export class CategoryTemplateContext {
       perTemplateNeed.set(template, amount);
       totalNeeded += amount;
     }
-    const toBudget = Math.round(
-      (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
+    // money already set aside beyond the targets stays in the category
+    const toBudget = Math.max(
+      0,
+      Math.round(
+        (totalNeeded - templateContext.fromLastMonth) / (shortNumMonths + 1),
+      ),
     );
     return { toBudget, perTemplateNeed };
   }
