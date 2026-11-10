@@ -5,55 +5,55 @@ import { composite, contrastRatio, resolveToken } from './resolve';
 import { themeNames } from './types';
 import type { ThemeName, TokenDefinition } from './types';
 
-const knownFailures = new Set<string>([
-  'light: pageTextLink on pageBackground',
-  'light: pageTextLink on tableBackground',
-  'light: pageTextSubdued on pageBackground',
-  'light: pageTextSubdued on tableBackground',
-  'light: tableTextLight on tableBackground',
-  'light: tableTextSubdued on tableBackground',
-  'light: numberNeutral on tableBackground',
-  'light: budgetNumberZero on tableBackground',
-  'light: menuItemTextSelected on menuBackground',
-  'light: menuItemTextHeader on menuBackground',
-  'light: menuKeybindingText on menuBackground',
-  'light: mobileHeaderTextSubdued on mobileHeaderBackground',
-  'light: mobileNavItem on mobileNavBackground',
-  'light: buttonPrimaryTextHover on buttonPrimaryBackgroundHover',
-  'light: buttonNormalSelectedText on buttonNormalSelectedBackground',
-  'light: noticeText on noticeBackground',
-  'light: noticeTextLight on tableBackground',
-  'light: warningText on warningBackground',
-  'light: warningText on tableBackground',
-  'light: errorText on errorBackground',
-  'light: formLabelText on tableBackground',
-  'light: formInputTextPlaceholder on formInputBackground',
-  'dark: pageTextLink on pageBackground',
-  'dark: pageTextLink on tableBackground',
-  'dark: pageTextSubdued on tableBackground',
-  'dark: tableHeaderText on tableHeaderBackground',
-  'dark: tableTextSubdued on tableBackground',
-  'dark: numberNeutral on tableBackground',
-  'dark: budgetNumberZero on tableBackground',
-  'dark: menuItemTextHover on menuItemBackgroundHover',
-  'dark: menuItemTextSelected on menuBackground',
-  'dark: mobileNavItemSelected on mobileNavBackground',
-  'dark: noticeText on noticeBackground',
-  'dark: noticeTextLight on tableBackground',
-  'midnight: pageTextLink on pageBackground',
-  'midnight: pageTextSubdued on pageBackground',
-  'midnight: tableTextSubdued on tableBackground',
-  'midnight: numberNeutral on tableBackground',
-  'midnight: budgetNumberZero on tableBackground',
-  'midnight: menuItemTextSelected on menuBackground',
-  'midnight: menuAutoCompleteTextHover on menuAutoCompleteBackgroundHover',
-  'midnight: buttonPrimaryText on buttonPrimaryBackground',
-  'midnight: buttonPrimaryTextHover on buttonPrimaryBackgroundHover',
-  'midnight: buttonNormalTextHover on buttonNormalBackgroundHover',
-  'midnight: noticeText on noticeBackground',
-  'midnight: noticeTextDark on noticeBackground',
-  'midnight: pillText on pillBackground',
-]);
+const knownFailures: Record<string, number> = {
+  'light: pageTextLink on pageBackground': 3.48,
+  'light: pageTextLink on tableBackground': 4.13,
+  'light: pageTextSubdued on pageBackground': 1.81,
+  'light: pageTextSubdued on tableBackground': 2.15,
+  'light: tableTextLight on tableBackground': 2.91,
+  'light: tableTextSubdued on tableBackground': 1.19,
+  'light: numberNeutral on tableBackground': 1.19,
+  'light: budgetNumberZero on tableBackground': 1.19,
+  'light: menuItemTextSelected on menuBackground': 3.53,
+  'light: menuItemTextHeader on menuBackground': 2.91,
+  'light: menuKeybindingText on menuBackground': 2.91,
+  'light: mobileHeaderTextSubdued on mobileHeaderBackground': 2.77,
+  'light: mobileNavItem on mobileNavBackground': 2.61,
+  'light: buttonPrimaryTextHover on buttonPrimaryBackgroundHover': 3.53,
+  'light: buttonNormalSelectedText on buttonNormalSelectedBackground': 4.13,
+  'light: noticeText on noticeBackground': 4.29,
+  'light: noticeTextLight on tableBackground': 2.9,
+  'light: warningText on warningBackground': 2.9,
+  'light: warningText on tableBackground': 3.39,
+  'light: errorText on errorBackground': 3.74,
+  'light: formLabelText on tableBackground': 4.13,
+  'light: formInputTextPlaceholder on formInputBackground': 2.05,
+  'dark: pageTextLink on pageBackground': 4.14,
+  'dark: pageTextLink on tableBackground': 2.39,
+  'dark: pageTextSubdued on tableBackground': 2.69,
+  'dark: tableHeaderText on tableHeaderBackground': 4.01,
+  'dark: tableTextSubdued on tableBackground': 2.69,
+  'dark: numberNeutral on tableBackground': 2.69,
+  'dark: budgetNumberZero on tableBackground': 2.69,
+  'dark: menuItemTextHover on menuItemBackgroundHover': 4.08,
+  'dark: menuItemTextSelected on menuBackground': 2.39,
+  'dark: mobileNavItemSelected on mobileNavBackground': 2.39,
+  'dark: noticeText on noticeBackground': 3.61,
+  'dark: noticeTextLight on tableBackground': 3.97,
+  'midnight: pageTextLink on pageBackground': 3.15,
+  'midnight: pageTextSubdued on pageBackground': 2.65,
+  'midnight: tableTextSubdued on tableBackground': 2.49,
+  'midnight: numberNeutral on tableBackground': 2.49,
+  'midnight: budgetNumberZero on tableBackground': 2.49,
+  'midnight: menuItemTextSelected on menuBackground': 3.08,
+  'midnight: menuAutoCompleteTextHover on menuAutoCompleteBackgroundHover': 3.09,
+  'midnight: buttonPrimaryText on buttonPrimaryBackground': 3.53,
+  'midnight: buttonPrimaryTextHover on buttonPrimaryBackgroundHover': 3.53,
+  'midnight: buttonNormalTextHover on buttonNormalBackgroundHover': 2.98,
+  'midnight: noticeText on noticeBackground': 2.13,
+  'midnight: noticeTextDark on noticeBackground': 3.22,
+  'midnight: pillText on pillBackground': 4.19,
+};
 
 function describePair(theme: ThemeName, text: string, background: string) {
   return `${theme}: ${text} on ${background}`;
@@ -86,8 +86,9 @@ describe('theme contrast', () => {
     const ratio = measure(theme, pair);
     const minimum = contrastMinimums[pair.level];
 
-    if (knownFailures.has(name)) {
+    if (name in knownFailures) {
       expect(ratio).toBeLessThan(minimum);
+      expect(Number(ratio.toFixed(2))).toBe(knownFailures[name]);
     } else {
       expect(ratio).toBeGreaterThanOrEqual(minimum);
     }
@@ -95,7 +96,9 @@ describe('theme contrast', () => {
 
   it('only lists known failures for declared pairs', () => {
     const names = new Set(cases.map(({ name }) => name));
-    expect([...knownFailures].filter(name => !names.has(name))).toEqual([]);
+    expect(Object.keys(knownFailures).filter(name => !names.has(name))).toEqual(
+      [],
+    );
   });
 });
 
