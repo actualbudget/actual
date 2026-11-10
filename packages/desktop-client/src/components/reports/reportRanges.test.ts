@@ -7,6 +7,8 @@ import {
   calculateTimeRange,
   getFullFutureRange,
   getLatestRange,
+  validateEnd,
+  validateStart,
 } from './reportRanges';
 
 // In test mode, monthUtils.currentMonth() returns '2017-01'
@@ -239,4 +241,69 @@ describe('boundMonthRange', () => {
       ['2026-09', '2026-09'],
     );
   });
+});
+
+describe('Quarterly range validation', () => {
+  it('starts a range on the first day of the chosen quarter', () => {
+    expect(
+      validateStart(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-04',
+        '2016-12-31',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-04-01', '2016-12-31', 'static']);
+  });
+
+  it('ends a range on the last day of the chosen quarter', () => {
+    expect(
+      validateEnd(
+        '2016-01-01',
+        '2016-12-31',
+        '2016-01-01',
+        '2016-04',
+        'Quarterly',
+      ),
+    ).toEqual(['2016-01-01', '2016-06-30', 'static']);
+  });
+
+  it('keeps From when To moves before it on whole-quarter bounds', () => {
+    expect(
+      validateStart(
+        '2010-01-01',
+        '2016-12-31',
+        '2014-07',
+        '2014-06-30',
+        'Quarterly',
+      ),
+    ).toEqual(['2014-07-01', '2015-06-30', 'static']);
+  });
+
+  it('keeps To when From moves after it on whole-quarter bounds', () => {
+    expect(
+      validateEnd(
+        '2010-01-01',
+        '2016-12-31',
+        '2014-07-01',
+        '2014-04',
+        'Quarterly',
+      ),
+    ).toEqual(['2013-07-01', '2014-06-30', 'static']);
+  });
+});
+
+describe('same-period range validation', () => {
+  it.each([
+    ['Monthly', '2016-04-01', '2016-04', '2016-04-30'],
+    ['Quarterly', '2016-04-01', '2016-04', '2016-06-30'],
+    ['Yearly', '2016-01-01', '2016', '2016-12-31'],
+  ])(
+    'keeps From when %s To is the same period',
+    (interval, start, end, expectedEnd) => {
+      expect(
+        validateEnd('2015-01-01', '2016-12-31', start, end, interval),
+      ).toEqual([start, expectedEnd, 'static']);
+    },
+  );
 });

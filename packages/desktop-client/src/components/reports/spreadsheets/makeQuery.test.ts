@@ -31,4 +31,20 @@ describe('makeQuery', () => {
       expect(query.selectExpressions).not.toContain('notes');
     },
   );
+
+  it('queries Quarterly reports by month so they can be rolled up', () => {
+    const query = makeQuery(
+      'assets',
+      '2026-01-01',
+      '2026-06-30',
+      'Quarterly',
+      '$and',
+      [],
+    ).serialize();
+
+    expect(query.groupExpressions).toContainEqual({ $month: '$date' });
+    expect(query.selectExpressions).toContainEqual({
+      date: { $month: '$date' },
+    });
+  });
 });

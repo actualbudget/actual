@@ -21,6 +21,8 @@ type MonteCarloYearStoryInput = {
   /** How the surplus pot is labelled in the UI */
   surplusPotName: string;
   hasSurplusPot: boolean;
+  /** The configured one-off withdrawals, named as the editor lists them */
+  lumpSumNames: string[];
   format: (amount: number, type: 'financial') => string;
   translate: TFunction;
 };
@@ -37,6 +39,7 @@ export function buildMonteCarloYearStory({
   withdrawalRule,
   surplusPotName,
   hasSurplusPot,
+  lumpSumNames,
   format,
   translate,
 }: MonteCarloYearStoryInput): string[] {
@@ -71,6 +74,16 @@ export function buildMonteCarloYearStory({
   }
 
   sentences.push(...getFundingSentences(row, format, translate));
+
+  const lumpSumSentence = getLumpSumSentence(
+    row,
+    lumpSumNames,
+    format,
+    translate,
+  );
+  if (lumpSumSentence != null) {
+    sentences.push(lumpSumSentence);
+  }
 
   const surplusSentence = getSurplusSentence(
     row,
@@ -319,6 +332,80 @@ function getFundingSentences(
   return [
     translate('Spent {{spent}} as planned, funded from the pots.', { spent }),
   ];
+}
+
+// The one-off withdrawals the year called for, and whether the pots
+// could pay them; null when none fell in this year. Names are user text
+// and may be any phrase, so they are quoted rather than woven in
+function getLumpSumSentence(
+  row: MonteCarloRunDetailRow,
+  lumpSumNames: string[],
+  format: MonteCarloYearStoryInput['format'],
+  translate: TFunction,
+): string | null {
+  const requested = row.lumpSumAmounts
+    .map((amount, lumpSumIndex) => ({ amount, lumpSumIndex }))
+    .filter(({ amount }) => amount > 0);
+  if (requested.length === 0) {
+    return null;
+  }
+  const quotedNames = requested
+    .map(
+      ({ lumpSumIndex }) =>
+        `"${
+          lumpSumNames[lumpSumIndex] ||
+          translate('One-off {{number}}', { number: lumpSumIndex + 1 })
+        }"`,
+    )
+    .join(', ');
+  const amount = format(
+    requested.reduce((sum, { amount }) => sum + amount, 0),
+    'financial',
+  );
+  // A single one-off is named only when the user named it
+  const singleName =
+    requested.length === 1 ? lumpSumNames[requested[0].lumpSumIndex] : '';
+  // The gross the pots actually gave up, net of its tax, against what was
+  // asked for - short on a failure year or after the plan ran out
+  const received = row.lumpSumWithdrawal - row.lumpSumTax;
+  const isShort =
+    row.afterDepletion ||
+    received <
+      row.lumpSumAmounts.reduce(
+        (sum, requestedAmount) => sum + requestedAmount,
+        0,
+      );
+  if (isShort) {
+    if (requested.length > 1) {
+      return translate(
+        'The {{amount}} of one-off withdrawals ({{names}}) could not be fully funded.',
+        { amount, names: quotedNames },
+      );
+    }
+    return singleName
+      ? translate(
+          'The {{amount}} one-off withdrawal "{{name}}" could not be fully funded.',
+          { amount, name: singleName },
+        )
+      : translate(
+          'The {{amount}} one-off withdrawal could not be fully funded.',
+          { amount },
+        );
+  }
+  if (requested.length > 1) {
+    return translate(
+      'One-off withdrawals of {{amount}} ({{names}}) were taken from the pots.',
+      { amount, names: quotedNames },
+    );
+  }
+  return singleName
+    ? translate(
+        'A one-off withdrawal of {{amount}}, "{{name}}", was taken from the pots.',
+        { amount, name: singleName },
+      )
+    : translate('A one-off withdrawal of {{amount}} was taken from the pots.', {
+        amount,
+      });
 }
 
 // Where money the plan didn't spend ended up; null when there was none

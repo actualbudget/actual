@@ -16,6 +16,8 @@ describe('category-update', () => {
     // caller changing only the group never sends `name`. Trimming it
     // unconditionally raised "Cannot read properties of undefined (reading
     // 'trim')" for every such update (#8857).
+    vi.mocked(db.first).mockResolvedValueOnce({ id: 'new-group-id' });
+
     await app.handlers['category-update']({
       id: 'category-id',
       group: 'new-group-id',

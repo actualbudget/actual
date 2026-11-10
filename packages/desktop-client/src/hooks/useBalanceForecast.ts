@@ -1,10 +1,13 @@
-import { send } from '@actual-app/core/platform/client/connection';
+import { useEffect, useEffectEvent } from 'react';
+
+import { listen, send } from '@actual-app/core/platform/client/connection';
 import type { RuleConditionEntity } from '@actual-app/core/types/models';
 import type {
-  ForecastResult,
+  ForecastSeries,
   ForecastSource,
 } from '@actual-app/core/types/models/forecast';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
+import type { ServerEvents } from '@actual-app/core/types/server-events';
+import { useQuery } from '@tanstack/react-query';
 
 type UseBalanceForecastParams = {
   accountIds?: string[];
@@ -39,43 +42,79 @@ export function buildBalanceForecastRequest({
   );
 }
 
-export function useBalanceForecast({
-  accountIds,
-  conditions,
-  conditionsOp,
-  startDate,
-  endDate,
-  includeAccountlessSchedules,
-  source = 'schedules',
+export function useBalanceForecastSeries({
+  series,
   enabled = true,
-}: UseBalanceForecastParams) {
-  return useQuery({
-    queryKey: [
-      'balance-forecast',
-      {
-        accountIds: accountIds ?? null,
-        conditions: conditions ?? null,
-        conditionsOp: conditionsOp ?? 'and',
-        startDate,
-        endDate,
-        includeAccountlessSchedules: includeAccountlessSchedules ?? false,
-        source,
-      },
-    ],
-    queryFn: async (): Promise<ForecastResult> =>
-      send(
-        'forecast/generate',
-        buildBalanceForecastRequest({
-          accountIds,
-          conditions,
-          conditionsOp,
-          startDate,
-          endDate,
-          includeAccountlessSchedules,
-          source,
-        }),
+  ...params
+}: UseBalanceForecastParams & { series?: ForecastSeries[] }) {
+  const requests = buildBalanceForecastSeriesRequests(series, params);
+
+  const result = useQuery({
+    queryKey: ['balance-forecast-series', requests],
+    queryFn: () =>
+      Promise.all(
+        requests.map(async ({ id, request }) => ({
+          id,
+          forecast: await send('forecast/generate', request),
+        })),
       ),
-    placeholderData: keepPreviousData,
+    // Keep the whole comparison visible while its dates or filters change.
+    // Drop previous results when line IDs or their order change.
+    placeholderData: (previous, previousQuery) => {
+      const previousRequests = previousQuery?.queryKey[1];
+      if (!Array.isArray(previousRequests)) {
+        return undefined;
+      }
+      return requests.length === previousRequests.length &&
+        requests.every(({ id }, index) => id === previousRequests[index].id)
+        ? previous
+        : undefined;
+    },
     enabled,
   });
+  const onSyncEvent = useEffectEvent((event: ServerEvents['sync-event']) => {
+    if (
+      enabled &&
+      (event.type === 'applied' || event.type === 'success') &&
+      event.tables.some(table =>
+        [
+          'schedules',
+          'schedules_next_date',
+          'rules',
+          'transactions',
+          'accounts',
+          'payees',
+          'payee_mapping',
+          'categories',
+          'category_groups',
+          'category_mapping',
+        ].includes(table),
+      )
+    ) {
+      void result.refetch();
+    }
+  });
+  useEffect(() => listen('sync-event', onSyncEvent), []);
+
+  return result;
+}
+
+export function buildBalanceForecastSeriesRequests(
+  series: ForecastSeries[] | undefined,
+  params: UseBalanceForecastParams,
+) {
+  if (!series?.length || params.source === 'tracking-budget') {
+    return [{ id: 'balance', request: buildBalanceForecastRequest(params) }];
+  }
+
+  return series.map(line => ({
+    id: line.id,
+    request: buildBalanceForecastRequest({
+      ...params,
+      accountIds: line.accounts,
+      conditions: line.conditions,
+      conditionsOp: line.conditionsOp,
+      includeAccountlessSchedules: line.accounts === undefined,
+    }),
+  }));
 }

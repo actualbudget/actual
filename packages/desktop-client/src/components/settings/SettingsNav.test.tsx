@@ -81,6 +81,14 @@ describe('SettingsNav', () => {
     ]);
   });
 
+  it('leaves out a hidden reports page', () => {
+    renderNav('/settings', [{ id: 'reports', hidden: true }]);
+
+    expect(
+      screen.queryByRole('link', { name: 'Reports' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('hides bank sync without a server', () => {
     vi.mocked(useSyncServerStatus).mockReturnValue('no-server');
 

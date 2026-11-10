@@ -10,6 +10,7 @@ import type { Template } from '#types/models/templates';
 import * as actions from './actions';
 import {
   applyMultipleCategoryTemplates,
+  applySingleCategoryTemplate,
   applyTemplate,
   dryRunCategoryTemplate,
   storeTemplates,
@@ -52,6 +53,13 @@ const category: CategoryEntity = {
   name: 'Groceries',
   group: 'g1',
   is_income: false,
+};
+
+const incomeCategory: CategoryEntity = {
+  id: 'income-1',
+  name: 'Salary',
+  group: 'g2',
+  is_income: true,
 };
 
 function setupSheetMock(values: Record<string, number>) {
@@ -224,6 +232,7 @@ describe('dryRunCategoryTemplate', () => {
       perTemplate: [0],
       goal: null,
       longGoal: false,
+      errors: [],
     });
   });
 
@@ -260,6 +269,26 @@ describe('dryRunCategoryTemplate', () => {
     });
     expect(result.budgeted).toBe(500000);
     expect(result.perTemplate).toEqual([180000, 320000]);
+  });
+
+  it('returns the errors when the templates fail validation', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+    setupAqlForCategoryLookup(category);
+
+    const templates: Template[] = [
+      { type: 'goal', amount: 100, directive: 'goal' },
+      { type: 'goal', amount: 200, directive: 'goal' },
+    ];
+    const result = await dryRunCategoryTemplate({
+      month: '2024-01',
+      categoryId: category.id,
+      templates,
+    });
+    expect(result.errors).toEqual([
+      expect.stringContaining(
+        'Groceries: Only one #goal is allowed per category',
+      ),
+    ]);
   });
 });
 
@@ -357,6 +386,43 @@ describe('storeTemplates with a month', () => {
       month: '2024-01',
       category: category.id,
       goal: null,
+      long_goal: null,
+    });
+  });
+
+  it('records no goal for an income category in an envelope budget', async () => {
+    setupSheetMock({ 'to-budget': 100000 });
+    setupAqlForCategoryLookup(incomeCategory);
+
+    await storeTemplates({
+      categoriesWithTemplates: [
+        { id: incomeCategory.id, templates: [monthly] },
+      ],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(db.updateWithSchema).toHaveBeenCalled();
+    expect(actions.setGoal).not.toHaveBeenCalled();
+  });
+
+  it('records the goal for an income category in a tracking budget', async () => {
+    setupSheetMock({ 'total-saved': 100000 });
+    vi.mocked(actions.isTrackingBudget).mockReturnValue(true);
+    setupAqlForCategoryLookup(incomeCategory);
+
+    await storeTemplates({
+      categoriesWithTemplates: [
+        { id: incomeCategory.id, templates: [monthly] },
+      ],
+      source: 'ui',
+      month: '2024-01',
+    });
+
+    expect(actions.setGoal).toHaveBeenCalledWith({
+      month: '2024-01',
+      category: incomeCategory.id,
+      goal: 10000,
       long_goal: null,
     });
   });
@@ -600,6 +666,73 @@ describe('applyMultipleCategoryTemplates', () => {
     expect(cat1Amount).toBe(15000);
     expect(cat2Amount).toBe(5000);
     expect(cat1Amount + cat2Amount).toBe(20000);
+  });
+
+  describe('income categories', () => {
+    const monthly: Template = {
+      type: 'periodic',
+      amount: 100,
+      period: { period: 'month', amount: 1 },
+      starting: '2024-01-01',
+      directive: 'template',
+      priority: 1,
+    };
+
+    it.each([
+      [
+        'multiple',
+        () =>
+          applyMultipleCategoryTemplates({
+            month: '2024-01',
+            categoryIds: [incomeCategory.id],
+          }),
+      ],
+      [
+        'single',
+        () =>
+          applySingleCategoryTemplate({
+            month: '2024-01',
+            category: incomeCategory.id,
+          }),
+      ],
+    ])(
+      'are skipped when applying %s category templates in an envelope budget',
+      async (_, apply) => {
+        setupSheetMock({ 'to-budget': 100000 });
+        setupAqlMultiCategory([incomeCategory], {
+          [incomeCategory.id]: [monthly],
+        });
+
+        const result = await apply();
+
+        expect(result.message).toBe('templates-up-to-date');
+        expect(actions.setBudget).not.toHaveBeenCalled();
+        expect(actions.setGoal).not.toHaveBeenCalled();
+      },
+    );
+
+    it('get their templates applied in a tracking budget', async () => {
+      setupSheetMock({ 'total-saved': 100000 });
+      vi.mocked(actions.isTrackingBudget).mockReturnValue(true);
+      setupAqlMultiCategory([incomeCategory], {
+        [incomeCategory.id]: [monthly],
+      });
+
+      const result = await applyMultipleCategoryTemplates({
+        month: '2024-01',
+        categoryIds: [incomeCategory.id],
+      });
+
+      expect(result.message).toBe('templates-applied');
+      expect(actions.setBudget).toHaveBeenCalledWith({
+        category: incomeCategory.id,
+        month: '2024-01',
+        amount: 10000,
+      });
+      expect(actions.setGoal).toHaveBeenCalledWith(
+        expect.objectContaining({ category: incomeCategory.id }),
+      );
+    });
   });
 });
 

@@ -3,11 +3,18 @@ import { format } from 'node:util';
 import createDebug from 'debug';
 import express from 'express';
 import request from 'supertest';
+import { fetch, Response } from 'undici';
+import type * as Undici from 'undici';
 
 import { enableBankingService } from '#app-enablebanking/services/enablebanking-service';
 import { handleEnableBankingError } from '#app-enablebanking/utils/errors';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
+
+vi.mock('undici', async importOriginal => ({
+  ...(await importOriginal<typeof Undici>()),
+  fetch: vi.fn(),
+}));
 
 vi.mock('#app-enablebanking/utils/jwt', () => ({
   getJWT: () => 'provider-jwt',
@@ -27,7 +34,7 @@ it.each(['', 'actual:*', 'actual-sensitive:enable-banking'])(
       'test-application',
     );
     secretsService.set(SecretName.enablebanking_secretKey, 'test-key');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{}')));
+    vi.mocked(fetch).mockResolvedValue(new Response('{}'));
     try {
       const error = handleEnableBankingError(400, {
         message: `Invalid redirect for ${secret}`,
@@ -45,7 +52,7 @@ it.each(['', 'actual:*', 'actual-sensitive:enable-banking'])(
     } finally {
       secretsService.reset(SecretName.enablebanking_applicationId);
       secretsService.reset(SecretName.enablebanking_secretKey);
-      vi.unstubAllGlobals();
+      vi.mocked(fetch).mockReset();
       log.mockRestore();
       createDebug.enable(previous);
     }

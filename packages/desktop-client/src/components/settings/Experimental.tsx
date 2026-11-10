@@ -281,14 +281,6 @@ export function ExperimentalFeatures() {
           <Trans>Enable Banking sync (EU banks)</Trans>
         </FeatureToggle>
       )}
-      {isUsingServer && (
-        <FeatureToggle
-          flag="akahuBankSync"
-          feedbackLink="https://github.com/actualbudget/actual/issues/8020"
-        >
-          <Trans>Akahu Bank Sync (NZ banks)</Trans>
-        </FeatureToggle>
-      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"

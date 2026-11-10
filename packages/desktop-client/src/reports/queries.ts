@@ -34,15 +34,6 @@ export const dashboardQueries = {
         return data;
       },
     }),
-  listDashboardPageWidgets: <T extends DashboardWidgetEntity>(
-    dashboardPageId?: DashboardPageEntity['id'] | null,
-  ) =>
-    queryOptions<T[]>({
-      ...dashboardQueries.listDashboardWidgets<T>(),
-      select: widgets =>
-        widgets.filter(w => w.dashboard_page_id === dashboardPageId),
-      enabled: !!dashboardPageId,
-    }),
   listDashboardPages: () =>
     queryOptions<DashboardPageEntity[]>({
       queryKey: [...dashboardQueries.lists(), 'pages'],

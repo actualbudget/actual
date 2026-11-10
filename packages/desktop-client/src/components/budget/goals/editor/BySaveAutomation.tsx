@@ -21,7 +21,6 @@ import { FormField, FormLabel } from '#components/forms';
 import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { AmountInput } from '#components/util/AmountInput';
 import { MonthInput } from '#components/util/MonthInput';
-import { useFormat } from '#hooks/useFormat';
 
 type BySaveAutomationProps = {
   template: ByTemplate | SpendTemplate;
@@ -33,12 +32,8 @@ export const BySaveAutomation = ({
   dispatch,
 }: BySaveAutomationProps) => {
   const { t } = useTranslation();
-  const format = useFormat();
 
-  const amount = amountToInteger(
-    template.amount,
-    format.currency.decimalPlaces,
-  );
+  const amount = amountToInteger(template.amount);
 
   const committedRepeat = template.repeat ?? 1;
   const [rawRepeat, setRawRepeat] = useState(String(committedRepeat));
@@ -82,7 +77,7 @@ export const BySaveAutomation = ({
               dispatch(
                 updateTemplate({
                   type: template.type,
-                  amount: integerToAmount(value, format.currency.decimalPlaces),
+                  amount: integerToAmount(value),
                 }),
               )
             }

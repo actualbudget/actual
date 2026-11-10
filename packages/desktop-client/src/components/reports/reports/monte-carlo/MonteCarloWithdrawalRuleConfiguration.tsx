@@ -84,11 +84,14 @@ export function MonteCarloWithdrawalRuleConfiguration({
               </Text>
               <MonteCarloHelpTooltip>
                 <Trans>
-                  The lowest amount you need to live on in any year, no matter
-                  what the rule says: when the rule cuts below it, the plan is
-                  lifted back up to it and that is what gets spent. Income
-                  counts towards it, so the pots only withdraw enough to top it
-                  up. It only applies in years with planned spending - a
+                  The lowest amount you need to live on, no matter what the rule
+                  says: when the rule cuts below it, spending is lifted back up
+                  to it. It never raises spending above what a phase plans -
+                  each year the floor is the lower of this amount and the
+                  phase&apos;s planned spending, so a floor sized for full
+                  retirement simply holds cheaper part-time years at their plan.
+                  Income counts towards it, so the pots only withdraw enough to
+                  top it up. It only applies in years with planned spending - a
                   spending phase set to 0 takes nothing. Like your planned
                   spending, it&apos;s in today&apos;s money and rises with
                   inflation. Set to 0 for no floor.

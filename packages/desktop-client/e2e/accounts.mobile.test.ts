@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { expect, test } from './fixtures';
 import { ConfigurationPage } from './page-models/configuration-page';
 import { MobileNavigation } from './page-models/mobile-navigation';
+import { MobileTransactionEntryPage } from './page-models/mobile-transaction-entry-page';
 
 test.describe('Mobile Accounts', () => {
   let page: Page;
@@ -61,6 +62,31 @@ test.describe('Mobile Accounts', () => {
     await accountPage.searchByText('Kroger');
     await expect(accountPage.transactions).not.toHaveCount(0);
     await expect(page).toMatchThemeScreenshots();
+  });
+
+  test('keeps the search after opening a transaction and going back', async () => {
+    const accountsPage = await navigation.goToAccountsPage();
+    await accountsPage.waitFor();
+
+    const accountPage = await accountsPage.openNthAccount(0);
+    await accountPage.waitFor();
+
+    await accountPage.searchByText('Kroger');
+    await expect(page).toHaveURL(/[?&]search=Kroger/);
+    // Wait for the filtered list; unfiltered, the first rows are schedules.
+    await expect(accountPage.transactions.first()).toContainText('Kroger');
+    const searchedCount = await accountPage.transactions.count();
+
+    await accountPage.transactions.first().click();
+    const transactionPage = new MobileTransactionEntryPage(page);
+    await transactionPage.waitFor();
+
+    await page.getByRole('button', { name: 'Back', exact: true }).click();
+    await accountPage.waitFor();
+
+    await expect(accountPage.searchBox).toHaveValue('Kroger');
+    await expect(page).toHaveURL(/[?&]search=Kroger/);
+    await expect(accountPage.transactions).toHaveCount(searchedCount);
   });
 
   test('reconciles an account', async () => {

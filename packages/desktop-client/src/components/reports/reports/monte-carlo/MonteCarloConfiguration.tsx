@@ -22,6 +22,7 @@ import { LabeledCheckbox } from '#components/forms/LabeledCheckbox';
 import { MonteCarloContributions } from '#components/reports/reports/monte-carlo/MonteCarloContributions';
 import { MonteCarloHelpTooltip } from '#components/reports/reports/monte-carlo/MonteCarloHelpTooltip';
 import { MonteCarloIncomeStreams } from '#components/reports/reports/monte-carlo/MonteCarloIncomeStreams';
+import { MonteCarloLumpSums } from '#components/reports/reports/monte-carlo/MonteCarloLumpSums';
 import { MonteCarloNumberInput } from '#components/reports/reports/monte-carlo/MonteCarloNumberInput';
 import { MonteCarloPotConfiguration } from '#components/reports/reports/monte-carlo/MonteCarloPotConfiguration';
 import { MonteCarloPotsTableHeader } from '#components/reports/reports/monte-carlo/MonteCarloPotsTableHeader';
@@ -219,7 +220,7 @@ export function MonteCarloConfiguration({
                     )
                   : activeTab === 'withdrawals'
                     ? t(
-                        'How much you take out each year, and optional rules that adjust it as markets move.',
+                        'How much you take out each year, optional rules that adjust it as markets move, and any one-off withdrawals on top.',
                       )
                     : t(
                         'How withdrawals are taxed - your spending is what you keep after tax.',
@@ -657,6 +658,12 @@ export function MonteCarloConfiguration({
                         contributions: config.contributions.filter(
                           contribution => contribution.potId !== pot.id,
                         ),
+                        // Lump sums drawn from it fall back to the order
+                        lumpSums: config.lumpSums.map(lumpSum =>
+                          lumpSum.sourcePotId === pot.id
+                            ? { ...lumpSum, sourcePotId: null }
+                            : lumpSum,
+                        ),
                       })
                     }
                   />
@@ -778,6 +785,14 @@ export function MonteCarloConfiguration({
             onMinimumSpendingChange={value =>
               onConfigChange({ minimumSpending: value })
             }
+          />
+          <MonteCarloLumpSums
+            lumpSums={config.lumpSums}
+            pots={config.pots}
+            usesTaxBands={config.taxModel === 'bands'}
+            currentAge={config.currentAge}
+            targetAge={config.targetAge}
+            onConfigChange={onConfigChange}
           />
         </View>
       )}

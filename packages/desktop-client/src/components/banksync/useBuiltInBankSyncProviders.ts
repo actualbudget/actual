@@ -118,11 +118,10 @@ export function useBuiltInBankSyncProviders({
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
-  const akahuEnabled = useFeatureFlag('akahuBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { simpleFinStatus, setSimpleFinStatus } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
-  const { configuredAkahu } = useAkahuStatus(akahuEnabled);
+  const { configuredAkahu } = useAkahuStatus();
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
@@ -722,23 +721,21 @@ export function useBuiltInBankSyncProviders({
         };
       });
 
-    if (akahuEnabled) {
-      baseProviders.push({
-        id: 'akahu',
-        displayName: 'Akahu',
-        description: t(
-          'Link a New Zealand bank account to automatically download transactions.',
-        ),
-        isConfigured: configuredProviders.akahu,
-        credentialSource: 'global',
-        supportsPerBudgetFile: false,
-        canConfigure: canConfigureProviders,
-        isLoading: loadingAkahuAccounts,
-        onConfigure: onAkahuInit,
-        onLink: onConnectAkahu,
-        onReset: onAkahuReset,
-      });
-    }
+    baseProviders.push({
+      id: 'akahu',
+      displayName: 'Akahu',
+      description: t(
+        'Link a New Zealand bank account to automatically download transactions.',
+      ),
+      isConfigured: configuredProviders.akahu,
+      credentialSource: 'global',
+      supportsPerBudgetFile: false,
+      canConfigure: canConfigureProviders,
+      isLoading: loadingAkahuAccounts,
+      onConfigure: onAkahuInit,
+      onLink: onConnectAkahu,
+      onReset: onAkahuReset,
+    });
 
     if (enableBankingEnabled) {
       baseProviders.push({
@@ -772,7 +769,6 @@ export function useBuiltInBankSyncProviders({
     simpleFinStatus,
     syncServerStatus,
     enableBankingEnabled,
-    akahuEnabled,
     isEnableBankingLoading,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,
