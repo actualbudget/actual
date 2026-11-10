@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from '#redux';
 
 import { UserAccessPage } from './admin/UserAccess/UserAccessPage';
 import { UserDirectoryPage } from './admin/UserDirectory/UserDirectoryPage';
+import { RequireSyncServer } from './banksync/RequireSyncServer';
 import { BankSyncStatus } from './BankSyncStatus';
 import { CommandBar } from './CommandBar';
 import { ContextMenu } from './ContextMenu';
@@ -351,9 +352,11 @@ export function FinancesApp() {
                           FallbackComponent={FeatureErrorFallback}
                           resetKeys={[location.pathname]}
                         >
-                          <WideNotSupported redirectTo="/settings/bank-sync">
-                            <MobileBankSyncAccountEditPage />
-                          </WideNotSupported>
+                          <RequireSyncServer>
+                            <WideNotSupported redirectTo="/settings/bank-sync">
+                              <MobileBankSyncAccountEditPage />
+                            </WideNotSupported>
+                          </RequireSyncServer>
                         </ErrorBoundary>
                       }
                     />
