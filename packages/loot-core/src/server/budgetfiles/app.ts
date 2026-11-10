@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   flushSqliteStorage,
+  StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
 } from '#platform/server/sqlite';
@@ -629,7 +630,8 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'opening-budget'
     | 'budget-in-use'
     | 'storage-migration-failed'
-    | 'storage-unavailable';
+    | 'storage-unavailable'
+    | 'storage-lost';
 }> {
   let dir: string;
   try {
@@ -666,6 +668,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);
       return { error: 'storage-unavailable' };
+    }
+    if (e instanceof StorageLostError) {
+      logger.error('Storage lost', e);
+      return { error: 'storage-lost' };
     }
     captureException(e);
     return { error: 'opening-budget' };

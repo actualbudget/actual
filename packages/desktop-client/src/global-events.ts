@@ -179,6 +179,24 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
+  // The browser dropped the private file system under the open app, which
+  // some do in private windows: nothing more can be saved from this tab
+  const unlistenStorageLost = listen('storage-lost', () => {
+    store.dispatch(
+      addNotification({
+        notification: {
+          id: 'storage-lost',
+          type: 'error',
+          title: t('Local data was discarded'),
+          sticky: true,
+          message: t(
+            'This browser has discarded the data Actual keeps on this device, which can happen in private windows. Changes can no longer be saved in this tab. Reload the page; a budget on a sync server can then be downloaded again.',
+          ),
+        },
+      }),
+    );
+  });
+
   const unlistenIndexeddbQuotaError = listen('indexeddb-quota-error', () => {
     alert(
       t(
@@ -289,6 +307,7 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenUndo();
     unlistenFallbackWriteError();
     unlistenStorageWriteFailed();
+    unlistenStorageLost();
     unlistenIndexeddbQuotaError();
     unlistenStartLoad();
     unlistenFinishLoad();

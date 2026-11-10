@@ -14,8 +14,8 @@ import * as wasm from '#platform/server/sqlite/wasm';
 
 import {
   BudgetInUseError,
+  StorageLostError,
   StorageMigrationError,
-  StorageUnavailableError,
 } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
@@ -400,9 +400,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
 
-    await expect(store.open(PATH)).rejects.toBeInstanceOf(
-      StorageUnavailableError,
-    );
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(StorageLostError);
     expect(pool.importDb).not.toHaveBeenCalled();
     expect(pool.files.size).toBe(0);
     // The marker and the copy are left as they were

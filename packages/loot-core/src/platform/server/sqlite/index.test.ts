@@ -2,7 +2,9 @@ import 'fake-indexeddb/auto';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
+import * as connection from '#platform/server/connection';
 
+import * as storage from './storage';
 import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
 import { putSqliteFileRow } from './storage/files-store';
 import {
@@ -10,7 +12,7 @@ import {
   readSqliteWasm,
   resetIndexedDb,
 } from './storage/test-helpers';
-import type { Database } from './types';
+import type { Database, Statement } from './types';
 
 import {
   closeDatabase,
@@ -43,8 +45,12 @@ function expectConstraintFailure(fn: () => void) {
 }
 
 // Satisfies the OPFS probe of `detectOpfsSyncAccess`, which jsdom cannot,
-// for the duration of `run`
-async function withOpfsSyncAccess(run: () => Promise<void>): Promise<void> {
+// for the duration of `run`. Once the browser has dropped its index of the
+// private file system, lookups that create nothing fail.
+async function withOpfsSyncAccess(
+  run: () => Promise<void>,
+  isIndexDropped: () => boolean = () => false,
+): Promise<void> {
   const directory = {
     getFileHandle: async () => ({
       createSyncAccessHandle: async () => ({ close: () => undefined }),
@@ -54,7 +60,17 @@ async function withOpfsSyncAccess(run: () => Promise<void>): Promise<void> {
   Object.defineProperty(navigator, 'storage', {
     configurable: true,
     value: {
-      getDirectory: async () => ({ getDirectoryHandle: async () => directory }),
+      getDirectory: async () => ({
+        getDirectoryHandle: async (
+          _name: string,
+          options?: { create?: boolean },
+        ) => {
+          if (!options?.create && isIndexDropped()) {
+            throw new DOMException('could not be found', 'NotFoundError');
+          }
+          return directory;
+        },
+      }),
     },
   });
   try {
@@ -467,6 +483,82 @@ describe('sqlite-wasm engine', () => {
       log.mockRestore();
     }
     closeDatabase(db);
+  });
+
+  it('has the storage looked at when a statement fails with an I/O error', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const check = vi
+      .spyOn(storage, 'checkStorageAfterIoError')
+      .mockImplementation(() => undefined);
+    try {
+      // A routine failure is none of the storage's business
+      expectConstraintFailure(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      );
+      expect(check).not.toHaveBeenCalled();
+
+      // SQLITE_IOERR_WRITE, what a write gets once the browser has dropped
+      // the file under an open database
+      const ioError = Object.assign(new Error('disk I/O error'), {
+        resultCode: 778,
+      });
+      const failing = {
+        step: () => {
+          throw ioError;
+        },
+        reset: () => undefined,
+      };
+      expect(() =>
+        runQuery(db, failing as unknown as Statement, [], false),
+      ).toThrow(ioError);
+      expect(check).toHaveBeenCalledTimes(1);
+
+      const exec = vi
+        .spyOn(db as unknown as { exec: (sql: string) => void }, 'exec')
+        .mockImplementation(() => {
+          throw ioError;
+        });
+      expect(() => execQuery(db, 'BEGIN')).toThrow(ioError);
+      exec.mockRestore();
+      expect(check).toHaveBeenCalledTimes(2);
+    } finally {
+      check.mockRestore();
+    }
+    closeDatabase(db);
+  });
+
+  it('tells the client when the browser drops the private file system', async () => {
+    const wasmBinary = readSqliteWasm();
+    const send = vi
+      .spyOn(connection, 'send')
+      .mockImplementation(() => undefined);
+    const error = vi.spyOn(console, 'error').mockImplementation(() => null);
+    let isIndexDropped = false;
+    try {
+      await withOpfsSyncAccess(
+        async () => {
+          await resetIndexedDb();
+          expect(await init({ storage: 'opfs', wasmBinary })).toBe('opfs');
+
+          // An I/O error with the files still there says nothing
+          storage.checkStorageAfterIoError();
+          await new Promise(resolve => setTimeout(resolve, 10));
+          expect(send).not.toHaveBeenCalledWith('storage-lost');
+
+          isIndexDropped = true;
+          storage.checkStorageAfterIoError();
+          await vi.waitFor(() =>
+            expect(send).toHaveBeenCalledWith('storage-lost'),
+          );
+        },
+        () => isIndexDropped,
+      );
+    } finally {
+      send.mockRestore();
+      error.mockRestore();
+      await initWasmEngine();
+    }
   });
 
   it('asks for OPFS when a fallback request meets data held in OPFS', async () => {

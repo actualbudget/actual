@@ -1,6 +1,6 @@
 import { logger } from '#platform/server/log';
 
-import { getSqliteStore } from './storage';
+import { checkStorageAfterIoError, getSqliteStore } from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
@@ -51,6 +51,18 @@ function sqlText(statement: PreparedStatement): string {
   return statement.pointer == null
     ? ''
     : getSqlite3().capi.sqlite3_sql(statement.pointer);
+}
+
+// Extended result codes keep the primary one in their low byte
+function isIoError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('resultCode' in error)) {
+    return false;
+  }
+  const { resultCode } = error;
+  return (
+    typeof resultCode === 'number' &&
+    (resultCode & 0xff) === getSqlite3().capi.SQLITE_IOERR
+  );
 }
 
 function verifyParamTypes(sql: string | Statement, params: SqlParam[]) {
@@ -113,6 +125,9 @@ function runQuery<T>(
     if (fetchAll) {
       logger.log(sqlText(statement));
     }
+    if (isIoError(error)) {
+      checkStorageAfterIoError();
+    }
     throw error;
   } finally {
     // Told even after a failure: a statement can leave changes behind
@@ -134,6 +149,11 @@ function execQuery(db: Database, sql: string) {
   const database = asWasm(db);
   try {
     database.exec(sql);
+  } catch (error) {
+    if (isIoError(error)) {
+      checkStorageAfterIoError();
+    }
+    throw error;
   } finally {
     // A script can fail after its earlier statements were committed
     notifyWrite(database);

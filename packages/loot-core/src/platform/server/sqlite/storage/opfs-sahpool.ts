@@ -14,8 +14,8 @@ import {
 } from './absurd-migration';
 import {
   BudgetInUseError,
+  StorageLostError,
   StorageMigrationError,
-  StorageUnavailableError,
 } from './errors';
 import {
   deleteSqliteFileRow,
@@ -350,9 +350,7 @@ export function createOpfsStore({
     const pooled = pool.util.getFileNames().includes(fileName);
     if (row?.storage === 'opfs') {
       if (!pooled) {
-        throw new StorageUnavailableError(
-          `${path} is missing from its OPFS pool`,
-        );
+        throw new StorageLostError(path);
       }
       return true;
     }
@@ -581,9 +579,7 @@ export function createOpfsStore({
         const row = await getSqliteFileRow(path);
         const pooled = pool.util.getFileNames().includes(fileName);
         if (row?.storage === 'opfs' && !pooled) {
-          throw new StorageUnavailableError(
-            `${path} is missing from its OPFS pool`,
-          );
+          throw new StorageLostError(path);
         }
         // The fallback's whole-file row is what the app last used, so as on
         // open it wins over a pooled file an interrupted promotion left; an

@@ -25,6 +25,7 @@ export type {
 } from './types';
 export {
   BudgetInUseError,
+  StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
 } from './storage/errors';

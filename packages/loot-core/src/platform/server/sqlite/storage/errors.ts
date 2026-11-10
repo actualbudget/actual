@@ -29,3 +29,12 @@ export class StorageUnavailableError extends Error {
     this.name = 'StorageUnavailableError';
   }
 }
+
+// The browser no longer has the bytes of a file its marker says it holds.
+// Unlike storage that is out of reach, nothing brings them back
+export class StorageLostError extends Error {
+  constructor(path: string) {
+    super(`The browser no longer holds the database at ${path}`);
+    this.name = 'StorageLostError';
+  }
+}
