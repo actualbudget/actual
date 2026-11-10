@@ -2095,16 +2095,18 @@ describe('CategoryTemplateContext', () => {
         expect(await context.runAll(1000000)).toBe(30000);
       });
 
-      it('ignores the priority of an expired target', async () => {
+      it('still rejects an expired target with a different priority', async () => {
         mockBalance(0);
-        const context = await CategoryTemplateContext.init(
-          [{ ...expiredBy, priority: 2 }, activeBy],
-          category,
-          '2024-06',
-          0,
+        await expect(
+          CategoryTemplateContext.init(
+            [{ ...expiredBy, priority: 2 }, activeBy],
+            category,
+            '2024-06',
+            0,
+          ),
+        ).rejects.toThrow(
+          'Schedule and By templates must be the same priority level',
         );
-
-        expect(context.getPriorities()).toEqual([1]);
       });
 
       it('leaves a surplus from an expired target in the category', async () => {

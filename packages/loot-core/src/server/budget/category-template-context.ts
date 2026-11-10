@@ -79,20 +79,19 @@ export class CategoryTemplateContext {
       fromLastMonth = 0;
     }
 
-    // expired targets are set aside first so they can't fail any checks
-    const expiredTemplates = templates.filter(
-      (t): t is ByTemplate | SpendTemplate => isTemplateExpired(t, month),
-    );
-    const activeTemplates = templates.filter(t => !isTemplateExpired(t, month));
-
     // run all checks
-    CategoryTemplateContext.checkPeriodicInterval(activeTemplates);
-    await CategoryTemplateContext.checkByAndSchedule(activeTemplates);
-    await CategoryTemplateContext.checkPercentage(activeTemplates);
+    CategoryTemplateContext.checkPeriodicInterval(templates);
+    await CategoryTemplateContext.checkByAndSchedule(templates);
+    await CategoryTemplateContext.checkPercentage(templates);
 
     const hideDecimal = await aqlQuery(
       q('preferences').filter({ id: 'hideFraction' }).select('*'),
     );
+
+    const expiredTemplates = templates.filter(
+      (t): t is ByTemplate | SpendTemplate => isTemplateExpired(t, month),
+    );
+    const activeTemplates = templates.filter(t => !isTemplateExpired(t, month));
 
     // call the private constructor
     return new CategoryTemplateContext(

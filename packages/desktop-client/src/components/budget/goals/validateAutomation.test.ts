@@ -215,7 +215,6 @@ describe('validateAutomation adjustment range', () => {
 });
 
 describe('validateSchedulePriorities', () => {
-  const today = new Date(2026, 5, 15);
   function scheduleAt(name: string, priority: number): Template {
     return { type: 'schedule', name, directive: 'template', priority };
   }
@@ -230,54 +229,44 @@ describe('validateSchedulePriorities', () => {
   }
 
   it('returns null when there are no schedule or by templates', () => {
-    expect(validateSchedulePriorities([], today)).toBeNull();
+    expect(validateSchedulePriorities([])).toBeNull();
   });
 
   it('returns null for a single schedule', () => {
-    expect(
-      validateSchedulePriorities([scheduleAt('Rent', 1)], today),
-    ).toBeNull();
+    expect(validateSchedulePriorities([scheduleAt('Rent', 1)])).toBeNull();
   });
 
   it('returns null when all schedules share a priority', () => {
     expect(
-      validateSchedulePriorities(
-        [scheduleAt('Rent', 2), scheduleAt('Gym', 2)],
-        today,
-      ),
+      validateSchedulePriorities([scheduleAt('Rent', 2), scheduleAt('Gym', 2)]),
     ).toBeNull();
   });
 
   it('flags schedules with mismatched priorities', () => {
     expect(
-      validateSchedulePriorities(
-        [scheduleAt('Rent', 1), scheduleAt('Gym', 2)],
-        today,
-      ),
+      validateSchedulePriorities([scheduleAt('Rent', 1), scheduleAt('Gym', 2)]),
     ).toEqual({ kind: 'schedule-priority-mismatch' });
   });
 
   it('flags a schedule and a by-date with mismatched priorities', () => {
     expect(
-      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2)], today),
+      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2)]),
     ).toEqual({ kind: 'schedule-priority-mismatch' });
   });
 
-  it('ignores the priority of an expired by-date', () => {
+  it('still counts the priority of an expired by-date', () => {
+    // rerunning the month the target was active in includes it
     expect(
-      validateSchedulePriorities(
-        [scheduleAt('Rent', 1), byAt(2, '2026-05')],
-        today,
-      ),
-    ).toBeNull();
+      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2, '2026-05')]),
+    ).toEqual({ kind: 'schedule-priority-mismatch' });
   });
 
   it('ignores priorities of other automation types', () => {
     expect(
-      validateSchedulePriorities(
-        [scheduleAt('Rent', 1), percent('Salary', 10)],
-        today,
-      ),
+      validateSchedulePriorities([
+        scheduleAt('Rent', 1),
+        percent('Salary', 10),
+      ]),
     ).toBeNull();
   });
 });

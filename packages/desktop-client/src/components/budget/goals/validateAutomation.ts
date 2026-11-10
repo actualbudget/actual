@@ -160,18 +160,14 @@ export function validatePercentageAllocation(
 // The engine (CategoryTemplateContext.checkByAndSchedule) requires
 // every schedule and by-date template in a category to share one priority; if
 // they don't, none of them budget. Surface that as a conflict so it can't be
-// saved. Expired targets are skipped, as the engine skips them.
+// saved. Expired targets still count, as they do in the engine, so a mismatch
+// fails the same way in every month.
 export function validateSchedulePriorities(
   templates: readonly Template[],
-  today: Date,
 ): GlobalConflictKind | null {
-  const month = monthUtils.monthFromDate(today);
   const priorities = new Set<number>();
   for (const t of templates) {
-    if (
-      (t.type === 'schedule' || t.type === 'by') &&
-      !isTemplateExpired(t, month)
-    ) {
+    if (t.type === 'schedule' || t.type === 'by') {
       priorities.add(t.priority);
     }
   }

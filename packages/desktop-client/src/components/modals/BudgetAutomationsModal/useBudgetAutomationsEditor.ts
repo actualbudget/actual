@@ -255,7 +255,7 @@ export function useBudgetAutomationsEditor({
   const hasErrors = automationErrors.some(isBlockingAutomationError);
   const conflicts = [
     validatePercentageAllocation(templates),
-    validateSchedulePriorities(templates, today),
+    validateSchedulePriorities(templates),
   ].filter(conflict => conflict !== null);
 
   const categoryNameMap: Record<string, string> = {};
