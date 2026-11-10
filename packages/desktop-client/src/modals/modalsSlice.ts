@@ -449,6 +449,14 @@ export type Modal =
       };
     }
   | {
+      name: 'tag-color';
+      options: {
+        tagName: string;
+        color: string | null;
+        onSelect: (color: string | null) => void;
+      };
+    }
+  | {
       name: 'notes';
       options: {
         id: NoteEntity['id'];
