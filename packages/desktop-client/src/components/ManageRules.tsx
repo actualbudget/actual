@@ -323,6 +323,7 @@ export function ManageRules({
         search={
           <Search
             placeholder={t('Filter rules…')}
+            width="100%"
             value={filter}
             onChange={onSearchChange}
           />

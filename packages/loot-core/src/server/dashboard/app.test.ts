@@ -292,3 +292,42 @@ describe('dashboard page order', () => {
     expect(await getPageNames()).toEqual(['Main', 'Second', 'Third']);
   });
 });
+
+describe('dashboard queries', () => {
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+  });
+
+  it('retrieves dashboard pages and widgets', async () => {
+    const initialPages = await dashboardApp.handlers['dashboard-get-pages']();
+    expect(initialPages.length).toBeGreaterThan(0);
+
+    await db.insertWithSchema('dashboard_pages', {
+      id: 'page-1',
+      name: 'Custom Page',
+    });
+
+    const pages = await dashboardApp.handlers['dashboard-get-pages']();
+    expect(pages).toHaveLength(initialPages.length + 1);
+    expect(pages.find(p => p.id === 'page-1')?.name).toBe('Custom Page');
+
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-add-widget']({
+        type: 'net-worth-card',
+        width: 6,
+        height: 3,
+        x: 0,
+        y: 0,
+        meta: null,
+        dashboard_page_id: 'page-1',
+      }),
+    );
+
+    const widgets = await dashboardApp.handlers['dashboard-get-widgets']({
+      pageId: 'page-1',
+    });
+    expect(widgets).toHaveLength(1);
+    expect(widgets[0].type).toBe('net-worth-card');
+  });
+});

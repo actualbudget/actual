@@ -2,10 +2,12 @@ import { type ReactNode } from 'react';
 
 import type { Preview } from '@storybook/react-vite';
 
-import darkThemeCss from '../src/themes/dark.css?inline';
-import lightThemeCss from '../src/themes/light.css?inline';
-import midnightThemeCss from '../src/themes/midnight.css?inline';
-import paletteCss from '../src/themes/palette.css?inline';
+import {
+  darkThemeCss,
+  lightThemeCss,
+  midnightThemeCss,
+  paletteCss,
+} from '../src/themes';
 
 const THEMES = {
   light: lightThemeCss,
