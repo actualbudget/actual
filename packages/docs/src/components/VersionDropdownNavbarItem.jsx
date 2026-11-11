@@ -10,9 +10,7 @@ export default function VersionDropdownNavbarItem({ items, ...props }) {
     <DropdownNavbarItem
       {...props}
       items={items.map(item =>
-        item.href
-          ? { ...item, href: new URL(pathname, item.href).href }
-          : item,
+        item.href ? { ...item, href: new URL(pathname, item.href).href } : item,
       )}
     />
   );
