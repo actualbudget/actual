@@ -95,6 +95,20 @@ import APIList from './APIList';
 "updateNote"
 ]} />
 
+<APIList title="Dashboards" sections={[
+"getDashboardPages",
+"createDashboardPage",
+"renameDashboardPage",
+"deleteDashboardPage",
+"resetDashboard",
+"getDashboardWidgets",
+"addDashboardWidget",
+"updateDashboardWidget",
+"removeDashboardWidget",
+"updateDashboard",
+"copyDashboardWidget"
+]} />
+
 <APIList title="Misc" sections={[
 "BudgetFile",
 "initConfig",
@@ -856,6 +870,76 @@ Returns the note for the given entity ID, or `null` if no note has been set.
 <Method name="updateNote" args={[{ name: 'id', type: 'id' }, { name: 'note', type: 'string' }]} returns="Promise<void>" />
 
 Sets the note on the entity with the given ID. Pass an empty string to clear the note.
+
+## Dashboards
+
+Dashboards consist of dashboard pages and widgets displayed on those pages.
+
+#### `getDashboardPages`
+
+<Method name="getDashboardPages" args={[]} returns="Promise<DashboardPageEntity[]>" />
+
+Returns all dashboard pages in the budget.
+
+#### `createDashboardPage`
+
+<Method name="createDashboardPage" args={[{ name: 'name', type: 'string' }]} returns="Promise<id>" />
+
+Creates a new dashboard page with the given name. Returns the `id` of the created dashboard page.
+
+#### `renameDashboardPage`
+
+<Method name="renameDashboardPage" args={[{ name: 'id', type: 'id' }, { name: 'name', type: 'string' }]} returns="Promise<void>" />
+
+Renames an existing dashboard page.
+
+#### `deleteDashboardPage`
+
+<Method name="deleteDashboardPage" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Deletes the dashboard page with the given ID and all of its associated widgets.
+
+#### `resetDashboard`
+
+<Method name="resetDashboard" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Resets the dashboard page to its default state.
+
+#### `getDashboardWidgets`
+
+<Method name="getDashboardWidgets" args={[{ name: 'pageId', type: 'id?' }]} returns="Promise<DashboardWidgetEntity[]>" />
+
+Returns all dashboard widgets. If `pageId` is specified, returns only the widgets belonging to that dashboard page.
+
+#### `addDashboardWidget`
+
+<Method name="addDashboardWidget" args={[{ name: 'widget', type: 'AddDashboardWidgetInput' }]} returns="Promise<void>" />
+
+Adds a new widget to a dashboard page. If `x` and `y` coordinates are omitted, they are calculated automatically.
+
+#### `updateDashboardWidget`
+
+<Method name="updateDashboardWidget" args={[{ name: 'widget', type: 'object' }]} returns="Promise<void>" />
+
+Updates properties of a single dashboard widget. The `widget` object must include the widget `id`.
+
+#### `removeDashboardWidget`
+
+<Method name="removeDashboardWidget" args={[{ name: 'id', type: 'id' }]} returns="Promise<void>" />
+
+Removes the dashboard widget with the specified ID.
+
+#### `updateDashboard`
+
+<Method name="updateDashboard" args={[{ name: 'widgets', type: 'object[]' }]} returns="Promise<void>" />
+
+Batch updates multiple dashboard widgets (for example, when updating a grid layout). Each item in `widgets` must include the widget `id`.
+
+#### `copyDashboardWidget`
+
+<Method name="copyDashboardWidget" args={[{ name: 'id', type: 'id' }, { name: 'targetDashboardPageId', type: 'id' }]} returns="Promise<void>" />
+
+Copies an existing dashboard widget to another dashboard page.
 
 ## Misc
 

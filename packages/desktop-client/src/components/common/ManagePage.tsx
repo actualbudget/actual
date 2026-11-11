@@ -43,14 +43,15 @@ export function ManagePage({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          justifyContent: 'flex-end',
+          flexWrap: 'wrap',
           gap: spacing.sm,
           flexShrink: 0,
         }}
       >
         <View
           style={{
-            flex: 1,
-            minWidth: 0,
+            flex: '1 0 auto',
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.sm,
@@ -58,7 +59,9 @@ export function ManagePage({
         >
           {actions}
         </View>
-        {search}
+        {search != null && (
+          <View style={{ flex: '100 1 100px', maxWidth: 250 }}>{search}</View>
+        )}
         {selection}
         {menu}
       </View>

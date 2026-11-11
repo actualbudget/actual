@@ -16,6 +16,7 @@ import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -192,6 +193,37 @@ async function moveDashboardPage({
 
 async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
+}
+
+async function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
+    q('dashboard_pages').select('*'),
+  );
+  return data.map(page => ({
+    ...page,
+    name: page.name ?? '',
+  }));
+}
+
+async function getDashboardWidgets({
+  pageId,
+}: { pageId?: string } = {}): Promise<DashboardWidgetEntity[]> {
+  let query = q('dashboard').select('*');
+  if (pageId) {
+    query = query.filter({ dashboard_page_id: pageId });
+  }
+  const {
+    data,
+  }: {
+    data: (DashboardWidgetEntity & {
+      meta?: string | Record<string, unknown>;
+    })[];
+  } = await aqlQuery(query);
+  return data.map(widget => ({
+    ...widget,
+    meta:
+      typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
+  }));
 }
 
 async function updateDashboard(
@@ -409,6 +441,8 @@ async function importDashboard({
 }
 
 export type DashboardHandlers = {
+  'dashboard-get-pages': typeof getDashboardPages;
+  'dashboard-get-widgets': typeof getDashboardWidgets;
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
   'dashboard-rename': typeof renameDashboardPage;
@@ -424,6 +458,8 @@ export type DashboardHandlers = {
 
 export const app = createApp<DashboardHandlers>();
 
+app.method('dashboard-get-pages', getDashboardPages);
+app.method('dashboard-get-widgets', getDashboardWidgets);
 app.method('dashboard-create', mutator(undoable(createDashboardPage)));
 app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
 app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));
