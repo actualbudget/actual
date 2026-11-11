@@ -31,7 +31,7 @@ export default function DocVersionBanner() {
   const isLocal = host === 'localhost' || host === '127.0.0.1';
 
   if (
-    !isBrowser ||
+    (!isBrowser && !configIsNext) ||
     (!isNext &&
       (isLocal ||
         host === mainHost ||

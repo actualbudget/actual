@@ -10,7 +10,7 @@ export default function VersionDropdownNavbarItem({ items, ...props }) {
     <DropdownNavbarItem
       {...props}
       items={items.map(item =>
-        item.href
+        item.href && pathname.startsWith('/docs/')
           ? { ...item, href: new URL(item.href).origin + pathname }
           : item,
       )}
