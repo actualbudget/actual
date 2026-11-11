@@ -1,10 +1,10 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type {
   ComponentPropsWithoutRef,
   ComponentPropsWithRef,
   CSSProperties,
   ReactNode,
 } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   Dialog,
   Modal as ReactAriaModal,
@@ -126,7 +126,14 @@ export const Modal = ({
     return () => disableScope(name);
   }, [enableScope, disableScope, name]);
 
-  const { isHidden, isActive, onClose: closeModal } = useModalState();
+  const {
+    isHidden,
+    isActive,
+    modalStack,
+    onClose: closeModal,
+  } = useModalState();
+  const isDirectlyBelowTopModal =
+    !isActive(name) && modalStack.at(-2)?.name === name;
   const dispatch = useDispatch();
   const prefersReducedMotion = useReducedMotion();
   const isAnimatedSheet = isSheet && !prefersReducedMotion;
@@ -188,14 +195,11 @@ export const Modal = ({
           inset: 0,
           zIndex: MODAL_Z_INDEX,
           fontSize: 14,
-          // on mobile, we disable the blurred background for performance reasons
-          ...(isNarrowWidth
-            ? {
-                backgroundColor: 'rgba(0, 0, 0, 0.4)',
-              }
-            : {
-                backdropFilter: 'blur(1px) brightness(0.9)',
-              }),
+          ...getOverlayBackgroundStyle({
+            isNarrowWidth,
+            isTopModal: isActive(name),
+            isDirectlyBelowTopModal,
+          }),
           ...style,
         }}
         {...props}
@@ -288,6 +292,33 @@ export const Modal = ({
     </ErrorBoundary>
   );
 };
+
+type OverlayBackgroundStyleOptions = {
+  isNarrowWidth: boolean;
+  isTopModal: boolean;
+  isDirectlyBelowTopModal: boolean;
+};
+
+function getOverlayBackgroundStyle({
+  isNarrowWidth,
+  isTopModal,
+  isDirectlyBelowTopModal,
+}: OverlayBackgroundStyleOptions): CSSProperties {
+  // On mobile, we disable the blurred background for performance reasons.
+  if (isNarrowWidth) {
+    return { backgroundColor: 'rgba(0, 0, 0, 0.4)' };
+  }
+  // On desktop, only the top modal blurs: each stacked backdrop filter
+  // re-filters the whole viewport, which is extremely slow in Firefox.
+  if (isTopModal) {
+    return { backdropFilter: 'blur(1px) brightness(0.9)' };
+  }
+  // The modal directly below the top one gets a plain dim, equal to brightness(0.9).
+  if (isDirectlyBelowTopModal) {
+    return { backgroundColor: 'rgba(0, 0, 0, 0.1)' };
+  }
+  return {};
+}
 
 type ModalContentContainerProps = {
   style?: CSSProperties;
