@@ -28,6 +28,7 @@ import {
   amountToInteger,
   hasFieldsChanged,
   integerToAmount,
+  MAX_SAFE_NUMBER,
 } from '#shared/util';
 import type {
   AccountEntity,
@@ -785,6 +786,92 @@ export async function reconcileTransactions(
   });
 
   if (!isPreview) {
+    const balanceChanges = new Map<string, number>();
+
+    // Calculate the balance changes caused by new transactions.
+    for (const trans of added.filter(t => !t.is_parent)) {
+      const amount = trans.amount ?? 0;
+      const sourceAccount = trans.account ?? acctId;
+
+      balanceChanges.set(
+        sourceAccount,
+        (balanceChanges.get(sourceAccount) ?? 0) + amount,
+      );
+
+      // Transfers generate an opposite transaction in another account.
+      if (trans.payee) {
+        const transferPayee = await db.first<{
+          transfer_acct: string | null;
+        }>('SELECT transfer_acct FROM v_payees WHERE id = ?', [trans.payee]);
+
+        if (transferPayee?.transfer_acct) {
+          const destination = transferPayee.transfer_acct;
+
+          balanceChanges.set(
+            destination,
+            (balanceChanges.get(destination) ?? 0) - amount,
+          );
+        }
+      }
+    }
+
+    let globalBalanceChange = 0;
+
+    for (const [accountId, change] of balanceChanges) {
+      const result = await db.first<{ balance: number }>(
+        `SELECT SUM(amount) AS balance
+       FROM transactions
+       WHERE acct = ?
+         AND isParent = 0
+         AND tombstone = 0`,
+        [accountId],
+      );
+
+      const existingBalance = result?.balance ?? 0;
+      const resultingBalance = existingBalance + change;
+
+      if (
+        !Number.isSafeInteger(resultingBalance) ||
+        Math.abs(resultingBalance) > MAX_SAFE_NUMBER
+      ) {
+        throw new TransactionError(
+          'Import would result in an account balance exceeding the supported numerical limit.',
+        );
+      }
+
+      const account = await db.first<{
+        closed: number;
+        tombstone: number;
+      }>('SELECT closed, tombstone FROM accounts WHERE id = ?', [accountId]);
+
+      if (account?.closed === 0 && account.tombstone === 0) {
+        globalBalanceChange += change;
+      }
+    }
+
+    // Check the balance across all open accounts.
+    const globalResult = await db.first<{ balance: number }>(
+      `SELECT SUM(t.amount) AS balance
+     FROM transactions t
+     JOIN accounts a ON t.acct = a.id
+     WHERE t.isParent = 0
+       AND t.tombstone = 0
+       AND a.tombstone = 0
+       AND a.closed = 0`,
+    );
+
+    const resultingGlobalBalance =
+      (globalResult?.balance ?? 0) + globalBalanceChange;
+
+    if (
+      !Number.isSafeInteger(resultingGlobalBalance) ||
+      Math.abs(resultingGlobalBalance) > MAX_SAFE_NUMBER
+    ) {
+      throw new TransactionError(
+        'Import would result in a global balance exceeding the supported numerical limit.',
+      );
+    }
+
     await createNewPayees(payeesToCreate, [...added, ...updated]);
     await batchUpdateTransactions({ added, updated });
   }

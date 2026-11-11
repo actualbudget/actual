@@ -1,7 +1,30 @@
-import { filterByStartDate, parseCategoryFields, parseDate } from './utils';
+import {
+  filterByStartDate,
+  isSafeImportAmount,
+  parseCategoryFields,
+  parseDate,
+} from './utils';
 import type { ImportTransaction } from './utils';
 
 describe('Import transactions', () => {
+  describe('safe import amounts', () => {
+    it('accepts valid transaction amounts', () => {
+      expect(isSafeImportAmount(100)).toBe(true);
+      expect(isSafeImportAmount(-250.75)).toBe(true);
+      expect(isSafeImportAmount(0)).toBe(true);
+    });
+
+    it('rejects amounts exceeding the supported numerical limit', () => {
+      expect(isSafeImportAmount(30_000_000_000_000)).toBe(false);
+      expect(isSafeImportAmount(-30_000_000_000_000)).toBe(false);
+    });
+
+    it('rejects non-finite amounts', () => {
+      expect(isSafeImportAmount(Infinity)).toBe(false);
+      expect(isSafeImportAmount(-Infinity)).toBe(false);
+      expect(isSafeImportAmount(NaN)).toBe(false);
+    });
+  });
   describe('date parsing', () => {
     const invalidInputs: Array<{
       str: Parameters<typeof parseDate>[0];
