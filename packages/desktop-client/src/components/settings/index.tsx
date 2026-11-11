@@ -47,6 +47,7 @@ import { SettingsPageTitle } from './SettingsPageTitle';
 import { SettingsRow } from './SettingsRow';
 import { SidebarSettings } from './SidebarSettings';
 import { ThemeSettings } from './Themes';
+import { TotpSettings } from './TotpSettings';
 
 function About() {
   const { t } = useTranslation();
@@ -295,6 +296,7 @@ export function GeneralSettings() {
       {serverURL && (
         <SettingsGroup title={t('Security')}>
           <AuthSettings />
+          <TotpSettings />
           <EncryptionSettings />
           {fileId && <ApiKeys key={`${serverURL}:${fileId}`} fileId={fileId} />}
         </SettingsGroup>

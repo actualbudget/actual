@@ -11,6 +11,44 @@ export function getServerErrorReason(error) {
     : error.reason;
 }
 
+// Failed requests are logged with their body, which for auth endpoints means
+// passwords, session tokens, one-time codes and enrollment secrets. Values of
+// these keys are replaced before logging; the keys themselves stay so failures
+// are still diagnosable.
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'code',
+  'token',
+  'mfatoken',
+  'secret',
+  'client_secret',
+  'otpauthurl',
+]);
+
+const REDACTED = '<redacted>';
+
+/**
+ * Deep-copies `value`, replacing anything stored under a sensitive key. Nesting
+ * matters: the OpenID client secret arrives as `{ openId: { client_secret } }`,
+ * so a shallow pass would miss it.
+ */
+export function redactSensitive(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(redactSensitive);
+  }
+
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, entry]) => [
+      key,
+      SENSITIVE_KEYS.has(key.toLowerCase()) ? REDACTED : redactSensitive(entry),
+    ]),
+  );
+}
+
 function throwIfNot200(res: Response, text: string) {
   if (res.status !== 200) {
     if (res.status === 500) {
@@ -107,9 +145,9 @@ export async function post(
       'API call failed: ' +
         url +
         '\nData: ' +
-        JSON.stringify(data, null, 2) +
+        JSON.stringify(redactSensitive(data), null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2),
+        JSON.stringify(redactSensitive(res), null, 2),
     );
 
     throw new PostError(
@@ -157,9 +195,9 @@ export async function del(url, data, headers = {}, timeout = null) {
       'API call failed: ' +
         url +
         '\nData: ' +
-        JSON.stringify(data, null, 2) +
+        JSON.stringify(redactSensitive(data), null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2),
+        JSON.stringify(redactSensitive(res), null, 2),
     );
 
     throw new PostError(res.description || res.reason || 'unknown');
@@ -205,9 +243,9 @@ export async function patch(url, data, headers = {}, timeout = null) {
       'API call failed: ' +
         url +
         '\nData: ' +
-        JSON.stringify(data, null, 2) +
+        JSON.stringify(redactSensitive(data), null, 2) +
         '\nResponse: ' +
-        JSON.stringify(res, null, 2),
+        JSON.stringify(redactSensitive(res), null, 2),
     );
 
     throw new PostError(res.description || res.reason || 'unknown');
