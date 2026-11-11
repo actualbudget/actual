@@ -48,6 +48,7 @@ import {
 } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarMenuRoute } from './sidebar/SidebarMenuRoute';
+import { useSidebar } from './sidebar/SidebarProvider';
 import { StartPageRedirect } from './StartPageRedirect';
 import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
@@ -101,6 +102,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
+  const sidebar = useSidebar();
   useMetaThemeColor(theme.mobileViewTheme);
 
   const location = useLocation();
@@ -232,6 +234,18 @@ export function FinancesApp() {
               flex: 1,
               overflow: 'hidden',
               width: '100%',
+              // The wide layout has no header of its own to absorb the status
+              // bar in the mobile apps (zero elsewhere); the narrow layout's
+              // page header handles it.
+              ...(!isNarrowWidth && {
+                paddingTop: 'env(safe-area-inset-top)',
+                paddingRight: 'env(safe-area-inset-right)',
+                // A floating sidebar overlays this pane instead of sitting
+                // beside it, so the pane itself reaches the left edge.
+                ...(sidebar.floating && {
+                  paddingLeft: 'env(safe-area-inset-left)',
+                }),
+              }),
             }}
           >
             <ScrollProvider
