@@ -94,7 +94,11 @@ export function checkPrDescription(
   const section = name => sections.get(normalize(name)).trim();
   const errors = [];
 
-  const humanSummary = section('Human Summary');
+  // The template ends this section with a "> 🤖 ..." line marking where the
+  // AI-written sections start; that line is not a summary.
+  const humanSummary = section('Human Summary')
+    .replace(/^>\s*🤖.*$/gm, '')
+    .trim();
   if (isAgent) {
     if (humanSummary) {
       errors.push(

@@ -4,6 +4,8 @@
 
 <!-- Written by you, in your own words - not by an AI tool. A sentence or two is enough: why do we need this change? What problem is it solving for you? -->
 
+> 🤖 The sections below this line are mostly written by AI tools.
+
 ## Description
 
 <!-- What does this PR do? AI tools may write this section and "Testing", but keep them short: at most 150 words in total. -->
