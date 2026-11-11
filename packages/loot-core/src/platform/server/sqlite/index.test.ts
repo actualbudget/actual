@@ -2,11 +2,17 @@ import 'fake-indexeddb/auto';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { patchFetchForSqlJS } from '#mocks/util';
+import * as connection from '#platform/server/connection';
 
+import * as storage from './storage';
 import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
 import { putSqliteFileRow } from './storage/files-store';
-import { initWasmEngine } from './storage/test-helpers';
-import type { Database } from './types';
+import {
+  initWasmEngine,
+  readSqliteWasm,
+  resetIndexedDb,
+} from './storage/test-helpers';
+import type { Database, Statement } from './types';
 
 import {
   closeDatabase,
@@ -15,6 +21,8 @@ import {
   init,
   openDatabase,
   prepare,
+  releaseSqliteStorage,
+  resumeSqliteStorage,
   runQuery,
   transaction,
 } from './index';
@@ -36,6 +44,42 @@ function expectConstraintFailure(fn: () => void) {
   const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => null);
   expect(fn).toThrow(/constraint failed/i);
   consoleSpy.mockRestore();
+}
+
+// Satisfies the OPFS probe of `detectOpfsSyncAccess`, which jsdom cannot,
+// for the duration of `run`. Once the browser has dropped its index of the
+// private file system, lookups that create nothing fail.
+async function withOpfsSyncAccess(
+  run: () => Promise<void>,
+  isIndexDropped: () => boolean = () => false,
+): Promise<void> {
+  const directory = {
+    getFileHandle: async () => ({
+      createSyncAccessHandle: async () => ({ close: () => undefined }),
+    }),
+    removeEntry: async () => undefined,
+  };
+  Object.defineProperty(navigator, 'storage', {
+    configurable: true,
+    value: {
+      getDirectory: async () => ({
+        getDirectoryHandle: async (
+          _name: string,
+          options?: { create?: boolean },
+        ) => {
+          if (!options?.create && isIndexDropped()) {
+            throw new DOMException('could not be found', 'NotFoundError');
+          }
+          return directory;
+        },
+      }),
+    },
+  });
+  try {
+    await run();
+  } finally {
+    Reflect.deleteProperty(navigator, 'storage');
+  }
 }
 
 // The same contract is expected of both web engines; each describe block
@@ -421,5 +465,180 @@ describe('sqlite-wasm engine', () => {
       warn.mockRestore();
     }
     closeDatabase(db);
+  });
+
+  it('logs the text of a failed read, and nothing for a failed write', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const log = vi.spyOn(console, 'log').mockImplementation(() => null);
+    try {
+      expect(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      ).toThrow(/constraint failed/i);
+      expect(log).not.toHaveBeenCalled();
+
+      // Fails when stepped rather than prepared, so it can be cached
+      const statement = prepare(db, 'SELECT abs(-9223372036854775808)');
+      expect(() => runQuery(db, statement, [], true)).toThrow(/overflow/i);
+      expect(log).toHaveBeenCalledWith('SELECT abs(-9223372036854775808)');
+    } finally {
+      log.mockRestore();
+    }
+    closeDatabase(db);
+  });
+
+  it('has the storage looked at when a statement fails with an I/O error', async () => {
+    const db = await openWithSchema();
+    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 1)");
+    const check = vi
+      .spyOn(storage, 'checkStorageAfterIoError')
+      .mockImplementation(() => undefined);
+    try {
+      // A routine failure is none of the storage's business
+      expectConstraintFailure(() =>
+        runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 2)"),
+      );
+      expect(check).not.toHaveBeenCalled();
+
+      // SQLITE_IOERR_WRITE, what a write gets once the browser has dropped
+      // the file under an open database
+      const ioError = Object.assign(new Error('disk I/O error'), {
+        resultCode: 778,
+      });
+      const failing = {
+        step: () => {
+          throw ioError;
+        },
+        reset: () => undefined,
+      };
+      expect(() =>
+        runQuery(db, failing as unknown as Statement, [], false),
+      ).toThrow(ioError);
+      expect(check).toHaveBeenCalledTimes(1);
+
+      const exec = vi
+        .spyOn(db as unknown as { exec: (sql: string) => void }, 'exec')
+        .mockImplementation(() => {
+          throw ioError;
+        });
+      expect(() => execQuery(db, 'BEGIN')).toThrow(ioError);
+      exec.mockRestore();
+      expect(check).toHaveBeenCalledTimes(2);
+    } finally {
+      check.mockRestore();
+    }
+    closeDatabase(db);
+  });
+
+  it('tells the client when the browser drops the private file system', async () => {
+    const wasmBinary = readSqliteWasm();
+    const send = vi
+      .spyOn(connection, 'send')
+      .mockImplementation(() => undefined);
+    const error = vi.spyOn(console, 'error').mockImplementation(() => null);
+    let isIndexDropped = false;
+    try {
+      await withOpfsSyncAccess(
+        async () => {
+          await resetIndexedDb();
+          expect(await init({ storage: 'opfs', wasmBinary })).toBe('opfs');
+
+          // An I/O error with the files still there says nothing
+          storage.checkStorageAfterIoError();
+          await new Promise(resolve => setTimeout(resolve, 10));
+          expect(send).not.toHaveBeenCalledWith('storage-lost');
+
+          isIndexDropped = true;
+          storage.checkStorageAfterIoError();
+          await vi.waitFor(() =>
+            expect(send).toHaveBeenCalledWith('storage-lost'),
+          );
+        },
+        () => isIndexDropped,
+      );
+    } finally {
+      send.mockRestore();
+      error.mockRestore();
+      await initWasmEngine();
+    }
+  });
+
+  it('opens no stored database once the storage is let go, until it is resumed', async () => {
+    await resetIndexedDb();
+    await initWasmEngine();
+    const path = '/documents/Actual/let-go/db.sqlite';
+    try {
+      await releaseSqliteStorage();
+      await expect(openDatabase(path)).rejects.toBeInstanceOf(
+        StorageUnavailableError,
+      );
+      // A database in memory holds no storage
+      closeDatabase(await openDatabase());
+
+      resumeSqliteStorage();
+      closeDatabase(await openDatabase(path));
+      // The new file's first save, so that it does not outlast the test
+      await storage.getSqliteStore().flush();
+    } finally {
+      await initWasmEngine();
+    }
+  });
+
+  it('gives back a database that was still being opened when the storage was let go', async () => {
+    await resetIndexedDb();
+    await initWasmEngine();
+    let heldLocks = 0;
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: {
+        request: (
+          _name: string,
+          _options: unknown,
+          hold: () => Promise<void>,
+        ) => {
+          heldLocks += 1;
+          return hold().then(() => {
+            heldLocks -= 1;
+          });
+        },
+      },
+    });
+    try {
+      const opening = openDatabase('/documents/Actual/on-its-way/db.sqlite');
+      await releaseSqliteStorage();
+      // Under way, with the budget's lock already taken
+      expect(heldLocks).toBe(1);
+      await expect(opening).rejects.toBeInstanceOf(StorageUnavailableError);
+      await vi.waitFor(() => expect(heldLocks).toBe(0));
+    } finally {
+      Reflect.deleteProperty(navigator, 'locks');
+      await initWasmEngine();
+    }
+  });
+
+  it('asks for OPFS when a fallback request meets data held in OPFS', async () => {
+    const wasmBinary = readSqliteWasm();
+    try {
+      await withOpfsSyncAccess(async () => {
+        await resetIndexedDb();
+        await putSqliteFileRow({
+          filepath: '/documents/Actual/a/db.sqlite',
+          contents: new Uint8Array(0),
+          storage: 'memory-idb',
+        });
+        expect(await init({ storage: 'memory-idb', wasmBinary })).toBe(
+          'memory-idb',
+        );
+        await putSqliteFileRow({
+          filepath: '/documents/Actual/b/db.sqlite',
+          contents: '',
+          storage: 'opfs',
+        });
+        expect(await init({ storage: 'memory-idb', wasmBinary })).toBe('opfs');
+        expect(await init({ storage: 'legacy', wasmBinary })).toBe('opfs');
+      });
+    } finally {
+      await initWasmEngine();
+    }
   });
 });

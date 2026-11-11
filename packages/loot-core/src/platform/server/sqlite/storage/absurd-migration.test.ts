@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   closeDatabase,
@@ -201,6 +201,30 @@ describe('absurd-sql migration helpers', () => {
     } finally {
       other.close();
     }
+  });
+
+  it('reports the budget in use when nothing answers the version change', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    // A connection in a worker that never reaches its event loop never
+    // acknowledges the version change, and the browser reports `blocked`
+    // only once every connection has: the open request just stays pending
+    const realOpen = indexedDB.open.bind(indexedDB);
+    const open = vi
+      .spyOn(indexedDB, 'open')
+      .mockImplementation((name, version) =>
+        version == null ? realOpen(name) : ({} as unknown as IDBOpenDBRequest),
+      );
+    vi.useFakeTimers();
+    try {
+      const pending = readLegacyDatabaseBytes(PATH);
+      pending.catch(() => undefined);
+      await vi.advanceTimersByTimeAsync(5000);
+      await expect(pending).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      vi.useRealTimers();
+      open.mockRestore();
+    }
+    expect(await legacyVersion(NAME)).toBe(2);
   });
 
   it('refuses the cutover when a connection to the copy appeared meanwhile', async () => {

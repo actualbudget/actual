@@ -67,6 +67,16 @@ describe('getSyncError', () => {
     );
   });
 
+  it('says when the browser no longer has the local copy, and what to do', () => {
+    expect(getSyncError('storage-lost', 'budget-id')).toBe(
+      'This browser no longer has the local copy of budget "budget-id". Browsers can discard it, mostly in private windows. Delete this copy and download the budget again, or restore it from a backup.',
+    );
+    // Not the message for storage that is only out of reach
+    expect(getSyncError('storage-unavailable', 'budget-id')).toContain(
+      'Nothing was deleted',
+    );
+  });
+
   it('falls back to the generic message for unknown errors', () => {
     expect(getSyncError('something-else', 'budget-id')).toBe(
       'We had an unknown problem opening "budget-id".',

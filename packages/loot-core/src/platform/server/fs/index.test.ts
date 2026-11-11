@@ -299,6 +299,43 @@ describe('web filesystem', () => {
     const { node } = FS.lookupPath('/custom/xyz/db.sqlite', {});
     expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
   });
+
+  test('releasing the storage closes the database and gives up its lock', async () => {
+    const dir = '/documents/Actual/leaving';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+
+    let isReleased = false;
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback().then(() => {
+          isReleased = true;
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      const db = await sqlite.openDatabase(dir + '/db.sqlite');
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(isReleased).toBe(false);
+
+      await sqlite.releaseSqliteStorage();
+      await vi.waitFor(() => expect(isReleased).toBe(true));
+      // Closed for good, so absurd-sql lets go of its IndexedDB connection
+      // too; the page relaunches if it comes back
+      expect(() => sqlite.runQuery(db, 'SELECT 1 AS one', [], true)).toThrow();
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
 });
 
 describe('join', () => {

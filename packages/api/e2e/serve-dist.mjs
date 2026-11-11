@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Static server for the package root with the COOP/COEP headers required for
-// SharedArrayBuffer (absurd-sql). Used by playwright.config.ts.
+// Static server for the package root, used by playwright.config.ts. It sends
+// no cross-origin isolation headers on purpose: the browser build must work
+// without SharedArrayBuffer, and the tests check that it does.
 
 import fs from 'node:fs';
 import http from 'node:http';
@@ -21,9 +22,6 @@ const MIME = {
 
 http
   .createServer((req, res) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-
     const urlPath = decodeURIComponent(req.url.split('?')[0]);
     const file = path.resolve(ROOT, urlPath.replace(/^\/+/, ''));
     if (

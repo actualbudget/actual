@@ -25,6 +25,7 @@ export type {
 } from './types';
 export {
   BudgetInUseError,
+  StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
 } from './storage/errors';
@@ -54,8 +55,24 @@ export async function init(_options?: {
   return 'legacy';
 }
 
+export function getStorageBackend(): StorageBackend {
+  return 'legacy';
+}
+
 export async function flushSqliteStorage(): Promise<void> {
   // Native sqlite writes through to disk
+}
+
+export async function releaseSqliteStorage(): Promise<void> {
+  // Nothing to release on native sqlite
+}
+
+export function resumeSqliteStorage(): void {
+  // Nothing was released on native sqlite
+}
+
+export async function revertSqliteStorageToLegacy(): Promise<void> {
+  // Only the browser has a legacy storage layout
 }
 
 // Parity with the browser sqlite backend (which instantiates sql.js from an

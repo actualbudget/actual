@@ -1,6 +1,8 @@
 import * as idb from '#platform/server/indexeddb';
 import type { Data } from '#platform/server/indexeddb';
 
+import type { FileStoreKind } from './types';
+
 // The IndexedDB `files` store keeps one row per persisted path. For a
 // sqlite path the row is the marker the filesystem rebuilds its hierarchy
 // from, records which store holds the bytes, and for the IndexedDB
@@ -62,14 +64,43 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await Promise.all([idb.del(store, path), committed(trans)]);
 }
 
-// Whether any sqlite file already moved off absurd-sql. Used at startup:
-// once data lives in the new storage the legacy engine must not be chosen,
-// whatever the flag says. One store then serves every budget: one still in
-// absurd-sql's layout is migrated when opened, and the OPFS store adopts
-// the fallback's rows. Walks the rows with a cursor and stops at the first
-// marked one, so the fallback's whole-file rows are not all read into
-// memory.
-export async function hasMigratedSqliteFiles(): Promise<boolean> {
+// Rows of sqlite files held by the sqlite-wasm storage, without their
+// contents. Walks the rows with a cursor so the fallback's whole-file rows
+// are held one at a time rather than all at once.
+export async function listSqliteFileRows(): Promise<
+  Pick<Data, 'filepath' | 'storage'>[]
+> {
+  const { store } = idb.getStore(await idb.openDatabase(), 'files');
+  return new Promise((resolve, reject) => {
+    const rows: Pick<Data, 'filepath' | 'storage'>[] = [];
+    const request = store.openCursor();
+    request.onsuccess = () => {
+      const cursor = request.result;
+      if (!cursor) {
+        resolve(rows);
+        return;
+      }
+      const { filepath, storage } = cursor.value as Data;
+      if (storage != null) {
+        rows.push({ filepath, storage });
+      }
+      cursor.continue();
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// Whether any sqlite file already moved off absurd-sql, or into `kind` when
+// given. Used at startup: once data lives in the new storage the legacy
+// engine must not be chosen, and once data lives in an OPFS pool the
+// fallback must not be, whatever the flag says. One store then serves every
+// budget: one still in absurd-sql's layout is migrated when opened, and the
+// OPFS store adopts the fallback's rows. Walks the rows with a cursor and
+// stops at the first match, so the fallback's whole-file rows are not all
+// read into memory.
+export async function hasMigratedSqliteFiles(
+  kind?: FileStoreKind,
+): Promise<boolean> {
   const { store } = idb.getStore(await idb.openDatabase(), 'files');
   return new Promise((resolve, reject) => {
     const request = store.openCursor();
@@ -77,7 +108,10 @@ export async function hasMigratedSqliteFiles(): Promise<boolean> {
       const cursor = request.result;
       if (!cursor) {
         resolve(false);
-      } else if ((cursor.value as Data).storage) {
+        return;
+      }
+      const { storage } = cursor.value as Data;
+      if (storage && (kind == null || storage === kind)) {
         resolve(true);
       } else {
         cursor.continue();

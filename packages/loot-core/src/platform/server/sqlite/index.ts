@@ -5,7 +5,8 @@ import type {
 
 import * as legacy from './engine.sqljs.legacy';
 import { wasmEngine } from './engine.wasm';
-import { getSqliteStore, initSqliteStorage } from './storage';
+import { getSqliteStore, initSqliteStorage, revertToLegacy } from './storage';
+import { StorageUnavailableError } from './storage/errors';
 import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
@@ -25,6 +26,7 @@ export type {
 } from './types';
 export {
   BudgetInUseError,
+  StorageLostError,
   StorageMigrationError,
   StorageUnavailableError,
 } from './storage/errors';
@@ -72,17 +74,22 @@ const legacyEngine: SqliteEngine = {
 };
 
 let activeEngine: SqliteEngine = legacyEngine;
+let activeBackend: StorageBackend = 'legacy';
 
-// The browser build of `@actual-app/api` embeds sql.js's wasm; the
-// sqlite-wasm engine fetches its own file.
+// Opt-in: the browser build of `@actual-app/api` embeds the wasm of the
+// engine it ships and hands it over here before `init`, so the engine is
+// instantiated from these bytes instead of fetching them.
+let wasmBinaryOverride: ArrayBuffer | Uint8Array | undefined;
+
 export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
-  legacyEngine.setWasmBinary(binary);
+  wasmBinaryOverride = binary;
 }
 
 // Starts the engine for the requested storage and resolves to the backend
 // actually in use: data already moved to the new storage wins over a
-// `legacy` request, so a cleared flag never shows an empty app, and `opfs`
-// falls back to `memory-idb` where sync access handles are unavailable.
+// `legacy` request and data held in OPFS over a `memory-idb` one, so a
+// cleared or stale flag never shows an empty app, and `opfs` falls back to
+// `memory-idb` where sync access handles are unavailable.
 export async function init({
   baseURL,
   wasmBinary,
@@ -92,26 +99,78 @@ export async function init({
   wasmBinary?: ArrayBuffer | Uint8Array;
   storage?: StorageBackend;
 } = {}): Promise<StorageBackend> {
-  // Only the OPFS store can read its pools, and it adopts the fallback's
-  // rows, so any migrated data means asking for OPFS (which itself falls
-  // back where sync access handles are missing)
+  isReleased = false;
+  // The legacy engine reads neither store's data and the fallback cannot
+  // read OPFS pools, while the OPFS store adopts the fallback's rows, so
+  // data the requested engine could not read means asking for OPFS instead
+  // (which itself falls back where sync access handles are missing)
   const requested =
-    storage === 'legacy' && (await hasMigratedSqliteFiles()) ? 'opfs' : storage;
+    (storage === 'legacy' && (await hasMigratedSqliteFiles())) ||
+    (storage === 'memory-idb' && (await hasMigratedSqliteFiles('opfs')))
+      ? 'opfs'
+      : storage;
   if (requested === 'legacy') {
     activeEngine = legacyEngine;
-    await legacyEngine.init({ baseURL, wasmBinary });
-    return 'legacy';
+    await legacyEngine.init({
+      baseURL,
+      wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    });
+    activeBackend = 'legacy';
+  } else {
+    activeEngine = wasmEngine;
+    await wasmEngine.init({
+      baseURL,
+      wasmBinary: wasmBinary ?? wasmBinaryOverride,
+    });
+    activeBackend = await initSqliteStorage(requested);
   }
-  activeEngine = wasmEngine;
-  await wasmEngine.init({ baseURL, wasmBinary });
-  return initSqliteStorage(requested);
+  return activeBackend;
 }
 
-// Persist anything pending (the IndexedDB fallback writes lazily); rejects
-// when a file could not be written
+export function getStorageBackend(): StorageBackend {
+  return activeBackend;
+}
+
+// Persist anything pending (the IndexedDB fallback writes lazily)
 export async function flushSqliteStorage(): Promise<void> {
-  if (activeEngine === wasmEngine) {
+  if (activeBackend !== 'legacy') {
     await getSqliteStore().flush();
+  }
+}
+
+// Set once the storage was let go of. A budget can be on its way in just
+// then; it would open its database afterwards and hold the budget from then
+// on, in a worker that is about to end or to be frozen along with its page.
+// So nothing stored is opened until `resumeSqliteStorage`
+let isReleased = false;
+
+function assertNotReleased() {
+  if (isReleased) {
+    throw new StorageUnavailableError('this worker has let go of its storage');
+  }
+}
+
+// Let go of storage handles and locks, so another worker can take over or
+// so a page that is leaving holds nothing back
+export async function releaseSqliteStorage(): Promise<void> {
+  isReleased = true;
+  if (activeBackend === 'legacy') {
+    legacy.closeOpenDatabases();
+  } else {
+    await getSqliteStore().releaseAll();
+  }
+}
+
+// For a worker whose page came back out of the back/forward cache
+export function resumeSqliteStorage(): void {
+  isReleased = false;
+}
+
+// Move every budget back to absurd-sql's layout (the opt-in phase's way
+// back); the next start then picks the legacy engine
+export async function revertSqliteStorageToLegacy(): Promise<void> {
+  if (activeBackend !== 'legacy') {
+    await revertToLegacy();
   }
 }
 
@@ -215,7 +274,18 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
 ): Promise<Database> {
-  return activeEngine.openDatabase(pathOrBuffer);
+  if (typeof pathOrBuffer !== 'string' || pathOrBuffer === ':memory:') {
+    // In memory, which holds no storage
+    return activeEngine.openDatabase(pathOrBuffer);
+  }
+  assertNotReleased();
+  const db = await activeEngine.openDatabase(pathOrBuffer);
+  if (isReleased) {
+    // Let go of while this database was being opened, so it goes back too
+    activeEngine.closeDatabase(db);
+  }
+  assertNotReleased();
+  return db;
 }
 
 export function closeDatabase(db: Database) {

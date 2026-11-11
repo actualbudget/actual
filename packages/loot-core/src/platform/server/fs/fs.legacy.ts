@@ -450,7 +450,7 @@ function lockBudget(filepath: string): Promise<() => void> {
     BUDGET_LOCK_TIMEOUT_MS,
     'shared',
   ).catch(() => {
-    throw new BudgetInUseError(filepath);
+    throw new BudgetInUseError(filepath, 'the storage lock could not be taken');
   });
 }
 

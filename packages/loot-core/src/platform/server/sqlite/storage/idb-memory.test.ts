@@ -509,6 +509,82 @@ describe('IndexedDB in-memory store', () => {
     expect(await store.exists(other)).toBe(false);
   });
 
+  it('leaves the legacy marker and the absurd-sql copy when a file moves back', async () => {
+    const store = getSqliteStore();
+    await store.writeFile(PATH, new Uint8Array([1]));
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await store.revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+
+    // A plain removal takes the copy with it
+    await store.removeFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('leaves alone a file another worker has already moved back', async () => {
+    // What a finished revert leaves: the legacy marker and its copy. A
+    // second revert that listed the file earlier finds them once it has
+    // the lock
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, new Uint8Array([1]));
+
+    await getSqliteStore().revertFile(PATH);
+    expect(await getSqliteFileRow(PATH)).toEqual({
+      filepath: PATH,
+      contents: '',
+    });
+    expect(await listIndexedDbNames()).toContain(name);
+  });
+
+  it('waits out a slow hand-over before it reports the budget in use', async () => {
+    // A lock that is never granted, and gives up only when told to
+    const request = vi.fn(
+      (_name: string, options: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          options.signal.addEventListener('abort', () =>
+            reject(new DOMException('aborted', 'AbortError')),
+          );
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    vi.useFakeTimers();
+    try {
+      let outcome = 'waiting';
+      const opening = getSqliteStore().open(PATH);
+      opening.then(
+        () => {
+          outcome = 'opened';
+        },
+        () => {
+          outcome = 'refused';
+        },
+      );
+      // A leaving leader gets three seconds to save and let go
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(outcome).toBe('waiting');
+
+      await vi.advanceTimersByTimeAsync(7000);
+      await expect(opening).rejects.toBeInstanceOf(BudgetInUseError);
+    } finally {
+      vi.useRealTimers();
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+  });
+
   it('writes a row only at the revision it expects', async () => {
     await putSqliteFileRow({ filepath: PATH, contents: '', rev: 1 });
     const next = { filepath: PATH, contents: new Uint8Array([1]), rev: 2 };
@@ -560,6 +636,36 @@ describe('IndexedDB in-memory store', () => {
       { v: 'from elsewhere' },
     ]);
     closeDatabase(reopened);
+  });
+
+  it('reads and moves back the row another worker wrote, not a snapshot it moved past', async () => {
+    await strandSnapshot('stranded');
+    const source = await openDatabase();
+    execQuery(source, SCHEMA);
+    runQuery(source, "INSERT INTO t (v) VALUES ('from elsewhere')");
+    await putSqliteFileRow({
+      filepath: PATH,
+      contents: await exportDatabase(source),
+      storage: 'memory-idb',
+      rev: 9,
+    });
+    closeDatabase(source);
+    const store = getSqliteStore();
+
+    const read = await openDatabase(await store.readFile(PATH));
+    expect(runQuery(read, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(read);
+
+    await store.revertFile(PATH);
+    const back = await openDatabase(
+      (await absurdMigration.readLegacyDatabaseBytes(PATH)) as Uint8Array,
+    );
+    expect(runQuery(back, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from elsewhere' },
+    ]);
+    closeDatabase(back);
   });
 
   it('refuses a new file another worker created meanwhile', async () => {

@@ -1,6 +1,6 @@
 import { logger } from '#platform/server/log';
 
-import { getSqliteStore } from './storage';
+import { checkStorageAfterIoError, getSqliteStore } from './storage';
 import type { Database, SqliteEngine, SqlParam, Statement } from './types';
 import {
   exportBytes,
@@ -42,6 +42,26 @@ function isReadOnly(statement: PreparedStatement): boolean {
   return (
     statement.pointer != null &&
     getSqlite3().capi.sqlite3_stmt_readonly(statement.pointer) !== 0
+  );
+}
+
+// The text of a statement, for the log: a cached one would otherwise be
+// logged as an object
+function sqlText(statement: PreparedStatement): string {
+  return statement.pointer == null
+    ? ''
+    : getSqlite3().capi.sqlite3_sql(statement.pointer);
+}
+
+// Extended result codes keep the primary one in their low byte
+function isIoError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null || !('resultCode' in error)) {
+    return false;
+  }
+  const { resultCode } = error;
+  return (
+    typeof resultCode === 'number' &&
+    (resultCode & 0xff) === getSqlite3().capi.SQLITE_IOERR
   );
 }
 
@@ -100,7 +120,14 @@ function runQuery<T>(
     statement.step();
     return { changes: database.changes() };
   } catch (error) {
-    logger.log(sql);
+    // Only failed reads are logged, as in the legacy engine: sync applies
+    // messages as insert-then-update, so failed writes are routine
+    if (fetchAll) {
+      logger.log(sqlText(statement));
+    }
+    if (isIoError(error)) {
+      checkStorageAfterIoError();
+    }
     throw error;
   } finally {
     // Told even after a failure: a statement can leave changes behind
@@ -122,6 +149,11 @@ function execQuery(db: Database, sql: string) {
   const database = asWasm(db);
   try {
     database.exec(sql);
+  } catch (error) {
+    if (isIoError(error)) {
+      checkStorageAfterIoError();
+    }
+    throw error;
   } finally {
     // A script can fail after its earlier statements were committed
     notifyWrite(database);

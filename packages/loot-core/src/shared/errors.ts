@@ -167,6 +167,8 @@ export function getSyncError(error: string, id: string, meta?: unknown) {
     return `Moving budget "${id}" to the new browser storage failed. Nothing was deleted; reload the page and try again.`;
   } else if (error === 'storage-unavailable') {
     return `Budget "${id}" is in storage this browser cannot reach right now. Nothing was deleted; reload the page and try again.`;
+  } else if (error === 'storage-lost') {
+    return `This browser no longer has the local copy of budget "${id}". Browsers can discard it, mostly in private windows. Delete this copy and download the budget again, or restore it from a backup.`;
   } else if (error === 'clock-drift') {
     return 'Failed to sync because your device time differs too much from the server. Please check your device time settings and ensure they are correct.';
   } else if (error === 'out-of-sync') {
