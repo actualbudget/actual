@@ -49,7 +49,7 @@ type SignOutPayload = {
 export const signOut = createAppAsyncThunk(
   `${sliceName}/signOut`,
   async (options: SignOutPayload | void, { dispatch }) => {
-    await send('subscribe-sign-out', options ?? undefined);
+    await send('subscribe-sign-out', options ? options : undefined);
 
     void dispatch(getUserData());
     void dispatch(loadGlobalPrefs());

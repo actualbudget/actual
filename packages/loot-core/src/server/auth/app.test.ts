@@ -5,9 +5,37 @@ import * as encryption from '#server/encryption';
 
 import { app } from './app';
 
+const { mockStorage } = vi.hoisted(() => ({
+  mockStorage: new Map<string, unknown>(),
+}));
+
+// Global test setup auto-mocks asyncStorage as no-op vi.fn() stubs because
+// `#platform/server/asyncStorage` resolves to `index.electron.ts` rather than
+// `__mocks__/index.ts`. Back it with an isolated in-memory store here.
+vi.mock('#platform/server/asyncStorage', () => ({
+  getItem: vi.fn(async (key: string) => mockStorage.get(key)),
+  setItem: vi.fn(async (key: string, value: unknown) => {
+    mockStorage.set(key, value);
+  }),
+  removeItem: vi.fn(async (key: string) => {
+    mockStorage.delete(key);
+  }),
+  multiSet: vi.fn(async (keyValues: Array<[string, unknown]>) => {
+    for (const [key, value] of keyValues) {
+      mockStorage.set(key, value);
+    }
+  }),
+  multiRemove: vi.fn(async (keys: string[]) => {
+    for (const key of keys) {
+      mockStorage.delete(key);
+    }
+  }),
+}));
+
 describe('auth app', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockStorage.clear();
     await asyncStorage.multiRemove([
       'user-token',
       'encrypt-keys',
