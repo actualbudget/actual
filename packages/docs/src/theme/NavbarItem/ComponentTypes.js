@@ -1,6 +1,5 @@
-import ComponentTypes from '@theme-original/NavbarItem/ComponentTypes';
-
 import VersionDropdownNavbarItem from '@site/src/components/VersionDropdownNavbarItem';
+import ComponentTypes from '@theme-original/NavbarItem/ComponentTypes';
 
 export default {
   ...ComponentTypes,
