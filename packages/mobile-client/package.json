@@ -12,7 +12,7 @@
     "build:ios": "yarn sync:ios && xcodebuild -workspace ios/App/App.xcworkspace -scheme App -archivePath ./build/App.xcarchive archive CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",
     "build:android": "yarn sync:android && cd android/ && ./gradlew assembleDebug && cp ./app/build/outputs/apk/debug/app-debug.apk ../build/",
     "build:ipa": "NODE_ENV=production yarn sync:ios && xcodebuild -workspace ios/App/App.xcworkspace -scheme App -configuration Release -destination generic/platform=iOS -archivePath build/App.xcarchive -allowProvisioningUpdates ${XCODEBUILD_AUTH_ARGS:-} DEVELOPMENT_TEAM=\"$APPLE_TEAM_ID\" MARKETING_VERSION=\"$npm_package_version\" CURRENT_PROJECT_VERSION=\"$(date -u +%Y%m%d%H%M)\" archive && xcodebuild -exportArchive -archivePath build/App.xcarchive -exportOptionsPlist ios/App/ExportOptions.plist -exportPath build/export -allowProvisioningUpdates ${XCODEBUILD_AUTH_ARGS:-}",
-    "test:ios": "yarn sync:ios && rm -rf build/ios-test-results.xcresult && xcodebuild test -workspace ios/App/App.xcworkspace -scheme App -destination \"id=$(xcrun simctl list devices available | grep iPhone | grep -oE '[0-9A-F-]{36}' | head -1)\" -resultBundlePath build/ios-test-results.xcresult",
+    "test:ios": "yarn sync:ios && rm -rf build/ios-test-results.xcresult && xcodebuild test -workspace ios/App/App.xcworkspace -scheme App -destination \"id=$(xcrun simctl list devices available | grep iPhone | grep -oE '[0-9A-F-]{36}' | head -1)\" -resultBundlePath build/ios-test-results.xcresult COMPILER_INDEX_STORE_ENABLE=NO",
     "release:android": "yarn sync:android && cap build android",
     "build": "yarn build:ios && yarn build:android",
     "start:ios": "yarn build:ios && cap run ios --live-reload --port 3001",

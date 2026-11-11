@@ -173,7 +173,7 @@ jobs:
     name: Functional iOS App
     runs-on: depot-macos-latest
     needs: build-web
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -187,8 +187,6 @@ jobs:
         with:
           name: desktop-client-build
           path: packages/desktop-client/build/
-      # Builds the app, launches it in a simulator and checks that the first
-      # screen renders.
       - name: Run iOS app tests
         run: yarn workspace mobile-client test:ios
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
