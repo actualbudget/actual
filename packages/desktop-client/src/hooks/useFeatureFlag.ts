@@ -16,6 +16,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   sankeyReport: false,
   mobileCalculator: false,
   monteCarloReport: false,
+  bankSyncTransferDetection: false,
 };
 
 export function useFeatureFlag(name: FeatureFlag): boolean {

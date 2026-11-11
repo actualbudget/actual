@@ -37,6 +37,10 @@ import type {
 
 import { getStartingBalancePayee } from './payees';
 import { title } from './title';
+import {
+  isTransferDetectionEnabled,
+  linkDetectedTransfers,
+} from './transfer-detection';
 
 function BankSyncError(type: string, code: string, details?: object) {
   return { type: 'BankSyncError', category: type, code, details };
@@ -1105,6 +1109,20 @@ export async function addTransactions(
   return newTransactions;
 }
 
+// Newly synced transactions can be the other side of a transaction that is
+// already in another account. The transactions changed in those other accounts
+// are reported as updated.
+async function linkTransfersIfEnabled(
+  result: ReconcileTransactionsResult,
+): Promise<ReconcileTransactionsResult> {
+  if (result.added.length === 0 || !(await isTransferDetectionEnabled())) {
+    return result;
+  }
+
+  const linked = await linkDetectedTransfers(result.added);
+  return { ...result, updated: [...result.updated, ...linked] };
+}
+
 async function processBankSyncDownload(
   download,
   id,
@@ -1213,11 +1231,13 @@ async function processBankSyncDownload(
               starting_balance_flag: true,
             });
 
-      const result = await reconcileTransactions(id, transactions, {
-        isBankSyncAccount: true,
-        strictIdChecking: useStrictIdChecking,
-        updateDates,
-      });
+      const result = await linkTransfersIfEnabled(
+        await reconcileTransactions(id, transactions, {
+          isBankSyncAccount: true,
+          strictIdChecking: useStrictIdChecking,
+          updateDates,
+        }),
+      );
       return {
         ...result,
         added: initialId === null ? result.added : [initialId, ...result.added],
@@ -1231,14 +1251,12 @@ async function processBankSyncDownload(
   }));
 
   return runMutator(async () => {
-    const result = await reconcileTransactions(
-      id,
-      importTransactions ? transactions : [],
-      {
+    const result = await linkTransfersIfEnabled(
+      await reconcileTransactions(id, importTransactions ? transactions : [], {
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
-      },
+      }),
     );
 
     if (currentBalance != null) {
