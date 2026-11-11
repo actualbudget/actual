@@ -1,5 +1,6 @@
 import { fetch } from 'undici';
 
+import { normalizeBasePath } from '#base-path';
 import { config } from '#load-config';
 
 const protocol =
@@ -20,7 +21,9 @@ function getHealthStatus(response: unknown): string | undefined {
   return undefined;
 }
 
-fetch(`${protocol}://${hostname}:${config.get('port')}/health`)
+fetch(
+  `${protocol}://${hostname}:${config.get('port')}${normalizeBasePath(config.get('basePath'))}/health`,
+)
   .then(response => response.json())
   .then(response => {
     const status = getHealthStatus(response);

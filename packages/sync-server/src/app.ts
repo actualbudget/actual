@@ -182,6 +182,8 @@ if (isDev) {
   app.use(
     httpProxyMiddleware.createProxyMiddleware({
       target: 'http://localhost:3001',
+      // Restore the prefix for Vite after API handlers used stripped paths.
+      pathRewrite: path => `${basePath}${path}`,
       changeOrigin: true,
       ws: true,
     }),
