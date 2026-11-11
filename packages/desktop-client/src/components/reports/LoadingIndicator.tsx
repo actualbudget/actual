@@ -13,6 +13,7 @@ type LoadingIndicatorProps = {
 export const LoadingIndicator = ({ message }: LoadingIndicatorProps) => {
   return (
     <View
+      data-dashboard-loading
       style={{
         flex: 1,
         gap: 20,

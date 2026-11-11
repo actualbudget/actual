@@ -1,21 +1,21 @@
 import { useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 
+import { useOnboarding } from '#components/onboarding/OnboardingProvider';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useLocalPref } from '#hooks/useLocalPref';
-import { addNotification } from '#notifications/notificationsSlice';
-import { useDispatch } from '#redux';
 
-import { TOUR_OFFER_NOTIFICATION_ID, useTour } from './TourProvider';
-
+/**
+ * The first time a budget file is opened on a device, open the "Getting
+ * started" checklist so new users immediately see what to do next. It only
+ * happens once; afterwards the checklist stays available as a small launcher
+ * and from the Help menu.
+ */
 export function TourAutoOffer() {
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const isTestEnv = useIsTestEnv();
-  const { startTour } = useTour();
+  const { showChecklist } = useOnboarding();
   const [introSeen, setIntroSeen] = useLocalPref('tour.introSeen');
   const hasOffered = useRef(false);
 
@@ -24,34 +24,9 @@ export function TourAutoOffer() {
       return;
     }
     hasOffered.current = true;
-    dispatch(
-      addNotification({
-        notification: {
-          id: TOUR_OFFER_NOTIFICATION_ID,
-          type: 'message',
-          sticky: true,
-          title: t('Welcome to {{appName}}!', { appName: 'Actual' }),
-          message: t(
-            'New to {{appName}}? Take a short tour to learn how budgeting works and find your way around.',
-            { appName: 'Actual' },
-          ),
-          button: {
-            title: t('Take the tour'),
-            action: () => startTour(),
-          },
-          onClose: () => setIntroSeen(true),
-        },
-      }),
-    );
-  }, [
-    dispatch,
-    introSeen,
-    isNarrowWidth,
-    isTestEnv,
-    setIntroSeen,
-    startTour,
-    t,
-  ]);
+    showChecklist();
+    setIntroSeen(true);
+  }, [introSeen, isNarrowWidth, isTestEnv, setIntroSeen, showChecklist]);
 
   return null;
 }

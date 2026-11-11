@@ -23,18 +23,20 @@ export function AccountEmptyMessage({ onAdd }: AccountEmptyMessageProps) {
     >
       <View
         style={{
-          width: 550,
+          maxWidth: 550,
           marginTop: 75,
+          padding: '0 20px',
           fontSize: 15,
           alignItems: 'center',
         }}
       >
-        <Text style={{ textAlign: 'center', lineHeight: '1.4em' }}>
+        <Text style={{ textAlign: 'center', lineHeight: '1.5em' }}>
           <Trans>
             <strong>Let's add your first account.</strong> Accounts hold your
             transactions, like everyday spending, savings, credit cards, or
-            cash. You can connect to your bank to import transactions
-            automatically, or add them yourself.
+            cash. Once an account exists you can import a statement file from
+            your bank (CSV, OFX, QFX, QIF), connect it to your bank, or add
+            transactions yourself.
           </Trans>
         </Text>
 

@@ -22,6 +22,18 @@ The chart has two main view modes. **Spent** shows how income flows into account
   - Switch between viewing percentages or absolute values
   - Choose to group all accounts in the Spent view. This is useful if most of your spending happens from accounts without direct income i.e. if you spend from credit cards, but get your salary on a different account.
 
+## Exploring a Branch
+
+Every branch of the chart can be zoomed into. Click anywhere on a branch — its node or the flow leading to it (an account, a category group, a category, a payee, ...) — and the chart smoothly zooms into just that branch, showing where its money goes: the branch on the left and how it splits up on the right. Hovering still shows the details of a node or flow. Keep clicking to break a branch down further — for example _Bills → Internet → the payee_ — until you reach the individual transactions that make it up.
+
+A path such as **Main › Bills › Internet** appears above the chart while you are zoomed in. Click any earlier step (or the arrow in front of it) to zoom back out; **Main** returns to the full diagram.
+
+- Each zoom follows the direction of the money (account → category group → category → payee → transactions for spending; payee → income category → account → transactions for income); it never goes back upstream. Levels with nothing to split (for example a category that only has a single payee) are skipped, so every zoom reveals something new.
+- Individual transactions are the end of the chart; clicking one shows an "End of chart reached" notice.
+- An **Other** node first splits into the items that were grouped into it.
+- The date range and filters of the report also apply to the branch you are looking at.
+- In the **Budgeted** view a branch shows how the selected node's budget is allocated.
+
 ## Important information
 
 - A Sankey chart cannot directly represent negative numbers. In some cases, such as when funds are reallocated from categories with negative budgeting (e.g. using savings to cover overspending), the chart structure may differ from the main budget overview. As a result, some category totals and flows in this diagram may not exactly match the summary figures elsewhere in the app.

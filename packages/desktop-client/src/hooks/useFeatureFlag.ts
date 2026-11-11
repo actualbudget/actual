@@ -3,7 +3,7 @@ import type { FeatureFlag } from '@actual-app/core/types/prefs';
 import { useSyncedPref } from './useSyncedPref';
 
 const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
-  newSidebarUI: false,
+  newSidebarUI: true,
   goalTemplatesEnabled: false,
   goalTemplatesUIEnabled: false,
   actionTemplating: false,
@@ -13,7 +13,7 @@ const DEFAULT_FEATURE_FLAG_STATE: Record<FeatureFlag, boolean> = {
   customThemes: false,
   budgetAnalysisReport: false,
   enableBanking: false,
-  sankeyReport: false,
+  sankeyReport: true,
   mobileCalculator: false,
   monteCarloReport: false,
 };

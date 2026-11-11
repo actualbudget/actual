@@ -23,6 +23,7 @@ import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
+import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
@@ -94,7 +95,7 @@ type AccountHeaderProps = {
   onSaveName: AccountNameFieldProps['onSaveName'];
   saveNameError: AccountNameFieldProps['saveNameError'];
   onSync: () => void;
-  onImport: () => void;
+  onImport: (accountId?: string) => void;
   onMenuSelect: AccountMenuProps['onMenuSelect'];
   onReconcile: ComponentProps<typeof ReconcileMenu>['onReconcile'];
   onBatchEdit: ComponentProps<typeof SelectedTransactionsButton>['onEdit'];
@@ -270,22 +271,123 @@ export function AccountHeader({
     [onSync],
   );
 
+  const importableAccounts = accounts.filter(
+    acct => !acct.closed && !acct.tombstone,
+  );
+
+  const primaryActions = (
+    <View
+      data-testid="account-actions"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        flexShrink: 0,
+      }}
+    >
+      {canSync && (
+        <Button variant="normal" onPress={onSync} isDisabled={isServerOffline}>
+          <AnimatedRefresh
+            width={13}
+            height={13}
+            animating={
+              account
+                ? accountsSyncing.includes(account.id)
+                : accountsSyncing.length > 0
+            }
+          />{' '}
+          {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
+        </Button>
+      )}
+
+      {account && !account.closed ? (
+        <Tooltip
+          content={t(
+            'Bring in transactions from a CSV, OFX, QFX, QIF or CAMT file downloaded from your bank',
+          )}
+          placement="bottom"
+          style={styles.tooltip}
+          triggerProps={{ delay: 400 }}
+        >
+          <Button
+            variant="normal"
+            onPress={() => onImport()}
+            data-testid="import-transactions-button"
+          >
+            <SvgDownloadThickBottom
+              width={12}
+              height={12}
+              style={{ marginRight: 6 }}
+            />
+            <Trans>Import</Trans>
+          </Button>
+        </Tooltip>
+      ) : !account && importableAccounts.length > 0 ? (
+        <DialogTrigger>
+          <Button variant="normal" data-testid="import-transactions-button">
+            <SvgDownloadThickBottom
+              width={12}
+              height={12}
+              style={{ marginRight: 6 }}
+            />
+            <Trans>Import</Trans>
+          </Button>
+          <Popover style={{ minWidth: 220 }}>
+            <Dialog>
+              <Menu
+                slot="close"
+                header={
+                  <Text
+                    style={{
+                      ...styles.eyebrow,
+                      padding: '6px 10px 4px',
+                    }}
+                  >
+                    <Trans>Import a file into…</Trans>
+                  </Text>
+                }
+                onMenuSelect={(id: string) => onImport(id)}
+                items={importableAccounts.map(acct => ({
+                  name: acct.id,
+                  text: acct.name,
+                }))}
+              />
+            </Dialog>
+          </Popover>
+        </DialogTrigger>
+      ) : null}
+
+      {!showEmptyMessage && (
+        <Button
+          variant="primary"
+          onPress={onAddTransaction}
+          data-testid="add-transaction-button"
+        >
+          <SvgAdd width={10} height={10} style={{ marginRight: 6 }} />
+          <Trans>Add transaction</Trans>
+        </Button>
+      )}
+    </View>
+  );
+
   return (
     <>
-      <View style={{ ...styles.pageContent, paddingBottom: 10, flexShrink: 0 }}>
+      <View style={{ ...styles.pageContent, paddingBottom: 12, flexShrink: 0 }}>
         <View
           style={{
-            flexDirection: 'column',
-            marginTop: 2,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
             justifyContent: 'space-between',
-            gap: 10,
+            gap: 16,
+            marginTop: 2,
           }}
         >
           <View
             style={{
               flexGrow: 1,
+              minWidth: 0,
               alignItems: 'flex-start',
-              gap: 10,
+              gap: 6,
             }}
           >
             <View
@@ -319,54 +421,20 @@ export function AccountHeader({
               filteredAmount={filteredAmount}
             />
           </View>
-
-          <BalanceHistoryGraph
-            ref={graphRef}
-            accountId={accountId}
-            style={{
-              height: 'calc(5vh + 5vw)',
-              margin: 0,
-              display: showNetWorthChart ? 'flex' : 'none',
-            }}
-          />
+          {primaryActions}
         </View>
-        <SpaceBetween gap={10} style={{ marginTop: 12 }}>
-          {canSync && (
-            <Button
-              variant="bare"
-              onPress={onSync}
-              isDisabled={isServerOffline}
-            >
-              <AnimatedRefresh
-                width={13}
-                height={13}
-                animating={
-                  account
-                    ? accountsSyncing.includes(account.id)
-                    : accountsSyncing.length > 0
-                }
-              />{' '}
-              {isServerOffline ? t('Bank Sync Offline') : t('Bank Sync')}
-            </Button>
-          )}
 
-          {account && !account.closed && (
-            <Button variant="bare" onPress={onImport}>
-              <SvgDownloadThickBottom
-                width={13}
-                height={13}
-                style={{ marginRight: 4 }}
-              />{' '}
-              <Trans>Import</Trans>
-            </Button>
-          )}
+        <BalanceHistoryGraph
+          ref={graphRef}
+          accountId={accountId}
+          style={{
+            height: 'calc(5vh + 5vw)',
+            margin: '10px 0 0',
+            display: showNetWorthChart ? 'flex' : 'none',
+          }}
+        />
 
-          {!showEmptyMessage && (
-            <Button variant="bare" onPress={onAddTransaction}>
-              <SvgAdd width={10} height={10} style={{ marginRight: 3 }} />
-              <Trans>Add New</Trans>
-            </Button>
-          )}
+        <SpaceBetween gap={10} style={{ marginTop: 14 }}>
           <View style={{ flexShrink: 0 }}>
             {/* @ts-expect-error fix me */}
             <FilterButton onApply={onApplyFilter} />

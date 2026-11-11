@@ -35,8 +35,12 @@ export const darkThemeOptions = Object.entries({
   midnight: themes.midnight,
 }).map(([key, { name }]) => [key, name] as [DarkTheme, string]);
 
+// New users start on the light theme; any theme they pick afterwards is saved
+// as a global preference and therefore persists across sessions.
+export const DEFAULT_THEME: Theme = 'light';
+
 export function useTheme() {
-  const [theme = 'auto', setThemePref] = useGlobalPref('theme');
+  const [theme = DEFAULT_THEME, setThemePref] = useGlobalPref('theme');
   return [theme, setThemePref] as const;
 }
 

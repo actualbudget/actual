@@ -95,8 +95,13 @@ export function Schedules() {
   return (
     <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
       <ManagePage
+        data-testid="schedules-toolbar"
         actions={
-          <Button variant="primary" onPress={onAdd}>
+          <Button
+            variant="primary"
+            onPress={onAdd}
+            data-testid="add-schedule-button"
+          >
             <SvgAdd
               width={10}
               height={10}
@@ -115,6 +120,7 @@ export function Schedules() {
         }
         menu={
           <PageMenuButton<'discover' | 'upcoming-length'>
+            data-testid="find-schedules-button"
             items={[
               {
                 name: 'discover',

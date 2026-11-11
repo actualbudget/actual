@@ -15,6 +15,7 @@ import {
   SvgArrowThickDown,
   SvgArrowThickUp,
 } from '@actual-app/components/icons/v1';
+import { Menu } from '@actual-app/components/menu';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
@@ -29,6 +30,11 @@ import { debounce } from 'es-toolkit/compat';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CalendarCardSkeleton } from '#components/reports/CalendarCardSkeleton';
+import {
+  CALENDAR_CARD_MONTH_OPTIONS,
+  getCalendarCardMonthsShown,
+  getMonthsShownRange,
+} from '#components/reports/calendarMonths';
 import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -37,6 +43,7 @@ import { calculateTimeRange } from '#components/reports/reportRanges';
 import { calendarSpreadsheet } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import type { CalendarDataType } from '#components/reports/spreadsheets/calendar-spreadsheet';
 import { useReport } from '#components/reports/useReport';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
@@ -73,15 +80,55 @@ export function CalendarCard({
     void fetchLatestTransaction();
   }, []);
 
-  const [start, end] = calculateTimeRange(
-    meta?.timeFrame,
-    {
-      start: monthUtils.dayFromDate(monthUtils.currentMonth()),
-      end: monthUtils.currentDay(),
-      mode: 'full',
-    },
-    latestTransaction,
-  );
+  // The card shows whole calendar months ending with the current one. Only
+  // cards saved with a custom range from the full report fall back to the
+  // saved time frame.
+  const monthsShown = getCalendarCardMonthsShown(meta);
+  const [start, end] =
+    monthsShown !== undefined
+      ? getMonthsShownRange(monthsShown, latestTransaction)
+      : calculateTimeRange(
+          meta?.timeFrame,
+          {
+            start: monthUtils.dayFromDate(monthUtils.currentMonth()),
+            end: monthUtils.currentDay(),
+            mode: 'full',
+          },
+          latestTransaction,
+        );
+
+  const contextMenuTriggerRef = useRef<HTMLDivElement>(null);
+  useContextMenu({
+    triggerRef: contextMenuTriggerRef,
+    items: [
+      {
+        type: Menu.label,
+        name: t('Months shown:'),
+        text: '',
+      },
+      ...CALENDAR_CARD_MONTH_OPTIONS.map(months => ({
+        name: `months-shown-${months}`,
+        text:
+          (months === 1
+            ? t('1 month')
+            : t('{{count}} months', { count: months })) +
+          (monthsShown === months ? ` (${t('current')})` : ''),
+        onClick: () =>
+          onMetaChange({
+            ...meta,
+            monthsShown: months,
+            // Keep the full report in sync with what the card shows.
+            timeFrame: {
+              start: getMonthsShownRange(months, latestTransaction)[0],
+              end: getMonthsShownRange(months, latestTransaction)[1],
+              mode: 'sliding-window',
+            },
+          }),
+      })),
+      Menu.line,
+    ],
+  });
+
   const params = useMemo(
     () =>
       calendarSpreadsheet(
@@ -169,6 +216,7 @@ export function CalendarCard({
       disableClick={nameMenuOpen}
       to={`/reports/calendar/${widgetId}`}
       onRename={() => setNameMenuOpen(true)}
+      contextMenuTriggerRef={contextMenuTriggerRef}
     >
       <View
         ref={el => (el ? cardRef(el) : undefined)}

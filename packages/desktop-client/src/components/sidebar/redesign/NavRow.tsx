@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
@@ -14,11 +14,20 @@ type NavRowProps = {
     | ComponentType<SVGProps<SVGElement>>
     | ComponentType<SVGProps<SVGSVGElement>>;
   to: string;
+  /** Optional element rendered at the end of the row, e.g. a count pill. */
+  trailing?: ReactNode;
+  'data-testid'?: string;
 };
 
-export function NavRow({ title, Icon, to }: NavRowProps) {
+export function NavRow({
+  title,
+  Icon,
+  to,
+  trailing,
+  'data-testid': dataTestId,
+}: NavRowProps) {
   return (
-    <View style={{ flexShrink: 0 }}>
+    <View style={{ flexShrink: 0 }} data-testid={dataTestId}>
       <Link
         variant="internal"
         to={to}
@@ -26,11 +35,11 @@ export function NavRow({ title, Icon, to }: NavRowProps) {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: spacing.sm,
-          padding: spacing.sm,
-          borderRadius: radius.sm,
-          marginBottom: 1,
-          fontSize: 13,
+          gap: spacing.sm + spacing.xxs,
+          padding: `${spacing.sm - 1}px ${spacing.md}px`,
+          borderRadius: radius.sm + 2,
+          marginBottom: 2,
+          fontSize: 14,
           fontWeight: 500,
           textDecoration: 'none',
           color: theme.sidebarItemText,
@@ -42,8 +51,9 @@ export function NavRow({ title, Icon, to }: NavRowProps) {
           fontWeight: 600,
         }}
       >
-        <Icon width={15} height={15} style={{ flexShrink: 0 }} />
-        <Text style={styles.ellipsisText}>{title}</Text>
+        <Icon width={16} height={16} style={{ flexShrink: 0 }} />
+        <Text style={{ ...styles.ellipsisText, flex: 1 }}>{title}</Text>
+        {trailing}
       </Link>
     </View>
   );

@@ -16,10 +16,20 @@ describe('TourProvider', () => {
     expect(result.current.activeTourId).toBeNull();
 
     act(() => result.current.startTour());
-    expect(result.current.activeTourId).toBe('budget-tour');
+    expect(result.current.activeTourId).toBe('welcome-tour');
 
     act(() => result.current.stopTour());
     expect(result.current.activeTourId).toBeNull();
+  });
+
+  it('starts a specific tour chapter', () => {
+    const { result } = renderHook(() => useTour(), { wrapper });
+
+    act(() => result.current.startTour('schedules-tour'));
+    expect(result.current.activeTourId).toBe('schedules-tour');
+
+    act(() => result.current.startTour('reports-tour'));
+    expect(result.current.activeTourId).toBe('reports-tour');
   });
 
   it('does not start the tour on narrow screens', () => {

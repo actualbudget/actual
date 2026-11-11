@@ -1,7 +1,8 @@
-import React, { memo, useRef, useState } from 'react';
+import React, { memo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
 import {
   SvgArrowButtonLeft1,
@@ -10,10 +11,10 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Menu } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
-import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { Term } from '#components/common/Term';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 
 import { RenderMonths } from './RenderMonths';
@@ -36,8 +37,7 @@ export const BudgetTotals = memo(function BudgetTotals({
   const [categoryExpandedStatePref, setCategoryExpandedStatePref] =
     useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
-  const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef(null);
+  const menu = useHoverMenu();
 
   const cycleExpandedState = () => {
     const nextState = (categoryExpandedState + 1) % 3;
@@ -66,10 +66,8 @@ export const BudgetTotals = memo(function BudgetTotals({
         backgroundColor: theme.budgetCurrentMonth, //use budget colors, not generic table colors
         flexDirection: 'row',
         flexShrink: 0,
-        boxShadow: styles.cardShadow,
-        marginLeft: 5,
-        marginRight: 5 + getScrollbarWidth(),
-        borderRadius: '4px 4px 0 0',
+        // Keep the header columns aligned with the scrollable rows below.
+        paddingRight: getScrollbarWidth(),
         borderBottom: '1px solid ' + theme.tableBorder,
         '& .hover-visible': {
           opacity: 0,
@@ -128,14 +126,17 @@ export const BudgetTotals = memo(function BudgetTotals({
             />
           )}
         </Button>
-        <View style={{ flexGrow: '1' }}>
-          <Trans>Category</Trans>
+        <View style={{ flexGrow: '1', fontSize: 13, fontWeight: 600 }}>
+          <Term id="category" isFocusable={false}>
+            <Trans>Category</Trans>
+          </Term>
         </View>
         <Button
-          ref={triggerRef}
+          ref={menu.triggerRef}
+          {...menu.triggerProps}
           variant="bare"
           aria-label={t('Menu')}
-          onPress={() => setMenuOpen(true)}
+          onPress={menu.toggle}
           style={{ color: 'currentColor', padding: 3 }}
         >
           <SvgDotsHorizontalTriple
@@ -145,14 +146,10 @@ export const BudgetTotals = memo(function BudgetTotals({
           />
         </Button>
 
-        <Popover
-          triggerRef={triggerRef}
-          isOpen={menuOpen}
-          onOpenChange={() => setMenuOpen(false)}
-          style={{ width: 200 }}
-        >
+        <Popover {...menu.popoverProps} style={{ width: 200 }}>
           <Menu
             onMenuSelect={type => {
+              menu.close();
               if (type === 'toggle-visibility') {
                 toggleHiddenCategories();
               } else if (type === 'expandAllCategories') {
@@ -160,7 +157,6 @@ export const BudgetTotals = memo(function BudgetTotals({
               } else if (type === 'collapseAllCategories') {
                 collapseAllCategories();
               }
-              setMenuOpen(false);
             }}
             items={[
               {

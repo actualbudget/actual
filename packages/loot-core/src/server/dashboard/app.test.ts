@@ -8,7 +8,7 @@ import { setSyncingMode } from '#server/sync';
 import { q } from '#shared/query';
 import type { DashboardWidgetEntity } from '#types/models';
 
-import { app as dashboardApp, isWidgetType } from './app';
+import { app as dashboardApp, DuplicateWidgetError, isWidgetType } from './app';
 
 function allWidgetTypes<T extends DashboardWidgetEntity['type'][]>(
   ...types: T &
@@ -329,5 +329,110 @@ describe('dashboard queries', () => {
     });
     expect(widgets).toHaveLength(1);
     expect(widgets[0].type).toBe('net-worth-card');
+  });
+});
+
+describe('duplicate widgets', () => {
+  beforeEach(async () => {
+    await global.emptyDatabase()();
+    await loadMappings();
+    await db.insertWithSchema('dashboard_pages', {
+      id: 'page-a',
+      name: 'Main',
+    });
+    await db.insertWithSchema('dashboard_pages', {
+      id: 'page-b',
+      name: 'Other',
+    });
+  });
+
+  async function widgetsOnPage(pageId: string) {
+    return db.selectWithSchema(
+      'dashboard',
+      'SELECT type, meta FROM dashboard WHERE dashboard_page_id = ? AND tombstone = 0',
+      [pageId],
+    );
+  }
+
+  it('refuses to add a widget showing the same data twice', async () => {
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-add-widget']({
+        type: 'spending-card',
+        width: 4,
+        height: 2,
+        meta: { name: 'This Month', mode: 'single-month' },
+        dashboard_page_id: 'page-a',
+      }),
+    );
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-add-widget']({
+          type: 'spending-card',
+          width: 4,
+          height: 2,
+          meta: null,
+          dashboard_page_id: 'page-a',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(DuplicateWidgetError);
+
+    expect(await widgetsOnPage('page-a')).toHaveLength(1);
+  });
+
+  it('allows widgets of the same type with different settings', async () => {
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-add-widget']({
+        type: 'spending-card',
+        width: 4,
+        height: 2,
+        meta: { mode: 'single-month' },
+        dashboard_page_id: 'page-a',
+      }),
+    );
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-add-widget']({
+        type: 'spending-card',
+        width: 4,
+        height: 2,
+        meta: { mode: 'budget' },
+        dashboard_page_id: 'page-a',
+      }),
+    );
+
+    expect(await widgetsOnPage('page-a')).toHaveLength(2);
+  });
+
+  it('allows the same widget on a different dashboard but not twice there', async () => {
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-add-widget']({
+        id: 'widget-1',
+        type: 'net-worth-card',
+        width: 4,
+        height: 2,
+        meta: null,
+        dashboard_page_id: 'page-a',
+      } as Parameters<
+        (typeof dashboardApp.handlers)['dashboard-add-widget']
+      >[0]),
+    );
+
+    await runMutator(() =>
+      dashboardApp.handlers['dashboard-copy-widget']({
+        id: 'widget-1',
+        targetDashboardPageId: 'page-b',
+      }),
+    );
+    expect(await widgetsOnPage('page-b')).toHaveLength(1);
+
+    await expect(
+      runMutator(() =>
+        dashboardApp.handlers['dashboard-copy-widget']({
+          id: 'widget-1',
+          targetDashboardPageId: 'page-b',
+        }),
+      ),
+    ).rejects.toBeInstanceOf(DuplicateWidgetError);
+    expect(await widgetsOnPage('page-b')).toHaveLength(1);
   });
 });

@@ -35,9 +35,9 @@ export class AccountPage {
 
     this.accountName = this.page.getByTestId('account-name');
     this.accountBalance = this.page.getByTestId('account-balance');
-    this.addNewTransactionButton = this.page.getByRole('button', {
-      name: 'Add New',
-    });
+    this.addNewTransactionButton = this.page.getByTestId(
+      'add-transaction-button',
+    );
     this.newTransactionRow = this.page
       .getByTestId('new-transaction')
       .getByTestId('row');
@@ -52,7 +52,10 @@ export class AccountPage {
     this.transactionTable = this.page.getByTestId('transaction-table');
     this.transactionTableRow = this.transactionTable.getByTestId('row');
 
-    this.filterButton = this.page.getByRole('button', { name: 'Filter' });
+    this.filterButton = this.page.getByRole('button', {
+      name: 'Filter',
+      exact: true,
+    });
     this.filterSelectTooltip = this.page.getByTestId('filters-select-tooltip');
 
     this.selectButton = this.page.getByTestId('transactions-select-button');

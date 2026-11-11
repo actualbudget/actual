@@ -27,8 +27,17 @@ The following are available as experimental features:
 
 - [Budget Analysis report](../experimental/budget-analysis-report.md)
 - [Balance Forecast report](../experimental/balance-forecast-report.md)
-- [Sankey report](../experimental/sankey-report.md)
+- [Sankey report](../experimental/sankey-report.md) (enabled by default; a "Money Flow" card is part of the default dashboard)
 - [Monte Carlo Analysis](../experimental/monte-carlo-analysis.md)
+
+## Managing the Dashboard
+
+- **Edit dashboard** lets you drag, resize, rename and remove widgets, and reveals the **Add new widget** menu listing every widget that can be added. A dashboard never shows the same information twice: entries that would duplicate a widget already on the dashboard are greyed out. Some widgets have extra settings in their menu, e.g. the number of months a calendar card shows.
+- The menus at the top of the page (and the per-widget menus while editing) open when you rest the pointer on them and close again when you move away. Click a menu to keep it open.
+- The **⋯** menu holds **Reset to default**, **Import** and **Export**. Exporting offers three formats:
+  - **PDF document** — a printable version of the dashboard with its title and date, followed by the widgets as they are laid out on screen. Widgets are never cut across pages: when a widget does not fit on the current page, it and the widgets after it move on to the next page.
+  - **PNG image** — one image of the whole dashboard.
+  - **JSON file** — the layout and widget settings, which can be imported into another dashboard.
 
 ## Cash Flow Graph
 
@@ -72,6 +81,7 @@ The summary card provides an overview of all transactions within a selected time
 <img width="780" alt="A calendar card showing daily income and expenses for four months" src="/img/reports/reports-calendar-card@2x.webp" />
 
 The calendar card displays daily income and expenses in a calendar format for a specified time period.
+By default it shows the current month. While editing the dashboard, open the card's menu to show up to four months side by side; the full report lets you pick any custom range.
 
 ## Crossover Point
 

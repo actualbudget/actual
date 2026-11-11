@@ -64,7 +64,7 @@ export function SidebarCategory({
 
   const temporary = category.id === 'new';
   const triggerRef = useRef(null);
-  const { handleContextMenu } = useContextMenu({
+  const { handleContextMenu, hoverProps } = useContextMenu({
     triggerRef,
     items: [
       {
@@ -105,6 +105,7 @@ export function SidebarCategory({
           className="hover-visible"
           style={{ color: 'currentColor', padding: 3 }}
           onPress={handleContextMenu}
+          {...hoverProps}
         >
           <SvgCheveronDown
             width={14}

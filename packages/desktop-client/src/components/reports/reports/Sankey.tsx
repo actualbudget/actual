@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import {
   SvgArrowDown,
@@ -34,17 +35,35 @@ import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
+import type { SankeyGraphNode } from '#components/reports/graphs/SankeyGraph';
+import { SankeyZoomStage } from '#components/reports/graphs/SankeyZoomStage';
+import type { ZoomTransition } from '#components/reports/graphs/SankeyZoomStage';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import {
   boundMonthRangeFromDates,
   calculateTimeRange,
 } from '#components/reports/reportRanges';
+import { SankeyBreadcrumb } from '#components/reports/SankeyBreadcrumb';
+import {
+  buildDrilldownData,
+  buildNeighborhoodData,
+  createFlowTransactionsSpreadsheet,
+  segmentForGraphNode,
+} from '#components/reports/spreadsheets/sankey-drilldown';
+import type {
+  DrillPath,
+  DrillSankeyData,
+  DrillSankeyNode,
+  DrillSegment,
+  FlowTransaction,
+} from '#components/reports/spreadsheets/sankey-drilldown';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
   GRAPH_LAYER_ORDER,
   GraphLayers,
+  SpecialNodeKeys,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
   Graph,
@@ -53,6 +72,7 @@ import type {
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
+import { useDateFormat } from '#hooks/useDateFormat';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
@@ -62,6 +82,18 @@ import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
 import { useUpdateDashboardWidgetMutation } from '#reports/mutations';
 import { mapField } from '#util/rule';
+
+// Stable fallbacks for `useReport` while the real parameters are not ready
+// yet (a fresh function on every render would re-run the report endlessly).
+const defaultGetBaseGraph = async (
+  _spreadsheet: unknown,
+  setData: (data: Graph) => void,
+) => setData(new Map());
+
+const defaultGetFlowTransactions = async (
+  _spreadsheet: unknown,
+  setData: (data: FlowTransaction[]) => void,
+) => setData([]);
 
 export function Sankey() {
   const params = useParams();
@@ -191,15 +223,16 @@ function displayN(n: number, t: TFunction): string {
 
 function TopNSelector({ value, onChange }: TopNSelectorProps) {
   const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle, close } =
+    useHoverMenu();
 
   return (
     <>
       <Button
         ref={triggerRef}
         variant="bare"
-        onPress={() => setIsOpen(true)}
+        onPress={toggle}
+        {...triggerProps}
         aria-label={t('Change category limit')}
       >
         <SvgList style={{ width: 12, height: 12 }} />
@@ -207,16 +240,11 @@ function TopNSelector({ value, onChange }: TopNSelectorProps) {
           {t('Show up to {{n}}', { n: displayN(value, t) })}
         </span>
       </Button>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom start">
         <Menu
           onMenuSelect={item => {
             onChange(Number(item));
-            setIsOpen(false);
+            close();
           }}
           items={TOP_N_OPTIONS.map(n => ({
             name: String(n),
@@ -235,8 +263,8 @@ type CategorySortSelectorProps = {
 
 function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
   const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle, close } =
+    useHoverMenu();
 
   const options: Array<{
     key: 'per-group' | 'global' | 'budget-order';
@@ -259,22 +287,18 @@ function CategorySortSelector({ value, onChange }: CategorySortSelectorProps) {
       <Button
         ref={triggerRef}
         variant="bare"
-        onPress={() => setIsOpen(true)}
+        onPress={toggle}
+        {...triggerProps}
         aria-label={t('Change category sort order')}
       >
         <SvgArrowDown style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{currentLabel}</span>
       </Button>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom start">
         <Menu
           onMenuSelect={item => {
             onChange(item as 'per-group' | 'global' | 'budget-order');
-            setIsOpen(false);
+            close();
           }}
           items={options.map(({ key, label }) => ({
             name: key,
@@ -302,8 +326,8 @@ function LayerSelector({
   onChange,
 }: LayerSelectorProps) {
   const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle, close } =
+    useHoverMenu();
 
   const translatedDirection = direction === 'from' ? t('from') : t('to');
 
@@ -312,23 +336,19 @@ function LayerSelector({
       <Button
         ref={triggerRef}
         variant="bare"
-        onPress={() => setIsOpen(true)}
+        onPress={toggle}
+        {...triggerProps}
         aria-label={t('Change layer {{direction}}', {
           direction: translatedDirection,
         })}
       >
         <span style={{ marginLeft: 5 }}>{layerLabels[value]}</span>
       </Button>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom start">
         <Menu
           onMenuSelect={item => {
             onChange(item as GraphLayer);
-            setIsOpen(false);
+            close();
           }}
           items={menuItems.map(layer => ({
             name: layer,
@@ -392,19 +412,13 @@ function OptionsButton({
   onToggleShowTransfers,
 }: OptionsButtonProps) {
   const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle } = useHoverMenu();
   return (
     <>
-      <Button ref={triggerRef} onPress={() => setIsOpen(true)}>
+      <Button ref={triggerRef} onPress={toggle} {...triggerProps}>
         <Trans>Options</Trans>
       </Button>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom end"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom end">
         <Menu
           onMenuSelect={item => {
             if (item === 'show-percentages') onTogglePercentages();
@@ -616,11 +630,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     showTransfers,
   ]);
 
-  const defaultGetBaseGraph = async (
-    _spreadsheet: unknown,
-    setData: (data: Graph) => void,
-  ) => setData(new Map());
-
   const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
   const baseGraphRef = useRef(baseGraph);
 
@@ -652,6 +661,162 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     layerFrom,
     layerTo,
   ]);
+
+  // --- Drill-down -----------------------------------------------------------
+  // Clicking a node zooms into that branch; the path records every level.
+  const [drillPath, setDrillPath] = useState<DrillPath>([]);
+  const [zoomTransition, setZoomTransition] = useState<ZoomTransition | null>(
+    null,
+  );
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
+
+  // The branches of the budgeted view are different things; start over.
+  useEffect(() => {
+    setDrillPath([]);
+    setZoomTransition(null);
+  }, [graphMode]);
+
+  // Individual transactions back the spent-view drill-down, all the way down
+  // to single transactions. They are loaded alongside the main chart so the
+  // first zoom is instant.
+  const flowTransactionsParams = useMemo(() => {
+    if (!datesInitialized || graphMode !== 'spent') {
+      return null;
+    }
+    const [boundedStart, boundedEnd] = boundMonthRangeFromDates(
+      earliestTransaction,
+      latestTransaction,
+      start,
+      end,
+    );
+    return createFlowTransactionsSpreadsheet(
+      boundedStart,
+      boundedEnd,
+      conditions,
+      conditionsOp,
+    );
+  }, [
+    datesInitialized,
+    graphMode,
+    earliestTransaction,
+    latestTransaction,
+    start,
+    end,
+    conditions,
+    conditionsOp,
+  ]);
+
+  const flowTransactions = useReport(
+    'sankey-flows',
+    flowTransactionsParams ?? defaultGetFlowTransactions,
+  );
+  const flowTransactionsRef = useRef(flowTransactions);
+  useEffect(() => {
+    if (flowTransactions) {
+      flowTransactionsRef.current = flowTransactions;
+    }
+  }, [flowTransactions]);
+  const displayFlowTransactions =
+    flowTransactions || flowTransactionsRef.current;
+
+  const drillData: DrillSankeyData | null = useMemo(() => {
+    const current = drillPath[drillPath.length - 1];
+    if (!current) {
+      return null;
+    }
+    if (current.type === 'node') {
+      return displayBaseGraph
+        ? buildNeighborhoodData(displayBaseGraph, current.key, t)
+        : null;
+    }
+    if (!displayFlowTransactions) {
+      return null;
+    }
+    return buildDrilldownData(displayFlowTransactions, drillPath, {
+      topN,
+      t,
+      formatDate: date => monthUtils.format(date, dateFormat),
+    });
+  }, [
+    drillPath,
+    displayBaseGraph,
+    displayFlowTransactions,
+    topN,
+    t,
+    dateFormat,
+  ]);
+
+  // What zooming into a node of the main chart means.
+  const segmentForRootNode = (node: SankeyGraphNode): DrillSegment | null => {
+    if (graphMode === 'budgeted') {
+      if (
+        !displayBaseGraph?.has(node.key) ||
+        node.key.endsWith(SpecialNodeKeys.HiddenSuffix)
+      ) {
+        return null;
+      }
+      return { type: 'node', key: node.key, name: node.name };
+    }
+    return segmentForGraphNode(node);
+  };
+
+  const segmentForNode = (node: SankeyGraphNode): DrillSegment | null =>
+    drillPath.length === 0
+      ? segmentForRootNode(node)
+      : ((node as DrillSankeyNode).drill ?? null);
+
+  const onDrillInto = (node: SankeyGraphNode, rect: DOMRect) => {
+    const segment = segmentForNode(node);
+    if (!segment) {
+      onEndOfChart();
+      return;
+    }
+    const stageRect = stageRef.current?.getBoundingClientRect();
+    setZoomTransition({
+      direction: 'in',
+      origin: stageRect
+        ? {
+            x: rect.left - stageRect.left,
+            y: rect.top - stageRect.top,
+            width: rect.width,
+            height: rect.height,
+            color: node.color,
+          }
+        : null,
+    });
+    setDrillPath(previous => [...previous, segment]);
+  };
+
+  // Leaves (e.g. single transactions) cannot be zoomed into any further.
+  const onEndOfChart = () => {
+    dispatch(
+      addNotification({
+        notification: {
+          id: 'sankey-end-of-chart',
+          type: 'message',
+          message: t('End of chart reached'),
+          timeout: 2500,
+        },
+      }),
+    );
+  };
+
+  const onNavigateToDepth = (depth: number) => {
+    setZoomTransition({ direction: 'out' });
+    setDrillPath(previous => previous.slice(0, depth));
+  };
+
+  const levelKey =
+    drillPath.length === 0
+      ? 'root'
+      : drillPath
+          .map(segment =>
+            segment.type === 'flow'
+              ? `${segment.dimension}:${segment.ids?.join(',') ?? '*'}:${segment.sign ?? ''}`
+              : `node:${segment.key}`,
+          )
+          .join('>');
 
   useEffect(() => {
     async function run() {
@@ -851,42 +1016,46 @@ function SankeyInner({ widget }: SankeyInnerProps) {
               }}
             />
             <TopNSelector value={topNcategories} onChange={settopNcategories} />
-            <CategorySortSelector
-              value={categorySort}
-              onChange={setCategorySort}
-            />
-            <View
-              style={{
-                width: 1,
-                height: 28,
-                backgroundColor: theme.pillBorderDark,
-                marginRight: 10,
-                marginLeft: 10,
-              }}
-            />
-            <SvgLayers style={{ width: 12, height: 12 }} />
-            <LayerSelector
-              direction="from"
-              value={layerFrom}
-              layerLabels={layerLabels}
-              menuItems={fromLayerMenuItems}
-              onChange={layer => onChangeLayer('from', layer)}
-            />
-            <SvgCheveronRight style={{ width: 12, height: 12 }} />
-            <LayerSelector
-              direction="to"
-              value={layerTo}
-              layerLabels={layerLabels}
-              menuItems={toLayerMenuItems}
-              onChange={layer => onChangeLayer('to', layer)}
-            />
-            <Button
-              variant="bare"
-              onPress={onResetLayers}
-              aria-label={t('Reset layers')}
-            >
-              <SvgRefresh style={{ width: 12, height: 12 }} />
-            </Button>
+            {drillPath.length === 0 && (
+              <>
+                <CategorySortSelector
+                  value={categorySort}
+                  onChange={setCategorySort}
+                />
+                <View
+                  style={{
+                    width: 1,
+                    height: 28,
+                    backgroundColor: theme.pillBorderDark,
+                    marginRight: 10,
+                    marginLeft: 10,
+                  }}
+                />
+                <SvgLayers style={{ width: 12, height: 12 }} />
+                <LayerSelector
+                  direction="from"
+                  value={layerFrom}
+                  layerLabels={layerLabels}
+                  menuItems={fromLayerMenuItems}
+                  onChange={layer => onChangeLayer('from', layer)}
+                />
+                <SvgCheveronRight style={{ width: 12, height: 12 }} />
+                <LayerSelector
+                  direction="to"
+                  value={layerTo}
+                  layerLabels={layerLabels}
+                  menuItems={toLayerMenuItems}
+                  onChange={layer => onChangeLayer('to', layer)}
+                />
+                <Button
+                  variant="bare"
+                  onPress={onResetLayers}
+                  aria-label={t('Reset layers')}
+                >
+                  <SvgRefresh style={{ width: 12, height: 12 }} />
+                </Button>
+              </>
+            )}
           </>
         }
       >
@@ -945,6 +1114,11 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   paddingTop: 10,
                 }}
               >
+                <SankeyBreadcrumb
+                  rootLabel={t('Main')}
+                  segments={drillPath.map(segment => segment.name)}
+                  onNavigate={onNavigateToDepth}
+                />
                 {displayData &&
                 displayData.links &&
                 displayData.links.length > 0 ? (
@@ -955,11 +1129,64 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                       flexGrow: 1,
                     }}
                   >
-                    <SankeyGraph
-                      style={{ flexGrow: 1 }}
-                      data={displayData}
-                      showPercentages={showPercentages}
-                    />
+                    <div
+                      ref={stageRef}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flexGrow: 1,
+                        minHeight: 0,
+                      }}
+                    >
+                      <SankeyZoomStage
+                        levelKey={levelKey}
+                        transition={zoomTransition}
+                      >
+                        {drillPath.length === 0 ? (
+                          <SankeyGraph
+                            style={{ flexGrow: 1 }}
+                            data={displayData}
+                            showPercentages={showPercentages}
+                            onNodeClick={onDrillInto}
+                            isNodeClickable={node =>
+                              segmentForRootNode(node) !== null
+                            }
+                            clickHint={t('Click to zoom into this branch')}
+                            onLeafClick={onEndOfChart}
+                          />
+                        ) : drillData && drillData.links.length > 0 ? (
+                          <SankeyGraph
+                            style={{ flexGrow: 1 }}
+                            data={drillData}
+                            showPercentages={showPercentages}
+                            onNodeClick={onDrillInto}
+                            isNodeClickable={node =>
+                              (node as DrillSankeyNode).drill != null
+                            }
+                            clickHint={t('Click to zoom into this branch')}
+                            onLeafClick={onEndOfChart}
+                          />
+                        ) : drillData ? (
+                          <View
+                            style={{
+                              flexGrow: 1,
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: theme.pageTextSubdued,
+                            }}
+                          >
+                            <Text style={{ fontSize: 16, textAlign: 'center' }}>
+                              <Trans>
+                                Nothing flows through this branch in the
+                                selected period.
+                              </Trans>
+                            </Text>
+                          </View>
+                        ) : (
+                          <LoadingIndicator />
+                        )}
+                      </SankeyZoomStage>
+                    </div>
                   </View>
                 ) : (
                   <View

@@ -81,6 +81,7 @@ export function ExpenseCategory({
       style={{
         backgroundColor: theme.budgetCurrentMonth,
         opacity: cat.hidden || categoryGroup?.hidden ? 0.5 : undefined,
+        ':hover': { backgroundColor: theme.tableRowBackgroundHover },
       }}
     >
       <DropHighlight pos={dropPos} offset={{ top: 1 }} />

@@ -16,6 +16,12 @@ import { BudgetPageHeader } from './BudgetPageHeader';
 import { BudgetTable } from './BudgetTable';
 import { clampMonth } from './MonthsContext';
 
+export type SummaryLayout = 'side' | 'top';
+
+export const SIDE_PANEL_WIDTH = 300;
+export const SIDE_PANEL_GAP = 16;
+const SIDE_PANEL_MIN_WIDTH = 780;
+
 function getNumPossibleMonths(width: number, categoryWidth: number) {
   const estimatedTableWidth = width - categoryWidth;
 
@@ -52,6 +58,7 @@ const DynamicBudgetTable = ({
   ...props
 }: DynamicBudgetTableProps) => {
   const { setDisplayMax } = useBudgetMonthCount();
+  const [, setMaxMonthsPref] = useGlobalPref('maxMonths');
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
@@ -61,7 +68,16 @@ const DynamicBudgetTable = ({
     200 + 100 * categoryExpandedState,
   );
   const numMonths = Math.min(numPossible, maxMonths);
-  const maxWidth = 200 + 100 * categoryExpandedState + 500 * numMonths;
+  // With a single month there is room to show the month summary as a side
+  // panel next to the table (the clearest layout for new users). Multiple
+  // months keep the summaries stacked above their own column.
+  const summaryLayout: SummaryLayout =
+    numMonths === 1 && width >= SIDE_PANEL_MIN_WIDTH ? 'side' : 'top';
+  const maxWidth =
+    200 +
+    100 * categoryExpandedState +
+    500 * numMonths +
+    (summaryLayout === 'side' ? SIDE_PANEL_WIDTH + SIDE_PANEL_GAP : 0);
 
   // Every displayed column must stay inside the bounds, so the first
   // column can go no later than `numMonths - 1` months before the end.
@@ -164,13 +180,12 @@ const DynamicBudgetTable = ({
         opacity: width <= 0 || height <= 0 ? 0 : 1,
       }}
     >
-      <View style={{ width: '100%', maxWidth }}>
+      <View style={{ width: '100%', maxWidth, flex: 1, minHeight: 0 }}>
         <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
           <BudgetPageHeader
-            startMonth={prewarmStartMonth}
-            numMonths={numMonths}
-            monthBounds={monthBounds}
-            onMonthSelect={_onMonthSelect}
+            maxMonths={maxMonths}
+            onMaxMonthsChange={setMaxMonthsPref}
+            onGoToToday={() => _onMonthSelect(monthUtils.currentMonth())}
           />
           <BudgetTable
             type={type}
@@ -178,6 +193,8 @@ const DynamicBudgetTable = ({
             startMonth={startMonth}
             numMonths={numMonths}
             monthBounds={monthBounds}
+            summaryLayout={summaryLayout}
+            onMonthSelect={_onMonthSelect}
             onBudgetAction={onBudgetAction}
             {...props}
           />
@@ -191,7 +208,7 @@ DynamicBudgetTable.displayName = 'DynamicBudgetTable';
 
 type AutoSizingBudgetTableProps = Omit<
   ComponentProps<typeof BudgetTable>,
-  'numMonths'
+  'numMonths' | 'summaryLayout' | 'onMonthSelect'
 > & {
   maxMonths: number;
   onMonthSelect: (month: string, numMonths: number) => void;

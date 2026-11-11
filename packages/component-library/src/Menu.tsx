@@ -196,6 +196,7 @@ export function Menu<const NameType = string>({
         return (
           <Button
             excludeFromTabOrder
+            aria-disabled={item.disabled || undefined}
             key={String(item.name)}
             variant="bare"
             slot={slot}

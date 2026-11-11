@@ -5,6 +5,7 @@ import { Button } from '@actual-app/components/button';
 import { SvgPencil1 } from '@actual-app/components/icons/v2';
 import { InitialFocus } from '@actual-app/components/initial-focus';
 import { Input } from '@actual-app/components/input';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import type { DashboardPageEntity } from '@actual-app/core/types/models';
@@ -62,15 +63,27 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
       }}
     >
       <View
+        role="heading"
+        aria-level={1}
         style={{
-          fontSize: 25,
-          fontWeight: 500,
+          ...styles.pageTitle,
           flexGrow: 0,
           flexShrink: 0,
           flexBasis: 'auto',
         }}
       >
-        <Trans>Reports</Trans>:
+        <Trans>Reports</Trans>
+      </View>
+      <View
+        aria-hidden
+        style={{
+          ...styles.pageTitle,
+          color: theme.pageTextSubdued,
+          margin: '0 8px',
+          fontWeight: 400,
+        }}
+      >
+        /
       </View>
       {editingName ? (
         <InitialFocus>
@@ -80,8 +93,7 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
             onUpdate={handleSaveName}
             onEscape={() => setEditingName(false)}
             style={{
-              fontSize: 25,
-              fontWeight: 500,
+              ...styles.pageTitle,
               marginTop: -3,
               marginBottom: -4,
               paddingTop: 2,
@@ -92,8 +104,10 @@ export function DashboardHeader({ dashboard }: DashboardHeaderProps) {
       ) : (
         <>
           <View
+            data-testid="dashboard-name"
             style={{
-              fontSize: 25,
+              ...styles.pageTitle,
+              color: theme.pageTextLight,
               fontWeight: 500,
               marginRight: 5,
               flexGrow: 0,

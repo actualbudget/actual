@@ -4,9 +4,12 @@ import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { addItems } from '#contextmenu/contextMenuSlice';
+import {
+  addItems,
+  setContextMenuHoverTrigger,
+} from '#contextmenu/contextMenuSlice';
 import { useRefEventListener } from '#hooks/useRefEventListener';
-import { useDispatch } from '#redux';
+import { useDispatch, useSelector } from '#redux';
 
 import { useContextMenu } from './useContextMenu';
 
@@ -20,6 +23,10 @@ vi.mock('#hooks/useRefEventListener', () => ({
   useRefEventListener: vi.fn(),
 }));
 
+vi.mock('@actual-app/components/hooks/useResponsive', () => ({
+  useResponsive: () => ({ isNarrowWidth: false }),
+}));
+
 describe('useContextMenu', () => {
   let mockDispatch: Mock;
   let mockTriggerRef: {
@@ -30,10 +37,19 @@ describe('useContextMenu', () => {
     vi.clearAllMocks();
     mockDispatch = vi.fn();
     (useDispatch as unknown as Mock).mockReturnValue(mockDispatch);
+    (useSelector as unknown as Mock).mockReturnValue(false);
 
     mockTriggerRef = {
       current: {
-        getBoundingClientRect: vi.fn(() => ({ x: 100, y: 200, height: 50 })),
+        getBoundingClientRect: vi.fn(() => ({
+          x: 100,
+          y: 200,
+          height: 50,
+          left: 100,
+          top: 200,
+          right: 140,
+          bottom: 250,
+        })),
         dispatchEvent: vi.fn(),
       },
     };
@@ -141,5 +157,117 @@ describe('useContextMenu', () => {
     });
 
     expect(mockTriggerRef.current.dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  describe('hoverProps', () => {
+    it('opens the menu after resting the pointer on the trigger', () => {
+      vi.useFakeTimers();
+      try {
+        const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
+
+        const { result } = renderHook(() =>
+          useContextMenu({
+            triggerRef:
+              mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+            items,
+            isHoverEnabled: true,
+          }),
+        );
+
+        act(() => {
+          result.current.hoverProps.onHoverStart();
+        });
+        expect(mockTriggerRef.current.dispatchEvent).not.toHaveBeenCalled();
+
+        act(() => {
+          vi.advanceTimersByTime(500);
+        });
+
+        expect(mockDispatch).toHaveBeenCalledWith(
+          setContextMenuHoverTrigger({
+            left: 100,
+            top: 200,
+            right: 140,
+            bottom: 250,
+          }),
+        );
+        const dispatchedEvent =
+          mockTriggerRef.current.dispatchEvent.mock.calls[0][0];
+        expect(dispatchedEvent.type).toBe('contextmenu');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does not open when the pointer leaves before the delay', () => {
+      vi.useFakeTimers();
+      try {
+        const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
+
+        const { result } = renderHook(() =>
+          useContextMenu({
+            triggerRef:
+              mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+            items,
+            isHoverEnabled: true,
+          }),
+        );
+
+        act(() => {
+          result.current.hoverProps.onHoverStart();
+          result.current.hoverProps.onHoverEnd();
+          vi.advanceTimersByTime(500);
+        });
+
+        expect(mockTriggerRef.current.dispatchEvent).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does nothing when hovering is disabled', () => {
+      vi.useFakeTimers();
+      try {
+        const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
+
+        const { result } = renderHook(() =>
+          useContextMenu({
+            triggerRef:
+              mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+            items,
+            isHoverEnabled: false,
+          }),
+        );
+
+        act(() => {
+          result.current.hoverProps.onHoverStart();
+          vi.advanceTimersByTime(500);
+        });
+
+        expect(mockTriggerRef.current.dispatchEvent).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('marks explicitly opened menus as not hover-opened', () => {
+      const items = [{ name: 'test', text: 'Test', onClick: vi.fn() }];
+
+      const { result } = renderHook(() =>
+        useContextMenu({
+          triggerRef:
+            mockTriggerRef as unknown as RefObject<HTMLElement | null>,
+          items,
+        }),
+      );
+
+      act(() => {
+        result.current.handleContextMenu();
+      });
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        setContextMenuHoverTrigger(null),
+      );
+    });
   });
 });

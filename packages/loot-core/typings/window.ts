@@ -19,7 +19,7 @@ type Actual = {
   openURLInBrowser: (url: string) => void;
   openInFileManager: (filepath: string) => void;
   saveFile: (
-    contents: string | Buffer,
+    contents: string | Buffer | Uint8Array,
     filename: string,
     dialogTitle?: string,
   ) => Promise<void>;

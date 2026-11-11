@@ -1,23 +1,26 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans } from 'react-i18next';
 
+import { Term } from '#components/common/Term';
 import { trackingBudget } from '#spreadsheet/bindings';
 
 import { BudgetTotal } from './BudgetTotal';
-import { IncomeProgress } from './IncomeProgress';
 
 type IncomeTotalProps = {
   style?: CSSProperties;
 };
 export function IncomeTotal({ style }: IncomeTotalProps) {
-  const { t } = useTranslation();
   return (
     <BudgetTotal
-      title={t('Income')}
+      title={
+        <Term id="income" isFocusable={false}>
+          <Trans>Income</Trans>
+        </Term>
+      }
+      kind="income"
       current={trackingBudget.totalIncome}
       target={trackingBudget.totalBudgetedIncome}
-      ProgressComponent={IncomeProgress}
       style={style}
     />
   );

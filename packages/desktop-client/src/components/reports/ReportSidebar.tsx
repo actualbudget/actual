@@ -1,7 +1,8 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { Menu } from '@actual-app/components/menu';
 import { ModeButton } from '@actual-app/components/mode-button';
 import { Popover } from '@actual-app/components/popover';
@@ -122,8 +123,7 @@ export function ReportSidebar({
   const locale = useLocale();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const triggerRef = useRef(null);
+  const optionsMenu = useHoverMenu();
 
   const onSelectRange = (cond: string) => {
     setSessionReport('dateRange', cond);
@@ -436,10 +436,9 @@ export function ReportSidebar({
         >
           <Text style={{ width: 50, textAlign: 'right', marginRight: 5 }} />
           <Button
-            ref={triggerRef}
-            onPress={() => {
-              setMenuOpen(true);
-            }}
+            ref={optionsMenu.triggerRef}
+            {...optionsMenu.triggerProps}
+            onPress={optionsMenu.toggle}
             style={{
               color: 'currentColor',
               padding: '5px 10px',
@@ -447,12 +446,7 @@ export function ReportSidebar({
           >
             <Trans>Options</Trans>
           </Button>
-          <Popover
-            triggerRef={triggerRef}
-            placement="bottom start"
-            isOpen={menuOpen}
-            onOpenChange={() => setMenuOpen(false)}
-          >
+          <Popover {...optionsMenu.popoverProps} placement="bottom start">
             <Menu
               onMenuSelect={type => {
                 onReportChange({ type: 'modify' });

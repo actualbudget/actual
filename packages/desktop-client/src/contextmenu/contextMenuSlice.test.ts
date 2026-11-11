@@ -5,6 +5,7 @@ import {
   closeContextMenu,
   getInitialState,
   reducer,
+  setContextMenuHoverTrigger,
   setContextMenuPosition,
 } from './contextMenuSlice';
 import type { ContextMenuItem } from './types';
@@ -15,6 +16,18 @@ describe('contextMenuSlice', () => {
       isOpen: false,
       position: { x: 0, y: 0 },
       items: [],
+      hoverTrigger: null,
+    });
+  });
+
+  describe('setContextMenuHoverTrigger', () => {
+    it('should remember the hover trigger and clear it on close', () => {
+      const rect = { left: 1, top: 2, right: 3, bottom: 4 };
+      let state = reducer(getInitialState(), setContextMenuHoverTrigger(rect));
+      expect(state.hoverTrigger).toEqual(rect);
+
+      state = reducer(state, closeContextMenu());
+      expect(state.hoverTrigger).toBeNull();
     });
   });
 

@@ -19,7 +19,6 @@ import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
-import { isDevelopmentEnvironment } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import { css } from '@emotion/css';
 
@@ -36,7 +35,6 @@ import * as bindings from '#spreadsheet/bindings';
 
 import { AccountSyncCheck } from './accounts/AccountSyncCheck';
 import { AnimatedRefresh } from './AnimatedRefresh';
-import { MonthCountSelector } from './budget/MonthCountSelector';
 import { Link } from './common/Link';
 import { HelpMenu } from './HelpMenu';
 import { LoggedInUser } from './LoggedInUser';
@@ -250,19 +248,6 @@ function ServerSyncButton({ style, isMobile = false }: ServerSyncButtonProps) {
   );
 }
 
-function BudgetTitlebar() {
-  const [maxMonths, setMaxMonthsPref] = useGlobalPref('maxMonths');
-
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <MonthCountSelector
-        maxMonths={maxMonths || 1}
-        onChange={value => setMaxMonthsPref(value)}
-      />
-    </View>
-  );
-}
-
 type TitlebarProps = {
   style?: CSSProperties;
 };
@@ -335,13 +320,11 @@ export function Titlebar({ style }: TitlebarProps) {
         />
 
         <Route path="/accounts/:id" element={<AccountSyncCheck />} />
-
-        <Route path="/budget" element={<BudgetTitlebar />} />
       </Routes>
       <View style={{ flex: 1 }} />
       <SpaceBetween gap={10}>
         <UncategorizedButton />
-        {isDevelopmentEnvironment() && !isTestEnv && <ThemeSelector />}
+        {!isTestEnv && <ThemeSelector />}
         <PrivacyButton />
         <NotificationsButton />
         {serverURL ? <ServerSyncButton /> : null}

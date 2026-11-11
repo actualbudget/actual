@@ -16,9 +16,39 @@ const shadowSheet = {
   boxShadow: '0 -4px 24px rgba(0,0,0,0.2)',
 };
 
+// Flat, layered surface used for the cards that make up each page. Cards sit
+// on the page background with a hairline border and a very soft shadow so
+// the content hierarchy is visible without heavy chrome.
+const card = {
+  backgroundColor: theme.cardBackground,
+  border: `1px solid ${theme.cardBorder}`,
+  borderRadius: 10,
+  boxShadow: `0 1px 2px ${theme.cardShadow}`,
+};
+
 export const styles: CSSProperties = {
   incomeHeaderHeight: 70,
-  cardShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
+  cardShadow: `0 1px 2px ${theme.cardShadow}`,
+  card,
+  cardRadius: 10,
+  // Small uppercase label that introduces a card or section ("NET WORTH").
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    color: theme.pageTextLight,
+  },
+  pageTitle: {
+    fontSize: 22,
+    fontWeight: 600,
+    letterSpacing: '-0.01em',
+  },
+  pageSubtitle: {
+    fontSize: 13,
+    lineHeight: '1.4em',
+    color: theme.pageTextLight,
+  },
   monthRightPadding: 5,
   menuBorderRadius: 4,
   mobileMinHeight: MOBILE_MIN_HEIGHT,
@@ -185,8 +215,8 @@ export const styles: CSSProperties = {
   tableContainer: {
     flex: 1,
     border: '1px solid ' + theme.tableBorder,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     overflow: 'hidden',
   },
 };

@@ -70,7 +70,7 @@ export function SidebarGroup({
   const canSortCategories =
     !!onSortCategories && (group.categories?.length ?? 0) > 1;
   const triggerRef = useRef(null);
-  const { handleContextMenu } = useContextMenu({
+  const { handleContextMenu, hoverProps } = useContextMenu({
     triggerRef,
     items: [
       onEdit && {
@@ -158,6 +158,7 @@ export function SidebarGroup({
               className="hover-visible"
               style={{ padding: 3 }}
               onPress={handleContextMenu}
+              {...hoverProps}
             >
               <SvgCheveronDown width={14} height={14} />
             </Button>

@@ -32,6 +32,7 @@ export function ReportCardValueSkeleton() {
   const reducedMotion = useReducedMotion();
   return (
     <View
+      data-dashboard-loading
       style={{
         flex: 1,
         justifyContent: 'center',

@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDotsHorizontalTriple } from '@actual-app/components/icons/v1';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
+import { useIsDashboardCapturing } from '#components/reports/DashboardCaptureContext';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useIsInViewport } from '#hooks/useIsInViewport';
 import { useNavigate } from '#hooks/useNavigate';
@@ -48,6 +50,7 @@ export function ReportCard({
   // toggling edit mode swaps the clickable wrapper in and out.
   const [cardElement, setCardElement] = useState<HTMLDivElement | null>(null);
   const isInViewport = useIsInViewport(cardElement);
+  const isCapturing = useIsDashboardCapturing();
   const [hasRendered, setHasRendered] = useState(false);
   const navigate = useNavigate();
   const { isNarrowWidth } = useResponsive();
@@ -56,10 +59,10 @@ export function ReportCard({
   };
 
   useEffect(() => {
-    if (isInViewport && !hasRendered) {
+    if ((isInViewport || isCapturing) && !hasRendered) {
       setHasRendered(true);
     }
-  }, [isInViewport, hasRendered]);
+  }, [isInViewport, isCapturing, hasRendered]);
 
   const layoutProps = {
     isEditing,
@@ -71,14 +74,12 @@ export function ReportCard({
   const content = (
     <View
       ref={setCardElement}
+      data-testid="report-card"
       style={{
-        backgroundColor: theme.tableBackground,
-        borderBottomLeftRadius: 2,
-        borderBottomRightRadius: 2,
+        ...styles.card,
         width: '100%',
         height: '100%',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, .15)',
-        transition: 'box-shadow .25s',
+        transition: 'box-shadow .25s, border-color .25s',
         ...(isEditing
           ? {
               '& .recharts-surface:hover': {
@@ -94,7 +95,12 @@ export function ReportCard({
               },
             }),
         ':hover': {
-          ...(to ? { boxShadow: '0 4px 6px rgba(0, 0, 0, .15)' } : null),
+          ...(to
+            ? {
+                boxShadow: `0 4px 12px ${theme.cardShadow}`,
+                borderColor: theme.tableBorderHover,
+              }
+            : null),
           ...(isEditing ? { cursor: 'move', filter: 'grayscale(0)' } : null),
         },
         ...(to ? null : containerProps),
@@ -104,7 +110,7 @@ export function ReportCard({
       {/* we render the content only if it is in the viewport
       this reduces the amount of concurrent server api calls and thus
       has a better performance */}
-      {isInViewport || hasRendered ? children : null}
+      {isInViewport || hasRendered || isCapturing ? children : null}
     </View>
   );
 
@@ -156,8 +162,9 @@ function Layout({
   const removeDashboardWidgetMutation = useRemoveDashboardWidgetMutation();
   const copyDashboardWidgetMutation = useCopyDashboardWidgetMutation();
 
-  useContextMenu({
+  const { handleContextMenu, hoverProps } = useContextMenu({
     triggerRef: viewRef,
+    anchorRef: triggerRef,
     items: [
       onRename && {
         name: 'rename',
@@ -223,22 +230,10 @@ function Layout({
         >
           <Button
             ref={triggerRef}
+            {...hoverProps}
             variant="bare"
             aria-label={t('Menu')}
-            onPress={() => {
-              if (viewRef.current) {
-                const rect = triggerRef.current?.getBoundingClientRect();
-                const clientX = rect ? rect.left : 0;
-                const clientY = rect ? rect.bottom : 0;
-                viewRef.current.dispatchEvent(
-                  new MouseEvent('contextmenu', {
-                    bubbles: true,
-                    clientX,
-                    clientY,
-                  }),
-                );
-              }
-            }}
+            onPress={handleContextMenu}
           >
             <SvgDotsHorizontalTriple
               width={15}

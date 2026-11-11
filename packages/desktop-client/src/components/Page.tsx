@@ -4,41 +4,57 @@ import { createPortal } from 'react-dom';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+
+import { PageTitle } from './PageTitle';
 
 const HEADER_HEIGHT = 50;
 
 type PageHeaderProps = {
   title: ReactNode;
+  subtitle?: ReactNode;
+  /** Buttons rendered at the end of the header row. */
+  actions?: ReactNode;
   style?: CSSProperties;
 };
 
-export const pageTitleStyle = {
-  fontSize: 25,
-  fontWeight: 500,
-} satisfies CSSProperties;
+export const pageTitleStyle = styles.pageTitle satisfies CSSProperties;
 
-export function PageHeader({ title, style }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  style,
+}: PageHeaderProps) {
   return (
     <View
+      data-testid="page-header"
       style={{
         flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        gap: 16,
         marginLeft: 20,
+        marginRight: 20,
+        marginBottom: 12,
+        flexShrink: 0,
         ...style,
       }}
     >
-      <View
-        style={{
-          flexDirection: 'row',
-          ...pageTitleStyle,
-        }}
-      >
-        {typeof title === 'string' ? <Text>{title}</Text> : title}
-      </View>
+      <PageTitle title={title} subtitle={subtitle} />
+      {actions && (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            flexShrink: 0,
+          }}
+        >
+          {actions}
+        </View>
+      )}
     </View>
   );
 }
@@ -161,13 +177,25 @@ export function MobilePageHeaderSlot({ style }: MobilePageHeaderSlotProps) {
 
 type PageProps = {
   header: ReactNode;
+  /** Desktop only: short description rendered under a string `header`. */
+  subtitle?: ReactNode;
+  /** Desktop only: actions rendered on the right of a string `header`. */
+  actions?: ReactNode;
   style?: CSSProperties;
   padding?: number;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-export function Page({ header, style, padding, children, footer }: PageProps) {
+export function Page({
+  header,
+  subtitle,
+  actions,
+  style,
+  padding,
+  children,
+  footer,
+}: PageProps) {
   const { isNarrowWidth } = useResponsive();
   const mobileHeaderSlot = useContext(MobilePageHeaderSlotContext);
   const childrenPadding = padding != null ? padding : isNarrowWidth ? 10 : 20;
@@ -177,7 +205,7 @@ export function Page({ header, style, padding, children, footer }: PageProps) {
       isNarrowWidth ? (
         <MobilePageHeader title={header} />
       ) : (
-        <PageHeader title={header} />
+        <PageHeader title={header} subtitle={subtitle} actions={actions} />
       )
     ) : (
       header

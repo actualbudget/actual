@@ -329,7 +329,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <View
                   style={{
                     height: styles.incomeHeaderHeight,
-                    backgroundColor: theme.budgetCurrentMonth,
+                    backgroundColor: theme.tableRowHeaderBackground,
                   }}
                 >
                   <IncomeHeader onShowNewGroup={onShowNewGroup} />

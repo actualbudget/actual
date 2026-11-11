@@ -247,8 +247,9 @@ export function Budget() {
       <View
         style={{
           ...styles.page,
-          paddingLeft: 8,
-          paddingRight: 8,
+          paddingLeft: 20,
+          paddingRight: 20,
+          paddingBottom: 16,
           overflow: 'hidden',
         }}
       >

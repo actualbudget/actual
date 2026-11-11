@@ -11,7 +11,6 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -21,6 +20,7 @@ import { t } from 'i18next';
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { GoalStatus } from '#components/budget/GoalStatus';
 import { makeAmountGrey } from '#components/budget/util';
+import { Term } from '#components/common/Term';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, SheetCell } from '#components/table';
@@ -61,11 +61,18 @@ const TrackingSheetCell = <FieldName extends SheetFields<'tracking-budget'>>(
 const headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
+  alignItems: 'flex-end',
   textAlign: 'right',
 };
 
-const cellStyle: CSSProperties = {
+const headerTermStyle: CSSProperties = {
   color: theme.tableHeaderText,
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const cellStyle: CSSProperties = {
+  color: theme.pageText,
   fontWeight: 600,
 };
 
@@ -81,9 +88,9 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="budgeted" style={headerTermStyle} isFocusable={false}>
           <Trans>Budgeted</Trans>
-        </Text>
+        </Term>
         <TrackingCellValue
           binding={trackingBudget.totalBudgetedExpense}
           type="financial"
@@ -92,17 +99,17 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
         </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="spent" style={headerTermStyle} isFocusable={false}>
           <Trans>Spent</Trans>
-        </Text>
+        </Term>
         <TrackingCellValue binding={trackingBudget.totalSpent} type="financial">
           {props => <CellValueText {...props} style={cellStyle} />}
         </TrackingCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="balance" style={headerTermStyle} isFocusable={false}>
           <Trans>Balance</Trans>
-        </Text>
+        </Term>
         <TrackingCellValue
           binding={trackingBudget.totalLeftover}
           type="financial"
@@ -124,14 +131,14 @@ export function IncomeHeaderMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="budgeted" style={headerTermStyle} isFocusable={false}>
           <Trans>Budgeted</Trans>
-        </Text>
+        </Term>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="received" style={headerTermStyle} isFocusable={false}>
           <Trans>Received</Trans>
-        </Text>
+        </Term>
       </View>
     </View>
   );

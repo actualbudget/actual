@@ -8,6 +8,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 type ManagePageProps = {
+  'data-testid'?: string;
   description?: ReactNode;
   actions?: ReactNode;
   search?: ReactNode;
@@ -18,6 +19,7 @@ type ManagePageProps = {
 };
 
 export function ManagePage({
+  'data-testid': testId,
   description,
   actions,
   search,
@@ -27,7 +29,10 @@ export function ManagePage({
   children,
 }: ManagePageProps) {
   return (
-    <View style={{ flex: 1, minHeight: 0, gap: spacing.md, ...style }}>
+    <View
+      data-testid={testId}
+      style={{ flex: 1, minHeight: 0, gap: spacing.md, ...style }}
+    >
       {description != null && (
         <Text
           style={{

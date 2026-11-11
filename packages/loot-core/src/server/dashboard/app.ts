@@ -13,7 +13,10 @@ import { mutator } from '#server/mutators';
 import { reportModel } from '#server/reports/app';
 import { batchMessages } from '#server/sync';
 import { undoable } from '#server/undo';
-import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
+import {
+  DEFAULT_DASHBOARD_STATE,
+  findDuplicateWidget,
+} from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
   DashboardPageEntity,
@@ -274,12 +277,42 @@ async function resetDashboard(id: string) {
   });
 }
 
+export class DuplicateWidgetError extends Error {
+  code = 'duplicate-widget' as const;
+
+  constructor() {
+    super('This dashboard already contains a widget showing the same data.');
+    this.name = 'DuplicateWidgetError';
+  }
+}
+
+/**
+ * Dashboards never hold two widgets that display exactly the same data.
+ * Throws when `widget` would duplicate one already on its dashboard page.
+ */
+async function assertNotDuplicateWidget(
+  widget: Pick<DashboardWidgetEntity, 'type' | 'meta' | 'dashboard_page_id'>,
+) {
+  const existingWidgets: Array<Pick<DashboardWidgetEntity, 'type' | 'meta'>> =
+    await db.selectWithSchema(
+      'dashboard',
+      'SELECT type, meta FROM dashboard WHERE dashboard_page_id = ? AND type = ? AND tombstone = 0',
+      [widget.dashboard_page_id, widget.type],
+    );
+
+  if (findDuplicateWidget(existingWidgets, widget)) {
+    throw new DuplicateWidgetError();
+  }
+}
+
 async function addDashboardWidget(
   widget: WithOptional<
     Omit<DashboardWidgetEntity, 'id' | 'tombstone'>,
     'x' | 'y'
   >,
 ) {
+  await assertNotDuplicateWidget(widget);
+
   // If no x & y was provided - calculate it dynamically
   // The new widget should be the very last one in the list of all widgets
   if (!('x' in widget) && !('y' in widget)) {

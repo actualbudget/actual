@@ -12,6 +12,13 @@ import { ReportCardValueSkeleton } from './ReportCardValueSkeleton';
 
 const FONT_SIZE_SCALE_FACTOR = 1.6;
 const CONTAINER_MARGIN = 8;
+const HORIZONTAL_PADDING = 16;
+/**
+ * Numbers on the dashboard share one comfortable size and only shrink when
+ * they would not fit their card, so neighbouring cards look consistent
+ * instead of each value stretching to fill the available space.
+ */
+const MAX_FONT_SIZE_PX = 40;
 
 type SummaryNumberProps = {
   value: number;
@@ -37,7 +44,7 @@ export function SummaryNumber({
 
   displayAmount += suffix;
 
-  const fontSize = `min(${(FONT_SIZE_SCALE_FACTOR * 100) / displayAmount.length}cqi, calc(100cqb - ${CONTAINER_MARGIN * 2}px))`;
+  const fontSize = `min(${MAX_FONT_SIZE_PX}px, ${(FONT_SIZE_SCALE_FACTOR * 100) / displayAmount.length}cqi, calc(100cqb - ${CONTAINER_MARGIN * 2}px))`;
 
   return (
     <>
@@ -62,6 +69,8 @@ export function SummaryNumber({
             maxWidth: '100%',
             containerType: 'size',
             margin: `${CONTAINER_MARGIN}px 0`,
+            padding: `0 ${HORIZONTAL_PADDING}px`,
+            boxSizing: 'border-box',
             justifyContent: 'center',
             color: !isNumericValue
               ? theme.reportsNumberNeutral

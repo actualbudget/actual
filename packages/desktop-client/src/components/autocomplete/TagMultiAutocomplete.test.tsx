@@ -25,7 +25,7 @@ function FilterTagPicker() {
         embedded
         inputProps={{ 'aria-label': 'Choose tags' }}
       />
-      <output>{value}</output>
+      <output data-testid="selected-tags">{value}</output>
     </TestProviders>
   );
 }
@@ -40,11 +40,13 @@ describe('TagMultiAutocomplete', () => {
       'cir',
     );
     await user.click(screen.getByRole('button', { name: '#circle' }));
-    expect(screen.getByRole('status')).toHaveTextContent(
+    expect(screen.getByTestId('selected-tags')).toHaveTextContent(
       '#missing #red #circle',
     );
 
     await user.click(screen.getByRole('button', { name: '#red' }));
-    expect(screen.getByRole('status')).toHaveTextContent('#missing #circle');
+    expect(screen.getByTestId('selected-tags')).toHaveTextContent(
+      '#missing #circle',
+    );
   });
 });

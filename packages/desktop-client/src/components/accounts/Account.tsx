@@ -7,11 +7,9 @@ import React, {
 } from 'react';
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { Trans } from 'react-i18next';
 import { Navigate, useLocation, useParams } from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
-import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
@@ -96,6 +94,7 @@ import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
 import { AccountHeader } from './Header';
+import { TransactionsEmptyMessage } from './TransactionsEmptyMessage';
 
 type ConditionEntity = Partial<RuleConditionEntity> | TransactionFilterEntity;
 
@@ -669,8 +668,8 @@ class AccountInternal extends PureComponent<
     this.props.onSyncAndDownload(account ? account.id : accountId);
   };
 
-  onImport = async () => {
-    const accountId = this.props.accountId;
+  onImport = async (targetAccountId?: string) => {
+    const accountId = targetAccountId ?? this.props.accountId;
     const account = this.props.accounts.find(acct => acct.id === accountId);
 
     if (account) {
@@ -1993,7 +1992,19 @@ class AccountInternal extends PureComponent<
                 onMergeTransactions={this.onMergeTransactions}
               />
 
-              <View style={{ flex: 1 }}>
+              <View
+                data-testid="transactions-card"
+                style={{
+                  flex: 1,
+                  ...styles.card,
+                  borderBottomLeftRadius: 0,
+                  borderBottomRightRadius: 0,
+                  borderBottomWidth: 0,
+                  marginLeft: 20,
+                  marginRight: 20,
+                  overflow: 'hidden',
+                }}
+              >
                 <TransactionList
                   headerContent={undefined}
                   // @ts-expect-error - fix me
@@ -2039,16 +2050,21 @@ class AccountInternal extends PureComponent<
                         }
                       />
                     ) : !loading ? (
-                      <View
-                        style={{
-                          color: theme.tableText,
-                          marginTop: 20,
-                          textAlign: 'center',
-                          fontStyle: 'italic',
-                        }}
-                      >
-                        <Trans>No transactions</Trans>
-                      </View>
+                      <TransactionsEmptyMessage
+                        isFiltered={
+                          !!transactionsFiltered || this.state.search !== ''
+                        }
+                        onImport={
+                          account && !account.closed
+                            ? () => this.onImport()
+                            : undefined
+                        }
+                        onAddTransaction={
+                          account && !account.closed
+                            ? this.onAddTransaction
+                            : undefined
+                        }
+                      />
                     ) : null
                   }
                   onSort={this.onSort}

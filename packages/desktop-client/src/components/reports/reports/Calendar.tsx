@@ -36,6 +36,10 @@ import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { TransactionList as TransactionListMobile } from '#components/mobile/transactions/TransactionList';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
 import { PrivacyFilter } from '#components/PrivacyFilter';
+import {
+  getCalendarCardMonthsShown,
+  getMonthsShownRange,
+} from '#components/reports/calendarMonths';
 import { DateRange } from '#components/reports/DateRange';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { Header } from '#components/reports/Header';
@@ -300,8 +304,22 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
     void run();
   }, [locale]);
 
+  const widgetMonthsShown = getCalendarCardMonthsShown(widget?.meta);
+
   useEffect(() => {
     if (latestTransaction) {
+      if (widgetMonthsShown !== undefined) {
+        // Mirror the dashboard card: whole months ending with the current one.
+        const [monthsStart, monthsEnd] = getMonthsShownRange(
+          widgetMonthsShown,
+          latestTransaction,
+        );
+        setStart(monthsStart);
+        setEnd(monthsEnd);
+        setMode('sliding-window');
+        return;
+      }
+
       const [initialStart, initialEnd, initialMode] = calculateTimeRange(
         widget?.meta?.timeFrame,
         {
@@ -315,7 +333,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, widgetMonthsShown]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -353,6 +371,14 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
       throw new Error('No widget that could be saved.');
     }
 
+    // A custom range picked here replaces the card's "months shown" setting,
+    // unless it still matches that setting exactly.
+    const [monthsStart, monthsEnd] =
+      widgetMonthsShown !== undefined
+        ? getMonthsShownRange(widgetMonthsShown, latestTransaction)
+        : [undefined, undefined];
+    const keepsMonthsShown = start === monthsStart && end === monthsEnd;
+
     updateDashboardWidgetMutation.mutate(
       {
         widget: {
@@ -361,6 +387,7 @@ function CalendarInner({ widget, parameters }: CalendarInnerProps) {
             ...(widget.meta ?? {}),
             conditions,
             conditionsOp,
+            monthsShown: keepsMonthsShown ? widgetMonthsShown : undefined,
             timeFrame: {
               start,
               end,

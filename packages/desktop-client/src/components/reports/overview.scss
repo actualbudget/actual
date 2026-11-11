@@ -9,10 +9,26 @@
 }
 
 .react-grid-item.react-grid-placeholder {
-  background-color: #8719e0;
+  background-color: var(--color-buttonPrimaryBackground);
+  border-radius: 10px;
+  opacity: 0.25;
 }
 
 .react-grid-item > .react-resizable-handle::after {
   border-right: 2px solid var(--color-pageTextLight);
   border-bottom: 2px solid var(--color-pageTextLight);
+}
+
+/* While the dashboard is rendered for an image/PDF export, scrollbars inside
+   widgets are hidden so they do not end up in the captured image. */
+[data-dashboard-capturing='true'] .react-grid-item * {
+  scrollbar-width: none;
+}
+
+[data-dashboard-capturing='true'] .react-grid-item *::-webkit-scrollbar {
+  display: none;
+}
+
+[data-dashboard-capturing='true'] .react-grid-item > .react-resizable-handle {
+  display: none;
 }

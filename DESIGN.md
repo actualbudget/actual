@@ -4,23 +4,24 @@ description: Local-first personal finance, built around envelope budgeting
 # All color values are the light-theme palette mapping; dark and midnight
 # remap the same semantic roles via `theme.*` tokens (see The Semantic Token Rule).
 colors:
-  actual-purple: '#8719e0'
-  actual-purple-hover: '#a368fc'
-  navy-ink: '#102a43'
-  navy-slate: '#627d98'
-  navy-mist: '#e8ecf0'
-  navy-frost: '#f7fafc'
-  page-text: '#272630'
+  actual-orange: '#f4732a'
+  actual-orange-hover: '#dc5f1b'
+  stone-ink: '#1c1b19'
+  stone-secondary: '#5e5c56'
+  stone-ground: '#f7f6f3'
+  stone-hover: '#faf9f7'
+  page-text: '#1c1b19'
   surface-white: '#ffffff'
-  positive-green: '#147d64'
-  negative-red: '#e12d39'
+  positive-green: '#167a46'
+  negative-red: '#b3302b'
   link-blue: '#1980d4'
   warning-gold: '#b88115'
 typography:
   display:
     fontFamily: 'Inter Variable, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
-    fontSize: '30px'
+    fontSize: '22px'
     fontWeight: 600
+    letterSpacing: '-0.01em'
   headline:
     fontFamily: 'Inter Variable, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif'
     fontSize: '20px'
@@ -41,7 +42,7 @@ typography:
     fontWeight: 400
 rounded:
   sm: '4px'
-  md: '6px'
+  md: '10px'
   sheet: '18px'
 spacing:
   xs: '5px'
@@ -50,16 +51,16 @@ spacing:
   lg: '20px'
 components:
   button-primary:
-    backgroundColor: '{colors.actual-purple}'
-    textColor: '{colors.surface-white}'
+    backgroundColor: '{colors.actual-orange}'
+    textColor: '{colors.stone-ink}'
     rounded: '{rounded.sm}'
     padding: '5px 10px'
   button-primary-hover:
-    backgroundColor: '{colors.actual-purple-hover}'
-    textColor: '{colors.surface-white}'
+    backgroundColor: '{colors.actual-orange-hover}'
+    textColor: '{colors.stone-ink}'
   button-normal:
     backgroundColor: '{colors.surface-white}'
-    textColor: '{colors.navy-ink}'
+    textColor: '{colors.stone-ink}'
     rounded: '{rounded.sm}'
     padding: '5px 10px'
   input:
@@ -82,34 +83,34 @@ The system explicitly rejects fintech-startup gloss (gradient heroes, glassmorph
 **Key Characteristics:**
 
 - Table-first layouts with tabular numerals everywhere money appears
-- One accent (Actual Purple) used sparingly for primary actions and selection
+- One accent (Actual Orange) used sparingly for primary actions and selection
 - Semantic color tokens only; components never hardcode hex values
 - Utilitarian, compact components built for daily repetition
 - Flat-first surfaces; shadows reserved for transient overlays
 
 ## 2. Colors
 
-A calm navy-neutral base with one confident purple accent and strict semantic roles for money.
+A warm stone base with one orange accent and strict semantic roles for money.
 
 All hex values in this file (frontmatter included) are the light-theme palette mapping. The dark and midnight themes remap the same semantic roles to different palette values, so never use these hexes directly in components — route every color through the `theme.*` semantic tokens (see The Semantic Token Rule below).
 
 ### Primary
 
-- **Actual Purple** (#8719e0): The single brand accent. Primary buttons, selected rows and borders, active navigation, mobile header. Hover lightens to **Lifted Purple** (#a368fc).
+- **Actual Orange** (#f4732a): Primary buttons, selected months, borders and the mobile header. Orange surfaces use dark stone text. Hover deepens to #dc5f1b; orange text on light surfaces uses #b84c14 for contrast.
 
 ### Neutral
 
-- **Navy Ink** (#102a43): Sidebar background, darkest text. The app's anchor dark.
-- **Page Ink** (#272630): Default body text on light surfaces.
-- **Navy Slate** (#627d98): Secondary and subdued text, table headers.
-- **Navy Mist** (#e8ecf0): Page background, table borders, dividers.
-- **Navy Frost** (#f7fafc): Hover rows, raised header rows.
-- **Surface White** (#ffffff): Tables, cards, menus, modals.
+- **Stone Ink** (#1c1b19): Default text and text on orange controls.
+- **Stone Secondary** (#5e5c56): Secondary text, dates, table headings and zero amounts.
+- **Stone Ground** (#f7f6f3): Page and sidebar background.
+- **Stone Hover** (#faf9f7): Hover rows and raised header rows.
+- **Surface White** (#ffffff): Tables, cards, menus and modals.
+- **Stone Border** (#ebe9e5): Card borders and dividers; pale stone values are not used for informative text.
 
 ### Tertiary (semantic money and status colors)
 
-- **Positive Green** (#147d64): Positive amounts and funded budgets.
-- **Negative Red** (#e12d39): Negative amounts, overspending, failures.
+- **Positive Green** (#167a46): Positive amounts and funded budgets.
+- **Negative Red** (#b3302b): Negative amounts, overspending, failures.
 - **Link Blue** (#1980d4): Links and informational highlights.
 - **Warning Gold** (#b88115): Underfunded templates, pending states.
 
@@ -117,7 +118,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 
 **The Semantic Token Rule.** Components never use raw palette values or hex codes. Every color goes through the `theme.*` semantic layer (`--color-*` custom properties) so all three themes (light, dark, midnight) stay correct. A hardcoded hex in a component is a bug.
 
-**The One Accent Rule.** Actual Purple appears on well under 10% of any screen: primary action, current selection, active nav. It never decorates.
+**The One Accent Rule.** Actual Orange appears on well under 10% of any screen: primary action, current selection, active nav. It never decorates.
 
 **The Never-Color-Alone Rule.** Positive/negative money state is conveyed by sign and context as well as color; green/red are reinforcement, never the only signal.
 
@@ -130,7 +131,7 @@ All hex values in this file (frontmatter included) are the light-theme palette m
 
 ### Hierarchy
 
-- **Display** (600, 30px): Page-level headings and large balances. Rare.
+- **Display** (600, 22px): Page-level headings and large balances. Rare.
 - **Headline** (700, 20px, 0.5px letter-spacing): Section titles.
 - **Title** (500, 15px): Emphasized in-table and card text.
 - **Sheet title** (600, 18px): Centred title of a mobile bottom sheet. Mobile only.
@@ -167,11 +168,11 @@ Control values for Button/Input (paddingY / paddingX / min-height, px):
 
 ## 4. Elevation
 
-Flat-first with ambient shadows. Structure comes from 1px borders (Navy Mist) and background shifts (White on Mist, Frost on hover), not depth. Shadows exist only to lift **transient** surfaces above the page: menus, tooltips, popovers, modals. Persistent surfaces like tables and cards sit flat or carry the faint card shadow at most.
+Flat-first with ambient shadows. Structure comes from 1px borders (Stone Ground) and background shifts (White on Mist, Frost on hover), not depth. Shadows exist only to lift **transient** surfaces above the page: menus, tooltips, popovers, modals. Persistent surfaces like tables and cards sit flat or carry the faint card shadow at most.
 
 ### Shadow Vocabulary
 
-- **Card** (`box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)`): Resting cards and small raised widgets.
+- **Card** (`box-shadow: 0 1px 2px var(--color-cardShadow)`): Resting cards and small raised widgets.
 - **Ambient** (`box-shadow: 0 2px 4px 0 rgba(0,0,0,0.1)`): Focused inputs, subtle lift.
 - **Large** (`box-shadow: 0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)`): Tooltips, popovers, floating panels.
 
@@ -186,8 +187,8 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 ### Buttons
 
 - **Shape:** Gently rounded (4px radius), compact padding (5px 10px)
-- **Primary:** Actual Purple background, white text; hover lifts to Lifted Purple with a soft shadow transition (`box-shadow .25s`)
-- **Normal:** White background, Navy Ink text, 1px navy border
+- **Primary:** Actual Orange background, dark stone text; hover deepens to Deep Orange with a soft shadow transition (`box-shadow .25s`)
+- **Normal:** White background, Stone Ink text, 1px stone border
 - **Bare:** Transparent, 5px padding; background tint on hover/press. The workhorse for in-table actions
 
 ### Inputs / Fields
@@ -198,15 +199,15 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 ### Cards / Containers
 
-- **Corner Style:** 6px radius on table containers (top corners), 4px elsewhere; mobile bottom sheets use 18px top corners and a flat bottom edge
-- **Background:** Surface White on Navy Mist page background
-- **Shadow Strategy:** Card shadow at most; structure via 1px Navy Mist border
+- **Corner Style:** 10px radius on report and summary cards and table containers (top corners), 4px on controls; mobile bottom sheets use 18px top corners and a flat bottom edge
+- **Background:** Surface White on Stone Ground page background
+- **Shadow Strategy:** Card shadow at most; structure via 1px Stone Ground border
 - **Internal Padding:** 16-20px
 
 ### Navigation
 
-- **Sidebar:** Navy Ink background, light navy text; hover darkens the row, selection marked with a purple accent and purple text. Status states (pending/positive/failed) tint the item background gold/green/red
-- **Mobile:** Purple header, white nav bar, purple selected item
+- **Sidebar:** Stone Ground background, dark stone text; hover darkens the row and the selected route uses a stone tint. Status states (pending/positive/failed) tint the item background gold/green/red
+- **Mobile:** Orange header, white nav bar, dark orange selected item
 - **Mobile sheets:** Menus open as bottom sheets on the modal surface (`modalBackground`) with a grab handle in `pageTextSubdued` and hairline row dividers in `tooltipBorder`. Rows are full-width bare buttons, destructive rows in `errorText`, section labels in sentence case only when a sheet has two or more groups. Dismiss by swipe down, tap outside or Escape; no close button
 
 ### Pills / Chips
@@ -215,7 +216,7 @@ Utilitarian and quick: compact paddings, instant state feedback, built for daily
 
 ### Signature Component: The Money Table
 
-The core surface of the app. White rows on 1px Navy Mist borders, Frost hover, purple-bordered selection, sticky header with Slate 13px text, amounts right-aligned in tabular figures colored by the semantic money tokens. Alternate-row striping is theme-controlled, never hardcoded.
+The core surface of the app. White rows on 1px Stone Ground borders, Frost hover, orange-bordered selection, sticky header with Slate 13px text, amounts right-aligned in tabular figures colored by the semantic money tokens. Alternate-row striping is theme-controlled, never hardcoded.
 
 ## 6. Do's and Don'ts
 
@@ -225,7 +226,7 @@ The core surface of the app. White rows on 1px Navy Mist borders, Frost hover, p
 - **Do** wrap standalone financial numbers in `FinancialText` or apply `styles.tnum`.
 - **Do** keep components compact and quick: 4px radii, 5-10px paddings, instant hover/press states.
 - **Do** reuse the existing component library (`@actual-app/components`) before writing new UI.
-- **Do** keep Actual Purple scarce: primary action and selection only.
+- **Do** keep Actual Orange scarce: primary action and selection only.
 - **Do** respect the breakpoints: 512px (small), 730px (medium), 1100px (wide); mobile touch targets are at least 40px tall.
 
 ### Don't:

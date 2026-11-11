@@ -169,15 +169,17 @@ export function WelcomeScreen() {
           }}
         >
           <Trans>
-            New to budgeting? Take the{' '}
+            New to budgeting? Choose <strong>Start budgeting</strong> and a
+            step-by-step guide will walk you through setting things up. You can
+            also read the{' '}
             <Link
               variant="external"
               to="https://actualbudget.org/docs/tour/"
               linkColor="purple"
             >
-              guided tour
-            </Link>{' '}
-            to learn how Actual works.
+              written tour
+            </Link>
+            .
           </Trans>
         </Paragraph>
       </View>

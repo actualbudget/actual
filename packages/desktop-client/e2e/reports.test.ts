@@ -42,34 +42,110 @@ test.describe('Reports', () => {
       'Total Expenses (YTD)',
       'Avg Per Month',
       'Avg Per Transaction',
+      'Money Flow',
       'Net Worth',
       'Cash Flow',
       'This Month',
       'Budget Overview',
       '3-Month Average',
+      'Transaction Calendar',
+      'Recent Net Worth Change',
     ]);
+    // Demo entity IDs change between runs, which changes Sankey node colors.
+    // Cover the dashboard layout here; drilldown behavior is tested separately.
+    await page
+      .getByRole('button', { name: /^Money Flow/ })
+      .locator('.recharts-surface')
+      .evaluate(element => element.setAttribute('data-vrt-mask', 'true'));
     await expect(page).toMatchThemeScreenshots();
   });
 
-  test('resizes number cards with the viewport', async () => {
+  test('keeps number cards within their bounds as the viewport changes', async () => {
     await page.setViewportSize({ width: 1440, height: 900 });
 
     const number = page.locator('[aria-label*="amount:"]').first();
     await expect(number).toBeVisible();
     const numberText = number.locator('span').first();
-    const initialFontSize = await numberText.evaluate(
-      element => getComputedStyle(element).fontSize,
-    );
+    async function expectNumberToFit() {
+      const amount = await numberText.boundingBox();
+      const container = await number.boundingBox();
+      expect(amount).not.toBeNull();
+      expect(container).not.toBeNull();
+      expect(amount!.width).toBeLessThanOrEqual(container!.width);
+      expect(amount!.height).toBeLessThanOrEqual(container!.height);
+    }
+    await expect(expectNumberToFit).toPass();
     await expect(number).toMatchThemeScreenshots();
 
     await page.setViewportSize({ width: 900, height: 900 });
     await expect(number).toMatchThemeScreenshots();
 
-    await expect
-      .poll(() =>
-        numberText.evaluate(element => getComputedStyle(element).fontSize),
-      )
-      .not.toBe(initialFontSize);
+    await expect(expectNumberToFit).toPass();
+  });
+
+  test('dashboard menu opens on hover and stays open when clicked', async () => {
+    const menuButton = page.getByTestId('dashboard-menu-button');
+    const resetItem = page.getByRole('button', { name: 'Reset to default' });
+
+    await menuButton.hover();
+    await expect(resetItem).toBeVisible();
+
+    // Leaving the button and its menu closes it again.
+    await page.mouse.move(10, 10);
+    await expect(resetItem).not.toBeVisible();
+
+    // Clicking pins the menu open.
+    await menuButton.click();
+    await page.mouse.move(10, 10);
+    await expect(resetItem).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(resetItem).not.toBeVisible();
+  });
+
+  test('offers PDF, PNG and JSON dashboard exports', async () => {
+    await page.getByTestId('dashboard-menu-button').click();
+    await page.getByRole('button', { name: 'Export' }).click();
+
+    const modal = page.getByTestId('export-dashboard-modal');
+    await expect(modal.getByTestId('export-dashboard-pdf')).toBeVisible();
+    await expect(modal.getByTestId('export-dashboard-png')).toBeVisible();
+    await expect(modal.getByTestId('export-dashboard-json')).toBeVisible();
+
+    const download = page.waitForEvent('download');
+    await modal.getByTestId('export-dashboard-json').click();
+    expect((await download).suggestedFilename()).toBe('dashboard.json');
+    await expect(modal).not.toBeVisible();
+  });
+
+  test('does not allow adding a widget that is already on the dashboard', async () => {
+    await page.getByTestId('edit-dashboard-button').click();
+    await page.getByTestId('add-widget-button').click();
+    await expect(
+      page.getByRole('button', { name: 'Net worth graph' }),
+    ).toBeDisabled();
+    await expect(
+      page.getByRole('button', { name: 'Summary card' }),
+    ).toBeEnabled();
+    await page.keyboard.press('Escape');
+    await page.getByTestId('edit-dashboard-button').click();
+  });
+
+  test('zooms into a branch of the money flow diagram', async () => {
+    await page.getByRole('button', { name: /^Money Flow/ }).click();
+    await page.waitForURL(/\/reports\/sankey\/.+/);
+
+    const node = page
+      .locator('g[data-sankey-node][data-clickable]')
+      .filter({ hasText: 'Usual Expenses' })
+      .first();
+    await node.click();
+
+    const breadcrumb = page.getByTestId('sankey-breadcrumb');
+    await expect(breadcrumb).toContainText('Main');
+    await expect(breadcrumb).toContainText('Usual Expenses');
+
+    await page.getByTestId('sankey-breadcrumb-back').click();
+    await expect(breadcrumb).not.toBeVisible();
   });
 
   test('right clicking a report card opens context menu', async () => {

@@ -16,6 +16,8 @@ The option **Show in-app notifications (release notes and announcements)** contr
 
 Themes change the user interface colors. Pick from the built-in **Light**, **Dark**, **Midnight**, or **Auto** themes, or install a community-built theme from the catalog. See [Custom Themes](../custom-themes.md) for the full guide.
 
+New installations start with the **Light** theme. The theme icon in the top bar is a quick toggle that cycles through Light, Dark and Midnight; whichever theme you pick (here or on the settings page) is remembered for future sessions.
+
 ### Sidebar
 
 By default the sidebar shows **Budget**, **Reports** and **Schedules**. The **Sidebar** section lets you choose which pages appear there, drag them into order, and pick the **Start page**, the page Actual shows when it opens or when you go to its home page. Pages that are switched off, such as Payees, Rules and Tags, are listed in the Settings navigation instead. These settings are stored in your budget file, so they apply on every device that opens it. The mobile layout does not use these settings yet, but support for it is planned.

@@ -462,6 +462,12 @@ export type CalendarWidget = AbstractWidget<
     conditions?: RuleConditionEntity[];
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
+    /**
+     * Number of calendar months (1-4) the dashboard card shows, always ending
+     * with the current month. Takes precedence over `timeFrame` on the card so
+     * the range never drifts across month boundaries.
+     */
+    monthsShown?: number;
   } | null
 >;
 

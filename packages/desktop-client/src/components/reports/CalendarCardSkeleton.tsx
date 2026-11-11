@@ -29,7 +29,7 @@ export function CalendarCardSkeleton() {
   const reducedMotion = useReducedMotion();
   const cell = reducedMotion ? staticCell : pulsingCell;
   return (
-    <View style={{ flex: 1, gap: 4 }} aria-hidden="true">
+    <View style={{ flex: 1, gap: 4 }} aria-hidden="true" data-dashboard-loading>
       <View
         style={{
           display: 'grid',

@@ -77,7 +77,9 @@ test.describe('Transactions', () => {
       await filterTooltip.applyButton.click();
 
       // Assert that there are no transactions
-      await expect(accountPage.transactionTable).toHaveText('No transactions');
+      await expect(accountPage.transactionTable).toHaveText(
+        'No transactions match your search or filters.',
+      );
       await expect(page).toMatchThemeScreenshots();
     });
 
@@ -376,6 +378,8 @@ test.describe('Transactions', () => {
 
   test.describe('notes tags', () => {
     test('removes a single tag from the notes without shifting the layout', async () => {
+      // Keep both tags fully visible; the next test covers truncated notes.
+      await page.setViewportSize({ width: 1440, height: 900 });
       await accountPage.createSingleTransaction({
         payee: 'Kroger',
         notes: '#work coffee with #friends',

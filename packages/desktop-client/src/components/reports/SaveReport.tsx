@@ -1,7 +1,8 @@
-import React, { createRef, useRef, useState } from 'react';
+import React, { createRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { Popover } from '@actual-app/components/popover';
 import { Select } from '@actual-app/components/select';
@@ -82,10 +83,12 @@ export function SaveReport({
   dashboardPages,
 }: SaveReportProps) {
   const { data: listReports = [] } = useReports();
-  const triggerRef = useRef(null);
   const [deleteMenuOpen, setDeleteMenuOpen] = useState(false);
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const mainMenu = useHoverMenu();
+  const { triggerRef } = mainMenu;
+  const setMenuOpen = (isOpen: boolean) =>
+    isOpen ? mainMenu.open() : mainMenu.close();
   const [chooseMenuOpen, setChooseMenuOpen] = useState(false);
   const [menuItem, setMenuItem] = useState('');
   const [err, setErr] = useState('');
@@ -250,10 +253,9 @@ export function SaveReport({
     >
       <Button
         ref={triggerRef}
+        {...mainMenu.triggerProps}
         variant="bare"
-        onPress={() => {
-          setMenuOpen(true);
-        }}
+        onPress={mainMenu.toggle}
       >
         <Text
           style={{
@@ -274,12 +276,7 @@ export function SaveReport({
         <SvgExpandArrow width={8} height={8} style={{ marginRight: 5 }} />
       </Button>
 
-      <Popover
-        triggerRef={triggerRef}
-        isOpen={menuOpen}
-        onOpenChange={() => setMenuOpen(false)}
-        style={{ width: 150 }}
-      >
+      <Popover {...mainMenu.popoverProps} style={{ width: 150 }}>
         <SaveReportMenu
           onMenuSelect={onMenuSelect}
           savedStatus={savedStatus}

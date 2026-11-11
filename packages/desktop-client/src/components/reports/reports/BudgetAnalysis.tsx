@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
 import { Block } from '@actual-app/components/block';
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgDownload } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
@@ -71,20 +72,14 @@ function OptionsButton({
   onToggleShowHiddenCategories,
 }: OptionsButtonProps) {
   const { t } = useTranslation();
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle } = useHoverMenu();
 
   return (
     <>
-      <Button ref={triggerRef} onPress={() => setIsOpen(true)}>
+      <Button ref={triggerRef} onPress={toggle} {...triggerProps}>
         <Trans>Options</Trans>
       </Button>
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom end"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom end">
         <Menu
           onMenuSelect={item => {
             if (item === 'graph-type') onToggleGraphType();

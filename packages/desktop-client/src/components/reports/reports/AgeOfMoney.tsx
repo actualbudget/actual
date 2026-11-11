@@ -1,14 +1,9 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { SvgCalendar } from '@actual-app/components/icons/v1';
 import { Menu } from '@actual-app/components/menu';
@@ -410,8 +405,8 @@ function GranularitySelector({
 }) {
   const { t } = useTranslation();
 
-  const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const { triggerRef, triggerProps, popoverProps, toggle, close } =
+    useHoverMenu();
 
   const options: Array<{ key: AgeOfMoneyGranularity; description: string }> = [
     { key: 'daily', description: t('Daily') },
@@ -427,23 +422,19 @@ function GranularitySelector({
       <Button
         ref={triggerRef}
         variant="bare"
-        onPress={() => setIsOpen(true)}
+        onPress={toggle}
+        {...triggerProps}
         aria-label={t('Change granularity')}
       >
         <SvgCalendar style={{ width: 12, height: 12 }} />
         <span style={{ marginLeft: 5 }}>{currentLabel}</span>
       </Button>
 
-      <Popover
-        triggerRef={triggerRef}
-        placement="bottom start"
-        isOpen={isOpen}
-        onOpenChange={() => setIsOpen(false)}
-      >
+      <Popover {...popoverProps} placement="bottom start">
         <Menu
           onMenuSelect={item => {
             onChange(item as AgeOfMoneyGranularity);
-            setIsOpen(false);
+            close();
           }}
           items={options.map(({ key, description }) => ({
             name: key,

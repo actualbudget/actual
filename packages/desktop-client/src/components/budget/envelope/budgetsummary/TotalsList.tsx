@@ -3,12 +3,13 @@ import type { CSSProperties } from 'react';
 import { Trans } from 'react-i18next';
 
 import { AlignedText } from '@actual-app/components/aligned-text';
-import { Block } from '@actual-app/components/block';
 import { styles } from '@actual-app/components/styles';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
 import { EnvelopeCellValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { SummaryRow } from '#components/budget/SummaryCard';
+import { Term } from '#components/common/Term';
 import { CellValueText } from '#components/spreadsheet/CellValue';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
@@ -28,7 +29,7 @@ function makeSignedFormatter(
   return (value: number, type?: FormatType) => {
     const v = format(Math.abs(value), type);
     if (value === 0) {
-      return '-' + v;
+      return v;
     }
     const isPositive = value > 0;
     return invert
@@ -44,120 +45,134 @@ function makeSignedFormatter(
 type TotalsListProps = {
   prevMonthName: string;
   style?: CSSProperties;
+  /** Render as a compact tooltip body instead of summary rows. */
+  compact?: boolean;
 };
 
-export function TotalsList({ prevMonthName, style }: TotalsListProps) {
+/**
+ * Explains how the "To budget" figure is calculated: available funds, minus
+ * last month's overspending, minus what has been budgeted, minus money put
+ * aside for next month.
+ */
+export function TotalsList({ prevMonthName, style, compact }: TotalsListProps) {
   const format = useFormat();
   const signedFormatter = makeSignedFormatter(format);
   const invertedSignedFormatter = makeSignedFormatter(format, true);
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        lineHeight: 1.5,
-        justifyContent: 'center',
-        ...styles.smallText,
-        ...style,
-      }}
+
+  const availableFunds = (
+    <Tooltip
+      style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
+      content={
+        <>
+          <AlignedText
+            left={<Trans>Income this month:</Trans>}
+            right={
+              <EnvelopeCellValue
+                binding={envelopeBudget.totalIncome}
+                type="financial"
+              />
+            }
+          />
+          <AlignedText
+            left={<Trans>Left over from last month:</Trans>}
+            right={
+              <EnvelopeCellValue
+                binding={envelopeBudget.fromLastMonth}
+                type="financial"
+              />
+            }
+          />
+        </>
+      }
+      placement="bottom end"
     >
-      <View
-        style={{
-          textAlign: 'right',
-          marginRight: 10,
-          minWidth: 50,
-        }}
+      <EnvelopeCellValue
+        binding={envelopeBudget.incomeAvailable}
+        type="financial"
       >
-        <Tooltip
-          style={{ ...styles.tooltip, lineHeight: 1.5, padding: '6px 10px' }}
-          content={
-            <>
-              <AlignedText
-                left="Income:"
-                right={
-                  <EnvelopeCellValue
-                    binding={envelopeBudget.totalIncome}
-                    type="financial"
-                  />
-                }
-              />
-              <AlignedText
-                left="From Last Month:"
-                right={
-                  <EnvelopeCellValue
-                    binding={envelopeBudget.fromLastMonth}
-                    type="financial"
-                  />
-                }
-              />
-            </>
-          }
-          placement="bottom end"
-        >
-          <EnvelopeCellValue
-            binding={envelopeBudget.incomeAvailable}
-            type="financial"
-          >
-            {props => <CellValueText {...props} style={{ fontWeight: 600 }} />}
-          </EnvelopeCellValue>
-        </Tooltip>
+        {props => <CellValueText {...props} />}
+      </EnvelopeCellValue>
+    </Tooltip>
+  );
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.lastMonthOverspent}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={signedFormatter}
-            />
-          )}
-        </EnvelopeCellValue>
+  const overspent = (
+    <EnvelopeCellValue
+      binding={envelopeBudget.lastMonthOverspent}
+      type="financial"
+    >
+      {props => <CellValueText {...props} formatter={signedFormatter} />}
+    </EnvelopeCellValue>
+  );
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.totalBudgeted}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={signedFormatter}
-            />
-          )}
-        </EnvelopeCellValue>
+  const budgeted = (
+    <EnvelopeCellValue binding={envelopeBudget.totalBudgeted} type="financial">
+      {props => <CellValueText {...props} formatter={signedFormatter} />}
+    </EnvelopeCellValue>
+  );
 
-        <EnvelopeCellValue
-          binding={envelopeBudget.forNextMonth}
-          type="financial"
-        >
-          {props => (
-            <CellValueText
-              {...props}
-              style={{ fontWeight: 600 }}
-              formatter={invertedSignedFormatter}
-            />
-          )}
-        </EnvelopeCellValue>
+  const forNextMonth = (
+    <EnvelopeCellValue binding={envelopeBudget.forNextMonth} type="financial">
+      {props => (
+        <CellValueText {...props} formatter={invertedSignedFormatter} />
+      )}
+    </EnvelopeCellValue>
+  );
+
+  if (compact) {
+    return (
+      <View style={{ gap: 2, ...styles.smallText, ...style }}>
+        <AlignedText
+          left={<Trans>Available funds</Trans>}
+          right={availableFunds}
+        />
+        <AlignedText
+          left={<Trans>Overspent in {{ prevMonthName }}</Trans>}
+          right={overspent}
+        />
+        <AlignedText left={<Trans>Budgeted</Trans>} right={budgeted} />
+        <AlignedText
+          left={<Trans>For next month</Trans>}
+          right={forNextMonth}
+        />
       </View>
+    );
+  }
 
-      <View>
-        <Block>
-          <Trans>Available funds</Trans>
-        </Block>
-
-        <Block>
-          <Trans>Overspent in {{ prevMonthName }}</Trans>
-        </Block>
-
-        <Block>
-          <Trans>Budgeted</Trans>
-        </Block>
-
-        <Block>
-          <Trans>For next month</Trans>
-        </Block>
-      </View>
+  return (
+    <View data-testid="budget-totals-list" style={{ gap: 8, ...style }}>
+      <SummaryRow
+        emphasized
+        label={
+          <Term id="available-funds" isFocusable={false}>
+            <Trans>Available funds</Trans>
+          </Term>
+        }
+        value={availableFunds}
+      />
+      <SummaryRow
+        label={
+          <Term id="overspent-last-month" isFocusable={false}>
+            <Trans>Overspent in {{ prevMonthName }}</Trans>
+          </Term>
+        }
+        value={overspent}
+      />
+      <SummaryRow
+        label={
+          <Term id="budgeted-this-month" isFocusable={false}>
+            <Trans>Budgeted</Trans>
+          </Term>
+        }
+        value={budgeted}
+      />
+      <SummaryRow
+        label={
+          <Term id="for-next-month" isFocusable={false}>
+            <Trans>For next month</Trans>
+          </Term>
+        }
+        value={forNextMonth}
+      />
     </View>
   );
 }

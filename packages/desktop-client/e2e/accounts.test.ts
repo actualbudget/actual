@@ -225,12 +225,14 @@ test.describe('Accounts', () => {
       .getByTestId('cleared')
       .click();
 
-    await page.getByRole('button', { name: 'Reconcile' }).click();
+    await page.getByRole('button', { name: 'Reconcile', exact: true }).click();
     // The reconciliation amount is pre-filled with the cleared balance,
     // so submitting right away results in a zero difference.
     const reconcilePopover = page.locator('[data-popover]');
     await reconcilePopover.getByRole('textbox').waitFor();
-    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+    await reconcilePopover
+      .getByRole('button', { name: 'Reconcile', exact: true })
+      .click();
     await page.getByRole('button', { name: 'Lock transactions' }).click();
 
     // Showing the running balance keeps reconciled transactions loaded
@@ -339,7 +341,7 @@ test.describe('Accounts', () => {
 
     async function importRows(rows: string[]) {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await page.getByRole('button', { name: 'Import' }).click();
+      await page.getByRole('button', { name: 'Import', exact: true }).click();
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles({
         name: 'transactions.csv',
@@ -366,10 +368,12 @@ test.describe('Accounts', () => {
       ),
     );
 
-    await page.getByRole('button', { name: 'Reconcile' }).click();
+    await page.getByRole('button', { name: 'Reconcile', exact: true }).click();
     const reconcilePopover = page.locator('[data-popover]');
     await reconcilePopover.getByRole('textbox').waitFor();
-    await reconcilePopover.getByRole('button', { name: 'Reconcile' }).click();
+    await reconcilePopover
+      .getByRole('button', { name: 'Reconcile', exact: true })
+      .click();
     await page.getByRole('button', { name: 'Lock transactions' }).click();
 
     await importRows(['2024-06-01,Recent,not-reconciled,,-10.00']);
@@ -548,7 +552,7 @@ test.describe('Accounts', () => {
 
     async function importCsv(screenshot = false) {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page.getByTestId('import-transactions-button').click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -572,7 +576,7 @@ test.describe('Accounts', () => {
 
     test('preserves QIF categories in preview and imported transactions', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page.getByTestId('import-transactions-button').click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/qif-categories.qif'));
@@ -599,7 +603,7 @@ test.describe('Accounts', () => {
       await importCsv(false);
 
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page.getByTestId('import-transactions-button').click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));
@@ -623,7 +627,9 @@ test.describe('Accounts', () => {
     test('imports a new transaction when an unchecked match has the same amount', async () => {
       async function openCsv(content: string) {
         const fileChooserPromise = page.waitForEvent('filechooser');
-        await accountPage.page.getByRole('button', { name: 'Import' }).click();
+        await accountPage.page
+          .getByTestId('import-transactions-button')
+          .click();
         const fileChooser = await fileChooserPromise;
         await fileChooser.setFiles({
           name: 'same-amount.csv',
@@ -671,7 +677,7 @@ test.describe('Accounts', () => {
 
     test('import notes checkbox is not shown for CSV files', async () => {
       const fileChooserPromise = page.waitForEvent('filechooser');
-      await accountPage.page.getByRole('button', { name: 'Import' }).click();
+      await accountPage.page.getByTestId('import-transactions-button').click();
 
       const fileChooser = await fileChooserPromise;
       await fileChooser.setFiles(join(__dirname, 'data/test.csv'));

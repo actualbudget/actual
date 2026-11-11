@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { DragItem } from 'react-aria';
 import {
@@ -12,6 +12,7 @@ import {
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { useHoverMenu } from '@actual-app/components/hooks/useHoverMenu';
 import { SvgExpandArrow } from '@actual-app/components/icons/v0';
 import { SvgMenu } from '@actual-app/components/icons/v1';
 import { Popover } from '@actual-app/components/popover';
@@ -38,10 +39,12 @@ export function DashboardSelector({
 }: DashboardSelectorProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const triggerRef = useRef(null);
+  const menu = useHoverMenu();
+  const triggerRef = menu.triggerRef;
+  const menuOpen = menu.isOpen;
+  const setMenuOpen = (open: boolean) => (open ? menu.open() : menu.close());
   const gridListRef = useRef<HTMLDivElement>(null);
   const addDashboardButtonRef = useRef<HTMLButtonElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const createDashboardPageMutation = useCreateDashboardPageMutation();
   const moveDashboardPageMutation = useMoveDashboardPageMutation();
@@ -118,7 +121,8 @@ export function DashboardSelector({
     <DialogTrigger>
       <Button
         ref={triggerRef}
-        onPress={() => setMenuOpen(true)}
+        {...menu.triggerProps}
+        onPress={menu.toggle}
         style={{
           flexGrow: 1,
           flexShrink: 1,
@@ -160,6 +164,7 @@ export function DashboardSelector({
 
       {menuOpen && (
         <Popover
+          {...menu.popoverProps}
           triggerRef={triggerRef}
           isOpen
           onOpenChange={setMenuOpen}

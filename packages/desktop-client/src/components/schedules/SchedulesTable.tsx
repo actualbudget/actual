@@ -16,6 +16,7 @@ import { getScheduledAmount } from '@actual-app/core/shared/schedules';
 import type { ScheduleStatuses } from '@actual-app/core/shared/schedules';
 import type { ScheduleEntity } from '@actual-app/core/types/models';
 
+import { Term } from '#components/common/Term';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { Cell, Field, Row, Table, TableHeader } from '#components/table';
@@ -166,8 +167,9 @@ function ScheduleRow({
   const buttonRef = useRef(null);
 
   const status = statuses.get(schedule.id);
-  useContextMenu({
+  const { handleContextMenu, hoverProps } = useContextMenu({
     triggerRef: rowRef,
+    anchorRef: buttonRef,
     items: !minimal
       ? [
           {
@@ -261,22 +263,10 @@ function ScheduleRow({
           <View>
             <Button
               ref={buttonRef}
+              {...hoverProps}
               variant="bare"
               aria-label={t('Menu')}
-              onPress={() => {
-                if (rowRef.current) {
-                  const rect = buttonRef.current?.getBoundingClientRect();
-                  const clientX = rect ? rect.left : 0;
-                  const clientY = rect ? rect.bottom : 0;
-                  (rowRef.current as HTMLElement).dispatchEvent(
-                    new MouseEvent('contextmenu', {
-                      bubbles: true,
-                      clientX,
-                      clientY,
-                    }),
-                  );
-                }
-              }}
+              onPress={handleContextMenu}
             >
               <SvgDotsHorizontalTriple
                 width={15}
@@ -401,22 +391,34 @@ export function SchedulesTable({
   }
 
   return (
-    <View style={{ ...styles.tableContainer, ...tableStyle }}>
+    <View
+      style={{
+        ...styles.tableContainer,
+        ...(minimal ? {} : { border: 'none', borderRadius: 0 }),
+        ...tableStyle,
+      }}
+    >
       <TableHeader height={ROW_HEIGHT} inset={15}>
         <Field width="flex">
           <Trans>Name</Trans>
         </Field>
         <Field width="flex">
-          <Trans>Payee</Trans>
+          <Term id="payee" isFocusable={false}>
+            <Trans>Payee</Trans>
+          </Term>
         </Field>
         <Field width="flex">
-          <Trans>Account</Trans>
+          <Term id="account" isFocusable={false}>
+            <Trans>Account</Trans>
+          </Term>
         </Field>
         <Field width={110}>
           <Trans>Next date</Trans>
         </Field>
         <Field width={120}>
-          <Trans>Status</Trans>
+          <Term id="schedule-status" isFocusable={false}>
+            <Trans>Status</Trans>
+          </Term>
         </Field>
         <Field width={100} style={{ textAlign: 'right' }}>
           <Trans>Amount</Trans>
@@ -435,7 +437,33 @@ export function SchedulesTable({
         style={{ flex: 1, backgroundColor: 'transparent', ...style }}
         items={items as ScheduleEntity[]}
         renderItem={renderItem}
-        renderEmpty={filter ? t('No matching schedules') : t('No schedules')}
+        renderEmpty={
+          filter ? (
+            t('No matching schedules')
+          ) : (
+            <View
+              style={{
+                alignItems: 'center',
+                gap: 6,
+                padding: '40px 20px',
+                color: theme.pageTextLight,
+                fontStyle: 'normal',
+                textAlign: 'center',
+              }}
+            >
+              <Text style={{ fontWeight: 600, color: theme.pageText }}>
+                <Trans>No schedules yet</Trans>
+              </Text>
+              <Text style={{ maxWidth: 420, lineHeight: '1.4em' }}>
+                <Trans>
+                  Add a schedule for bills and income that repeat — like rent,
+                  salary or subscriptions — and they will show up here and in
+                  your accounts before they happen.
+                </Trans>
+              </Text>
+            </View>
+          )
+        }
       />
     </View>
   );

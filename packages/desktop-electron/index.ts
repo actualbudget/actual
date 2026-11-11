@@ -810,7 +810,7 @@ ipcMain.handle(
 export type SaveFileDialogPayload = {
   title: SaveDialogOptions['title'];
   defaultPath?: SaveDialogOptions['defaultPath'];
-  fileContents: string | Buffer;
+  fileContents: string | Buffer | Uint8Array;
 };
 
 ipcMain.handle(

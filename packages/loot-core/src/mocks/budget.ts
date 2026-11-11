@@ -1053,4 +1053,13 @@ export async function createTestBudget(handlers: Handlers) {
 
   // Create a budget
   await createBudget(accounts, payees, allGroups);
+
+  // Make sure the demo shows the current default dashboard (including the
+  // "Money Flow" Sankey card), whatever the state the migrations left it in.
+  const dashboardPages = await db.all<{ id: string }>(
+    'SELECT id FROM dashboard_pages WHERE tombstone = 0',
+  );
+  for (const page of dashboardPages) {
+    await runHandler(handlers['dashboard-reset'], page.id);
+  }
 }

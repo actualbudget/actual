@@ -47,14 +47,20 @@ type AggregatedBudget = {
   endMonth: string;
 };
 
-type SankeyNode = {
+export type SankeyNode = {
   name: string;
   percentageLabel?: string;
   key: string;
   color?: string;
+  /** The graph layer the node belongs to. */
+  layer?: GraphLayer;
+  /** For "Other" buckets: the keys of the nodes folded into it. */
+  members?: string[];
+  /** Whether the node represents a negative (reversed) flow. */
+  isNegative?: boolean;
 };
 
-type SankeyLink = {
+export type SankeyLink = {
   source: number;
   target: number;
   value: number;
@@ -62,7 +68,7 @@ type SankeyLink = {
   color?: string;
 };
 
-type SankeyData = {
+export type SankeyData = {
   nodes: SankeyNode[];
   links: SankeyLink[];
 };
@@ -111,6 +117,8 @@ export type NodeData = {
   tooltipInfo?: Array<{ name: string; value: number }>;
   percentageLabel?: string;
   color?: string;
+  /** For "Other" buckets: the keys of the nodes that were folded into it. */
+  members?: NodeKey[];
 };
 export type Graph = Map<NodeKey, NodeData>;
 type VisualLayerIndex = number;
@@ -120,7 +128,7 @@ type TooltipInfoMap = Map<
   Map<NodeKey, Array<{ name: string; value: number }>>
 >;
 
-const SpecialNodeKeys = {
+export const SpecialNodeKeys = {
   ToBudget: 'to_budget',
   Budgeted: 'budgeted',
   LastMonthOverspent: 'last_month_overspent',
@@ -414,6 +422,7 @@ function cloneGraph(graph: Graph): Graph {
       ...node,
       to: new Map(node.to),
       tooltipInfo: node.tooltipInfo?.map(info => ({ ...info })),
+      members: node.members ? [...node.members] : undefined,
     });
   }
 
@@ -1283,6 +1292,13 @@ function moveToOther(
 
   // Make sure the Other node exists
   addNode(graph, otherKey, nodeData.type, 'Other');
+  const otherNode = graph.get(otherKey);
+  if (otherNode) {
+    otherNode.members = [
+      ...(otherNode.members ?? []),
+      ...(nodeData.members ?? [key]),
+    ];
+  }
 
   fromNodes.forEach(([fromKey, fromData]) => {
     const linkValue = fromData.to.get(key);
@@ -1646,7 +1662,7 @@ function addColors(graph: Graph) {
   setColor(graph, SpecialNodeKeys.AllAccounts, theme.reportsBlue);
 }
 
-function colorIndexFromKey(key: string, colorCount: number): number {
+export function colorIndexFromKey(key: string, colorCount: number): number {
   // Use the first three chars of the key (UUID) as a stable random value
   const hex = key.replace(/[^0-9a-f]/gi, '').slice(0, 3);
   const val = parseInt(hex || '0', 16);
@@ -1933,13 +1949,16 @@ export function convertToSankeyData(
   graph: Graph,
   toolTipInfoMap: TooltipInfoMap,
 ): SankeyData {
-  const nodes = Array.from(graph, ([key, data]) => ({
+  const nodes: SankeyNode[] = Array.from(graph, ([key, data]) => ({
     key,
     name: data.labelKey
       ? t(data.labelKey, data.labelParams)
       : (data.name ?? key),
     percentageLabel: data.percentageLabel ?? '',
     color: data.color ?? undefined,
+    layer: data.type,
+    members: data.members,
+    isNegative: data.isNegative,
   }));
   const links = Array.from(graph).flatMap(([key, data]) =>
     Array.from(data.to, ([targetKey, value]) => {

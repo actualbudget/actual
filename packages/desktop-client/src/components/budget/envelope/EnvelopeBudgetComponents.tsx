@@ -10,7 +10,6 @@ import {
 } from '@actual-app/components/icons/v2';
 import { Popover } from '@actual-app/components/popover';
 import { styles } from '@actual-app/components/styles';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
@@ -18,6 +17,7 @@ import { css } from '@emotion/css';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
 import { makeAmountGrey } from '#components/budget/util';
+import { Term } from '#components/common/Term';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, Row, SheetCell } from '#components/table';
@@ -65,11 +65,18 @@ const EnvelopeSheetCell = <FieldName extends SheetFields<'envelope-budget'>>(
 const headerLabelStyle: CSSProperties = {
   flex: 1,
   padding: '0 5px',
+  alignItems: 'flex-end',
   textAlign: 'right',
 };
 
-const cellStyle: CSSProperties = {
+const headerTermStyle: CSSProperties = {
   color: theme.tableHeaderText,
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const cellStyle: CSSProperties = {
+  color: theme.pageText,
   fontWeight: 600,
 };
 
@@ -86,30 +93,34 @@ export const BudgetTotalsMonth = memo(function BudgetTotalsMonth() {
       }}
     >
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="budgeted" style={headerTermStyle} isFocusable={false}>
           <Trans>Budgeted</Trans>
-        </Text>
+        </Term>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBudgeted}
           type="financial"
         >
           {props => (
-            <CellValueText {...props} value={-props.value} style={cellStyle} />
+            <CellValueText
+              {...props}
+              value={props.value === 0 ? 0 : -props.value}
+              style={cellStyle}
+            />
           )}
         </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="spent" style={headerTermStyle} isFocusable={false}>
           <Trans>Spent</Trans>
-        </Text>
+        </Term>
         <EnvelopeCellValue binding={envelopeBudget.totalSpent} type="financial">
           {props => <CellValueText {...props} style={cellStyle} />}
         </EnvelopeCellValue>
       </View>
       <View style={headerLabelStyle}>
-        <Text style={{ color: theme.tableHeaderText }}>
+        <Term id="balance" style={headerTermStyle} isFocusable={false}>
           <Trans>Balance</Trans>
-        </Text>
+        </Term>
         <EnvelopeCellValue
           binding={envelopeBudget.totalBalance}
           type="financial"
@@ -128,11 +139,12 @@ export function IncomeHeaderMonth() {
         color: theme.tableHeaderText,
         alignItems: 'center',
         paddingRight: 10,
-        backgroundColor: theme.budgetCurrentMonth,
       }}
     >
-      <View style={{ flex: 1, textAlign: 'right' }}>
-        <Trans>Received</Trans>
+      <View style={{ flex: 1, alignItems: 'flex-end' }}>
+        <Term id="received" style={headerTermStyle} isFocusable={false}>
+          <Trans>Received</Trans>
+        </Term>
       </View>
     </Row>
   );

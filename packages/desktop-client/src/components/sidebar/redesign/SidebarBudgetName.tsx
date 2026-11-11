@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -14,7 +15,10 @@ import { View } from '@actual-app/components/view';
 import { isElectron } from '@actual-app/core/shared/environment';
 import { css, cx } from '@emotion/css';
 
+import { closeBudget } from '#budgetfiles/budgetfilesSlice';
+import { useContextMenu } from '#hooks/useContextMenu';
 import { useMetadataPref } from '#hooks/useMetadataPref';
+import { useNavigate } from '#hooks/useNavigate';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
@@ -30,6 +34,36 @@ export function SidebarBudgetName({
   const { t } = useTranslation();
   const [budgetName, setBudgetNamePref] = useMetadataPref('budgetName');
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const nameRef = useRef<HTMLDivElement>(null);
+
+  // Right-clicking the name offers the same shortcuts as the classic sidebar.
+  useContextMenu({
+    triggerRef: nameRef,
+    items: [
+      {
+        name: 'rename',
+        text: t('Rename budget'),
+        onClick: () => onEditingChange(true),
+      },
+      {
+        name: 'settings',
+        text: t('Settings'),
+        onClick: () => void navigate('/settings'),
+      },
+      isElectron() && {
+        name: 'loadBackup',
+        text: t('Load Backup…'),
+        onClick: () =>
+          dispatch(pushModal({ modal: { name: 'load-backup', options: {} } })),
+      },
+      {
+        name: 'close',
+        text: t('Switch file'),
+        onClick: () => void dispatch(closeBudget()),
+      },
+    ],
+  });
 
   const iconButtonClassName = cx(
     'hover-visible',
@@ -51,6 +85,7 @@ export function SidebarBudgetName({
   return (
     <>
       <View
+        innerRef={nameRef}
         style={{
           flexDirection: 'row',
           alignItems: 'center',

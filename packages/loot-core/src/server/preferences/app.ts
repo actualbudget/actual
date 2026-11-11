@@ -197,7 +197,7 @@ async function loadGlobalPrefs(): Promise<GlobalPrefs> {
       theme === 'auto' ||
       theme === 'midnight'
         ? theme
-        : 'auto',
+        : 'light',
     preferredDarkTheme:
       preferredDarkTheme === 'dark' || preferredDarkTheme === 'midnight'
         ? preferredDarkTheme

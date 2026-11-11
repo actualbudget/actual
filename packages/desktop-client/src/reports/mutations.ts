@@ -47,6 +47,15 @@ function invalidateDashboardQueries(
   });
 }
 
+// Errors crossing the server boundary keep their machine-readable `code`.
+function isDuplicateWidgetError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { code?: unknown }).code === 'duplicate-widget'
+  );
+}
+
 function dispatchErrorNotification(
   dispatch: AppDispatch,
   message: string,
@@ -338,6 +347,15 @@ export function useAddDashboardWidgetMutation() {
     },
     onSuccess: () => invalidateDashboardQueries(queryClient),
     onError: error => {
+      if (isDuplicateWidgetError(error)) {
+        dispatchErrorNotification(
+          dispatch,
+          t(
+            'This dashboard already has a widget showing the same data, so it was not added again.',
+          ),
+        );
+        return;
+      }
       console.error('Error adding dashboard widget:', error);
       dispatchErrorNotification(
         dispatch,
@@ -397,6 +415,15 @@ export function useCopyDashboardWidgetMutation() {
     },
     onSuccess: () => invalidateDashboardQueries(queryClient),
     onError: error => {
+      if (isDuplicateWidgetError(error)) {
+        dispatchErrorNotification(
+          dispatch,
+          t(
+            'The selected dashboard already has a widget showing the same data, so it was not copied.',
+          ),
+        );
+        return;
+      }
       console.error('Error copying dashboard widget:', error);
       dispatchErrorNotification(
         dispatch,

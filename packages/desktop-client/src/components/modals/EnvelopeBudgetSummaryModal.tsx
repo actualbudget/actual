@@ -142,6 +142,7 @@ export function EnvelopeBudgetSummaryModal({
             />
             <ToBudgetAmount
               prevMonthName={prevMonthName}
+              align="center"
               style={{ ...styles.mediumText, marginTop: spacing.lg }}
               isTotalsListTooltipDisabled
             />

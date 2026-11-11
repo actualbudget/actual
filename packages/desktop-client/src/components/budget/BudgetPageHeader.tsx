@@ -1,47 +1,69 @@
-// @ts-strict-ignore
 import React, { memo } from 'react';
-import type { ComponentProps } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
+import { Button } from '@actual-app/components/button';
 import { View } from '@actual-app/components/view';
 
-import { useGlobalPref } from '#hooks/useGlobalPref';
+import { PageTitle } from '#components/PageTitle';
+import { useSyncedPref } from '#hooks/useSyncedPref';
 
-import { MonthPicker } from './MonthPicker';
-import { getScrollbarWidth } from './util';
+import { MonthCountSelector } from './MonthCountSelector';
 
 type BudgetPageHeaderProps = {
-  startMonth: string;
-  onMonthSelect: (month: string) => void;
-  numMonths: number;
-  monthBounds: ComponentProps<typeof MonthPicker>['monthBounds'];
+  maxMonths: number;
+  onMaxMonthsChange: (value: number) => void;
+  onGoToToday: () => void;
 };
 
+/**
+ * Title row of the budget page. The month itself is chosen with the month
+ * strip rendered above the table, so this row only carries the page title,
+ * a one-line explanation for newcomers, and the page-level controls.
+ */
 export const BudgetPageHeader = memo<BudgetPageHeaderProps>(
-  ({ startMonth, onMonthSelect, numMonths, monthBounds }) => {
-    const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
-    const categoryExpandedState = categoryExpandedStatePref ?? 0;
-    const offsetMultipleMonths = numMonths === 1 ? 4 : 0;
+  ({ maxMonths, onMaxMonthsChange, onGoToToday }) => {
+    const { t } = useTranslation();
+    const [budgetType = 'envelope'] = useSyncedPref('budgetType');
 
     return (
       <View
+        data-testid="budget-page-header"
         style={{
-          marginLeft:
-            200 + 100 * categoryExpandedState + 5 - offsetMultipleMonths,
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 16,
           flexShrink: 0,
+          paddingBottom: 14,
         }}
       >
+        <PageTitle
+          title={t('Budget')}
+          subtitle={
+            budgetType === 'tracking'
+              ? t(
+                  'Set a target for each category and compare it with what actually happened. Click any budgeted amount to change it.',
+                )
+              : t(
+                  'Give every dollar in your accounts a job by assigning it to a category. Click any budgeted amount to change it.',
+                )
+          }
+        />
         <View
           style={{
-            marginRight: 5 + getScrollbarWidth() - offsetMultipleMonths,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            flexShrink: 0,
           }}
         >
-          <MonthPicker
-            startMonth={startMonth}
-            numDisplayed={numMonths}
-            monthBounds={monthBounds}
-            style={{ paddingTop: 5 }}
-            onSelect={month => onMonthSelect(month)}
+          <MonthCountSelector
+            maxMonths={maxMonths}
+            onChange={onMaxMonthsChange}
           />
+          <Button variant="normal" onPress={onGoToToday}>
+            <Trans>Today</Trans>
+          </Button>
         </View>
       </View>
     );

@@ -26,6 +26,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { accountQueries } from '#accounts';
 import { resetApp, setAppState } from '#app/appSlice';
 import type { SelectLinkedAccountsModalProps } from '#components/modals/SelectLinkedAccountsModal';
+import type { DashboardExportFormat } from '#components/reports/dashboardExport';
 import type { TransactionTableColumn } from '#components/transactions/table/columns';
 import { createAppAsyncThunk } from '#redux';
 import { signOut } from '#users/usersSlice';
@@ -622,6 +623,13 @@ export type Modal =
       name: 'copy-widget-to-dashboard';
       options: {
         onSelect: (dashboardId: string) => void;
+      };
+    }
+  | {
+      name: 'export-dashboard';
+      options: {
+        dashboardName: string;
+        onExport: (format: DashboardExportFormat) => Promise<void>;
       };
     }
   | {

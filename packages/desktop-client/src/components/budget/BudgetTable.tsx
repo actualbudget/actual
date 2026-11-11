@@ -19,6 +19,9 @@ import { useLocalPref } from '#hooks/useLocalPref';
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
+import type { SummaryLayout } from './DynamicBudgetTable';
+import { SIDE_PANEL_GAP, SIDE_PANEL_WIDTH } from './DynamicBudgetTable';
+import { MonthPicker } from './MonthPicker';
 import { MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
@@ -28,12 +31,20 @@ import {
   separateGroups,
 } from './util';
 
+import { useBudgetComponents } from '.';
+
 type BudgetTableProps = {
   type: string;
   prewarmStartMonth: string;
   startMonth: string;
   numMonths: number;
   monthBounds: MonthBounds;
+  /**
+   * Where the month summary is rendered: as a panel beside the table
+   * (single month) or stacked above each month column.
+   */
+  summaryLayout?: SummaryLayout;
+  onMonthSelect: (month: string) => void;
   onSaveCategory: (category: CategoryEntity) => void;
   onDeleteCategory: (id: CategoryEntity['id']) => void;
   onSaveGroup: (group: CategoryGroupEntity) => void;
@@ -65,6 +76,8 @@ export function BudgetTable(props: BudgetTableProps) {
     startMonth,
     numMonths,
     monthBounds,
+    summaryLayout = 'top',
+    onMonthSelect,
     onSaveCategory,
     onDeleteCategory,
     onSaveGroup,
@@ -244,50 +257,34 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const schedulesQuery = useMemo(() => q('schedules').select('*'), []);
+  const { SummaryComponent } = useBudgetComponents();
+  const categoryWidth = 200 + 100 * categoryExpandedState;
 
-  return (
-    <View
-      data-testid="budget-table"
-      style={{
-        flex: 1,
-        ...(styles.lightScrollbar && {
-          '& ::-webkit-scrollbar': {
-            backgroundColor: 'transparent',
-          },
-          '& ::-webkit-scrollbar-thumb:vertical': {
-            backgroundColor: theme.pageTextSubdued,
-            // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
-          },
-        }),
-      }}
+  const monthPicker = (
+    <MonthPicker
+      startMonth={prewarmStartMonth}
+      numDisplayed={numMonths}
+      monthBounds={monthBounds}
+      style={{ paddingBottom: 10 }}
+      onSelect={onMonthSelect}
+    />
+  );
+
+  const table = (
+    <MonthsProvider
+      startMonth={startMonth}
+      numMonths={numMonths}
+      monthBounds={monthBounds}
+      type={type}
     >
       <View
+        data-testid="budget-table-card"
         style={{
-          flexDirection: 'row',
+          ...styles.card,
+          flex: 1,
+          minHeight: 0,
           overflow: 'hidden',
-          flexShrink: 0,
-          // This is necessary to align with the table because the
-          // table has this padding to allow the shadow to show
-          paddingLeft: 5,
-          paddingRight: 5 + getScrollbarWidth(),
         }}
-      >
-        <View style={{ width: 200 + 100 * categoryExpandedState }} />
-        <MonthsProvider
-          startMonth={prewarmStartMonth}
-          numMonths={numMonths}
-          monthBounds={monthBounds}
-          type={type}
-        >
-          <BudgetSummaries />
-        </MonthsProvider>
-      </View>
-
-      <MonthsProvider
-        startMonth={startMonth}
-        numMonths={numMonths}
-        monthBounds={monthBounds}
-        type={type}
       >
         <BudgetTotals
           toggleHiddenCategories={toggleHiddenCategories}
@@ -301,8 +298,6 @@ export function BudgetTable(props: BudgetTableProps) {
             overflowY: 'scroll',
             overflowAnchor: 'none',
             flex: 1,
-            paddingLeft: 5,
-            paddingRight: 5,
           }}
         >
           <View
@@ -331,7 +326,93 @@ export function BudgetTable(props: BudgetTableProps) {
             </SchedulesProvider>
           </View>
         </View>
-      </MonthsProvider>
+      </View>
+    </MonthsProvider>
+  );
+
+  const scrollbarStyle = styles.lightScrollbar && {
+    '& ::-webkit-scrollbar': {
+      backgroundColor: 'transparent',
+    },
+    '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: theme.pageTextSubdued,
+      // changed from tableHeaderBackground. pageTextSubdued is always visible on pageBackground
+    },
+  };
+
+  if (summaryLayout === 'side') {
+    return (
+      <View
+        data-testid="budget-table"
+        data-summary-layout="side"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          flexDirection: 'row',
+          gap: SIDE_PANEL_GAP,
+          ...scrollbarStyle,
+        }}
+      >
+        <View style={{ flex: 1, minWidth: 0 }}>
+          {monthPicker}
+          {table}
+        </View>
+        <View
+          data-testid="budget-summary-panel"
+          style={{
+            width: SIDE_PANEL_WIDTH,
+            flexShrink: 0,
+            overflowY: 'auto',
+          }}
+        >
+          <MonthsProvider
+            startMonth={prewarmStartMonth}
+            numMonths={numMonths}
+            monthBounds={monthBounds}
+            type={type}
+          >
+            <SummaryComponent month={prewarmStartMonth} />
+          </MonthsProvider>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View
+      data-testid="budget-table"
+      data-summary-layout="top"
+      style={{
+        flex: 1,
+        minHeight: 0,
+        ...scrollbarStyle,
+      }}
+    >
+      <View style={{ marginLeft: categoryWidth, flexShrink: 0 }}>
+        <View style={{ marginRight: getScrollbarWidth() }}>{monthPicker}</View>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          overflow: 'hidden',
+          flexShrink: 0,
+          paddingBottom: 12,
+          // Align the summaries with the month columns of the table below.
+          paddingRight: getScrollbarWidth(),
+        }}
+      >
+        <View style={{ width: categoryWidth }} />
+        <MonthsProvider
+          startMonth={prewarmStartMonth}
+          numMonths={numMonths}
+          monthBounds={monthBounds}
+          type={type}
+        >
+          <BudgetSummaries />
+        </MonthsProvider>
+      </View>
+
+      {table}
     </View>
   );
 }

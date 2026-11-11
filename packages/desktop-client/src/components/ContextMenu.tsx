@@ -1,5 +1,9 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
+import {
+  HOVER_MENU_CLOSE_DELAY,
+  isPointInsideRect,
+} from '@actual-app/components/hooks/useHoverMenu';
 import { Menu } from '@actual-app/components/menu';
 import type { MenuItem } from '@actual-app/components/menu';
 import { Popover } from '@actual-app/components/popover';
@@ -11,7 +15,9 @@ import { useDispatch, useSelector } from '#redux';
 
 export function ContextMenu() {
   const dispatch = useDispatch();
-  const { isOpen, position, items } = useSelector(state => state.contextMenu);
+  const { isOpen, position, items, hoverTrigger } = useSelector(
+    state => state.contextMenu,
+  );
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
@@ -33,6 +39,56 @@ export function ContextMenu() {
       handleOpenChange(false);
     }
   });
+
+  // A menu that was opened by hovering its trigger closes again once the
+  // pointer has left both the trigger and the menu for a moment. Menus opened
+  // explicitly (click / right-click) have no hover trigger and stay open.
+  useEffect(() => {
+    if (!isOpen || !hoverTrigger) {
+      return;
+    }
+
+    let closeTimer: ReturnType<typeof setTimeout> | null = null;
+    const clearCloseTimer = () => {
+      if (closeTimer) {
+        clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+    };
+    const scheduleClose = () => {
+      if (closeTimer) return;
+      closeTimer = setTimeout(() => {
+        closeTimer = null;
+        dispatch(closeContextMenu());
+      }, HOVER_MENU_CLOSE_DELAY);
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      const isInside =
+        isPointInsideRect(hoverTrigger, event.clientX, event.clientY) ||
+        isPointInsideRect(
+          popoverRef.current?.getBoundingClientRect(),
+          event.clientX,
+          event.clientY,
+        );
+      if (isInside) {
+        clearCloseTimer();
+      } else {
+        scheduleClose();
+      }
+    };
+
+    document.addEventListener('pointermove', onPointerMove);
+    document.documentElement.addEventListener('pointerleave', scheduleClose);
+    return () => {
+      document.removeEventListener('pointermove', onPointerMove);
+      document.documentElement.removeEventListener(
+        'pointerleave',
+        scheduleClose,
+      );
+      clearCloseTimer();
+    };
+  }, [isOpen, hoverTrigger, dispatch]);
 
   function handleMenuSelect(itemName: string) {
     for (const item of items) {

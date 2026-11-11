@@ -105,6 +105,14 @@ export type LocalPrefs = Partial<{
   'budget.startMonth': string;
   'flags.updateNotificationShownForVersion': string;
   'tour.introSeen': boolean;
+  /** Tour chapters the user has finished on this device. */
+  'onboarding.completedTours': string[];
+  /** Whether the "Getting started" checklist has been hidden. */
+  'onboarding.checklistHidden': boolean;
+  /** Whether the checklist panel is expanded (true) or collapsed to a pill. */
+  'onboarding.checklistExpanded': boolean;
+  /** Whether the reports page has been visited (completes a checklist step). */
+  'onboarding.reportsVisited': boolean;
   'schedules.showCompleted': boolean;
   reportsViewLegend: boolean;
   reportsViewSummary: boolean;

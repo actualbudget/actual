@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
+import { Term } from '#components/common/Term';
 import type { Binding } from '#spreadsheet';
 
 import { AccountTree } from './AccountTree';
@@ -100,7 +100,13 @@ export function SideGroup({
           }}
           activeStyle={{ color: theme.sidebarItemTextSelected }}
         >
-          <Text style={sectionLabelStyle}>{label}</Text>
+          <Term
+            id={side === 'on' ? 'on-budget' : 'off-budget'}
+            isFocusable={false}
+            style={sectionLabelStyle}
+          >
+            {label}
+          </Term>
           {!isOpen && <CountPill count={sideData.accountCount} />}
           <SyncErrorRollup count={sideData.failedCount} />
           <View style={{ flex: 1 }} />

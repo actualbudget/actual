@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import type { Locator, Page } from '@playwright/test';
 
 import { AccountPage } from './account-page';
@@ -71,12 +72,31 @@ export class Navigation {
     this.page = page;
   }
 
-  async goToAccountPage(accountName: string) {
-    await this.page
-      .getByRole('link', { name: new RegExp(`^${accountName}`) })
-      .click();
+  /**
+   * Locate an entry in the sidebar's account list. The aggregate rows
+   * ("All accounts", "On budget", "Off budget") are links, while individual
+   * accounts are rows of a draggable tree.
+   */
+  sidebarAccount(accountName: string): Locator {
+    const sidebar = this.page.getByRole('navigation', { name: 'Sidebar' });
+    const pattern = new RegExp(`^${accountName}`);
+    return sidebar
+      .locator('[role="row"], a')
+      .filter({ hasText: pattern })
+      .first();
+  }
 
-    return new AccountPage(this.page);
+  async goToAccountPage(accountName: string) {
+    await this.sidebarAccount(accountName).click();
+
+    const accountPage = new AccountPage(this.page);
+    // Navigating between accounts re-renders the register in a React
+    // transition. Wait for the heading to switch so the next step does not
+    // act on the previous account.
+    await expect(accountPage.accountName).toHaveText(
+      new RegExp(accountName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+    );
+    return accountPage;
   }
 
   async goToReportsPage() {
@@ -135,11 +155,18 @@ export class Navigation {
       .getByRole('heading', { name: 'Add account' })
       .waitFor({ state: 'visible' });
 
-    await fillReactInput(this.page.getByLabel('Name'), data.name);
-    await fillReactInput(this.page.getByLabel('Balance'), String(data.balance));
+    const dialog = this.page.getByRole('dialog');
+    await fillReactInput(
+      dialog.getByRole('textbox', { name: /^Name/ }),
+      data.name,
+    );
+    await fillReactInput(
+      dialog.getByRole('textbox', { name: /^Balance/ }),
+      String(data.balance),
+    );
 
     if (data.offBudget) {
-      await this.page.getByLabel('Off budget').click();
+      await dialog.getByLabel('Off budget').click();
     }
 
     await clickReactAriaButton(
@@ -159,9 +186,7 @@ export class Navigation {
   }
 
   async rightClickAccount(accountName: string) {
-    await this.page
-      .getByRole('link', { name: new RegExp(`^${accountName}`) })
-      .click({ button: 'right' });
+    await this.sidebarAccount(accountName).click({ button: 'right' });
   }
 
   async rightClickBudgetName() {

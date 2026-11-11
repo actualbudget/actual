@@ -7,7 +7,6 @@ import {
   SvgCheveronLeft,
   SvgCheveronRight,
 } from '@actual-app/components/icons/v1';
-import { SvgCalendar } from '@actual-app/components/icons/v2';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -27,6 +26,17 @@ type MonthPickerProps = {
   onSelect: (month: string) => void;
 };
 
+const arrowButtonStyle: CSSProperties = {
+  padding: 4,
+  borderRadius: 6,
+  color: theme.pageTextLight,
+};
+
+/**
+ * A strip of months used to pick which month(s) the budget shows. Months
+ * without any budget data are struck through so it is clear where the data
+ * starts and ends.
+ */
 export const MonthPicker = ({
   startMonth,
   numDisplayed,
@@ -65,9 +75,9 @@ export const MonthPicker = ({
   const [size, setSize] = useState('small');
   const containerRef = useResizeObserver(
     rect => {
-      setSize(rect.width <= 400 ? 'small' : 'big');
+      setSize(rect.width <= 420 ? 'small' : 'big');
       setTargetMonthCount(
-        Math.min(Math.max(Math.floor(rect.width / 50), 12), 24),
+        Math.min(Math.max(Math.floor((rect.width - 120) / 44), 6), 24),
       );
     },
     { measureOnAttach: true },
@@ -77,6 +87,7 @@ export const MonthPicker = ({
 
   return (
     <View
+      data-testid="month-picker"
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -91,180 +102,154 @@ export const MonthPicker = ({
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
+          // Leave room for the year labels drawn above the months.
+          paddingTop: 14,
         }}
       >
         <Link
           variant="button"
           buttonVariant="bare"
-          onPress={() => onSelect(currentMonth)}
-          style={{
-            padding: '3px 3px',
-            marginRight: '12px',
-          }}
-        >
-          <View title={t('Today')}>
-            <SvgCalendar
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
-          </View>
-        </Link>
-        <Link
-          variant="button"
-          buttonVariant="bare"
+          aria-label={t('Previous month')}
           onPress={() => onSelect(monthUtils.prevMonth(startMonth))}
-          style={{
-            padding: '3px 3px',
-            marginRight: '12px',
-          }}
+          style={{ ...arrowButtonStyle, marginRight: 6 }}
         >
           <View title={t('Previous month')}>
-            <SvgCheveronLeft
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
+            <SvgCheveronLeft style={{ width: 16, height: 16 }} />
           </View>
         </Link>
-        {range.map((month, idx) => {
-          const monthName = monthUtils.format(month, 'MMM', locale);
-          const selected =
-            idx >= firstSelectedIndex && idx <= lastSelectedIndex;
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 2,
+            padding: 2,
+            borderRadius: 8,
+            backgroundColor: theme.pillBackgroundLight,
+            border: `1px solid ${theme.tableBorder}`,
+          }}
+        >
+          {range.map((month, idx) => {
+            const monthName = monthUtils.format(month, 'MMM', locale);
+            const selected =
+              idx >= firstSelectedIndex && idx <= lastSelectedIndex;
 
-          const lastHoverId = hoverId + numDisplayed - 1;
-          const hovered =
-            hoverId === null ? false : idx >= hoverId && idx <= lastHoverId;
+            const lastHoverId = hoverId + numDisplayed - 1;
+            const hovered =
+              hoverId === null ? false : idx >= hoverId && idx <= lastHoverId;
 
-          const current = currentMonth === month;
-          const year = monthUtils.getYear(month);
+            const current = currentMonth === month;
+            const year = monthUtils.getYear(month);
 
-          let showYearHeader = false;
+            let showYearHeader = false;
 
-          if (!yearHeadersShown.includes(year)) {
-            yearHeadersShown.push(year);
-            showYearHeader = true;
-          }
+            if (!yearHeadersShown.includes(year)) {
+              yearHeadersShown.push(year);
+              showYearHeader = true;
+            }
 
-          const isMonthBudgeted =
-            month >= monthBounds.start && month <= monthBounds.end;
+            const isMonthBudgeted =
+              month >= monthBounds.start && month <= monthBounds.end;
 
-          return (
-            <View
-              key={month}
-              data-testid={selected ? 'selected-budget-month' : undefined}
-              data-month={selected ? month : undefined}
-              style={{
-                alignItems: 'center',
-                padding: '3px 3px',
-                width: size === 'big' ? '35px' : '20px',
-                textAlign: 'center',
-                userSelect: 'none',
-                cursor: 'default',
-                borderRadius: 2,
-                border: 'none',
-                ...(!isMonthBudgeted && {
-                  textDecoration: 'line-through',
-                  color: theme.pageTextSubdued,
-                }),
-                ...styles.smallText,
-                ...(selected && {
-                  backgroundColor: theme.buttonPrimaryBackground,
-                  color: theme.buttonPrimaryText,
-                }),
-                ...((hovered || selected) && {
-                  borderRadius: 0,
+            return (
+              <View
+                key={month}
+                data-testid={selected ? 'selected-budget-month' : undefined}
+                data-month={selected ? month : undefined}
+                aria-current={current ? 'date' : undefined}
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px 0',
+                  height: 26,
+                  width: size === 'big' ? 40 : 24,
+                  textAlign: 'center',
+                  userSelect: 'none',
                   cursor: 'pointer',
-                }),
-                ...(hoverId !== null &&
-                  !hovered &&
-                  selected && {
-                    filter: 'brightness(65%)',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: current ? 700 : 500,
+                  color: isMonthBudgeted
+                    ? theme.pageText
+                    : theme.pageTextSubdued,
+                  transition: 'background-color .1s',
+                  ...(!isMonthBudgeted && {
+                    textDecoration: 'line-through',
                   }),
-                ...(hovered &&
-                  !selected && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                  }),
-                ...(!hovered &&
-                  !selected &&
-                  current && {
-                    backgroundColor: theme.buttonBareBackgroundHover,
-                    filter: 'brightness(120%)',
-                  }),
-                ...(hovered &&
-                  selected &&
-                  current && {
-                    filter: 'brightness(120%)',
-                  }),
-                ...(hovered &&
-                  selected && {
+                  ...(selected && {
                     backgroundColor: theme.buttonPrimaryBackground,
+                    color: theme.buttonPrimaryText,
+                    borderRadius: 0,
                   }),
-                ...((idx === firstSelectedIndex ||
-                  (idx === hoverId && !selected)) && {
-                  borderTopLeftRadius: 2,
-                  borderBottomLeftRadius: 2,
-                }),
-                ...((idx === lastSelectedIndex ||
-                  (idx === lastHoverId && !selected)) && {
-                  borderTopRightRadius: 2,
-                  borderBottomRightRadius: 2,
-                }),
-                ...(current && { fontWeight: 'bold' }),
-              }}
-              onClick={() => onSelect(month)}
-              onMouseEnter={() => setHoverId(idx)}
-              onMouseLeave={() => setHoverId(null)}
-            >
-              <View>
-                {size === 'small' ? monthName[0] : monthName}
-                {showYearHeader && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: -16,
-                      left: 0,
-                      fontSize: 10,
-                      fontWeight: 'bold',
-                      color: isMonthBudgeted
-                        ? theme.pageText
-                        : theme.pageTextSubdued,
-                    }}
-                  >
-                    {year}
-                  </View>
-                )}
+                  ...(hoverId !== null &&
+                    !hovered &&
+                    selected && {
+                      filter: 'brightness(85%)',
+                    }),
+                  ...(hovered &&
+                    !selected && {
+                      backgroundColor: theme.buttonBareBackgroundHover,
+                      borderRadius: 0,
+                    }),
+                  ...(!hovered &&
+                    !selected &&
+                    current && {
+                      boxShadow: `inset 0 0 0 1px ${theme.buttonPrimaryBackground}`,
+                      color: theme.pageTextPositive,
+                    }),
+                  ...(hovered &&
+                    selected && {
+                      backgroundColor: theme.buttonPrimaryBackgroundHover,
+                    }),
+                  ...((idx === firstSelectedIndex ||
+                    (idx === hoverId && !selected)) && {
+                    borderTopLeftRadius: 6,
+                    borderBottomLeftRadius: 6,
+                  }),
+                  ...((idx === lastSelectedIndex ||
+                    (idx === lastHoverId && !selected)) && {
+                    borderTopRightRadius: 6,
+                    borderBottomRightRadius: 6,
+                  }),
+                }}
+                onClick={() => onSelect(month)}
+                onMouseEnter={() => setHoverId(idx)}
+                onMouseLeave={() => setHoverId(null)}
+              >
+                <View>
+                  {size === 'small' ? monthName[0] : monthName}
+                  {showYearHeader && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: -20,
+                        left: 0,
+                        ...styles.tinyText,
+                        fontWeight: 700,
+                        letterSpacing: '0.04em',
+                        color: isMonthBudgeted
+                          ? theme.pageTextLight
+                          : theme.pageTextSubdued,
+                      }}
+                    >
+                      {year}
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-          );
-        })}
+            );
+          })}
+        </View>
         <Link
           variant="button"
           buttonVariant="bare"
+          aria-label={t('Next month')}
           onPress={() => onSelect(monthUtils.nextMonth(startMonth))}
-          style={{
-            padding: '3px 3px',
-            marginLeft: '12px',
-          }}
+          style={{ ...arrowButtonStyle, marginLeft: 6 }}
         >
           <View title={t('Next month')}>
-            <SvgCheveronRight
-              style={{
-                width: 16,
-                height: 16,
-              }}
-            />
+            <SvgCheveronRight style={{ width: 16, height: 16 }} />
           </View>
         </Link>
-        {/*Keep range centered*/}
-        <span
-          style={{
-            width: '22px',
-            marginLeft: '12px',
-          }}
-        />
       </View>
     </View>
   );
