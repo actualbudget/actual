@@ -22,9 +22,13 @@ jobs:
   check-pr-description:
     name: Check PR description
     # Bot-authored PRs (dependency bumps, the automated release PRs) don't use
-    # the PR template. Don't filter further by event, e.g. edits that leave the
-    # body unchanged: a skipped run would replace an earlier failure with a pass.
-    if: github.event.pull_request.user.type != 'Bot'
+    # the PR template, and PRs into `release` cherry-pick changes that were
+    # already described and proven on master. Don't filter further by event,
+    # e.g. edits that leave the body unchanged: a skipped run would replace an
+    # earlier failure with a pass.
+    if: >-
+      github.event.pull_request.user.type != 'Bot'
+      && github.base_ref != 'release'
     runs-on: depot-ubuntu-latest
     permissions:
       contents: read
