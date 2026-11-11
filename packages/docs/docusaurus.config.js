@@ -163,7 +163,7 @@ module.exports = {
           ...(activeVersion
             ? [
                 {
-                  type: 'dropdown',
+                  type: 'custom-versionDropdown',
                   position: 'right',
                   label:
                     activeVersion === 'next' ? 'Next' : `v${activeVersion}`,
