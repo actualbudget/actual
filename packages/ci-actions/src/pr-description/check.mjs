@@ -57,11 +57,23 @@ export function checkPrDescription(
 
   const sections = new Map();
   let current = null;
-  let inCodeBlock = false;
+  let openFence = null;
   for (const line of text.split(/\r?\n/)) {
     // A "## Heading" inside a fenced code block is an example, not a section.
-    if (/^\s*(```|~~~)/.test(line)) inCodeBlock = !inCodeBlock;
-    const heading = !inCodeBlock && line.match(/^##\s+(.+?)\s*$/);
+    // A block closes only on a fence of the same character, at least as long
+    // as the one that opened it, with nothing after it.
+    const [, fence, rest] = line.match(/^\s*(`{3,}|~{3,})(.*)$/) ?? [];
+    if (fence && !openFence) {
+      openFence = fence;
+    } else if (
+      fence &&
+      fence[0] === openFence[0] &&
+      fence.length >= openFence.length &&
+      !rest.trim()
+    ) {
+      openFence = null;
+    }
+    const heading = !openFence && line.match(/^##\s+(.+?)\s*$/);
     if (heading) {
       current = normalize(heading[1]);
       sections.set(current, '');

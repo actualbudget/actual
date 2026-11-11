@@ -43,12 +43,20 @@ describe('checkPrDescription', () => {
   });
 
   it('ignores headings inside fenced code blocks', () => {
-    const body = fill({
-      Testing: '```md\n## Human Summary\n\nFrom an example.\n```',
-    });
-    expect(checkPrDescription(body)).toEqual([
-      expect.stringContaining('"Human Summary" section is empty'),
-    ]);
+    const example = '## Human Summary\n\nFrom an example.';
+    for (const block of [
+      '```md\n' + example + '\n```',
+      // Nested: a shorter fence does not close a longer one.
+      '````md\n```\n' + example + '\n```\n````',
+      // Mixed markers: a tilde fence does not close a backtick one.
+      '```md\n~~~\n' + example + '\n```',
+      // A fence with trailing text opens a block; it cannot close one.
+      '```md\n```js\n' + example + '\n```',
+    ]) {
+      expect(checkPrDescription(fill({ Testing: block }))).toEqual([
+        expect.stringContaining('"Human Summary" section is empty'),
+      ]);
+    }
   });
 
   it('does not count hidden comments as a human summary', () => {
