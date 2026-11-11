@@ -210,6 +210,71 @@ describe('resolveBuildRun', () => {
     );
   });
 
+  // The polling log is the main evidence when a comparison times out, so it
+  // must say which run (if any) it is waiting on and why.
+  it.each([
+    ['no run for the commit exists', listing(), /\(no run yet\)/],
+    [
+      'only runs for other commits exist',
+      listing(makeRun(9, { head_sha: 'other' })),
+      /\(no run yet\)/,
+    ],
+    [
+      'the run is queued',
+      listing(makeRun(4, { status: 'queued', conclusion: null })),
+      /\(run 4 is queued\)/,
+    ],
+    [
+      'the run is in progress',
+      listing(makeRun(4, { status: 'in_progress', conclusion: null })),
+      /\(run 4 is in_progress\)/,
+    ],
+    [
+      'the run awaits approval',
+      listing(makeRun(4, { conclusion: 'action_required' })),
+      /\(run 4 is awaiting approval\)/,
+    ],
+    [
+      'a completed run has no conclusion',
+      listing(makeRun(4, { conclusion: null })),
+      /\(run 4 completed without a conclusion\)/,
+    ],
+    [
+      'a newer run is queued after a failure',
+      listing(
+        makeRun(5, { status: 'queued', conclusion: null }),
+        makeRun(4, { conclusion: 'failure' }),
+      ),
+      /\(run 5 is queued\)/,
+    ],
+  ])('logs why it is waiting when %s', async (_, response, reason) => {
+    const log = vi.fn();
+    const listWorkflowRuns = vi
+      .fn()
+      .mockResolvedValueOnce(response)
+      .mockResolvedValueOnce(listing(makeRun(4)));
+
+    await resolve(listWorkflowRuns, { log });
+
+    expect(log).toHaveBeenCalledWith(
+      expect.stringMatching(
+        new RegExp(
+          `^No successful PR head build run yet ${reason.source} — sleeping \\d+s\\.$`,
+        ),
+      ),
+    );
+  });
+
+  it('tells the reader how to recover from a failed build', async () => {
+    const listWorkflowRuns = vi
+      .fn()
+      .mockResolvedValue(listing(makeRun(7, { conclusion: 'failure' })));
+
+    await expect(resolve(listWorkflowRuns)).rejects.toThrow(
+      /actions\/runs\/7\. Re-run that build, then re-run this workflow\.$/,
+    );
+  });
+
   it.each([
     'failure',
     'cancelled',

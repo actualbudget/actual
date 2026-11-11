@@ -76,7 +76,7 @@ export async function resolveBuildRun({
       // The API lists runs newest first.
       const latest = runs[0];
       throw new Error(
-        `${workflowId} run ${latest.id} for ${label} finished without success (conclusion: ${latest.conclusion}) — ${latest.html_url}`,
+        `${workflowId} run ${latest.id} for ${label} finished without success (conclusion: ${latest.conclusion}) — ${latest.html_url}. Re-run that build, then re-run this workflow.`,
       );
     }
 
@@ -86,8 +86,10 @@ export async function resolveBuildRun({
       );
     }
 
+    // The newest run that can still succeed is the one being waited on.
+    const pendingRun = runs.find(run => !hasFailedForGood(run));
     log?.(
-      `No successful ${label} build run yet — sleeping ${sleepMs / 1000}s.`,
+      `No successful ${label} build run yet (${describeWait(pendingRun)}) — sleeping ${sleepMs / 1000}s.`,
     );
     await sleep(sleepMs);
   }
@@ -95,6 +97,21 @@ export async function resolveBuildRun({
 
 function hasFailedForGood(run) {
   return run.status === 'completed' && TERMINAL_FAILURES.has(run.conclusion);
+}
+
+function describeWait(run) {
+  if (!run) {
+    return 'no run yet';
+  }
+  if (run.conclusion === 'action_required') {
+    return `run ${run.id} is awaiting approval`;
+  }
+  if (run.status !== 'completed') {
+    return `run ${run.id} is ${run.status}`;
+  }
+  return run.conclusion
+    ? `run ${run.id} completed with conclusion ${run.conclusion}`
+    : `run ${run.id} completed without a conclusion`;
 }
 
 // The caller only needs the artifacts from `requiredJobs`, so a run qualifies
