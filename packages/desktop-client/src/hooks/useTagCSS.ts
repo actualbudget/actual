@@ -18,11 +18,12 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
       options: { color?: string | null; compact?: boolean } = {},
     ) => {
       const tagObj = tags.find(t => t.tag === tag);
-      const [color, backgroundColor, backgroundColorHovered] = getTagCSSColors(
-        theme,
-        // fallback strategy: options color > tag color > default color > theme color (undefined)
-        options.color ?? tagObj?.color,
-      );
+      const { color, backgroundColor, backgroundColorHovered, isCustomColor } =
+        getTagCSSColors(
+          theme,
+          // fallback strategy: options color > tag color > default color > theme color (undefined)
+          options.color ?? tagObj?.color,
+        );
 
       return css({
         ...(opts?.ellipsis
@@ -39,7 +40,21 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
         borderRadius: 16,
         userSelect: 'none',
         backgroundColor,
-        color,
+        // Users can give a tag its own colour on the Tags page; that colour
+        // becomes the pill's background, and the tag's label (e.g. "#food")
+        // is drawn in black or white, whichever contrasts with it. Tags
+        // without their own colour use the theme's default pill colours.
+        //
+        // The pill is a bare Button, and Button's hover style changes the
+        // label to the normal page text colour. On a default pill that's
+        // still readable, so it's left alone. On a user-coloured pill it can
+        // leave dark text on a dark background, so !important keeps the
+        // black or white label while hovered.
+        //
+        // getTagCSSColors returns plain colours (callers like the remove
+        // badge mix them into other CSS, where !important would be invalid),
+        // so the suffix is added here, only for user-coloured tags.
+        color: isCustomColor ? `${color} !important` : color,
         cursor: 'pointer',
         '&[data-hovered]': {
           backgroundColor: backgroundColorHovered,
@@ -53,13 +68,50 @@ export function useTagCSS(opts?: { ellipsis?: boolean }) {
   );
 }
 
-function getTagCSSColors(theme: Theme, color?: string | null) {
+type TagPillColors = {
+  color: string;
+  backgroundColor: string;
+  backgroundColorHovered: string;
+};
+
+type TagPillStyle = TagPillColors & { isHidden: boolean };
+
+/**
+ * Returns a getter for what a tag's pill looks like (its plain colours, and
+ * whether the tag is hidden, which draws it faded), for callers that need to
+ * build styles around the pill rather than use the pill class itself.
+ */
+export function useTagPillStyle() {
+  const { data: tags = [] } = useTags();
+  const [theme] = useTheme();
+
+  return (tag: string): TagPillStyle => {
+    const tagObj = tags.find(t => t.tag === tag);
+    const { color, backgroundColor, backgroundColorHovered } = getTagCSSColors(
+      theme,
+      tagObj?.color,
+    );
+
+    return {
+      color,
+      backgroundColor,
+      backgroundColorHovered,
+      isHidden: Boolean(tagObj?.hidden),
+    };
+  };
+}
+
+function getTagCSSColors(
+  theme: Theme,
+  color?: string | null,
+): TagPillColors & { isCustomColor: boolean } {
   if (!color) {
-    return [
-      themeStyle.noteTagText,
-      themeStyle.noteTagBackground,
-      themeStyle.noteTagBackgroundHover,
-    ];
+    return {
+      color: themeStyle.noteTagText,
+      backgroundColor: themeStyle.noteTagBackground,
+      backgroundColorHovered: themeStyle.noteTagBackgroundHover,
+      isCustomColor: false,
+    };
   }
 
   // see: https://www.w3.org/TR/AERT/#color-contrast
@@ -69,13 +121,18 @@ function getTagCSSColors(theme: Theme, color?: string | null) {
   const brightnessDiff = (r * 299 + g * 587 + b * 114) / 1000;
 
   if (brightnessDiff >= 125) {
-    // !important is used to override the hover text color in button.tsx used to style the tag button
-    return [
-      'black !important',
-      color,
-      `color-mix(in srgb, ${color} 80%, black)`,
-    ];
+    return {
+      color: 'black',
+      backgroundColor: color,
+      backgroundColorHovered: `color-mix(in srgb, ${color} 80%, black)`,
+      isCustomColor: true,
+    };
   }
 
-  return ['white !important', color, `color-mix(in srgb, ${color} 70%, white)`];
+  return {
+    color: 'white',
+    backgroundColor: color,
+    backgroundColorHovered: `color-mix(in srgb, ${color} 70%, white)`,
+    isCustomColor: true,
+  };
 }

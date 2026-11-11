@@ -174,6 +174,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -594,6 +596,29 @@ describe('Transactions', () => {
     });
   });
 
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
+      const onFocusedTransactionShown = vi.fn();
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
+
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -749,6 +774,34 @@ describe('Transactions', () => {
     expect(input.value).toEqual(oldValue);
   });
 
+  test.each(['debit', 'credit'] as const)(
+    'invalid arithmetic in %s preserves the amount and allows correction',
+    async field => {
+      const onTransactionsChange = vi.fn();
+      const { container } = renderTransactions({ onTransactionsChange });
+      const input = await editField(container, field, 0);
+      await userEvent.clear(input);
+      await userEvent.type(input, '1/0[Tab]');
+
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([expect.objectContaining({ amount: -2777 })]),
+      );
+      expect(queryField(container, 'debit', 'div', 0).textContent).toBe(
+        '27.77',
+      );
+      expect(queryField(container, 'credit', '', 0).textContent).toBe('');
+
+      const correctedInput = await editField(container, field, 0);
+      await userEvent.clear(correctedInput);
+      await userEvent.type(correctedInput, '12/2[Tab]');
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ amount: field === 'debit' ? -600 : 600 }),
+        ]),
+      );
+    },
+  );
+
   test('text fields save when moved away from', async () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -785,6 +838,74 @@ describe('Transactions', () => {
     // Blur the input to make it stop editing
     await userEvent.tab();
     expect(getTransactions()[2].notes).toBe('another happy note');
+  });
+
+  test('a note with line breaks is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI\r\nFrom 2. Savings';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    // The input shows the line breaks as spaces, like the cell does
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('To 1. Main EndToEndID: FRI From 2. Savings');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('a note with leading and trailing whitespace is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = '  a note with spaces  ';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('  a note with spaces  ');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('editing a note with line breaks saves them as spaces', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    const input = await editField(container, 'notes', 2);
+    await userEvent.type(input, ' paid');
+    await userEvent.tab();
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: transactions[2].id,
+          notes: 'To 1. Main EndToEndID: FRI paid',
+        }),
+      ]),
+    );
   });
 
   test('dropdown automatically opens and can be filtered', async () => {

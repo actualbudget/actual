@@ -6,6 +6,7 @@ import * as fs from '#platform/server/fs';
 import { createApp } from '#server/app';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
+import { shoveSortOrders, SORT_INCREMENT } from '#server/db/sort';
 import { ValidationError } from '#server/errors';
 import { requiredFields } from '#server/models';
 import { mutator } from '#server/mutators';
@@ -15,6 +16,7 @@ import { undoable } from '#server/undo';
 import { DEFAULT_DASHBOARD_STATE } from '#shared/dashboard';
 import { q } from '#shared/query';
 import type {
+  DashboardPageEntity,
   DashboardWidgetEntity,
   ExportImportCustomReportWidget,
   ExportImportDashboard,
@@ -106,9 +108,17 @@ const exportModel = {
   },
 };
 
+function getDashboardPagesInOrder() {
+  return db.all<Pick<db.DbDashboardPage, 'id' | 'sort_order'>>(
+    'SELECT id, sort_order FROM dashboard_pages WHERE tombstone = 0 ORDER BY sort_order, id',
+  );
+}
+
 async function createDashboardPage({ name }: { name: string }) {
   const id = uuidv4();
-  await db.insertWithSchema('dashboard_pages', { id, name });
+  // Don't pass a target in, it will default to appending at the end
+  const { sort_order } = shoveSortOrders(await getDashboardPagesInOrder());
+  await db.insertWithSchema('dashboard_pages', { id, name, sort_order });
 
   return id;
 }
@@ -136,8 +146,84 @@ async function deleteDashboardPage(id: string) {
   });
 }
 
+/**
+ * Move a dashboard page before the page with `targetId`,
+ * or to the end when `targetId` is null
+ */
+async function moveDashboardPage({
+  id,
+  targetId,
+}: {
+  id: string;
+  targetId: string | null;
+}) {
+  const pages = await getDashboardPagesInOrder();
+  const movedPage = pages.find(page => page.id === id);
+  if (!movedPage) {
+    throw new Error(`Dashboard page not found: ${id}`);
+  }
+  // Reject a target that was deleted instead of moving the page to the end
+  if (targetId !== null && !pages.some(page => page.id === targetId)) {
+    throw new Error(`Dashboard page not found: ${targetId}`);
+  }
+  if (targetId === id) {
+    return;
+  }
+
+  const reorderedPages = pages.filter(page => page.id !== id);
+  const targetIndex =
+    targetId === null
+      ? reorderedPages.length
+      : reorderedPages.findIndex(page => page.id === targetId);
+  reorderedPages.splice(targetIndex, 0, movedPage);
+
+  // Write the order of every page, not only the moved one. The migration
+  // backfills sort_order locally, so devices can disagree on the order of
+  // pages that a move does not touch, and pages from older clients share
+  // the column default. A full renumber makes every device agree.
+  await batchMessages(async () => {
+    for (const [index, page] of reorderedPages.entries()) {
+      await db.update('dashboard_pages', {
+        id: page.id,
+        sort_order: (index + 1) * SORT_INCREMENT,
+      });
+    }
+  });
+}
+
 async function renameDashboardPage({ id, name }: { id: string; name: string }) {
   await db.updateWithSchema('dashboard_pages', { id, name });
+}
+
+async function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  const { data }: { data: DashboardPageEntity[] } = await aqlQuery(
+    q('dashboard_pages').select('*'),
+  );
+  return data.map(page => ({
+    ...page,
+    name: page.name ?? '',
+  }));
+}
+
+async function getDashboardWidgets({
+  pageId,
+}: { pageId?: string } = {}): Promise<DashboardWidgetEntity[]> {
+  let query = q('dashboard').select('*');
+  if (pageId) {
+    query = query.filter({ dashboard_page_id: pageId });
+  }
+  const {
+    data,
+  }: {
+    data: (DashboardWidgetEntity & {
+      meta?: string | Record<string, unknown>;
+    })[];
+  } = await aqlQuery(query);
+  return data.map(widget => ({
+    ...widget,
+    meta:
+      typeof widget.meta === 'string' ? JSON.parse(widget.meta) : widget.meta,
+  }));
 }
 
 async function updateDashboard(
@@ -355,9 +441,12 @@ async function importDashboard({
 }
 
 export type DashboardHandlers = {
+  'dashboard-get-pages': typeof getDashboardPages;
+  'dashboard-get-widgets': typeof getDashboardWidgets;
   'dashboard-create': typeof createDashboardPage;
   'dashboard-delete': typeof deleteDashboardPage;
   'dashboard-rename': typeof renameDashboardPage;
+  'dashboard-move': typeof moveDashboardPage;
   'dashboard-update': typeof updateDashboard;
   'dashboard-update-widget': typeof updateDashboardWidget;
   'dashboard-reset': typeof resetDashboard;
@@ -369,9 +458,12 @@ export type DashboardHandlers = {
 
 export const app = createApp<DashboardHandlers>();
 
+app.method('dashboard-get-pages', getDashboardPages);
+app.method('dashboard-get-widgets', getDashboardWidgets);
 app.method('dashboard-create', mutator(undoable(createDashboardPage)));
 app.method('dashboard-delete', mutator(undoable(deleteDashboardPage)));
 app.method('dashboard-rename', mutator(undoable(renameDashboardPage)));
+app.method('dashboard-move', mutator(undoable(moveDashboardPage)));
 app.method('dashboard-update', mutator(undoable(updateDashboard)));
 app.method('dashboard-update-widget', mutator(undoable(updateDashboardWidget)));
 app.method('dashboard-reset', mutator(undoable(resetDashboard)));

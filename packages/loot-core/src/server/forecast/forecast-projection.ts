@@ -2,19 +2,19 @@ import { addMonths, format } from 'date-fns';
 
 import * as monthUtils from '#shared/months';
 import type { TransactionEntity } from '#types/models';
-import type { ForecastDataPoint, ForecastResult } from '#types/models/forecast';
+import type {
+  ForecastDataPoint,
+  ForecastResult,
+  ForecastTransaction,
+} from '#types/models/forecast';
 
 import type { AccountWithComputedBalance } from './forecast-accounts';
 import { matchesForecastFilters } from './forecast-filters';
 import type { ForecastFilterInfo } from './forecast-filters';
 import type { ForecastScheduleOccurrence } from './forecast-schedules';
+import { FORECAST_UNASSIGNED_ACCOUNT_ID } from './forecast-schedules';
 
-type ScheduleOccurrenceSummary = {
-  amount: number;
-  payee: string;
-  scheduleId: string;
-  scheduleName: string;
-};
+type ScheduleOccurrenceSummary = ForecastTransaction;
 
 type ScheduleOccurrencesByAccount = Record<
   string,
@@ -134,6 +134,10 @@ export function indexScheduleOccurrences(
         payee: occurrence.payee,
         scheduleId: occurrence.scheduleId,
         scheduleName: occurrence.scheduleName,
+        occurrenceDate: occurrence.occurrenceDate,
+        isTransfer: occurrence.transaction.transfer_id != null,
+        isAccountless:
+          occurrence.transaction.account === FORECAST_UNASSIGNED_ACCOUNT_ID,
       },
     );
   }
@@ -201,12 +205,8 @@ function buildAccountForecastDataPoints(
       balance: runningBalance,
       accountId: account.id,
       accountName: account.name,
-      transactions: scheduleTxns.map(scheduleTxn => ({
-        amount: scheduleTxn.amount,
-        payee: scheduleTxn.payee,
-        scheduleId: scheduleTxn.scheduleId,
-        scheduleName: scheduleTxn.scheduleName,
-      })),
+      recordedAmount: txDelta,
+      transactions: scheduleTxns,
     };
   });
 }

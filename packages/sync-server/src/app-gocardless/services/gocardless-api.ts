@@ -1,4 +1,5 @@
 import createDebug from 'debug';
+import { fetch } from 'undici';
 
 import type {
   GoCardlessAccountDetails,

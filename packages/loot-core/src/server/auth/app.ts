@@ -7,7 +7,12 @@ import { get, post } from '#server/post';
 import { getServer, isValidBaseURL } from '#server/server-config';
 import type { OpenIdConfig } from '#types/models';
 
+import { createApiKey, listApiKeys, revokeApiKey } from './api-keys';
+
 export type AuthHandlers = {
+  'api-keys-list': typeof listApiKeys;
+  'api-keys-create': typeof createApiKey;
+  'api-keys-revoke': typeof revokeApiKey;
   'get-did-bootstrap': typeof didBootstrap;
   'subscribe-needs-bootstrap': typeof needsBootstrap;
   'subscribe-bootstrap': typeof bootstrap;
@@ -23,6 +28,9 @@ export type AuthHandlers = {
 };
 
 export const app = createApp<AuthHandlers>();
+app.method('api-keys-list', listApiKeys);
+app.method('api-keys-create', createApiKey);
+app.method('api-keys-revoke', revokeApiKey);
 app.method('get-did-bootstrap', didBootstrap);
 app.method('subscribe-needs-bootstrap', needsBootstrap);
 app.method('subscribe-bootstrap', bootstrap);

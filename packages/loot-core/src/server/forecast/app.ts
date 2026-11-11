@@ -18,6 +18,7 @@ import {
   buildFutureScheduleOccurrences,
   FORECAST_UNASSIGNED_ACCOUNT_ID,
   getNormalizedSchedules,
+  getPostedScheduleTransactions,
 } from './forecast-schedules';
 import { projectTrackingBudgetForecast } from './forecast-tracking-budget';
 
@@ -151,7 +152,7 @@ export async function generateForecast({
     dateContext.endDateObj,
     accountsById,
     ruleAccountsById,
-    transactions,
+    await getPostedScheduleTransactions(schedules),
   );
   const { dataPoints, lowestBalance } = projectForecastData({
     accounts,

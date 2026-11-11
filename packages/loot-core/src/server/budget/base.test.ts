@@ -644,6 +644,64 @@ describe('Base budget', () => {
     },
   );
 
+  describe.each(['tracking', 'envelope'] as const)(
+    'budget changes (%s)',
+    budgetType => {
+      const table =
+        budgetType === 'tracking' ? 'reflect_budgets' : 'zero_budgets';
+      const otherTable =
+        budgetType === 'tracking' ? 'zero_budgets' : 'reflect_budgets';
+      const month = monthUtils.currentMonth();
+      const sheetName = monthUtils.sheetForMonth(month);
+      const row = {
+        id: `${month.replace('-', '')}-planned`,
+        month: parseInt(month.replace('-', '')),
+        category: 'planned',
+        amount: 100,
+        goal: 5000,
+      };
+
+      beforeEach(async () => {
+        await db.insertCategoryGroup({
+          id: 'income',
+          name: 'Income',
+          is_income: 1,
+        });
+        await db.insertCategoryGroup({ id: 'expenses', name: 'Expenses' });
+        await db.insertCategory({
+          id: 'planned',
+          name: 'Planned',
+          cat_group: 'expenses',
+        });
+        db.runQuery(
+          "INSERT INTO preferences (id, value) VALUES ('budgetType', ?)",
+          [budgetType],
+        );
+        await sheet.loadSpreadsheet(db);
+        sheet.get().meta().budgetType = budgetType;
+        await createAllBudgets();
+      });
+
+      it('applies amounts and goals saved for the active budget type', async () => {
+        await db.insert(table, row);
+        await sheet.waitOnSpreadsheet();
+
+        expect(sheet.getCellValue(sheetName, 'budget-planned')).toBe(100);
+        expect(sheet.getCellValue(sheetName, 'goal-planned')).toBe(5000);
+      });
+
+      it('ignores amounts and goals saved for the other budget type', async () => {
+        await db.insert(otherTable, row);
+        await sheet.waitOnSpreadsheet();
+
+        expect(sheet.getCellValue(sheetName, 'budget-planned')).toBe(0);
+        expect(
+          sheet.get().getCellValueLoose(sheetName, 'goal-planned'),
+        ).toBeNull();
+      });
+    },
+  );
+
   it('Recomputes budget cells when account fields change', async () => {
     await sheet.loadSpreadsheet(db);
 

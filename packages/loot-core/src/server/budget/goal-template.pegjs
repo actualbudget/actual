@@ -22,6 +22,8 @@ expr
     { return { type: 'schedule', name: name.trim(), priority: template.priority, directive: template.directive, full, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ remainder: remainder limit: limit?
     { return { type: 'remainder', priority: null, directive: template.directive, weight: remainder, limit }}
+  / template: template _ 'average'i _ amount: positive _ ('weeks'i / 'week'i) _ 'on'i _ weekday: weekday modifiers:modifiers?
+    { return { type: 'weeklyAverage', numWeeks: +amount, weekday, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'average'i _ amount: positive _ 'months'i? modifiers:modifiers?
     { return { type: 'average', numMonths: +amount, priority: template.priority, directive: template.directive, adjustment: modifiers?.adjustment, adjustmentType: modifiers?.adjustmentType  }}
   / template: template _ 'copy from'i _ lookBack: positive _ 'months ago'i limit:limit?
@@ -63,6 +65,10 @@ periodCount = 'day'i { return {period: 'day', amount: 1 }}
            / n: positive _ 'months'i _ {return {period: 'month', amount: +n }}
            / 'year'i _ { return {period: 'year', amount: 1 }}
            / n: positive _ 'years'i _ { return { period: 'year', amount: +n }}
+
+weekday 'weekday'
+  = day: ('sunday'i / 'monday'i / 'tuesday'i / 'wednesday'i / 'thursday'i / 'friday'i / 'saturday'i)
+    { return day.toLowerCase() }
 
 spendFrom = _ 'spend'i _ 'from'i _ month: month { return month }
 

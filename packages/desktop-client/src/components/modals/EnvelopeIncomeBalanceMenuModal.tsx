@@ -38,6 +38,7 @@ export function EnvelopeIncomeBalanceMenuModal({
         goal={envelopeBudget.catGoal(categoryId)}
         budgeted={envelopeBudget.catBudgeted(categoryId)}
         longGoal={envelopeBudget.catLongGoal(categoryId)}
+        isIncome
       />
       <MobileSheetSection>
         <MobileSheetRow

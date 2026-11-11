@@ -9,6 +9,7 @@ import {
   copyUntilYearEnd,
   coverOverbudgeted,
   coverOverspending,
+  getCategoryWeeklyAverage,
   getSheetValue,
   holdForNextMonth,
   set3MonthAvg,
@@ -504,6 +505,39 @@ describe('set budget average', () => {
     await sheet.waitOnSpreadsheet();
 
     expect(await getSheetValue('budget202404', 'budget-cat1')).toBe(600);
+  });
+});
+
+describe('getCategoryWeeklyAverage', () => {
+  beforeEach(global.emptyDatabase());
+
+  it('averages the complete weeks just before the budget month', async () => {
+    await db.insertAccount({ id: 'account1', name: 'Account 1' });
+    await db.insertCategoryGroup({ id: 'group1', name: 'group1' });
+    await db.insertCategory({ id: 'cat1', name: 'cat1', cat_group: 'group1' });
+    // 2 weeks before 2016-11 is 2016-10-18 through 2016-10-31; the days on
+    // either side are outside the window.
+    for (const [date, amount] of [
+      ['2016-10-17', -1000],
+      ['2016-10-18', -300],
+      ['2016-10-31', -101],
+      ['2016-11-01', -1000],
+    ] as const) {
+      await db.insertTransaction({
+        date,
+        amount,
+        account: 'account1',
+        category: 'cat1',
+      });
+    }
+
+    expect(
+      await getCategoryWeeklyAverage({
+        month: '2016-11',
+        numWeeks: 2,
+        categoryId: 'cat1',
+      }),
+    ).toBe(-200.5);
   });
 });
 

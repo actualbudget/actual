@@ -338,18 +338,11 @@ export class FixedSizeList extends PureComponent<
       case 'end':
         return minOffset;
       case 'center': {
-        // "Centered" offset is usually the average of the min and max.
-        // But near the edges of the list, this doesn't hold true.
-        const middleOffset = Math.round(
-          minOffset + (maxOffset - minOffset) / 2,
+        // Items near either end can't be centered, so clamp to the list
+        const centeredOffset = Math.round(
+          index * this.props.itemSize - (size - this.props.itemSize) / 2,
         );
-        if (middleOffset < Math.ceil(size / 2)) {
-          return 0; // near the beginning
-        } else if (middleOffset > lastItemOffset + Math.floor(size / 2)) {
-          return lastItemOffset; // near the end
-        } else {
-          return middleOffset;
-        }
+        return Math.min(lastItemOffset, Math.max(0, centeredOffset));
       }
       case 'auto':
       default:

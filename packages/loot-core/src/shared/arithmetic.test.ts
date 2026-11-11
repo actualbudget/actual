@@ -33,6 +33,21 @@ describe('arithmetic', () => {
     expect(evalArithmetic('2400 / 2 / 5')).toEqual(240);
   });
 
+  test.each(['1/0', '-1/0', '0/0', '2^1024', '(-1)^.5'])(
+    'returns the default for a non-finite result from %s',
+    expression => {
+      expect(evalArithmetic(expression)).toBeNull();
+      expect(evalArithmetic(expression, 42)).toBe(42);
+      expect(evalArithmetic(expression, 0)).toBe(0);
+    },
+  );
+
+  test('keeps valid arithmetic results instead of the default', () => {
+    expect(evalArithmetic('12/2', 42)).toBe(6);
+    expect(evalArithmetic('-12/2', 42)).toBe(-6);
+    expect(evalArithmetic('0/2', 42)).toBe(0);
+  });
+
   test('handles order of operations', () => {
     expect(evalArithmetic('(5 + 3) * 10')).toEqual(80);
     expect(evalArithmetic('5 + 3 * 10')).toEqual(35);

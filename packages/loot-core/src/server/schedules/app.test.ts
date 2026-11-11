@@ -4,10 +4,17 @@ import MockDate from 'mockdate';
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { app as mainApp } from '#server/main-app';
+import { runMutator } from '#server/mutators';
 import * as prefs from '#server/prefs';
-import { loadRules, updateRule } from '#server/transactions/transaction-rules';
+import {
+  loadRules,
+  runRules,
+  updateRule,
+} from '#server/transactions/transaction-rules';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
+import type { ServerEvents } from '#types/server-events';
 
 import {
   advanceSchedulesService,
@@ -352,6 +359,56 @@ describe('schedule app', () => {
       expect(row.next_date).toBe('2020-12-30');
     });
 
+    it('preserves skipped dates on rename but resets them when the account changes', async () => {
+      MockDate.set(new Date(2021, 4, 17));
+
+      const accountId = await db.insertAccount({ name: 'Checking' });
+      const otherAccountId = await db.insertAccount({ name: 'Savings' });
+      const id = await createSchedule({
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          {
+            op: 'is',
+            field: 'date',
+            value: {
+              start: '2021-05-17',
+              frequency: 'monthly',
+              patterns: [{ type: 'day', value: 17 }],
+            },
+          },
+        ],
+      });
+
+      await skipNextDate({ id });
+      const {
+        data: [schedule],
+      } = await aqlQuery(q('schedules').filter({ id }).select(['_conditions']));
+      // Advance the clock so a reset stamps a newer `base_next_date_ts` than the skip
+      MockDate.set(new Date(2021, 4, 17, 0, 1));
+
+      await updateSchedule({
+        schedule: { id, name: 'Broadband' },
+        conditions: schedule._conditions,
+      });
+      let result = await aqlQuery(
+        q('schedules').filter({ id }).calculate('next_date'),
+      );
+      expect(result.data).toBe('2021-06-17');
+
+      await updateSchedule({
+        schedule: { id },
+        conditions: schedule._conditions.map(condition =>
+          condition.value === accountId
+            ? { ...condition, value: otherAccountId }
+            : condition,
+        ),
+      });
+      result = await aqlQuery(
+        q('schedules').filter({ id }).calculate('next_date'),
+      );
+      expect(result.data).toBe('2021-05-17');
+    });
+
     it('updateSchedule ignores the condition `type` field when date value is unchanged', async () => {
       const id = await createSchedule({
         conditions: [
@@ -422,6 +479,92 @@ describe('schedule app', () => {
       await deleteSchedule({ id });
       const { data: schedules2 } = await aqlQuery(q('schedules').select('*'));
       expect(schedules2.length).toBe(0);
+    });
+
+    describe('completed schedules and rules', () => {
+      async function createMatchingSchedule() {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+        const id = await createSchedule({
+          schedule: { name: 'Rent' },
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: -10000 },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-01',
+                frequency: 'monthly',
+                patterns: [],
+                skipWeekend: false,
+                weekendSolveMode: 'after',
+                endMode: 'never',
+                endOccurrences: 1,
+                endDate: '2016-12-31',
+              },
+            },
+          ],
+        });
+        const transaction = {
+          account: accountId,
+          amount: -10000,
+          date: '2017-01-01',
+        };
+        return { id, transaction };
+      }
+
+      it('links a new transaction to an active schedule', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBe(id);
+      });
+
+      it('does not link a new transaction to a completed schedule', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        await updateSchedule({ schedule: { id, completed: true } });
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBeFalsy();
+      });
+
+      it('links again after a completed schedule is reopened', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+
+        await updateSchedule({ schedule: { id, completed: true } });
+        await updateSchedule({ schedule: { id, completed: false } });
+
+        const result = await runRules(transaction);
+
+        expect(result.schedule).toBe(id);
+      });
+
+      it('still runs the rule of a completed schedule for a transaction already linked to it', async () => {
+        const { id, transaction } = await createMatchingSchedule();
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id }).calculate('rule'),
+        );
+        await updateRule({
+          id: ruleId,
+          actions: [
+            { op: 'set', field: 'notes', value: 'Monthly rent' },
+            { op: 'link-schedule', value: id },
+          ],
+        });
+        await updateSchedule({ schedule: { id, completed: true } });
+
+        const result = await runRules({ ...transaction, schedule: id });
+
+        expect(result.schedule).toBe(id);
+        expect(result.notes).toBe('Monthly rent');
+      });
     });
 
     it('setNextDate sets `next_date`', async () => {
@@ -1260,6 +1403,302 @@ describe('schedule app', () => {
         MockDate.reset();
         await schedulesApp.stopServices();
       }
+    });
+
+    it('advances a recurring schedule without an account when paid', async () => {
+      MockDate.set(new Date(2016, 11, 6, 12));
+      schedulesApp.startServices();
+
+      try {
+        const accountId = await db.insertAccount({
+          name: 'Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: false },
+          conditions: [
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-05',
+                frequency: 'weekly',
+                interval: 2,
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161205,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161205,
+          base_next_date_ts: Date.now(),
+        });
+
+        await db.insertTransaction({
+          account: accountId,
+          amount: -10000,
+          date: '2016-12-05',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2016-12-19');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+
+    it('does not advance a recurring schedule for a closed account when paid', async () => {
+      MockDate.set(new Date(2016, 11, 6, 12));
+      schedulesApp.startServices();
+
+      try {
+        const openAccountId = await db.insertAccount({
+          name: 'Open Checking',
+          offbudget: 0,
+          closed: 0,
+        });
+
+        const closedAccountId = await db.insertAccount({
+          name: 'Closed Checking',
+          offbudget: 0,
+          closed: 1,
+        });
+
+        const id = await createSchedule({
+          schedule: { posts_transaction: false },
+          conditions: [
+            {
+              op: 'is',
+              field: 'account',
+              value: closedAccountId,
+            },
+            {
+              op: 'is',
+              field: 'date',
+              value: {
+                start: '2016-12-05',
+                frequency: 'weekly',
+                interval: 2,
+                patterns: [],
+              },
+            },
+          ],
+        });
+
+        const nextDateRow = await db.first<{
+          id: string;
+        }>('SELECT id FROM schedules_next_date WHERE schedule_id = ?', [id]);
+
+        await db.update('schedules_next_date', {
+          id: nextDateRow.id,
+          local_next_date: 20161205,
+          local_next_date_ts: Date.now(),
+          base_next_date: 20161205,
+          base_next_date_ts: Date.now(),
+        });
+
+        await db.insertTransaction({
+          account: openAccountId,
+          amount: -10000,
+          date: '2016-12-05',
+          schedule: id,
+        });
+
+        await advanceSchedulesService(true);
+
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(schedule.next_date).toBe('2016-12-05');
+      } finally {
+        MockDate.reset();
+        await schedulesApp.stopServices();
+      }
+    });
+  });
+
+  describe('schedule advancement failures', () => {
+    let accountId: string;
+    let syncErrors: number;
+    const catchUpDates = ['2016-12-18', '2016-12-25', '2017-01-01'];
+    const healthyDates = ['2016-12-25', '2017-01-01'];
+
+    function forwardSync(event: ServerEvents['sync-event']) {
+      if (event.type === 'error') {
+        syncErrors++;
+      }
+      schedulesApp.events.emit('sync', event);
+    }
+
+    beforeEach(async () => {
+      MockDate.set(new Date(2016, 11, 31, 12));
+      schedulesApp.startServices();
+      await prefs.loadPrefs();
+      accountId = await db.insertAccount({ name: 'Checking', closed: 0 });
+      syncErrors = 0;
+      // Production also registers the schedule listener on the main app.
+      mainApp.events.on('sync', forwardSync);
+    });
+
+    afterEach(async () => {
+      // Detach before draining so a self-retry regression cannot leak work.
+      mainApp.events.off('sync', forwardSync);
+      await runMutator(() => Promise.resolve());
+      db.runQuery('DROP TRIGGER IF EXISTS fail_schedule_advancement');
+      prefs.unloadPrefs();
+      MockDate.reset();
+      await schedulesApp.stopServices();
+    });
+
+    function rewindSchedule(id: string, nextDate = 20161218) {
+      db.runQuery(
+        'UPDATE schedules_next_date SET local_next_date = ?, base_next_date = ? WHERE schedule_id = ?',
+        [nextDate, nextDate, id],
+      );
+    }
+
+    async function createRecurringSchedule({
+      postsTransaction = true,
+      nextDate = 20161218,
+    } = {}) {
+      const id = await createSchedule({
+        schedule: { posts_transaction: postsTransaction },
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          {
+            op: 'is',
+            field: 'date',
+            value: { start: '2016-12-18', frequency: 'weekly', patterns: [] },
+          },
+        ],
+      });
+      rewindSchedule(id, nextDate);
+      if (!postsTransaction) {
+        await db.insertTransaction({
+          account: accountId,
+          amount: 0,
+          date: '2016-12-18',
+          schedule: id,
+        });
+      }
+      return id;
+    }
+
+    async function postedDates(id: string) {
+      const { data } = await aqlQuery(
+        q('transactions')
+          .filter({ schedule: id })
+          .select('date')
+          .orderBy({ date: 'asc' }),
+      );
+      return data.map(row => row.date);
+    }
+
+    async function syncSuccessfully() {
+      mainApp.events.emit('sync', { type: 'success', tables: [] });
+      await runMutator(() => Promise.resolve());
+      // Also drain a retry incorrectly enqueued by this run's own error.
+      await runMutator(() => Promise.resolve());
+    }
+
+    it.each([
+      { postsTransaction: true, ruleState: 'missing' },
+      { postsTransaction: false, ruleState: 'corrupt' },
+    ])(
+      'isolates a $ruleState rule and retries unexpected errors without duplicates (auto-post: $postsTransaction)',
+      async ({ postsTransaction, ruleState }) => {
+        const failedId = await createRecurringSchedule({ postsTransaction });
+        const brokenId = await createRecurringSchedule({
+          postsTransaction: false,
+        });
+        // The healthy schedule must sort after the failing ones.
+        const healthyId = await createRecurringSchedule({ nextDate: 20161225 });
+        const { data: ruleId } = await aqlQuery(
+          q('schedules').filter({ id: brokenId }).calculate('rule'),
+        );
+        if (ruleState === 'missing') {
+          db.runQuery('DELETE FROM rules WHERE id = ?', [ruleId]);
+        } else {
+          db.runQuery('UPDATE rules SET actions = ? WHERE id = ?', [
+            JSON.stringify([{ op: 'invalid-action' }]),
+            ruleId,
+          ]);
+        }
+        await loadRules();
+        // Exercise the real setNextDate write through each advancement path.
+        db.runQuery(`
+          CREATE TEMP TRIGGER fail_schedule_advancement
+          BEFORE UPDATE OF local_next_date ON schedules_next_date
+          WHEN OLD.schedule_id = '${failedId}'
+          BEGIN SELECT RAISE(FAIL, 'schedule advancement write failed'); END
+        `);
+
+        await syncSuccessfully();
+        expect.soft(syncErrors).toBe(1);
+        expect.soft(prefs.getPrefs().lastScheduleRun).not.toBe('2017-01-01');
+        expect(await postedDates(failedId)).toEqual(['2016-12-18']);
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+
+        db.runQuery('DROP TRIGGER fail_schedule_advancement');
+        await syncSuccessfully();
+        expect(await postedDates(failedId)).toEqual(
+          postsTransaction ? catchUpDates : ['2016-12-18'],
+        );
+        expect(await postedDates(healthyId)).toEqual(healthyDates);
+        const { data: nextDate } = await aqlQuery(
+          q('schedules').filter({ id: failedId }).calculate('next_date'),
+        );
+        expect(nextDate).toBe('2017-01-01');
+        expect(prefs.getPrefs().lastScheduleRun).toBe('2017-01-01');
+
+        // Incoming old next-date data must not bypass the successful daily marker.
+        rewindSchedule(healthyId);
+        await syncSuccessfully();
+        const { data: unchangedDate } = await aqlQuery(
+          q('schedules').filter({ id: healthyId }).calculate('next_date'),
+        );
+        expect(unchangedDate).toBe('2016-12-18');
+      },
+    );
+
+    it('does not retry its own clock-drift error', async () => {
+      const id = await createSchedule({
+        schedule: { posts_transaction: true },
+        conditions: [
+          { op: 'is', field: 'account', value: accountId },
+          { op: 'is', field: 'date', value: '2016-12-18' },
+        ],
+      });
+      // Completing this paid one-time schedule writes a new message.
+      await db.insertTransaction({
+        account: accountId,
+        amount: 0,
+        date: '2016-12-18',
+        schedule: id,
+      });
+      // A backward clock correction leaves the clock over five minutes ahead.
+      MockDate.set(new Date(2016, 11, 31, 11, 50));
+
+      await syncSuccessfully();
+      expect(syncErrors).toBe(1);
     });
   });
 

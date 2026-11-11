@@ -280,6 +280,10 @@ function handleBudgetChange(budget) {
 export function triggerBudgetChanges(oldValues, newValues) {
   const { createdMonths = new Set() } = sheet.get().meta();
   const budgetType = getBudgetType();
+  // Amounts and goals are saved per budget type, and only the active type's
+  // belong in the sheet. Go by the stored pref, which decides the table the
+  // budget actions save to.
+  const budgetTable = budgetActions.getBudgetTable();
   sheet.startTransaction();
 
   try {
@@ -292,7 +296,9 @@ export function triggerBudgetChanges(oldValues, newValues) {
         if (table === 'zero_budget_months') {
           handleBudgetMonthChange(newValue);
         } else if (table === 'zero_budgets' || table === 'reflect_budgets') {
-          handleBudgetChange(newValue);
+          if (table === budgetTable) {
+            handleBudgetChange(newValue);
+          }
         } else if (table === 'transactions') {
           const changed = new Set(
             Object.keys(getChangedValues(oldValue || {}, newValue) || {}),
@@ -530,7 +536,10 @@ export async function setType(type) {
   });
 
   sheet.get().startCacheBarrier();
-  void sheet.loadUserBudgets(db);
+  // The cache still holds the old type's cells. Goals and other inputs are
+  // never recomputed, so the next load from the cache would restore them.
+  sheet.clearCache();
+  await sheet.loadUserBudgets(db);
   const bounds = await createAllBudgets();
   sheet.get().endCacheBarrier();
 

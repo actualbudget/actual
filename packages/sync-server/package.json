@@ -1,6 +1,6 @@
 {
   "name": "@actual-app/sync-server",
-  "version": "26.10.0",
+  "version": "26.11.0",
   "description": "actual syncing server",
   "license": "MIT",
   "repository": {
@@ -90,7 +90,7 @@
   "dependencies": {
     "@actual-app/crdt": "workspace:*",
     "@actual-app/web": "workspace:*",
-    "akahu": "^2.5.1",
+    "akahu": "^2.6.0",
     "argon2": "^0.45.1",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.3",
@@ -129,6 +129,6 @@
     "vitest": "^5.0.4"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.19.0"
   }
 }

@@ -29,8 +29,13 @@ export function PostsOfflineNotification() {
       : [];
 
   async function onPost() {
-    await send('schedule/force-run-service');
-    dispatch(popModal());
+    try {
+      await send('schedule/force-run-service');
+      dispatch(popModal());
+    } catch (error) {
+      // The connection also reports this through the global server-error notification.
+      console.error('Failed to post scheduled transactions', error);
+    }
   }
 
   const payeesList = payees.map(id => (

@@ -4,6 +4,7 @@ import { IDBFactory } from 'fake-indexeddb';
 import { patchFetchForSqlJS } from '#mocks/util';
 import * as idb from '#platform/server/indexeddb';
 import * as sqlite from '#platform/server/sqlite';
+import { StorageUnavailableError } from '#platform/server/sqlite/storage/errors';
 
 import {
   _setDocumentDir,
@@ -12,6 +13,8 @@ import {
   join,
   pathToId,
   readFile,
+  removeDirRecursively,
+  removeFile,
   writeFile,
 } from './index';
 
@@ -30,6 +33,137 @@ afterEach(() => {
 });
 
 describe('web filesystem', () => {
+  test('refuses to change a database another worker moved', async () => {
+    const dir = '/documents/Actual/moved';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+    // Another worker moves the budget to the new storage after this one
+    // started on the legacy engine
+    const { store: later } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(later, {
+      filepath: dir + '/db.sqlite',
+      contents: '',
+      storage: 'opfs',
+    });
+
+    await expect(
+      writeFile(dir + '/db.sqlite', new Uint8Array([1])),
+    ).rejects.toBeInstanceOf(StorageUnavailableError);
+    await expect(removeFile(dir + '/db.sqlite')).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    // The directory is refused as a whole, nothing half deleted
+    await expect(removeDirRecursively(dir)).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect(await exists(dir + '/metadata.json')).toBe(true);
+    const { store: after } = idb.getStore(await idb.openDatabase(), 'files');
+    expect((await idb.get(after, dir + '/db.sqlite'))?.storage).toBe('opfs');
+    // The connection is shared across tests: leave no marker behind
+    await idb.del(after, dir + '/db.sqlite');
+  });
+
+  test('holds every budget in a directory before removing any of it', async () => {
+    const dir = '/documents/Actual/held';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await idb.set(store, {
+      filepath: dir + '/backups/old.sqlite',
+      contents: '',
+    });
+    await sqlite.init();
+    await init();
+    // A Web Locks API that grants and records
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback(),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    const delSpy = vi.spyOn(idb, 'del');
+    try {
+      await removeDirRecursively(dir);
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    expect(await exists(dir)).toBe(false);
+    // The budget's own lock was taken before the first row went, not only
+    // when its database's turn came in the walk
+    const budgetLock = request.mock.calls.findIndex(
+      call => call[0] === 'actual-budget:documents-Actual-held',
+    );
+    expect(budgetLock).toBeGreaterThanOrEqual(0);
+    expect(request.mock.invocationCallOrder[budgetLock]).toBeLessThan(
+      delSpy.mock.invocationCallOrder[0],
+    );
+    // And taken once: the walk underneath requests no lock of its own
+    expect(
+      request.mock.calls.filter(
+        call => call[0] === 'actual-budget:documents-Actual-held',
+      ),
+    ).toHaveLength(1);
+    delSpy.mockRestore();
+  });
+
+  test('checks a database that appears during the removal walk', async () => {
+    const dir = '/documents/Actual/late';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/a-first.json', contents: '{}' });
+    await idb.set(store, {
+      filepath: dir + '/backups/old.sqlite',
+      contents: '',
+    });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback(),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    const originalDel = idb.del;
+    const late = dir + '/backups/late.sqlite';
+    const delSpy = vi
+      .spyOn(idb, 'del')
+      .mockImplementationOnce(async (target, key) => {
+        // The real delete goes first, while its transaction is still live
+        const deleted = originalDel(target, key);
+        // While the first file goes, a database appears further down the
+        // tree, and another worker moves it to the new storage
+        await writeFile(late, new Uint8Array([1]));
+        const { store: rows } = idb.getStore(await idb.openDatabase(), 'files');
+        await idb.set(rows, { filepath: late, contents: '', storage: 'opfs' });
+        return deleted;
+      });
+    try {
+      await expect(removeDirRecursively(dir)).rejects.toBeInstanceOf(
+        StorageUnavailableError,
+      );
+    } finally {
+      delSpy.mockRestore();
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
+    const { store: after } = idb.getStore(await idb.openDatabase(), 'files');
+    expect((await idb.get(after, late))?.storage).toBe('opfs');
+    // The connection is shared across tests: leave no marker behind
+    await idb.del(after, late);
+  });
+
   test('basic reads/writes are stored in idb', async () => {
     await idb.openDatabase();
     await sqlite.init();
@@ -59,8 +193,8 @@ describe('web filesystem', () => {
       contents: 'hello',
     });
     const binResult = await idb.get(store, '/documents/foo.bin');
-    expect(binResult.filepath).toBe('/documents/foo.bin');
-    expect(Array.from(binResult.contents)).toEqual(
+    expect(binResult?.filepath).toBe('/documents/foo.bin');
+    expect(Array.from(binResult?.contents as Uint8Array)).toEqual(
       Array.from(new Uint8Array(buf)),
     );
 
@@ -164,6 +298,43 @@ describe('web filesystem', () => {
     const FS = sqlite._getModule().FS;
     const { node } = FS.lookupPath('/custom/xyz/db.sqlite', {});
     expect(node.link).toBe('/blocked/' + pathToId('/custom/xyz/db.sqlite'));
+  });
+
+  test('releasing the storage closes the database and gives up its lock', async () => {
+    const dir = '/documents/Actual/leaving';
+    const { store } = idb.getStore(await idb.openDatabase(), 'files');
+    await idb.set(store, { filepath: dir + '/metadata.json', contents: '{}' });
+    await idb.set(store, { filepath: dir + '/db.sqlite', contents: '' });
+    await sqlite.init();
+    await init();
+
+    let isReleased = false;
+    const request = vi.fn(
+      (_name: string, _options: unknown, callback: () => Promise<void>) =>
+        callback().then(() => {
+          isReleased = true;
+        }),
+    );
+    Object.defineProperty(navigator, 'locks', {
+      value: { request },
+      configurable: true,
+    });
+    try {
+      const db = await sqlite.openDatabase(dir + '/db.sqlite');
+      expect(request).toHaveBeenCalledTimes(1);
+      expect(isReleased).toBe(false);
+
+      await sqlite.releaseSqliteStorage();
+      await vi.waitFor(() => expect(isReleased).toBe(true));
+      // Closed for good, so absurd-sql lets go of its IndexedDB connection
+      // too; the page relaunches if it comes back
+      expect(() => sqlite.runQuery(db, 'SELECT 1 AS one', [], true)).toThrow();
+    } finally {
+      Object.defineProperty(navigator, 'locks', {
+        value: undefined,
+        configurable: true,
+      });
+    }
   });
 });
 

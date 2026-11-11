@@ -19,7 +19,9 @@ export type AutomationErrorKind =
 
 function isAdjustmentOutOfRange(template: Template): boolean {
   if (
-    (template.type === 'schedule' || template.type === 'average') &&
+    (template.type === 'schedule' ||
+      template.type === 'average' ||
+      template.type === 'weeklyAverage') &&
     template.adjustment !== undefined &&
     template.adjustmentType === 'percent'
   ) {

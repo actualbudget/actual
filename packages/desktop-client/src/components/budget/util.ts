@@ -7,6 +7,7 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import {
   amountToInteger,
   currencyToAmount,
+  getNumberFormat,
   integerToCurrency,
 } from '@actual-app/core/shared/util';
 import type { Handlers } from '@actual-app/core/types/handlers';
@@ -77,9 +78,15 @@ function normalizeIntegerValue(
   val: number | null | undefined,
   decimalPlaces = 2,
 ) {
-  return typeof val === 'number'
-    ? currencyToAmount(integerToCurrency(val, undefined, decimalPlaces))
-    : 0;
+  if (typeof val !== 'number') {
+    return 0;
+  }
+  // Round to the currency's digits when it shows fewer than the stored two
+  const formatter =
+    decimalPlaces < 2
+      ? getNumberFormat({ decimalPlaces }).formatter
+      : undefined;
+  return currencyToAmount(integerToCurrency(val, formatter));
 }
 
 /**
@@ -96,8 +103,47 @@ export function getGoalDifference(
   return amountToInteger(
     normalizeIntegerValue(have, decimalPlaces) -
       normalizeIntegerValue(goalValue, decimalPlaces),
-    decimalPlaces,
   );
+}
+
+/**
+ * How much of the goal is funded, as a whole percentage from 0 to 100.
+ * Rounded down while underfunded so it only reads 100 once the goal is met.
+ */
+export function getGoalProgress(
+  have: number | null | undefined,
+  goalValue: number,
+  decimalPlaces = 2,
+): number {
+  if (getGoalDifference(have, goalValue, decimalPlaces) >= 0) {
+    return 100;
+  }
+  if (goalValue <= 0) {
+    return 0;
+  }
+  const ratio = Math.max(0, (have ?? 0) / goalValue);
+  return Math.min(99, Math.floor(ratio * 100));
+}
+
+/**
+ * The progress to draw in the ring beside a balance, or null when no ring is
+ * drawn: without a goal, when overspent (the red amount already says so) or
+ * once the goal is funded (nothing left to do). Amounts compare as displayed.
+ */
+export function getGoalRingProgress(
+  balance: number,
+  goalValue: number | null | undefined,
+  have: number | null | undefined,
+  decimalPlaces = 2,
+): number | null {
+  if (
+    goalValue == null ||
+    normalizeIntegerValue(balance, decimalPlaces) < 0 ||
+    getGoalDifference(have, goalValue, decimalPlaces) >= 0
+  ) {
+    return null;
+  }
+  return getGoalProgress(have, goalValue, decimalPlaces);
 }
 
 export function makeBalanceAmountStyle(

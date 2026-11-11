@@ -38,10 +38,7 @@ export function FormulaResult({
     } else if (value === null || value === undefined) {
       return '';
     } else if (typeof value === 'number') {
-      return format(
-        amountToInteger(value, format.currency.decimalPlaces),
-        'financial',
-      );
+      return format(amountToInteger(value), 'financial');
     } else {
       return String(value);
     }

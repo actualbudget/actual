@@ -24,6 +24,7 @@ import { useMonteCarloTickFormatter } from '#components/reports/graphs/util/useM
 import type {
   MonteCarloContribution,
   MonteCarloIncomeStream,
+  MonteCarloLumpSum,
   MonteCarloPot,
   MonteCarloRunDetailRow,
   MonteCarloSpendingPhase,
@@ -44,6 +45,7 @@ type MonteCarloCashflowGraphProps = {
   contributions: MonteCarloContribution[];
   incomeStreams: MonteCarloIncomeStream[];
   spendingPhases: MonteCarloSpendingPhase[];
+  lumpSums: MonteCarloLumpSum[];
   /** The user's current age; the x-axis shows startAge + year - 1 */
   startAge: number;
 };
@@ -60,6 +62,7 @@ export function MonteCarloCashflowGraph({
   contributions,
   incomeStreams,
   spendingPhases,
+  lumpSums,
   startAge,
 }: MonteCarloCashflowGraphProps) {
   const { t } = useTranslation();
@@ -74,6 +77,7 @@ export function MonteCarloCashflowGraph({
       contributions,
       incomeStreams,
       spendingPhases,
+      lumpSums,
       startAge,
       translate: t,
     });
@@ -125,9 +129,9 @@ export function MonteCarloCashflowGraph({
                 maxBarSize={MAX_BAR_SIZE}
                 {...animationProps}
               >
-                {/* Only spending remains after the plan runs out; dim it
-                    so those years read as planned-but-unfunded */}
-                {series.kind === 'phase' &&
+                {/* Only spending and one-offs remain after the plan runs
+                    out; dim them so those years read as planned-but-unfunded */}
+                {(series.kind === 'phase' || series.kind === 'lumpSum') &&
                   data.map(point => (
                     <Cell
                       key={point.year}

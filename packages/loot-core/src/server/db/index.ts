@@ -7,11 +7,11 @@ import {
   setClock,
   Timestamp,
 } from '@actual-app/crdt';
-import type { Database, Statement } from '@jlongster/sql.js';
 import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
+import type { Database, Statement } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 import {
   convertForInsert,
@@ -146,7 +146,16 @@ export function execQuery(sql: string) {
 
 // This manages an LRU cache of prepared query statements. This is
 // only needed in hot spots when you are running lots of queries.
-let _queryCache = new LRUCache<string, Statement>({ max: 100 });
+function createQueryCache() {
+  return new LRUCache<string, Statement>({
+    max: 100,
+    // Free statements as they are evicted so they do not pile up in the
+    // sqlite heap over a long session
+    dispose: statement => sqlite.finalizeStatement(statement),
+  });
+}
+
+let _queryCache = createQueryCache();
 export function cache(sql: string) {
   const cached = _queryCache.get(sql);
   if (cached) {
@@ -159,7 +168,7 @@ export function cache(sql: string) {
 }
 
 function resetQueryCache() {
-  _queryCache = new LRUCache<string, Statement>({ max: 100 });
+  _queryCache = createQueryCache();
 }
 
 export function transaction(

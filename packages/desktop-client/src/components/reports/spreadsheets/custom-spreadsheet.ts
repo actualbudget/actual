@@ -18,7 +18,6 @@ import type { SyncedPrefs } from '@actual-app/core/types/prefs';
 import * as d from 'date-fns';
 
 import {
-  categoryLists,
   getIntervalFormat,
   groupBySelections,
   ReportOptions,
@@ -35,6 +34,7 @@ import {
   filterReportTransactions,
 } from './filterHiddenItems';
 import { recalculate } from './recalculate';
+import { reportCategoryLists } from './reportCategoryLists';
 import { sortData } from './sortData';
 import { groupQueryDataByTags } from './tagGroups';
 import {
@@ -92,7 +92,14 @@ export function createCustomSpreadsheet({
   firstDayOfWeekIdx,
   dateFormat,
 }: createCustomSpreadsheetProps) {
-  const [categoryList, categoryGroup] = categoryLists(categories);
+  const [categoryList, categoryGroup] = reportCategoryLists({
+    categories,
+    conditions,
+    conditionsOp,
+    showOffBudget,
+    showHiddenCategories,
+    showUncategorized,
+  });
   const [initialGroups, groupByLabel] = groupBySelections(
     groupBy,
     categoryList,
@@ -191,6 +198,17 @@ export function createCustomSpreadsheet({
           date: monthUtils.weekFromDate(d.date, firstDayOfWeekIdx),
         };
       });
+    }
+
+    if (interval === 'Quarterly' && balanceTypeOp !== 'totalBudgeted') {
+      debts = debts.map(d => ({
+        ...d,
+        date: monthUtils.quarterFromDate(d.date),
+      }));
+      assets = assets.map(d => ({
+        ...d,
+        date: monthUtils.quarterFromDate(d.date),
+      }));
     }
 
     const intervals =

@@ -1,4 +1,7 @@
-import { startBrowserBackend } from '@actual-app/core/platform/client/browser-preload';
+import {
+  resolveStorageBackend,
+  startBrowserBackend,
+} from '@actual-app/core/platform/client/browser-preload';
 import * as Platform from '@actual-app/core/shared/platform';
 import { registerSW } from 'virtual:pwa-register';
 
@@ -36,6 +39,11 @@ const isOpenIdCallback = window.location.pathname
   .replace(/\/+$/, '')
   .endsWith('/openid-cb');
 
+// Which engine the backend uses for budget files: `?storage=opfs` once, or
+// the choice stored by the experimental setting. Resolved on the main
+// thread because the worker needs it in its init message.
+const storageBackend = resolveStorageBackend();
+
 // *** Start the backend ***
 //
 // The multi-tab coordinator (leader/follower over SharedWorker), the direct
@@ -50,6 +58,7 @@ const worker = startBrowserBackend({
     isDev: IS_DEV,
     publicUrl: import.meta.env.BASE_URL.slice(0, -1),
     hash: import.meta.env.REACT_APP_BACKEND_WORKER_HASH,
+    storageBackend,
   },
   createSharedWorker: () =>
     new SharedBrowserServerWorker({ name: 'actual-backend' }),
@@ -88,16 +97,17 @@ const isUpdateReadyForDownloadPromise = new Promise(resolve => {
   };
 });
 // Skip SW registration in dev so stale cached assets don't override edits
-// between page loads. Plugin code that needs a SW can register one itself.
-// In dev there is no SW to install, so applyAppUpdate() can't rely on the
-// SW lifecycle to swap the page — fall back to a plain reload so callers
-// don't hang on the never-resolving promise inside applyAppUpdate.
-const updateSW = IS_DEV
-  ? () => window.location.reload()
-  : registerSW({
-      immediate: true,
-      onNeedRefresh: markUpdateReadyForDownload,
-    });
+// between page loads, and in the native mobile apps, whose assets ship in the
+// app bundle and update via the app stores. Plugin code that needs a SW can
+// register one itself. Without a SW, applyAppUpdate() falls back to a plain
+// reload so callers don't hang on its never-resolving promise.
+const updateSW =
+  IS_DEV || Platform.isNativeMobileApp
+    ? () => window.location.reload()
+    : registerSW({
+        immediate: true,
+        onNeedRefresh: markUpdateReadyForDownload,
+      });
 
 global.Actual = {
   IS_DEV,

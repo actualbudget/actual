@@ -59,6 +59,7 @@ describe('forecast projection', () => {
         payee: 'Paycheck',
         scheduleId: 'sched-1',
         scheduleName: 'Paycheck',
+        occurrenceDate: '2024-03-02',
       },
     ];
     const filterInfo: ForecastFilterInfo = {
@@ -86,7 +87,10 @@ describe('forecast projection', () => {
       110, 70, 70,
     ]);
     expect(result.dataPoints[0].transactions).toMatchObject([
-      { amount: 10, scheduleId: 'sched-1' },
+      { amount: 10, scheduleId: 'sched-1', occurrenceDate: '2024-03-02' },
+    ]);
+    expect(result.dataPoints.map(point => point.recordedAmount)).toEqual([
+      0, -40, 0,
     ]);
     expect(result.lowestBalance).toEqual({
       date: '2024-03-03',

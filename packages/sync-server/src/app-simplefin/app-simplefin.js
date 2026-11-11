@@ -1,16 +1,15 @@
 import createDebug from 'debug';
 import express from 'express';
+import { fetch } from 'undici';
 
 import { handleError } from '#app-gocardless/util/handle-error';
 import { config } from '#load-config';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '#util/middlewares';
+import { requestLoggerMiddleware } from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
 import { assertUrlAllowed, createSsrfDispatcher } from '#util/ssrf';
+import { validateBankSyncSession } from '#util/validate-budget-session';
 
 const debugSensitive = createDebug('actual-sensitive:simplefin');
 const networkOptions = {
@@ -22,7 +21,16 @@ const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
-app.use(validateSessionMiddleware);
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// API keys may only use credentials configured for an accessible budget.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
+app.use(validateBankSyncSession);
 
 app.use((req, res, next) => {
   const fileId = req.get('X-Actual-File-Id');
@@ -41,7 +49,8 @@ app.use((req, res, next) => {
   // Falling back in that case could expose global accounts unexpectedly.
   res.locals.credentialFileId =
     fileId != null &&
-    (secretsService.exists(SecretName.simplefin_token, fileId) ||
+    (res.locals.apiKeyFileIds ||
+      secretsService.exists(SecretName.simplefin_token, fileId) ||
       secretsService.exists(SecretName.simplefin_accessKey, fileId))
       ? fileId
       : null;
