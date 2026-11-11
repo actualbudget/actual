@@ -19,7 +19,7 @@ import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
 import * as simpleFinApp from './app-simplefin/app-simplefin';
 import * as syncApp from './app-sync';
-import { normalizeBasePath } from './base-path.js';
+import { normalizeBasePath } from './base-path';
 import { config } from './load-config';
 import { listen } from './util/server-listen';
 

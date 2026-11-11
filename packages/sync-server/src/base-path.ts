@@ -1,4 +1,4 @@
-export function normalizeBasePath(value) {
+export function normalizeBasePath(value: string): string {
   const path = value.trim();
   if (!path || path === '/') return '';
   if (
