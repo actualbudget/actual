@@ -258,42 +258,4 @@ test.describe('Mobile Tags', () => {
     await expect(page).toHaveURL(/\/accounts\/all$/);
     await expect(page.getByText('Filters applied')).toBeVisible();
   });
-
-  test('opens the transactions that use a tag from the edit page', async () => {
-    await tagsPage.getTag('clothing').click();
-    await expect(page.getByRole('heading', { name: 'Edit tag' })).toBeVisible();
-    await tagsPage.viewTransactionsButton.click();
-
-    await expect(page).toHaveURL(/\/accounts\/all$/);
-    await expect(page.getByText('Filters applied')).toBeVisible();
-  });
-
-  test('deletes a tag from the edit page and restores it with undo', async () => {
-    await tagsPage.getTag('clothing').click();
-    await expect(page.getByRole('heading', { name: 'Edit tag' })).toBeVisible();
-    await tagsPage.deleteTagButton.click();
-
-    await expect(page).toHaveURL(/\/settings\/tags$/);
-    await expect(tagsPage.getToast('Tag "#clothing" deleted')).toBeVisible();
-    await expect(tagsPage.getTag('clothing')).toHaveCount(0);
-
-    await tagsPage.undoFromToast('Tag "#clothing" deleted');
-
-    await expect(tagsPage.getTag('clothing')).toBeVisible();
-    await expect(page).toHaveURL(/\/settings\/tags$/);
-  });
-
-  test('does not return to a deleted tag with the browser back button', async () => {
-    await tagsPage.getTag('clothing').click();
-    await expect(page.getByRole('heading', { name: 'Edit tag' })).toBeVisible();
-    const editUrl = page.url();
-    await tagsPage.deleteTagButton.click();
-    await expect(tagsPage.getToast('Tag "#clothing" deleted')).toBeVisible();
-    await expect(tagsPage.getTag('clothing')).toHaveCount(0);
-
-    await page.goBack();
-
-    await expect(page).not.toHaveURL(editUrl);
-    await expect(page).not.toHaveURL(/\/tags\/[^/]+$/);
-  });
 });

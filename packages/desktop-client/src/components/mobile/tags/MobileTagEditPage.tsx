@@ -30,16 +30,11 @@ import { useDispatch } from '#redux';
 import {
   tagQueries,
   useCreateTagMutation,
-  useDeleteTagMutation,
   useRenameTagMutation,
   useUpdateTagMutation,
 } from '#tags';
 
-import {
-  getTagTransactionsLocationState,
-  sanitiseTagName,
-  sanitiseTagNameInput,
-} from './utils';
+import { sanitiseTagName, sanitiseTagNameInput } from './utils';
 
 export function MobileTagEditPage() {
   const { t } = useTranslation();
@@ -116,8 +111,6 @@ function TagEditForm({ tag }: TagEditFormProps) {
     useUpdateTagMutation();
   const { mutateAsync: renameTag, isPending: isRenaming } =
     useRenameTagMutation();
-  const { mutateAsync: deleteTag, isPending: isDeleting } =
-    useDeleteTagMutation();
 
   const filter = new URLSearchParams(location.search).get('filter') ?? '';
   const editPath = `${location.pathname}${location.search}`;
@@ -142,8 +135,7 @@ function TagEditForm({ tag }: TagEditFormProps) {
   const [syncedValues, setSyncedValues] = useState(() => getTagValues(tag));
 
   const name = nameInput.trim();
-  const isBusy =
-    isSaving || isCreating || isUpdating || isRenaming || isDeleting;
+  const isBusy = isSaving || isCreating || isUpdating || isRenaming;
 
   const tagValues = getTagValues(tag);
   const hasNewTagValues =
@@ -185,14 +177,9 @@ function TagEditForm({ tag }: TagEditFormProps) {
     }
   };
 
-  const goTo = (path: string, options?: { replace: boolean }) => {
-    if (!isMountedRef.current) {
-      return;
-    }
-    if (options == null) {
+  const goTo = (path: string) => {
+    if (isMountedRef.current) {
       void navigate(path);
-    } else {
-      void navigate(path, options);
     }
   };
 
@@ -267,31 +254,6 @@ function TagEditForm({ tag }: TagEditFormProps) {
     if (isSaved) {
       goTo(tagsListPath);
     }
-  };
-
-  const onDelete = async () => {
-    if (tag == null || isBusy) {
-      return;
-    }
-    const isDeleted = await withUndoReturningTo(tagsListPath, async () => {
-      await deleteTag({ id: tag.id });
-    });
-    if (!isDeleted) {
-      return;
-    }
-    showUndoNotification({
-      message: t('Tag "{{name}}" deleted', { name: `#${tag.tag}` }),
-    });
-    goTo(tagsListPath, { replace: true });
-  };
-
-  const onViewTransactions = () => {
-    if (tag == null) {
-      return;
-    }
-    void navigate('/accounts', {
-      state: getTagTransactionsLocationState(tag.tag),
-    });
   };
 
   const onChooseColor = () => {
@@ -402,33 +364,6 @@ function TagEditForm({ tag }: TagEditFormProps) {
         autoCapitalize="sentences"
         autoCorrect="on"
       />
-
-      {tag != null && (
-        <View
-          style={{
-            gap: spacing.xl,
-            marginTop: spacing.xl,
-            padding: `0 ${spacing.sm}px ${spacing.xl}px`,
-          }}
-        >
-          <Button
-            onPress={onViewTransactions}
-            style={{ height: styles.mobileMinHeight }}
-          >
-            <Trans>View transactions</Trans>
-          </Button>
-          <Button
-            onPress={onDelete}
-            isDisabled={isBusy}
-            style={{
-              height: styles.mobileMinHeight,
-              color: theme.errorText,
-            }}
-          >
-            <Trans>Delete tag</Trans>
-          </Button>
-        </View>
-      )}
     </Page>
   );
 }

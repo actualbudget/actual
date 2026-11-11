@@ -254,50 +254,6 @@ describe('MobileTagEditPage', () => {
     expect(send).not.toBeCalled();
   });
 
-  it('opens the transactions that use the tag', async () => {
-    const user = userEvent.setup();
-    renderEditPage('/tags/tag-2');
-
-    await user.click(screen.getByRole('button', { name: 'View transactions' }));
-
-    expect(mockNavigate).toBeCalledWith('/accounts', {
-      state: {
-        goBack: true,
-        filterConditions: [
-          { field: 'notes', op: 'hasTags', value: '#holiday', type: 'string' },
-        ],
-      },
-    });
-  });
-
-  it('deletes the tag and returns to the list', async () => {
-    const user = userEvent.setup();
-    renderEditPage('/tags/tag-2?filter=hol');
-
-    await user.click(screen.getByRole('button', { name: 'Delete tag' }));
-
-    await waitFor(() =>
-      expect(send).toBeCalledWith('tags-delete', { id: 'tag-2' }),
-    );
-    await waitFor(() =>
-      expect(mockNavigate).toBeCalledWith('/settings/tags?filter=hol', {
-        replace: true,
-      }),
-    );
-    expect(getNotificationMessages()).toEqual(['Tag "#holiday" deleted']);
-  });
-
-  it('offers no delete or transactions actions for a new tag', () => {
-    renderEditPage('/tags/new');
-
-    expect(
-      screen.queryByRole('button', { name: 'Delete tag' }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: 'View transactions' }),
-    ).not.toBeInTheDocument();
-  });
-
   it('returns to the list when the tag does not exist', async () => {
     renderEditPage('/tags/missing');
 
@@ -394,7 +350,6 @@ describe('MobileTagEditPage', () => {
       'Weekly shop',
     );
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Delete tag' })).toBeDisabled();
 
     await act(async () => {
       failUpdate(new Error('update failed'));

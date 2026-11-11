@@ -76,9 +76,7 @@ export function TagsListItem({
           gap: spacing.xs,
         }}
       >
-        <span className={getTagCSS(tag.tag)} style={{ fontSize: 15 }}>
-          {label}
-        </span>
+        <span className={getTagCSS(tag.tag)}>{label}</span>
         {tag.description != null && tag.description !== '' && (
           <Text
             style={{

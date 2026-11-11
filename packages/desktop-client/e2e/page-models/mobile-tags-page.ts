@@ -14,8 +14,6 @@ export class MobileTagsPage {
   readonly saveButton: Locator;
   readonly colorSheet: Locator;
   readonly hexInput: Locator;
-  readonly viewTransactionsButton: Locator;
-  readonly deleteTagButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -31,10 +29,6 @@ export class MobileTagsPage {
     this.saveButton = page.getByRole('button', { name: 'Save' });
     this.colorSheet = page.getByRole('dialog', { name: 'Color' });
     this.hexInput = this.colorSheet.getByRole('textbox', { name: 'Hex color' });
-    this.viewTransactionsButton = page.getByRole('button', {
-      name: 'View transactions',
-    });
-    this.deleteTagButton = page.getByRole('button', { name: 'Delete tag' });
   }
 
   async waitFor(options?: {
