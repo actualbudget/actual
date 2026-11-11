@@ -19,21 +19,25 @@ Regardless of whether the code is written by you or by an AI, it still has to me
 
 ## Interacting with maintainers should be human
 
-When it comes to interacting with the project — PR descriptions, code review replies, issue comments, and discussion threads — we expect to interact with real humans, not with AI-generated replies.
+When it comes to interacting with the project — code review replies, issue comments, and discussion threads — we expect to interact with real humans, not with AI-generated replies.
 
 Please do not:
 
 - Paste a reviewer's comment back into an AI and post the raw output as your reply.
-- Generate issue or PR descriptions wholesale from AI without reading and editing them yourself.
+- Generate issue descriptions wholesale from AI without reading and editing them yourself.
 - Use AI to argue with maintainers on your behalf.
 
 Maintainer bandwidth is limited, and the conversation around a change is where most of the value of code review lives. If that conversation is between an AI on one side and a human on the other, it stops being useful.
 
-## Disclose when AI was used
+## Pull request descriptions
 
-If AI was used to generate a significant portion of an issue, PR, or the code it contains, please say so in the submission. A short note in the PR description is enough — for example, "The initial implementation was drafted with Claude and then reviewed and edited by me."
+AI tools may help write a pull request description, within a fixed format. The pull request template has these rules, and an automated check enforces them:
 
-Issues and pull requests that appear to be AI-generated but do not disclose it may be closed without review. Contributors who repeatedly submit undisclosed AI content, or who ignore this policy, may be blocked from contributing.
+- **Human Summary** — written by you, in your own words. A sentence or two on why the change is needed is enough. An AI tool must not write this section.
+- **Description** and **Testing** — may be written with AI, but must stay short: at most 150 words in total.
+- **Proof** — every pull request that changes the app must show that it works. Verify your change in a real browser and add a before and an after screenshot, or a video, to the Proof section. Maintainers should not have to test your change by hand to see what it does, and pull requests without proof are not reviewed. If the change has nothing to show (for example a refactor), tick the "no user-visible effect" box instead.
+
+You can fix a failing check by editing the pull request description; the check runs again automatically.
 
 ## Quality Over Quantity
 
@@ -41,7 +45,7 @@ Modern AI tools make it easy to generate a large number of changes very quickly.
 
 A stack of simultaneous, similar pull requests from one author takes much longer for us to review than a single, well-tested change, and it is often a sign that the work has not been read or tested by a human. We would much rather receive one change that you understand and have verified than ten that you have not.
 
-A good rhythm is to open one pull request, work with us to get it reviewed and merged, and only then open the next one. Pull requests that are low-effort, untested, or undisclosed AI output may be closed without a detailed review, and authors who repeatedly submit them may be blocked from contributing.
+A good rhythm is to open one pull request, work with us to get it reviewed and merged, and only then open the next one. Pull requests that are low-effort or untested may be closed without a detailed review, and authors who repeatedly submit them may be blocked from contributing.
 
 ## You are responsible for what you submit
 
@@ -55,4 +59,4 @@ You are the author of the contribution. The AI is not.
 
 ## A note on automated AI agents
 
-This page is for human contributors who are using AI as an assistant. Autonomous AI agents operating directly on this repository (for example, via Claude Code or Cursor Agents) follow a separate set of rules — they must prefix commits and PR titles with `[AI]` and apply the `AI generated` label. Those rules live in [`AGENTS.md`](https://github.com/actualbudget/actual/blob/master/AGENTS.md) and [`.github/agents/pr-and-commit-rules.md`](https://github.com/actualbudget/actual/blob/master/.github/agents/pr-and-commit-rules.md).
+This page is for human contributors who are using AI as an assistant. Autonomous AI agents operating directly on this repository (for example, via Claude Code or Cursor Agents) follow a separate set of rules. Those rules live in [`AGENTS.md`](https://github.com/actualbudget/actual/blob/master/AGENTS.md) and [`.github/agents/pr-and-commit-rules.md`](https://github.com/actualbudget/actual/blob/master/.github/agents/pr-and-commit-rules.md).

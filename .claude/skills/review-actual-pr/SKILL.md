@@ -53,8 +53,8 @@ gh pr view <num> --repo actualbudget/actual --json headRefOid -q .headRefOid
 
 Auto-detect using these signals, in order of strength:
 
-- **Bug** if any label name matches (case-insensitive) `bug`, `defect`, `regression`, OR title starts with `fix:`, `bug:`, `hotfix:`, `[AI] fix`, `[AI] bug`, OR body contains `Fixes #` / `Closes #` linked to an issue with a `bug` label.
-- **Feature / enhancement** if any label matches `enhancement`, `feature`, `feature request`, `improvement`, OR title starts with `feat:`, `feature:`, `enhancement:`, `[AI] add`, `[AI] feat`, OR the diff adds substantial new components/pages.
+- **Bug** if any label name matches (case-insensitive) `bug`, `defect`, `regression`, OR title starts with `fix:`, `bug:`, `hotfix:`, OR body contains `Fixes #` / `Closes #` linked to an issue with a `bug` label.
+- **Feature / enhancement** if any label matches `enhancement`, `feature`, `feature request`, `improvement`, OR title starts with `feat:`, `feature:`, `enhancement:`, OR the diff adds substantial new components/pages.
 - **Other** (refactor, chore, docs, deps): tell the user the PR doesn't look like a user-facing change, do the code review only, skip browser testing unless the user insists.
 
 If both signals fire (rare) or neither fires confidently, ask via `AskUserQuestion`. Don't guess.
@@ -64,7 +64,7 @@ If both signals fire (rare) or neither fires confidently, ask via `AskUserQuesti
 Read `references/code-review-rubric.md` first — it's the condensed rule set. Then walk the diff and produce findings in three tiers:
 
 - **Critical** — bugs, security issues, broken types/build, data loss risk, anything that would harm users.
-- **Important** — repo-rule violations: new `@ts-strict-ignore`, new `eslint-disable` / `oxlint-disable`, untranslated user-facing strings, new UI-tweak settings, `as` where `satisfies` would work, missing `FinancialText`/`tnum` on standalone financial numbers, `any`/`unknown` without justification, wrong import sources (e.g. `useNavigate` from react-router instead of `src/hooks`), `[AI]` prefix missing from PR title.
+- **Important** — repo-rule violations: new `@ts-strict-ignore`, new `eslint-disable` / `oxlint-disable`, untranslated user-facing strings, new UI-tweak settings, `as` where `satisfies` would work, missing `FinancialText`/`tnum` on standalone financial numbers, `any`/`unknown` without justification, wrong import sources (e.g. `useNavigate` from react-router instead of `src/hooks`).
 - **Suggestions** — clarity, naming, dead code, repeated patterns worth extracting, unnecessary mocks in tests.
 
 For every finding, include:

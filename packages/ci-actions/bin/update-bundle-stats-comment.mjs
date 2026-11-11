@@ -14,7 +14,8 @@ import process from 'node:process';
 
 import { Octokit } from '@octokit/rest';
 
-const BOT_BOUNDARY_MARKER = '<!--- actual-bot-sections --->';
+import { BOT_BOUNDARY_MARKER } from '../src/pr-description/check.mjs';
+
 const BOT_BOUNDARY_TEXT = `${BOT_BOUNDARY_MARKER}\n<hr />`;
 
 function parseArgs(argv) {
