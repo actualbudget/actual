@@ -49,7 +49,10 @@ export default function DocVersionBanner() {
           ? 'This is unreleased documentation for Actual Budget (Next).'
           : `This is documentation for v${docVersion} of Actual Budget.`}{' '}
         For the current release, see the{' '}
-        <Link to={new URL(pathname, currentDocsUrl).href}>latest version</Link>.
+        <Link to={new URL(currentDocsUrl).origin + pathname}>
+          latest version
+        </Link>
+        .
       </div>
     </div>
   );
