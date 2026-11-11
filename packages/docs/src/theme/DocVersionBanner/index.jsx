@@ -1,6 +1,7 @@
 import React from 'react';
 
 import Link from '@docusaurus/Link';
+import { useLocation } from '@docusaurus/router';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import useIsBrowser from '@docusaurus/useIsBrowser';
 
@@ -11,6 +12,7 @@ const host =
 
 export default function DocVersionBanner() {
   const isBrowser = useIsBrowser();
+  const { pathname } = useLocation();
   const {
     siteConfig: {
       customFields: {
@@ -47,7 +49,7 @@ export default function DocVersionBanner() {
           ? 'This is unreleased documentation for Actual Budget (Next).'
           : `This is documentation for v${docVersion} of Actual Budget.`}{' '}
         For the current release, see the{' '}
-        <Link to={currentDocsUrl}>latest version</Link>.
+        <Link to={new URL(pathname, currentDocsUrl).href}>latest version</Link>.
       </div>
     </div>
   );
