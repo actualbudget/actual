@@ -86,33 +86,44 @@ function listenForPageLifecycle(backend: Worker): (() => void) | null {
   // back has waited for it
   let leaving: Promise<unknown> | null = null;
   let reopening: Promise<void> = Promise.resolve();
+  // Counts departures, so a reopening can tell that the page left again
+  let departures = 0;
+  // The budget to open again. Kept until it is open, as a reopening the
+  // page left in the middle of may already have closed it
+  let budgetToReopen: string | null = null;
 
-  async function reopenBudget() {
-    const left = leaving;
-    if (!left) {
-      return;
-    }
-    leaving = null;
+  // `left` and `departure` are what the page had at its return
+  async function reopenBudget(left: Promise<unknown>, departure: number) {
+    // Once the page has left again, nothing more is asked of the worker:
+    // the next return starts over
+    const hasLeftAgain = () => departures !== departure;
     try {
       // Frozen along with its page, the worker may not have finished
       await left;
-      await sendAhead(() => send('storage-resume'));
-      // The worker still counts the budget it gave up as open
-      const loaded = await sendAhead(() => send('load-prefs'));
-      const budgetId = loaded?.id;
-      if (budgetId) {
+      if (!hasLeftAgain()) {
+        await sendAhead(() => send('storage-resume'));
+        // The worker still counts the budget it gave up as open
+        const loaded = await sendAhead(() => send('load-prefs'));
+        budgetToReopen ??= loaded?.id ?? null;
+      }
+      const budgetId = budgetToReopen;
+      if (budgetId && !hasLeftAgain()) {
         await sendAhead(() => send('close-budget'));
-        await sendAhead(() => send('load-budget', { id: budgetId }));
+        if (!hasLeftAgain()) {
+          await sendAhead(() => send('load-budget', { id: budgetId }));
+        }
       }
     } catch {
       // The held requests meet the same trouble, and report it
     }
-    // Unless the page left again meanwhile: they then wait for its return
-    if (!leaving) {
-      const requests = heldRequests ?? [];
-      heldRequests = null;
-      requests.forEach(request => post(request));
+    // The held requests wait for the next return too
+    if (hasLeftAgain()) {
+      return;
     }
+    budgetToReopen = null;
+    const requests = heldRequests ?? [];
+    heldRequests = null;
+    requests.forEach(request => post(request));
   }
 
   const onVisibilityChange = () => {
@@ -121,12 +132,16 @@ function listenForPageLifecycle(backend: Worker): (() => void) | null {
     }
   };
   const onPageHide = () => {
+    departures += 1;
     heldRequests ??= [];
     leaving = sendAhead(() => send('storage-release')).catch(() => undefined);
   };
   const onPageShow = (event: PageTransitionEvent) => {
-    if (event.persisted) {
-      reopening = reopening.then(reopenBudget);
+    const left = leaving;
+    if (event.persisted && left) {
+      leaving = null;
+      const departure = departures;
+      reopening = reopening.then(() => reopenBudget(left, departure));
     }
   };
   window.addEventListener('pagehide', onPageHide);

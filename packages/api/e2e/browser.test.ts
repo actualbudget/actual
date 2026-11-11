@@ -440,6 +440,53 @@ for (const storageBackend of ['opfs', 'memory-idb']) {
     });
   });
 
+  test(`a page that leaves again while it reopens its budget holds nothing, and reopens it on its next return (${storageBackend})`, async ({
+    page,
+  }) => {
+    await page.goto('/e2e/harness.html');
+    await page.evaluate(async backend => {
+      const api = await window.apiReady;
+      await api.init({ dataDir: '/documents', storageBackend: backend });
+      await api.runImport('e2e-back-and-forth-budget', async () => {
+        await api.createAccount({ name: 'Checking' }, 0);
+      });
+    }, storageBackend);
+
+    // Back, forward and back again before the budget is open again, the
+    // second departure landing at a different step of the reopening each time
+    for (const delayMs of [0, 10, 30, 60, 120, 250]) {
+      await page.evaluate(async delay => {
+        const dispatch = (type: string) =>
+          window.dispatchEvent(
+            new PageTransitionEvent(type, { persisted: true }),
+          );
+        dispatch('pagehide');
+        dispatch('pageshow');
+        await new Promise(resolve => setTimeout(resolve, delay));
+        dispatch('pagehide');
+      }, delayMs);
+      // The reopening that began in between must not take the budget back
+      await page.waitForTimeout(1000);
+      expect(await countHeldBudgetLocks(page), `after ${delayMs} ms`).toBe(0);
+
+      const accountNames = await page.evaluate(async () => {
+        const api = await window.apiReady;
+        window.dispatchEvent(
+          new PageTransitionEvent('pageshow', { persisted: true }),
+        );
+        const accounts = await api.getAccounts();
+        return accounts.map(account => account.name);
+      });
+      expect(accountNames, `after ${delayMs} ms`).toEqual(['Checking']);
+      expect(await countHeldBudgetLocks(page), `after ${delayMs} ms`).toBe(1);
+    }
+
+    await page.evaluate(async () => {
+      const api = await window.apiReady;
+      await api.shutdown();
+    });
+  });
+
   test(`holds nothing for a page that leaves while its budget is loading (${storageBackend})`, async ({
     page,
   }) => {
