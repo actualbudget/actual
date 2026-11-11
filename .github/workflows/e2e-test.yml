@@ -169,6 +169,36 @@ jobs:
         with:
           path: packages/desktop-electron/e2e/test-results/junit.xml
 
+  functional-ios-app:
+    name: Functional iOS App
+    runs-on: depot-macos-latest
+    needs: build-web
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Set up environment
+        uses: ./.github/actions/setup
+        with:
+          download-translations: 'false'
+      - name: Download web build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: desktop-client-build
+          path: packages/desktop-client/build/
+      # Builds the app, launches it in a simulator and checks that the first
+      # screen renders.
+      - name: Run iOS app tests
+        run: yarn workspace mobile-client test:ios
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: ios-app-test-results
+          path: packages/mobile-client/build/ios-test-results.xcresult
+          retention-days: 30
+          overwrite: true
+
   vrt:
     name: Visual regression (shard ${{ matrix.shard }}/${{ vars.E2E_SHARD_TOTAL || '3' }})
     runs-on: depot-ubuntu-latest
