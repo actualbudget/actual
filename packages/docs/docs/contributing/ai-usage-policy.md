@@ -34,7 +34,7 @@ Maintainer bandwidth is limited, and the conversation around a change is where m
 AI tools may help write a pull request description, within a fixed format. The pull request template has these rules, and an automated check enforces them:
 
 - **Human Summary** — written by you, in your own words. A sentence or two on why the change is needed is enough. An AI tool must not write this section.
-- **Description** and **Testing** — may be written with AI, but must stay short: at most 150 words in total.
+- **Description** and **Testing** — may be written with AI, but must stay short: at most 150 words in total. Testing should be step-by-step instructions a maintainer can follow to see the change for themselves, not a list of the commands you ran.
 - **Proof** — every pull request that changes the app must show that it works. Verify your change in a real browser and add a before and an after screenshot, or a video, to the Proof section. Maintainers should not have to test your change by hand to see what it does, and pull requests without proof are not reviewed. If the change has nothing to show (for example a refactor), tick the "no user-visible effect" box instead.
 
 You can fix a failing check by editing the pull request description; the check runs again automatically.

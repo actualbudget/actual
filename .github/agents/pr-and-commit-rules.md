@@ -19,7 +19,10 @@ GitHub MCP tool, and CI checks it on the PR itself however it was created.
   section unchecked.** The human author writes the summary in their own words and ticks
   the checklist; CI fails the PR until the summary is filled in.
 - **You may write the "Description" and "Testing" sections**, but keep them to
-  150 words in total. Say what changed and how to test it — no filler.
+  150 words in total. "Description" says what changed. "Testing" is numbered
+  steps a maintainer can follow to see the change for themselves — where to go,
+  what to click or run, what they should see — not a list of the commands you
+  ran.
 
 ### Proof is mandatory
 

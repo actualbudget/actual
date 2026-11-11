@@ -57,8 +57,11 @@ export function checkPrDescription(
 
   const sections = new Map();
   let current = null;
+  let inCodeBlock = false;
   for (const line of text.split(/\r?\n/)) {
-    const heading = line.match(/^##\s+(.+?)\s*$/);
+    // A "## Heading" inside a fenced code block is an example, not a section.
+    if (/^\s*(```|~~~)/.test(line)) inCodeBlock = !inCodeBlock;
+    const heading = !inCodeBlock && line.match(/^##\s+(.+?)\s*$/);
     if (heading) {
       current = normalize(heading[1]);
       sections.set(current, '');

@@ -42,6 +42,15 @@ describe('checkPrDescription', () => {
     ).toEqual([expect.stringContaining('Checklist')]);
   });
 
+  it('ignores headings inside fenced code blocks', () => {
+    const body = fill({
+      Testing: '```md\n## Human Summary\n\nFrom an example.\n```',
+    });
+    expect(checkPrDescription(body)).toEqual([
+      expect.stringContaining('"Human Summary" section is empty'),
+    ]);
+  });
+
   it('does not count hidden comments as a human summary', () => {
     for (const hidden of ['<!-- todo -->', '<!-- never closed']) {
       expect(

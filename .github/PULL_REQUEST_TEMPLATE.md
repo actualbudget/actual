@@ -14,7 +14,7 @@
 
 ## Testing
 
-<!-- What did you test? How can we reproduce the issue you are fixing or how can we test the feature you built? -->
+<!-- Step-by-step instructions a maintainer can follow to see the change for themselves, as a numbered list: where to go, what to click or run, and what they should see at each step. Not a list of the commands or tools you ran. -->
 
 ## Proof
 
