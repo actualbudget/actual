@@ -26,6 +26,7 @@ declare global {
   // oxlint-disable-next-line typescript/consistent-type-definitions -- global Window augmentation requires interface
   interface Window {
     apiReady: Promise<Api>;
+    unansweredBackendRequests: Set<unknown>;
   }
 }
 
@@ -366,6 +367,57 @@ test('keeps the worker and the budget when the last changes cannot be saved, and
   });
 });
 
+// Keeps count of the requests the backend has yet to answer. Installed
+// before the page loads, as it has to see the worker being created
+async function trackBackendRequests(page: Page) {
+  await page.addInitScript(() => {
+    const unanswered = new Set<unknown>();
+    window.unansweredBackendRequests = unanswered;
+    const NativeWorker = window.Worker;
+    window.Worker = class TrackedWorker extends NativeWorker {
+      constructor(...args: ConstructorParameters<typeof Worker>) {
+        super(...args);
+        const post = this.postMessage.bind(this);
+        this.postMessage = (message: { id?: unknown }) => {
+          if (message.id != null) {
+            unanswered.add(message.id);
+          }
+          post(message);
+        };
+        this.addEventListener('message', event => {
+          unanswered.delete(event.data?.id);
+        });
+      }
+    };
+  });
+}
+
+// The API moves on to its next request as each answer arrives, so once
+// nothing is unanswered it has finished whatever a departure or a return
+// set off
+async function backendToSettle(page: Page) {
+  await expect
+    .poll(() => page.evaluate(() => window.unansweredBackendRequests.size))
+    .toBe(0);
+}
+
+// Makes the backend fail to take a budget's lock, at once rather than after
+// the wait a budget that is open in another tab ends with
+async function setBudgetLocksRefused(page: Page, isRefused: boolean) {
+  const [backend] = page.workers();
+  await backend.evaluate(refused => {
+    const scope = globalThis as typeof globalThis & {
+      workingRequest?: LockManager['request'];
+    };
+    scope.workingRequest ??= LockManager.prototype.request;
+    LockManager.prototype.request = refused
+      ? function refusedRequest() {
+          return Promise.reject(new DOMException('held', 'AbortError'));
+        }
+      : scope.workingRequest;
+  }, isRefused);
+}
+
 // The budget locks held anywhere in this origin, the API's worker included
 function countHeldBudgetLocks(page: Page) {
   return page.evaluate(async () => {
@@ -443,6 +495,7 @@ for (const storageBackend of ['opfs', 'memory-idb']) {
   test(`a page that leaves again while it reopens its budget holds nothing, and reopens it on its next return (${storageBackend})`, async ({
     page,
   }) => {
+    await trackBackendRequests(page);
     await page.goto('/e2e/harness.html');
     await page.evaluate(async backend => {
       const api = await window.apiReady;
@@ -465,9 +518,14 @@ for (const storageBackend of ['opfs', 'memory-idb']) {
         await new Promise(resolve => setTimeout(resolve, delay));
         dispatch('pagehide');
       }, delayMs);
-      // The reopening that began in between must not take the budget back
-      await page.waitForTimeout(1000);
-      expect(await countHeldBudgetLocks(page), `after ${delayMs} ms`).toBe(0);
+      // The reopening that began in between has run its course by now, and
+      // must not have taken the budget back
+      await backendToSettle(page);
+      await expect
+        .poll(() => countHeldBudgetLocks(page), {
+          message: `after ${delayMs} ms`,
+        })
+        .toBe(0);
 
       const accountNames = await page.evaluate(async () => {
         const api = await window.apiReady;
@@ -480,6 +538,50 @@ for (const storageBackend of ['opfs', 'memory-idb']) {
       expect(accountNames, `after ${delayMs} ms`).toEqual(['Checking']);
       expect(await countHeldBudgetLocks(page), `after ${delayMs} ms`).toBe(1);
     }
+
+    await page.evaluate(async () => {
+      const api = await window.apiReady;
+      await api.shutdown();
+    });
+  });
+
+  test(`a budget that could not be reopened is tried again on the next return (${storageBackend})`, async ({
+    page,
+  }) => {
+    await page.goto('/e2e/harness.html');
+    await page.evaluate(async backend => {
+      const api = await window.apiReady;
+      await api.init({ dataDir: '/documents', storageBackend: backend });
+      await api.runImport('e2e-taken-budget', async () => {
+        await api.createAccount({ name: 'Checking' }, 0);
+      });
+    }, storageBackend);
+
+    async function leaveAndReturn() {
+      return page.evaluate(async () => {
+        const api = await window.apiReady;
+        for (const type of ['pagehide', 'pageshow']) {
+          window.dispatchEvent(
+            new PageTransitionEvent(type, { persisted: true }),
+          );
+        }
+        return api.getAccounts().then(
+          accounts => accounts.map(account => account.name),
+          (error: { message?: string }) => error.message,
+        );
+      });
+    }
+
+    // Another tab took the budget while the page was away: what was asked
+    // meanwhile is answered for the budget being closed
+    await setBudgetLocksRefused(page, true);
+    expect(await leaveAndReturn()).toBe('No budget file is open');
+    expect(await countHeldBudgetLocks(page)).toBe(0);
+
+    // The other tab is done by the next return, and the budget opens again
+    await setBudgetLocksRefused(page, false);
+    expect(await leaveAndReturn()).toEqual(['Checking']);
+    expect(await countHeldBudgetLocks(page)).toBe(1);
 
     await page.evaluate(async () => {
       const api = await window.apiReady;

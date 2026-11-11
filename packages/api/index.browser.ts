@@ -88,8 +88,8 @@ function listenForPageLifecycle(backend: Worker): (() => void) | null {
   let reopening: Promise<void> = Promise.resolve();
   // Counts departures, so a reopening can tell that the page left again
   let departures = 0;
-  // The budget to open again. Kept until it is open, as a reopening the
-  // page left in the middle of may already have closed it
+  // The budget to open again. Kept until it is open: a reopening can fail,
+  // and one the page left in the middle of may already have closed it
   let budgetToReopen: string | null = null;
 
   // `left` and `departure` are what the page had at its return
@@ -104,13 +104,19 @@ function listenForPageLifecycle(backend: Worker): (() => void) | null {
         await sendAhead(() => send('storage-resume'));
         // The worker still counts the budget it gave up as open
         const loaded = await sendAhead(() => send('load-prefs'));
-        budgetToReopen ??= loaded?.id ?? null;
+        // A budget that is open now counts over one kept from before
+        budgetToReopen = loaded?.id ?? budgetToReopen;
       }
       const budgetId = budgetToReopen;
       if (budgetId && !hasLeftAgain()) {
         await sendAhead(() => send('close-budget'));
         if (!hasLeftAgain()) {
-          await sendAhead(() => send('load-budget', { id: budgetId }));
+          const { error } = await sendAhead(() =>
+            send('load-budget', { id: budgetId }),
+          );
+          if (!error) {
+            budgetToReopen = null;
+          }
         }
       }
     } catch {
@@ -120,7 +126,8 @@ function listenForPageLifecycle(backend: Worker): (() => void) | null {
     if (hasLeftAgain()) {
       return;
     }
-    budgetToReopen = null;
+    // Sent whether or not the budget is open again: those that need it are
+    // told that none is open, and the others run as usual
     const requests = heldRequests ?? [];
     heldRequests = null;
     requests.forEach(request => post(request));
