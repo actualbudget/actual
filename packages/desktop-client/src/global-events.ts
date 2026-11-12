@@ -1,4 +1,8 @@
-import { listen } from '@actual-app/core/platform/client/connection';
+import {
+  releaseBackendStorage,
+  STORAGE_BACKEND_KEY,
+} from '@actual-app/core/platform/client/browser-preload';
+import { listen, send } from '@actual-app/core/platform/client/connection';
 import * as undo from '@actual-app/core/platform/client/undo';
 // @ts-strict-ignore
 import type { QueryClient } from '@tanstack/react-query';
@@ -19,6 +23,7 @@ import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import * as syncEvents from './sync-events';
+import { tagQueries } from './tags';
 
 export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
   const unlistenServerError = listen('server-error', () => {
@@ -101,6 +106,14 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       );
     }
 
+    if (tables.includes('tags')) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: tagQueries.lists(),
+        }),
+      );
+    }
+
     const tagged = undo.getTaggedState(undoTag);
 
     if (tagged) {
@@ -157,6 +170,45 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     );
   });
 
+  // The IndexedDB fallback could not store the budget, retry included; the
+  // id keeps one notification up however many writes fail. From here on the
+  // latest changes may be in the backend's memory only
+  let hasUnsavedChanges = false;
+  const unlistenStorageWriteFailed = listen('storage-write-failed', () => {
+    hasUnsavedChanges = true;
+    store.dispatch(
+      addNotification({
+        notification: {
+          id: 'storage-write-failed',
+          type: 'error',
+          title: t('Unable to save changes'),
+          sticky: true,
+          message: t(
+            'Your latest changes could not be stored in this browser, which may be out of space. They are kept in memory for now: free up space, or export your budget before closing this tab.',
+          ),
+        },
+      }),
+    );
+  });
+
+  // The browser dropped the private file system under the open app, which
+  // some do in private windows: nothing more can be saved from this tab
+  const unlistenStorageLost = listen('storage-lost', () => {
+    store.dispatch(
+      addNotification({
+        notification: {
+          id: 'storage-lost',
+          type: 'error',
+          title: t('Local data was discarded'),
+          sticky: true,
+          message: t(
+            'This browser has discarded the data Actual keeps on this device, which can happen in private windows. Changes can no longer be saved in this tab. Reload the page; a budget on a sync server can then be downloaded again.',
+          ),
+        },
+      }),
+    );
+  });
+
   const unlistenIndexeddbQuotaError = listen('indexeddb-quota-error', () => {
     alert(
       t(
@@ -195,6 +247,83 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     void window.Actual.reload();
   });
 
+  // Progress while a budget is moved into the new browser storage; the
+  // budget loader shows it on the loading screen. A move the worker starts
+  // by itself, such as reopening a budget after a failed revert, has no
+  // loading screen, and must not leave a stray one behind
+  const unlistenStorageMigration = listen(
+    'storage-migration',
+    ({ phase, percent }) => {
+      if (store.getState().app.loadingText == null) {
+        return;
+      }
+      let loadingText: string;
+      if (phase === 'copy') {
+        loadingText = t(
+          'Moving your budget to the new storage... {{percent}}%',
+          { percent: Math.round(percent ?? 0) },
+        );
+      } else if (phase === 'verify') {
+        loadingText = t('Checking the moved budget...');
+      } else if (phase === 'cleanup') {
+        loadingText = t('Cleaning up the old storage...');
+      } else {
+        loadingText = t('Loading...');
+      }
+      store.dispatch(setAppState({ loadingText }));
+    },
+  );
+
+  // The IndexedDB fallback of the new storage persists lazily; ask for a
+  // flush whenever the tab is hidden
+  const flushStorage = () => {
+    send('storage-flush').catch(() => {
+      // No backend to flush, or it is already gone
+    });
+  };
+  const unlistenVisibilityChange = listenOnDocument('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushStorage();
+    }
+  });
+
+  // A page that is leaving gives its budget up, flushing first: the browser
+  // frees a destroyed worker's locks and handles itself, but WebKit keeps
+  // those of a worker whose page went into the back/forward cache, where
+  // they would block the next page's open until the cached page is evicted.
+  // Restored from that cache, the page relaunches, as its worker no longer
+  // holds the budget
+  const unlistenPageHide = listenOnWindow('pagehide', () => {
+    releaseBackendStorage();
+  });
+  const unlistenPageShow = listenOnWindow('pageshow', event => {
+    if (event.persisted) {
+      window.Actual.relaunch();
+    }
+  });
+
+  // The storage engine is one choice for the whole origin. When another tab
+  // changes it, this tab relaunches into the same engine: a tab left on the
+  // old one would keep the budgets there, or move them straight back. Not
+  // over changes it was told are only in memory, though: those are saved
+  // first, and the tab stays as it is for as long as they cannot be
+  const unlistenStorageBackendChange = listenOnWindow('storage', event => {
+    if (event.key !== STORAGE_BACKEND_KEY) {
+      return;
+    }
+    if (!hasUnsavedChanges) {
+      window.Actual.relaunch();
+      return;
+    }
+    void send('storage-flush', undefined, { catchErrors: true }).then(
+      ({ error }) => {
+        if (!error) {
+          window.Actual.relaunch();
+        }
+      },
+    );
+  });
+
   return () => {
     unlistenServerError();
     unlistenOrphanedPayees();
@@ -202,6 +331,8 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenSync();
     unlistenUndo();
     unlistenFallbackWriteError();
+    unlistenStorageWriteFailed();
+    unlistenStorageLost();
     unlistenIndexeddbQuotaError();
     unlistenStartLoad();
     unlistenFinishLoad();
@@ -209,5 +340,28 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
     unlistenFinishImport();
     unlistenShowBudgets();
     unlistenApiFetchRedirected();
+    unlistenStorageMigration();
+    unlistenVisibilityChange();
+    unlistenPageHide();
+    unlistenPageShow();
+    unlistenStorageBackendChange();
   };
+}
+
+// Browser events in the shape of the backend's `listen`: registering hands
+// back the remover
+function listenOnWindow<Type extends keyof WindowEventMap>(
+  type: Type,
+  handler: (event: WindowEventMap[Type]) => void,
+) {
+  window.addEventListener(type, handler);
+  return () => window.removeEventListener(type, handler);
+}
+
+function listenOnDocument<Type extends keyof DocumentEventMap>(
+  type: Type,
+  handler: (event: DocumentEventMap[Type]) => void,
+) {
+  document.addEventListener(type, handler);
+  return () => document.removeEventListener(type, handler);
 }

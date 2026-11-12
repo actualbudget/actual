@@ -20305,8 +20305,8 @@ __metadata:
   linkType: hard
 
 "native-run@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "native-run@npm:2.0.3"
+  version: 2.1.0
+  resolution: "native-run@npm:2.1.0"
   dependencies:
     "@ionic/utils-fs": "npm:^3.1.7"
     "@ionic/utils-terminal": "npm:^2.3.4"
@@ -20321,7 +20321,7 @@ __metadata:
     yauzl: "npm:^2.10.0"
   bin:
     native-run: bin/native-run
-  checksum: 10/f78268262d94f758d4d0ecb7a3ece3c4b38f57aefcc9d71d99e0f1d81c5ea9bf2dd6f459fab64652071f5743f3a80e92259590c54754be6f25a600d9b4ccd856
+  checksum: 10/da34b58c3e406eec306e5318634047a9c03e10a0156a994420c93c0e30a0fd9aa5e45289f2d2492d99014154cb0d1b47877ea0ca01145cefaa685c15499e725a
   languageName: node
   linkType: hard
 

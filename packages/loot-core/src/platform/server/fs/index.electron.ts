@@ -47,8 +47,6 @@ export const demoBudgetPath: typeof T.demoBudgetPath = path.join(
 export const join: typeof T.join = (...args: Parameters<typeof path.join>) =>
   path.join(...args);
 
-export const basename: typeof T.basename = filepath => path.basename(filepath);
-
 export const listDir: typeof T.listDir = filepath =>
   new Promise((resolve, reject) => {
     fs.readdir(filepath, (err, files) => {
@@ -74,17 +72,6 @@ export const mkdir: typeof T.mkdir = filepath =>
         reject(err);
       } else {
         resolve(undefined);
-      }
-    });
-  });
-
-export const size: typeof T.size = filepath =>
-  new Promise((resolve, reject) => {
-    fs.stat(filepath, (err, stats) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stats.size);
       }
     });
   });
@@ -125,7 +112,9 @@ export const readFile: typeof T.readFile = (
 };
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
-  await atomicWriteFile(filepath, contents);
+  const data =
+    contents instanceof ArrayBuffer ? new Uint8Array(contents) : contents;
+  await atomicWriteFile(filepath, data);
   return undefined;
 };
 

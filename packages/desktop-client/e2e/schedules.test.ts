@@ -26,6 +26,14 @@ test.describe('Schedules', () => {
     await page?.close();
   });
 
+  test('finds schedules from the page menu', async () => {
+    await page.getByRole('button', { name: 'Menu' }).first().click();
+    await page.getByRole('button', { name: 'Find schedules' }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Found Schedules' }),
+    ).toBeVisible();
+  });
+
   test('checks the page visuals', async () => {
     await expect(page).toMatchThemeScreenshots();
   });
