@@ -664,11 +664,9 @@ type CustomStartingSettings = {
 };
 
 /**
- * Converts a provider's account balance to integer cents for `format`. Enable
- * Banking's sync server already reports cents; the other providers report
- * decimal amounts (a number or numeric string). Returns `null` when the balance
- * is missing, not a number, or too large to format, so the caller shows it as
- * unknown instead of crashing.
+ * Converts a provider balance to integer cents, or `null` if it is missing,
+ * invalid, or too large to format. Enable Banking already reports cents; other
+ * providers report decimal amounts.
  */
 export function externalBalanceToInteger(
   balance: number | string | null | undefined,
