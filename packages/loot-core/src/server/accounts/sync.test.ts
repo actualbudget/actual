@@ -1465,6 +1465,27 @@ describe('Bank sync reverse amounts', () => {
     expect(await getImportedAmounts(id)).toEqual(reversedAmounts);
   });
 
+  test('rounds the bank amount before reversing it', async () => {
+    const { id } = await prepareDatabase();
+    await enableReverseAmounts(id);
+
+    await importBankTransactions(id, [bankTransaction('tx-1', '0.005')]);
+
+    expect(await getImportedAmounts(id)).toEqual({ 'tx-1': -1 });
+  });
+
+  test('uses the settings snapshot passed in for the whole sync', async () => {
+    const { id } = await prepareDatabase();
+
+    await reconcileTransactions(id, [bankTransaction('tx-1', '25.00')], {
+      isBankSyncAccount: true,
+      strictIdChecking: false,
+      reverseAmountsSettings: { isFlagEnabled: true, isEnabled: true },
+    });
+
+    expect(await getImportedAmounts(id)).toEqual({ 'tx-1': -2500 });
+  });
+
   test('keeps the raw synced data as received from the bank', async () => {
     const { id } = await prepareDatabase();
     await enableReverseAmounts(id);
@@ -1618,6 +1639,23 @@ describe('Bank sync reverse amounts', () => {
         { imported_id: null, amount: 2500 },
         { imported_id: 'tx-1', amount: -2500 },
       ]);
+    });
+
+    test('does not merge a new reversed purchase into an earlier refund of the same stored amount', async () => {
+      const { id } = await prepareDatabase();
+      await importBankTransactions(id, [bankTransaction('refund', '-25.00')]);
+
+      await enableReverseAmounts(id);
+      await importBankTransactions(id, [bankTransaction('purchase', '25.00')]);
+
+      const transactions = await getAccountTransactions(id);
+      expect(transactions).toHaveLength(2);
+      expect(transactions).toEqual(
+        expect.arrayContaining([
+          { imported_id: 'refund', amount: -2500 },
+          { imported_id: 'purchase', amount: -2500 },
+        ]),
+      );
     });
 
     test('keeps the original matching when the experimental feature is disabled', async () => {

@@ -86,6 +86,10 @@ async function getReverseAmountsSettings(id: AccountEntity['id']) {
   return { isFlagEnabled, isEnabled: isFlagEnabled && isAccountEnabled };
 }
 
+type ReverseAmountsSettings = Awaited<
+  ReturnType<typeof getReverseAmountsSettings>
+>;
+
 function getRawBankAmount(rawSyncedData: string | null): number | null {
   if (!rawSyncedData) {
     return null;
@@ -545,7 +549,11 @@ async function normalizeTransactions(
   return { normalized, payeesToCreate };
 }
 
-async function normalizeBankSyncTransactions(transactions, acctId) {
+async function normalizeBankSyncTransactions(
+  transactions,
+  acctId,
+  reverseAmountsSettings?: ReverseAmountsSettings,
+) {
   const payeesToCreate = new Map();
 
   const [customMappingsRaw, importPending, importNotes, reverseSettings] =
@@ -565,7 +573,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
           .filter({ id: `sync-import-notes-${acctId}` })
           .select('value'),
       ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-      getReverseAmountsSettings(acctId),
+      reverseAmountsSettings ?? getReverseAmountsSettings(acctId),
     ]);
   const reverseAmounts = reverseSettings.isEnabled;
 
@@ -621,16 +629,19 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     trans.account = acctId;
     trans.payee = await resolvePayee(trans, payeeName, payeesToCreate);
 
-    const importedAmount = amountToInteger(amount);
+    // Round first, so reversing cannot change the rounded amount.
     const bankAmount = amountToInteger(Number(trans.amount));
+    const importedAmount = reverseAmounts
+      ? negateAmount(bankAmount)
+      : bankAmount;
 
     normalized.push({
       payee_name: payeeName,
-      // Earlier imports of this transaction may have been stored with the
-      // other sign convention, before the reverse option was toggled.
-      oppositeSignMatch:
+      // Fuzzy matching compares the bank amount of earlier imports, which may
+      // be stored with the other sign convention if the option was toggled.
+      signMatch:
         reverseSettings.isFlagEnabled && bankAmount !== 0
-          ? { bankAmount, amount: negateAmount(importedAmount) }
+          ? { bankAmount, oppositeAmount: negateAmount(importedAmount) }
           : null,
       trans: {
         amount: importedAmount,
@@ -668,6 +679,8 @@ export type MatchTransactionsOptions = {
   strictIdChecking?: boolean;
   reimportDeleted?: boolean;
   payeeNameNormalization?: PayeeNameNormalization;
+  // Read once per bank sync so balances and transactions use the same value.
+  reverseAmountsSettings?: ReverseAmountsSettings;
 };
 
 export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
@@ -698,6 +711,7 @@ export async function reconcileTransactions(
     updateDates = false,
     reimportDeleted,
     payeeNameNormalization,
+    reverseAmountsSettings,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -717,6 +731,7 @@ export async function reconcileTransactions(
     strictIdChecking,
     reimportDeleted,
     payeeNameNormalization,
+    reverseAmountsSettings,
   });
 
   // Finally, generate & commit the changes
@@ -883,6 +898,8 @@ export function compareFuzzyMatchCandidates(
   return aDistance - bDistance || aHasImportedId - bHasImportedId;
 }
 
+type SignMatch = { bankAmount: number; oppositeAmount: number };
+
 // Finds bank-synced transactions stored with the other sign convention, from
 // before the reverse amounts option was toggled. Only rows whose raw synced
 // data shows the same bank amount qualify, so genuine opposite-sign
@@ -893,14 +910,14 @@ async function getOppositeSignCandidates({
   fromDate,
   toDate,
   strictIdChecking,
-  oppositeSignMatch,
+  signMatch,
 }: {
   acctId: AccountEntity['id'];
   importedId: string | null;
   fromDate: number;
   toDate: number;
   strictIdChecking: boolean;
-  oppositeSignMatch: { bankAmount: number; amount: number };
+  signMatch: SignMatch;
 }) {
   const rows = await db.all<
     Pick<
@@ -929,7 +946,7 @@ async function getOppositeSignCandidates({
       ...(strictIdChecking ? [importedId] : []),
       fromDate,
       toDate,
-      oppositeSignMatch.amount,
+      signMatch.oppositeAmount,
       acctId,
     ],
   );
@@ -938,10 +955,31 @@ async function getOppositeSignCandidates({
   // behaviour of fuzzy matches, which take the new raw data.
   return rows
     .filter(
-      row =>
-        getRawBankAmount(row.raw_synced_data) === oppositeSignMatch.bankAmount,
+      row => getRawBankAmount(row.raw_synced_data) === signMatch.bankAmount,
     )
     .map(({ raw_synced_data: _rawSyncedData, ...row }) => row);
+}
+
+// Drops same-sign fuzzy candidates that the bank reported with a different
+// amount, e.g. an earlier refund that has the same stored amount as a new
+// reversed purchase. Rows without raw synced data (manual ones) are kept.
+async function excludeOtherBankAmounts<T extends { id: string }>(
+  rows: T[],
+  signMatch: SignMatch,
+): Promise<T[]> {
+  if (rows.length === 0) {
+    return rows;
+  }
+  const rawRows = await db.all<{ id: string; raw_synced_data: string | null }>(
+    `SELECT id, raw_synced_data FROM v_transactions
+    WHERE id IN (${rows.map(() => '?').join(', ')})`,
+    rows.map(row => row.id),
+  );
+  const rawById = new Map(rawRows.map(row => [row.id, row.raw_synced_data]));
+  return rows.filter(row => {
+    const rawBankAmount = getRawBankAmount(rawById.get(row.id) ?? null);
+    return rawBankAmount === null || rawBankAmount === signMatch.bankAmount;
+  });
 }
 
 export async function matchTransactions(
@@ -952,6 +990,7 @@ export async function matchTransactions(
     strictIdChecking = true,
     reimportDeleted: reimportDeletedOverride,
     payeeNameNormalization,
+    reverseAmountsSettings,
   }: MatchTransactionsOptions = {},
 ) {
   logger.log('Performing transaction reconciliation matching');
@@ -969,7 +1008,11 @@ export async function matchTransactions(
   const exactMatchedParentIds = new Set<db.DbViewTransaction['id']>();
 
   const { normalized, payeesToCreate } = isBankSyncAccount
-    ? await normalizeBankSyncTransactions(transactions, acctId)
+    ? await normalizeBankSyncTransactions(
+        transactions,
+        acctId,
+        reverseAmountsSettings,
+      )
     : await normalizeTransactions(transactions, acctId, {
         payeeNameNormalization,
       });
@@ -983,7 +1026,7 @@ export async function matchTransactions(
     payee_name,
     trans: originalTrans,
     subtransactions,
-    oppositeSignMatch,
+    signMatch,
   } of normalized) {
     // Run the rules
     const trans = await runRules(originalTrans, accountsMap);
@@ -1080,17 +1123,18 @@ export async function matchTransactions(
         );
       }
 
-      if (oppositeSignMatch) {
-        fuzzyDataset = fuzzyDataset.concat(
-          await getOppositeSignCandidates({
+      if (signMatch) {
+        fuzzyDataset = [
+          ...(await excludeOtherBankAmounts(fuzzyDataset, signMatch)),
+          ...(await getOppositeSignCandidates({
             acctId,
             importedId: trans.imported_id || null,
             fromDate: sevenDaysBefore,
             toDate: sevenDaysAfter,
             strictIdChecking,
-            oppositeSignMatch,
-          }),
-        );
+            signMatch,
+          })),
+        ];
       }
 
       // Sort the matched transactions according to the distance from the original
@@ -1254,7 +1298,8 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
 
-  const { isEnabled: reverseAmounts } = await getReverseAmountsSettings(id);
+  const reverseAmountsSettings = await getReverseAmountsSettings(id);
+  const reverseAmounts = reverseAmountsSettings.isEnabled;
 
   /** Starting balance is actually the current balance of the account. */
   const {
@@ -1359,6 +1404,7 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
+        reverseAmountsSettings,
       });
       return {
         ...result,
@@ -1380,6 +1426,7 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
+        reverseAmountsSettings,
       },
     );
 
