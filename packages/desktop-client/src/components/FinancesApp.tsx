@@ -48,8 +48,8 @@ import {
 } from './settings';
 import { FloatableSidebar } from './sidebar';
 import { SidebarMenuRoute } from './sidebar/SidebarMenuRoute';
+import { useSidebar } from './sidebar/SidebarProvider';
 import { StartPageRedirect } from './StartPageRedirect';
-import { ManageTagsPage } from './tags/ManageTagsPage';
 import { Titlebar } from './Titlebar';
 import { Tour } from './tour/Tour';
 import { TourAutoOffer } from './tour/TourAutoOffer';
@@ -101,6 +101,7 @@ function RouterBehaviors() {
 
 export function FinancesApp() {
   const { isNarrowWidth } = useResponsive();
+  const sidebar = useSidebar();
   useMetaThemeColor(theme.mobileViewTheme);
 
   const location = useLocation();
@@ -232,6 +233,18 @@ export function FinancesApp() {
               flex: 1,
               overflow: 'hidden',
               width: '100%',
+              // The wide layout has no header of its own to absorb the status
+              // bar in the mobile apps (zero elsewhere); the narrow layout's
+              // page header handles it.
+              ...(!isNarrowWidth && {
+                paddingTop: 'env(safe-area-inset-top)',
+                paddingRight: 'env(safe-area-inset-right)',
+                // A floating sidebar overlays this pane instead of sitting
+                // beside it, so the pane itself reaches the left edge.
+                ...(sidebar.floating && {
+                  paddingLeft: 'env(safe-area-inset-left)',
+                }),
+              }),
             }}
           >
             <ScrollProvider
@@ -358,10 +371,28 @@ export function FinancesApp() {
                       }
                     />
                     <Route
+                      path="/tags/:id"
+                      element={
+                        <ErrorBoundary
+                          FallbackComponent={FeatureErrorFallback}
+                          resetKeys={[location.pathname]}
+                        >
+                          <WideNotSupported redirectTo="/settings/tags">
+                            <NarrowAlternate name="TagEdit" />
+                          </WideNotSupported>
+                        </ErrorBoundary>
+                      }
+                    />
+                    <Route
                       path="/tags"
                       element={
                         <SidebarMenuRoute id="tags">
-                          <ManageTagsPage />
+                          <ErrorBoundary
+                            FallbackComponent={FeatureErrorFallback}
+                            resetKeys={[location.pathname]}
+                          >
+                            <NarrowAlternate name="Tags" />
+                          </ErrorBoundary>
                         </SidebarMenuRoute>
                       }
                     />
@@ -386,9 +417,7 @@ export function FinancesApp() {
                             FallbackComponent={FeatureErrorFallback}
                             resetKeys={[location.pathname]}
                           >
-                            <View style={{ flexShrink: 0, paddingTop: 10 }}>
-                              <NarrowAlternate name="BankSync" />
-                            </View>
+                            <NarrowAlternate name="BankSync" />
                           </ErrorBoundary>
                         </SidebarMenuRoute>
                       }
@@ -430,7 +459,12 @@ export function FinancesApp() {
                         path="tags"
                         element={
                           <SidebarMenuRoute id="tags" isInSettings>
-                            <ManageTagsPage />
+                            <ErrorBoundary
+                              FallbackComponent={FeatureErrorFallback}
+                              resetKeys={[location.pathname]}
+                            >
+                              <NarrowAlternate name="Tags" />
+                            </ErrorBoundary>
                           </SidebarMenuRoute>
                         }
                       />

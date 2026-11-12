@@ -501,6 +501,78 @@ describe('API CRUD operations', () => {
     );
   });
 
+  // apis: applyCategoryTemplate, getCategoryTemplateAmount
+  test('Budgets: successfully apply a category template', async () => {
+    const month = '2023-10';
+    global.currentMonth = month;
+
+    const groupId = await api.createCategoryGroup({
+      name: 'tests',
+    });
+    const categoryId = await api.createCategory({
+      name: 'test-template',
+      group_id: groupId,
+    });
+    const noTemplateId = await api.createCategory({
+      name: 'test-no-template',
+      group_id: groupId,
+    });
+    await api.updateNote(categoryId, '#template 50');
+
+    expect(await api.getCategoryTemplateAmount(month, categoryId)).toBe(5000);
+    // The preview parses the note without storing its templates.
+    const { data: previewed } = (await api.aqlQuery(
+      api.q('categories').filter({ id: categoryId }).select(['goal_def']),
+    )) as { data: Array<{ goal_def: string | null }> };
+    expect(previewed).toEqual([expect.objectContaining({ goal_def: null })]);
+
+    await api.setBudgetAmount(month, categoryId, 100);
+    await api.applyCategoryTemplate(month, categoryId);
+
+    const budgetMonth = await api.getBudgetMonth(month);
+    expect(budgetMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
+          ]),
+        }),
+      ]),
+    );
+
+    await expect(
+      api.applyCategoryTemplate(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+    await expect(
+      api.getCategoryTemplateAmount(month, noTemplateId),
+    ).rejects.toThrow('has no template');
+
+    await api.updateNote(categoryId, '#goal 100\n#goal 200');
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('Only one #goal is allowed per category');
+
+    await api.updateNote(categoryId, '#template 70\n#template nonsense');
+    await expect(api.applyCategoryTemplate(month, categoryId)).rejects.toThrow(
+      '#template nonsense',
+    );
+    await expect(
+      api.getCategoryTemplateAmount(month, categoryId),
+    ).rejects.toThrow('#template nonsense');
+    const unchangedMonth = await api.getBudgetMonth(month);
+    expect(unchangedMonth.categoryGroups).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: groupId,
+          categories: expect.arrayContaining([
+            expect.objectContaining({ id: categoryId, budgeted: 5000 }),
+          ]),
+        }),
+      ]),
+    );
+  });
+
   //apis: createAccount, getAccounts, updateAccount, closeAccount, deleteAccount, reopenAccount, getAccountBalance
   test('Accounts: successfully complete account operators', async () => {
     const accountId1 = await api.createAccount(
@@ -1598,5 +1670,110 @@ describe('API preferences: setPreference', () => {
     expect(preferences[`csv-mappings-${budgetName}`]).toBe(
       'col1:name,col2:amount',
     );
+  });
+});
+
+describe('Dashboard and widget operations', () => {
+  beforeEach(async () => {
+    await api.loadBudget(budgetName);
+  });
+
+  test('successfully manages dashboard pages and widgets', async () => {
+    // 1. Get existing dashboard pages
+    const pages = await api.getDashboardPages();
+    expect(pages.length).toBeGreaterThan(0);
+
+    // 2. Create a new dashboard page
+    const pageId = await api.createDashboardPage('Custom Page');
+    expect(typeof pageId).toBe('string');
+
+    // 3. Rename dashboard page
+    await api.renameDashboardPage(pageId, 'Renamed Page');
+    const updatedPages = await api.getDashboardPages();
+    const renamed = updatedPages.find(p => p.id === pageId);
+    expect(renamed?.name).toBe('Renamed Page');
+
+    // 4. Add widget with explicit coordinates
+    await api.addDashboardWidget({
+      type: 'net-worth-card',
+      width: 6,
+      height: 3,
+      x: 0,
+      y: 0,
+      dashboard_page_id: pageId,
+    });
+
+    // 5. Add widget with auto-calculated coordinates
+    await api.addDashboardWidget({
+      type: 'cash-flow-card',
+      width: 6,
+      height: 3,
+      dashboard_page_id: pageId,
+    });
+
+    // 5c. Add custom-report widget with valid metadata
+    await api.addDashboardWidget({
+      type: 'custom-report',
+      width: 4,
+      height: 2,
+      dashboard_page_id: pageId,
+      meta: { id: 'report-id-1' },
+    });
+
+    // 6. Get widgets for the page
+    const widgets = await api.getDashboardWidgets(pageId);
+    expect(widgets.length).toBe(3);
+    const netWorth = widgets.find(w => w.type === 'net-worth-card');
+    const cashFlow = widgets.find(w => w.type === 'cash-flow-card');
+    const customReport = widgets.find(w => w.type === 'custom-report');
+    expect(netWorth).toBeDefined();
+    expect(cashFlow).toBeDefined();
+    expect(customReport).toBeDefined();
+    expect(netWorth?.width).toBe(6);
+    expect(customReport?.meta).toEqual({ id: 'report-id-1' });
+
+    // 7. Update single widget
+    if (netWorth && cashFlow && customReport) {
+      await api.updateDashboardWidget({
+        id: netWorth.id,
+        width: 12,
+      });
+      const reloadedWidgets = await api.getDashboardWidgets(pageId);
+      const updatedWidget = reloadedWidgets.find(w => w.id === netWorth.id);
+      expect(updatedWidget?.width).toBe(12);
+
+      // 7b. Partial update on custom-report preserves meta
+      await api.updateDashboardWidget({
+        id: customReport.id,
+        width: 8,
+      });
+      const updatedCustomReport = (await api.getDashboardWidgets(pageId)).find(
+        w => w.id === customReport.id,
+      );
+      expect(updatedCustomReport?.width).toBe(8);
+      expect(updatedCustomReport?.meta).toEqual({ id: 'report-id-1' });
+
+      // 8. Update dashboard layout batch with multiple widgets
+      await api.updateDashboard([
+        { id: netWorth.id, x: 1, y: 1 },
+        { id: cashFlow.id, x: 7, y: 1 },
+      ]);
+      const batchWidgets = await api.getDashboardWidgets(pageId);
+      const batchUpdatedNetWorth = batchWidgets.find(w => w.id === netWorth.id);
+      const batchUpdatedCashFlow = batchWidgets.find(w => w.id === cashFlow.id);
+      expect(batchUpdatedNetWorth?.x).toBe(1);
+      expect(batchUpdatedCashFlow?.x).toBe(7);
+
+      // 9. Remove widget
+      await api.removeDashboardWidget(netWorth.id);
+      const remainingWidgets = await api.getDashboardWidgets(pageId);
+      expect(remainingWidgets.find(w => w.id === netWorth.id)).toBeUndefined();
+      expect(remainingWidgets.length).toBe(2);
+    }
+
+    // 10. Delete the custom dashboard page
+    await api.deleteDashboardPage(pageId);
+    const finalPages = await api.getDashboardPages();
+    expect(finalPages.find(p => p.id === pageId)).toBeUndefined();
   });
 });

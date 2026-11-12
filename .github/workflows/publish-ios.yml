@@ -2,7 +2,9 @@ name: Publish iOS
 
 # Uploads the Capacitor iOS app to App Store Connect. The nightly run
 # produces a TestFlight build from master for the external "Beta testers"
-# group; a published release also submits the build for App Store review.
+# group; a published release also submits the build for App Store review and
+# publishes the listing text and screenshots kept in
+# packages/mobile-client/ios/App/fastlane.
 #
 # Secrets (all in the `release` environment) and how to regenerate them:
 #
@@ -118,6 +120,27 @@ jobs:
             echo "| --- | --- |"
             echo "| $VERSION | $BUILD |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # Runs before the upload step submits the version for review, after which
+      # the listing can no longer be edited. Creates the version if needed.
+      - name: Publish App Store listing text and screenshots
+        if: github.event_name == 'release' && !github.event.release.prerelease
+        working-directory: packages/mobile-client/ios/App
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          FASTLANE_SKIP_UPDATE_CHECK: '1'
+          FASTLANE_OPT_OUT_USAGE: '1'
+        run: |
+          export GEM_HOME="$RUNNER_TEMP/fastlane-gems"
+          gem install fastlane --version 2.241.2 --no-document
+          trap 'rm -f "$RUNNER_TEMP/asc-api-key.json"' EXIT
+          (umask 077 && jq -n --arg key_id "$API_KEY_ID" --arg issuer_id "$API_ISSUER_ID" --arg key "$API_KEY_P8" \
+            '{key_id: $key_id, issuer_id: $issuer_id, key: $key, in_house: false}' > "$RUNNER_TEMP/asc-api-key.json")
+          "$GEM_HOME/bin/fastlane" deliver \
+            --api_key_path "$RUNNER_TEMP/asc-api-key.json" \
+            --app_version "$(jq -r .version ../../package.json)"
 
       - name: Upload to App Store Connect
         uses: ./.github/actions/app-store-connect-publish
