@@ -670,11 +670,18 @@ type CustomStartingSettings = {
  * non-digit stripped, so a float such as `83710.79999999999` would become an
  * unsafe integer and a one-decimal amount such as `1234.5` would show as
  * `123.45`.
+ *
+ * Returns `null` when the balance is missing or not a finite number, so the
+ * caller shows it as unknown instead of crashing or showing a made-up `0`.
  */
 export function externalBalanceToInteger(
-  balance: number | string,
-): IntegerAmount {
-  return amountToInteger(Number(balance));
+  balance: number | string | null | undefined,
+): IntegerAmount | null {
+  if (balance == null || (typeof balance === 'string' && !balance.trim())) {
+    return null;
+  }
+  const amount = Number(balance);
+  return Number.isFinite(amount) ? amountToInteger(amount) : null;
 }
 
 /**
@@ -771,6 +778,7 @@ function TableRow({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const balance = externalBalanceToInteger(externalAccount.balance);
   const startingBalanceInfo = useStartingBalanceInfo(
     showStartingOptions ? undefined : chosenAccount?.id,
   );
@@ -817,13 +825,8 @@ function TableRow({
       {/* Balance */}
       <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(
-                externalBalanceToInteger(externalAccount.balance),
-                'financial',
-              )}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}
@@ -1073,6 +1076,7 @@ function AccountCard({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const balance = externalBalanceToInteger(externalAccount.balance);
 
   const availableAccountOptions = getSelectableAccountOptions({
     localAccounts,
@@ -1137,13 +1141,8 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(
-                externalBalanceToInteger(externalAccount.balance),
-                'financial',
-              )}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}

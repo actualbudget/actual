@@ -231,4 +231,20 @@ describe('externalBalanceToInteger', () => {
     expect(externalBalanceToInteger(-42.1)).toBe(-4210);
     expect(externalBalanceToInteger('-0.5')).toBe(-50);
   });
+
+  it('returns null for a missing or invalid balance instead of a number', () => {
+    // e.g. Pluggy.ai omitting one of the two balances it sums gives NaN
+    expect(externalBalanceToInteger(NaN)).toBeNull();
+    expect(externalBalanceToInteger(Infinity)).toBeNull();
+    expect(externalBalanceToInteger('')).toBeNull();
+    expect(externalBalanceToInteger('   ')).toBeNull();
+    expect(externalBalanceToInteger('abc')).toBeNull();
+    expect(externalBalanceToInteger(null)).toBeNull();
+    expect(externalBalanceToInteger(undefined)).toBeNull();
+  });
+
+  it('keeps a real zero balance as zero', () => {
+    expect(externalBalanceToInteger(0)).toBe(0);
+    expect(externalBalanceToInteger('0.00')).toBe(0);
+  });
 });
