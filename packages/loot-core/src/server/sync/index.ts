@@ -1004,9 +1004,6 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  // Later batches only ask for messages newer than the snapshot; anything
-  // older already came back with the first batch or is caught by the
-  // merkle diff below
   const batches = splitIntoSyncBatches(messages);
   const serverMessages = new Map<string, Message>();
   let serverMerkle;
@@ -1016,6 +1013,8 @@ async function _fullSync(
       logger.info(`Sending sync batch ${i + 1}/${batches.length}`);
     }
 
+    // Later batches only fetch messages newer than the snapshot; older ones
+    // came back with the first batch or are caught by the merkle diff below
     const buffer = await encoder.encode(
       groupId,
       cloudFileId,
