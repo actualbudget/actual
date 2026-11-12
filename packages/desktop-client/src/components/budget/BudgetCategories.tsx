@@ -303,6 +303,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onShowNewCategory={onShowNewCategory}
                   onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                   onSortCategories={onSortCategories}
+                  onBudgetAction={onBudgetAction}
                 />
               );
               break;
@@ -347,6 +348,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onSortCategories={onSortCategories}
                   onToggleCollapse={onToggleCollapse}
                   onShowNewCategory={onShowNewCategory!}
+                  onBudgetAction={onBudgetAction}
                 />
               );
               break;

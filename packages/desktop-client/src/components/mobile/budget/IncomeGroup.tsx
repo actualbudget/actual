@@ -23,6 +23,7 @@ import { useSyncedPref } from '#hooks/useSyncedPref';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
 import { getColumnWidth, ROW_HEIGHT } from './BudgetTable';
+import { GroupBudgetCell } from './GroupBudgetCell';
 import { IncomeCategoryList } from './IncomeCategoryList';
 
 type IncomeGroupProps = {
@@ -90,6 +91,7 @@ export function IncomeGroup({
           onEdit={onEditCategoryGroup}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          onBudgetAction={onBudgetAction}
         />
         <IncomeCategoryList
           categories={categories}
@@ -108,6 +110,7 @@ type IncomeGroupHeaderProps = {
   onEdit: (id: CategoryGroupEntity['id']) => void;
   isCollapsed: (id: CategoryGroupEntity['id']) => boolean;
   onToggleCollapse: (id: CategoryGroupEntity['id']) => void;
+  onBudgetAction: IncomeGroupProps['onBudgetAction'];
   style?: CSSProperties;
 };
 
@@ -117,6 +120,7 @@ function IncomeGroupHeader({
   onEdit,
   isCollapsed,
   onToggleCollapse,
+  onBudgetAction,
   style,
 }: IncomeGroupHeaderProps) {
   return (
@@ -145,7 +149,11 @@ function IncomeGroupHeader({
         isCollapsed={isCollapsed}
         onToggleCollapse={onToggleCollapse}
       />
-      <IncomeGroupCells group={group} />
+      <IncomeGroupCells
+        group={group}
+        month={month}
+        onBudgetAction={onBudgetAction}
+      />
     </View>
   );
 }
@@ -236,9 +244,15 @@ function IncomeGroupName({
 
 type IncomeGroupCellsProps = {
   group: CategoryGroupEntity;
+  month: string;
+  onBudgetAction: IncomeGroupProps['onBudgetAction'];
 };
 
-function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
+function IncomeGroupCells({
+  group,
+  month,
+  onBudgetAction,
+}: IncomeGroupCellsProps) {
   const [budgetType = 'envelope'] = useSyncedPref('budgetType');
   const format = useFormat();
 
@@ -262,36 +276,15 @@ function IncomeGroupCells({ group }: IncomeGroupCellsProps) {
       }}
     >
       {budgeted && (
-        <CellValue<'envelope-budget' | 'tracking-budget', 'group-budget'>
-          binding={budgeted}
-          type="financial"
-        >
-          {({ type, value }) => (
-            <View>
-              <PrivacyFilter>
-                <AutoTextSize
-                  key={value}
-                  as={Text}
-                  minFontSizePx={6}
-                  maxFontSizePx={12}
-                  mode="oneline"
-                  style={{
-                    ...styles.tnum,
-                    width: columnWidth,
-                    justifyContent: 'center',
-                    alignItems: 'flex-end',
-                    paddingLeft: 5,
-                    textAlign: 'right',
-                    fontSize: 12,
-                    fontWeight: '500',
-                  }}
-                >
-                  {format(value, type)}
-                </AutoTextSize>
-              </PrivacyFilter>
-            </View>
-          )}
-        </CellValue>
+        <View style={{ width: columnWidth, alignItems: 'flex-end' }}>
+          <GroupBudgetCell
+            binding={budgeted}
+            group={group}
+            month={month}
+            columnWidth={columnWidth}
+            onBudgetAction={onBudgetAction}
+          />
+        </View>
       )}
       <CellValue<'envelope-budget' | 'tracking-budget', 'group-sum-amount'>
         binding={balance}
