@@ -85,6 +85,8 @@ import { TrackingBudgetSummaryModal } from './modals/TrackingBudgetSummaryModal'
 import { TransactionTableColumnsModal } from './modals/TransactionTableColumnsModal';
 import { TransferModal } from './modals/TransferModal';
 import { TransferOwnership } from './modals/TransferOwnership';
+import { TrueLayerExternalMsgModal } from './modals/TrueLayerExternalMsgModal';
+import { TrueLayerInitialiseModal } from './modals/TrueLayerInitialiseModal';
 import { UnmigrateBudgetAutomationsModal } from './modals/UnmigrateBudgetAutomationsModal';
 import { CategoryLearning } from './payees/CategoryLearning';
 import { DiscoverSchedules } from './schedules/DiscoverSchedules';
@@ -209,6 +211,12 @@ export function Modals() {
 
         case 'enablebanking-external-msg':
           return <EnableBankingExternalMsgModal key={key} {...modal.options} />;
+
+        case 'truelayer-init':
+          return <TrueLayerInitialiseModal key={key} {...modal.options} />;
+
+        case 'truelayer-external-msg':
+          return <TrueLayerExternalMsgModal key={key} {...modal.options} />;
 
         case 'gocardless-external-msg':
           return (

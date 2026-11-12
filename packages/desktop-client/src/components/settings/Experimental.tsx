@@ -287,6 +287,11 @@ export function ExperimentalFeatures() {
           <Trans>Enable Banking sync (EU banks)</Trans>
         </FeatureToggle>
       )}
+      {isUsingServer && (
+        <FeatureToggle flag="trueLayerBankSync">
+          <Trans>TrueLayer bank sync (UK banks)</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
