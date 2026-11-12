@@ -14,6 +14,7 @@ export type AutomationErrorKind =
   | { kind: 'percentage-source-not-found'; source: string }
   | { kind: 'by-no-month' }
   | { kind: 'by-target-past'; month: string }
+  | { kind: 'by-negative-amount' }
   | { kind: 'spend-no-from' }
   | { kind: 'spend-from-after-target' }
   | { kind: 'adjustment-out-of-range' };
@@ -118,6 +119,11 @@ export function validateAutomation(
       if (template.type !== 'by' && template.type !== 'spend') return null;
       if (!template.month || !monthUtils.isValidYearMonth(template.month)) {
         return { kind: 'by-no-month' };
+      }
+      // The engine never budgets toward a negative target, and notes can't
+      // express one, so flag any saved before that was disallowed.
+      if (template.amount < 0) {
+        return { kind: 'by-negative-amount' };
       }
       const targetMonth = template.month;
       // Uses the same rule the engine uses to skip expired targets, measured

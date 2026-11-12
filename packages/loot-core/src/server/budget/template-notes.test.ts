@@ -448,6 +448,22 @@ describe('unparse/parse round-trip', () => {
   });
 });
 
+describe('negative amounts', () => {
+  it.each([
+    '#template -100 by 2026-12',
+    '#template -100 by 2026-12 repeat every month',
+    '#template -100 by 2026-12 spend from 2026-10',
+  ])('rejects a negative `by` or `spend` target: %s', line => {
+    expect(() => parse(line)).toThrow();
+  });
+
+  it('still allows a negative periodic template', () => {
+    expect(
+      parse('#template -100 repeat every 2 months starting 2026-01-01'),
+    ).toMatchObject({ type: 'periodic', amount: -100 });
+  });
+});
+
 describe('unparse limit templates', () => {
   it('serializes refill limits to notes syntax', async () => {
     const serialized = await unparse([

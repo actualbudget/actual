@@ -5,7 +5,7 @@ expr
     { return { type: 'percentage', percent: +percentOf.percent, previous: percentOf.prev, category, priority: template.priority, directive: template.directive }}
   / template: template _ amount: amount _ repeatEvery _ period: periodCount _ starting _ starting: date limit: limit?
     { return { type: 'periodic', amount, period, starting, limit, priority: template.priority, directive: template.directive }}
-  / template: template _ amount: amount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
+  / template: template _ amount: unsignedAmount _ by _ month: month from: spendFrom? repeat: (_ repeatEvery _ repeat)?
     { return {
       type: from ? 'spend' : 'by',
       amount,
@@ -94,6 +94,8 @@ d 'digit' = [0-9]
 number 'number' = $(d+)
 positive = $([1-9][0-9]*)
 amount 'amount' = currencySymbol? _? amount: $('-'?d+ ('.' (d d?)?)?) { return +amount }
+// `by` and `spend` targets can't be negative
+unsignedAmount 'amount' = currencySymbol? _? amount: $(d+ ('.' (d d?)?)?) { return +amount }
 percent 'percentage' = percent: $(d+ ('.' (d+)?)?) _? '%' { return percent }
 year 'year' = $(d d d d)
 month 'month' = $(year '-' d d)

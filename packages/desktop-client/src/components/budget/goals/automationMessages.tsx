@@ -25,6 +25,8 @@ export function AutomationErrorTitle({
       return <Trans>Source category missing</Trans>;
     case 'by-no-month':
       return <Trans>Target month missing</Trans>;
+    case 'by-negative-amount':
+      return <Trans>Target amount is negative</Trans>;
     case 'by-target-past':
       return <Trans>Target month has passed</Trans>;
     case 'spend-no-from':
@@ -65,6 +67,8 @@ export function AutomationErrorShort({
       return <Trans>Pick a source category</Trans>;
     case 'by-no-month':
       return <Trans>Pick a target month</Trans>;
+    case 'by-negative-amount':
+      return <Trans>Enter a positive amount</Trans>;
     case 'by-target-past':
       return <Trans>Target month has passed</Trans>;
     case 'spend-no-from':
@@ -122,6 +126,13 @@ export function AutomationErrorDetail({
         <Trans>
           Goals by date need a target month. Pick when you want this fully
           funded.
+        </Trans>
+      );
+    case 'by-negative-amount':
+      return (
+        <Trans>
+          Goals by date need a positive amount. Enter how much you want saved by
+          the target month.
         </Trans>
       );
     case 'by-target-past':

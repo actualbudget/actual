@@ -300,6 +300,19 @@ describe('validateAutomation past targets', () => {
     ).toBeNull();
   });
 
+  it('flags a negative target amount and blocks save', () => {
+    const error = validateAutomation(
+      { ...by, amount: -100, month: '2026-12' },
+      'by',
+      [],
+      [],
+      today,
+    );
+
+    expect(error).toEqual({ kind: 'by-negative-amount' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
   it('still blocks save for other errors', () => {
     expect(isBlockingAutomationError({ kind: 'by-no-month' })).toBe(true);
     expect(isBlockingAutomationError(null)).toBe(false);
