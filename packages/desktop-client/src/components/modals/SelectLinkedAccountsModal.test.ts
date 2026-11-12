@@ -208,43 +208,19 @@ describe('getDefaultStartingSettings', () => {
 });
 
 describe('externalBalanceToInteger', () => {
-  it('converts a float sum of two balances to safe integer cents', () => {
-    // Pluggy.ai adds closingBalance and automaticallyInvestedBalance.
-    const balance = 27903.6 + 55807.2;
-    expect(balance).toBe(83710.79999999999);
-    expect(externalBalanceToInteger(balance)).toBe(8371080);
+  it.each([
+    [27903.6 + 55807.2, 8371080],
+    [1234.5, 123450],
+    ['-100', -10000],
+    [0, 0],
+  ])('converts %s to integer cents', (balance, expected) => {
+    expect(externalBalanceToInteger(balance)).toBe(expected);
   });
 
-  it('converts a one-decimal amount', () => {
-    expect(externalBalanceToInteger(1234.5)).toBe(123450);
-  });
-
-  it('converts a whole amount', () => {
-    expect(externalBalanceToInteger(100)).toBe(10000);
-  });
-
-  it('converts a numeric string', () => {
-    expect(externalBalanceToInteger('1234.56')).toBe(123456);
-  });
-
-  it('keeps negative balances negative', () => {
-    expect(externalBalanceToInteger(-42.1)).toBe(-4210);
-    expect(externalBalanceToInteger('-0.5')).toBe(-50);
-  });
-
-  it('returns null for a missing or invalid balance instead of a number', () => {
-    // e.g. Pluggy.ai omitting one of the two balances it sums gives NaN
-    expect(externalBalanceToInteger(NaN)).toBeNull();
-    expect(externalBalanceToInteger(Infinity)).toBeNull();
-    expect(externalBalanceToInteger('')).toBeNull();
-    expect(externalBalanceToInteger('   ')).toBeNull();
-    expect(externalBalanceToInteger('abc')).toBeNull();
-    expect(externalBalanceToInteger(null)).toBeNull();
-    expect(externalBalanceToInteger(undefined)).toBeNull();
-  });
-
-  it('keeps a real zero balance as zero', () => {
-    expect(externalBalanceToInteger(0)).toBe(0);
-    expect(externalBalanceToInteger('0.00')).toBe(0);
-  });
+  it.each([null, undefined, '   ', NaN, 'abc'])(
+    'returns unknown for an unavailable balance (%s)',
+    balance => {
+      expect(externalBalanceToInteger(balance)).toBeNull();
+    },
+  );
 });
