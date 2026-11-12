@@ -5,12 +5,13 @@ import type { NextFunction, Request, Response } from 'express';
 import { getAccountDb } from '#account-db';
 import { canAccessActiveFile } from '#services/user-service';
 
-import { validateSession } from './validate-user';
+import { getRequestToken, validateSession } from './validate-user';
 
 // Only call this on endpoints that explicitly support budget-scoped keys.
 // All other endpoints must continue to require an ordinary session.
 export function validateBudgetSession(req: Request, res: Response) {
-  const token = req.body?.token || req.headers['x-actual-token'];
+  const token = getRequestToken(req, res);
+  if (res.headersSent) return null;
   if (typeof token !== 'string' || !token.startsWith('actual_')) {
     return validateSession(req, res);
   }
@@ -26,6 +27,7 @@ export function validateBudgetSession(req: Request, res: Response) {
       : null;
 
   if (!key) {
+    res.setHeader('WWW-Authenticate', 'Bearer error="invalid_token"');
     res.status(401).send({ status: 'error', reason: 'unauthorized' });
     return null;
   }
