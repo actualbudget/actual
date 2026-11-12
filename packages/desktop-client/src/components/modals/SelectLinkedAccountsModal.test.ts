@@ -214,13 +214,17 @@ describe('externalBalanceToInteger', () => {
     ['-100', -10000],
     [0, 0],
   ])('converts %s to integer cents', (balance, expected) => {
-    expect(externalBalanceToInteger(balance)).toBe(expected);
+    expect(externalBalanceToInteger(balance, 'pluggyai')).toBe(expected);
+  });
+
+  it('keeps Enable Banking balances, which are already in cents', () => {
+    expect(externalBalanceToInteger(123456, 'enableBanking')).toBe(123456);
   });
 
   it.each([null, undefined, '   ', NaN, 'abc', 1e14])(
     'returns unknown for a missing or invalid balance (%s)',
     balance => {
-      expect(externalBalanceToInteger(balance)).toBeNull();
+      expect(externalBalanceToInteger(balance, 'pluggyai')).toBeNull();
     },
   );
 });

@@ -664,20 +664,25 @@ type CustomStartingSettings = {
 };
 
 /**
- * Bank sync providers report balances as decimal amounts (a number or numeric
- * string), but `format` expects integer cents. Returns `null` when the balance
+ * Converts a provider's account balance to integer cents for `format`. Enable
+ * Banking's sync server already reports cents; the other providers report
+ * decimal amounts (a number or numeric string). Returns `null` when the balance
  * is missing, not a number, or too large to format, so the caller shows it as
  * unknown instead of crashing.
  */
 export function externalBalanceToInteger(
   balance: number | string | null | undefined,
+  syncSource: SelectLinkedAccountsModalProps['syncSource'],
 ): IntegerAmount | null {
   if (balance == null || (typeof balance === 'string' && !balance.trim())) {
     return null;
   }
-  const amount = amountToInteger(Number(balance));
-  // Also false for NaN and Infinity.
-  return Math.abs(amount) <= MAX_SAFE_NUMBER ? amount : null;
+  const value = Number(balance);
+  const amount =
+    syncSource === 'enableBanking' ? value : amountToInteger(value);
+  return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
+    ? amount
+    : null;
 }
 
 /**
@@ -774,7 +779,7 @@ function TableRow({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
-  const balance = externalBalanceToInteger(externalAccount.balance);
+  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
   const startingBalanceInfo = useStartingBalanceInfo(
     showStartingOptions ? undefined : chosenAccount?.id,
   );
@@ -1072,7 +1077,7 @@ function AccountCard({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
-  const balance = externalBalanceToInteger(externalAccount.balance);
+  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
 
   const availableAccountOptions = getSelectableAccountOptions({
     localAccounts,
