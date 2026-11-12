@@ -182,8 +182,11 @@ if (isDev) {
   app.use(
     httpProxyMiddleware.createProxyMiddleware({
       target: 'http://localhost:3001',
-      // Restore the prefix for Vite after API handlers used stripped paths.
-      pathRewrite: path => `${basePath}${path}`,
+      // HTTP paths were stripped above; upgrades bypass Express and retain it.
+      pathRewrite: (path, req) =>
+        req.headers.upgrade?.toLowerCase() === 'websocket'
+          ? path
+          : `${basePath}${path}`,
       changeOrigin: true,
       ws: true,
     }),
