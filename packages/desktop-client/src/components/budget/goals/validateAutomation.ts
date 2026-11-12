@@ -126,11 +126,6 @@ export function validateAutomation(
         return { kind: 'by-negative-amount' };
       }
       const targetMonth = template.month;
-      // Uses the same rule the engine uses to skip expired targets, measured
-      // from today like the engine's warning after a template run.
-      if (isTemplateExpired(template, monthUtils.monthFromDate(today))) {
-        return { kind: 'by-target-past', month: targetMonth };
-      }
       if (template.type === 'spend') {
         if (!template.from || !monthUtils.isValidYearMonth(template.from)) {
           return { kind: 'spend-no-from' };
@@ -140,6 +135,13 @@ export function validateAutomation(
         ) {
           return { kind: 'spend-from-after-target' };
         }
+      }
+      // Checked last: it's only a warning, so returning it earlier would hide
+      // the blocking errors above. Uses the same rule the engine uses to skip
+      // expired targets, measured from today like the engine's warning after a
+      // template run.
+      if (isTemplateExpired(template, monthUtils.monthFromDate(today))) {
+        return { kind: 'by-target-past', month: targetMonth };
       }
       return null;
     }

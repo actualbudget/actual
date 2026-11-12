@@ -300,6 +300,36 @@ describe('validateAutomation past targets', () => {
     ).toBeNull();
   });
 
+  it('still blocks save when a passed spend target starts spending after it', () => {
+    const spend: Template = {
+      type: 'spend',
+      amount: 1200,
+      month: '2026-10',
+      from: '2027-06',
+      directive: 'template',
+      priority: 1,
+    };
+    const error = validateAutomation(spend, 'by', [spend], [], today);
+
+    expect(error).toEqual({ kind: 'spend-from-after-target' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
+  it('still blocks save when a passed spend target has no start month', () => {
+    const spend: Template = {
+      type: 'spend',
+      amount: 1200,
+      month: '2026-10',
+      from: '',
+      directive: 'template',
+      priority: 1,
+    };
+    const error = validateAutomation(spend, 'by', [spend], [], today);
+
+    expect(error).toEqual({ kind: 'spend-no-from' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
   it('flags a negative target amount and blocks save', () => {
     const error = validateAutomation(
       { ...by, amount: -100, month: '2026-12' },
