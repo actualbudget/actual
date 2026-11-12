@@ -2,7 +2,7 @@ name: Production Backup Watchdog
 
 on:
   schedule:
-    - cron: '17 4,5 * * *'
+    - cron: '17 5 * * *'
 
 permissions:
   actions: read
@@ -13,19 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Check scheduled run time
-        id: schedule
-        run: |
-          local_time=$(TZ=Europe/Budapest date +'%H%M')
-          if [[ "$local_time" > "0616" && "$local_time" < "0700" ]]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping non-matching UTC schedule occurrence (local time: $local_time)"
-          fi
-
       - name: Check for a successful scheduled backup today
-        if: steps.schedule.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

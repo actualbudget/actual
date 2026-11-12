@@ -64,15 +64,18 @@ contacting Fly if this secret is missing.
 
 ### Backup schedule and alerts
 
-- The `Production Backup` workflow checks twice daily in UTC and runs at
-  approximately 03:17 Europe/Budapest time, accounting for daylight saving
-  time. GitHub scheduled workflows are best-effort and may be delayed.
+- The `Production Backup` workflow runs daily at 02:17 UTC (03:17 in Budapest
+  during standard time and 04:17 during daylight saving time). GitHub scheduled
+  workflows are best-effort and may be delayed; a delayed event still runs the
+  backup rather than being silently skipped.
 - The workflow connects to the existing Fly app and invokes
   `node /app/backup-trigger.cjs`. The container-side process performs and
   verifies the backup.
-- The `Production Backup Watchdog` workflow checks at approximately 06:17
-  Europe/Budapest time. It fails if it cannot find a successful scheduled
-  backup run for that Budapest calendar day.
+- The `Production Backup Watchdog` workflow runs daily at 05:17 UTC (06:17 in
+  Budapest during standard time and 07:17 during daylight saving time). It
+  fails if it cannot find a successful scheduled backup run for that Budapest
+  calendar day. Both workflows check on every scheduled event, even if GitHub
+  starts the event later than expected.
 - GitHub Actions failure notifications should be enabled for the account that
   owns the scheduled workflow. Scheduled-workflow notifications go to the
   user GitHub associates with the workflow schedule. Confirm this setting in
@@ -80,6 +83,21 @@ contacting Fly if this secret is missing.
 - A successful watchdog run is evidence that GitHub found the backup
   workflow's verification step succeeded. It is not a substitute for
   periodically checking the Restic repository.
+
+### Finding the repository in Cloudflare R2
+
+In the Cloudflare dashboard, open **R2 Object Storage**, select the bucket
+named in the `RESTIC_REPOSITORY` Fly secret, then open the repository's key
+prefix if the repository URL includes one. Restic stores encrypted repository
+objects there, typically under keys such as `config`, `data/`, `index/`,
+`keys/`, `locks/`, and `snapshots/`. These are not individual Actual budget
+files and should not be renamed, moved, or deleted in the dashboard.
+
+The contents are encrypted and packed by Restic, so the dashboard cannot show
+transactions or other readable budget files. Use `restic snapshots` and
+`restic restore` to inspect or recover backup contents. The bucket name and
+optional prefix depend on the existing secret value; never paste secret values
+into logs, screenshots, or support requests.
 
 To inspect activity, open the repository **Actions** tab and review both
 workflows. A manual dispatch of `Production Backup` is available for a
