@@ -18,6 +18,8 @@ import { useCategories } from '#hooks/useCategories';
 
 type TransferMenuProps = {
   categoryId?: CategoryEntity['id'];
+  // The currency of the amount, when it is a currency line's
+  currencyCode?: string;
   initialAmount?: IntegerAmount | null;
   showToBeBudgeted?: boolean;
   onSubmit: (amount: IntegerAmount, categoryId: CategoryEntity['id']) => void;
@@ -26,6 +28,7 @@ type TransferMenuProps = {
 
 export function TransferMenu({
   categoryId,
+  currencyCode,
   initialAmount = 0,
   showToBeBudgeted,
   onSubmit,
@@ -68,11 +71,19 @@ export function TransferMenu({
     >
       <View style={{ padding: 10 }}>
         <View style={{ marginBottom: 5 }}>
-          <Trans>Transfer this amount:</Trans>
+          {currencyCode ? (
+            <Trans>Transfer this amount ({{ currencyCode }}):</Trans>
+          ) : (
+            <Trans>Transfer this amount:</Trans>
+          )}
         </View>
         <View>
           <InitialFocus>
-            <FinancialInput value={amount} onUpdate={setAmount} />
+            <FinancialInput
+              value={amount}
+              currencyCode={currencyCode}
+              onUpdate={setAmount}
+            />
           </InitialFocus>
         </View>
         <View style={{ margin: '10px 0 5px 0' }}>
@@ -88,6 +99,7 @@ export function TransferMenu({
             placeholder: t('(none)'),
           }}
           showHiddenCategories
+          showOwnBalances
         />
 
         <View

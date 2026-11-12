@@ -8,6 +8,8 @@ import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
 import { Link } from '#components/common/Link';
+import { getAccountsInScope } from '#components/currency/totalScopes';
+import { useAccounts } from '#hooks/useAccounts';
 import type { Binding } from '#spreadsheet';
 
 import { AccountTree } from './AccountTree';
@@ -49,6 +51,11 @@ export function SideGroup({
   onToggleBucket,
 }: SideGroupProps) {
   const { t } = useTranslation();
+  const { data: accounts = [] } = useAccounts();
+  const totalAccounts = getAccountsInScope(
+    accounts,
+    side === 'off' ? 'offbudget' : 'onbudget',
+  );
 
   return (
     <View style={{ marginTop: spacing.xxs }}>
@@ -106,6 +113,7 @@ export function SideGroup({
           <View style={{ flex: 1 }} />
           <SidebarBalance
             binding={totalBinding}
+            totalAccounts={totalAccounts}
             testId={balanceTestId}
             style={{ fontSize: 12, fontWeight: 600, color: 'inherit' }}
           />

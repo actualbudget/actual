@@ -24,6 +24,9 @@ import { getColumnWidth, PILL_STYLE } from './BudgetTable';
 type SpentCellProps = {
   binding: Binding<'envelope-budget' | 'tracking-budget', 'sum-amount'>;
   category: CategoryEntity;
+  // The currency of a currency line. Its row names the currency, so its
+  // amounts leave out the symbol.
+  currencyCode?: string;
   month: string;
   show3Columns?: boolean;
   onPress?: () => void;
@@ -32,6 +35,7 @@ type SpentCellProps = {
 export function SpentCell({
   binding,
   category,
+  currencyCode,
   month,
   show3Columns,
   onPress,
@@ -83,11 +87,14 @@ export function SpentCell({
                   fontSize: 12,
                 }}
               >
-                {format(value, type)}
+                {format(value, type, {
+                  currencyCode,
+                  hideSymbol: !!currencyCode,
+                })}
               </AutoTextSize>
             </PrivacyFilter>
           </Button>
-          {schedule && scheduleStatus && (
+          {!currencyCode && schedule && scheduleStatus && (
             <View
               style={{
                 position: 'absolute',

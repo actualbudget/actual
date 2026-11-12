@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import { send } from '@actual-app/core/platform/client/connection';
+import { findCategoryMonthCell } from '@actual-app/core/shared/budget-cells';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
@@ -101,14 +102,21 @@ export function summarizeMonthCategories(
 
   for (const cat of categoriesToInclude) {
     // Find the budget, spent, balance, and carryover flag for this category
-    const budgetCell = monthData.find((cell: BudgetMonthCell) =>
-      cell.name.endsWith(`budget-${cat.id}`),
+    // A category budgeted in several currencies counts its total
+    const budgetCell = findCategoryMonthCell<BudgetMonthCell>(
+      monthData,
+      'budget',
+      cat.id,
     );
-    const spentCell = monthData.find((cell: BudgetMonthCell) =>
-      cell.name.endsWith(`sum-amount-${cat.id}`),
+    const spentCell = findCategoryMonthCell<BudgetMonthCell>(
+      monthData,
+      'sum-amount',
+      cat.id,
     );
-    const balanceCell = monthData.find((cell: BudgetMonthCell) =>
-      cell.name.endsWith(`leftover-${cat.id}`),
+    const balanceCell = findCategoryMonthCell<BudgetMonthCell>(
+      monthData,
+      'leftover',
+      cat.id,
     );
     const carryoverCell = monthData.find((cell: BudgetMonthCell) =>
       cell.name.endsWith(`carryover-${cat.id}`),

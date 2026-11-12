@@ -4,6 +4,7 @@ import type { KeyboardEvent } from 'react';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
   CategoryEntity,
@@ -13,13 +14,15 @@ import type {
 import type { DropPosition } from '#components/sort';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
+import { useShownCurrencyLines } from '#hooks/useShownCurrencyLines';
 
 import { BudgetCategories } from './BudgetCategories';
 import { BudgetSummaries } from './BudgetSummaries';
 import { BudgetTotals } from './BudgetTotals';
-import { MonthsProvider } from './MonthsContext';
+import { getValidMonthBounds, MonthsProvider } from './MonthsContext';
 import type { MonthBounds } from './MonthsContext';
 import {
   findSortDown,
@@ -81,6 +84,17 @@ export function BudgetTable(props: BudgetTableProps) {
     useCategories();
   const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
     useLocalPref('budget.collapsed');
+  const { getLines } = useCategoryCurrencies();
+  // The months the table shows, as its months provider has them
+  const months = useMemo(() => {
+    const bounds = getValidMonthBounds(
+      monthBounds,
+      startMonth,
+      monthUtils.addMonths(startMonth, numMonths - 1),
+    );
+    return monthUtils.rangeInclusive(bounds.start ?? startMonth, bounds.end);
+  }, [monthBounds, startMonth, numMonths]);
+  const { isLineShown, probes: lineProbes } = useShownCurrencyLines(months);
   const [showHiddenCategories, setShowHiddenCategoriesPef] = useLocalPref(
     'budget.showHiddenCategories',
   );
@@ -164,6 +178,9 @@ export function BudgetTable(props: BudgetTableProps) {
   };
 
   const moveVertically = (dir: 1 | -1) => {
+    // Names are edited on categories only
+    const editedMonth =
+      editing && editing.cell !== 'name' ? editing.cell : null;
     const flattened = categoryGroups.reduce(
       (all, group) => {
         if (collapsedGroupIds.includes(group.id)) {
@@ -171,7 +188,20 @@ export function BudgetTable(props: BudgetTableProps) {
         }
         return all.concat([
           { id: group.id, isGroup: true },
-          ...(group?.categories || []),
+          // A category's own budget is edited on its id, then each of its
+          // other currencies that has started by the edited month
+          ...(group?.categories || []).flatMap(cat => [
+            cat,
+            ...getLines(cat.id)
+              .filter(
+                line =>
+                  line.id !== cat.id &&
+                  editedMonth != null &&
+                  isLineShown(line.id) &&
+                  (!line.startMonth || line.startMonth <= editedMonth),
+              )
+              .map(line => ({ ...cat, id: line.id })),
+          ]),
         ]);
       },
       [] as Array<
@@ -327,8 +357,10 @@ export function BudgetTable(props: BudgetTableProps) {
                 onShowActivity={_onShowActivity}
                 onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}
                 onSortCategories={onSortCategories}
+                isLineShown={isLineShown}
               />
             </SchedulesProvider>
+            {lineProbes}
           </View>
         </View>
       </MonthsProvider>

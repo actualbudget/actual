@@ -9,6 +9,7 @@ import {
   getSyncError,
   getTestKeyError,
 } from '#shared/errors';
+import { getSqlDefaultCurrencyCode } from '#shared/fx/sql';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import {
@@ -20,6 +21,7 @@ import { integerToAmount } from '#shared/util';
 import type { Handlers } from '#types/handlers';
 import type {
   AccountEntity,
+  CategoryEntity,
   CategoryGroupEntity,
   RecurConfig,
   ScheduleEntity,
@@ -34,6 +36,7 @@ import {
   budgetModel,
   categoryGroupModel,
   categoryModel,
+  exchangeRateModel,
   payeeModel,
   remoteFileModel,
   ruleModel,
@@ -43,11 +46,21 @@ import {
 import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import {
+  fromLineMonth,
+  getCurrencyLine,
+  getCurrencyLines,
+  isLineStarted,
+} from './budget/category-currencies';
 import { getCategoriesWithTemplates } from './budget/template-notes';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
 import { APIError, withErrorCode } from './errors';
+import {
+  checkAccountCurrencyChange,
+  checkMultipleCurrenciesEnabled,
+} from './fx/accountCurrency';
 import { runMutator } from './mutators';
 import * as prefs from './prefs';
 import { getScheduleDates } from './schedules/occurrences';
@@ -192,6 +205,18 @@ function validateScheduleDate(date: RecurConfig | string) {
 function checkFileOpen() {
   if (!(prefs.getPrefs() || {}).id) {
     throw APIError('No budget file is open');
+  }
+}
+
+// Account currencies and exchange rates can only be set while multiple
+// currencies are on, which also needs a default currency they support
+function checkMultiCurrencyEnabled() {
+  try {
+    checkMultipleCurrenciesEnabled();
+  } catch {
+    throw APIError(
+      'Multiple currencies are not enabled: turn on the currency and multiCurrency feature flags and set a default currency',
+    );
   }
 }
 
@@ -496,6 +521,41 @@ handlers['api/budget-month'] = async function ({ month }) {
     return v === '' ? 0 : v;
   }
 
+  // The values of a category, named after their cells. A category budgeted
+  // in several currencies reports its totals, in the default currency, and
+  // each currency in its own.
+  function categoryValues(
+    cat: CategoryEntity,
+    fields: Record<string, 'budget' | 'sum-amount' | 'leftover' | 'carryover'>,
+  ) {
+    const lines = getCurrencyLines(cat.id);
+    const valuesOf = (id: string, total: boolean) =>
+      Object.fromEntries(
+        Object.entries(fields).map(([field, cell]) => [
+          field,
+          value(
+            `${total && cell !== 'carryover' ? `${cell}-total` : cell}-${id}`,
+          ),
+        ]),
+      );
+    return {
+      ...categoryModel.toExternal(cat),
+      ...valuesOf(cat.id, lines.length > 0),
+      ...(lines.length > 0 && {
+        currencies: [
+          {
+            currency: getSqlDefaultCurrencyCode(),
+            ...valuesOf(cat.id, false),
+          },
+          ...lines.map(line => ({
+            currency: line.currency,
+            ...valuesOf(line.id, false),
+          })),
+        ],
+      }),
+    };
+  }
+
   // This is duplicated from main.js because the return format is
   // different (for now)
   return {
@@ -520,13 +580,14 @@ handlers['api/budget-month'] = async function ({ month }) {
             received: value(`group-sum-amount-${group.id}`),
             balance: value(`group-leftover-${group.id}`),
 
-            categories: group.categories.map(cat => ({
-              ...categoryModel.toExternal(cat),
-              budgeted: value(`budget-${cat.id}`),
-              received: value(`sum-amount-${cat.id}`),
-              balance: value(`leftover-${cat.id}`),
-              carryover: value(`carryover-${cat.id}`),
-            })),
+            categories: group.categories.map(cat =>
+              categoryValues(cat, {
+                budgeted: 'budget',
+                received: 'sum-amount',
+                balance: 'leftover',
+                carryover: 'carryover',
+              }),
+            ),
           };
         }
 
@@ -534,10 +595,9 @@ handlers['api/budget-month'] = async function ({ month }) {
           ...categoryGroupModel.toExternal(group),
           received: value('total-income'),
 
-          categories: group.categories.map(cat => ({
-            ...categoryModel.toExternal(cat),
-            received: value(`sum-amount-${cat.id}`),
-          })),
+          categories: group.categories.map(cat =>
+            categoryValues(cat, { received: 'sum-amount' }),
+          ),
         };
       }
 
@@ -547,27 +607,51 @@ handlers['api/budget-month'] = async function ({ month }) {
         spent: value(`group-sum-amount-${group.id}`),
         balance: value(`group-leftover-${group.id}`),
 
-        categories: group.categories.map(cat => ({
-          ...categoryModel.toExternal(cat),
-          budgeted: value(`budget-${cat.id}`),
-          spent: value(`sum-amount-${cat.id}`),
-          balance: value(`leftover-${cat.id}`),
-          carryover: value(`carryover-${cat.id}`),
-        })),
+        categories: group.categories.map(cat =>
+          categoryValues(cat, {
+            budgeted: 'budget',
+            spent: 'sum-amount',
+            balance: 'leftover',
+            carryover: 'carryover',
+          }),
+        ),
       };
     }),
   };
 };
 
+// The budget line of a category in `currency` in `month`: the category
+// itself for the default currency, or one of its currency lines
+function getBudgetLineId(
+  categoryId: string,
+  month: string,
+  currency?: string,
+): string {
+  if (currency == null || currency === getSqlDefaultCurrencyCode()) {
+    return categoryId;
+  }
+  const line = getCurrencyLine(db.getCategoryCurrencyId(categoryId, currency));
+  if (!line) {
+    throw APIError(`The category has no ${currency} line`);
+  }
+  if (!isLineStarted(line.id, month)) {
+    throw APIError(
+      `The ${currency} line of the category starts in ${fromLineMonth(line.startMonth)}`,
+    );
+  }
+  return line.id;
+}
+
 handlers['api/budget-set-amount'] = withMutation(async function ({
   month,
   categoryId,
   amount,
+  currency,
 }) {
   checkFileOpen();
   return handlers['budget/budget-amount']({
     month,
-    category: categoryId,
+    category: getBudgetLineId(categoryId, month, currency),
     amount,
   });
 });
@@ -576,13 +660,14 @@ handlers['api/budget-set-carryover'] = withMutation(async function ({
   month,
   categoryId,
   flag,
+  currency,
 }) {
   checkFileOpen();
   await validateMonth(month);
   await validateExpenseCategory('budget-set-carryover', categoryId);
   return handlers['budget/set-carryover']({
     startMonth: month,
-    category: categoryId,
+    category: getBudgetLineId(categoryId, month, currency),
     flag,
   });
 });
@@ -776,10 +861,15 @@ handlers['api/account-create'] = withMutation(async function ({
   initialBalance = null,
 }) {
   checkFileOpen();
+  if (account.currency != null) {
+    accountModel.validateCurrency(account.currency);
+    checkMultiCurrencyEnabled();
+  }
   return handlers['account-create']({
     name: account.name,
     offBudget: account.offbudget,
     closed: account.closed,
+    currency: account.currency ?? null,
     // Current the API expects an amount but it really should expect
     // an integer
     balance: initialBalance != null ? integerToAmount(initialBalance) : null,
@@ -789,7 +879,19 @@ handlers['api/account-create'] = withMutation(async function ({
 handlers['api/account-update'] = withMutation(async function ({ id, fields }) {
   checkFileOpen();
   // @ts-expect-error - fix me
-  return db.updateAccount({ id, ...accountModel.fromExternal(fields) });
+  const { currency, ...otherFields } = accountModel.fromExternal(fields);
+  // Scripts can write back an account as they read it, so a currency it
+  // already has is left as it is
+  const isCurrencyChanged =
+    currency !== undefined && (await checkAccountCurrencyChange(id, currency));
+  if (isCurrencyChanged) {
+    checkMultiCurrencyEnabled();
+  }
+  return db.updateAccount({
+    id,
+    ...otherFields,
+    ...(isCurrencyChanged && { currency }),
+  });
 });
 
 handlers['api/account-close'] = withMutation(async function ({
@@ -849,6 +951,57 @@ handlers['api/account-group-update'] = withMutation(async function ({
 handlers['api/account-group-delete'] = withMutation(async function ({ id }) {
   checkFileOpen();
   await handlers['account-group-delete']({ id });
+});
+
+handlers['api/exchange-rates-get'] = async function () {
+  checkFileOpen();
+  const exchangeRates = await handlers['exchange-rates-get']();
+  return exchangeRates.map(exchangeRate =>
+    exchangeRateModel.toExternal(exchangeRate),
+  );
+};
+
+handlers['api/exchange-rate-create'] = withMutation(async function ({
+  exchangeRate,
+}) {
+  checkFileOpen();
+  checkMultiCurrencyEnabled();
+  if (exchangeRate == null || typeof exchangeRate !== 'object') {
+    throw APIError('exchangeRate is required');
+  }
+  return handlers['exchange-rate-create']({
+    from_currency: exchangeRate.from_currency,
+    to_currency: exchangeRate.to_currency,
+    rate: exchangeRate.rate,
+    date: exchangeRate.date,
+  });
+});
+
+handlers['api/exchange-rate-update'] = withMutation(async function ({
+  id,
+  fields,
+}) {
+  checkFileOpen();
+  checkMultiCurrencyEnabled();
+  if (fields == null || typeof fields !== 'object') {
+    throw APIError('fields is required');
+  }
+  await handlers['exchange-rate-update']({
+    id,
+    ...(fields.from_currency !== undefined && {
+      from_currency: fields.from_currency,
+    }),
+    ...(fields.to_currency !== undefined && {
+      to_currency: fields.to_currency,
+    }),
+    ...(fields.rate !== undefined && { rate: fields.rate }),
+    ...(fields.date !== undefined && { date: fields.date }),
+  });
+});
+
+handlers['api/exchange-rate-delete'] = withMutation(async function ({ id }) {
+  checkFileOpen();
+  await handlers['exchange-rate-delete']({ id });
 });
 
 handlers['api/categories-get'] = async function ({

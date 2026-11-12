@@ -71,6 +71,12 @@ export type Modal =
       };
     }
   | {
+      name: 'account-settings';
+      options: {
+        accountId: AccountEntity['id'];
+      };
+    }
+  | {
       name: 'close-account';
       options: {
         account: AccountEntity;
@@ -291,6 +297,8 @@ export type Modal =
         onSelect: (categoryId: string | null, categoryName: string) => void;
         month?: string | undefined;
         showHiddenCategories?: boolean;
+        // Balances of the categories' own budgets, when money moves on them
+        showOwnBalances?: boolean;
         showNoneOption?: boolean;
         closeOnSelect?: boolean;
         clearOnSelect?: boolean;
@@ -389,6 +397,9 @@ export type Modal =
       name: 'category-menu';
       options: {
         categoryId: CategoryEntity['id'];
+        // The month shown, whose spending converted from other currencies
+        // the menu mentions
+        month: string;
         onSave: (category: CategoryEntity) => void;
         onEditNotes: (id: NoteEntity['id']) => void;
         onDelete: (
@@ -407,7 +418,8 @@ export type Modal =
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
+        // Left out for currency lines, which have no templates
+        onApplyBudgetTemplate?: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
     }
@@ -419,7 +431,8 @@ export type Modal =
         onUpdateBudget: (amount: number) => void;
         onCopyLastMonthAverage: () => void;
         onSetMonthsAverage: (numberOfMonths: number) => void;
-        onApplyBudgetTemplate: () => void;
+        // Left out for currency lines, which have no templates
+        onApplyBudgetTemplate?: () => void;
         onCopyUntilYearEnd: () => void;
         onEditNotes: (id: NoteEntity['id'], month: string) => void;
       };
@@ -593,6 +606,23 @@ export type Modal =
       };
     }
   | {
+      name: 'transfer-amount';
+      options: {
+        // The side of the transfer being saved, with its signed amount
+        accountId: AccountEntity['id'];
+        transferAccountId: AccountEntity['id'];
+        amount: IntegerAmount;
+        date: string;
+        // The amount on the other side, in that account's currency
+        onConfirm: (amount: IntegerAmount) => void;
+        // Closed without an amount, or gone without being closed (e.g. on
+        // navigation): the other side is converted with the exchange rate
+        // of the day. Also called after onConfirm; only the first of the
+        // two counts
+        onClose: () => void;
+      };
+    }
+  | {
       name: 'transaction-table-columns';
       options: {
         columns: TransactionTableColumn[];
@@ -617,6 +647,17 @@ export type Modal =
         message: string;
         onConfirm: () => void;
       };
+    }
+  | {
+      name: 'category-currency-add';
+      options: {
+        category: Pick<CategoryEntity, 'id' | 'name'>;
+        // The month on screen, the line's first month
+        month: string;
+      };
+    }
+  | {
+      name: 'currency-own-lines';
     }
   | {
       name: 'copy-widget-to-dashboard';

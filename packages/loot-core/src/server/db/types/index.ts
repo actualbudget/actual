@@ -38,12 +38,24 @@ export type DbAccount = {
     | 'not-configured'
     | null;
   account_group_id?: DbAccountGroup['id'] | null;
+  currency?: string | null;
 };
 
 export type DbAccountGroup = {
   id: string;
   name: string;
   sort_order: number;
+  tombstone: 1 | 0;
+};
+
+export type DbExchangeRate = {
+  id: string;
+  from_currency: string;
+  to_currency: string;
+  rate: number;
+  date: number;
+  source: string;
+  created_at: number | null;
   tombstone: 1 | 0;
 };
 
@@ -73,6 +85,15 @@ export type DbCategoryGroup = {
   is_income: 1 | 0;
   sort_order: number;
   hidden: 1 | 0;
+  tombstone: 1 | 0;
+};
+
+export type DbCategoryCurrency = {
+  id: string;
+  category: DbCategory['id'];
+  currency: string;
+  // YYYYMM, like the month of a budget amount
+  start_month: number;
   tombstone: 1 | 0;
 };
 

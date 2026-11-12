@@ -23,6 +23,8 @@ import {
   useSortCategoriesMutation,
 } from '#budget';
 import { useCategories } from '#hooks/useCategories';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
+import type { CategoryLine } from '#hooks/useCategoryCurrencies';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useNavigate } from '#hooks/useNavigate';
@@ -54,6 +56,7 @@ export function Budget() {
   const [initialized, setInitialized] = useState(false);
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
+  const { isLoading: isLoadingCurrencyLines } = useCategoryCurrencies();
 
   // Re-runs whenever the bounds change so newly available months get warmed.
   const init = useEffectEvent(
@@ -171,7 +174,7 @@ export function Budget() {
     applyBudgetAction.mutate({ month, type, args });
   };
 
-  if (!initialized || !bounds || !categoryGroups) {
+  if (!initialized || !bounds || !categoryGroups || isLoadingCurrencyLines) {
     return null;
   }
 
@@ -265,6 +268,10 @@ export type BudgetSummaryProps = {
 export type CategoryMonthProps = {
   month: string;
   category: CategoryEntity;
+  // A currency line of the category, budgeted in its own currency
+  line?: CategoryLine;
+  // The total of a category with currency lines, which is only shown
+  showTotal?: boolean;
   editing: boolean;
   isLast?: boolean;
   onEdit: (id: CategoryEntity['id'] | null, month?: string) => void;

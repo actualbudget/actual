@@ -12,7 +12,11 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { isIOS } from '@actual-app/core/shared/platform';
-import { amountToCurrency } from '@actual-app/core/shared/util';
+import {
+  amountToCurrency,
+  amountToInteger,
+  integerToCurrencyForEdit,
+} from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
 import { makeAmountFullStyle } from '#components/budget/util';
@@ -56,6 +60,9 @@ export type CalculatorAmountInputProps = {
   autoFocusDelay?: number;
   autoFocusIndirect?: boolean;
   disabled?: boolean;
+  // The currency of the amount when it isn't the default one: the amount is
+  // then shown with the decimal places of that currency
+  currencyCode?: string;
 };
 
 const placeholderClassName = css({
@@ -78,6 +85,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   onEnter,
   variant = 'normal',
   keyboardHeader,
+  currencyCode,
   ...props
 }: CalculatorAmountInputProps) {
   const internalInputRef = useRef<HTMLInputElement>(null);
@@ -87,7 +95,9 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const [liveValue, setLiveValue] = useState(() => value);
-  const [expression, setExpression] = useState(() => formatAmount(liveValue));
+  const [expression, setExpression] = useState(() =>
+    formatAmount(liveValue, currencyCode),
+  );
   const valueIsNegative = () =>
     isNegativeAmount(negate && value === 0 ? -value : value);
   const isNegative = useRef(valueIsNegative());
@@ -121,7 +131,7 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }
 
     if (negate && isNegative.current) {
-      setExpression(formatAmount(-value));
+      setExpression(formatAmount(-value, currencyCode));
     }
     setTimeout(() => {
       const input = inputRef.current;
@@ -130,7 +140,15 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }, 0);
 
     setFocused(true);
-  }, [inputRef, setExpression, negate, isNegative, value, setFocused]);
+  }, [
+    inputRef,
+    setExpression,
+    negate,
+    isNegative,
+    value,
+    currencyCode,
+    setFocused,
+  ]);
 
   const onInputBlur = useCallback(() => {
     if (isKeepingFocusRef.current) {
@@ -139,20 +157,22 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
     }
 
     setFocused(false);
-    setExpression(formatAmount(liveValue));
+    setExpression(formatAmount(liveValue, currencyCode));
     if (value === liveValue) {
       return true;
     }
     onChange?.(liveValue);
     return true;
-  }, [setExpression, value, liveValue, onChange, inputRef]);
+  }, [setExpression, value, liveValue, currencyCode, onChange, inputRef]);
 
   const onChangeAmount = useCallback(
     (amount: number) => {
       setLiveValue(amount);
-      setExpression(formatAmount(negate ? Math.abs(amount) : amount));
+      setExpression(
+        formatAmount(negate ? Math.abs(amount) : amount, currencyCode),
+      );
     },
-    [setExpression, setLiveValue, negate],
+    [setExpression, setLiveValue, negate, currencyCode],
   );
 
   const onChangeExpression = useCallback(
@@ -170,11 +190,13 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 
   const valueRef = useRef(value);
-  if (value !== valueRef.current) {
+  const currencyCodeRef = useRef(currencyCode);
+  if (value !== valueRef.current || currencyCode !== currencyCodeRef.current) {
     valueRef.current = value;
+    currencyCodeRef.current = currencyCode;
     isNegative.current = valueIsNegative();
     setLiveValue(value);
-    setExpression(formatAmount(value));
+    setExpression(formatAmount(value, currencyCode));
   }
 
   useLayoutEffect(() => {
@@ -273,8 +295,13 @@ export const CalculatorAmountInput = memo(function CalculatorAmountInput({
   );
 });
 
-function formatAmount(value: number) {
-  return value === 0 ? '' : amountToCurrency(value);
+function formatAmount(value: number, currencyCode: string | undefined) {
+  if (value === 0) {
+    return '';
+  }
+  return currencyCode === undefined
+    ? amountToCurrency(value)
+    : integerToCurrencyForEdit(amountToInteger(value), currencyCode);
 }
 
 function isNegativeAmount(value: number) {

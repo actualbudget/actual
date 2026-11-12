@@ -3,6 +3,7 @@ import {
   initServer,
 } from '@actual-app/core/platform/client/connection';
 import { getCurrency } from '@actual-app/core/shared/currencies';
+import { CONVERTED_AMOUNT } from '@actual-app/core/shared/fx/aql';
 import type {
   RuleConditionEntity,
   TimeFrame,
@@ -24,6 +25,7 @@ vi.mock(
 
 type SerializedQuery = {
   filterExpressions: ReadonlyArray<Record<string, unknown>>;
+  selectExpressions?: ReadonlyArray<unknown>;
   tableOptions?: Record<string, unknown>;
 };
 
@@ -268,6 +270,10 @@ describe('BALANCE_OF in query mode', () => {
       ),
     );
     expect(balanceQuery).toBeDefined();
+    // Balances are in the default currency, like QUERY sums
+    expect(balanceQuery?.selectExpressions).toEqual([
+      { result: { $sum: CONVERTED_AMOUNT } },
+    ]);
   });
 
   it('resolves an account by exact name', async () => {

@@ -94,6 +94,7 @@ export function Accounts() {
           name={t('All accounts')}
           to="/accounts"
           query={bindings.allAccountBalance()}
+          totalAccounts={[...onBudgetAccounts, ...offbudgetAccounts]}
           style={{ fontWeight, marginTop: 15 }}
           isExactPathMatch
           balanceTestId="sidebar-all-accounts-balance"
@@ -104,6 +105,7 @@ export function Accounts() {
             name={t('On budget')}
             to="/accounts/onbudget"
             query={bindings.onBudgetAccountBalance()}
+            totalAccounts={onBudgetAccounts}
             style={{
               fontWeight,
               marginTop: 13,
@@ -136,6 +138,7 @@ export function Accounts() {
             name={t('Off budget')}
             to="/accounts/offbudget"
             query={bindings.offBudgetAccountBalance()}
+            totalAccounts={offbudgetAccounts}
             style={{
               fontWeight,
               marginTop: 13,

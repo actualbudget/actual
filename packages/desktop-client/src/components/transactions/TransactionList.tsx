@@ -31,6 +31,7 @@ import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
 import { useNavigate } from '#hooks/useNavigate';
+import { usePromptTransferAmounts } from '#hooks/usePromptTransferAmounts';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -60,10 +61,11 @@ import type { TransactionTableProps } from './TransactionsTable';
 // differently than a full refresh. It's up to you to decide which
 // one to use when doing updates.
 
-async function saveDiff(diff, learnCategories) {
+async function saveDiff(diff, learnCategories, transferAmounts = {}) {
   const remoteUpdates = await send('transactions-batch-update', {
     ...diff,
     learnCategories,
+    transferAmounts,
   });
 
   if (remoteUpdates && remoteUpdates.updated.length > 0) {
@@ -72,8 +74,14 @@ async function saveDiff(diff, learnCategories) {
   return {};
 }
 
-async function saveDiffAndApply(diff, changes, onChange, learnCategories) {
-  const remoteDiff = await saveDiff(diff, learnCategories);
+async function saveDiffAndApply(
+  diff,
+  changes,
+  onChange,
+  learnCategories,
+  transferAmounts = {},
+) {
+  const remoteDiff = await saveDiff(diff, learnCategories, transferAmounts);
   onChange(
     // TODO:
     // @ts-expect-error - fix me
@@ -185,6 +193,7 @@ export function TransactionList({
   const navigate = useNavigate();
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
+  const promptTransferAmounts = usePromptTransferAmounts();
 
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
@@ -194,26 +203,43 @@ export function TransactionList({
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+      const transferAmounts = await promptTransferAmounts(newTransactions);
+      await saveDiff(
+        { added: newTransactions },
+        isLearnCategoriesEnabled,
+        transferAmounts,
+      );
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch],
+    [isLearnCategoriesEnabled, onRefetch, promptTransferAmounts],
   );
 
   const onSave = useCallback(
     async (transaction: TransactionEntity) => {
       const saveTransaction = async () => {
-        const changes = updateTransaction(
-          transactionsLatest.current,
-          transaction,
-        );
+        const previousTransactions = transactionsLatest.current;
+        const changes = updateTransaction(previousTransactions, transaction);
         transactionsLatest.current = changes.data;
 
         if (changes.diff.updated.length > 0) {
+          // Transfers to an account in another currency ask how much
+          // arrived on the other side
+          const changedIds = new Set(
+            [...changes.diff.added, ...changes.diff.updated].map(t => t.id),
+          );
+          const transferAmounts = await promptTransferAmounts(
+            changes.data.filter(t => changedIds.has(t.id)),
+            previousTransactions,
+          );
+
           const dateChanged = !!changes.diff.updated[0].date;
           if (dateChanged) {
             changes.diff.updated[0].sort_order = Date.now();
-            await saveDiff(changes.diff, isLearnCategoriesEnabled);
+            await saveDiff(
+              changes.diff,
+              isLearnCategoriesEnabled,
+              transferAmounts,
+            );
             onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
@@ -222,6 +248,7 @@ export function TransactionList({
               changes,
               onChange,
               isLearnCategoriesEnabled,
+              transferAmounts,
             );
           }
         }
@@ -229,7 +256,7 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
+    [isLearnCategoriesEnabled, onChange, onRefetch, promptTransferAmounts],
   );
 
   const onAddSplit = useCallback(

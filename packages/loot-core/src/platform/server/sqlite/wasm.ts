@@ -7,6 +7,7 @@ import type {
 
 import { logger } from '#platform/server/log';
 
+import { fxConvert, fxConvertOnDate } from './fx';
 import { normalise } from './normalise';
 import { regexp } from './regexp';
 import { unicodeLike } from './unicodeLike';
@@ -120,8 +121,23 @@ function defineFunction(
   });
 }
 
+// Not deterministic: the result depends on the budget's exchange rates
+function defineCurrencyFunction(
+  db: WasmDatabase,
+  name: string,
+  fn: (amount: unknown, currency: unknown, date: unknown) => unknown,
+) {
+  db.createFunction(name, {
+    arity: 3,
+    deterministic: false,
+    xFunc: (_context, amount, currency, date) =>
+      (fn(amount, currency, date) ?? null) as string | number | null,
+  });
+}
+
 // Unicode-aware LOWER, UPPER and LIKE, plus REGEXP and NORMALISE. The
-// build has no ICU, and the app's queries rely on these names.
+// build has no ICU, and the app's queries rely on these names. Also the
+// conversions of amounts between currencies.
 export function installUserFunctions(db: WasmDatabase) {
   defineFunction(db, 'UNICODE_LOWER', 1, value => value?.toLowerCase());
   defineFunction(db, 'UNICODE_UPPER', 1, value => value?.toUpperCase());
@@ -130,6 +146,8 @@ export function installUserFunctions(db: WasmDatabase) {
   );
   defineFunction(db, 'REGEXP', 2, (pattern, text) => regexp(pattern, text));
   defineFunction(db, 'NORMALISE', 1, value => normalise(value));
+  defineCurrencyFunction(db, 'FX_CONVERT', fxConvert);
+  defineCurrencyFunction(db, 'FX_CONVERT_ON_DATE', fxConvertOnDate);
 }
 
 function pointerOf(db: WasmDatabase): number {

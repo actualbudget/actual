@@ -1,7 +1,12 @@
+import { setNumberFormat } from '@actual-app/core/shared/util';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import type { SerializedTransaction } from './utils';
-import { deserializeTransaction, shouldApplyRuleChange } from './utils';
+import {
+  deserializeTransaction,
+  serializeTransaction,
+  shouldApplyRuleChange,
+} from './utils';
 
 describe('shouldApplyRuleChange', () => {
   test('applies rule changes to empty fields', () => {
@@ -149,5 +154,80 @@ describe('deserializeTransaction', () => {
         { ...originalTransaction, amount: -2500 },
       ).amount,
     ).toBe(-2500);
+  });
+
+  test.each([
+    [{ debit: '1500' }, -150000],
+    [{ credit: '7.6' }, 760],
+  ])(
+    'reads %o at the stored scale, whatever the currency',
+    (fields, expected) => {
+      expect(
+        deserializeTransaction(serialized(fields), originalTransaction).amount,
+      ).toBe(expected);
+    },
+  );
+});
+
+describe('serializeTransaction', () => {
+  const transaction: TransactionEntity = {
+    id: 'id',
+    account: 'account-id',
+    date: '2017-01-01',
+    amount: -1500,
+    cleared: false,
+  };
+
+  afterEach(() => {
+    setNumberFormat({ format: 'comma-dot', hideFraction: false });
+  });
+
+  test.each([
+    ['JPY', -150000, '1,500'],
+    [undefined, -1500, '15.00'],
+  ])(
+    'formats amounts of %s accounts, stored as %s, as %s',
+    (currencyCode, amount, expected) => {
+      expect(
+        serializeTransaction({ ...transaction, amount }, false, currencyCode)
+          .debit,
+      ).toBe(expected);
+    },
+  );
+
+  describe('with decimals hidden', () => {
+    beforeEach(() => {
+      setNumberFormat({ format: 'comma-dot', hideFraction: true });
+    });
+
+    test.each([
+      ['in the default currency', undefined, -150000, '1,500'],
+      ['in the default currency', undefined, -150025, '1,500.25'],
+      ['in another currency', 'USD', -150000, '1,500.00'],
+      ['in another currency', 'JPY', -150000, '1,500'],
+      ['in another currency', 'JPY', -1526, '15.26'],
+    ])(
+      'formats amounts of accounts %s (%s) for editing',
+      (_account, foreignCurrencyCode, amount, expected) => {
+        expect(
+          serializeTransaction(
+            { ...transaction, amount },
+            false,
+            foreignCurrencyCode,
+          ).debit,
+        ).toBe(expected);
+      },
+    );
+
+    test('reads back the edited amount of an account in the default currency', () => {
+      const serialized = serializeTransaction(
+        { ...transaction, amount: -150000 },
+        false,
+      );
+
+      expect(deserializeTransaction(serialized, transaction).amount).toBe(
+        -150000,
+      );
+    });
   });
 });

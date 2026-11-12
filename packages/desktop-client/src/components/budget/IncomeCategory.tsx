@@ -16,6 +16,8 @@ import { useBudgetComponents } from '.';
 
 type IncomeCategoryProps = {
   cat: CategoryEntity;
+  // Its months then show the total of its currency lines
+  hasCurrencyLines?: boolean;
   isLast?: boolean;
   editingCell: { id: CategoryEntity['id']; cell: string } | null;
   onEditName: ComponentProps<typeof SidebarCategory>['onEditName'];
@@ -30,6 +32,7 @@ type IncomeCategoryProps = {
 
 export function IncomeCategory({
   cat,
+  hasCurrencyLines = false,
   isLast,
   editingCell,
   onEditName,
@@ -90,6 +93,7 @@ export function IncomeCategory({
               editingCell.cell === month
             }
             category={cat}
+            showTotal={hasCurrencyLines}
             isLast={isLast}
             onEdit={onEditMonth}
             onBudgetAction={onBudgetAction}

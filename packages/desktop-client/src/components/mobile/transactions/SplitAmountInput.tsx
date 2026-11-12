@@ -6,6 +6,7 @@ import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 
 import { AmountInput as LegacyAmountInput } from '#components/util/AmountInput';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useForeignCurrencyCode } from '#hooks/useMultiCurrency';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { CalculatorAmountInput } from './CalculatorAmountInput';
@@ -20,10 +21,13 @@ export type SplitAmountInputProps = {
   keyboardHeader?: ReactNode;
   autoFocus?: boolean;
   disabled?: boolean;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string;
 };
 
 export const SplitAmountInput = memo(function SplitAmountInput({
   autoFocus = false,
+  currencyCode,
   disabled,
   negate = false,
   onBlur,
@@ -35,6 +39,7 @@ export const SplitAmountInput = memo(function SplitAmountInput({
 }: SplitAmountInputProps) {
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [hideFraction] = useSyncedPref('hideFraction');
+  const foreignCurrencyCode = useForeignCurrencyCode(currencyCode);
   const [focused, setFocused] = useState(autoFocus);
 
   useEffect(() => {
@@ -47,6 +52,7 @@ export const SplitAmountInput = memo(function SplitAmountInput({
     return (
       <CalculatorAmountInput
         autoFocus={autoFocus}
+        currencyCode={foreignCurrencyCode}
         disabled={disabled}
         keyboardHeader={keyboardHeader}
         negate={negate}
@@ -67,7 +73,12 @@ export const SplitAmountInput = memo(function SplitAmountInput({
 
   return (
     <LegacyAmountInput
-      autoDecimals={String(hideFraction) !== 'true'}
+      // Hiding decimals is chosen for the default currency, so typed digits
+      // always fill the smallest unit of another currency
+      autoDecimals={
+        foreignCurrencyCode !== undefined || String(hideFraction) !== 'true'
+      }
+      currencyCode={foreignCurrencyCode}
       disabled={disabled}
       focused={focused}
       inputStyle={{

@@ -19,8 +19,10 @@ import { css } from '@emotion/css';
 import { t } from 'i18next';
 
 import { BalanceWithCarryover } from '#components/budget/BalanceWithCarryover';
+import { CategoryTotalMonth } from '#components/budget/CategoryTotalMonth';
 import { GoalStatus } from '#components/budget/GoalStatus';
 import { makeAmountGrey } from '#components/budget/util';
+import { ConvertedSpendingHint } from '#components/currency/ConvertedSpendingHint';
 import { NotesButton } from '#components/NotesButton';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
 import { Field, SheetCell } from '#components/table';
@@ -196,6 +198,8 @@ export const GroupMonth = memo(function GroupMonth({
 export const CategoryMonth = memo(function CategoryMonth({
   month,
   category,
+  line,
+  showTotal,
   editing,
   onEdit,
   onBudgetAction,
@@ -224,13 +228,57 @@ export const CategoryMonth = memo(function CategoryMonth({
       month,
     });
 
-  const showScheduleIndicator = schedule && scheduleStatus;
+  // A currency line of the category is budgeted in its own currency
+  const lineId = line?.id ?? category.id;
+  const lineCurrencyCode =
+    line && line.id !== category.id ? line.currencyCode : undefined;
+  const isCurrencyLine = lineCurrencyCode != null;
+  const formatLineAmount = lineCurrencyCode
+    ? (value: unknown) =>
+        format(value, 'financial', { currencyCode: lineCurrencyCode })
+    : undefined;
+
+  const showScheduleIndicator = !isCurrencyLine && schedule && scheduleStatus;
 
   const isGoalTemplatesEnabled = useFeatureFlag('goalTemplatesEnabled');
   const goal = useTrackingSheetValue(trackingBudget.catGoal(category.id));
-  // Income rows without a goal keep their plain received amount
+  // Income rows without a goal keep their plain received amount; currency
+  // lines have no goals
   const showsIncomeGoal =
-    category.is_income && isGoalTemplatesEnabled && goal != null;
+    !isCurrencyLine &&
+    category.is_income &&
+    isGoalTemplatesEnabled &&
+    goal != null;
+
+  // Income categories have no balance column
+  const columns = category.is_income
+    ? (['budgeted', 'spent'] as const)
+    : (['budgeted', 'spent', 'balance'] as const);
+
+  if (showTotal) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={columns}
+        bindings={{
+          budgeted: trackingBudget.catBudgetedTotal(category.id),
+          spent: trackingBudget.catSumAmountTotal(category.id),
+          balance: trackingBudget.catBalanceTotal(category.id),
+        }}
+        onShowActivity={() => onShowActivity(category.id, month)}
+      />
+    );
+  }
+  if (line?.startMonth && month < line.startMonth) {
+    return (
+      <CategoryTotalMonth
+        categoryId={category.id}
+        month={month}
+        columns={columns}
+      />
+    );
+  }
 
   return (
     <View
@@ -277,10 +325,12 @@ export const CategoryMonth = memo(function CategoryMonth({
                 borderColor: theme.tableBorder,
               }}
             >
-              <NotesButton
-                id={`${category.id}-${month}`}
-                defaultColor={theme.pageTextLight}
-              />
+              {!isCurrencyLine && (
+                <NotesButton
+                  id={`${category.id}-${month}`}
+                  defaultColor={theme.pageTextLight}
+                />
+              )}
             </View>
             <View
               className={`hover-expand ${menuOpen ? 'force-visible' : ''}`}
@@ -319,7 +369,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                 <BudgetMenu
                   onCopyLastMonthAverage={() => {
                     onMenuAction(month, 'copy-single-last', {
-                      category: category.id,
+                      category: lineId,
                     });
                     showUndoNotification({
                       message: t(`Budget set to last month's budget.`),
@@ -335,7 +385,7 @@ export const CategoryMonth = memo(function CategoryMonth({
                     }
 
                     onMenuAction(month, `set-single-${numberOfMonths}-avg`, {
-                      category: category.id,
+                      category: lineId,
                     });
                     showUndoNotification({
                       message: t(
@@ -344,17 +394,25 @@ export const CategoryMonth = memo(function CategoryMonth({
                       ),
                     });
                   }}
-                  onApplyBudgetTemplate={() => {
-                    onMenuAction(month, 'apply-single-category-template', {
-                      category: category.id,
-                    });
-                    showUndoNotification({
-                      message: t(`Budget template applied.`),
-                    });
-                  }}
+                  onApplyBudgetTemplate={
+                    isCurrencyLine
+                      ? undefined
+                      : () => {
+                          onMenuAction(
+                            month,
+                            'apply-single-category-template',
+                            {
+                              category: category.id,
+                            },
+                          );
+                          showUndoNotification({
+                            message: t(`Budget template applied.`),
+                          });
+                        }
+                  }
                   onCopyUntilYearEnd={() => {
                     onMenuAction(month, 'copy-until-year-end', {
-                      category: category.id,
+                      category: lineId,
                     });
                     showUndoNotification({
                       message: t(`Budget copied until year end.`),
@@ -368,9 +426,10 @@ export const CategoryMonth = memo(function CategoryMonth({
         <TrackingSheetCell
           name="budget"
           exposed={editing}
+          formatter={formatLineAmount}
           focused={editing}
           width="flex"
-          onExpose={() => onEdit(category.id, month)}
+          onExpose={() => onEdit(lineId, month)}
           style={{ ...(editing && { zIndex: 100 }), ...styles.tnum }}
           textAlign="right"
           valueStyle={{
@@ -384,10 +443,11 @@ export const CategoryMonth = memo(function CategoryMonth({
             },
           }}
           valueProps={{
-            binding: trackingBudget.catBudgeted(category.id),
+            binding: trackingBudget.catBudgeted(lineId),
             type: 'financial',
             getValueStyle: makeAmountGrey,
-            formatExpr: format.forEdit,
+            formatExpr: value =>
+              format.forEdit(value, { currencyCode: lineCurrencyCode }),
             unformatExpr: format.fromEdit,
           }}
           inputProps={{
@@ -400,7 +460,7 @@ export const CategoryMonth = memo(function CategoryMonth({
           }}
           onSave={(parsedIntegerAmount: number | null) => {
             onBudgetAction(month, 'budget-amount', {
-              category: category.id,
+              category: lineId,
               amount: parsedIntegerAmount ?? 0,
             });
           }}
@@ -419,6 +479,9 @@ export const CategoryMonth = memo(function CategoryMonth({
             gap: 2,
           }}
         >
+          {!isCurrencyLine && (
+            <ConvertedSpendingHint category={category} month={month} />
+          )}
           {showScheduleIndicator && (
             <View title={description}>
               <Button
@@ -460,12 +523,13 @@ export const CategoryMonth = memo(function CategoryMonth({
             </View>
           ) : (
             <TrackingCellValue
-              binding={trackingBudget.catSumAmount(category.id)}
+              binding={trackingBudget.catSumAmount(lineId)}
               type="financial"
             >
               {props => (
                 <CellValueText
                   {...props}
+                  formatter={formatLineAmount}
                   className={css({
                     cursor: 'pointer',
                     ':hover': {
@@ -498,12 +562,13 @@ export const CategoryMonth = memo(function CategoryMonth({
             }}
           >
             <BalanceWithCarryover
+              formatter={formatLineAmount}
               isDisabled={category.is_income}
-              carryover={trackingBudget.catCarryover(category.id)}
-              balance={trackingBudget.catBalance(category.id)}
-              goal={trackingBudget.catGoal(category.id)}
-              budgeted={trackingBudget.catBudgeted(category.id)}
-              longGoal={trackingBudget.catLongGoal(category.id)}
+              carryover={trackingBudget.catCarryover(lineId)}
+              balance={trackingBudget.catBalance(lineId)}
+              goal={trackingBudget.catGoal(lineId)}
+              budgeted={trackingBudget.catBudgeted(lineId)}
+              longGoal={trackingBudget.catLongGoal(lineId)}
             />
           </Button>
 
@@ -514,13 +579,13 @@ export const CategoryMonth = memo(function CategoryMonth({
             placement="bottom end"
           >
             <BalanceMenu
-              categoryId={category.id}
+              categoryId={lineId}
               header={
                 <GoalStatus
-                  balance={trackingBudget.catBalance(category.id)}
-                  goal={trackingBudget.catGoal(category.id)}
-                  budgeted={trackingBudget.catBudgeted(category.id)}
-                  longGoal={trackingBudget.catLongGoal(category.id)}
+                  balance={trackingBudget.catBalance(lineId)}
+                  goal={trackingBudget.catGoal(lineId)}
+                  budgeted={trackingBudget.catBudgeted(lineId)}
+                  longGoal={trackingBudget.catLongGoal(lineId)}
                   style={{
                     padding: 10,
                     borderBottom: '1px solid ' + theme.menuBorder,
@@ -529,7 +594,7 @@ export const CategoryMonth = memo(function CategoryMonth({
               }
               onCarryover={carryover => {
                 onMenuAction(month, 'carryover', {
-                  category: category.id,
+                  category: lineId,
                   flag: carryover,
                 });
               }}
