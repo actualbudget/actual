@@ -17,7 +17,6 @@ import {
   receiveMessages,
   sendMessages,
   setSyncingMode,
-  splitIntoSyncBatches,
   SYNC_BATCH_MAX_BYTES,
 } from './index';
 
@@ -152,10 +151,26 @@ describe('Sync', () => {
       lastSyncedTimestamp: getClock().timestamp.toString(),
     });
 
+    // Another client syncs while the batches are being sent; only a
+    // later batch's response can return this message
+    const later = {
+      dataset: 'transactions',
+      row: 'later',
+      column: 'amount',
+      value: 'N:200',
+      timestamp: Timestamp.parse(
+        '2018-11-13T13:21:00.000Z-0000-0000testinguuid3',
+      ),
+    };
     const originalHandler = mockSyncServer.handlers['/sync/sync'];
     const requestSizes: number[] = [];
-    mockSyncServer.handlers['/sync/sync'] = (data: Uint8Array) => {
+    mockSyncServer.handlers['/sync/sync'] = async (data: Uint8Array) => {
       requestSizes.push(data.length);
+      if (requestSizes.length === 3) {
+        await originalHandler(
+          await encoder.encode('group', 'client', Timestamp.zero, [later]),
+        );
+      }
       return originalHandler(data);
     };
 
@@ -163,17 +178,19 @@ describe('Sync', () => {
       const result = await fullSync();
       if (isError(result)) throw result.error;
 
-      expect(result.messages.map(msg => msg.row)).toEqual(['other']);
+      expect(result.messages.map(msg => msg.row)).toEqual(['other', 'later']);
     } finally {
       mockSyncServer.handlers['/sync/sync'] = originalHandler;
     }
 
-    expect(mockSyncServer.getMessages().length).toBe(7);
-    expect(mockSyncServer.getClock().merkle.hash).toBe(getClock().merkle.hash);
-    expect(requestSizes.length).toBeGreaterThan(2);
+    // One empty request, then the 6 messages in 3 batches. Any further
+    // request would be a merkle retry fetching a dropped response.
+    expect(requestSizes.length).toBe(4);
     for (const size of requestSizes) {
       expect(size).toBeLessThan(SYNC_BATCH_MAX_BYTES + 1024 * 1024);
     }
+    expect(mockSyncServer.getMessages().length).toBe(8);
+    expect(mockSyncServer.getClock().merkle.hash).toBe(getClock().merkle.hash);
   });
 
   it('should sync multiple clients', async () => {
@@ -575,61 +592,5 @@ describe('Sync account balance cells', () => {
     expect(recomputed).toContain('__global!onbudget-accounts-balance');
     expect(recomputed).toContain('__global!account-group-balance-g1-on');
     expect(recomputed).not.toContain('__global!balance-acct1');
-  });
-});
-
-describe('splitIntoSyncBatches', () => {
-  function message(value: string) {
-    return {
-      dataset: 'notes',
-      row: 'row',
-      column: 'note',
-      value,
-      timestamp: Timestamp.zero,
-    };
-  }
-
-  it('returns one empty batch when there is nothing to send', () => {
-    expect(splitIntoSyncBatches([])).toEqual([[]]);
-  });
-
-  it('keeps small syncs in a single batch', () => {
-    const messages = [message('S:a'), message('S:b'), message('S:c')];
-    expect(splitIntoSyncBatches(messages)).toEqual([messages]);
-  });
-
-  it('splits messages once a batch reaches the size limit', () => {
-    const messages = [
-      message('S:' + 'a'.repeat(400)),
-      message('S:' + 'b'.repeat(400)),
-      message('S:' + 'c'.repeat(400)),
-    ];
-    // ~500 bytes each with overhead, so two fit in 1200 bytes but not three
-    const batches = splitIntoSyncBatches(messages, 1200);
-
-    expect(batches).toEqual([[messages[0], messages[1]], [messages[2]]]);
-  });
-
-  it('measures the size of non-ASCII text in UTF-8 bytes', () => {
-    // 300 characters, but 900 bytes in UTF-8 (each is 3 bytes)
-    const wide = message('S:' + '€'.repeat(300));
-    // 300 emoji are 600 UTF-16 code units, but 1200 bytes in UTF-8
-    const emoji = message('S:' + '💰'.repeat(300));
-
-    expect(splitIntoSyncBatches([wide, wide], 1500)).toEqual([[wide], [wide]]);
-    expect(splitIntoSyncBatches([emoji, emoji], 2000)).toEqual([
-      [emoji],
-      [emoji],
-    ]);
-    expect(splitIntoSyncBatches([emoji, emoji], 3000)).toEqual([
-      [emoji, emoji],
-    ]);
-  });
-
-  it('puts a message larger than the limit in a batch of its own', () => {
-    const messages = [message('S:small'), message('S:' + 'x'.repeat(2000))];
-    const batches = splitIntoSyncBatches(messages, 1000);
-
-    expect(batches).toEqual([[messages[0]], [messages[1]]]);
   });
 });

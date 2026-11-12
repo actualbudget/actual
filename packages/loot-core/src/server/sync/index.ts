@@ -762,73 +762,38 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
-// Upper bound on the estimated size of the messages in one sync request.
-// Well below the server's default 20MB limit to leave room for encoding
-// and encryption overhead.
+// The server rejects sync requests over 20MB by default, so large
+// uploads are split into batches of roughly this size
 export const SYNC_BATCH_MAX_BYTES = 4 * 1024 * 1024;
 
-// Rough per-message overhead on the wire: timestamp, protobuf framing
-// and the encryption envelope (iv + auth tag) when the file is encrypted
+// Generous allowance for the timestamp, protobuf framing and encryption
 const SYNC_MESSAGE_OVERHEAD_BYTES = 100;
 
-// Number of bytes `str` takes when encoded as UTF-8, which is how the
-// strings go over the wire. Counted without allocating, since this runs
-// for every message of a sync.
-function utf8ByteLength(str: string): number {
-  let bytes = 0;
-  for (let i = 0; i < str.length; i++) {
-    const code = str.charCodeAt(i);
-    if (code < 0x80) {
-      bytes += 1;
-    } else if (code < 0x800) {
-      bytes += 2;
-    } else if (code >= 0xd800 && code < 0xdc00 && i + 1 < str.length) {
-      // A surrogate pair is one 4-byte character
-      bytes += 4;
-      i++;
-    } else {
-      bytes += 3;
-    }
-  }
-  return bytes;
-}
-
-function estimateMessageSize(msg: Message): number {
-  const value = msg.value == null ? '' : String(msg.value);
+function estimateMessageSize({ dataset, row, column, value }: Message) {
   return (
-    utf8ByteLength(msg.dataset) +
-    utf8ByteLength(msg.row) +
-    utf8ByteLength(msg.column) +
-    utf8ByteLength(value) +
+    Buffer.byteLength(dataset) +
+    Buffer.byteLength(row) +
+    Buffer.byteLength(column) +
+    Buffer.byteLength(String(value ?? '')) +
     SYNC_MESSAGE_OVERHEAD_BYTES
   );
 }
 
-/**
- * Split messages into batches small enough for a single sync request.
- * Always returns at least one batch, so a sync with nothing to send still
- * makes one request to fetch the server's messages.
- */
-export function splitIntoSyncBatches(
-  messages: Message[],
-  maxBytes: number = SYNC_BATCH_MAX_BYTES,
-): Message[][] {
-  const batches: Message[][] = [];
-  let current: Message[] = [];
-  let currentSize = 0;
-
+// Always returns at least one batch so that a sync with nothing to send
+// still fetches the server's messages. A message over the limit gets a
+// batch of its own.
+function splitIntoSyncBatches(messages: Message[]): Message[][] {
+  const batches: Message[][] = [[]];
+  let size = 0;
   for (const msg of messages) {
-    const size = estimateMessageSize(msg);
-    if (current.length > 0 && currentSize + size > maxBytes) {
-      batches.push(current);
-      current = [];
-      currentSize = 0;
+    const msgSize = estimateMessageSize(msg);
+    if (size > 0 && size + msgSize > SYNC_BATCH_MAX_BYTES) {
+      batches.push([]);
+      size = 0;
     }
-    current.push(msg);
-    currentSize += size;
+    batches[batches.length - 1].push(msg);
+    size += msgSize;
   }
-
-  batches.push(current);
   return batches;
 }
 
@@ -1039,32 +1004,24 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  // The server caps the size of a sync request (20MB by default), so a
-  // large backlog of messages (e.g. a budget imported into a fresh
-  // server, which has to upload its whole history) is sent in batches.
-  // The first batch asks for everything the server has since `since`;
-  // later batches only ask for what is newer than our clock, since the
-  // older messages already came back with the first batch. Anything
-  // missed in between is caught by the merkle diff below.
+  // Later batches only ask for messages newer than the snapshot; anything
+  // older already came back with the first batch or is caught by the
+  // merkle diff below
   const batches = splitIntoSyncBatches(messages);
   const serverMessages = new Map<string, Message>();
-  let res: Awaited<ReturnType<typeof encoder.decode>>;
+  let serverMerkle;
 
-  for (let i = 0; i < batches.length; i++) {
-    const batchSince = i === 0 ? since : currentTime;
+  for (const [i, batch] of batches.entries()) {
+    if (batches.length > 1) {
+      logger.info(`Sending sync batch ${i + 1}/${batches.length}`);
+    }
+
     const buffer = await encoder.encode(
       groupId,
       cloudFileId,
-      batchSince,
-      batches[i],
+      i === 0 ? since : currentTime,
+      batch,
     );
-
-    if (batches.length > 1) {
-      logger.info(
-        `Sending sync batch ${i + 1}/${batches.length}`,
-        batches[i].length,
-      );
-    }
 
     const resBuffer = await postBinary(
       getServer().SYNC_SERVER + '/sync',
@@ -1080,14 +1037,14 @@ async function _fullSync(
       return [];
     }
 
-    res = await encoder.decode(resBuffer);
-
-    for (const msg of res.messages) {
+    const batchRes = await encoder.decode(resBuffer);
+    for (const msg of batchRes.messages) {
       serverMessages.set(msg.timestamp.toString(), msg);
     }
+    serverMerkle = batchRes.merkle;
   }
 
-  res = { ...res, messages: [...serverMessages.values()] };
+  const res = { messages: [...serverMessages.values()], merkle: serverMerkle };
 
   logger.info('Got messages from server', res.messages.length);
 
