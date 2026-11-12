@@ -26,7 +26,8 @@ describe('alior_albpplpw', () => {
         transactionAmount: { amount: '-45.90', currency: 'PLN' },
         debtorName: 'JOHN EXAMPLE',
         debtorAccount: { iban: 'PL00000000000000000987654321' },
-        remittanceInformationUnstructured: 'Transakcja kartą, EXAMPLE MARKET 02',
+        remittanceInformationUnstructured:
+          'Transakcja kartą, EXAMPLE MARKET 02',
       };
 
       const normalizedTransaction = AliorAlbpplpw.normalizeTransaction(
