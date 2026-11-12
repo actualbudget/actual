@@ -5,7 +5,12 @@ import { resolveName } from '#server/spreadsheet/util';
 import * as monthUtils from '#shared/months';
 import { safeNumber } from '#shared/util';
 
-import { createCategory as createCategoryFromBase } from './base';
+import {
+  createCategory as createCategoryFromBase,
+  createCurrencyLinesOf,
+} from './base';
+import { getCurrencyLines } from './category-currencies';
+import type { CurrencyLine } from './category-currencies';
 import { number, sumAmounts } from './util';
 
 export async function createCategory(cat, sheetName, prevSheetName) {
@@ -63,29 +68,68 @@ export async function createCategory(cat, sheetName, prevSheetName) {
   sheet.get().createStatic(sheetName, `carryover-${cat.id}`, false);
 }
 
+// The cells of a group's visible categories, and of their currency lines in
+// the default currency
+function getGroupCells(group, own: string, lineValue: string): string[] {
+  return group.categories
+    .filter(cat => !cat.hidden)
+    .flatMap(cat => [
+      own + cat.id,
+      ...getCurrencyLines(cat.id).map(line => lineValue + line.id),
+    ]);
+}
+
 export function createCategoryGroup(group, sheetName) {
   // different sum amount dependencies
   sheet.get().createDynamic(sheetName, 'group-sum-amount-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .filter(cat => !cat.hidden)
-      .map(cat => `sum-amount-${cat.id}`),
+    dependencies: getGroupCells(group, 'sum-amount-', 'sum-amount-fx-'),
     run: sumAmounts,
   });
   sheet.get().createDynamic(sheetName, 'group-budget-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .filter(cat => !cat.hidden)
-      .map(cat => `budget-${cat.id}`),
+    dependencies: getGroupCells(group, 'budget-', 'budget-fx-'),
     run: sumAmounts,
   });
   sheet.get().createDynamic(sheetName, 'group-leftover-' + group.id, {
     initialValue: 0,
-    dependencies: group.categories
-      .filter(cat => !cat.hidden)
-      .map(cat => `leftover-${cat.id}`),
+    dependencies: getGroupCells(group, 'leftover-', 'leftover-fx-'),
     run: sumAmounts,
   });
+}
+
+// What group totals add up for a currency line, in the default currency
+function getCurrencyLineDependencies(
+  groupId: string,
+  line: CurrencyLine,
+): Array<[string, string[]]> {
+  return [
+    [`group-sum-amount-${groupId}`, [`sum-amount-fx-${line.id}`]],
+    [`group-budget-${groupId}`, [`budget-fx-${line.id}`]],
+    [`group-leftover-${groupId}`, [`leftover-fx-${line.id}`]],
+  ];
+}
+
+export function addCurrencyLineDependencies(
+  month: string,
+  groupId: string,
+  line: CurrencyLine,
+) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  for (const [cellName, deps] of getCurrencyLineDependencies(groupId, line)) {
+    sheet.get().addDependencies(sheetName, cellName, deps);
+  }
+}
+
+export function removeCurrencyLineDependencies(
+  month: string,
+  groupId: string,
+  line: CurrencyLine,
+) {
+  const sheetName = monthUtils.sheetForMonth(month);
+  for (const [cellName, deps] of getCurrencyLineDependencies(groupId, line)) {
+    sheet.get().removeDependencies(sheetName, cellName, deps);
+  }
 }
 
 export function createSummary(groups, sheetName) {
@@ -143,40 +187,37 @@ export function createSummary(groups, sheetName) {
 }
 
 export function handleCategoryChange(months, oldValue, newValue) {
+  function getDeps(groupId, catId): Array<[string, string[]]> {
+    const lines = getCurrencyLines(catId);
+    return [
+      [
+        `group-sum-amount-${groupId}`,
+        [
+          `sum-amount-${catId}`,
+          ...lines.map(line => `sum-amount-fx-${line.id}`),
+        ],
+      ],
+      [
+        `group-budget-${groupId}`,
+        [`budget-${catId}`, ...lines.map(line => `budget-fx-${line.id}`)],
+      ],
+      [
+        `group-leftover-${groupId}`,
+        [`leftover-${catId}`, ...lines.map(line => `leftover-fx-${line.id}`)],
+      ],
+    ];
+  }
+
   function addDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .addDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
+    for (const [cellName, deps] of getDeps(groupId, catId)) {
+      sheet.get().addDependencies(sheetName, cellName, deps);
+    }
   }
 
   function removeDeps(sheetName, groupId, catId) {
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-sum-amount-${groupId}`, [
-        `sum-amount-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-budget-${groupId}`, [
-        `budget-${catId}`,
-      ]);
-    sheet
-      .get()
-      .removeDependencies(sheetName, `group-leftover-${groupId}`, [
-        `leftover-${catId}`,
-      ]);
+    for (const [cellName, deps] of getDeps(groupId, catId)) {
+      sheet.get().removeDependencies(sheetName, cellName, deps);
+    }
   }
 
   if (oldValue && oldValue.tombstone === 0 && newValue.tombstone === 1) {
@@ -198,6 +239,7 @@ export function handleCategoryChange(months, oldValue, newValue) {
       const { start, end } = monthUtils.bounds(month);
 
       createCategoryFromBase(newValue, sheetName, prevSheetName, start, end);
+      createCurrencyLinesOf(newValue.id, month);
 
       const id = newValue.id;
       const groupId = newValue.cat_group;

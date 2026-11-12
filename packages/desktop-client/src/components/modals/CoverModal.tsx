@@ -15,6 +15,7 @@ import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import { FieldLabel, TapField } from '#components/mobile/MobileForms';
 import { AmountInput } from '#components/util/AmountInput';
 import { useCategories } from '#hooks/useCategories';
+import { useBudgetLine } from '#hooks/useCategoryCurrencies';
 import { useInitialMount } from '#hooks/useInitialMount';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -32,6 +33,8 @@ export function CoverModal({
   onSubmit,
 }: CoverModalProps) {
   const { t } = useTranslation();
+  // A currency line's amounts are in its currency
+  const { currencyCode } = useBudgetLine(categoryId ?? '');
   const [hideFraction] = useSyncedPref('hideFraction');
 
   const { data: { grouped: originalCategoryGroups } = { grouped: [] } } =
@@ -61,6 +64,7 @@ export function CoverModal({
           options: {
             categoryGroups,
             month,
+            showOwnBalances: true,
             onSelect: categoryId => {
               setFromCategoryId(categoryId);
             },
@@ -97,10 +101,17 @@ export function CoverModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View>
-            <FieldLabel title={t('Cover this amount:')} />
+            <FieldLabel
+              title={
+                currencyCode
+                  ? t('Cover this amount ({{currencyCode}}):', { currencyCode })
+                  : t('Cover this amount:')
+              }
+            />
             <InitialFocus>
               <AmountInput
                 value={amount}
+                currencyCode={currencyCode}
                 autoDecimals={String(hideFraction) !== 'true'}
                 style={{
                   marginLeft: styles.mobileEditingPadding,

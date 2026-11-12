@@ -4,6 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { budgetBoundsQueries } from './budget';
+import { exchangeRateQueries } from './currency/queries';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
 import { listenForSyncEvent } from './sync-events';
@@ -166,4 +167,24 @@ describe('listenForSyncEvent', () => {
       expect(dispatch).not.toHaveBeenCalledWith(getUserDataAction);
     },
   );
+
+  it('invalidates the exchange rates when they sync', () => {
+    const { invalidateQueries } = setup();
+
+    publishSyncEvent(appliedEvent(['exchange_rates']));
+
+    expect(invalidateQueries).toHaveBeenCalledWith({
+      queryKey: exchangeRateQueries.lists(),
+    });
+  });
+
+  it('leaves the exchange rates alone for unrelated tables', () => {
+    const { invalidateQueries } = setup();
+
+    publishSyncEvent(appliedEvent(['transactions']));
+
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
+      queryKey: exchangeRateQueries.lists(),
+    });
+  });
 });

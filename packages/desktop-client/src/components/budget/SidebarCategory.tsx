@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import React, { useRef } from 'react';
+import React, { useContext, useRef } from 'react';
 import type { CSSProperties, Ref } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,15 +8,25 @@ import { SvgCheveronDown } from '@actual-app/components/icons/v1';
 import { TextOneLine } from '@actual-app/components/text-one-line';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   CategoryEntity,
   CategoryGroupEntity,
 } from '@actual-app/core/types/models';
 
 import { InputCell } from '#components/table';
+import { useBudgetableCurrencies } from '#hooks/useCategoryCurrencies';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useGlobalPref } from '#hooks/useGlobalPref';
+import { useMultiCurrency } from '#hooks/useMultiCurrency';
+import { pushModal } from '#modals/modalsSlice';
+import { useDispatch } from '#redux';
 
+import {
+  addCurrencyLine,
+  addOtherCurrencyModal,
+} from './categoryCurrencyModals';
+import { MonthsContext } from './MonthsContext';
 import { SidebarCategoryButtons } from './SidebarCategoryButtons';
 
 type SidebarCategoryProps = {
@@ -62,6 +72,13 @@ export function SidebarCategory({
   const [categoryExpandedStatePref] = useGlobalPref('categoryExpandedState');
   const categoryExpandedState = categoryExpandedStatePref ?? 0;
 
+  const dispatch = useDispatch();
+  // A line budgeted ahead starts in the first month on screen
+  const month =
+    useContext(MonthsContext)?.months?.[0] ?? monthUtils.currentMonth();
+  const budgetableCurrencies = useBudgetableCurrencies(category.id, month);
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
+
   const temporary = category.id === 'new';
   const triggerRef = useRef(null);
   const { handleContextMenu } = useContextMenu({
@@ -76,6 +93,20 @@ export function SidebarCategory({
         name: 'toggle-visibility',
         text: category.hidden ? t('Show') : t('Hide'),
         onClick: () => onSave({ ...category, hidden: !category.hidden }),
+      },
+      ...budgetableCurrencies.map(currency => ({
+        name: `add-line-${currency}`,
+        text: t('Add a {{currency}} line', { currency }),
+        onClick: () =>
+          void addCurrencyLine(dispatch, t, category, currency, month),
+      })),
+      isMultiCurrencyEnabled && {
+        name: 'add-line-other',
+        text: t('Add currency…'),
+        onClick: () =>
+          dispatch(
+            pushModal({ modal: addOtherCurrencyModal(category, month) }),
+          ),
       },
       {
         name: 'delete',

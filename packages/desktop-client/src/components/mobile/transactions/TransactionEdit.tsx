@@ -58,6 +58,7 @@ import {
   integerToCurrency,
   titleFirst,
 } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   CategoryEntity,
@@ -73,6 +74,7 @@ import {
 
 import { NoteInsertHashButton } from '#components/autocomplete/NoteInsertHashButton';
 import { NoteTagAutocomplete } from '#components/autocomplete/NoteTagAutocomplete';
+import { TransferRateDetails } from '#components/currency/TransferRateDetails';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import {
   FieldLabel,
@@ -93,12 +95,15 @@ import {
 } from '#components/transactions/table/utils';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
+import { useForeignCurrencyCode } from '#hooks/useMultiCurrency';
 import { useNavigate } from '#hooks/useNavigate';
 import { useNearbyPayees } from '#hooks/useNearbyPayees';
 import { usePayees } from '#hooks/usePayees';
+import { usePromptTransferAmounts } from '#hooks/usePromptTransferAmounts';
 import {
   SingleActiveEditFormProvider,
   useSingleActiveEditForm,
@@ -246,6 +251,8 @@ type FooterProps = {
   onEmptySplitFound: (id: TransactionEntity['id']) => void;
   editingField?: string;
   isFuture: boolean;
+  // Formats an amount of the transaction, in the currency of its account
+  formatAmount: (amount: IntegerAmount) => string;
   onEditField: (
     id: TransactionEntity['id'],
     field: 'category' | 'payee' | 'account' | 'date' | 'amount' | 'notes',
@@ -264,6 +271,7 @@ function Footer({
   editingField,
   onEditField,
   isFuture,
+  formatAmount,
 }: FooterProps) {
   const [transaction, ...childTransactions] = transactions;
   const emptySplitTransaction = childTransactions.find(t => t.amount === 0);
@@ -329,7 +337,7 @@ function Footer({
               <Trans>
                 Add new split -{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: formatAmount(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
@@ -341,7 +349,7 @@ function Footer({
               <Trans>
                 Amount left:{' '}
                 {{
-                  amount: integerToCurrency(
+                  amount: formatAmount(
                     transaction.amount > 0
                       ? transaction.error.difference
                       : -transaction.error.difference,
@@ -418,6 +426,8 @@ type ChildTransactionEditProps = {
     transaction: TransactionEntity,
   ) => AccountEntity | undefined;
   isOffBudget: boolean;
+  // The currency of the account, when it has one of its own
+  currencyCode?: string;
   isBudgetTransfer: (transaction: TransactionEntity) => boolean;
   onEditField: (
     id: TransactionEntity['id'],
@@ -444,6 +454,7 @@ const ChildTransactionEdit = forwardRef<
       getPayee,
       getTransferAccount,
       isOffBudget,
+      currencyCode,
       isBudgetTransfer,
       onEditField,
       onUpdate,
@@ -506,6 +517,7 @@ const ChildTransactionEdit = forwardRef<
             <FieldLabel title={t('Amount')} style={{ padding: 0 }} />
             <SplitAmountInput
               keyboardHeader={keyboardHeader}
+              currencyCode={currencyCode}
               disabled={
                 !!editingField &&
                 editingField !== getFieldName(transaction.id, 'amount')
@@ -615,7 +627,9 @@ type TransactionEditInnerProps = {
   payees: PayeeEntity[];
   dateFormat: string;
   transactions: TransactionEntity[];
-  onSave: (transactions: TransactionEntity[]) => void;
+  // The transactions as stored, before any edit; none while adding
+  savedTransactions: TransactionEntity[];
+  onSave: (transactions: TransactionEntity[]) => Promise<void>;
   onUpdate: <Field extends keyof TransactionEntity>(
     transaction: TransactionEntity,
     field: Field,
@@ -639,6 +653,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     payees,
     dateFormat,
     transactions: unserializedTransactions,
+    savedTransactions,
     onSave,
     onUpdate,
     onDelete,
@@ -653,6 +668,12 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { t } = useTranslation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const {
+      isEnabled: isMultiCurrencyEnabled,
+      defaultCurrencyCode,
+      getAccountCurrency,
+      formatAmount,
+    } = useCurrencyFormatter();
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
     const [upcomingLength = DEFAULT_UPCOMING_SCHEDULE_DAYS] = useSyncedPref(
       'upcomingScheduledTransactionLength',
@@ -736,8 +757,18 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
       [categories, isBudgetTransfer, t],
     );
 
+    // Whether the page was left, e.g. with the back button, while a save
+    // was still asking about a transfer
+    const isPageLeft = useRef(false);
+    useEffect(
+      () => () => {
+        isPageLeft.current = true;
+      },
+      [],
+    );
+
     const onSaveInner = useCallback(async () => {
-      const onConfirmSave = () => {
+      const onConfirmSave = async () => {
         let transactionsToSave = unserializedTransactions;
         if (isAdding) {
           transactionsToSave = realizeTempTransactions(
@@ -745,8 +776,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
           );
         }
 
-        onSave(transactionsToSave);
-        void navigate(-1);
+        // Asks how much arrived on the other side of a transfer between
+        // currencies before leaving the page. Leaving it meanwhile still
+        // saves, without going back once more.
+        await onSave(transactionsToSave);
+        if (!isPageLeft.current) {
+          void navigate(-1);
+        }
       };
 
       if (unserializedTransactions.some(t => t.reconciled)) {
@@ -759,7 +795,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             modal: {
               name: 'confirm-transaction-edit',
               options: {
-                onConfirm: onConfirmSave,
+                onConfirm: () => void onConfirmSave(),
                 confirmReason: 'editReconciled',
               },
             },
@@ -785,17 +821,17 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 modal: {
                   name: 'confirm-transaction-edit',
                   options: {
-                    onConfirm: onConfirmSave,
+                    onConfirm: () => void onConfirmSave(),
                     confirmReason: 'batchEditWithReconciledTransfer',
                   },
                 },
               }),
             );
           } else {
-            onConfirmSave();
+            await onConfirmSave();
           }
         } else {
-          onConfirmSave();
+          await onConfirmSave();
         }
       }
     }, [isAdding, dispatch, navigate, onSave, unserializedTransactions]);
@@ -1186,6 +1222,35 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
 
     const account = getAccount(transaction);
     const isOffBudget = account ? !!account.offbudget : false;
+    const foreignCurrencyCode = useForeignCurrencyCode(account?.currency);
+    // In another currency, amounts left to split carry its code, like the
+    // amount of the transaction
+    const formatAmountLeft = (amount: IntegerAmount) =>
+      foreignCurrencyCode !== undefined
+        ? formatAmount(amount, foreignCurrencyCode)
+        : integerToCurrency(amount);
+    // The transfer as saved: its details are hidden while the account or
+    // payee is changed, as they would describe a transfer about to change
+    const [savedTransaction] = savedTransactions;
+    const savedAccount = savedTransaction
+      ? getAccount(savedTransaction)
+      : undefined;
+    const savedTransferAccount = savedTransaction
+      ? getTransferAccount(savedTransaction)
+      : undefined;
+    const isCrossCurrencyTransfer =
+      isMultiCurrencyEnabled &&
+      !!savedTransaction?.transfer_id &&
+      savedTransaction.account === transaction.account &&
+      savedTransaction.payee === transaction.payee &&
+      !!savedAccount &&
+      !!savedTransferAccount &&
+      getAccountCurrency(savedAccount) !==
+        getAccountCurrency(savedTransferAccount);
+    const amountLabel =
+      foreignCurrencyCode !== undefined
+        ? t('Amount ({{currency}})', { currency: foreignCurrencyCode })
+        : t('Amount');
     const title = getPrettyPayee({
       t,
       transaction,
@@ -1229,6 +1294,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
             onEmptySplitFound={onEmptySplitFound}
             editingField={editingField}
             isFuture={isFuture}
+            formatAmount={formatAmountLeft}
             onEditField={onEditFieldInner}
           />
         }
@@ -1243,9 +1309,10 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               alignItems: 'center',
             }}
           >
-            <FieldLabel title={t('Amount')} flush style={{ marginBottom: 0 }} />
+            <FieldLabel title={amountLabel} flush style={{ marginBottom: 0 }} />
             <AmountInput
               value={transaction.amount}
+              currencyCode={account?.currency ?? undefined}
               negate
               disabled={
                 !!editingField &&
@@ -1260,6 +1327,25 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               onChange={onTotalAmountUpdate}
               variant="large"
             />
+            {/* Touch screens can't hover to see it, as on desktop */}
+            {foreignCurrencyCode !== undefined && transaction.amount !== 0 && (
+              <Text
+                style={{
+                  marginTop: 4,
+                  color: theme.pageTextLight,
+                  fontSize: 13,
+                }}
+              >
+                {t('Worth {{amount}} in {{currency}}', {
+                  amount: formatAmount(
+                    Math.abs(amountToInteger(transaction.amount)),
+                    foreignCurrencyCode,
+                    { mode: 'converted', date: dateDefaultValue },
+                  ),
+                  currency: defaultCurrencyCode,
+                })}
+              </Text>
+            )}
           </View>
 
           <View>
@@ -1361,6 +1447,25 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 )
               }
             />
+            {isCrossCurrencyTransfer &&
+              savedAccount &&
+              savedTransferAccount && (
+                <View
+                  style={{
+                    marginTop: 6,
+                    marginLeft: styles.mobileEditingPadding,
+                    marginRight: styles.mobileEditingPadding,
+                    color: theme.pageTextLight,
+                    fontSize: 13,
+                  }}
+                >
+                  <TransferRateDetails
+                    transaction={savedTransaction}
+                    account={savedAccount}
+                    transferAccount={savedTransferAccount}
+                  />
+                </View>
+              )}
           </View>
 
           {!transaction.is_parent && (
@@ -1404,6 +1509,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 };
               }}
               isOffBudget={isOffBudget}
+              currencyCode={account?.currency ?? undefined}
               getCategory={getCategory}
               getPayee={getPayee}
               getTransferAccount={getTransferAccount}
@@ -1414,6 +1520,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
               keyboardHeader={
                 <FillRemainingButton
                   remaining={remaining}
+                  formatAmount={formatAmountLeft}
                   onPress={() => {
                     void onUpdateInner(
                       childTrans,
@@ -1624,6 +1731,7 @@ function TransactionEditUnconnected({
   const isDeleted = useRef(false);
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
+  const promptTransferAmounts = usePromptTransferAmounts();
 
   const searchParamCategory = useMemo(
     () => categories.find(c => c.name === searchParams.get('category'))?.id,
@@ -1899,6 +2007,9 @@ function TransactionEditUnconnected({
     [dateFormat, isLocationGranted],
   );
 
+  // Resolves once nothing more needs to be asked, i.e. how much arrived on
+  // the other side of a new transfer between currencies. The page can then
+  // be left while the changes are saved, as before.
   const onSave = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       if (isDeleted.current) {
@@ -1906,33 +2017,51 @@ function TransactionEditUnconnected({
       }
 
       const changes = diffItems(fetchedTransactions || [], newTransactions);
-      if (
+      const hasChanges =
         changes.added.length > 0 ||
         changes.updated.length > 0 ||
-        changes.deleted.length
-      ) {
-        const _remoteUpdates = await send('transactions-batch-update', {
-          added: changes.added,
-          deleted: changes.deleted,
-          updated: changes.updated,
-          learnCategories: isLearnCategoriesEnabled,
-        });
+        changes.deleted.length > 0;
+      const changedIds = new Set(
+        [...changes.added, ...changes.updated].map(t => t.id),
+      );
+      const transferAmounts = hasChanges
+        ? await promptTransferAmounts(
+            newTransactions.filter(t => changedIds.has(t.id)),
+            fetchedTransactions || [],
+          )
+        : {};
 
-        // if (onTransactionsChange) {
-        //   onTransactionsChange({
-        //     ...changes,
-        //     updated: changes.updated.concat(remoteUpdates),
-        //   });
-        // }
-      }
+      void (async () => {
+        if (hasChanges) {
+          const _remoteUpdates = await send('transactions-batch-update', {
+            added: changes.added,
+            deleted: changes.deleted,
+            updated: changes.updated,
+            learnCategories: isLearnCategoriesEnabled,
+            transferAmounts,
+          });
 
-      if (isAdding.current) {
-        // The first one is always the "parent" and the only one we care
-        // about
-        dispatch(setLastTransaction({ transaction: newTransactions[0] }));
-      }
+          // if (onTransactionsChange) {
+          //   onTransactionsChange({
+          //     ...changes,
+          //     updated: changes.updated.concat(remoteUpdates),
+          //   });
+          // }
+        }
+
+        if (isAdding.current) {
+          // The first one is always the "parent" and the only one we care
+          // about
+          dispatch(setLastTransaction({ transaction: newTransactions[0] }));
+        }
+      })();
     },
-    [dispatch, fetchedTransactions, isLearnCategoriesEnabled],
+    [
+      dispatch,
+      fetchedTransactions,
+      isLearnCategoriesEnabled,
+      promptTransferAmounts,
+    ],
   );
 
   const onDelete = useCallback(
@@ -2126,6 +2255,7 @@ function TransactionEditUnconnected({
     >
       <TransactionEditInner
         transactions={transactions}
+        savedTransactions={fetchedTransactions}
         isAdding={isAdding.current}
         categories={categories}
         accounts={accounts}
@@ -2170,9 +2300,11 @@ export const TransactionEdit = () => {
 
 function FillRemainingButton({
   remaining,
+  formatAmount,
   onPress,
 }: {
   readonly remaining: number;
+  readonly formatAmount: (amount: IntegerAmount) => string;
   readonly onPress: () => void;
 }) {
   return (
@@ -2192,7 +2324,7 @@ function FillRemainingButton({
         <Trans>
           Use remaining:{' '}
           {{
-            amount: integerToCurrency(Math.abs(remaining)),
+            amount: formatAmount(Math.abs(remaining)),
           }}
         </Trans>
       </Text>

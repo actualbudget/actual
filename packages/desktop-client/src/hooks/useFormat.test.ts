@@ -19,4 +19,14 @@ describe('useFormat', () => {
     expect(format.fromEdit('1500')).toBe(150000);
     expect(format.fromEdit(format.forEdit(150050))).toBe(150050);
   });
+
+  it('shows and edits amounts in another currency with its decimals', () => {
+    const format = renderHook(() => useFormat()).result.current;
+
+    expect(format.forEdit(150000, { currencyCode: 'USD' })).toBe('1,500.00');
+    expect(
+      format(150000, 'financial', { currencyCode: 'USD', hideSymbol: true }),
+    ).toBe('1,500.00');
+    expect(format(150000, 'financial', { hideSymbol: true })).toBe('1,500');
+  });
 });

@@ -11,8 +11,11 @@ import type {
 import { DropHighlightPosContext } from '#components/sort';
 import type { DragState, OnDropCallback } from '#components/sort';
 import { Row } from '#components/table';
+import { useCategoryCurrencies } from '#hooks/useCategoryCurrencies';
+import type { CategoryLine } from '#hooks/useCategoryCurrencies';
 import { useLocalPref } from '#hooks/useLocalPref';
 
+import { CategoryCurrencyLine } from './CategoryCurrencyLine';
 import { ExpenseCategory } from './ExpenseCategory';
 import { ExpenseGroup } from './ExpenseGroup';
 import { IncomeCategory } from './IncomeCategory';
@@ -30,10 +33,21 @@ type BudgetItem =
       type: 'expense-category';
       value: CategoryEntity;
       group: CategoryGroupEntity;
+      hasCurrencyLines: boolean;
+    }
+  | {
+      type: 'category-line';
+      value: CategoryEntity;
+      group: CategoryGroupEntity;
+      line: CategoryLine;
     }
   | { type: 'income-separator' }
   | { type: 'income-group'; value: CategoryGroupEntity }
-  | { type: 'income-category'; value: CategoryEntity };
+  | {
+      type: 'income-category';
+      value: CategoryEntity;
+      hasCurrencyLines: boolean;
+    };
 
 type LocalDragState =
   | DragState<CategoryEntity>
@@ -58,6 +72,8 @@ type BudgetCategoriesProps = {
   ) => void;
   onReorderCategory: OnDropCallback;
   onReorderGroup: OnDropCallback;
+  // Whether a currency line shows in the months on screen
+  isLineShown: (lineId: string) => boolean;
 };
 
 export const BudgetCategories = memo<BudgetCategoriesProps>(
@@ -76,10 +92,12 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     onSortCategories,
     onReorderCategory,
     onReorderGroup,
+    isLineShown,
   }) => {
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
     const [showHiddenCategories] = useLocalPref('budget.showHiddenCategories');
+    const { getLines } = useCategoryCurrencies();
     function onCollapse(value: Array<CategoryGroupEntity['id']>) {
       setCollapsedGroupIdsPref(value);
     }
@@ -90,6 +108,14 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
     >(null);
     const items: BudgetItem[] = useMemo(() => {
       const [expenseGroups, incomeGroup] = separateGroups(categoryGroups);
+      // The lines a category shows: its own budget and the currencies shown,
+      // or none when no other currency shows, so it looks like any category
+      const getShownLines = (categoryId: CategoryEntity['id']) => {
+        const lines = getLines(categoryId).filter(
+          line => line.id === categoryId || isLineShown(line.id),
+        );
+        return lines.some(line => line.id !== categoryId) ? lines : [];
+      };
 
       let items: BudgetItem[] = Array.prototype.concat.apply(
         [],
@@ -115,11 +141,25 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             ...(collapsedGroupIds.includes(group.id)
               ? []
               : groupCategories || []
-            ).map((cat): BudgetItem => ({
-              type: 'expense-category',
-              value: cat,
-              group,
-            })),
+            ).flatMap((cat): BudgetItem[] => {
+              // A category budgeted in several currencies shows its total,
+              // then a line per currency
+              const lines = getShownLines(cat.id);
+              return [
+                {
+                  type: 'expense-category',
+                  value: cat,
+                  group,
+                  hasCurrencyLines: lines.length > 0,
+                },
+                ...lines.map((line): BudgetItem => ({
+                  type: 'category-line',
+                  value: cat,
+                  group,
+                  line,
+                })),
+              ];
+            }),
           ];
         }),
       );
@@ -144,10 +184,22 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
             : incomeGroup.categories?.filter(
                 cat => showHiddenCategories || !cat.hidden,
               ) || []
-          ).map((cat): BudgetItem => ({
-            type: 'income-category',
-            value: cat,
-          })),
+          ).flatMap((cat): BudgetItem[] => {
+            const lines = getShownLines(cat.id);
+            return [
+              {
+                type: 'income-category',
+                value: cat,
+                hasCurrencyLines: lines.length > 0,
+              },
+              ...lines.map((line): BudgetItem => ({
+                type: 'category-line',
+                value: cat,
+                group: incomeGroup,
+                line,
+              })),
+            ];
+          }),
         );
 
         items = items.concat(incomeCategoryItems);
@@ -160,6 +212,8 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
       newCategoryForGroup,
       isAddingGroup,
       showHiddenCategories,
+      getLines,
+      isLineShown,
     ]);
 
     const [dragState, setDragState] = useState<LocalDragState>(null);
@@ -311,6 +365,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                 <ExpenseCategory
                   cat={item.value}
                   categoryGroup={item.group}
+                  hasCurrencyLines={item.hasCurrencyLines}
                   editingCell={editingCell}
                   dragState={dragState}
                   onEditName={onEditName}
@@ -319,6 +374,20 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
                   onDelete={onDeleteCategory}
                   onDragChange={onDragChange}
                   onReorder={onReorderCategory}
+                  onBudgetAction={onBudgetAction}
+                  onShowActivity={onShowActivity}
+                />
+              );
+              break;
+            case 'category-line':
+              content = (
+                <CategoryCurrencyLine
+                  category={item.value}
+                  categoryGroup={item.group}
+                  line={item.line}
+                  isLast={idx === items.length - 1}
+                  editingCell={editingCell}
+                  onEditMonth={onEditMonth}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
                 />
@@ -354,6 +423,7 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
               content = (
                 <IncomeCategory
                   cat={item.value}
+                  hasCurrencyLines={item.hasCurrencyLines}
                   editingCell={editingCell}
                   isLast={idx === items.length - 1}
                   onEditName={onEditName}
@@ -378,11 +448,13 @@ export const BudgetCategories = memo<BudgetCategoriesProps>(
           return (
             <DropHighlightPosContext.Provider
               key={
-                'value' in item
-                  ? item.value.id
-                  : item.type === 'income-separator'
-                    ? 'separator'
-                    : idx
+                item.type === 'category-line'
+                  ? `line-${item.line.id}`
+                  : 'value' in item
+                    ? item.value.id
+                    : item.type === 'income-separator'
+                      ? 'separator'
+                      : idx
               }
               value={pos}
             >

@@ -5,6 +5,7 @@ export type FeatureFlag =
   | 'actionTemplating'
   | 'formulaMode'
   | 'currency'
+  | 'multiCurrency'
   | 'balanceForecastReport'
   | 'customThemes'
   | 'budgetAnalysisReport'
@@ -28,6 +29,27 @@ export type SyncedPrefs = Partial<
     | 'currencySymbolPosition'
     | 'currencySpaceBetweenAmountAndSymbol'
     | 'defaultCurrencyCode'
+    // How amounts of accounts in a non-default currency are shown:
+    // 'original' | 'converted' | 'both'. The per-account key overrides
+    // the budget-wide one.
+    | 'currency-display-mode'
+    | `currency-display-mode-${string}`
+    // How amounts in the default currency are marked: 'none' (default),
+    // 'symbol' ($) or 'code' (CAD$)
+    | 'currency-default-symbol'
+    // Which exchange rate past amounts are converted with: 'latest' values
+    // everything at the most recent rate, 'historical' at the rate of the
+    // date of each amount
+    | 'currency-conversion-rate'
+    // The currencies budgeted on lines of their own, whose spending gets a
+    // line in its category automatically; see `shared/fx/ownLines.ts`
+    | 'currency-own-lines'
+    | 'multi-currency-nudge-dismissed'
+    // 'true' to fetch exchange rates once a day, 'false' (default) not to
+    | 'exchange-rates-auto-update'
+    // Base URL of a self-hosted Frankfurter instance; empty for the public
+    // service
+    | 'exchange-rates-provider-url'
     | `show-account-${string}-net-worth-chart`
     | `side-nav.show-balance-history-${string}`
     // @deprecated: superseded by `transaction-table-columns-${string}`; only
@@ -89,6 +111,13 @@ export type MetadataPrefs = Partial<{
   lastSyncedTimestamp: string;
   resetClock: boolean;
   lastScheduleRun: string;
+  // The day exchange rates were last fetched automatically on this device
+  lastExchangeRateUpdate: string;
+  // The outcome of the last fetch on this device, as JSON
+  exchangeRatesUpdateStatus: string;
+  // Days the provider has no rate for, per currency, as JSON (e.g.
+  // holidays), so they aren't asked for or reported as missing again
+  exchangeRatesProviderGaps: string;
   userId: string; // TODO: delete this (unused)
 }>;
 
@@ -118,6 +147,11 @@ export type LocalPrefs = Partial<{
    * back-to-back sync attempts.
    */
   'bankSync.lastAutomaticRun': number;
+  /**
+   * The day this device last reminded the user of missing exchange rates,
+   * so the reminder shows at most once a day.
+   */
+  'exchangeRates.lastReminder': string;
 }>;
 
 export type Theme = 'light' | 'dark' | 'auto' | 'midnight' | string;

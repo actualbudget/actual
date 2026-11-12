@@ -45,9 +45,11 @@ import type {
   DbAccountGroup,
   DbBank,
   DbCategory,
+  DbCategoryCurrency,
   DbCategoryGroup,
   DbCategoryMapping,
   DbClockMessage,
+  DbExchangeRate,
   DbPayee,
   DbPayeeMapping,
   DbTag,
@@ -570,6 +572,72 @@ export async function deleteCategory(
   return delete_('categories', category.id);
 }
 
+// Changes sync column by column, so a currency line can arrive partly
+// written; one without its category, currency or first month is left out
+const CATEGORY_CURRENCIES_SQL = `
+  SELECT cc.id, cc.category, cc.currency, cc.start_month, cc.tombstone
+    FROM category_currencies cc
+    JOIN categories c ON c.id = cc.category
+   WHERE cc.tombstone = 0
+     AND c.tombstone = 0
+     AND cc.currency IS NOT NULL
+     AND cc.start_month IS NOT NULL
+   ORDER BY cc.category, cc.currency`;
+
+// The currency lines of categories still in use
+export function getCategoryCurrencies() {
+  return all<DbCategoryCurrency>(CATEGORY_CURRENCIES_SQL);
+}
+
+// For the budget, which builds its cells synchronously. Lines of deleted
+// categories are included, so their cells can be taken out of the totals.
+export function getCategoryCurrenciesSync() {
+  return runQuery<DbCategoryCurrency & Pick<DbCategory, 'is_income'>>(
+    `SELECT cc.id, cc.category, cc.currency, cc.start_month, cc.tombstone,
+            COALESCE(c.is_income, 0) AS is_income
+       FROM category_currencies cc
+       LEFT JOIN categories c ON c.id = cc.category
+      WHERE cc.tombstone = 0
+        AND cc.category IS NOT NULL
+        AND cc.currency IS NOT NULL
+        AND cc.start_month IS NOT NULL
+      ORDER BY cc.category, cc.currency`,
+    [],
+    true,
+  );
+}
+
+// One line per currency and category, whichever device adds it
+export function getCategoryCurrencyId(
+  category: DbCategory['id'],
+  currency: string,
+): DbCategoryCurrency['id'] {
+  return `${category}-${currency}`;
+}
+
+// Adds the line, or brings a removed one back
+export async function insertCategoryCurrency({
+  category,
+  currency,
+  start_month,
+}: Pick<DbCategoryCurrency, 'category' | 'currency' | 'start_month'>): Promise<
+  DbCategoryCurrency['id']
+> {
+  const id = getCategoryCurrencyId(category, currency);
+  await insert('category_currencies', {
+    id,
+    category,
+    currency,
+    start_month,
+    tombstone: 0,
+  });
+  return id;
+}
+
+export function deleteCategoryCurrency({ id }: Pick<DbCategoryCurrency, 'id'>) {
+  return delete_('category_currencies', id);
+}
+
 export async function getPayee(id: DbPayee['id']) {
   return first<DbPayee>(`SELECT * FROM payees WHERE id = ?`, [id]);
 }
@@ -888,6 +956,57 @@ export async function deleteAccountGroup(group: Pick<DbAccountGroup, 'id'>) {
     }
     await delete_('account_groups', group.id);
   });
+}
+
+const EXCHANGE_RATE_COLUMNS =
+  'id, from_currency, to_currency, rate, date, source, created_at, tombstone';
+
+export function getExchangeRates() {
+  return all<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE tombstone = 0
+       ORDER BY date DESC, from_currency, to_currency, id`,
+  );
+}
+
+export function getExchangeRate(id: DbExchangeRate['id']) {
+  return first<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE id = ? AND tombstone = 0`,
+    [id],
+  );
+}
+
+export function findExchangeRate({
+  from_currency,
+  to_currency,
+  date,
+  source,
+}: Pick<DbExchangeRate, 'from_currency' | 'to_currency' | 'date' | 'source'>) {
+  return first<DbExchangeRate>(
+    `SELECT ${EXCHANGE_RATE_COLUMNS} FROM exchange_rates
+       WHERE from_currency = ? AND to_currency = ? AND date = ? AND source = ?
+         AND tombstone = 0
+       ORDER BY created_at DESC, id DESC
+       LIMIT 1`,
+    [from_currency, to_currency, date, source],
+  );
+}
+
+export function insertExchangeRate(
+  exchangeRate: Omit<DbExchangeRate, 'id' | 'tombstone'>,
+): Promise<DbExchangeRate['id']> {
+  return insertWithUUID('exchange_rates', exchangeRate);
+}
+
+export function updateExchangeRate(
+  exchangeRate: WithRequired<Partial<DbExchangeRate>, 'id'>,
+) {
+  return update('exchange_rates', exchangeRate);
+}
+
+export function deleteExchangeRate(exchangeRate: Pick<DbExchangeRate, 'id'>) {
+  return delete_('exchange_rates', exchangeRate.id);
 }
 
 export async function getTransaction(id: DbViewTransaction['id']) {

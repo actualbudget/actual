@@ -4,6 +4,10 @@ import { evalArithmetic } from '@actual-app/core/shared/arithmetic';
 import { getCurrency } from '@actual-app/core/shared/currencies';
 import type { Currency } from '@actual-app/core/shared/currencies';
 import {
+  getCurrencyDisplaySymbol,
+  parseDefaultCurrencySymbol,
+} from '@actual-app/core/shared/fx/symbols';
+import {
   amountToInteger,
   currencyToAmount,
   getNumberFormat,
@@ -14,6 +18,7 @@ import {
 } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 
+import { useMultiCurrency } from './useMultiCurrency';
 import { useSyncedPref } from './useSyncedPref';
 
 export type FormatType =
@@ -24,9 +29,18 @@ export type FormatType =
   | 'financial-with-sign'
   | 'financial-no-decimals';
 
+type FormatOptions = {
+  // Format a financial value in this currency instead of the budget's
+  // default one
+  currencyCode?: string;
+  // Leave out the currency's symbol, e.g. where the currency is already
+  // named next to the amount
+  hideSymbol?: boolean;
+};
+
 export type UseFormatResult = {
-  (value: unknown, type?: FormatType): string;
-  forEdit: (value: IntegerAmount) => string;
+  (value: unknown, type?: FormatType, options?: FormatOptions): string;
+  forEdit: (value: IntegerAmount, options?: FormatOptions) => string;
   fromEdit: (
     value: string,
     defaultValue?: number | null,
@@ -110,10 +124,25 @@ export function useFormat(): UseFormatResult {
   const [spaceEnabledPref] = useSyncedPref(
     'currencySpaceBetweenAmountAndSymbol',
   );
+  const [defaultSymbolPref] = useSyncedPref('currency-default-symbol');
+  const { isEnabled: isMultiCurrencyEnabled } = useMultiCurrency();
 
   const activeCurrency = useMemo(() => {
     return getCurrency(defaultCurrencyCodePref || '');
   }, [defaultCurrencyCodePref]);
+
+  // With multiple currencies the default currency drops its country prefix
+  // ("$" instead of "CA$") and other currencies get their code ("USD$")
+  const getSymbol = useCallback(
+    (currency: Currency) =>
+      isMultiCurrencyEnabled
+        ? getCurrencyDisplaySymbol(currency.code, {
+            defaultCurrencyCode: activeCurrency.code,
+            defaultSymbol: parseDefaultCurrencySymbol(defaultSymbolPref),
+          })
+        : currency.symbol,
+    [isMultiCurrencyEnabled, activeCurrency.code, defaultSymbolPref],
+  );
 
   const numberFormatConfig = useMemo(
     () =>
@@ -159,19 +188,34 @@ export function useFormat(): UseFormatResult {
   );
 
   const formatDisplay = useCallback(
-    (value: unknown, type: FormatType = 'string'): string => {
+    (
+      value: unknown,
+      type: FormatType = 'string',
+      options?: FormatOptions,
+    ): string => {
       const isFinancialType =
         type === 'financial' ||
         type === 'financial-with-sign' ||
         type === 'financial-no-decimals';
 
+      const currency =
+        options?.currencyCode != null &&
+        options.currencyCode !== activeCurrency.code
+          ? getCurrency(options.currencyCode)
+          : activeCurrency;
+
       let displayDecimalPlaces: number | undefined;
 
       if (isFinancialType) {
-        if (type === 'financial-no-decimals' || hideFractionPref === 'true') {
+        // Hiding the fraction is chosen for the default currency, so it
+        // doesn't apply to amounts in other currencies
+        if (
+          type === 'financial-no-decimals' ||
+          (hideFractionPref === 'true' && currency === activeCurrency)
+        ) {
           displayDecimalPlaces = 0;
         } else {
-          displayDecimalPlaces = activeCurrency.decimalPlaces;
+          displayDecimalPlaces = currency.decimalPlaces;
         }
       }
 
@@ -187,10 +231,10 @@ export function useFormat(): UseFormatResult {
       );
 
       let styledValue = formattedString;
-      if (isFinancialType && activeCurrency && activeCurrency.code !== '') {
+      if (isFinancialType && currency.code !== '' && !options?.hideSymbol) {
         styledValue = applyCurrencyStyling(
           formattedString,
-          activeCurrency.symbol,
+          getSymbol(currency),
         );
       }
 
@@ -205,6 +249,7 @@ export function useFormat(): UseFormatResult {
     },
     [
       activeCurrency,
+      getSymbol,
       numberFormatConfig,
       applyCurrencyStyling,
       hideFractionPref,
@@ -212,23 +257,29 @@ export function useFormat(): UseFormatResult {
   );
 
   const forEdit = useCallback(
-    (value: IntegerAmount) => {
+    (value: IntegerAmount, options?: FormatOptions) => {
       const amount = integerToAmount(value);
+      const currency =
+        options?.currencyCode != null &&
+        options.currencyCode !== activeCurrency.code
+          ? getCurrency(options.currencyCode)
+          : activeCurrency;
       // Show a stored fraction (¥1,500.50) so saving the text unedited
-      // doesn't round it away, unless fractions are hidden
+      // doesn't round it away, unless fractions are hidden; hiding them is
+      // chosen for the default currency only
       const decimalPlaces =
-        hideFractionPref === 'true'
+        hideFractionPref === 'true' && currency === activeCurrency
           ? 0
           : value % 100 !== 0
             ? 2
-            : activeCurrency.decimalPlaces;
+            : currency.decimalPlaces;
       const editFormatter = getNumberFormat({
         format: numberFormatConfig.format,
         decimalPlaces,
       }).formatter;
       return editFormatter.format(amount);
     },
-    [hideFractionPref, activeCurrency.decimalPlaces, numberFormatConfig.format],
+    [hideFractionPref, activeCurrency, numberFormatConfig.format],
   );
 
   const fromEdit = useCallback(

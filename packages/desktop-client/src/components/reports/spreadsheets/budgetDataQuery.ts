@@ -1,4 +1,5 @@
 import { send } from '@actual-app/core/platform/client/connection';
+import { findCategoryMonthCell } from '@actual-app/core/shared/budget-cells';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { getNormalisedString } from '@actual-app/core/shared/normalisation';
 import { unicodeLike } from '@actual-app/core/shared/unicodeLike';
@@ -249,8 +250,10 @@ export async function fetchBudgetData({
         continue;
       }
 
-      const budgetCell = monthData.find((cell: BudgetMonthCell) =>
-        cell.name.endsWith(`budget-${cat.id}`),
+      const budgetCell = findCategoryMonthCell<BudgetMonthCell>(
+        monthData,
+        'budget',
+        cat.id,
       );
 
       const amount = Number(budgetCell?.value) || 0;

@@ -30,6 +30,9 @@ type BudgetCellProps<
   typeof CellValue<'envelope-budget' | 'tracking-budget', SheetFieldName>
 > & {
   category: CategoryEntity;
+  // The currency of a currency line. Its row names the currency, so its
+  // amounts leave out the symbol.
+  currencyCode?: string;
   month: string;
   onBudgetAction: (month: string, action: string, args: unknown) => void;
 };
@@ -39,6 +42,7 @@ export function BudgetCell<
 >({
   binding,
   category,
+  currencyCode,
   month,
   onBudgetAction,
   children,
@@ -89,7 +93,7 @@ export function BudgetCell<
           amount,
         });
         showUndoNotification({
-          message: `${category.name} budget has been updated to ${format(amount, 'financial')}.`,
+          message: `${category.name} budget has been updated to ${format(amount, 'financial', { currencyCode })}.`,
         });
       },
       onCopyLastMonthAverage: () => {
@@ -115,15 +119,18 @@ export function BudgetCell<
           message: `${category.name} budget has been set to ${numberOfMonths === 12 ? 'yearly' : `${numberOfMonths} month`} average.`,
         });
       },
-      onApplyBudgetTemplate: () => {
-        onBudgetAction(month, 'apply-single-category-template', {
-          category: category.id,
-        });
-        showUndoNotification({
-          message: `${category.name} budget templates have been applied.`,
-          pre: categoryNotes ?? undefined,
-        });
-      },
+      // Templates fill in the category's own budget only
+      onApplyBudgetTemplate: currencyCode
+        ? undefined
+        : () => {
+            onBudgetAction(month, 'apply-single-category-template', {
+              category: category.id,
+            });
+            showUndoNotification({
+              message: `${category.name} budget templates have been applied.`,
+              pre: categoryNotes ?? undefined,
+            });
+          },
     };
 
     if (budgetType === 'envelope') {
@@ -162,6 +169,7 @@ export function BudgetCell<
     category.id,
     category.name,
     categoryNotes,
+    currencyCode,
     dispatch,
     month,
     onBudgetAction,
@@ -212,7 +220,10 @@ export function BudgetCell<
                   fontSize: 12,
                 }}
               >
-                {format(value, type)}
+                {format(value, type, {
+                  currencyCode,
+                  hideSymbol: !!currencyCode,
+                })}
               </AutoTextSize>
             </PrivacyFilter>
           </Button>

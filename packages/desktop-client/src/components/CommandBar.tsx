@@ -13,12 +13,16 @@ import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import { Command } from 'cmdk';
 
+import { ConvertedCellValue } from '#components/currency/ConvertedCellValue';
+import { getAccountsInScope } from '#components/currency/totalScopes';
 import { getSidebarMenuItemPath } from '#components/sidebar/sidebarMenu';
 import { useSidebarMenuItemDetails } from '#components/sidebar/useSidebarMenuItemDetails';
 import { useAccounts } from '#hooks/useAccounts';
+import { useCurrencyFormatter } from '#hooks/useCurrencyFormatter';
 import { useDashboardPages } from '#hooks/useDashboardPages';
 import { useMetadataPref } from '#hooks/useMetadataPref';
 import { useModalState } from '#hooks/useModalState';
@@ -33,7 +37,7 @@ import {
   onBudgetAccountBalance,
 } from '#spreadsheet/bindings';
 
-import { CellValue, CellValueText } from './spreadsheet/CellValue';
+import { CellValueText } from './spreadsheet/CellValue';
 import { useTour } from './tour/TourProvider';
 
 type SearchableItem = {
@@ -64,9 +68,15 @@ function BalanceRow<
 >({
   label,
   binding,
+  formatter,
+  totalAccounts = [],
 }: {
   label: string;
   binding: Binding<SheetName, FieldName>;
+  formatter?: (value: number) => string;
+  // For totals: the accounts `binding` adds up, so balances in other
+  // currencies can be converted first
+  totalAccounts?: AccountEntity[];
 }) {
   return (
     <View
@@ -78,14 +88,23 @@ function BalanceRow<
       }}
     >
       <Text>{label}</Text>
-      <CellValue binding={binding} type="financial">
+      <ConvertedCellValue<SheetName, FieldName>
+        binding={binding}
+        accounts={totalAccounts}
+        type="financial"
+      >
         {props => (
           <CellValueText
             {...props}
+            formatter={
+              formatter
+                ? value => formatter(Number(value ?? 0))
+                : props.formatter
+            }
             style={{ ...styles.tnum, whiteSpace: 'nowrap', opacity: 0.9 }}
           />
         )}
-      </CellValue>
+      </ConvertedCellValue>
     </View>
   );
 }
@@ -100,7 +119,9 @@ export function CommandBar() {
   const { startTour } = useTour();
 
   const { availableItems: menuItems } = useSidebarMenu();
+  const { data: allAccounts = [] } = useAccounts();
   const menuItemDetails = useSidebarMenuItemDetails();
+  const { formatAmount, getAccountCurrency } = useCurrencyFormatter();
 
   const navigationItems = useMemo(
     () => [
@@ -119,12 +140,13 @@ export function CommandBar() {
           <BalanceRow<'account', 'accounts-balance'>
             label={t('All Accounts')}
             binding={allAccountBalance()}
+            totalAccounts={getAccountsInScope(allAccounts, 'all')}
           />
         ),
         Icon: SvgLibrary,
       },
     ],
-    [t, menuItems, menuItemDetails],
+    [t, menuItems, menuItemDetails, allAccounts],
   );
 
   useEffect(() => {
@@ -132,7 +154,6 @@ export function CommandBar() {
     if (!open) setSearch('');
   }, [open]);
 
-  const { data: allAccounts = [] } = useAccounts();
   const { data: customReports = [] } = useReports();
   const { data: dashboardPages = [] } = useDashboardPages();
 
@@ -184,6 +205,7 @@ export function CommandBar() {
             <BalanceRow<'account', 'onbudget-accounts-balance'>
               label={t('On Budget')}
               binding={onBudgetAccountBalance()}
+              totalAccounts={getAccountsInScope(allAccounts, 'onbudget')}
             />
           ),
           Icon: SvgLibrary,
@@ -195,6 +217,7 @@ export function CommandBar() {
             <BalanceRow<'account', 'offbudget-accounts-balance'>
               label={t('Off Budget')}
               binding={offBudgetAccountBalance()}
+              totalAccounts={getAccountsInScope(allAccounts, 'offbudget')}
             />
           ),
           Icon: SvgLibrary,
@@ -205,6 +228,9 @@ export function CommandBar() {
             <BalanceRow<'account', 'balance'>
               label={account.name}
               binding={accountBalance(account.id)}
+              formatter={value =>
+                formatAmount(value ?? 0, getAccountCurrency(account))
+              }
             />
           ),
           Icon: SvgPiggyBank,

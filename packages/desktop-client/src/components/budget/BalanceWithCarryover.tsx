@@ -85,6 +85,8 @@ type BalanceWithCarryoverProps = Omit<
    * ignore any goal left on one
    */
   isIncome?: boolean;
+  // Formats the balance, e.g. in the currency of a currency line
+  formatter?: (value: number) => string;
   shouldInlineGoalStatus?: boolean;
   CarryoverIndicator?: ComponentType<CarryoverIndicatorProps>;
 };
@@ -97,6 +99,7 @@ export function BalanceWithCarryover({
   longGoal,
   isDisabled,
   isIncome,
+  formatter,
   shouldInlineGoalStatus,
   CarryoverIndicator: CarryoverIndicatorComponent = CarryoverIndicator,
   children,
@@ -178,6 +181,7 @@ export function BalanceWithCarryover({
                   type={type}
                   name={name}
                   value={balanceValue}
+                  formatter={formatter}
                   className={getDefaultClassName(balanceValue)}
                 />
               )}

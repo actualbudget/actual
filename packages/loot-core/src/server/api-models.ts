@@ -4,6 +4,7 @@ import type {
   AccountGroupEntity,
   CategoryEntity,
   CategoryGroupEntity,
+  ExchangeRateEntity,
   NewRuleEntity,
   PayeeEntity,
   RuleEntity,
@@ -19,6 +20,7 @@ export type APIAccountEntity = Pick<AccountEntity, 'id' | 'name'> & {
   closed?: boolean;
   balance_current?: number | null;
   account_group_id?: string | null;
+  currency?: string | null;
 };
 
 export const accountModel = {
@@ -32,6 +34,7 @@ export const accountModel = {
       closed: account.closed ? true : false,
       balance_current: account.balance_current ?? null,
       account_group_id: account.account_group_id ?? null,
+      currency: account.currency ?? null,
     };
   },
 
@@ -62,6 +65,26 @@ export const accountGroupModel = {
   fromExternal(group: Partial<APIAccountGroupEntity>) {
     // No translation is needed
     return group as Partial<AccountGroupEntity>;
+  },
+};
+
+export type APIExchangeRateEntity = Pick<
+  ExchangeRateEntity,
+  'id' | 'from_currency' | 'to_currency' | 'rate' | 'date' | 'source'
+>;
+
+export const exchangeRateModel = {
+  ...models.exchangeRateModel,
+
+  toExternal(exchangeRate: ExchangeRateEntity): APIExchangeRateEntity {
+    return {
+      id: exchangeRate.id,
+      from_currency: exchangeRate.from_currency,
+      to_currency: exchangeRate.to_currency,
+      rate: exchangeRate.rate,
+      date: exchangeRate.date,
+      source: exchangeRate.source,
+    };
   },
 };
 

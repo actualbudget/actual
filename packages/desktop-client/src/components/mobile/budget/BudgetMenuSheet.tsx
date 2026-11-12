@@ -18,6 +18,7 @@ import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { AmountInput } from '#components/mobile/transactions/AmountInput';
 import { CALCULATOR_KEYBOARD_HEIGHT } from '#components/mobile/transactions/CalculatorKeyboard';
 import { useCategory } from '#hooks/useCategory';
+import { useBudgetLine } from '#hooks/useCategoryCurrencies';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNotes } from '#hooks/useNotes';
 import type { Modal as ModalType } from '#modals/modalsSlice';
@@ -47,7 +48,8 @@ export function BudgetMenuSheet({
   onEditNotes,
 }: BudgetMenuSheetProps) {
   const { t } = useTranslation();
-  const { data: category } = useCategory(categoryId);
+  const { categoryId: ownerId, currencyCode } = useBudgetLine(categoryId);
+  const { data: category } = useCategory(ownerId);
   const isMobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false);
   const notesId = `${categoryId}-${month}`;
@@ -60,7 +62,9 @@ export function BudgetMenuSheet({
   return (
     <MobileSheet
       name={name}
-      title={category.name}
+      title={
+        currencyCode ? `${category.name} (${currencyCode})` : category.name
+      }
       wrapperStyle={{
         paddingBottom: isCalculatorOpen ? CALCULATOR_KEYBOARD_HEIGHT : 0,
       }}
@@ -85,6 +89,7 @@ export function BudgetMenuSheet({
             </Text>
             <AmountInput
               value={integerToAmount(budgeted)}
+              currencyCode={currencyCode}
               onEnter={close}
               onChange={amount => onUpdateBudget(amountToInteger(amount))}
               onFocus={() => setIsCalculatorOpen(isMobileCalculatorEnabled)}
@@ -93,13 +98,15 @@ export function BudgetMenuSheet({
               variant="large"
             />
           </View>
-          {notes && <MobileSheetNotes notes={notes} />}
+          {!currencyCode && notes && <MobileSheetNotes notes={notes} />}
 
           <MobileSheetSection>
-            <MobileSheetRow
-              label={t('Edit notes')}
-              onPress={() => onEditNotes(notesId, month)}
-            />
+            {!currencyCode && (
+              <MobileSheetRow
+                label={t('Edit notes')}
+                onPress={() => onEditNotes(notesId, month)}
+              />
+            )}
             <MobileSheetMenuRows
               items={items}
               onSelect={itemName => {

@@ -12,6 +12,11 @@ import { accountQueries } from './accounts';
 import { setAppState } from './app/appSlice';
 import { categoryQueries } from './budget';
 import { closeBudgetUI } from './budgetfiles/budgetfilesSlice';
+import {
+  CATEGORY_CURRENCY_TABLES,
+  categoryCurrencyQueries,
+  exchangeRateQueries,
+} from './currency/queries';
 import { closeModal, pushModal, replaceModal } from './modals/modalsSlice';
 import type { Modal } from './modals/modalsSlice';
 import {
@@ -90,6 +95,22 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
       );
     }
 
+    if (tables.includes('exchange_rates')) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: exchangeRateQueries.lists(),
+        }),
+      );
+    }
+
+    if (tables.some(table => CATEGORY_CURRENCY_TABLES.includes(table))) {
+      promises.push(
+        queryClient.invalidateQueries({
+          queryKey: categoryCurrencyQueries.lists(),
+        }),
+      );
+    }
+
     if (tables.includes('dashboard') || tables.includes('dashboard_pages')) {
       promises.push(
         queryClient.invalidateQueries({
@@ -112,6 +133,12 @@ export function handleGlobalEvents(store: AppStore, queryClient: QueryClient) {
           queryKey: tagQueries.lists(),
         }),
       );
+    }
+
+    // Undoing a synced preference, e.g. the default currency, only changes
+    // the database
+    if (tables.includes('preferences')) {
+      promises.push(store.dispatch(loadPrefs()));
     }
 
     const tagged = undo.getTaggedState(undoTag);
