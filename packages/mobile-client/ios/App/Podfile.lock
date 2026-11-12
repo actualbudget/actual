@@ -48,9 +48,9 @@ SPEC CHECKSUMS:
   Capacitor: 2f67eaeb8ed79909cd35b5e7439a5c2a9ca58e0f
   CapacitorApp: 7b7e43debe505bc61beedb83796aa1368c86078b
   CapacitorCordova: 0b7326439c7a09fc5d20eced5e0dab986327a493
-  CapacitorFilesystem: 23beb239d41c889b38be13fe6a7a2f28d8250b62
+  CapacitorFilesystem: e3bc7123acb1554df1b7b099fa5847064b9e1bd4
   CapacitorHaptics: 296f771ecd89c7a1bd92a7b6826a7d268e2e70f5
-  CapacitorShare: c19ef886b846555a4eca4f085d4414b6cac91d4b
+  CapacitorShare: 5b5e53347556bee89ae6163ed20b5b3c25fe75f1
   CapacitorSplashScreen: 7bf61c2001557ff9e195e601c6b87344480d3c65
   IONFilesystemLib: 306469e4c563f61de82d7bca2bbfed9e64d1b2d2
 
