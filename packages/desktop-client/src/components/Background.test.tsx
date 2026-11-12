@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { expect, it, vi } from 'vitest';
 
 import { Background } from './Background';
@@ -13,7 +13,5 @@ it('keeps the background artwork mounted when its parent rerenders', async () =>
 
   rerender(<Background />);
 
-  await waitFor(() => {
-    expect(screen.getByTestId('background-artwork')).toBe(artwork);
-  });
+  expect(screen.getByTestId('background-artwork')).toBe(artwork);
 });
