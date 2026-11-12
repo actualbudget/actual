@@ -1,4 +1,4 @@
-import { Directory, Filesystem } from '@capacitor/filesystem';
+import { Directory, Encoding, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 
 // The iOS and Android web views ignore `<a download>` links, so the browser
@@ -14,12 +14,15 @@ export async function saveFileInNativeApp(
 ) {
   const { uri } = await Filesystem.writeFile({
     path: filename,
-    data: await toBase64(contents),
     directory: Directory.Cache,
+    // Text is written as-is; only binary data needs the base64 round trip.
+    ...(typeof contents === 'string'
+      ? { data: contents, encoding: Encoding.UTF8 }
+      : { data: await toBase64(contents) }),
   });
 
   try {
-    await Share.share({ files: [uri], title: dialogTitle, dialogTitle });
+    await Share.share({ files: [uri], dialogTitle });
   } catch (error) {
     // Closing the share sheet without picking anything is not a failure.
     if (!isShareCanceled(error)) {
@@ -28,7 +31,7 @@ export async function saveFileInNativeApp(
   }
 }
 
-function toBase64(contents: string | Uint8Array<ArrayBuffer>): Promise<string> {
+function toBase64(contents: Uint8Array<ArrayBuffer>): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
