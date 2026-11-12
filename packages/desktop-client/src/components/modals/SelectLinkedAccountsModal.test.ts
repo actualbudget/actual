@@ -217,8 +217,8 @@ describe('externalBalanceToInteger', () => {
     expect(externalBalanceToInteger(balance)).toBe(expected);
   });
 
-  it.each([null, undefined, '   ', NaN, 'abc'])(
-    'returns unknown for an unavailable balance (%s)',
+  it.each([null, undefined, '   ', NaN, 'abc', 1e14])(
+    'returns unknown for a missing or invalid balance (%s)',
     balance => {
       expect(externalBalanceToInteger(balance)).toBeNull();
     },

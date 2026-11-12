@@ -12,7 +12,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
-import { amountToInteger } from '@actual-app/core/shared/util';
+import { amountToInteger, MAX_SAFE_NUMBER } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
@@ -664,15 +664,10 @@ type CustomStartingSettings = {
 };
 
 /**
- * Bank sync providers report an account's balance as a decimal amount (e.g.
- * `1234.56`), either as a number or as a numeric string, not as integer
- * cents. Convert it before formatting: a string passed to `format` has every
- * non-digit stripped, so a float such as `83710.79999999999` would become an
- * unsafe integer and a one-decimal amount such as `1234.5` would show as
- * `123.45`.
- *
- * Returns `null` when the balance is missing or not a finite number, so the
- * caller shows it as unknown instead of crashing or showing a made-up `0`.
+ * Bank sync providers report balances as decimal amounts (a number or numeric
+ * string), but `format` expects integer cents. Returns `null` when the balance
+ * is missing, not a number, or too large to format, so the caller shows it as
+ * unknown instead of crashing.
  */
 export function externalBalanceToInteger(
   balance: number | string | null | undefined,
@@ -680,8 +675,9 @@ export function externalBalanceToInteger(
   if (balance == null || (typeof balance === 'string' && !balance.trim())) {
     return null;
   }
-  const amount = Number(balance);
-  return Number.isFinite(amount) ? amountToInteger(amount) : null;
+  const amount = amountToInteger(Number(balance));
+  // Also false for NaN and Infinity.
+  return Math.abs(amount) <= MAX_SAFE_NUMBER ? amount : null;
 }
 
 /**
@@ -859,7 +855,7 @@ function TableRow({
       {showStartingOptions ? (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={balance}
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="inline"
@@ -1235,7 +1231,7 @@ function AccountCard({
       {shouldShowStartingOptions && (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={balance}
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="stacked"
