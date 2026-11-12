@@ -12,6 +12,8 @@ import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
+import { amountToInteger } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   SyncServerAkahuAccount,
@@ -662,6 +664,20 @@ type CustomStartingSettings = {
 };
 
 /**
+ * Bank sync providers report an account's balance as a decimal amount (e.g.
+ * `1234.56`), either as a number or as a numeric string, not as integer
+ * cents. Convert it before formatting: a string passed to `format` has every
+ * non-digit stripped, so a float such as `83710.79999999999` would become an
+ * unsafe integer and a one-decimal amount such as `1234.5` would show as
+ * `123.45`.
+ */
+export function externalBalanceToInteger(
+  balance: number | string,
+): IntegerAmount {
+  return amountToInteger(Number(balance));
+}
+
+/**
  * The settings a row starts with. The balance is deliberately absent: the
  * server derives the opening balance from the bank unless one is supplied, so
  * defaulting it to 0 here would silently override the real balance for anyone
@@ -803,7 +819,10 @@ function TableRow({
         <PrivacyFilter>
           {externalAccount.balance != null ? (
             <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
+              {format(
+                externalBalanceToInteger(externalAccount.balance),
+                'financial',
+              )}
             </FinancialText>
           ) : (
             t('Unknown')
@@ -1120,7 +1139,10 @@ function AccountCard({
         <PrivacyFilter>
           {externalAccount.balance != null ? (
             <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
+              {format(
+                externalBalanceToInteger(externalAccount.balance),
+                'financial',
+              )}
             </FinancialText>
           ) : (
             t('Unknown')

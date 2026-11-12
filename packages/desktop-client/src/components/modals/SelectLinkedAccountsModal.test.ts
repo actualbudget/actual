@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   computeInitialLinkState,
+  externalBalanceToInteger,
   getDefaultStartingSettings,
   getSelectableAccountOptions,
   resolveStartingSettings,
@@ -203,5 +204,31 @@ describe('resolveStartingSettings', () => {
 describe('getDefaultStartingSettings', () => {
   it('does not include a starting balance', () => {
     expect(getDefaultStartingSettings().amount).toBeUndefined();
+  });
+});
+
+describe('externalBalanceToInteger', () => {
+  it('converts a float sum of two balances to safe integer cents', () => {
+    // Pluggy.ai adds closingBalance and automaticallyInvestedBalance.
+    const balance = 27903.6 + 55807.2;
+    expect(balance).toBe(83710.79999999999);
+    expect(externalBalanceToInteger(balance)).toBe(8371080);
+  });
+
+  it('converts a one-decimal amount', () => {
+    expect(externalBalanceToInteger(1234.5)).toBe(123450);
+  });
+
+  it('converts a whole amount', () => {
+    expect(externalBalanceToInteger(100)).toBe(10000);
+  });
+
+  it('converts a numeric string', () => {
+    expect(externalBalanceToInteger('1234.56')).toBe(123456);
+  });
+
+  it('keeps negative balances negative', () => {
+    expect(externalBalanceToInteger(-42.1)).toBe(-4210);
+    expect(externalBalanceToInteger('-0.5')).toBe(-50);
   });
 });
