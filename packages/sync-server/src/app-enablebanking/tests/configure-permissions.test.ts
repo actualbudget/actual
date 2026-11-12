@@ -53,3 +53,18 @@ it.each([false, true])(
     expect(secretsService.get(key)).toBe('replacement-key');
   },
 );
+
+it('trims whitespace around the application id before validating and storing it', async () => {
+  const validate = vi
+    .spyOn(enableBankingService, 'validateCredentials')
+    .mockResolvedValue({ name: 'Test app' });
+
+  await request(handlers)
+    .post('/configure')
+    .set('x-actual-token', 'valid-token-admin')
+    .send({ applicationId: '  pasted-id \n', secretKey: 'pasted-key' })
+    .expect(200);
+
+  expect(validate).toHaveBeenCalledWith('pasted-id', 'pasted-key');
+  expect(secretsService.get(application)).toBe('pasted-id');
+});

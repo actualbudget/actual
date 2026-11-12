@@ -11,6 +11,7 @@ import { bootstrap } from './account-db';
 import * as accountApp from './app-account';
 import * as adminApp from './app-admin';
 import * as akahuApp from './app-akahu/app-akahu.js';
+import * as apiKeysApp from './app-api-keys';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
@@ -63,6 +64,7 @@ app.use(
 
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
+app.use('/api-keys', apiKeysApp.handlers);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
@@ -228,14 +230,13 @@ export async function run() {
       key: parseHTTPSConfig(config.get('https.key')),
       cert: parseHTTPSConfig(config.get('https.cert')),
     };
-    listen(
-      https.createServer(httpsOptions, app),
-      port,
-      hostname,
-      sendServerStartedMessage,
+    sendServerStartedMessage(
+      await listen(https.createServer(httpsOptions, app), port, hostname),
     );
   } else {
     const http = await import('node:http');
-    listen(http.createServer(app), port, hostname, sendServerStartedMessage);
+    sendServerStartedMessage(
+      await listen(http.createServer(app), port, hostname),
+    );
   }
 }
