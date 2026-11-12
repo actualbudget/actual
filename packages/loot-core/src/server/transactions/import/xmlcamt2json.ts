@@ -151,15 +151,16 @@ export async function xmlCAMT2json(
 
     const date = getDtOrDtTm(entry.ValDt) || getDtOrDtTm(entry.BookgDt);
 
-    // A batch entry whose details carry no amounts of their own is imported
-    // as one transaction with the entry amount.
+    // A batch entry is only split when every detail carries its own amount.
+    // Otherwise it is imported as one transaction with the entry amount, so
+    // details without an amount don't drop part of the entry total.
     const batchDetails = Array.isArray(entry.NtryDtls?.TxDtls)
       ? entry.NtryDtls.TxDtls
       : null;
-    const hasDetailAmounts =
-      batchDetails?.some(TxDtls => getTxDtlsAmount(TxDtls) != null) ?? false;
+    const hasAllDetailAmounts =
+      batchDetails?.every(TxDtls => getTxDtlsAmount(TxDtls) != null) ?? false;
 
-    if (batchDetails && hasDetailAmounts) {
+    if (batchDetails && hasAllDetailAmounts) {
       // we add subtransactions as normal transactions as importing split with subtransactions is not supported
       // amount, and payee_name are not processed correctly for subtransaction.
       batchDetails.forEach((TxDtls: TxDtls) => {

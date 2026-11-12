@@ -76,19 +76,20 @@ describe('xmlCAMT2json batch entries', () => {
     ]);
   });
 
-  test('skips a detail without an amount instead of importing it as zero', async () => {
+  test('keeps the entry total when only some details have amounts', async () => {
     const transactions = await xmlCAMT2json(
       camt(
         entry({
-          amount: '100.00',
+          amount: '150.00',
           indicator: 'DBIT',
+          info: 'Batch payment',
           details: txDtls('Alice', '100.00') + txDtls('Bob'),
         }),
       ),
     );
 
     expect(transactions.map(t => [t.payee_name, t.amount])).toEqual([
-      ['Alice', -100],
+      ['Batch payment', -150],
     ]);
   });
 
