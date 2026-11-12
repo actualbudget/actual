@@ -210,7 +210,7 @@ const lootCoreBackend = (): Plugin => ({
     process.once('SIGTERM', cleanup);
     process.once('exit', cleanup);
 
-    server.middlewares.use('/kcab', (req, res, next) => {
+    server.middlewares.use(`${server.config.base}kcab`, (req, res, next) => {
       const url = new URL(req.url ?? '/', 'http://localhost');
       const filePath = path.join(lootCoreOutDir, url.pathname);
       if (!filePath.startsWith(lootCoreOutDir + path.sep)) return next();
@@ -242,7 +242,8 @@ const lootCoreBackend = (): Plugin => ({
 const pluginsServiceAssets = (): Plugin => ({
   name: 'plugins-service-assets',
   configureServer(server) {
-    server.middlewares.use('/service-worker', (req, res, next) => {
+    const mountPath = `${server.config.base}service-worker`;
+    server.middlewares.use(mountPath, (req, res, next) => {
       const url = new URL(req.url ?? '/', 'http://localhost');
       const filePath = path.join(pluginsServiceDistDir, url.pathname);
       if (!filePath.startsWith(pluginsServiceDistDir + path.sep)) return next();

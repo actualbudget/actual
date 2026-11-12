@@ -69,8 +69,8 @@ describe('base path', () => {
 
   it('keeps generated document and manifest assets under the configured base path', () => {
     const html = readFileSync(resolve('index.html'), 'utf8');
-    expect(html).toContain('href="%BASE_URL%favicon.ico"');
-    expect(html).toContain('href="%BASE_URL%site.webmanifest"');
+    expect(html).toContain('href="/favicon.ico"');
+    expect(html).toContain('href="/site.webmanifest"');
 
     const manifest = JSON.parse(
       readFileSync(resolve('public/site.webmanifest'), 'utf8'),
