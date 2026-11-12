@@ -12,16 +12,10 @@ const TRANSFER_DATE_WINDOW_DAYS = 3;
 
 type TransferSide = Pick<
   TransactionEntity,
-  | 'id'
-  | 'account'
-  | 'amount'
-  | 'date'
-  | 'imported_id'
-  | 'is_parent'
-  | 'is_child'
-  | 'starting_balance_flag'
-  | 'reconciled'
->;
+  'id' | 'account' | 'amount' | 'date'
+> & {
+  imported_id?: string | null;
+};
 
 export async function isTransferDetectionEnabled(): Promise<boolean> {
   const { data } = await aqlQuery(
@@ -34,34 +28,58 @@ export async function isTransferDetectionEnabled(): Promise<boolean> {
   return String(data?.[0]?.value) === 'true';
 }
 
-async function getUnlinkedTransactions(
+// Only transactions with one of the given amounts are read, so a sync that
+// covers a long history doesn't load every transaction of that period.
+async function getLinkableTransactions(
   from: string,
   to: string,
+  amounts: number[],
+  openAccountIds: Set<AccountEntity['id']>,
 ): Promise<TransferSide[]> {
-  const { data } = await aqlQuery(
-    q('transactions')
-      .filter({
-        $and: [{ date: { $gte: from } }, { date: { $lte: to } }],
-        transfer_id: null,
-      })
-      .select([
-        'id',
-        'account',
-        'amount',
-        'date',
-        'imported_id',
-        'is_parent',
-        'is_child',
-        'starting_balance_flag',
-        'reconciled',
-      ]),
+  const rows = await db.all<
+    Pick<
+      db.DbViewTransactionInternalAlive,
+      | 'id'
+      | 'account'
+      | 'amount'
+      | 'date'
+      | 'imported_id'
+      | 'is_parent'
+      | 'is_child'
+      | 'starting_balance_flag'
+      | 'reconciled'
+    >
+  >(
+    `SELECT id, account, amount, date, imported_id, is_parent, is_child,
+            starting_balance_flag, reconciled
+       FROM v_transactions_internal_alive
+       WHERE date >= ? AND date <= ? AND transfer_id IS NULL
+         AND amount IN (${amounts.filter(Number.isInteger).join(',')})`,
+    [db.toDateRepr(from), db.toDateRepr(to)],
   );
-  return data;
+
+  return rows
+    .filter(
+      row =>
+        !row.is_parent &&
+        !row.is_child &&
+        !row.starting_balance_flag &&
+        !row.reconciled &&
+        openAccountIds.has(row.account),
+    )
+    .map(row => ({
+      id: row.id,
+      account: row.account,
+      amount: row.amount,
+      date: db.fromDateRepr(row.date),
+      imported_id: row.imported_id,
+    }));
 }
 
 // Turning one side of a transfer back into a normal transaction deletes the
-// other side, which the next bank sync then imports again. Linking it a second
-// time would undo the user's correction.
+// other side, which the next bank sync then imports again. Linking that
+// transaction again, to either the same or another transaction, would undo
+// the user's correction.
 async function wasDeletedBefore(transaction: TransferSide): Promise<boolean> {
   if (!transaction.imported_id) {
     return false;
@@ -93,13 +111,14 @@ export async function linkDetectedTransfers(
     return [];
   }
 
-  const { data: dates }: { data: Array<Pick<TransactionEntity, 'date'>> } =
+  const { data }: { data: Array<Pick<TransactionEntity, 'date' | 'amount'>> } =
     await aqlQuery(
       q('transactions')
         .filter({ id: { $oneof: transactionIds }, transfer_id: null })
-        .select('date'),
+        .select(['date', 'amount']),
     );
-  if (dates.length === 0) {
+  const imported = data.filter(transaction => transaction.amount !== 0);
+  if (imported.length === 0) {
     return [];
   }
 
@@ -116,29 +135,22 @@ export async function linkDetectedTransfers(
     }
   }
 
-  const sortedDates = dates.map(({ date }) => date).sort();
+  const sortedDates = imported.map(({ date }) => date).sort();
   // A counterpart is up to one window away, and the transactions competing
-  // for that counterpart are up to one more window away from it.
-  const unlinked = await getUnlinkedTransactions(
+  // for that counterpart are up to one more window away from it. They have
+  // the opposite amount and the same amount respectively.
+  const linkable = await getLinkableTransactions(
     monthUtils.subDays(sortedDates[0], TRANSFER_DATE_WINDOW_DAYS * 2),
     monthUtils.addDays(
       sortedDates[sortedDates.length - 1],
       TRANSFER_DATE_WINDOW_DAYS * 2,
     ),
+    [...new Set(imported.flatMap(({ amount }) => [amount, -amount]))],
+    new Set(offBudgetByAccount.keys()),
   );
 
   const linkableByAmount = new Map<number, TransferSide[]>();
-  for (const transaction of unlinked) {
-    if (
-      transaction.amount === 0 ||
-      transaction.is_parent ||
-      transaction.is_child ||
-      transaction.starting_balance_flag ||
-      transaction.reconciled ||
-      !offBudgetByAccount.has(transaction.account)
-    ) {
-      continue;
-    }
+  for (const transaction of linkable) {
     const sameAmount = linkableByAmount.get(transaction.amount) ?? [];
     sameAmount.push(transaction);
     linkableByAmount.set(transaction.amount, sameAmount);
@@ -189,7 +201,10 @@ export async function linkDetectedTransfers(
         continue;
       }
 
-      if (await wasDeletedBefore(transaction)) {
+      if (
+        (await wasDeletedBefore(transaction)) ||
+        (await wasDeletedBefore(counterpart))
+      ) {
         continue;
       }
 

@@ -361,6 +361,42 @@ describe('linkDetectedTransfers', () => {
     await expectUnlinked(outgoing, importedAgain);
   });
 
+  test('does not link another transaction to one the user unlinked', async () => {
+    const outgoing = await insertTransaction({
+      account: 'checking',
+      amount: -5000,
+    });
+    const incoming = await insertTransaction({
+      account: 'savings',
+      amount: 5000,
+      imported_id: 'bank-id',
+    });
+    expect(await linkDetectedTransfers([incoming])).toEqual([outgoing]);
+
+    // The user undoes the transfer and the other side is imported again
+    await batchUpdateTransactions({
+      updated: [{ id: outgoing, payee: 'bank-payee' }],
+    });
+    const importedAgain = await insertTransaction({
+      account: 'savings',
+      amount: 5000,
+      imported_id: 'bank-id',
+    });
+    expect(await linkDetectedTransfers([importedAgain])).toEqual([]);
+
+    // Once the side that was kept is reconciled, a new transaction has only
+    // the transaction that was imported again left to pair with
+    await db.updateTransaction({ id: outgoing, reconciled: true });
+    const unrelated = await insertTransaction({
+      account: 'card',
+      amount: -5000,
+      date: '2024-03-11',
+    });
+
+    expect(await linkDetectedTransfers([unrelated])).toEqual([]);
+    await expectUnlinked(outgoing, importedAgain, unrelated);
+  });
+
   test('does not link to part of a split transaction', async () => {
     const parent = await insertTransaction({
       account: 'checking',

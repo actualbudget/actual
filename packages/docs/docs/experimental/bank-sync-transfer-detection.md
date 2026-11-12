@@ -49,15 +49,17 @@ Transfer detection only looks at transactions that a bank sync has just added. I
 
 Two unrelated transactions can look like a transfer. For example, a $40.00 purchase from your checking account and a $40.00 refund on your credit card two days later.
 
+Undoing a match removes one of the two transactions for a moment: when you change one side back into a normal transaction, Actual removes the other side, the same way it does whenever a transfer is turned back into a normal transaction. Bank sync can only bring back a transaction that came from your bank, so it matters which side you change.
+
 To undo a wrong match:
 
-1. Open one of the two transactions.
+1. If one of the two transactions was added by hand or imported from a file, open that one. If both came from bank sync, open either of them.
 2. Change its **Payee** back to the real payee, and choose a category if it needs one.
 
-Actual removes the transaction on the other side, the same way it does whenever a transfer is turned back into a normal transaction. The next bank sync imports that transaction again, and this time Actual doesn't link it.
+The next bank sync of the other account imports the removed transaction again, and this time Actual doesn't link it.
 
 :::caution
-The transaction on the other side only comes back when **Reimport deleted transactions** is ticked in the bank sync settings of that account, which it is by default. If you have unticked it, add the transaction again by hand.
+The removed transaction only comes back if your bank still reports it and **Reimport deleted transactions** is ticked in the bank sync settings of that account, which it is by default. Otherwise, add the transaction again by hand.
 :::
 
 ## Known Limitations
