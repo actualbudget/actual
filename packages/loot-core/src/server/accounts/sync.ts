@@ -72,6 +72,28 @@ async function updateAccountBalance(id: AccountEntity['id'], balance: number) {
   await db.update('accounts', { id, balance_current: balance });
 }
 
+// Both the experimental flag and the per-account option have to be enabled,
+// so turning the experimental feature off restores the default behaviour.
+async function isReverseAmountsEnabled(id: AccountEntity['id']) {
+  const prefIds = [
+    'flags.bankSyncReverseAmounts',
+    `sync-reverse-amounts-${id}`,
+  ];
+  const values = await Promise.all(
+    prefIds.map(prefId =>
+      aqlQuery(q('preferences').filter({ id: prefId }).select('value')).then(
+        data => String(data?.data?.[0]?.value ?? 'false') === 'true',
+      ),
+    ),
+  );
+  return values.every(Boolean);
+}
+
+function negateAmount(amount: number): number {
+  // Avoid producing -0 for zero amounts.
+  return amount === 0 ? 0 : -amount;
+}
+
 async function getAccountOldestTransaction(id): Promise<TransactionEntity> {
   return (
     await aqlQuery(
@@ -516,23 +538,25 @@ async function normalizeTransactions(
 async function normalizeBankSyncTransactions(transactions, acctId) {
   const payeesToCreate = new Map();
 
-  const [customMappingsRaw, importPending, importNotes] = await Promise.all([
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `custom-sync-mappings-${acctId}` })
-        .select('value'),
-    ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-notes-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
-  ]);
+  const [customMappingsRaw, importPending, importNotes, reverseAmounts] =
+    await Promise.all([
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `custom-sync-mappings-${acctId}` })
+          .select('value'),
+      ).then(data => data?.data?.[0]?.value),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-pending-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      aqlQuery(
+        q('preferences')
+          .filter({ id: `sync-import-notes-${acctId}` })
+          .select('value'),
+      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+      isReverseAmountsEnabled(acctId),
+    ]);
 
   const mappings = customMappingsRaw
     ? mappingsFromString(customMappingsRaw)
@@ -549,7 +573,12 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
       trans.amount = trans.transactionAmount.amount;
     }
 
-    const mapping = mappings.get(trans.amount <= 0 ? 'payment' : 'deposit');
+    // `trans` is kept as received from the bank for raw_synced_data.
+    const amount = reverseAmounts
+      ? negateAmount(Number(trans.amount))
+      : trans.amount;
+
+    const mapping = mappings.get(amount <= 0 ? 'payment' : 'deposit');
 
     const date = trans[mapping.get('date')] ?? trans.date;
     const payeeName = trans[mapping.get('payee')] ?? trans.payeeName;
@@ -584,7 +613,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
     normalized.push({
       payee_name: payeeName,
       trans: {
-        amount: amountToInteger(trans.amount),
+        amount: amountToInteger(amount),
         payee: trans.payee,
         account: trans.account,
         date,
@@ -1130,15 +1159,22 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
 
+  const reverseAmounts = await isReverseAmountsEnabled(id);
+
   /** Starting balance is actually the current balance of the account. */
   const {
     transactions: originalTransactions,
-    startingBalance: currentBalance,
+    startingBalance: downloadedBalance,
   } = download;
+  // Transaction amounts are reversed later, in normalizeBankSyncTransactions.
+  const currentBalance =
+    reverseAmounts && downloadedBalance != null
+      ? negateAmount(downloadedBalance)
+      : downloadedBalance;
 
   if (initialSync) {
     const { transactions } = download;
-    let balanceToUse = currentBalance;
+    let balanceToUse = downloadedBalance;
 
     // Use custom starting balance if provided, otherwise calculate it
     if (customStartingBalance !== undefined) {
@@ -1148,7 +1184,7 @@ async function processBankSyncDownload(
         return (
           total - parseInt(trans.transactionAmount.amount.replace('.', ''))
         );
-      }, currentBalance);
+      }, downloadedBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'pluggyai') {
       const currentBalance = download.startingBalance;
@@ -1159,7 +1195,7 @@ async function processBankSyncDownload(
       balanceToUse = Math.round(previousBalance);
     } else if (
       acctRow.account_sync_source === 'enableBanking' &&
-      currentBalance !== null
+      downloadedBalance !== null
     ) {
       const importPending = await aqlQuery(
         q('preferences')
@@ -1171,7 +1207,7 @@ async function processBankSyncDownload(
         : transactions.filter(trans => Boolean(trans.booked));
       const previousBalance = importable.reduce((total, trans) => {
         return total - amountToInteger(trans.transactionAmount.amount);
-      }, currentBalance);
+      }, downloadedBalance);
       balanceToUse = previousBalance;
     } else if (acctRow.account_sync_source === 'akahu') {
       const currentBalance = download.startingBalance;
@@ -1181,6 +1217,17 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
+    }
+
+    // Reversing the current balance and every transaction amount reverses
+    // the derived opening balance too. A custom balance is entered by the
+    // user in Actual's own sign convention, so it is kept as is.
+    if (
+      reverseAmounts &&
+      customStartingBalance === undefined &&
+      balanceToUse != null
+    ) {
+      balanceToUse = negateAmount(balanceToUse);
     }
 
     const oldestTransaction = transactions[transactions.length - 1];

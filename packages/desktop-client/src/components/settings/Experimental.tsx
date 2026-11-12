@@ -287,6 +287,11 @@ export function ExperimentalFeatures() {
           <Trans>Enable Banking sync (EU banks)</Trans>
         </FeatureToggle>
       )}
+      {isUsingServer && (
+        <FeatureToggle flag="bankSyncReverseAmounts">
+          <Trans>Reverse bank sync transaction amounts</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
