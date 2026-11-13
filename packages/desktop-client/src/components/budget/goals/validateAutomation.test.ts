@@ -3,6 +3,7 @@ import type { Template } from '@actual-app/core/types/models/templates';
 import { describe, expect, it } from 'vitest';
 
 import {
+  isBlockingAutomationError,
   validateAutomation,
   validatePercentageAllocation,
   validateSchedulePriorities,
@@ -217,11 +218,11 @@ describe('validateSchedulePriorities', () => {
   function scheduleAt(name: string, priority: number): Template {
     return { type: 'schedule', name, directive: 'template', priority };
   }
-  function byAt(priority: number): Template {
+  function byAt(priority: number, month = '2026-12'): Template {
     return {
       type: 'by',
       amount: 100,
-      month: '2026-12',
+      month,
       directive: 'template',
       priority,
     };
@@ -253,6 +254,13 @@ describe('validateSchedulePriorities', () => {
     ).toEqual({ kind: 'schedule-priority-mismatch' });
   });
 
+  it('still counts the priority of an expired by-date', () => {
+    // rerunning the month the target was active in includes it
+    expect(
+      validateSchedulePriorities([scheduleAt('Rent', 1), byAt(2, '2026-05')]),
+    ).toEqual({ kind: 'schedule-priority-mismatch' });
+  });
+
   it('ignores priorities of other automation types', () => {
     expect(
       validateSchedulePriorities([
@@ -260,5 +268,83 @@ describe('validateSchedulePriorities', () => {
         percent('Salary', 10),
       ]),
     ).toBeNull();
+  });
+});
+
+describe('validateAutomation past targets', () => {
+  const today = new Date(2026, 10, 15);
+  const by: Template = {
+    type: 'by',
+    amount: 100,
+    month: '2026-10',
+    directive: 'template',
+    priority: 1,
+  };
+
+  it('flags a one-off target whose month has passed without blocking save', () => {
+    const error = validateAutomation(by, 'by', [by], [], today);
+
+    expect(error).toEqual({ kind: 'by-target-past', month: '2026-10' });
+    expect(isBlockingAutomationError(error)).toBe(false);
+  });
+
+  it('accepts a target in the current month', () => {
+    expect(
+      validateAutomation({ ...by, month: '2026-11' }, 'by', [], [], today),
+    ).toBeNull();
+  });
+
+  it('accepts a past target that repeats', () => {
+    expect(
+      validateAutomation({ ...by, annual: true }, 'by', [], [], today),
+    ).toBeNull();
+  });
+
+  it('still blocks save when a passed spend target starts spending after it', () => {
+    const spend: Template = {
+      type: 'spend',
+      amount: 1200,
+      month: '2026-10',
+      from: '2027-06',
+      directive: 'template',
+      priority: 1,
+    };
+    const error = validateAutomation(spend, 'by', [spend], [], today);
+
+    expect(error).toEqual({ kind: 'spend-from-after-target' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
+  it('still blocks save when a passed spend target has no start month', () => {
+    const spend: Template = {
+      type: 'spend',
+      amount: 1200,
+      month: '2026-10',
+      from: '',
+      directive: 'template',
+      priority: 1,
+    };
+    const error = validateAutomation(spend, 'by', [spend], [], today);
+
+    expect(error).toEqual({ kind: 'spend-no-from' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
+  it('flags a negative target amount and blocks save', () => {
+    const error = validateAutomation(
+      { ...by, amount: -100, month: '2026-12' },
+      'by',
+      [],
+      [],
+      today,
+    );
+
+    expect(error).toEqual({ kind: 'by-negative-amount' });
+    expect(isBlockingAutomationError(error)).toBe(true);
+  });
+
+  it('still blocks save for other errors', () => {
+    expect(isBlockingAutomationError({ kind: 'by-no-month' })).toBe(true);
+    expect(isBlockingAutomationError(null)).toBe(false);
   });
 });

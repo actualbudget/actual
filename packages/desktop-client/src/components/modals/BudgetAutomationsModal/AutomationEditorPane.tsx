@@ -28,6 +28,7 @@ import {
   getInitialState,
   templateReducer,
 } from '#components/budget/goals/reducer';
+import { isBlockingAutomationError } from '#components/budget/goals/validateAutomation';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 
 import { NON_CONTRIBUTION_TYPES, TypePicker } from './TypePicker';
@@ -116,6 +117,7 @@ export function AutomationEditorPane({
   const { t } = useTranslation();
   const active = entries[activeIdx];
   const activeError = automationErrors[activeIdx];
+  const isActiveErrorBlocking = isBlockingAutomationError(activeError);
 
   const state = active ? getInitialState(active.template) : null;
   const defaultWeeklyStart = getDefaultWeeklyStart(entries);
@@ -212,9 +214,15 @@ export function AutomationEditorPane({
             style={{
               padding: '10px 12px',
               borderRadius: 6,
-              backgroundColor: theme.errorBackground,
-              border: `1px solid ${theme.errorBorder}`,
-              color: theme.errorText,
+              backgroundColor: isActiveErrorBlocking
+                ? theme.errorBackground
+                : theme.warningBackground,
+              border: `1px solid ${
+                isActiveErrorBlocking ? theme.errorBorder : theme.warningBorder
+              }`,
+              color: isActiveErrorBlocking
+                ? theme.errorText
+                : theme.warningText,
               fontSize: 13,
               flexDirection: 'row',
               gap: 10,

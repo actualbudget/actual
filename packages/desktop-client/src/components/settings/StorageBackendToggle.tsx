@@ -17,10 +17,10 @@ import { useDispatch } from '#redux';
 import { SettingsRow } from './SettingsRow';
 
 /**
- * Opt-in to the sqlite-wasm storage for budget files (hidden behind a dev
- * flag while it is being tried out). Switching on only stores the choice:
- * budgets move over when they are next opened. Switching off moves every
- * budget back first, so nothing is lost either way. Both relaunch the app.
+ * Opt-in to the sqlite-wasm storage for budget files while it is being
+ * tried out. Switching on only stores the choice: budgets move over when
+ * they are next opened. Switching off moves every budget back first, so
+ * nothing is lost either way. Both relaunch the app.
  */
 export function StorageBackendToggle() {
   const { t } = useTranslation();
