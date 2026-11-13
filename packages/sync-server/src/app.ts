@@ -15,6 +15,7 @@ import * as apiKeysApp from './app-api-keys';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
+import * as oauthApp from './app-oauth';
 import * as openidApp from './app-openid';
 import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
@@ -65,6 +66,11 @@ app.use(
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/api-keys', apiKeysApp.handlers);
+app.use('/oauth', oauthApp.handlers);
+app.get(
+  '/.well-known/oauth-authorization-server',
+  oauthApp.authorizationServerMetadata,
+);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
