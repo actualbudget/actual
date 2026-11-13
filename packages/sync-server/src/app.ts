@@ -160,6 +160,27 @@ const csp = [
   `connect-src ${connectSrc}`,
 ].join('; ');
 
+// Consent is a separate React entry point without cross-origin isolation.
+app.get('/oauth/authorize', async (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  res.set(
+    'Content-Security-Policy',
+    `${csp.replace("img-src 'self' blob: data:", "img-src 'self' blob: data: https:")}; frame-ancestors 'none'; form-action 'self'`,
+  );
+  res.set('Referrer-Policy', 'no-referrer');
+  res.set('X-Frame-Options', 'DENY');
+  if (isDev) {
+    const proxy = await import('http-proxy-middleware');
+    void proxy.createProxyMiddleware({
+      target: 'http://localhost:3001',
+      changeOrigin: true,
+      pathRewrite: () => '/oauth-consent.html',
+    })(req, res, next);
+    return;
+  }
+  res.sendFile('oauth-consent.html', { root: config.get('webRoot') });
+});
+
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');

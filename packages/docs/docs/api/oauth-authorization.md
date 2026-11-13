@@ -3,7 +3,7 @@ title: Application authorization
 ---
 
 Actual supports the OAuth 2.0 authorization-code flow with PKCE (`S256`) for
-administrator-registered public clients. Each approved grant creates an API key
+administrator-registered clients. Each approved grant creates an API key
 limited to one budget. The key remains valid until revoked.
 
 ## Server configuration
@@ -20,6 +20,12 @@ Register clients in `oauth.clients`, or provide the same JSON array through
         "name": "Budget automation",
         "logoUri": "https://automation.example/icon.svg",
         "redirectUris": ["https://automation.example/actual/callback"]
+      },
+      {
+        "clientId": "confidential-automation",
+        "name": "Confidential automation",
+        "clientSecret": "store-this-secret-securely",
+        "redirectUris": ["https://automation.example/actual/callback"]
       }
     ]
   }
@@ -29,7 +35,11 @@ Register clients in `oauth.clients`, or provide the same JSON array through
 `clientId` must be unique. Register exact redirect URIs; HTTPS is required,
 except for HTTP loopback addresses. `logoUri` is optional and must be an HTTPS
 URL to an image supported by the user's browser. Client registration is managed
-by the server administrator; dynamic registration is not supported.
+by the server administrator; dynamic registration is not supported. Clients
+without `clientSecret` are public clients and use PKCE. A client configured with
+`clientSecret` must authenticate at the token endpoint with HTTP Basic
+(`client_secret_basic`) or `client_secret_post`. Prefer HTTP Basic, and keep
+client secrets out of browser code and source control.
 
 Set `ACTUAL_OAUTH_ISSUER` to the public HTTPS origin to publish authorization
 server metadata at `/.well-known/oauth-authorization-server`.
@@ -53,9 +63,17 @@ After approval, Actual redirects to the registered callback with a short-lived
 `code` and the original `state`. On denial, it returns `error=access_denied` and
 `state`. The client must validate the returned state.
 
-The client exchanges the code at `/oauth/token` using the original verifier.
+Users sign in through the server's existing OpenID Connect setup; no additional
+identity-provider callback is required.
+
+The client exchanges the code at `/oauth/token` using the original verifier. A
+public client includes its `client_id` in the form body. A confidential client
+authenticates with its registered `clientId` and `clientSecret` using one of the
+methods above.
 Codes expire after two minutes and can be used once. The response contains an
-`access_token` and `token_type: "Bearer"`.
+`access_token` and `token_type: "Bearer"`. If a consumed code is presented
+again, Actual rejects the exchange and revokes the API key created by its first
+exchange.
 
 Pass `access_token` to the Actual SDK as `sessionToken`; the SDK handles
 authenticated budget requests. The token is limited to the approved budget,

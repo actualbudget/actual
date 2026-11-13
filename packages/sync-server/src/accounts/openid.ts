@@ -13,6 +13,7 @@ import {
   getUserByUsername,
   transferAllFilesFromUser,
 } from '#services/user-service';
+import { hashBrowserNonce } from '#util/oauth-browser-session';
 import { TOKEN_EXPIRATION_NEVER } from '#util/validate-user';
 
 import { checkPassword } from './password';
@@ -106,6 +107,7 @@ async function setupOpenIdClient(configParameter) {
 export async function loginWithOpenIdSetup(
   returnUrl,
   firstTimeLoginPassword = '',
+  browserAuthorization?: { query: string; nonceHash: string },
 ) {
   if (!returnUrl) {
     return { error: 'return-url-missing' };
@@ -167,8 +169,15 @@ export async function loginWithOpenIdSetup(
     [now_time],
   );
   accountDb.mutate(
-    'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time) VALUES (?, ?, ?, ?)',
-    [state, code_verifier, returnUrl, expiry_time],
+    'INSERT INTO pending_openid_requests (state, code_verifier, return_url, expiry_time, oauth_query, browser_nonce_hash) VALUES (?, ?, ?, ?, ?, ?)',
+    [
+      state,
+      code_verifier,
+      returnUrl,
+      expiry_time,
+      browserAuthorization?.query ?? null,
+      browserAuthorization?.nonceHash ?? null,
+    ],
   );
 
   const url = client.authorizationUrl({
@@ -182,7 +191,7 @@ export async function loginWithOpenIdSetup(
   return { url };
 }
 
-export async function loginWithOpenIdFinalize(body) {
+export async function loginWithOpenIdFinalize(body, browserNonce?: string) {
   if (!body.code) {
     return { error: 'missing-authorization-code' };
   }
@@ -214,7 +223,7 @@ export async function loginWithOpenIdFinalize(body) {
   }
 
   const pendingRequest = accountDb.first(
-    'SELECT code_verifier, return_url FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
+    'SELECT code_verifier, return_url, oauth_query, browser_nonce_hash FROM pending_openid_requests WHERE state = ? AND expiry_time > ?',
     [body.state, Date.now()],
   );
 
@@ -222,7 +231,18 @@ export async function loginWithOpenIdFinalize(body) {
     return { error: 'invalid-or-expired-state' };
   }
 
+  if (
+    pendingRequest.oauth_query !== null &&
+    (!browserNonce ||
+      hashBrowserNonce(browserNonce) !== pendingRequest.browser_nonce_hash)
+  ) {
+    return { error: 'invalid-browser-login' };
+  }
   const { code_verifier, return_url } = pendingRequest;
+  // Consume state before exchanging the code so callbacks cannot be replayed.
+  accountDb.mutate('DELETE FROM pending_openid_requests WHERE state = ?', [
+    body.state,
+  ]);
 
   try {
     let tokenSet = null;
@@ -342,6 +362,12 @@ export async function loginWithOpenIdFinalize(body) {
 
     clearExpiredSessions();
 
+    if (pendingRequest.oauth_query !== null) {
+      return {
+        browserSessionToken: token,
+        url: `/oauth/authorize${pendingRequest.oauth_query}`,
+      };
+    }
     return { url: `${return_url}/openid-cb?token=${token}` };
   } catch (error) {
     console.error('OpenID grant failed');

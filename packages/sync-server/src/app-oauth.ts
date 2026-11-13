@@ -8,6 +8,7 @@ import {
 import express from 'express';
 
 import { getAccountDb } from './account-db';
+import { handlers as browserHandlers } from './app-oauth-browser';
 import { config } from './load-config';
 import {
   authorizationCallback,
@@ -28,6 +29,8 @@ app.use((_req, res, next) => {
   next();
 });
 
+app.use('/browser', browserHandlers);
+
 // Validate requests before serving the standalone consent entry point.
 app.get('/authorize', (req, res, next) => {
   const request = readAuthorizationRequest(req.query);
@@ -42,7 +45,7 @@ app.get('/authorize', (req, res, next) => {
   next();
 });
 
-// Unsupported methods must not fall through to the isolated PWA error page.
+// Unsupported methods must not fall through to the main application route.
 app.all('/authorize', (req, res, next) => {
   if (req.method === 'GET' || req.method === 'HEAD') {
     next();
