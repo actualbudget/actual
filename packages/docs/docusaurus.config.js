@@ -175,32 +175,6 @@ module.exports = {
         disableSwitch: false,
         respectPrefersColorScheme: true,
       },
-
-      zoom: {
-        // See: https://github.com/timmywil/panzoom for available options
-        disableZoom: true,
-        // A list of selectors to look for elements to enable pan and zoom
-        selectors: [
-          'div.mermaid[data-processed="true"]:not(.panzoom-exclude *)',
-          'div.docusaurus-mermaid-container:not(.panzoom-exclude *)',
-          '.drawio',
-          '.panzoom-example',
-        ],
-
-        // Whether to wrap the panzoom items in a div with overflow:hidden
-        // This constrains the pan zoom detail into the original container
-        wrap: true,
-
-        // The amount of time to wait in MS before the plugin client module tries to look for
-        // and alter pan zoom elements. Some renders take a little bit before they appear in the
-        // dom to find.
-        timeout: 2000,
-        excludeClass: 'panzoom-exclude',
-
-        toolbar: {
-          enabled: true,
-        },
-      },
     }),
   plugins: [
     [
@@ -250,6 +224,5 @@ module.exports = {
         ],
       }),
     ],
-    '@r74tech/docusaurus-plugin-panzoom',
   ],
 };

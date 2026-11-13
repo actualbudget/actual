@@ -61,6 +61,7 @@ export default function Hello() {
               dark: '/img/homepage/actual-main-budget-dark.webp',
             }}
             alt="Actual Budget"
+            loading="lazy"
           />
           <Button
             to="https://demo.actualbudget.org/"
@@ -332,6 +333,7 @@ function BigFeature({ title, media, srcLight, srcDark = null, children }) {
             light: srcLight,
             dark: imgDark,
           }}
+          loading="lazy"
         />
       )}
     </div>
