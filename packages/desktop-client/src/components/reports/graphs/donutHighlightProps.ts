@@ -1,7 +1,7 @@
 /**
- * What Recharts passes a donut's active sector, and how to draw around it.
+ * What Recharts passes a donut's selected sector, and how to draw its highlight.
  */
-export type DonutActiveShapeProps = {
+export type DonutHighlightProps = {
   cx: number;
   cy: number;
   midAngle: number;
