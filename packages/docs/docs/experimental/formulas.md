@@ -3,15 +3,19 @@
 <ExperimentalFeatureWarning issueId="5949" />
 
 ::::warning
-All functionality described here may not be available in the latest stable release. See [Experimental Features](./index.md) for instructions to enable experimental features. Use the `nightly` images for the latest implementation.
+All functionality described here may not be available in the latest stable release.
+See [Experimental Features](./index.md) for instructions to enable experimental features. Use the `nightly` images for
+the latest implementation.
 ::::
 
 Excel formula mode adds two related features:
 
-- **Formula cards**: a dashboard/report card that evaluates an Excel-style formula, including totals from custom queries.
+- **Formula cards**: a dashboard/report card that evaluates an Excel-style formula, including totals from custom
+  queries.
 - **Rule formulas**: in the Rules editor, some “set field” actions can be driven by a formula instead of a fixed value.
 
-Under the hood, Actual evaluates formulas using [HyperFormula](https://hyperformula.handsontable.com/). Formulas **must start with `=`**.
+Under the hood, Actual evaluates formulas using [HyperFormula](https://hyperformula.handsontable.com/). Formulas **must
+start with `=`**.
 
 ## Enable the feature
 
@@ -41,10 +45,12 @@ Click the card to open the editor (where you can save the widget).
 
 ## Function reference
 
-This list documents formula functions that are useful in Actual. The in-app **autocomplete/hover popover** provides a curated subset of these functions.
+This list documents formula functions that are useful in Actual. The in-app **autocomplete/hover popover** provides a
+curated subset of these functions.
 
 :::tip
-If a function isn’t listed here, it still might work. Actual uses HyperFormula under the hood, so you can also refer to [HyperFormula’s built-in functions list](https://hyperformula.handsontable.com/guide/built-in-functions.html).
+If a function isn’t listed here, it still might work. Actual uses HyperFormula under the hood, so you can also refer
+to [HyperFormula’s built-in functions list](https://hyperformula.handsontable.com/guide/built-in-functions.html).
 :::
 
 | Function                        | Available in | Description                                                                                                                                                           | Syntax example                                                                                                                | Optional params                                                                                                 |
@@ -149,6 +155,9 @@ If a function isn’t listed here, it still might work. Actual uses HyperFormula
 | `RATE`                          | Query        | Calculates interest rate per period.                                                                                                                                  | `=RATE(60, -200, 10000)`                                                                                                      | —                                                                                                               |
 | `REPLACE`                       | Query, Rules | Replaces substring at specified position.                                                                                                                             | `=REPLACE(notes, 1, 5, "")`                                                                                                   | —                                                                                                               |
 | `REPT`                          | Query, Rules | Repeats text specified number of times.                                                                                                                               | `=REPT("*", 10)`                                                                                                              | —                                                                                                               |
+| `REGEXEXTRACT`                  | Query, Rules | Extracts text matching a regular expression.                                                                                                                          | `=REGEXEXTRACT(notes, "foo")`                                                                                                 | `flags` (default `""`) For example: "g" (Global), "i" (Case-insensitive).                                       |
+| `REGEXMATCH`                    | Query, Rules | Returns TRUE if text matches a regular expression.                                                                                                                    | `=REGEXMATCH(notes, "foo")`                                                                                                   | `flags` (default `""`) For example: "g" (Global), "i" (Case-insensitive).                                       |
+| `REGEXREPLACE`                  | Query, Rules | Replaces text matching a regular expression.                                                                                                                          | `=REGEXREPLACE(notes, "foo", "bar")`                                                                                          | `replacement` (default `""`), `flags` (default `"g"`)                                                           |
 | `RIGHT`                         | Query, Rules | Returns rightmost characters from text.                                                                                                                               | `=RIGHT(imported_payee, 4)`                                                                                                   | —                                                                                                               |
 | `ROUND`                         | Query, Rules | Rounds a number to specified decimals.                                                                                                                                | `=ROUND(amount, 2)`                                                                                                           | —                                                                                                               |
 | `ROUNDDOWN`                     | Query, Rules | Rounds down to specified decimals.                                                                                                                                    | `=ROUNDDOWN(amount, 0)`                                                                                                       | —                                                                                                               |
@@ -200,13 +209,15 @@ You can override separators and currency display for a single formula:
 =FORMATCURRENCY(1234.5, "€", 2, ".", ",", "after", TRUE())
 ```
 
-The `symbolPosition` argument accepts `"before"` or `"after"`. The `spaceBetweenAmountAndSymbol` argument accepts `TRUE()` or `FALSE()`.
+The `symbolPosition` argument accepts `"before"` or `"after"`. The `spaceBetweenAmountAndSymbol` argument accepts
+`TRUE()` or `FALSE()`.
 
 ### Use queries with `QUERY("name")` and `QUERY_COUNT("name")`
 
 Formula cards can reference **named queries** that you define in the right-side panel (**Query Definitions**).
 
-- `QUERY("myQuery")` returns the **sum of transaction amounts** for that query’s filters and date range (returned in normal “money” units, e.g. `-123.45`).
+- `QUERY("myQuery")` returns the **sum of transaction amounts** for that query’s filters and date range (returned in
+  normal “money” units, e.g. `-123.45`).
 - If a query name doesn’t exist, it evaluates as **0**.
 
 Example:
@@ -219,7 +230,8 @@ Example:
 
 Formula cards can also reference an account's **current balance** directly, without setting up a named query:
 
-- `BALANCE_OF("Checking")` returns the account's current balance, in normal "money" units (e.g. `-123.45`), the same as `QUERY()`.
+- `BALANCE_OF("Checking")` returns the account's current balance, in normal "money" units (e.g. `-123.45`), the same as
+  `QUERY()`.
 - Pass a **quoted account id** for a deterministic match, or a **quoted account name** for an exact name match.
 - If the account isn't found, it evaluates as **0**.
 
@@ -230,7 +242,8 @@ Example:
 ```
 
 :::tip
-In rule formulas, `BALANCE_OF` instead returns the running balance **at a specific transaction** — see [Rule formulas](#rule-formulas) below.
+In rule formulas, `BALANCE_OF` instead returns the running balance **at a specific transaction** —
+see [Rule formulas](#rule-formulas) below.
 :::
 
 ### Define a query
@@ -239,15 +252,18 @@ In the Formula editor page, use **Query Definitions**:
 
 1. **Add Query** and give it a name (the name is what you reference in `QUERY("...")`)
 2. Set the date range:
-   - **Live**: keeps the range moving (e.g. “last 3 months”)
-   - **Static**: fixed start/end dates
+
+- **Live**: keeps the range moving (e.g. “last 3 months”)
+- **Static**: fixed start/end dates
+
 3. Add **Filters** (same style as report filters)
 
 <img width="1196" alt="The formula editor with two named queries in the Query Definitions panel, numbered by step" src="/img/experimental/formulas/formulas-editor-and-queries@2x.webp" />
 
 ### Budget queries with `BUDGET_QUERY`
 
-`BUDGET_QUERY` reads directly from your **envelope budget** (budgeted amounts, spending, balances, and goals) for a fixed set of categories over a month range.
+`BUDGET_QUERY` reads directly from your **envelope budget** (budgeted amounts, spending, balances, and goals) for a
+fixed set of categories over a month range.
 
 Syntax:
 
@@ -276,9 +292,11 @@ The result is in normal "money" units (e.g. `-123.45`), the same as `QUERY()`.
 
 #### Using `QUERY_EXTRACT_*` helpers
 
-These three helpers pull values out of a named query definition so you can reuse a query's filters and date range as inputs to `BUDGET_QUERY`:
+These three helpers pull values out of a named query definition so you can reuse a query's filters and date range as
+inputs to `BUDGET_QUERY`:
 
-- **`QUERY_EXTRACT_CATEGORIES("queryName")`** — uses the query's category filters to determine which categories to include. If the query has no category filter, all non-income, non-hidden categories are included.
+- **`QUERY_EXTRACT_CATEGORIES("queryName")`** — uses the query's category filters to determine which categories to
+  include. If the query has no category filter, all non-income, non-hidden categories are included.
 - **`QUERY_EXTRACT_TIMEFRAME_START("queryName")`** — returns the query's start month as a `YYYY-MM` string.
 - **`QUERY_EXTRACT_TIMEFRAME_END("queryName")`** — returns the query's end month as a `YYYY-MM` string.
 
@@ -297,7 +315,8 @@ Example — compare budgeted vs actual spent for a hard-coded month range:
 
 ### Optional: conditional color
 
-Formula cards support an optional **Conditional color** formula (single line) that returns a color string like `red` or `#ff0000`.
+Formula cards support an optional **Conditional color** formula (single line) that returns a color string like `red` or
+`#ff0000`.
 
 - Use the **`RESULT`** variable to reference the main formula result.
 
@@ -347,7 +366,11 @@ Rule formulas evaluate with named variables from the transaction context, includ
 - `reconciled` — Whether transaction is reconciled (`TRUE` or `FALSE`)
 
 :::caution
-Rule formulas used to work in cents, so they had to divide by 100. Formulas you saved back then are not updated for you, and they now produce a result 100 times too small. Open each one and remove the `/ 100`: a formula that read `=amount / 100 * 1.05` becomes `=amount * 1.05`. The same goes for uses of the `INTEGER_TO_AMOUNT` and `AMOUNT_TO_INTEGER` functions, your formula outputs may be off by a factor of 100 for each use. Evaluate your personal formulas as likely you no longer need to use these functions.
+Rule formulas used to work in cents, so they had to divide by 100. Formulas you saved back then are not updated for you,
+and they now produce a result 100 times too small. Open each one and remove the `/ 100`: a formula that read
+`=amount / 100 * 1.05` becomes `=amount * 1.05`. The same goes for uses of the `INTEGER_TO_AMOUNT` and
+`AMOUNT_TO_INTEGER` functions, your formula outputs may be off by a factor of 100 for each use. Evaluate your personal
+formulas as likely you no longer need to use these functions.
 :::
 
 ### Available functions
@@ -359,21 +382,29 @@ Rule formulas used to work in cents, so they had to divide by 100. Formulas you 
 =BALANCE_OF("Checking")
 ```
 
-- `BALANCE_OF("…")` — Running balance for another account, using the same cutoff as `balance` (same `date`, `sort_order`, and `id` ordering as the current transaction).
-- Pass a **quoted account id** (matches an account id in your budget) for a deterministic result, or a **quoted account name** for an exact name match. If the account name is ambiguous (duplicates), the first match is used.
+- `BALANCE_OF("…")` — Running balance for another account, using the same cutoff as `balance` (same `date`,
+  `sort_order`, and `id` ordering as the current transaction).
+- Pass a **quoted account id** (matches an account id in your budget) for a deterministic result, or a **quoted account
+  name** for an exact name match. If the account name is ambiguous (duplicates), the first match is used.
 - If the account is not found, the value is **0**.
 - For the **current** transaction’s account, use the `balance` variable instead of `BALANCE_OF`.
-- `BALANCE_OF` is also available in Formula cards, where it returns the account's current balance instead — see [Account balances with `BALANCE_OF("name")`](#account-balances-with-balance_ofname) above.
+- `BALANCE_OF` is also available in Formula cards, where it returns the account's current balance instead —
+  see [Account balances with `BALANCE_OF("name")`](#account-balances-with-balance_ofname) above.
 
 **Loan payment functions (`IPMT`, `PPMT`, `NPER`, `CUMIPMT`, `CUMPRINC`):**
 
-If you record a loan (mortgage, auto loan, etc.) payment as a single transaction, these functions let a rule split it into interest/principal or show progress, based on the transaction's own `date`. They need a **period number**, which you can derive from the loan's start date with `DATEDIF`:
+If you record a loan (mortgage, auto loan, etc.) payment as a single transaction, these functions let a rule split it
+into interest/principal or show progress, based on the transaction's own `date`. They need a **period number**, which
+you can derive from the loan's start date with `DATEDIF`:
 
 ```text
 =IPMT(0.05/12, DATEDIF("2024-01-01", date, "M") + 1, 360, -300000)
 ```
 
-This computes the interest portion of the payment for the month of the current transaction, for a 30-year (360-month) loan that started 2024-01-01 at 5% annual interest on a $300,000 principal. Swap `IPMT` for `PPMT` to get the principal portion instead, or use `CUMIPMT`/`CUMPRINC` with a `start_period` of `1` and that same period as `end_period` to get interest/principal paid to date.
+This computes the interest portion of the payment for the month of the current transaction, for a 30-year (360-month)
+loan that started 2024-01-01 at 5% annual interest on a $300,000 principal. Swap `IPMT` for `PPMT` to get the principal
+portion instead, or use `CUMIPMT`/`CUMPRINC` with a `start_period` of `1` and that same period as `end_period` to get
+interest/principal paid to date.
 
 These functions return their result in the same units you pass in, so write the principal as `-300000`.
 
