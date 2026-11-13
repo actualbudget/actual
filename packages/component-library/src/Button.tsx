@@ -181,6 +181,10 @@ const buttonSizeOverrides: Record<
     bare: getButtonSizeOverrides('extra-large', true),
     framed: getButtonSizeOverrides('extra-large', false),
   },
+  touch: {
+    bare: getButtonSizeOverrides('touch', true),
+    framed: getButtonSizeOverrides('touch', false),
+  },
 };
 
 type ButtonProps = Omit<
@@ -190,6 +194,7 @@ type ButtonProps = Omit<
   variant?: ButtonVariant;
   size?: ComponentSize;
   bounce?: boolean;
+  block?: boolean;
   children?: ReactNode;
 };
 
@@ -202,6 +207,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       variant = 'normal',
       bounce = true,
       size,
+      block,
       ...restProps
     } = props;
 
@@ -230,10 +236,11 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           WebkitAppRegion: 'no-drag',
           ...styles.smallText,
           ...sizeOverrides,
+          ...(block ? { width: '100%', alignSelf: 'stretch' } : null),
           '&[data-hovered]': _getHoveredStyles(variant),
           '&[data-pressed]': _getActiveStyles(variant, bounce),
         }),
-      [bounce, variant, variantWithDisabled, sizeOverrides],
+      [bounce, block, variant, variantWithDisabled, sizeOverrides],
     );
 
     const className = restProps.className;

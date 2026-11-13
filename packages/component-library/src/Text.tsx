@@ -10,17 +10,20 @@ import {
   type ComponentSize,
 } from './tokens';
 
+// `touch` is a control concept; text elements don't accept it.
+type TextSize = Exclude<ComponentSize, 'touch'>;
+
 type TextProps = Omit<HTMLProps<HTMLSpanElement>, 'size' | 'style'> & {
   innerRef?: Ref<HTMLSpanElement>;
   className?: string;
-  size?: ComponentSize;
+  size?: TextSize;
   children?: ReactNode;
   style?: CSSProperties;
 };
 
 // Per-size typography, varying by breakpoint via media queries (no
 // hooks). Precomputed once at module level so rendering stays cheap.
-const getTextSizeStyles = (size: ComponentSize): Record<string, unknown> => {
+const getTextSizeStyles = (size: TextSize): Record<string, unknown> => {
   const text = componentSizeText[size];
 
   const getGroupStyles = (group: keyof typeof text) => {
@@ -42,7 +45,7 @@ const textSizeStyles = {
   medium: getTextSizeStyles('medium'),
   large: getTextSizeStyles('large'),
   'extra-large': getTextSizeStyles('extra-large'),
-} satisfies Record<ComponentSize, Record<string, unknown>>;
+} satisfies Record<TextSize, Record<string, unknown>>;
 
 export const Text = forwardRef<HTMLSpanElement, TextProps>((props, ref) => {
   const { className = '', style, innerRef, size, ...restProps } = props;

@@ -5,6 +5,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
+import { IconButton } from '@actual-app/components/icon-button';
 import {
   SvgAdd,
   SvgDelete,
@@ -244,24 +245,18 @@ function EditorButtons({ onAdd, onDelete }) {
   return (
     <>
       {onDelete && (
-        <Button
-          variant="bare"
+        <IconButton
+          size="small"
           onPress={onDelete}
-          style={{ padding: 7 }}
           aria-label={t('Delete entry')}
         >
           <SvgSubtract style={{ width: 8, height: 8, color: 'inherit' }} />
-        </Button>
+        </IconButton>
       )}
       {onAdd && (
-        <Button
-          variant="bare"
-          onPress={onAdd}
-          style={{ padding: 7 }}
-          aria-label={t('Add entry')}
-        >
+        <IconButton size="small" onPress={onAdd} aria-label={t('Add entry')}>
           <SvgAdd style={{ width: 10, height: 10, color: 'inherit' }} />
-        </Button>
+        </IconButton>
       )}
     </>
   );
