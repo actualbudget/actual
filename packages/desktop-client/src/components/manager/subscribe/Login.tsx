@@ -19,6 +19,7 @@ import { isElectron } from '@actual-app/core/shared/environment';
 import * as Platform from '@actual-app/core/shared/platform';
 import type { OpenIdConfig } from '@actual-app/core/types/models';
 
+import { getCurrentDomainUrl } from '#base-path';
 import { Link } from '#components/common/Link';
 import {
   useAvailableLoginMethods,
@@ -105,7 +106,7 @@ async function getOpenIdReturnUrl() {
   if (Platform.isNativeMobileApp) {
     return 'actualbudget://localhost';
   }
-  return window.location.origin;
+  return getCurrentDomainUrl(window.location.origin, import.meta.env.BASE_URL);
 }
 
 function OpenIdLogin({ setError }) {

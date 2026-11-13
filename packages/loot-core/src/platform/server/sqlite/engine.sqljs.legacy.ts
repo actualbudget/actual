@@ -62,6 +62,10 @@ export function setWasmBinary(binary: ArrayBuffer | Uint8Array) {
   wasmBinaryOverride = binary;
 }
 
+export function getSqlWasmUrl(baseURL: string, file = 'sql-wasm.wasm') {
+  return `${baseURL.replace(/\/?$/, '/')}${file}`;
+}
+
 export async function init({
   baseURL = process.env.PUBLIC_URL,
   wasmBinary = wasmBinaryOverride,
@@ -70,7 +74,7 @@ export async function init({
   // we're returning a real one for correct semantics
   return new Promise((resolve, reject) => {
     initSqlJS({
-      locateFile: file => baseURL + file,
+      locateFile: file => getSqlWasmUrl(baseURL, file),
       ...(wasmBinary ? { wasmBinary: wasmBinary as ArrayBuffer } : {}),
     }).then(
       sql => {
