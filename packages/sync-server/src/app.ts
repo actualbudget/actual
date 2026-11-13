@@ -15,6 +15,7 @@ import * as apiKeysApp from './app-api-keys';
 import * as corsApp from './app-cors-proxy';
 import * as enableBankingApp from './app-enablebanking/app-enablebanking';
 import * as goCardlessApp from './app-gocardless/app-gocardless';
+import * as oauthApp from './app-oauth';
 import * as openidApp from './app-openid';
 import * as pluggai from './app-pluggyai/app-pluggyai';
 import * as secretApp from './app-secrets';
@@ -65,6 +66,11 @@ app.use(
 app.use('/sync', syncApp.handlers);
 app.use('/account', accountApp.handlers);
 app.use('/api-keys', apiKeysApp.handlers);
+app.use('/oauth', oauthApp.handlers);
+app.get(
+  '/.well-known/oauth-authorization-server',
+  oauthApp.authorizationServerMetadata,
+);
 app.use('/gocardless', goCardlessApp.handlers);
 app.use('/simplefin', simpleFinApp.handlers);
 app.use('/pluggyai', pluggai.handlers);
@@ -153,6 +159,27 @@ const csp = [
   "font-src 'self' data:",
   `connect-src ${connectSrc}`,
 ].join('; ');
+
+// Consent is a separate React entry point without cross-origin isolation.
+app.get('/oauth/authorize', async (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  res.set(
+    'Content-Security-Policy',
+    `${csp.replace("img-src 'self' blob: data:", "img-src 'self' blob: data: https:")}; frame-ancestors 'none'; form-action 'self'`,
+  );
+  res.set('Referrer-Policy', 'no-referrer');
+  res.set('X-Frame-Options', 'DENY');
+  if (isDev) {
+    const proxy = await import('http-proxy-middleware');
+    void proxy.createProxyMiddleware({
+      target: 'http://localhost:3001',
+      changeOrigin: true,
+      pathRewrite: () => '/oauth-consent.html',
+    })(req, res, next);
+    return;
+  }
+  res.sendFile('oauth-consent.html', { root: config.get('webRoot') });
+});
 
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
