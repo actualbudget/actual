@@ -10,6 +10,7 @@ import type {
 import { AreaGraph } from './graphs/AreaGraph';
 import { BarGraph } from './graphs/BarGraph';
 import { BarLineGraph } from './graphs/BarLineGraph';
+import { ComparisonDonutGraph } from './graphs/ComparisonDonutGraph';
 import { DonutGraph } from './graphs/DonutGraph';
 import { LineGraph } from './graphs/LineGraph';
 import { StackedBarGraph } from './graphs/StackedBarGraph';
@@ -31,6 +32,7 @@ type ChooseGraphProps = {
   showHiddenCategories?: boolean;
   showOffBudget?: boolean;
   showTrendLines?: boolean;
+  showAmounts?: boolean;
   showTooltip?: boolean;
   intervalsCount: number;
 };
@@ -50,6 +52,7 @@ export function ChooseGraph({
   showHiddenCategories = false,
   showOffBudget = false,
   showTrendLines = false,
+  showAmounts = false,
   showTooltip = true,
   intervalsCount,
 }: ChooseGraphProps) {
@@ -111,6 +114,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
+        showAmounts={showAmounts}
       />
     );
   }
@@ -127,6 +131,7 @@ export function ChooseGraph({
         showHiddenCategories={showHiddenCategories}
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
+        showAmounts={showAmounts}
       />
     );
   }
@@ -136,6 +141,21 @@ export function ChooseGraph({
         style={graphStyle}
         compact={compact}
         data={data}
+        showTooltip={showTooltip}
+      />
+    );
+  }
+  if (graphType === 'DonutGraph' && data.comparison) {
+    return (
+      <ComparisonDonutGraph
+        style={graphStyle}
+        data={data}
+        filters={filters}
+        groupBy={groupBy}
+        balanceTypeOp={balanceTypeOp}
+        viewLabels={viewLabels}
+        showHiddenCategories={showHiddenCategories}
+        showOffBudget={showOffBudget}
         showTooltip={showTooltip}
       />
     );
@@ -169,6 +189,7 @@ export function ChooseGraph({
         showTrendLines={showTrendLines}
         showTooltip={showTooltip}
         interval={interval}
+        showAmounts={showAmounts}
       />
     );
   }
@@ -186,6 +207,7 @@ export function ChooseGraph({
         showOffBudget={showOffBudget}
         showTooltip={showTooltip}
         interval={interval}
+        showAmounts={showAmounts}
       />
     );
   }

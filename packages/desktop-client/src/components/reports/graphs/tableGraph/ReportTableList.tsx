@@ -40,6 +40,7 @@ export function ReportTableList({
               netDebts: interval.netDebts,
               totalTotals: interval.totalTotals,
               totalBudgeted: interval.totalBudgeted,
+              comparison: interval.comparison,
               // Keeps the interval's date range available for drilldowns
               intervalData: [interval],
               categories: [],

@@ -6,8 +6,56 @@ export type CustomReportTagScope =
 
 export type CustomReportMetadata = Record<string, unknown>;
 
+// What the report's data is offset against: a date range, by its daily
+// average, or each interval's own window an offset back in time
+export type CustomReportComparison = {
+  enabled: boolean;
+  dateRange: string;
+  isDateStatic: boolean;
+  startDate: string;
+  endDate: string;
+  includeCurrentInterval: boolean;
+  // Project amounts so far over the report's whole range, by days elapsed
+  projectToFullPeriod: boolean;
+  // Draw graphs as changes from the comparison, rather than as amounts with the
+  // comparison drawn in. Optional since older reports don't store it.
+  showChanges?: boolean;
+  // The amount rows sort by. Without it, rows sort by the current amount when
+  // drawing amounts, and by the change when drawing changes.
+  sortAmount?: CustomReportComparisonSortAmount;
+  // Compare against what was spent over the range, or the average of what
+  // was budgeted for it. Optional since older reports don't store it.
+  source?: CustomReportComparisonSource;
+  // Optional since older reports don't store them, and those use a range
+  mode?: CustomReportComparisonMode;
+  offsetCount?: number;
+  offsetUnit?: CustomReportComparisonOffsetUnit;
+  // Scale each offset window to its interval's number of days, so windows
+  // of different lengths compare by their daily average
+  compareDailyAverage?: boolean;
+};
+
+export type CustomReportComparisonSource = 'actual' | 'budgeted';
+
+export type CustomReportComparisonMode = 'range' | 'offset';
+
+export type CustomReportComparisonSortAmount =
+  | 'current'
+  | 'comparison'
+  | 'change';
+
+// Intervals are the report's own interval, and ranges its whole date range
+export type CustomReportComparisonOffsetUnit =
+  | 'days'
+  | 'weeks'
+  | 'months'
+  | 'years'
+  | 'intervals'
+  | 'ranges';
+
 type CustomReportStoredMetadata = CustomReportMetadata & {
   tagScope?: CustomReportTagScope;
+  comparison?: CustomReportComparison;
 };
 
 export type CustomReportEntity = {
@@ -30,6 +78,7 @@ export type CustomReportEntity = {
   showUncategorized: boolean;
   trimIntervals: boolean;
   showTrendLines: boolean;
+  comparison?: CustomReportComparison;
   graphType: string;
   conditions?: RuleConditionEntity[];
   conditionsOp: 'and' | 'or';
@@ -46,6 +95,31 @@ export type balanceTypeOpType =
   | 'totalBudgeted';
 
 export type sortByOpType = 'asc' | 'desc' | 'name' | 'budget';
+
+export type ReportValues = Record<balanceTypeOpType, number>;
+
+// What an amount offset against a comparison was built from
+export type ComparisonBreakdown = {
+  // The comparison's daily average over the same number of days
+  expected: ReportValues;
+  actual: ReportValues;
+  // A row's or total's actual amount projected over the whole range from its
+  // pace so far. Single intervals aren't projected.
+  projected?: ReportValues;
+  // The comparison over an average-length interval, for tables and summaries
+  perInterval?: ReportValues;
+  // The comparison over an interval that hasn't started, which compares
+  // nothing yet but lets charts draw the comparison ahead
+  upcoming?: ReportValues;
+  // The actual amount at its pace so far over an average-length interval, to
+  // compare against perInterval
+  pacePerInterval?: ReportValues;
+  // The comparison is the average of what was budgeted, not what was spent
+  budgeted?: boolean;
+  // An offset comparison's window is before the earliest transaction, so there
+  // is nothing to compare against
+  noData?: boolean;
+};
 
 export type SpendingMonthEntity = Record<
   string | number,
@@ -100,6 +174,9 @@ export type DataEntity = {
   totalTotals: number;
   totalBudgeted: number;
   scopeTagNames?: string[];
+  comparison?: ComparisonBreakdown;
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
 };
 
 export type LegendEntity = {
@@ -122,6 +199,14 @@ export type IntervalEntity = {
   netDebts: number;
   totalTotals: number;
   totalBudgeted: number;
+  comparison?: ComparisonBreakdown;
+  // When graphs draw amounts against a comparison: the interval's amount, which
+  // is null before it starts, and its comparison
+  amount?: number | null;
+  comparisonAmount?: number | null;
+  // With an offset comparison: the past window this interval is compared with
+  comparisonStartDate?: string;
+  comparisonEndDate?: string;
 };
 
 export type GroupedEntity = {
@@ -138,6 +223,7 @@ export type GroupedEntity = {
   totalBudgeted: number;
   categories?: GroupedEntity[];
   bucketTagNames?: string[];
+  comparison?: ComparisonBreakdown;
 };
 
 export type Interval = {

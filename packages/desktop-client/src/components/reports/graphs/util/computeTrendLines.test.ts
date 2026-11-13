@@ -2,7 +2,7 @@ import type { DataEntity, LegendEntity } from '@actual-app/core/types/models';
 
 import { computeTrendLines } from './computeTrendLines';
 
-function point(date: string, values: Record<string, number>) {
+function point(date: string, values: Record<string, number | null>) {
   return {
     date,
     totalAssets: 0,
@@ -95,5 +95,62 @@ describe('computeTrendLines', () => {
     expect(result).toHaveLength(2);
     expect(result[0].end.y).toBeCloseTo(20);
     expect(result[1].end.y).toBeCloseTo(60);
+  });
+
+  describe('with a pace interval', () => {
+    // In test mode, monthUtils.currentDay() returns '2017-01-01'
+    const dated = (
+      intervalStartDate: string,
+      intervalEndDate: string,
+      a: number | null,
+    ) => ({
+      ...point(intervalStartDate, { a }),
+      intervalStartDate,
+      intervalEndDate,
+    });
+
+    it('scales intervals the range cuts short to a full interval', () => {
+      const result = computeTrendLines(
+        [
+          dated('2016-12-01', '2016-12-03', 30),
+          dated('2016-12-04', '2016-12-10', 70),
+          dated('2016-12-11', '2016-12-17', 70),
+        ],
+        [series()],
+        'Weekly',
+      );
+
+      // Three days of 10 a day is a 70 week, so the line is flat
+      expect(result[0].start.y).toBeCloseTo(70);
+      expect(result[0].end.y).toBeCloseTo(70);
+    });
+
+    it('leaves out intervals that have not started', () => {
+      const result = computeTrendLines(
+        [
+          dated('2016-11-01', '2016-11-30', 10),
+          dated('2016-12-01', '2016-12-31', 20),
+          dated('2017-02-01', '2017-02-28', 0),
+        ],
+        [series()],
+        'Monthly',
+      );
+
+      expect(result[0].end.x).toBe('2016-12-01');
+    });
+
+    it('leaves out values marked as not started yet', () => {
+      const result = computeTrendLines(
+        [
+          point('Jan', { a: 10 }),
+          point('Feb', { a: 20 }),
+          point('Mar', { a: null }),
+        ],
+        [series()],
+        'Monthly',
+      );
+
+      expect(result[0].end).toEqual({ x: 'Feb', y: 20 });
+    });
   });
 });
