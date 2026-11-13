@@ -19,9 +19,11 @@ import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { useTrueLayerStatus } from '#hooks/useTrueLayerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
+import { authorizeBank as authorizeTrueLayer } from '#truelayer';
 
 import { BUILT_IN_BANK_SYNC_PROVIDERS } from './bankSyncUtils';
 
@@ -118,12 +120,25 @@ export function useBuiltInBankSyncProviders({
   const [loadingAkahuAccounts, setLoadingAkahuAccounts] = useState(false);
 
   const enableBankingEnabled = useFeatureFlag('enableBanking');
+  const trueLayerEnabled = useFeatureFlag('trueLayerBankSync');
   const { configuredGoCardless } = useGoCardlessStatus();
   const { simpleFinStatus, setSimpleFinStatus } = useSimpleFinStatus();
   const { pluggyAiStatus, setPluggyAiStatus } = usePluggyAiStatus();
   const { configuredAkahu } = useAkahuStatus();
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
+  const { configuredTrueLayer, isLoading: isTrueLayerLoading } =
+    useTrueLayerStatus(trueLayerEnabled);
+
+  const [isTrueLayerSetupComplete, setIsTrueLayerSetupComplete] = useState<
+    boolean | null
+  >(configuredTrueLayer);
+  const [prevConfiguredTrueLayer, setPrevConfiguredTrueLayer] =
+    useState(configuredTrueLayer);
+  if (configuredTrueLayer !== prevConfiguredTrueLayer) {
+    setPrevConfiguredTrueLayer(configuredTrueLayer);
+    setIsTrueLayerSetupComplete(configuredTrueLayer);
+  }
 
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
@@ -212,6 +227,19 @@ export function useBuiltInBankSyncProviders({
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
+          },
+        },
+      }),
+    );
+  }, [dispatch]);
+
+  const onTrueLayerInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'truelayer-init',
+          options: {
+            onSuccess: () => setIsTrueLayerSetupComplete(true),
           },
         },
       }),
@@ -372,6 +400,28 @@ export function useBuiltInBankSyncProviders({
     }
   }, [notifyResetFailure]);
 
+  const onTrueLayerReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'truelayer_clientId',
+          value: null,
+        }),
+        'Failed to clear TrueLayer client ID',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'truelayer_clientSecret',
+          value: null,
+        }),
+        'Failed to clear TrueLayer client secret',
+      );
+      setIsTrueLayerSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('TrueLayer', error);
+    }
+  }, [notifyResetFailure]);
+
   const onAkahuReset = useCallback(async () => {
     try {
       await ensureSuccessResponse(
@@ -476,6 +526,35 @@ export function useBuiltInBankSyncProviders({
     simpleFinStatus.configured,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    t,
+    upgradingAccountId,
+  ]);
+
+  const onConnectTrueLayer = useCallback(async () => {
+    if (!isTrueLayerSetupComplete) {
+      onTrueLayerInit();
+      return;
+    }
+
+    try {
+      await authorizeTrueLayer(dispatch, upgradingAccountId);
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact TrueLayer'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+      onTrueLayerInit();
+    }
+  }, [
+    dispatch,
+    isTrueLayerSetupComplete,
+    onTrueLayerInit,
     t,
     upgradingAccountId,
   ]);
@@ -661,6 +740,7 @@ export function useBuiltInBankSyncProviders({
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
+    trueLayer: Boolean(isTrueLayerSetupComplete),
   } satisfies Record<BankSyncProviders, boolean>;
 
   const providers = useMemo<BuiltInBankSyncProviderState[]>(() => {
@@ -755,6 +835,24 @@ export function useBuiltInBankSyncProviders({
       });
     }
 
+    if (trueLayerEnabled) {
+      baseProviders.push({
+        id: 'trueLayer',
+        displayName: 'TrueLayer',
+        description: t(
+          'Link a UK bank account via TrueLayer using your own TrueLayer application.',
+        ),
+        isConfigured: configuredProviders.trueLayer,
+        credentialSource: 'global',
+        supportsPerBudgetFile: false,
+        canConfigure: canConfigureProviders,
+        isLoading: isTrueLayerLoading,
+        onConfigure: onTrueLayerInit,
+        onLink: onConnectTrueLayer,
+        onReset: onTrueLayerReset,
+      });
+    }
+
     return baseProviders;
   }, [
     canConfigureProviders,
@@ -765,11 +863,14 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
+    configuredProviders.trueLayer,
     pluggyAiStatus,
     simpleFinStatus,
     syncServerStatus,
     enableBankingEnabled,
+    trueLayerEnabled,
     isEnableBankingLoading,
+    isTrueLayerLoading,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,
     onConnectAkahu,
@@ -777,6 +878,7 @@ export function useBuiltInBankSyncProviders({
     onConnectGoCardless,
     onConnectPluggyAi,
     onConnectSimpleFin,
+    onConnectTrueLayer,
     onAkahuInit,
     onAkahuReset,
     onEnableBankingInit,
@@ -787,6 +889,8 @@ export function useBuiltInBankSyncProviders({
     onPluggyAiReset,
     onSimpleFinInit,
     onSimpleFinReset,
+    onTrueLayerInit,
+    onTrueLayerReset,
     t,
   ]);
 

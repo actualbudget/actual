@@ -19,6 +19,7 @@ import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useFailedAccounts } from '#hooks/useFailedAccounts';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import { authorizeBank as authorizeTrueLayer } from '#truelayer';
 
 function useErrorMessage() {
   const { t } = useTranslation();
@@ -120,6 +121,8 @@ export function AccountSyncCheck() {
       if (acc.account_id) {
         if (acc.account_sync_source === 'enableBanking') {
           void authorizeEnableBanking(dispatch);
+        } else if (acc.account_sync_source === 'trueLayer') {
+          void authorizeTrueLayer(dispatch);
         } else if (acc.account_sync_source === 'goCardless') {
           void authorizeGoCardless(dispatch);
         }

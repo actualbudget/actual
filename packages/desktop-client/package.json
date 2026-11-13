@@ -29,6 +29,7 @@
     "#undo": "./src/undo/index.ts",
     "#global-events": "./src/global-events.ts",
     "#enablebanking": "./src/enablebanking.ts",
+    "#truelayer": "./src/truelayer.ts",
     "#gocardless": "./src/gocardless.ts",
     "#i18n": "./src/i18n.ts",
     "#mocks": "./src/mocks.tsx",

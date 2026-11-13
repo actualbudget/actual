@@ -14,6 +14,7 @@ import type {
   RuleEntity,
   ScheduleEntity,
   SyncServerEnableBankingAccount,
+  SyncServerTrueLayerAccount,
   TransactionEntity,
   UserAccessEntity,
   UserEntity,
@@ -154,6 +155,28 @@ export type Modal =
       name: 'enablebanking-init';
       options: {
         onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'truelayer-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
+      name: 'truelayer-external-msg';
+      options: {
+        onMoveExternal: (
+          onStateReady: (state: string) => void,
+        ) => Promise<
+          | { error: 'timeout' }
+          | { error: 'unknown'; message?: string }
+          | { data: { accounts: SyncServerTrueLayerAccount[] } }
+        >;
+        onClose?: (() => void) | undefined;
+        onSuccess: (data: {
+          accounts: SyncServerTrueLayerAccount[];
+        }) => Promise<void>;
       };
     }
   | {
