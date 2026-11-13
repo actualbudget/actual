@@ -64,7 +64,7 @@ self.addEventListener('message', async event => {
         const isDev = !!msg.isDev;
         // let version = msg.version;
         const hash = msg.hash;
-        const storageBackend = msg.storageBackend ?? 'legacy';
+        const storageBackend = msg.storageBackend ?? 'opfs';
 
         // A single failed importScripts bricks the SharedWorker until
         // it's evicted, so retry in production too.
