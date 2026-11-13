@@ -121,6 +121,8 @@ export default function Hello() {
           title="Powerful budgeting made simple"
           srcLight="/img/homepage/actual-main-budget.webp"
           srcDark="/img/homepage/actual-main-budget-dark.webp"
+          width={1900}
+          height={1069}
         >
           <strong>
             Save hundreds of dollars a year (at least!) by tracking your
@@ -137,6 +139,8 @@ export default function Hello() {
           title="The fastest way to manage transactions"
           srcLight="/img/homepage/actual-main-transaction.webp"
           srcDark="/img/homepage/actual-main-transaction-dark.webp"
+          width={1900}
+          height={1069}
         >
           Breeze through your transactions and update them easily with a
           streamlined, minimal interface. Categorizing your transactions
@@ -148,6 +152,8 @@ export default function Hello() {
           title="Oh my, the reports"
           srcLight="/img/homepage/actual-report-dashboard-light.webp"
           srcDark="/img/homepage/actual-report-dashboard-dark.webp"
+          width={1440}
+          height={725}
         >
           Intuitive reports give you a quick way to learn about your finances.
           By default, we include net worth and cash flow reports. Actual also
@@ -317,7 +323,15 @@ function MediumFeature({ title, media, src, flip, children }) {
   );
 }
 
-function BigFeature({ title, media, srcLight, srcDark = null, children }) {
+function BigFeature({
+  title,
+  media,
+  srcLight,
+  srcDark = null,
+  width,
+  height,
+  children,
+}) {
   const imgDark = srcDark ? srcDark : srcLight;
   return (
     <div className={classes.bigFeature}>
@@ -333,6 +347,8 @@ function BigFeature({ title, media, srcLight, srcDark = null, children }) {
             light: srcLight,
             dark: imgDark,
           }}
+          width={width}
+          height={height}
           loading="lazy"
         />
       )}

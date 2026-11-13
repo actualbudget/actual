@@ -13718,6 +13718,7 @@ __metadata:
     "@easyops-cn/docusaurus-search-local": "npm:^0.55.3"
     "@mdx-js/react": "npm:^3.1.1"
     "@types/react": "npm:^19.3.0"
+    image-size: "npm:^2.0.2"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.3.0"
     react-dom: "npm:19.3.0"
