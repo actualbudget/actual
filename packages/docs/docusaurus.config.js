@@ -236,6 +236,18 @@ module.exports = {
         indexDocs: true,
         indexPages: false,
         language: 'en',
+        ignoreFiles: [
+          // Release notes are left out of search: they make up over a third of the index
+          /^blog\/release-/,
+          'docs/upcoming-release-notes',
+          // Blog list pages have no content of their own
+          /^blog\/(page|archive|authors)(\/|$)/,
+        ],
+        ignoreCssSelectors: [
+          // Keep the release notes page findable by its title, but leave its content out of search
+          '.docs-doc-id-releases .theme-doc-markdown > :not(header)',
+          '.docs-doc-id-releases meta[name="description"]',
+        ],
       }),
     ],
     '@r74tech/docusaurus-plugin-panzoom',

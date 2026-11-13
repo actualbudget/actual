@@ -393,7 +393,9 @@ async function downloadEnableBankingTransactions(
   return {
     transactions: all,
     accountBalance: balances,
-    startingBalance,
+    // `null` when the bank reported no balance. Normalize a missing field to
+    // the same, so the strict null checks downstream cover both.
+    startingBalance: startingBalance ?? null,
   };
 }
 
@@ -1160,7 +1162,10 @@ async function processBankSyncDownload(
         currentBalance,
       );
       balanceToUse = Math.round(previousBalance);
-    } else if (acctRow.account_sync_source === 'enableBanking') {
+    } else if (
+      acctRow.account_sync_source === 'enableBanking' &&
+      currentBalance !== null
+    ) {
       const importPending = await aqlQuery(
         q('preferences')
           .filter({ id: `sync-import-pending-${id}` })
@@ -1198,15 +1203,20 @@ async function processBankSyncDownload(
     const payee = await getStartingBalancePayee();
 
     return runMutator(async () => {
-      const initialId = await db.insertTransaction({
-        account: id,
-        amount: balanceToUse,
-        category: acctRow.offbudget === 0 ? payee.category : null,
-        payee: payee.id,
-        date: startingBalanceDate,
-        cleared: true,
-        starting_balance_flag: true,
-      });
+      // Enable Banking reports no balance when the bank refuses the request;
+      // there is then nothing to derive an opening balance from.
+      const initialId =
+        balanceToUse === null
+          ? null
+          : await db.insertTransaction({
+              account: id,
+              amount: balanceToUse,
+              category: acctRow.offbudget === 0 ? payee.category : null,
+              payee: payee.id,
+              date: startingBalanceDate,
+              cleared: true,
+              starting_balance_flag: true,
+            });
 
       const result = await reconcileTransactions(id, transactions, {
         isBankSyncAccount: true,
@@ -1215,7 +1225,7 @@ async function processBankSyncDownload(
       });
       return {
         ...result,
-        added: [initialId, ...result.added],
+        added: initialId === null ? result.added : [initialId, ...result.added],
       };
     });
   }

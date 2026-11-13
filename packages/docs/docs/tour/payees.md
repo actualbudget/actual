@@ -4,7 +4,7 @@ This view lets you manage your Payees. See [Payees](../transactions/payees.md) f
 
 In the overview, you can see which Payees you have used in your system and if they have any associated [rules](./rules.md).
 
-If you have any unused payees, they are readily available by clicking on the _Show n unused payee_.
+If you have any unused payees, choose **Show n unused payees** from the menu at the top right of the Payees page.
 
 ![The Payees page in Settings, listing each payee and its rules](/img/a-tour-of-actual/tour-payees-overview@2x.webp)
 

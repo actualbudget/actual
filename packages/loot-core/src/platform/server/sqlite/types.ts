@@ -19,9 +19,13 @@ export type TransactionOptions = {
   immediate?: boolean;
 };
 
-// What a web sqlite engine provides to the facade in `index.ts`. Engines
-// other than the default register themselves at startup, so a build that
-// never imports one does not bundle it.
+// Which storage backs sqlite on the web. `legacy` is sql.js over absurd-sql
+// (IndexedDB blocks, needs SharedArrayBuffer); the other two use the
+// official sqlite-wasm build, persisted to OPFS or, when sync access
+// handles are unavailable, to IndexedDB as a whole file.
+export type StorageBackend = 'legacy' | 'opfs' | 'memory-idb';
+
+// What a web sqlite engine provides to the facade in `index.ts`
 export type SqliteEngine = {
   init(options: {
     baseURL?: string;

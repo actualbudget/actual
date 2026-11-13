@@ -25,6 +25,11 @@ function parseOfxAmount(amount: string): number | null {
     cleaned = '-' + cleaned.slice(1, -1);
   }
 
+  // OFX allows a comma as the decimal mark ("-19,78")
+  if (!cleaned.includes('.')) {
+    cleaned = cleaned.replace(',', '.');
+  }
+
   // Remove currency symbols and other non-numeric characters except decimal point and minus sign
   cleaned = cleaned.replace(/[^\d.-]/g, '');
 
