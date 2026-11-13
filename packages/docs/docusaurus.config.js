@@ -8,6 +8,7 @@ const defaultOptions = {
   beforeDefaultRemarkPlugins: [
     require('./src/remark/mentions'),
     require('./src/remark/enforce-doc-links'),
+    require('./src/remark/lazy-images'),
   ],
 };
 
