@@ -13,7 +13,8 @@ export async function saveFileInNativeApp(
   dialogTitle?: string,
 ) {
   const { uri } = await Filesystem.writeFile({
-    path: filename,
+    // A slash (e.g. from a budget or account name) would be read as a folder.
+    path: filename.replaceAll('/', '-'),
     directory: Directory.Cache,
     // Text is written as-is; only binary data needs the base64 round trip.
     ...(typeof contents === 'string'
