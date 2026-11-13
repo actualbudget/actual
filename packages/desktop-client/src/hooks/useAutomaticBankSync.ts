@@ -1,12 +1,15 @@
-import { useEffect, useEffectEvent } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 
+import { send } from '@actual-app/core/platform/client/connection';
 import type { AccountEntity } from '@actual-app/core/types/models';
 
 import { useSyncAndDownloadMutation } from '#accounts';
+import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
+import { useDispatch } from '#redux';
 
 // How often we check whether a sync is due. A sync can only ever be late by up
 // to one check, so this just needs to stay comfortably shorter than
@@ -35,7 +38,10 @@ export function parseBankSyncInterval(interval: string | undefined) {
 type IsAutomaticSyncDueArgs = {
   now: number;
   intervalMs: number;
-  /** Epoch ms of the last automatic sync attempted by this device. */
+  /**
+   * Epoch ms of the last automatic sync attempted by this device, including
+   * one that got no further than syncing the budget.
+   */
   lastAutomaticRun: number | undefined;
   accounts: AccountEntity[];
   /** Bank sync goes through the sync server, so it must be reachable. */
@@ -113,33 +119,66 @@ export function useAutomaticBankSync() {
 
   const intervalMs = parseBankSyncInterval(interval);
 
-  const maybeSync = useEffectEvent(() => {
-    const now = Date.now();
+  const dispatch = useDispatch();
+  const isChecking = useRef(false);
 
-    if (
-      !isAutomaticSyncDue({
+  const maybeSync = useEffectEvent(async () => {
+    const now = Date.now();
+    const isDue = (candidates: AccountEntity[]) =>
+      isAutomaticSyncDue({
         now,
         intervalMs,
         lastAutomaticRun,
-        accounts,
+        accounts: candidates,
         isServerOnline: serverStatus === 'online',
-      })
-    ) {
+      });
+
+    if (isChecking.current || !isDue(accounts)) {
       return;
     }
 
-    setLastAutomaticRun(now);
-    syncAndDownload.mutate({});
+    // The local `last_sync` can be stale: the first check runs before the
+    // budget syncs, and the mobile apps wake up with what they had when
+    // suspended. Sync and re-check so another device's sync isn't repeated.
+    isChecking.current = true;
+    try {
+      const { error } = await dispatch(sync()).unwrap();
+      if (error) {
+        // A failed budget sync still counts as an attempt, so it is retried
+        // once per interval rather than on every check.
+        setLastAutomaticRun(now);
+        return;
+      }
+
+      if (!isDue(await send('accounts-get'))) {
+        return;
+      }
+
+      setLastAutomaticRun(now);
+      syncAndDownload.mutate({});
+    } catch {
+      setLastAutomaticRun(now);
+    } finally {
+      isChecking.current = false;
+    }
   });
 
+  // The accounts query starts out with an empty placeholder and the server
+  // status is only known once the user data has loaded, so a check on mount
+  // alone finds nothing to do. Re-check when these become ready rather than
+  // waiting for the next timer tick: the mobile apps suspend the web view in
+  // the background, so that tick may never come.
+  const isReady =
+    intervalMs > 0 && serverStatus === 'online' && accounts.length > 0;
+
   useEffect(() => {
-    if (intervalMs <= 0) {
+    if (!isReady) {
       return;
     }
 
-    maybeSync();
+    void maybeSync();
 
     const timer = setInterval(maybeSync, CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [intervalMs]);
+  }, [isReady]);
 }
