@@ -1,11 +1,10 @@
 import 'fake-indexeddb/auto';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { patchFetchForSqlJS } from '#mocks/util';
 import * as connection from '#platform/server/connection';
 
 import * as storage from './storage';
-import { BudgetInUseError, StorageUnavailableError } from './storage/errors';
+import { StorageUnavailableError } from './storage/errors';
 import { putSqliteFileRow } from './storage/files-store';
 import {
   initWasmEngine,
@@ -82,8 +81,7 @@ async function withOpfsSyncAccess(
   }
 }
 
-// The same contract is expected of both web engines; each describe block
-// below switches the facade to one of them.
+// The engine contract the facade relies on
 function itBehavesLikeSqlite() {
   it('runs statements and reports changes', async () => {
     const db = await openWithSchema();
@@ -335,100 +333,6 @@ function itBehavesLikeSqlite() {
     closeDatabase(copy);
   });
 }
-
-describe('legacy sql.js engine', () => {
-  beforeAll(() => {
-    const baseURL = `${__dirname}/../../../../../../node_modules/@jlongster/sql.js/dist/`;
-    patchFetchForSqlJS(baseURL);
-    return init({ baseURL });
-  });
-
-  itBehavesLikeSqlite();
-
-  it('releases the shared budget lock when the open fails', async () => {
-    let released = false;
-    const request = vi.fn(
-      (_name: string, _options: unknown, callback: () => Promise<void>) =>
-        callback().then(() => {
-          released = true;
-        }),
-    );
-    Object.defineProperty(navigator, 'locks', {
-      value: { request },
-      configurable: true,
-    });
-    try {
-      // No such file in the legacy filesystem, so the open fails after
-      // the lock was taken
-      await expect(
-        openDatabase('/documents/Actual/missing/db.sqlite'),
-      ).rejects.toThrow();
-      await vi.waitFor(() => expect(released).toBe(true));
-    } finally {
-      Object.defineProperty(navigator, 'locks', {
-        value: undefined,
-        configurable: true,
-      });
-    }
-  });
-
-  it('shares the budget lock and reports a budget in use when it is held', async () => {
-    // A fake Web Locks API that times out, as it does while another
-    // worker holds the budget exclusively
-    const request = vi.fn(() =>
-      Promise.reject(new DOMException('aborted', 'AbortError')),
-    );
-    Object.defineProperty(navigator, 'locks', {
-      value: { request },
-      configurable: true,
-    });
-    try {
-      await expect(
-        openDatabase('/documents/Actual/budget-one/db.sqlite'),
-      ).rejects.toBeInstanceOf(BudgetInUseError);
-      expect(request).toHaveBeenCalledWith(
-        'actual-budget:documents-Actual-budget-one',
-        expect.objectContaining({ mode: 'shared' }),
-        expect.any(Function),
-      );
-    } finally {
-      Object.defineProperty(navigator, 'locks', {
-        value: undefined,
-        configurable: true,
-      });
-    }
-  });
-
-  it('refuses a budget that moved to the new storage while it waited', async () => {
-    const path = '/documents/Actual/moved/db.sqlite';
-    await putSqliteFileRow({ filepath: path, contents: '', storage: 'opfs' });
-    await expect(openDatabase(path)).rejects.toBeInstanceOf(
-      StorageUnavailableError,
-    );
-  });
-
-  it('frees the statements it prepares', async () => {
-    const db = await openWithSchema();
-    // The facade hands out an opaque handle; the legacy engine's statements
-    // are plain sql.js objects underneath
-    const prepareSpy = vi.spyOn(
-      db as unknown as { prepare: (sql: string) => { run: () => void } },
-      'prepare',
-    );
-
-    runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 4)");
-    runQuery(db, 'SELECT * FROM numbers', [], true);
-    expectConstraintFailure(() =>
-      runQuery(db, "INSERT INTO numbers (id, number) VALUES ('id1', 5)"),
-    );
-
-    expect(prepareSpy).toHaveBeenCalledTimes(3);
-    for (const { value: statement } of prepareSpy.mock.results) {
-      expect(() => statement.run()).toThrow(/Statement closed/);
-    }
-    closeDatabase(db);
-  });
-});
 
 describe('sqlite-wasm engine', () => {
   beforeAll(() => initWasmEngine());

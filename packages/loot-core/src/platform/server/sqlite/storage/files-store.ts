@@ -64,38 +64,10 @@ export async function deleteSqliteFileRow(path: string): Promise<void> {
   await Promise.all([idb.del(store, path), committed(trans)]);
 }
 
-// Rows of sqlite files held by the sqlite-wasm storage, without their
-// contents. Walks the rows with a cursor so the fallback's whole-file rows
-// are held one at a time rather than all at once.
-export async function listSqliteFileRows(): Promise<
-  Pick<Data, 'filepath' | 'storage'>[]
-> {
-  const { store } = idb.getStore(await idb.openDatabase(), 'files');
-  return new Promise((resolve, reject) => {
-    const rows: Pick<Data, 'filepath' | 'storage'>[] = [];
-    const request = store.openCursor();
-    request.onsuccess = () => {
-      const cursor = request.result;
-      if (!cursor) {
-        resolve(rows);
-        return;
-      }
-      const { filepath, storage } = cursor.value as Data;
-      if (storage != null) {
-        rows.push({ filepath, storage });
-      }
-      cursor.continue();
-    };
-    request.onerror = () => reject(request.error);
-  });
-}
-
 // Whether any sqlite file already moved off absurd-sql, or into `kind` when
-// given. Used at startup: once data lives in the new storage the legacy
-// engine must not be chosen, and once data lives in an OPFS pool the
-// fallback must not be, whatever the flag says. One store then serves every
-// budget: one still in absurd-sql's layout is migrated when opened, and the
-// OPFS store adopts the fallback's rows. Walks the rows with a cursor and
+// given. Used at startup: once data lives in an OPFS pool the fallback must
+// not be chosen, whatever the flag says; the OPFS store then serves every
+// budget and adopts the fallback's rows. Walks the rows with a cursor and
 // stops at the first match, so the fallback's whole-file rows are not all
 // read into memory.
 export async function hasMigratedSqliteFiles(

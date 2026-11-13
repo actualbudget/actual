@@ -1,7 +1,7 @@
 // Build-time source of truth for the "default filesystem" that loot-core's
 // populateDefaultFilesystem() restores at startup: the default budget DB and
 // the migration files, plus the `data-file-index.txt` wire format, and the
-// paths of the SQLite wasm binaries. loot-core owns these files and the
+// path of the SQLite wasm binary. loot-core owns these files and the
 // protocol, so consumers should read them from here rather than reaching into
 // loot-core's tree themselves.
 //
@@ -20,10 +20,6 @@ const require = createRequire(import.meta.url);
 
 export const migrationsDir = path.join(root, 'migrations');
 export const defaultDbPath = path.join(root, 'default-db.sqlite');
-// The legacy engine's wasm (sql.js over absurd-sql), still served by
-// @actual-app/web until that engine is removed
-export const sqlWasmPath =
-  require.resolve('@jlongster/sql.js/dist/sql-wasm.wasm');
 // The official SQLite build the sqlite-wasm engine runs on
 export const sqliteWasmPath =
   require.resolve('@sqlite.org/sqlite-wasm/sqlite3.wasm');

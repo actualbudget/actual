@@ -1,5 +1,3 @@
-import { initBackend as initSQLBackend } from 'absurd-sql/dist/indexeddb-main-thread';
-
 import { logger } from '#platform/server/log';
 import type { StorageBackend } from '#platform/server/sqlite';
 import * as Platform from '#shared/platform';
@@ -62,8 +60,8 @@ export function startBrowserBackend(
   // Each budget gets its own leader tab running a dedicated Worker. All other
   // tabs on the same budget are followers — their messages are routed through
   // the SharedWorker to the leader's Worker.
-  // The SharedWorker never touches SharedArrayBuffer, so this works on all
-  // platforms including iOS/Safari.
+  // The SharedWorker only routes messages, so this works on all platforms
+  // including iOS/Safari.
   if (
     !forceDirectWorker &&
     typeof SharedWorker !== 'undefined' &&
@@ -80,16 +78,9 @@ export function startBrowserBackend(
       // messages (especially 'connect') are queued until connectWorker()
       // sets onmessage, which implicitly starts the port via the bridge.
 
-      if (window.SharedArrayBuffer) {
-        localStorage.removeItem('SharedArrayBufferOverride');
-      }
-
       sharedPort.postMessage({
         type: 'init',
         ...initPayload,
-        isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-          'SharedArrayBufferOverride',
-        ),
       });
       bridge.markInitialized();
 
@@ -108,19 +99,10 @@ export function startBrowserBackend(
   // consumer opted out by omitting createSharedWorker, or the path above threw).
   logger.log('[WorkerBridge] No SharedWorker available, using direct Worker');
   const worker = new Worker(backendWorkerUrl);
-  initSQLBackend(worker);
-
-  if (window.SharedArrayBuffer) {
-    localStorage.removeItem('SharedArrayBufferOverride');
-  }
 
   worker.postMessage({
     type: 'init',
     ...initPayload,
-    hasSharedArrayBuffer: !!window.SharedArrayBuffer,
-    isSharedArrayBufferOverrideEnabled: localStorage.getItem(
-      'SharedArrayBufferOverride',
-    ),
   });
 
   activeHandle = worker;

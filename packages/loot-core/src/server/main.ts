@@ -217,27 +217,11 @@ async function ensureUsable(dir) {
 export async function initApp(
   isDev,
   socketName,
-  {
-    storageBackend = 'legacy',
-    isSharedArrayBufferOverrideEnabled = false,
-  }: {
-    storageBackend?: StorageBackend;
-    isSharedArrayBufferOverrideEnabled?: boolean;
-  } = {},
+  { storageBackend = 'legacy' }: { storageBackend?: StorageBackend } = {},
 ) {
-  const storage = await sqlite.init({ storage: storageBackend });
-  // Only the legacy engine (absurd-sql) needs SharedArrayBuffer, and
-  // whether it runs is known only now: data already moved to the new
-  // storage wins over the flag
-  if (
-    storage === 'legacy' &&
-    typeof SharedArrayBuffer === 'undefined' &&
-    !isSharedArrayBufferOverrideEnabled
-  ) {
-    throw new Error('shared-array-buffer-missing');
-  }
+  await sqlite.init({ storage: storageBackend });
   asyncStorage.init();
-  await fs.init({ storage });
+  await fs.init();
   await setupDocumentsDir();
 
   const keysStr = await asyncStorage.getItem('encrypt-keys');
@@ -279,9 +263,9 @@ export async function initApp(
 
 type BaseInitConfig = {
   /**
-   * Browser build only: which storage holds budgets. `opfs` uses the
-   * origin private file system, falling back to `memory-idb` where
-   * unavailable.
+   * Browser build only: which storage holds budgets. `opfs` uses the origin
+   * private file system, falling back to `memory-idb` where unavailable.
+   * Budgets left by earlier versions are migrated when next opened.
    */
   storageBackend?: StorageBackend;
   /**
@@ -337,9 +321,9 @@ export async function init(config: InitConfig) {
     serverURL = process.env.ACTUAL_SERVER_URL;
   }
 
-  const storage = await sqlite.init({ storage: config?.storageBackend });
+  await sqlite.init({ storage: config?.storageBackend });
   asyncStorage.init({ persist: false });
-  await fs.init({ storage });
+  await fs.init();
   fs._setDocumentDir(dataDir || process.cwd());
 
   if (serverURL) {
