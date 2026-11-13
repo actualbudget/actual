@@ -11,7 +11,8 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'mobileCalculator'
-  | 'monteCarloReport';
+  | 'monteCarloReport'
+  | 'futureBufferMode';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.
@@ -19,6 +20,9 @@ export type FeatureFlag =
 export type SyncedPrefs = Partial<
   Record<
     | 'budgetType'
+    // The month automatic "For next month" was turned on ('YYYY-MM').
+    // Missing or empty means manual mode.
+    | 'futureBufferMode'
     | 'upcomingScheduledTransactionLength'
     | 'firstDayOfWeekIdx'
     | 'dateFormat'

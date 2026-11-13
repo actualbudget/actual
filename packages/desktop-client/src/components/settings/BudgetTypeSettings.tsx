@@ -7,6 +7,7 @@ import { spacing } from '@actual-app/components/tokens';
 import { send } from '@actual-app/core/platform/client/connection';
 
 import { Link } from '#components/common/Link';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 
 import { SettingsRow } from './SettingsRow';
@@ -15,6 +16,10 @@ export function BudgetTypeSettings() {
   const { t } = useTranslation();
   const [budgetType = 'envelope', setBudgetType] = useSyncedPref('budgetType');
   const [isLoading, setIsLoading] = useState(false);
+  // Switching to Tracking turns the automatic buffer off first
+  const { mode: futureBufferMode } = useFutureBufferMode();
+  const turnsOffFutureBuffer =
+    budgetType === 'envelope' && futureBufferMode === 'automatic';
 
   async function onSwitchType() {
     setIsLoading(true);
@@ -64,6 +69,14 @@ export function BudgetTypeSettings() {
               <Trans>Learn more</Trans>
             </Link>
           </Text>
+          {turnsOffFutureBuffer && (
+            <Text style={{ display: 'block', marginTop: spacing.xs }}>
+              <Trans>
+                Automatic "For next month" will be turned off, and each month
+                keeps its current amount as a manual hold.
+              </Trans>
+            </Text>
+          )}
         </>
       }
       control={

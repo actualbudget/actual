@@ -6,6 +6,7 @@ import { MobileSheetBalanceHeader } from '#components/mobile/MobileSheetBalanceH
 import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
 import { MobileSheetSection } from '#components/mobile/MobileSheetSection';
 import { useCategory } from '#hooks/useCategory';
+import { useFutureBufferMode } from '#hooks/useFutureBufferMode';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { envelopeBudget } from '#spreadsheet/bindings';
 
@@ -24,6 +25,9 @@ export function EnvelopeIncomeBalanceMenuModal({
   const carryover = useEnvelopeSheetValue(
     envelopeBudget.catCarryover(categoryId),
   );
+  // Managed and frozen months ignore the income auto-hold
+  const { isManagedMonth, isFrozenMonth } = useFutureBufferMode();
+  const canToggleAutoHold = !isManagedMonth && !isFrozenMonth;
 
   if (!category) {
     return null;
@@ -34,6 +38,7 @@ export function EnvelopeIncomeBalanceMenuModal({
       <MobileSheetBalanceHeader
         label={<Trans>Received</Trans>}
         carryover={envelopeBudget.catCarryover(categoryId)}
+        isCarryoverHidden={!canToggleAutoHold}
         balance={envelopeBudget.catSumAmount(categoryId)}
         goal={envelopeBudget.catGoal(categoryId)}
         budgeted={envelopeBudget.catBudgeted(categoryId)}
@@ -41,10 +46,12 @@ export function EnvelopeIncomeBalanceMenuModal({
         isIncome
       />
       <MobileSheetSection>
-        <MobileSheetRow
-          label={carryover ? t('Disable auto hold') : t('Enable auto hold')}
-          onPress={() => onCarryover(!carryover)}
-        />
+        {canToggleAutoHold && (
+          <MobileSheetRow
+            label={carryover ? t('Disable auto hold') : t('Enable auto hold')}
+            onPress={() => onCarryover(!carryover)}
+          />
+        )}
         <MobileSheetRow
           label={t('View transactions')}
           onPress={() => onShowActivity()}
