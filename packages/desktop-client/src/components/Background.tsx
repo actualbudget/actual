@@ -4,6 +4,8 @@ import { theme } from '@actual-app/components/theme';
 
 import { LoadComponent } from './util/LoadComponent';
 
+const loadBackgroundImage = () => import('./BackgroundImage');
+
 export function Background() {
   return (
     <div
@@ -47,10 +49,7 @@ export function Background() {
             />
           </linearGradient>
         </defs>
-        <LoadComponent
-          importer={() => import('./BackgroundImage')}
-          name="BackgroundImage"
-        />
+        <LoadComponent importer={loadBackgroundImage} name="BackgroundImage" />
       </svg>
     </div>
   );
