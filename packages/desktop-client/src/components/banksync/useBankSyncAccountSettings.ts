@@ -35,6 +35,9 @@ export function useBankSyncAccountSettings(accountId: string) {
   const [savedUpdateDates = false, setSavedUpdateDates] = useSyncedPref(
     `sync-update-dates-${accountId}`,
   );
+  const [savedReverseAmounts = false, setSavedReverseAmounts] = useSyncedPref(
+    `sync-reverse-amounts-${accountId}`,
+  );
 
   const [transactionDirection, setTransactionDirection] =
     useState<TransactionDirection>('payment');
@@ -55,6 +58,9 @@ export function useBankSyncAccountSettings(accountId: string) {
   );
   const [updateDates, setUpdateDates] = useState(
     String(savedUpdateDates) === 'true',
+  );
+  const [reverseAmounts, setReverseAmounts] = useState(
+    String(savedReverseAmounts) === 'true',
   );
 
   const transactionQuery = q('transactions')
@@ -92,6 +98,11 @@ export function useBankSyncAccountSettings(accountId: string) {
     setSavedReimportDeleted(String(reimportDeleted));
     setSavedImportTransactions(String(importTransactions));
     setSavedUpdateDates(String(updateDates));
+    // Only persist once changed, so the option stays unset for accounts where
+    // the experimental feature was never used.
+    if (reverseAmounts !== (String(savedReverseAmounts) === 'true')) {
+      setSavedReverseAmounts(String(reverseAmounts));
+    }
   };
 
   const setMapping = (field: string, value: string) => {
@@ -120,6 +131,8 @@ export function useBankSyncAccountSettings(accountId: string) {
     setImportTransactions,
     updateDates,
     setUpdateDates,
+    reverseAmounts,
+    setReverseAmounts,
     mappings,
     setMapping,
     exampleTransaction,
