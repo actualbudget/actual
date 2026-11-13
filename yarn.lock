@@ -86,10 +86,12 @@ __metadata:
     "@svgr/cli": "npm:^8.1.0"
     "@svgr/core": "npm:^8.1.0"
     "@testing-library/react": "npm:16.3.3"
+    "@types/culori": "npm:^4.0.1"
     "@types/react": "npm:^19.3.0"
     "@typescript/native-preview": "npm:beta"
     "@vitejs/plugin-react": "npm:^6.1.2"
     babel-plugin-react-compiler: "npm:^1.0.0"
+    culori: "npm:^4.0.2"
     eslint-plugin-storybook: "npm:^10.6.2"
     react: "npm:19.3.0"
     react-aria-components: "npm:^1.22.1"
@@ -8433,6 +8435,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/culori@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@types/culori@npm:4.0.1"
+  checksum: 10/34240fce795cdcbeefbbb4ec1fd6adec1c7edafa949131586176649c21d912236d151bf7af53de161454a6c2fa259a4ddd54f204c66e67e8b9ecfd90b9021c68
+  languageName: node
+  linkType: hard
+
 "@types/d3-array@npm:*, @types/d3-array@npm:^3.0.3":
   version: 3.2.2
   resolution: "@types/d3-array@npm:3.2.2"
@@ -12880,6 +12889,13 @@ __metadata:
   version: 6.9.0
   resolution: "csv-stringify@npm:6.9.0"
   checksum: 10/af8bb8999ee023183fcec2b95693cb7fda90466e1961509936eda55886963e4e01ce9109fce7e22da4c2c42ebdaf8bcddf178974c5508e8e2ea12fe42670e524
+  languageName: node
+  linkType: hard
+
+"culori@npm:^4.0.2":
+  version: 4.0.2
+  resolution: "culori@npm:4.0.2"
+  checksum: 10/9d297ca5c6fc86b2637200e1d9edb5a7d1015a2e978a6748781ef53c9577269ce1df96dc0925b0002239c85665ba881a3d580564dfd2807c65ee65dc2e829849
   languageName: node
   linkType: hard
 
