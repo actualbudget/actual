@@ -274,6 +274,15 @@ it.each([
   },
 );
 
+it('rejects shared bank sync when no budget remains accessible', async () => {
+  db.mutate('UPDATE files SET deleted = 1 WHERE id = ?', [budget]);
+  try {
+    expect((await sync('gocardless', sharedKey, null)).status).toBe(401);
+  } finally {
+    db.mutate('UPDATE files SET deleted = 0 WHERE id = ?', [budget]);
+  }
+});
+
 it('lists shared permissions and removes them on revocation', async () => {
   const listed = await request(app)
     .get('/api-keys')

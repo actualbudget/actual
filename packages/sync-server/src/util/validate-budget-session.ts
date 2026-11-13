@@ -30,7 +30,6 @@ export function validateBudgetSession(req: Request, res: Response) {
     return null;
   }
 
-  // Budget grants restrict access, but do not determine whether the key is valid.
   const budgets: { file_id: string }[] = getAccountDb().all(
     'SELECT file_id FROM api_key_budgets WHERE key_id = ?',
     [key.id],
@@ -38,6 +37,11 @@ export function validateBudgetSession(req: Request, res: Response) {
   const apiKeyFileIds = budgets
     .map(budget => budget.file_id)
     .filter(fileId => canAccessActiveFile(fileId, key.user_id));
+
+  if (apiKeyFileIds.length === 0) {
+    res.status(401).send({ status: 'error', reason: 'unauthorized' });
+    return null;
+  }
 
   const allowGlobalBankSync = !!getAccountDb().first(
     "SELECT key_id FROM api_key_permissions WHERE key_id = ? AND permission = 'bank-sync-global'",
