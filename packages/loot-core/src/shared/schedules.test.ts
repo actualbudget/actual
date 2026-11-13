@@ -372,6 +372,48 @@ describe('schedules', () => {
         ),
       ).toBe(occurrenceDate);
     });
+
+    it('clamps the lookback so a daily isapprox schedule does not hide due/missed occurrences', () => {
+      // Regression test for #8558: for a daily `isapprox` schedule the
+      // previous occurrence is yesterday, so the 2-day lookback would let a
+      // transaction posted yesterday mark today as paid, hiding both the
+      // missed days and today's due transaction.
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          {
+            posts_transaction: false,
+            _conditions: [
+              {
+                op: 'isapprox',
+                field: 'date',
+                value: { start: '2024-03-01', frequency: 'daily' },
+              },
+            ],
+          },
+          occurrenceDate,
+        ),
+      ).toBe(occurrenceDate);
+    });
+
+    it('keeps the lookback when the previous occurrence is more than 2 days ago', () => {
+      // A transaction may still be posted a couple of days early for a
+      // monthly schedule.
+      expect(
+        getScheduleOccurrenceMatchStartDate(
+          {
+            posts_transaction: false,
+            _conditions: [
+              {
+                op: 'isapprox',
+                field: 'date',
+                value: { start: '2024-02-10', frequency: 'monthly' },
+              },
+            ],
+          },
+          occurrenceDate,
+        ),
+      ).toBe('2024-03-08');
+    });
   });
 
   describe('indexPostedScheduleTransactions', () => {
