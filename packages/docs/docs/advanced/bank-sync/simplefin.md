@@ -85,6 +85,8 @@ Budget-specific credentials take precedence over global credentials. Resetting t
 
 2. SimpleFIN's data updates one time / day, roughly every 24 hours, for each linked account. The time of day that each bank updates in SimpleFIN may vary, even from day to day (based on the bank and upstream provider, MX).
 
+3. Actual uses SimpleFIN's payee name for the transaction's payee and `imported payee`, and puts SimpleFIN's description, which is usually your bank's own text, in the notes. For example, a credit card payment can arrive with the payee "Chase Credit Card" and the notes "Payment to Chase card ending in 1234". A [rule](../../budgeting/rules/index.md) that should match your bank's text needs a `notes` condition, not an `imported payee` condition.
+
 ### Resetting the Setup Token
 
 To reset your SimpleFIN setup token:
