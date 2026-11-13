@@ -426,5 +426,18 @@
       "#b03b4a"
     ],
     "mode": "light"
+  },
+  {
+    "name": "Tokyo Night",
+    "repo": "williamcorsel/actual-tokyo-night",
+    "colors": [
+      "#1a1b26",
+      "#16161e",
+      "#292e42",
+      "#7aa2f7",
+      "#bb9af7",
+      "#c0caf5"
+    ],
+    "mode": "dark"
   }
 ]
