@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 
+import { AlignedText } from '@actual-app/components/aligned-text';
 import { theme } from '@actual-app/components/theme';
 import { css, keyframes } from '@emotion/css';
 import { t } from 'i18next';
@@ -13,7 +14,9 @@ import {
 } from 'recharts';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
+import { FinancialText } from '#components/FinancialText';
 import { Container } from '#components/reports/Container';
+import type { SankeyNodeDrilldown } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useFormat } from '#hooks/useFormat';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 import { useReducedMotion } from '#hooks/useReducedMotion';
@@ -25,6 +28,11 @@ const fadeIn = keyframes({
 
 // kept invisible until the card scrolls into view
 const hiddenClass = css({ opacity: 0 });
+
+// A link's hit area is its stroke, not its fill (the path itself has
+// `fill="none"`) - below this width a small-value link becomes both
+// invisible and effectively unclickable, so floor it.
+const MIN_LINK_WIDTH = 2;
 
 // stagger the load fade-in left-to-right, keyed off horizontal position
 function fadeInClass(fraction: number) {
@@ -39,6 +47,9 @@ type SankeyGraphNode = SankeyData['nodes'][number] & {
   percentageLabel?: string;
   key: string;
   color?: string;
+  drilldown?: SankeyNodeDrilldown;
+  inflow?: number;
+  outflow?: number;
 };
 
 type SankeyLinkPayload = {
@@ -47,6 +58,12 @@ type SankeyLinkPayload = {
   value: number;
   color?: string;
 };
+
+// A link's two endpoint keys, stable across re-renders even if `data.nodes`/
+// `data.links` get reordered (unlike a raw array index).
+function linkKey(source: { key: string }, target: { key: string }) {
+  return `${source.key}->${target.key}`;
+}
 
 type SankeyLinkProps = {
   sourceX: number;
@@ -62,6 +79,7 @@ type SankeyLinkProps = {
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onDrilldownClick?: (drilldowns: SankeyNodeDrilldown[]) => void;
 };
 
 function SankeyLink({
@@ -78,6 +96,7 @@ function SankeyLink({
   isHovered,
   onMouseEnter,
   onMouseLeave,
+  onDrilldownClick,
 }: SankeyLinkProps) {
   const reducedMotion = useReducedMotion();
 
@@ -85,10 +104,21 @@ function SankeyLink({
     return null;
   }
   const linkColor = payload.color ?? theme.reportsGray;
-  const strokeWidth = linkWidth;
+  const strokeWidth = Math.max(linkWidth, MIN_LINK_WIDTH);
   const strokeOpacity = isHovered ? 1 : 0.6;
   // use the link's midpoint so it eases in with the columns it spans
   const fraction = (sourceX + targetX) / 2 / containerWidth;
+  // a link is drilldownable if either endpoint maps to a real entity -
+  // e.g. a category -> account link filters by both, but a link into an
+  // aggregated "Other" node still filters by whichever side is real
+  const drilldowns = [
+    payload.source.drilldown,
+    payload.target.drilldown,
+  ].filter((drilldown): drilldown is SankeyNodeDrilldown => Boolean(drilldown));
+  const handleClick =
+    onDrilldownClick && drilldowns.length > 0
+      ? () => onDrilldownClick(drilldowns)
+      : undefined;
 
   return (
     <path
@@ -104,7 +134,8 @@ function SankeyLink({
       stroke={linkColor}
       strokeWidth={strokeWidth}
       strokeOpacity={strokeOpacity}
-      cursor="default"
+      cursor={handleClick ? 'pointer' : 'default'}
+      onClick={handleClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{ transition: 'stroke-opacity 0.2s ease' }}
@@ -122,6 +153,9 @@ type SankeyNodeProps = {
   phase: 'waiting' | 'animating' | 'done';
   showPercentages?: boolean;
   color?: string;
+  onDrilldownClick?: (drilldowns: SankeyNodeDrilldown[]) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 function SankeyNode({
   x,
@@ -132,6 +166,9 @@ function SankeyNode({
   containerWidth,
   phase,
   showPercentages,
+  onDrilldownClick,
+  onMouseEnter,
+  onMouseLeave,
 }: SankeyNodeProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
@@ -141,6 +178,11 @@ function SankeyNode({
     return null;
   }
   const isOut = x + width + 6 > containerWidth;
+  const { drilldown } = payload;
+  const handleClick =
+    onDrilldownClick && drilldown
+      ? () => onDrilldownClick([drilldown])
+      : undefined;
 
   const fillColor = payload.color ?? theme.reportsBlue;
 
@@ -174,6 +216,10 @@ function SankeyNode({
             ? fadeInClass(x / containerWidth)
             : hiddenClass
       }
+      cursor={handleClick ? 'pointer' : 'default'}
+      onClick={handleClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <Rectangle x={x} y={y} width={width} height={height} fill={fillColor} />
       {renderText(payload.name || '', height / 2)}
@@ -195,16 +241,20 @@ type SankeyGraphProps = {
   data: SankeyData;
   showTooltip?: boolean;
   showPercentages?: boolean;
+  onDrilldownClick?: (drilldowns: SankeyNodeDrilldown[]) => void;
 };
 export function SankeyGraph({
   style,
   data,
   showTooltip = true,
   showPercentages = false,
+  onDrilldownClick,
 }: SankeyGraphProps) {
   const privacyMode = usePrivacyMode();
   const format = useFormat();
-  const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
+  const [hovered, setHovered] = useState<
+    { type: 'node'; key: string } | { type: 'link'; key: string } | null
+  >(null);
 
   // play the load animation once: wait until the card scrolls into view,
   // run the fade-in, then stay in 'done' so later data changes (filters,
@@ -248,18 +298,39 @@ export function SankeyGraph({
                   containerWidth={width}
                   phase={phase}
                   showPercentages={showPercentages}
+                  onDrilldownClick={onDrilldownClick}
+                  onMouseEnter={() =>
+                    setHovered({
+                      type: 'node',
+                      key: (props.payload as SankeyGraphNode).key,
+                    })
+                  }
+                  onMouseLeave={() => setHovered(null)}
                 />
               )}
-              link={props => (
-                <SankeyLink
-                  {...props}
-                  containerWidth={width}
-                  phase={phase}
-                  isHovered={hoveredLinkIndex === props.index}
-                  onMouseEnter={() => setHoveredLinkIndex(props.index)}
-                  onMouseLeave={() => setHoveredLinkIndex(null)}
-                />
-              )}
+              link={props => {
+                const linkPayload = props.payload as SankeyLinkPayload;
+                return (
+                  <SankeyLink
+                    {...props}
+                    containerWidth={width}
+                    phase={phase}
+                    isHovered={
+                      hovered?.type === 'link' &&
+                      hovered.key ===
+                        linkKey(linkPayload.source, linkPayload.target)
+                    }
+                    onMouseEnter={() =>
+                      setHovered({
+                        type: 'link',
+                        key: linkKey(linkPayload.source, linkPayload.target),
+                      })
+                    }
+                    onMouseLeave={() => setHovered(null)}
+                    onDrilldownClick={onDrilldownClick}
+                  />
+                );
+              }}
               sort={false}
               iterations={128}
               nodePadding={23}
@@ -277,17 +348,55 @@ export function SankeyGraph({
                   content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     const { value = 0, name = '' } = payload[0];
+                    // Looked up by stable key (not array index) so a data
+                    // refresh that reorders nodes/links while the pointer
+                    // stays put can't make this resolve to the wrong one.
                     const tooltipInfo =
-                      hoveredLinkIndex !== null
+                      hovered?.type === 'link'
                         ? (
-                            data.links[hoveredLinkIndex] as {
-                              tooltipInfo?: Array<{
-                                name: string;
-                                value: number;
-                              }>;
-                            }
+                            data.links.find(link => {
+                              const { source, target } = link as {
+                                source: number;
+                                target: number;
+                              };
+                              const sourceNode = data.nodes[source] as
+                                | SankeyGraphNode
+                                | undefined;
+                              const targetNode = data.nodes[target] as
+                                | SankeyGraphNode
+                                | undefined;
+                              return (
+                                sourceNode &&
+                                targetNode &&
+                                linkKey(sourceNode, targetNode) === hovered.key
+                              );
+                            }) as
+                              | {
+                                  tooltipInfo?: Array<{
+                                    name: string;
+                                    value: number;
+                                  }>;
+                                }
+                              | undefined
                           )?.tooltipInfo
                         : undefined;
+                    // `data` is typed as the generic recharts SankeyData, so
+                    // the extra fields convertToSankeyData attaches (same as
+                    // the links cast above) aren't visible without this cast.
+                    const hoveredNode =
+                      hovered?.type === 'node'
+                        ? (data.nodes.find(
+                            node =>
+                              (node as SankeyGraphNode).key === hovered.key,
+                          ) as SankeyGraphNode | undefined)
+                        : undefined;
+                    const showInOutNet =
+                      hoveredNode?.inflow !== undefined &&
+                      hoveredNode?.outflow !== undefined;
+                    const redactedFont = privacyMode
+                      ? t('Redacted Script')
+                      : undefined;
+
                     return (
                       <div
                         className={css({
@@ -300,44 +409,98 @@ export function SankeyGraph({
                           padding: 10,
                         })}
                       >
-                        <div style={{ lineHeight: 1.4 }}>
+                        <div>
                           {name && (
-                            <div style={{ marginBottom: 5 }}>{name}</div>
-                          )}
-                          <div
-                            style={{
-                              fontFamily: privacyMode
-                                ? t('Redacted Script')
-                                : undefined,
-                            }}
-                          >
-                            {format(value, 'financial')}
-                          </div>
-                          {tooltipInfo && tooltipInfo.length > 0 && (
-                            <div
-                              style={{
-                                marginTop: 6,
-                                fontSize: 11,
-                                opacity: 0.7,
-                              }}
-                            >
-                              {tooltipInfo.map(item => (
-                                <div key={item.name}>
-                                  {item.name} (
-                                  <span
-                                    style={{
-                                      fontFamily: privacyMode
-                                        ? t('Redacted Script')
-                                        : undefined,
-                                    }}
-                                  >
-                                    {format(item.value, 'financial')}
-                                  </span>
-                                  )
-                                </div>
-                              ))}
+                            <div style={{ marginBottom: 10 }}>
+                              <strong>{name}</strong>
                             </div>
                           )}
+                          <div style={{ lineHeight: 1.4 }}>
+                            {showInOutNet && hoveredNode ? (
+                              <>
+                                <AlignedText
+                                  left={t('In')}
+                                  right={
+                                    <FinancialText
+                                      style={{
+                                        color: theme.reportsNumberPositive,
+                                        fontFamily: redactedFont,
+                                      }}
+                                    >
+                                      {format(
+                                        hoveredNode.inflow ?? 0,
+                                        'financial',
+                                      )}
+                                    </FinancialText>
+                                  }
+                                />
+                                <AlignedText
+                                  left={t('Out')}
+                                  right={
+                                    <FinancialText
+                                      style={{
+                                        color: theme.reportsNumberNegative,
+                                        fontFamily: redactedFont,
+                                      }}
+                                    >
+                                      {format(
+                                        -(hoveredNode.outflow ?? 0),
+                                        'financial',
+                                      )}
+                                    </FinancialText>
+                                  }
+                                />
+                                <AlignedText
+                                  left={t('Net')}
+                                  right={
+                                    <FinancialText
+                                      style={{ fontFamily: redactedFont }}
+                                    >
+                                      {format(
+                                        (hoveredNode.inflow ?? 0) -
+                                          (hoveredNode.outflow ?? 0),
+                                        'financial',
+                                      )}
+                                    </FinancialText>
+                                  }
+                                  style={{ fontWeight: 600 }}
+                                />
+                              </>
+                            ) : tooltipInfo && tooltipInfo.length > 0 ? (
+                              <>
+                                {tooltipInfo.map(item => (
+                                  <AlignedText
+                                    key={item.name}
+                                    left={item.name}
+                                    right={
+                                      <FinancialText
+                                        style={{ fontFamily: redactedFont }}
+                                      >
+                                        {format(item.value, 'financial')}
+                                      </FinancialText>
+                                    }
+                                  />
+                                ))}
+                                <AlignedText
+                                  left={t('Total')}
+                                  right={
+                                    <FinancialText
+                                      style={{ fontFamily: redactedFont }}
+                                    >
+                                      {format(value, 'financial')}
+                                    </FinancialText>
+                                  }
+                                  style={{ fontWeight: 600 }}
+                                />
+                              </>
+                            ) : (
+                              <FinancialText
+                                style={{ fontFamily: redactedFont }}
+                              >
+                                {format(value, 'financial')}
+                              </FinancialText>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

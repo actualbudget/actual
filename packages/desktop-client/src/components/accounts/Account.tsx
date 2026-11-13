@@ -223,6 +223,7 @@ type AccountInternalProps = {
     | 'uncategorized'
     | undefined;
   filterConditions: RuleConditionEntity[];
+  filterConditionsOp?: 'and' | 'or';
   showBalances?: boolean;
   showNetWorthChart: boolean;
   setShowNetWorthChart: (newValue: boolean) => void;
@@ -330,7 +331,7 @@ class AccountInternal extends PureComponent<
       search: '',
       filterConditions: props.filterConditions || [],
       filterId: undefined,
-      filterConditionsOp: 'and',
+      filterConditionsOp: props.filterConditionsOp || 'and',
       loading: true,
       workingHard: false,
       reconcileAmount: null,
@@ -2160,6 +2161,7 @@ export function Account() {
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
   const filterConditions = location?.state?.filterConditions || [];
+  const filterConditionsOp = location?.state?.filterConditionsOp;
 
   const savedFiters = useTransactionFilters();
 
@@ -2218,6 +2220,7 @@ export function Account() {
             modalShowing={modalShowing}
             accountsSyncing={accountsSyncing}
             filterConditions={filterConditions}
+            filterConditionsOp={filterConditionsOp}
             categoryGroups={categoryGroups}
             accountId={params.id}
             categoryId={location?.state?.categoryId}
