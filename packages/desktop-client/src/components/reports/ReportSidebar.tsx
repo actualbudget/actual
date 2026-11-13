@@ -81,7 +81,10 @@ type ReportSidebarProps = {
   earliestTransaction: TransactionEntity['date'];
   latestTransaction: TransactionEntity['date'];
   firstDayOfWeekIdx: SyncedPrefs['firstDayOfWeekIdx'];
+  referenceDate?: string;
   isComplexCategoryCondition?: boolean;
+  useDashboardDateRange?: boolean;
+  onUseDashboardDateRangeChange?: (value: boolean) => void;
 };
 
 export function ReportSidebar({
@@ -116,7 +119,10 @@ export function ReportSidebar({
   earliestTransaction,
   latestTransaction,
   firstDayOfWeekIdx,
+  referenceDate,
   isComplexCategoryCondition = false,
+  useDashboardDateRange,
+  onUseDashboardDateRangeChange,
 }: ReportSidebarProps) {
   const { t } = useTranslation();
   const locale = useLocale();
@@ -136,6 +142,7 @@ export function ReportSidebar({
         latestTransaction,
         customReportItems.includeCurrentInterval,
         firstDayOfWeekIdx,
+        referenceDate,
       ),
     );
   };
@@ -578,9 +585,18 @@ export function ReportSidebar({
             </strong>
           </Text>
           <View style={{ flex: 1 }} />
+          {onUseDashboardDateRangeChange && (
+            <ModeButton
+              selected={Boolean(useDashboardDateRange)}
+              onSelect={() => onUseDashboardDateRangeChange(true)}
+            >
+              <Trans>Dashboard</Trans>
+            </ModeButton>
+          )}
           <ModeButton
-            selected={!customReportItems.isDateStatic}
+            selected={!useDashboardDateRange && !customReportItems.isDateStatic}
             onSelect={() => {
+              onUseDashboardDateRangeChange?.(false);
               setSessionReport('isDateStatic', false);
               setIsDateStatic(false);
               onSelectRange(customReportItems.dateRange);
@@ -589,8 +605,9 @@ export function ReportSidebar({
             <Trans>Live</Trans>
           </ModeButton>
           <ModeButton
-            selected={customReportItems.isDateStatic}
+            selected={!useDashboardDateRange && customReportItems.isDateStatic}
             onSelect={() => {
+              onUseDashboardDateRangeChange?.(false);
               setSessionReport('isDateStatic', true);
               setIsDateStatic(true);
               onChangeDates(
@@ -617,6 +634,7 @@ export function ReportSidebar({
             <Select
               value={customReportItems.dateRange}
               onChange={onSelectRange}
+              disabled={useDashboardDateRange}
               options={rangeOptions}
             />
             {!disabledList.currentInterval.get(customReportItems.dateRange) &&
@@ -665,6 +683,7 @@ export function ReportSidebar({
                   )
                 }
                 value={customReportItems.startDate}
+                disabled={useDashboardDateRange}
                 defaultLabel={monthUtils.format(
                   customReportItems.startDate,
                   getIntervalFormat(customReportItems.interval, dateFormat),
@@ -697,6 +716,7 @@ export function ReportSidebar({
                   )
                 }
                 value={customReportItems.endDate}
+                disabled={useDashboardDateRange}
                 defaultLabel={monthUtils.format(
                   customReportItems.endDate,
                   getIntervalFormat(customReportItems.interval, dateFormat),

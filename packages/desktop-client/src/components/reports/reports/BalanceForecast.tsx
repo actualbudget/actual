@@ -45,6 +45,7 @@ import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { BalanceForecastContributors } from '#components/reports/reports/BalanceForecastContributors';
 import { useAccounts } from '#hooks/useAccounts';
 import { useBalanceForecastSeries } from '#hooks/useBalanceForecast';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormat } from '#hooks/useFormat';
 import { useLocale } from '#hooks/useLocale';
@@ -120,17 +121,32 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   }> | null>(null);
 
   const currentMonth = monthUtils.currentMonth();
-  const [selectedStart, setStart] = useState(
-    widget?.meta?.timeFrame?.start ?? widget?.meta?.startDate ?? currentMonth,
+  const { resolve, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
+  const defaultTimeFrame = useMemo(
+    () => ({
+      start: widget?.meta?.startDate ?? currentMonth,
+      end: widget?.meta?.endDate ?? monthUtils.addMonths(currentMonth, 11),
+      mode: 'static' as const,
+    }),
+    [currentMonth, widget?.meta?.endDate, widget?.meta?.startDate],
   );
-  const [selectedEnd, setEnd] = useState(
-    widget?.meta?.timeFrame?.end ??
-      widget?.meta?.endDate ??
-      monthUtils.addMonths(currentMonth, 11),
+  const [initialStart, initialEnd, initialMode] = resolve(
+    widget?.meta?.timeFrame,
+    defaultTimeFrame,
   );
-  const [mode, setMode] = useState<TimeFrame['mode']>(
-    widget?.meta?.timeFrame?.mode ?? 'static',
-  );
+  const [selectedStart, setStart] = useState(initialStart);
+  const [selectedEnd, setEnd] = useState(initialEnd);
+  const [mode, setMode] = useState<TimeFrame['mode']>(initialMode);
+  useEffect(() => {
+    const [nextStart, nextEnd, nextMode] = resolve(
+      widget?.meta?.timeFrame,
+      defaultTimeFrame,
+    );
+    setStart(nextStart);
+    setEnd(nextEnd);
+    setMode(nextMode);
+  }, [defaultTimeFrame, resolve, widget?.meta?.timeFrame]);
   const [granularity, setGranularity] = useState<'Daily' | 'Monthly'>(
     widget?.meta?.granularity ?? 'Monthly',
   );
@@ -153,13 +169,19 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
   );
   const { start, end, startDate, endDate } = resolveBalanceForecastRange(
     {
-      timeFrame: { start: selectedStart, end: selectedEnd, mode },
-      monthsFromToday,
+      timeFrame: {
+        start: selectedStart,
+        end: selectedEnd,
+        mode: isUsingDashboardRange ? 'static' : mode,
+      },
+      monthsFromToday: isUsingDashboardRange ? undefined : monthsFromToday,
     },
     source,
   );
   const startsToday =
-    monthsFromToday !== undefined && !isTrackingBudgetForecast;
+    monthsFromToday !== undefined &&
+    !isTrackingBudgetForecast &&
+    !isUsingDashboardRange;
 
   useEffect(() => {
     if (budgetType !== 'tracking' && source === 'tracking-budget') {
@@ -217,8 +239,8 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
         ...widget.meta,
         conditions,
         conditionsOp,
-        startDate: start,
-        endDate: end,
+        startDate: isUsingDashboardRange ? widget.meta?.startDate : start,
+        endDate: isUsingDashboardRange ? widget.meta?.endDate : end,
         granularity: isTrackingBudgetForecast ? 'Monthly' : granularity,
         yAxisBase,
         source,
@@ -235,12 +257,14 @@ function BalanceForecastInner({ widget }: BalanceForecastInnerProps) {
               conditionsOp: series[0].conditionsOp,
             }
           : {}),
-        monthsFromToday: startsToday ? monthsFromToday : undefined,
-        timeFrame: {
-          start,
-          end,
-          mode,
-        },
+        monthsFromToday: isUsingDashboardRange
+          ? widget.meta?.monthsFromToday
+          : startsToday
+            ? monthsFromToday
+            : undefined,
+        timeFrame: isUsingDashboardRange
+          ? widget.meta?.timeFrame
+          : { start, end, mode },
       },
     });
     dispatch(
