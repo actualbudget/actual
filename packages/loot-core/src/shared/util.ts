@@ -413,7 +413,6 @@ export type CurrencyAmount = string;
 /**
  * The amount with the decimal point removed.
  * For example, 123.45 would be 12345.
- * Always two implied decimals, whatever the currency: ¥1,500 is 150000.
  */
 export type IntegerAmount = number;
 
@@ -448,8 +447,11 @@ export function toRelaxedNumber(currencyAmount: CurrencyAmount): Amount {
 export function integerToCurrency(
   integerAmount: IntegerAmount,
   formatter = getNumberFormat().formatter,
+  decimalPlaces: number = 2,
 ) {
-  return formatter.format(integerToAmount(safeNumber(integerAmount)));
+  return formatter.format(
+    integerToAmount(safeNumber(integerAmount), decimalPlaces),
+  );
 }
 
 export function integerToCurrencyWithDecimal(
@@ -534,8 +536,24 @@ export function amountToInteger(
   amount: Amount,
   decimalPlaces: number = 2,
 ): IntegerAmount {
-  const multiplier = Math.pow(10, decimalPlaces);
-  return Math.round(amount * multiplier);
+  const scaled = amount * Math.pow(10, decimalPlaces);
+  // Banker's rounding: .5 ties go to the even neighbour.
+  const low = Math.floor(scaled);
+  const result = isDecimalTie(amount, decimalPlaces)
+    ? low % 2 === 0
+      ? low
+      : low + 1
+    : Math.round(scaled);
+  return result === 0 ? 0 : result;
+}
+
+// Scaling can land a decimal tie just off .5 (1.225 * 100 is
+// 122.50000000000001), so read the tie from the shortest decimal form.
+function isDecimalTie(amount: Amount, decimalPlaces: number): boolean {
+  const [mantissa, exponent] = Math.abs(amount).toExponential().split('e');
+  const digits = mantissa.replace('.', '');
+  const cut = Number(exponent) + decimalPlaces + 1;
+  return cut >= 0 && digits.slice(cut) === '5';
 }
 
 export function integerToAmount(
