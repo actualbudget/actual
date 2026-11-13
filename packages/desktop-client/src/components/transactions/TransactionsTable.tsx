@@ -1990,6 +1990,7 @@ const Transaction = memo(function Transaction({
                   showSplitOption={
                     !isChild && !isParent && allowSplitTransaction
                   }
+                  showCreateOption
                   shouldSaveFromKey={shouldSaveFromKey}
                   inputProps={{ onBlur, onKeyDown, style: inputStyle }}
                   onUpdate={onUpdate}
