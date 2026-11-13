@@ -146,6 +146,14 @@ describe('normalizeTransaction', () => {
     expect(result.transactionId).toBe('tx-003');
   });
 
+  it.each(['HOLD', 'SCHD', 'OTHR'] as const)(
+    'should mark %s transactions as not booked',
+    status => {
+      const result = normalizeTransaction({ ...mockCreditTransaction, status });
+      expect(result.booked).toBe(false);
+    },
+  );
+
   it('should preserve original sign when credit_debit_indicator is absent', () => {
     const result = normalizeTransaction(mockPendingTransaction);
     expect(result.transactionAmount.amount).toBe('-10.00');
@@ -214,6 +222,17 @@ describe('isImportableTransaction', () => {
     expect(normalized.booked).toBe(false);
     expect(isImportableTransaction(normalized)).toBe(false);
   });
+
+  it.each(['CNCL', 'RJCT'] as const)(
+    'rejects a %s transaction, which never moved any money',
+    status => {
+      const normalized = normalizeTransaction({
+        ...mockCreditTransaction,
+        status,
+      });
+      expect(isImportableTransaction(normalized)).toBe(false);
+    },
+  );
 
   it('rejects a non-ISO date', () => {
     const normalized = normalizeTransaction({

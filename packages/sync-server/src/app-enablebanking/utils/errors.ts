@@ -16,6 +16,15 @@ export class EnableBankingError extends Error {
   }
 }
 
+// Enable Banking error codes that mean the bank authorization is gone and the
+// user has to go through the bank's login again.
+const SESSION_ENDED_ERRORS = new Set([
+  'CLOSED_SESSION',
+  'EXPIRED_SESSION',
+  'REVOKED_SESSION',
+  'SESSION_DOES_NOT_EXIST',
+]);
+
 export function handleEnableBankingError(
   statusCode: number,
   body: unknown,
@@ -34,14 +43,25 @@ export function handleEnableBankingError(
       ? Object.fromEntries(Object.entries(body))
       : {};
   const message = typeof parsed.message === 'string' ? parsed.message : bodyStr;
-  const errorType = typeof parsed.error === 'string' ? parsed.error : 'UNKNOWN';
+  const errorType =
+    typeof parsed.error === 'string' ? parsed.error.toUpperCase() : 'UNKNOWN';
 
-  if (statusCode === 401 || statusCode === 403) {
-    return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
+  // Check Enable Banking's error code before the HTTP status: a bank's rate
+  // limit or timeout passes by itself and must not ask for a new bank login.
+  if (errorType === 'ASPSP_RATE_LIMIT_EXCEEDED' || statusCode === 429) {
+    return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
   }
 
-  if (statusCode === 429) {
-    return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
+  if (errorType === 'ASPSP_TIMEOUT' || statusCode === 408) {
+    return new EnableBankingError(message, 'TIMED_OUT', message);
+  }
+
+  if (
+    SESSION_ENDED_ERRORS.has(errorType) ||
+    statusCode === 401 ||
+    statusCode === 403
+  ) {
+    return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
   }
 
   if (statusCode === 404) {
@@ -49,15 +69,8 @@ export function handleEnableBankingError(
   }
 
   if (statusCode >= 400 && statusCode < 500) {
-    // Check for closed/expired session errors (case-insensitive)
-    const lowerErrorType = (errorType || '').toLowerCase();
-    const lowerMessage = (message || '').toLowerCase();
-    if (
-      lowerErrorType === 'closed_session' ||
-      lowerErrorType === 'expired_session' ||
-      lowerMessage.includes('session') ||
-      lowerMessage.includes('expired')
-    ) {
+    // Without an error code the message is all there is to go on.
+    if (errorType === 'UNKNOWN' && /session|expired/i.test(message)) {
       return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
     }
     return new EnableBankingError(message, 'INVALID_INPUT', message);

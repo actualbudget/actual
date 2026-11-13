@@ -1305,34 +1305,39 @@ describe('Enable Banking sync', () => {
     delete handlers['/enablebanking/transactions'];
   });
 
+  async function prepareEnableBankingAccount() {
+    vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+    vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+      'user-id': 'user-1',
+      'user-key': 'key-1',
+    });
+
+    db.runQuery(
+      'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+      ['bank-eb', 'eb-acct-1', 'Enable Bank'],
+    );
+    const acctId = await db.insertAccount({
+      id: 'acct-eb-1',
+      account_id: 'eb-acct-1',
+      name: 'Checking',
+      bank: 'bank-eb',
+      account_sync_source: 'enableBanking',
+    });
+    await db.insertPayee({
+      id: 'transfer-' + acctId,
+      name: '',
+      transfer_acct: acctId,
+    });
+    return acctId;
+  }
+
   test.each([
     ['reports no balance', null],
     ['omits the balance field', undefined],
   ])(
     'imports transactions without an opening balance when the bank %s',
     async (_case, startingBalance) => {
-      vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
-      vi.mocked(asyncStorage.multiGet).mockResolvedValue({
-        'user-id': 'user-1',
-        'user-key': 'key-1',
-      });
-
-      db.runQuery(
-        'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
-        ['bank-eb', 'eb-acct-1', 'Enable Bank'],
-      );
-      const acctId = await db.insertAccount({
-        id: 'acct-eb-1',
-        account_id: 'eb-acct-1',
-        name: 'Checking',
-        bank: 'bank-eb',
-        account_sync_source: 'enableBanking',
-      });
-      await db.insertPayee({
-        id: 'transfer-' + acctId,
-        name: '',
-        transfer_acct: acctId,
-      });
+      const acctId = await prepareEnableBankingAccount();
 
       const transaction = {
         transactionId: 'eb-tx-1',
@@ -1366,6 +1371,36 @@ describe('Enable Banking sync', () => {
         [acctId],
       );
       expect(account!.balance_current).toBeNull();
+    },
+  );
+
+  test.each([
+    ['is off', 'false', false],
+    ['is not set', undefined, true],
+  ])(
+    'tells the server whether to fetch pending transactions when the setting %s',
+    async (_case, pref, expected) => {
+      const acctId = await prepareEnableBankingAccount();
+      if (pref !== undefined) {
+        db.runQuery('INSERT INTO preferences (id, value) VALUES (?, ?)', [
+          `sync-import-pending-${acctId}`,
+          pref,
+        ]);
+      }
+
+      let sent: { importPending?: boolean } = {};
+      handlers['/enablebanking/transactions'] = body => {
+        sent = body;
+        return {
+          transactions: { all: [], booked: [], pending: [] },
+          balances: [],
+          startingBalance: null,
+        };
+      };
+
+      await accountsApp.handlers['accounts-bank-sync']({ ids: [acctId] });
+
+      expect(sent.importPending).toBe(expected);
     },
   );
 });

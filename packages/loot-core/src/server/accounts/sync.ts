@@ -357,9 +357,18 @@ async function downloadAkahuTransactions(
   return retVal;
 }
 
+function getImportPending(id: string): Promise<boolean> {
+  return aqlQuery(
+    q('preferences')
+      .filter({ id: `sync-import-pending-${id}` })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+}
+
 async function downloadEnableBankingTransactions(
   acctId: string,
   since: string,
+  importPending: boolean,
   aspspName?: string,
 ) {
   const userToken = await asyncStorage.getItem('user-token');
@@ -373,6 +382,7 @@ async function downloadEnableBankingTransactions(
       accountId: acctId,
       startDate: since,
       aspspName,
+      importPending,
     },
     {
       'X-ACTUAL-TOKEN': userToken,
@@ -522,11 +532,7 @@ async function normalizeBankSyncTransactions(transactions, acctId) {
         .filter({ id: `custom-sync-mappings-${acctId}` })
         .select('value'),
     ).then(data => data?.data?.[0]?.value),
-    aqlQuery(
-      q('preferences')
-        .filter({ id: `sync-import-pending-${acctId}` })
-        .select('value'),
-    ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true'),
+    getImportPending(acctId),
     aqlQuery(
       q('preferences')
         .filter({ id: `sync-import-notes-${acctId}` })
@@ -1161,11 +1167,7 @@ async function processBankSyncDownload(
       acctRow.account_sync_source === 'enableBanking' &&
       currentBalance !== null
     ) {
-      const importPending = await aqlQuery(
-        q('preferences')
-          .filter({ id: `sync-import-pending-${id}` })
-          .select('value'),
-      ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
+      const importPending = await getImportPending(id);
       const importable = importPending
         ? transactions
         : transactions.filter(trans => Boolean(trans.booked));
@@ -1295,6 +1297,7 @@ export async function syncAccount(
     download = await downloadEnableBankingTransactions(
       acctId,
       syncStartDate,
+      await getImportPending(id),
       bankRow?.name,
     );
   } else {

@@ -71,6 +71,51 @@ describe('handleEnableBankingError', () => {
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
+  it.each([400, 403, 429])(
+    'reports a bank rate limit as RATE_LIMIT_EXCEEDED whatever the status (%d)',
+    status => {
+      const error = handleEnableBankingError(status, {
+        error: 'ASPSP_RATE_LIMIT_EXCEEDED',
+        message: 'ASPSP Rate limit exceeded',
+      });
+      expect(error.error_code).toBe('RATE_LIMIT_EXCEEDED');
+    },
+  );
+
+  it('reports a bank timeout as TIMED_OUT', () => {
+    const error = handleEnableBankingError(400, {
+      error: 'ASPSP_TIMEOUT',
+      message: 'Timeout interacting with ASPSP',
+    });
+    expect(error.error_code).toBe('TIMED_OUT');
+  });
+
+  it.each(['REVOKED_SESSION', 'SESSION_DOES_NOT_EXIST'])(
+    'asks for a new login when the session is gone (%s)',
+    code => {
+      const error = handleEnableBankingError(422, {
+        error: code,
+        message: 'gone',
+      });
+      expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
+    },
+  );
+
+  it('does not ask for a new login when a bank error only mentions a session', () => {
+    const error = handleEnableBankingError(400, {
+      error: 'ASPSP_ERROR',
+      message: 'Error interacting with ASPSP: session quota expired',
+    });
+    expect(error.error_code).toBe('INVALID_INPUT');
+  });
+
+  it('falls back to the message when there is no error code', () => {
+    const error = handleEnableBankingError(400, {
+      message: 'Session is expired',
+    });
+    expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
+  });
+
   it('should return INTERNAL_ERROR for 500+', () => {
     const error = handleEnableBankingError(500, { message: 'Server error' });
     expect(error.error_type).toBe('Server error');

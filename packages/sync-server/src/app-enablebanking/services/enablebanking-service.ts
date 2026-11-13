@@ -26,7 +26,7 @@ export type EnableBankingTransaction = {
   creditor?: { name?: string | null } | null;
   debtor?: { name?: string | null } | null;
   credit_debit_indicator?: 'CRDT' | 'DBIT';
-  status?: 'BOOK' | 'PDNG';
+  status?: 'BOOK' | 'CNCL' | 'HOLD' | 'OTHR' | 'PDNG' | 'RJCT' | 'SCHD';
   booking_date?: string;
   value_date?: string;
   transaction_date?: string;
@@ -329,7 +329,9 @@ export function normalizeTransaction(
     payeeName,
     notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
-    booked: tx.status !== 'PDNG',
+    // Holds, scheduled payments and anything else not yet booked are pending.
+    // A missing status is taken as booked.
+    booked: !tx.status || tx.status === 'BOOK',
   };
 }
 
@@ -342,11 +344,16 @@ const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 // sync. Enable Banking occasionally returns such records — e.g. a pending
 // transaction with no booking/value/transaction date — so callers skip them
 // instead of failing the entire import.
+//
+// Cancelled and rejected transactions never moved any money, so they are left
+// out as well.
 export function isImportableTransaction(tx: BankSyncTransaction): boolean {
   // Trim and reject empty amounts explicitly: Number('') is 0 (finite), so an
   // empty/whitespace amount would otherwise slip through as a zero transaction.
   const amount = tx.transactionAmount.amount.trim();
   return (
+    tx.status !== 'CNCL' &&
+    tx.status !== 'RJCT' &&
     IMPORTABLE_DATE_REGEX.test(tx.date) &&
     amount !== '' &&
     Number.isFinite(Number(amount))
@@ -480,11 +487,17 @@ export const enableBankingService = {
     dateTo: string,
     continuationKey?: string,
     psuHeaders?: PsuHeaders,
+    { bookedOnly = false }: { bookedOnly?: boolean } = {},
   ): Promise<{
     transactions: EnableBankingTransaction[];
     continuation_key?: string;
   }> {
     let path = `/accounts/${encodeURIComponent(accountUid)}/transactions?date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(dateTo)}`;
+    // Some banks do not flag pending transactions, so filtering at the bank
+    // is the only way to keep those out.
+    if (bookedOnly) {
+      path += '&transaction_status=BOOK';
+    }
     if (continuationKey) {
       path += `&continuation_key=${encodeURIComponent(continuationKey)}`;
     }
@@ -499,6 +512,7 @@ export const enableBankingService = {
     dateFrom: string,
     dateTo: string,
     psuHeaders?: PsuHeaders,
+    options: { bookedOnly?: boolean } = {},
   ): Promise<EnableBankingTransaction[]> {
     const allTransactions: EnableBankingTransaction[] = [];
     let continuationKey: string | undefined;
@@ -512,6 +526,7 @@ export const enableBankingService = {
         dateTo,
         continuationKey,
         psuHeaders,
+        options,
       );
 
       if (
