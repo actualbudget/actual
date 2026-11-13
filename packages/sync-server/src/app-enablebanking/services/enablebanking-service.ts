@@ -329,9 +329,8 @@ export function normalizeTransaction(
     payeeName,
     notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
-    // Holds, scheduled payments and anything else not yet booked are pending.
-    // A missing status is taken as booked.
-    booked: !tx.status || tx.status === 'BOOK',
+    // Holds and scheduled payments have not moved any money yet.
+    booked: !['PDNG', 'HOLD', 'SCHD'].includes(tx.status ?? ''),
   };
 }
 
@@ -344,16 +343,11 @@ const IMPORTABLE_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 // sync. Enable Banking occasionally returns such records — e.g. a pending
 // transaction with no booking/value/transaction date — so callers skip them
 // instead of failing the entire import.
-//
-// Cancelled and rejected transactions never moved any money, so they are left
-// out as well.
 export function isImportableTransaction(tx: BankSyncTransaction): boolean {
   // Trim and reject empty amounts explicitly: Number('') is 0 (finite), so an
   // empty/whitespace amount would otherwise slip through as a zero transaction.
   const amount = tx.transactionAmount.amount.trim();
   return (
-    tx.status !== 'CNCL' &&
-    tx.status !== 'RJCT' &&
     IMPORTABLE_DATE_REGEX.test(tx.date) &&
     amount !== '' &&
     Number.isFinite(Number(amount))

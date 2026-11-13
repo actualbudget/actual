@@ -617,11 +617,10 @@ app.post(
         // account sync. Pending transactions that carry a date are unaffected.
         if (!isImportableTransaction(normalized)) {
           debugSensitive(
-            'Skipping unimportable transaction id=%s date=%s amount=%s status=%s',
+            'Skipping unimportable transaction id=%s date=%s amount=%s',
             normalized.transactionId,
             normalized.date,
             normalized.transactionAmount.amount,
-            normalized.status,
           );
           continue;
         }

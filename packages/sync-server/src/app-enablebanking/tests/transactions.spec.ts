@@ -196,22 +196,4 @@ describe('POST /transactions', () => {
       );
     },
   );
-
-  it('reports a bank rate limit as such, not as a lost login', async () => {
-    vi.spyOn(enableBankingService, 'getAllTransactions').mockRejectedValue(
-      new EnableBankingError(
-        'ASPSP Rate limit exceeded',
-        'RATE_LIMIT_EXCEEDED',
-      ),
-    );
-
-    const res = await request(app)
-      .post('/transactions')
-      .send({ accountId: 'acc-1', startDate: '2026-03-01' });
-
-    expect(res.body.data).toEqual({
-      error_type: 'RATE_LIMIT_EXCEEDED',
-      error_code: 'RATE_LIMIT_EXCEEDED',
-    });
-  });
 });

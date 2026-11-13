@@ -16,16 +16,6 @@ export class EnableBankingError extends Error {
   }
 }
 
-// Enable Banking error codes that mean the bank authorization is gone and the
-// user has to go through the bank's login again.
-const SESSION_ENDED_ERRORS = new Set([
-  'CLOSED_SESSION',
-  'EXPIRED_SESSION',
-  'REVOKED_SESSION',
-  'SESSION_DOES_NOT_EXIST',
-  'WRONG_SESSION_STATUS',
-]);
-
 export function handleEnableBankingError(
   statusCode: number,
   body: unknown,
@@ -44,35 +34,36 @@ export function handleEnableBankingError(
       ? Object.fromEntries(Object.entries(body))
       : {};
   const message = typeof parsed.message === 'string' ? parsed.message : bodyStr;
-  const errorType =
-    typeof parsed.error === 'string' ? parsed.error.toUpperCase() : 'UNKNOWN';
+  const errorType = typeof parsed.error === 'string' ? parsed.error : 'UNKNOWN';
 
-  // Check Enable Banking's error code before the HTTP status: a bank's rate
-  // limit or timeout passes by itself and must not ask for a new bank login.
-  if (errorType === 'ASPSP_RATE_LIMIT_EXCEEDED' || statusCode === 429) {
-    return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
-  }
-
-  if (errorType === 'ASPSP_TIMEOUT' || statusCode === 408) {
-    return new EnableBankingError(message, 'TIMED_OUT', message);
-  }
-
-  if (
-    SESSION_ENDED_ERRORS.has(errorType) ||
-    statusCode === 401 ||
-    statusCode === 403
-  ) {
+  if (statusCode === 401 || statusCode === 403) {
     return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
   }
 
-  if (statusCode === 404) {
-    return new EnableBankingError(message, 'NOT_FOUND', message);
+  if (statusCode === 429) {
+    return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
+  }
+
+  if (statusCode === 408 || errorType === 'ASPSP_TIMEOUT') {
+    return new EnableBankingError(message, 'TIMED_OUT', message);
   }
 
   if (statusCode >= 400 && statusCode < 500) {
-    // Without an error code the message is all there is to go on.
-    if (errorType === 'UNKNOWN' && /session|expired/i.test(message)) {
+    // Check for closed/expired session errors (case-insensitive)
+    const lowerErrorType = (errorType || '').toLowerCase();
+    const lowerMessage = (message || '').toLowerCase();
+    if (
+      lowerErrorType === 'closed_session' ||
+      lowerErrorType === 'expired_session' ||
+      lowerMessage.includes('session') ||
+      lowerMessage.includes('expired')
+    ) {
       return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
+    }
+    // After the session check: a session that no longer exists is a 404 too,
+    // and needs a new login rather than a "not found".
+    if (statusCode === 404) {
+      return new EnableBankingError(message, 'NOT_FOUND', message);
     }
     return new EnableBankingError(message, 'INVALID_INPUT', message);
   }
