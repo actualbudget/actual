@@ -21,6 +21,7 @@ import type { FieldMapping, ImportTransaction } from './utils';
 type TransactionProps = {
   transaction: ImportTransaction;
   fieldMappings: FieldMapping;
+  showNumber: boolean;
   showParsed: boolean;
   parseDateFormat: ComponentProps<typeof ParsedDate>['parseDateFormat'];
   dateFormat: ComponentProps<typeof ParsedDate>['dateFormat'];
@@ -38,6 +39,7 @@ type TransactionProps = {
 export function Transaction({
   transaction: rawTransaction,
   fieldMappings,
+  showNumber,
   showParsed,
   parseDateFormat,
   dateFormat,
@@ -207,6 +209,11 @@ export function Transaction({
           formatDate(transaction.date ?? null, dateFormat)
         )}
       </Field>
+      {showNumber && (
+        <Field width={100} title={transaction.number ?? undefined}>
+          {transaction.number}
+        </Field>
+      )}
       <Field
         width="flex"
         title={transaction.imported_payee || transaction.payee_name}

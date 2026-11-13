@@ -6,6 +6,7 @@ type TransactionEntry = {
   debit?: string;
   credit?: string;
   account?: string;
+  number?: string;
   payee?: string;
   notes?: string;
   category?: string;
@@ -154,6 +155,7 @@ export class AccountPage {
   _getTransactionDetails(row: Locator) {
     return {
       account: row.getByTestId('account'),
+      number: row.getByTestId('number'),
       payee: row.getByTestId('payee'),
       notes: row.getByTestId('notes'),
       category: row.getByTestId('category'),
@@ -221,6 +223,28 @@ export class AccountPage {
   }
 
   /**
+   * Filter to a specific transaction number
+   */
+  async filterByNumber(number: string) {
+    const filterTooltip = await this.filterBy('Number');
+    await this.page.keyboard.type(number);
+    await filterTooltip.applyButton.click();
+  }
+
+  /**
+   * Set the transaction number of the nth transaction in the table
+   */
+  async setNthNumber(index: number, number: string) {
+    const cell = this.getNthTransaction(index).number;
+    await cell.click();
+    const input = cell.getByRole('textbox');
+    await this.selectInputText(input);
+    await input.fill(number);
+    await this.page.keyboard.press('Enter');
+    await this.page.keyboard.press('Escape');
+  }
+
+  /**
    * Remove the nth filter
    */
   async removeFilter(idx: number) {
@@ -258,6 +282,15 @@ export class AccountPage {
       const accountInput = accountCell.getByRole('textbox');
       await this.selectInputText(accountInput);
       await accountInput.pressSequentially(transaction.account);
+      await this.page.keyboard.press('Tab');
+    }
+
+    if (transaction.number) {
+      const numberCell = transactionRow.getByTestId('number');
+      await numberCell.click();
+      const numberInput = numberCell.getByRole('textbox');
+      await this.selectInputText(numberInput);
+      await numberInput.fill(transaction.number);
       await this.page.keyboard.press('Tab');
     }
 

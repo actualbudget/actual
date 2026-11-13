@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.04">
+    <BkToCstmrStmt>
+        <Stmt>
+            <Id>TEST-TRACKING-NUMBER</Id>
+            <Ntry>
+                <Amt Ccy="EUR">10.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <AcctSvcrRef>test-cheque</AcctSvcrRef>
+                <NtryDtls>
+                    <TxDtls>
+                        <Refs>
+                            <ChqNb>3003</ChqNb>
+                        </Refs>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Cheque Payee</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+            <Ntry>
+                <Amt Ccy="EUR">20.00</Amt>
+                <CdtDbtInd>DBIT</CdtDbtInd>
+                <BookgDt>
+                    <Dt>2019-01-23</Dt>
+                </BookgDt>
+                <AcctSvcrRef>test-no-cheque</AcctSvcrRef>
+                <NtryDtls>
+                    <TxDtls>
+                        <RltdPties>
+                            <Cdtr>
+                                <Nm>Other Payee</Nm>
+                            </Cdtr>
+                        </RltdPties>
+                    </TxDtls>
+                </NtryDtls>
+            </Ntry>
+        </Stmt>
+    </BkToCstmrStmt>
+</Document>
