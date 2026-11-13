@@ -244,13 +244,11 @@ export function LineGraph({
                 />
               )}
               {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              <XAxis
+                dataKey="date"
+                tick={{ fill: theme.pageText }}
+                tickLine={{ stroke: theme.pageText }}
+              />
               {!compact && (
                 <YAxis
                   tickFormatter={value =>
