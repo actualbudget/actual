@@ -34,6 +34,10 @@ import type {
 } from 'electron';
 
 import { openExternalUrl, revealLocalFile } from './external-links';
+import {
+  getLastFileDialogFolder,
+  rememberFileDialogSelection,
+} from './file-dialog-folder';
 import { getMenu } from './menu';
 import { retry as promiseRetry } from './retry';
 import type { AppInitFailurePayload } from './server';
@@ -799,11 +803,31 @@ export type OpenFileDialogPayload = {
 
 ipcMain.handle(
   'open-file-dialog',
-  (_event, { filters, properties }: OpenFileDialogPayload) => {
-    return dialog.showOpenDialogSync({
-      properties: properties || ['openFile'],
+  async (_event, { filters, properties }: OpenFileDialogPayload) => {
+    const dialogProperties = properties || ['openFile'];
+    const isFilePicker = !dialogProperties.includes('openDirectory');
+    const dataDir = process.env.ACTUAL_DATA_DIR!;
+
+    const selectedFiles = dialog.showOpenDialogSync({
+      properties: dialogProperties,
       filters,
+      defaultPath: isFilePicker
+        ? await getLastFileDialogFolder(dataDir)
+        : undefined,
     });
+
+    if (isFilePicker) {
+      try {
+        await rememberFileDialogSelection(dataDir, selectedFiles);
+      } catch (error) {
+        logMessage(
+          'error',
+          `Could not remember the last file dialog folder: ${String(error)}`,
+        );
+      }
+    }
+
+    return selectedFiles;
   },
 );
 
