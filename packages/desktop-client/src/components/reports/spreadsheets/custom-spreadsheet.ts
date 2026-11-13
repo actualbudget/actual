@@ -1,4 +1,3 @@
-import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type {
   AccountEntity,
@@ -33,6 +32,7 @@ import {
   filterHiddenItems,
   filterReportTransactions,
 } from './filterHiddenItems';
+import { makeCustomReportFilters } from './makeCustomReportFilters';
 import { recalculate } from './recalculate';
 import { reportCategoryLists } from './reportCategoryLists';
 import { sortData } from './sortData';
@@ -133,9 +133,7 @@ export function createCustomSpreadsheet({
       return;
     }
 
-    const { filters } = await send('make-filters-from-conditions', {
-      conditions: conditions.filter(cond => !cond.customName),
-    });
+    const filters = await makeCustomReportFilters(conditions);
     const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
     let assets: QueryDataEntity[];
