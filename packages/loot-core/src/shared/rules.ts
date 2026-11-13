@@ -5,7 +5,7 @@ import type { FieldValueTypes, RuleConditionOp } from '#types/models';
 // to share it later.
 const TYPE_INFO = {
   date: {
-    ops: ['is', 'isapprox', 'gt', 'gte', 'lt', 'lte'],
+    ops: ['is', 'isapprox', 'isbetween', 'gt', 'gte', 'lt', 'lte'],
     nullable: false,
   },
   id: {
