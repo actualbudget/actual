@@ -666,7 +666,39 @@ export function createCoordinator({
             lastAppInitFailure = workerMsg;
             broadcastToAllInGroup(portBudget!, workerMsg);
           } else {
-            broadcastToAllInGroup(portBudget!, workerMsg);
+            const syncEvent =
+              workerMsg.type === 'push' && workerMsg.name === 'sync-event'
+                ? (workerMsg.args as Record<string, unknown> | undefined)
+                : undefined;
+
+            const originPort =
+              syncEvent?.type === 'applied' &&
+              typeof syncEvent.requestId === 'string'
+                ? group.requestToPort.get(syncEvent.requestId)
+                : undefined;
+
+            // If the originating tab disconnected, all remaining tabs
+            // must treat its applied changes as remote.
+            if (
+              syncEvent?.type === 'applied' &&
+              typeof syncEvent.requestId === 'string'
+            ) {
+              for (const targetPort of [group.leaderPort, ...group.followers]) {
+                targetPort.postMessage(
+                  targetPort === originPort
+                    ? workerMsg
+                    : {
+                        ...workerMsg,
+                        args: {
+                          ...syncEvent,
+                          fromAnotherTab: true,
+                        },
+                      },
+                );
+              }
+            } else {
+              broadcastToAllInGroup(portBudget!, workerMsg);
+            }
           }
           return;
         }

@@ -42,7 +42,15 @@ function wait(time) {
 export async function runHandler<T extends Handlers[keyof Handlers]>(
   handler: T,
   args?: Parameters<T>[0],
-  { undoTag, name }: { undoTag?; name? } = {},
+  {
+    undoTag,
+    name,
+    requestId,
+  }: {
+    undoTag?;
+    name?;
+    requestId?: string;
+  } = {},
 ): Promise<ReturnType<T>> {
   // For debug reasons, track the latest handlers that have been
   // called
@@ -52,7 +60,7 @@ export async function runHandler<T extends Handlers[keyof Handlers]>(
   }
 
   if (mutatingMethods.has(handler)) {
-    return runMutator(() => handler(args), { undoTag }) as Promise<
+    return runMutator(() => handler(args), { undoTag, requestId }) as Promise<
       ReturnType<T>
     >;
   }
@@ -135,6 +143,10 @@ export function withMutatorContext<T>(
   return func().finally(() => {
     currentContext = prevContext;
   });
+}
+
+export function getCurrentMutatorRequestId(): string | undefined {
+  return currentContext?.requestId;
 }
 
 export function getMutatorContext() {
