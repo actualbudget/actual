@@ -69,4 +69,15 @@ describe('countFilteredMonths', () => {
     expect(countFilteredMonths(start, end, [january, payee], 'and')).toBe(1);
     expect(countFilteredMonths(start, end, [january, payee], 'or')).toBe(5);
   });
+
+  it('does not widen the date range for an empty category selection joined with OR', () => {
+    expect(
+      countFilteredMonths(
+        start,
+        end,
+        [{ date: '2026-01-15' }, { id: null }],
+        'or',
+      ),
+    ).toBe(1);
+  });
 });

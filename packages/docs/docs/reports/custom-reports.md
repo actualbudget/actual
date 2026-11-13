@@ -58,7 +58,7 @@ Icons in the first group of the center menu are used to select the displayed rep
 - **C. Filter.** Filter the transactions in the report.
 - **D. Save menu.** Save, update or reset the report.
 
-In a monthly summary, a date filter from the toolbar limits the average to the months it covers within the report range. Partial months and months with no matching transactions count as whole months. If a date filter is joined to a filter on another field with **or**, the average uses the full report range because the other filter can match transactions on any date.
+In a monthly summary, a date filter from the toolbar limits the average to the months it covers within the report range. Partial months and months with no matching transactions count as whole months. If you combine a date filter with another condition using **or**, the average uses the full report range if the other condition can match transactions on any date. An empty category selection matches no transactions, so it contributes no months to an **or** filter.
 
 ## Saving a Report
 

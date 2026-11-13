@@ -43,6 +43,11 @@ function matchesDateFilter(date: string, filter: unknown): boolean | undefined {
       : undefined;
   }
 
+  // The rule converter uses { id: null } for conditions that match no transactions.
+  if ('id' in filter && filter.id === null) {
+    return false;
+  }
+
   // A condition on another field can match on any date.
   if (!('date' in filter)) {
     return true;
