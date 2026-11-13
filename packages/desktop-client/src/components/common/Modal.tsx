@@ -204,12 +204,14 @@ export const Modal = ({
       >
         {/* A container for positioning the modal relative to the visual viewport */}
         <View
-          style={{
-            display: 'flex',
+          nativeStyle={{
             // React Aria's height removes pinch zoom scaling. Safari page zoom
             // needs CSS pixels, including keyboard resizing while zoomed.
             '--visual-viewport-height': `${viewport.height}px`,
             top: viewport.offsetTop,
+          }}
+          style={{
+            display: 'flex',
             ...(isSheet
               ? { alignItems: 'stretch', justifyContent: 'flex-end' }
               : { alignItems: 'center', justifyContent: 'center' }),
