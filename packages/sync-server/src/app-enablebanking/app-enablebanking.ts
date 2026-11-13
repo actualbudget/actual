@@ -12,6 +12,7 @@ import {
   validateSessionMiddleware,
 } from '#util/middlewares';
 import { isBlockedIp } from '#util/ssrf';
+import { validateGlobalBankSyncSession } from '#util/validate-budget-session';
 
 import type {
   EnableBankingSession,
@@ -124,7 +125,7 @@ async function buildSessionResult(
   };
 }
 
-// Auth callback from bank redirect — must be before validateSessionMiddleware
+// The bank redirect callback does not require an Actual session.
 // since the bank redirects here directly (no auth token available)
 app.get('/auth_callback', async (req: Request, res: Response) => {
   const code = typeof req.query.code === 'string' ? req.query.code : undefined;
@@ -200,8 +201,12 @@ app.get('/auth_callback', async (req: Request, res: Response) => {
 // server-wide (global) bank-sync credentials is admin-only, but every
 // signed-in user on that server may use them. This is a supported feature
 // and will remain; budgets with their own credentials use those instead.
+// API keys need explicit permission to sync shared connections.
 // All users on one server are trusted; roles are not a security boundary.
 // See SECURITY.md ("Threat model" and "Out of scope").
+const bankSync = express.Router();
+bankSync.use(validateGlobalBankSyncSession);
+app.use(bankSync);
 app.use(validateSessionMiddleware);
 
 // --- Poll/complete-auth coordination ---
@@ -233,7 +238,7 @@ function cleanupPendingAuth(state: string, waiterId?: string) {
 
 // --- Routes ---
 
-app.post(
+bankSync.post(
   '/status',
   handleError(async (req: Request, res: Response) => {
     const configured = enableBankingService.isConfigured();
@@ -541,7 +546,7 @@ app.post(
   }),
 );
 
-app.post(
+bankSync.post(
   '/transactions',
   handleError(async (req: Request, res: Response) => {
     const { accountId, startDate, aspspName } = req.body || {};

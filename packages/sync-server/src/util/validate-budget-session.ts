@@ -30,7 +30,6 @@ export function validateBudgetSession(req: Request, res: Response) {
     return null;
   }
 
-  // Budget grants restrict access, but do not determine whether the key is valid.
   const budgets: { file_id: string }[] = getAccountDb().all(
     'SELECT file_id FROM api_key_budgets WHERE key_id = ?',
     [key.id],
@@ -39,22 +38,52 @@ export function validateBudgetSession(req: Request, res: Response) {
     .map(budget => budget.file_id)
     .filter(fileId => canAccessActiveFile(fileId, key.user_id));
 
-  return { user_id: key.user_id, apiKeyFileIds };
+  if (apiKeyFileIds.length === 0) {
+    res.status(401).send({ status: 'error', reason: 'unauthorized' });
+    return null;
+  }
+
+  const allowGlobalBankSync = !!getAccountDb().first(
+    "SELECT key_id FROM api_key_permissions WHERE key_id = ? AND permission = 'bank-sync-global'",
+    [key.id],
+  );
+  return { user_id: key.user_id, apiKeyFileIds, allowGlobalBankSync };
 }
 
 // Bank-sync keys must name an accessible budget; session requests may omit it.
-export function validateBankSyncSession(
+export function validateBankSyncSession({
+  allowGlobalCredentials = false,
+} = {}) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const session = validateBudgetSession(req, res);
+    if (!session) return;
+    if (
+      'apiKeyFileIds' in session &&
+      !session.apiKeyFileIds.includes(req.get('X-Actual-File-Id') ?? '')
+    ) {
+      res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+      return;
+    }
+    res.locals = {
+      ...session,
+      allowGlobalBankSync:
+        !('apiKeyFileIds' in session) ||
+        (session.allowGlobalBankSync && allowGlobalCredentials),
+    };
+    next();
+  };
+}
+
+// Setup and connection management continue to require an ordinary session.
+export function validateGlobalBankSyncSession(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   const session = validateBudgetSession(req, res);
   if (!session) return;
-  if (
-    'apiKeyFileIds' in session &&
-    !session.apiKeyFileIds.includes(req.get('X-Actual-File-Id') ?? '')
-  ) {
-    res.status(403).send({ status: 'error', reason: 'file-access-denied' });
+  if ('apiKeyFileIds' in session && !session.allowGlobalBankSync) {
+    res.status(403).send({ status: 'error', reason: 'permission-denied' });
     return;
   }
   res.locals = session;
