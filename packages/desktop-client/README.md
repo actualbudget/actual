@@ -41,7 +41,7 @@ HTTPS=true yarn start
 or using the dev container:
 
 ```
-HTTPS=true docker compose up --build
+env HTTPS=true UID="$(id -u)" GID="$(id -g)" docker compose up --build
 ```
 
 Note the network IP address and port the dev instance is listening on.
