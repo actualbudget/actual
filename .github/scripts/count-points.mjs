@@ -35,6 +35,11 @@ const CONFIG = {
     'release-notes/**/*',
     'upcoming-release-notes/**/*',
   ],
+  // Repositories to count points in; the first one is the main repository
+  REPOS: [
+    { repo: 'actual', base: 'master' },
+    { repo: 'actual-gh-bot', base: 'main' },
+  ],
   DOCS_FILES_PATTERNS: [
     'packages/docs/**/*',
     '!packages/docs/package.json',
@@ -150,7 +155,6 @@ async function countContributorPoints() {
     auth: process.env.GITHUB_TOKEN,
   });
   const owner = 'actualbudget';
-  const repo = 'actual';
 
   const { since, until } = getLastMonthDates();
 
@@ -194,226 +198,234 @@ async function countContributorPoints() {
     }
   };
 
-  // Get all PRs using search
-  const searchQuery = `repo:${owner}/${repo} is:pr is:merged base:master merged:${since.toISOString()}..${until.toISOString()}`;
-  const recentPRs = await octokit.paginate(
-    'GET /search/issues',
-    {
-      q: searchQuery,
-      per_page: 100,
-      advanced_search: true,
-    },
-    response => response.data.filter(pr => pr.number),
-  );
+  for (const { repo, base } of CONFIG.REPOS) {
+    // PR and issue numbers overlap between repositories, so qualify the
+    // ones outside the main repository (e.g. `actual-gh-bot#12`)
+    const ref = number =>
+      repo === CONFIG.REPOS[0].repo ? `#${number}` : `${repo}#${number}`;
 
-  // Get reviews and PR details for each PR
-  await Promise.all(
-    recentPRs.map(pr =>
-      limit(async () => {
-        const [reviews, modifiedFiles] = await Promise.all([
-          octokit.pulls.listReviews({ owner, repo, pull_number: pr.number }),
-          octokit.paginate(
-            octokit.pulls.listFiles,
-            {
+    // Get all PRs using search
+    const searchQuery = `repo:${owner}/${repo} is:pr is:merged base:${base} merged:${since.toISOString()}..${until.toISOString()}`;
+    const recentPRs = await octokit.paginate(
+      'GET /search/issues',
+      {
+        q: searchQuery,
+        per_page: 100,
+        advanced_search: true,
+      },
+      response => response.data.filter(pr => pr.number),
+    );
+
+    // Get reviews and PR details for each PR
+    await Promise.all(
+      recentPRs.map(pr =>
+        limit(async () => {
+          const [reviews, modifiedFiles] = await Promise.all([
+            octokit.pulls.listReviews({ owner, repo, pull_number: pr.number }),
+            octokit.paginate(
+              octokit.pulls.listFiles,
+              {
+                owner,
+                repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+              res => res.data,
+            ),
+          ]);
+
+          const filteredFiles = modifiedFiles.filter(
+            file =>
+              !CONFIG.EXCLUDED_FILES.some(pattern =>
+                minimatch(file.filename, pattern, { dot: true }),
+              ),
+          );
+
+          const isDocsFile = file => {
+            const positivePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(
+              p => !p.startsWith('!'),
+            );
+            const negativePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(p =>
+              p.startsWith('!'),
+            );
+            return (
+              positivePatterns.some(p =>
+                minimatch(file.filename, p, { dot: true }),
+              ) &&
+              negativePatterns.every(p =>
+                minimatch(file.filename, p, { dot: true }),
+              )
+            );
+          };
+
+          const docsFiles = filteredFiles.filter(isDocsFile);
+          const codeFiles = filteredFiles.filter(file => !isDocsFile(file));
+
+          const docsChanges = docsFiles.reduce(
+            (sum, file) => sum + file.additions + file.deletions,
+            0,
+          );
+          const codeChanges = codeFiles.reduce(
+            (sum, file) => sum + file.additions + file.deletions,
+            0,
+          );
+
+          const docsPoints =
+            docsChanges > 0
+              ? (CONFIG.DOCS_PR_REVIEW_POINT_TIERS.find(
+                  t => docsChanges >= t.minChanges,
+                )?.points ?? 0)
+              : 0;
+          const codePoints =
+            codeChanges > 0 || docsChanges === 0
+              ? (CONFIG.CODE_PR_REVIEW_POINT_TIERS.find(
+                  t => codeChanges >= t.minChanges,
+                )?.points ?? 0)
+              : 0;
+
+          const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
+
+          if (isReleasePR) {
+            // release PRs are created by the github-actions bot so we attribute points to the merger
+            const { data: prDetails } = await octokit.pulls.get({
               owner,
               repo,
               pull_number: pr.number,
-              per_page: 100,
-            },
-            res => res.data,
-          ),
-        ]);
+            });
 
-        const filteredFiles = modifiedFiles.filter(
-          file =>
-            !CONFIG.EXCLUDED_FILES.some(pattern =>
-              minimatch(file.filename, pattern, { dot: true }),
-            ),
-        );
+            if (prDetails.merged_by && stats.has(prDetails.merged_by.login)) {
+              const mergerStats = stats.get(prDetails.merged_by.login);
+              mergerStats.codeReviews.push({
+                pr: ref(pr.number),
+                points: CONFIG.POINTS_PER_RELEASE_PR,
+                isReleaseMerger: true,
+              });
+              mergerStats.points += CONFIG.POINTS_PER_RELEASE_PR;
+            }
+          } else {
+            // Award points to PR author if they are a core maintainer
+            const prAuthor = pr.user?.login;
+            if (prAuthor && orgMemberLogins.has(prAuthor)) {
+              const isReleaseNoteFile = file =>
+                file.filename.startsWith('upcoming-release-notes/') &&
+                file.filename.endsWith('.md') &&
+                file.filename !== 'upcoming-release-notes/README.md';
+              const releaseNoteFile =
+                modifiedFiles.find(
+                  file =>
+                    file.filename ===
+                      `upcoming-release-notes/${pr.number}.md` &&
+                    file.status !== 'removed',
+                ) ??
+                modifiedFiles.find(
+                  file => file.status === 'added' && isReleaseNoteFile(file),
+                );
+              const categoryAndPoints = await getPRCategoryAndPoints(
+                octokit,
+                owner,
+                repo,
+                releaseNoteFile?.sha ?? null,
+              );
 
-        const isDocsFile = file => {
-          const positivePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(
-            p => !p.startsWith('!'),
-          );
-          const negativePatterns = CONFIG.DOCS_FILES_PATTERNS.filter(p =>
-            p.startsWith('!'),
-          );
-          return (
-            positivePatterns.some(p =>
-              minimatch(file.filename, p, { dot: true }),
-            ) &&
-            negativePatterns.every(p =>
-              minimatch(file.filename, p, { dot: true }),
-            )
-          );
-        };
+              if (categoryAndPoints) {
+                const authorStats = stats.get(prAuthor);
+                authorStats.prContributions.push({
+                  pr: ref(pr.number),
+                  category: categoryAndPoints.category,
+                  points: categoryAndPoints.points,
+                });
+                authorStats.points += categoryAndPoints.points;
+              }
+            }
 
-        const docsFiles = filteredFiles.filter(isDocsFile);
-        const codeFiles = filteredFiles.filter(file => !isDocsFile(file));
+            const uniqueReviewers = new Set();
+            reviews.data.forEach(review => {
+              if (
+                review.state === 'APPROVED' &&
+                stats.has(review.user?.login) &&
+                !uniqueReviewers.has(review.user?.login)
+              ) {
+                const reviewer = review.user.login;
+                uniqueReviewers.add(reviewer);
+                const userStats = stats.get(reviewer);
 
-        const docsChanges = docsFiles.reduce(
-          (sum, file) => sum + file.additions + file.deletions,
-          0,
-        );
-        const codeChanges = codeFiles.reduce(
-          (sum, file) => sum + file.additions + file.deletions,
-          0,
-        );
+                if (docsPoints > 0) {
+                  userStats.docsReviews.push({
+                    pr: ref(pr.number),
+                    points: docsPoints,
+                  });
+                  userStats.points += docsPoints;
+                }
 
-        const docsPoints =
-          docsChanges > 0
-            ? (CONFIG.DOCS_PR_REVIEW_POINT_TIERS.find(
-                t => docsChanges >= t.minChanges,
-              )?.points ?? 0)
-            : 0;
-        const codePoints =
-          codeChanges > 0 || docsChanges === 0
-            ? (CONFIG.CODE_PR_REVIEW_POINT_TIERS.find(
-                t => codeChanges >= t.minChanges,
-              )?.points ?? 0)
-            : 0;
+                if (codePoints > 0) {
+                  userStats.codeReviews.push({
+                    pr: ref(pr.number),
+                    points: codePoints,
+                  });
+                  userStats.points += codePoints;
+                }
+              }
+            });
+          }
+        }),
+      ),
+    );
 
-        const isReleasePR = pr.title.match(/🔖.*\d+\.\d+\.\d+/);
+    // Get all issues with label events in the last month
+    const issues = await octokit.paginate(octokit.issues.listForRepo, {
+      owner,
+      repo,
+      state: 'all',
+      sort: 'updated',
+      direction: 'desc',
+      per_page: 100,
+      since: since.toISOString(),
+    });
 
-        if (isReleasePR) {
-          // release PRs are created by the github-actions bot so we attribute points to the merger
-          const { data: prDetails } = await octokit.pulls.get({
+    // Get label events for each issue
+    await Promise.all(
+      issues.map(issue =>
+        limit(async () => {
+          const { data: events } = await octokit.issues.listEventsForTimeline({
             owner,
             repo,
-            pull_number: pr.number,
+            issue_number: issue.number,
           });
 
-          if (prDetails.merged_by && stats.has(prDetails.merged_by.login)) {
-            const mergerStats = stats.get(prDetails.merged_by.login);
-            mergerStats.codeReviews.push({
-              pr: pr.number.toString(),
-              points: CONFIG.POINTS_PER_RELEASE_PR,
-              isReleaseMerger: true,
-            });
-            mergerStats.points += CONFIG.POINTS_PER_RELEASE_PR;
-          }
-        } else {
-          // Award points to PR author if they are a core maintainer
-          const prAuthor = pr.user?.login;
-          if (prAuthor && orgMemberLogins.has(prAuthor)) {
-            const isReleaseNoteFile = file =>
-              file.filename.startsWith('upcoming-release-notes/') &&
-              file.filename.endsWith('.md') &&
-              file.filename !== 'upcoming-release-notes/README.md';
-            const releaseNoteFile =
-              modifiedFiles.find(
-                file =>
-                  file.filename === `upcoming-release-notes/${pr.number}.md` &&
-                  file.status !== 'removed',
-              ) ??
-              modifiedFiles.find(
-                file => file.status === 'added' && isReleaseNoteFile(file),
+          events
+            .filter(event => {
+              const createdAt = new Date(event.created_at);
+              return (
+                createdAt.getTime() > since.getTime() &&
+                createdAt.getTime() <= until.getTime() &&
+                stats.has(event.actor?.login)
               );
-            const categoryAndPoints = await getPRCategoryAndPoints(
-              octokit,
-              owner,
-              repo,
-              releaseNoteFile?.sha ?? null,
-            );
-
-            if (categoryAndPoints) {
-              const authorStats = stats.get(prAuthor);
-              authorStats.prContributions.push({
-                pr: pr.number.toString(),
-                category: categoryAndPoints.category,
-                points: categoryAndPoints.points,
-              });
-              authorStats.points += categoryAndPoints.points;
-            }
-          }
-
-          const uniqueReviewers = new Set();
-          reviews.data.forEach(review => {
-            if (
-              review.state === 'APPROVED' &&
-              stats.has(review.user?.login) &&
-              !uniqueReviewers.has(review.user?.login)
-            ) {
-              const reviewer = review.user.login;
-              uniqueReviewers.add(reviewer);
-              const userStats = stats.get(reviewer);
-
-              if (docsPoints > 0) {
-                userStats.docsReviews.push({
-                  pr: pr.number.toString(),
-                  points: docsPoints,
-                });
-                userStats.points += docsPoints;
+            })
+            .forEach(event => {
+              if (
+                event.event === 'unlabeled' &&
+                event.label?.name.toLowerCase() === 'needs triage'
+              ) {
+                const remover = event.actor.login;
+                const userStats = stats.get(remover);
+                userStats.labelRemovals.push(ref(issue.number));
+                userStats.points += CONFIG.POINTS_PER_ISSUE_TRIAGE_ACTION;
               }
 
-              if (codePoints > 0) {
-                userStats.codeReviews.push({
-                  pr: pr.number.toString(),
-                  points: codePoints,
-                });
-                userStats.points += codePoints;
+              if (
+                event.event === 'closed' &&
+                ['not_planned', 'duplicate'].includes(event.state_reason)
+              ) {
+                const closer = event.actor.login;
+                const userStats = stats.get(closer);
+                userStats.issueClosings.push(ref(issue.number));
+                userStats.points += CONFIG.POINTS_PER_ISSUE_CLOSING_ACTION;
               }
-            }
-          });
-        }
-      }),
-    ),
-  );
-
-  // Get all issues with label events in the last month
-  const issues = await octokit.paginate(octokit.issues.listForRepo, {
-    owner,
-    repo,
-    state: 'all',
-    sort: 'updated',
-    direction: 'desc',
-    per_page: 100,
-    since: since.toISOString(),
-  });
-
-  // Get label events for each issue
-  await Promise.all(
-    issues.map(issue =>
-      limit(async () => {
-        const { data: events } = await octokit.issues.listEventsForTimeline({
-          owner,
-          repo,
-          issue_number: issue.number,
-        });
-
-        events
-          .filter(event => {
-            const createdAt = new Date(event.created_at);
-            return (
-              createdAt.getTime() > since.getTime() &&
-              createdAt.getTime() <= until.getTime() &&
-              stats.has(event.actor?.login)
-            );
-          })
-          .forEach(event => {
-            if (
-              event.event === 'unlabeled' &&
-              event.label?.name.toLowerCase() === 'needs triage'
-            ) {
-              const remover = event.actor.login;
-              const userStats = stats.get(remover);
-              userStats.labelRemovals.push(issue.number.toString());
-              userStats.points += CONFIG.POINTS_PER_ISSUE_TRIAGE_ACTION;
-            }
-
-            if (
-              event.event === 'closed' &&
-              ['not_planned', 'duplicate'].includes(event.state_reason)
-            ) {
-              const closer = event.actor.login;
-              const userStats = stats.get(closer);
-              userStats.issueClosings.push(issue.number.toString());
-              userStats.points += CONFIG.POINTS_PER_ISSUE_CLOSING_ACTION;
-            }
-          });
-      }),
-    ),
-  );
+            });
+        }),
+      ),
+    );
+  }
 
   // Print all statistics
   printStats(
@@ -424,9 +436,9 @@ async function countContributorPoints() {
         .get(user)
         .codeReviews.map(r => {
           if (r.isReleaseMerger) {
-            return `#${r.pr} (${r.points}pts - Release Merger)`;
+            return `${r.pr} (${r.points}pts - Release Merger)`;
           }
-          return `#${r.pr} (${r.points}pts)`;
+          return `${r.pr} (${r.points}pts)`;
         })
         .join(', ')})`,
   );
@@ -437,7 +449,7 @@ async function countContributorPoints() {
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
-        .docsReviews.map(r => `#${r.pr} (${r.points}pts)`)
+        .docsReviews.map(r => `${r.pr} (${r.points}pts)`)
         .join(', ')})`,
   );
 
@@ -447,7 +459,7 @@ async function countContributorPoints() {
     (user, count) =>
       `${user}: ${count} (PRs: ${stats
         .get(user)
-        .prContributions.map(r => `#${r.pr} (${r.points}pts - ${r.category})`)
+        .prContributions.map(r => `${r.pr} (${r.points}pts - ${r.category})`)
         .join(', ')})`,
   );
 
