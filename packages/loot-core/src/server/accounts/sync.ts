@@ -20,6 +20,7 @@ import {
 } from '#server/util/custom-sync-mapping';
 import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
+import { addTag, UNREVIEWED_TAG } from '#shared/tags';
 import {
   makeChild as makeChildTransaction,
   recalculateSplit,
@@ -625,6 +626,9 @@ export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
   isPreview?: boolean;
   defaultCleared?: boolean;
   updateDates?: boolean;
+  // Tag added to the notes of transactions this call creates. Transactions
+  // matched to an existing one never get it, so removing the tag sticks.
+  reviewTag?: string;
 };
 
 export type ReconcileTransactionsResult = {
@@ -649,6 +653,7 @@ export async function reconcileTransactions(
     updateDates = false,
     reimportDeleted,
     payeeNameNormalization,
+    reviewTag,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -770,6 +775,7 @@ export async function reconcileTransactions(
         id: uuidv4(),
         category: trans.category || null,
         cleared: trans.cleared ?? defaultCleared,
+        ...(reviewTag ? { notes: addTag(trans.notes, reviewTag) } : {}),
       };
 
       if (subtransactions && subtransactions.length > 0) {
@@ -1124,6 +1130,12 @@ async function processBankSyncDownload(
       .select('value'),
   ).then(data => String(data?.data?.[0]?.value ?? 'true') === 'true');
 
+  const isReviewTagEnabled = await aqlQuery(
+    q('preferences')
+      .filter({ id: 'flags.reviewNewTransactions' })
+      .select('value'),
+  ).then(data => String(data?.data?.[0]?.value ?? 'false') === 'true');
+
   const updateDates = await aqlQuery(
     q('preferences')
       .filter({ id: `sync-update-dates-${id}` })
@@ -1238,6 +1250,9 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
+        // The initial sync backfills history, which isn't "new" to the
+        // user, so only later syncs tag transactions for review.
+        reviewTag: isReviewTagEnabled ? UNREVIEWED_TAG : undefined,
       },
     );
 
