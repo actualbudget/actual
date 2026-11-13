@@ -20,7 +20,6 @@ import type {
 } from 'react';
 import { DragPreview } from 'react-aria';
 import type { DragPreviewRenderer } from 'react-aria';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -125,6 +124,7 @@ import type {
   OnDragChangeCallback,
   OnDropCallback,
 } from '#hooks/useDragDrop';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { usePrevious } from '#hooks/usePrevious';

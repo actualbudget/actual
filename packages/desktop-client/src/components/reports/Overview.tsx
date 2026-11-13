@@ -3,7 +3,6 @@ import { Dialog, DialogTrigger } from 'react-aria-components';
 import { ErrorBoundary } from 'react-error-boundary';
 import ReactGridLayout from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -30,6 +29,7 @@ import {
   useDashboardPageWidgets,
 } from '#hooks/useDashboardPages';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { useNavigate } from '#hooks/useNavigate';
 import { useReports } from '#hooks/useReports';
 import { useResizeObserver } from '#hooks/useResizeObserver';

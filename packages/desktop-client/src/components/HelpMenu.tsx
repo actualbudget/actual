@@ -1,5 +1,4 @@
 import { forwardRef, useRef } from 'react';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router';
 
@@ -11,6 +10,7 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { useToggle } from 'usehooks-ts';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 

@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components';
-import { useHotkeys } from 'react-hotkeys-hook';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -45,6 +44,7 @@ import { NotesButton } from '#components/NotesButton';
 import { SelectedTransactionsButton } from '#components/transactions/SelectedTransactionsButton';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
+import { useHotkeys } from '#hooks/useHotkeys';
 import { useLocale } from '#hooks/useLocale';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useSplitsExpanded } from '#hooks/useSplitsExpanded';
