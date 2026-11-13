@@ -71,6 +71,25 @@ describe('handleEnableBankingError', () => {
     expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
   });
 
+  it('asks for a new login when the session no longer exists (404)', () => {
+    const error = handleEnableBankingError(404, {
+      error: 'SESSION_DOES_NOT_EXIST',
+      message: 'No session found matching provided id',
+    });
+    expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
+  });
+
+  it.each([
+    [408, undefined],
+    [400, 'ASPSP_TIMEOUT'],
+  ])('reports a timeout as TIMED_OUT (%d %s)', (status, code) => {
+    const error = handleEnableBankingError(status, {
+      error: code,
+      message: 'Timeout interacting with ASPSP',
+    });
+    expect(error.error_code).toBe('TIMED_OUT');
+  });
+
   it('should return INTERNAL_ERROR for 500+', () => {
     const error = handleEnableBankingError(500, { message: 'Server error' });
     expect(error.error_type).toBe('Server error');

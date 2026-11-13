@@ -146,6 +146,15 @@ describe('normalizeTransaction', () => {
     expect(result.transactionId).toBe('tx-003');
   });
 
+  it.each([
+    ['HOLD', false],
+    ['SCHD', false],
+    ['OTHR', true],
+  ] as const)('should mark %s transactions as booked: %s', (status, booked) => {
+    const result = normalizeTransaction({ ...mockCreditTransaction, status });
+    expect(result.booked).toBe(booked);
+  });
+
   it('should preserve original sign when credit_debit_indicator is absent', () => {
     const result = normalizeTransaction(mockPendingTransaction);
     expect(result.transactionAmount.amount).toBe('-10.00');

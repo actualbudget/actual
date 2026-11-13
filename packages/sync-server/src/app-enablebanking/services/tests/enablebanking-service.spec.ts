@@ -401,6 +401,39 @@ describe('enableBankingService', () => {
       );
     });
 
+    it('asks for booked transactions only when told to', async () => {
+      mockFetchResponse({ transactions: [] });
+
+      await enableBankingService.getTransactions(
+        'uid',
+        '2026-01-01',
+        '2026-03-25',
+        undefined,
+        undefined,
+        { bookedOnly: true },
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining('transaction_status=BOOK'),
+        expect.anything(),
+      );
+    });
+
+    it('does not filter by status by default', async () => {
+      mockFetchResponse({ transactions: [] });
+
+      await enableBankingService.getTransactions(
+        'uid',
+        '2026-01-01',
+        '2026-03-25',
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.not.stringContaining('transaction_status'),
+        expect.anything(),
+      );
+    });
+
     it('returns continuation_key from response', async () => {
       mockFetchResponse({
         transactions: [mockCreditTransaction],

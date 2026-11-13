@@ -26,7 +26,7 @@ export type EnableBankingTransaction = {
   creditor?: { name?: string | null } | null;
   debtor?: { name?: string | null } | null;
   credit_debit_indicator?: 'CRDT' | 'DBIT';
-  status?: 'BOOK' | 'PDNG';
+  status?: 'BOOK' | 'CNCL' | 'HOLD' | 'OTHR' | 'PDNG' | 'RJCT' | 'SCHD';
   booking_date?: string;
   value_date?: string;
   transaction_date?: string;
@@ -329,7 +329,8 @@ export function normalizeTransaction(
     payeeName,
     notes: remittanceInformationUnstructured,
     remittanceInformationUnstructured,
-    booked: tx.status !== 'PDNG',
+    // Holds and scheduled payments have not moved any money yet.
+    booked: !['PDNG', 'HOLD', 'SCHD'].includes(tx.status ?? ''),
   };
 }
 
@@ -480,11 +481,17 @@ export const enableBankingService = {
     dateTo: string,
     continuationKey?: string,
     psuHeaders?: PsuHeaders,
+    { bookedOnly = false }: { bookedOnly?: boolean } = {},
   ): Promise<{
     transactions: EnableBankingTransaction[];
     continuation_key?: string;
   }> {
     let path = `/accounts/${encodeURIComponent(accountUid)}/transactions?date_from=${encodeURIComponent(dateFrom)}&date_to=${encodeURIComponent(dateTo)}`;
+    // Some banks do not flag pending transactions, so filtering at the bank
+    // is the only way to keep those out.
+    if (bookedOnly) {
+      path += '&transaction_status=BOOK';
+    }
     if (continuationKey) {
       path += `&continuation_key=${encodeURIComponent(continuationKey)}`;
     }
@@ -499,6 +506,7 @@ export const enableBankingService = {
     dateFrom: string,
     dateTo: string,
     psuHeaders?: PsuHeaders,
+    options: { bookedOnly?: boolean } = {},
   ): Promise<EnableBankingTransaction[]> {
     const allTransactions: EnableBankingTransaction[] = [];
     let continuationKey: string | undefined;
@@ -512,6 +520,7 @@ export const enableBankingService = {
         dateTo,
         continuationKey,
         psuHeaders,
+        options,
       );
 
       if (

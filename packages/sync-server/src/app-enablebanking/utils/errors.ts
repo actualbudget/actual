@@ -44,8 +44,8 @@ export function handleEnableBankingError(
     return new EnableBankingError(message, 'RATE_LIMIT_EXCEEDED', message);
   }
 
-  if (statusCode === 404) {
-    return new EnableBankingError(message, 'NOT_FOUND', message);
+  if (statusCode === 408 || errorType === 'ASPSP_TIMEOUT') {
+    return new EnableBankingError(message, 'TIMED_OUT', message);
   }
 
   if (statusCode >= 400 && statusCode < 500) {
@@ -59,6 +59,11 @@ export function handleEnableBankingError(
       lowerMessage.includes('expired')
     ) {
       return new EnableBankingError(message, 'INVALID_ACCESS_TOKEN', message);
+    }
+    // After the session check: a session that no longer exists is a 404 too,
+    // and needs a new login rather than a "not found".
+    if (statusCode === 404) {
+      return new EnableBankingError(message, 'NOT_FOUND', message);
     }
     return new EnableBankingError(message, 'INVALID_INPUT', message);
   }

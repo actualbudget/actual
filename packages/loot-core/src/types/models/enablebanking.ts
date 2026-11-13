@@ -43,7 +43,7 @@ export type EnableBankingRawTransaction = {
   creditor_account?: { iban?: string };
   debtor_account?: { iban?: string };
   credit_debit_indicator?: 'CRDT' | 'DBIT';
-  status: 'BOOK' | 'PDNG';
+  status: 'BOOK' | 'CNCL' | 'HOLD' | 'OTHR' | 'PDNG' | 'RJCT' | 'SCHD';
   booking_date?: string;
   value_date?: string;
   transaction_date?: string;
