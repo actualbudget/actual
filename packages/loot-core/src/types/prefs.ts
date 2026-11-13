@@ -11,7 +11,8 @@ export type FeatureFlag =
   | 'enableBanking'
   | 'sankeyReport'
   | 'mobileCalculator'
-  | 'monteCarloReport';
+  | 'monteCarloReport'
+  | 'bankSyncTransferDetection';
 
 /**
  * Cross-device preferences. These sync across devices when they are changed.

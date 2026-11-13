@@ -285,6 +285,14 @@ export function ExperimentalFeatures() {
           <Trans>Enable Banking sync (EU banks)</Trans>
         </FeatureToggle>
       )}
+      {isUsingServer && (
+        <FeatureToggle
+          flag="bankSyncTransferDetection"
+          feedbackLink="https://github.com/actualbudget/actual/issues/1628"
+        >
+          <Trans>Transfer detection during bank sync</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
