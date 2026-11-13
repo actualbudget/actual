@@ -63,6 +63,8 @@
     "knip": "knip",
     "install:server": "yarn workspaces focus @actual-app/sync-server --production",
     "constraints": "yarn constraints",
+    "check:currency-metadata": "node scripts/check-currency-metadata.mjs",
+    "test:currency-metadata": "node --test --test-isolation=none scripts/check-currency-metadata.test.mjs",
     "typecheck": "tsgo -p tsconfig.root.json --noEmit && lage typecheck",
     "check:tsconfig-references": "workspaces-to-typescript-project-references --check",
     "sync:tsconfig-references": "workspaces-to-typescript-project-references",
