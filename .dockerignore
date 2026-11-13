@@ -1,4 +1,5 @@
 **/node_modules
+packages/desktop-client/locale
 .git
 .lage
 .pnp.*
