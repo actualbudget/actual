@@ -20,9 +20,14 @@ type QIFTransaction = {
 };
 
 export function qif2json(qif, options: { dateFormat?: string } = {}) {
-  const lines = qif.split('\n').filter(Boolean);
+  // Trim before dropping blank lines: in a CRLF file a blank line is a lone
+  // "\r", which would otherwise reach the detail-code switch below.
+  const lines = qif
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean);
   let line = lines.shift();
-  const type = /!Type:([^$]*)$/.exec(line.trim());
+  const type = /!Type:([^$]*)$/.exec(line);
   const data: {
     dateFormat: string | undefined;
     type?;
