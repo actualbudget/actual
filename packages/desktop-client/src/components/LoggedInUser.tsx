@@ -102,7 +102,7 @@ export function LoggedInUser({ hideIfNoServer, style }: LoggedInUserProps) {
         void navigate('/');
         break;
       case 'sign-out':
-        void dispatch(signOut());
+        void dispatch(signOut({ clearEncryptionKeys: true }));
         break;
       case 'config-server':
         await onCloseBudget();

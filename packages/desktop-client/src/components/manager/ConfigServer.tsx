@@ -334,6 +334,9 @@ export function ConfigServer() {
       httpUrl = 'https://' + url;
     }
 
+    const previousUrl = currentUrl ? currentUrl.replace(/\/+$/, '') : null;
+    const urlChanged = httpUrl.replace(/\/+$/, '') !== previousUrl;
+
     const { error } = await setServerUrl(httpUrl);
     setUrl(httpUrl);
 
@@ -342,7 +345,11 @@ export function ConfigServer() {
       setError(error);
     } else {
       setLoading(false);
-      await dispatch(signOut());
+      if (urlChanged) {
+        await dispatch(signOut());
+      } else {
+        await dispatch(loggedIn());
+      }
       void navigate('/');
     }
   }
