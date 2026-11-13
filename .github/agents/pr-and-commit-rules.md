@@ -4,25 +4,38 @@ This file lists the PR and commit rules you have to apply yourself.
 
 ## Pull Request Rules
 
-### `[AI]` prefix on PR titles
+### Draft PRs
 
-**ALL pull request titles MUST be prefixed with `[AI]`** — you have to apply it
-yourself.
+Open a PR as a draft while the work is still in progress, and mark it ready for
+review once it is done.
 
-**Examples:**
+### PR description
 
-- `[AI] Fix type error in account validation`
-- `Fix type error in account validation` (MISSING PREFIX — NOT ALLOWED)
+Use the PR template (`.github/PULL_REQUEST_TEMPLATE.md`) as the body and keep
+every heading. A hook checks the body when you create the PR through the
+GitHub MCP tool, and CI checks it on the PR itself however it was created.
 
-### Do not fill in the PR template
+- **Leave the "Human Summary" section empty and every box in the "Checklist"
+  section unchecked.** The human author writes the summary in their own words and ticks
+  the checklist; CI fails the PR until the summary is filled in.
+- **You may write the "Description" and "Testing" sections**, but keep them to
+  150 words in total. "Description" says what changed. "Testing" is numbered
+  steps a maintainer can follow to see the change for themselves — where to go,
+  what to click or run, what they should see — not a list of the commands you
+  ran.
 
-- **NEVER fill in the PR template** (`.github/PULL_REQUEST_TEMPLATE.md`). Create
-  the PR with that template as the body, unmodified — leave all blank spaces and
-  placeholder comments as-is, and leave every checklist box unchecked. The human
-  who tested the change fills in the Description, Related issue(s), Testing, and
-  Checklist sections.
-- **Exception**: if a human **explicitly asks** you to fill it out, do so **in
-  Chinese**, using Chinese characters (简体中文) for all content you add.
+### Proof is mandatory
+
+**Every PR that changes app code must prove that it works.** Maintainers
+should not have to test a change by hand to see what it does.
+
+Verify the change in a real browser before opening the PR, and put a before
+AND an after screenshot, or a video, in the "Proof" section. Passing tests are
+not proof. The commands for capturing and attaching it, including from a fork,
+are in `.claude/skills/proving-actual-changes/SKILL.md`.
+
+Tick the checkbox in the "Proof" section only when there is truly nothing to
+show (a refactor, types, tests) — never to skip the verification.
 
 ## Do not create GitHub issues
 
@@ -38,8 +51,7 @@ commenting on them) remains allowed.
 **Prefix everything you post to GitHub with the robot emoji 🤖** — pull-request
 and issue comments, pull-request reviews (including inline review comments), and
 the title and body of issues you edit. This keeps agent-authored content
-visibly marked. It does **not** change PR titles (still `[AI] …`) or commit
-messages (still `[AI] …`).
+visibly marked. PR titles and commit messages take no prefix.
 
 Write the text normally; just make sure 🤖 is the first character (for issues,
 on both the title and the body).
