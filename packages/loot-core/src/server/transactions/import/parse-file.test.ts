@@ -382,6 +382,47 @@ describe('File import', () => {
     });
   });
 
+  test('xlsx import reads the first sheet like a csv file', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/data.xlsx',
+      { hasHeaderRow: true, delimiter: ';' },
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toEqual([
+      {
+        Date: '2026-01-05',
+        Payee: 'Fast Internet',
+        Notes: 'Monthly bill',
+        Amount: '-29.99',
+      },
+      {
+        Date: '2026-01-07',
+        Payee: 'Kovács, Éva',
+        Notes: 'Lunch',
+        Amount: '-12.5',
+      },
+      {
+        Date: '2026-01-12',
+        Payee: 'Employer Inc',
+        Notes: 'Salary',
+        Amount: '2500',
+      },
+      { Date: '2026-01-15', Payee: 'Coffee Shop', Notes: '', Amount: '-0.3' },
+    ]);
+  });
+
+  test('xlsx import rejects a file that is not a workbook', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/not-a-workbook.xlsx',
+      {},
+    );
+
+    expect(errors.length).toBe(1);
+    expect(transactions).toHaveLength(0);
+    expect(errors[0].message).toContain('Failed parsing');
+  });
+
   test('csv import rejects an invalid encoding', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/utf-8-bom.csv',

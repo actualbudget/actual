@@ -83,8 +83,18 @@ function getFileType(filepath: string): string {
   const m = filepath.match(/\.([^.]*)$/);
   if (!m) return 'ofx';
   const rawType = m[1].toLowerCase();
-  if (rawType === 'tsv') return 'csv';
+  if (rawType === 'tsv' || rawType === 'xlsx') return 'csv';
   return rawType;
+}
+
+// .xlsx files go through the CSV import, but keep their own date format.
+function isXlsxFile(filename: string) {
+  return /\.xlsx$/i.test(filename);
+}
+
+function getDateFormatPrefKey(accountId: string, filename: string) {
+  const filetype = isXlsxFile(filename) ? 'xlsx' : getFileType(filename);
+  return `parse-date-${accountId}-${filetype}`;
 }
 
 function getInitialDateFormat(transactions, mappings) {
@@ -441,7 +451,7 @@ export function ImportTransactionsModal({
             setSplitMode(splitMode);
 
             const parseDateFormat =
-              prefs[`parse-date-${accountId}-${filetype}`] ||
+              prefs[getDateFormatPrefKey(accountId, filename)] ||
               getInitialDateFormat(transactions, mappings);
             setParseDateFormat(
               isDateFormat(parseDateFormat) ? parseDateFormat : null,
@@ -557,7 +567,7 @@ export function ImportTransactionsModal({
       filters: [
         {
           name: 'Financial Files',
-          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xml'],
+          extensions: ['qif', 'ofx', 'qfx', 'csv', 'tsv', 'xlsx', 'xml'],
         },
       ],
     });
@@ -736,7 +746,7 @@ export function ImportTransactionsModal({
     }
 
     if (!isOfxFile(filetype) && !isCamtFile(filetype)) {
-      const key = `parse-date-${accountId}-${filetype}`;
+      const key = getDateFormatPrefKey(accountId, filename);
       savePrefs({ [key]: parseDateFormat });
     }
 
@@ -1204,6 +1214,7 @@ export function ImportTransactionsModal({
                           ['~', '~'],
                         ]}
                         value={delimiter}
+                        disabled={isXlsxFile(filename)}
                         onChange={value => {
                           setDelimiter(value);
                         }}
@@ -1232,6 +1243,7 @@ export function ImportTransactionsModal({
                           ['iso-8859-2', t('ISO-8859-2')],
                         ]}
                         value={csvEncoding}
+                        disabled={isXlsxFile(filename)}
                         onChange={value => {
                           setCsvEncoding(value);
                         }}
