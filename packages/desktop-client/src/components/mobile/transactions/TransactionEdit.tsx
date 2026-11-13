@@ -40,6 +40,12 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
+  addTag,
+  hasTag,
+  removeTag,
+  UNREVIEWED_TAG,
+} from '@actual-app/core/shared/tags';
+import {
   addSplitTransaction,
   deleteTransaction,
   makeEmptySplitSubtransactions,
@@ -94,6 +100,7 @@ import {
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -667,6 +674,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
     const { data: { grouped: categoryGroups } = { grouped: [] } } =
       useCategories();
     const noteRef = useRef<HTMLInputElement | null>(null);
+    const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
     useEffect(() => {
       if (window.history.length === 1) {
@@ -1521,6 +1529,26 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   id="cleared"
                   isOn={!!transaction.cleared}
                   onToggle={on => onUpdateInner(transaction, 'cleared', on)}
+                />
+              </View>
+            )}
+            {isReviewTagEnabled && !isAdding && (
+              <View style={{ alignItems: 'center' }}>
+                <FieldLabel title={t('Reviewed')} />
+                <ToggleField
+                  id="reviewed"
+                  isOn={!hasTag(transaction.notes, UNREVIEWED_TAG)}
+                  onToggle={isReviewed => {
+                    const notes = isReviewed
+                      ? (removeTag(transaction.notes, UNREVIEWED_TAG) ?? '')
+                      : addTag(transaction.notes, UNREVIEWED_TAG);
+                    // The notes input is uncontrolled, so show the new
+                    // text there too.
+                    if (noteRef.current) {
+                      noteRef.current.value = notes;
+                    }
+                    return onUpdateInner(transaction, 'notes', notes);
+                  }}
                 />
               </View>
             )}
