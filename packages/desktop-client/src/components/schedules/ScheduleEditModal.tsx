@@ -1,10 +1,11 @@
 // @ts-strict-ignore
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
 import { SpaceBetween } from '@actual-app/components/space-between';
 import { send, sendCatch } from '@actual-app/core/platform/client/connection';
+import * as undo from '@actual-app/core/platform/client/undo';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type {
@@ -31,6 +32,23 @@ type ScheduleEditModalProps = Extract<
 
 export function ScheduleEditModal({ id, transaction }: ScheduleEditModalProps) {
   const { t } = useTranslation();
+
+  // Tag this modal on the undo state so that undoing a change made from here
+  // reopens the schedule rather than navigating back to the schedules page.
+  useEffect(() => {
+    // Restore rather than clear on cleanup: `openModal` is global, so a modal
+    // opened underneath this one would otherwise lose its own tag.
+    const previousOpenModal = undo.getUndoState('openModal');
+
+    undo.setUndoState('openModal', {
+      name: 'schedule-edit',
+      options: { id, transaction },
+    });
+
+    return () => {
+      undo.setUndoState('openModal', previousOpenModal);
+    };
+  }, [id, transaction]);
 
   const adding = id == null;
   const fromTrans = transaction != null;
