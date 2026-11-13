@@ -277,6 +277,12 @@ export function ExperimentalFeatures() {
       >
         <Trans>Monte Carlo Analysis Report</Trans>
       </FeatureToggle>
+      <FeatureToggle
+        flag="reviewNewTransactions"
+        feedbackLink="https://github.com/actualbudget/actual/issues/4230"
+      >
+        <Trans>Tag new bank sync transactions for review</Trans>
+      </FeatureToggle>
       {isUsingServer && (
         <FeatureToggle
           flag="enableBanking"
