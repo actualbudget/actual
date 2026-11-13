@@ -780,6 +780,12 @@ test('uses filtered months for average spending in a custom report', async ({
   await expect(total).toContainText('-500.00');
   // The two partial boundary months and the three empty months all count.
   await expect(average).toContainText('-100.00');
+
+  await report.selectViz('Data Table');
+  const tableTotals = page.getByTestId('report-row-Totals');
+  await expect(tableTotals.getByText('-500.00', { exact: true })).toBeVisible();
+  await expect(tableTotals.getByText('-100.00', { exact: true })).toBeVisible();
+  await expect(average).toContainText('-100.00');
 });
 
 test.describe('Reports without transactions', () => {

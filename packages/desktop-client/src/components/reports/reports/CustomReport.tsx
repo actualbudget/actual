@@ -614,6 +614,7 @@ function CustomReportInner({
   const groupedData = useReport('grouped', getGroupData);
 
   const data = graphData ? { ...graphData, groupedData } : null;
+  const averageIntervalsCount = data?.filteredMonthCount ?? intervals.length;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -1077,7 +1078,7 @@ function CustomReportInner({
                     showHiddenCategories={showHiddenCategories}
                     showOffBudget={showOffBudget}
                     showTrendLines={showTrendLines}
-                    intervalsCount={intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 ) : (
                   <LoadingIndicator message={t('Loading report...')} />
@@ -1099,7 +1100,7 @@ function CustomReportInner({
                     balanceTypeOp={balanceTypeOp}
                     data={data}
                     interval={interval}
-                    intervalsCount={data.filteredMonthCount ?? intervals.length}
+                    intervalsCount={averageIntervalsCount}
                   />
                 )}
                 {viewLegend && (
