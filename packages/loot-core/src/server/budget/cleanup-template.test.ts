@@ -7,6 +7,7 @@ import * as actions from './actions';
 import { cleanupTemplate } from './cleanup-template';
 
 vi.mock('./actions', () => ({
+  getSheetBoolean: vi.fn(),
   getSheetValue: vi.fn(),
   setBudget: vi.fn(),
   setGoal: vi.fn(),
@@ -14,7 +15,6 @@ vi.mock('./actions', () => ({
 
 vi.mock('#server/db', () => ({
   all: vi.fn(),
-  first: vi.fn(),
 }));
 
 vi.mock('./cleanup-template-notes', () => ({
@@ -48,8 +48,8 @@ function setup({
       cleanup_def: JSON.stringify(c.cleanup_def),
     }));
   });
-  // No carryover rows, so overspending never rolls over in these tests.
-  vi.mocked(db.first).mockResolvedValue(null);
+  // Overspending never rolls over in these tests.
+  vi.mocked(actions.getSheetBoolean).mockResolvedValue(false);
   vi.mocked(actions.getSheetValue).mockImplementation(
     async (_sheet: string, key: string) => sheetValues[key] ?? 0,
   );

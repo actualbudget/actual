@@ -148,6 +148,8 @@ export function setBudget({
   if (existing) {
     return db.update(table, { id: existing.id, amount });
   }
+  // Sync creates the row with a NULL carryover, which continues the previous
+  // month's rollover. Sending one would overwrite a flag set on another device.
   return db.insert(table, {
     id: `${dbMonth(month)}-${category}`,
     month: dbMonth(month),
@@ -206,14 +208,17 @@ function setCarryover(
     month,
     category,
   ]);
+  // On is stored as 2, so following months keep it (see `createCategory`
+  // in base.ts). Older versions read only 1 as on, so they show it as off.
+  const carryover = flag ? 2 : 0;
   if (existing) {
-    return db.update(table, { id: existing.id, carryover: flag ? 1 : 0 });
+    return db.update(table, { id: existing.id, carryover });
   }
   return db.insert(table, {
     id: `${month}-${category}`,
     month,
     category,
-    carryover: flag ? 1 : 0,
+    carryover,
   });
 }
 
@@ -843,9 +848,27 @@ export async function resetIncomeCarryover({
   const categories = await db.all<db.DbViewCategory>(
     'SELECT * FROM v_categories WHERE is_income = 1 AND tombstone = 0',
   );
+  const sheetName = monthUtils.sheetForMonth(month);
+  const nextMonth = dbMonth(monthUtils.nextMonth(month)).toString();
 
   await batchMessages(async () => {
     for (const category of categories) {
+      // The reset only covers this month. If next month continues this
+      // month's chain, start the chain again there so it doesn't end here.
+      const chain = await getSheetBoolean(
+        sheetName,
+        `carryover-chain-${category.id}`,
+      );
+      const next = db.firstSync<
+        Pick<db.DbZeroBudget | db.DbReflectBudget, 'carryover'>
+      >(`SELECT carryover FROM ${table} WHERE month = ? AND category = ?`, [
+        nextMonth,
+        category.id,
+      ]);
+      if (chain && next?.carryover !== 0 && next?.carryover !== 2) {
+        await setCarryover(table, category.id, nextMonth, true);
+      }
+
       await setCarryover(table, category.id, dbMonth(month).toString(), false);
     }
   });

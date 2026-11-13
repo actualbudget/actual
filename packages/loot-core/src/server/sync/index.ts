@@ -151,6 +151,18 @@ function apply(
           sql: `UPDATE ${quoteSqlId(dataset)} SET ${quoteSqlId(column)} = ? WHERE id = ?`,
           params: [value, row],
         };
+      } else if (
+        (dataset === 'zero_budgets' || dataset === 'reflect_budgets') &&
+        column !== 'carryover'
+      ) {
+        // A budget row's carryover flag inherits the previous month's until
+        // a message sets it. The column default of 0 means off, so set it
+        // here, where every row is created, rather than sending a NULL that
+        // would overwrite a flag another device set on the same row.
+        query = {
+          sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}, carryover) VALUES (?, ?, NULL)`,
+          params: [row, value],
+        };
       } else {
         query = {
           sql: `INSERT INTO ${quoteSqlId(dataset)} (id, ${quoteSqlId(column)}) VALUES (?, ?)`,
