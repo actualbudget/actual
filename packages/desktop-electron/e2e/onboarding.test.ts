@@ -12,6 +12,9 @@ test.describe('Onboarding', () => {
   });
 
   test('checks the page visuals', async ({ electronPage }) => {
+    await electronPage
+      .getByRole('button', { name: 'Start', exact: true })
+      .hover();
     await expect(electronPage).toHaveScreenshot();
     await configurationPage.clickOnNoServer();
     await expect(electronPage).toHaveScreenshot();

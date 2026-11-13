@@ -212,6 +212,7 @@
     "lru-cache": "^11.5.3",
     "mitt": "^3.0.1",
     "uuid": "^14.0.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {

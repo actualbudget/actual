@@ -12,6 +12,7 @@ import { stripCsvImportTransaction } from './utils';
 import type { FieldMapping, ImportTransaction } from './utils';
 
 type FieldMappingsProps = {
+  title?: string;
   transactions: ImportTransaction[];
   mappings?: FieldMapping;
   onChange: (field: keyof FieldMapping, newValue: string) => void;
@@ -21,6 +22,7 @@ type FieldMappingsProps = {
 };
 
 export function FieldMappings({
+  title,
   transactions,
   mappings = {
     date: null,
@@ -47,7 +49,7 @@ export function FieldMappings({
 
   return (
     <View>
-      <SectionLabel title={t('CSV FIELDS')} />
+      <SectionLabel title={title ?? t('CSV FIELDS')} />
       <SpaceBetween gap={10} style={{ marginTop: 5, alignItems: 'flex-start' }}>
         <View style={{ flex: 1 }}>
           <SubLabel title={t('Date')} />
