@@ -23,6 +23,7 @@ const SESSION_ENDED_ERRORS = new Set([
   'EXPIRED_SESSION',
   'REVOKED_SESSION',
   'SESSION_DOES_NOT_EXIST',
+  'WRONG_SESSION_STATUS',
 ]);
 
 export function handleEnableBankingError(

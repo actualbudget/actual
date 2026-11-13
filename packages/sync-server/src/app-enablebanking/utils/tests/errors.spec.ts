@@ -90,16 +90,17 @@ describe('handleEnableBankingError', () => {
     expect(error.error_code).toBe('TIMED_OUT');
   });
 
-  it.each(['REVOKED_SESSION', 'SESSION_DOES_NOT_EXIST'])(
-    'asks for a new login when the session is gone (%s)',
-    code => {
-      const error = handleEnableBankingError(422, {
-        error: code,
-        message: 'gone',
-      });
-      expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
-    },
-  );
+  it.each([
+    'REVOKED_SESSION',
+    'SESSION_DOES_NOT_EXIST',
+    'WRONG_SESSION_STATUS',
+  ])('asks for a new login when the session is gone (%s)', code => {
+    const error = handleEnableBankingError(422, {
+      error: code,
+      message: 'gone',
+    });
+    expect(error.error_code).toBe('INVALID_ACCESS_TOKEN');
+  });
 
   it('does not ask for a new login when a bank error only mentions a session', () => {
     const error = handleEnableBankingError(400, {
