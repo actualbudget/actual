@@ -15,7 +15,6 @@ import type {
   balanceTypeOpType,
   CategoryEntity,
   CustomReportEntity,
-  DataEntity,
   RuleConditionEntity,
   sortByOpType,
   TransactionEntity,
@@ -614,9 +613,7 @@ function CustomReportInner({
   const graphData = useReport('default', getGraphData);
   const groupedData = useReport('grouped', getGroupData);
 
-  const data: DataEntity | null = graphData
-    ? { ...graphData, groupedData }
-    : null;
+  const data = graphData ? { ...graphData, groupedData } : null;
 
   const customReportItems: CustomReportEntity = {
     id: '',
@@ -1102,7 +1099,7 @@ function CustomReportInner({
                     balanceTypeOp={balanceTypeOp}
                     data={data}
                     interval={interval}
-                    intervalsCount={intervals.length}
+                    intervalsCount={data.filteredMonthCount ?? intervals.length}
                   />
                 )}
                 {viewLegend && (

@@ -711,6 +711,77 @@ test.describe('Reports', () => {
   });
 });
 
+test('uses filtered months for average spending in a custom report', async ({
+  page,
+}) => {
+  const configurationPage = new ConfigurationPage(page);
+  const navigation = new Navigation(page);
+  await page.goto('/');
+  await configurationPage.startFresh();
+
+  const account = await navigation.createAccount({
+    name: 'Checking',
+    balance: 0,
+  });
+  for (const [date, debit] of [
+    ['02/01/2024', '340.00'],
+    ['03/15/2026', '300.00'],
+    ['07/02/2026', '200.00'],
+    ['11/01/2026', '180.00'],
+  ]) {
+    await account.enterSingleTransaction({ payee: 'Groceries', debit });
+    const dateCell = account.newTransactionRow.getByTestId('date');
+    await dateCell.click();
+    const dateInput = dateCell.getByRole('textbox');
+    await dateInput.fill(date);
+    await dateInput.press('Tab');
+    await account.addEnteredTransaction();
+  }
+
+  const reports = await navigation.goToReportsPage();
+  await reports.waitToLoad();
+  const report = await reports.goToCustomReportPage();
+  await report.selectMode('time');
+  await report.selectViz('Stacked Bar Graph');
+  await page
+    .getByRole('button', { name: 'Last 6 months', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'All time', exact: true }).click();
+  await report.showSummaryButton.click();
+
+  const total = page.getByText('TOTAL SPENDING', { exact: true }).locator('..');
+  const average = page
+    .getByText('AVERAGE SPENDING', { exact: true })
+    .locator('..');
+  await expect(total).toContainText('-1,020.00');
+  await expect(average).toContainText('-30.00');
+
+  const filter = page
+    .getByRole('button', { name: /Unsaved report/ })
+    .locator('../..')
+    .getByRole('button', { name: '', exact: true });
+  for (const [operator, date] of [
+    ['is greater than or equals', '03/15/2026'],
+    ['is less than or equals', '07/02/2026'],
+  ]) {
+    await filter.click();
+    await page
+      .getByTestId('filters-select-tooltip')
+      .getByRole('button', { name: 'Date', exact: true })
+      .click();
+    const menu = page.getByTestId('filters-menu-tooltip');
+    await menu.getByRole('button', { name: operator, exact: true }).click();
+    const input = menu.getByRole('textbox');
+    await input.fill(date);
+    await input.press('Tab');
+    await menu.getByRole('button', { name: 'Apply', exact: true }).click();
+  }
+
+  await expect(total).toContainText('-500.00');
+  // The two partial boundary months and the three empty months all count.
+  await expect(average).toContainText('-100.00');
+});
+
 test.describe('Reports without transactions', () => {
   let page: Page;
 
