@@ -51,6 +51,7 @@ import {
   dateFormats,
   filterByStartDate,
   isDateFormat,
+  isSafeImportAmount,
   parseAmountFields,
   parseCategoryFields,
   parseDate,
@@ -298,6 +299,11 @@ export function ImportTransactionsModal({
       multiplierAmount: string,
     ) => {
       const previewTransactions = [];
+      // trx_ids rejected during validation — amounts that cannot be
+      // represented, or amount fields present but unparseable; used to keep
+      // these rows out of the displayed preview so they cannot block the
+      // import.
+      const skippedUnsafeIds: string[] = [];
       const inOutModeEnabled = isOfxFile(filetype) ? false : inOutMode;
       const getTransDate: (trans: ImportTransaction) => string | null =
         isOfxFile(filetype)
@@ -346,7 +352,15 @@ export function ImportTransactionsModal({
         );
         if (amount == null) {
           console.log(`Transaction on ${trans.date} has no amount`);
-          break;
+          skippedUnsafeIds.push(trans.trx_id);
+          continue;
+        }
+        if (!isSafeImportAmount(amount)) {
+          console.log(
+            `Transaction on ${trans.date} has an amount too large to import`,
+          );
+          skippedUnsafeIds.push(trans.trx_id);
+          continue;
         }
 
         const category_id = parseCategoryFields(trans, categories);
@@ -371,7 +385,7 @@ export function ImportTransactionsModal({
         });
       }
 
-      return previewTransactions;
+      return { previewTransactions, skippedUnsafeIds };
     },
     [categories, clearOnImport],
   );
@@ -535,8 +549,10 @@ export function ImportTransactionsModal({
     setSplitMode(isSplit);
 
     // Run auto-detection on the fields to try to detect the fields
-    // automatically
-    const mappings = getInitialMappings(transactions);
+    // automatically. Use the original parsed rows: if every row was
+    // filtered out of the preview (e.g. all amounts oversized), the mapping
+    // controls must stay usable so the user can correct the fields.
+    const mappings = getInitialMappings(parsedTransactions);
 
     const newFieldMappings = isSplit
       ? {
@@ -687,6 +703,13 @@ export function ImportTransactionsModal({
         });
         break;
       }
+      if (!isSafeImportAmount(amount)) {
+        errorMessage = t(
+          'Transaction on {{date}} has an amount too large to import',
+          { date: trans.date },
+        );
+        break;
+      }
 
       const category_id = parseCategoryFields(trans, categories);
 
@@ -824,7 +847,10 @@ export function ImportTransactionsModal({
     );
 
     // always start from the original parsed transactions, not the previewed ones to ensure rules run
-    const previewTransactionsToImport = await getImportPreview(
+    const {
+      previewTransactions: previewTransactionsToImport,
+      skippedUnsafeIds,
+    } = await getImportPreview(
       filteredTransactions,
       filetype,
       flipAmount,
@@ -834,6 +860,12 @@ export function ImportTransactionsModal({
       inOutMode,
       outValue,
       multiplierAmount,
+    );
+    // Rows whose amount cannot be represented are excluded from the import;
+    // keep them out of the displayed preview as well so they cannot block
+    // submission.
+    const displayableTransactions = filteredTransactions.filter(
+      trans => !skippedUnsafeIds.includes(trans.trx_id),
     );
 
     // Retreive the transactions that would be updated (along with the existing trx)
@@ -851,7 +883,7 @@ export function ImportTransactionsModal({
             return map;
           }, {});
 
-          const previewTransactions = filteredTransactions
+          const previewTransactions = displayableTransactions
             .filter(trans => !trans.isMatchedTransaction)
             .reduce((previous, currentTrx) => {
               let next = previous;
@@ -909,6 +941,11 @@ export function ImportTransactionsModal({
     fieldMappings,
     parseDateFormat,
     reimportDeleted,
+    multiplierAmount,
+    splitMode,
+    flipAmount,
+    inOutMode,
+    outValue,
   ]);
 
   const headers: ComponentProps<typeof TableHeader>['headers'] = [
