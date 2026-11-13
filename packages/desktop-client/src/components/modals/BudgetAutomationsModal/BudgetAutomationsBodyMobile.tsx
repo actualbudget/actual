@@ -265,6 +265,7 @@ export function BudgetAutomationsBodyMobile({
           </View>
         ) : (
           <AutomationEditorPane
+            categoryId={categoryId}
             entries={entries}
             activeIdx={safeActiveIdx}
             automationErrors={automationErrors}

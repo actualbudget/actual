@@ -92,6 +92,7 @@ function getDefaultWeeklyStart(entries: AutomationEntry[]): string {
 }
 
 type AutomationEditorPaneProps = {
+  categoryId: string;
   entries: AutomationEntry[];
   activeIdx: number;
   automationErrors: (AutomationErrorKind | null)[];
@@ -104,6 +105,7 @@ type AutomationEditorPaneProps = {
 };
 
 export function AutomationEditorPane({
+  categoryId,
   entries,
   activeIdx,
   automationErrors,
@@ -309,6 +311,7 @@ export function AutomationEditorPane({
               )}
               <ActiveEditor
                 key={active.id}
+                categoryId={categoryId}
                 state={state}
                 dispatch={dispatch}
                 schedules={schedules}
@@ -324,6 +327,7 @@ export function AutomationEditorPane({
         {state.displayType === 'refill' && (
           <ActiveEditor
             key={active.id}
+            categoryId={categoryId}
             state={state}
             dispatch={dispatch}
             schedules={schedules}
