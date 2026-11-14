@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 import * as db from '#server/db';
 import { batchMessages } from '#server/sync';
+import { validForTransfer } from '#shared/transfer';
 
 import { runRules } from './transaction-rules';
 
@@ -45,13 +46,34 @@ async function clearCategory(transaction, transferAcct) {
   return false;
 }
 
-export async function addTransfer(transaction, transferredAccount) {
+export async function addTransfer(
+  transaction,
+  transferredAccount,
+  existingId?: string,
+) {
   if (transaction.is_parent) {
     // For split transactions, we should create transfers using child transactions.
     // This is to ensure that the amounts received by the transferred account
     // reflects the amounts in the child transactions and not the parent transaction
     // amount which is the total amount.
     return null;
+  }
+
+  // The user chose an existing transaction as the other side. It is used only
+  // if it still fits, otherwise a new one is created as usual.
+  const existing = existingId && (await db.getTransaction(existingId));
+  if (
+    existing &&
+    existing.account === transferredAccount &&
+    !existing.is_parent &&
+    validForTransfer(transaction, existing)
+  ) {
+    const categoryCleared = await linkTransfer(transaction, existing);
+    return {
+      id: transaction.id,
+      transfer_id: existing.id,
+      ...(categoryCleared ? { category: null } : {}),
+    };
   }
 
   const { id: fromPayee } = await db.first<Pick<db.DbPayee, 'id'>>(
@@ -167,11 +189,11 @@ export async function updateTransfer(transaction, transferredAccount) {
   }
 }
 
-export async function onInsert(transaction) {
+export async function onInsert(transaction, existingId?: string) {
   const transferredAccount = await getTransferredAccount(transaction);
 
   if (transferredAccount) {
-    return addTransfer(transaction, transferredAccount);
+    return addTransfer(transaction, transferredAccount, existingId);
   }
 }
 
@@ -181,7 +203,7 @@ export async function onDelete(transaction) {
   }
 }
 
-export async function onUpdate(transaction) {
+export async function onUpdate(transaction, existingId?: string) {
   const transferredAccount = await getTransferredAccount(transaction);
 
   if (transaction.is_parent) {
@@ -189,7 +211,7 @@ export async function onUpdate(transaction) {
   }
 
   if (transferredAccount && !transaction.transfer_id) {
-    return addTransfer(transaction, transferredAccount);
+    return addTransfer(transaction, transferredAccount, existingId);
   }
 
   if (!transferredAccount && transaction.transfer_id) {

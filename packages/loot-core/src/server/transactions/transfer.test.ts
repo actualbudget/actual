@@ -251,6 +251,70 @@ describe('Transfer', () => {
     expect(await db.getTransaction(other)).toMatchObject({ transfer_id: null });
   });
 
+  test('a new transfer links to the chosen existing transaction', async () => {
+    await prepareDatabase();
+    const [transferOne, transferTwo] = await Promise.all([
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'one'"),
+      db.first<db.DbPayee>("SELECT * FROM payees WHERE transfer_acct = 'two'"),
+    ]);
+    const bank = await db.insertPayee({ name: 'Bank' });
+    const existing = await db.insertTransaction({
+      account: 'two',
+      amount: 5000,
+      payee: bank,
+      category: '1',
+      date: '2017-01-03',
+      notes: 'from the bank',
+    });
+    const differentAmount = await db.insertTransaction({
+      account: 'two',
+      amount: 4000,
+      payee: bank,
+      date: '2017-01-03',
+    });
+
+    const transaction: Transaction = {
+      account: 'one',
+      amount: -5000,
+      payee: transferTwo.id,
+      date: '2017-01-01',
+    };
+    transaction.id = await db.insertTransaction(transaction);
+    await transfer.onInsert(transaction, existing);
+
+    expect(await db.getTransaction(transaction.id)).toMatchObject({
+      transfer_id: existing,
+    });
+    expect(await db.getTransaction(existing)).toMatchObject({
+      payee: transferOne.id,
+      transfer_id: transaction.id,
+      category: null,
+      date: '2017-01-03',
+      notes: 'from the bank',
+    });
+    expect(await getAllTransactions()).toHaveLength(3);
+
+    // A match that no longer fits creates a new transaction instead
+    const second: Transaction = {
+      account: 'one',
+      amount: -5000,
+      payee: transferTwo.id,
+      date: '2017-01-01',
+    };
+    second.id = await db.insertTransaction(second);
+    await transfer.onInsert(second, differentAmount);
+
+    const created = (await db.getTransaction(second.id)).transfer_id;
+    expect(created).not.toBe(differentAmount);
+    expect(await db.getTransaction(created)).toMatchObject({
+      account: 'two',
+      amount: 5000,
+    });
+    expect(await db.getTransaction(differentAmount)).toMatchObject({
+      transfer_id: null,
+    });
+  });
+
   test('split transfers are retained on child transactions', async () => {
     // test: first add a txn having a transfer acct payee
     // then mark it as `is_parent` and add a child txn

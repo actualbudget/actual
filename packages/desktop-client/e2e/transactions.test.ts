@@ -334,6 +334,65 @@ test.describe('Transactions', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test.describe('links a manual transfer to an existing matching transaction', () => {
+    const linkDialog = () => page.getByTestId('confirm-transfer-link-modal');
+
+    // Adds a deposit to Bank of America, then a transfer to it from Ally
+    // Savings, and returns the Bank of America rows with the deposit amount
+    async function enterTransferWithMatch(
+      answer: (dialog: Locator) => Promise<void>,
+    ) {
+      const bankPage = await navigation.goToAccountPage('Bank of America');
+      await expect(bankPage.accountName).toHaveText('Bank of America');
+      await bankPage.createSingleTransaction({ credit: '12.34' });
+
+      accountPage = await navigation.goToAccountPage('Ally Savings');
+      await expect(accountPage.accountName).toHaveText('Ally Savings');
+      await accountPage.enterSingleTransaction({
+        payee: 'Bank of America',
+        debit: '12.34',
+      });
+      await accountPage.addTransactionButton.click();
+
+      await expect(linkDialog()).toBeVisible();
+      await answer(linkDialog());
+      await expect(linkDialog()).toHaveCount(0);
+      await accountPage.cancelTransactionButton.click();
+
+      const transaction = accountPage.getNthTransaction(0);
+      await expect(transaction.payee).toHaveText('Bank of America');
+      await expect(transaction.debit).toHaveText('12.34');
+
+      await navigation.goToAccountPage('Bank of America');
+      await expect(bankPage.accountName).toHaveText('Bank of America');
+      return bankPage.transactionTableRow.filter({
+        has: page.getByTestId('credit').filter({ hasText: /^12\.34$/ }),
+      });
+    }
+
+    test('links on Link', async () => {
+      const rows = await enterTransferWithMatch(dialog =>
+        dialog.getByRole('button', { name: 'Link' }).click(),
+      );
+      await expect(rows).toHaveCount(1);
+      await expect(rows.getByTestId('transfer-icon')).toBeVisible();
+    });
+
+    test('creates a new counterpart on Create new', async () => {
+      const rows = await enterTransferWithMatch(dialog =>
+        dialog.getByRole('button', { name: 'Create new' }).click(),
+      );
+      await expect(rows).toHaveCount(2);
+    });
+
+    test('creates a new counterpart when the dialog is closed', async () => {
+      const rows = await enterTransferWithMatch(() =>
+        page.keyboard.press('Escape'),
+      );
+      await expect(rows).toHaveCount(2);
+    });
+  });
+
   test.describe('notes tooltip', () => {
     test('shows the full note and its tags only when the note is truncated', async () => {
       const longNote =
