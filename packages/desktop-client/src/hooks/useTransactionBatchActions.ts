@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
-import { markReviewedOnCategoryChange } from '@actual-app/core/shared/tags';
+import {
+  addTag,
+  hasTag,
+  markReviewedOnCategoryChange,
+  removeTag,
+  UNREVIEWED_TAG,
+} from '@actual-app/core/shared/tags';
 import {
   deleteTransaction,
   realizeTempTransactions,
@@ -50,6 +56,14 @@ type BatchEditProps = {
     mode: Parameters<
       Extract<ModalType, { name: 'edit-field' }>['options']['onSubmit']
     >[2],
+  ) => void;
+};
+
+type BatchToggleReviewedProps = {
+  ids: Array<TransactionEntity['id']>;
+  onSuccess?: (
+    ids: Array<TransactionEntity['id']>,
+    isReviewed: boolean,
   ) => void;
 };
 
@@ -288,6 +302,52 @@ export function useTransactionBatchActions() {
     } else {
       openFieldEditor();
     }
+  };
+
+  // Like cleared: marks them all reviewed if any are unreviewed, otherwise
+  // marks them all unreviewed. The tag lives on a split's parent, so a
+  // selected child stands in for its parent.
+  const onBatchToggleReviewed = async ({
+    ids,
+    onSuccess,
+  }: BatchToggleReviewedProps) => {
+    const { data } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: ids } })
+        .select(['id', 'is_child', 'parent_id'])
+        .options({ splits: 'all' }),
+    );
+    const targetIds = [
+      ...new Set(
+        (data as TransactionEntity[]).map(t =>
+          t.is_child && t.parent_id ? t.parent_id : t.id,
+        ),
+      ),
+    ];
+
+    const { data: targets } = await aqlQuery(
+      q('transactions')
+        .filter({ id: { $oneof: targetIds } })
+        .select(['id', 'notes'])
+        .options({ splits: 'all' }),
+    );
+    const transactions = targets as Array<
+      Pick<TransactionEntity, 'id' | 'notes'>
+    >;
+
+    const isReviewed = transactions.some(t => hasTag(t.notes, UNREVIEWED_TAG));
+    const updated = transactions
+      .filter(t => hasTag(t.notes, UNREVIEWED_TAG) === isReviewed)
+      .map(t => ({
+        id: t.id,
+        notes: isReviewed
+          ? removeTag(t.notes, UNREVIEWED_TAG)
+          : addTag(t.notes, UNREVIEWED_TAG),
+      }));
+
+    await send('transactions-batch-update', { updated });
+
+    onSuccess?.(ids, isReviewed);
   };
 
   const onBatchDuplicate = async ({ ids, onSuccess }: BatchDuplicateProps) => {
@@ -604,6 +664,7 @@ export function useTransactionBatchActions() {
 
   return {
     onBatchEdit,
+    onBatchToggleReviewed,
     onBatchDuplicate,
     onBatchDelete,
     onBatchLinkSchedule,
