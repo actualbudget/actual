@@ -13,6 +13,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models/category';
 import { ToBudgetAmount } from '#components/budget/envelope/budgetsummary/ToBudgetAmount';
 import { TotalsList } from '#components/budget/envelope/budgetsummary/TotalsList';
 import { useEnvelopeSheetValue } from '#components/budget/envelope/EnvelopeBudgetComponents';
+import { useToBudgetMode } from '#components/budget/envelope/useToBudgetMode';
 import { ToBudgetSheetActions } from '#components/mobile/budget/ToBudgetSheetActions';
 import { MobileSheet } from '#components/mobile/MobileSheet';
 import { useCategoriesById } from '#hooks/useCategories';
@@ -23,7 +24,6 @@ import { useUndo } from '#hooks/useUndo';
 import { collapseModals, pushModal } from '#modals/modalsSlice';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
-import { envelopeBudget } from '#spreadsheet/bindings';
 
 type EnvelopeBudgetSummaryModalProps = Extract<
   ModalType,
@@ -36,12 +36,13 @@ export function EnvelopeBudgetSummaryModal({
 }: EnvelopeBudgetSummaryModalProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const { toBudgetBinding } = useToBudgetMode(month);
   const locale = useLocale();
   const dispatch = useDispatch();
   const prevMonthName = formatMonth(prevMonth(month), 'MMM', locale);
   const sheetValue =
     useEnvelopeSheetValue({
-      name: envelopeBudget.toBudget,
+      name: toBudgetBinding,
       value: 0,
     }) ?? 0;
 
@@ -137,10 +138,12 @@ export function EnvelopeBudgetSummaryModal({
             }}
           >
             <TotalsList
+              month={month}
               prevMonthName={prevMonthName}
               style={styles.mediumText}
             />
             <ToBudgetAmount
+              month={month}
               prevMonthName={prevMonthName}
               style={{ ...styles.mediumText, marginTop: spacing.lg }}
               isTotalsListTooltipDisabled
