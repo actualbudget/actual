@@ -16,6 +16,7 @@ import { useCurrentAccess } from '#hooks/useCurrentAccess';
 import { useEnableBankingStatus } from '#hooks/useEnableBankingStatus';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
+import { usePayPalStatus } from '#hooks/usePayPalStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
@@ -125,6 +126,21 @@ export function useBuiltInBankSyncProviders({
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
+  const paypalEnabled = useFeatureFlag('paypalBankSync');
+  const { configuredPayPal, isLoading: isPayPalLoading } =
+    usePayPalStatus(paypalEnabled);
+  const [loadingPayPalAccounts, setLoadingPayPalAccounts] = useState(false);
+
+  const [isPayPalSetupComplete, setIsPayPalSetupComplete] = useState<
+    boolean | null
+  >(configuredPayPal);
+  const [prevConfiguredPayPal, setPrevConfiguredPayPal] =
+    useState(configuredPayPal);
+  if (configuredPayPal !== prevConfiguredPayPal) {
+    setPrevConfiguredPayPal(configuredPayPal);
+    setIsPayPalSetupComplete(configuredPayPal);
+  }
+
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(configuredGoCardless);
@@ -212,6 +228,19 @@ export function useBuiltInBankSyncProviders({
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
+          },
+        },
+      }),
+    );
+  }, [dispatch]);
+
+  const onPayPalInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'paypal-init',
+          options: {
+            onSuccess: () => setIsPayPalSetupComplete(true),
           },
         },
       }),
@@ -372,6 +401,28 @@ export function useBuiltInBankSyncProviders({
     }
   }, [notifyResetFailure]);
 
+  const onPayPalReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'paypal_clientId',
+          value: null,
+        }),
+        'Failed to clear PayPal client ID',
+      );
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'paypal_clientSecret',
+          value: null,
+        }),
+        'Failed to clear PayPal client secret',
+      );
+      setIsPayPalSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('PayPal', error);
+    }
+  }, [notifyResetFailure]);
+
   const onAkahuReset = useCallback(async () => {
     try {
       await ensureSuccessResponse(
@@ -476,6 +527,63 @@ export function useBuiltInBankSyncProviders({
     simpleFinStatus.configured,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    t,
+    upgradingAccountId,
+  ]);
+
+  const onConnectPayPal = useCallback(async () => {
+    if (!isPayPalSetupComplete) {
+      onPayPalInit();
+      return;
+    }
+
+    if (loadingPayPalAccounts) {
+      return;
+    }
+
+    setLoadingPayPalAccounts(true);
+
+    try {
+      const results = await send('paypal-accounts');
+      if (results?.error_code) {
+        throw new Error(results.error_type || results.error_code);
+      }
+      if (results?.error) {
+        throw new Error(results.error);
+      }
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: results.accounts ?? [],
+              syncSource: 'paypal',
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact PayPal'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+      onPayPalInit();
+    } finally {
+      setLoadingPayPalAccounts(false);
+    }
+  }, [
+    dispatch,
+    isPayPalSetupComplete,
+    loadingPayPalAccounts,
+    onPayPalInit,
     t,
     upgradingAccountId,
   ]);
@@ -661,6 +769,7 @@ export function useBuiltInBankSyncProviders({
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
+    paypal: Boolean(isPayPalSetupComplete),
   } satisfies Record<BankSyncProviders, boolean>;
 
   const providers = useMemo<BuiltInBankSyncProviderState[]>(() => {
@@ -755,6 +864,24 @@ export function useBuiltInBankSyncProviders({
       });
     }
 
+    if (paypalEnabled) {
+      baseProviders.push({
+        id: 'paypal',
+        displayName: 'PayPal',
+        description: t(
+          'Import the PayPal balance using your own PayPal REST API app.',
+        ),
+        isConfigured: configuredProviders.paypal,
+        credentialSource: 'global',
+        supportsPerBudgetFile: false,
+        canConfigure: canConfigureProviders,
+        isLoading: isPayPalLoading || loadingPayPalAccounts,
+        onConfigure: onPayPalInit,
+        onLink: onConnectPayPal,
+        onReset: onPayPalReset,
+      });
+    }
+
     return baseProviders;
   }, [
     canConfigureProviders,
@@ -765,11 +892,15 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
+    configuredProviders.paypal,
     pluggyAiStatus,
     simpleFinStatus,
     syncServerStatus,
     enableBankingEnabled,
+    paypalEnabled,
     isEnableBankingLoading,
+    isPayPalLoading,
+    loadingPayPalAccounts,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,
     onConnectAkahu,
@@ -777,6 +908,7 @@ export function useBuiltInBankSyncProviders({
     onConnectGoCardless,
     onConnectPluggyAi,
     onConnectSimpleFin,
+    onConnectPayPal,
     onAkahuInit,
     onAkahuReset,
     onEnableBankingInit,
@@ -787,6 +919,8 @@ export function useBuiltInBankSyncProviders({
     onPluggyAiReset,
     onSimpleFinInit,
     onSimpleFinReset,
+    onPayPalInit,
+    onPayPalReset,
     t,
   ]);
 

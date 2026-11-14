@@ -157,6 +157,12 @@ export type Modal =
       };
     }
   | {
+      name: 'paypal-init';
+      options: {
+        onSuccess: () => void;
+      };
+    }
+  | {
       name: 'enablebanking-external-msg';
       options: {
         onMoveExternal: (arg: {

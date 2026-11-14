@@ -19,6 +19,7 @@ import type {
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
+  SyncServerPayPalAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
 } from '@actual-app/core/types/models';
@@ -28,6 +29,7 @@ import {
   useLinkAccountAkahuMutation,
   useLinkAccountEnableBankingMutation,
   useLinkAccountMutation,
+  useLinkAccountPayPalMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
   useUnlinkAccountMutation,
@@ -194,6 +196,12 @@ export type SelectLinkedAccountsModalProps =
       externalAccounts: SyncServerAkahuAccount[];
       syncSource: 'akahu';
       upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerPayPalAccount[];
+      syncSource: 'paypal';
+      upgradingAccountId?: string;
     };
 
 export function SelectLinkedAccountsModal({
@@ -242,6 +250,12 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerEnableBankingAccount[],
             upgradingAccountId,
           };
+        case 'paypal':
+          return {
+            syncSource: 'paypal',
+            externalAccounts: toSort as SyncServerPayPalAccount[],
+            upgradingAccountId,
+          };
         default:
           throw new Error(`Unrecognized sync source: ${String(syncSource)}`);
       }
@@ -284,6 +298,7 @@ export function SelectLinkedAccountsModal({
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
   const linkAccountAkahu = useLinkAccountAkahuMutation();
   const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
+  const linkAccountPayPal = useLinkAccountPayPalMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -364,6 +379,21 @@ export function SelectLinkedAccountsModal({
           propsWithSortedExternalAccounts.syncSource === 'enableBanking'
         ) {
           linkAccountEnableBanking.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
+        } else if (propsWithSortedExternalAccounts.syncSource === 'paypal') {
+          linkAccountPayPal.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -647,7 +677,8 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount
   | SyncServerAkahuAccount
-  | SyncServerEnableBankingAccount;
+  | SyncServerEnableBankingAccount
+  | SyncServerPayPalAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -677,7 +708,9 @@ export function externalBalanceToInteger(
   }
   const value = Number(balance);
   const amount =
-    syncSource === 'enableBanking' ? value : amountToInteger(value);
+    syncSource === 'enableBanking' || syncSource === 'paypal'
+      ? value
+      : amountToInteger(value);
   return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
     ? amount
     : null;
@@ -927,7 +960,8 @@ function getInstitutionName(
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
     | SyncServerPluggyAiAccount
-    | SyncServerEnableBankingAccount,
+    | SyncServerEnableBankingAccount
+    | SyncServerPayPalAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

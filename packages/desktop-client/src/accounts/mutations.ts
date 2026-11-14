@@ -9,6 +9,7 @@ import type {
   SyncServerAkahuAccount,
   SyncServerEnableBankingAccount,
   SyncServerGoCardlessAccount,
+  SyncServerPayPalAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
   TransactionEntity,
@@ -582,6 +583,48 @@ export function useLinkAccountEnableBankingMutation() {
         dispatch,
         t(
           'There was an error linking the account to Enable Banking. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountPayPalPayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerPayPalAccount;
+};
+
+export function useLinkAccountPayPalMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountPayPalPayload) => {
+      await send('paypal-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to PayPal:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to PayPal. Please try again.',
         ),
         error,
       );

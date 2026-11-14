@@ -399,6 +399,41 @@ async function downloadEnableBankingTransactions(
   };
 }
 
+async function downloadPayPalTransactions(acctId: string, since: string) {
+  const userToken = await asyncStorage.getItem('user-token');
+  if (!userToken) return;
+
+  logger.log('Pulling transactions from PayPal');
+
+  const res = await post(
+    getServer().PAYPAL_SERVER + '/transactions',
+    {
+      accountId: acctId,
+      startDate: since,
+    },
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    120000,
+  );
+
+  if (res.error_code) {
+    throw BankSyncError(res.error_type, res.error_code);
+  }
+
+  const {
+    transactions: { all },
+    balances,
+    startingBalance,
+  } = res;
+
+  return {
+    transactions: all,
+    accountBalance: balances,
+    startingBalance,
+  };
+}
+
 async function resolvePayee(trans, payeeName, payeesToCreate) {
   if (trans.payee == null && payeeName) {
     // First check our registry of new payees (to avoid a db access)
@@ -1173,7 +1208,10 @@ async function processBankSyncDownload(
         return total - amountToInteger(trans.transactionAmount.amount);
       }, currentBalance);
       balanceToUse = previousBalance;
-    } else if (acctRow.account_sync_source === 'akahu') {
+    } else if (
+      acctRow.account_sync_source === 'akahu' ||
+      acctRow.account_sync_source === 'paypal'
+    ) {
       const currentBalance = download.startingBalance;
       const previousBalance = transactions.reduce(
         (total, trans) =>
@@ -1281,6 +1319,8 @@ export async function syncAccount(
     );
   } else if (acctRow.account_sync_source === 'akahu') {
     download = await downloadAkahuTransactions(acctId, syncStartDate);
+  } else if (acctRow.account_sync_source === 'paypal') {
+    download = await downloadPayPalTransactions(acctId, syncStartDate);
   } else if (acctRow.account_sync_source === 'goCardless') {
     download = await downloadGoCardlessTransactions(
       userId,
