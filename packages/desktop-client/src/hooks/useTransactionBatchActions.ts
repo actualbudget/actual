@@ -535,6 +535,21 @@ export function useTransactionBatchActions() {
     );
   };
 
+  // Unlinking changes the payee of both sides, so a reconciled side asks first
+  const onUnlinkTransfer = async (
+    id: TransactionEntity['id'],
+    onSuccess: () => void,
+  ) => {
+    await checkForReconciledTransactions(
+      [id],
+      'batchEditWithReconciled',
+      async () => {
+        await send('transactions-unlink-transfer', { id });
+        onSuccess();
+      },
+    );
+  };
+
   const onMerge = async (ids: string[], onSuccess: () => void) => {
     await send(
       'transactions-merge',
@@ -550,6 +565,7 @@ export function useTransactionBatchActions() {
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
     onSetTransfer,
+    onUnlinkTransfer,
     onMerge,
   };
 }
