@@ -43,6 +43,7 @@ import type {
 import * as link from './link';
 import { getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
+import { linkImportedTransfers } from './transfer-detection';
 
 // Shared base type for link account parameters
 type LinkAccountBaseParams = {
@@ -1690,10 +1691,14 @@ async function importTransactions({
         payeeNameNormalization,
       },
     );
+    // The other side of a new transfer was updated too
+    const linked = isPreview
+      ? []
+      : await linkImportedTransfers(reconciled.added);
     return {
       errors: [],
       added: reconciled.added,
-      updated: reconciled.updated,
+      updated: [...reconciled.updated, ...linked],
       updatedPreview: reconciled.updatedPreview,
     };
   } catch (err) {

@@ -150,6 +150,46 @@ describe('Account sync', () => {
     expect(transactions[0].imported_payee).toBe('Nintendo Store New York Ny');
   });
 
+  test('transactions-import links a transfer to another account when transfer detection is on', async () => {
+    const { id } = await prepareDatabase();
+    await db.insertAccount({ id: 'two', name: 'two' });
+    await db.insertPayee({
+      id: 'transfer-two',
+      name: '',
+      transfer_acct: 'two',
+    });
+    const existing = await db.insertTransaction({
+      account: 'two',
+      amount: -4133,
+      date: '2020-01-01',
+    });
+    await db.update('preferences', {
+      id: 'flags.transferDetection',
+      value: 'true',
+    });
+
+    const result = await accountsApp.handlers['transactions-import']({
+      accountId: id,
+      transactions: [
+        {
+          account: id,
+          date: '2020-01-02',
+          payee_name: 'From two',
+          amount: 4133,
+        },
+      ],
+      isPreview: false,
+    });
+
+    expect(result.updated).toEqual([existing]);
+    const imported = await db.getTransaction(result.added[0]);
+    expect(imported).toMatchObject({
+      payee: 'transfer-two',
+      transfer_id: existing,
+      imported_payee: 'From Two',
+    });
+  });
+
   test("transactions-import keeps the payee name with payeeNameNormalization 'original'", async () => {
     const { id } = await prepareDatabase();
 

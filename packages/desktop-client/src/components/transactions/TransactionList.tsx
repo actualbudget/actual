@@ -33,6 +33,7 @@ import type { DropPosition } from '#hooks/useDragDrop';
 import { useLinkExistingTransfer } from '#hooks/useLinkExistingTransfer';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useTransactionBatchActions } from '#hooks/useTransactionBatchActions';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -188,6 +189,7 @@ export function TransactionList({
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
   const linkExistingTransfer = useLinkExistingTransfer();
+  const { onUnlinkTransfer } = useTransactionBatchActions();
 
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
@@ -562,6 +564,7 @@ export function TransactionList({
         onBatchDuplicate={onBatchDuplicate}
         onBatchLinkSchedule={onBatchLinkSchedule}
         onBatchUnlinkSchedule={onBatchUnlinkSchedule}
+        onBatchUnlinkTransfer={id => void onUnlinkTransfer(id, onRefetch)}
         onCreateRule={onCreateRule}
         onScheduleAction={onScheduleAction}
         onMakeAsNonSplitTransactions={onMakeAsNonSplitTransactions}
