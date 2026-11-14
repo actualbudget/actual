@@ -1,5 +1,6 @@
 // @ts-strict-ignore
 import * as db from '#server/db';
+import { batchMessages } from '#server/sync';
 
 import { runRules } from './transaction-rules';
 
@@ -90,6 +91,35 @@ export async function addTransfer(transaction, transferredAccount) {
     transfer_id: id,
     ...(categoryCleared ? { category: null } : {}),
   };
+}
+
+// Links two existing transactions as the two sides of a transfer: each one's
+// payee becomes the other account's transfer payee, and the category follows
+// the same rule as a newly created transfer.
+export async function linkTransfer(transaction, counterpart) {
+  const [fromPayee, toPayee] = await Promise.all([
+    getPayee(transaction.account),
+    getPayee(counterpart.account),
+  ]);
+  // One batch, so a failed write never leaves only one side linked
+  let categoryCleared = false;
+  await batchMessages(async () => {
+    await db.updateTransaction({
+      id: transaction.id,
+      payee: toPayee.id,
+      transfer_id: counterpart.id,
+    });
+    await db.updateTransaction({
+      id: counterpart.id,
+      payee: fromPayee.id,
+      transfer_id: transaction.id,
+    });
+    categoryCleared = await clearCategory(
+      { ...transaction, transfer_id: counterpart.id },
+      counterpart.account,
+    );
+  });
+  return categoryCleared;
 }
 
 export async function removeTransfer(transaction) {

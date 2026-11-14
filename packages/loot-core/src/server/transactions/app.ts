@@ -5,6 +5,7 @@ import { mutator } from '#server/mutators';
 import { undoable } from '#server/undo';
 import { q, Query } from '#shared/query';
 import type { QueryState } from '#shared/query';
+import { validForTransfer } from '#shared/transfer';
 import type {
   AccountEntity,
   CategoryGroupEntity,
@@ -16,6 +17,7 @@ import { exportQueryToCSV, exportToCSV } from './export/export-to-csv';
 import { parseFile } from './import/parse-file';
 import type { ParseFileOptions } from './import/parse-file';
 import { mergeTransactions } from './merge';
+import { linkTransfer } from './transfer';
 
 import { batchUpdateTransactions } from '.';
 
@@ -29,6 +31,7 @@ export type TransactionHandlers = {
   'transactions-export': typeof exportTransactions;
   'transactions-export-query': typeof exportTransactionsQuery;
   'transactions-merge': typeof mergeTransactions;
+  'transactions-link-transfer': typeof linkTransactionsAsTransfer;
   'get-earliest-transaction': typeof getEarliestTransaction;
   'get-latest-transaction': typeof getLatestTransaction;
 };
@@ -49,6 +52,28 @@ async function handleBatchUpdateTransactions({
   });
 
   return result;
+}
+
+async function linkTransactionsAsTransfer({
+  ids: [fromId, toId],
+}: {
+  ids: [TransactionEntity['id'], TransactionEntity['id']];
+}) {
+  const [from, to] = await Promise.all([
+    db.getTransaction(fromId),
+    db.getTransaction(toId),
+  ]);
+  // A split transfers through its children, never through the parent
+  if (
+    from &&
+    to &&
+    !from.is_parent &&
+    !to.is_parent &&
+    validForTransfer(from, to)
+  ) {
+    await linkTransfer(from, to);
+  }
+  return {};
 }
 
 async function addTransaction(transaction: TransactionEntity) {
@@ -157,6 +182,10 @@ app.method(
   mutator(undoable(handleBatchUpdateTransactions)),
 );
 app.method('transactions-merge', mutator(undoable(mergeTransactions)));
+app.method(
+  'transactions-link-transfer',
+  mutator(undoable(linkTransactionsAsTransfer)),
+);
 
 app.method('transaction-add', mutator(addTransaction));
 app.method('transaction-update', mutator(updateTransaction));

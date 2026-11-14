@@ -1501,11 +1501,7 @@ class AccountInternal extends PureComponent<
 
   onSetTransfer = async (ids: string[]) => {
     this.setState({ workingHard: true });
-    await this.props.onSetTransfer(
-      ids,
-      this.props.payees,
-      this.refetchTransactions,
-    );
+    await this.props.onSetTransfer(ids, this.refetchTransactions);
   };
 
   onConditionsOpChange = (value: 'and' | 'or') => {

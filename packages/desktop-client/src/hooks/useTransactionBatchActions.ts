@@ -10,12 +10,10 @@ import {
   ungroupTransactions,
   updateTransaction,
 } from '@actual-app/core/shared/transactions';
-import { validForTransfer } from '@actual-app/core/shared/transfer';
 import { applyChanges, applyFindReplace } from '@actual-app/core/shared/util';
 import type { Diff } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
-  PayeeEntity,
   ScheduleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -519,62 +517,12 @@ export function useTransactionBatchActions() {
 
   const onSetTransfer = async (
     ids: string[],
-    payees: PayeeEntity[],
     onSuccess: (ids: string[]) => void,
   ) => {
     const onConfirmTransfer = async (ids: string[]) => {
-      const { data: transactions } = await aqlQuery(
-        q('transactions')
-          .filter({ id: { $oneof: ids } })
-          .select('*'),
-      );
-      const [fromTrans, toTrans] = transactions;
-
-      if (transactions.length === 2 && validForTransfer(fromTrans, toTrans)) {
-        const fromPayee = payees.find(
-          p => p.transfer_acct === fromTrans.account,
-        );
-        const toPayee = payees.find(p => p.transfer_acct === toTrans.account);
-
-        // Only clear the category when the transfer is between two accounts
-        // of the same budget type (both on-budget or both off-budget),
-        // because the category is not relevant for such transfers. A transfer
-        // between an on-budget and an off-budget account represents money
-        // entering/leaving the budget, so the category must be preserved.
-        // This matches the server-side logic in clearCategory (transfer.ts).
-        const { data: accounts } = await aqlQuery(
-          q('accounts')
-            .filter({ id: { $oneof: [fromTrans.account, toTrans.account] } })
-            .select(['id', 'offbudget']),
-        );
-        const fromAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) =>
-            a.id === fromTrans.account,
-        );
-        const toAccount = accounts.find(
-          (a: { id: string; offbudget?: boolean }) => a.id === toTrans.account,
-        );
-        const clearCategory = fromAccount?.offbudget === toAccount?.offbudget;
-
-        const changes = {
-          updated: [
-            {
-              ...fromTrans,
-              ...(clearCategory ? { category: null } : {}),
-              payee: toPayee?.id,
-              transfer_id: toTrans.id,
-            },
-            {
-              ...toTrans,
-              ...(clearCategory ? { category: null } : {}),
-              payee: fromPayee?.id,
-              transfer_id: fromTrans.id,
-            },
-          ],
-          runTransfers: false,
-        };
-
-        await send('transactions-batch-update', changes);
+      if (ids.length === 2) {
+        const [fromId, toId] = ids;
+        await send('transactions-link-transfer', { ids: [fromId, toId] });
       }
 
       onSuccess?.(ids);

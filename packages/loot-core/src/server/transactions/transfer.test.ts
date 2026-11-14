@@ -2,6 +2,7 @@
 import { expectSnapshotWithDiffer } from '#mocks/util';
 import * as db from '#server/db';
 
+import { app } from './app';
 import * as transfer from './transfer';
 
 beforeEach(global.emptyDatabase());
@@ -169,6 +170,85 @@ describe('Transfer', () => {
     await db.updateTransaction(transaction);
     await transfer.onUpdate(transaction);
     differ.expectToMatchDiff(await getAllTransactions());
+  });
+
+  test('existing transactions are linked as a transfer', async () => {
+    await prepareDatabase();
+    const payee = await db.insertPayee({ name: 'Bank' });
+
+    const insert = (account: string, amount: number) =>
+      db.insertTransaction({
+        account,
+        amount,
+        payee,
+        category: '1',
+        date: '2017-01-01',
+        notes: account,
+      });
+    const getPayeeOf = (account: string) =>
+      db.first<db.DbPayee>('SELECT * FROM payees WHERE transfer_acct = ?', [
+        account,
+      ]);
+
+    const out = await insert('one', -5000);
+    const into = await insert('two', 5000);
+    expect(
+      await transfer.linkTransfer(
+        await db.getTransaction(out),
+        await db.getTransaction(into),
+      ),
+    ).toBe(true);
+    expect(await db.getTransaction(out)).toMatchObject({
+      payee: (await getPayeeOf('two')).id,
+      transfer_id: into,
+      category: null,
+      notes: 'one',
+    });
+    expect(await db.getTransaction(into)).toMatchObject({
+      payee: (await getPayeeOf('one')).id,
+      transfer_id: out,
+      category: null,
+      notes: 'two',
+    });
+
+    // A transfer to an off-budget account keeps its category
+    const payment = await insert('one', -7000);
+    const received = await insert('three', 7000);
+    expect(
+      await transfer.linkTransfer(
+        await db.getTransaction(payment),
+        await db.getTransaction(received),
+      ),
+    ).toBe(false);
+    expect(await db.getTransaction(payment)).toMatchObject({
+      transfer_id: received,
+      category: '1',
+    });
+  });
+
+  test('Make transfer does not link a split parent', async () => {
+    await prepareDatabase();
+    const payee = await db.insertPayee({ name: 'Bank' });
+    const parent = await db.insertTransaction({
+      account: 'one',
+      amount: -5000,
+      payee,
+      date: '2017-01-01',
+      is_parent: true,
+    });
+    const other = await db.insertTransaction({
+      account: 'two',
+      amount: 5000,
+      payee,
+      date: '2017-01-01',
+    });
+
+    await app.handlers['transactions-link-transfer']({ ids: [parent, other] });
+
+    expect(await db.getTransaction(parent)).toMatchObject({
+      transfer_id: null,
+    });
+    expect(await db.getTransaction(other)).toMatchObject({ transfer_id: null });
   });
 
   test('split transfers are retained on child transactions', async () => {
