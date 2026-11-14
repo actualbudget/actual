@@ -125,6 +125,36 @@ test.describe('Browser storage', () => {
     expectStorageLayout(await inspectStorage(page), 'new');
   });
 
+  test('turns the new storage on from the settings', async ({ browser }) => {
+    page = await browser.newPage();
+    // The URL flag wins over the stored choice for this first load
+    await page.goto(`/?storage=legacy`);
+    await page.evaluate(
+      flag => sessionStorage.setItem(flag, '1'),
+      MANUAL_STORAGE_BACKEND_FLAG,
+    );
+    await new ConfigurationPage(page).createTestFile();
+    const balance = await readAllySavingsBalance(page);
+
+    const settingsPage = await new Navigation(page).goToSettingsPage();
+    await settingsPage.goToSection('Experimental');
+    const toggle = page.getByRole('checkbox', {
+      name: 'New browser storage engine',
+    });
+    await expect(toggle).not.toBeChecked();
+    // Stores the choice and reloads; the budget is moved as it reopens
+    const reloaded = page.waitForEvent('load', { timeout: 60_000 });
+    await toggle.click();
+    await reloaded;
+    await settingsPage.waitFor({ timeout: 60_000 });
+    await settingsPage.goToSection('Experimental');
+    await expect(toggle).toBeChecked();
+    await expectAllySavingsBalance(page, balance);
+    await expect(async () => {
+      expectStorageLayout(await inspectStorage(page), 'new');
+    }).toPass({ timeout: 10_000 });
+  });
+
   test('switches back to the legacy storage from the settings', async ({
     browser,
   }) => {
@@ -134,10 +164,10 @@ test.describe('Browser storage', () => {
     await page.goto('/');
     await new ConfigurationPage(page).createTestFile();
     const balance = await readAllySavingsBalance(page);
-    await page.evaluate(flag => {
-      sessionStorage.setItem(flag, '1');
-      localStorage.setItem('devEnableStoragePrefs', 'true');
-    }, MANUAL_STORAGE_BACKEND_FLAG);
+    await page.evaluate(
+      flag => sessionStorage.setItem(flag, '1'),
+      MANUAL_STORAGE_BACKEND_FLAG,
+    );
 
     const settingsPage = await new Navigation(page).goToSettingsPage();
     await settingsPage.goToSection('Experimental');
