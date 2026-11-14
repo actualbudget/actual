@@ -1540,7 +1540,7 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   isOn={!hasTag(transaction.notes, UNREVIEWED_TAG)}
                   onToggle={isReviewed => {
                     const notes = isReviewed
-                      ? (removeTag(transaction.notes, UNREVIEWED_TAG) ?? '')
+                      ? removeTag(transaction.notes, UNREVIEWED_TAG)
                       : addTag(transaction.notes, UNREVIEWED_TAG);
                     // The notes input is uncontrolled, so show the new
                     // text there too.

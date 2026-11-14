@@ -60,8 +60,8 @@ export function hasTag(notes: string | null | undefined, tag: string) {
 }
 
 export function addTag(notes: string | null | undefined, tag: string) {
-  if (hasTag(notes, tag)) {
-    return notes as string;
+  if (notes && hasTag(notes, tag)) {
+    return notes;
   }
   const trimmed = notes?.trimEnd();
   return trimmed ? `${trimmed} #${tag}` : `#${tag}`;
