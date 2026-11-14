@@ -94,6 +94,7 @@ import {
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useLinkExistingTransfer } from '#hooks/useLinkExistingTransfer';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useLocationPermission } from '#hooks/useLocationPermission';
 import { useNavigate } from '#hooks/useNavigate';
@@ -1612,6 +1613,7 @@ function TransactionEditUnconnected({
   const dispatch = useDispatch();
   const updatePayeeLocationMutation = useSavePayeeLocationMutation();
   const navigate = useNavigate();
+  const linkExistingTransfer = useLinkExistingTransfer();
   const [transactions, setTransactions] = useState<TransactionEntity[]>([]);
   const [fetchedTransactions, setFetchedTransactions] = useState<
     TransactionEntity[]
@@ -1911,10 +1913,9 @@ function TransactionEditUnconnected({
         changes.updated.length > 0 ||
         changes.deleted.length
       ) {
+        const diff = await linkExistingTransfer(changes, newTransactions);
         const _remoteUpdates = await send('transactions-batch-update', {
-          added: changes.added,
-          deleted: changes.deleted,
-          updated: changes.updated,
+          ...diff,
           learnCategories: isLearnCategoriesEnabled,
         });
 
@@ -1932,7 +1933,12 @@ function TransactionEditUnconnected({
         dispatch(setLastTransaction({ transaction: newTransactions[0] }));
       }
     },
-    [dispatch, fetchedTransactions, isLearnCategoriesEnabled],
+    [
+      dispatch,
+      fetchedTransactions,
+      isLearnCategoriesEnabled,
+      linkExistingTransfer,
+    ],
   );
 
   const onDelete = useCallback(

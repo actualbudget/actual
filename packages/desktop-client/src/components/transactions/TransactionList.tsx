@@ -30,6 +30,7 @@ import { FeatureErrorFallback } from '#components/FeatureErrorFallback';
 import type { TableHandleRef } from '#components/table';
 import { isValidBoundaryDrop } from '#hooks/useDragDrop';
 import type { DropPosition } from '#hooks/useDragDrop';
+import { useLinkExistingTransfer } from '#hooks/useLinkExistingTransfer';
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
 import { pushModal } from '#modals/modalsSlice';
@@ -186,6 +187,8 @@ export function TransactionList({
   const [learnCategories = 'true'] = useSyncedPref('learn-categories');
   const isLearnCategoriesEnabled = String(learnCategories) === 'true';
 
+  const linkExistingTransfer = useLinkExistingTransfer();
+
   const transactionsLatest = useRef<readonly TransactionEntity[]>([]);
   useLayoutEffect(() => {
     transactionsLatest.current = transactions;
@@ -194,10 +197,14 @@ export function TransactionList({
   const onAdd = useCallback(
     async (newTransactions: TransactionEntity[]) => {
       newTransactions = realizeTempTransactions(newTransactions);
-      await saveDiff({ added: newTransactions }, isLearnCategoriesEnabled);
+      const diff = await linkExistingTransfer(
+        { added: newTransactions, updated: [], deleted: [] },
+        newTransactions,
+      );
+      await saveDiff(diff, isLearnCategoriesEnabled);
       onRefetch();
     },
-    [isLearnCategoriesEnabled, onRefetch],
+    [isLearnCategoriesEnabled, linkExistingTransfer, onRefetch],
   );
 
   const onSave = useCallback(
@@ -210,10 +217,15 @@ export function TransactionList({
         transactionsLatest.current = changes.data;
 
         if (changes.diff.updated.length > 0) {
+          const diff = await linkExistingTransfer(changes.diff, changes.data);
           const dateChanged = !!changes.diff.updated[0].date;
-          if (dateChanged) {
-            changes.diff.updated[0].sort_order = Date.now();
-            await saveDiff(changes.diff, isLearnCategoriesEnabled);
+          // Linking also updates a transaction outside this list, so
+          // refetch to show both sides
+          if (diff.transferMatches || dateChanged) {
+            if (dateChanged) {
+              diff.updated[0].sort_order = Date.now();
+            }
+            await saveDiff(diff, isLearnCategoriesEnabled);
             onRefetch();
           } else {
             onChange(changes.newTransaction, changes.data);
@@ -229,7 +241,7 @@ export function TransactionList({
 
       await saveTransaction();
     },
-    [isLearnCategoriesEnabled, onChange, onRefetch],
+    [isLearnCategoriesEnabled, linkExistingTransfer, onChange, onRefetch],
   );
 
   const onAddSplit = useCallback(
