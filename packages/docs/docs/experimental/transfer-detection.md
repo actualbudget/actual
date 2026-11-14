@@ -2,9 +2,9 @@
 
 <ExperimentalFeatureWarning issueId="1628" />
 
-When you move money between two of your own accounts, your bank reports it twice: once as money leaving the first account, and once as money arriving in the second. [File imports](../transactions/importing.md) bring these in as two separate transactions, so the movement looks like spending in one account and income in the other.
+When you move money between two of your own accounts, your bank reports it twice: once as money leaving the first account, and once as money arriving in the second. [Bank sync](../advanced/bank-sync.md) and [file imports](../transactions/importing.md) bring these in as two separate transactions, so the movement looks like spending in one account and income in the other.
 
-With this feature turned on, Actual recognizes the two transactions when they come in through a file import, and links them as a [transfer](../transactions/transfers.md) for you.
+With this feature turned on, Actual recognizes the two transactions when they come in through bank sync or a file import, and links them as a [transfer](../transactions/transfers.md) for you.
 
 ## Turning On Transfer Detection
 
@@ -19,7 +19,7 @@ Turning the feature off stops Actual from linking new transactions. Transfers th
 
 ## How Actual Recognizes a Transfer
 
-Every time a file import adds a new transaction, Actual looks for the other side of it. Two transactions are linked when all of the following are true:
+Every time a bank sync or a file import adds a new transaction, Actual looks for the other side of it. Two transactions are linked when all of the following are true:
 
 - They are in two different accounts, and neither account is closed.
 - The amounts are exactly the same but inverted, for example a payment of $250.00 and a deposit of $250.00.
@@ -37,10 +37,10 @@ Linking does the same thing as selecting both transactions and choosing [**Make 
 - The category is removed when both accounts are on budget, or both are off budget. A transfer between an on budget account and an off budget account keeps its category. See [Transfer Categories](../transactions/transfers.md#transfer-categories).
 - Amounts, dates and notes are not changed.
 
-After the import, the transaction that was already in the other account is marked there with a link icon, the same way as any other transaction that an import updated.
+After the sync or import, the transaction that was already in the other account is marked there with a link icon, the same way as any other transaction that a sync or import updated.
 
 :::note
-Transfer detection runs when an import adds transactions, and each new transaction can be matched with one already in your accounts. It doesn't go back to link pairs where both transactions were already there, such as transfers imported before you turned this feature on. Link those yourself with [**Make transfer**](../transactions/transfers.md#make-a-transfer-from-two-existing-transactions).
+Transfer detection runs when a bank sync or an import adds transactions, and each new transaction can be matched with one already in your accounts. It doesn't go back to link pairs where both transactions were already there, such as transfers imported before you turned this feature on. Link those yourself with [**Make transfer**](../transactions/transfers.md#make-a-transfer-from-two-existing-transactions).
 :::
 
 ## Fixing a Wrong Match
@@ -49,10 +49,10 @@ Two unrelated transactions can look like a transfer. For example, a $40.00 purch
 
 To undo a wrong match, right-click either of the two transactions and choose **Unlink transfer**. Both transactions stay. Each one gets back the payee name that your bank reported, and your [rules](../budgeting/rules/index.md) run on it again, so a rule that sets its category or renames its payee applies as it did when it was imported.
 
-Changing the payee of one side by hand also ends the transfer, but it removes the other side, the same way it does for any other transfer. Use **Unlink transfer** to keep both.
+Changing the payee of one side by hand also ends the transfer, but it removes the other side, the same way it does for any other transfer. If the removed side came from bank sync, the next sync imports it again and Actual doesn't link it. Use **Unlink transfer** to keep both.
 
 ## Known Limitations
 
 - Amounts have to match exactly. A transfer with a fee taken out of it, or a transfer between two currencies, is not recognized.
 - If you use a [rule](../budgeting/rules/index.md) to turn imported transactions into transfers, that rule still creates a new transaction in the other account, even when a matching one is already there.
-- Actual decides on a match at the end of each import. If a second possible match arrives later, the link that was already made stays.
+- Actual decides on a match at the end of each sync or import. If a second possible match arrives later, the link that was already made stays.
