@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 import { UNREVIEWED_TAG } from '@actual-app/core/shared/tags';
 
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
@@ -18,10 +16,9 @@ export function useUnreviewedTransactions() {
   const navigate = useNavigate();
   const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
-  const query = useMemo(
-    () => unreviewedTransactions().options({ splits: 'grouped' }).select('id'),
-    [],
-  );
+  const query = unreviewedTransactions()
+    .options({ splits: 'grouped' })
+    .select('id');
 
   const { transactions, isPending } = useTransactions({
     query: isReviewTagEnabled ? query : undefined,
