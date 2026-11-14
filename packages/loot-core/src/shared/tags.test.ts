@@ -49,13 +49,42 @@ describe('removeTag', () => {
     expect(removeTag('#unreviewed #food', 'unreviewed')).toBe('#food');
   });
 
-  test('returns null when only the tag was left', () => {
-    expect(removeTag('#unreviewed', 'unreviewed')).toBeNull();
+  test('returns an empty string when only the tag was left', () => {
+    expect(removeTag('#unreviewed', 'unreviewed')).toBe('');
+    expect(removeTag(null, 'unreviewed')).toBe('');
   });
 
   test('leaves escaped and longer tags alone', () => {
     expect(removeTag('##unreviewed #unreviewedx', 'unreviewed')).toBe(
       '##unreviewed #unreviewedx',
     );
+  });
+});
+
+describe('removeTag whitespace handling', () => {
+  test('leaves the rest of the notes untouched', () => {
+    expect(removeTag('a  b #unreviewed', 'unreviewed')).toBe('a  b');
+    expect(removeTag('  indented #unreviewed', 'unreviewed')).toBe(
+      '  indented',
+    );
+  });
+
+  test('does not leave a trailing space before a newline', () => {
+    expect(removeTag('a #unreviewed\nb', 'unreviewed')).toBe('a\nb');
+  });
+
+  test('keeps the separator before a following tag', () => {
+    expect(removeTag('lunch #unreviewed#food', 'unreviewed')).toBe(
+      'lunch #food',
+    );
+  });
+
+  test('undoes addTag', () => {
+    const notes = 'a  b\tc';
+    expect(removeTag(addTag(notes, 'unreviewed'), 'unreviewed')).toBe(notes);
+  });
+
+  test('returns an empty string when only whitespace is left', () => {
+    expect(removeTag('  #unreviewed  ', 'unreviewed')).toBe('');
   });
 });

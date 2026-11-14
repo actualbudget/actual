@@ -67,17 +67,28 @@ export function addTag(notes: string | null | undefined, tag: string) {
   return trimmed ? `${trimmed} #${tag}` : `#${tag}`;
 }
 
-// Returns null rather than an empty string when only the tag was left,
-// matching how the rest of the app stores "no notes".
+// Removes the tag and the spaces or tabs next to it, keeping one separator
+// only where the tag sat between other text. The rest of the notes is left
+// as-is, so this undoes `addTag`. Returns an empty string when nothing
+// but whitespace was left, matching what the notes field saves when it is
+// cleared.
 export function removeTag(notes: string | null | undefined, tag: string) {
   if (!notes) {
-    return notes ?? null;
+    return '';
   }
-  const cleaned = notes
-    .replace(makeTagRegex(tag, 'g'), '')
-    .replace(/[ \t]{2,}/g, ' ')
-    .trim();
-  return cleaned === '' ? null : cleaned;
+  const pattern = new RegExp(
+    `([ \\t]*)${makeTagRegex(tag).source}([ \\t]*)`,
+    'g',
+  );
+  const cleaned = notes.replace(
+    pattern,
+    (match: string, before: string, after: string, offset: number) => {
+      const next = notes[offset + match.length];
+      const isBetweenText = after !== '' || next === '#';
+      return before !== '' && isBetweenText ? before : '';
+    },
+  );
+  return cleaned.trim() === '' ? '' : cleaned;
 }
 
 export function makeTagAqlRegex(tag: string): string {
