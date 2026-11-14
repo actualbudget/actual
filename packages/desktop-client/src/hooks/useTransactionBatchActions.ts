@@ -4,11 +4,9 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import {
-  addTag,
-  hasTag,
+  isUnreviewed,
   markReviewedOnCategoryChange,
-  removeTag,
-  UNREVIEWED_TAG,
+  setReviewed,
 } from '@actual-app/core/shared/tags';
 import {
   deleteTransaction,
@@ -335,15 +333,10 @@ export function useTransactionBatchActions() {
       Pick<TransactionEntity, 'id' | 'notes'>
     >;
 
-    const isReviewed = transactions.some(t => hasTag(t.notes, UNREVIEWED_TAG));
+    const isReviewed = transactions.some(t => isUnreviewed(t.notes));
     const updated = transactions
-      .filter(t => hasTag(t.notes, UNREVIEWED_TAG) === isReviewed)
-      .map(t => ({
-        id: t.id,
-        notes: isReviewed
-          ? removeTag(t.notes, UNREVIEWED_TAG)
-          : addTag(t.notes, UNREVIEWED_TAG),
-      }));
+      .filter(t => isUnreviewed(t.notes) === isReviewed)
+      .map(t => ({ id: t.id, notes: setReviewed(t.notes, isReviewed) }));
 
     await send('transactions-batch-update', { updated });
 

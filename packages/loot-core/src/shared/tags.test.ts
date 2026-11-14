@@ -1,9 +1,11 @@
 import {
   addTag,
   hasTag,
+  isUnreviewed,
   markReviewedOnCategoryChange,
   removeTag,
   renameTagInNotes,
+  setReviewed,
 } from './tags';
 
 describe('renameTagInNotes', () => {
@@ -92,6 +94,28 @@ describe('removeTag whitespace handling', () => {
 
   test('returns an empty string when only whitespace is left', () => {
     expect(removeTag('  #unreviewed  ', 'unreviewed')).toBe('');
+  });
+});
+
+describe('isUnreviewed', () => {
+  test('is true only when the notes carry the unreviewed tag', () => {
+    expect(isUnreviewed('Coffee #unreviewed')).toBe(true);
+    expect(isUnreviewed('Coffee ##unreviewed')).toBe(false);
+    expect(isUnreviewed('Coffee')).toBe(false);
+    expect(isUnreviewed(null)).toBe(false);
+  });
+});
+
+describe('setReviewed', () => {
+  test('removes the tag when marking reviewed', () => {
+    expect(setReviewed('Coffee #unreviewed', true)).toBe('Coffee');
+    expect(setReviewed('Coffee', true)).toBe('Coffee');
+  });
+
+  test('adds the tag when marking unreviewed', () => {
+    expect(setReviewed('Coffee', false)).toBe('Coffee #unreviewed');
+    expect(setReviewed(null, false)).toBe('#unreviewed');
+    expect(setReviewed('Coffee #unreviewed', false)).toBe('Coffee #unreviewed');
   });
 });
 

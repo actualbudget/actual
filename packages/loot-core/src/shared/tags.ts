@@ -93,6 +93,20 @@ export function removeTag(notes: string | null | undefined, tag: string) {
   return cleaned.trim() === '' ? '' : cleaned;
 }
 
+export function isUnreviewed(notes: string | null | undefined) {
+  return hasTag(notes, UNREVIEWED_TAG);
+}
+
+// Adds or removes the unreviewed tag so the notes match `reviewed`.
+export function setReviewed(
+  notes: string | null | undefined,
+  reviewed: boolean,
+) {
+  return reviewed
+    ? removeTag(notes, UNREVIEWED_TAG)
+    : addTag(notes, UNREVIEWED_TAG);
+}
+
 // Someone who sets a transaction's category has looked at it, so it no
 // longer needs review. Only call this for edits a person makes: categories
 // set by rules or bank sync must leave the tag alone. The tag lives on a
@@ -104,11 +118,11 @@ export function markReviewedOnCategoryChange<
     !previous ||
     next.is_child ||
     previous.category === next.category ||
-    !hasTag(next.notes, UNREVIEWED_TAG)
+    !isUnreviewed(next.notes)
   ) {
     return next;
   }
-  return { ...next, notes: removeTag(next.notes, UNREVIEWED_TAG) };
+  return { ...next, notes: setReviewed(next.notes, true) };
 }
 
 export function makeTagAqlRegex(tag: string): string {

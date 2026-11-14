@@ -40,11 +40,9 @@ import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
 import {
-  addTag,
-  hasTag,
+  isUnreviewed,
   markReviewedOnCategoryChange,
-  removeTag,
-  UNREVIEWED_TAG,
+  setReviewed,
 } from '@actual-app/core/shared/tags';
 import {
   addSplitTransaction,
@@ -1553,15 +1551,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                 <FieldLabel title={t('Reviewed')} />
                 <ToggleField
                   id="reviewed"
-                  isOn={!hasTag(transaction.notes, UNREVIEWED_TAG)}
+                  isOn={!isUnreviewed(transaction.notes)}
                   onToggle={isReviewed => {
                     // The notes input is uncontrolled and may hold text
                     // that isn't saved yet, so build on what it shows.
                     const currentNotes =
                       noteRef.current?.value ?? transaction.notes;
-                    const notes = isReviewed
-                      ? removeTag(currentNotes, UNREVIEWED_TAG)
-                      : addTag(currentNotes, UNREVIEWED_TAG);
+                    const notes = setReviewed(currentNotes, isReviewed);
                     if (noteRef.current) {
                       noteRef.current.value = notes;
                     }

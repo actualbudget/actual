@@ -54,12 +54,7 @@ import { memoizeOne } from '@actual-app/core/shared/memoize';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import { DEFAULT_UPCOMING_SCHEDULE_DAYS } from '@actual-app/core/shared/schedules';
-import {
-  addTag,
-  hasTag,
-  removeTag,
-  UNREVIEWED_TAG,
-} from '@actual-app/core/shared/tags';
+import { isUnreviewed, setReviewed } from '@actual-app/core/shared/tags';
 import {
   addSplitTransaction,
   deleteTransaction,
@@ -595,7 +590,7 @@ function ReviewedCell({
   onUpdate,
 }: ReviewedCellProps) {
   const { t } = useTranslation();
-  const isReviewed = !hasTag(notes, UNREVIEWED_TAG);
+  const isReviewed = !isUnreviewed(notes);
   const isHidden = isChild || isPreview;
 
   return (
@@ -622,14 +617,7 @@ function ReviewedCell({
         }}
         disabled={isHidden}
         onEdit={() => onEdit(id, 'reviewed')}
-        onSelect={() =>
-          onUpdate(
-            'notes',
-            isReviewed
-              ? addTag(notes, UNREVIEWED_TAG)
-              : removeTag(notes, UNREVIEWED_TAG),
-          )
-        }
+        onSelect={() => onUpdate('notes', setReviewed(notes, !isReviewed))}
       >
         <View
           aria-label={isReviewed ? t('Reviewed') : t('Not reviewed')}
