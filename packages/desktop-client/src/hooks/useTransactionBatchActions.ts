@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
+import { markReviewedOnCategoryChange } from '@actual-app/core/shared/tags';
 import {
   deleteTransaction,
   realizeTempTransactions,
@@ -20,6 +21,7 @@ import type {
   TransactionEntity,
 } from '@actual-app/core/types/models';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { pushModal } from '#modals/modalsSlice';
 import type {
   ConfirmTransactionEditReason,
@@ -78,6 +80,7 @@ type BatchUnlinkScheduleProps = {
 export function useTransactionBatchActions() {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
   const onBatchEdit = async ({ name, ids, onSuccess }: BatchEditProps) => {
     const { data } = await aqlQuery(
@@ -147,10 +150,14 @@ export function useTransactionBatchActions() {
             );
           }
         }
-        const transaction = {
+        let transaction = {
           ...trans,
           [name]: valueToSet,
         };
+
+        if (isReviewTagEnabled && name === 'category') {
+          transaction = markReviewedOnCategoryChange(trans, transaction);
+        }
 
         if (name === 'account' && trans.account !== value) {
           transaction.reconciled = false;

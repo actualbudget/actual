@@ -1,4 +1,10 @@
-import { addTag, hasTag, removeTag, renameTagInNotes } from './tags';
+import {
+  addTag,
+  hasTag,
+  markReviewedOnCategoryChange,
+  removeTag,
+  renameTagInNotes,
+} from './tags';
 
 describe('renameTagInNotes', () => {
   test('renames only whole, unescaped, case-sensitive tags', () => {
@@ -86,5 +92,34 @@ describe('removeTag whitespace handling', () => {
 
   test('returns an empty string when only whitespace is left', () => {
     expect(removeTag('  #unreviewed  ', 'unreviewed')).toBe('');
+  });
+});
+
+describe('markReviewedOnCategoryChange', () => {
+  const unreviewed = { category: 'food', notes: 'lunch #unreviewed' };
+
+  test('removes the tag when the category changes', () => {
+    expect(
+      markReviewedOnCategoryChange(unreviewed, {
+        ...unreviewed,
+        category: 'fun',
+      }),
+    ).toEqual({ category: 'fun', notes: 'lunch' });
+  });
+
+  test('keeps the tag when the category is unchanged', () => {
+    expect(markReviewedOnCategoryChange(unreviewed, unreviewed)).toBe(
+      unreviewed,
+    );
+  });
+
+  test('ignores split children, which never carry the tag', () => {
+    const child = { ...unreviewed, category: 'fun', is_child: true };
+    expect(markReviewedOnCategoryChange(unreviewed, child)).toBe(child);
+  });
+
+  test('does nothing without a previous version', () => {
+    const next = { ...unreviewed, category: 'fun' };
+    expect(markReviewedOnCategoryChange(undefined, next)).toBe(next);
   });
 });

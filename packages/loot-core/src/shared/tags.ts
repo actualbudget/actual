@@ -1,3 +1,5 @@
+import type { TransactionEntity } from '#types/models';
+
 import type { ObjectExpression } from './query';
 
 // for a given string, returns an array of unique words
@@ -89,6 +91,24 @@ export function removeTag(notes: string | null | undefined, tag: string) {
     },
   );
   return cleaned.trim() === '' ? '' : cleaned;
+}
+
+// Someone who sets a transaction's category has looked at it, so it no
+// longer needs review. Only call this for edits a person makes: categories
+// set by rules or bank sync must leave the tag alone. The tag lives on a
+// split's parent, so a child's category doesn't count.
+export function markReviewedOnCategoryChange<
+  T extends Pick<TransactionEntity, 'category' | 'notes' | 'is_child'>,
+>(previous: Pick<TransactionEntity, 'category'> | undefined, next: T): T {
+  if (
+    !previous ||
+    next.is_child ||
+    previous.category === next.category ||
+    !hasTag(next.notes, UNREVIEWED_TAG)
+  ) {
+    return next;
+  }
+  return { ...next, notes: removeTag(next.notes, UNREVIEWED_TAG) };
 }
 
 export function makeTagAqlRegex(tag: string): string {
