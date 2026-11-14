@@ -18,6 +18,11 @@ export function extractTagsForFilter(value: string) {
   return tagValues;
 }
 
+function makeTagRegex(tag: string, flags?: string) {
+  const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, flags);
+}
+
 // Tags in notes are delimited by whitespace or another '#', and a doubled
 // '#' escapes the tag (see `parseNotes`). Matching is case sensitive because
 // tag identity elsewhere (colors, discovery) is case sensitive too.
@@ -26,9 +31,7 @@ export function renameTagInNotes(
   oldTag: string,
   newTag: string,
 ) {
-  const escaped = oldTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, 'g');
-  return notes.replace(pattern, () => `#${newTag}`);
+  return notes.replace(makeTagRegex(oldTag, 'g'), () => `#${newTag}`);
 }
 
 export function extractTagsFromText(value: string): string[] {
@@ -51,11 +54,6 @@ export function extractTagsFromText(value: string): string[] {
 // the `reviewNewTransactions` experimental feature is on. The tag lives
 // in the notes, so it needs no column and syncs like any other edit.
 export const UNREVIEWED_TAG = 'unreviewed';
-
-function makeTagRegex(tag: string, flags?: string) {
-  const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(?<!#)#${escaped}(?=[\\s#]|$)`, flags);
-}
 
 export function hasTag(notes: string | null | undefined, tag: string) {
   return !!notes && makeTagRegex(tag).test(notes);
