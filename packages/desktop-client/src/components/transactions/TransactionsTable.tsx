@@ -3260,13 +3260,13 @@ export const TransactionTable = forwardRef(
       [],
     );
 
-    // The ordered list of columns to render. The show* flags control which
-    // of the account/category/balance/cleared columns are available in the
-    // current view; `columnOrder` carries the user's column preferences.
-    // Memoized manually (the compiler bails out on this component) so the
-    // array identity is stable across renders — it crosses the `memo()`
-    // boundary of every transaction row.
     const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
+    // The ordered list of columns to render. The show* flags control which
+    // of the account/category/balance/cleared/reviewed columns are available
+    // in the current view; `columnOrder` carries the user's column
+    // preferences. Memoized manually (the compiler bails out on this
+    // component) so the array identity is stable across renders — it crosses
+    // the `memo()` boundary of every transaction row.
     const {
       columnOrder,
       showAccount,
