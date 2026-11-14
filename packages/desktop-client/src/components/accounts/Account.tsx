@@ -60,6 +60,7 @@ import { useAccounts } from '#hooks/useAccounts';
 import { SchedulesProvider } from '#hooks/useCachedSchedules';
 import { useCategories } from '#hooks/useCategories';
 import { useDateFormat } from '#hooks/useDateFormat';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useFormat } from '#hooks/useFormat';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { usePayees } from '#hooks/usePayees';
@@ -230,6 +231,7 @@ type AccountInternalProps = {
   showReconciled: boolean;
   setShowReconciled: (newValue: boolean) => void;
   showGroup: boolean;
+  isReviewTagEnabled: boolean;
   showExtraBalances?: boolean;
   setShowExtraBalances: (newValue: boolean) => void;
   transactionColumns: TransactionTableColumn[];
@@ -1008,7 +1010,8 @@ class AccountInternal extends PureComponent<
       .filter(
         column =>
           (column.id !== 'account' || this.showAccountColumn()) &&
-          (column.id !== 'balance' || this.canCalculateBalance()),
+          (column.id !== 'balance' || this.canCalculateBalance()) &&
+          (column.id !== 'reviewed' || this.props.isReviewTagEnabled),
       )
       .map(column => {
         // Balance and cleared visibility can be temporarily overridden in
@@ -2181,6 +2184,7 @@ export function Account() {
     showGroup,
     saveColumns,
   } = useTransactionTableColumns(params.id);
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
 
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
@@ -2232,6 +2236,7 @@ export function Account() {
             showReconciled={String(hideReconciled) !== 'true'}
             setShowReconciled={val => setHideReconciled(String(!val))}
             showGroup={showGroup}
+            isReviewTagEnabled={isReviewTagEnabled}
             showExtraBalances={String(showExtraBalances) === 'true'}
             setShowExtraBalances={extraBalances =>
               setShowExtraBalances(String(extraBalances))
