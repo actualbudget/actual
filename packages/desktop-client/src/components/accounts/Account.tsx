@@ -437,6 +437,17 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    } else if (
+      this.props.location.key !== prevProps.location.key &&
+      this.props.filterConditions.length > 0
+    ) {
+      // A drill-down (e.g. the title bar's unreviewed link) can navigate here
+      // with new filters while this view is already open. The constructor
+      // only reads the filters it mounts with, so apply these ones now.
+      const conditions = [...this.props.filterConditions];
+      this.setState({ filterId: undefined, filterConditionsOp: 'and' }, () => {
+        void this.applyFilters(conditions);
+      });
     }
   }
 
