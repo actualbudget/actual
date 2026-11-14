@@ -18,6 +18,7 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGoCardlessStatus } from '#hooks/useGoCardlessStatus';
 import { usePluggyAiStatus } from '#hooks/usePluggyAiStatus';
 import { useSimpleFinStatus } from '#hooks/useSimpleFinStatus';
+import { useStripeStatus } from '#hooks/useStripeStatus';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { addNotification } from '#notifications/notificationsSlice';
@@ -125,6 +126,21 @@ export function useBuiltInBankSyncProviders({
   const { configuredEnableBanking, isLoading: isEnableBankingLoading } =
     useEnableBankingStatus(enableBankingEnabled);
 
+  const stripeEnabled = useFeatureFlag('stripeBankSync');
+  const { configuredStripe, isLoading: isStripeLoading } =
+    useStripeStatus(stripeEnabled);
+  const [loadingStripeAccounts, setLoadingStripeAccounts] = useState(false);
+
+  const [isStripeSetupComplete, setIsStripeSetupComplete] = useState<
+    boolean | null
+  >(configuredStripe);
+  const [prevConfiguredStripe, setPrevConfiguredStripe] =
+    useState(configuredStripe);
+  if (configuredStripe !== prevConfiguredStripe) {
+    setPrevConfiguredStripe(configuredStripe);
+    setIsStripeSetupComplete(configuredStripe);
+  }
+
   const [isGoCardlessSetupComplete, setIsGoCardlessSetupComplete] = useState<
     boolean | null
   >(configuredGoCardless);
@@ -212,6 +228,19 @@ export function useBuiltInBankSyncProviders({
           name: 'enablebanking-init',
           options: {
             onSuccess: () => setIsEnableBankingSetupComplete(true),
+          },
+        },
+      }),
+    );
+  }, [dispatch]);
+
+  const onStripeInit = useCallback(() => {
+    dispatch(
+      pushModal({
+        modal: {
+          name: 'stripe-init',
+          options: {
+            onSuccess: () => setIsStripeSetupComplete(true),
           },
         },
       }),
@@ -372,6 +401,21 @@ export function useBuiltInBankSyncProviders({
     }
   }, [notifyResetFailure]);
 
+  const onStripeReset = useCallback(async () => {
+    try {
+      await ensureSuccessResponse(
+        await send('secret-set', {
+          name: 'stripe_key',
+          value: null,
+        }),
+        'Failed to clear Stripe key',
+      );
+      setIsStripeSetupComplete(false);
+    } catch (error) {
+      notifyResetFailure('Stripe', error);
+    }
+  }, [notifyResetFailure]);
+
   const onAkahuReset = useCallback(async () => {
     try {
       await ensureSuccessResponse(
@@ -476,6 +520,63 @@ export function useBuiltInBankSyncProviders({
     simpleFinStatus.configured,
     loadingSimpleFinAccounts,
     onSimpleFinInit,
+    t,
+    upgradingAccountId,
+  ]);
+
+  const onConnectStripe = useCallback(async () => {
+    if (!isStripeSetupComplete) {
+      onStripeInit();
+      return;
+    }
+
+    if (loadingStripeAccounts) {
+      return;
+    }
+
+    setLoadingStripeAccounts(true);
+
+    try {
+      const results = await send('stripe-accounts');
+      if (results?.error_code) {
+        throw new Error(results.error_type || results.error_code);
+      }
+      if (results?.error) {
+        throw new Error(results.error);
+      }
+
+      dispatch(
+        pushModal({
+          modal: {
+            name: 'select-linked-accounts',
+            options: {
+              externalAccounts: results.accounts ?? [],
+              syncSource: 'stripe',
+              upgradingAccountId,
+            },
+          },
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        addNotification({
+          notification: {
+            type: 'error',
+            title: t('Error when trying to contact Stripe'),
+            message: error instanceof Error ? error.message : String(error),
+            timeout: 5000,
+          },
+        }),
+      );
+      onStripeInit();
+    } finally {
+      setLoadingStripeAccounts(false);
+    }
+  }, [
+    dispatch,
+    isStripeSetupComplete,
+    loadingStripeAccounts,
+    onStripeInit,
     t,
     upgradingAccountId,
   ]);
@@ -661,6 +762,7 @@ export function useBuiltInBankSyncProviders({
     pluggyai: Boolean(pluggyAiStatus.configured),
     enableBanking: Boolean(isEnableBankingSetupComplete),
     akahu: Boolean(isAkahuSetupComplete),
+    stripe: Boolean(isStripeSetupComplete),
   } satisfies Record<BankSyncProviders, boolean>;
 
   const providers = useMemo<BuiltInBankSyncProviderState[]>(() => {
@@ -755,6 +857,24 @@ export function useBuiltInBankSyncProviders({
       });
     }
 
+    if (stripeEnabled) {
+      baseProviders.push({
+        id: 'stripe',
+        displayName: 'Stripe',
+        description: t(
+          'Import the Stripe balance and its payouts using a restricted key.',
+        ),
+        isConfigured: configuredProviders.stripe,
+        credentialSource: 'global',
+        supportsPerBudgetFile: false,
+        canConfigure: canConfigureProviders,
+        isLoading: isStripeLoading || loadingStripeAccounts,
+        onConfigure: onStripeInit,
+        onLink: onConnectStripe,
+        onReset: onStripeReset,
+      });
+    }
+
     return baseProviders;
   }, [
     canConfigureProviders,
@@ -765,11 +885,15 @@ export function useBuiltInBankSyncProviders({
     configuredProviders.pluggyai,
     configuredProviders.simpleFin,
     configuredProviders.akahu,
+    configuredProviders.stripe,
     pluggyAiStatus,
     simpleFinStatus,
     syncServerStatus,
     enableBankingEnabled,
+    stripeEnabled,
     isEnableBankingLoading,
+    isStripeLoading,
+    loadingStripeAccounts,
     loadingSimpleFinAccounts,
     loadingAkahuAccounts,
     onConnectAkahu,
@@ -777,6 +901,7 @@ export function useBuiltInBankSyncProviders({
     onConnectGoCardless,
     onConnectPluggyAi,
     onConnectSimpleFin,
+    onConnectStripe,
     onAkahuInit,
     onAkahuReset,
     onEnableBankingInit,
@@ -787,6 +912,8 @@ export function useBuiltInBankSyncProviders({
     onPluggyAiReset,
     onSimpleFinInit,
     onSimpleFinReset,
+    onStripeInit,
+    onStripeReset,
     t,
   ]);
 

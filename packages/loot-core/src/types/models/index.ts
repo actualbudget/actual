@@ -20,6 +20,7 @@ export type * from './reports';
 export type * from './rule';
 export type * from './schedule';
 export type * from './simplefin';
+export type * from './stripe';
 export type * from './transaction';
 export type * from './transaction-filter';
 export type * from './user';

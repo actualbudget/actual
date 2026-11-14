@@ -77,6 +77,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StripeInitialiseModal } from './modals/StripeInitialiseModal';
 import { TagColorModal } from './modals/TagColorModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
@@ -209,6 +210,9 @@ export function Modals() {
 
         case 'enablebanking-external-msg':
           return <EnableBankingExternalMsgModal key={key} {...modal.options} />;
+
+        case 'stripe-init':
+          return <StripeInitialiseModal key={key} {...modal.options} />;
 
         case 'gocardless-external-msg':
           return (

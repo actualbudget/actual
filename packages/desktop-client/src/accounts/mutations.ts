@@ -11,6 +11,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerStripeAccount,
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -582,6 +583,48 @@ export function useLinkAccountEnableBankingMutation() {
         dispatch,
         t(
           'There was an error linking the account to Enable Banking. Please try again.',
+        ),
+        error,
+      );
+    },
+  });
+}
+
+type LinkAccountStripePayload = LinkAccountBasePayload & {
+  externalAccount: SyncServerStripeAccount;
+};
+
+export function useLinkAccountStripeMutation() {
+  const queryClient = useQueryClient();
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async ({
+      externalAccount,
+      upgradingId,
+      offBudget,
+      startingDate,
+      startingBalance,
+    }: LinkAccountStripePayload) => {
+      await send('stripe-accounts-link', {
+        externalAccount,
+        upgradingId,
+        offBudget,
+        startingDate,
+        startingBalance,
+      });
+    },
+    onSuccess: () => {
+      invalidateQueries(queryClient);
+      invalidateQueries(queryClient, payeeQueries.lists());
+    },
+    onError: error => {
+      console.error('Error linking account to Stripe:', error);
+      dispatchErrorNotification(
+        dispatch,
+        t(
+          'There was an error linking the account to Stripe. Please try again.',
         ),
         error,
       );

@@ -37,6 +37,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerStripeAccount,
   TransactionEntity,
 } from '#types/models';
 
@@ -62,6 +63,7 @@ export type AccountHandlers = {
   'pluggyai-accounts-link': typeof linkPluggyAiAccount;
   'akahu-accounts-link': typeof linkAkahuAccount;
   'enablebanking-accounts-link': typeof linkEnableBankingAccount;
+  'stripe-accounts-link': typeof linkStripeAccount;
   'account-create': typeof createAccount;
   'account-close': typeof closeAccount;
   'account-reopen': typeof reopenAccount;
@@ -81,6 +83,9 @@ export type AccountHandlers = {
   'enablebanking-poll-auth': typeof enableBankingPollAuth;
   'enablebanking-poll-auth-stop': typeof stopEnableBankingPollAuth;
   'enablebanking-configure': typeof enableBankingConfigure;
+  'stripe-status': typeof stripeStatus;
+  'stripe-configure': typeof stripeConfigure;
+  'stripe-accounts': typeof stripeAccounts;
   'simplefin-accounts': typeof simpleFinAccounts;
   'pluggyai-accounts': typeof pluggyAiAccounts;
   'akahu-accounts': typeof akahuAccounts;
@@ -469,14 +474,16 @@ async function linkAkahuAccount({
   return 'ok';
 }
 
-async function linkEnableBankingAccount({
+async function linkPerAccountBank({
   externalAccount,
+  syncSource,
   upgradingId,
   offBudget = false,
   startingDate,
   startingBalance,
 }: LinkAccountBaseParams & {
-  externalAccount: SyncServerEnableBankingAccount;
+  externalAccount: SyncServerEnableBankingAccount | SyncServerStripeAccount;
+  syncSource: 'enableBanking' | 'stripe';
 }) {
   let id: string | undefined;
 
@@ -511,7 +518,7 @@ async function linkEnableBankingAccount({
       id,
       account_id: externalAccount.account_id,
       bank: bank.id,
-      account_sync_source: 'enableBanking',
+      account_sync_source: syncSource,
     });
   } else {
     id = uuidv4();
@@ -522,7 +529,7 @@ async function linkEnableBankingAccount({
       official_name: externalAccount.name,
       bank: bank.id,
       offbudget: offBudget ? 1 : 0,
-      account_sync_source: 'enableBanking',
+      account_sync_source: syncSource,
     });
     await db.insertPayee({
       name: '',
@@ -531,7 +538,7 @@ async function linkEnableBankingAccount({
   }
 
   if (id == null) {
-    throw new Error('id was not assigned in linkEnableBankingAccount');
+    throw new Error(`id was not assigned when linking a ${syncSource} account`);
   }
 
   const syncRes = await bankSync.syncAccount(
@@ -552,6 +559,22 @@ async function linkEnableBankingAccount({
   });
 
   return 'ok';
+}
+
+async function linkEnableBankingAccount(
+  params: LinkAccountBaseParams & {
+    externalAccount: SyncServerEnableBankingAccount;
+  },
+) {
+  return linkPerAccountBank({ ...params, syncSource: 'enableBanking' });
+}
+
+async function linkStripeAccount(
+  params: LinkAccountBaseParams & {
+    externalAccount: SyncServerStripeAccount;
+  },
+) {
+  return linkPerAccountBank({ ...params, syncSource: 'stripe' });
 }
 
 async function createAccount({
@@ -1228,6 +1251,40 @@ async function enableBankingConfigure(config: {
   });
 }
 
+async function postStripe(path: string, body: unknown) {
+  const userToken = await asyncStorage.getItem('user-token');
+
+  if (!userToken) {
+    return { error: 'unauthorized' };
+  }
+
+  const serverConfig = getServer();
+  if (!serverConfig) {
+    throw new Error('Failed to get server config.');
+  }
+
+  return post(
+    serverConfig.STRIPE_SERVER + path,
+    body,
+    {
+      'X-ACTUAL-TOKEN': userToken,
+    },
+    60000,
+  );
+}
+
+async function stripeStatus() {
+  return postStripe('/status', {});
+}
+
+async function stripeConfigure(config: { key: string }) {
+  return postStripe('/configure', config);
+}
+
+async function stripeAccounts() {
+  return postStripe('/accounts', {});
+}
+
 async function getGoCardlessBanks(country: string) {
   const userToken = await asyncStorage.getItem('user-token');
 
@@ -1801,6 +1858,7 @@ app.method('simplefin-accounts-link', linkSimpleFinAccount);
 app.method('pluggyai-accounts-link', linkPluggyAiAccount);
 app.method('akahu-accounts-link', linkAkahuAccount);
 app.method('enablebanking-accounts-link', linkEnableBankingAccount);
+app.method('stripe-accounts-link', linkStripeAccount);
 app.method('account-create', mutator(undoable(createAccount)));
 app.method('account-close', mutator(closeAccount));
 app.method('account-reopen', mutator(undoable(reopenAccount)));
@@ -1820,6 +1878,9 @@ app.method('enablebanking-complete-auth', enableBankingCompleteAuth);
 app.method('enablebanking-poll-auth', enableBankingPollAuth);
 app.method('enablebanking-poll-auth-stop', stopEnableBankingPollAuth);
 app.method('enablebanking-configure', enableBankingConfigure);
+app.method('stripe-status', stripeStatus);
+app.method('stripe-configure', stripeConfigure);
+app.method('stripe-accounts', stripeAccounts);
 app.method('simplefin-accounts', simpleFinAccounts);
 app.method('pluggyai-accounts', pluggyAiAccounts);
 app.method('akahu-accounts', akahuAccounts);

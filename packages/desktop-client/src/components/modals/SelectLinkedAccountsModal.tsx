@@ -21,6 +21,7 @@ import type {
   SyncServerGoCardlessAccount,
   SyncServerPluggyAiAccount,
   SyncServerSimpleFinAccount,
+  SyncServerStripeAccount,
 } from '@actual-app/core/types/models';
 import { format as formatDate, parseISO } from 'date-fns';
 
@@ -30,6 +31,7 @@ import {
   useLinkAccountMutation,
   useLinkAccountPluggyAiMutation,
   useLinkAccountSimpleFinMutation,
+  useLinkAccountStripeMutation,
   useUnlinkAccountMutation,
 } from '#accounts';
 import { Autocomplete } from '#components/autocomplete/Autocomplete';
@@ -194,6 +196,12 @@ export type SelectLinkedAccountsModalProps =
       externalAccounts: SyncServerAkahuAccount[];
       syncSource: 'akahu';
       upgradingAccountId?: string;
+    }
+  | {
+      requisitionId?: undefined;
+      externalAccounts: SyncServerStripeAccount[];
+      syncSource: 'stripe';
+      upgradingAccountId?: string;
     };
 
 export function SelectLinkedAccountsModal({
@@ -242,6 +250,12 @@ export function SelectLinkedAccountsModal({
             externalAccounts: toSort as SyncServerEnableBankingAccount[],
             upgradingAccountId,
           };
+        case 'stripe':
+          return {
+            syncSource: 'stripe',
+            externalAccounts: toSort as SyncServerStripeAccount[],
+            upgradingAccountId,
+          };
         default:
           throw new Error(`Unrecognized sync source: ${String(syncSource)}`);
       }
@@ -284,6 +298,7 @@ export function SelectLinkedAccountsModal({
   const linkAccountPluggyAi = useLinkAccountPluggyAiMutation();
   const linkAccountAkahu = useLinkAccountAkahuMutation();
   const linkAccountEnableBanking = useLinkAccountEnableBankingMutation();
+  const linkAccountStripe = useLinkAccountStripeMutation();
 
   async function onNext() {
     const chosenLocalAccountIds = Object.values(chosenAccounts);
@@ -364,6 +379,21 @@ export function SelectLinkedAccountsModal({
           propsWithSortedExternalAccounts.syncSource === 'enableBanking'
         ) {
           linkAccountEnableBanking.mutate({
+            externalAccount:
+              propsWithSortedExternalAccounts.externalAccounts[
+                externalAccountIndex
+              ],
+            upgradingId:
+              chosenLocalAccountId !== addOnBudgetAccountOption.id &&
+              chosenLocalAccountId !== addOffBudgetAccountOption.id
+                ? chosenLocalAccountId
+                : undefined,
+            offBudget,
+            startingDate,
+            startingBalance,
+          });
+        } else if (propsWithSortedExternalAccounts.syncSource === 'stripe') {
+          linkAccountStripe.mutate({
             externalAccount:
               propsWithSortedExternalAccounts.externalAccounts[
                 externalAccountIndex
@@ -647,7 +677,8 @@ type ExternalAccount =
   | SyncServerSimpleFinAccount
   | SyncServerPluggyAiAccount
   | SyncServerAkahuAccount
-  | SyncServerEnableBankingAccount;
+  | SyncServerEnableBankingAccount
+  | SyncServerStripeAccount;
 
 type StartingBalanceInfo = {
   date: string;
@@ -677,7 +708,9 @@ export function externalBalanceToInteger(
   }
   const value = Number(balance);
   const amount =
-    syncSource === 'enableBanking' ? value : amountToInteger(value);
+    syncSource === 'enableBanking' || syncSource === 'stripe'
+      ? value
+      : amountToInteger(value);
   return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
     ? amount
     : null;
@@ -927,7 +960,8 @@ function getInstitutionName(
     | SyncServerGoCardlessAccount
     | SyncServerSimpleFinAccount
     | SyncServerPluggyAiAccount
-    | SyncServerEnableBankingAccount,
+    | SyncServerEnableBankingAccount
+    | SyncServerStripeAccount,
 ) {
   if (typeof externalAccount?.institution === 'string') {
     return externalAccount?.institution ?? '';

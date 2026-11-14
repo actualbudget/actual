@@ -18,6 +18,7 @@ const SYNC_PROVIDER_KEYS = [
   ...BUILT_IN_BANK_SYNC_PROVIDERS,
   'enableBanking',
   'akahu',
+  'stripe',
   'unlinked',
 ] as const satisfies readonly SyncProviders[];
 
@@ -36,6 +37,7 @@ export function getSyncSourceReadable(
     pluggyai: 'Pluggy.ai',
     enableBanking: 'Enable Banking',
     akahu: 'Akahu',
+    stripe: 'Stripe',
     unlinked: translate('Unlinked'),
   };
 }

@@ -285,6 +285,11 @@ export function ExperimentalFeatures() {
           <Trans>Enable Banking sync (EU banks)</Trans>
         </FeatureToggle>
       )}
+      {isUsingServer && (
+        <FeatureToggle flag="stripeBankSync">
+          <Trans>Stripe bank sync</Trans>
+        </FeatureToggle>
+      )}
       {showServerPrefs && (
         <ServerFeatureToggle
           prefName="flags.plugins"
