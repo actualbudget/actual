@@ -234,6 +234,8 @@ If you have extra funds one month and add that to your car savings, the template
 
 **Note**: The date must be in YYYY-MM format.
 
+**Note**: A target without a repeat stops applying after its target month. Budgeting a later month ignores that line, and other templates in the category keep running. If the target month is in the past, you'll see a warning so you can remove the line. Keeping it means you can still re-run templates for earlier months. Any money left over stays in the category until you move it.
+
 #### Repeated savings
 
 The By template can also repeat if your savings is cyclical, such as yearly taxes or insurance.

@@ -762,6 +762,41 @@ export async function sendMessages(messages: Message[]) {
   }
 }
 
+// The server rejects sync requests over 20MB by default, so large
+// uploads are split into batches of roughly this size
+export const SYNC_BATCH_MAX_BYTES = 4 * 1024 * 1024;
+
+// Generous allowance for the timestamp, protobuf framing and encryption
+const SYNC_MESSAGE_OVERHEAD_BYTES = 100;
+
+function estimateMessageSize({ dataset, row, column, value }: Message) {
+  return (
+    Buffer.byteLength(dataset) +
+    Buffer.byteLength(row) +
+    Buffer.byteLength(column) +
+    Buffer.byteLength(String(value ?? '')) +
+    SYNC_MESSAGE_OVERHEAD_BYTES
+  );
+}
+
+// Always returns at least one batch so that a sync with nothing to send
+// still fetches the server's messages. A message over the limit gets a
+// batch of its own.
+function splitIntoSyncBatches(messages: Message[]): Message[][] {
+  const batches: Message[][] = [[]];
+  let size = 0;
+  for (const msg of messages) {
+    const msgSize = estimateMessageSize(msg);
+    if (size > 0 && size + msgSize > SYNC_BATCH_MAX_BYTES) {
+      batches.push([]);
+      size = 0;
+    }
+    batches[batches.length - 1].push(msg);
+    size += msgSize;
+  }
+  return batches;
+}
+
 export function getMessagesSince(since: string): Message[] {
   return db.runQuery(
     'SELECT timestamp, dataset, row, column, value FROM messages_crdt WHERE timestamp > ?',
@@ -969,27 +1004,46 @@ async function _fullSync(
     '(attempt: ' + count + ')',
   );
 
-  const buffer = await encoder.encode(groupId, cloudFileId, since, messages);
+  const batches = splitIntoSyncBatches(messages);
+  const serverMessages = new Map<string, Message>();
+  let serverMerkle;
 
-  // TODO: There a limit on how many messages we can send because of
-  // the payload size. Right now it's at 20MB on the server. We should
-  // check the worst case here and make multiple requests if it's
-  // really large.
-  const resBuffer = await postBinary(
-    getServer().SYNC_SERVER + '/sync',
-    buffer,
-    {
-      'X-ACTUAL-TOKEN': userToken,
-    },
-  );
+  for (const [i, batch] of batches.entries()) {
+    if (batches.length > 1) {
+      logger.info(`Sending sync batch ${i + 1}/${batches.length}`);
+    }
 
-  // Abort if the file is either no longer loaded, the group id has
-  // changed because of a sync reset
-  if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
-    return [];
+    // Later batches only fetch messages newer than the snapshot; older ones
+    // came back with the first batch or are caught by the merkle diff below
+    const buffer = await encoder.encode(
+      groupId,
+      cloudFileId,
+      i === 0 ? since : currentTime,
+      batch,
+    );
+
+    const resBuffer = await postBinary(
+      getServer().SYNC_SERVER + '/sync',
+      buffer,
+      {
+        'X-ACTUAL-TOKEN': userToken,
+      },
+    );
+
+    // Abort if the file is either no longer loaded, the group id has
+    // changed because of a sync reset
+    if (!prefs.getPrefs() || prefs.getPrefs().groupId !== groupId) {
+      return [];
+    }
+
+    const batchRes = await encoder.decode(resBuffer);
+    for (const msg of batchRes.messages) {
+      serverMessages.set(msg.timestamp.toString(), msg);
+    }
+    serverMerkle = batchRes.merkle;
   }
 
-  const res = await encoder.decode(resBuffer);
+  const res = { messages: [...serverMessages.values()], merkle: serverMerkle };
 
   logger.info('Got messages from server', res.messages.length);
 

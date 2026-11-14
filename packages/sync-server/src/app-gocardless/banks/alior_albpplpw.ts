@@ -8,6 +8,10 @@ import Fallback from './integration-bank';
  *
  *   "Transakcja kartą debetową, Example Coffee Bar"
  *
+ * Credit card accounts send the same thing without the card type:
+ *
+ *   "Transakcja kartą, Example Coffee Bar"
+ *
  * Without the merchant, `formatPayeeName` walks its fallback chain down to
  * `debtorName`, which on an outgoing transaction is the account holder. Every
  * card payment then gets booked against the account holder instead of the
@@ -24,7 +28,7 @@ import Fallback from './integration-bank';
  * `remittanceInformationUnstructuredArray` was always a single element equal to
  * `remittanceInformationUnstructured`.
  */
-const CARD_PAYMENT_MERCHANT = /^Transakcja kartą [^,]+,\s*(.+)$/is;
+const CARD_PAYMENT_MERCHANT = /^Transakcja kartą[^,]*,\s*(.+)$/is;
 
 export default {
   ...Fallback,
