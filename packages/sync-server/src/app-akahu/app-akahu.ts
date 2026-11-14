@@ -166,6 +166,9 @@ app.post(
         now.getMonth() + 1,
         1,
       ).toISOString();
+      const startDateObj = new Date(
+        Math.min(getNZStartOfDay(startDate).getTime(), now.getTime()),
+      );
 
       // Fetch all transactions using pagination
       const transactions: Transaction[] = [];
@@ -173,7 +176,7 @@ app.post(
       do {
         const { items, cursor: nextCursor } =
           await akahu.accounts.listTransactions(userToken, accountId, {
-            start: new Date(startDate).toISOString(),
+            start: startDateObj.toISOString(),
             end: endDate,
             cursor,
           });
@@ -216,7 +219,6 @@ app.post(
         });
       }
 
-      const startDateObj = new Date(startDate);
       const all = [];
       const booked = [];
       const pending = [];
@@ -304,6 +306,20 @@ function getRefreshedAccount(
 
     return account;
   });
+}
+
+function getNZStartOfDay(startDate: string): Date {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    return new Date(startDate);
+  }
+  const utcMidnight = new Date(`${startDate}T00:00:00Z`);
+  const nz = new Date(
+    utcMidnight.toLocaleString('en-US', { timeZone: 'Pacific/Auckland' }),
+  );
+  const utc = new Date(
+    utcMidnight.toLocaleString('en-US', { timeZone: 'UTC' }),
+  );
+  return new Date(utcMidnight.getTime() - (nz.getTime() - utc.getTime()));
 }
 
 function getDate(date: Date): string {
