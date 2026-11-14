@@ -657,7 +657,7 @@ function SelectedTransactionsFloatingActionBar({
                     },
                   });
                 } else if (type === 'transfer') {
-                  void onSetTransfer?.(selectedTransactionsArray, payees, ids =>
+                  void onSetTransfer?.(selectedTransactionsArray, ids =>
                     showUndoNotification({
                       message: t(
                         'Successfully marked {{count}} transactions as transfer.',
