@@ -11,7 +11,7 @@ import {
   validateSessionMiddleware,
 } from './util/middlewares';
 import {
-  browserLoginCookie,
+  browserLoginCookieForState,
   readBrowserCookie,
   setBrowserSession,
 } from './util/oauth-browser-session';
@@ -102,10 +102,23 @@ app.post('/config', openIdConfigRateLimiter, async (req, res) => {
 });
 
 app.get('/callback', async (req, res) => {
+  const loginCookie =
+    typeof req.query.state === 'string'
+      ? browserLoginCookieForState(req.query.state)
+      : null;
   const { error, url, browserSessionToken } = await loginWithOpenIdFinalize(
     req.query,
-    readBrowserCookie(req, browserLoginCookie),
+    loginCookie ? readBrowserCookie(req, loginCookie) : undefined,
   );
+
+  if (loginCookie) {
+    res.clearCookie(loginCookie, {
+      path: '/openid/callback',
+      secure: true,
+      httpOnly: true,
+      sameSite: 'lax',
+    });
+  }
 
   if (error) {
     res.status(400).send({ status: 'error', reason: error });
@@ -114,12 +127,6 @@ app.get('/callback', async (req, res) => {
 
   if (browserSessionToken && url?.startsWith('/oauth/authorize?')) {
     setBrowserSession(res, browserSessionToken);
-    res.clearCookie(browserLoginCookie, {
-      path: '/openid/callback',
-      secure: true,
-      httpOnly: true,
-      sameSite: 'lax',
-    });
     res.set('Cache-Control', 'no-store');
     res.set('Referrer-Policy', 'no-referrer');
     res.redirect(url);

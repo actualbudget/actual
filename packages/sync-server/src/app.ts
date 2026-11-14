@@ -181,6 +181,13 @@ app.get('/oauth/authorize', async (req, res, next) => {
   res.sendFile('oauth-consent.html', { root: config.get('webRoot') });
 });
 
+app.get('/oauth-consent.html', (req, res) =>
+  res.redirect(
+    302,
+    `/oauth/authorize${new URL(req.originalUrl, 'https://actual.invalid').search}`,
+  ),
+);
+
 app.use((req, res, next) => {
   res.set('Cross-Origin-Opener-Policy', 'same-origin');
   res.set('Cross-Origin-Embedder-Policy', 'require-corp');

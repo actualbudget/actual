@@ -188,7 +188,7 @@ export async function loginWithOpenIdSetup(
     code_challenge_method: 'S256',
   });
 
-  return { url };
+  return { url, state };
 }
 
 export async function loginWithOpenIdFinalize(body, browserNonce?: string) {

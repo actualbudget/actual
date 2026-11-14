@@ -15,7 +15,7 @@ import {
 import { canAccessActiveFile } from './services/user-service';
 import {
   browserCsrfToken,
-  browserLoginCookie,
+  browserLoginCookieForState,
   getBrowserSession,
   hashBrowserNonce,
   matchesBrowserCsrf,
@@ -107,11 +107,11 @@ app.get('/login', async (req, res) => {
     query,
     nonceHash: hashBrowserNonce(nonce),
   });
-  if (result.error || !result.url) {
+  if (result.error || !result.url || !result.state) {
     res.status(400).send('Unable to sign in with OpenID Connect');
     return;
   }
-  res.cookie(browserLoginCookie, nonce, {
+  res.cookie(browserLoginCookieForState(result.state), nonce, {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',

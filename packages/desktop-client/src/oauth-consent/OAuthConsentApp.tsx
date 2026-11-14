@@ -183,6 +183,10 @@ export function OAuthConsentApp() {
         },
         body: JSON.stringify({ csrfToken, fileId, authorizationQuery }),
       });
+      if (response.status === 401) {
+        redirectTo(`/oauth/browser/login${authorizationQuery}`);
+        return;
+      }
       const result = await readResponse(
         response,
         t('The server returned an invalid response.'),

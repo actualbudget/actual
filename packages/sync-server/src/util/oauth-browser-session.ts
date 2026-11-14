@@ -9,6 +9,10 @@ import { TOKEN_EXPIRATION_NEVER } from './validate-user';
 export const browserSessionCookie = '__Secure-actual-oauth-session';
 export const browserLoginCookie = '__Secure-actual-oauth-login';
 
+export function browserLoginCookieForState(state: string) {
+  return `${browserLoginCookie}-${createHash('sha256').update(state).digest('hex')}`;
+}
+
 export function readBrowserCookie(req: Request, name: string) {
   const values = (req.headers.cookie ?? '')
     .split(';')

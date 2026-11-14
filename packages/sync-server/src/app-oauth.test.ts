@@ -87,11 +87,9 @@ describe('OAuth token endpoints', () => {
     expect(
       db.all('SELECT file_id FROM api_key_budgets WHERE key_id = ?', [keyId]),
     ).toEqual([{ file_id: fileId }]);
-    await exchange().expect(400);
     expect(
       db.first('SELECT id FROM api_keys WHERE id = ?', [keyId]),
-    ).toBeNull();
-
+    ).not.toBeNull();
     await request(app)
       .post('/revoke')
       .type('form')
@@ -101,6 +99,49 @@ describe('OAuth token endpoints', () => {
       db.first('SELECT id FROM api_keys WHERE id = ?', [keyId]),
     ).toBeNull();
     keyId = undefined;
+  });
+
+  it('allows only one concurrent redemption of an authorization code', async () => {
+    const code = randomUUID();
+    db.mutate(
+      `INSERT INTO oauth_authorization_codes
+       (code_hash, client_id, redirect_uri, code_challenge, user_id, file_id, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        createHash('sha256').update(code).digest('hex'),
+        clientId,
+        redirectUri,
+        challenge,
+        userId,
+        fileId,
+        Math.floor(Date.now() / 1000) + 120,
+      ],
+    );
+    const exchange = () =>
+      request(app).post('/token').type('form').send({
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code,
+        code_verifier: verifier,
+      });
+    const responses = await Promise.all([exchange(), exchange()]);
+    expect(responses.map(response => response.status).sort()).toEqual([
+      200, 400,
+    ]);
+    expect(
+      responses.find(response => response.status === 400)?.body,
+    ).toMatchObject({
+      error: 'invalid_grant',
+    });
+    const token = responses.find(response => response.status === 200)?.body
+      .access_token;
+    expect(token).toEqual(expect.stringMatching(/^actual_/));
+    expect(
+      db.first('SELECT id FROM api_keys WHERE key_hash = ?', [
+        createHash('sha256').update(token).digest('hex'),
+      ]),
+    ).toBeNull();
   });
 
   it('requires a configured client secret using HTTP Basic authentication', async () => {

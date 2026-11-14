@@ -141,7 +141,9 @@ describe('OAuth authorization code flow', () => {
     expect(
       db.all('SELECT file_id FROM api_key_budgets WHERE key_id = ?', [key.id]),
     ).toEqual([{ file_id: fileId }]);
-    expect((await exchange()).status).toBe(400);
+    expect(
+      db.first('SELECT id FROM api_keys WHERE id = ?', [key.id]),
+    ).not.toBeNull();
     expect(
       (
         await request(app)
@@ -178,6 +180,29 @@ describe('OAuth authorization code flow', () => {
       .type('form')
       .send({ client_id: clientId, token: 'unknown' })
       .expect(200);
+  });
+
+  it('revokes an issued key when its authorization code is replayed', async () => {
+    const { code } = await authorize();
+    const exchange = () =>
+      request(app).post('/token').type('form').send({
+        grant_type: 'authorization_code',
+        client_id: clientId,
+        redirect_uri: redirectUri,
+        code,
+        code_verifier: verifier,
+      });
+    const token = await exchange().expect(200);
+    const keyHash = createHash('sha256')
+      .update(token.body.access_token)
+      .digest('hex');
+    expect(
+      db.first('SELECT id FROM api_keys WHERE key_hash = ?', [keyHash]),
+    ).not.toBeNull();
+    expect((await exchange().expect(400)).body.error).toBe('invalid_grant');
+    expect(
+      db.first('SELECT id FROM api_keys WHERE key_hash = ?', [keyHash]),
+    ).toBeNull();
   });
 
   it('rejects an unregistered redirect and an incorrect verifier without consuming a valid code', async () => {
