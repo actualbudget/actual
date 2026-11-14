@@ -624,9 +624,10 @@ export type ReconcileTransactionsOptions = MatchTransactionsOptions & {
   isPreview?: boolean;
   defaultCleared?: boolean;
   updateDates?: boolean;
-  // Tag added to the notes of transactions this call creates. Transactions
-  // matched to an existing one never get it, so removing the tag sticks.
-  reviewTag?: string;
+  // Add the unreviewed tag to the notes of transactions this call creates.
+  // Transactions matched to an existing one never get it, so removing the
+  // tag sticks.
+  tagNewForReview?: boolean;
 };
 
 export type ReconcileTransactionsResult = {
@@ -651,7 +652,7 @@ export async function reconcileTransactions(
     updateDates = false,
     reimportDeleted,
     payeeNameNormalization,
-    reviewTag,
+    tagNewForReview = false,
   }: ReconcileTransactionsOptions = {},
 ): Promise<ReconcileTransactionsResult> {
   logger.log('Performing transaction reconciliation');
@@ -773,7 +774,9 @@ export async function reconcileTransactions(
         id: uuidv4(),
         category: trans.category || null,
         cleared: trans.cleared ?? defaultCleared,
-        ...(reviewTag ? { notes: addTag(trans.notes, reviewTag) } : {}),
+        ...(tagNewForReview
+          ? { notes: addTag(trans.notes, UNREVIEWED_TAG) }
+          : {}),
       };
 
       if (subtransactions && subtransactions.length > 0) {
@@ -1123,11 +1126,6 @@ async function processBankSyncDownload(
     true,
   );
 
-  const isReviewTagEnabled = await readBoolPref(
-    'flags.reviewNewTransactions',
-    false,
-  );
-
   const updateDates = await readBoolPref(`sync-update-dates-${id}`, false);
 
   /** Starting balance is actually the current balance of the account. */
@@ -1229,6 +1227,14 @@ async function processBankSyncDownload(
     account: id,
   }));
 
+  // Only reached on later syncs: the initial sync above returns early and
+  // deliberately doesn't tag, since its history backfill isn't "new" to
+  // the user.
+  const tagNewForReview = await readBoolPref(
+    'flags.reviewNewTransactions',
+    false,
+  );
+
   return runMutator(async () => {
     const result = await reconcileTransactions(
       id,
@@ -1237,9 +1243,7 @@ async function processBankSyncDownload(
         isBankSyncAccount: true,
         strictIdChecking: useStrictIdChecking,
         updateDates,
-        // The initial sync backfills history, which isn't "new" to the
-        // user, so only later syncs tag transactions for review.
-        reviewTag: isReviewTagEnabled ? UNREVIEWED_TAG : undefined,
+        tagNewForReview,
       },
     );
 
