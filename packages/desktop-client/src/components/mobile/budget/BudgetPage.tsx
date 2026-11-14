@@ -7,6 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
+import type { GridListItemProps } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -722,7 +723,10 @@ function UncategorizedTransactionsBanner(props) {
   );
 }
 
-function UnreviewedTransactionsBanner(props) {
+function UnreviewedTransactionsBanner(
+  props: Omit<GridListItemProps, 'textValue'>,
+) {
+  const { t } = useTranslation();
   const { count, openUnreviewed } = useUnreviewedTransactions();
 
   if (count === 0) {
@@ -730,7 +734,7 @@ function UnreviewedTransactionsBanner(props) {
   }
 
   return (
-    <GridListItem textValue="Unreviewed transactions banner" {...props}>
+    <GridListItem textValue={t('Unreviewed transactions banner')} {...props}>
       <Banner type="info">
         <View
           style={{
