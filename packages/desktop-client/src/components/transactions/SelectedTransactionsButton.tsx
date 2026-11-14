@@ -14,6 +14,7 @@ import { validForTransfer } from '@actual-app/core/shared/transfer';
 import type { TransactionEntity } from '@actual-app/core/types/models';
 
 import { SelectedItemsButton } from '#components/table';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useSchedules } from '#hooks/useSchedules';
 import { useSelectedItems } from '#hooks/useSelected';
 import { pushModal } from '#modals/modalsSlice';
@@ -35,6 +36,7 @@ type SelectedTransactionsButtonProps = {
       | 'cleared',
     selectedIds: string[],
   ) => void;
+  onToggleReviewed: (selectedIds: string[]) => void;
   onLinkSchedule: (selectedIds: string[]) => void;
   onUnlinkSchedule: (selectedIds: string[]) => void;
   onCreateRule: (selectedIds: string[]) => void;
@@ -56,6 +58,7 @@ export function SelectedTransactionsButton({
   onDuplicate,
   onDelete,
   onEdit,
+  onToggleReviewed,
   onLinkSchedule,
   onUnlinkSchedule,
   onCreateRule,
@@ -69,6 +72,7 @@ export function SelectedTransactionsButton({
 }: SelectedTransactionsButtonProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const isReviewTagEnabled = useFeatureFlag('reviewNewTransactions');
   const selectedItems = useSelectedItems();
   const selectedIds = useMemo(() => [...selectedItems], [selectedItems]);
 
@@ -407,6 +411,9 @@ export function SelectedTransactionsButton({
               { name: 'category', text: t('Category'), key: 'C' } as const,
               { name: 'amount', text: t('Amount'), key: 'M' } as const,
               { name: 'cleared', text: t('Cleared'), key: 'L' } as const,
+              ...(isReviewTagEnabled
+                ? [{ name: 'reviewed', text: t('Reviewed') } as const]
+                : []),
             ]),
       ]}
       onSelect={name => {
@@ -452,6 +459,9 @@ export function SelectedTransactionsButton({
             break;
           case 'set-transfer':
             onSetTransfer(selectedIds);
+            break;
+          case 'reviewed':
+            onToggleReviewed(selectedIds);
             break;
           default:
             // @ts-expect-error fix me

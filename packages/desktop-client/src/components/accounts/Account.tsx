@@ -243,6 +243,9 @@ type AccountInternalProps = {
   expandSplits?: boolean | undefined;
   savedFilters: TransactionFilterEntity[];
   onBatchEdit: ReturnType<typeof useTransactionBatchActions>['onBatchEdit'];
+  onBatchToggleReviewed: ReturnType<
+    typeof useTransactionBatchActions
+  >['onBatchToggleReviewed'];
   onBatchDuplicate: ReturnType<
     typeof useTransactionBatchActions
   >['onBatchDuplicate'];
@@ -1236,6 +1239,13 @@ class AccountInternal extends PureComponent<
     });
   };
 
+  onBatchToggleReviewed = (ids: string[]) => {
+    void this.props.onBatchToggleReviewed({
+      ids,
+      onSuccess: this.refetchTransactions,
+    });
+  };
+
   onBatchDuplicate = (ids: string[]) => {
     void this.props.onBatchDuplicate({
       ids,
@@ -1988,6 +1998,7 @@ class AccountInternal extends PureComponent<
                 onBatchDuplicate={this.onBatchDuplicate}
                 onRunRules={this.onRunRules}
                 onBatchEdit={this.onBatchEdit}
+                onBatchToggleReviewed={this.onBatchToggleReviewed}
                 onBatchLinkSchedule={this.onBatchLinkSchedule}
                 onBatchUnlinkSchedule={this.onBatchUnlinkSchedule}
                 onCreateRule={this.onCreateRule}
@@ -2098,6 +2109,7 @@ type AccountHackProps = Omit<
   | 'dispatch'
   | 'splitsExpandedDispatch'
   | 'onBatchEdit'
+  | 'onBatchToggleReviewed'
   | 'onBatchDuplicate'
   | 'onBatchLinkSchedule'
   | 'onBatchUnlinkSchedule'
@@ -2110,6 +2122,7 @@ function AccountHack(props: AccountHackProps) {
   const dispatch = useDispatch();
   const {
     onBatchEdit,
+    onBatchToggleReviewed,
     onBatchDuplicate,
     onBatchLinkSchedule,
     onBatchUnlinkSchedule,
@@ -2122,6 +2135,7 @@ function AccountHack(props: AccountHackProps) {
       dispatch={dispatch}
       splitsExpandedDispatch={splitsExpandedDispatch}
       onBatchEdit={onBatchEdit}
+      onBatchToggleReviewed={onBatchToggleReviewed}
       onBatchDuplicate={onBatchDuplicate}
       onBatchLinkSchedule={onBatchLinkSchedule}
       onBatchUnlinkSchedule={onBatchUnlinkSchedule}
