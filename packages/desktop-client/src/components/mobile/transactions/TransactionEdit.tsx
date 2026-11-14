@@ -1539,11 +1539,13 @@ const TransactionEditInner = memo<TransactionEditInnerProps>(
                   id="reviewed"
                   isOn={!hasTag(transaction.notes, UNREVIEWED_TAG)}
                   onToggle={isReviewed => {
+                    // The notes input is uncontrolled and may hold text
+                    // that isn't saved yet, so build on what it shows.
+                    const currentNotes =
+                      noteRef.current?.value ?? transaction.notes;
                     const notes = isReviewed
-                      ? removeTag(transaction.notes, UNREVIEWED_TAG)
-                      : addTag(transaction.notes, UNREVIEWED_TAG);
-                    // The notes input is uncontrolled, so show the new
-                    // text there too.
+                      ? removeTag(currentNotes, UNREVIEWED_TAG)
+                      : addTag(currentNotes, UNREVIEWED_TAG);
                     if (noteRef.current) {
                       noteRef.current.value = notes;
                     }
