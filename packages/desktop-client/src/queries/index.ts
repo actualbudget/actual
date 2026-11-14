@@ -7,6 +7,7 @@ import {
 } from '@actual-app/core/shared/months';
 import { q } from '@actual-app/core/shared/query';
 import type { Query } from '@actual-app/core/shared/query';
+import { makeTagAqlRegex, UNREVIEWED_TAG } from '@actual-app/core/shared/tags';
 import {
   amountToInteger,
   currencyToAmount,
@@ -136,6 +137,13 @@ export function transactionsSearch(
           },
       ].filter(Boolean),
     },
+  });
+}
+
+// Only parent transactions carry the tag, so split children never match.
+export function unreviewedTransactions() {
+  return q('transactions').filter({
+    notes: { $regexp: makeTagAqlRegex(UNREVIEWED_TAG) },
   });
 }
 
