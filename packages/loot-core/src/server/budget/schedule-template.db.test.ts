@@ -7,7 +7,7 @@ import {
 } from '#server/schedules/app';
 import { loadRules } from '#server/transactions/transaction-rules';
 import * as monthUtils from '#shared/months';
-import type { CategoryEntity } from '#types/models';
+import type { CategoryEntity, RuleConditionEntity } from '#types/models';
 
 import { runScheduleForecast } from './schedule-template';
 
@@ -93,25 +93,26 @@ async function setUpYearlyBill() {
     cat_group: group,
   });
   const category = { id: categoryId, name: 'Insurance' } as CategoryEntity;
+  const conditions = [
+    { op: 'is', field: 'account', value: account },
+    { op: 'is', field: 'amount', value: -10000 },
+    {
+      op: 'is',
+      field: 'date',
+      value: {
+        start: '2026-11-11',
+        frequency: 'yearly',
+        interval: 1,
+        patterns: [],
+        skipWeekend: false,
+        weekendSolveMode: 'after',
+        endMode: 'never',
+      },
+    },
+  ] satisfies RuleConditionEntity[];
   const scheduleId = await createSchedule({
     schedule: { name: 'Insurance' },
-    conditions: [
-      { op: 'is', field: 'account', value: account },
-      { op: 'is', field: 'amount', value: -10000 },
-      {
-        op: 'is',
-        field: 'date',
-        value: {
-          start: '2026-11-11',
-          frequency: 'yearly',
-          interval: 1,
-          patterns: [],
-          skipWeekend: false,
-          weekendSolveMode: 'after',
-          endMode: 'never',
-        },
-      },
-    ],
+    conditions,
   });
   const template = {
     type: 'schedule',
@@ -120,7 +121,7 @@ async function setUpYearlyBill() {
     priority: 0,
     directive: 'template',
   } as const;
-  return { account, category, template, scheduleId };
+  return { account, category, template, scheduleId, conditions };
 }
 
 async function setUpOneTimeBills() {
@@ -642,6 +643,92 @@ describe('runScheduleForecast against a real database', () => {
     );
 
     expect(result.to_budget).toBe(770);
+  });
+
+  describe('when an edit moves next_date past an unpaid occurrence', () => {
+    // Nov 12, budgeting November. The yearly $100 bill due Nov 11 is unpaid.
+    // Changing the schedule's account or date moves next_date on from today
+    // to Nov 11, 2027, but the bill is still due, as it is without the edit.
+    async function forecastBeforeAndAfter(
+      edit: (
+        conditions: RuleConditionEntity[],
+      ) => Promise<RuleConditionEntity[]> | RuleConditionEntity[],
+    ) {
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-05');
+      const { category, template, scheduleId, conditions } =
+        await setUpYearlyBill();
+      vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-12');
+      const unedited = await runScheduleForecast(
+        [template],
+        '2026-11',
+        0,
+        0,
+        category,
+      );
+
+      const newConditions = await edit(conditions);
+      // A reset computes next_date from the clock rather than currentDay().
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2026, 10, 12, 12));
+      try {
+        await updateSchedule({
+          schedule: { id: scheduleId },
+          conditions: newConditions,
+        });
+      } finally {
+        vi.useRealTimers();
+      }
+
+      const edited = await runScheduleForecast(
+        [template],
+        '2026-11',
+        0,
+        0,
+        category,
+      );
+      return { unedited, edited };
+    }
+
+    it('still budgets it after an account change', async () => {
+      const { unedited, edited } = await forecastBeforeAndAfter(
+        async conditions => {
+          const savings = await db.insertAccount({
+            name: 'Savings',
+            offbudget: 0,
+            closed: 0,
+          });
+          return conditions.map(c =>
+            c.field === 'account' ? { ...c, value: savings } : c,
+          );
+        },
+      );
+
+      expect(edited.to_budget).toBe(unedited.to_budget);
+    });
+
+    it('still budgets it after a date change', async () => {
+      // Same yearly dates, from an earlier start.
+      const { unedited, edited } = await forecastBeforeAndAfter(conditions =>
+        conditions.map(c =>
+          c.field === 'date'
+            ? {
+                ...c,
+                value: {
+                  start: '2025-11-11',
+                  frequency: 'yearly',
+                  interval: 1,
+                  patterns: [],
+                  skipWeekend: false,
+                  weekendSolveMode: 'after',
+                  endMode: 'never',
+                },
+              }
+            : c,
+        ),
+      );
+
+      expect(edited.to_budget).toBe(unedited.to_budget);
+    });
   });
 
   it('does not budget an occurrence due today that was paid early by hand and skipped', async () => {
