@@ -10,6 +10,7 @@ import { useAccount } from '#hooks/useAccount';
 import { useAccounts } from '#hooks/useAccounts';
 import { useNotes } from '#hooks/useNotes';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+import { useUndo } from '#hooks/useUndo';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 
 type AccountMenuModalProps = Extract<
@@ -28,7 +29,10 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
-  const moveAccountItem = useMoveAccountMenuItem(account);
+  const { showUndoNotification } = useUndo();
+  const moveAccountItem = useMoveAccountMenuItem(account, () => {
+    showUndoNotification({ message: t('Account moved') });
+  });
   const { data: accounts = [] } = useAccounts();
   const notes = useNotes(`account-${accountId}`);
   const [showBalances, setShowBalances] = useSyncedPref(
