@@ -331,6 +331,9 @@ class AccountInternal extends PureComponent<
   _isOptimisticUpdate: boolean = false;
   // A transaction to bring into view once the account is loaded
   pendingFocusId: TransactionEntity['id'] | null = null;
+  // Counts applyFilters calls, so a call that is still waiting on the
+  // backend can tell a newer call has replaced its filters.
+  filtersRequestId = 0;
 
   constructor(props: AccountInternalProps) {
     super(props);
@@ -1707,6 +1710,7 @@ class AccountInternal extends PureComponent<
   };
 
   applyFilters = async (conditions: ConditionEntity[]) => {
+    const requestId = ++this.filtersRequestId;
     if (conditions.length > 0) {
       const filteredCustomQueryFilters: Partial<RuleConditionEntity>[] =
         conditions.filter(cond => !isTransactionFilterEntity(cond));
@@ -1721,6 +1725,10 @@ class AccountInternal extends PureComponent<
           ),
         },
       );
+      // Filters applied or cleared while this request was pending win.
+      if (requestId !== this.filtersRequestId) {
+        return;
+      }
       const conditionsOpKey =
         this.state.filterConditionsOp === 'or' ? '$or' : '$and';
       this.currentQuery = this.rootQuery.filter({
