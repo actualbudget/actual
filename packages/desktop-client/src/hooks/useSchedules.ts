@@ -160,7 +160,15 @@ export function getSchedulesQuery(
       $and: [{ '_account.closed': false }],
     });
 
-  if (view) {
+  if (!view) {
+    query = query.filter({
+      '_account.hidden': false,
+      $or: {
+        '_payee.transfer_acct.hidden': false,
+        '_payee.transfer_acct': null,
+      },
+    });
+  } else {
     if (view === 'uncategorized') {
       query = query.filter({ next_date: null });
     } else {

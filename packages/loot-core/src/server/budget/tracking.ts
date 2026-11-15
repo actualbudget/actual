@@ -135,9 +135,9 @@ export function createSummary(groups, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'real-saved', {
     initialValue: 0,
-    dependencies: ['total-income', 'total-spent'],
-    run: (income, spent) => {
-      return safeNumber(income - -spent);
+    dependencies: ['total-income', 'total-spent', 'hidden-account-transfers'],
+    run: (income, spent, hiddenAccountTransfers) => {
+      return safeNumber(income + spent + number(hiddenAccountTransfers));
     },
   });
 }

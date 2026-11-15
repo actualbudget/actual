@@ -72,6 +72,14 @@ export function AccountRow({
         text: t('Rename'),
         onClick: () => setIsEditing(true),
       },
+      {
+        name: 'account-visibility',
+        text: account.isHidden ? t('Show account') : t('Hide account'),
+        onClick: () =>
+          updateAccount.mutate({
+            account: { id: account.id, isHidden: !account.isHidden },
+          }),
+      },
       isClosed
         ? {
             name: 'account-reopen',
@@ -142,6 +150,7 @@ export function AccountRow({
             ? theme.sidebarItemBackgroundSelected
             : theme.sidebarItemBackgroundHover,
         },
+        opacity: account.isHidden ? 0.55 : undefined,
         '&[data-dragging]': { opacity: 0.5 },
       })}
     >

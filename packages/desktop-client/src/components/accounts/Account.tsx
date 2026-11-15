@@ -92,6 +92,7 @@ import { pagedQuery } from '#queries/pagedQuery';
 import type { PagedQuery } from '#queries/pagedQuery';
 import { useDispatch, useSelector } from '#redux';
 import type { AppDispatch } from '#redux/store';
+import { allAccountBalance } from '#spreadsheet/bindings';
 import { updateNewTransactions } from '#transactions/transactionsSlice';
 
 import { AccountEmptyMessage } from './AccountEmptyMessage';
@@ -264,7 +265,9 @@ type AccountInternalProps = {
   dispatch: AppDispatch;
   onSetTransfer: ReturnType<typeof useTransactionBatchActions>['onSetTransfer'];
   onReopenAccount: (id: AccountEntity['id']) => void;
-  onUpdateAccount: (account: AccountEntity) => void;
+  onUpdateAccount: (
+    account: Pick<AccountEntity, 'id'> & Partial<AccountEntity>,
+  ) => void;
   onUnlinkAccount: (id: AccountEntity['id']) => void;
   onSyncAndDownload: (accountId?: AccountEntity['id']) => void;
   onCreatePayee: (name: PayeeEntity['name']) => Promise<PayeeEntity['id']>;
@@ -434,9 +437,28 @@ class AccountInternal extends PureComponent<
       }, 100);
     }
 
-    //Resest sort/filter/search on account change
-    if (this.props.accountId !== prevProps.accountId) {
+    // Reset sort/filter/search on account change.
+    const { accountId, accounts } = this.props;
+    if (accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    } else if (
+      accounts !== prevProps.accounts &&
+      !accounts.some(account => account.id === accountId)
+    ) {
+      // The paged query skips local transaction updates because they are
+      // optimistic. Account visibility changes also affect aggregate results.
+      const previouslyHidden = new Set(
+        prevProps.accounts
+          .filter(account => account.isHidden)
+          .map(account => account.id),
+      );
+      if (
+        accounts.some(
+          account => !!account.isHidden !== previouslyHidden.has(account.id),
+        )
+      ) {
+        void this.refetchTransactions();
+      }
     }
   }
 
@@ -480,7 +502,13 @@ class AccountInternal extends PureComponent<
   };
 
   makeRootTransactionsQuery = () => {
-    const accountId = this.props.accountId;
+    const { accountId, categoryId } = this.props;
+    if (categoryId && !accountId) {
+      return q('transactions').options({ splits: 'grouped' }).filter({
+        'account.offbudget': false,
+        'account.hidden': false,
+      });
+    }
 
     return queries.transactions(accountId);
   };
@@ -872,7 +900,7 @@ class AccountInternal extends PureComponent<
       if (!account) {
         throw new Error(`Account with ID ${this.props.accountId} not found.`);
       }
-      this.props.onUpdateAccount({ ...account, name });
+      this.props.onUpdateAccount({ id: account.id, name });
       this.setState({ nameError: '' });
     }
   };
@@ -1111,7 +1139,10 @@ class AccountInternal extends PureComponent<
   getBalanceQuery(id?: string) {
     return {
       name: `balance-query-${id}`,
-      query: this.makeRootTransactionsQuery().calculate({ $sum: '$amount' }),
+      query:
+        id || this.props.categoryId
+          ? this.makeRootTransactionsQuery().calculate({ $sum: '$amount' })
+          : allAccountBalance().query,
     } as const;
   }
 
@@ -1178,7 +1209,10 @@ class AccountInternal extends PureComponent<
     );
 
     const lastReconciled = new Date().getTime().toString();
-    this.props.onUpdateAccount({ ...account, last_reconciled: lastReconciled });
+    this.props.onUpdateAccount({
+      id: account.id,
+      last_reconciled: lastReconciled,
+    });
 
     this.setState(state => ({
       reconcileAmount: null,
@@ -2172,7 +2206,7 @@ export function Account() {
   const onReopenAccount = (id: AccountEntity['id']) => reopenAccount({ id });
 
   const { mutate: updateAccount } = useUpdateAccountMutation();
-  const onUpdateAccount = (account: AccountEntity) =>
+  const onUpdateAccount: AccountInternalProps['onUpdateAccount'] = account =>
     updateAccount({ account });
 
   const { mutate: unlinkAccount } = useUnlinkAccountMutation();

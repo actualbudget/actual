@@ -77,13 +77,20 @@ function execTransactions(
 
 function _isUnhappy(filter) {
   // These fields can be filtered - all split transactions will
-  // still be returned regardless
+  // still be returned regardless. The hidden transfer filter applies to the
+  // whole split, so it also works when only the parent is tested.
   for (const key of Object.keys(filter)) {
     if (key === '$or' || key === '$and') {
       if (filter[key] && _isUnhappy(filter[key])) {
         return true;
       }
-    } else if (!(key.indexOf('account') === 0 || key === 'date')) {
+    } else if (
+      !(
+        key.indexOf('account') === 0 ||
+        key === 'date' ||
+        key === '_has_hidden_transfer'
+      )
+    ) {
       return true;
     }
   }

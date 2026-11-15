@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { useUpdateAccountMutation } from '#accounts';
 import { MobileSheet } from '#components/mobile/MobileSheet';
 import { MobileSheetNotes } from '#components/mobile/MobileSheetNotes';
 import { MobileSheetRow } from '#components/mobile/MobileSheetRow';
@@ -27,6 +28,7 @@ export function AccountMenuModal({
 }: AccountMenuModalProps) {
   const { t } = useTranslation();
   const account = useAccount(accountId);
+  const updateAccount = useUpdateAccountMutation();
   const { data: accounts = [] } = useAccounts();
   const notes = useNotes(`account-${accountId}`);
   const [showBalances, setShowBalances] = useSyncedPref(
@@ -92,6 +94,14 @@ export function AccountMenuModal({
               onPress={() => {
                 setHideReconciled(hideReconciled === 'true' ? 'false' : 'true');
               }}
+            />
+            <MobileSheetRow
+              label={account.isHidden ? t('Show account') : t('Hide account')}
+              onPress={() =>
+                updateAccount.mutate({
+                  account: { id: account.id, isHidden: !account.isHidden },
+                })
+              }
             />
             {account.closed ? (
               <MobileSheetRow

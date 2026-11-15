@@ -97,15 +97,20 @@ async function updateAccount({
   name,
   last_reconciled,
   account_group_id,
+  isHidden,
 }: Pick<AccountEntity, 'id'> &
   Partial<
-    Pick<AccountEntity, 'name' | 'last_reconciled' | 'account_group_id'>
+    Pick<
+      AccountEntity,
+      'name' | 'last_reconciled' | 'account_group_id' | 'isHidden'
+    >
   >) {
   await db.update('accounts', {
     id,
     ...(name !== undefined && { name }),
     ...(last_reconciled && { last_reconciled }),
     ...(account_group_id !== undefined && { account_group_id }),
+    ...(isHidden !== undefined && { hidden: isHidden ? 1 : 0 }),
   });
   return {};
 }
@@ -118,6 +123,7 @@ async function getAccounts(): Promise<AccountEntity[]> {
         id: dbAccount.id,
         name: dbAccount.name,
         offbudget: dbAccount.offbudget,
+        isHidden: dbAccount.hidden === 1,
         closed: dbAccount.closed,
         sort_order: dbAccount.sort_order,
         last_reconciled: dbAccount.last_reconciled ?? null,

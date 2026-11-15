@@ -104,7 +104,7 @@ function AccountHeader({ account }: { readonly account: AccountEntity }) {
 
   const onSave = useCallback(
     (account: AccountEntity) => {
-      updateAccount({ account });
+      updateAccount({ account: { id: account.id, name: account.name } });
     },
     [updateAccount],
   );

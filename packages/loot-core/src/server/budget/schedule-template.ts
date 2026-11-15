@@ -402,6 +402,7 @@ export async function buildMonthlyOutflow(
           category: category.id,
           schedule: { $oneof: completedEntries.map(entry => entry.scheduleId) },
           'account.offbudget': false,
+          'account.hidden': false,
           ...(earliestNextDate ? { date: { $gt: earliestNextDate } } : {}),
         })
         .select(['date', 'schedule']),
@@ -436,6 +437,7 @@ export async function buildMonthlyOutflow(
       .filter({
         schedule: { $oneof: reservedEntries.map(entry => entry.scheduleId) },
         'account.offbudget': false,
+        'account.hidden': false,
         date: [
           {
             $gte: `${monthUtils.subMonths(windowStart, LINKED_PAYMENT_SEARCH_MONTHS)}-01`,
@@ -474,6 +476,7 @@ export async function buildMonthlyOutflow(
         .filter({
           category: category.id,
           'account.offbudget': false,
+          'account.hidden': false,
           date: [{ $gte: windowStart }, { $lt: postedEnd }],
         })
         .select(['amount', 'date', 'schedule']),
@@ -609,6 +612,7 @@ export async function buildMonthlyOutflow(
         category: category.id,
         schedule: null,
         'account.offbudget': false,
+        'account.hidden': false,
         date: [{ $gte: unlinkedStart }, { $lt: windowEnd }],
       })
       .select(['amount', 'date']),

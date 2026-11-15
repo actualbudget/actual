@@ -112,6 +112,7 @@ export function useTransactions({
       const tables = event.tables;
       if (
         tables.includes('transactions') ||
+        tables.includes('accounts') ||
         tables.includes('category_mapping') ||
         tables.includes('payee_mapping')
       ) {

@@ -53,7 +53,7 @@ export function accountBalanceUncleared(accountId: AccountEntity['id']) {
 export function allAccountBalance() {
   return {
     query: q('transactions')
-      .filter({ 'account.closed': false })
+      .filter({ 'account.closed': false, 'account.hidden': false })
       .calculate({ $sum: '$amount' }),
     name: 'accounts-balance',
   } satisfies Binding<'account', 'accounts-balance'>;
@@ -63,7 +63,11 @@ export function onBudgetAccountBalance() {
   return {
     name: `onbudget-accounts-balance`,
     query: q('transactions')
-      .filter({ 'account.offbudget': false, 'account.closed': false })
+      .filter({
+        'account.offbudget': false,
+        'account.closed': false,
+        'account.hidden': false,
+      })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'onbudget-accounts-balance'>;
 }
@@ -72,7 +76,11 @@ export function offBudgetAccountBalance() {
   return {
     name: `offbudget-accounts-balance`,
     query: q('transactions')
-      .filter({ 'account.offbudget': true, 'account.closed': false })
+      .filter({
+        'account.offbudget': true,
+        'account.closed': false,
+        'account.hidden': false,
+      })
       .calculate({ $sum: '$amount' }),
   } satisfies Binding<'account', 'offbudget-accounts-balance'>;
 }
@@ -95,6 +103,7 @@ export function accountGroupBalance(
     query: q('transactions')
       .filter({
         'account.account_group_id': groupId,
+        'account.hidden': false,
         'account.offbudget': offbudget,
         'account.closed': false,
       })
@@ -112,6 +121,8 @@ export function categoryBalance(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.hidden': false,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
       })
       .options({ splits: 'inline' })
@@ -128,6 +139,8 @@ export function categoryBalanceCleared(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.hidden': false,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
         cleared: true,
       })
@@ -145,6 +158,8 @@ export function categoryBalanceUncleared(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.hidden': false,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
         cleared: false,
       })
@@ -169,6 +184,7 @@ export function uncategorizedCount<SheetName extends SheetNames>() {
 
 export const envelopeBudget = {
   incomeAvailable: 'available-funds',
+  hiddenAccountTransfers: 'hidden-account-transfers',
   lastMonthOverspent: 'last-month-overspent',
   forNextMonth: 'buffered-selected',
   totalBudgeted: 'total-budgeted',

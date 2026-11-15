@@ -443,7 +443,8 @@ export async function getCategoryWeeklyAverage({
        LEFT JOIN accounts a ON a.id = t.account
       WHERE t.category = ?
         AND t.date <= ?
-        AND a.offbudget = 0`,
+        AND a.offbudget = 0
+        AND a.hidden = 0`,
     [categoryId, db.toDateRepr(fullWindow.end)],
   );
   const window = trimWeeklyAverageWindow(
@@ -463,7 +464,8 @@ export async function getCategoryWeeklyAverage({
       WHERE t.category = ?
         AND t.date >= ?
         AND t.date <= ?
-        AND a.offbudget = 0`,
+        AND a.offbudget = 0
+        AND a.hidden = 0`,
     [categoryId, db.toDateRepr(window.start), db.toDateRepr(window.end)],
   );
 
@@ -531,6 +533,7 @@ async function getFirstActivityMonth({
           WHERE t.category = ?
             AND CAST(t.date / 100 AS INTEGER) <= ?
             AND a.offbudget = 0
+            AND a.hidden = 0
        )`,
     [categoryId, endDbMonth, categoryId, endDbMonth],
   );

@@ -5,6 +5,7 @@ export type AccountEntity = {
   id: string;
   name: string;
   offbudget: 0 | 1;
+  isHidden?: boolean;
   closed: 0 | 1;
   sort_order: number;
   last_reconciled: string | null;

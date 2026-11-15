@@ -79,6 +79,134 @@ test.describe('Accounts', () => {
     await expect(menu.getByRole('button', { name: 'Rename' })).toBeVisible();
   });
 
+  test('hides and restores an account in the budget and All Accounts', async () => {
+    const accountName = 'Temporary checking';
+    const transactionNote = 'Hide account test';
+    const sidebarAccount = page.getByRole('link', {
+      name: /^Temporary checking/,
+    });
+    const budgetTotals = page.getByTestId('budget-totals');
+    const monthSpending = (month: string) =>
+      budgetTotals.getByTestId(`budget${month}!total-spent`);
+    async function spentInCents(month: string) {
+      const amount = await monthSpending(month).innerText();
+      return Math.round(Number(amount.replace(/[,$]/g, '')) * 100);
+    }
+    async function selectBudgetMonth(month: '201701' | '201612') {
+      await page.getByTitle('Today', { exact: true }).click();
+      await expect(monthSpending('201701')).toBeVisible();
+      if (month === '201612') {
+        await page.getByTitle('Previous month', { exact: true }).click();
+        await expect(monthSpending(month)).toBeVisible();
+      }
+    }
+    async function showAllAccountTransactions() {
+      const allAccounts = await navigation.goToAccountPage('All accounts');
+      await allAccounts.waitFor();
+      await allAccounts.filterByNote(transactionNote);
+      return allAccounts.transactionTableRow;
+    }
+
+    // Playwright's current month is January 2017.
+    const januarySpending = await spentInCents('201701');
+    await selectBudgetMonth('201612');
+    const decemberSpending = await spentInCents('201612');
+
+    accountPage = await navigation.createAccount({
+      name: accountName,
+      offBudget: false,
+      balance: 100,
+    });
+    const fileChooserPromise = page.waitForEvent('filechooser');
+    await page.getByRole('button', { name: 'Import', exact: true }).click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles({
+      name: 'account-spending.qif',
+      mimeType: 'application/qif',
+      buffer: Buffer.from(
+        '!Type:Bank\n' +
+          `D12/15/2016\nPDecember groceries\nM${transactionNote}\nT-9.40\nLUsual Expenses:Food\n^\n` +
+          `D1/1/2017\nPJanuary groceries\nM${transactionNote}\nT-16.60\nLUsual Expenses:Food\n^\n`,
+      ),
+    });
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: 'Import 2 transactions' }).click();
+    await expect(dialog).not.toBeVisible();
+    await accountPage.createSingleTransaction({
+      payee: 'Ally Savings',
+      notes: transactionNote,
+      debit: '12.34',
+    });
+
+    const allAccountTransactions = await showAllAccountTransactions();
+    await expect(allAccountTransactions).toHaveCount(4);
+    await expect(
+      allAccountTransactions.getByTestId('transfer-icon'),
+    ).toHaveCount(2);
+
+    await navigation.goToBudgetPage();
+    await selectBudgetMonth('201701');
+    await expect
+      .poll(() => spentInCents('201701'))
+      .toBe(januarySpending - 1660);
+    await selectBudgetMonth('201612');
+    await expect
+      .poll(() => spentInCents('201612'))
+      .toBe(decemberSpending - 940);
+
+    await expect(await showAllAccountTransactions()).toHaveCount(4);
+    await navigation.rightClickAccount(accountName);
+    const hideAccount = page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Hide account', exact: true });
+    await expect(hideAccount).toBeVisible();
+    await hideAccount.click();
+    await expect(sidebarAccount).toHaveCSS('opacity', '0.55');
+    await expect(
+      page.getByText('No transactions', { exact: true }),
+    ).toBeVisible();
+
+    await navigation.goToBudgetPage();
+    await selectBudgetMonth('201612');
+    await expect.poll(() => spentInCents('201612')).toBe(decemberSpending);
+    await selectBudgetMonth('201701');
+    await expect.poll(() => spentInCents('201701')).toBe(januarySpending);
+
+    const visibleRegister = await navigation.goToAccountPage('Ally Savings');
+    await visibleRegister.waitFor();
+    await visibleRegister.filterByNote(transactionNote);
+    await expect(visibleRegister.transactionTableRow).toHaveCount(1);
+    await expect(
+      visibleRegister.transactionTableRow.getByTestId('transfer-icon'),
+    ).toBeVisible();
+
+    accountPage = await navigation.goToAccountPage(accountName);
+    await page.reload();
+    await expect(sidebarAccount).toHaveCSS('opacity', '0.55');
+    await expect(accountPage.transactionTableRow).toHaveCount(4);
+    await expect(
+      accountPage.transactionTableRow.getByTestId('transfer-icon'),
+    ).toHaveCount(1);
+
+    await navigation.rightClickAccount(accountName);
+    await page
+      .getByRole('menu')
+      .getByRole('button', { name: 'Show account', exact: true })
+      .click();
+    await expect(sidebarAccount).toHaveCSS('opacity', '1');
+    await expect(await showAllAccountTransactions()).toHaveCount(4);
+
+    await navigation.goToBudgetPage();
+    await selectBudgetMonth('201701');
+    await expect
+      .poll(() => spentInCents('201701'))
+      .toBe(januarySpending - 1660);
+    await selectBudgetMonth('201612');
+    await expect
+      .poll(() => spentInCents('201612'))
+      .toBe(decemberSpending - 940);
+  });
+
   test('right clicking a transaction row opens context menu', async () => {
     accountPage = await navigation.createAccount({
       name: 'New Account',

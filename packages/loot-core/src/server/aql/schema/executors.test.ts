@@ -364,6 +364,69 @@ describe('transaction executors', () => {
     });
   }, 20_000);
 
+  it('hides a whole split and its opposite transfer leg when an account is hidden', async () => {
+    const checking = await db.insertAccount({ name: 'Checking' });
+    const savings = await db.insertAccount({ name: 'Savings' });
+    const date = '2025-01-01';
+
+    await insertTransactions([
+      { id: 'ordinary', account: checking, date, amount: -200 },
+      { id: 'split', account: checking, date, amount: -3000, is_parent: true },
+      {
+        id: 'child-transfer',
+        account: checking,
+        date,
+        amount: -2500,
+        is_child: true,
+        parent_id: 'split',
+        transfer_id: 'opposite-transfer',
+      },
+      {
+        id: 'child-expense',
+        account: checking,
+        date,
+        amount: -500,
+        is_child: true,
+        parent_id: 'split',
+      },
+      {
+        id: 'opposite-transfer',
+        account: savings,
+        date,
+        amount: 2500,
+        transfer_id: 'child-transfer',
+      },
+    ]);
+
+    const query = q('transactions')
+      .filter({
+        _has_hidden_transfer: false,
+        $or: { 'account.hidden': false, account: null },
+      })
+      .options({ splits: 'grouped' })
+      .select('*')
+      .serialize();
+    expect(isHappyPathQuery(query)).toBe(true);
+
+    await db.update('accounts', { id: savings, hidden: 1 });
+    const { data: hidden } = await aqlQuery(query);
+    expect(hidden.map(row => row.id)).toEqual(['ordinary']);
+
+    await db.update('accounts', { id: savings, hidden: 0 });
+    const { data: shown } = await aqlQuery(query);
+    expect(shown.map(row => row.id).sort()).toEqual([
+      'opposite-transfer',
+      'ordinary',
+      'split',
+    ]);
+    expect(
+      shown
+        .find(row => row.id === 'split')
+        .subtransactions.map(row => row.id)
+        .sort(),
+    ).toEqual(['child-expense', 'child-transfer']);
+  });
+
   it(`queries the correct transactions with a filter`, async () => {
     return runTest(arr => {
       const expectedIds = new Set();

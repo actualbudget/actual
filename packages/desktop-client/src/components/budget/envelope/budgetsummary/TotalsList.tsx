@@ -80,6 +80,19 @@ export function TotalsList({ prevMonthName, style }: TotalsListProps) {
                   />
                 }
               />
+              <EnvelopeCellValue
+                binding={envelopeBudget.hiddenAccountTransfers}
+                type="financial"
+              >
+                {props =>
+                  props.value ? (
+                    <AlignedText
+                      left={<Trans>Transfers with hidden accounts</Trans>}
+                      right={<CellValueText {...props} />}
+                    />
+                  ) : null
+                }
+              </EnvelopeCellValue>
               <AlignedText
                 left="From Last Month:"
                 right={

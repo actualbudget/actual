@@ -34,6 +34,7 @@ export type Spreadsheets = {
 
     // Envelope budget fields
     'available-funds': number;
+    'hidden-account-transfers': number;
     'last-month-overspent': number;
     buffered: number;
     'buffered-auto': number;

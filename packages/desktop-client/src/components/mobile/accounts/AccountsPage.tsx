@@ -165,6 +165,7 @@ function AccountListItem({
             border: 'none',
             borderRadius: 0,
             paddingLeft: 8,
+            opacity: account.isHidden ? 0.55 : undefined,
           }}
           data-testid="account-list-item"
           onPress={() => onSelect(account)}

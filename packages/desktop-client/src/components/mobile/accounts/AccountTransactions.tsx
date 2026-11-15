@@ -238,7 +238,7 @@ function TransactionListWithPreviews({
 
     updateAccount({
       account: {
-        ...account,
+        id: account.id,
         last_reconciled: new Date().getTime().toString(),
       },
     });

@@ -32,6 +32,7 @@ export function accountFilter(
         $and: [
           { [`${field}.offbudget`]: false },
           { [`${field}.closed`]: false },
+          { [`${field}.hidden`]: false },
         ],
       };
     } else if (accountId === 'offbudget') {
@@ -39,6 +40,7 @@ export function accountFilter(
         $and: [
           { [`${field}.offbudget`]: true },
           { [`${field}.closed`]: false },
+          { [`${field}.hidden`]: false },
         ],
       };
     } else if (accountId === 'closed') {
@@ -46,6 +48,7 @@ export function accountFilter(
     } else if (accountId === 'uncategorized') {
       return {
         [`${field}.offbudget`]: false,
+        [`${field}.hidden`]: false,
         category: null,
         is_parent: false,
         $or: [
@@ -76,6 +79,11 @@ export function transactions(
   const filter = accountFilter(accountId);
   if (filter) {
     query = query.filter(filter);
+  } else {
+    query = query.filter({
+      _has_hidden_transfer: false,
+      $or: { 'account.hidden': false, account: null },
+    });
   }
 
   return query;
@@ -142,6 +150,7 @@ export function transactionsSearch(
 export function uncategorizedTransactions() {
   return q('transactions').filter({
     'account.offbudget': false,
+    'account.hidden': false,
     category: null,
     $or: [
       {

@@ -4,7 +4,7 @@ import * as sheet from '#server/sheet';
 import * as monthUtils from '#shared/months';
 
 import { setBudget, setCategoryCarryover } from './actions';
-import { createAllBudgets, getBudgetRange } from './base';
+import { createAllBudgets, createBudget, getBudgetRange } from './base';
 
 beforeEach(() => {
   return global.emptyDatabase()();
@@ -31,6 +31,186 @@ describe('getBudgetRange', () => {
 });
 
 describe('Base budget', () => {
+  describe.each(['envelope', 'tracking'] as const)(
+    'hidden accounts (%s)',
+    budgetType => {
+      it('restores historical income and both directions of transfers when showing an account', async () => {
+        const january = 'budget202501';
+        const february = 'budget202502';
+        const summary = budgetType === 'envelope' ? 'to-budget' : 'real-saved';
+        const incomeGroup = await db.insertCategoryGroup({
+          name: 'Income',
+          is_income: 1,
+        });
+        const income = await db.insertCategory({
+          name: 'Starting Balance',
+          cat_group: incomeGroup,
+          is_income: 1,
+        });
+        const visible = await db.insertAccount({ name: 'Checking' });
+        const hidden = await db.insertAccount({ name: 'Savings' });
+        await db.insertTransaction({
+          date: '2025-01-01',
+          account: visible,
+          amount: 100000,
+          category: income,
+        });
+        await db.insertTransaction({
+          date: '2025-01-01',
+          account: hidden,
+          amount: 50000,
+          category: income,
+        });
+
+        async function addTransfer(
+          from: string,
+          to: string,
+          amount: number,
+          sentOn: string,
+          receivedOn: string,
+        ) {
+          const sent = await db.insertTransaction({
+            date: sentOn,
+            account: from,
+            amount: -amount,
+          });
+          const received = await db.insertTransaction({
+            date: receivedOn,
+            account: to,
+            amount,
+            transfer_id: sent,
+          });
+          await db.updateTransaction({ id: sent, transfer_id: received });
+          return { sent, received };
+        }
+
+        // Banks can post the two sides of a transfer on different dates.
+        const outgoing = await addTransfer(
+          visible,
+          hidden,
+          20000,
+          '2025-01-31',
+          '2025-02-01',
+        );
+        await addTransfer(hidden, visible, 5000, '2025-02-07', '2025-02-08');
+        const offBudget = await db.insertAccount({
+          name: 'Brokerage',
+          offbudget: 1,
+          hidden: 1,
+        });
+        // Hiding an already off-budget account does not change how an
+        // uncategorized transfer to it was treated before the hide.
+        await addTransfer(visible, offBudget, 1000, '2025-01-20', '2025-01-20');
+
+        async function loadBudget() {
+          await sheet.loadSpreadsheet(db);
+          sheet.get().meta().budgetType = budgetType;
+          await createBudget(['2025-01', '2025-02']);
+          await sheet.waitOnSpreadsheet();
+        }
+
+        await loadBudget();
+        expect(sheet.getCellValue(january, summary)).toBe(150000);
+        expect(sheet.getCellValue(february, summary)).toBe(
+          budgetType === 'envelope' ? 150000 : 0,
+        );
+
+        await db.update('accounts', { id: hidden, hidden: 1 });
+        await sheet.waitOnSpreadsheet();
+        expect(sheet.getCellValue(january, 'total-income')).toBe(100000);
+        expect(sheet.getCellValue(january, summary)).toBe(80000);
+        expect(sheet.getCellValue(february, summary)).toBe(
+          budgetType === 'envelope' ? 85000 : 5000,
+        );
+
+        sheet.unloadSpreadsheet();
+        await loadBudget();
+        expect(sheet.getCellValue(january, summary)).toBe(80000);
+
+        // Sync can deliver changes to the two legs separately.
+        await db.update('transactions', {
+          id: outgoing.received,
+          tombstone: 1,
+        });
+        await sheet.waitOnSpreadsheet();
+        expect(sheet.getCellValue(january, summary)).toBe(100000);
+        await db.update('transactions', {
+          id: outgoing.received,
+          tombstone: 0,
+        });
+        await sheet.waitOnSpreadsheet();
+        expect(sheet.getCellValue(january, summary)).toBe(80000);
+
+        // A transfer between two hidden accounts is outside the budget.
+        await db.update('accounts', { id: visible, hidden: 1 });
+        await sheet.waitOnSpreadsheet();
+        expect(sheet.getCellValue(january, summary)).toBe(0);
+        expect(sheet.getCellValue(february, summary)).toBe(0);
+        await db.update('accounts', { id: visible, hidden: 0 });
+
+        await db.update('accounts', { id: hidden, hidden: 0 });
+        await sheet.waitOnSpreadsheet();
+        expect(sheet.getCellValue(january, summary)).toBe(150000);
+        expect(sheet.getCellValue(february, summary)).toBe(
+          budgetType === 'envelope' ? 150000 : 0,
+        );
+        expect(await db.getTransaction(outgoing.sent)).toMatchObject({
+          transfer_id: outgoing.received,
+          category: null,
+        });
+      });
+    },
+  );
+
+  it('updates the visible transfer total when a hidden split parent is deleted', async () => {
+    const incomeGroup = await db.insertCategoryGroup({
+      name: 'Income',
+      is_income: 1,
+    });
+    const income = await db.insertCategory({
+      name: 'Starting Balance',
+      cat_group: incomeGroup,
+      is_income: 1,
+    });
+    const visible = await db.insertAccount({ name: 'Checking' });
+    const hidden = await db.insertAccount({ name: 'Savings', hidden: 1 });
+    await db.insertTransaction({
+      date: '2025-01-15',
+      account: visible,
+      amount: 100000,
+      category: income,
+    });
+    const parent = await db.insertTransaction({
+      date: '2025-02-01',
+      account: hidden,
+      amount: 20000,
+      is_parent: true,
+    });
+    const sent = await db.insertTransaction({
+      date: '2025-01-31',
+      account: visible,
+      amount: -20000,
+    });
+    const received = await db.insertTransaction({
+      date: '2025-02-01',
+      account: hidden,
+      amount: 20000,
+      is_child: true,
+      parent_id: parent,
+      transfer_id: sent,
+    });
+    await db.updateTransaction({ id: sent, transfer_id: received });
+
+    await sheet.loadSpreadsheet(db);
+    await createBudget(['2025-01', '2025-02']);
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue('budget202501', 'to-budget')).toBe(80000);
+
+    await db.update('transactions', { id: parent, tombstone: 1 });
+    await sheet.waitOnSpreadsheet();
+    expect(sheet.getCellValue('budget202501', 'to-budget')).toBe(100000);
+  });
+
   describe.each(['tracking', 'envelope'] as const)(
     'automatic range (%s)',
     budgetType => {

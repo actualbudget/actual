@@ -48,6 +48,7 @@ export const schema = {
     imported_payee: f('string'),
     starting_balance_flag: f('boolean'),
     transfer_id: f('id'),
+    _has_hidden_transfer: f('boolean'),
     sort_order: f('float', { default: () => Date.now() }),
     cleared: f('boolean', { default: true }),
     reconciled: f('boolean', { default: false }),
@@ -69,6 +70,7 @@ export const schema = {
     id: f('id'),
     name: f('string', { required: true }),
     offbudget: f('boolean'),
+    hidden: f('boolean', { default: false }),
     closed: f('boolean'),
     sort_order: f('float'),
     tombstone: f('boolean'),
@@ -392,6 +394,24 @@ export const schemaConfig: SchemaConfig = {
           category: `CASE WHEN _.isParent = 1 THEN NULL ELSE cm.transferId END`,
           amount: `IFNULL(_.amount, 0)`,
           parent_id: 'CASE WHEN _.isChild = 0 THEN NULL ELSE _.parent_id END',
+          // When a split contains a transfer to a hidden account, keep the
+          // entire split out of the aggregate register so it stays intact.
+          _has_hidden_transfer: `
+            EXISTS (SELECT 1 FROM accounts WHERE hidden = 1 AND tombstone = 0)
+            AND EXISTS (
+              SELECT 1
+              FROM transactions leg
+              JOIN transactions other
+                ON other.id = leg.transferred_id AND other.transferred_id = leg.id
+              JOIN accounts a ON a.id = other.acct
+              WHERE (leg.id = CASE WHEN _.isChild = 1 THEN _.parent_id ELSE _.id END OR (
+                leg.isChild = 1 AND leg.parent_id =
+                  CASE WHEN _.isChild = 1 THEN _.parent_id ELSE _.id END
+              ))
+                AND IFNULL(leg.tombstone, 0) = 0 AND IFNULL(other.tombstone, 0) = 0
+                AND a.hidden = 1 AND a.tombstone = 0
+            )
+          `,
         });
 
         return `

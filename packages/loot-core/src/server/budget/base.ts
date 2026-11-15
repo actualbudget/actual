@@ -119,6 +119,7 @@ function getSumAmountsByMonth(
       WHERE t.date >= ${rangeStart} AND t.date <= ${rangeEnd}
         AND t.category IS NOT NULL
         AND a.offbudget = 0
+        AND a.hidden = 0
       GROUP BY t.category, t.date / 100`,
     [],
     true,
@@ -179,7 +180,7 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
         `SELECT SUM(amount) as amount FROM v_transactions_internal_alive t
            LEFT JOIN accounts a ON a.id = t.account
          WHERE t.date >= ${start} AND t.date <= ${end}
-           AND category = '${cat.id}' AND a.offbudget = 0`,
+           AND category = '${cat.id}' AND a.offbudget = 0 AND a.hidden = 0`,
         [],
         true,
       );
@@ -196,12 +197,61 @@ export function createCategory(cat, sheetName, prevSheetName, start, end) {
   }
 }
 
+function createHiddenAccountTransferTotal(
+  sheetName: string,
+  start: number,
+  end: number,
+) {
+  sheet.get().createDynamic(sheetName, 'hidden-account-transfers', {
+    initialValue: 0,
+    run: () => {
+      // These two legs were an internal transfer in the unfiltered budget.
+      // Include only the visible leg so the amount leaving or entering the
+      // budget counts without changing either leg or assigning a category.
+      const [result] = db.runQuery<{ amount: number | null }>(
+        `SELECT SUM(t.amount) AS amount
+           FROM v_transactions_internal_alive t
+           JOIN accounts a ON a.id = t.account
+           JOIN v_transactions_internal_alive other
+             ON other.id = t.transfer_id AND other.transfer_id = t.id
+           JOIN accounts destination ON destination.id = other.account
+          WHERE EXISTS (
+              SELECT 1 FROM accounts
+               WHERE hidden = 1 AND offbudget = 0 AND tombstone = 0
+            )
+            AND t.date BETWEEN ? AND ?
+            AND t.is_parent = 0 AND other.is_parent = 0
+            AND t.category IS NULL
+            AND a.offbudget = 0 AND a.hidden = 0
+            AND destination.offbudget = 0 AND destination.hidden = 1
+            AND destination.tombstone = 0`,
+        [start, end],
+        true,
+      );
+      return result?.amount ?? 0;
+    },
+  });
+}
+
+function recomputeHiddenAccountTransferTotal(month: string) {
+  sheet
+    .get()
+    .recompute(
+      resolveName(monthUtils.sheetForMonth(month), 'hidden-account-transfers'),
+    );
+}
+
 function handleAccountChange(months, oldValue, newValue) {
-  if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
+  if (
+    !oldValue ||
+    oldValue.offbudget !== newValue.offbudget ||
+    oldValue.tombstone !== newValue.tombstone ||
+    oldValue.hidden !== newValue.hidden
+  ) {
     const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
       `
-        SELECT DISTINCT(category) as category FROM transactions
-        WHERE acct = ?
+        SELECT DISTINCT category FROM v_transactions_internal_alive
+        WHERE account = ? AND category IS NOT NULL
       `,
       [newValue.id],
       true,
@@ -209,6 +259,7 @@ function handleAccountChange(months, oldValue, newValue) {
 
     months.forEach(month => {
       const sheetName = monthUtils.sheetForMonth(month);
+      recomputeHiddenAccountTransferTotal(month);
 
       rows.forEach(row => {
         sheet
@@ -216,6 +267,70 @@ function handleAccountChange(months, oldValue, newValue) {
           .recompute(resolveName(sheetName, 'sum-amount-' + row.category));
       });
     });
+  }
+}
+
+function handleTransferChange(
+  transaction: db.DbTransaction,
+  changedFields: Set<string>,
+  months: Set<string>,
+) {
+  if (!transaction.transferred_id && !transaction.isParent) {
+    return;
+  }
+
+  const relationshipChanged = [
+    'date',
+    'acct',
+    'tombstone',
+    'transferred_id',
+    'isParent',
+    'isChild',
+    'parent_id',
+  ].some(field => changedFields.has(field));
+
+  function addMonth(date?: db.DbTransaction['date']) {
+    if (date) {
+      months.add(monthUtils.monthFromDate(db.fromDateRepr(date)));
+    }
+  }
+
+  if (transaction.transferred_id) {
+    if (
+      relationshipChanged ||
+      changedFields.has('amount') ||
+      changedFields.has('category')
+    ) {
+      addMonth(transaction.date);
+    }
+    if (relationshipChanged) {
+      // The linked leg's own date can be in a different month.
+      const linked = db.firstSync<Pick<db.DbTransaction, 'date'>>(
+        'SELECT date FROM transactions WHERE id = ?',
+        [transaction.transferred_id],
+      );
+      addMonth(linked?.date);
+    }
+  }
+
+  if (transaction.isParent && changedFields.has('tombstone')) {
+    // A child and its transfer can be affected even when only its parent
+    // changes, since the transaction view excludes children of dead parents.
+    const dates = db.runQuery<{
+      date: db.DbTransaction['date'];
+      otherDate: db.DbTransaction['date'];
+    }>(
+      `SELECT child.date, other.date AS otherDate
+         FROM transactions child
+         JOIN transactions other ON other.id = child.transferred_id
+        WHERE child.parent_id = ?`,
+      [transaction.id],
+      true,
+    );
+    for (const { date, otherDate } of dates) {
+      addMonth(date);
+      addMonth(otherDate);
+    }
   }
 }
 
@@ -284,6 +399,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
   // belong in the sheet. Go by the stored pref, which decides the table the
   // budget actions save to.
   const budgetTable = budgetActions.getBudgetTable();
+  const transferMonths = new Set<string>();
   sheet.startTransaction();
 
   try {
@@ -306,8 +422,10 @@ export function triggerBudgetChanges(oldValues, newValues) {
 
           if (oldValue) {
             handleTransactionChange(oldValue, changed);
+            handleTransferChange(oldValue, changed, transferMonths);
           }
           handleTransactionChange(newValue, changed);
+          handleTransferChange(newValue, changed, transferMonths);
         } else if (table === 'category_mapping') {
           handleCategoryMappingChange(createdMonths, oldValue, newValue);
         } else if (table === 'categories') {
@@ -343,6 +461,7 @@ export function triggerBudgetChanges(oldValues, newValues) {
         }
       });
     });
+    transferMonths.forEach(recomputeHiddenAccountTransferTotal);
   } finally {
     sheet.endTransaction();
   }
@@ -433,6 +552,8 @@ export async function createBudget(months) {
         trackingBudget.createCategoryGroup(group, sheetName);
       }
     });
+
+    createHiddenAccountTransferTotal(sheetName, start, end);
 
     if (budgetType === 'envelope') {
       envelopeBudget.createSummary(

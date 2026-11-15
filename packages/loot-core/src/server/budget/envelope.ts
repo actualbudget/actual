@@ -121,9 +121,15 @@ export function createSummary(groups, categories, prevSheetName, sheetName) {
 
   sheet.get().createDynamic(sheetName, 'available-funds', {
     initialValue: 0,
-    dependencies: ['total-income', 'from-last-month'],
-    run: (income, fromLastMonth) =>
-      safeNumber(number(income) + number(fromLastMonth)),
+    dependencies: [
+      'total-income',
+      'from-last-month',
+      'hidden-account-transfers',
+    ],
+    run: (income, fromLastMonth, hiddenAccountTransfers) =>
+      safeNumber(
+        number(income) + number(fromLastMonth) + number(hiddenAccountTransfers),
+      ),
   });
 
   sheet.get().createDynamic(sheetName, 'last-month-overspent', {

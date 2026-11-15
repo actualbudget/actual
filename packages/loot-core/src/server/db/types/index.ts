@@ -9,6 +9,7 @@ export type DbAccount = {
   id: string;
   name: string;
   offbudget: 1 | 0;
+  hidden?: 1 | 0;
   closed: 1 | 0;
   tombstone: 1 | 0;
   sort_order: number;

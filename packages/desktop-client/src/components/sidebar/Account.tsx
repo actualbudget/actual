@@ -141,6 +141,14 @@ export function Account<FieldName extends SheetFields<'account'>>({
         text: t('Rename'),
         onClick: () => setIsEditing(true),
       },
+      account && {
+        name: 'account-visibility',
+        text: account.isHidden ? t('Show account') : t('Hide account'),
+        onClick: () =>
+          updateAccount.mutate({
+            account: { id: account.id, isHidden: !account.isHidden },
+          }),
+      },
       account?.closed
         ? {
             name: 'account-reopen',
@@ -171,6 +179,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
               ...style,
               position: 'relative',
               borderLeft: '4px solid transparent',
+              opacity: account?.isHidden ? 0.55 : undefined,
               ...(updated && {
                 fontWeight: 700,
                 color: theme.sidebarItemTextUpdated,
@@ -242,7 +251,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
                         if (newAccountName.trim() !== '') {
                           updateAccount.mutate({
                             account: {
-                              ...account,
+                              id: account.id,
                               name: newAccountName,
                             },
                           });
