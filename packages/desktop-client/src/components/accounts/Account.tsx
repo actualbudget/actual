@@ -449,10 +449,15 @@ class AccountInternal extends PureComponent<
       // A drill-down (e.g. the title bar's unreviewed link) can navigate here
       // with new filters while this view is already open. The constructor
       // only reads the filters it mounts with, so apply these ones now.
+      // Clear any search too: applyFilters doesn't reapply it, and the
+      // drill-down should show everything its filters match.
       const conditions = [...this.props.filterConditions];
-      this.setState({ filterId: undefined, filterConditionsOp: 'and' }, () => {
-        void this.applyFilters(conditions);
-      });
+      this.setState(
+        { filterId: undefined, filterConditionsOp: 'and', search: '' },
+        () => {
+          void this.applyFilters(conditions);
+        },
+      );
     }
   }
 
