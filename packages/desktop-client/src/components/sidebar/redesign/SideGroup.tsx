@@ -1,9 +1,10 @@
 import { useRef } from 'react';
-import { useDrop } from 'react-aria';
+import { useButton, useDrop } from 'react-aria';
 import { isTextDropItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
+import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { radius, spacing } from '@actual-app/components/tokens';
@@ -55,10 +56,11 @@ export function SideGroup({
 }: SideGroupProps) {
   const { t } = useTranslation();
   const moveAccount = useMoveAccountMutation();
-  const headingRef = useRef<HTMLDivElement>(null);
+  const dropButtonRef = useRef<HTMLButtonElement>(null);
   const oppositeAccountType = accountDragType(side === 'on' ? 'off' : 'on');
-  const { dropProps, isDropTarget } = useDrop({
-    ref: headingRef,
+  const { dropProps, dropButtonProps, isDropTarget } = useDrop({
+    ref: dropButtonRef,
+    hasDropButton: true,
     isDisabled: isDragDisabled,
     getDropOperation: types =>
       types.has(oppositeAccountType) ? 'move' : 'cancel',
@@ -70,12 +72,19 @@ export function SideGroup({
       }
     },
   });
+  const { buttonProps } = useButton(
+    {
+      ...dropButtonProps,
+      'aria-label': t('Drop account in {{section}}', { section: label }),
+      excludeFromTabOrder: true,
+    },
+    dropButtonRef,
+  );
 
   return (
     <View style={{ marginTop: spacing.xxs }}>
       <View
         {...dropProps}
-        ref={headingRef}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -90,6 +99,13 @@ export function SideGroup({
           }),
         }}
       >
+        {!isDragDisabled && (
+          <button
+            {...buttonProps}
+            ref={dropButtonRef}
+            style={styles.visuallyHidden}
+          />
+        )}
         <Button
           variant="bare"
           aria-expanded={isOpen}
