@@ -81,6 +81,48 @@ async function setUpRent(start = '2024-01-25') {
   return { account, category, payRent, template, scheduleId };
 }
 
+async function setUpYearlyBill() {
+  const account = await db.insertAccount({
+    name: 'Checking',
+    offbudget: 0,
+    closed: 0,
+  });
+  const group = await db.insertCategoryGroup({ name: 'Bills' });
+  const categoryId = await db.insertCategory({
+    name: 'Insurance',
+    cat_group: group,
+  });
+  const category = { id: categoryId, name: 'Insurance' } as CategoryEntity;
+  const scheduleId = await createSchedule({
+    schedule: { name: 'Insurance' },
+    conditions: [
+      { op: 'is', field: 'account', value: account },
+      { op: 'is', field: 'amount', value: -10000 },
+      {
+        op: 'is',
+        field: 'date',
+        value: {
+          start: '2026-11-11',
+          frequency: 'yearly',
+          interval: 1,
+          patterns: [],
+          skipWeekend: false,
+          weekendSolveMode: 'after',
+          endMode: 'never',
+        },
+      },
+    ],
+  });
+  const template = {
+    type: 'schedule',
+    name: 'Insurance',
+    scheduleId,
+    priority: 0,
+    directive: 'template',
+  } as const;
+  return { account, category, template, scheduleId };
+}
+
 async function setUpOneTimeBills() {
   const account = await db.insertAccount({
     name: 'Checking',
@@ -527,11 +569,12 @@ describe('runScheduleForecast against a real database', () => {
     // linked, so the schedule moved on to Nov 22, but the payment hasn't
     // been categorized yet. The $100 carried into November still has to
     // pay it, so November needs its own $100.
-    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-26');
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-20');
     const { category, payRent, template, scheduleId } =
       await setUpRent('2026-10-22');
     await payRent('2026-10-22', null);
     await setNextDate({ id: scheduleId, advance: true });
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-26');
 
     const result = await runScheduleForecast(
       [template],
@@ -560,6 +603,50 @@ describe('runScheduleForecast against a real database', () => {
     );
 
     expect(result.to_budget).toBe(0);
+  });
+
+  it('does not budget a skipped occurrence later this month', async () => {
+    // Nov 5, budgeting November. The yearly $100 bill due Nov 11 was
+    // skipped, so the schedule moved on to Nov 11, 2027. Nothing is due
+    // this month; next year's bill is saved over the 13 months up to it.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-05');
+    const { category, template, scheduleId } = await setUpYearlyBill();
+    await setNextDate({ id: scheduleId, advance: true });
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      0,
+      0,
+      category,
+    );
+
+    expect(result.to_budget).toBe(770);
+  });
+
+  it('does not budget an occurrence due today that was paid early by hand and skipped', async () => {
+    // Nov 11, budgeting November. The yearly $100 bill due today was paid
+    // on Oct 31 without linking the payment, then skipped, so the schedule
+    // moved on to Nov 11, 2027. The payment already came out of October.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-11');
+    const { account, category, template, scheduleId } = await setUpYearlyBill();
+    await db.insertTransaction({
+      account,
+      amount: -10000,
+      date: '2026-10-31',
+      category: category.id,
+    });
+    await setNextDate({ id: scheduleId, advance: true });
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      0,
+      0,
+      category,
+    );
+
+    expect(result.to_budget).toBe(770);
   });
 
   it('reserves a bill that has not posted yet this month when budgeting ahead', async () => {

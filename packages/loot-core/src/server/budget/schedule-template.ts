@@ -548,13 +548,53 @@ export async function buildMonthlyOutflow(
     }
   }
 
+  // next_date only moves past an occurrence due today or later when that
+  // occurrence was skipped, or when a payment linked to it was posted
+  // early. So such an occurrence before next_date with no linked payment
+  // anywhere was skipped, and nothing is due for it.
+  const skippingEntries = smoothEntries.filter(
+    entry => entry.storedNextDate && entry.storedNextDate > today,
+  );
+  let linkedAnywhere: PostedTransaction[] = [];
+  if (skippingEntries.length > 0) {
+    ({ data: linkedAnywhere } = await aqlQuery(
+      q('transactions')
+        .filter({
+          schedule: {
+            $oneof: skippingEntries.map(entry => entry.scheduleId),
+          },
+          date: { $gte: linkedSearchStart(today) },
+        })
+        .select(['date', 'schedule']),
+    ));
+  }
+  const skippedOccurrences = (
+    entry: ScheduleTemplateTarget,
+    occurrencesBetween: OccurrencesBetween,
+  ) => {
+    if (!skippingEntries.includes(entry)) return new Set<string>();
+    const paid = settledOccurrences(
+      entry,
+      linkedAnywhere,
+      today,
+      entry.storedNextDate,
+      occurrencesBetween,
+    );
+    return new Set(
+      occurrencesBetween(today, entry.storedNextDate).filter(
+        date => !paid.has(date),
+      ),
+    );
+  };
+
   let dueByToday = 0;
   for (const entry of smoothEntries) {
     const occurrencesBetween = lookups.get(entry);
+    const skipped = skippedOccurrences(entry, occurrencesBetween);
     const occurrences = withinCutoff(
       entry,
       occurrencesBetween(windowStart, windowEnd),
-    );
+    ).filter(date => !skipped.has(date));
     const settledEarly = settledOccurrences(
       entry,
       linkedBeforeWindow,
