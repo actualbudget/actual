@@ -94,8 +94,10 @@ export function removeTag(notes: string | null | undefined, tag: string) {
         return before;
       }
       // The tag was written right after other text (`receipt#tag more`),
-      // so the space after it is the only separator left.
-      return offset > 0 ? after : '';
+      // so the space after it is the only separator left. At the start of
+      // the notes or of a line there is nothing to separate.
+      const previous = notes[offset - 1];
+      return previous !== undefined && !/\s/.test(previous) ? after : '';
     },
   );
   return cleaned.trim() === '' ? '' : cleaned;

@@ -96,6 +96,11 @@ describe('removeTag whitespace handling', () => {
     );
   });
 
+  test('does not leave a space at the start of a line', () => {
+    expect(removeTag('a\n#unreviewed b', 'unreviewed')).toBe('a\nb');
+    expect(removeTag('#unreviewed b', 'unreviewed')).toBe('b');
+  });
+
   test('undoes addTag', () => {
     const notes = 'a  b\tc';
     expect(removeTag(addTag(notes, 'unreviewed'), 'unreviewed')).toBe(notes);
