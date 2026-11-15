@@ -13,6 +13,7 @@ import { getLatestAppVersion, sync } from '#app/appSlice';
 import { ProtectedRoute } from '#auth/ProtectedRoute';
 import { Permissions } from '#auth/types';
 import { useAutomaticBankSync } from '#hooks/useAutomaticBankSync';
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useGlobalPref } from '#hooks/useGlobalPref';
 import { useLocalPref } from '#hooks/useLocalPref';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
@@ -117,6 +118,7 @@ export function FinancesApp() {
   );
 
   const multiuserEnabled = useMultiuserEnabled();
+  const isSimpleMobileNavbar = useFeatureFlag('simpleMobileNavbar');
 
   useAutomaticBankSync();
   useNewsNotification();
@@ -592,19 +594,35 @@ export function FinancesApp() {
                   </Routes>
                 </View>
 
-                <Routes>
-                  <Route path="/budget" element={<MobileNavTabs />} />
-                  <Route path="/accounts" element={<MobileNavTabs />} />
-                  <Route path="/settings/*" element={<MobileNavTabs />} />
-                  <Route path="/notifications" element={<MobileNavTabs />} />
-                  <Route path="/reports" element={<MobileNavTabs />} />
-                  <Route
-                    path="/reports/:dashboardId"
-                    element={<MobileNavTabs />}
-                  />
-                  <Route path="/schedules" element={<MobileNavTabs />} />
-                  <Route path="*" element={null} />
-                </Routes>
+                {isSimpleMobileNavbar ? (
+                  <Routes>
+                    {/* Full-screen edit forms have their own bottom action bar */}
+                    <Route path="/transactions/:id" element={null} />
+                    <Route path="/schedules/:id" element={null} />
+                    <Route path="/payees/:id" element={null} />
+                    <Route path="/rules/:id" element={null} />
+                    <Route path="/tags/:id" element={null} />
+                    <Route
+                      path="/bank-sync/account/:accountId/edit"
+                      element={null}
+                    />
+                    <Route path="*" element={<MobileNavTabs />} />
+                  </Routes>
+                ) : (
+                  <Routes>
+                    <Route path="/budget" element={<MobileNavTabs />} />
+                    <Route path="/accounts" element={<MobileNavTabs />} />
+                    <Route path="/settings/*" element={<MobileNavTabs />} />
+                    <Route path="/notifications" element={<MobileNavTabs />} />
+                    <Route path="/reports" element={<MobileNavTabs />} />
+                    <Route
+                      path="/reports/:dashboardId"
+                      element={<MobileNavTabs />}
+                    />
+                    <Route path="/schedules" element={<MobileNavTabs />} />
+                    <Route path="*" element={null} />
+                  </Routes>
+                )}
               </MobilePageHeaderProvider>
             </ScrollProvider>
           </View>

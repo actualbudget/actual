@@ -40,6 +40,7 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { FloatingActionBar } from '#components/mobile/FloatingActionBar';
+import { useFixedMobileNavHeight } from '#components/mobile/MobileNavTabs';
 import { useAccounts } from '#hooks/useAccounts';
 import { useCategoriesById } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
@@ -104,6 +105,7 @@ export function TransactionList({
   isReconciling = false,
   onToggleTransactionCleared,
 }: TransactionListProps) {
+  const navHeight = useFixedMobileNavHeight();
   const locale = useLocale();
   const { t } = useTranslation();
   const sections = useMemo(() => {
@@ -160,7 +162,14 @@ export function TransactionList({
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingBottom: navHeight
+          ? `calc(${navHeight}px + env(safe-area-inset-bottom))`
+          : undefined,
+      }}
+    >
       {isLoading && (
         <Loading
           style={{ flex: 'none', paddingBottom: 8 }}
