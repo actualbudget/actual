@@ -616,13 +616,16 @@ function ReviewedCell({
           ...(isHidden && { visibility: 'hidden' }),
         }}
         disabled={isHidden}
+        // CellButton keeps its custom keyboard and focus handling, which a
+        // native checkbox input would replace.
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+        role="checkbox"
+        aria-label={t('Reviewed')}
+        aria-checked={isReviewed}
         onEdit={() => onEdit(id, 'reviewed')}
         onSelect={() => onUpdate('notes', setReviewed(notes, !isReviewed))}
       >
-        <View
-          aria-label={isReviewed ? t('Reviewed') : t('Not reviewed')}
-          title={isReviewed ? t('Reviewed') : t('Not reviewed')}
-        >
+        <View title={isReviewed ? t('Reviewed') : t('Not reviewed')}>
           {isReviewed ? (
             <SvgViewShow
               style={{ width: 13, height: 13, color: theme.pageTextSubdued }}
