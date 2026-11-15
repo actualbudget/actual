@@ -48,6 +48,12 @@ If you select the Off budget checkbox then change the account type, the Off budg
 
 You can now see the account in the sidebar of Actual
 
+## Moving an Account On or Off Budget
+
+Right-click an open account in the sidebar and choose **Move to on budget** or **Move to off budget**. You can also drag the account to the destination section or beside another account there.
+
+Moving an account changes how its transactions count in past and current budget months. Review any uncategorized transactions or transfers after the move. Use **Undo** to reverse the move and restore any transfer categories it cleared.
+
 ## Closing or deleting an account
 
 1. Navigate to the account by clicking on it in the sidebar

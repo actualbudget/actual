@@ -776,11 +776,21 @@ export async function moveAccount(
   id: DbAccount['id'],
   targetId: DbAccount['id'] | null,
   accountGroupId?: DbAccountGroup['id'] | null,
+  offBudget?: boolean,
 ) {
   const account = await first<DbAccount>(
-    'SELECT * FROM accounts WHERE id = ?',
+    'SELECT * FROM accounts WHERE id = ? AND tombstone = 0',
     [id],
   );
+  if (!account) {
+    throw new Error('Account not found');
+  }
+  const wasOffBudget = account.offbudget === 1;
+  const destinationOffBudget = offBudget ?? wasOffBudget;
+  if (account.closed && destinationOffBudget !== wasOffBudget) {
+    throw new Error('A closed account cannot change budget sides');
+  }
+
   let accounts;
   if (account.closed) {
     accounts = await all<Pick<DbAccount, 'id' | 'sort_order'>>(
@@ -789,7 +799,7 @@ export async function moveAccount(
   } else {
     accounts = await all<Pick<DbAccount, 'id' | 'sort_order'>>(
       `SELECT id, sort_order FROM accounts WHERE tombstone = 0 AND offbudget = ? ORDER BY sort_order, name`,
-      [account.offbudget ? 1 : 0],
+      [destinationOffBudget ? 1 : 0],
     );
   }
 
@@ -801,11 +811,15 @@ export async function moveAccount(
     void update('accounts', {
       id,
       sort_order,
+      ...(destinationOffBudget !== wasOffBudget && {
+        offbudget: destinationOffBudget ? 1 : 0,
+      }),
       ...(accountGroupId !== undefined && {
         account_group_id: accountGroupId,
       }),
     });
   });
+  return wasOffBudget;
 }
 
 export function getAccountGroups() {

@@ -32,6 +32,8 @@ export function AccountsSection() {
   };
 
   const visibleTree = filterSidebarTree(tree, trimmedQuery);
+  const hasOpenAccounts =
+    tree.onBudget.accountCount + tree.offBudget.accountCount > 0;
 
   const showSyncDot = [
     ...tree.onBudget.buckets.map(b => b.accounts).flat(),
@@ -62,7 +64,7 @@ export function AccountsSection() {
             onClose={onToggleSearch}
           />
         )}
-        {tree.onBudget.buckets.length > 0 && (
+        {hasOpenAccounts && (
           <SideGroup
             label={t('On budget')}
             side="on"
@@ -77,7 +79,7 @@ export function AccountsSection() {
             onToggleBucket={bucket => collapse.toggle(bucketKey('on', bucket))}
           />
         )}
-        {tree.offBudget.buckets.length > 0 && (
+        {hasOpenAccounts && (
           <SideGroup
             label={t('Off budget')}
             side="off"

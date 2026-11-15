@@ -101,7 +101,7 @@ describe('sidebar Account context menu', () => {
     expect(contextMenuItemNames()).toEqual([]);
   });
 
-  it('opens rename/close on an account row', async () => {
+  it('opens rename, move, and close on an account row', async () => {
     const account = generateAccount('Bank of America');
 
     await renderRow(
@@ -116,6 +116,10 @@ describe('sidebar Account context menu', () => {
     fireEvent.contextMenu(screen.getByText('Bank of America'));
 
     expect(store.getState().contextMenu.isOpen).toBe(true);
-    expect(contextMenuItemNames()).toEqual(['account-rename', 'account-close']);
+    expect(contextMenuItemNames()).toEqual([
+      'account-rename',
+      'account-move-budget',
+      'account-close',
+    ]);
   });
 });

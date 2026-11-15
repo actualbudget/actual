@@ -200,8 +200,8 @@ function handleAccountChange(months, oldValue, newValue) {
   if (!oldValue || oldValue.offbudget !== newValue.offbudget) {
     const rows = db.runQuery<Pick<db.DbTransaction, 'category'>>(
       `
-        SELECT DISTINCT(category) as category FROM transactions
-        WHERE acct = ?
+        SELECT DISTINCT category FROM v_transactions_internal_alive
+        WHERE account = ? AND category IS NOT NULL
       `,
       [newValue.id],
       true,

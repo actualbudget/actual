@@ -693,3 +693,87 @@ test.describe('Accounts', () => {
     });
   });
 });
+
+test('moves an existing account between budget sections by dragging and from the sidebar menu', async ({
+  page,
+}) => {
+  const configurationPage = new ConfigurationPage(page);
+  const navigation = new Navigation(page);
+  await page.goto('/');
+  await configurationPage.startFresh();
+
+  await navigation.createAccount({
+    name: 'On budget anchor',
+    offBudget: false,
+    balance: 25,
+  });
+  // Open the next add-account form from a page without an active register.
+  await navigation.goToBudgetPage();
+  const accountName = 'Savings to move';
+  const accountPage = await navigation.createAccount({
+    name: accountName,
+    offBudget: false,
+    balance: 100,
+  });
+  await expect(accountPage.accountName).toHaveText(accountName);
+  const accountUrl = page.url();
+  const account = page.getByRole('link', {
+    name: new RegExp(`^${accountName}`),
+  });
+
+  async function dragAccountTo(target: Locator) {
+    // An empty destination is only shown while a drag is active.
+    const source = await account.boundingBox();
+    if (!source) {
+      throw new Error('Could not locate the account to drag');
+    }
+    const x = source.x + source.width / 2;
+    const y = source.y + source.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    try {
+      await page.mouse.move(x + 20, y, { steps: 5 });
+      await expect(target).toBeVisible();
+      const destination = await target.boundingBox();
+      if (!destination) {
+        throw new Error('Could not locate the account drop target');
+      }
+      const targetY = destination.y + destination.height / 4;
+      // Move within the row so Chromium emits dragover after reaching it.
+      await page.mouse.move(destination.x + 25, targetY, { steps: 10 });
+      await page.mouse.move(destination.x + 65, targetY, { steps: 10 });
+    } finally {
+      await page.mouse.up();
+    }
+  }
+
+  await dragAccountTo(page.getByRole('link', { name: /^Off budget/ }));
+  await expect(accountPage.sidebarOffBudgetBalance).toHaveText('100.00');
+  await expect(accountPage.sidebarOnBudgetBalance).toHaveText('25.00');
+
+  await dragAccountTo(page.getByRole('link', { name: /^On budget anchor/ }));
+  await expect(accountPage.sidebarOnBudgetBalance).toHaveText('125.00');
+
+  async function moveAccountFromMenu(section: 'on' | 'off') {
+    await navigation.rightClickAccount(accountName);
+    await page
+      .getByRole('menu')
+      .getByRole('button', { name: `Move to ${section} budget`, exact: true })
+      .click();
+  }
+
+  await moveAccountFromMenu('off');
+  await expect(accountPage.sidebarOffBudgetBalance).toHaveText('100.00');
+  await expect(accountPage.sidebarOnBudgetBalance).toHaveText('25.00');
+  await expect(accountPage.sidebarAllAccountsBalance).toHaveText('125.00');
+
+  await page.reload();
+  await expect(accountPage.sidebarOffBudgetBalance).toHaveText('100.00');
+  await moveAccountFromMenu('on');
+  await expect(accountPage.sidebarOnBudgetBalance).toHaveText('125.00');
+  await expect(page).toHaveURL(accountUrl);
+  await expect(accountPage.transactionTableRow).toHaveCount(1);
+  const { credit, payee } = accountPage.getNthTransaction(0);
+  await expect(credit).toHaveText('100.00');
+  await expect(payee).toHaveText('Starting Balance');
+});

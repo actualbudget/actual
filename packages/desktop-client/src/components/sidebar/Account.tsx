@@ -20,7 +20,11 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { css, cx } from '@emotion/css';
 
-import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import {
+  useMoveAccountMenuItem,
+  useReopenAccountMutation,
+  useUpdateAccountMutation,
+} from '#accounts';
 import { BalanceHistoryGraph } from '#components/accounts/BalanceHistoryGraph';
 import { Link } from '#components/common/Link';
 import { Notes } from '#components/Notes';
@@ -87,13 +91,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
 }: AccountProps<FieldName>) {
   const isTestEnv = useIsTestEnv();
   const { t } = useTranslation();
-  const type = account
-    ? account.closed
-      ? 'account-closed'
-      : account.offbudget
-        ? 'account-offbudget'
-        : 'account-onbudget'
-    : 'title';
+  const type = account?.closed ? 'account-closed' : 'account-open';
 
   const triggerRef = useRef(null);
 
@@ -106,8 +104,8 @@ export function Account<FieldName extends SheetFields<'account'>>({
   const handleDragRef = useDragRef(dragRef);
 
   const { dropRef, dropPos } = useDroppable({
-    types: account ? [type] : [],
-    id: account && account.id,
+    types: onDrop ? [type] : [],
+    id: account?.id ?? to,
     onDrop,
   });
 
@@ -121,6 +119,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
 
   const accountNote = useNotes(`account-${account?.id}`);
   const needsTooltip = !!account?.id && !isTouchDevice();
+  const moveAccountItem = useMoveAccountMenuItem(account);
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
 
@@ -141,6 +140,7 @@ export function Account<FieldName extends SheetFields<'account'>>({
         text: t('Rename'),
         onClick: () => setIsEditing(true),
       },
+      moveAccountItem,
       account?.closed
         ? {
             name: 'account-reopen',

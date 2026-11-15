@@ -1,3 +1,6 @@
+import { useRef } from 'react';
+import { useDrop } from 'react-aria';
+import { isTextDropItem } from 'react-aria-components';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -7,6 +10,7 @@ import { radius, spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 import { css } from '@emotion/css';
 
+import { useMoveAccountMutation } from '#accounts';
 import { Link } from '#components/common/Link';
 import type { Binding } from '#spreadsheet';
 
@@ -16,6 +20,7 @@ import { CountPill } from './CountPill';
 import { SidebarBalance } from './SidebarBalance';
 import { sectionLabelStyle } from './styles';
 import { SyncErrorRollup } from './SyncErrorRollup';
+import { accountDragType } from './useAccountTreeDragAndDrop';
 import type { GroupBucket, SidebarAccountSide } from './useSidebarAccountTree';
 
 type SideGroupProps = {
@@ -49,10 +54,28 @@ export function SideGroup({
   onToggleBucket,
 }: SideGroupProps) {
   const { t } = useTranslation();
+  const moveAccount = useMoveAccountMutation();
+  const headingRef = useRef<HTMLDivElement>(null);
+  const oppositeAccountType = accountDragType(side === 'on' ? 'off' : 'on');
+  const { dropProps, isDropTarget } = useDrop({
+    ref: headingRef,
+    isDisabled: isDragDisabled,
+    getDropOperation: types =>
+      types.has(oppositeAccountType) ? 'move' : 'cancel',
+    async onDrop({ items }) {
+      const [item] = items;
+      if (item && isTextDropItem(item) && item.types.has(oppositeAccountType)) {
+        const id = await item.getText(oppositeAccountType);
+        moveAccount.mutate({ id, targetId: null, offBudget: side === 'off' });
+      }
+    },
+  });
 
   return (
     <View style={{ marginTop: spacing.xxs }}>
       <View
+        {...dropProps}
+        ref={headingRef}
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -60,6 +83,11 @@ export function SideGroup({
           paddingBlock: spacing.xs,
           paddingLeft: spacing.xs,
           paddingRight: spacing.sm,
+          ...(isDropTarget && {
+            backgroundColor: theme.sidebarItemBackgroundHover,
+            outline: `2px solid ${theme.pageTextLink}`,
+            borderRadius: radius.sm,
+          }),
         }}
       >
         <Button
@@ -111,7 +139,7 @@ export function SideGroup({
           />
         </Link>
       </View>
-      {isOpen && (
+      {isOpen && sideData.buckets.length > 0 && (
         <AccountTree
           label={label}
           side={side}

@@ -41,7 +41,7 @@ import type {
 } from '#types/models';
 
 import * as link from './link';
-import { getStartingBalancePayee } from './payees';
+import { getStartingBalanceCategory, getStartingBalancePayee } from './payees';
 import * as bankSync from './sync';
 
 // Shared base type for link account parameters
@@ -713,12 +713,66 @@ async function moveAccount({
   id,
   targetId,
   accountGroupId,
+  offBudget,
 }: {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;
   accountGroupId?: AccountGroupEntity['id'] | null;
+  offBudget?: boolean;
 }) {
-  await db.moveAccount(id, targetId, accountGroupId);
+  await batchMessages(async () => {
+    const wasOffBudget = await db.moveAccount(
+      id,
+      targetId,
+      accountGroupId,
+      offBudget,
+    );
+    if (offBudget === undefined || offBudget === wasOffBudget) {
+      return;
+    }
+
+    // Transfers within either side of the budget are uncategorized. Leave
+    // transfers that now cross the budget boundary for the user to categorize.
+    const internalTransfers = await db.all<{
+      id: db.DbTransaction['id'];
+      category: db.DbTransaction['category'];
+      otherId: db.DbTransaction['id'];
+      otherCategory: db.DbTransaction['category'];
+    }>(
+      `SELECT t.id, t.category, other.id AS otherId, other.category AS otherCategory
+         FROM v_transactions_internal_alive t
+         JOIN v_transactions_internal_alive other
+           ON other.id = t.transfer_id AND other.transfer_id = t.id
+         JOIN accounts a ON a.id = other.account
+        WHERE t.account = ? AND a.offbudget = ? AND a.tombstone = 0
+          AND (t.category IS NOT NULL OR other.category IS NOT NULL)`,
+      [id, offBudget ? 1 : 0],
+    );
+
+    for (const transfer of internalTransfers) {
+      if (transfer.category != null) {
+        await db.updateTransaction({ id: transfer.id, category: null });
+      }
+      if (transfer.otherCategory != null) {
+        await db.updateTransaction({ id: transfer.otherId, category: null });
+      }
+    }
+
+    if (!offBudget) {
+      const category = await getStartingBalanceCategory();
+      if (category != null) {
+        const startingBalances = await db.all<Pick<db.DbTransaction, 'id'>>(
+          `SELECT id FROM v_transactions
+            WHERE account = ? AND starting_balance_flag = 1
+              AND category IS NULL AND transfer_id IS NULL AND is_parent = 0`,
+          [id],
+        );
+        for (const { id: transactionId } of startingBalances) {
+          await db.updateTransaction({ id: transactionId, category });
+        }
+      }
+    }
+  });
 }
 
 async function setSecret({

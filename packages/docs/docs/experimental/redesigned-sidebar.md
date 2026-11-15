@@ -49,7 +49,7 @@ Below the heading, your accounts are split into sections:
 - Inside each section, accounts that aren't in a group come first, followed by your [account groups](#organizing-accounts-into-groups). Each group shows the combined balance of the accounts in it.
 - **Closed** accounts are listed at the bottom. This section is collapsed by default.
 
-Click an account to open it. Right-click an account to rename it, close it (or reopen it, if it's already closed), or change its group.
+Click an account to open it. Right-click an account to rename it, move it on or off budget, close or reopen it, or change its group.
 
 ### Collapsing Sections and Groups
 
@@ -108,7 +108,7 @@ Accounts and groups can be reordered by dragging them:
 
 <img width="262" alt="An account being dragged into the Checking group" src="/img/experimental/redesigned-sidebar/redesigned-sidebar-drag-and-drop@2x.webp" />
 
-Accounts can't be dragged between the on budget, off budget and closed sections. Dragging is turned off while searching.
+Drag an open account between **On budget** and **Off budget** to [change how it counts toward the budget](../accounts/index.md#moving-an-account-on-or-off-budget). Drag closed accounts within **Closed accounts** to reorder them. Dragging is turned off while searching.
 
 :::tip
 Accounts and groups can also be moved with the keyboard. Move the focus to an account or group, press <Key arrow="right" /> to reach its drag handle, and press <Key k="enter" /> to pick it up. Use the arrow keys to choose where it should go, then press <Key k="enter" /> to drop it, or <Key k="escape" /> to cancel.

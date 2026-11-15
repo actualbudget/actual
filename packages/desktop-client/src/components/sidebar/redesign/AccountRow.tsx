@@ -13,7 +13,11 @@ import { View } from '@actual-app/components/view';
 import type { AccountEntity } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 
-import { useReopenAccountMutation, useUpdateAccountMutation } from '#accounts';
+import {
+  useMoveAccountMenuItem,
+  useReopenAccountMutation,
+  useUpdateAccountMutation,
+} from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { useContextMenu } from '#hooks/useContextMenu';
 import { useUpdatedAccounts } from '#hooks/useUpdatedAccounts';
@@ -55,6 +59,7 @@ export function AccountRow({
 
   const reopenAccount = useReopenAccountMutation();
   const updateAccount = useUpdateAccountMutation();
+  const moveAccountItem = useMoveAccountMenuItem(account);
 
   const isContextMenuOpen = useSelector(state =>
     state.contextMenu.items.some(
@@ -72,6 +77,7 @@ export function AccountRow({
         text: t('Rename'),
         onClick: () => setIsEditing(true),
       },
+      moveAccountItem,
       isClosed
         ? {
             name: 'account-reopen',

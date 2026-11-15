@@ -58,13 +58,47 @@ export function Accounts() {
     dropPos: 'top' | 'bottom' | null,
     targetId: string,
   ) {
-    let targetIdToMove: string | null = targetId;
-    if (dropPos === 'bottom') {
-      const idx = accounts.findIndex(a => a.id === targetId) + 1;
-      targetIdToMove = idx < accounts.length ? accounts[idx].id : null;
+    const source = accounts.find(account => account.id === id);
+    const target = accounts.find(account => account.id === targetId);
+    if (
+      !source ||
+      !target ||
+      source.closed !== target.closed ||
+      id === targetId
+    ) {
+      return;
     }
 
-    moveAccount.mutate({ id, targetId: targetIdToMove });
+    const siblings = target.closed
+      ? closedAccounts
+      : target.offbudget
+        ? offbudgetAccounts
+        : onBudgetAccounts;
+    const nextIndex =
+      siblings.findIndex(account => account.id === targetId) + 1;
+    const beforeId =
+      dropPos === 'bottom' ? (siblings[nextIndex]?.id ?? null) : targetId;
+    if (beforeId !== id) {
+      moveAccount.mutate({
+        id,
+        targetId: beforeId,
+        ...(!target.closed &&
+          source.offbudget !== target.offbudget && {
+            offBudget: !!target.offbudget,
+          }),
+      });
+    }
+  }
+
+  function onDropOnSection(id: string, offBudget: boolean) {
+    const account = accounts.find(account => account.id === id);
+    if (
+      account &&
+      !account.closed &&
+      Boolean(account.offbudget) !== offBudget
+    ) {
+      moveAccount.mutate({ id, targetId: null, offBudget });
+    }
   }
 
   const onToggleClosedAccounts = () => {
@@ -99,7 +133,7 @@ export function Accounts() {
           balanceTestId="sidebar-all-accounts-balance"
         />
 
-        {onBudgetAccounts.length > 0 && (
+        {(onBudgetAccounts.length > 0 || isDragging) && (
           <Account
             name={t('On budget')}
             to="/accounts/onbudget"
@@ -110,6 +144,7 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            onDrop={id => onDropOnSection(id, false)}
             balanceTestId="sidebar-on-budget-balance"
           />
         )}
@@ -131,7 +166,7 @@ export function Accounts() {
           />
         ))}
 
-        {offbudgetAccounts.length > 0 && (
+        {(offbudgetAccounts.length > 0 || isDragging) && (
           <Account
             name={t('Off budget')}
             to="/accounts/offbudget"
@@ -142,6 +177,7 @@ export function Accounts() {
               marginBottom: 5,
             }}
             titleAccount
+            onDrop={id => onDropOnSection(id, true)}
             balanceTestId="sidebar-off-budget-balance"
           />
         )}

@@ -434,9 +434,23 @@ class AccountInternal extends PureComponent<
       }, 100);
     }
 
-    //Resest sort/filter/search on account change
+    // Reset sort/filter/search on account change.
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
+    } else if (this.props.accounts !== prevProps.accounts) {
+      const oldBudgetTypes = new Map(
+        prevProps.accounts.map(account => [account.id, account.offbudget]),
+      );
+      if (
+        this.props.accounts.some(
+          account =>
+            oldBudgetTypes.has(account.id) &&
+            oldBudgetTypes.get(account.id) !== account.offbudget,
+        )
+      ) {
+        // A move changes aggregate register membership and can update transfer categories.
+        void this.refetchTransactions();
+      }
     }
   }
 
@@ -480,9 +494,12 @@ class AccountInternal extends PureComponent<
   };
 
   makeRootTransactionsQuery = () => {
-    const accountId = this.props.accountId;
-
-    return queries.transactions(accountId);
+    const { accountId, categoryId } = this.props;
+    const query = queries.transactions(accountId);
+    if (categoryId && !accountId) {
+      return query.filter({ 'account.offbudget': false });
+    }
+    return query;
   };
 
   updateQuery(query: Query, isFiltered: boolean = false) {

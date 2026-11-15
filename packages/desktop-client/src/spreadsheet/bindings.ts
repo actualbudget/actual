@@ -112,6 +112,7 @@ export function categoryBalance(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
       })
       .options({ splits: 'inline' })
@@ -128,6 +129,7 @@ export function categoryBalanceCleared(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
         cleared: true,
       })
@@ -145,6 +147,7 @@ export function categoryBalanceUncleared(
     query: q('transactions')
       .filter({
         category: categoryId,
+        'account.offbudget': false,
         date: { $transform: '$month', $eq: month },
         cleared: false,
       })

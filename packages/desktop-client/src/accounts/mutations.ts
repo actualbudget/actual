@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { sync } from '#app/appSlice';
 import { useAccounts } from '#hooks/useAccounts';
+import { useUndo } from '#hooks/useUndo';
 import { addNotification } from '#notifications/notificationsSlice';
 import { payeeQueries } from '#payees';
 import { useDispatch, useStore } from '#redux';
@@ -181,24 +182,25 @@ type MoveAccountPayload = {
   id: AccountEntity['id'];
   targetId: AccountEntity['id'] | null;
   accountGroupId?: AccountGroupEntity['id'] | null;
+  offBudget?: boolean;
 };
 
 export function useMoveAccountMutation() {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { showUndoNotification } = useUndo();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      targetId,
-      accountGroupId,
-    }: MoveAccountPayload) => {
-      await send('account-move', { id, targetId, accountGroupId });
+    mutationFn: async (account: MoveAccountPayload) => {
+      await send('account-move', account);
     },
-    onSuccess: () => {
+    onSuccess: (_, { offBudget }) => {
       invalidateQueries(queryClient);
       invalidateQueries(queryClient, payeeQueries.lists());
+      if (offBudget !== undefined) {
+        showUndoNotification({ message: t('Account moved') });
+      }
     },
     onError: error => {
       console.error('Error moving account:', error);
@@ -209,6 +211,25 @@ export function useMoveAccountMutation() {
       );
     },
   });
+}
+
+export function useMoveAccountMenuItem(account: AccountEntity | undefined) {
+  const { t } = useTranslation();
+  const moveAccount = useMoveAccountMutation();
+  if (!account || account.closed) {
+    return;
+  }
+
+  return {
+    name: 'account-move-budget',
+    text: account.offbudget ? t('Move to on budget') : t('Move to off budget'),
+    onClick: () =>
+      moveAccount.mutate({
+        id: account.id,
+        targetId: null,
+        offBudget: !account.offbudget,
+      }),
+  };
 }
 
 type ImportPreviewTransactionsPayload = {

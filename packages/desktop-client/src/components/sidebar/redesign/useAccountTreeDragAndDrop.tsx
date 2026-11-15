@@ -1,8 +1,13 @@
 import { useRef, useState } from 'react';
 import type { DragItem } from 'react-aria';
-import { DropIndicator, useDragAndDrop } from 'react-aria-components';
+import {
+  DropIndicator,
+  isTextDropItem,
+  useDragAndDrop,
+} from 'react-aria-components';
 import type {
   DragTypes,
+  DroppableCollectionInsertDropEvent,
   DropTarget,
   ItemDropTarget,
 } from 'react-aria-components';
@@ -27,6 +32,10 @@ import { getEffectiveGroupId } from './useSidebarAccountTree';
 import type { GroupBucket } from './useSidebarAccountTree';
 
 export type AccountTreeSide = 'on' | 'off' | 'closed';
+
+export function accountDragType(side: AccountTreeSide) {
+  return `sidebar-account-${side}`;
+}
 
 type DraggedNode =
   | {
@@ -58,7 +67,12 @@ export function useAccountTreeDragAndDrop({
   const [isDraggingGroup, setIsDraggingGroup] = useState(false);
   const collapseTimer = useRef<number | undefined>(undefined);
 
-  const accountType = `sidebar-account-${side}`;
+  const accountType = accountDragType(side);
+  const oppositeAccountType =
+    side === 'closed' ? null : accountDragType(side === 'on' ? 'off' : 'on');
+  const accountTypes = oppositeAccountType
+    ? [accountType, oppositeAccountType]
+    : [accountType];
   const groupType = `sidebar-group-${side}`;
   const liveGroupIds = new Set(accountGroups.map(group => group.id));
   const firstRootGroupId = buckets.find(bucket => bucket.group != null)?.group
@@ -77,6 +91,9 @@ export function useAccountTreeDragAndDrop({
     return null;
   };
 
+  const acceptsAccount = (types: DragTypes) =>
+    accountTypes.some(type => types.has(type));
+
   const isValidTarget = (target: DropTarget, types: DragTypes) => {
     if (target.type === 'root') {
       return false;
@@ -88,7 +105,7 @@ export function useAccountTreeDragAndDrop({
     if (types.has(groupType)) {
       return node.kind === 'group' && target.dropPosition !== 'on';
     }
-    if (!types.has(accountType)) {
+    if (!acceptsAccount(types)) {
       return false;
     }
     if (node.kind === 'account') {
@@ -102,19 +119,19 @@ export function useAccountTreeDragAndDrop({
     );
   };
 
-  const applyDrop = (target: ItemDropTarget) => {
+  const applyDrop = (source: SidebarTreeNode, target: ItemDropTarget) => {
     const targetNode = parseTreeKey(target.key);
-    if (dragged == null || targetNode == null) {
+    if (targetNode == null) {
       return;
     }
 
-    if (dragged.kind === 'group') {
+    if (source.kind === 'group') {
       if (targetNode.kind !== 'group' || target.dropPosition === 'on') {
         return;
       }
       const move = computeGroupMove({
         groups: accountGroups,
-        draggedId: dragged.groupId,
+        draggedId: source.groupId,
         targetId: targetNode.groupId,
         position: target.dropPosition,
       });
@@ -127,7 +144,7 @@ export function useAccountTreeDragAndDrop({
     const move = computeAccountMove({
       accounts,
       liveGroupIds,
-      draggedId: dragged.accountId,
+      draggedId: source.accountId,
       target:
         targetNode.kind === 'account'
           ? {
@@ -138,11 +155,28 @@ export function useAccountTreeDragAndDrop({
           : {
               kind: 'group',
               groupId: targetNode.groupId,
+              offBudget: side === 'off',
               position: target.dropPosition,
             },
     });
     if (move != null) {
       moveAccount.mutate(move);
+    }
+  };
+
+  const applyDropFromOtherSide = async ({
+    items,
+    target,
+  }: DroppableCollectionInsertDropEvent) => {
+    const [item] = items;
+    if (
+      oppositeAccountType != null &&
+      item &&
+      isTextDropItem(item) &&
+      item.types.has(oppositeAccountType)
+    ) {
+      const accountId = await item.getText(oppositeAccountType);
+      applyDrop({ kind: 'account', accountId }, target);
     }
   };
 
@@ -159,9 +193,9 @@ export function useAccountTreeDragAndDrop({
         }
         return [];
       }),
-    acceptedDragTypes: [accountType, groupType],
+    acceptedDragTypes: [...accountTypes, groupType],
     shouldAcceptItemDrop: (target, types) =>
-      types.has(accountType) && parseTreeKey(target.key)?.kind === 'group',
+      acceptsAccount(types) && parseTreeKey(target.key)?.kind === 'group',
     getDropOperation: (target, types) =>
       isValidTarget(target, types) ? 'move' : 'cancel',
     renderDropIndicator: target => (
@@ -207,13 +241,21 @@ export function useAccountTreeDragAndDrop({
       );
     },
     onDropExit: () => setHoveredGroupId(null),
-    onMove: e => applyDrop(e.target),
+    onMove: e => {
+      const [key] = e.keys;
+      const source = key == null ? null : parseTreeKey(key);
+      if (source) {
+        applyDrop(source, e.target);
+      }
+    },
+    onInsert: applyDropFromOtherSide,
+    onItemDrop: applyDropFromOtherSide,
   });
 
   const isGroupDropZoneActive = (groupId: AccountGroupEntity['id']) =>
-    dragged?.kind === 'account' &&
     hoveredGroupId === groupId &&
-    dragged.groupId !== groupId;
+    (dragged == null ||
+      (dragged.kind === 'account' && dragged.groupId !== groupId));
 
   return {
     dragAndDropHooks,
