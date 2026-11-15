@@ -624,6 +624,26 @@ describe('runScheduleForecast against a real database', () => {
     expect(result.to_budget).toBe(770);
   });
 
+  it('does not budget a skipped occurrence after its date has passed', async () => {
+    // Nov 12, budgeting November. The yearly $100 bill due Nov 11 was
+    // skipped on Nov 5, so the schedule moved on to Nov 11, 2027. The
+    // skipped bill still isn't due, now that its date is behind us.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-05');
+    const { category, template, scheduleId } = await setUpYearlyBill();
+    await setNextDate({ id: scheduleId, advance: true });
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-12');
+
+    const result = await runScheduleForecast(
+      [template],
+      '2026-11',
+      0,
+      0,
+      category,
+    );
+
+    expect(result.to_budget).toBe(770);
+  });
+
   it('does not budget an occurrence due today that was paid early by hand and skipped', async () => {
     // Nov 11, budgeting November. The yearly $100 bill due today was paid
     // on Oct 31 without linking the payment, then skipped, so the schedule

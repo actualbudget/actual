@@ -548,12 +548,15 @@ export async function buildMonthlyOutflow(
     }
   }
 
-  // next_date only moves past an occurrence due today or later when that
-  // occurrence was skipped, or when a payment linked to it was posted
-  // early. So such an occurrence before next_date with no linked payment
-  // anywhere was skipped, and nothing is due for it.
+  // next_date moves past an occurrence when that occurrence is skipped or
+  // a payment is linked to it. So an occurrence this month before next_date
+  // with no linked payment anywhere was skipped, and nothing is due for it,
+  // even once its date has passed. Earlier months aren't read this way:
+  // over that long, editing the schedule's date (which moves next_date on
+  // from today) is as likely to have moved it past an unpaid occurrence.
+  const skipFrom = isBudgetingAhead ? today : currentMonthStart;
   const skippingEntries = smoothEntries.filter(
-    entry => entry.storedNextDate && entry.storedNextDate > today,
+    entry => entry.storedNextDate && entry.storedNextDate > skipFrom,
   );
   let linkedAnywhere: PostedTransaction[] = [];
   if (skippingEntries.length > 0) {
@@ -563,7 +566,7 @@ export async function buildMonthlyOutflow(
           schedule: {
             $oneof: skippingEntries.map(entry => entry.scheduleId),
           },
-          date: { $gte: linkedSearchStart(today) },
+          date: { $gte: linkedSearchStart(skipFrom) },
         })
         .select(['date', 'schedule']),
     ));
@@ -576,12 +579,12 @@ export async function buildMonthlyOutflow(
     const paid = settledOccurrences(
       entry,
       linkedAnywhere,
-      today,
+      skipFrom,
       entry.storedNextDate,
       occurrencesBetween,
     );
     return new Set(
-      occurrencesBetween(today, entry.storedNextDate).filter(
+      occurrencesBetween(skipFrom, entry.storedNextDate).filter(
         date => !paid.has(date),
       ),
     );

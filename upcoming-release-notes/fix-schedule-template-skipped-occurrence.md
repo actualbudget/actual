@@ -1,6 +1,6 @@
 ---
-category: Bugfixes
+category: Bugfix
 authors: [seragAhmed]
 ---
 
-Stop schedule templates from budgeting for a skipped upcoming payment in the current month
+Stop schedule templates from budgeting for a skipped payment in the current month
