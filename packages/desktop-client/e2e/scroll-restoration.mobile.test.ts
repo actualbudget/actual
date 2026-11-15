@@ -97,6 +97,7 @@ test.describe('Mobile scroll restoration', () => {
     await spentButton.click();
     await expect(page).toHaveURL(/\/categories\//);
     const offsetWhenLeaving = await getOffsetWhenLeaving();
+    expect(offsetWhenLeaving).toBeGreaterThan(200);
 
     await page.getByRole('button', { name: 'Back' }).click();
     await new MobileBudgetPage(page).waitFor();
@@ -126,6 +127,7 @@ test.describe('Mobile scroll restoration', () => {
     await (await firstOnScreen(accountPage.transactions)).click();
     await expect(page).toHaveURL(/\/transactions\//);
     const offsetWhenLeaving = await getOffsetWhenLeaving();
+    expect(offsetWhenLeaving).toBeGreaterThan(300);
 
     await page.getByRole('button', { name: 'Back' }).click();
     const restoredAccountPage = new MobileAccountPage(page);
