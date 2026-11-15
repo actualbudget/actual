@@ -140,6 +140,16 @@ describe('markReviewedOnCategoryChange', () => {
     ).toEqual({ category: 'fun', notes: 'lunch' });
   });
 
+  test('removes the tag when the category is cleared', () => {
+    // e.g. moving the transaction to an off-budget account
+    expect(
+      markReviewedOnCategoryChange(unreviewed, {
+        ...unreviewed,
+        category: undefined,
+      }),
+    ).toEqual({ category: undefined, notes: 'lunch' });
+  });
+
   test('keeps the tag when the category is unchanged', () => {
     expect(markReviewedOnCategoryChange(unreviewed, unreviewed)).toBe(
       unreviewed,

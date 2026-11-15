@@ -118,7 +118,9 @@ export function setReviewed(
 // Someone who sets a transaction's category has looked at it, so it no
 // longer needs review. Only call this for edits a person makes: categories
 // set by rules or bank sync must leave the tag alone. The tag lives on a
-// split's parent, so a child's category doesn't count.
+// split's parent, so a child's category doesn't count. Moving a
+// transaction to an off-budget account clears its category, so that marks
+// it reviewed too: choosing to take it off-budget is a review decision.
 export function markReviewedOnCategoryChange<
   T extends Pick<TransactionEntity, 'category' | 'notes' | 'is_child'>,
 >(previous: Pick<TransactionEntity, 'category'> | undefined, next: T): T {
