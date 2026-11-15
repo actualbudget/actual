@@ -72,6 +72,28 @@ test.describe('Accounts', () => {
     await expect(page).toMatchThemeScreenshots();
   });
 
+  test('shows all transactions when leaving a category register for All accounts', async () => {
+    accountPage = await navigation.createAccount({
+      name: 'Off-budget account',
+      offBudget: true,
+      balance: 0,
+    });
+    const notes = 'Off-budget transaction outside the category';
+    await accountPage.createSingleTransaction({ notes, credit: '42.00' });
+    const transaction = accountPage.transactionTableRow.filter({
+      hasText: notes,
+    });
+    await expect(transaction).toBeVisible();
+
+    const budgetPage = await navigation.goToBudgetPage();
+    await budgetPage.clickOnSpentAmountForRow(1);
+    await expect(page.getByRole('button', { name: 'Back' })).toBeVisible();
+    await expect(transaction).toHaveCount(0);
+
+    await navigation.goToAccountPage('All accounts');
+    await expect(transaction).toBeVisible();
+  });
+
   test('right clicking an account in sidebar opens context menu', async () => {
     await navigation.rightClickAccount('Roth IRA');
     const menu = page.getByRole('menu');

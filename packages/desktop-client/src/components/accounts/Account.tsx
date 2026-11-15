@@ -2176,6 +2176,7 @@ export function Account() {
 
   const modalShowing = useSelector(state => state.modals.modalStack.length > 0);
   const accountsSyncing = useSelector(state => state.account.accountsSyncing);
+  const categoryId = location?.state?.categoryId;
   const filterConditions = location?.state?.filterConditions || [];
 
   const savedFiters = useTransactionFilters();
@@ -2210,6 +2211,7 @@ export function Account() {
           initialMode={expandSplits ? 'collapse' : 'expand'}
         >
           <AccountHack
+            key={categoryId}
             newTransactions={newTransactions}
             matchedTransactions={matchedTransactions}
             accounts={accounts}
@@ -2237,7 +2239,7 @@ export function Account() {
             filterConditions={filterConditions}
             categoryGroups={categoryGroups}
             accountId={params.id}
-            categoryId={location?.state?.categoryId}
+            categoryId={categoryId}
             location={location}
             savedFilters={savedFiters}
             onReopenAccount={onReopenAccount}
