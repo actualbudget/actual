@@ -627,6 +627,8 @@ class AccountInternal extends PureComponent<
   // oxlint-disable-next-line react/no-unsafe
   UNSAFE_componentWillReceiveProps(nextProps: AccountInternalProps) {
     if (this.props.accountId !== nextProps.accountId) {
+      // Discard any filter request still pending for the previous account.
+      this.filtersRequestId++;
       this.pendingFocusId = getFocusTransactionId(nextProps.location);
       this.setState(
         {
