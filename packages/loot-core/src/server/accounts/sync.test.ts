@@ -671,6 +671,88 @@ describe('Account sync', () => {
     ).toBe(-1239);
   });
 
+  test('reconcile matches imported ids across a batch of transactions', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'existing-1',
+      account: id,
+      amount: -1000,
+      date: '2024-01-10',
+      imported_id: 'import-1',
+    });
+    await db.insertTransaction({
+      id: 'existing-2',
+      account: id,
+      amount: -2000,
+      date: '2024-03-10',
+      imported_id: 'import-2',
+    });
+
+    const { added, updated } = await reconcileTransactions(id, [
+      {
+        date: '2024-03-11',
+        amount: -2000,
+        payee_name: 'Shop',
+        imported_id: 'import-2',
+      },
+      {
+        date: '2024-02-01',
+        amount: -3000,
+        payee_name: 'Shop',
+        imported_id: 'import-3',
+      },
+      {
+        date: '2024-01-11',
+        amount: -1000,
+        payee_name: 'Shop',
+        imported_id: 'import-1',
+      },
+    ]);
+
+    expect(updated.sort()).toEqual(['existing-1', 'existing-2']);
+    expect(added.length).toBe(1);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(3);
+    expect(transactions.find(t => t.id === added[0]).imported_id).toBe(
+      'import-3',
+    );
+  });
+
+  test('reconcile fuzzy matches each transaction only within 7 days of its own date', async () => {
+    const { id } = await prepareDatabase();
+
+    await db.insertTransaction({
+      id: 'existing-1',
+      account: id,
+      amount: -1000,
+      date: '2024-01-10',
+    });
+    await db.insertTransaction({
+      id: 'existing-2',
+      account: id,
+      amount: -1000,
+      date: '2024-02-20',
+    });
+
+    const { added, updated } = await reconcileTransactions(id, [
+      // 5 days before existing-1
+      { date: '2024-01-05', amount: -1000, payee_name: 'Shop' },
+      // 19 days after existing-2, but within the dates of the whole batch
+      { date: '2024-03-10', amount: -1000, payee_name: 'Shop' },
+      // 1 day after existing-2, but a different amount
+      { date: '2024-02-21', amount: -2000, payee_name: 'Shop' },
+    ]);
+
+    expect(updated).toEqual(['existing-1']);
+    expect(added.length).toBe(2);
+
+    const transactions = await getAllTransactions();
+    expect(transactions.length).toBe(4);
+    expect(transactions.find(t => t.id === 'existing-2').payee).toBe(null);
+  });
+
   describe('compareFuzzyMatchCandidates', () => {
     const transDate = '2024-04-05';
     const alreadyImported = {
