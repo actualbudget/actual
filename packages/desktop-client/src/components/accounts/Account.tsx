@@ -8,7 +8,12 @@ import React, {
 import type { ReactElement, RefObject } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Trans } from 'react-i18next';
-import { Navigate, useLocation, useParams } from 'react-router';
+import {
+  Navigate,
+  useLocation,
+  useNavigationType,
+  useParams,
+} from 'react-router';
 
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
@@ -260,6 +265,7 @@ type AccountInternalProps = {
   onBatchDelete: ReturnType<typeof useTransactionBatchActions>['onBatchDelete'];
   categoryId?: string;
   location: ReturnType<typeof useLocation>;
+  navigationType: ReturnType<typeof useNavigationType>;
   dateFormat: ReturnType<typeof useDateFormat>;
   currencySymbol: string;
   payees: PayeeEntity[];
@@ -442,23 +448,40 @@ class AccountInternal extends PureComponent<
     //Resest sort/filter/search on account change
     if (this.props.accountId !== prevProps.accountId) {
       this.setState({ sort: null, search: '', filterConditions: [] });
-    } else if (
-      this.props.location.key !== prevProps.location.key &&
-      this.props.filterConditions.length > 0
-    ) {
+    } else if (this.props.location.key !== prevProps.location.key) {
+      this.applyLocationFilters(prevProps);
+    }
+  }
+
+  applyLocationFilters(prevProps: AccountInternalProps) {
+    if (this.props.filterConditions.length > 0) {
       // A drill-down (e.g. the title bar's unreviewed link) can navigate here
       // with new filters while this view is already open. The constructor
       // only reads the filters it mounts with, so apply these ones now.
       // Clear any search too: applyFilters doesn't reapply it, and the
       // drill-down should show everything its filters match.
-      const conditions = [...this.props.filterConditions];
-      this.setState(
-        { filterId: undefined, filterConditionsOp: 'and', search: '' },
-        () => {
-          void this.applyFilters(conditions);
-        },
-      );
+      this.resetFilters([...this.props.filterConditions]);
+    } else if (
+      this.props.navigationType === 'POP' &&
+      prevProps.filterConditions.length > 0 &&
+      isEqual(this.state.filterConditions, prevProps.filterConditions)
+    ) {
+      // Going Back (or Forward) from a drill-down to a location without
+      // filters removes the filters that drill-down applied. Other
+      // navigations without filters, such as undo or jumping to a transfer,
+      // keep the current filters, and so does Back once the user has
+      // changed the filters themselves.
+      this.resetFilters([]);
     }
+  }
+
+  resetFilters(conditions: ConditionEntity[]) {
+    this.setState(
+      { filterId: undefined, filterConditionsOp: 'and', search: '' },
+      () => {
+        void this.applyFilters(conditions);
+      },
+    );
   }
 
   componentWillUnmount() {
@@ -2157,6 +2180,7 @@ function AccountHack(props: AccountHackProps) {
 export function Account() {
   const params = useParams();
   const location = useLocation();
+  const navigationType = useNavigationType();
 
   const { data: { grouped: categoryGroups } = { grouped: [] } } =
     useCategories();
@@ -2257,6 +2281,7 @@ export function Account() {
             accountId={params.id}
             categoryId={location?.state?.categoryId}
             location={location}
+            navigationType={navigationType}
             savedFilters={savedFiters}
             onReopenAccount={onReopenAccount}
             onUpdateAccount={onUpdateAccount}
