@@ -31,8 +31,9 @@ export function SimpleMobileNavTabs() {
 
   return (
     <nav
-      // Kept so existing e2e page models can still locate the navbar.
-      data-navbar-state="default"
+      // Lets e2e page models locate the navbar and tell it apart from the
+      // legacy swipeable one.
+      data-navbar-state="fixed"
       style={{
         backgroundColor: theme.mobileNavBackground,
         borderTop: `1px solid ${theme.menuBorder}`,
