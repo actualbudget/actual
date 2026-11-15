@@ -87,6 +87,15 @@ describe('removeTag whitespace handling', () => {
     );
   });
 
+  test('keeps the separator after a tag written right after text', () => {
+    expect(removeTag('receipt#unreviewed with Sam', 'unreviewed')).toBe(
+      'receipt with Sam',
+    );
+    expect(removeTag('receipt#unreviewed#food', 'unreviewed')).toBe(
+      'receipt#food',
+    );
+  });
+
   test('undoes addTag', () => {
     const notes = 'a  b\tc';
     expect(removeTag(addTag(notes, 'unreviewed'), 'unreviewed')).toBe(notes);

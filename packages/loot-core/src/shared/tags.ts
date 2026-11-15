@@ -87,7 +87,15 @@ export function removeTag(notes: string | null | undefined, tag: string) {
     (match: string, before: string, after: string, offset: number) => {
       const next = notes[offset + match.length];
       const isBetweenText = after !== '' || next === '#';
-      return before !== '' && isBetweenText ? before : '';
+      if (!isBetweenText) {
+        return '';
+      }
+      if (before !== '') {
+        return before;
+      }
+      // The tag was written right after other text (`receipt#tag more`),
+      // so the space after it is the only separator left.
+      return offset > 0 ? after : '';
     },
   );
   return cleaned.trim() === '' ? '' : cleaned;
