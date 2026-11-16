@@ -633,6 +633,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'storage-migration-failed'
     | 'storage-unavailable'
     | 'storage-lost';
+  // What the user calls the budget, where it got as far as its
+  // preferences, for the client to say which one this is about
+  budgetName?: string;
   // With `storage-migration-failed`: whether the budget could be opened
   // on the previous storage engine instead
   canKeepPreviousStorage?: boolean;
@@ -660,15 +663,17 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
+    const budgetName = prefs.getPrefs()?.budgetName;
     await closeBudget();
     // Expected conditions on the web storage, not bugs
     if (e instanceof BudgetInUseError) {
-      return { error: 'budget-in-use' };
+      return { error: 'budget-in-use', budgetName };
     }
     if (e instanceof StorageMigrationError) {
       logger.error('Storage migration failed', e);
       return {
         error: 'storage-migration-failed',
+        budgetName,
         // The previous engine reads nothing held in the new storage, so
         // it can only take over while no budget has been moved there
         canKeepPreviousStorage: !(await hasMigratedSqliteFiles().catch(
@@ -678,14 +683,14 @@ async function _loadBudget(id: Budget['id']): Promise<{
     }
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);
-      return { error: 'storage-unavailable' };
+      return { error: 'storage-unavailable', budgetName };
     }
     if (e instanceof StorageLostError) {
       logger.error('Storage lost', e);
-      return { error: 'storage-lost' };
+      return { error: 'storage-lost', budgetName };
     }
     captureException(e);
-    return { error: 'opening-budget' };
+    return { error: 'opening-budget', budgetName };
   }
 
   // Older versions didn't tag the file with the current user, so do
@@ -708,7 +713,10 @@ async function _loadBudget(id: Budget['id']): Promise<{
       captureException(e);
       logger.info('Error updating budget ' + id, e);
       logger.log('Error updating budget', e);
-      result = { error: 'loading-budget' };
+      result = {
+        error: 'loading-budget',
+        budgetName: prefs.getPrefs()?.budgetName,
+      };
     }
 
     await closeBudget();

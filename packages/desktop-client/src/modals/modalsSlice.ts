@@ -246,6 +246,8 @@ export type Modal =
       name: 'storage-migration-failed';
       options: {
         budgetId: string;
+        // What went wrong, naming the budget
+        message: string;
         // Whether the budget could be opened on the previous storage
         // engine instead
         canKeepPreviousStorage: boolean;

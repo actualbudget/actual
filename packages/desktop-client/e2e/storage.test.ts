@@ -234,7 +234,12 @@ test.describe('Browser storage', () => {
     await page.getByText('Test Budget').click();
     const report = failedMoveReport(page);
     await expect(report).toBeVisible({ timeout: 60_000 });
-    await expect(report.getByText('Nothing was deleted')).toBeVisible();
+    // Named the way the user knows it, not by its id
+    await expect(
+      report.getByText(
+        'Moving budget "Test Budget" to the new browser storage failed. Nothing was deleted',
+      ),
+    ).toBeVisible();
     expectStorageLayout(await inspectStorage(page), 'legacy');
 
     // Back on the previous engine the budget opens as it did before
@@ -335,9 +340,14 @@ test.describe('Browser storage', () => {
     // The budget is reopened at once, cannot be moved, and the app then
     // goes to its list of files: the report has to outlast that
     await page.goto('/accounts');
-    await expect(failedMoveReport(page)).toBeVisible({ timeout: 60_000 });
-    await expect(page.getByText('Test Budget')).toBeVisible();
-    await expect(failedMoveReport(page)).toBeVisible();
+    const report = failedMoveReport(page);
+    await expect(report).toBeVisible({ timeout: 60_000 });
+    await expect(
+      page.getByRole('grid', { name: 'Budget files' }).getByText('Test Budget'),
+    ).toBeVisible();
+    // Still there, and it names the budget although no list was loaded
+    // when it was raised
+    await expect(report.getByText('Moving budget "Test Budget"')).toBeVisible();
   });
 
   test('a second tab cannot open the same budget at the same time', async ({
@@ -361,7 +371,7 @@ test.describe('Browser storage', () => {
     await secondTab.goto('/');
     await expect
       .poll(() => dialogs.join('\n'), { timeout: 45_000 })
-      .toMatch(/already open in another tab/);
+      .toMatch(/Budget "Test Budget" is already open in another tab/);
 
     // Once the first tab is gone its budget can be opened here. The failed
     // open forgot the last budget, so it is picked from the file list.

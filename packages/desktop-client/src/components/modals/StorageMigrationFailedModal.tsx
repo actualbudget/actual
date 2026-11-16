@@ -11,7 +11,6 @@ import { View } from '@actual-app/components/view';
 
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import type { Modal as ModalType } from '#modals/modalsSlice';
-import { getSyncError } from '#util/error';
 import {
   describePreviousStorageError,
   returnToPreviousStorage,
@@ -32,6 +31,7 @@ type StorageMigrationFailedModalProps = Extract<
  */
 export function StorageMigrationFailedModal({
   budgetId,
+  message,
   canKeepPreviousStorage,
 }: StorageMigrationFailedModalProps) {
   const { t } = useTranslation();
@@ -63,9 +63,7 @@ export function StorageMigrationFailedModal({
             rightContent={<ModalCloseButton onPress={() => state.close()} />}
           />
           <View style={{ lineHeight: 1.5, maxWidth: 500 }}>
-            <Paragraph>
-              {getSyncError('storage-migration-failed', budgetId)}
-            </Paragraph>
+            <Paragraph>{message}</Paragraph>
             <Paragraph>
               {canKeepPreviousStorage ? (
                 <Trans>

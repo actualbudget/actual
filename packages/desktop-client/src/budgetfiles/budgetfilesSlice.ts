@@ -59,19 +59,22 @@ export const loadBudget = createAppAsyncThunk(
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error, canKeepPreviousStorage = false } = await send(
-      'load-budget',
-      { id, ...options },
-    );
+    const {
+      error,
+      budgetName,
+      canKeepPreviousStorage = false,
+    } = await send('load-budget', { id, ...options });
 
     if (error) {
-      const message = getSyncError(error, id);
+      // By the name the user knows the budget by, where the backend got
+      // far enough to tell it
+      const message = getSyncError(error, budgetName ?? id);
       if (error === 'storage-migration-failed') {
         dispatch(
           pushModal({
             modal: {
               name: 'storage-migration-failed',
-              options: { budgetId: id, canKeepPreviousStorage },
+              options: { budgetId: id, message, canKeepPreviousStorage },
             },
           }),
         );
