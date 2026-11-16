@@ -30,7 +30,6 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CalendarCardSkeleton } from '#components/reports/CalendarCardSkeleton';
 import { DateRange } from '#components/reports/DateRange';
-import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -43,6 +42,8 @@ import type { FormatType } from '#hooks/useFormat';
 import { useMergedRefs } from '#hooks/useMergedRefs';
 import { useNavigate } from '#hooks/useNavigate';
 import { useResizeObserver } from '#hooks/useResizeObserver';
+
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
 
 type CalendarCardProps = {
   widgetId: string;

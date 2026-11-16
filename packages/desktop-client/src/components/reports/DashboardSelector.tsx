@@ -27,7 +27,7 @@ import {
   useMoveDashboardPageMutation,
 } from '#reports/mutations';
 
-import { translateBuiltInDashboardName } from './defaultDashboardNames';
+import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
 
 type DashboardSelectorProps = {
   dashboards: readonly DashboardPageEntity[];

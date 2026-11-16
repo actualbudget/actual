@@ -1,5 +1,8 @@
 type Translate = (key: string) => string;
 
+const DEFAULT_DASHBOARD_TIPS =
+  '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".';
+
 // These names are seeded by the server for the built-in dashboard. Translate
 // only this fixed set so user-provided report names remain user data.
 export function translateBuiltInDashboardName(name: string, t: Translate) {
@@ -27,4 +30,17 @@ export function translateBuiltInDashboardName(name: string, t: Translate) {
     default:
       return name;
   }
+}
+
+export function translateBuiltInDashboardContent(
+  content: string,
+  t: Translate,
+) {
+  if (content === DEFAULT_DASHBOARD_TIPS) {
+    return t(
+      '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".',
+    );
+  }
+
+  return content;
 }

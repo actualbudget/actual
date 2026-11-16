@@ -21,6 +21,8 @@ import {
   sequentialNewlinesPlugin,
 } from '#util/markdown';
 
+import { translateBuiltInDashboardContent } from './defaultDashboardNames';
+
 const remarkPlugins = [sequentialNewlinesPlugin, remarkGfm, remarkBreaks];
 
 const markdownStyles = css(markdownBaseStyles, {
@@ -147,7 +149,7 @@ export function MarkdownCard({
                 ],
               ]}
             >
-              {meta.content}
+              {translateBuiltInDashboardContent(meta.content, t)}
             </ReactMarkdown>
           </Text>
         )}

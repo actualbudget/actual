@@ -11,7 +11,6 @@ import type { SpendingWidget } from '@actual-app/core/types/models';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { DateRange } from '#components/reports/DateRange';
-import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -25,6 +24,8 @@ import { createSpendingSpreadsheet } from '#components/reports/spreadsheets/spen
 import { useReport } from '#components/reports/useReport';
 import { useFormat } from '#hooks/useFormat';
 import { useSyncedPref } from '#hooks/useSyncedPref';
+
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
 
 type SpendingCardProps = {
   widgetId: string;

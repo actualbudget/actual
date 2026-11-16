@@ -23,8 +23,8 @@ import {
   useUpdateReportMutation,
 } from '#reports/mutations';
 
-import { translateBuiltInDashboardName } from './defaultDashboardNames';
 import { LoadingIndicator } from './LoadingIndicator';
+import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';

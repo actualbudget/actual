@@ -10,7 +10,6 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { DateRange } from '#components/reports/DateRange';
-import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { ReportCardValueSkeleton } from '#components/reports/ReportCardValueSkeleton';
@@ -19,6 +18,8 @@ import { summarySpreadsheet } from '#components/reports/spreadsheets/summary-spr
 import { SummaryNumber } from '#components/reports/SummaryNumber';
 import { useReport } from '#components/reports/useReport';
 import { useLocale } from '#hooks/useLocale';
+
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
 
 type SummaryCardProps = {
   widgetId: string;

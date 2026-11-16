@@ -11,7 +11,7 @@ import type { DashboardPageEntity } from '@actual-app/core/types/models';
 
 import { useRenameDashboardPageMutation } from '#reports/mutations';
 
-import { translateBuiltInDashboardName } from './defaultDashboardNames';
+import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
 
 type DashboardHeaderProps = {
   dashboard: DashboardPageEntity;
