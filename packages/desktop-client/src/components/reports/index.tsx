@@ -4,6 +4,9 @@ import { View } from '@actual-app/components/view';
 
 import { LoadComponent } from '#components/util/LoadComponent';
 
+const loadReportRouter = () =>
+  import(/* webpackChunkName: 'reports' */ './ReportRouter');
+
 export function Reports() {
   const { t } = useTranslation();
 
@@ -12,9 +15,7 @@ export function Reports() {
       <LoadComponent
         name="ReportRouter"
         message={t('Loading reports...')}
-        importer={() =>
-          import(/* webpackChunkName: 'reports' */ './ReportRouter')
-        }
+        importer={loadReportRouter}
       />
     </View>
   );
