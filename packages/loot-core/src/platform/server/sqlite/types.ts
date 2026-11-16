@@ -19,6 +19,15 @@ export type TransactionOptions = {
   immediate?: boolean;
 };
 
+// How a stored database is opened. Only the web storage has anything to
+// be told
+export type OpenDatabaseOptions = {
+  // A budget still in absurd-sql's layout is moved to the new storage
+  // when it is opened, which the user is asked about first. Without this
+  // an open of such a budget is refused
+  allowStorageMigration?: boolean;
+};
+
 // Which storage backs sqlite on the web. `legacy` is sql.js over absurd-sql
 // (IndexedDB blocks, needs SharedArrayBuffer); the other two use the
 // official sqlite-wasm build, persisted to OPFS or, when sync access
@@ -41,7 +50,10 @@ export type SqliteEngine = {
     fetchAll: boolean,
   ): T[] | { changes: unknown };
   execQuery(db: Database, sql: string): void;
-  openDatabase(pathOrBuffer?: string | Uint8Array): Promise<Database>;
+  openDatabase(
+    pathOrBuffer?: string | Uint8Array,
+    options?: OpenDatabaseOptions,
+  ): Promise<Database>;
   closeDatabase(db: Database): void;
   exportDatabase(db: Database): Promise<Uint8Array>;
 };

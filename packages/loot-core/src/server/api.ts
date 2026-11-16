@@ -91,6 +91,10 @@ function withMutation<Params extends Array<unknown>, ReturnType>(
 
 let handlers = {} as unknown as Handlers;
 
+// An API caller has no one to ask before a budget is moved to the new
+// browser storage, so its loads go ahead
+const withoutAsking = { allowStorageMigration: true };
+
 async function validateMonth(month) {
   if (!month.match(/^\d{4}-\d{2}$/)) {
     throw APIError('Invalid month format, use YYYY-MM: ' + month);
@@ -234,7 +238,10 @@ handlers['api/load-budget'] = async function ({ id }) {
 
   if (currentId !== id) {
     connection.send('start-load');
-    const { error } = await handlers['load-budget']({ id });
+    const { error } = await handlers['load-budget']({
+      id,
+      ...withoutAsking,
+    });
 
     if (!error) {
       connection.send('finish-load');
@@ -305,7 +312,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
 
   // Sync the local budget file
   if (localBudget) {
-    await handlers['load-budget']({ id: localBudget.id });
+    await handlers['load-budget']({ id: localBudget.id, ...withoutAsking });
     const result = await handlers['sync-budget']();
     if (result.error) {
       throw withErrorCode(
@@ -330,7 +337,7 @@ handlers['api/download-budget'] = async function ({ syncId, password }) {
       result.error.reason,
     );
   }
-  await handlers['load-budget']({ id: result.id });
+  await handlers['load-budget']({ id: result.id, ...withoutAsking });
 };
 
 handlers['api/get-budgets'] = async function () {
@@ -444,7 +451,7 @@ handlers['api/finish-import'] = async function () {
   // either; there is other internal state that isn't created
   const { id } = prefs.getPrefs();
   await handlers['close-budget']();
-  await handlers['load-budget']({ id });
+  await handlers['load-budget']({ id, ...withoutAsking });
 
   await handlers['get-budget-bounds']();
   await sheet.waitOnSpreadsheet();

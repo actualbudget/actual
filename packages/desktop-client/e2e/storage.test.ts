@@ -19,6 +19,10 @@ const requestedBackend = E2E_STORAGE_BACKEND ?? 'legacy';
 const usesNewStorage = requestedBackend !== 'legacy';
 // The IndexedDB fallback persists on a one second debounce
 const PERSIST_WAIT_MS = 2000;
+// A user agent without "playwright" in it, so the app uses the SharedWorker
+// coordinator (leader tab plus followers) instead of a worker per tab
+const CHROME_USER_AGENT =
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 
 function expectStorageLayout(
   snapshot: StorageSnapshot,
@@ -68,6 +72,31 @@ async function expectAllySavingsBalance(page: Page, balance?: string) {
   await expect(accountPage.accountBalance).toHaveText(balance ?? '');
 }
 
+// The dialog that asks before a budget is moved to the new storage
+function movePrompt(page: Page) {
+  return page.getByTestId('confirm-storage-migration-modal');
+}
+
+// Leaves the page with a budget the legacy storage wrote and the
+// requested storage chosen for the next load; resolves the balance to
+// find again
+async function createLegacyBudgetThenSwitch(page: Page) {
+  // The URL flag wins over the stored choice for this first load
+  await page.goto(`/?storage=legacy`);
+  await page.evaluate(
+    flag => sessionStorage.setItem(flag, '1'),
+    MANUAL_STORAGE_BACKEND_FLAG,
+  );
+  await new ConfigurationPage(page).createTestFile();
+  const balance = await readAllySavingsBalance(page);
+  expectStorageLayout(await inspectStorage(page), 'legacy');
+  await page.evaluate(
+    ([key, backend]) => localStorage.setItem(key, backend),
+    [STORAGE_BACKEND_KEY, requestedBackend],
+  );
+  return balance;
+}
+
 test.describe('Browser storage', () => {
   let page: Page;
 
@@ -94,35 +123,103 @@ test.describe('Browser storage', () => {
     await expect(accountPage.accountBalance).toHaveText(balance ?? '');
   });
 
-  test('moves a budget created under the legacy storage', async ({
+  test('moves a budget created under the legacy storage once the user agrees', async ({
+    browser,
+  }, testInfo) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    page = await browser.newPage();
+    const balance = await createLegacyBudgetThenSwitch(page);
+
+    // Reopening the budget asks first, and nothing moves meanwhile
+    await page.goto('/');
+    const prompt = movePrompt(page);
+    await expect(prompt).toBeVisible({ timeout: 60_000 });
+    const downloading = page.waitForEvent('download');
+    await prompt.getByRole('button', { name: 'Download backup' }).click();
+    const download = await downloading;
+    expect(download.suggestedFilename()).toMatch(/^\d{4}-\d{2}-\d{2}-.*\.zip$/);
+    const backupPath = testInfo.outputPath('backup.zip');
+    await download.saveAs(backupPath);
+    await expect(prompt.getByText('Backup downloaded')).toBeVisible();
+    expectStorageLayout(await inspectStorage(page), 'legacy');
+
+    await prompt.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByTestId('budget-table')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expectAllySavingsBalance(page, balance);
+    await expect(async () => {
+      expectStorageLayout(await inspectStorage(page), 'new');
+    }).toPass({ timeout: 10_000 });
+
+    // The backup is a whole budget: a browser that has nothing imports it
+    const emptyBrowser = await browser.newContext();
+    await addE2EInitScripts(emptyBrowser);
+    const restored = await emptyBrowser.newPage();
+    await restored.goto('/');
+    await new ConfigurationPage(restored).importBudget('Actual', backupPath);
+    await expect(restored.getByTestId('budget-table')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expectAllySavingsBalance(restored, balance);
+    await emptyBrowser.close();
+  });
+
+  test('leaves a budget where it is until the user agrees to the move', async ({
     browser,
   }) => {
     test.skip(!usesNewStorage, 'only meaningful for the new storage');
 
     page = await browser.newPage();
-    // The URL flag wins over the stored choice for this first load
-    await page.goto(`/?storage=legacy`);
-    await page.evaluate(
-      flag => sessionStorage.setItem(flag, '1'),
-      MANUAL_STORAGE_BACKEND_FLAG,
-    );
-    await new ConfigurationPage(page).createTestFile();
-    const balance = await readAllySavingsBalance(page);
+    const balance = await createLegacyBudgetThenSwitch(page);
+
+    await page.goto('/');
+    const prompt = movePrompt(page);
+    await expect(prompt).toBeVisible({ timeout: 60_000 });
+    await prompt.getByRole('button', { name: 'Not now' }).click();
+    await expect(prompt).toBeHidden();
+    // Back on the list of files, with the budget still where it was
+    await expect(page.getByText('Test Budget')).toBeVisible();
     expectStorageLayout(await inspectStorage(page), 'legacy');
 
-    // Switch the flag and reload: the budget is moved when it is reopened
-    await page.evaluate(
-      ([key, backend]) => localStorage.setItem(key, backend),
-      [STORAGE_BACKEND_KEY, requestedBackend],
-    );
-    await page.goto('/');
+    // Opening it asks again
+    await page.getByText('Test Budget').click();
+    await expect(prompt).toBeVisible({ timeout: 60_000 });
+    await prompt.getByRole('button', { name: 'Continue' }).click();
     await expect(page.getByTestId('budget-table')).toBeVisible({
       timeout: 60_000,
     });
     await expectAllySavingsBalance(page, balance);
+  });
 
-    await page.waitForTimeout(PERSIST_WAIT_MS);
-    expectStorageLayout(await inspectStorage(page), 'new');
+  test('moves a budget once the user agrees where tabs share one backend', async ({
+    browser,
+  }) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    // Without "playwright" in the user agent the app runs its SharedWorker
+    // coordinator, as desktop browsers do
+    const context = await browser.newContext({ userAgent: CHROME_USER_AGENT });
+    await addE2EInitScripts(context);
+    const first = await context.newPage();
+    const balance = await createLegacyBudgetThenSwitch(first);
+    // The coordinator goes with its last page, so the next one starts a
+    // backend on the requested storage
+    await first.close();
+
+    page = await context.newPage();
+    await page.goto('/');
+    const prompt = movePrompt(page);
+    await expect(prompt).toBeVisible({ timeout: 60_000 });
+    // The same tab asks its backend for the budget a second time
+    await prompt.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByTestId('budget-table')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expectAllySavingsBalance(page, balance);
+    await page.close();
+    await context.close();
   });
 
   test('turns the new storage on from the settings', async ({ browser }) => {
@@ -146,10 +243,16 @@ test.describe('Browser storage', () => {
     const reloaded = page.waitForEvent('load', { timeout: 60_000 });
     await toggle.click();
     await reloaded;
-    await settingsPage.waitFor({ timeout: 60_000 });
+    // The app comes back on the settings address with no budget open,
+    // and the prompt outlasts its move to the list of files
+    await movePrompt(page).getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByTestId('budget-table')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expectAllySavingsBalance(page, balance);
+    await new Navigation(page).goToSettingsPage();
     await settingsPage.goToSection('Experimental');
     await expect(toggle).toBeChecked();
-    await expectAllySavingsBalance(page, balance);
     await expect(async () => {
       expectStorageLayout(await inspectStorage(page), 'new');
     }).toPass({ timeout: 10_000 });

@@ -243,6 +243,12 @@ export type Modal =
       name: 'out-of-sync-migrations';
     }
   | {
+      name: 'confirm-storage-migration';
+      options: {
+        budgetId: string;
+      };
+    }
+  | {
       name: 'files-settings';
     }
   | {

@@ -49,21 +49,41 @@ export const loadAllFiles = createAppAsyncThunk(
 
 type LoadBudgetPayload = {
   id: string;
+  // Set once the user has agreed to the budget being moved to the new
+  // browser storage
+  allowStorageMigration?: boolean;
   // TODO: Is this still needed?
   options?: Record<string, unknown>;
 };
 
 export const loadBudget = createAppAsyncThunk(
   `${sliceName}/loadBudget`,
-  async ({ id, options = {} }: LoadBudgetPayload, { dispatch }) => {
+  async (
+    { id, allowStorageMigration, options = {} }: LoadBudgetPayload,
+    { dispatch },
+  ) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error } = await send('load-budget', { id, ...options });
+    const { error } = await send('load-budget', {
+      id,
+      allowStorageMigration,
+      ...options,
+    });
 
     if (error) {
       const message = getSyncError(error, id);
-      if (error === 'out-of-sync-migrations') {
+      if (error === 'storage-migration-needed') {
+        // The budget is loaded again from there, once the user agrees
+        dispatch(
+          pushModal({
+            modal: {
+              name: 'confirm-storage-migration',
+              options: { budgetId: id },
+            },
+          }),
+        );
+      } else if (error === 'out-of-sync-migrations') {
         dispatch(pushModal({ modal: { name: 'out-of-sync-migrations' } }));
       } else if (error === 'out-of-sync-data') {
         // confirm is not available on iOS

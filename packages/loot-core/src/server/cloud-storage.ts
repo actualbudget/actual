@@ -148,50 +148,57 @@ export async function exportBuffer() {
     return null;
   }
 
-  const budgetDir = fs.getBudgetDir(id);
-
   // We run this in a mutator even though its not mutating anything
   // because we are reading the sqlite file from disk. We want to make
   // sure that we get a valid snapshot of it so we want this to be
   // serialized with all other mutations.
-  const { zipped, entries } = await runMutator(async () => {
-    const rawDbContent = await fs.readFile(
-      fs.join(budgetDir, 'db.sqlite'),
-      'binary',
-    );
+  return runMutator(() => exportBudgetDir(fs.getBudgetDir(id)));
+}
 
-    // Do some post-processing of the database. We NEVER upload the cache with
-    // the database; this forces new downloads to always recompute everything
-    // which is not only safer, but reduces the filesize a lot.
-    const memDb = await sqlite.openDatabase(rawDbContent);
-    sqlite.execQuery(
-      memDb,
-      `
-        DELETE FROM kvcache;
-        DELETE FROM kvcache_key;
-      `,
-    );
+// The export file of a budget that is not open, made from its files as
+// they are stored. The web app offers it as a backup before it moves a
+// budget to the new storage, which is why the database is read rather
+// than opened: a read leaves an absurd-sql copy where it is.
+export async function exportUnopenedBuffer(id: string) {
+  return exportBudgetDir(fs.getBudgetDir(id));
+}
 
-    const dbContent = await sqlite.exportDatabase(memDb);
+async function exportBudgetDir(budgetDir: string) {
+  const rawDbContent = await fs.readFile(
+    fs.join(budgetDir, 'db.sqlite'),
+    'binary',
+  );
 
-    sqlite.closeDatabase(memDb);
+  // Do some post-processing of the database. We NEVER upload the cache with
+  // the database; this forces new downloads to always recompute everything
+  // which is not only safer, but reduces the filesize a lot.
+  const memDb = await sqlite.openDatabase(rawDbContent);
+  sqlite.execQuery(
+    memDb,
+    `
+      DELETE FROM kvcache;
+      DELETE FROM kvcache_key;
+    `,
+  );
 
-    // mark it as a file that needs a new clock so when a new client
-    // downloads it, it'll get set to a unique node
-    const meta = JSON.parse(
-      await fs.readFile(fs.join(budgetDir, 'metadata.json')),
-    );
+  const dbContent = await sqlite.exportDatabase(memDb);
 
-    meta.resetClock = true;
-    const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
+  sqlite.closeDatabase(memDb);
 
-    const entries = {
-      'db.sqlite': Buffer.from(dbContent),
-      'metadata.json': metaContent,
-    };
+  // mark it as a file that needs a new clock so when a new client
+  // downloads it, it'll get set to a unique node
+  const meta = JSON.parse(
+    await fs.readFile(fs.join(budgetDir, 'metadata.json')),
+  );
 
-    return { zipped: safeZip(entries), entries };
-  });
+  meta.resetClock = true;
+  const metaContent = Buffer.from(JSON.stringify(meta), 'utf8');
+
+  const entries = {
+    'db.sqlite': Buffer.from(dbContent),
+    'metadata.json': metaContent,
+  };
+  const zipped = safeZip(entries);
 
   const warnings: string[] = [];
   if (exceedsSafeUnzipLimits(zipped, entries)) {
@@ -206,7 +213,11 @@ export async function exportBuffer() {
     warnings.push('may-exceed-available-memory');
   }
 
-  return { data: Buffer.from(zipped), warnings };
+  return {
+    data: Buffer.from(zipped),
+    warnings,
+    budgetName: meta.budgetName as string,
+  };
 }
 
 export async function importBuffer(fileData, buffer, localId?: string) {

@@ -146,6 +146,34 @@ async function openLegacyDatabase(
   });
 }
 
+// Opens the absurd-sql database only if there is one: a plain open
+// upgrades just a database that does not exist yet, and abandoning that
+// upgrade leaves it that way. No connection is asked to close.
+function openLegacyDatabaseIfPresent(
+  name: string,
+): Promise<IDBDatabase | null> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(name);
+    let isMissing = false;
+    request.onupgradeneeded = () => {
+      isMissing = true;
+      request.transaction?.abort();
+    };
+    request.onsuccess = () => {
+      const database = request.result;
+      database.onversionchange = () => database.close();
+      resolve(database);
+    };
+    request.onerror = () => {
+      if (isMissing) {
+        resolve(null);
+      } else {
+        reject(request.error);
+      }
+    };
+  });
+}
+
 function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
@@ -258,6 +286,29 @@ export function deleteLegacyDatabase(name: string): Promise<boolean> {
       resolve(false);
     };
   });
+}
+
+// Whether an absurd-sql copy with anything in it exists for a sqlite
+// path, found out without changing it or disturbing its connections. A
+// copy that cannot be read as one counts: moving it is what reports the
+// damage.
+export async function hasLegacyDatabase(path: string): Promise<boolean> {
+  const database = await openLegacyDatabaseIfPresent(legacyDatabaseName(path));
+  if (database == null) {
+    return false;
+  }
+  try {
+    const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
+    if (typeof meta?.size === 'number' && meta.size > 0) {
+      return true;
+    }
+    // absurd-sql creates the database before its first write
+    return (await readLegacyKey(database, 0)) != null;
+  } catch {
+    return true;
+  } finally {
+    database.close();
+  }
 }
 
 export type LegacyDatabaseContents = {

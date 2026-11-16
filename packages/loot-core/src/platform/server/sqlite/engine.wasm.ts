@@ -1,7 +1,13 @@
 import { logger } from '#platform/server/log';
 
 import { checkStorageAfterIoError, getSqliteStore } from './storage';
-import type { Database, SqliteEngine, SqlParam, Statement } from './types';
+import type {
+  Database,
+  OpenDatabaseOptions,
+  SqliteEngine,
+  SqlParam,
+  Statement,
+} from './types';
 import {
   exportBytes,
   getSqlite3,
@@ -162,6 +168,7 @@ function execQuery(db: Database, sql: string) {
 
 async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
+  options?: OpenDatabaseOptions,
 ): Promise<Database> {
   let db: WasmDatabase;
   if (pathOrBuffer == null || pathOrBuffer === ':memory:') {
@@ -169,7 +176,7 @@ async function openDatabase(
   } else if (typeof pathOrBuffer !== 'string') {
     db = openMemoryDatabase(pathOrBuffer);
   } else {
-    db = await getSqliteStore().open(pathOrBuffer);
+    db = await getSqliteStore().open(pathOrBuffer, options);
     openPaths.set(db, pathOrBuffer);
   }
 

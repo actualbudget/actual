@@ -12,6 +12,7 @@ import {
 import {
   completeMigration,
   deleteLegacyDatabase,
+  hasLegacyDatabase,
   legacySnapshot,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
@@ -151,6 +152,40 @@ describe('absurd-sql migration helpers', () => {
     expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
     // The empty one is cleaned up
     expect(await listIndexedDbNames()).not.toContain(NAME);
+  });
+
+  it('tells whether a copy with data exists without disturbing it', async () => {
+    expect(await hasLegacyDatabase(PATH)).toBe(false);
+    // Looking did not create one
+    expect(await listIndexedDbNames()).not.toContain(NAME);
+
+    // absurd-sql creates the database before its first write
+    await seedLegacyDatabase(NAME, new Uint8Array(0));
+    expect(await hasLegacyDatabase(PATH)).toBe(false);
+
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    // A connection that would never close for a move is not asked to
+    const other = await holdLegacyConnection(NAME, { stubborn: true });
+    try {
+      expect(await hasLegacyDatabase(PATH)).toBe(true);
+      expect(await legacyVersion(NAME)).toBe(2);
+    } finally {
+      other.close();
+    }
+  });
+
+  it('counts a copy whose size metadata is damaged, for the move to report', async () => {
+    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
+    const database = await holdLegacyConnection(NAME);
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction('data', 'readwrite');
+      transaction.objectStore('data').delete(-1);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+    database.close();
+
+    expect(await hasLegacyDatabase(PATH)).toBe(true);
   });
 
   it('keeps a legacy database whose size metadata is damaged', async () => {

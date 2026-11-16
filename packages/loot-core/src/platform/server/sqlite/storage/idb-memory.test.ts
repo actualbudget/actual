@@ -12,7 +12,11 @@ import {
 } from '#platform/server/sqlite';
 
 import * as absurdMigration from './absurd-migration';
-import { BudgetInUseError, StorageUnavailableError } from './errors';
+import {
+  BudgetInUseError,
+  StorageMigrationNeededError,
+  StorageUnavailableError,
+} from './errors';
 import {
   getSqliteFileRow,
   putSqliteFileRow,
@@ -34,6 +38,8 @@ const sendMock = vi.hoisted(() => vi.fn());
 vi.mock('#platform/server/connection', () => ({ send: sendMock }));
 
 const PATH = '/documents/Actual/budget-one/db.sqlite';
+// What an open is told once the user has agreed to the move
+const MOVE = { allowStorageMigration: true };
 const SCHEMA =
   'CREATE TABLE __migrations__ (id INTEGER PRIMARY KEY); CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT);';
 
@@ -44,6 +50,16 @@ beforeEach(async () => {
   sendMock.mockClear();
   setSqliteStore(createMemoryIdbStore({ debounceMs: 30, maxDirtyMs: 200 }));
 });
+
+// A budget database as absurd-sql would have held it
+async function legacyBytes(value: string): Promise<Uint8Array> {
+  const source = await openDatabase();
+  execQuery(source, SCHEMA);
+  runQuery(source, 'INSERT INTO t (v) VALUES (?)', [value]);
+  const bytes = await exportDatabase(source);
+  closeDatabase(source);
+  return bytes;
+}
 
 async function rowBytes(path: string): Promise<Uint8Array | null> {
   const row = await getSqliteFileRow(path);
@@ -187,7 +203,7 @@ describe('IndexedDB in-memory store', () => {
     // The legacy filesystem's marker row
     await putSqliteFileRow({ filepath: PATH, contents: '' });
 
-    const db = await openDatabase(PATH);
+    const db = await openDatabase(PATH, MOVE);
     expect(runQuery(db, 'SELECT v FROM t', [], true)).toEqual([
       { v: 'from legacy' },
     ]);
@@ -198,6 +214,40 @@ describe('IndexedDB in-memory store', () => {
     const row = await getSqliteFileRow(PATH);
     expect(row?.storage).toBe('memory-idb');
     expect(ArrayBuffer.isView(row?.contents)).toBe(true);
+  });
+
+  it('does not open a database still in absurd-sql until told it may be moved', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await legacyBytes('from legacy'));
+    // The legacy filesystem's marker row
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+
+    await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationNeededError,
+    );
+    // Nothing was touched
+    expect(await listIndexedDbNames()).toContain(name);
+    expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
+
+    const db = await openDatabase(PATH, MOVE);
+    expect(runQuery(db, 'SELECT v FROM t', [], true)).toEqual([
+      { v: 'from legacy' },
+    ]);
+    closeDatabase(db);
+    await sleep(10);
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
+  it('reads an absurd-sql copy where it is', async () => {
+    const bytes = await legacyBytes('from legacy');
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, bytes);
+    await putSqliteFileRow({ filepath: PATH, contents: '' });
+
+    const read = await getSqliteStore().readFile(PATH);
+    expect(Buffer.from(read).equals(Buffer.from(bytes))).toBe(true);
+    expect(await listIndexedDbNames()).toContain(name);
+    expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
   });
 
   it('keeps a snapshot whose write on close failed for the next open', async () => {
@@ -464,7 +514,7 @@ describe('IndexedDB in-memory store', () => {
     // A read during the migrating open comes from the opened database
     const readLegacy = vi.spyOn(absurdMigration, 'readLegacyDatabaseBytes');
     try {
-      const opening = store.open(PATH);
+      const opening = store.open(PATH, MOVE);
       const read = await openDatabase(await store.readFile(PATH));
       expect(runQuery(read, 'SELECT v FROM t', [], true)).toEqual([
         { v: 'from legacy' },
@@ -478,10 +528,10 @@ describe('IndexedDB in-memory store', () => {
 
     // A write waits for an open in flight and then refuses as for any open
     // database; a removal waits and then closes and removes it
-    const reopening = store.open(PATH);
+    const reopening = store.open(PATH, MOVE);
     await expect(store.writeFile(PATH, bytes)).rejects.toThrow(/open database/);
     store.close(PATH, await reopening);
-    const third = store.open(PATH);
+    const third = store.open(PATH, MOVE);
     await store.removeFile(PATH);
     await third;
     await expect(store.readFile(PATH)).rejects.toThrow(/does not exist/);
@@ -670,7 +720,7 @@ describe('IndexedDB in-memory store', () => {
 
   it('refuses a new file another worker created meanwhile', async () => {
     const lookup = vi
-      .spyOn(absurdMigration, 'readLegacyDatabaseBytes')
+      .spyOn(absurdMigration, 'hasLegacyDatabase')
       .mockImplementation(async () => {
         // Lands between this worker's row read and its marker write
         await putSqliteFileRow({
@@ -679,7 +729,7 @@ describe('IndexedDB in-memory store', () => {
           storage: 'memory-idb',
           rev: 1,
         });
-        return null;
+        return false;
       });
     try {
       await expect(openDatabase(PATH)).rejects.toBeInstanceOf(BudgetInUseError);

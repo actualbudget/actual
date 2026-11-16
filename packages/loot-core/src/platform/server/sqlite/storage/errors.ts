@@ -23,6 +23,16 @@ export class StorageMigrationError extends Error {
   }
 }
 
+// An absurd-sql copy is moved into the new storage only once the user has
+// agreed to it. An open that was not told so stops here, before anything
+// is touched
+export class StorageMigrationNeededError extends Error {
+  constructor(path: string) {
+    super(`The database at ${path} has yet to be moved to the new storage`);
+    this.name = 'StorageMigrationNeededError';
+  }
+}
+
 export class StorageUnavailableError extends Error {
   constructor(reason: string) {
     super(`No usable browser storage: ${reason}`);
