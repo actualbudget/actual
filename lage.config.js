@@ -33,6 +33,11 @@ module.exports = {
       dependsOn: ['^build'],
       cache: false,
     },
+    'build:mobile': {
+      type: 'npmScript',
+      dependsOn: ['^build'],
+      cache: false,
+    },
   },
   cacheOptions: {
     cacheStorageConfig: {

@@ -8,7 +8,7 @@ import { Share } from '@capacitor/share';
 // The copy is left in the cache (the receiving app may read it after the
 // share sheet closes); the system clears the cache when it needs space.
 export async function saveFileInNativeApp(
-  contents: string | Uint8Array<ArrayBuffer>,
+  contents: string | Uint8Array,
   filename: string,
   dialogTitle?: string,
 ) {
@@ -32,7 +32,7 @@ export async function saveFileInNativeApp(
   }
 }
 
-function toBase64(contents: Uint8Array<ArrayBuffer>): Promise<string> {
+function toBase64(contents: Uint8Array): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -41,7 +41,8 @@ function toBase64(contents: Uint8Array<ArrayBuffer>): Promise<string> {
       resolve(dataUrl.slice(dataUrl.indexOf(',') + 1));
     };
     reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(new Blob([contents]));
+    // Copied because a Blob cannot be made from a view over shared memory.
+    reader.readAsDataURL(new Blob([new Uint8Array(contents)]));
   });
 }
 
