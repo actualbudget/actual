@@ -18,8 +18,11 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 import { useDrag } from '@use-gesture/react';
 
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useIsTestEnv } from '#hooks/useIsTestEnv';
 import { useScrollListener } from '#hooks/useScrollListener';
+
+import { primeIOSKeyboard } from './transactions/iosKeyboard';
 
 const COLUMN_COUNT = 3;
 const ROW_COUNT = 2;
@@ -36,6 +39,9 @@ export function MobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
   const isTestEnv = useIsTestEnv();
+  // The calculator input brings its own keypad, so the native one must not
+  // open first.
+  const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
   const [navbarState, setNavbarState] = useState<'default' | 'open' | 'hidden'>(
     'default',
   );
@@ -133,7 +139,16 @@ export function MobileNavTabs() {
       Icon: SvgCog,
     },
   ].map(tab => (
-    <NavTab key={tab.path} onClick={() => openDefault()} {...tab} />
+    <NavTab
+      key={tab.path}
+      onClick={() => {
+        if (tab.path === '/transactions/new' && !mobileCalculatorEnabled) {
+          primeIOSKeyboard();
+        }
+        openDefault();
+      }}
+      {...tab}
+    />
   ));
 
   useScrollListener(

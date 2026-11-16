@@ -9,6 +9,7 @@ import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { CalculatorAmountInput } from './CalculatorAmountInput';
 import type { CalculatorAmountInputProps } from './CalculatorAmountInput';
 import { FocusableAmountInput } from './FocusableAmountInput';
+import { takePrimedIOSKeyboard } from './iosKeyboard';
 
 export type AmountInputProps = Omit<CalculatorAmountInputProps, 'onFocus'> & {
   disableNativeAutoFocusOnIOS?: boolean;
@@ -30,8 +31,11 @@ export const AmountInput = memo(function AmountInput({
   ...props
 }: AmountInputProps) {
   const mobileCalculatorEnabled = useFeatureFlag('mobileCalculator');
-  const fallbackAutoFocus =
-    autoFocus && !(disableNativeAutoFocusOnIOS && Platform.isIOSAgent);
+  const blockedOnIOS = disableNativeAutoFocusOnIOS && Platform.isIOSAgent;
+  // The tap that opened this screen focused a stand-in field, so the
+  // keyboard is already open and focus can move here (see iosKeyboard.ts).
+  const [keyboardPrimed] = useState(() => autoFocus && takePrimedIOSKeyboard());
+  const fallbackAutoFocus = autoFocus && (!blockedOnIOS || keyboardPrimed);
   const [focused, setFocused] = useState(fallbackAutoFocus);
 
   useEffect(() => {
@@ -45,7 +49,7 @@ export const AmountInput = memo(function AmountInput({
       <CalculatorAmountInput
         {...props}
         autoFocus={autoFocus}
-        autoFocusIndirect={disableNativeAutoFocusOnIOS}
+        autoFocusIndirect={disableNativeAutoFocusOnIOS && !keyboardPrimed}
         disabled={disabled}
         inputRef={inputRef}
         negate={negate}
