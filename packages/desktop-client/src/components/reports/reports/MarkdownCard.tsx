@@ -49,6 +49,7 @@ export function MarkdownCard({
   onMetaChange,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
+  const displayContent = translateBuiltInDashboardContent(meta.content, t);
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
@@ -129,12 +130,14 @@ export function MarkdownCard({
             }}
             className={NON_DRAGGABLE_AREA_CLASS_NAME}
             autoFocus
-            defaultValue={meta.content}
+            defaultValue={displayContent}
             onBlur={event => {
-              onMetaChange({
-                ...meta,
-                content: event.currentTarget.value,
-              });
+              if (event.currentTarget.value !== displayContent) {
+                onMetaChange({
+                  ...meta,
+                  content: event.currentTarget.value,
+                });
+              }
               setIsVisibleTextArea(false);
             }}
           />
@@ -149,7 +152,7 @@ export function MarkdownCard({
                 ],
               ]}
             >
-              {translateBuiltInDashboardContent(meta.content, t)}
+              {displayContent}
             </ReactMarkdown>
           </Text>
         )}
