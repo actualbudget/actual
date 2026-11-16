@@ -3613,7 +3613,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@docusaurus/utils-validation@npm:3.10.2, @docusaurus/utils-validation@npm:^2 || ^3, @docusaurus/utils-validation@npm:^3.10.2":
+"@docusaurus/utils-validation@npm:3.10.2, @docusaurus/utils-validation@npm:^2 || ^3":
   version: 3.10.2
   resolution: "@docusaurus/utils-validation@npm:3.10.2"
   dependencies:
@@ -6392,13 +6392,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@panzoom/panzoom@npm:^4.6.2":
-  version: 4.6.2
-  resolution: "@panzoom/panzoom@npm:4.6.2"
-  checksum: 10/169981bb2648012b39fa3f18b35d3cb4b9cb7de805a65dc9a730efbe724dae48b88dbd61661f5a700f606546595e84acf3f0d969685be872cd29d51a095ad48b
-  languageName: node
-  linkType: hard
-
 "@paralleldrive/cuid2@npm:^2.2.2":
   version: 2.2.2
   resolution: "@paralleldrive/cuid2@npm:2.2.2"
@@ -6793,16 +6786,6 @@ __metadata:
   version: 1.0.0-next.29
   resolution: "@polka/url@npm:1.0.0-next.29"
   checksum: 10/69ca11ab15a4ffec7f0b07fcc4e1f01489b3d9683a7e1867758818386575c60c213401259ba3705b8a812228d17e2bfd18e6f021194d943fff4bca389c9d4f28
-  languageName: node
-  linkType: hard
-
-"@r74tech/docusaurus-plugin-panzoom@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "@r74tech/docusaurus-plugin-panzoom@npm:2.5.0"
-  dependencies:
-    "@docusaurus/utils-validation": "npm:^3.10.2"
-    "@panzoom/panzoom": "npm:^4.6.2"
-  checksum: 10/106757f0cd23bcd09104dbbdd662a5d7094a5bb93479f926b527f28edc1a2540c88d71cdd2548619dfab8b4f053633b82f79ecee34c07daeb3310fe6f644f07c
   languageName: node
   linkType: hard
 
@@ -13734,8 +13717,8 @@ __metadata:
     "@docusaurus/types": "npm:^3.10.2"
     "@easyops-cn/docusaurus-search-local": "npm:^0.55.3"
     "@mdx-js/react": "npm:^3.1.1"
-    "@r74tech/docusaurus-plugin-panzoom": "npm:^2.5.0"
     "@types/react": "npm:^19.3.0"
+    image-size: "npm:^2.0.2"
     prism-react-renderer: "npm:^2.4.1"
     react: "npm:19.3.0"
     react-dom: "npm:19.3.0"
