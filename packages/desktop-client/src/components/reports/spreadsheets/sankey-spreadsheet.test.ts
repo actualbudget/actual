@@ -914,14 +914,17 @@ describe('sankey-spreadsheet', () => {
 
       addPercentageLabels(graph);
 
-      const percentagesByLayer = new Map<number, number>();
+      const percentagesByLayer = new Map<string, number>();
 
       for (const [key, node] of graph) {
         if (key.endsWith('__HIDDEN') || !node.percentageLabel) {
           continue;
         }
 
-        const layer = getLayer(graph, key);
+        const layer =
+          node.type === GraphLayers.Account
+            ? `type:${node.type}`
+            : `layer:${getLayer(graph, key)}`;
         const percentage = Number.parseFloat(node.percentageLabel);
         percentagesByLayer.set(
           layer,
@@ -934,6 +937,22 @@ describe('sankey-spreadsheet', () => {
       for (const total of percentagesByLayer.values()) {
         expect(total).toBeCloseTo(100, 1);
       }
+    });
+
+    it('includes accounts masked by hidden alignment nodes', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addNode(graph, 'account-b__HIDDEN', GraphLayers.IncomeCategory, '');
+      addNode(graph, 'target', GraphLayers.Category, 'Target');
+      addValueToLink(graph, 'account-a', 'target', 75);
+      addValueToLink(graph, 'account-b__HIDDEN', 'account-b', -1);
+      addValueToLink(graph, 'account-b', 'target', 25);
+
+      addPercentageLabels(graph);
+
+      expect(graph.get('account-a')?.percentageLabel).toBe('75.0%');
+      expect(graph.get('account-b')?.percentageLabel).toBe('25.0%');
     });
   });
 

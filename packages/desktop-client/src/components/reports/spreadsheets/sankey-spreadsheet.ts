@@ -1606,8 +1606,8 @@ export function getNodeValue(
       nodeValue += data.to.get(key) ?? 0;
     });
 
-    // If node is in reality a root node, masked behind hidden nodes
-    if (nodeValue < 0) {
+    // If the node is masked behind hidden nodes, use its visible outgoing flow.
+    if (nodeValue <= 0) {
       nodeValue = 0;
       const node = graph.get(key);
       if (node) {
@@ -1624,8 +1624,19 @@ export function getNodeValue(
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<VisualLayerIndex, number>();
+  const layerSums = new Map<string, number>();
   const computedLayersByNode = getComputedNodeLayers(graph);
+
+  function getPercentageGroup(
+    data: NodeData,
+    layer: VisualLayerIndex,
+  ): string {
+    // Accounts can be split across visual columns by hidden alignment nodes,
+    // but their percentages should still describe the account distribution.
+    return data.type === GraphLayers.Account
+      ? `type:${data.type}`
+      : `layer:${layer}`;
+  }
 
   // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
@@ -1639,7 +1650,11 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+    const percentageGroup = getPercentageGroup(graph.get(key)!, layer);
+    layerSums.set(
+      percentageGroup,
+      (layerSums.get(percentageGroup) ?? 0) + nodeValue,
+    );
   });
 
   // Second pass: assign percentage label to each node
@@ -1656,7 +1671,8 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentageGroup = getPercentageGroup(data, layer);
+    const layerTotal = layerSums.get(percentageGroup) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
   });
