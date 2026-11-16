@@ -62,6 +62,10 @@ export function CalendarCard({
 }: CalendarCardProps) {
   const { t } = useTranslation();
   const format = useFormat();
+  const cardName = translateBuiltInDashboardName(
+    meta?.name || t('Calendar'),
+    t,
+  );
 
   const [latestTransaction, setLatestTransaction] = useState<string>('');
 
@@ -179,16 +183,15 @@ export function CalendarCard({
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
           <View style={{ flex: 1, marginBottom: -5 }}>
             <ReportCardName
-              name={translateBuiltInDashboardName(
-                meta?.name || t('Calendar'),
-                t,
-              )}
+              name={cardName}
               isEditing={nameMenuOpen}
               onChange={newName => {
-                onMetaChange({
-                  ...meta,
-                  name: newName,
-                });
+                if (newName !== cardName) {
+                  onMetaChange({
+                    ...meta,
+                    name: newName,
+                  });
+                }
                 setNameMenuOpen(false);
               }}
               onClose={() => setNameMenuOpen(false)}
