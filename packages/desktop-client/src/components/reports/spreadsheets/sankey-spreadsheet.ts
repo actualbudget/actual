@@ -550,13 +550,17 @@ async function fetchCategoryData(
                     ]
                   : [{ $id: '$category' }, { $id: '$account' }],
               )
-              .select([
-                { accountId: { $id: '$account.id' } },
-                { accountName: { $id: '$account.name' } },
-                { amount: { $sum: '$amount' } },
-                { payeeId: { $id: '$payee.id' } },
-                { payeeName: { $id: '$payee.name' } },
-              ]),
+               .select([
+                 { accountId: { $id: '$account.id' } },
+                 { accountName: { $id: '$account.name' } },
+                 { amount: { $sum: '$amount' } },
+                 ...(categoryGroup.is_income
+                   ? [
+                       { payeeId: { $id: '$payee.id' } },
+                       { payeeName: { $id: '$payee.name' } },
+                     ]
+                   : []),
+               ]),
           );
           return results.data.map(
             (row: {
@@ -587,16 +591,57 @@ async function fetchCategoryData(
   );
   const allCategoryData = nested.flat();
 
-  if (groupAccounts) {
-    allCategoryData.forEach(entry => {
-      if (entry.accountName && entry.accountId) {
-        entry.accountName = SpecialNodeKeys.AllAccounts;
-        entry.accountId = SpecialNodeKeys.AllAccounts;
-      }
-    });
+  return aggregateCategoryData(allCategoryData, groupAccounts);
+}
+
+export function aggregateCategoryData(
+  categoryData: readonly CategoryEntry[],
+  groupAccounts: boolean,
+): CategoryEntry[] {
+  if (!groupAccounts) {
+    return categoryData.map(entry => ({ ...entry }));
   }
 
-  return allCategoryData;
+  const groupedCategoryData = new Map<
+    string,
+    CategoryEntry & { signedValue: number }
+  >();
+
+  // Preserve income payees while netting their account flows together.
+  categoryData.forEach(entry => {
+    const key = entry.isIncome
+      ? `${entry.categoryId}|${entry.payeeId}`
+      : entry.categoryId;
+    const existingEntry = groupedCategoryData.get(key);
+    const signedValue = entry.isNegative ? -entry.value : entry.value;
+
+    if (existingEntry) {
+      existingEntry.signedValue += signedValue;
+    } else {
+      groupedCategoryData.set(key, {
+        ...entry,
+        payeeId: entry.isIncome ? entry.payeeId : '',
+        payeeName: entry.isIncome ? entry.payeeName : '',
+        value: Math.abs(signedValue),
+        isNegative: signedValue < 0,
+        signedValue,
+      });
+    }
+  });
+
+  return Array.from(groupedCategoryData.values())
+    .filter(entry => entry.signedValue !== 0)
+    .map(({ signedValue, ...entry }) => ({
+      ...entry,
+      value: Math.abs(signedValue),
+      isNegative: signedValue < 0,
+      ...(entry.accountName && entry.accountId
+        ? {
+            accountName: SpecialNodeKeys.AllAccounts,
+            accountId: SpecialNodeKeys.AllAccounts,
+          }
+        : {}),
+    }));
 }
 
 // Fetch transactions that are transfers within the provided month range

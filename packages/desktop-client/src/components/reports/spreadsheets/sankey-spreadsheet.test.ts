@@ -6,6 +6,7 @@ import {
   addNode,
   addPercentageLabels,
   addValueToLink,
+  aggregateCategoryData,
   aggregateTransferPairs,
   buildSankeyData,
   cleanUpNodes,
@@ -604,6 +605,123 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('c_groceries')).toBe(true);
       expect(graph.has('c_salary')).toBe(true);
       expect(graph.has('p_employer')).toBe(true);
+    });
+  });
+
+  describe('aggregateCategoryData', () => {
+    const makeEntry = (overrides: Record<string, unknown>) => ({
+      categoryGroup: 'Category Group',
+      categoryGroupId: 'group',
+      category: 'Category',
+      categoryId: 'category',
+      value: 100,
+      isIncome: false,
+      isNegative: false,
+      accountName: 'Account',
+      accountId: 'account',
+      payeeName: 'Payee',
+      payeeId: 'payee',
+      ...overrides,
+    });
+
+    const cases = [
+      {
+        name: 'normal category payment',
+        entries: [makeEntry({ value: 100, isNegative: true })],
+        expected: [{ value: 100, isNegative: true, payeeId: '' }],
+      },
+      {
+        name: 'normal category deposit',
+        entries: [makeEntry({ value: 100 })],
+        expected: [{ value: 100, isNegative: false, payeeId: '' }],
+      },
+      {
+        name: 'normal category net payment',
+        entries: [
+          makeEntry({ accountId: 'one', value: 100, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 25 }),
+        ],
+        expected: [{ value: 75, isNegative: true, payeeId: '' }],
+      },
+      {
+        name: 'normal category net deposit',
+        entries: [
+          makeEntry({ accountId: 'one', value: 25, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 100 }),
+        ],
+        expected: [{ value: 75, isNegative: false, payeeId: '' }],
+      },
+      {
+        name: 'normal category zero net',
+        entries: [
+          makeEntry({ accountId: 'one', value: 100, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 100 }),
+        ],
+        expected: [],
+      },
+      {
+        name: 'income category deposit',
+        entries: [makeEntry({ isIncome: true })],
+        expected: [{ value: 100, isNegative: false, payeeId: 'payee' }],
+      },
+      {
+        name: 'income category payment',
+        entries: [makeEntry({ isIncome: true, isNegative: true })],
+        expected: [{ value: 100, isNegative: true, payeeId: 'payee' }],
+      },
+      {
+        name: 'income category mixed flows with separate payees',
+        entries: [
+          makeEntry({
+            isIncome: true,
+            accountId: 'one',
+            value: 100,
+            payeeId: 'one',
+            payeeName: 'One',
+          }),
+          makeEntry({
+            isIncome: true,
+            accountId: 'two',
+            value: 25,
+            isNegative: true,
+            payeeId: 'one',
+            payeeName: 'One',
+          }),
+          makeEntry({
+            isIncome: true,
+            accountId: 'two',
+            value: 50,
+            payeeId: 'two',
+            payeeName: 'Two',
+          }),
+        ],
+        expected: [
+          { value: 75, isNegative: false, payeeId: 'one' },
+          { value: 50, isNegative: false, payeeId: 'two' },
+        ],
+      },
+    ] as const;
+
+    it('keeps account-level flows when accounts are not grouped', () => {
+      const entries = [makeEntry({ value: 100, isNegative: true })];
+
+      expect(aggregateCategoryData(entries, false)).toEqual(entries);
+    });
+
+    it.each(cases)('$name', testCase => {
+      const input = structuredClone(testCase.entries);
+      const result = aggregateCategoryData(input, true);
+
+      expect(result).toEqual(
+        testCase.expected.map(expected =>
+          expect.objectContaining({
+            ...expected,
+            accountId: 'all_income',
+            accountName: 'all_income',
+          }),
+        ),
+      );
+      expect(input).toEqual(testCase.entries);
     });
   });
 
