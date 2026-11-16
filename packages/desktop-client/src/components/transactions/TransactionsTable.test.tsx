@@ -1766,6 +1766,52 @@ describe('Transactions', () => {
     // expect(getTransactions()[0].isParent).toBe(false);
   });
 
+  test('distributing a split updates every child so they add up to the parent', async () => {
+    const { container, getTransactions } = renderTransactions();
+
+    await editField(container, 'category', 0);
+    expect(getTransactions()[0].amount).toBe(-2777);
+
+    // Split into two empty children
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await userEvent.click(screen.getByTestId('add-split-button'));
+    expect(getTransactions().length).toBe(7);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+
+    const [parent, ...children] = getTransactions().slice(0, 3);
+    expect(children.map(t => t.amount)).toEqual([-1389, -1388]);
+    expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
+    expect(screen.queryAllByTestId('transaction-error')).toHaveLength(0);
+  });
+
+  test('distributing a split with no empty children spreads the remainder proportionally', async () => {
+    const { container, getTransactions } = renderTransactions();
+
+    await editField(container, 'category', 0);
+    expect(getTransactions()[0].amount).toBe(-2777);
+
+    await userEvent.click(screen.getByTestId('split-transaction-button'));
+    await waitForAutocomplete();
+    await userEvent.click(screen.getByTestId('add-split-button'));
+
+    let input = await editField(container, 'debit', 1);
+    await userEvent.clear(input);
+    await userEvent.type(input, '10.00[tab]');
+    input = await editField(container, 'debit', 2);
+    await userEvent.clear(input);
+    await userEvent.type(input, '5.00[tab]');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Distribute' }));
+
+    // The remaining -12.77 is split 2:1, with the leftover cent going to the
+    // child with the larger fractional share
+    const [parent, ...children] = getTransactions().slice(0, 3);
+    expect(children.map(t => t.amount)).toEqual([-1851, -926]);
+    expect(children.reduce((acc, t) => acc + t.amount, 0)).toBe(parent.amount);
+  });
+
   test('transaction with splits shows 0 in correct column', async () => {
     const { container, getTransactions } = renderTransactions();
 
