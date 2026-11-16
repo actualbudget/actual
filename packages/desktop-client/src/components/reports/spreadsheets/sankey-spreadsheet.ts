@@ -998,8 +998,7 @@ export function createTransactionsGraph(
             );
             addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
           } else {
-            const noPayeeKey =
-              entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
+            const noPayeeKey = entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
             addNode(
               graph,
               noPayeeKey,
