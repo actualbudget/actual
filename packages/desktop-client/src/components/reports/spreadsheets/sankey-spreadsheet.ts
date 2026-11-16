@@ -541,26 +541,18 @@ async function fetchCategoryData(
                 ],
               })
               .filter({ category: category.id })
-              .groupBy(
-                categoryGroup.is_income
-                  ? [
-                      { $id: '$category' },
-                      { $id: '$account' },
-                      { $id: '$payee' },
-                    ]
-                  : [{ $id: '$category' }, { $id: '$account' }],
-              )
-               .select([
-                 { accountId: { $id: '$account.id' } },
-                 { accountName: { $id: '$account.name' } },
-                 { amount: { $sum: '$amount' } },
-                 ...(categoryGroup.is_income
-                   ? [
-                       { payeeId: { $id: '$payee.id' } },
-                       { payeeName: { $id: '$payee.name' } },
-                     ]
-                   : []),
-               ]),
+              .groupBy([
+                { $id: '$category' },
+                { $id: '$account' },
+                { $id: '$payee' },
+              ])
+              .select([
+                { accountId: { $id: '$account.id' } },
+                { accountName: { $id: '$account.name' } },
+                { amount: { $sum: '$amount' } },
+                { payeeId: { $id: '$payee.id' } },
+                { payeeName: { $id: '$payee.name' } },
+              ]),
           );
           return results.data.map(
             (row: {
@@ -607,11 +599,9 @@ export function aggregateCategoryData(
     CategoryEntry & { signedValue: number }
   >();
 
-  // Preserve income payees while netting their account flows together.
+  // Preserve payee paths while netting their account flows together.
   categoryData.forEach(entry => {
-    const key = entry.isIncome
-      ? `${entry.categoryId}|${entry.payeeId}`
-      : entry.categoryId;
+    const key = `${entry.categoryId}|${entry.payeeId}`;
     const existingEntry = groupedCategoryData.get(key);
     const signedValue = entry.isNegative ? -entry.value : entry.value;
 
@@ -620,8 +610,8 @@ export function aggregateCategoryData(
     } else {
       groupedCategoryData.set(key, {
         ...entry,
-        payeeId: entry.isIncome ? entry.payeeId : '',
-        payeeName: entry.isIncome ? entry.payeeName : '',
+        payeeId: entry.payeeId,
+        payeeName: entry.payeeName,
         value: Math.abs(signedValue),
         isNegative: signedValue < 0,
         signedValue,
@@ -793,7 +783,7 @@ export function createBudgetGraph(
           SpecialNodeKeys.Budgeted,
           entry.value,
         );
-      } else {
+        } else {
         addNodeWithLabel(
           graph,
           entry.categoryId,
@@ -988,20 +978,25 @@ export function createTransactionsGraph(
             entry.value,
           );
         } else {
-          // Category > Account
-          addNode(
-            graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
-            GraphLayers.IncomeCategory,
-            entry.payeeName || entry.category,
-          );
+          // Payee > Category > Account
+          const categoryKey = entry.categoryId + SpecialNodeKeys.NegativeSuffix;
+          addNode(graph, categoryKey, GraphLayers.IncomeCategory, entry.category);
           addAccountNode(entry.accountId, entry.accountName);
           addValueToLink(
             graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            categoryKey,
             entry.accountId,
             entry.value,
           );
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
+          }
         }
       }
     }

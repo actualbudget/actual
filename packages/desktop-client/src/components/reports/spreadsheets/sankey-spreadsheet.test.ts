@@ -597,6 +597,19 @@ describe('sankey-spreadsheet', () => {
           payeeName: 'Employer',
           payeeId: 'p_employer',
         },
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 25,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+          payeeName: 'Store',
+          payeeId: 'p_store',
+        },
       ];
 
       const graph = createTransactionsGraph(categoryData);
@@ -605,6 +618,9 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('c_groceries')).toBe(true);
       expect(graph.has('c_salary')).toBe(true);
       expect(graph.has('p_employer')).toBe(true);
+      expect(graph.has('p_store')).toBe(true);
+      expect(graph.get('p_store')?.to.get('c_refund__NEGATIVE')).toBe(25);
+      expect(graph.get('c_refund__NEGATIVE')?.to.get('a_checking')).toBe(25);
     });
   });
 
@@ -628,12 +644,12 @@ describe('sankey-spreadsheet', () => {
       {
         name: 'normal category payment',
         entries: [makeEntry({ value: 100, isNegative: true })],
-        expected: [{ value: 100, isNegative: true, payeeId: '' }],
+        expected: [{ value: 100, isNegative: true, payeeId: 'payee' }],
       },
       {
         name: 'normal category deposit',
         entries: [makeEntry({ value: 100 })],
-        expected: [{ value: 100, isNegative: false, payeeId: '' }],
+        expected: [{ value: 100, isNegative: false, payeeId: 'payee' }],
       },
       {
         name: 'normal category net payment',
@@ -641,7 +657,7 @@ describe('sankey-spreadsheet', () => {
           makeEntry({ accountId: 'one', value: 100, isNegative: true }),
           makeEntry({ accountId: 'two', value: 25 }),
         ],
-        expected: [{ value: 75, isNegative: true, payeeId: '' }],
+        expected: [{ value: 75, isNegative: true, payeeId: 'payee' }],
       },
       {
         name: 'normal category net deposit',
@@ -649,7 +665,7 @@ describe('sankey-spreadsheet', () => {
           makeEntry({ accountId: 'one', value: 25, isNegative: true }),
           makeEntry({ accountId: 'two', value: 100 }),
         ],
-        expected: [{ value: 75, isNegative: false, payeeId: '' }],
+        expected: [{ value: 75, isNegative: false, payeeId: 'payee' }],
       },
       {
         name: 'normal category zero net',
@@ -658,6 +674,17 @@ describe('sankey-spreadsheet', () => {
           makeEntry({ accountId: 'two', value: 100 }),
         ],
         expected: [],
+      },
+      {
+        name: 'normal category keeps separate payees',
+        entries: [
+          makeEntry({ payeeId: 'one', payeeName: 'One' }),
+          makeEntry({ payeeId: 'two', payeeName: 'Two' }),
+        ],
+        expected: [
+          { value: 100, isNegative: false, payeeId: 'one' },
+          { value: 100, isNegative: false, payeeId: 'two' },
+        ],
       },
       {
         name: 'income category deposit',
