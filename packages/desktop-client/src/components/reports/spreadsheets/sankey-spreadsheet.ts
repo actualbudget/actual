@@ -113,10 +113,6 @@ export type NodeData = {
   color?: string;
 };
 export type Graph = Map<NodeKey, NodeData>;
-export type SankeyGraphResult = {
-  graph: Graph;
-  hasTransferCycle: boolean;
-};
 type VisualLayerIndex = number;
 
 type TooltipInfoMap = Map<
@@ -174,9 +170,9 @@ export function createBaseGraphSpreadsheet(
 ) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: SankeyGraphResult) => void,
+    setData: (data: Graph) => void,
   ) => {
-    const result = await createBaseGraph(
+    const graph = await createBaseGraph(
       start,
       end,
       categories,
@@ -187,7 +183,7 @@ export function createBaseGraphSpreadsheet(
       showTransfers,
     );
 
-    setData(result);
+    setData(graph);
   };
 }
 
@@ -200,7 +196,7 @@ async function createBaseGraph(
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
   showTransfers: boolean = false,
-): Promise<SankeyGraphResult> {
+): Promise<Graph> {
   let data: CategoryEntry[] = [];
   let aggregated: AggregatedBudget | undefined;
   let transferData: TransferPair[] | undefined;
@@ -226,15 +222,9 @@ async function createBaseGraph(
     transferData = res.transferData;
   }
 
-  const transferCycle =
-    !groupAccounts && transferData ? hasTransferCycle(transferData) : false;
-
-  return {
-    graph: aggregated
-      ? createBudgetGraph(data, aggregated)
-      : createTransactionsGraph(data, transferData, groupAccounts),
-    hasTransferCycle: transferCycle,
-  };
+  return aggregated
+    ? createBudgetGraph(data, aggregated)
+    : createTransactionsGraph(data, transferData, groupAccounts);
 }
 
 export function buildSankeyData(
@@ -246,6 +236,10 @@ export function buildSankeyData(
   layerTo: GraphLayer,
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
+
+  if (hasTransferCycle(graph)) {
+    removeTransferLinks(graph);
+  }
 
   const toolTipInfoMap = groupOtherCategories(
     graph,
@@ -700,30 +694,51 @@ export function aggregateTransferPairs(
     }) satisfies TransferPair[];
 }
 
-export function hasTransferCycle(
-  transferData: readonly TransferPair[],
-): boolean {
+export function hasTransferCycle(graph: Graph): boolean {
   const childrenByAccount = new Map<string, Set<string>>();
   const incomingCount = new Map<string, number>();
 
-  transferData.forEach(pair => {
-    if (!incomingCount.has(pair.fromAccountId)) {
-      incomingCount.set(pair.fromAccountId, 0);
+  graph.forEach((node, accountId) => {
+    if (node.type !== GraphLayers.Account) {
+      return;
     }
-    if (!incomingCount.has(pair.toAccountId)) {
-      incomingCount.set(pair.toAccountId, 0);
+    if (!incomingCount.has(accountId)) {
+      incomingCount.set(accountId, 0);
     }
-    const children = childrenByAccount.get(pair.fromAccountId) ?? new Set();
-    if (!children.has(pair.toAccountId)) {
-      children.add(pair.toAccountId);
-      incomingCount.set(
-        pair.toAccountId,
-        (incomingCount.get(pair.toAccountId) ?? 0) + 1,
-      );
+    for (const childId of node.to.keys()) {
+      if (graph.get(childId)?.type !== GraphLayers.Account) {
+        continue;
+      }
+      const children = childrenByAccount.get(accountId) ?? new Set();
+      if (!children.has(childId)) {
+        children.add(childId);
+        incomingCount.set(childId, (incomingCount.get(childId) ?? 0) + 1);
+      }
+      childrenByAccount.set(accountId, children);
     }
-    childrenByAccount.set(pair.fromAccountId, children);
   });
 
+  return hasDirectedCycle(childrenByAccount, incomingCount);
+}
+
+function removeTransferLinks(graph: Graph): void {
+  graph.forEach((node, sourceKey) => {
+    if (node.type !== GraphLayers.Account) {
+      return;
+    }
+
+    for (const targetKey of node.to.keys()) {
+      if (graph.get(targetKey)?.type === GraphLayers.Account) {
+        deleteLink(graph, sourceKey, targetKey);
+      }
+    }
+  });
+}
+
+function hasDirectedCycle(
+  childrenByAccount: Map<string, Set<string>>,
+  incomingCount: Map<string, number>,
+): boolean {
   const accountsWithoutParents = Array.from(incomingCount)
     .filter(([, count]) => count === 0)
     .map(([accountId]) => accountId);
@@ -1019,12 +1034,7 @@ export function createTransactionsGraph(
 
   // If transfer data is provided, add links between accounts representing transfers.
   // Pair transactions strictly by transfer_id === id.
-  if (
-    transferData &&
-    transferData.length > 0 &&
-    !groupAccounts &&
-    !hasTransferCycle(transferData)
-  ) {
+  if (transferData && transferData.length > 0 && !groupAccounts) {
     transferData.forEach((pair: TransferPair) => {
       addAccountNode(pair.fromAccountId, pair.fromAccountName);
       addAccountNode(pair.toAccountId, pair.toAccountName);

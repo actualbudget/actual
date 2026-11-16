@@ -654,10 +654,10 @@ describe('sankey-spreadsheet', () => {
       ]);
       const graph = createTransactionsGraph([], transferData);
 
-      expect(hasTransferCycle(transferData)).toBe(true);
-      expect(graph.get('account-a')).toBeUndefined();
-      expect(graph.get('account-b')).toBeUndefined();
-      expect(graph.get('account-c')).toBeUndefined();
+      expect(hasTransferCycle(graph)).toBe(true);
+      expect(graph.get('account-a')?.to.get('account-b')).toBe(100);
+      expect(graph.get('account-b')?.to.get('account-c')).toBe(100);
+      expect(graph.get('account-c')?.to.get('account-a')).toBe(100);
     });
   });
 

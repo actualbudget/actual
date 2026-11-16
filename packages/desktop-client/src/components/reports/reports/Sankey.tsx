@@ -46,10 +46,11 @@ import {
   createBaseGraphSpreadsheet,
   GRAPH_LAYER_ORDER,
   GraphLayers,
+  hasTransferCycle,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
+  Graph,
   GraphLayer,
-  SankeyGraphResult,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -619,10 +620,10 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const defaultGetBaseGraph = async (
     _spreadsheet: unknown,
-    setData: (data: SankeyGraphResult) => void,
-  ) => setData({ graph: new Map(), hasTransferCycle: false });
+    setData: (data: Graph) => void,
+  ) => setData(new Map());
 
-  const baseGraph = useReport<SankeyGraphResult>(
+  const baseGraph = useReport<Graph>(
     'sankey',
     baseGraphParams ?? defaultGetBaseGraph,
   );
@@ -634,8 +635,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     }
   }, [baseGraph]);
 
-  const displayReport = baseGraph || baseGraphRef.current;
-  const displayBaseGraph = displayReport?.graph;
+  const displayBaseGraph = baseGraph || baseGraphRef.current;
   const displayData: SankeyData | null = useMemo(() => {
     if (!displayBaseGraph) {
       return null;
@@ -950,7 +950,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   paddingTop: 10,
                 }}
               >
-                {displayReport?.hasTransferCycle && (
+                {displayBaseGraph && hasTransferCycle(displayBaseGraph) && (
                   <Warning style={{ marginBottom: 10 }}>
                     <Trans>
                       Transfers are hidden because they create a circular flow

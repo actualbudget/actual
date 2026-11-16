@@ -27,11 +27,12 @@ import {
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
+  hasTransferCycle,
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
+  Graph,
   GraphLayer,
-  SankeyGraphResult,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -40,8 +41,8 @@ import { useResizeObserver } from '#hooks/useResizeObserver';
 
 const defaultGetBaseGraph = async (
   _spreadsheet: unknown,
-  setData: (data: SankeyGraphResult) => void,
-) => setData({ graph: new Map(), hasTransferCycle: false });
+  setData: (data: Graph) => void,
+) => setData(new Map());
 
 type SankeyCardProps = {
   widgetId: string;
@@ -159,7 +160,7 @@ export function SankeyCard({
     meta?.showTransfers,
   ]);
 
-  const baseGraph = useReport<SankeyGraphResult>(
+  const baseGraph = useReport<Graph>(
     'sankey',
     baseGraphParams ?? defaultGetBaseGraph,
   );
@@ -171,8 +172,7 @@ export function SankeyCard({
     }
   }, [baseGraph]);
 
-  const displayReport = baseGraph || baseGraphRef.current;
-  const displayBaseGraph = displayReport?.graph;
+  const displayBaseGraph = baseGraph || baseGraphRef.current;
   const compactData = useMemo(() => {
     if (!displayBaseGraph) {
       return null;
@@ -245,7 +245,7 @@ export function SankeyCard({
 
         {compactData ? (
           <View ref={containerRef} style={{ flexGrow: 1 }}>
-            {displayReport?.hasTransferCycle && (
+            {displayBaseGraph && hasTransferCycle(displayBaseGraph) && (
               <Warning style={{ margin: '0 20px 10px' }}>
                 <Trans>
                   Transfers are hidden because they create a circular flow that
