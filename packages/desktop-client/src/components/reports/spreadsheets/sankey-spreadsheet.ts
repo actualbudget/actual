@@ -113,6 +113,10 @@ export type NodeData = {
   color?: string;
 };
 export type Graph = Map<NodeKey, NodeData>;
+export type SankeyGraphResult = {
+  graph: Graph;
+  hasTransferCycle: boolean;
+};
 type VisualLayerIndex = number;
 
 type TooltipInfoMap = Map<
@@ -170,9 +174,9 @@ export function createBaseGraphSpreadsheet(
 ) {
   return async (
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
-    setData: (data: Graph) => void,
+    setData: (data: SankeyGraphResult) => void,
   ) => {
-    const baseGraph = await createBaseGraph(
+    const result = await createBaseGraph(
       start,
       end,
       categories,
@@ -183,7 +187,7 @@ export function createBaseGraphSpreadsheet(
       showTransfers,
     );
 
-    setData(baseGraph);
+    setData(result);
   };
 }
 
@@ -196,7 +200,7 @@ async function createBaseGraph(
   mode: 'budgeted' | 'spent' = 'spent',
   groupAccounts: boolean = false,
   showTransfers: boolean = false,
-): Promise<Graph> {
+): Promise<SankeyGraphResult> {
   let data: CategoryEntry[] = [];
   let aggregated: AggregatedBudget | undefined;
   let transferData: TransferPair[] | undefined;
@@ -222,9 +226,15 @@ async function createBaseGraph(
     transferData = res.transferData;
   }
 
-  return aggregated
-    ? createBudgetGraph(data, aggregated)
-    : createTransactionsGraph(data, transferData, groupAccounts);
+  const transferCycle =
+    !groupAccounts && transferData ? hasTransferCycle(transferData) : false;
+
+  return {
+    graph: aggregated
+      ? createBudgetGraph(data, aggregated)
+      : createTransactionsGraph(data, transferData, groupAccounts),
+    hasTransferCycle: transferCycle,
+  };
 }
 
 export function buildSankeyData(
@@ -690,6 +700,51 @@ export function aggregateTransferPairs(
     }) satisfies TransferPair[];
 }
 
+export function hasTransferCycle(
+  transferData: readonly TransferPair[],
+): boolean {
+  const childrenByAccount = new Map<string, Set<string>>();
+  const incomingCount = new Map<string, number>();
+
+  transferData.forEach(pair => {
+    if (!incomingCount.has(pair.fromAccountId)) {
+      incomingCount.set(pair.fromAccountId, 0);
+    }
+    if (!incomingCount.has(pair.toAccountId)) {
+      incomingCount.set(pair.toAccountId, 0);
+    }
+    const children = childrenByAccount.get(pair.fromAccountId) ?? new Set();
+    if (!children.has(pair.toAccountId)) {
+      children.add(pair.toAccountId);
+      incomingCount.set(
+        pair.toAccountId,
+        (incomingCount.get(pair.toAccountId) ?? 0) + 1,
+      );
+    }
+    childrenByAccount.set(pair.fromAccountId, children);
+  });
+
+  const accountsWithoutParents = Array.from(incomingCount)
+    .filter(([, count]) => count === 0)
+    .map(([accountId]) => accountId);
+  let processedAccounts = 0;
+
+  for (let index = 0; index < accountsWithoutParents.length; index++) {
+    const accountId = accountsWithoutParents[index];
+    processedAccounts += 1;
+
+    for (const childId of childrenByAccount.get(accountId) ?? []) {
+      const count = (incomingCount.get(childId) ?? 0) - 1;
+      incomingCount.set(childId, count);
+      if (count === 0) {
+        accountsWithoutParents.push(childId);
+      }
+    }
+  }
+
+  return processedAccounts !== incomingCount.size;
+}
+
 export function createBudgetGraph(
   categoryData: CategoryEntry[],
   aggregated: AggregatedBudget,
@@ -964,7 +1019,12 @@ export function createTransactionsGraph(
 
   // If transfer data is provided, add links between accounts representing transfers.
   // Pair transactions strictly by transfer_id === id.
-  if (transferData && transferData.length > 0 && !groupAccounts) {
+  if (
+    transferData &&
+    transferData.length > 0 &&
+    !groupAccounts &&
+    !hasTransferCycle(transferData)
+  ) {
     transferData.forEach((pair: TransferPair) => {
       addAccountNode(pair.fromAccountId, pair.fromAccountName);
       addAccountNode(pair.toAccountId, pair.toAccountName);

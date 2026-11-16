@@ -30,6 +30,7 @@ import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
+import { Warning } from '#components/alerts';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
@@ -47,8 +48,8 @@ import {
   GraphLayers,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
-  Graph,
   GraphLayer,
+  SankeyGraphResult,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -618,10 +619,13 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const defaultGetBaseGraph = async (
     _spreadsheet: unknown,
-    setData: (data: Graph) => void,
-  ) => setData(new Map());
+    setData: (data: SankeyGraphResult) => void,
+  ) => setData({ graph: new Map(), hasTransferCycle: false });
 
-  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
+  const baseGraph = useReport<SankeyGraphResult>(
+    'sankey',
+    baseGraphParams ?? defaultGetBaseGraph,
+  );
   const baseGraphRef = useRef(baseGraph);
 
   useEffect(() => {
@@ -630,7 +634,8 @@ function SankeyInner({ widget }: SankeyInnerProps) {
     }
   }, [baseGraph]);
 
-  const displayBaseGraph = baseGraph || baseGraphRef.current;
+  const displayReport = baseGraph || baseGraphRef.current;
+  const displayBaseGraph = displayReport?.graph;
   const displayData: SankeyData | null = useMemo(() => {
     if (!displayBaseGraph) {
       return null;
@@ -945,6 +950,15 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   paddingTop: 10,
                 }}
               >
+                {displayReport?.hasTransferCycle && (
+                  <Warning style={{ marginBottom: 10 }}>
+                    <Trans>
+                      Transfers are hidden because they create a circular flow
+                      that cannot be displayed in a Sankey chart.
+                    </Trans>
+                  </Warning>
+                )}
+
                 {displayData &&
                 displayData.links &&
                 displayData.links.length > 0 ? (

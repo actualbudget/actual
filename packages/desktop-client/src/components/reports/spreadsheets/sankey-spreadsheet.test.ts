@@ -21,6 +21,7 @@ import {
   GraphLayers,
   hasChild,
   hasParent,
+  hasTransferCycle,
   isGraphLayer,
   moveNodeToEnd,
   moveNodeToStart,
@@ -604,6 +605,59 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('c_groceries')).toBe(true);
       expect(graph.has('c_salary')).toBe(true);
       expect(graph.has('p_employer')).toBe(true);
+    });
+
+    it('omits circular transfers between three accounts', () => {
+      const transferData = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'account-a',
+          accountName: 'Account A',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'account-b',
+          accountName: 'Account B',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'account-b',
+          accountName: 'Account B',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'account-c',
+          accountName: 'Account C',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'account-c',
+          accountName: 'Account C',
+          amount: -100,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'account-a',
+          accountName: 'Account A',
+          amount: 100,
+        },
+      ]);
+      const graph = createTransactionsGraph([], transferData);
+
+      expect(hasTransferCycle(transferData)).toBe(true);
+      expect(graph.get('account-a')).toBeUndefined();
+      expect(graph.get('account-b')).toBeUndefined();
+      expect(graph.get('account-c')).toBeUndefined();
     });
   });
 

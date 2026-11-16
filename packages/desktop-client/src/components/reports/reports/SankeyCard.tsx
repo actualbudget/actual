@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
@@ -11,6 +11,7 @@ import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 
+import { Warning } from '#components/alerts';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -29,8 +30,8 @@ import {
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
-  Graph,
   GraphLayer,
+  SankeyGraphResult,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
@@ -39,8 +40,8 @@ import { useResizeObserver } from '#hooks/useResizeObserver';
 
 const defaultGetBaseGraph = async (
   _spreadsheet: unknown,
-  setData: (data: Graph) => void,
-) => setData(new Map());
+  setData: (data: SankeyGraphResult) => void,
+) => setData({ graph: new Map(), hasTransferCycle: false });
 
 type SankeyCardProps = {
   widgetId: string;
@@ -158,7 +159,10 @@ export function SankeyCard({
     meta?.showTransfers,
   ]);
 
-  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
+  const baseGraph = useReport<SankeyGraphResult>(
+    'sankey',
+    baseGraphParams ?? defaultGetBaseGraph,
+  );
   const baseGraphRef = useRef(baseGraph);
 
   useEffect(() => {
@@ -167,7 +171,8 @@ export function SankeyCard({
     }
   }, [baseGraph]);
 
-  const displayBaseGraph = baseGraph || baseGraphRef.current;
+  const displayReport = baseGraph || baseGraphRef.current;
+  const displayBaseGraph = displayReport?.graph;
   const compactData = useMemo(() => {
     if (!displayBaseGraph) {
       return null;
@@ -240,6 +245,14 @@ export function SankeyCard({
 
         {compactData ? (
           <View ref={containerRef} style={{ flexGrow: 1 }}>
+            {displayReport?.hasTransferCycle && (
+              <Warning style={{ margin: '0 20px 10px' }}>
+                <Trans>
+                  Transfers are hidden because they create a circular flow that
+                  cannot be displayed in a Sankey chart.
+                </Trans>
+              </Warning>
+            )}
             <SankeyGraph
               data={compactData}
               showPercentages={meta?.showPercentages}
