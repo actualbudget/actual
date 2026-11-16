@@ -23,6 +23,7 @@ import {
   useUpdateReportMutation,
 } from '#reports/mutations';
 
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
 import { LoadingIndicator } from './LoadingIndicator';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
@@ -323,7 +324,10 @@ export function SaveReport({
                     value={saveDashboardId}
                     onChange={v => setSaveDashboardId(v)}
                     defaultLabel={t('None')}
-                    options={dashboardPages.map(d => [d.id, d.name])}
+                    options={dashboardPages.map(d => [
+                      d.id,
+                      translateBuiltInDashboardName(d.name, t),
+                    ])}
                     style={{ marginTop: 10, width: 300 }}
                   />
                 </FormField>

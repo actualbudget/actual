@@ -27,6 +27,8 @@ import {
   useMoveDashboardPageMutation,
 } from '#reports/mutations';
 
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
+
 type DashboardSelectorProps = {
   dashboards: readonly DashboardPageEntity[];
   currentDashboard: DashboardPageEntity;
@@ -144,7 +146,7 @@ export function DashboardSelector({
             textAlign: 'center',
           }}
         >
-          {currentDashboard.name}
+          {translateBuiltInDashboardName(currentDashboard.name, t)}
         </View>
         <SvgExpandArrow
           width={7}
@@ -232,7 +234,7 @@ function DashboardSelectorItem({
   return (
     <GridListItem
       id={dashboard.id}
-      textValue={dashboard.name}
+      textValue={translateBuiltInDashboardName(dashboard.name, t)}
       className={css({
         display: 'flex',
         flexDirection: 'row',
@@ -250,7 +252,7 @@ function DashboardSelectorItem({
         slot="drag"
         variant="bare"
         aria-label={t('Reorder {{ dashboardName }}', {
-          dashboardName: dashboard.name,
+          dashboardName: translateBuiltInDashboardName(dashboard.name, t),
         })}
         style={{
           cursor: 'grab',
@@ -261,7 +263,7 @@ function DashboardSelectorItem({
         <SvgMenu width={10} height={10} />
       </Button>
       <Text style={{ fontWeight: isCurrent ? 600 : undefined }}>
-        {dashboard.name}
+        {translateBuiltInDashboardName(dashboard.name, t)}
       </Text>
     </GridListItem>
   );

@@ -10,6 +10,7 @@ import type {
 } from '@actual-app/core/types/models';
 
 import { DateRange } from '#components/reports/DateRange';
+import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
 import { ReportCardValueSkeleton } from '#components/reports/ReportCardValueSkeleton';
@@ -98,7 +99,7 @@ export function SummaryCard({
       <View style={{ flex: 1, overflow: 'hidden' }}>
         <View style={{ flexGrow: 0, flexShrink: 0, padding: 20 }}>
           <ReportCardName
-            name={meta?.name || t('Summary')}
+            name={translateBuiltInDashboardName(meta?.name || t('Summary'), t)}
             isEditing={nameMenuOpen}
             onChange={newName => {
               onMetaChange({

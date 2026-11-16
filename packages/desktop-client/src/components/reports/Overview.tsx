@@ -51,8 +51,9 @@ import {
 
 import { NON_DRAGGABLE_AREA_CLASS_NAME } from './constants';
 import { DashboardHeader } from './DashboardHeader';
-import './overview.scss';
 import { DashboardSelector } from './DashboardSelector';
+import './overview.scss';
+import { translateBuiltInDashboardName } from './defaultDashboardNames';
 import { LoadingIndicator } from './LoadingIndicator';
 import { AgeOfMoneyCard } from './reports/AgeOfMoneyCard';
 import { BalanceForecastCard } from './reports/BalanceForecastCard';
@@ -490,7 +491,8 @@ export function Overview({ dashboard }: OverviewProps) {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  <Trans>Reports</Trans>: {dashboard.name}
+                  <Trans>Reports</Trans>:{' '}
+                  {translateBuiltInDashboardName(dashboard.name, t)}
                 </View>
               }
             />

@@ -30,6 +30,7 @@ import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { CalendarCardSkeleton } from '#components/reports/CalendarCardSkeleton';
 import { DateRange } from '#components/reports/DateRange';
+import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { CalendarGraph } from '#components/reports/graphs/CalendarGraph';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -177,7 +178,10 @@ export function CalendarCard({
         <View style={{ flexDirection: 'row', padding: 20, paddingBottom: 0 }}>
           <View style={{ flex: 1, marginBottom: -5 }}>
             <ReportCardName
-              name={meta?.name || t('Calendar')}
+              name={translateBuiltInDashboardName(
+                meta?.name || t('Calendar'),
+                t,
+              )}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({

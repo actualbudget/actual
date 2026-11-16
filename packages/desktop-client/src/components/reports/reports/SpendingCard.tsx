@@ -11,6 +11,7 @@ import type { SpendingWidget } from '@actual-app/core/types/models';
 import { FinancialText } from '#components/FinancialText';
 import { PrivacyFilter } from '#components/PrivacyFilter';
 import { DateRange } from '#components/reports/DateRange';
+import { translateBuiltInDashboardName } from '#components/reports/defaultDashboardNames';
 import { SpendingGraph } from '#components/reports/graphs/SpendingGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -103,7 +104,10 @@ export function SpendingCard({
         <View style={{ flexDirection: 'row', padding: 20 }}>
           <View style={{ flex: 1 }}>
             <ReportCardName
-              name={meta?.name || t('Monthly Spending')}
+              name={translateBuiltInDashboardName(
+                meta?.name || t('Monthly Spending'),
+                t,
+              )}
               isEditing={nameMenuOpen}
               onChange={newName => {
                 onMetaChange({
