@@ -783,7 +783,7 @@ export function createBudgetGraph(
           SpecialNodeKeys.Budgeted,
           entry.value,
         );
-        } else {
+      } else {
         addNodeWithLabel(
           graph,
           entry.categoryId,
@@ -980,14 +980,14 @@ export function createTransactionsGraph(
         } else {
           // Payee > Category > Account
           const categoryKey = entry.categoryId + SpecialNodeKeys.NegativeSuffix;
-          addNode(graph, categoryKey, GraphLayers.IncomeCategory, entry.category);
-          addAccountNode(entry.accountId, entry.accountName);
-          addValueToLink(
+          addNode(
             graph,
             categoryKey,
-            entry.accountId,
-            entry.value,
+            GraphLayers.IncomeCategory,
+            entry.category,
           );
+          addAccountNode(entry.accountId, entry.accountName);
+          addValueToLink(graph, categoryKey, entry.accountId, entry.value);
           if (entry.payeeId) {
             addNode(
               graph,
@@ -1627,10 +1627,7 @@ export function addPercentageLabels(graph: Graph): void {
   const layerSums = new Map<string, number>();
   const computedLayersByNode = getComputedNodeLayers(graph);
 
-  function getPercentageGroup(
-    data: NodeData,
-    layer: VisualLayerIndex,
-  ): string {
+  function getPercentageGroup(data: NodeData, layer: VisualLayerIndex): string {
     // Accounts can be split across visual columns by hidden alignment nodes,
     // but their percentages should still describe the account distribution.
     return data.type === GraphLayers.Account
