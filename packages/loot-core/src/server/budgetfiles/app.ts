@@ -10,6 +10,7 @@ import { logger } from '#platform/server/log';
 import {
   BudgetInUseError,
   flushSqliteStorage,
+  hasMigratedSqliteFiles,
   StorageLostError,
   StorageMigrationError,
   StorageMigrationNeededError,
@@ -662,6 +663,9 @@ async function _loadBudget(
     | 'storage-migration-failed'
     | 'storage-unavailable'
     | 'storage-lost';
+  // With `storage-migration-needed`: whether the budget could be opened
+  // on the previous storage engine instead
+  canKeepPreviousStorage?: boolean;
 }> {
   let dir: string;
   try {
@@ -689,7 +693,12 @@ async function _loadBudget(
     await closeBudget();
     // Expected conditions on the web storage, not bugs
     if (e instanceof StorageMigrationNeededError) {
-      return { error: 'storage-migration-needed' };
+      return {
+        error: 'storage-migration-needed',
+        // The previous engine reads nothing held in the new storage, so
+        // it can only take over while no budget has been moved there
+        canKeepPreviousStorage: !(await hasMigratedSqliteFiles()),
+      };
     }
     if (e instanceof BudgetInUseError) {
       return { error: 'budget-in-use' };

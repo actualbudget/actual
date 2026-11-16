@@ -59,8 +59,11 @@ async function getStorageInfo() {
 
 // Move every budget back to absurd-sql's layout so the next start can use
 // the legacy engine. Closes the open budget first; a budget open in another
-// tab holds its storage lock and makes this fail.
-async function revertStorage(): Promise<
+// tab holds its storage lock and makes this fail. That start opens the
+// budget it is given, or else the one opened last.
+async function revertStorage({
+  budgetToStartOn,
+}: { budgetToStartOn?: string } = {}): Promise<
   { ok: true } | { error: 'budget-in-use' | 'revert-failed' }
 > {
   if (sqlite.getStorageBackend() === 'legacy') {
@@ -69,7 +72,8 @@ async function revertStorage(): Promise<
   // The budget this worker has open; `lastBudget` is whichever budget any
   // tab opened last, kept only so the relaunch starts where the user was
   const openBudgetId = prefs.getPrefs()?.id;
-  const lastBudget = await asyncStorage.getItem('lastBudget');
+  const lastBudget =
+    budgetToStartOn ?? (await asyncStorage.getItem('lastBudget'));
   if (openBudgetId) {
     await runHandler(mainApp.handlers['close-budget'], undefined);
   }

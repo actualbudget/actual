@@ -16,6 +16,11 @@ import { loadBudget } from '#budgetfiles/budgetfilesSlice';
 import { Modal, ModalCloseButton, ModalHeader } from '#components/common/Modal';
 import type { Modal as ModalType } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
+import {
+  describePreviousStorageError,
+  returnToPreviousStorage,
+} from '#util/previous-storage';
+import type { PreviousStorageError } from '#util/previous-storage';
 
 type ConfirmStorageMigrationModalProps = Extract<
   ModalType,
@@ -29,19 +34,26 @@ type BackupState =
 /**
  * Asks before a budget is moved from the previous browser storage to the
  * new one, and offers a backup of it first. The budget is only opened, and
- * with that moved, once the user continues.
+ * with that moved, once the user continues. While nothing in the browser
+ * has been moved yet they can also put it off, which takes the browser back
+ * to the previous storage engine and opens the budget there.
  */
 export function ConfirmStorageMigrationModal({
   budgetId,
+  canKeepPreviousStorage,
 }: ConfirmStorageMigrationModalProps) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { isNarrowWidth } = useResponsive();
   const [backup, setBackup] = useState<BackupState>({ status: 'none' });
+  const [isGoingBack, setIsGoingBack] = useState(false);
+  const [goingBackError, setGoingBackError] =
+    useState<PreviousStorageError | null>(null);
   const narrowButtonStyle = isNarrowWidth
     ? { height: styles.mobileMinHeight }
     : {};
   const isBackupSaved = backup.status === 'saved';
+  const isBusy = isGoingBack || backup.status === 'saving';
 
   async function downloadBackup() {
     setBackup({ status: 'saving' });
@@ -62,6 +74,17 @@ export function ConfirmStorageMigrationModal({
     }
   }
 
+  // The page reloads when this works, so only a failure comes back
+  async function keepPreviousStorage() {
+    setIsGoingBack(true);
+    setGoingBackError(null);
+    const error = await returnToPreviousStorage(budgetId);
+    if (error) {
+      setGoingBackError(error);
+      setIsGoingBack(false);
+    }
+  }
+
   return (
     <Modal name="confirm-storage-migration">
       {({ state }) => (
@@ -72,17 +95,41 @@ export function ConfirmStorageMigrationModal({
           />
           <View style={{ lineHeight: 1.5, maxWidth: 500 }}>
             <Paragraph>
-              <Trans>
-                Actual has a new, faster way of storing budgets in your browser.
-                This budget needs to be moved to it before it can be opened.
-                This only happens once.
-              </Trans>
+              {canKeepPreviousStorage ? (
+                <Trans>
+                  Actual has a new, faster way of storing budgets in your
+                  browser. Opening this budget moves it there, which only
+                  happens once.
+                </Trans>
+              ) : (
+                <Trans>
+                  Actual has a new, faster way of storing budgets in your
+                  browser. This budget needs to be moved to it before it can be
+                  opened, which only happens once.
+                </Trans>
+              )}
             </Paragraph>
             <Paragraph>
               <Trans>
                 We recommend downloading a backup first. If anything goes wrong,
                 you can import the backup again from the list of budget files.
               </Trans>
+            </Paragraph>
+            <Paragraph>
+              {canKeepPreviousStorage ? (
+                <Trans>
+                  <strong>Not now</strong> opens this budget on the previous
+                  storage and turns the new storage engine off again. You can
+                  turn it back on under Settings → Experimental.
+                </Trans>
+              ) : (
+                <Trans>
+                  Other budgets in this browser already use the new storage, so
+                  this one has to move as well. To go back to the previous
+                  storage for all of them, open one of those budgets and turn
+                  the new storage engine off under Settings → Experimental.
+                </Trans>
+              )}
             </Paragraph>
             {isBackupSaved && (
               <Paragraph>
@@ -95,6 +142,11 @@ export function ConfirmStorageMigrationModal({
                   An unknown error occurred while exporting. Please report this
                   as a new issue on GitHub.
                 </Trans>
+              </Paragraph>
+            )}
+            {goingBackError && (
+              <Paragraph style={{ color: theme.errorText }}>
+                {describePreviousStorageError(goingBackError)}
               </Paragraph>
             )}
             {isBackupSaved &&
@@ -124,13 +176,28 @@ export function ConfirmStorageMigrationModal({
                 marginTop: 10,
               }}
             >
-              <Button style={narrowButtonStyle} onPress={() => state.close()}>
-                <Trans>Not now</Trans>
-              </Button>
+              {canKeepPreviousStorage ? (
+                <ButtonWithLoading
+                  style={narrowButtonStyle}
+                  isLoading={isGoingBack}
+                  isDisabled={isBusy}
+                  onPress={keepPreviousStorage}
+                >
+                  <Trans>Not now</Trans>
+                </ButtonWithLoading>
+              ) : (
+                <Button
+                  style={narrowButtonStyle}
+                  isDisabled={isBusy}
+                  onPress={() => state.close()}
+                >
+                  <Trans>Cancel</Trans>
+                </Button>
+              )}
               <Button
                 variant={isBackupSaved ? 'primary' : 'normal'}
                 style={narrowButtonStyle}
-                isDisabled={backup.status === 'saving'}
+                isDisabled={isBusy}
                 onPress={() => {
                   state.close();
                   void dispatch(
@@ -145,6 +212,7 @@ export function ConfirmStorageMigrationModal({
                   variant={isBackupSaved ? 'normal' : 'primary'}
                   style={narrowButtonStyle}
                   isLoading={backup.status === 'saving'}
+                  isDisabled={isBusy}
                   onPress={downloadBackup}
                 >
                   <Trans>Download backup</Trans>

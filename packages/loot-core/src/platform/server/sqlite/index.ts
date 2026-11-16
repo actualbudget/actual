@@ -33,6 +33,9 @@ export {
   StorageMigrationNeededError,
   StorageUnavailableError,
 } from './storage/errors';
+// Whether anything lives in the new storage, which the legacy engine
+// cannot read
+export { hasMigratedSqliteFiles } from './storage/files-store';
 // Used by the legacy filesystem layer and its tests
 export { _getModule } from './engine.sqljs.legacy';
 export type { SqlJsModule } from './engine.sqljs.legacy';

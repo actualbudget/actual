@@ -65,11 +65,14 @@ export const loadBudget = createAppAsyncThunk(
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
-    const { error } = await send('load-budget', {
-      id,
-      allowStorageMigration,
-      ...options,
-    });
+    const { error, canKeepPreviousStorage = false } = await send(
+      'load-budget',
+      {
+        id,
+        allowStorageMigration,
+        ...options,
+      },
+    );
 
     if (error) {
       const message = getSyncError(error, id);
@@ -79,7 +82,7 @@ export const loadBudget = createAppAsyncThunk(
           pushModal({
             modal: {
               name: 'confirm-storage-migration',
-              options: { budgetId: id },
+              options: { budgetId: id, canKeepPreviousStorage },
             },
           }),
         );

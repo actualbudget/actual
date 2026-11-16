@@ -24,7 +24,9 @@ Each budget is moved to the new storage the first time it is opened. Actual asks
 
 - **Download backup** saves a copy of the budget first. It is the same file that **Settings → Export data** gives you, and you can bring it back with **Import file** on the list of budget files.
 - **Continue** moves the budget and opens it. The loading screen shows the progress, and the old copy is deleted only after the moved budget has been checked.
-- **Not now** leaves the budget where it is. Actual asks again the next time you open it.
+- **Not now** opens the budget on the previous storage instead, and turns the new storage engine off again. You can turn it back on in the same place as before.
+
+**Not now** is only offered while no budget in the browser is on the new storage. After that, the previous engine could not read the budgets that have moved. To go back anyway, use the setting as described under [Turning It Off](#turning-it-off), which moves them back first.
 
 Opening Actual once with `?storage=opfs` added to the address, for example `https://your-server.example/?storage=opfs`, turns it on as well. You do not need the parameter again.
 

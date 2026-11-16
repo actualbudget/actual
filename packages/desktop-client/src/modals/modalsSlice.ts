@@ -246,6 +246,9 @@ export type Modal =
       name: 'confirm-storage-migration';
       options: {
         budgetId: string;
+        // Whether the budget could be opened on the previous storage
+        // engine instead of being moved
+        canKeepPreviousStorage: boolean;
       };
     }
   | {
