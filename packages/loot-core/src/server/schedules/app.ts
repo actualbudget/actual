@@ -626,7 +626,7 @@ export async function postTransactionForSchedule({
   const { date: dateCond } = extractScheduleConds(schedule._conditions);
   if (dateCond && schedule.next_date > currentDay()) {
     if (getNextDateAfter(dateCond, schedule.next_date) != null) {
-      await advanceRecurringScheduleFromNextDate(schedule);
+      await skipNextDate({ id });
     } else {
       await updateSchedule({ schedule: { id, completed: true } });
     }
