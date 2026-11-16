@@ -131,6 +131,7 @@ const SpecialNodeKeys = {
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
   NegativeSuffix: '__NEGATIVE',
+  NoPayeeSuffix: '__NO_PAYEE',
 } as const;
 export const GraphLayers = {
   IncomePayee: 'payee',
@@ -996,6 +997,16 @@ export function createTransactionsGraph(
               entry.payeeName,
             );
             addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
+          } else {
+            const noPayeeKey =
+              entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
+            addNode(
+              graph,
+              noPayeeKey,
+              GraphLayers.IncomePayee,
+              t('(No payee)'),
+            );
+            addValueToLink(graph, noPayeeKey, categoryKey, entry.value);
           }
         }
       }

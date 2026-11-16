@@ -622,6 +622,41 @@ describe('sankey-spreadsheet', () => {
       expect(graph.get('p_store')?.to.get('c_refund__NEGATIVE')).toBe(25);
       expect(graph.get('c_refund__NEGATIVE')?.to.get('a_checking')).toBe(25);
     });
+
+    it('includes refunds without a payee in the category value', () => {
+      const graph = createTransactionsGraph([
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 50,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+          payeeName: 'Store',
+          payeeId: 'p_store',
+        },
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 50,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+        },
+      ]);
+
+      expect(graph.get('p_store')?.to.get('c_refund__NEGATIVE')).toBe(50);
+      expect(
+        graph.get('c_refund__NO_PAYEE')?.to.get('c_refund__NEGATIVE'),
+      ).toBe(50);
+      expect(getNodeValue(graph, 'c_refund__NEGATIVE')).toBe(100);
+    });
   });
 
   describe('aggregateCategoryData', () => {
