@@ -146,34 +146,6 @@ async function openLegacyDatabase(
   });
 }
 
-// Opens the absurd-sql database only if there is one: a plain open
-// upgrades just a database that does not exist yet, and abandoning that
-// upgrade leaves it that way. No connection is asked to close.
-function openLegacyDatabaseIfPresent(
-  name: string,
-): Promise<IDBDatabase | null> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(name);
-    let isMissing = false;
-    request.onupgradeneeded = () => {
-      isMissing = true;
-      request.transaction?.abort();
-    };
-    request.onsuccess = () => {
-      const database = request.result;
-      database.onversionchange = () => database.close();
-      resolve(database);
-    };
-    request.onerror = () => {
-      if (isMissing) {
-        resolve(null);
-      } else {
-        reject(request.error);
-      }
-    };
-  });
-}
-
 function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
@@ -202,22 +174,32 @@ export function pageSizeFromHeader(header: Uint8Array): number | null {
   return size >= 512 && size <= 65536 && isPowerOfTwo ? size : null;
 }
 
-// Reads every block in one read-only transaction, so a legacy writer in
-// another tab waits until the copy is done rather than changing the file
-// part-way through. Gaps are zero-filled and the last block is cut to the
-// file size. Resolves with the file in chunks.
-function readAllBlocks(
+// A run of consecutive block numbers and the blocks stored for them, in
+// order. `keys` names the stored ones: absurd-sql leaves gaps.
+type BlockRun = {
+  blockSize: number;
+  firstBlock: number;
+  lastBlock: number;
+  keys: number[];
+  blocks: ArrayBuffer[];
+};
+
+// Walks the blocks of a file from first to last, a run at a time, in one
+// read-only transaction, so a legacy writer in another tab waits until
+// the walk is done rather than changing the file part-way through. The
+// walk ends early when `visit` returns false.
+function walkBlocks(
   database: IDBDatabase,
   size: number,
+  visit: (run: BlockRun) => boolean,
   onProgress?: (percent: number) => void,
-): Promise<Uint8Array[]> {
+): Promise<void> {
   return new Promise((resolve, reject) => {
     const transaction = database.transaction([LEGACY_STORE], 'readonly');
     const store = transaction.objectStore(LEGACY_STORE);
-    const chunks: Uint8Array[] = [];
     transaction.onerror = () => reject(transaction.error);
     transaction.onabort = () => reject(transaction.error);
-    transaction.oncomplete = () => resolve(chunks);
+    transaction.oncomplete = () => resolve();
 
     function fail(message: string) {
       reject(new Error(message));
@@ -227,31 +209,28 @@ function readAllBlocks(
     // Requests complete in order, so the keys are in by the time the
     // values arrive; issuing the next pair from there keeps the
     // transaction alive
-    function readChunk(fromBlock: number, blockSize: number) {
+    function readRun(firstBlock: number, blockSize: number) {
       const totalBlocks = Math.ceil(size / blockSize);
-      if (fromBlock >= totalBlocks) {
+      if (firstBlock >= totalBlocks) {
         return;
       }
-      const lastBlock = Math.min(fromBlock + BLOCKS_PER_CHUNK, totalBlocks) - 1;
-      const range = IDBKeyRange.bound(fromBlock, lastBlock);
+      const lastBlock =
+        Math.min(firstBlock + BLOCKS_PER_CHUNK, totalBlocks) - 1;
+      const range = IDBKeyRange.bound(firstBlock, lastBlock);
       const keysRequest = store.getAllKeys(range);
-      const valuesRequest = store.getAll(range);
-      valuesRequest.onsuccess = () => {
-        const chunkStart = fromBlock * blockSize;
-        const chunkEnd = Math.min((lastBlock + 1) * blockSize, size);
-        const chunk = new Uint8Array(chunkEnd - chunkStart);
-        valuesRequest.result.forEach((value, index) => {
-          const key = keysRequest.result[index] as number;
-          const block = new Uint8Array(value as ArrayBuffer);
-          const offset = key * blockSize - chunkStart;
-          chunk.set(
-            block.subarray(0, Math.min(block.length, chunk.length - offset)),
-            offset,
-          );
+      const blocksRequest = store.getAll(range);
+      blocksRequest.onsuccess = () => {
+        const isWanted = visit({
+          blockSize,
+          firstBlock,
+          lastBlock,
+          keys: keysRequest.result as number[],
+          blocks: blocksRequest.result as ArrayBuffer[],
         });
-        chunks.push(chunk);
         onProgress?.(Math.round((100 * (lastBlock + 1)) / totalBlocks));
-        readChunk(lastBlock + 1, blockSize);
+        if (isWanted) {
+          readRun(lastBlock + 1, blockSize);
+        }
       };
     }
 
@@ -267,9 +246,83 @@ function readAllBlocks(
         fail('legacy database has no valid sqlite header');
         return;
       }
-      readChunk(0, blockSize);
+      readRun(0, blockSize);
     };
   });
+}
+
+// Reads the whole file. Gaps are zero-filled and the last block is cut to
+// the file size. Resolves with the file in chunks.
+async function readAllBlocks(
+  database: IDBDatabase,
+  size: number,
+  onProgress?: (percent: number) => void,
+): Promise<Uint8Array[]> {
+  const chunks: Uint8Array[] = [];
+  await walkBlocks(
+    database,
+    size,
+    ({ blockSize, firstBlock, lastBlock, keys, blocks }) => {
+      const chunkStart = firstBlock * blockSize;
+      const chunkEnd = Math.min((lastBlock + 1) * blockSize, size);
+      const chunk = new Uint8Array(chunkEnd - chunkStart);
+      blocks.forEach((value, index) => {
+        const block = new Uint8Array(value);
+        const offset = keys[index] * blockSize - chunkStart;
+        chunk.set(
+          block.subarray(0, Math.min(block.length, chunk.length - offset)),
+          offset,
+        );
+      });
+      chunks.push(chunk);
+      return true;
+    },
+    onProgress,
+  );
+  return chunks;
+}
+
+// Whether `bytes` is the file these blocks make up: every stored block
+// where it belongs, zeros where the store holds none, and nothing past
+// the recorded size. Each block is held against its place in the file,
+// so this does not lean on how the file was put together.
+async function blocksMatch(
+  database: IDBDatabase,
+  size: number,
+  bytes: Uint8Array,
+): Promise<boolean> {
+  if (bytes.length !== size) {
+    return false;
+  }
+  let isSame = true;
+  await walkBlocks(
+    database,
+    size,
+    ({ blockSize, firstBlock, lastBlock, keys, blocks }) => {
+      let storedIndex = 0;
+      for (
+        let blockNumber = firstBlock;
+        blockNumber <= lastBlock && isSame;
+        blockNumber++
+      ) {
+        const isStored = keys[storedIndex] === blockNumber;
+        const block = isStored ? new Uint8Array(blocks[storedIndex]) : null;
+        if (isStored) {
+          storedIndex++;
+        }
+        const start = blockNumber * blockSize;
+        const end = Math.min(start + blockSize, size);
+        for (let offset = start; offset < end; offset++) {
+          if (bytes[offset] !== (block?.[offset - start] ?? 0)) {
+            isSame = false;
+            break;
+          }
+        }
+      }
+      return isSame;
+    },
+  );
+  return isSame;
 }
 
 // Resolves false when the database is still open elsewhere after a while
@@ -286,29 +339,6 @@ export function deleteLegacyDatabase(name: string): Promise<boolean> {
       resolve(false);
     };
   });
-}
-
-// Whether an absurd-sql copy with anything in it exists for a sqlite
-// path, found out without changing it or disturbing its connections. A
-// copy that cannot be read as one counts: moving it is what reports the
-// damage.
-export async function hasLegacyDatabase(path: string): Promise<boolean> {
-  const database = await openLegacyDatabaseIfPresent(legacyDatabaseName(path));
-  if (database == null) {
-    return false;
-  }
-  try {
-    const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
-    if (typeof meta?.size === 'number' && meta.size > 0) {
-      return true;
-    }
-    // absurd-sql creates the database before its first write
-    return (await readLegacyKey(database, 0)) != null;
-  } catch {
-    return true;
-  } finally {
-    database.close();
-  }
 }
 
 export type LegacyDatabaseContents = {
@@ -377,6 +407,30 @@ export async function readLegacyDatabaseBytes(
     offset += chunk.length;
   }
   return bytes;
+}
+
+// Whether a file holds exactly what the absurd-sql copy of its path does
+// now, byte for byte. The copy is read a second time for this, so a
+// copy written to since it was moved does not match either. Both stores
+// ask it of what they moved before the copy is dropped: the structural
+// check alone would pass a file whose contents went wrong on the way.
+export async function matchesLegacyDatabase(
+  path: string,
+  bytes: Uint8Array,
+): Promise<boolean> {
+  const database = await openLegacyDatabase(legacyDatabaseName(path), path);
+  if (database == null) {
+    return false;
+  }
+  try {
+    const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
+    return (
+      typeof meta?.size === 'number' &&
+      (await blocksMatch(database, meta.size, bytes))
+    );
+  } finally {
+    database.close();
+  }
 }
 
 // Writes a sqlite file back into absurd-sql's layout so switching the

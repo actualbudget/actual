@@ -2,16 +2,14 @@ import type { SAHPoolUtil, Sqlite3Static } from '@sqlite.org/sqlite-wasm';
 
 import type { Data } from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
-import type { OpenDatabaseOptions } from '#platform/server/sqlite/types';
 import { exportBytes, getSqlite3 } from '#platform/server/sqlite/wasm';
 import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 
 import {
   completeMigration,
   deleteLegacyDatabase,
-  hasLegacyDatabase,
+  matchesLegacyDatabase,
   openLegacyDatabaseContents,
-  readLegacyDatabaseBytes,
   verifyMigratedDatabase,
   writeLegacyDatabaseBytes,
 } from './absurd-migration';
@@ -19,7 +17,6 @@ import {
   BudgetInUseError,
   StorageLostError,
   StorageMigrationError,
-  StorageMigrationNeededError,
 } from './errors';
 import {
   deleteSqliteFileRow,
@@ -32,11 +29,7 @@ import {
   budgetLockName,
 } from './locks';
 import { legacyDatabaseName, splitSqlitePath } from './paths';
-import type {
-  LegacyCopyUse,
-  MigrationProgress,
-  SqliteFileStore,
-} from './types';
+import type { MigrationProgress, SqliteFileStore } from './types';
 
 // Primary web storage: SQLite's own `opfs-sahpool` VFS, one pool per
 // budget directory so budgets can be open in different tabs at once. A
@@ -284,6 +277,12 @@ export function createOpfsStore({
     try {
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
+      // Before any connection touches the file, so it is as imported
+      if (
+        !(await matchesLegacyDatabase(path, pool.util.exportFile(fileName)))
+      ) {
+        throw new Error('the moved file differs from the absurd-sql copy');
+      }
       verifyImported(pool, fileName);
       // A refused cutover or a failed marker write leaves nothing of the
       // move behind, so the next open redoes it
@@ -348,14 +347,11 @@ export function createOpfsStore({
   // means the pool lost it, which is never stood in for. With no row to
   // say, an absurd-sql copy wins over a pooled file: a crash between an
   // import and its marker leaves such a file, and the copy is what the
-  // legacy engine kept editing since. That copy is moved in only when
-  // the caller may: otherwise an open is refused, and a read is told
-  // the pool does not have the database, so that it reads the copy.
+  // legacy engine kept editing since.
   async function importExisting(
     pool: Pool,
     path: string,
     fileName: string,
-    legacyCopy: LegacyCopyUse,
   ): Promise<boolean> {
     const row = await getSqliteFileRow(path);
     const pooled = pool.util.getFileNames().includes(fileName);
@@ -368,16 +364,7 @@ export function createOpfsStore({
     if (await promoteFallbackRow(pool, path, fileName, row)) {
       return true;
     }
-    if (legacyCopy === 'move') {
-      return (await migrateLegacy(pool, path, fileName, row)) || pooled;
-    }
-    if (!(await hasLegacyDatabase(path))) {
-      return pooled;
-    }
-    if (legacyCopy === 'refuse') {
-      throw new StorageMigrationNeededError(path);
-    }
-    return false;
+    return (await migrateLegacy(pool, path, fileName, row)) || pooled;
   }
 
   // A write replacing a file is kept apart from opens and reads of that
@@ -411,18 +398,12 @@ export function createOpfsStore({
   // migrated into the pool once rather than by each caller
   const opening = new Map<string, Promise<WasmDatabase>>();
 
-  function open(
-    path: string,
-    options?: OpenDatabaseOptions,
-  ): Promise<WasmDatabase> {
+  function open(path: string): Promise<WasmDatabase> {
     const inFlight = opening.get(path);
     if (inFlight) {
       return inFlight;
     }
-    const promise = openOnce(
-      path,
-      options?.allowStorageMigration ? 'move' : 'refuse',
-    ).finally(() => {
+    const promise = openOnce(path).finally(() => {
       if (opening.get(path) === promise) {
         opening.delete(path);
       }
@@ -431,10 +412,7 @@ export function createOpfsStore({
     return promise;
   }
 
-  async function openOnce(
-    path: string,
-    legacyCopy: LegacyCopyUse,
-  ): Promise<WasmDatabase> {
+  async function openOnce(path: string): Promise<WasmDatabase> {
     const { dirId, fileName } = splitSqlitePath(path);
     await replacing.get(path)?.catch(() => undefined);
     const pool = await acquire(dirId, path);
@@ -444,7 +422,7 @@ export function createOpfsStore({
       if (already) {
         return already;
       }
-      const present = await importExisting(pool, path, fileName, legacyCopy);
+      const present = await importExisting(pool, path, fileName);
       // Another call may have opened the file while that ran
       const opened = pool.open.get(fileName);
       if (opened) {
@@ -514,15 +492,10 @@ export function createOpfsStore({
       await replacing.get(path)?.catch(() => undefined);
       const pool = await acquire(dirId, path);
       try {
-        if (await importExisting(pool, path, fileName, 'read')) {
-          return exportPooled(pool, fileName);
-        }
-        // Under the budget's lock, like the move this stands in for
-        const bytes = await readLegacyDatabaseBytes(path);
-        if (bytes == null) {
+        if (!(await importExisting(pool, path, fileName))) {
           throw new Error('File does not exist: ' + path);
         }
-        return bytes;
+        return exportPooled(pool, fileName);
       } finally {
         release(pool);
       }

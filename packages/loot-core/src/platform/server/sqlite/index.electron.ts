@@ -9,7 +9,6 @@ import { normalise } from './normalise';
 import { regexp } from './regexp';
 import type {
   Database,
-  OpenDatabaseOptions,
   SqlParam,
   Statement,
   StorageBackend,
@@ -19,7 +18,6 @@ import { unicodeLike } from './unicodeLike';
 
 export type {
   Database,
-  OpenDatabaseOptions,
   SqlParam,
   Statement,
   StorageBackend,
@@ -29,7 +27,6 @@ export {
   BudgetInUseError,
   StorageLostError,
   StorageMigrationError,
-  StorageMigrationNeededError,
   StorageUnavailableError,
 } from './storage/errors';
 
@@ -178,11 +175,7 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
   }
 }
 
-// Nothing is moved on native sqlite, so the options change nothing here
-export function openDatabase(
-  pathOrBuffer: string | Buffer,
-  _options?: OpenDatabaseOptions,
-): Database {
+export function openDatabase(pathOrBuffer: string | Buffer): Database {
   const db = new SQL(pathOrBuffer);
   // Define Unicode-aware LOWER, UPPER, and LIKE implementation.
   // This is necessary because better-sqlite3 uses SQLite build without ICU support.

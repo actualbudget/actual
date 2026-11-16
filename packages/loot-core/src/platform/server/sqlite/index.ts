@@ -10,7 +10,6 @@ import { StorageUnavailableError } from './storage/errors';
 import { hasMigratedSqliteFiles } from './storage/files-store';
 import type {
   Database,
-  OpenDatabaseOptions,
   SqliteEngine,
   SqlParam,
   Statement,
@@ -20,7 +19,6 @@ import type {
 
 export type {
   Database,
-  OpenDatabaseOptions,
   SqlParam,
   Statement,
   StorageBackend,
@@ -30,7 +28,6 @@ export {
   BudgetInUseError,
   StorageLostError,
   StorageMigrationError,
-  StorageMigrationNeededError,
   StorageUnavailableError,
 } from './storage/errors';
 // Whether anything lives in the new storage, which the legacy engine
@@ -279,14 +276,13 @@ export async function asyncTransaction(db: Database, fn: () => Promise<void>) {
 
 export async function openDatabase(
   pathOrBuffer?: string | Uint8Array,
-  options?: OpenDatabaseOptions,
 ): Promise<Database> {
   if (typeof pathOrBuffer !== 'string' || pathOrBuffer === ':memory:') {
     // In memory, which holds no storage
     return activeEngine.openDatabase(pathOrBuffer);
   }
   assertNotReleased();
-  const db = await activeEngine.openDatabase(pathOrBuffer, options);
+  const db = await activeEngine.openDatabase(pathOrBuffer);
   if (isReleased) {
     // Let go of while this database was being opened, so it goes back too
     activeEngine.closeDatabase(db);

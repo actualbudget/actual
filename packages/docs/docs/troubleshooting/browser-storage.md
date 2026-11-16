@@ -20,13 +20,9 @@ This page is for people who want to try it before it becomes the default. Everyt
 
 The choice is remembered by the browser, not by the budget. It covers every budget opened in that browser, and your other browsers and devices keep their own setting.
 
-Each budget is moved to the new storage the first time it is opened. Actual asks before it moves a budget:
+Each budget is moved to the new storage the first time it is opened. The loading screen shows the progress. The old copy is deleted only after the moved budget has been checked against it, byte for byte.
 
-- **Download backup** saves a copy of the budget first. It is the same file that **Settings → Export data** gives you, and you can bring it back with **Import file** on the list of budget files.
-- **Continue** moves the budget and opens it. The loading screen shows the progress, and the old copy is deleted only after the moved budget has been checked.
-- **Not now** opens the budget on the previous storage instead, and turns the new storage engine off again. You can turn it back on in the same place as before.
-
-**Not now** is only offered while no budget in the browser is on the new storage. After that, the previous engine could not read the budgets that have moved. To go back anyway, use the setting as described under [Turning It Off](#turning-it-off), which moves them back first.
+If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no budget in the browser has been moved yet, the message also offers **Go back to previous storage**, which opens the budget as before and turns the new storage engine off again.
 
 Opening Actual once with `?storage=opfs` added to the address, for example `https://your-server.example/?storage=opfs`, turns it on as well. You do not need the parameter again.
 

@@ -243,11 +243,11 @@ export type Modal =
       name: 'out-of-sync-migrations';
     }
   | {
-      name: 'confirm-storage-migration';
+      name: 'storage-migration-failed';
       options: {
         budgetId: string;
         // Whether the budget could be opened on the previous storage
-        // engine instead of being moved
+        // engine instead
         canKeepPreviousStorage: boolean;
       };
     }

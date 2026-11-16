@@ -29,7 +29,6 @@ import { CloseAccountModal } from './modals/CloseAccountModal';
 import { ConfirmCategoryDeleteModal } from './modals/ConfirmCategoryDeleteModal';
 import { ConfirmDeleteModal } from './modals/ConfirmDeleteModal';
 import { ConfirmPayeesMergeModal } from './modals/ConfirmPayeesMergeModal';
-import { ConfirmStorageMigrationModal } from './modals/ConfirmStorageMigrationModal';
 import { ConfirmTransactionEditModal } from './modals/ConfirmTransactionEditModal';
 import { ConfirmUnlinkAccountModal } from './modals/ConfirmUnlinkAccountModal';
 import { ConvertToScheduleModal } from './modals/ConvertToScheduleModal';
@@ -78,6 +77,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { StorageMigrationFailedModal } from './modals/StorageMigrationFailedModal';
 import { TagColorModal } from './modals/TagColorModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
@@ -101,11 +101,11 @@ export function Modals() {
   const [budgetId] = useMetadataPref('id');
 
   const onCloseModal = useEffectEvent(() => {
-    // The storage prompt is raised while the app is still settling on its
-    // first page, which must not dismiss it
-    const isStoragePromptOpen =
-      modalStack.at(-1)?.name === 'confirm-storage-migration';
-    if (modalStack.length > 0 && !isStoragePromptOpen) {
+    // A budget that failed to move is reported while the app is still
+    // settling on its first page, which must not dismiss the report
+    const isReportingFailedMove =
+      modalStack.at(-1)?.name === 'storage-migration-failed';
+    if (modalStack.length > 0 && !isReportingFailedMove) {
       dispatch(closeModal());
     }
   });
@@ -423,8 +423,8 @@ export function Modals() {
         case 'out-of-sync-migrations':
           return <OutOfSyncMigrationsModal key={key} />;
 
-        case 'confirm-storage-migration':
-          return <ConfirmStorageMigrationModal key={key} {...modal.options} />;
+        case 'storage-migration-failed':
+          return <StorageMigrationFailedModal key={key} {...modal.options} />;
 
         case 'edit-access':
           return <EditUserAccess key={key} {...modal.options} />;

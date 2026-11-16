@@ -13,10 +13,8 @@ import {
   hasMigratedSqliteFiles,
   StorageLostError,
   StorageMigrationError,
-  StorageMigrationNeededError,
   StorageUnavailableError,
 } from '#platform/server/sqlite';
-import type { OpenDatabaseOptions } from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
@@ -78,7 +76,6 @@ export type BudgetFileHandlers = {
   'create-budget': typeof createBudget;
   'import-budget': typeof importBudget;
   'export-budget': typeof exportBudget;
-  'export-unopened-budget': typeof exportUnopenedBudget;
   'upload-file-web': typeof uploadFileWeb;
   'backups-get': typeof getBackups;
   'backup-load': typeof loadBackup;
@@ -103,7 +100,6 @@ app.method('duplicate-budget', duplicateBudget);
 app.method('create-budget', createBudget);
 app.method('import-budget', importBudget);
 app.method('export-budget', exportBudget);
-app.method('export-unopened-budget', exportUnopenedBudget);
 app.method('upload-file-web', uploadFileWeb);
 app.method('backups-get', getBackups);
 app.method('backup-load', loadBackup);
@@ -289,20 +285,11 @@ let loading: {
   result: ReturnType<typeof loadBudgetOnce>;
 } | null = null;
 
-// On the web, a budget still in the previous storage layout is moved
-// when it is opened. The user is asked first, so such a budget answers
-// `storage-migration-needed` until the request says they agreed.
-async function loadBudget({
-  id,
-  allowStorageMigration = false,
-}: {
-  id: Budget['id'];
-  allowStorageMigration?: boolean;
-}) {
+async function loadBudget({ id }: { id: Budget['id'] }) {
   if (loading?.id === id) {
     return loading.result;
   }
-  const result = loadBudgetOnce(id, { allowStorageMigration }).finally(() => {
+  const result = loadBudgetOnce(id).finally(() => {
     if (loading?.result === result) {
       loading = null;
     }
@@ -311,7 +298,7 @@ async function loadBudget({
   return result;
 }
 
-async function loadBudgetOnce(id: Budget['id'], options: OpenDatabaseOptions) {
+async function loadBudgetOnce(id: Budget['id']) {
   const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -324,7 +311,7 @@ async function loadBudgetOnce(id: Budget['id'], options: OpenDatabaseOptions) {
     }
   }
 
-  return _loadBudget(id, options);
+  return _loadBudget(id);
 }
 
 async function createDemoBudget() {
@@ -402,9 +389,8 @@ async function deleteBudget({
     // opening and then closing the database is a hack to be able to delete
     // the budget file if it hasn't been opened yet.  This needs a better
     // way, but works for now.
-    // A budget about to be deleted is not worth asking about
     try {
-      await db.openDatabase(id, { allowStorageMigration: true });
+      await db.openDatabase(id);
       db.closeDatabase();
       const budgetDir = fs.getBudgetDir(id);
       await fs.removeDirRecursively(budgetDir);
@@ -628,18 +614,6 @@ async function exportBudget() {
   }
 }
 
-// The export file of a budget that is not open. The web app offers it as
-// a backup before it moves a budget to the new storage
-async function exportUnopenedBudget({ id }: { id: Budget['id'] }) {
-  try {
-    return await cloudStorage.exportUnopenedBuffer(id);
-  } catch (err) {
-    err.message = 'Error exporting budget: ' + err.message;
-    captureException(err);
-    return { error: 'internal-error' };
-  }
-}
-
 function onSheetChange({ names }: { names: string[] }) {
   const nodes = names.map(name => {
     const node = sheet.get()._getNode(name);
@@ -648,10 +622,7 @@ function onSheetChange({ names }: { names: string[] }) {
   connection.send('cells-changed', nodes);
 }
 
-async function _loadBudget(
-  id: Budget['id'],
-  options: OpenDatabaseOptions = {},
-): Promise<{
+async function _loadBudget(id: Budget['id']): Promise<{
   error?:
     | 'budget-not-found'
     | 'loading-budget'
@@ -659,11 +630,10 @@ async function _loadBudget(
     | 'out-of-sync-data'
     | 'opening-budget'
     | 'budget-in-use'
-    | 'storage-migration-needed'
     | 'storage-migration-failed'
     | 'storage-unavailable'
     | 'storage-lost';
-  // With `storage-migration-needed`: whether the budget could be opened
+  // With `storage-migration-failed`: whether the budget could be opened
   // on the previous storage engine instead
   canKeepPreviousStorage?: boolean;
 }> {
@@ -687,25 +657,24 @@ async function _loadBudget(
   try {
     resetFormulaPreferencesCache();
     await prefs.loadPrefs(id);
-    await db.openDatabase(id, options);
+    await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
     await closeBudget();
     // Expected conditions on the web storage, not bugs
-    if (e instanceof StorageMigrationNeededError) {
-      return {
-        error: 'storage-migration-needed',
-        // The previous engine reads nothing held in the new storage, so
-        // it can only take over while no budget has been moved there
-        canKeepPreviousStorage: !(await hasMigratedSqliteFiles()),
-      };
-    }
     if (e instanceof BudgetInUseError) {
       return { error: 'budget-in-use' };
     }
     if (e instanceof StorageMigrationError) {
       logger.error('Storage migration failed', e);
-      return { error: 'storage-migration-failed' };
+      return {
+        error: 'storage-migration-failed',
+        // The previous engine reads nothing held in the new storage, so
+        // it can only take over while no budget has been moved there
+        canKeepPreviousStorage: !(await hasMigratedSqliteFiles().catch(
+          () => true,
+        )),
+      };
     }
     if (e instanceof StorageUnavailableError) {
       logger.error('Storage unavailable', e);

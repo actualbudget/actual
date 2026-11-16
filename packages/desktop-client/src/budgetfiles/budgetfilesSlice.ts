@@ -49,39 +49,28 @@ export const loadAllFiles = createAppAsyncThunk(
 
 type LoadBudgetPayload = {
   id: string;
-  // Set once the user has agreed to the budget being moved to the new
-  // browser storage
-  allowStorageMigration?: boolean;
   // TODO: Is this still needed?
   options?: Record<string, unknown>;
 };
 
 export const loadBudget = createAppAsyncThunk(
   `${sliceName}/loadBudget`,
-  async (
-    { id, allowStorageMigration, options = {} }: LoadBudgetPayload,
-    { dispatch },
-  ) => {
+  async ({ id, options = {} }: LoadBudgetPayload, { dispatch }) => {
     dispatch(setAppState({ loadingText: t('Loading...') }));
 
     // Loading a budget may fail
     const { error, canKeepPreviousStorage = false } = await send(
       'load-budget',
-      {
-        id,
-        allowStorageMigration,
-        ...options,
-      },
+      { id, ...options },
     );
 
     if (error) {
       const message = getSyncError(error, id);
-      if (error === 'storage-migration-needed') {
-        // The budget is loaded again from there, once the user agrees
+      if (error === 'storage-migration-failed') {
         dispatch(
           pushModal({
             modal: {
-              name: 'confirm-storage-migration',
+              name: 'storage-migration-failed',
               options: { budgetId: id, canKeepPreviousStorage },
             },
           }),

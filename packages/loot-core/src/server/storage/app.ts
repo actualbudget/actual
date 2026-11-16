@@ -81,14 +81,12 @@ async function revertStorage({
     await sqlite.revertSqliteStorageToLegacy();
     return { ok: true };
   } catch (error) {
-    // The client still shows the budget this closed, so reopen it, even
-    // if it was moved back by then; a failure to is logged, and the
-    // revert's own error still answers
+    // The client still shows the budget this closed, so reopen it; a
+    // failure to is logged, and the revert's own error still answers
     if (openBudgetId) {
       try {
         const reopened = await runHandler(mainApp.handlers['load-budget'], {
           id: openBudgetId,
-          allowStorageMigration: true,
         });
         if (reopened.error) {
           logger.error(

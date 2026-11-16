@@ -229,10 +229,6 @@ it.each(['original-cloud', 'different-cloud'])(
     } else {
       expect(downloaded?.id).not.toBe('victim');
     }
-    // The API has no one to ask before a budget changes storage
-    expect(loadBudget).toHaveBeenCalledWith({
-      id: downloaded?.id,
-      allowStorageMigration: true,
-    });
+    expect(loadBudget).toHaveBeenCalledWith({ id: downloaded?.id });
   },
 );

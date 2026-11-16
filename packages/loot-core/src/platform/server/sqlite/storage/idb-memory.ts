@@ -1,7 +1,6 @@
 import * as connection from '#platform/server/connection';
 import type { Data } from '#platform/server/indexeddb';
 import { logger } from '#platform/server/log';
-import type { OpenDatabaseOptions } from '#platform/server/sqlite/types';
 import {
   exportBytes,
   getSqlite3,
@@ -12,8 +11,8 @@ import type { WasmDatabase } from '#platform/server/sqlite/wasm';
 import {
   completeMigration,
   deleteLegacyDatabase,
-  hasLegacyDatabase,
   legacySnapshot,
+  matchesLegacyDatabase,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
   writeLegacyDatabaseBytes,
@@ -21,7 +20,6 @@ import {
 import {
   BudgetInUseError,
   StorageMigrationError,
-  StorageMigrationNeededError,
   StorageUnavailableError,
 } from './errors';
 import {
@@ -36,11 +34,7 @@ import {
   budgetLockName,
 } from './locks';
 import { legacyDatabaseName } from './paths';
-import type {
-  LegacyCopyUse,
-  MigrationProgress,
-  SqliteFileStore,
-} from './types';
+import type { MigrationProgress, SqliteFileStore } from './types';
 
 // The fallback for browsers without OPFS sync access handles. Each
 // database runs in memory and its bytes are written back to the
@@ -188,13 +182,10 @@ export function createMemoryIdbStore({
   }
 
   // The stored bytes of a path (null for a database that does not exist
-  // yet) and the row revision to continue from. An absurd-sql copy is
-  // moved into the row only when the caller may: otherwise an open is
-  // refused, and a read gets the copy's bytes with nothing moved
+  // yet) and the row revision to continue from
   async function loadBytes(
     path: string,
     row: Data | undefined,
-    legacyCopy: LegacyCopyUse,
   ): Promise<{ bytes: Uint8Array | null; rev: number }> {
     assertNotInOpfs(path, row);
     const rev = row?.rev ?? 0;
@@ -207,25 +198,19 @@ export function createMemoryIdbStore({
     }
     // Either no row or the legacy filesystem's marker: look for absurd-sql
     // data
-    if (legacyCopy === 'refuse') {
-      if (await hasLegacyDatabase(path)) {
-        throw new StorageMigrationNeededError(path);
-      }
-      return { bytes: null, rev };
-    }
-    const bytes = await readLegacyDatabaseBytes(
-      path,
-      legacyCopy === 'move'
-        ? percent => onMigrationProgress?.('copy', percent)
-        : undefined,
+    const bytes = await readLegacyDatabaseBytes(path, percent =>
+      onMigrationProgress?.('copy', percent),
     );
-    if (bytes == null || legacyCopy === 'read') {
-      return { bytes, rev };
+    if (bytes == null) {
+      return { bytes: null, rev };
     }
     onMigrationProgress?.('verify');
     const check = openMemoryDatabase(bytes);
     try {
       verifyMigratedDatabase(check);
+      if (!(await matchesLegacyDatabase(path, bytes))) {
+        throw new Error('the moved file differs from the absurd-sql copy');
+      }
     } catch (error) {
       onMigrationProgress?.('failed');
       throw new StorageMigrationError(path, error);
@@ -263,18 +248,12 @@ export function createMemoryIdbStore({
   // is taken and the row loaded once
   const opening = new Map<string, Promise<WasmDatabase>>();
 
-  function open(
-    path: string,
-    options?: OpenDatabaseOptions,
-  ): Promise<WasmDatabase> {
+  function open(path: string): Promise<WasmDatabase> {
     const inFlight = opening.get(path);
     if (inFlight) {
       return inFlight;
     }
-    const promise = openOnce(
-      path,
-      options?.allowStorageMigration ? 'move' : 'refuse',
-    ).finally(() => {
+    const promise = openOnce(path).finally(() => {
       if (opening.get(path) === promise) {
         opening.delete(path);
       }
@@ -283,10 +262,7 @@ export function createMemoryIdbStore({
     return promise;
   }
 
-  async function openOnce(
-    path: string,
-    legacyCopy: LegacyCopyUse,
-  ): Promise<WasmDatabase> {
+  async function openOnce(path: string): Promise<WasmDatabase> {
     const existing = entries.get(path);
     if (existing) {
       return existing.db;
@@ -297,8 +273,7 @@ export function createMemoryIdbStore({
       const row = await getSqliteFileRow(path);
       assertNotInOpfs(path, row);
       const stranded = currentStranded(path, row);
-      const { bytes, rev } =
-        stranded ?? (await loadBytes(path, row, legacyCopy));
+      const { bytes, rev } = stranded ?? (await loadBytes(path, row));
       const db = openMemoryDatabase(bytes ?? undefined);
       const entry: Entry = {
         path,
@@ -418,8 +393,8 @@ export function createMemoryIdbStore({
       if (entry) {
         return exportBytes(entry.db);
       }
-      // Under the budget lock, as an open is, so the row or an
-      // absurd-sql copy is not read while another worker moves it
+      // Loading may migrate the absurd-sql copy, so hold the budget lock
+      // as an open does
       const releaseLock = await lockBudget(path);
       try {
         const row = await getSqliteFileRow(path);
@@ -428,7 +403,7 @@ export function createMemoryIdbStore({
         if (stranded) {
           return stranded.bytes;
         }
-        const { bytes } = await loadBytes(path, row, 'read');
+        const { bytes } = await loadBytes(path, row);
         if (bytes == null) {
           throw new Error('File does not exist: ' + path);
         }

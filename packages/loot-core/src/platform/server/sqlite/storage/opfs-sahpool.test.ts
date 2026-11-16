@@ -16,7 +16,6 @@ import {
   BudgetInUseError,
   StorageLostError,
   StorageMigrationError,
-  StorageMigrationNeededError,
 } from './errors';
 import { getSqliteFileRow, putSqliteFileRow } from './files-store';
 import { applyFilePragmas, createOpfsStore, POOL_ROOT } from './opfs-sahpool';
@@ -31,8 +30,6 @@ import {
 const noSleep = () => Promise.resolve();
 
 const PATH = '/documents/Actual/budget-one/db.sqlite';
-// What an open is told once the user has agreed to the move
-const MOVE = { allowStorageMigration: true };
 
 // A pool that keeps files in memory and records every call
 function fakePool(
@@ -254,8 +251,8 @@ describe('OPFS pool store', () => {
     });
 
     const [first, second] = await Promise.all([
-      store.open(PATH, MOVE),
-      store.open(PATH, MOVE),
+      store.open(PATH),
+      store.open(PATH),
     ]);
     expect(second).toBe(first);
     expect(pool.importDb).toHaveBeenCalledTimes(1);
@@ -344,7 +341,7 @@ describe('OPFS pool store', () => {
     const setSpy = vi
       .spyOn(idb, 'set')
       .mockRejectedValueOnce(new Error('quota exceeded'));
-    await expect(store.open(PATH, MOVE)).rejects.toBeInstanceOf(
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
       StorageMigrationError,
     );
     setSpy.mockRestore();
@@ -352,7 +349,7 @@ describe('OPFS pool store', () => {
     expect(pool.files.size).toBe(0);
     expect(await listIndexedDbNames()).toContain(name);
 
-    const db = await store.open(PATH, MOVE);
+    const db = await store.open(PATH);
     expect(pool.importDb).toHaveBeenCalledTimes(2);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
     expect(await listIndexedDbNames()).not.toContain(name);
@@ -403,9 +400,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
 
-    await expect(store.open(PATH, MOVE)).rejects.toBeInstanceOf(
-      StorageLostError,
-    );
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(StorageLostError);
     expect(pool.importDb).not.toHaveBeenCalled();
     expect(pool.files.size).toBe(0);
     // The marker and the copy are left as they were
@@ -447,7 +442,7 @@ describe('OPFS pool store', () => {
 
     // A write to another file of the directory ends while the open is
     // still importing
-    const opening = store.open(PATH, MOVE);
+    const opening = store.open(PATH);
     await store.writeFile(
       '/documents/Actual/budget-one/other.sqlite',
       new Uint8Array([1]),
@@ -474,7 +469,7 @@ describe('OPFS pool store', () => {
       .spyOn(wasm, 'exportBytes')
       .mockReturnValue(new Uint8Array([7]));
     try {
-      const opening = store.open(PATH, MOVE);
+      const opening = store.open(PATH);
       expect(await store.readFile(PATH)).toEqual(new Uint8Array([7]));
       expect(exportSpy).toHaveBeenCalledWith(await opening);
       expect(pool.importDb).toHaveBeenCalledTimes(1);
@@ -495,7 +490,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
 
-    const opening = store.open(PATH, MOVE);
+    const opening = store.open(PATH);
     await store.removeFile(PATH);
     await opening;
     expect(pool.importDb).toHaveBeenCalledTimes(1);
@@ -591,7 +586,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
 
-    const db = await store.open(PATH, MOVE);
+    const db = await store.open(PATH);
     const pooled = pool.files.get('/db.sqlite');
     expect(pooled && Buffer.from(pooled).equals(Buffer.from(bytes))).toBe(true);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
@@ -618,9 +613,7 @@ describe('OPFS pool store', () => {
     });
 
     try {
-      await expect(store.open(PATH, MOVE)).rejects.toBeInstanceOf(
-        BudgetInUseError,
-      );
+      await expect(store.open(PATH)).rejects.toBeInstanceOf(BudgetInUseError);
     } finally {
       other?.close();
     }
@@ -671,7 +664,7 @@ describe('OPFS pool store', () => {
       acquireLock: trackingLock().acquire,
       sleep: noSleep,
     });
-    await store.open(PATH, MOVE);
+    await store.open(PATH);
     expect(pool.pauseVfs).not.toHaveBeenCalled();
     await store.releaseAll();
     expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
@@ -683,7 +676,7 @@ describe('OPFS pool store', () => {
       legacyDatabaseName(other),
       await budgetBytes('slow'),
     );
-    const opening = store.open(other, MOVE);
+    const opening = store.open(other);
     await store.readFile(PATH);
     expect(pool.pauseVfs).toHaveBeenCalledTimes(1);
     store.close(other, await opening);
@@ -806,6 +799,41 @@ describe('OPFS pool store', () => {
     });
   });
 
+  it('keeps the absurd-sql copy when the moved file differs from it', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('legacy'));
+    const pool = fakePool();
+    // What landed in the pool is one byte off, in a place the structural
+    // check would not look
+    pool.exportFile.mockImplementationOnce((fileName: string) => {
+      const stored = pool.files.get(fileName) as Uint8Array;
+      const altered = stored.slice();
+      altered[altered.length - 1] ^= 0xff;
+      return altered;
+    });
+    const phases: string[] = [];
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+      onMigrationProgress: phase => phases.push(phase),
+    });
+
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    // The move is undone and the copy is still the budget
+    expect(phases).toContain('failed');
+    expect(pool.files.size).toBe(0);
+    expect(await listIndexedDbNames()).toContain(name);
+    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+
+    // The next open moves it
+    await store.open(PATH);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
   it('imports an absurd-sql database into the pool and verifies it', async () => {
     const bytes = await budgetBytes('legacy');
     const name = legacyDatabaseName(PATH);
@@ -821,7 +849,7 @@ describe('OPFS pool store', () => {
       onMigrationProgress: phase => phases.push(phase),
     });
 
-    await store.open(PATH, MOVE);
+    await store.open(PATH);
     const imported = pool.files.get('/db.sqlite');
     expect(imported && Buffer.from(imported).equals(Buffer.from(bytes))).toBe(
       true,
@@ -831,52 +859,6 @@ describe('OPFS pool store', () => {
     );
     expect(await listIndexedDbNames()).not.toContain(name);
     expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
-  });
-
-  it('does not open a database still in absurd-sql until told it may be moved', async () => {
-    const name = legacyDatabaseName(PATH);
-    await seedLegacyDatabase(name, await budgetBytes('legacy'));
-    // The legacy filesystem's marker row
-    await putSqliteFileRow({ filepath: PATH, contents: '' });
-    const pool = fakePool();
-    const { acquire, releases } = trackingLock();
-    const store = createOpfsStore({
-      sqlite3: () => fakeSqlite3(pool),
-      acquireLock: acquire,
-      sleep: noSleep,
-    });
-
-    await expect(store.open(PATH)).rejects.toBeInstanceOf(
-      StorageMigrationNeededError,
-    );
-    // Nothing was touched, and the budget is free again
-    expect(pool.importDb).not.toHaveBeenCalled();
-    expect(pool.files.size).toBe(0);
-    expect(await listIndexedDbNames()).toContain(name);
-    expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
-    expect(releases).toHaveLength(1);
-
-    await store.open(PATH, MOVE);
-    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
-    expect(await listIndexedDbNames()).not.toContain(name);
-  });
-
-  it('reads an absurd-sql copy where it is', async () => {
-    const bytes = await budgetBytes('legacy');
-    const name = legacyDatabaseName(PATH);
-    await seedLegacyDatabase(name, bytes);
-    const pool = fakePool();
-    const store = createOpfsStore({
-      sqlite3: () => fakeSqlite3(pool),
-      acquireLock: trackingLock().acquire,
-      sleep: noSleep,
-    });
-
-    const read = await store.readFile(PATH);
-    expect(Buffer.from(read).equals(Buffer.from(bytes))).toBe(true);
-    expect(pool.importDb).not.toHaveBeenCalled();
-    expect(await listIndexedDbNames()).toContain(name);
-    expect(await getSqliteFileRow(PATH)).toBeUndefined();
   });
 
   it('prefers the fallback row over a stale absurd-sql copy', async () => {
@@ -896,7 +878,7 @@ describe('OPFS pool store', () => {
       sleep: noSleep,
     });
 
-    await store.open(PATH, MOVE);
+    await store.open(PATH);
     const imported = pool.files.get('/db.sqlite');
     expect(imported && Buffer.from(imported).equals(Buffer.from(current))).toBe(
       true,

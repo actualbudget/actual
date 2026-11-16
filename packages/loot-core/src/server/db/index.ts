@@ -11,11 +11,7 @@ import { LRUCache } from 'lru-cache';
 import { v4 as uuidv4 } from 'uuid';
 
 import * as fs from '#platform/server/fs';
-import type {
-  Database,
-  OpenDatabaseOptions,
-  Statement,
-} from '#platform/server/sqlite';
+import type { Database, Statement } from '#platform/server/sqlite';
 import * as sqlite from '#platform/server/sqlite';
 import {
   convertForInsert,
@@ -73,13 +69,13 @@ export function getDatabasePath() {
   return dbPath;
 }
 
-export async function openDatabase(id?: string, options?: OpenDatabaseOptions) {
+export async function openDatabase(id?: string) {
   if (db) {
     sqlite.closeDatabase(db);
   }
 
   dbPath = fs.join(fs.getBudgetDir(id), 'db.sqlite');
-  setDatabase(await sqlite.openDatabase(dbPath, options));
+  setDatabase(await sqlite.openDatabase(dbPath));
 
   // await execQuery('PRAGMA journal_mode = WAL');
 }

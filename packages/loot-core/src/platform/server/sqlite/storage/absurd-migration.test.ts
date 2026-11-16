@@ -12,8 +12,8 @@ import {
 import {
   completeMigration,
   deleteLegacyDatabase,
-  hasLegacyDatabase,
   legacySnapshot,
+  matchesLegacyDatabase,
   pageSizeFromHeader,
   readLegacyDatabaseBytes,
 } from './absurd-migration';
@@ -144,6 +144,43 @@ describe('absurd-sql migration helpers', () => {
     expect(tail.every(byte => byte === 0)).toBe(true);
   });
 
+  it('tells a file that is the copy byte for byte from one that is not', async () => {
+    // More than one run of blocks, so a difference in a later one counts
+    const bytes = await makeDatabaseBytes(3000, 1024);
+    const pageSize = pageSizeFromHeader(bytes) ?? 4096;
+    expect(bytes.length).toBeGreaterThan(256 * pageSize);
+    await seedLegacyDatabase(NAME, bytes);
+
+    expect(await matchesLegacyDatabase(PATH, bytes)).toBe(true);
+
+    for (const offset of [200, 300 * pageSize + 7, bytes.length - 1]) {
+      const altered = bytes.slice();
+      altered[offset] ^= 0xff;
+      expect(await matchesLegacyDatabase(PATH, altered)).toBe(false);
+    }
+    expect(await matchesLegacyDatabase(PATH, bytes.slice(0, -1))).toBe(false);
+    const longer = new Uint8Array(bytes.length + 1);
+    longer.set(bytes);
+    expect(await matchesLegacyDatabase(PATH, longer)).toBe(false);
+  });
+
+  it('holds the blocks a copy lacks to be zeros', async () => {
+    const bytes = await makeDatabaseBytes(50);
+    const pageSize = pageSizeFromHeader(bytes) ?? 4096;
+    const lastBlock = Math.ceil(bytes.length / pageSize) - 1;
+    await seedLegacyDatabase(NAME, bytes, { skipBlocks: [lastBlock] });
+
+    // What a move reads has the gap filled in, and that is what matches
+    const read = (await readLegacyDatabaseBytes(PATH)) as Uint8Array;
+    expect(await matchesLegacyDatabase(PATH, read)).toBe(true);
+    expect(await matchesLegacyDatabase(PATH, bytes)).toBe(false);
+  });
+
+  it('matches nothing where there is no copy', async () => {
+    expect(await matchesLegacyDatabase(PATH, new Uint8Array(0))).toBe(false);
+    expect(await listIndexedDbNames()).not.toContain(NAME);
+  });
+
   it('returns null for a missing or empty legacy database', async () => {
     expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
     // Looking did not create one
@@ -152,40 +189,6 @@ describe('absurd-sql migration helpers', () => {
     expect(await readLegacyDatabaseBytes(PATH)).toBeNull();
     // The empty one is cleaned up
     expect(await listIndexedDbNames()).not.toContain(NAME);
-  });
-
-  it('tells whether a copy with data exists without disturbing it', async () => {
-    expect(await hasLegacyDatabase(PATH)).toBe(false);
-    // Looking did not create one
-    expect(await listIndexedDbNames()).not.toContain(NAME);
-
-    // absurd-sql creates the database before its first write
-    await seedLegacyDatabase(NAME, new Uint8Array(0));
-    expect(await hasLegacyDatabase(PATH)).toBe(false);
-
-    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
-    // A connection that would never close for a move is not asked to
-    const other = await holdLegacyConnection(NAME, { stubborn: true });
-    try {
-      expect(await hasLegacyDatabase(PATH)).toBe(true);
-      expect(await legacyVersion(NAME)).toBe(2);
-    } finally {
-      other.close();
-    }
-  });
-
-  it('counts a copy whose size metadata is damaged, for the move to report', async () => {
-    await seedLegacyDatabase(NAME, await makeDatabaseBytes(5));
-    const database = await holdLegacyConnection(NAME);
-    await new Promise<void>((resolve, reject) => {
-      const transaction = database.transaction('data', 'readwrite');
-      transaction.objectStore('data').delete(-1);
-      transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-    });
-    database.close();
-
-    expect(await hasLegacyDatabase(PATH)).toBe(true);
   });
 
   it('keeps a legacy database whose size metadata is damaged', async () => {
