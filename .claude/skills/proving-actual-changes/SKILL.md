@@ -25,7 +25,7 @@ playwright-cli screenshot --filename="$PROOF/before.png"
 
 Keep the proof folder outside the repository so the files are never committed.
 
-Edge is the last nightly build of `master`. If your base differs (a stacked PR, or newer `master` commits), capture "before" from the merge base: commit your work, run `git switch --detach "$(git merge-base HEAD <base-branch>)"`, start the app as in step 2 and save `"$PROOF/before.png"`. Stop that server, then run `git switch -`.
+Edge is the last nightly build of `master`. If your base differs (a stacked PR, or newer `master` commits), capture "before" from the merge base: commit your work, run `git switch --detach "$(git merge-base HEAD <base-branch>)"`, start the app as in step 2 and save `"$PROOF/before.png"`. Stop that server, then run `git checkout -` to return to where you were (`git switch -` fails if you started on a detached HEAD) and capture "after" from there.
 
 For a brand-new feature there is no "before" state to show. Use two screenshots of the new flow (for example the entry point and the result), or a video. To point out the new UI in a screenshot, see "Highlighting elements in screenshots" in `.claude/skills/review-actual-pr/SKILL.md`.
 
