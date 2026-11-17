@@ -13,6 +13,7 @@
   "imports": {
     "#browser-preload": {
       "electron-renderer": "./src/browser-preload.electron.ts",
+      "mobile": "./src/browser-preload.mobile.ts",
       "default": "./src/browser-preload.js"
     },
     "#account-groups": "./src/account-groups/index.ts",
@@ -139,6 +140,7 @@
     "watch": "cross-env BROWSER=none yarn start",
     "build": "vite build",
     "build:browser": "vite build --mode=browser",
+    "build:mobile": "vite build --mode=mobile",
     "generate:i18n": "i18next",
     "test": "vitest --run",
     "validate:theme-catalog": "node --experimental-strip-types bin/validate-theme-catalog.mts",
@@ -153,7 +155,9 @@
     "@babel/core": "^8.0.7",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.4.2",
+    "@capacitor/filesystem": "^8.1.5",
     "@capacitor/haptics": "^8.0.2",
+    "@capacitor/share": "^8.0.3",
     "@codemirror/autocomplete": "^6.20.3",
     "@codemirror/language": "^6.13.1",
     "@codemirror/state": "^6.7.6",
