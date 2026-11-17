@@ -243,6 +243,56 @@ describe('SharedWorker coordinator', () => {
       );
     });
 
+    it('keeps a leader that asks again for a budget that did not load', () => {
+      const leader = connectTab(coordinator);
+      sendInit(leader);
+      sendMsg(leader, {
+        id: 'lb-1',
+        name: 'load-budget',
+        args: { id: 'my-budget' },
+      });
+      simulateWorkerConnect(leader);
+      // The budget could not be opened
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: {
+          type: 'reply',
+          id: 'lb-1',
+          result: { error: 'opening-budget' },
+        },
+      });
+      leader.postMessage.mockClear();
+
+      const retry = {
+        id: 'lb-2',
+        name: 'load-budget',
+        args: { id: 'my-budget' },
+      };
+      sendMsg(leader, retry);
+
+      // Its own Worker gets the request, and it is not made a follower of
+      // itself, which would terminate that Worker
+      expect(leader.postMessage).toHaveBeenCalledWith({
+        type: '__to-worker',
+        msg: retry,
+      });
+      expect(leader.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: '__role-change', role: 'FOLLOWER' }),
+      );
+      const group = coordinator.getState().budgetGroups.get('my-budget');
+      expect(group.leaderPort).toBe(leader);
+      expect(group.followers.size).toBe(0);
+
+      // The reply finds its way back
+      sendMsg(leader, {
+        type: '__from-worker',
+        msg: { type: 'reply', id: 'lb-2', result: {} },
+      });
+      expect(leader.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'reply', id: 'lb-2' }),
+      );
+    });
+
     it('second tab joins existing budget as follower', () => {
       setupBudgetGroup(coordinator, 'budget-1');
 
