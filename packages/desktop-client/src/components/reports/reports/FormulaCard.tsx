@@ -7,6 +7,7 @@ import type {
   FormulaWidget,
 } from '@actual-app/core/types/models';
 
+import { useDashboardDateScope } from '#components/reports/DashboardDateScope';
 import { FormulaResult } from '#components/reports/FormulaResult';
 import { ReportCard } from '#components/reports/ReportCard';
 import { ReportCardName } from '#components/reports/ReportCardName';
@@ -36,6 +37,7 @@ export function FormulaCard({
   const { t } = useTranslation();
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
   const themeColors = useThemeColors();
+  const dashboardScope = useDashboardDateScope();
   // Not `const { data: accounts = [] }` — a default inside a destructuring
   // pattern makes React Compiler bail out of the whole component, which leaves
   // the objects handed to `useFormulaExecution` unmemoized.
@@ -61,6 +63,7 @@ export function FormulaCard({
     meta?.queriesVersion,
     undefined,
     simpleAccounts,
+    dashboardScope,
   );
 
   const colorVariables = useMemo(
@@ -82,6 +85,7 @@ export function FormulaCard({
     meta?.queriesVersion,
     colorVariables,
     simpleAccounts,
+    dashboardScope,
   );
 
   // Determine the custom color from color formula result

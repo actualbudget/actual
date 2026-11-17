@@ -13,6 +13,7 @@ type RangeSelectorProps = {
   end: string;
   min: string;
   max: string;
+  referenceMonth?: string;
   locale: string;
   labels: Pick<DateRangePickerLabels, 'previous' | 'next'>;
   onChange: (start: string, end: string) => void;
@@ -24,6 +25,7 @@ export function RangeSelector({
   end,
   min,
   max,
+  referenceMonth,
   locale,
   labels,
   onChange,
@@ -83,6 +85,7 @@ export function RangeSelector({
         rangeEnd={bandEnd}
         minMonth={min}
         maxMonth={max}
+        referenceMonth={referenceMonth}
         locale={locale}
         onSelect={pick}
         onHover={anchor ? setHoverValue : undefined}

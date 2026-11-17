@@ -33,10 +33,10 @@ import { PrivacyFilter } from '#components/PrivacyFilter';
 import { AgeOfMoneyGraph } from '#components/reports/graphs/AgeOfMoneyGraph';
 import { Header } from '#components/reports/Header';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
-import { calculateTimeRange } from '#components/reports/reportRanges';
 import { createAgeOfMoneySpreadsheet } from '#components/reports/spreadsheets/age-of-money-spreadsheet';
 import { useReport } from '#components/reports/useReport';
 import { fromDateRepr } from '#components/reports/util';
+import { useDashboardReportTimeRange } from '#hooks/useDashboardReportTimeRange';
 import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
@@ -67,6 +67,8 @@ type AgeOfMoneyInnerProps = {
 };
 
 function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
+  const { resolve: resolveTimeRange, isUsingDashboardRange } =
+    useDashboardReportTimeRange(widget);
   const locale = useLocale();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -100,7 +102,6 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
   const [_firstDayOfWeekIdx] = useSyncedPref('firstDayOfWeekIdx');
   const firstDayOfWeekIdx = _firstDayOfWeekIdx || '0';
-
   const reportParams = useMemo(
     () =>
       createAgeOfMoneySpreadsheet({
@@ -159,7 +160,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
 
   useEffect(() => {
     if (latestTransaction) {
-      const [initialStart, initialEnd, initialMode] = calculateTimeRange(
+      const [initialStart, initialEnd, initialMode] = resolveTimeRange(
         widget?.meta?.timeFrame,
         undefined,
         latestTransaction,
@@ -168,7 +169,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
       setEnd(initialEnd);
       setMode(initialMode);
     }
-  }, [latestTransaction, widget?.meta?.timeFrame]);
+  }, [latestTransaction, widget?.meta?.timeFrame, resolveTimeRange]);
 
   function onChangeDates(
     newStart: string,
@@ -194,11 +195,13 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
           ...(widget.meta ?? {}),
           conditions,
           conditionsOp,
-          timeFrame: {
-            start,
-            end,
-            mode,
-          },
+          timeFrame: isUsingDashboardRange
+            ? widget.meta?.timeFrame
+            : {
+                start,
+                end,
+                mode,
+              },
           granularity,
         },
       },
@@ -220,6 +223,7 @@ function AgeOfMoneyInner({ widget }: AgeOfMoneyInnerProps) {
     end,
     mode,
     granularity,
+    isUsingDashboardRange,
     dispatch,
     t,
   ]);

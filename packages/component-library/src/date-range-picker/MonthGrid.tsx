@@ -16,6 +16,7 @@ type MonthGridProps = {
   rangeEnd: string;
   minMonth: string;
   maxMonth: string;
+  referenceMonth?: string;
   /** BCP 47 language tag driving the month labels. */
   locale: string;
   onSelect: (month: string) => void;
@@ -29,6 +30,7 @@ export function MonthGrid({
   rangeEnd,
   minMonth,
   maxMonth,
+  referenceMonth,
   locale,
   onSelect,
   onHover,
@@ -65,6 +67,7 @@ export function MonthGrid({
           selected={month === rangeStart || month === rangeEnd}
           disabled={month < minMonth || month > maxMonth}
           isToday={month === thisMonth}
+          isReferenceDate={month === referenceMonth}
           position={rangePosition(month, rangeStart, rangeEnd)}
           label={fullLabel}
           onSelect={() => onSelect(month)}

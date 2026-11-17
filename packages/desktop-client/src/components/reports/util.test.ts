@@ -1,7 +1,7 @@
 import type { TagEntity } from '@actual-app/core/types/models';
 import { describe, expect, it } from 'vitest';
 
-import { calculateHasWarning } from './util';
+import { calculateHasWarning, normalizeCustomReportDateRange } from './util';
 
 const tags: TagEntity[] = [
   { id: 'visible-id', tag: 'visible' },
@@ -42,5 +42,18 @@ describe('calculateHasWarning tag scope', () => {
         tagScope: { mode: 'selected', tagIds: ['hidden-id'] },
       }),
     ).toBe(true);
+  });
+});
+
+describe('normalizeCustomReportDateRange', () => {
+  it.each<[string, [string, string]]>([
+    ['Daily', ['2026-03-01', '2026-08-31']],
+    ['Weekly', ['2026-03-01', '2026-08-31']],
+    ['Monthly', ['2026-03', '2026-08']],
+    ['Yearly', ['2026', '2026']],
+  ])('normalizes %s report boundaries', (interval, expected) => {
+    expect(
+      normalizeCustomReportDateRange(interval, '2026-03', '2026-08'),
+    ).toEqual(expected);
   });
 });
