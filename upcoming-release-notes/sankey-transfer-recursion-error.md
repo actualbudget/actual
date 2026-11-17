@@ -3,4 +3,4 @@ category: Bugfixes
 authors: [emiltb]
 ---
 
-Show warning in Sankey chart when cyclic transfers cannot be shown
+Break transfer cycles into net transfer chains to prevent recursion error
