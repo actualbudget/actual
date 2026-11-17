@@ -837,22 +837,25 @@ describe('sankey-spreadsheet', () => {
     });
 
     it('contracts a balanced transfer-only account', () => {
-      const graph = createTransactionsGraph([], [
-        {
-          fromAccountId: 'account-a',
-          fromAccountName: 'Account A',
-          toAccountId: 'account-b',
-          toAccountName: 'Account B',
-          amount: 100,
-        },
-        {
-          fromAccountId: 'account-b',
-          fromAccountName: 'Account B',
-          toAccountId: 'account-c',
-          toAccountName: 'Account C',
-          amount: 100,
-        },
-      ]);
+      const graph = createTransactionsGraph(
+        [],
+        [
+          {
+            fromAccountId: 'account-a',
+            fromAccountName: 'Account A',
+            toAccountId: 'account-b',
+            toAccountName: 'Account B',
+            amount: 100,
+          },
+          {
+            fromAccountId: 'account-b',
+            fromAccountName: 'Account B',
+            toAccountId: 'account-c',
+            toAccountName: 'Account C',
+            amount: 100,
+          },
+        ],
+      );
 
       expect(graph.has('account-b')).toBe(false);
       expect(graph.get('account-a')?.to.get('account-c')).toBe(100);

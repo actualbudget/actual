@@ -856,9 +856,10 @@ export function aggregateTransferPairs(
         amount,
       })),
     )
-    .sort((first, second) =>
-      first.fromAccountId.localeCompare(second.fromAccountId) ||
-      first.toAccountId.localeCompare(second.toAccountId),
+    .sort(
+      (first, second) =>
+        first.fromAccountId.localeCompare(second.fromAccountId) ||
+        first.toAccountId.localeCompare(second.toAccountId),
     ) satisfies TransferPair[];
 }
 
@@ -871,8 +872,9 @@ function cancelTransferCycles(graph: WeightedTransferGraph): void {
     if (!cycle) return;
 
     const cycleAmount = Math.min(
-      ...cycle.map(([fromAccountId, toAccountId]) =>
-        graph.get(fromAccountId)?.get(toAccountId) ?? 0,
+      ...cycle.map(
+        ([fromAccountId, toAccountId]) =>
+          graph.get(fromAccountId)?.get(toAccountId) ?? 0,
       ),
     );
 
@@ -880,8 +882,7 @@ function cancelTransferCycles(graph: WeightedTransferGraph): void {
       const children = graph.get(fromAccountId);
       if (!children) return;
 
-      const remainingAmount =
-        (children.get(toAccountId) ?? 0) - cycleAmount;
+      const remainingAmount = (children.get(toAccountId) ?? 0) - cycleAmount;
       if (remainingAmount > 0) {
         children.set(toAccountId, remainingAmount);
       } else {
@@ -1215,10 +1216,10 @@ function contractBalancedTransferNodes(graph: Graph): void {
             sourceNode.type === GraphLayers.Account &&
             sourceNode.to.has(accountKey),
         )
-        .map(([sourceKey, sourceNode]) => [
-          sourceKey,
-          sourceNode.to.get(accountKey) ?? 0,
-        ] as const);
+        .map(
+          ([sourceKey, sourceNode]) =>
+            [sourceKey, sourceNode.to.get(accountKey) ?? 0] as const,
+        );
 
       const hasNonTransferOutgoing = Array.from(accountNode.to.keys()).some(
         targetKey => graph.get(targetKey)?.type !== GraphLayers.Account,
@@ -1241,10 +1242,7 @@ function contractBalancedTransferNodes(graph: Graph): void {
 
       const [[toAccountId, outgoingAmount]] = outgoingTransfers;
       const [[fromAccountId, incomingAmount]] = incomingTransfers;
-      if (
-        fromAccountId === toAccountId ||
-        incomingAmount !== outgoingAmount
-      ) {
+      if (fromAccountId === toAccountId || incomingAmount !== outgoingAmount) {
         continue;
       }
 
@@ -1334,12 +1332,10 @@ export function getLayer(
 function getLayersByStronglyConnectedComponents(
   graph: Graph,
 ): Map<NodeKey, VisualLayerIndex> {
-  const components = getStronglyConnectedComponents(
-    graph.keys(),
-    nodeKey =>
-      Array.from(graph.get(nodeKey)?.to.keys() ?? []).filter(childKey =>
-        graph.has(childKey),
-      ),
+  const components = getStronglyConnectedComponents(graph.keys(), nodeKey =>
+    Array.from(graph.get(nodeKey)?.to.keys() ?? []).filter(childKey =>
+      graph.has(childKey),
+    ),
   );
   const componentByNode = new Map<NodeKey, number>();
   components.forEach((component, componentIndex) => {
