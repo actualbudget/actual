@@ -12,6 +12,7 @@ import {
   runRules,
   updateRule,
 } from '#server/transactions/transaction-rules';
+import * as monthUtils from '#shared/months';
 import { q } from '#shared/query';
 import { getNextDate } from '#shared/schedules';
 import type { RecurConfig } from '#types/models';
@@ -29,6 +30,16 @@ import {
   updateConditions,
   updateSchedule,
 } from './app';
+
+vi.mock('#shared/months', async () => {
+  const actualModule =
+    await vi.importActual<typeof monthUtils>('#shared/months');
+  return { ...actualModule, currentDay: vi.fn(actualModule.currentDay) };
+});
+
+afterEach(() => {
+  vi.mocked(monthUtils.currentDay).mockReset();
+});
 
 beforeEach(async () => {
   await global.emptyDatabase()();
@@ -1000,6 +1011,35 @@ describe('schedule app', () => {
           nextDate: '2017-01-01',
           completed: false,
         });
+      });
+
+      it('uses the posting day when the day changes during the post', async () => {
+        const accountId = await db.insertAccount({ name: 'Checking' });
+        const id = await createSchedule({
+          conditions: [
+            { op: 'is', field: 'account', value: accountId },
+            { op: 'is', field: 'amount', value: -10000 },
+            { op: 'is', field: 'date', value: monthly('2017-01-10') },
+          ],
+        });
+
+        // Posted "today" just before midnight on 9 January; the day is
+        // 10 January by the time the transaction is saved.
+        vi.mocked(monthUtils.currentDay)
+          .mockReturnValueOnce('2017-01-09')
+          .mockReturnValue('2017-01-10');
+
+        await postTransactionForSchedule({ id, today: true });
+
+        const { data: transactions } = await aqlQuery(
+          q('transactions').filter({ schedule: id }).select(['date']),
+        );
+        const {
+          data: [schedule],
+        } = await aqlQuery(q('schedules').filter({ id }).select(['next_date']));
+
+        expect(transactions.map(t => t.date)).toEqual(['2017-01-09']);
+        expect(schedule.next_date).toBe('2017-02-10');
       });
     });
 
