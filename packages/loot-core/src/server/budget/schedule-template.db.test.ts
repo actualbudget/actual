@@ -1,7 +1,9 @@
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
 import {
+  advanceSchedulesService,
   createSchedule,
+  app as schedulesApp,
   setNextDate,
   updateSchedule,
 } from '#server/schedules/app';
@@ -729,6 +731,99 @@ describe('runScheduleForecast against a real database', () => {
 
       expect(edited.to_budget).toBe(unedited.to_budget);
     });
+  });
+
+  it('still budgets the occurrences a late payment moved next_date past', async () => {
+    // Nov 12, budgeting November. A weekly $100 bill is due on Sundays from
+    // Nov 1. Nov 1 and Nov 8 are unpaid when a payment is linked on Nov 12.
+    // The schedule service counts that payment against next_date (Nov 1),
+    // then moves next_date on from today, to Nov 15, passing Nov 8 without a
+    // payment. The payment pays one occurrence; the others are still due, so
+    // November needs all five, as it did before next_date moved.
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-10-30');
+    const account = await db.insertAccount({
+      name: 'Checking',
+      offbudget: 0,
+      closed: 0,
+    });
+    const group = await db.insertCategoryGroup({ name: 'Bills' });
+    const categoryId = await db.insertCategory({
+      name: 'Cleaning',
+      cat_group: group,
+    });
+    const category = { id: categoryId, name: 'Cleaning' } as CategoryEntity;
+    const scheduleId = await createSchedule({
+      schedule: { name: 'Cleaning' },
+      conditions: [
+        { op: 'is', field: 'account', value: account },
+        { op: 'is', field: 'amount', value: -10000 },
+        {
+          op: 'is',
+          field: 'date',
+          value: {
+            start: '2026-11-01',
+            frequency: 'weekly',
+            interval: 1,
+            patterns: [],
+            skipWeekend: false,
+            weekendSolveMode: 'after',
+            endMode: 'never',
+          },
+        },
+      ],
+    });
+    const template = {
+      type: 'schedule',
+      name: 'Cleaning',
+      scheduleId,
+      priority: 0,
+      directive: 'template',
+    } as const;
+    await db.insertTransaction({
+      account,
+      amount: -10000,
+      date: '2026-11-12',
+      category: categoryId,
+      schedule: scheduleId,
+    });
+    vi.mocked(monthUtils.currentDay).mockReturnValue('2026-11-12');
+    const beforeService = await runScheduleForecast(
+      [template],
+      '2026-11',
+      0,
+      0,
+      category,
+    );
+
+    // The service moves next_date from the clock rather than currentDay(),
+    // and reads the schedule's date and account through the JSON paths the
+    // schedules app tracks.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 10, 12, 12));
+    schedulesApp.startServices();
+    try {
+      await advanceSchedulesService(true);
+    } finally {
+      await schedulesApp.stopServices();
+      vi.useRealTimers();
+    }
+    const nextDate = await db.first<{ local_next_date: number }>(
+      'SELECT local_next_date FROM schedules_next_date WHERE schedule_id = ?',
+      [scheduleId],
+    );
+    expect(nextDate?.local_next_date).toBe(20261115);
+
+    const afterService = await runScheduleForecast(
+      [template],
+      '2026-11',
+      0,
+      0,
+      category,
+    );
+
+    expect(afterService.to_budget).toBe(beforeService.to_budget);
+    // Nov 1, 8, 15, 22 and 29: the payment covers one of the five.
+    expect(afterService.to_budget).toBe(50000);
   });
 
   it('does not budget an occurrence due today that was paid early by hand and skipped', async () => {

@@ -570,7 +570,11 @@ export async function buildMonthlyOutflow(
   // skipped too, even once its date has passed, but only if a skip or a
   // payment moved next_date past it: creating the schedule or changing its
   // account or date moves next_date on from today without settling the
-  // occurrences it passes. Earlier months aren't read this way.
+  // occurrences it passes. A payment linked late also moves next_date on
+  // from the day it's seen, past the other occurrences missed before it,
+  // yet pays only one: so an occurrence before today with a linked payment
+  // on or after it doesn't count as skipped. Earlier months aren't read
+  // this way.
   const skipFromFor = (entry: ScheduleTemplateTarget) =>
     isBudgetingAhead || !entry.movedFrom || entry.movedFrom >= today
       ? today
@@ -609,9 +613,16 @@ export async function buildMonthlyOutflow(
       entry.storedNextDate,
       occurrencesBetween,
     );
+    const lastPayment = linkedAnywhere
+      .filter(transaction => transaction.schedule === entry.scheduleId)
+      .reduce(
+        (latest, transaction) =>
+          transaction.date > latest ? transaction.date : latest,
+        '',
+      );
     return new Set(
       occurrencesBetween(skipFrom, entry.storedNextDate).filter(
-        date => !paid.has(date),
+        date => !paid.has(date) && (date >= today || date > lastPayment),
       ),
     );
   };
