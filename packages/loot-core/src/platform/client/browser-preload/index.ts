@@ -10,7 +10,6 @@ export {
   DEFAULT_STORAGE_BACKEND,
   STORAGE_BACKEND_KEY,
   STORAGE_BACKEND_URL_PARAM,
-  STORAGE_PREFS_KEY,
   getStoredStorageBackend,
   isStorageBackend,
   resolveStorageBackend,

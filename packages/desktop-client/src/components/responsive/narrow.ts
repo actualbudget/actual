@@ -13,5 +13,8 @@ export { CategoryPage as Category } from '#components/mobile/budget/CategoryPage
 export { MobilePayeesPage as Payees } from '#components/mobile/payees/MobilePayeesPage';
 export { MobilePayeeEditPage as PayeeEdit } from '#components/mobile/payees/MobilePayeeEditPage';
 
+export { MobileTagsPage as Tags } from '#components/mobile/tags/MobileTagsPage';
+export { MobileTagEditPage as TagEdit } from '#components/mobile/tags/MobileTagEditPage';
+
 export { MobileBankSyncPage as BankSync } from '#components/mobile/banksync/MobileBankSyncPage';
 export { MobileBankSyncAccountEditPage as BankSyncAccountEdit } from '#components/mobile/banksync/MobileBankSyncAccountEditPage';

@@ -131,6 +131,7 @@ const SpecialNodeKeys = {
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
   NegativeSuffix: '__NEGATIVE',
+  NoPayeeSuffix: '__NO_PAYEE',
 } as const;
 export const GraphLayers = {
   IncomePayee: 'payee',
@@ -541,15 +542,11 @@ async function fetchCategoryData(
                 ],
               })
               .filter({ category: category.id })
-              .groupBy(
-                categoryGroup.is_income
-                  ? [
-                      { $id: '$category' },
-                      { $id: '$account' },
-                      { $id: '$payee' },
-                    ]
-                  : [{ $id: '$category' }, { $id: '$account' }],
-              )
+              .groupBy([
+                { $id: '$category' },
+                { $id: '$account' },
+                { $id: '$payee' },
+              ])
               .select([
                 { accountId: { $id: '$account.id' } },
                 { accountName: { $id: '$account.name' } },
@@ -587,16 +584,55 @@ async function fetchCategoryData(
   );
   const allCategoryData = nested.flat();
 
-  if (groupAccounts) {
-    allCategoryData.forEach(entry => {
-      if (entry.accountName && entry.accountId) {
-        entry.accountName = SpecialNodeKeys.AllAccounts;
-        entry.accountId = SpecialNodeKeys.AllAccounts;
-      }
-    });
+  return aggregateCategoryData(allCategoryData, groupAccounts);
+}
+
+export function aggregateCategoryData(
+  categoryData: readonly CategoryEntry[],
+  groupAccounts: boolean,
+): CategoryEntry[] {
+  if (!groupAccounts) {
+    return categoryData.map(entry => ({ ...entry }));
   }
 
-  return allCategoryData;
+  const groupedCategoryData = new Map<
+    string,
+    CategoryEntry & { signedValue: number }
+  >();
+
+  // Preserve payee paths while netting their account flows together.
+  categoryData.forEach(entry => {
+    const key = `${entry.categoryId}|${entry.payeeId}`;
+    const existingEntry = groupedCategoryData.get(key);
+    const signedValue = entry.isNegative ? -entry.value : entry.value;
+
+    if (existingEntry) {
+      existingEntry.signedValue += signedValue;
+    } else {
+      groupedCategoryData.set(key, {
+        ...entry,
+        payeeId: entry.payeeId,
+        payeeName: entry.payeeName,
+        value: Math.abs(signedValue),
+        isNegative: signedValue < 0,
+        signedValue,
+      });
+    }
+  });
+
+  return Array.from(groupedCategoryData.values())
+    .filter(entry => entry.signedValue !== 0)
+    .map(({ signedValue, ...entry }) => ({
+      ...entry,
+      value: Math.abs(signedValue),
+      isNegative: signedValue < 0,
+      ...(entry.accountName && entry.accountId
+        ? {
+            accountName: SpecialNodeKeys.AllAccounts,
+            accountId: SpecialNodeKeys.AllAccounts,
+          }
+        : {}),
+    }));
 }
 
 // Fetch transactions that are transfers within the provided month range
@@ -943,20 +979,34 @@ export function createTransactionsGraph(
             entry.value,
           );
         } else {
-          // Category > Account
+          // Payee > Category > Account
+          const categoryKey = entry.categoryId + SpecialNodeKeys.NegativeSuffix;
           addNode(
             graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            categoryKey,
             GraphLayers.IncomeCategory,
-            entry.payeeName || entry.category,
+            entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
-          addValueToLink(
-            graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
-            entry.accountId,
-            entry.value,
-          );
+          addValueToLink(graph, categoryKey, entry.accountId, entry.value);
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
+          } else {
+            const noPayeeKey = entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
+            addNode(
+              graph,
+              noPayeeKey,
+              GraphLayers.IncomePayee,
+              t('(No payee)'),
+            );
+            addValueToLink(graph, noPayeeKey, categoryKey, entry.value);
+          }
         }
       }
     }
@@ -1566,8 +1616,8 @@ export function getNodeValue(
       nodeValue += data.to.get(key) ?? 0;
     });
 
-    // If node is in reality a root node, masked behind hidden nodes
-    if (nodeValue < 0) {
+    // If the node is masked behind hidden nodes, use its visible outgoing flow.
+    if (nodeValue <= 0) {
       nodeValue = 0;
       const node = graph.get(key);
       if (node) {
@@ -1584,8 +1634,16 @@ export function getNodeValue(
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<VisualLayerIndex, number>();
+  const layerSums = new Map<string, number>();
   const computedLayersByNode = getComputedNodeLayers(graph);
+
+  function getPercentageGroup(data: NodeData, layer: VisualLayerIndex): string {
+    // Accounts can be split across visual columns by hidden alignment nodes,
+    // but their percentages should still describe the account distribution.
+    return data.type === GraphLayers.Account
+      ? `type:${data.type}`
+      : `layer:${layer}`;
+  }
 
   // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
@@ -1599,7 +1657,11 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+    const percentageGroup = getPercentageGroup(graph.get(key)!, layer);
+    layerSums.set(
+      percentageGroup,
+      (layerSums.get(percentageGroup) ?? 0) + nodeValue,
+    );
   });
 
   // Second pass: assign percentage label to each node
@@ -1616,7 +1678,8 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentageGroup = getPercentageGroup(data, layer);
+    const layerTotal = layerSums.get(percentageGroup) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
   });
