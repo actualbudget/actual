@@ -99,6 +99,136 @@ type TransferPair = {
 
 type WeightedTransferGraph = Map<string, Map<string, number>>;
 
+type DirectedGraphChildren<NodeKey extends string> = (
+  nodeKey: NodeKey,
+) => Iterable<NodeKey>;
+
+function findDirectedCycle<NodeKey extends string>(
+  nodes: Iterable<NodeKey>,
+  getChildren: DirectedGraphChildren<NodeKey>,
+): Array<[NodeKey, NodeKey]> | undefined {
+  const state = new Map<NodeKey, 'unvisited' | 'visiting' | 'visited'>();
+
+  type SearchFrame = {
+    nodeKey: NodeKey;
+    children: NodeKey[];
+    nextChildIndex: number;
+  };
+
+  for (const startNodeKey of Array.from(nodes).sort()) {
+    if (state.get(startNodeKey)) continue;
+
+    const path: NodeKey[] = [startNodeKey];
+    const pathIndex = new Map([[startNodeKey, 0]]);
+    const stack: SearchFrame[] = [
+      {
+        nodeKey: startNodeKey,
+        children: Array.from(getChildren(startNodeKey)).sort(),
+        nextChildIndex: 0,
+      },
+    ];
+    state.set(startNodeKey, 'visiting');
+
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      const childKey = frame.children[frame.nextChildIndex];
+
+      if (childKey === undefined) {
+        state.set(frame.nodeKey, 'visited');
+        stack.pop();
+        pathIndex.delete(frame.nodeKey);
+        path.pop();
+        continue;
+      }
+
+      frame.nextChildIndex += 1;
+      const childState = state.get(childKey);
+      if (childState === 'visited') continue;
+
+      if (childState === 'visiting') {
+        const cycleStart = pathIndex.get(childKey);
+        if (cycleStart === undefined) continue;
+
+        const cycle: Array<[NodeKey, NodeKey]> = [];
+        for (let index = cycleStart; index < path.length - 1; index++) {
+          cycle.push([path[index], path[index + 1]]);
+        }
+        cycle.push([frame.nodeKey, childKey]);
+        return cycle;
+      }
+
+      state.set(childKey, 'visiting');
+      pathIndex.set(childKey, path.length);
+      path.push(childKey);
+      stack.push({
+        nodeKey: childKey,
+        children: Array.from(getChildren(childKey)).sort(),
+        nextChildIndex: 0,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function getStronglyConnectedComponents<NodeKey extends string>(
+  nodes: Iterable<NodeKey>,
+  getChildren: DirectedGraphChildren<NodeKey>,
+): NodeKey[][] {
+  const visitedIndex = new Map<NodeKey, number>();
+  const lowlink = new Map<NodeKey, number>();
+  const stack: NodeKey[] = [];
+  const activeStack = new Set<NodeKey>();
+  const components: NodeKey[][] = [];
+  let index = 0;
+
+  function strongConnect(nodeKey: NodeKey): void {
+    visitedIndex.set(nodeKey, index);
+    lowlink.set(nodeKey, index);
+    index += 1;
+    stack.push(nodeKey);
+    activeStack.add(nodeKey);
+
+    for (const childKey of getChildren(nodeKey)) {
+      if (!visitedIndex.has(childKey)) {
+        strongConnect(childKey);
+        lowlink.set(
+          nodeKey,
+          Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
+        );
+      } else if (activeStack.has(childKey)) {
+        lowlink.set(
+          nodeKey,
+          Math.min(lowlink.get(nodeKey) ?? 0, visitedIndex.get(childKey) ?? 0),
+        );
+      }
+    }
+
+    if (lowlink.get(nodeKey) !== visitedIndex.get(nodeKey)) {
+      return;
+    }
+
+    const component: NodeKey[] = [];
+    let poppedNode: NodeKey | undefined;
+    do {
+      poppedNode = stack.pop();
+      if (!poppedNode) break;
+      activeStack.delete(poppedNode);
+      component.push(poppedNode);
+    } while (poppedNode !== nodeKey);
+
+    components.push(component);
+  }
+
+  for (const nodeKey of nodes) {
+    if (!visitedIndex.has(nodeKey)) {
+      strongConnect(nodeKey);
+    }
+  }
+
+  return components;
+}
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -734,7 +864,10 @@ export function aggregateTransferPairs(
 
 function cancelTransferCycles(graph: WeightedTransferGraph): void {
   while (true) {
-    const cycle = findTransferCycle(graph);
+    const cycle = findDirectedCycle(
+      graph.keys(),
+      accountId => graph.get(accountId)?.keys() ?? [],
+    );
     if (!cycle) return;
 
     const cycleAmount = Math.min(
@@ -759,73 +892,6 @@ function cancelTransferCycles(graph: WeightedTransferGraph): void {
       }
     });
   }
-}
-
-function findTransferCycle(
-  graph: WeightedTransferGraph,
-): Array<[string, string]> | undefined {
-  const state = new Map<string, 'unvisited' | 'visiting' | 'visited'>();
-
-  type SearchFrame = {
-    accountId: string;
-    children: string[];
-    nextChildIndex: number;
-  };
-
-  for (const startAccountId of Array.from(graph.keys()).sort()) {
-    if (state.get(startAccountId)) continue;
-
-    const path: string[] = [startAccountId];
-    const pathIndex = new Map([[startAccountId, 0]]);
-    const stack: SearchFrame[] = [
-      {
-        accountId: startAccountId,
-        children: Array.from(graph.get(startAccountId)?.keys() ?? []).sort(),
-        nextChildIndex: 0,
-      },
-    ];
-    state.set(startAccountId, 'visiting');
-
-    while (stack.length > 0) {
-      const frame = stack[stack.length - 1];
-      const childId = frame.children[frame.nextChildIndex];
-
-      if (childId === undefined) {
-        state.set(frame.accountId, 'visited');
-        stack.pop();
-        pathIndex.delete(frame.accountId);
-        path.pop();
-        continue;
-      }
-
-      frame.nextChildIndex += 1;
-      const childState = state.get(childId);
-      if (childState === 'visited') continue;
-
-      if (childState === 'visiting') {
-        const cycleStart = pathIndex.get(childId);
-        if (cycleStart === undefined) continue;
-
-        const cycle: Array<[string, string]> = [];
-        for (let index = cycleStart; index < path.length - 1; index++) {
-          cycle.push([path[index], path[index + 1]]);
-        }
-        cycle.push([frame.accountId, childId]);
-        return cycle;
-      }
-
-      state.set(childId, 'visiting');
-      pathIndex.set(childId, path.length);
-      path.push(childId);
-      stack.push({
-        accountId: childId,
-        children: Array.from(graph.get(childId)?.keys() ?? []).sort(),
-        nextChildIndex: 0,
-      });
-    }
-  }
-
-  return undefined;
 }
 
 export function createBudgetGraph(
@@ -1268,71 +1334,19 @@ export function getLayer(
 function getLayersByStronglyConnectedComponents(
   graph: Graph,
 ): Map<NodeKey, VisualLayerIndex> {
-  const visitedIndex = new Map<NodeKey, number>();
-  const lowlink = new Map<NodeKey, number>();
-  const stack: NodeKey[] = [];
-  const activeStack = new Set<NodeKey>();
+  const components = getStronglyConnectedComponents(
+    graph.keys(),
+    nodeKey =>
+      Array.from(graph.get(nodeKey)?.to.keys() ?? []).filter(childKey =>
+        graph.has(childKey),
+      ),
+  );
   const componentByNode = new Map<NodeKey, number>();
-  const components: NodeKey[][] = [];
-  let index = 0;
-
-  function strongConnect(nodeKey: NodeKey) {
-    visitedIndex.set(nodeKey, index);
-    lowlink.set(nodeKey, index);
-    index += 1;
-    stack.push(nodeKey);
-    activeStack.add(nodeKey);
-
-    const node = graph.get(nodeKey);
-    if (node) {
-      for (const childKey of node.to.keys()) {
-        if (!graph.has(childKey)) {
-          continue;
-        }
-
-        if (!visitedIndex.has(childKey)) {
-          strongConnect(childKey);
-          lowlink.set(
-            nodeKey,
-            Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
-          );
-        } else if (activeStack.has(childKey)) {
-          lowlink.set(
-            nodeKey,
-            Math.min(
-              lowlink.get(nodeKey) ?? 0,
-              visitedIndex.get(childKey) ?? 0,
-            ),
-          );
-        }
-      }
-    }
-
-    if (lowlink.get(nodeKey) === visitedIndex.get(nodeKey)) {
-      const componentIndex = components.length;
-      const componentNodes: NodeKey[] = [];
-
-      let poppedNode: NodeKey | undefined;
-      do {
-        poppedNode = stack.pop();
-        if (!poppedNode) {
-          break;
-        }
-
-        activeStack.delete(poppedNode);
-        componentByNode.set(poppedNode, componentIndex);
-        componentNodes.push(poppedNode);
-      } while (poppedNode !== nodeKey);
-
-      components.push(componentNodes);
-    }
-  }
-
-  for (const nodeKey of graph.keys()) {
-    if (!visitedIndex.has(nodeKey)) {
-      strongConnect(nodeKey);
-    }
-  }
+  components.forEach((component, componentIndex) => {
+    component.forEach(nodeKey => {
+      componentByNode.set(nodeKey, componentIndex);
+    });
+  });
 
   const parentsByComponent = new Map<number, Set<number>>();
   for (
