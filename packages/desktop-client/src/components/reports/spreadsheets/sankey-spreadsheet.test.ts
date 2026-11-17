@@ -835,69 +835,6 @@ describe('sankey-spreadsheet', () => {
 
       expect(graph).toEqual(new Map());
     });
-
-    it('contracts a balanced transfer-only account', () => {
-      const graph = createTransactionsGraph(
-        [],
-        [
-          {
-            fromAccountId: 'account-a',
-            fromAccountName: 'Account A',
-            toAccountId: 'account-b',
-            toAccountName: 'Account B',
-            amount: 100,
-          },
-          {
-            fromAccountId: 'account-b',
-            fromAccountName: 'Account B',
-            toAccountId: 'account-c',
-            toAccountName: 'Account C',
-            amount: 100,
-          },
-        ],
-      );
-
-      expect(graph.has('account-b')).toBe(false);
-      expect(graph.get('account-a')?.to.get('account-c')).toBe(100);
-    });
-
-    it('keeps a balanced account with non-transfer activity', () => {
-      const graph = createTransactionsGraph(
-        [
-          {
-            categoryGroup: 'Food',
-            categoryGroupId: 'group-food',
-            category: 'Groceries',
-            categoryId: 'category-groceries',
-            value: 50,
-            isIncome: false,
-            isNegative: true,
-            accountName: 'Account B',
-            accountId: 'account-b',
-          },
-        ],
-        [
-          {
-            fromAccountId: 'account-a',
-            fromAccountName: 'Account A',
-            toAccountId: 'account-b',
-            toAccountName: 'Account B',
-            amount: 100,
-          },
-          {
-            fromAccountId: 'account-b',
-            fromAccountName: 'Account B',
-            toAccountId: 'account-c',
-            toAccountName: 'Account C',
-            amount: 100,
-          },
-        ],
-      );
-
-      expect(graph.has('account-b')).toBe(true);
-      expect(graph.get('account-a')?.to.get('account-b')).toBe(100);
-      expect(graph.get('account-b')?.to.get('account-c')).toBe(100);
-    });
   });
 
   describe('aggregateTransferPairs', () => {

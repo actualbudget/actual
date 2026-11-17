@@ -158,10 +158,7 @@ export function SankeyCard({
     meta?.showTransfers,
   ]);
 
-  const baseGraph = useReport<Graph>(
-    'sankey',
-    baseGraphParams ?? defaultGetBaseGraph,
-  );
+  const baseGraph = useReport('sankey', baseGraphParams ?? defaultGetBaseGraph);
   const baseGraphRef = useRef(baseGraph);
 
   useEffect(() => {

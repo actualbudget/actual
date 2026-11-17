@@ -305,7 +305,7 @@ export function createBaseGraphSpreadsheet(
     _spreadsheet: ReturnType<typeof useSpreadsheet>,
     setData: (data: Graph) => void,
   ) => {
-    const graph = await createBaseGraph(
+    const baseGraph = await createBaseGraph(
       start,
       end,
       categories,
@@ -316,7 +316,7 @@ export function createBaseGraphSpreadsheet(
       showTransfers,
     );
 
-    setData(graph);
+    setData(baseGraph);
   };
 }
 
@@ -1193,7 +1193,6 @@ export function createTransactionsGraph(
 
   return graph;
 }
-
 
 export function addNode(
   graph: Graph,
