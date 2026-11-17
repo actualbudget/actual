@@ -26,16 +26,10 @@ GitHub MCP tool, and CI checks it on the PR itself however it was created.
 
 ### Proof is mandatory
 
-**Every PR that changes app code must prove that it works.** Maintainers
-should not have to test a change by hand to see what it does.
-
-Verify the change in a real browser before opening the PR, and put a before
-AND an after screenshot, or a video, in the "Proof" section. Passing tests are
-not proof. The commands for capturing and attaching it, including from a fork,
-are in `.claude/skills/proving-actual-changes/SKILL.md`.
-
-Tick the checkbox in the "Proof" section only when there is truly nothing to
-show (a refactor, types, tests) — never to skip the verification.
+**Every PR that changes app code must prove that it works** in the "Proof"
+section, so maintainers do not have to test it by hand. Follow the
+`proving-actual-changes` skill
+(`.claude/skills/proving-actual-changes/SKILL.md`).
 
 ## Do not create GitHub issues
 

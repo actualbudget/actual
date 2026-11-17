@@ -22,9 +22,11 @@ const TOOLING_PACKAGE =
 const TEST_OR_CONFIG =
   /\.(test|spec|stories|config)\.|\/(e2e|tests|__tests__|mocks|__mocks__)\//;
 const IMAGE = /!\[[^\]]*\]\([^)]*\)|<img\b[^>]*>/gi;
-// GitHub renders an uploaded video from its bare link. Images use the same
-// links, so strip them before testing for this.
-const VIDEO = /<video\b|github\.com\/user-attachments\//i;
+// GitHub renders an uploaded video as a player only from an upload link on a
+// line of its own. Image uploads use the same links, so replace them first,
+// leaving text behind so a link beside an image is not left alone on a line.
+const VIDEO =
+  /<video\b|^\s*https:\/\/github\.com\/user-attachments\/assets\/\S+\s*$/im;
 const NOTHING_TO_SHOW = /\[x\] This change has no user-visible effect/i;
 
 // Headings are compared without emoji, punctuation or case, so "## 👱 Human
@@ -134,7 +136,7 @@ export function checkPrDescription(
     const proof = section('Proof');
     const hasProof =
       (proof.match(IMAGE)?.length ?? 0) >= 2 ||
-      VIDEO.test(proof.replace(IMAGE, '')) ||
+      VIDEO.test(proof.replace(IMAGE, '[image]')) ||
       NOTHING_TO_SHOW.test(proof);
     if (!hasProof) {
       errors.push(

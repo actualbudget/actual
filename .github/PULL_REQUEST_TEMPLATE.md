@@ -20,7 +20,7 @@
 
 ## Proof
 
-<!-- REQUIRED for every change to app code. Verify your change in a real browser and show it here: a before AND an after screenshot, or a video. We should not have to test your change by hand to see that it works; PRs without proof are not reviewed. -->
+<!-- Required for app code changes: a before AND an after screenshot, or a video, from a real browser. PRs without proof are not reviewed. -->
 
 - [ ] This change has no user-visible effect (e.g. refactor, types, tests), so there is nothing to show
 

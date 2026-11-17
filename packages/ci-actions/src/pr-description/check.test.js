@@ -129,6 +129,13 @@ describe('checkPrDescription', () => {
       ),
     ).toEqual([]);
     expect(check(fill({ ...summary, Proof: upload }))).toEqual([]);
+    // A link inside text renders as a link, not a video player.
+    expect(
+      check(fill({ ...summary, Proof: `![after](${upload}) ${upload}` })),
+    ).toEqual(noProof);
+    expect(
+      check(fill({ ...summary, Proof: `See [the demo](${upload}).` })),
+    ).toEqual(noProof);
     // Proof must be in its own section.
     expect(check(fill({ ...summary, Testing: upload }))).toEqual(noProof);
     expect(
