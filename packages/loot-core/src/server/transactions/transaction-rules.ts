@@ -39,7 +39,7 @@ import {
 } from '#shared/months';
 import { q } from '#shared/query';
 import { getApproxNumberThreshold, sortNumbers } from '#shared/rules';
-import { extractTagsForFilter } from '#shared/tags';
+import { extractTagsForFilter, makeTagAqlRegex } from '#shared/tags';
 import { ungroupTransaction } from '#shared/transactions';
 import { fastSetMerge, partitionByField } from '#shared/util';
 import type {
@@ -317,7 +317,19 @@ export async function getAllRuleIdsFromSchedules(
   return ruleIds;
 }
 
+export async function getCompletedScheduleRuleIds(): Promise<Set<string>> {
+  const rows = await db.all<Pick<db.DbSchedule, 'rule'>>(
+    'SELECT rule FROM schedules WHERE completed = 1 AND tombstone = 0',
+  );
+
+  return new Set(
+    rows.map(r => r.rule).filter((rule): rule is string => !!rule),
+  );
+}
+
 // Runner
+const NULLABLE_RULE_FIELDS = ['payee', 'category'] as const;
+
 export async function runRules(
   trans,
   accounts: Map<string, db.DbAccount> | null = null,
@@ -340,9 +352,24 @@ export async function runRules(
     ),
   );
 
-  let finalTrans = await prepareTransactionForRules({ ...trans }, accountsMap, {
-    includeBalance: false,
-  });
+  // Bank sync and the client can leave `payee` or `category` out entirely
+  // when the transaction has none. A condition never matches a missing
+  // field, so a "payee is nothing" rule would silently skip such a
+  // transaction. Match against null instead, and drop the field again
+  // afterwards so the returned shape matches the input.
+  const missingNullableFields = NULLABLE_RULE_FIELDS.filter(
+    field => trans[field] === undefined,
+  );
+  const normalizedTrans = { ...trans };
+  for (const field of missingNullableFields) {
+    normalizedTrans[field] = null;
+  }
+
+  let finalTrans = await prepareTransactionForRules(
+    normalizedTrans,
+    accountsMap,
+    { includeBalance: false },
+  );
   let lastCategoryIdForGroup: string | null = finalTrans.category ?? null;
 
   // The running balance is a query over every earlier transaction in
@@ -371,6 +398,10 @@ export async function runRules(
 
   const RuleIdsLinkedToSchedules =
     await getAllRuleIdsFromSchedules(scheduleRuleID);
+
+  // Completed schedules are kept around for reference, so their rules must
+  // not link new transactions that happen to match.
+  const completedScheduleRuleIds = await getCompletedScheduleRuleIds();
 
   const formulaStrings = rules.flatMap(rule =>
     collectFormulasFromActions(rule.actions),
@@ -413,6 +444,9 @@ export async function runRules(
           lastCategoryIdForGroup,
         );
       }
+    } else if (completedScheduleRuleIds.has(rules[i].id)) {
+      // Completed schedules must not link new transactions.
+      continue;
     } else {
       // if there is no scheduleRuleID then just run all rules.
       if (rules[i].evalConditions(finalTrans)) {
@@ -431,7 +465,13 @@ export async function runRules(
     }
   }
 
-  return await finalizeTransactionForRules(finalTrans);
+  const result = await finalizeTransactionForRules(finalTrans);
+  for (const field of missingNullableFields) {
+    if (result[field] === null) {
+      delete result[field];
+    }
+  }
+  return result;
 }
 
 function conditionSpecialCases(cond: Condition | null): Condition | null {
@@ -684,13 +724,7 @@ export function conditionsToAQL(
         }
 
         return {
-          $and: tagValues.map(v => {
-            const escapedTag = v
-              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
-            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
-            return apply(field, '$regexp', pattern);
-          }),
+          $and: tagValues.map(v => apply(field, '$regexp', makeTagAqlRegex(v))),
         };
       }
 
@@ -700,13 +734,7 @@ export function conditionsToAQL(
           return { id: null };
         }
         return {
-          $or: tagValues.map(v => {
-            const escapedTag = v
-              .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              .replace(/\\\$/g, '[$]'); // Use '[$]' instead of '\$' so AQL string unescaping doesn't turn it into a bare '$' end-of-string anchor
-            const pattern = `(?<!#)${escapedTag}([\\s#]|$)`;
-            return apply(field, '$regexp', pattern);
-          }),
+          $or: tagValues.map(v => apply(field, '$regexp', makeTagAqlRegex(v))),
         };
       }
 
@@ -1022,8 +1050,14 @@ export async function updateCategoryRules(transactions) {
             });
           }
         }
-      } else {
-        // No existing rules, so create one
+      } else if (
+        !getOneOfSetterRules(null, 'payee', 'category', {
+          condValue: payeeId,
+          actionValue: category,
+        }).next().value
+      ) {
+        // No existing rules (and no "one of" rule that already sets this
+        // category for the payee), so create one
         const newRule = new Rule({
           stage: null,
           conditionsOp: 'and',
@@ -1049,7 +1083,10 @@ export type TransactionForRules = TransactionEntity & {
   parent_imported_payee?: string;
   parent_payee?: string;
   parent_account?: string;
-  /** Prefetched cent balances for BALANCE_OF("…") in rule formulas; cleared in finalize */
+  /**
+   * Prefetched integer balances for BALANCE_OF("…") in rule formulas; converted
+   * to amounts at the formula boundary in executeFormulaSync, cleared in finalize
+   */
   _balanceOfPrefetched?: Map<string, number>;
 };
 

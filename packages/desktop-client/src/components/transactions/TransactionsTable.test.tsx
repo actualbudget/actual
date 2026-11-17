@@ -164,6 +164,9 @@ type LiveTransactionTableProps = {
   showCategory: boolean;
   showGroup?: boolean;
   showCleared: boolean;
+  showBalances?: boolean;
+  balances?: Record<TransactionEntity['id'], number>;
+  onReorder?: () => void;
   isAdding: boolean;
   onTransactionsChange?: (newTrans: TransactionEntity[]) => void;
   onCloseAddTransaction?: () => void;
@@ -171,6 +174,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -591,6 +596,29 @@ describe('Transactions', () => {
     });
   });
 
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
+      const onFocusedTransactionShown = vi.fn();
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
+
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -746,6 +774,34 @@ describe('Transactions', () => {
     expect(input.value).toEqual(oldValue);
   });
 
+  test.each(['debit', 'credit'] as const)(
+    'invalid arithmetic in %s preserves the amount and allows correction',
+    async field => {
+      const onTransactionsChange = vi.fn();
+      const { container } = renderTransactions({ onTransactionsChange });
+      const input = await editField(container, field, 0);
+      await userEvent.clear(input);
+      await userEvent.type(input, '1/0[Tab]');
+
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([expect.objectContaining({ amount: -2777 })]),
+      );
+      expect(queryField(container, 'debit', 'div', 0).textContent).toBe(
+        '27.77',
+      );
+      expect(queryField(container, 'credit', '', 0).textContent).toBe('');
+
+      const correctedInput = await editField(container, field, 0);
+      await userEvent.clear(correctedInput);
+      await userEvent.type(correctedInput, '12/2[Tab]');
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ amount: field === 'debit' ? -600 : 600 }),
+        ]),
+      );
+    },
+  );
+
   test('text fields save when moved away from', async () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -782,6 +838,74 @@ describe('Transactions', () => {
     // Blur the input to make it stop editing
     await userEvent.tab();
     expect(getTransactions()[2].notes).toBe('another happy note');
+  });
+
+  test('a note with line breaks is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI\r\nFrom 2. Savings';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    // The input shows the line breaks as spaces, like the cell does
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('To 1. Main EndToEndID: FRI From 2. Savings');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('a note with leading and trailing whitespace is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = '  a note with spaces  ';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('  a note with spaces  ');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('editing a note with line breaks saves them as spaces', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    const input = await editField(container, 'notes', 2);
+    await userEvent.type(input, ' paid');
+    await userEvent.tab();
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: transactions[2].id,
+          notes: 'To 1. Main EndToEndID: FRI paid',
+        }),
+      ]),
+    );
   });
 
   test('dropdown automatically opens and can be filtered', async () => {
@@ -1024,7 +1148,7 @@ describe('Transactions', () => {
     expect(getTransactions()[3].payee).toBe(null);
   });
 
-  test('dropdown escape resets the value ', async () => {
+  test('dropdown escape resets the value', async () => {
     const { container } = renderTransactions();
 
     const input = await editField(container, 'category', 2);
@@ -1137,6 +1261,109 @@ describe('Transactions', () => {
     expect(getTransactions()[1].amount).toBe(-4500);
     expect(getTransactions()[2].is_child).toBe(true);
     expect(getTransactions()[2].amount).toBe(-1000);
+  });
+
+  test('selecting split with the keyboard keeps focus on the parent payment field', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'category');
+    expect(screen.getByTestId('autocomplete')).toBeTruthy();
+    expect(screen.getByTestId('split-transaction-button')).toBeTruthy();
+
+    // Nothing is highlighted on open; ArrowDown highlights Split (index 0).
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
+  test('selecting split after visiting payment keeps focus on the parent payment field', async () => {
+    const appliedTransactions: TransactionEntity[] = [];
+    const { container, updateProps } = renderTransactions({
+      onApplyRules: async transaction => {
+        appliedTransactions.push(transaction);
+        return transaction;
+      },
+    });
+    updateProps({ isAdding: true });
+
+    // Tabbing through payment saves debit 0 as -0 (negated), so amount is no longer null.
+    const debitInput = await editNewField(container, 'debit');
+    await userEvent.type(debitInput, '[Tab]');
+    await waitFor(() => {
+      const appliedAmount = appliedTransactions.at(-1)?.amount;
+      expect(appliedAmount == null).toBe(false);
+      expect(appliedAmount === 0).toBe(true);
+    });
+
+    const input = await editNewField(container, 'category');
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    expectToBeEditingField(container, 'debit', 0, true);
+  });
+
+  test('tab from the parent cleared field focuses the first split child', async () => {
+    const { container, updateProps } = renderTransactions();
+    updateProps({ isAdding: true });
+
+    const input = await editNewField(container, 'category');
+    await userEvent.keyboard('[ArrowDown]');
+    await userEvent.type(input, '[Enter]');
+    await waitForAutocomplete();
+    await waitForAutocomplete();
+
+    await waitFor(() => {
+      expect(
+        container.querySelectorAll(
+          '[data-testid="new-transaction"] [data-testid="debit"]',
+        ).length,
+      ).toBeGreaterThan(1);
+    });
+
+    // Enabling split still leaves the parent payment field focused.
+    let field = expectToBeEditingField(container, 'debit', 0, true);
+    await userEvent.type(field, '[Tab]');
+    field = expectToBeEditingField(container, 'credit', 0, true);
+    await userEvent.type(field, '[Tab]');
+    field = expectToBeEditingField(container, 'cleared', 0, true);
+    await userEvent.type(field, '[Tab]');
+
+    expectToBeEditingField(container, 'payee', 1, true);
+    const cancelButton = container.querySelector(
+      '[data-testid="new-transaction"] [data-testid="cancel-button"]',
+    )!;
+    expect(cancelButton.contains(container.ownerDocument.activeElement)).toBe(
+      false,
+    );
+
+    // Cancel follows the last split line.
+    const lastCleared = await editNewField(container, 'cleared', 2);
+    await userEvent.type(lastCleared, '[Tab]');
+    expect(cancelButton.contains(container.ownerDocument.activeElement)).toBe(
+      true,
+    );
   });
 
   test('escape closes the new transaction rows', async () => {
@@ -1486,6 +1713,37 @@ describe('Transactions', () => {
     expect(container.querySelectorAll('[data-testid=select] svg').length).toBe(
       2,
     );
+  });
+
+  test('pressing the mouse on the running balance pauses row drag so the text can be selected', () => {
+    // Two transactions on the same date, so the rows can be reordered
+    const transactions = generateTransactions(2).map(t => ({
+      ...t,
+      date: '2017-01-01',
+    }));
+    const { container } = renderTransactions({
+      transactions,
+      showBalances: true,
+      balances: Object.fromEntries(transactions.map(t => [t.id, 1000])),
+      onReorder: vi.fn(),
+    });
+
+    const balance = queryField(container, 'balance', '', 0);
+    const row = balance.closest('[data-testid=row]');
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance, { button: 2 });
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    expect(row).toHaveAttribute('draggable', 'false');
+
+    fireEvent.mouseUp(window);
+    expect(row).toHaveAttribute('draggable', 'true');
+
+    fireEvent.mouseDown(balance);
+    fireEvent.blur(window);
+    expect(row).toHaveAttribute('draggable', 'true');
   });
 
   test('transaction can be split, updated, and deleted', async () => {

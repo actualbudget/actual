@@ -2,17 +2,15 @@ import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
-import { Label } from '@actual-app/components/label';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
 
 import { useLoginMethod, useMultiuserEnabled } from '#components/ServerContext';
 import { useSyncServerStatus } from '#hooks/useSyncServerStatus';
 import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 
-import { Setting } from './UI';
+import { SettingsRow } from './SettingsRow';
 
 export function AuthSettings() {
   const { t } = useTranslation();
@@ -28,93 +26,53 @@ export function AuthSettings() {
   }
 
   const isOffline = serverStatus === 'offline';
+  const isUsingPassword = loginMethod === 'password';
 
   return (
-    <Setting
-      primaryAction={
-        <>
-          <label>
-            <Trans>OpenID is</Trans>{' '}
-            <label style={{ fontWeight: 'bold' }}>
-              {loginMethod === 'openid' ? t('enabled') : t('disabled')}
-            </label>
-          </label>
-          {isOffline && (
-            <View>
-              <Text style={{ paddingTop: 5, color: theme.warningText }}>
-                <Trans>
-                  Server is offline. OpenID settings are unavailable.
-                </Trans>
-              </Text>
-            </View>
-          )}
-          {loginMethod === 'password' && (
-            <>
-              <Button
-                id="start-using"
-                style={{
-                  marginTop: '10px',
-                }}
-                variant="normal"
-                isDisabled={isOffline}
-                onPress={() =>
-                  dispatch(
-                    pushModal({
-                      modal: {
-                        name: 'enable-openid',
-                        options: {},
-                      },
-                    }),
-                  )
-                }
-              >
-                <Trans>Start using OpenID</Trans>
-              </Button>
-              <Label
-                style={{ paddingTop: 5 }}
-                title={t('OpenID is required to enable multi-user mode.')}
-              />
-            </>
-          )}
-          {loginMethod !== 'password' && (
-            <>
-              <Button
-                style={{
-                  marginTop: '10px',
-                }}
-                variant="normal"
-                isDisabled={isOffline}
-                onPress={() =>
-                  dispatch(
-                    pushModal({
-                      modal: {
-                        name: 'enable-password-auth',
-                        options: {},
-                      },
-                    }),
-                  )
-                }
-              >
-                <Trans>Disable OpenID</Trans>
-              </Button>
-              {multiuserEnabled && (
-                <Text style={{ paddingTop: 5, color: theme.errorText }}>
-                  <Trans>
-                    Disabling OpenID will deactivate multi-user mode.
-                  </Trans>
-                </Text>
-              )}
-            </>
-          )}
-        </>
+    <SettingsRow
+      title={t('Authentication method')}
+      description={t(
+        'Enable OpenID to let users log in through an OpenID provider instead of the server password. OpenID is required for multi-user mode.',
+      )}
+      control={
+        isUsingPassword ? (
+          <Button
+            id="start-using"
+            isDisabled={isOffline}
+            onPress={() =>
+              dispatch(
+                pushModal({ modal: { name: 'enable-openid', options: {} } }),
+              )
+            }
+          >
+            <Trans>Start using OpenID</Trans>
+          </Button>
+        ) : (
+          <Button
+            isDisabled={isOffline}
+            onPress={() =>
+              dispatch(
+                pushModal({
+                  modal: { name: 'enable-password-auth', options: {} },
+                }),
+              )
+            }
+          >
+            <Trans>Disable OpenID</Trans>
+          </Button>
+        )
       }
     >
-      <Text>
-        <Trans>
-          <strong>Authentication method</strong> modifies how users log in to
-          the system.
-        </Trans>
-      </Text>
-    </Setting>
+      {isOffline && (
+        <Text style={{ color: theme.warningText }}>
+          <Trans>Server is offline. OpenID settings are unavailable.</Trans>
+        </Text>
+      )}
+      {!isUsingPassword && multiuserEnabled && (
+        <Text style={{ color: theme.errorText }}>
+          <Trans>Disabling OpenID will deactivate multi-user mode.</Trans>
+        </Text>
+      )}
+    </SettingsRow>
   );
 }

@@ -37,4 +37,6 @@ export type BankSyncStatus =
   | 'attention-required'
   | 'rate-limit-exceeded'
   | 'timed-out'
-  | 'account-missing';
+  | 'server-down'
+  | 'account-missing'
+  | 'not-configured';

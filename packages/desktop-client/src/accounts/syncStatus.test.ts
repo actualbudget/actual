@@ -17,7 +17,9 @@ describe('syncStatus', () => {
     expect(isAccountFailedSync(makeAccount('reauth-required'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('rate-limit-exceeded'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('timed-out'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('server-down'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('account-missing'))).toBe(true);
+    expect(isAccountFailedSync(makeAccount('not-configured'))).toBe(true);
     expect(isAccountFailedSync(makeAccount('pending'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('sync-requested'))).toBe(false);
     expect(isAccountFailedSync(makeAccount('ok'))).toBe(false);
@@ -47,9 +49,23 @@ describe('syncStatus', () => {
       type: 'TIMED_OUT',
       code: 'TIMED_OUT',
     });
+    expect(getFailedSyncError(makeAccount('server-down'))).toEqual({
+      type: 'SERVER_DOWN',
+      code: 'SERVER_DOWN',
+    });
     expect(getFailedSyncError(makeAccount('account-missing'))).toEqual({
       type: 'ACCOUNT_MISSING',
       code: 'ACCOUNT_MISSING',
+    });
+    expect(
+      getFailedSyncError(makeAccount('not-configured', 'goCardless')),
+    ).toEqual({
+      type: 'GOCARDLESS_NOT_CONFIGURED',
+      code: 'GOCARDLESS_NOT_CONFIGURED',
+    });
+    expect(getFailedSyncError(makeAccount('not-configured'))).toEqual({
+      type: 'NOT_CONFIGURED',
+      code: 'NOT_CONFIGURED',
     });
     expect(getFailedSyncError(makeAccount('failed'))).toEqual({
       type: 'SYNC_ERROR',

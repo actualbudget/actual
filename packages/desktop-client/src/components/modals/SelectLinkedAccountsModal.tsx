@@ -8,9 +8,12 @@ import { SpaceBetween } from '@actual-app/components/space-between';
 import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 import { currentDay, subDays } from '@actual-app/core/shared/months';
+import { amountToInteger, MAX_SAFE_NUMBER } from '@actual-app/core/shared/util';
+import type { IntegerAmount } from '@actual-app/core/shared/util';
 import type {
   AccountEntity,
   SyncServerAkahuAccount,
@@ -661,6 +664,26 @@ type CustomStartingSettings = {
 };
 
 /**
+ * Converts a provider balance to integer cents, or `null` if it is missing,
+ * invalid, or too large to format. Enable Banking already reports cents; other
+ * providers report decimal amounts.
+ */
+export function externalBalanceToInteger(
+  balance: number | string | null | undefined,
+  syncSource: SelectLinkedAccountsModalProps['syncSource'],
+): IntegerAmount | null {
+  if (balance == null || (typeof balance === 'string' && !balance.trim())) {
+    return null;
+  }
+  const value = Number(balance);
+  const amount =
+    syncSource === 'enableBanking' ? value : amountToInteger(value);
+  return Number.isInteger(amount) && Math.abs(amount) <= MAX_SAFE_NUMBER
+    ? amount
+    : null;
+}
+
+/**
  * The settings a row starts with. The balance is deliberately absent: the
  * server derives the opening balance from the bank unless one is supplied, so
  * defaulting it to 0 here would silently override the real balance for anyone
@@ -754,6 +777,7 @@ function TableRow({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
   const startingBalanceInfo = useStartingBalanceInfo(
     showStartingOptions ? undefined : chosenAccount?.id,
   );
@@ -800,10 +824,8 @@ function TableRow({
       {/* Balance */}
       <Field width={120} style={{ textAlign: 'right' }}>
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}
@@ -836,7 +858,7 @@ function TableRow({
       {showStartingOptions ? (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={balance}
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="inline"
@@ -982,9 +1004,9 @@ function StartingOptionsFields({
       <View style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <View>
           <Text
+            size="medium"
             style={{
-              marginBottom: 4,
-              fontSize: 13,
+              marginBottom: spacing.xs,
               color: theme.pageTextSubdued,
             }}
           >
@@ -1004,9 +1026,9 @@ function StartingOptionsFields({
         </View>
         <View>
           <Text
+            size="medium"
             style={{
-              marginBottom: 4,
-              fontSize: 13,
+              marginBottom: spacing.xs,
               color: theme.pageTextSubdued,
             }}
           >
@@ -1053,6 +1075,7 @@ function AccountCard({
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
   const { t } = useTranslation();
+  const balance = externalBalanceToInteger(externalAccount.balance, syncSource);
 
   const availableAccountOptions = getSelectableAccountOptions({
     localAccounts,
@@ -1117,10 +1140,8 @@ function AccountCard({
       >
         <Trans>Balance:</Trans>{' '}
         <PrivacyFilter>
-          {externalAccount.balance != null ? (
-            <FinancialText>
-              {format(externalAccount.balance.toString(), 'financial')}
-            </FinancialText>
+          {balance != null ? (
+            <FinancialText>{format(balance, 'financial')}</FinancialText>
           ) : (
             t('Unknown')
           )}
@@ -1213,7 +1234,7 @@ function AccountCard({
       {shouldShowStartingOptions && (
         <StartingOptionsFields
           accountId={externalAccount.account_id}
-          externalBalance={externalAccount.balance}
+          externalBalance={balance}
           customStartingDate={customStartingDate}
           onSetCustomStartingDate={onSetCustomStartingDate}
           layout="stacked"

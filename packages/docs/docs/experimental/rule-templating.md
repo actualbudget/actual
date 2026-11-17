@@ -26,11 +26,11 @@ Actual uses [handlebars](https://handlebarsjs.com/) under the hood to process th
 
 You can toggle between the normal and template input modes by clicking the icon to the right of the action input box.
 
-![How to enable rule action templating](/img/experimental/rule-templating/enable-rule-templating.webp)
+<img width="884" alt="A rule's set payee (name) action with the template toggle boxed" src="/img/experimental/rule-templating/rule-templating-toggle@2x.webp" />
 
 When the template input mode is active you can type your template into the input box as below. This example removes the string " 12345" from an imported payee and sets the payee to this new value.
 
-![How to enable rule action templating 2](/img/experimental/rule-templating/enable-rule-templating-2.webp)
+<img width="884" alt="The same action in template mode, removing 12345 from the imported payee" src="/img/experimental/rule-templating/rule-templating-template@2x.webp" />
 
 ## Variables
 

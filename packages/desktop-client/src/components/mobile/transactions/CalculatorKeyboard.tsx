@@ -8,6 +8,9 @@ import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
 import { CalculatorButtons } from '#components/common/CalculatorButtons';
+import { hapticKeyPress } from '#util/haptics';
+
+export const CALCULATOR_KEYBOARD_HEIGHT = 'min(400px, max(320px, 50dvh))';
 
 export const CalculatorKeyboard = memo(function CalculatorAmountInput({
   inputRef,
@@ -125,12 +128,6 @@ export const CalculatorKeyboard = memo(function CalculatorAmountInput({
   );
 });
 
-const maybeVibrate = () => {
-  if ('vibrate' in navigator) {
-    navigator.vibrate(3);
-  }
-};
-
 function NonFocusableButton({
   variant,
   onPress,
@@ -152,7 +149,7 @@ function NonFocusableButton({
       onPointerDown={e => {
         e.preventDefault();
         onInteractionStart?.();
-        maybeVibrate();
+        hapticKeyPress();
       }}
       onPress={onPress}
     >

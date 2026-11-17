@@ -19,7 +19,8 @@ vi.mock('#hooks/useNewsFeed', () => ({
     lastSeenNewsDate: undefined,
     markAllSeen: vi.fn(),
     isLoading: false,
-    error: null,
+    errorKind: undefined,
+    retry: vi.fn(),
   }),
 }));
 

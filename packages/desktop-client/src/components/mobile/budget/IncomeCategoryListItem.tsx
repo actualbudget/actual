@@ -14,7 +14,7 @@ import type { CategoryEntity } from '@actual-app/core/types/models';
 
 import { useNavigate } from '#hooks/useNavigate';
 import { useSyncedPref } from '#hooks/useSyncedPref';
-import { collapseModals, pushModal } from '#modals/modalsSlice';
+import { pushModal } from '#modals/modalsSlice';
 import { useDispatch } from '#redux';
 import { envelopeBudget, trackingBudget } from '#spreadsheet/bindings';
 
@@ -204,9 +204,8 @@ export function IncomeCategoryListItem({
         category: category.id,
         flag: carryover,
       });
-      dispatch(collapseModals({ rootModalName: balanceMenuModalName }));
     },
-    [category, onBudgetAction, month, dispatch, balanceMenuModalName],
+    [category, onBudgetAction, month],
   );
 
   const onOpenBalanceMenu = useCallback(() => {

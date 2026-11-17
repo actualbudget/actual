@@ -201,7 +201,7 @@ export function TransactionList({
                     backgroundColor: theme.mobilePageBackground,
                   }}
                 >
-                  <Text style={{ fontSize: 15 }}>
+                  <Text size="large">
                     <Trans>No transactions</Trans>
                   </Text>
                 </View>
@@ -532,7 +532,7 @@ function SelectedTransactionsFloatingActionBar({
                               void navigate(`/categories/${String(value)}`);
                               break;
                             case 'payee':
-                              void navigate(`/payees`);
+                              void navigate('/settings/payees');
                               break;
                             default:
                               break;

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import type { FocusEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import type { FocusEvent, MouseEvent } from 'react';
 
 import { useResponsive } from '@actual-app/components/hooks/useResponsive';
 import { Input } from '@actual-app/components/input';
@@ -35,6 +35,8 @@ export function FinancialInput({
   onChangeValue,
   onBlur,
   onFocus,
+  onMouseDown,
+  onMouseUp,
   onEnter,
   className,
   ...restProps
@@ -44,10 +46,16 @@ export function FinancialInput({
   // Like PrivacyFilter, redaction is desktop-only for now
   const { isNarrowWidth } = useResponsive();
   const inputRef = useRef<HTMLInputElement>(null);
+  // A mouse-down is in progress; when that is what focuses the field,
+  // the first mouse-up is cancelled so the click keeps the whole value
+  // selected (see handleMouseUp). Keyboard focus leaves clicks alone
+  const isPointerDown = useRef(false);
+  const shouldKeepSelection = useRef(false);
   const [internalValue, setInternalValue] = useState(() =>
     format(integerValue, 'financial'),
   );
   const [isFocused, setIsFocused] = useState(false);
+  const isEdited = useRef(false);
 
   useEffect(() => {
     if (!isFocused) {
@@ -55,31 +63,71 @@ export function FinancialInput({
     }
   }, [integerValue, format, isFocused]);
 
+  // Highlight the whole value on focus so typing replaces it. Focusing
+  // swaps the text to its edit form, which would collapse a selection
+  // made in the focus handler, so select once React has committed the
+  // swap - still synchronously within the focus event, so nothing runs
+  // after the user has moved on (a deferred select() would steal focus
+  // back and set two fields bouncing focus between each other)
+  useLayoutEffect(() => {
+    if (isFocused) {
+      inputRef.current?.select();
+    }
+  }, [isFocused]);
+
   const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
+    isEdited.current = false;
     setInternalValue(format.forEdit(integerValue));
-    setTimeout(() => {
-      inputRef.current?.select();
-    }, 0);
+    // The selection itself is made in the layout effect above
+    shouldKeepSelection.current = isPointerDown.current;
     onFocus?.(e);
   };
 
+  const handleMouseDown = (e: MouseEvent<HTMLInputElement>) => {
+    isPointerDown.current = true;
+    onMouseDown?.(e);
+  };
+
+  const handleMouseUp = (e: MouseEvent<HTMLInputElement>) => {
+    // The browser's mouse-up would otherwise replace the selection made
+    // on focus with a caret at the click point; later clicks in an
+    // already-focused field place the caret as normal
+    if (shouldKeepSelection.current) {
+      e.preventDefault();
+    }
+    shouldKeepSelection.current = false;
+    isPointerDown.current = false;
+    onMouseUp?.(e);
+  };
+
+  // Untouched text can be rounded (hidden decimals); keep the exact amount
+  const parseEdit = (stringValue: string) =>
+    isEdited.current ? (format.fromEdit(stringValue, 0) ?? 0) : integerValue;
+
   const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    const finalInteger = format.fromEdit(internalValue, 0) ?? 0;
-    onUpdate?.(finalInteger);
+    const finalInteger = parseEdit(internalValue);
+    // Only report a real change: tabbing through an untouched field is
+    // not an update, and callers may do expensive work on one
+    if (finalInteger !== integerValue) {
+      onUpdate?.(finalInteger);
+    }
     setInternalValue(format(finalInteger, 'financial'));
     onBlur?.(e);
   };
 
   const handleEnter = (stringValue: string) => {
-    const finalInteger = format.fromEdit(stringValue, 0) ?? 0;
-    onUpdate?.(finalInteger);
+    const finalInteger = parseEdit(stringValue);
+    if (finalInteger !== integerValue) {
+      onUpdate?.(finalInteger);
+    }
     onEnter?.(finalInteger);
   };
 
   const handleChange = (stringValue: string) => {
     setInternalValue(stringValue);
+    isEdited.current = true;
 
     if (onChangeValue) {
       const newInteger = format.fromEdit(stringValue, 0) ?? 0;
@@ -118,6 +166,8 @@ export function FinancialInput({
       style={{ ...restProps.style, ...styles.tnum }}
       onChangeValue={handleChange}
       onFocus={handleFocus}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onBlur={handleBlur}
       onEnter={handleEnter}
     />

@@ -103,7 +103,7 @@ type NodeKey = string;
 export type NodeData = {
   to: Map<NodeKey, number>;
   value?: number;
-  type: GraphLayers;
+  type: GraphLayer;
   name?: string;
   labelKey?: string;
   labelParams?: Record<string, string>;
@@ -131,9 +131,8 @@ const SpecialNodeKeys = {
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
   NegativeSuffix: '__NEGATIVE',
+  NoPayeeSuffix: '__NO_PAYEE',
 } as const;
-type SpecialNodeKeys = (typeof SpecialNodeKeys)[keyof typeof SpecialNodeKeys];
-
 export const GraphLayers = {
   IncomePayee: 'payee',
   IncomeCategory: 'income_category',
@@ -142,7 +141,7 @@ export const GraphLayers = {
   CategoryGroup: 'category_group',
   Category: 'category',
 } as const;
-export type GraphLayers = (typeof GraphLayers)[keyof typeof GraphLayers];
+export type GraphLayer = (typeof GraphLayers)[keyof typeof GraphLayers];
 
 export const GRAPH_LAYER_ORDER = [
   GraphLayers.IncomePayee,
@@ -153,7 +152,7 @@ export const GRAPH_LAYER_ORDER = [
   GraphLayers.Category,
 ] as const;
 
-export function isGraphLayer(value: unknown): value is GraphLayers {
+export function isGraphLayer(value: unknown): value is GraphLayer {
   return (
     typeof value === 'string' &&
     (Object.values(GraphLayers) as string[]).includes(value)
@@ -234,8 +233,8 @@ export function buildSankeyData(
   topNcategories: number,
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
+  layerFrom: GraphLayer,
+  layerTo: GraphLayer,
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
 
@@ -543,15 +542,11 @@ async function fetchCategoryData(
                 ],
               })
               .filter({ category: category.id })
-              .groupBy(
-                categoryGroup.is_income
-                  ? [
-                      { $id: '$category' },
-                      { $id: '$account' },
-                      { $id: '$payee' },
-                    ]
-                  : [{ $id: '$category' }, { $id: '$account' }],
-              )
+              .groupBy([
+                { $id: '$category' },
+                { $id: '$account' },
+                { $id: '$payee' },
+              ])
               .select([
                 { accountId: { $id: '$account.id' } },
                 { accountName: { $id: '$account.name' } },
@@ -589,16 +584,55 @@ async function fetchCategoryData(
   );
   const allCategoryData = nested.flat();
 
-  if (groupAccounts) {
-    allCategoryData.forEach(entry => {
-      if (entry.accountName && entry.accountId) {
-        entry.accountName = SpecialNodeKeys.AllAccounts;
-        entry.accountId = SpecialNodeKeys.AllAccounts;
-      }
-    });
+  return aggregateCategoryData(allCategoryData, groupAccounts);
+}
+
+export function aggregateCategoryData(
+  categoryData: readonly CategoryEntry[],
+  groupAccounts: boolean,
+): CategoryEntry[] {
+  if (!groupAccounts) {
+    return categoryData.map(entry => ({ ...entry }));
   }
 
-  return allCategoryData;
+  const groupedCategoryData = new Map<
+    string,
+    CategoryEntry & { signedValue: number }
+  >();
+
+  // Preserve payee paths while netting their account flows together.
+  categoryData.forEach(entry => {
+    const key = `${entry.categoryId}|${entry.payeeId}`;
+    const existingEntry = groupedCategoryData.get(key);
+    const signedValue = entry.isNegative ? -entry.value : entry.value;
+
+    if (existingEntry) {
+      existingEntry.signedValue += signedValue;
+    } else {
+      groupedCategoryData.set(key, {
+        ...entry,
+        payeeId: entry.payeeId,
+        payeeName: entry.payeeName,
+        value: Math.abs(signedValue),
+        isNegative: signedValue < 0,
+        signedValue,
+      });
+    }
+  });
+
+  return Array.from(groupedCategoryData.values())
+    .filter(entry => entry.signedValue !== 0)
+    .map(({ signedValue, ...entry }) => ({
+      ...entry,
+      value: Math.abs(signedValue),
+      isNegative: signedValue < 0,
+      ...(entry.accountName && entry.accountId
+        ? {
+            accountName: SpecialNodeKeys.AllAccounts,
+            accountId: SpecialNodeKeys.AllAccounts,
+          }
+        : {}),
+    }));
 }
 
 // Fetch transactions that are transfers within the provided month range
@@ -886,7 +920,7 @@ export function createTransactionsGraph(
             graph,
             entry.categoryId + SpecialNodeKeys.NegativeSuffix,
             GraphLayers.CategoryGroup,
-            entry.payeeName ?? entry.category,
+            entry.payeeName || entry.category,
             undefined,
             true,
           );
@@ -945,20 +979,34 @@ export function createTransactionsGraph(
             entry.value,
           );
         } else {
-          // Category > Account
+          // Payee > Category > Account
+          const categoryKey = entry.categoryId + SpecialNodeKeys.NegativeSuffix;
           addNode(
             graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            categoryKey,
             GraphLayers.IncomeCategory,
-            entry.payeeName ?? entry.category,
+            entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
-          addValueToLink(
-            graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
-            entry.accountId,
-            entry.value,
-          );
+          addValueToLink(graph, categoryKey, entry.accountId, entry.value);
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
+          } else {
+            const noPayeeKey = entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
+            addNode(
+              graph,
+              noPayeeKey,
+              GraphLayers.IncomePayee,
+              t('(No payee)'),
+            );
+            addValueToLink(graph, noPayeeKey, categoryKey, entry.value);
+          }
         }
       }
     }
@@ -980,7 +1028,7 @@ export function createTransactionsGraph(
 export function addNode(
   graph: Graph,
   key: NodeKey,
-  type: GraphLayers,
+  type: GraphLayer,
   name?: string,
 ) {
   if (!graph.has(key)) {
@@ -995,7 +1043,7 @@ export function addNode(
 export function addNodeWithLabel(
   graph: Graph,
   key: NodeKey,
-  type: GraphLayers,
+  type: GraphLayer,
   labelKey: string,
   labelParams?: Record<string, string>,
   isNegative?: boolean,
@@ -1204,7 +1252,7 @@ function groupOtherCategories(
     );
   }
 
-  Object.entries(GraphLayers).forEach(([_, layer]) => {
+  Object.values(GraphLayers).forEach(layer => {
     let ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
     let otherNodes = nodesInLayer(graph, layer).filter(s =>
       s.endsWith(SpecialNodeKeys.OtherSuffix),
@@ -1240,7 +1288,7 @@ function groupOtherCategories(
   return toolTipInfoMap;
 }
 
-export function nodesInLayer(graph: Graph, layer: GraphLayers): NodeKey[] {
+export function nodesInLayer(graph: Graph, layer: GraphLayer): NodeKey[] {
   return Array.from(graph)
     .filter(([, data]) => data.type === layer)
     .map(([key]) => key);
@@ -1368,8 +1416,8 @@ export function sortGraph(
 ): Graph {
   function sortRelatedNodesAroundAnchors(
     entries: Array<[string, NodeData]>,
-    anchorLayer: GraphLayers,
-    relatedLayer: GraphLayers,
+    anchorLayer: GraphLayer,
+    relatedLayer: GraphLayer,
     placement: 'before' | 'after',
   ) {
     const anchorKeys = nodesInLayer(graph, anchorLayer);
@@ -1568,8 +1616,8 @@ export function getNodeValue(
       nodeValue += data.to.get(key) ?? 0;
     });
 
-    // If node is in reality a root node, masked behind hidden nodes
-    if (nodeValue < 0) {
+    // If the node is masked behind hidden nodes, use its visible outgoing flow.
+    if (nodeValue <= 0) {
       nodeValue = 0;
       const node = graph.get(key);
       if (node) {
@@ -1586,8 +1634,16 @@ export function getNodeValue(
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<VisualLayerIndex, number>();
+  const layerSums = new Map<string, number>();
   const computedLayersByNode = getComputedNodeLayers(graph);
+
+  function getPercentageGroup(data: NodeData, layer: VisualLayerIndex): string {
+    // Accounts can be split across visual columns by hidden alignment nodes,
+    // but their percentages should still describe the account distribution.
+    return data.type === GraphLayers.Account
+      ? `type:${data.type}`
+      : `layer:${layer}`;
+  }
 
   // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
@@ -1601,7 +1657,11 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+    const percentageGroup = getPercentageGroup(graph.get(key)!, layer);
+    layerSums.set(
+      percentageGroup,
+      (layerSums.get(percentageGroup) ?? 0) + nodeValue,
+    );
   });
 
   // Second pass: assign percentage label to each node
@@ -1618,7 +1678,8 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentageGroup = getPercentageGroup(data, layer);
+    const layerTotal = layerSums.get(percentageGroup) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
   });
@@ -1667,7 +1728,7 @@ export function addHiddenNodes(graph: Graph) {
   // in the wrong place in the graph. This fixes that, by adding extra, hidden nodes.
 
   // Group nodes by type
-  const nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>> =
+  const nodesByType: Partial<Record<GraphLayer, Array<[NodeKey, NodeData]>>> =
     {};
 
   for (const [key, node] of graph) {
@@ -1683,12 +1744,12 @@ export function addHiddenNodes(graph: Graph) {
   const activeLayerOrder = GRAPH_LAYER_ORDER.filter(
     layer => (nodesByType[layer]?.length ?? 0) > 0,
   );
-  const layerIndex = new Map<GraphLayers, number>();
+  const layerIndex = new Map<GraphLayer, number>();
   activeLayerOrder.forEach((layer, index) => {
     layerIndex.set(layer, index);
   });
 
-  function addHiddenParentChain(key: NodeKey, type: GraphLayers) {
+  function addHiddenParentChain(key: NodeKey, type: GraphLayer) {
     const typeIndex = layerIndex.get(type);
     if (typeIndex === undefined || typeIndex <= 0) {
       return;
@@ -1707,7 +1768,7 @@ export function addHiddenNodes(graph: Graph) {
     }
   }
 
-  function addHiddenChildChain(key: NodeKey, type: GraphLayers) {
+  function addHiddenChildChain(key: NodeKey, type: GraphLayer) {
     const typeIndex = layerIndex.get(type);
     if (
       typeIndex === undefined ||
@@ -1835,10 +1896,10 @@ function getDeepestParentKey(
 
 function buildTypeConnectivity(
   graph: Map<NodeKey, NodeData>,
-  nodesByType: Partial<Record<GraphLayers, Array<[NodeKey, NodeData]>>>,
+  nodesByType: Partial<Record<GraphLayer, Array<[NodeKey, NodeData]>>>,
 ) {
-  const typeHasParent = {} as Record<GraphLayers, boolean>;
-  const typeHasChild = {} as Record<GraphLayers, boolean>;
+  const typeHasParent = {} as Record<GraphLayer, boolean>;
+  const typeHasChild = {} as Record<GraphLayer, boolean>;
 
   for (const typeStr in nodesByType) {
     if (!isGraphLayer(typeStr)) continue;
@@ -1871,8 +1932,8 @@ export function hasChild(node: NodeData): boolean {
 
 export function filterGraphByLayers(
   graph: Graph,
-  layerFrom: GraphLayers,
-  layerTo: GraphLayers,
+  layerFrom: GraphLayer,
+  layerTo: GraphLayer,
 ): void {
   const layerIndices = new Map<string, number>();
   GRAPH_LAYER_ORDER.forEach((layer, index) => {
@@ -1950,13 +2011,13 @@ export function convertToSankeyData(
       tooltipInfo.sort((a, b) => b.value - a.value);
 
       let color: string | undefined;
-      const sourceLayersWithOwnColor: readonly GraphLayers[] = [
+      const sourceLayersWithOwnColor: readonly GraphLayer[] = [
         GraphLayers.IncomePayee,
         GraphLayers.IncomeCategory,
         GraphLayers.Account,
         GraphLayers.CategoryGroup,
       ];
-      const targetLayersWithTargetColor: readonly GraphLayers[] = [
+      const targetLayersWithTargetColor: readonly GraphLayer[] = [
         GraphLayers.Category,
         GraphLayers.Budget,
       ];

@@ -33,7 +33,9 @@ export type DbAccount = {
     | 'attention-required'
     | 'rate-limit-exceeded'
     | 'timed-out'
+    | 'server-down'
     | 'account-missing'
+    | 'not-configured'
     | null;
   account_group_id?: DbAccountGroup['id'] | null;
 };
@@ -279,6 +281,7 @@ export type DbCustomReport = {
 export type DbDashboardPage = {
   id: string;
   name: string;
+  sort_order: number;
   tombstone: 1 | 0;
 };
 

@@ -1,0 +1,23 @@
+# Publishes the App Store listing text (./metadata) and screenshots
+# (./screenshots) for the iOS app. Run by .github/workflows/publish-ios.yml on
+# a release; the binary is uploaded and submitted separately.
+#
+# Only files that exist are uploaded, so anything not in ./metadata (keywords,
+# support URL, ...) keeps its App Store Connect value. The app name, subtitle,
+# privacy URL and categories are shared with the Mac app and deliberately left
+# out: they can only be changed while that shared record is editable.
+#
+# To pull the current App Store Connect content into this folder:
+#   fastlane deliver download_metadata --api_key_path <key.json>
+#   fastlane deliver download_screenshots --api_key_path <key.json>
+
+app_identifier 'com.actualbudget.actual'
+platform 'ios'
+
+skip_binary_upload true
+submit_for_review false
+run_precheck_before_submit false
+# Replace the uploaded screenshots with the ones in ./screenshots.
+overwrite_screenshots true
+# No interactive HTML preview.
+force true

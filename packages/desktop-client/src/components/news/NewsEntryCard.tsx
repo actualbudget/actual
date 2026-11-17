@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { VisuallyHidden } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -9,27 +8,22 @@ import { View } from '@actual-app/components/view';
 import * as monthUtils from '@actual-app/core/shared/months';
 
 import { Link } from '#components/common/Link';
-import { Markdown } from '#components/common/Markdown';
 import { Setting } from '#components/settings/UI';
 import { useDateFormat } from '#hooks/useDateFormat';
 import { useLocale } from '#hooks/useLocale';
-import { admonitionsToBlockquotes } from '#news/admonitions';
+import { countChanges, splitChangelog } from '#news/changelog';
 import type { NewsEntry } from '#news/types';
 
-import { MarkdownBlockquote } from './MarkdownBlockquote';
+import { ChangelogSection } from './ChangelogSection';
+import { NewsMarkdown } from './NewsMarkdown';
 
-const markdownComponents = { blockquote: MarkdownBlockquote };
-
-const markdownStyle = {
-  lineHeight: 1.5,
-  '& h2, & h3, & h4': { fontSize: 14, fontWeight: 600, margin: '20px 0 8px' },
-  '& p:not(:first-child)': { marginTop: '0.75rem' },
-  '& ul, & ol': { marginTop: '0.5rem' },
-  // The shared markdown style tints rules purple, which suits notes but reads
-  // as decoration here; match the body text instead.
-  '& hr': { borderBottomColor: theme.pageText },
-  '& img': { maxWidth: '100%' },
-};
+// The release tooling titles release posts "Release X.Y.Z". The pill beside
+// the title already says "Release", so only the version is shown.
+function getDisplayTitle(entry: NewsEntry): string {
+  return entry.type === 'release'
+    ? entry.title.replace(/^Release\s+/, '')
+    : entry.title;
+}
 
 type NewsEntryCardProps = {
   entry: NewsEntry;
@@ -37,10 +31,9 @@ type NewsEntryCardProps = {
 };
 
 export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
-  const { t } = useTranslation();
   const locale = useLocale();
+  // The date format chosen in Settings, as used everywhere else in the app.
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
-  const [isShowingDetails, setIsShowingDetails] = useState(false);
   const isRelease = entry.type === 'release';
 
   return (
@@ -66,11 +59,15 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
               : theme.pillBackgroundSelected,
           }}
         >
-          {isRelease ? t('Release') : t('Post')}
+          {isRelease ? (
+            <Trans>Release</Trans>
+          ) : (
+            <Trans context="news">Post</Trans>
+          )}
         </Text>
-        <Text style={{ fontWeight: 600, fontSize: 16, flex: 1 }}>
-          {entry.title}
-        </Text>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, flex: 1 }}>
+          {getDisplayTitle(entry)}
+        </h2>
         {isUnread && (
           <>
             <View
@@ -87,46 +84,16 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
             </VisuallyHidden>
           </>
         )}
-        <Text style={{ fontSize: 12 }}>
+        <time dateTime={entry.date} style={{ fontSize: 12 }}>
           {monthUtils.format(entry.date, dateFormat, locale)}
-        </Text>
+        </time>
       </View>
 
-      <Markdown
-        style={markdownStyle}
-        components={markdownComponents}
-        preserveBlankLines={false}
-      >
-        {admonitionsToBlockquotes(entry.body)}
-      </Markdown>
+      <NewsMarkdown>{entry.body}</NewsMarkdown>
 
-      {entry.details && isShowingDetails && (
-        <Markdown
-          style={markdownStyle}
-          components={markdownComponents}
-          preserveBlankLines={false}
-        >
-          {admonitionsToBlockquotes(entry.details)}
-        </Markdown>
-      )}
+      {entry.details && <AllChanges details={entry.details} />}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: 12,
-          alignItems: 'center',
-          fontSize: 13,
-        }}
-      >
-        {entry.details && (
-          <Link
-            variant="text"
-            onClick={() => setIsShowingDetails(!isShowingDetails)}
-            style={{ color: theme.pageTextPositive }}
-          >
-            {isShowingDetails ? t('Hide all changes') : t('Show all changes')}
-          </Link>
-        )}
+      <Text style={{ fontSize: 13 }}>
         <Link variant="external" to={entry.url} linkColor="purple">
           {isRelease ? (
             <Trans>View on actualbudget.org</Trans>
@@ -134,7 +101,42 @@ export function NewsEntryCard({ entry, isUnread }: NewsEntryCardProps) {
             <Trans>Read the full post</Trans>
           )}
         </Link>
-      </View>
+      </Text>
     </Setting>
+  );
+}
+
+/** The full list of a release's changes, one collapsed section per category. */
+function AllChanges({ details }: { details: string }) {
+  const { t } = useTranslation();
+  const { preamble, sections } = splitChangelog(details);
+
+  return (
+    <View
+      style={{
+        gap: 2,
+        paddingTop: 12,
+        borderTop: `1px solid ${theme.pillBorderDark}`,
+      }}
+    >
+      <h3 style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600 }}>
+        <Trans>All changes</Trans>
+      </h3>
+      {sections.length === 0 ? (
+        // Older release notes aren't split into categories.
+        <ChangelogSection
+          title={t('Changes')}
+          markdown={preamble}
+          changeCount={countChanges(preamble)}
+        />
+      ) : (
+        <>
+          {preamble && <NewsMarkdown>{preamble}</NewsMarkdown>}
+          {sections.map(section => (
+            <ChangelogSection key={section.title} {...section} />
+          ))}
+        </>
+      )}
+    </View>
   );
 }

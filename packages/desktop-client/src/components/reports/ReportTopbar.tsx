@@ -21,7 +21,7 @@ import type {
   CustomReportEntity,
   RuleConditionEntity,
 } from '@actual-app/core/types/models';
-import { toPng } from 'html-to-image';
+import { snapdom } from '@zumer/snapdom';
 
 import { FilterButton } from '#components/filters/FiltersMenu';
 
@@ -72,9 +72,9 @@ export function ReportTopbar({
     const reportElement = document.getElementById('custom-report-content');
     const title = report.name;
     if (reportElement) {
-      const dataUrl = await toPng(reportElement);
+      const image = await snapdom.toPng(reportElement);
       const link = document.createElement('a');
-      link.href = dataUrl;
+      link.href = image.src;
       link.download = `${monthUtils.currentDay()} - ${title}.png`;
       link.click();
     } else {

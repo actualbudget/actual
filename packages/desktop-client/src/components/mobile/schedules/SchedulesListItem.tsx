@@ -77,8 +77,8 @@ export function SchedulesListItem({
         >
           {/* Schedule name */}
           <Text
+            size="large"
             style={{
-              fontSize: 15,
               fontWeight: 600,
               color: schedule.name
                 ? theme.pageText

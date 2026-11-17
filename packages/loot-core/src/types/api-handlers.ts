@@ -1,5 +1,8 @@
 // @ts-strict-ignore
-import type { ImportTransactionsResult } from '#server/accounts/app';
+import type {
+  ImportTransactionsResult,
+  SyncResponse,
+} from '#server/accounts/app';
 import type { PayeeNameNormalization } from '#server/accounts/sync';
 import type {
   APIAccountEntity,
@@ -98,6 +101,16 @@ export type ApiHandlers = {
 
   'api/budget-reset-hold': (arg: { month: string }) => Promise<void>;
 
+  'api/budget-apply-category-template': (arg: {
+    month: string;
+    categoryId: APICategoryEntity['id'];
+  }) => Promise<void>;
+
+  'api/budget-get-category-template-amount': (arg: {
+    month: string;
+    categoryId: APICategoryEntity['id'];
+  }) => Promise<number>;
+
   'api/transactions-export': (arg: {
     transactions: TransactionEntity[];
     categoryGroups: CategoryGroupEntity[];
@@ -142,7 +155,7 @@ export type ApiHandlers = {
 
   'api/bank-sync': (arg?: {
     accountId: APIAccountEntity['id'];
-  }) => Promise<void>;
+  }) => Promise<SyncResponse>;
 
   'api/accounts-get': () => Promise<APIAccountEntity[]>;
 
@@ -304,6 +317,14 @@ export type ApiHandlers = {
   'api/schedule-delete': (id: string) => Promise<void>;
 
   'api/schedules-get': () => Promise<APIScheduleEntity[]>;
+
+  'api/schedule-dates-get': (arg: {
+    date: APIScheduleEntity['date'];
+    start?: string;
+    end?: string;
+    count?: number;
+  }) => Promise<string[]>;
+
   'api/get-id-by-name': (arg: {
     type: string;
     name: string;

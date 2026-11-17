@@ -34,7 +34,7 @@ function ColorSwatch(props: ColorSwatchProps) {
   );
 }
 
-const DEFAULT_COLOR_SET = [
+export const DEFAULT_COLOR_SET = [
   '#690CB0',
   '#D32F2F',
   '#C2185B',

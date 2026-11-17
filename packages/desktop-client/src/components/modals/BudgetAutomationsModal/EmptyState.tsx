@@ -3,6 +3,7 @@ import { Trans } from 'react-i18next';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { View } from '@actual-app/components/view';
 
 import { getAutomationExamples } from '#components/budget/goals/automationExamples';
@@ -50,10 +51,10 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
         <Trans>No automations yet</Trans>
       </Text>
       <Text
+        size="medium"
         style={{
-          fontSize: 13,
           color: theme.pageTextLight,
-          marginTop: 4,
+          marginTop: spacing.xs,
           marginBottom: 22,
           display: 'block',
         }}
@@ -112,8 +113,8 @@ export function EmptyState({ onAdd }: EmptyStateProps) {
                 <Icon width={16} height={16} />
               </View>
               <Text
+                size="medium"
                 style={{
-                  fontSize: 13,
                   fontWeight: 600,
                   color: theme.pageText,
                 }}

@@ -131,3 +131,41 @@ describe('CommerzbankCobadeff', () => {
     });
   });
 });
+
+describe('hostile payee names', () => {
+  it('handles the reported multi-word payload and slash-heavy near misses within a hard process deadline', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const { fileURLToPath } = await import('node:url');
+    const cases = [
+      { name: ' '.repeat(100), notes: 'Ordinary note' },
+      { name: 'A' + ' '.repeat(24) + 'B', notes: 'A' + '/'.repeat(48) + 'C' },
+      { name: 'A / B', notes: 'A' + '/'.repeat(10000) + 'C' },
+      { name: 'A (B)', notes: 'A///(B) reference' },
+    ];
+    const input = cases.map(({ name, notes }) => ({
+      creditorName: name,
+      transactionAmount: { amount: '-1', currency: 'EUR' },
+      bookingDate: '2026-09-27',
+      remittanceInformationUnstructuredArray: [notes],
+    }));
+    const output = execFileSync(
+      process.execPath,
+      [
+        fileURLToPath(
+          new URL('./fixtures/commerzbank-hostile.mjs', import.meta.url),
+        ),
+      ],
+      {
+        input: JSON.stringify(input),
+        timeout: 20000,
+        encoding: 'utf8',
+      },
+    );
+    expect(JSON.parse(output)).toEqual([
+      cases[0].notes,
+      cases[1].notes,
+      cases[2].notes,
+      'reference',
+    ]);
+  }, 30000);
+});

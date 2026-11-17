@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ErrorBoundary, useErrorBoundary } from 'react-error-boundary';
@@ -37,6 +37,7 @@ import { ExposeNavigate } from '#util/router-tools';
 
 import { AppBackground } from './AppBackground';
 import { BudgetMonthCountProvider } from './budget/BudgetMonthCountContext';
+import { AriaRouterProvider } from './common/AriaRouterProvider';
 import { DevelopmentTopBar } from './DevelopmentTopBar';
 import { FatalError } from './FatalError';
 import { FinancesApp } from './FinancesApp';
@@ -57,7 +58,13 @@ function AppInner() {
     setI18NextLanguage(null);
   }, []);
 
+  const isInitialized = useRef(false);
   useEffect(() => {
+    if (isInitialized.current) {
+      return;
+    }
+    isInitialized.current = true;
+
     const maybeUpdate = async <T,>(cb?: () => T): Promise<T | void> => {
       if (global.Actual.isUpdateReadyForDownload()) {
         dispatch(
@@ -125,9 +132,7 @@ function AppInner() {
     }
 
     initAll().catch(showErrorBoundary);
-    // Removed cloudFileId & t from dependencies to prevent hard crash when closing budget in Electron
-    // oxlint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, showErrorBoundary]);
+  }, [cloudFileId, dispatch, showErrorBoundary, t]);
 
   useEffect(() => {
     if (userData?.tokenExpired) {
@@ -204,46 +209,50 @@ export function App() {
   return (
     <BrowserRouter>
       <ExposeNavigate />
-      <HotkeysProvider initiallyActiveScopes={['app']}>
-        <SpreadsheetProvider>
-          <SidebarProvider>
-            <BudgetMonthCountProvider>
-              <DndProvider backend={HTML5Backend}>
-                <View
-                  data-theme={theme}
-                  style={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
+      <AriaRouterProvider>
+        <HotkeysProvider initiallyActiveScopes={['app']}>
+          <SpreadsheetProvider>
+            <SidebarProvider>
+              <BudgetMonthCountProvider>
+                <DndProvider backend={HTML5Backend}>
                   <View
-                    key={hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'}
+                    data-theme={theme}
                     style={{
-                      flexGrow: 1,
-                      overflow: 'hidden',
-                      ...styles.lightScrollbar,
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
                     }}
                   >
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
-                      {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
-                        <DevelopmentTopBar />
-                      )}
-                      <AppInner />
-                    </ErrorBoundary>
-                    <ThemeStyle />
-                    <CustomThemeStyle />
-                    <ErrorBoundary FallbackComponent={FatalError}>
-                      <Modals />
-                    </ErrorBoundary>
-                    <UpdateNotification />
+                    <View
+                      key={
+                        hiddenScrollbars ? 'hidden-scrollbars' : 'scrollbars'
+                      }
+                      style={{
+                        flexGrow: 1,
+                        overflow: 'hidden',
+                        ...styles.lightScrollbar,
+                      }}
+                    >
+                      <ErrorBoundary FallbackComponent={ErrorFallback}>
+                        {import.meta.env.REACT_APP_REVIEW_ID && !isTestEnv && (
+                          <DevelopmentTopBar />
+                        )}
+                        <AppInner />
+                      </ErrorBoundary>
+                      <ThemeStyle />
+                      <CustomThemeStyle />
+                      <ErrorBoundary FallbackComponent={FatalError}>
+                        <Modals />
+                      </ErrorBoundary>
+                      <UpdateNotification />
+                    </View>
                   </View>
-                </View>
-              </DndProvider>
-            </BudgetMonthCountProvider>
-          </SidebarProvider>
-        </SpreadsheetProvider>
-      </HotkeysProvider>
+                </DndProvider>
+              </BudgetMonthCountProvider>
+            </SidebarProvider>
+          </SpreadsheetProvider>
+        </HotkeysProvider>
+      </AriaRouterProvider>
     </BrowserRouter>
   );
 }

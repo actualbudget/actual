@@ -3,13 +3,13 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { ButtonWithLoading } from '@actual-app/components/button';
 import { Paragraph } from '@actual-app/components/paragraph';
-import { Text } from '@actual-app/components/text';
+import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
-import { View } from '@actual-app/components/view';
+import { spacing } from '@actual-app/components/tokens';
 import { send } from '@actual-app/core/platform/client/connection';
 import type { Handlers } from '@actual-app/core/types/handlers';
 
-import { Setting } from './UI';
+import { SettingsRow } from './SettingsRow';
 
 type Results = Awaited<ReturnType<Handlers['tools/fix-split-transactions']>>;
 
@@ -114,6 +114,7 @@ function useRenderResults() {
 }
 
 export function RepairTransactions() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Results | null>(null);
 
@@ -128,62 +129,62 @@ export function RepairTransactions() {
   }
 
   return (
-    <Setting
-      primaryAction={
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'flex-start',
-            gap: '1em',
-          }}
-        >
-          <ButtonWithLoading isLoading={loading} onPress={onFix}>
-            <Trans>Repair transactions</Trans>
-          </ButtonWithLoading>
-          {results && renderResults(results)}
-        </View>
+    <SettingsRow
+      title={t('Split transactions and transfers')}
+      description={
+        <Trans>
+          If you are experiencing bugs relating to split transactions or
+          transfers and the "Reset budget cache" button above does not help,
+          this tool may fix them. Some examples of bugs include seeing blank
+          payees on splits or incorrect account balances. This tool does six
+          things:
+        </Trans>
+      }
+      control={
+        <ButtonWithLoading isLoading={loading} onPress={onFix}>
+          <Trans>Repair transactions</Trans>
+        </ButtonWithLoading>
       }
     >
-      <Trans>
-        <Text>
-          <strong>Repair transactions</strong> if you are experiencing bugs
-          relating to split transactions or transfers and the "Reset budget
-          cache" button above does not help, this tool may fix them. Some
-          examples of bugs include seeing blank payees on splits or incorrect
-          account balances. This tool does six things:
-        </Text>
-        <ul style={{ margin: 0, paddingLeft: '1.5em' }}>
-          <li style={{ marginBottom: '0.5em' }}>
-            Ensures that deleted split transactions are fully deleted. In
-            previous versions of the app, certain split transactions may appear
-            deleted but not all of them are actually deleted. This causes the
-            transactions list to look correct, but certain balances may be
-            incorrect when filtering.
-          </li>
-          <li>
-            Sync the payee and cleared flag of a split transaction to the main
-            or "parent" transaction, if appropriate. The payee will only be set
-            if it currently doesn't have one.
-          </li>
-          <li>
-            Checks that the sum of all child transactions adds up to the total
-            amount. If not, these will be flagged below to allow you to easily
-            locate and fix the amounts.
-          </li>
-          <li>
-            Checks for any non-split transactions with erroneous split errors
-            and removes the errors if found.
-          </li>
-          <li>
-            Check if you have any budget transfers that erroneously contain a
-            category, and remove the category.
-          </li>
-          <li>
-            Checks for any parent transactions with a category and removes the
-            category if found.
-          </li>
+      <details style={{ ...styles.smallText, lineHeight: 1.5 }}>
+        <summary style={{ cursor: 'pointer' }}>
+          <Trans>What this repairs</Trans>
+        </summary>
+        <ul style={{ margin: `${spacing.sm}px 0 0`, paddingLeft: '1.5em' }}>
+          <Trans>
+            <li>
+              Ensures that deleted split transactions are fully deleted. In
+              previous versions of the app, certain split transactions may
+              appear deleted but not all of them are actually deleted. This
+              causes the transactions list to look correct, but certain balances
+              may be incorrect when filtering.
+            </li>
+            <li>
+              Sync the payee and cleared flag of a split transaction to the main
+              or "parent" transaction, if appropriate. The payee will only be
+              set if it currently doesn't have one.
+            </li>
+            <li>
+              Checks that the sum of all child transactions adds up to the total
+              amount. If not, these will be flagged below to allow you to easily
+              locate and fix the amounts.
+            </li>
+            <li>
+              Checks for any non-split transactions with erroneous split errors
+              and removes the errors if found.
+            </li>
+            <li>
+              Check if you have any budget transfers that erroneously contain a
+              category, and remove the category.
+            </li>
+            <li>
+              Checks for any parent transactions with a category and removes the
+              category if found.
+            </li>
+          </Trans>
         </ul>
-      </Trans>
-    </Setting>
+      </details>
+      {results && renderResults(results)}
+    </SettingsRow>
   );
 }

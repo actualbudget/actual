@@ -2,8 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { logger } from '#platform/server/log';
-import { retry as promiseRetry } from '#shared/retry';
+import { atomicWriteFile } from './atomic-write';
 
 import type * as T from './index';
 
@@ -48,8 +47,6 @@ export const demoBudgetPath: typeof T.demoBudgetPath = path.join(
 export const join: typeof T.join = (...args: Parameters<typeof path.join>) =>
   path.join(...args);
 
-export const basename: typeof T.basename = filepath => path.basename(filepath);
-
 export const listDir: typeof T.listDir = filepath =>
   new Promise((resolve, reject) => {
     fs.readdir(filepath, (err, files) => {
@@ -75,17 +72,6 @@ export const mkdir: typeof T.mkdir = filepath =>
         reject(err);
       } else {
         resolve(undefined);
-      }
-    });
-  });
-
-export const size: typeof T.size = filepath =>
-  new Promise((resolve, reject) => {
-    fs.stat(filepath, (err, stats) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stats.size);
       }
     });
   });
@@ -126,40 +112,10 @@ export const readFile: typeof T.readFile = (
 };
 
 export const writeFile: typeof T.writeFile = async (filepath, contents) => {
-  try {
-    await promiseRetry(
-      (retry, attempt) => {
-        return new Promise((resolve, reject) => {
-          fs.writeFile(filepath, contents, 'utf8', err => {
-            if (err) {
-              logger.error(
-                `Failed to write to ${filepath}. Attempted ${attempt} times. Something is locking the file - potentially a virus scanner or backup software.`,
-              );
-              reject(err);
-            } else {
-              if (attempt > 1) {
-                logger.info(
-                  `Successfully recovered from file lock. It took ${attempt} retries`,
-                );
-              }
-              resolve(undefined);
-            }
-          });
-        }).catch(retry);
-      },
-      {
-        retries: 20,
-        minTimeout: 100,
-        maxTimeout: 500,
-        factor: 1.5,
-      },
-    );
-
-    return undefined;
-  } catch (err) {
-    logger.error(`Unable to recover from file lock on file ${filepath}`);
-    throw err;
-  }
+  const data =
+    contents instanceof ArrayBuffer ? new Uint8Array(contents) : contents;
+  await atomicWriteFile(filepath, data);
+  return undefined;
 };
 
 export const removeFile: typeof T.removeFile = filepath => {

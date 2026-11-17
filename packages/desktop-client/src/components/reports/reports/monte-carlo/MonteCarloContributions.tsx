@@ -409,7 +409,7 @@ export function MonteCarloContributions({
                       padding: '2px 10px 8px',
                     }}
                   >
-                    <Text style={{ color: theme.warningText, fontSize: 13 }}>
+                    <Text size="medium" style={{ color: theme.warningText }}>
                       <Trans>
                         {{ stream: getIncomeStreamLabel(sourceIndex) }} pays{' '}
                         <PrivacyFilter>

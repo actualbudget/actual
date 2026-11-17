@@ -66,6 +66,7 @@ export function AccountsSection() {
           <SideGroup
             label={t('On budget')}
             side="on"
+            isDragDisabled={isSearching}
             showSyncDot={showSyncDot}
             sideData={visibleTree.onBudget}
             totalBinding={bindings.onBudgetAccountBalance()}
@@ -80,6 +81,7 @@ export function AccountsSection() {
           <SideGroup
             label={t('Off budget')}
             side="off"
+            isDragDisabled={isSearching}
             showSyncDot={showSyncDot}
             sideData={visibleTree.offBudget}
             totalBinding={bindings.offBudgetAccountBalance()}
@@ -94,6 +96,7 @@ export function AccountsSection() {
           accounts={visibleTree.closed}
           isOpen={collapse.isOpen('closed')}
           onToggle={() => collapse.toggle('closed')}
+          isDragDisabled={isSearching}
         />
         <View style={{ height: spacing.md }} />
       </View>

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { SvgAlertTriangle } from '@actual-app/components/icons/v2';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
+import { spacing } from '@actual-app/components/tokens';
 import { Tooltip } from '@actual-app/components/tooltip';
 import { View } from '@actual-app/components/view';
 
@@ -11,6 +12,7 @@ import { AutomationErrorShort } from '#components/budget/goals/automationMessage
 import { getDisplayTemplateMeta } from '#components/budget/goals/displayTemplateMeta';
 import { LimitAutomationShort } from '#components/budget/goals/editor/LimitAutomationShort';
 import { TemplateSentence } from '#components/budget/goals/TemplateSentence';
+import { isBlockingAutomationError } from '#components/budget/goals/validateAutomation';
 import type { AutomationErrorKind } from '#components/budget/goals/validateAutomation';
 import { useFormat } from '#hooks/useFormat';
 
@@ -51,18 +53,25 @@ export function AutomationListRow({
     />
   );
 
+  const isBlocking = isBlockingAutomationError(error);
+  const alertBorder = isBlocking ? theme.errorBorder : theme.warningBorder;
+  const alertBackground = isBlocking
+    ? theme.errorBackground
+    : theme.warningBackground;
+  const alertText = isBlocking ? theme.errorText : theme.warningText;
+
   const borderColor = isActive
     ? theme.tableBorderSelected
     : error
-      ? theme.errorBorder
+      ? alertBorder
       : 'transparent';
   const backgroundColor = isActive
     ? theme.upcomingBackground
     : error
-      ? theme.errorBackground
+      ? alertBackground
       : 'transparent';
-  const titleColor = error ? theme.errorText : theme.pageText;
-  const subtitleColor = error ? theme.errorText : theme.pageTextLight;
+  const titleColor = error ? alertText : theme.pageText;
+  const subtitleColor = error ? alertText : theme.pageTextLight;
   const priority =
     'priority' in entry.template && typeof entry.template.priority === 'number'
       ? entry.template.priority
@@ -91,12 +100,12 @@ export function AutomationListRow({
           height: 28,
           borderRadius: 6,
           backgroundColor: error
-            ? theme.errorBackground
+            ? alertBackground
             : isActive
               ? theme.upcomingBackground
               : theme.pillBackground,
           color: error
-            ? theme.errorText
+            ? alertText
             : isActive
               ? theme.pageTextPositive
               : theme.pageTextLight,
@@ -165,12 +174,12 @@ export function AutomationListRow({
           style={{
             flexShrink: 0,
             alignItems: 'flex-end',
-            gap: 2,
+            gap: spacing.xxs,
           }}
         >
           <Text
+            size="small"
             style={{
-              fontSize: 12,
               fontWeight: 600,
               fontVariantNumeric: 'tabular-nums',
               color:

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { CSSProperties, SVGAttributes } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,8 @@ import { theme } from '@actual-app/components/theme';
 import type {
   balanceTypeOpType,
   DataEntity,
+  IntervalEntity,
+  RuleConditionEntity,
 } from '@actual-app/core/types/models';
 import { css } from '@emotion/css';
 import {
@@ -23,12 +25,16 @@ import type { LabelProps } from 'recharts';
 import { FinancialText } from '#components/FinancialText';
 import { useRechartsAnimation } from '#components/reports/chart-theme';
 import { Container } from '#components/reports/Container';
+import { useAccounts } from '#hooks/useAccounts';
+import { useCategories } from '#hooks/useCategories';
 import { useFormat } from '#hooks/useFormat';
 import type { FormatType } from '#hooks/useFormat';
+import { useNavigate } from '#hooks/useNavigate';
 import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { adjustTextSize } from './adjustTextSize';
 import { renderCustomLabel } from './renderCustomLabel';
+import { showActivity } from './showActivity';
 
 type PayloadItem = {
   payload: {
@@ -174,24 +180,42 @@ const customLabel = ({
   return renderCustomLabel(calcX, calcY, textAnchor, display, textSize);
 };
 
+// Recharts calls activeDot handlers with the dot's props (including the data
+// point) as the second argument, although its types declare a MouseEvent
+function hasIntervalPayload(
+  value: unknown,
+): value is { payload: IntervalEntity } {
+  return value !== null && typeof value === 'object' && 'payload' in value;
+}
+
 type AreaGraphProps = {
   style?: CSSProperties;
   data: DataEntity;
+  filters?: RuleConditionEntity[];
   balanceTypeOp: balanceTypeOpType;
   compact?: boolean;
   viewLabels: boolean;
+  showHiddenCategories?: boolean;
+  showOffBudget?: boolean;
   showTooltip?: boolean;
 };
 
 export function AreaGraph({
   style,
   data,
+  filters = [],
   balanceTypeOp,
   compact,
   viewLabels,
+  showHiddenCategories = false,
+  showOffBudget = false,
   showTooltip = true,
 }: AreaGraphProps) {
   const format = useFormat();
+  const navigate = useNavigate();
+  const { data: categories = { grouped: [], list: [] } } = useCategories();
+  const { data: accounts = [] } = useAccounts();
+  const [pointer, setPointer] = useState('');
   const animationProps = useRechartsAnimation({ animationDuration: 1000 });
 
   const privacyMode = usePrivacyMode();
@@ -251,6 +275,7 @@ export function AreaGraph({
               width={width}
               height={height}
               data={data.intervalData}
+              style={{ cursor: pointer }}
               margin={{
                 top: 0,
                 right: labelsMargin,
@@ -334,7 +359,33 @@ export function AreaGraph({
               <Area
                 type="linear"
                 dot={false}
-                activeDot={false}
+                activeDot={{
+                  r: pointer && !compact ? 8 : 3,
+                  onMouseEnter: () => setPointer('pointer'),
+                  onMouseLeave: () => setPointer(''),
+                  onClick: (_, dot: unknown) => {
+                    const intervalItem = hasIntervalPayload(dot)
+                      ? dot.payload
+                      : undefined;
+                    const startDate =
+                      intervalItem?.intervalStartDate ?? data.startDate;
+
+                    if (((compact && showTooltip) || !compact) && startDate) {
+                      showActivity({
+                        navigate,
+                        categories,
+                        accounts,
+                        balanceTypeOp,
+                        filters,
+                        showHiddenCategories,
+                        showOffBudget,
+                        type: 'totals',
+                        startDate,
+                        endDate: intervalItem?.intervalEndDate ?? data.endDate,
+                      });
+                    }
+                  },
+                }}
                 {...animationProps}
                 dataKey={balanceTypeOp}
                 stroke={`url(#stroke${balanceTypeOp})`}

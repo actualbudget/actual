@@ -1,6 +1,7 @@
+import * as argon2 from 'argon2';
 import * as bcrypt from 'bcrypt';
 
-import { getAccountDb } from '#account-db';
+import { bootstrap, getAccountDb } from '#account-db';
 
 import {
   bootstrapPassword,
@@ -12,6 +13,8 @@ import {
   setPasswordHash,
   verifyPassword,
 } from './password';
+
+vi.mock('argon2', { spy: true });
 
 const FALLBACK_OWNER_ID = 'password-test-owner';
 
@@ -59,6 +62,48 @@ afterEach(() => {
 });
 
 describe('isValidPassword', () => {
+  it.each(
+    [null, undefined, '', {}, { length: 1000000000 }, [], 123, true].map(
+      value => [value],
+    ),
+  )(
+    'rejects invalid input without passing it to a password hasher: %j',
+    async password => {
+      const hash = vi.spyOn(argon2, 'hash');
+      const verify = vi.spyOn(argon2, 'verify');
+      try {
+        expect(isValidPassword(password)).toBe(false);
+        expect(() => hashPassword(password)).toThrow('invalid-password');
+        expect(await verifyPassword(password, '$argon2id$test')).toBe(false);
+        expect(await bootstrap({ password })).toEqual({
+          error: 'invalid-password',
+        });
+        expect(hash).not.toHaveBeenCalled();
+        expect(verify).not.toHaveBeenCalled();
+      } finally {
+        hash.mockRestore();
+        verify.mockRestore();
+      }
+    },
+  );
+
+  it('rejects invalid passwords without hashing on a configured server', async () => {
+    await bootstrapPassword('existing password');
+    const hash = vi.spyOn(argon2, 'hash');
+    hash.mockClear();
+    try {
+      for (const password of [{}, { length: 1000000000 }, [], 123, null, '']) {
+        expect(await bootstrap({ password })).toEqual({
+          error: 'invalid-password',
+        });
+      }
+      expect(hash).not.toHaveBeenCalled();
+      expect(await checkPassword('existing password')).toBe(true);
+    } finally {
+      hash.mockRestore();
+    }
+  });
+
   it('rejects null, undefined and empty passwords', () => {
     expect(isValidPassword(null)).toBe(false);
     expect(isValidPassword(undefined)).toBe(false);
@@ -198,5 +243,75 @@ describe('checkPassword', () => {
 
   it('returns false when no password is configured', async () => {
     expect(await checkPassword('anything')).toBe(false);
+  });
+});
+
+describe('password session revocation', () => {
+  it('issues distinct sessions and revokes both when the password changes', async () => {
+    await bootstrapPassword('old password');
+    const first = await loginWithPassword('old password');
+    const second = await loginWithPassword('old password');
+    expect(first.token).not.toBe(second.token);
+    expect(first.token).toBeTruthy();
+    expect(second.token).toBeTruthy();
+
+    await changePassword('new password');
+    for (const token of [first.token, second.token]) {
+      expect(
+        getAccountDb().first('SELECT token FROM sessions WHERE token = ?', [
+          token,
+        ]),
+      ).toBeNull();
+    }
+    expect(await loginWithPassword('old password')).toEqual({
+      error: 'invalid-password',
+    });
+    const fresh = await loginWithPassword('new password');
+    expect(fresh.token).toBeTruthy();
+    expect([first.token, second.token]).not.toContain(fresh.token);
+  });
+
+  it('rolls back the password update if session revocation fails', async () => {
+    await bootstrapPassword('old password');
+    const { token } = await loginWithPassword('old password');
+    const db = getAccountDb();
+    db.exec(
+      "CREATE TEMP TRIGGER fail_password_revocation BEFORE DELETE ON sessions WHEN OLD.auth_method = 'password' BEGIN SELECT RAISE(ABORT, 'revocation failed'); END",
+    );
+    try {
+      await expect(changePassword('new password')).rejects.toThrow(
+        'revocation failed',
+      );
+      expect(await checkPassword('old password')).toBe(true);
+      expect(
+        db.first('SELECT token FROM sessions WHERE token = ?', [token]),
+      ).not.toBeNull();
+    } finally {
+      db.exec('DROP TRIGGER fail_password_revocation');
+    }
+  });
+
+  it('does not issue a session if the password changes during verification', async () => {
+    await bootstrapPassword('old password');
+    let finishVerification;
+    const verify = vi.spyOn(argon2, 'verify').mockImplementationOnce(
+      () =>
+        new Promise(resolve => {
+          finishVerification = resolve;
+        }),
+    );
+    try {
+      const pendingLogin = loginWithPassword('old password');
+      await changePassword('new password');
+      finishVerification(true);
+      expect(await pendingLogin).toEqual({ error: 'invalid-password' });
+      expect(
+        getAccountDb().all(
+          "SELECT token FROM sessions WHERE auth_method = 'password'",
+        ),
+      ).toEqual([]);
+    } finally {
+      verify.mockRestore();
+    }
   });
 });

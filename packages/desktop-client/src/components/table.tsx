@@ -325,7 +325,7 @@ type InputValueProps = Omit<
   'value' | 'onUpdate'
 > & {
   value?: string;
-  onUpdate?: (newValue: string) => void;
+  onUpdate?: (newValue: string, isEdited: boolean) => void;
 } & {
   [key: `data-${string}`]: unknown;
 };
@@ -337,10 +337,12 @@ function InputValue({
   ...props
 }: InputValueProps) {
   const [value, setValue] = useState(defaultValue);
+  const [isEdited, setIsEdited] = useState(false);
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
+    setIsEdited(false);
     setPrevDefaultValue(defaultValue);
   }
 
@@ -358,7 +360,7 @@ function InputValue({
     }
 
     if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
+      onUpdate?.(value, isEdited);
     }
   }
 
@@ -366,6 +368,7 @@ function InputValue({
     if (value !== defaultValue) {
       setValue(defaultValue);
     }
+    setIsEdited(false);
   }
 
   const ops = ['+', '-', '*', '/', '^'];
@@ -375,6 +378,7 @@ function InputValue({
   }
 
   function setValue_(text) {
+    setIsEdited(true);
     if (valueIsASingleOperator(text)) {
       setValue(defaultValue + text);
     } else {
@@ -388,7 +392,7 @@ function InputValue({
       value={value}
       onChangeValue={setValue_}
       onBlur={onBlur_}
-      onUpdate={onUpdate}
+      onUpdate={newValue => onUpdate?.(newValue, isEdited)}
       onKeyDown={onKeyDown}
       onEscape={onEscape}
       style={{
@@ -773,8 +777,14 @@ export function SheetCell<
         return (
           <InputValue
             value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
-            onUpdate={value => {
-              onSave(unformatExpr ? unformatExpr(value) : value);
+            onUpdate={(value, isEdited) => {
+              if (!unformatExpr) {
+                onSave(value);
+              } else {
+                // Untouched text can be rounded (hidden decimals); keep the
+                // exact value
+                onSave(isEdited ? unformatExpr(value) : sheetValue);
+              }
             }}
             {...inputProps}
             style={{ textAlign, ...(inputProps?.style || {}) }}
@@ -834,6 +844,7 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
+  footer?: ReactNode;
 };
 
 export function SelectedItemsButton<Name extends string>({
@@ -841,6 +852,7 @@ export function SelectedItemsButton<Name extends string>({
   name,
   items,
   onSelect,
+  footer,
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -887,6 +899,7 @@ export function SelectedItemsButton<Name extends string>({
             setMenuOpen(false);
           }}
           items={items}
+          footer={footer}
         />
       </Popover>
     </View>
@@ -1047,6 +1060,15 @@ export const Table = forwardRef(
       },
     }));
 
+    function saveScrollDelayed() {
+      saveScrollWidth(
+        scrollContainer.current?.offsetParent
+          ? scrollContainer.current?.offsetParent.clientWidth
+          : 0,
+        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+      );
+    }
+
     useLayoutEffect(() => {
       // We wait for the list to mount because AutoSizer needs to run
       // before it's mounted
@@ -1063,15 +1085,6 @@ export const Table = forwardRef(
         return () => clearTimeout(timeout);
       }
     });
-
-    function saveScrollDelayed() {
-      saveScrollWidth(
-        scrollContainer.current?.offsetParent
-          ? scrollContainer.current?.offsetParent.clientWidth
-          : 0,
-        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
-      );
-    }
 
     function renderRow({ index, style, key }) {
       const item = items[index];

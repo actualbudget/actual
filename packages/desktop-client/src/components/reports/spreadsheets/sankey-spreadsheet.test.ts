@@ -6,6 +6,7 @@ import {
   addNode,
   addPercentageLabels,
   addValueToLink,
+  aggregateCategoryData,
   aggregateTransferPairs,
   buildSankeyData,
   cleanUpNodes,
@@ -596,6 +597,19 @@ describe('sankey-spreadsheet', () => {
           payeeName: 'Employer',
           payeeId: 'p_employer',
         },
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 25,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+          payeeName: 'Store',
+          payeeId: 'p_store',
+        },
       ];
 
       const graph = createTransactionsGraph(categoryData);
@@ -604,6 +618,172 @@ describe('sankey-spreadsheet', () => {
       expect(graph.has('c_groceries')).toBe(true);
       expect(graph.has('c_salary')).toBe(true);
       expect(graph.has('p_employer')).toBe(true);
+      expect(graph.has('p_store')).toBe(true);
+      expect(graph.get('p_store')?.to.get('c_refund__NEGATIVE')).toBe(25);
+      expect(graph.get('c_refund__NEGATIVE')?.to.get('a_checking')).toBe(25);
+    });
+
+    it('includes refunds without a payee in the category value', () => {
+      const graph = createTransactionsGraph([
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 50,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+          payeeName: 'Store',
+          payeeId: 'p_store',
+        },
+        {
+          categoryGroup: 'Food',
+          categoryGroupId: 'g_food',
+          category: 'Refund',
+          categoryId: 'c_refund',
+          value: 50,
+          isIncome: false,
+          isNegative: false,
+          accountName: 'Checking',
+          accountId: 'a_checking',
+        },
+      ]);
+
+      expect(graph.get('p_store')?.to.get('c_refund__NEGATIVE')).toBe(50);
+      expect(
+        graph.get('c_refund__NO_PAYEE')?.to.get('c_refund__NEGATIVE'),
+      ).toBe(50);
+      expect(getNodeValue(graph, 'c_refund__NEGATIVE')).toBe(100);
+    });
+  });
+
+  describe('aggregateCategoryData', () => {
+    const makeEntry = (overrides: Record<string, unknown>) => ({
+      categoryGroup: 'Category Group',
+      categoryGroupId: 'group',
+      category: 'Category',
+      categoryId: 'category',
+      value: 100,
+      isIncome: false,
+      isNegative: false,
+      accountName: 'Account',
+      accountId: 'account',
+      payeeName: 'Payee',
+      payeeId: 'payee',
+      ...overrides,
+    });
+
+    const cases = [
+      {
+        name: 'normal category payment',
+        entries: [makeEntry({ value: 100, isNegative: true })],
+        expected: [{ value: 100, isNegative: true, payeeId: 'payee' }],
+      },
+      {
+        name: 'normal category deposit',
+        entries: [makeEntry({ value: 100 })],
+        expected: [{ value: 100, isNegative: false, payeeId: 'payee' }],
+      },
+      {
+        name: 'normal category net payment',
+        entries: [
+          makeEntry({ accountId: 'one', value: 100, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 25 }),
+        ],
+        expected: [{ value: 75, isNegative: true, payeeId: 'payee' }],
+      },
+      {
+        name: 'normal category net deposit',
+        entries: [
+          makeEntry({ accountId: 'one', value: 25, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 100 }),
+        ],
+        expected: [{ value: 75, isNegative: false, payeeId: 'payee' }],
+      },
+      {
+        name: 'normal category zero net',
+        entries: [
+          makeEntry({ accountId: 'one', value: 100, isNegative: true }),
+          makeEntry({ accountId: 'two', value: 100 }),
+        ],
+        expected: [],
+      },
+      {
+        name: 'normal category keeps separate payees',
+        entries: [
+          makeEntry({ payeeId: 'one', payeeName: 'One' }),
+          makeEntry({ payeeId: 'two', payeeName: 'Two' }),
+        ],
+        expected: [
+          { value: 100, isNegative: false, payeeId: 'one' },
+          { value: 100, isNegative: false, payeeId: 'two' },
+        ],
+      },
+      {
+        name: 'income category deposit',
+        entries: [makeEntry({ isIncome: true })],
+        expected: [{ value: 100, isNegative: false, payeeId: 'payee' }],
+      },
+      {
+        name: 'income category payment',
+        entries: [makeEntry({ isIncome: true, isNegative: true })],
+        expected: [{ value: 100, isNegative: true, payeeId: 'payee' }],
+      },
+      {
+        name: 'income category mixed flows with separate payees',
+        entries: [
+          makeEntry({
+            isIncome: true,
+            accountId: 'one',
+            value: 100,
+            payeeId: 'one',
+            payeeName: 'One',
+          }),
+          makeEntry({
+            isIncome: true,
+            accountId: 'two',
+            value: 25,
+            isNegative: true,
+            payeeId: 'one',
+            payeeName: 'One',
+          }),
+          makeEntry({
+            isIncome: true,
+            accountId: 'two',
+            value: 50,
+            payeeId: 'two',
+            payeeName: 'Two',
+          }),
+        ],
+        expected: [
+          { value: 75, isNegative: false, payeeId: 'one' },
+          { value: 50, isNegative: false, payeeId: 'two' },
+        ],
+      },
+    ] as const;
+
+    it('keeps account-level flows when accounts are not grouped', () => {
+      const entries = [makeEntry({ value: 100, isNegative: true })];
+
+      expect(aggregateCategoryData(entries, false)).toEqual(entries);
+    });
+
+    it.each(cases)('$name', testCase => {
+      const input = structuredClone(testCase.entries);
+      const result = aggregateCategoryData(input, true);
+
+      expect(result).toEqual(
+        testCase.expected.map(expected =>
+          expect.objectContaining({
+            ...expected,
+            accountId: 'all_income',
+            accountName: 'all_income',
+          }),
+        ),
+      );
+      expect(input).toEqual(testCase.entries);
     });
   });
 
@@ -769,14 +949,17 @@ describe('sankey-spreadsheet', () => {
 
       addPercentageLabels(graph);
 
-      const percentagesByLayer = new Map<number, number>();
+      const percentagesByLayer = new Map<string, number>();
 
       for (const [key, node] of graph) {
         if (key.endsWith('__HIDDEN') || !node.percentageLabel) {
           continue;
         }
 
-        const layer = getLayer(graph, key);
+        const layer =
+          node.type === GraphLayers.Account
+            ? `type:${node.type}`
+            : `layer:${getLayer(graph, key)}`;
         const percentage = Number.parseFloat(node.percentageLabel);
         percentagesByLayer.set(
           layer,
@@ -789,6 +972,22 @@ describe('sankey-spreadsheet', () => {
       for (const total of percentagesByLayer.values()) {
         expect(total).toBeCloseTo(100, 1);
       }
+    });
+
+    it('includes accounts masked by hidden alignment nodes', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account-a', GraphLayers.Account, 'Account A');
+      addNode(graph, 'account-b', GraphLayers.Account, 'Account B');
+      addNode(graph, 'account-b__HIDDEN', GraphLayers.IncomeCategory, '');
+      addNode(graph, 'target', GraphLayers.Category, 'Target');
+      addValueToLink(graph, 'account-a', 'target', 75);
+      addValueToLink(graph, 'account-b__HIDDEN', 'account-b', -1);
+      addValueToLink(graph, 'account-b', 'target', 25);
+
+      addPercentageLabels(graph);
+
+      expect(graph.get('account-a')?.percentageLabel).toBe('75.0%');
+      expect(graph.get('account-b')?.percentageLabel).toBe('25.0%');
     });
   });
 

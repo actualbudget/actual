@@ -5,16 +5,19 @@ import * as db from '#server/db';
 import * as prefs from '#server/prefs';
 import * as sheet from '#server/sheet';
 import * as mockSyncServer from '#server/tests/mockSyncServer';
+import { q } from '#shared/query';
 
 import * as encoder from './encoder';
 import { isError } from './utils';
 
 import {
+  addSyncListener,
   applyMessages,
   fullSync,
   receiveMessages,
   sendMessages,
   setSyncingMode,
+  SYNC_BATCH_MAX_BYTES,
 } from './index';
 
 beforeEach(() => {
@@ -106,6 +109,90 @@ describe('Sync', () => {
     expect(mockSyncServer.getMessages().length).toBe(2);
   });
 
+  it('should send a large backlog to the server in batches', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+
+    // Another client already synced a message to the server
+    await mockSyncServer.handlers['/sync/sync'](
+      await encoder.encode('group', 'client', Timestamp.zero, [
+        {
+          dataset: 'transactions',
+          row: 'other',
+          column: 'amount',
+          value: 'N:100',
+          timestamp: Timestamp.parse(
+            '2018-11-13T13:00:00.000Z-0000-0000testinguuid2',
+          ),
+        },
+      ]),
+    );
+
+    global.stepForwardInTime(Date.parse('2018-11-13T13:20:00.000Z'));
+
+    // Each message is ~1.5MB, so together they exceed a single request
+    const bigValue = 'x'.repeat(1.5 * 1024 * 1024);
+    const local = [];
+    for (let i = 0; i < 6; i++) {
+      global.stepForwardInTime();
+      local.push({
+        dataset: 'notes',
+        row: `note-${i}`,
+        column: 'note',
+        value: bigValue,
+        timestamp: Timestamp.send(),
+      });
+    }
+    await applyMessages(local);
+
+    // Like a budget imported into a fresh server: nothing is sent
+    // automatically, the whole history goes out via the merkle diff
+    void prefs.savePrefs({
+      lastSyncedTimestamp: getClock().timestamp.toString(),
+    });
+
+    // Another client syncs while the batches are being sent; only a
+    // later batch's response can return this message
+    const later = {
+      dataset: 'transactions',
+      row: 'later',
+      column: 'amount',
+      value: 'N:200',
+      timestamp: Timestamp.parse(
+        '2018-11-13T13:21:00.000Z-0000-0000testinguuid3',
+      ),
+    };
+    const originalHandler = mockSyncServer.handlers['/sync/sync'];
+    const requestSizes: number[] = [];
+    mockSyncServer.handlers['/sync/sync'] = async (data: Uint8Array) => {
+      requestSizes.push(data.length);
+      if (requestSizes.length === 3) {
+        await originalHandler(
+          await encoder.encode('group', 'client', Timestamp.zero, [later]),
+        );
+      }
+      return originalHandler(data);
+    };
+
+    try {
+      const result = await fullSync();
+      if (isError(result)) throw result.error;
+
+      expect(result.messages.map(msg => msg.row)).toEqual(['other', 'later']);
+    } finally {
+      mockSyncServer.handlers['/sync/sync'] = originalHandler;
+    }
+
+    // One empty request, then the 6 messages in 3 batches. Any further
+    // request would be a merkle retry fetching a dropped response.
+    expect(requestSizes.length).toBe(4);
+    for (const size of requestSizes) {
+      expect(size).toBeLessThan(SYNC_BATCH_MAX_BYTES + 1024 * 1024);
+    }
+    expect(mockSyncServer.getMessages().length).toBe(8);
+    expect(mockSyncServer.getClock().merkle.hash).toBe(getClock().merkle.hash);
+  });
+
   it('should sync multiple clients', async () => {
     void prefs.loadPrefs();
     void prefs.savePrefs({
@@ -187,7 +274,7 @@ describe('Sync', () => {
     expect(getClock().timestamp.toString() > latest).toBe(true);
   });
 
-  it('should reject a batch holding a far-future timestamp', () => {
+  it('should reject a batch holding a far-future timestamp', async () => {
     // `toISOString` writes years above 9999 as `+010000-…`, which sorts below
     // every normal timestamp. The batch maximum must not rank it last, which
     // would let it skip the clock drift check.
@@ -201,12 +288,66 @@ describe('Sync', () => {
       ),
     });
 
-    expect(() =>
+    await expect(
       receiveMessages([
         message(Date.parse('1970-01-02T00:00:00.000Z')),
         message(253402300800000),
       ]),
-    ).toThrow(expect.objectContaining({ reason: 'clock-drift' }));
+    ).rejects.toMatchObject({ reason: 'clock-drift' });
+  });
+});
+
+describe('receiveMessages', () => {
+  function conflictingMessages() {
+    const timestamp = new Timestamp(Date.now() + 5000, 0, '0000000000000001');
+    // Duplicate timestamps make the batch fail inside the database transaction.
+    return ['foo', 'bar'].map(row => ({
+      dataset: 'transactions',
+      row,
+      column: 'amount',
+      value: 3200,
+      timestamp,
+    }));
+  }
+
+  it('discards failed clock advances before receiving the next queued batch', async () => {
+    const messages = conflictingMessages();
+    const failedBatch = receiveMessages(messages);
+    const nextBatch = receiveMessages([
+      {
+        ...messages[0],
+        timestamp: new Timestamp(Date.now() + 1000, 0, '0000000000000002'),
+      },
+    ]);
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    await expect(nextBatch).resolves.toHaveLength(1);
+    expect(getClock().timestamp.millis()).toBe(Date.now() + 1000);
+    expect(getClock().timestamp.counter()).toBe(1);
+  });
+
+  it('does not reuse timestamps issued while a failed receive is pending', async () => {
+    const failedBatch = receiveMessages(conflictingMessages());
+    const issued = Timestamp.send();
+
+    await expect(failedBatch).rejects.toThrow(/UNIQUE constraint failed/);
+    expect(Timestamp.send().toString() > issued.toString()).toBe(true);
+  });
+
+  it('keeps the received clock when a step after the commit fails', async () => {
+    const [message] = conflictingMessages();
+    const removeListener = addSyncListener(() => {
+      throw new Error('listener failed');
+    });
+
+    try {
+      await expect(receiveMessages([message])).rejects.toThrow(
+        'listener failed',
+      );
+    } finally {
+      removeListener();
+    }
+    expect(getClock().timestamp.millis()).toBe(message.timestamp.millis());
   });
 });
 
@@ -403,5 +544,53 @@ describe('Sync projections', () => {
 
     // Apply the messages that deletes it
     await applyMessages(secondMessages);
+  });
+});
+
+describe('Sync account balance cells', () => {
+  test('recomputes account totals and group subtotals when transactions sync', async () => {
+    void prefs.loadPrefs();
+    void prefs.savePrefs({ groupId: 'group' });
+    await sheet.loadSpreadsheet(db);
+
+    const spreadsheet = sheet.get();
+    function sumOf(filter: Record<string, unknown>) {
+      return q('transactions')
+        .filter(filter)
+        .calculate({ $sum: '$amount' })
+        .serialize();
+    }
+    spreadsheet.createQuery(
+      '__global',
+      'onbudget-accounts-balance',
+      sumOf({ 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'account-group-balance-g1-on',
+      sumOf({ 'account.account_group_id': 'g1', 'account.offbudget': false }),
+    );
+    spreadsheet.createQuery(
+      '__global',
+      'balance-acct1',
+      sumOf({ account: 'acct1' }),
+    );
+    await sheet.waitOnSpreadsheet();
+
+    const recompute = vi.spyOn(spreadsheet, 'recompute');
+    await applyMessages([
+      global.stepForwardInTime() || {
+        dataset: 'transactions',
+        row: 'foo',
+        column: 'amount',
+        value: 3200,
+        timestamp: Timestamp.send(),
+      },
+    ]);
+
+    const recomputed = recompute.mock.calls.map(([name]) => name);
+    expect(recomputed).toContain('__global!onbudget-accounts-balance');
+    expect(recomputed).toContain('__global!account-group-balance-g1-on');
+    expect(recomputed).not.toContain('__global!balance-acct1');
   });
 });

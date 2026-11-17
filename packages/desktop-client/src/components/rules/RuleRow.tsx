@@ -5,7 +5,6 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Button } from '@actual-app/components/button';
 import { SvgRightArrow2 } from '@actual-app/components/icons/v0';
 import { SpaceBetween } from '@actual-app/components/space-between';
-import { styles } from '@actual-app/components/styles';
 import { Text } from '@actual-app/components/text';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
@@ -166,8 +165,8 @@ export const RuleRow = memo(
                       }}
                     >
                       <Text
+                        size="medium"
                         style={{
-                          ...styles.smallText,
                           color: theme.pageTextLight,
                           marginBottom: 6,
                         }}

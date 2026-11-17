@@ -25,15 +25,38 @@ describe('Formula-based rule actions', () => {
     const transaction: Partial<TransactionForRules> = { amount: 500 };
     const result = action.executeFormulaSync('=100 + 200', transaction);
 
-    expect(result).toBe(30000);
+    expect(result).toBe(300);
   });
 
   it('should use transaction field variables', () => {
     const action = new Action('set', 'notes', null, {});
     const transaction = { amount: 5000 };
-    const result = action.executeFormulaSync('=amount / 100', transaction);
+    const result = action.executeFormulaSync('=amount', transaction);
 
-    expect(result).toBe(5000);
+    expect(result).toBe(50);
+  });
+
+  it('should provide amount and parent_amount as amounts, not integers', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction: Partial<TransactionForRules> = {
+      amount: -4567,
+      parent_amount: 20000,
+    };
+
+    expect(action.executeFormulaSync('=amount', transaction)).toBe(-45.67);
+    expect(action.executeFormulaSync('=parent_amount * 0.5', transaction)).toBe(
+      100,
+    );
+  });
+
+  it('should leave non-monetary numeric fields alone', () => {
+    const action = new Action('set', 'notes', null, {});
+    const transaction: Partial<TransactionForRules> = {
+      amount: 100,
+      sort_order: 1234,
+    };
+
+    expect(action.executeFormulaSync('=sort_order', transaction)).toBe(1234);
   });
 
   it('should support IF function with transaction fields', () => {
@@ -126,7 +149,7 @@ describe('Formula-based rule actions', () => {
     };
     const result = action.executeFormulaSync('=balance * 2', transaction);
 
-    expect(result).toBe(300000);
+    expect(result).toBe(30);
   });
 
   it('should support BALANCE_OF with prefetched map', () => {
@@ -142,13 +165,13 @@ describe('Formula-based rule actions', () => {
       '=BALANCE_OF("Savings") + 100',
       transaction,
     );
-    expect(byName).toBe(5010000);
+    expect(byName).toBe(600);
 
     const byId = action.executeFormulaSync(
       '=BALANCE_OF("550e8400-e29b-41d4-a716-446655440000")',
       transaction,
     );
-    expect(byId).toBe(120000);
+    expect(byId).toBe(12);
   });
 
   it('should return 0 for BALANCE_OF when literal missing from prefetch map', () => {
@@ -173,6 +196,26 @@ describe('Formula-based rule actions', () => {
     action.exec(transaction);
 
     expect(transaction.amount).toBe(75000);
+  });
+
+  it('should round-trip the amount field through a formula', () => {
+    const action = new Action('set', 'amount', null, { formula: '=amount' });
+
+    const transaction = { amount: 12345 };
+    action.exec(transaction);
+
+    expect(transaction.amount).toBe(12345);
+  });
+
+  it('should apply a percentage to the amount field', () => {
+    const action = new Action('set', 'amount', null, {
+      formula: '=amount * 1.05',
+    });
+
+    const transaction = { amount: -10000 };
+    action.exec(transaction);
+
+    expect(transaction.amount).toBe(-10500);
   });
 
   it('should execute formula and convert to string type', () => {
@@ -222,8 +265,9 @@ describe('Formula-based rule actions', () => {
     const transaction = { notes: 'original' };
     action.exec(transaction);
 
-    // Should convert number to string
-    expect(transaction.notes).toBe('75000');
+    // Text fields get the number the formula produced, not an amount scaled
+    // up for storage
+    expect(transaction.notes).toBe('750');
   });
 
   it('should format numbers with thousands separators using FORMATNUMBER', () => {

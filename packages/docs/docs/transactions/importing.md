@@ -30,10 +30,10 @@ If your bank doesn't support downloading financial files, you can import a CSV f
    - If the file can't be imported at all, try changing the CSV delimiter to match your file. (Let us know if your file uses a different delimiter that isn't listed!)
    - You can optionally toggle on "Flip amount" if you want to negate all of the amounts in the CSV file.
    - You can optionally toggle on "Split amount into separate inflow/outflow columns" if your CSV file has separate columns for inflow and outflow amounts (also known as debit and credit.)
-   - You can toggle on "Add Multiplier" to add a multiplier to all of the amounts in the CSV file. This can be useful if you want to make an approximate currency conversion.
+   - You can toggle on "Multiply amount" to add a multiplier to all of the amounts in the CSV file. This can be useful if you want to make an approximate currency conversion.
 5. Once you're happy with the settings, press **Import**.
 
-![CSV Import](/img/import/import-csv@2x.webp)
+<img width="800" alt="The Import transactions (CSV) dialog with a preview of the file, the CSV field mapping, and the date, CSV and amount options" src="/img/transactions/importing-csv@2x.webp" />
 
 ## Manually Add Transactions
 

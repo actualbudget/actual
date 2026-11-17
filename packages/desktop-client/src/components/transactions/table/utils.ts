@@ -118,24 +118,33 @@ export function selectAscDesc(
     : defaultAscDesc;
 }
 
+// An "empty" value from the perspective of rules: rules are only allowed to
+// fill fields the user left empty.
+export function isEmptyRuleTarget(value: unknown) {
+  return value == null || value === '' || value === 0 || value === false;
+}
+
 // Decides whether a rule result should be applied to a field while the user is
 // entering a new transaction. By default rules only fill fields the user left
-// empty, so their manual input isn't overwritten. The exception is the notes
-// field: append/prepend notes rules intentionally preserve the existing note and
-// add text before or after it, so we allow those through. The check stays
-// idempotent — rules are re-run on every keystroke during entry, so we must not
-// re-add text that the previous run already applied.
+// empty, so their manual input isn't overwritten. Fields the user explicitly
+// emptied (`clearedFieldNames`) also stay empty — clearing a pre-assigned
+// value is manual input too, so rules must not re-fill it on this or any later
+// run while the transaction is still being entered. The exception is the notes
+// field: append/prepend notes rules intentionally preserve the existing note
+// and add text before or after it, so we allow those through. The check stays
+// idempotent — rules are re-run on every keystroke during entry, so we must
+// not re-add text that the previous run already applied.
 export function shouldApplyRuleChange(
   field: string,
   currentValue: unknown,
   nextValue: unknown,
+  clearedFieldNames: readonly string[] = [],
 ) {
-  if (
-    currentValue == null ||
-    currentValue === '' ||
-    currentValue === 0 ||
-    currentValue === false
-  ) {
+  if (clearedFieldNames.includes(field)) {
+    return false;
+  }
+
+  if (isEmptyRuleTarget(currentValue)) {
     return true;
   }
 
@@ -165,6 +174,51 @@ export function shouldApplyRuleChange(
     (appended === '' || currentValue.endsWith(appended));
 
   return !alreadyApplied;
+}
+
+// Which fields the user explicitly emptied, tracked per transaction row so
+// that clearing a field on one split row doesn't stop rules from filling the
+// same field on its siblings.
+export type ClearedFieldsByTransaction = ReadonlyMap<
+  TransactionEntity['id'],
+  ReadonlySet<string>
+>;
+
+// Records whether the user's edit left `fieldName` empty on this row. An empty
+// value marks the field as explicitly cleared; a real value removes the mark.
+export function trackClearedField(
+  clearedFields: Map<TransactionEntity['id'], Set<string>>,
+  transaction: TransactionEntity,
+  fieldName: string,
+) {
+  if (isEmptyRuleTarget(Reflect.get(transaction, fieldName))) {
+    const fields = clearedFields.get(transaction.id) ?? new Set<string>();
+    fields.add(fieldName);
+    clearedFields.set(transaction.id, fields);
+  } else {
+    clearedFields.get(transaction.id)?.delete(fieldName);
+  }
+}
+
+export function getClearedFieldNames(
+  clearedFields: ClearedFieldsByTransaction | undefined,
+  transactionId: TransactionEntity['id'] | undefined,
+): readonly string[] {
+  if (clearedFields == null || transactionId == null) {
+    return [];
+  }
+  return [...(clearedFields.get(transactionId) ?? [])];
+}
+
+export function isFieldClearedByUser(
+  clearedFields: ClearedFieldsByTransaction | undefined,
+  transactionId: TransactionEntity['id'] | undefined,
+  fieldName: string,
+) {
+  return (
+    transactionId != null &&
+    (clearedFields?.get(transactionId)?.has(fieldName) ?? false)
+  );
 }
 
 export function makeTemporaryTransactions(
