@@ -27,6 +27,19 @@ describe('utility functions', () => {
     expect(looselyParseAmount('3.450000000')).toBe(3.45);
   });
 
+  test('looseParseAmount works with high-precision decimal amounts', () => {
+    // Ten or more decimal places are always a decimal marker: no
+    // thousands grouping is that wide. High-precision exports (e.g.
+    // crypto account statements) hit this path; see issue #9415.
+    expect(looselyParseAmount('3.4500000000')).toBe(3.45);
+    expect(looselyParseAmount('-18.818689242668')).toBe(-18.818689242668);
+    expect(looselyParseAmount('-12039.958653084400')).toBe(-12039.9586530844);
+    expect(looselyParseAmount('1,039.958653084400')).toBe(1039.9586530844);
+    expect(looselyParseAmount('1.039,958653084400')).toBe(1039.9586530844);
+    expect(looselyParseAmount('25.54107490366200')).toBe(25.541074903662);
+    expect(looselyParseAmount('-0.096469531158')).toBe(-0.096469531158);
+  });
+
   test('looseParseAmount works with alternate formats', () => {
     expect(looselyParseAmount('3,45')).toBe(3.45);
     expect(looselyParseAmount('3,456')).toBe(3456); //expected failing case
