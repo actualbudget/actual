@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactElement } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 import { Block } from '@actual-app/components/block';
 import { theme } from '@actual-app/components/theme';
@@ -11,7 +11,6 @@ import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
 import { debounce } from 'es-toolkit/compat';
 
-import { Warning } from '#components/alerts';
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
 import { ReportCard } from '#components/reports/ReportCard';
@@ -27,7 +26,6 @@ import {
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
-  hasTransferCycle,
   isGraphLayer,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
@@ -245,14 +243,6 @@ export function SankeyCard({
 
         {compactData ? (
           <View ref={containerRef} style={{ flexGrow: 1 }}>
-            {displayBaseGraph && hasTransferCycle(displayBaseGraph) && (
-              <Warning style={{ margin: '0 20px 10px' }}>
-                <Trans>
-                  Transfers are hidden because they create a circular flow that
-                  cannot be displayed in a Sankey chart.
-                </Trans>
-              </Warning>
-            )}
             <SankeyGraph
               data={compactData}
               showPercentages={meta?.showPercentages}

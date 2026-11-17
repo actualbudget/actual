@@ -30,7 +30,6 @@ import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
-import { Warning } from '#components/alerts';
 import { EditablePageHeaderTitle } from '#components/EditablePageHeaderTitle';
 import { MobileBackButton } from '#components/mobile/MobileBackButton';
 import { MobilePageHeader, Page, PageHeader } from '#components/Page';
@@ -46,7 +45,6 @@ import {
   createBaseGraphSpreadsheet,
   GRAPH_LAYER_ORDER,
   GraphLayers,
-  hasTransferCycle,
 } from '#components/reports/spreadsheets/sankey-spreadsheet';
 import type {
   Graph,
@@ -950,15 +948,6 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                   paddingTop: 10,
                 }}
               >
-                {displayBaseGraph && hasTransferCycle(displayBaseGraph) && (
-                  <Warning style={{ marginBottom: 10 }}>
-                    <Trans>
-                      Transfers are hidden because they create a circular flow
-                      that cannot be displayed in a Sankey chart.
-                    </Trans>
-                  </Warning>
-                )}
-
                 {displayData &&
                 displayData.links &&
                 displayData.links.length > 0 ? (

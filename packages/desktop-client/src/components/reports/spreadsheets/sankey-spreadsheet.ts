@@ -97,6 +97,8 @@ type TransferPair = {
   amount: number;
 };
 
+type WeightedTransferGraph = Map<string, Map<string, number>>;
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -237,10 +239,6 @@ export function buildSankeyData(
   layerTo: GraphLayer,
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
-
-  if (hasTransferCycle(graph)) {
-    removeTransferLinks(graph);
-  }
 
   const toolTipInfoMap = groupOtherCategories(
     graph,
@@ -690,13 +688,12 @@ export function aggregateTransferPairs(
 ): TransferPair[] {
   const byId = new Map<string, TransferEntry>();
   const byAccountId = new Map<string, string>();
+  const transferGraph: WeightedTransferGraph = new Map();
 
   rawResults.forEach((transfer: TransferEntry) => {
     byId.set(String(transfer.id), transfer);
     byAccountId.set(String(transfer.accountId), transfer.accountName);
   });
-
-  const resultPairs = new Map<string, number>();
 
   rawResults.forEach((from: TransferEntry) => {
     const to = byId.get(String(from.transfer_id));
@@ -704,96 +701,131 @@ export function aggregateTransferPairs(
 
     if (from.accountId > to.accountId) return;
 
-    const [accountId1, accountId2] = [from.accountId, to.accountId].sort();
-    const pairKey = `${accountId1}|${accountId2}`;
     const sourceAccountId = from.amount < 0 ? from.accountId : to.accountId;
-    const sign = sourceAccountId === accountId1 ? 1 : -1;
-    const existingValue = resultPairs.get(pairKey) ?? 0;
+    const targetAccountId =
+      sourceAccountId === from.accountId ? to.accountId : from.accountId;
+    if (sourceAccountId === targetAccountId || from.amount === 0) return;
 
-    resultPairs.set(pairKey, existingValue + sign * Math.abs(from.amount));
+    const children = transferGraph.get(sourceAccountId) ?? new Map();
+    children.set(
+      targetAccountId,
+      (children.get(targetAccountId) ?? 0) + Math.abs(from.amount),
+    );
+    transferGraph.set(sourceAccountId, children);
   });
 
-  return Array.from(resultPairs.entries())
-    .filter(([, value]) => value !== 0)
-    .map(([key, value]) => {
-      const [accountId1, accountId2] = key.split('|');
-      const fromAccountId = value > 0 ? accountId1 : accountId2;
-      const toAccountId = value > 0 ? accountId2 : accountId1;
+  cancelTransferCycles(transferGraph);
 
-      return {
+  return Array.from(transferGraph.entries())
+    .flatMap(([fromAccountId, children]) =>
+      Array.from(children.entries()).map(([toAccountId, amount]) => ({
         fromAccountId,
         fromAccountName: byAccountId.get(fromAccountId) || '',
         toAccountId,
         toAccountName: byAccountId.get(toAccountId) || '',
-        amount: Math.abs(value),
-      };
-    }) satisfies TransferPair[];
+        amount,
+      })),
+    )
+    .sort((first, second) =>
+      first.fromAccountId.localeCompare(second.fromAccountId) ||
+      first.toAccountId.localeCompare(second.toAccountId),
+    ) satisfies TransferPair[];
 }
 
-export function hasTransferCycle(graph: Graph): boolean {
-  const childrenByAccount = new Map<string, Set<string>>();
-  const incomingCount = new Map<string, number>();
+function cancelTransferCycles(graph: WeightedTransferGraph): void {
+  while (true) {
+    const cycle = findTransferCycle(graph);
+    if (!cycle) return;
 
-  graph.forEach((node, accountId) => {
-    if (node.type !== GraphLayers.Account) {
-      return;
-    }
-    if (!incomingCount.has(accountId)) {
-      incomingCount.set(accountId, 0);
-    }
-    for (const childId of node.to.keys()) {
-      if (graph.get(childId)?.type !== GraphLayers.Account) {
+    const cycleAmount = Math.min(
+      ...cycle.map(([fromAccountId, toAccountId]) =>
+        graph.get(fromAccountId)?.get(toAccountId) ?? 0,
+      ),
+    );
+
+    cycle.forEach(([fromAccountId, toAccountId]) => {
+      const children = graph.get(fromAccountId);
+      if (!children) return;
+
+      const remainingAmount =
+        (children.get(toAccountId) ?? 0) - cycleAmount;
+      if (remainingAmount > 0) {
+        children.set(toAccountId, remainingAmount);
+      } else {
+        children.delete(toAccountId);
+      }
+      if (children.size === 0) {
+        graph.delete(fromAccountId);
+      }
+    });
+  }
+}
+
+function findTransferCycle(
+  graph: WeightedTransferGraph,
+): Array<[string, string]> | undefined {
+  const state = new Map<string, 'unvisited' | 'visiting' | 'visited'>();
+
+  type SearchFrame = {
+    accountId: string;
+    children: string[];
+    nextChildIndex: number;
+  };
+
+  for (const startAccountId of Array.from(graph.keys()).sort()) {
+    if (state.get(startAccountId)) continue;
+
+    const path: string[] = [startAccountId];
+    const pathIndex = new Map([[startAccountId, 0]]);
+    const stack: SearchFrame[] = [
+      {
+        accountId: startAccountId,
+        children: Array.from(graph.get(startAccountId)?.keys() ?? []).sort(),
+        nextChildIndex: 0,
+      },
+    ];
+    state.set(startAccountId, 'visiting');
+
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      const childId = frame.children[frame.nextChildIndex];
+
+      if (childId === undefined) {
+        state.set(frame.accountId, 'visited');
+        stack.pop();
+        pathIndex.delete(frame.accountId);
+        path.pop();
         continue;
       }
-      const children = childrenByAccount.get(accountId) ?? new Set();
-      if (!children.has(childId)) {
-        children.add(childId);
-        incomingCount.set(childId, (incomingCount.get(childId) ?? 0) + 1);
+
+      frame.nextChildIndex += 1;
+      const childState = state.get(childId);
+      if (childState === 'visited') continue;
+
+      if (childState === 'visiting') {
+        const cycleStart = pathIndex.get(childId);
+        if (cycleStart === undefined) continue;
+
+        const cycle: Array<[string, string]> = [];
+        for (let index = cycleStart; index < path.length - 1; index++) {
+          cycle.push([path[index], path[index + 1]]);
+        }
+        cycle.push([frame.accountId, childId]);
+        return cycle;
       }
-      childrenByAccount.set(accountId, children);
-    }
-  });
 
-  return hasDirectedCycle(childrenByAccount, incomingCount);
-}
-
-function removeTransferLinks(graph: Graph): void {
-  graph.forEach((node, sourceKey) => {
-    if (node.type !== GraphLayers.Account) {
-      return;
-    }
-
-    for (const targetKey of node.to.keys()) {
-      if (graph.get(targetKey)?.type === GraphLayers.Account) {
-        deleteLink(graph, sourceKey, targetKey);
-      }
-    }
-  });
-}
-
-function hasDirectedCycle(
-  childrenByAccount: Map<string, Set<string>>,
-  incomingCount: Map<string, number>,
-): boolean {
-  const accountsWithoutParents = Array.from(incomingCount)
-    .filter(([, count]) => count === 0)
-    .map(([accountId]) => accountId);
-  let processedAccounts = 0;
-
-  for (let index = 0; index < accountsWithoutParents.length; index++) {
-    const accountId = accountsWithoutParents[index];
-    processedAccounts += 1;
-
-    for (const childId of childrenByAccount.get(accountId) ?? []) {
-      const count = (incomingCount.get(childId) ?? 0) - 1;
-      incomingCount.set(childId, count);
-      if (count === 0) {
-        accountsWithoutParents.push(childId);
-      }
+      state.set(childId, 'visiting');
+      pathIndex.set(childId, path.length);
+      path.push(childId);
+      stack.push({
+        accountId: childId,
+        children: Array.from(graph.get(childId)?.keys() ?? []).sort(),
+        nextChildIndex: 0,
+      });
     }
   }
 
-  return processedAccounts !== incomingCount.size;
+  return undefined;
 }
 
 export function createBudgetGraph(
@@ -1090,9 +1122,76 @@ export function createTransactionsGraph(
       addAccountNode(pair.toAccountId, pair.toAccountName);
       addValueToLink(graph, pair.fromAccountId, pair.toAccountId, pair.amount);
     });
+    contractBalancedTransferNodes(graph);
   }
 
   return graph;
+}
+
+function contractBalancedTransferNodes(graph: Graph): void {
+  while (true) {
+    const accountKeys = Array.from(graph.keys())
+      .filter(key => graph.get(key)?.type === GraphLayers.Account)
+      .sort();
+
+    let contracted = false;
+    for (const accountKey of accountKeys) {
+      const accountNode = graph.get(accountKey);
+      if (!accountNode) continue;
+
+      const outgoingTransfers = Array.from(accountNode.to.entries()).filter(
+        ([targetKey]) => graph.get(targetKey)?.type === GraphLayers.Account,
+      );
+      const incomingTransfers = Array.from(graph.entries())
+        .filter(
+          ([sourceKey, sourceNode]) =>
+            sourceKey !== accountKey &&
+            sourceNode.type === GraphLayers.Account &&
+            sourceNode.to.has(accountKey),
+        )
+        .map(([sourceKey, sourceNode]) => [
+          sourceKey,
+          sourceNode.to.get(accountKey) ?? 0,
+        ] as const);
+
+      const hasNonTransferOutgoing = Array.from(accountNode.to.keys()).some(
+        targetKey => graph.get(targetKey)?.type !== GraphLayers.Account,
+      );
+      const hasNonTransferIncoming = Array.from(graph.entries()).some(
+        ([sourceKey, sourceNode]) =>
+          sourceKey !== accountKey &&
+          sourceNode.type !== GraphLayers.Account &&
+          sourceNode.to.has(accountKey),
+      );
+
+      if (
+        outgoingTransfers.length !== 1 ||
+        incomingTransfers.length !== 1 ||
+        hasNonTransferOutgoing ||
+        hasNonTransferIncoming
+      ) {
+        continue;
+      }
+
+      const [[toAccountId, outgoingAmount]] = outgoingTransfers;
+      const [[fromAccountId, incomingAmount]] = incomingTransfers;
+      if (
+        fromAccountId === toAccountId ||
+        incomingAmount !== outgoingAmount
+      ) {
+        continue;
+      }
+
+      deleteLink(graph, fromAccountId, accountKey);
+      deleteLink(graph, accountKey, toAccountId);
+      graph.delete(accountKey);
+      addValueToLink(graph, fromAccountId, toAccountId, outgoingAmount);
+      contracted = true;
+      break;
+    }
+
+    if (!contracted) return;
+  }
 }
 
 export function addNode(

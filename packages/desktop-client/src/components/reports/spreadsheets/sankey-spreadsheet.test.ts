@@ -22,7 +22,6 @@ import {
   GraphLayers,
   hasChild,
   hasParent,
-  hasTransferCycle,
   isGraphLayer,
   moveNodeToEnd,
   moveNodeToStart,
@@ -787,7 +786,7 @@ describe('sankey-spreadsheet', () => {
       expect(input).toEqual(testCase.entries);
     });
 
-    it('omits circular transfers between three accounts', () => {
+    it('nets circular transfers between three accounts', () => {
       const transferData = aggregateTransferPairs([
         {
           id: 'a-to-b',
@@ -834,10 +833,67 @@ describe('sankey-spreadsheet', () => {
       ]);
       const graph = createTransactionsGraph([], transferData);
 
-      expect(hasTransferCycle(graph)).toBe(true);
+      expect(graph).toEqual(new Map());
+    });
+
+    it('contracts a balanced transfer-only account', () => {
+      const graph = createTransactionsGraph([], [
+        {
+          fromAccountId: 'account-a',
+          fromAccountName: 'Account A',
+          toAccountId: 'account-b',
+          toAccountName: 'Account B',
+          amount: 100,
+        },
+        {
+          fromAccountId: 'account-b',
+          fromAccountName: 'Account B',
+          toAccountId: 'account-c',
+          toAccountName: 'Account C',
+          amount: 100,
+        },
+      ]);
+
+      expect(graph.has('account-b')).toBe(false);
+      expect(graph.get('account-a')?.to.get('account-c')).toBe(100);
+    });
+
+    it('keeps a balanced account with non-transfer activity', () => {
+      const graph = createTransactionsGraph(
+        [
+          {
+            categoryGroup: 'Food',
+            categoryGroupId: 'group-food',
+            category: 'Groceries',
+            categoryId: 'category-groceries',
+            value: 50,
+            isIncome: false,
+            isNegative: true,
+            accountName: 'Account B',
+            accountId: 'account-b',
+          },
+        ],
+        [
+          {
+            fromAccountId: 'account-a',
+            fromAccountName: 'Account A',
+            toAccountId: 'account-b',
+            toAccountName: 'Account B',
+            amount: 100,
+          },
+          {
+            fromAccountId: 'account-b',
+            fromAccountName: 'Account B',
+            toAccountId: 'account-c',
+            toAccountName: 'Account C',
+            amount: 100,
+          },
+        ],
+      );
+
+      expect(graph.has('account-b')).toBe(true);
       expect(graph.get('account-a')?.to.get('account-b')).toBe(100);
       expect(graph.get('account-b')?.to.get('account-c')).toBe(100);
-      expect(graph.get('account-c')?.to.get('account-a')).toBe(100);
     });
   });
 
@@ -904,6 +960,162 @@ describe('sankey-spreadsheet', () => {
       ]);
 
       expect(transferPairs).toEqual([]);
+    });
+
+    it('cancels an unequal three-account cycle', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: -40,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 40,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'a-account',
+          fromAccountName: 'A Account',
+          toAccountId: 'b-account',
+          toAccountName: 'B Account',
+          amount: 60,
+        },
+        {
+          fromAccountId: 'b-account',
+          fromAccountName: 'B Account',
+          toAccountId: 'c-account',
+          toAccountName: 'C Account',
+          amount: 60,
+        },
+      ]);
+    });
+
+    it('uses lexicographical traversal for overlapping cycles', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: -100,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-d',
+          transfer_id: 'd-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -50,
+        },
+        {
+          id: 'd-to-b',
+          transfer_id: 'b-to-d',
+          accountId: 'd-account',
+          accountName: 'D Account',
+          amount: 50,
+        },
+        {
+          id: 'd-to-a',
+          transfer_id: 'a-to-d',
+          accountId: 'd-account',
+          accountName: 'D Account',
+          amount: -50,
+        },
+        {
+          id: 'a-to-d',
+          transfer_id: 'd-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 50,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'b-account',
+          fromAccountName: 'B Account',
+          toAccountId: 'd-account',
+          toAccountName: 'D Account',
+          amount: 50,
+        },
+        {
+          fromAccountId: 'd-account',
+          fromAccountName: 'D Account',
+          toAccountId: 'a-account',
+          toAccountName: 'A Account',
+          amount: 50,
+        },
+      ]);
     });
   });
 
