@@ -696,6 +696,23 @@ export function createCoordinator({
           const budgetId = (msg.args as Record<string, unknown>).id as string;
           const existingGroup = budgetGroups.get(budgetId);
 
+          // The group's own leader asking again, after a load that did not
+          // go through. Its Worker answers, and it stays the leader: added
+          // as a follower of itself it would terminate that Worker
+          if (existingGroup && port === existingGroup.leaderPort) {
+            existingGroup.requestToPort.set(msg.id as string, port);
+            existingGroup.requestNames.set(
+              msg.id as string,
+              msg.name as string,
+            );
+            existingGroup.requestBudgetIds.set(msg.id as string, budgetId);
+            existingGroup.leaderPort.postMessage({
+              type: '__to-worker',
+              msg,
+            });
+            return;
+          }
+
           if (existingGroup && existingGroup.backendConnected) {
             addFollower(budgetId, port);
             existingGroup.requestToPort.set(msg.id as string, port);

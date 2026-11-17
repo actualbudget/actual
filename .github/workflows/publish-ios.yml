@@ -63,7 +63,7 @@ jobs:
 
       # Build before any signing material lands on the runner.
       - name: Build web app
-        run: yarn build:browser
+        run: yarn build:browser --mobile
 
       - name: Import signing certificates
         env:
