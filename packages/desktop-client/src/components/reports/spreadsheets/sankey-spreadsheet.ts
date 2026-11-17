@@ -1189,74 +1189,11 @@ export function createTransactionsGraph(
       addAccountNode(pair.toAccountId, pair.toAccountName);
       addValueToLink(graph, pair.fromAccountId, pair.toAccountId, pair.amount);
     });
-    contractBalancedTransferNodes(graph);
   }
 
   return graph;
 }
 
-function contractBalancedTransferNodes(graph: Graph): void {
-  while (true) {
-    const accountKeys = Array.from(graph.keys())
-      .filter(key => graph.get(key)?.type === GraphLayers.Account)
-      .sort();
-
-    let contracted = false;
-    for (const accountKey of accountKeys) {
-      const accountNode = graph.get(accountKey);
-      if (!accountNode) continue;
-
-      const outgoingTransfers = Array.from(accountNode.to.entries()).filter(
-        ([targetKey]) => graph.get(targetKey)?.type === GraphLayers.Account,
-      );
-      const incomingTransfers = Array.from(graph.entries())
-        .filter(
-          ([sourceKey, sourceNode]) =>
-            sourceKey !== accountKey &&
-            sourceNode.type === GraphLayers.Account &&
-            sourceNode.to.has(accountKey),
-        )
-        .map(
-          ([sourceKey, sourceNode]) =>
-            [sourceKey, sourceNode.to.get(accountKey) ?? 0] as const,
-        );
-
-      const hasNonTransferOutgoing = Array.from(accountNode.to.keys()).some(
-        targetKey => graph.get(targetKey)?.type !== GraphLayers.Account,
-      );
-      const hasNonTransferIncoming = Array.from(graph.entries()).some(
-        ([sourceKey, sourceNode]) =>
-          sourceKey !== accountKey &&
-          sourceNode.type !== GraphLayers.Account &&
-          sourceNode.to.has(accountKey),
-      );
-
-      if (
-        outgoingTransfers.length !== 1 ||
-        incomingTransfers.length !== 1 ||
-        hasNonTransferOutgoing ||
-        hasNonTransferIncoming
-      ) {
-        continue;
-      }
-
-      const [[toAccountId, outgoingAmount]] = outgoingTransfers;
-      const [[fromAccountId, incomingAmount]] = incomingTransfers;
-      if (fromAccountId === toAccountId || incomingAmount !== outgoingAmount) {
-        continue;
-      }
-
-      deleteLink(graph, fromAccountId, accountKey);
-      deleteLink(graph, accountKey, toAccountId);
-      graph.delete(accountKey);
-      addValueToLink(graph, fromAccountId, toAccountId, outgoingAmount);
-      contracted = true;
-      break;
-    }
-
-    if (!contracted) return;
-  }
-}
 
 export function addNode(
   graph: Graph,
