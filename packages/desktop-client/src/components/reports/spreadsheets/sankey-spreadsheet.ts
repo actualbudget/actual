@@ -1194,7 +1194,6 @@ export function createTransactionsGraph(
   return graph;
 }
 
-
 export function addNode(
   graph: Graph,
   key: NodeKey,
