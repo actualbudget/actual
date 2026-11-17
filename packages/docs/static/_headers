@@ -11,3 +11,11 @@
   Cache-Control: public
   Cache-Control: max-age=604800
   Cache-Control: immutable
+
+# The search index is requested with a hash in the query string that changes
+# whenever a docs or blog Markdown file changes. The hash does not cover search
+# settings, so the cache is kept to a week and is not marked immutable.
+
+/search-index.json
+  Cache-Control: public
+  Cache-Control: max-age=604800
