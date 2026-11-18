@@ -637,8 +637,9 @@ async function _loadBudget(id: Budget['id']): Promise<{
   // preferences, for the client to say which one this is about
   budgetName?: string;
   // With `storage-migration-failed`: whether the budget could be opened
-  // on the previous storage engine instead
-  canKeepPreviousStorage?: boolean;
+  // on the previous storage engine instead, or null where that could not
+  // be found out
+  canKeepPreviousStorage?: boolean | null;
 }> {
   let dir: string;
   try {
@@ -657,13 +658,15 @@ async function _loadBudget(id: Budget['id']): Promise<{
     return { error: 'budget-not-found' };
   }
 
+  // Kept from this load's own preferences: the ones in memory are
+  // whichever budget's were loaded last
+  let budgetName: string | undefined;
   try {
     resetFormulaPreferencesCache();
-    await prefs.loadPrefs(id);
+    ({ budgetName } = await prefs.loadPrefs(id));
     await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
-    const budgetName = prefs.getPrefs()?.budgetName;
     await closeBudget();
     // Expected conditions on the web storage, not bugs
     if (e instanceof BudgetInUseError) {
@@ -678,11 +681,15 @@ async function _loadBudget(id: Budget['id']): Promise<{
         // back moves every budget there back first, which with others
         // moved is left to the setting. This budget's own row does not
         // count; it has one when it was being taken over from the
-        // fallback store, and goes back like any other
-        canKeepPreviousStorage: !(await hasMigratedSqliteFiles(
+        // fallback store, and goes back like any other. A lookup that
+        // fails says neither
+        canKeepPreviousStorage: await hasMigratedSqliteFiles(
           undefined,
           fs.join(dir, 'db.sqlite'),
-        ).catch(() => true)),
+        ).then(
+          hasOthers => !hasOthers,
+          () => null,
+        ),
       };
     }
     if (e instanceof StorageUnavailableError) {
@@ -717,10 +724,7 @@ async function _loadBudget(id: Budget['id']): Promise<{
       captureException(e);
       logger.info('Error updating budget ' + id, e);
       logger.log('Error updating budget', e);
-      result = {
-        error: 'loading-budget',
-        budgetName: prefs.getPrefs()?.budgetName,
-      };
+      result = { error: 'loading-budget', budgetName };
     }
 
     await closeBudget();

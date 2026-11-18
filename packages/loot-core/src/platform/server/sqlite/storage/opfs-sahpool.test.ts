@@ -430,6 +430,42 @@ describe('OPFS pool store', () => {
     );
   });
 
+  it.each([
+    [
+      'an absurd-sql copy is moved in',
+      (bytes: Uint8Array) =>
+        seedLegacyDatabase(legacyDatabaseName(PATH), bytes),
+    ],
+    [
+      'a fallback row is taken over',
+      (bytes: Uint8Array) =>
+        putSqliteFileRow({
+          filepath: PATH,
+          contents: bytes,
+          storage: 'memory-idb',
+          rev: 1,
+        }),
+    ],
+  ])('drops a leftover journal before %s', async (_what, arrange) => {
+    await arrange(await budgetBytes('kept'));
+    // Left by a crash: the first connection would roll it back into the
+    // file that was just imported
+    const pool = fakePool(
+      new Map([['/db.sqlite-journal', new Uint8Array([2])]]),
+    );
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await store.open(PATH);
+    expect(pool.files.has('/db.sqlite-journal')).toBe(false);
+    expect(pool.unlink.mock.invocationCallOrder[0]).toBeLessThan(
+      pool.importDb.mock.invocationCallOrder[0],
+    );
+  });
+
   it('keeps the pool live while operations overlap', async () => {
     await seedLegacyDatabase(
       legacyDatabaseName(PATH),
@@ -478,6 +514,34 @@ describe('OPFS pool store', () => {
     } finally {
       exportSpy.mockRestore();
     }
+  });
+
+  it('moves a closed file in once when a read and an open of it overlap', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('shared'));
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+    const exportSpy = vi
+      .spyOn(wasm, 'exportBytes')
+      .mockReturnValue(new Uint8Array([7]));
+    try {
+      // The read comes first, so there is no open in flight for it to
+      // wait on: the two share the move instead of each making one
+      const reading = store.readFile(PATH);
+      const opening = store.open(PATH);
+      expect(await reading).toEqual(new Uint8Array([7]));
+      // Read from the handle the open ended with
+      expect(exportSpy).toHaveBeenCalledWith(await opening);
+      expect(pool.importDb).toHaveBeenCalledTimes(1);
+    } finally {
+      exportSpy.mockRestore();
+    }
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
   });
 
   it('waits for an open in flight before removing its file', async () => {
@@ -874,6 +938,40 @@ describe('OPFS pool store', () => {
       expect(await listIndexedDbNames()).not.toContain(name);
     },
   );
+
+  it('leaves a file another call committed when its own move fails', async () => {
+    await seedLegacyDatabase(
+      legacyDatabaseName(PATH),
+      await budgetBytes('kept'),
+    );
+    const pool = fakePool();
+    const realImport = pool.importDb.getMockImplementation();
+    if (!realImport) {
+      throw new Error('the fake pool has no import');
+    }
+    // By the time this move finds its file off, the row names the pool
+    pool.importDb.mockImplementationOnce(async (fileName, data) => {
+      const imported = await realImport(fileName, data);
+      await putSqliteFileRow({ filepath: PATH, contents: '', storage: 'opfs' });
+      return imported;
+    });
+    pool.exportFile.mockImplementationOnce((fileName: string) => {
+      const altered = (pool.files.get(fileName) as Uint8Array).slice();
+      altered[altered.length - 1] ^= 0xff;
+      return altered;
+    });
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    await expect(store.open(PATH)).rejects.toBeInstanceOf(
+      StorageMigrationError,
+    );
+    // The pooled file is all there is of a budget whose row says so
+    expect(pool.files.has('/db.sqlite')).toBe(true);
+  });
 
   it('imports an absurd-sql database into the pool and verifies it', async () => {
     const bytes = await budgetBytes('legacy');

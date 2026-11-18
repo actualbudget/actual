@@ -29,6 +29,8 @@ type StorageMigrationFailedModalProps = Extract<
  * is also a way out that needs no open budget: back to the previous storage
  * engine, which opens the budget as before. The report cannot be dismissed
  * while that is under way, as it is where a failure to go back is shown.
+ * Where it could not be found out whether going back is possible, the
+ * report says nothing about it.
  */
 export function StorageMigrationFailedModal({
   budgetId,
@@ -37,6 +39,9 @@ export function StorageMigrationFailedModal({
 }: StorageMigrationFailedModalProps) {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
+  // Another budget can move to the new storage while this is shown, which
+  // the backend says when asked to go back
+  const [canGoBack, setCanGoBack] = useState(canKeepPreviousStorage);
   const [isGoingBack, setIsGoingBack] = useState(false);
   const [goingBackError, setGoingBackError] =
     useState<PreviousStorageError | null>(null);
@@ -49,8 +54,12 @@ export function StorageMigrationFailedModal({
     setIsGoingBack(true);
     setGoingBackError(null);
     const error = await returnToPreviousStorage(budgetId);
-    if (error) {
+    if (error === 'other-budgets-moved') {
+      setCanGoBack(false);
+    } else if (error) {
       setGoingBackError(error);
+    }
+    if (error) {
       setIsGoingBack(false);
     }
   }
@@ -71,25 +80,27 @@ export function StorageMigrationFailedModal({
           />
           <View style={{ lineHeight: 1.5, maxWidth: 500 }}>
             <Paragraph>{message}</Paragraph>
-            <Paragraph>
-              {canKeepPreviousStorage ? (
-                <Trans>
-                  If it keeps failing, you can go back to the previous storage.
-                  That opens this budget as before and turns the new storage
-                  engine off again. You can turn it back on under Settings →
-                  Experimental.
-                </Trans>
-              ) : (
-                <Trans>
-                  Other budgets in this browser already use the new storage. To
-                  go back to the previous storage for all of them, open one of
-                  those budgets and turn the new storage engine off under
-                  Settings → Experimental.
-                </Trans>
-              )}
-            </Paragraph>
+            {canGoBack != null && (
+              <Paragraph>
+                {canGoBack ? (
+                  <Trans>
+                    If it keeps failing, you can go back to the previous
+                    storage. That opens this budget as before and turns the new
+                    storage engine off again. You can turn it back on under
+                    Settings → Experimental.
+                  </Trans>
+                ) : (
+                  <Trans>
+                    Other budgets in this browser already use the new storage.
+                    To go back to the previous storage for all of them, open one
+                    of those budgets and turn the new storage engine off under
+                    Settings → Experimental.
+                  </Trans>
+                )}
+              </Paragraph>
+            )}
             {goingBackError && (
-              <Paragraph style={{ color: theme.errorText }}>
+              <Paragraph role="alert" style={{ color: theme.errorText }}>
                 {describePreviousStorageError(goingBackError)}
               </Paragraph>
             )}
@@ -102,10 +113,11 @@ export function StorageMigrationFailedModal({
                 marginTop: 10,
               }}
             >
-              {canKeepPreviousStorage && (
+              {canGoBack && (
                 <ButtonWithLoading
                   style={narrowButtonStyle}
                   isLoading={isGoingBack}
+                  isDisabled={isGoingBack}
                   onPress={goBackToPreviousStorage}
                 >
                   <Trans>Go back to previous storage</Trans>

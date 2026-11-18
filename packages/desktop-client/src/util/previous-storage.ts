@@ -1,24 +1,36 @@
-import { setStoredStorageBackend } from '@actual-app/core/platform/client/browser-preload';
+import {
+  setStoredStorageBackend,
+  STORAGE_BACKEND_URL_PARAM,
+} from '@actual-app/core/platform/client/browser-preload';
 import { send } from '@actual-app/core/platform/client/connection';
 import { t } from 'i18next';
 
-export type PreviousStorageError = 'budget-in-use' | 'revert-failed';
+export type PreviousStorageError =
+  | 'budget-in-use'
+  | 'other-budgets-moved'
+  | 'revert-failed';
 
 // Puts this browser back on the previous storage engine and starts the app
-// again on it, on the given budget if there is one. Budgets already moved
-// to the new storage are moved back first, so nothing is lost. Resolves
-// what went wrong when it could not; otherwise the page reloads.
+// again on it. Budgets already moved to the new storage are moved back
+// first, so nothing is lost. Asked for one budget, it goes back for that
+// one alone and starts on it, and is refused while any other budget has
+// moved. Resolves what went wrong when it could not; otherwise the page
+// loads again.
 export async function returnToPreviousStorage(
-  budgetToStartOn?: string,
+  forBudget?: string,
 ): Promise<PreviousStorageError | null> {
-  const result = await send('storage-revert', { budgetToStartOn }).catch(
-    () => ({ error: 'revert-failed' as const }),
-  );
+  const result = await send('storage-revert', { forBudget }).catch(() => ({
+    error: 'revert-failed' as const,
+  }));
   if ('error' in result) {
     return result.error;
   }
   setStoredStorageBackend('legacy');
-  window.Actual.relaunch();
+  // The address names the engine as well: it decides the next load even
+  // where the choice could not be stored, and is taken off again there
+  const address = new URL(window.location.href);
+  address.searchParams.set(STORAGE_BACKEND_URL_PARAM, 'legacy');
+  window.location.assign(address);
   return null;
 }
 

@@ -1,4 +1,5 @@
 import * as asyncStorage from '#platform/server/asyncStorage';
+import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
 import * as sqlite from '#platform/server/sqlite';
 import { createApp } from '#server/app';
@@ -59,16 +60,29 @@ async function getStorageInfo() {
 
 // Move every budget back to absurd-sql's layout so the next start can use
 // the legacy engine. Closes the open budget first; a budget open in another
-// tab holds its storage lock and makes this fail. That start opens the
-// budget it is given, or else the one opened last; a revert that fails
+// tab holds its storage lock and makes this fail. Asked on behalf of one
+// budget, by the report of its failed move, it is that budget's alone:
+// refused while any other budget lives in the new storage, which is for
+// the setting to move back, and the next start then opens that budget.
+// Otherwise that start opens the one opened last; a revert that fails
 // leaves where the app starts as it was.
 async function revertStorage({
-  budgetToStartOn,
-}: { budgetToStartOn?: string } = {}): Promise<
-  { ok: true } | { error: 'budget-in-use' | 'revert-failed' }
+  forBudget,
+}: { forBudget?: string } = {}): Promise<
+  | { ok: true }
+  | { error: 'budget-in-use' | 'other-budgets-moved' | 'revert-failed' }
 > {
   if (sqlite.getStorageBackend() === 'legacy') {
     return { ok: true };
+  }
+  if (
+    forBudget != null &&
+    (await sqlite.hasMigratedSqliteFiles(
+      undefined,
+      fs.join(fs.getBudgetDir(forBudget), 'db.sqlite'),
+    ))
+  ) {
+    return { error: 'other-budgets-moved' };
   }
   // The budget this worker has open; `lastBudget` is whichever budget any
   // tab opened last, kept only so the relaunch starts where the user was
@@ -80,7 +94,7 @@ async function revertStorage({
   }
   try {
     await sqlite.revertSqliteStorageToLegacy();
-    budgetToRestore = budgetToStartOn ?? lastBudget;
+    budgetToRestore = forBudget ?? lastBudget;
     return { ok: true };
   } catch (error) {
     // The client still shows the budget this closed, so reopen it; a

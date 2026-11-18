@@ -249,8 +249,8 @@ export type Modal =
         // What went wrong, naming the budget
         message: string;
         // Whether the budget could be opened on the previous storage
-        // engine instead
-        canKeepPreviousStorage: boolean;
+        // engine instead, or null where that could not be found out
+        canKeepPreviousStorage: boolean | null;
       };
     }
   | {

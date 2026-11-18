@@ -62,7 +62,7 @@ export const loadBudget = createAppAsyncThunk(
     const {
       error,
       budgetName,
-      canKeepPreviousStorage = false,
+      canKeepPreviousStorage = null,
     } = await send('load-budget', { id, ...options });
 
     if (error) {

@@ -243,20 +243,29 @@ test.describe('Browser storage', () => {
     expectStorageLayout(await inspectStorage(page), 'legacy');
 
     // While going back is under way the report cannot be dismissed: it is
-    // where a failure to would be shown
-    const reloaded = page.waitForEvent('load', { timeout: 60_000 });
-    const busy = keepBackendBusy(page, 3000);
-    await report
-      .getByRole('button', { name: 'Go back to previous storage' })
-      .click();
-    await page.keyboard.press('Escape');
-    // Long enough for a report that was dismissed to have gone
-    await page.waitForTimeout(500);
-    await expect(report).toBeVisible();
+    // where a failure to would be shown. The first request is kept from
+    // the backend, so it stays under way until the test answers it
+    const goBack = report.getByRole('button', {
+      name: 'Go back to previous storage',
+    });
+    await holdNextBackendRequest(page, 'storage-revert');
+    await goBack.click();
+    await expect(goBack).toBeDisabled();
     await expect(report.getByRole('button', { name: 'Close' })).toBeHidden();
-    await busy;
+    await page.keyboard.press('Escape');
+    await answerHeldBackendRequest(page, { error: 'revert-failed' });
+    // Announced in the report that Escape did not dismiss
+    await expect(report.getByRole('alert')).toHaveText(/Switching back failed/);
 
-    // Back on the previous engine the budget opens as it did before
+    // Back on the previous engine the budget opens as it did before, even
+    // where the choice cannot be stored: the address carries it too
+    await page.evaluate(() => {
+      Storage.prototype.setItem = () => {
+        throw new DOMException('full', 'QuotaExceededError');
+      };
+    });
+    const reloaded = page.waitForEvent('load', { timeout: 60_000 });
+    await goBack.click();
     await reloaded;
     await expect(page.getByTestId('budget-table')).toBeVisible({
       timeout: 60_000,
@@ -345,6 +354,58 @@ test.describe('Browser storage', () => {
     ).toBeHidden();
     await report.getByRole('button', { name: 'OK' }).click();
     await expect(report).toBeHidden();
+  });
+
+  test('goes back for no budget but the one that failed to move', async ({
+    browser,
+  }) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    page = await browser.newPage();
+    await createLegacyBudgetThenSwitch(page);
+    await setLegacyCopyUnreadable(page, true);
+    await page.getByText('Test Budget').click();
+    const report = failedMoveReport(page);
+    const goBack = report.getByRole('button', {
+      name: 'Go back to previous storage',
+    });
+    await expect(goBack).toBeVisible({ timeout: 60_000 });
+
+    // Another budget comes to live in the new storage while the report is
+    // up, as when another tab moves one
+    await recordBudgetInNewStorage(page, '/documents/Actual/other/db.sqlite');
+    await goBack.click();
+    // Going back would move that one as well, which is left to the setting
+    await expect(report.getByText('already use the new storage')).toBeVisible();
+    await expect(goBack).toBeHidden();
+    expect(
+      await page.evaluate(
+        key => localStorage.getItem(key),
+        STORAGE_BACKEND_KEY,
+      ),
+    ).toBe(requestedBackend);
+  });
+
+  test('says nothing about going back when it cannot tell', async ({
+    browser,
+  }) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    page = await browser.newPage();
+    await createLegacyBudgetThenSwitch(page);
+    await setLegacyCopyUnreadable(page, true);
+    await setFileRowLookupFailing(page);
+    await page.getByText('Test Budget').click();
+    const report = failedMoveReport(page);
+    await expect(report.getByText('Nothing was deleted')).toBeVisible({
+      timeout: 60_000,
+    });
+    // Neither the way back nor a claim that other budgets have moved
+    await expect(
+      report.getByRole('button', { name: 'Go back to previous storage' }),
+    ).toBeHidden();
+    await expect(report.getByText('already use the new storage')).toBeHidden();
+    await expect(report.getByText('If it keeps failing')).toBeHidden();
   });
 
   test('reports a failed move to an app that starts inside the budget', async ({
@@ -561,16 +622,90 @@ async function rewriteLegacyFirstBlocks(
   }, change);
 }
 
-// Keeps the backend from answering for a while, so that whatever it is
-// asked meanwhile stays under way
-function keepBackendBusy(page: Page, milliseconds: number) {
-  const [backend] = page.workers();
-  return backend.evaluate(duration => {
-    const end = Date.now() + duration;
-    while (Date.now() < end) {
-      // Spinning, as a waiting worker would still take messages
+type HeldRequest = { backend: Worker; id: string };
+type GatedWindow = Window & {
+  heldBackendRequest?: HeldRequest;
+};
+
+// Keeps the next request of that name from reaching the backend, so that
+// it stays under way until `answerHeldBackendRequest` answers it in the
+// backend's place. Requests after it go through as usual
+async function holdNextBackendRequest(page: Page, name: string) {
+  await page.evaluate(requestName => {
+    const workingPost = Worker.prototype.postMessage;
+    Worker.prototype.postMessage = function holdingPost(
+      this: Worker,
+      ...args: Parameters<Worker['postMessage']>
+    ) {
+      const [message] = args;
+      if (message?.name !== requestName) {
+        workingPost.apply(this, args);
+        return;
+      }
+      (window as GatedWindow).heldBackendRequest = {
+        backend: this,
+        id: message.id,
+      };
+      Worker.prototype.postMessage = workingPost;
+    };
+  }, name);
+}
+
+async function answerHeldBackendRequest(page: Page, result: unknown) {
+  await page.evaluate(answer => {
+    const held = (window as GatedWindow).heldBackendRequest;
+    if (!held) {
+      throw new Error('no backend request is being held');
     }
-  }, milliseconds);
+    held.backend.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'reply', id: held.id, result: answer },
+      }),
+    );
+  }, result);
+}
+
+// Records a budget file as living in the new storage, from the page, the
+// way the backend of another tab would after moving one
+async function recordBudgetInNewStorage(page: Page, filepath: string) {
+  await page.evaluate(async path => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('actual');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction(['files'], 'readwrite');
+        transaction
+          .objectStore('files')
+          .put({ filepath: path, contents: '', storage: 'opfs' });
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+    } finally {
+      database.close();
+    }
+  }, filepath);
+}
+
+// Makes the backend fail to walk its record of budget files, which is
+// how it tells whether other budgets live in the new storage
+async function setFileRowLookupFailing(page: Page) {
+  const [backend] = page.workers();
+  await backend.evaluate(() => {
+    const workingOpenCursor = IDBObjectStore.prototype.openCursor;
+    IDBObjectStore.prototype.openCursor = function failingOpenCursor(
+      this: IDBObjectStore,
+      ...args: Parameters<IDBObjectStore['openCursor']>
+    ) {
+      if (this.name === 'files') {
+        throw new DOMException('unreadable', 'UnknownError');
+      }
+      return workingOpenCursor.apply(this, args);
+    };
+  });
 }
 
 // What a tab hears when another one stores a different engine
