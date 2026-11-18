@@ -127,12 +127,15 @@ function evictLegacyConnections(
   });
 }
 
-// Resolves null when no absurd-sql database exists under this name
+// Resolves null when no absurd-sql database exists under this name. Given
+// the snapshot a copy was taken from, rejects as a budget in use when the
+// store no longer matches it.
 async function openLegacyDatabase(
   name: string,
   path: string,
+  snapshot?: LegacySnapshot,
 ): Promise<IDBDatabase | null> {
-  if (!(await evictLegacyConnections(name, path))) {
+  if (!(await evictLegacyConnections(name, path, snapshot))) {
     return null;
   }
   return new Promise((resolve, reject) => {
@@ -410,15 +413,21 @@ export async function readLegacyDatabaseBytes(
 }
 
 // Whether a file holds exactly what the absurd-sql copy of its path does
-// now, byte for byte. The copy is read a second time for this, so a
-// copy written to since it was moved does not match either. Both stores
+// now, byte for byte. The copy is read a second time for this. Both stores
 // ask it of what they moved before the copy is dropped: the structural
-// check alone would pass a file whose contents went wrong on the way.
+// check alone would pass a file whose contents went wrong on the way. A
+// copy written to since the snapshot it was moved at is not a move gone
+// wrong but a budget in use, and rejects as one before it is compared.
 export async function matchesLegacyDatabase(
   path: string,
   bytes: Uint8Array,
+  snapshot: LegacySnapshot,
 ): Promise<boolean> {
-  const database = await openLegacyDatabase(legacyDatabaseName(path), path);
+  const database = await openLegacyDatabase(
+    legacyDatabaseName(path),
+    path,
+    snapshot,
+  );
   if (database == null) {
     return false;
   }

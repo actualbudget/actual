@@ -674,11 +674,15 @@ async function _loadBudget(id: Budget['id']): Promise<{
       return {
         error: 'storage-migration-failed',
         budgetName,
-        // The previous engine reads nothing held in the new storage, so
-        // it can only take over while no budget has been moved there
-        canKeepPreviousStorage: !(await hasMigratedSqliteFiles().catch(
-          () => true,
-        )),
+        // Offered while no other budget lives in the new storage: going
+        // back moves every budget there back first, which with others
+        // moved is left to the setting. This budget's own row does not
+        // count; it has one when it was being taken over from the
+        // fallback store, and goes back like any other
+        canKeepPreviousStorage: !(await hasMigratedSqliteFiles(
+          undefined,
+          fs.join(dir, 'db.sqlite'),
+        ).catch(() => true)),
       };
     }
     if (e instanceof StorageUnavailableError) {

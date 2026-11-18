@@ -285,6 +285,27 @@ test.describe('Browser storage', () => {
     }).toPass({ timeout: 10_000 });
   });
 
+  test('moves a budget whose old copy is marked as write-ahead logged', async ({
+    browser,
+  }) => {
+    // Only the OPFS pool takes a file out of that mode as it imports it;
+    // the fallback loads the file into memory, which sqlite refuses
+    test.skip(requestedBackend !== 'opfs', 'only meaningful for OPFS');
+
+    page = await browser.newPage();
+    const balance = await createLegacyBudgetThenSwitch(page);
+    await rewriteLegacyFirstBlocks(page, 'mark-write-ahead-logged');
+
+    await page.getByText('Test Budget').click();
+    await expect(page.getByTestId('budget-table')).toBeVisible({
+      timeout: 60_000,
+    });
+    await expectAllySavingsBalance(page, balance);
+    await expect(async () => {
+      expectStorageLayout(await inspectStorage(page), 'new');
+    }).toPass({ timeout: 10_000 });
+  });
+
   test('offers no way back once another budget is on the new storage', async ({
     browser,
   }) => {
@@ -335,7 +356,7 @@ test.describe('Browser storage', () => {
     // From a page of the same site that runs no app, so nothing writes
     // the copy again behind this
     await page.goto('/data-file-index.txt');
-    await damageLegacyCopies(page);
+    await rewriteLegacyFirstBlocks(page, 'blank');
 
     // The budget is reopened at once, cannot be moved, and the app then
     // goes to its list of files: the report has to outlast that
@@ -486,10 +507,15 @@ async function setLegacyCopyUnreadable(page: Page, isUnreadable: boolean) {
   }, isUnreadable);
 }
 
-// Blanks the first block of every absurd-sql copy for good, from the
-// page: a move finds no sqlite header there
-async function damageLegacyCopies(page: Page) {
-  await page.evaluate(async () => {
+// Rewrites the first block of every absurd-sql copy for good, from the
+// page. Blanked, a move finds no sqlite header there. Marked as write-ahead
+// logged, the header says the file was last written in that mode (its
+// bytes 18 and 19), which the app never does but another sqlite tool can
+async function rewriteLegacyFirstBlocks(
+  page: Page,
+  change: 'blank' | 'mark-write-ahead-logged',
+) {
+  await page.evaluate(async requestedChange => {
     const databases = await indexedDB.databases();
     for (const { name } of databases) {
       if (!name?.startsWith('documents-')) {
@@ -502,13 +528,23 @@ async function damageLegacyCopies(page: Page) {
       });
       await new Promise<void>((resolve, reject) => {
         const transaction = database.transaction(['data'], 'readwrite');
-        transaction.objectStore('data').put(new ArrayBuffer(4096), 0);
+        const store = transaction.objectStore('data');
+        if (requestedChange === 'blank') {
+          store.put(new ArrayBuffer(4096), 0);
+        } else {
+          const read = store.get(0);
+          read.onsuccess = () => {
+            const block = new Uint8Array(read.result as ArrayBuffer);
+            block.set([2, 2], 18);
+            store.put(block.buffer, 0);
+          };
+        }
         transaction.oncomplete = () => resolve();
         transaction.onerror = () => reject(transaction.error);
       });
       database.close();
     }
-  });
+  }, change);
 }
 
 // What a tab hears when another one stores a different engine

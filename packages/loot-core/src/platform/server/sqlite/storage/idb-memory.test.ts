@@ -25,11 +25,13 @@ import {
 import { createMemoryIdbStore, isByteContents } from './idb-memory';
 import { legacyDatabaseName } from './paths';
 import {
+  holdLegacyConnection,
   initWasmEngine,
   listIndexedDbNames,
   resetIndexedDb,
   seedLegacyDatabase,
   sleep,
+  writeToLegacyDatabase,
 } from './test-helpers';
 
 import { getSqliteStore, setSqliteStore } from './index';
@@ -236,6 +238,53 @@ describe('IndexedDB in-memory store', () => {
     await sleep(10);
     expect(await listIndexedDbNames()).not.toContain(name);
   });
+
+  it.each([
+    [
+      'holds on to the copy',
+      (name: string) => holdLegacyConnection(name, { stubborn: true }),
+    ],
+    [
+      'writes to the copy',
+      async (name: string) => {
+        await writeToLegacyDatabase(name);
+        return undefined;
+      },
+    ],
+  ])(
+    'reports the budget in use when a tab on the previous engine %s during the move',
+    async (_what, interfere) => {
+      const source = await openDatabase();
+      execQuery(source, SCHEMA);
+      runQuery(source, "INSERT INTO t (v) VALUES ('from legacy')");
+      const bytes = await exportDatabase(source);
+      closeDatabase(source);
+      const name = legacyDatabaseName(PATH);
+      await seedLegacyDatabase(name, bytes);
+      await putSqliteFileRow({ filepath: PATH, contents: '' });
+      // The tab comes back once the copy has been read
+      const readLegacy = absurdMigration.readLegacyDatabaseBytes;
+      let other: IDBDatabase | undefined;
+      const read = vi
+        .spyOn(absurdMigration, 'readLegacyDatabaseBytes')
+        .mockImplementationOnce(async (...args) => {
+          const result = await readLegacy(...args);
+          other = await interfere(name);
+          return result;
+        });
+      try {
+        await expect(openDatabase(PATH)).rejects.toBeInstanceOf(
+          BudgetInUseError,
+        );
+      } finally {
+        read.mockRestore();
+        other?.close();
+      }
+      // Nothing was taken over, and the copy is still the budget
+      expect(await listIndexedDbNames()).toContain(name);
+      expect((await getSqliteFileRow(PATH))?.storage).toBeUndefined();
+    },
+  );
 
   it('keeps a snapshot whose write on close failed for the next open', async () => {
     await strandSnapshot('rescued');

@@ -7,6 +7,7 @@ import { logger } from '#platform/server/log';
 
 import { normalise } from './normalise';
 import { regexp } from './regexp';
+import type { FileStoreKind } from './storage/types';
 import type {
   Database,
   SqlParam,
@@ -75,7 +76,10 @@ export async function revertSqliteStorageToLegacy(): Promise<void> {
   // Only the browser has a legacy storage layout
 }
 
-export async function hasMigratedSqliteFiles(): Promise<boolean> {
+export async function hasMigratedSqliteFiles(
+  _kind?: FileStoreKind,
+  _exceptPath?: string,
+): Promise<boolean> {
   // Only the browser moves files between storage layouts
   return false;
 }

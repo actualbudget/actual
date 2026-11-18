@@ -277,10 +277,13 @@ export function createOpfsStore({
     try {
       await pool.util.importDb(fileName, contents.read);
       onMigrationProgress?.('verify');
-      // Before any connection touches the file, so it is as imported
-      if (
-        !(await matchesLegacyDatabase(path, pool.util.exportFile(fileName)))
-      ) {
+      // Before any connection touches the file, so it is as imported. The
+      // import itself sets the two file-format bytes of the header to 1,
+      // which takes a file out of WAL mode, so those are held to be the
+      // copy's; all else is compared
+      const imported = pool.util.exportFile(fileName);
+      imported.set(contents.snapshot.header.subarray(18, 20), 18);
+      if (!(await matchesLegacyDatabase(path, imported, contents.snapshot))) {
         throw new Error('the moved file differs from the absurd-sql copy');
       }
       verifyImported(pool, fileName);
