@@ -1380,6 +1380,39 @@ describe('sankey-spreadsheet', () => {
       expect(nodeKeys).toContain('small-category');
       expect(nodeKeys).not.toContain('category__OTHER_BUCKET');
     });
+
+    it('applies the render safety limit after percentage filtering', () => {
+      const graph: Graph = new Map();
+      addNode(graph, 'account', GraphLayers.Account, 'Account');
+      addNode(graph, 'large-category', GraphLayers.Category, 'Large category');
+      addNode(
+        graph,
+        'medium-category',
+        GraphLayers.Category,
+        'Medium category',
+      );
+      addNode(graph, 'small-category', GraphLayers.Category, 'Small category');
+      addValueToLink(graph, 'account', 'large-category', 70);
+      addValueToLink(graph, 'account', 'medium-category', 20);
+      addValueToLink(graph, 'account', 'small-category', 10);
+
+      const sankeyData = buildSankeyData(
+        graph,
+        100,
+        [],
+        'global',
+        GraphLayers.Account,
+        GraphLayers.Category,
+        2,
+      );
+
+      const categoryNodes = sankeyData.nodes.filter(
+        node =>
+          node.key === 'large-category' || node.key.endsWith('__OTHER_BUCKET'),
+      );
+      expect(categoryNodes).toHaveLength(2);
+      expect(categoryNodes.map(node => node.key)).toContain('large-category');
+    });
   });
 
   describe('convertToSankeyData', () => {

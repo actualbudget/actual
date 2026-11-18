@@ -367,6 +367,7 @@ export function buildSankeyData(
   categorySort: SortMode,
   layerFrom: GraphLayer,
   layerTo: GraphLayer,
+  maxNodesPerLayer?: number,
 ): SankeyData {
   const graph = cloneGraph(baseGraph);
 
@@ -374,6 +375,7 @@ export function buildSankeyData(
     graph,
     categoryPercentage,
     categorySort,
+    maxNodesPerLayer,
   );
   const sortedGraph = sortGraph(graph, categorySort, categories);
   cleanUpNodes(sortedGraph);
@@ -1353,6 +1355,7 @@ function groupOtherCategories(
   graph: Graph,
   categoryPercentage: number,
   categorySort: SortMode = 'per-group',
+  maxNodesPerLayer?: number,
 ): TooltipInfoMap {
   const toolTipInfoMap: TooltipInfoMap = new Map();
   const structuralKeys = new Set<string>(Object.values(SpecialNodeKeys));
@@ -1479,6 +1482,51 @@ function groupOtherCategories(
       ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
     }
   });
+
+  if (maxNodesPerLayer !== undefined) {
+    const computedLayersByNode = getComputedNodeLayers(graph);
+    const nodesByLayer = new Map<VisualLayerIndex, NodeKey[]>();
+
+    for (const [key] of graph) {
+      if (isHiddenNodeKey(key)) {
+        continue;
+      }
+
+      const visualLayer = computedLayersByNode.get(key);
+      if (visualLayer === undefined) {
+        continue;
+      }
+
+      const nodes = nodesByLayer.get(visualLayer) ?? [];
+      nodes.push(key);
+      nodesByLayer.set(visualLayer, nodes);
+    }
+
+    for (const nodes of nodesByLayer.values()) {
+      while (nodes.length > maxNodesPerLayer) {
+        const ordinaryNodes = nodes.filter(isGroupableNode);
+        if (ordinaryNodes.length === 0) {
+          break;
+        }
+
+        const nodeToDelete = ordinaryNodes.reduce((smallest, key) =>
+          getNodeValue(graph, key) < getNodeValue(graph, smallest)
+            ? key
+            : smallest,
+        );
+
+        const nodeType = graph.get(nodeToDelete)?.type;
+        const otherKey = nodeType
+          ? `${nodeType}${SpecialNodeKeys.OtherSuffix}`
+          : undefined;
+        moveToOther(graph, nodeToDelete, toolTipInfoMap, true);
+        nodes.splice(nodes.indexOf(nodeToDelete), 1);
+        if (otherKey && graph.has(otherKey) && !nodes.includes(otherKey)) {
+          nodes.push(otherKey);
+        }
+      }
+    }
+  }
 
   return toolTipInfoMap;
 }

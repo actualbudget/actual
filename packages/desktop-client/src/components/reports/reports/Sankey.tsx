@@ -26,6 +26,7 @@ import type {
   SankeyWidget,
   TimeFrame,
 } from '@actual-app/core/types/models';
+import { debounce } from 'es-toolkit/compat';
 import type { TFunction } from 'i18next';
 import type { SankeyData } from 'recharts/types/chart/Sankey';
 
@@ -55,6 +56,7 @@ import { useDashboardWidget } from '#hooks/useDashboardWidget';
 import { useFormatList } from '#hooks/useFormatList';
 import { useLocale } from '#hooks/useLocale';
 import { useNavigate } from '#hooks/useNavigate';
+import { useResizeObserver } from '#hooks/useResizeObserver';
 import { useRuleConditionFilters } from '#hooks/useRuleConditionFilters';
 import { addNotification } from '#notifications/notificationsSlice';
 import { useDispatch } from '#redux';
@@ -76,6 +78,14 @@ export function Sankey() {
 }
 
 type GraphMode = 'budgeted' | 'spent';
+
+export function maxRenderableNodes(chartHeight: number): number | undefined {
+  if (chartHeight <= 0) {
+    return undefined;
+  }
+
+  return Math.max(2, Math.floor(chartHeight / 45));
+}
 
 type LayerDirection = 'from' | 'to';
 type LayerRange = {
@@ -471,6 +481,31 @@ function SankeyInner({ widget }: SankeyInnerProps) {
 
   const [categoryPercentage, setCategoryPercentage] = useState<number>(1);
 
+  const [chartHeight, setChartHeight] = useState(0);
+  const throttledSetChartHeight = useMemo(
+    () =>
+      debounce(
+        (height: number) => {
+          setChartHeight(prev => (prev === height ? prev : height));
+        },
+        200,
+        { leading: true, trailing: true, maxWait: 200 },
+      ),
+    [],
+  );
+
+  useEffect(() => {
+    return () => {
+      throttledSetChartHeight.cancel();
+    };
+  }, [throttledSetChartHeight]);
+
+  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
+    throttledSetChartHeight(rect.height);
+  });
+
+  const maxNodesPerLayer = maxRenderableNodes(chartHeight);
+
   const [categorySort, setCategorySort] = useState<
     'per-group' | 'global' | 'budget-order'
   >(widget?.meta?.categorySort ?? 'per-group');
@@ -605,10 +640,12 @@ function SankeyInner({ widget }: SankeyInnerProps) {
       categorySort,
       layerFrom,
       layerTo,
+      maxNodesPerLayer,
     );
   }, [
     displayBaseGraph,
     categoryPercentage,
+    maxNodesPerLayer,
     groupedCategories,
     categorySort,
     layerFrom,
@@ -914,6 +951,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                 displayData.links &&
                 displayData.links.length > 0 ? (
                   <View
+                    ref={containerRef}
                     style={{
                       flexDirection: 'column',
                       flexGrow: 1,
@@ -922,6 +960,7 @@ function SankeyInner({ widget }: SankeyInnerProps) {
                     <SankeyGraph
                       style={{ flexGrow: 1 }}
                       data={displayData}
+                      maxNodesPerLayer={maxNodesPerLayer}
                       showPercentages={showPercentages}
                     />
                   </View>
