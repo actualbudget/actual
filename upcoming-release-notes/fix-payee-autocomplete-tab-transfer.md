@@ -3,4 +3,4 @@ category: Bugfix
 authors: [pouyashahrdami]
 ---
 
-Fix payee autocomplete selecting the wrong payee on Tab when a transfer payee is highlighted
+Fix payee autocomplete keyboard selection picking the wrong payee when a transfer payee is highlighted
