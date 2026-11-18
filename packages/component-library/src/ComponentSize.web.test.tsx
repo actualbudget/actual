@@ -113,11 +113,7 @@ describe('Button size', () => {
     expect(computed.minHeight).toBe('40px');
 
     // The 40px minimum must not survive past the narrow breakpoint.
-    expectMediaDeclaration(
-      button,
-      '@media (min-width: 512px)',
-      'min-height:0',
-    );
+    expectMediaDeclaration(button, '@media (min-width: 512px)', 'min-height:0');
   });
 
   it('uses uniform padding for bare buttons with an explicit size', () => {
