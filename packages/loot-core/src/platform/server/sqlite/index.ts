@@ -170,10 +170,13 @@ export function resumeSqliteStorage(): void {
 }
 
 // Move every budget back to absurd-sql's layout (the opt-in phase's way
-// back); the next start then picks the legacy engine
-export async function revertSqliteStorageToLegacy(): Promise<void> {
+// back), or only the one at the given path; the next start then picks
+// the legacy engine, unless something is left in the new storage
+export async function revertSqliteStorageToLegacy(
+  onlyPath?: string,
+): Promise<void> {
   if (activeBackend !== 'legacy') {
-    await revertToLegacy();
+    await revertToLegacy(onlyPath);
   }
 }
 

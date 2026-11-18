@@ -72,7 +72,9 @@ export function resumeSqliteStorage(): void {
   // Nothing was released on native sqlite
 }
 
-export async function revertSqliteStorageToLegacy(): Promise<void> {
+export async function revertSqliteStorageToLegacy(
+  _onlyPath?: string,
+): Promise<void> {
   // Only the browser has a legacy storage layout
 }
 

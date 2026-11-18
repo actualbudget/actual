@@ -62,10 +62,10 @@ async function getStorageInfo() {
 // the legacy engine. Closes the open budget first; a budget open in another
 // tab holds its storage lock and makes this fail. Asked on behalf of one
 // budget, by the report of its failed move, it is that budget's alone:
-// refused while any other budget lives in the new storage, which is for
-// the setting to move back, and the next start then opens that budget.
-// Otherwise that start opens the one opened last; a revert that fails
-// leaves where the app starts as it was.
+// no other budget is moved back, and it is refused while any other lives
+// in the new storage, which is for the setting to move back. The next
+// start then opens that budget. Otherwise that start opens the one
+// opened last; a revert that fails leaves where the app starts as it was.
 async function revertStorage({
   forBudget,
 }: { forBudget?: string } = {}): Promise<
@@ -75,12 +75,13 @@ async function revertStorage({
   if (sqlite.getStorageBackend() === 'legacy') {
     return { ok: true };
   }
+  const onlyPath =
+    forBudget != null
+      ? fs.join(fs.getBudgetDir(forBudget), 'db.sqlite')
+      : undefined;
   if (
-    forBudget != null &&
-    (await sqlite.hasMigratedSqliteFiles(
-      undefined,
-      fs.join(fs.getBudgetDir(forBudget), 'db.sqlite'),
-    ))
+    onlyPath != null &&
+    (await sqlite.hasMigratedSqliteFiles(undefined, onlyPath))
   ) {
     return { error: 'other-budgets-moved' };
   }
@@ -93,7 +94,12 @@ async function revertStorage({
     await runHandler(mainApp.handlers['close-budget'], undefined);
   }
   try {
-    await sqlite.revertSqliteStorageToLegacy();
+    await sqlite.revertSqliteStorageToLegacy(onlyPath);
+    // Another budget can have moved to the new storage since the check
+    // above. It was left there, where the previous engine cannot read it
+    if (onlyPath != null && (await sqlite.hasMigratedSqliteFiles())) {
+      return { error: 'other-budgets-moved' };
+    }
     budgetToRestore = forBudget ?? lastBudget;
     return { ok: true };
   } catch (error) {
