@@ -62,6 +62,8 @@ Actual currently has official support for migrating budgets from YNAB4 and nYNAB
   - _A collection of JavaScript/CSS Userscripts for Actual Budget._
 - **Actuali** - https://github.com/MattFaz/actuali
   - _An iOS app for Actual Budget. Connects directly to your self-hosted Actual server and supports syncing (offline supported), transactions, reports, budgets, iOS Shortcuts, and more. Available on the [App Store](https://apps.apple.com/app/actuali/id6764063765)._
+- **Actua** - https://github.com/azimul-kabir/actua
+  - _An open-source native Android client for Actual Budget. Supports offline budgeting, sync with a self-hosted Actual server, reports, home-screen widgets, and transaction imports from bank notifications. Available on [Google Play](https://play.google.com/store/apps/details?id=com.azimulkabir.actua)._
 - **Actual Budget iOS Widget** - https://github.com/TaylorJns/Actual-Budget-iOS-Widget
   - _An iOS widget to display your Actual Budget category balances for the current month. Requires your Actual server to be accessible via HTTPS, and the **Local REST API** community project to be installed._
 - **Actual Bench** - https://github.com/x-rous/actual-bench
