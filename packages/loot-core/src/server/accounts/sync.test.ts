@@ -1299,3 +1299,73 @@ describe('SimpleFin batch sync', () => {
     expect(account!.bank_sync_status).toBe('not-configured');
   });
 });
+
+describe('Enable Banking sync', () => {
+  afterEach(() => {
+    delete handlers['/enablebanking/transactions'];
+  });
+
+  test.each([
+    ['reports no balance', null],
+    ['omits the balance field', undefined],
+  ])(
+    'imports transactions without an opening balance when the bank %s',
+    async (_case, startingBalance) => {
+      vi.mocked(asyncStorage.getItem).mockResolvedValue('test-token');
+      vi.mocked(asyncStorage.multiGet).mockResolvedValue({
+        'user-id': 'user-1',
+        'user-key': 'key-1',
+      });
+
+      db.runQuery(
+        'INSERT INTO banks (id, bank_id, name, tombstone) VALUES (?, ?, ?, 0)',
+        ['bank-eb', 'eb-acct-1', 'Enable Bank'],
+      );
+      const acctId = await db.insertAccount({
+        id: 'acct-eb-1',
+        account_id: 'eb-acct-1',
+        name: 'Checking',
+        bank: 'bank-eb',
+        account_sync_source: 'enableBanking',
+      });
+      await db.insertPayee({
+        id: 'transfer-' + acctId,
+        name: '',
+        transfer_acct: acctId,
+      });
+
+      const transaction = {
+        transactionId: 'eb-tx-1',
+        date: '2017-10-02',
+        payeeName: 'Coffee Shop',
+        transactionAmount: { amount: '-12.34', currency: 'EUR' },
+        booked: true,
+      };
+      // The sync server reports `null` when the bank's balance request failed.
+      handlers['/enablebanking/transactions'] = () => ({
+        transactions: {
+          all: [transaction],
+          booked: [transaction],
+          pending: [],
+        },
+        balances: [],
+        startingBalance,
+      });
+
+      const result = await accountsApp.handlers['accounts-bank-sync']({
+        ids: [acctId],
+      });
+      expect(result.errors).toHaveLength(0);
+
+      const transactions = await getAllTransactions();
+      expect(transactions.map(t => t.imported_id)).toEqual(['eb-tx-1']);
+      expect(transactions.some(t => t.starting_balance_flag)).toBe(false);
+
+      const account = await db.first<db.DbAccount>(
+        'SELECT * FROM accounts WHERE id = ?',
+        [acctId],
+      );
+      expect(account!.balance_current).toBeNull();
+    },
+  );
+});

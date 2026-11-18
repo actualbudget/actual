@@ -22,6 +22,7 @@ import {
   useServerVersion,
 } from '#components/ServerContext';
 import { useMetaThemeColor } from '#hooks/useMetaThemeColor';
+import { useMobileOpenIdCallback } from '#hooks/useMobileOpenIdCallback';
 import { useDispatch, useSelector } from '#redux';
 import { loggedIn } from '#users/usersSlice';
 
@@ -65,6 +66,7 @@ function Version() {
 
 export function ManagementApp() {
   useMetaThemeColor(theme.mobileConfigServerViewTheme);
+  useMobileOpenIdCallback();
 
   const files = useSelector(state => state.budgetfiles.allFiles);
   const isLoading = useSelector(state => state.app.loadingText !== null);

@@ -14,12 +14,15 @@ import type { ImportableBudgetType } from '@actual-app/core/server/importers/ind
 import type { Query } from '@actual-app/core/shared/query';
 import type { ImportTransactionsOpts } from '@actual-app/core/types/api-handlers';
 import type {
+  DashboardPageEntity,
+  DashboardWidgetEntity,
   ImportTransactionEntity,
   NoteEntity,
   RuleEntity,
   TransactionEntity,
 } from '@actual-app/core/types/models';
 import type { SyncedPrefs } from '@actual-app/core/types/prefs';
+import type { EverythingButIdOptional } from '@actual-app/core/types/util';
 
 export { q } from './app/query';
 
@@ -415,6 +418,23 @@ export function resetBudgetHold(month: string) {
   return send('api/budget-reset-hold', { month });
 }
 
+export function applyCategoryTemplate(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-apply-category-template', { month, categoryId });
+}
+
+export function getCategoryTemplateAmount(
+  month: string,
+  categoryId: APICategoryEntity['id'],
+) {
+  return send('api/budget-get-category-template-amount', {
+    month,
+    categoryId,
+  });
+}
+
 export function createSchedule(schedule: Omit<APIScheduleEntity, 'id'>) {
   return send('api/schedule-create', schedule);
 }
@@ -467,4 +487,73 @@ export function setPreference<T extends keyof SyncedPrefs>(
   value: SyncedPrefs[T] | undefined,
 ): Promise<void> {
   return send('preferences/save', { id, value });
+}
+
+export function getDashboardPages(): Promise<DashboardPageEntity[]> {
+  return send('dashboard-get-pages');
+}
+
+export function createDashboardPage(name: string) {
+  return send('dashboard-create', { name });
+}
+
+export function renameDashboardPage(id: string, name: string) {
+  return send('dashboard-rename', { id, name });
+}
+
+export function deleteDashboardPage(id: string) {
+  return send('dashboard-delete', id);
+}
+
+export function resetDashboard(id: string) {
+  return send('dashboard-reset', id);
+}
+
+export function getDashboardWidgets(
+  pageId?: string,
+): Promise<DashboardWidgetEntity[]> {
+  return send('dashboard-get-widgets', { pageId });
+}
+
+type BaseAddDashboardWidgetInput<W extends DashboardWidgetEntity> = Omit<
+  W,
+  'id' | 'tombstone' | 'meta' | 'x' | 'y'
+> &
+  ({ x: number; y: number } | { x?: never; y?: never }) & {
+    id?: string;
+  } & (null extends W['meta'] ? { meta?: W['meta'] } : { meta: W['meta'] });
+
+export type AddDashboardWidgetInput = DashboardWidgetEntity extends infer W
+  ? W extends DashboardWidgetEntity
+    ? BaseAddDashboardWidgetInput<W>
+    : never
+  : never;
+
+export function addDashboardWidget(
+  widget: AddDashboardWidgetInput,
+): Promise<void> {
+  return send('dashboard-add-widget', {
+    meta: null,
+    ...widget,
+  });
+}
+
+export function updateDashboardWidget(
+  widget: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>,
+) {
+  return send('dashboard-update-widget', widget);
+}
+
+export function removeDashboardWidget(id: string) {
+  return send('dashboard-remove-widget', id);
+}
+
+export function updateDashboard(
+  widgets: EverythingButIdOptional<Omit<DashboardWidgetEntity, 'tombstone'>>[],
+) {
+  return send('dashboard-update', widgets);
+}
+
+export function copyDashboardWidget(id: string, targetDashboardPageId: string) {
+  return send('dashboard-copy-widget', { id, targetDashboardPageId });
 }

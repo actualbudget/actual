@@ -1,4 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, {
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type {
   ComponentPropsWithRef,
   CSSProperties,
@@ -49,6 +55,7 @@ const AmountInput = memo(function AmountInput({
   const [text, setText] = useState('');
   const [value, setValue] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const caretFromEnd = useRef<number | null>(null);
   const [hideFraction] = useSyncedPref('hideFraction');
   const format = useFormat();
 
@@ -58,6 +65,10 @@ const AmountInput = memo(function AmountInput({
   );
 
   const initialValue = Math.abs(props.value);
+  const formattedValue = format.forEdit(amountToInteger(value));
+  // Show the real amount in the input so it can be selected and copied.
+  // Zero stays empty so typed digits don't get appended to "0.00".
+  const inputValue = editing ? text : value === 0 ? '' : formattedValue;
 
   useEffect(() => {
     if (focused) {
@@ -70,6 +81,23 @@ const AmountInput = memo(function AmountInput({
     setText('');
     setValue(initialValue);
   }, [initialValue]);
+
+  // Reformatting moves the caret to the end; put it back before the same
+  // number of digits it had in front of it.
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    const digitsAfterCaret = caretFromEnd.current;
+    caretFromEnd.current = null;
+    if (!input || digitsAfterCaret === null) return;
+
+    let caret = input.value.length;
+    let digits = 0;
+    while (caret > 0 && digits < digitsAfterCaret) {
+      caret--;
+      if (/\d/.test(input.value[caret])) digits++;
+    }
+    input.setSelectionRange(caret, caret);
+  }, [text]);
 
   const onKeyUp: HTMLProps<HTMLInputElement>['onKeyUp'] = e => {
     if (e.key === 'Backspace' && text === '') {
@@ -88,7 +116,7 @@ const AmountInput = memo(function AmountInput({
   const applyText = (rawInput?: string) => {
     const domText = rawInput ?? inputRef.current?.value ?? text;
     const parsed = currencyToAmount(domText) || 0;
-    const hasPendingInput = domText !== '' || editing;
+    const hasPendingInput = editing || domText !== inputValue;
     const newValue = hasPendingInput ? parsed : value;
 
     setValue(Math.abs(newValue));
@@ -100,6 +128,10 @@ const AmountInput = memo(function AmountInput({
 
   const onFocus: HTMLProps<HTMLInputElement>['onFocus'] = e => {
     props.onFocus?.(e);
+    // Typing or pasting replaces the amount, like a regular input. Deferred
+    // because iOS Safari ignores selection changes made during focus.
+    const input = e.currentTarget;
+    setTimeout(() => input.setSelectionRange(0, input.value.length), 0);
   };
 
   const onUpdate = (value: string) => {
@@ -118,7 +150,16 @@ const AmountInput = memo(function AmountInput({
     }
   };
 
-  const onChangeText = (text: string) => {
+  const updateText = (text: string) => {
+    setEditing(true);
+    setText(text);
+    props.onChangeValue?.(text);
+  };
+
+  const onChangeText = (rawText: string, caret: number | null) => {
+    caretFromEnd.current =
+      caret === null ? null : rawText.slice(caret).replace(/\D/g, '').length;
+    let text = rawText;
     if (format.currency.decimalPlaces === 0) {
       // Typed digits are whole units, whatever the hideFraction setting
       text = format.forEdit(amountToInteger(Number(text.replace(/\D/g, ''))));
@@ -128,24 +169,55 @@ const AmountInput = memo(function AmountInput({
         String(hideFraction) === 'true',
       );
     }
-    setEditing(true);
-    setText(text);
-    props.onChangeValue?.(text);
+    updateText(text);
+  };
+
+  const onPaste: HTMLProps<HTMLInputElement>['onPaste'] = e => {
+    // Only a full replacement is an amount ("12" is 12, not 0.12); with a
+    // partial selection the browser inserts the text and onChange reformats.
+    const input = e.currentTarget;
+    if (
+      input.selectionStart !== 0 ||
+      input.selectionEnd !== input.value.length
+    ) {
+      return;
+    }
+    e.preventDefault();
+    const amount = currencyToAmount(e.clipboardData.getData('text'));
+    if (amount === null) return;
+    updateText(format.forEdit(amountToInteger(Math.abs(amount))));
   };
 
   const input = (
     <input
       type="text"
       ref={mergedInputRef}
-      value={text}
+      value={inputValue}
       inputMode="decimal"
       autoCapitalize="none"
-      onChange={e => onChangeText(e.target.value)}
+      onChange={e => onChangeText(e.target.value, e.target.selectionEnd)}
+      onPaste={onPaste}
       onFocus={onFocus}
       onBlur={onBlur}
       onKeyUp={onKeyUp}
       data-testid="amount-input"
-      style={{ flex: 1, textAlign: 'center', position: 'absolute' }}
+      style={{
+        ...textStyle,
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        padding: 5,
+        border: 0,
+        outline: 0,
+        background: 'transparent',
+        // The Text below draws the amount; the input only handles
+        // selection, caret and editing.
+        color: 'transparent',
+        // An empty input would put the caret mid-box next to the Text's "0.00"
+        caretColor: inputValue === '' ? 'transparent' : theme.pageText,
+      }}
     />
   );
 
@@ -162,7 +234,7 @@ const AmountInput = memo(function AmountInput({
         ...style,
       }}
     >
-      <View style={{ overflowY: 'auto', overflowX: 'hidden' }}>{input}</View>
+      {input}
       <Text
         style={{
           pointerEvents: 'none',
@@ -170,9 +242,7 @@ const AmountInput = memo(function AmountInput({
         }}
         data-testid="amount-input-text"
       >
-        {editing
-          ? text || format.forEdit(0)
-          : format.forEdit(amountToInteger(value))}
+        {editing ? text || format.forEdit(0) : formattedValue}
       </Text>
     </View>
   );

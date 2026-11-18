@@ -138,5 +138,10 @@ export async function exportQueryToCSV(query) {
     };
   });
 
-  return csvStringify(transactionsForExport, csvStringifyOptions);
+  // This export is saved straight to a file. Without a BOM, Excel on Windows
+  // reads the UTF-8 as the system ANSI code page and corrupts accented text.
+  return csvStringify(transactionsForExport, {
+    ...csvStringifyOptions,
+    bom: true,
+  });
 }

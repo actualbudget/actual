@@ -43,6 +43,7 @@ import {
 import type { AmountOPType, APIScheduleEntity } from './api-models';
 import { aqlQuery } from './aql';
 import { isTrackingBudget } from './budget/actions';
+import { getCategoriesWithTemplates } from './budget/template-notes';
 import * as cloudStorage from './cloud-storage';
 import type { RemoteFile } from './cloud-storage';
 import * as db from './db';
@@ -121,6 +122,36 @@ async function validateExpenseCategory(debug, id) {
   if (row.is_income !== 0) {
     throw APIError(`${debug}: category "${id}" is not an expense category`);
   }
+}
+
+// A `#template` line that fails to parse becomes an error template, which the
+// template runner skips, so it is rejected here instead.
+async function getCategoryTemplates(debug, categoryId) {
+  // A note's templates are parsed in memory rather than stored in `goal_def`,
+  // so reading them writes nothing. Applying stores them itself.
+  const { source } = await db.first<{ source: string }>(
+    `SELECT COALESCE(JSON_EXTRACT(template_settings, '$.source'), 'notes') AS source
+       FROM categories WHERE id = ?`,
+    [categoryId],
+  );
+  const templates =
+    source === 'ui'
+      ? ((await handlers['budget/get-category-automations'](categoryId))[
+          categoryId
+        ] ?? [])
+      : ((await getCategoriesWithTemplates([categoryId]))[0]?.templates ?? []);
+  if (templates.length === 0) {
+    throw APIError(`${debug}: category "${categoryId}" has no template`);
+  }
+  const parseErrors = templates.flatMap(template =>
+    template.type === 'error'
+      ? [`${template.line}\nError: ${template.error}`]
+      : [],
+  );
+  if (parseErrors.length > 0) {
+    throw APIError(`${debug}: ${parseErrors.join('\n\n')}`);
+  }
+  return templates;
 }
 
 function validateDay(name: string, value: string) {
@@ -576,6 +607,58 @@ handlers['api/budget-reset-hold'] = withMutation(async function ({ month }) {
   await validateMonth(month);
   return handlers['budget/reset-hold']({ month });
 });
+
+handlers['api/budget-apply-category-template'] = withMutation(async function ({
+  month,
+  categoryId,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  await validateExpenseCategory('budget-apply-category-template', categoryId);
+  await getCategoryTemplates('budget-apply-category-template', categoryId);
+  const result = await handlers['budget/apply-single-template']({
+    month,
+    category: categoryId,
+  });
+  if (result.message === 'template-errors') {
+    throw APIError(`budget-apply-category-template: ${result.pre}`);
+  }
+  // The templates were checked above, so a category is always applied.
+  if (result.message !== 'templates-applied') {
+    throw APIError(
+      `budget-apply-category-template: unexpected result "${result.message}"`,
+    );
+  }
+});
+
+handlers['api/budget-get-category-template-amount'] = async function ({
+  month,
+  categoryId,
+}) {
+  checkFileOpen();
+  await validateMonth(month);
+  await validateExpenseCategory(
+    'budget-get-category-template-amount',
+    categoryId,
+  );
+  const templates = await getCategoryTemplates(
+    'budget-get-category-template-amount',
+    categoryId,
+  );
+  const { budgeted, errors } = await handlers[
+    'budget/dry-run-category-template'
+  ]({
+    month,
+    categoryId,
+    templates,
+  });
+  if (errors.length > 0) {
+    throw APIError(
+      `budget-get-category-template-amount: ${errors.join('\n\n')}`,
+    );
+  }
+  return budgeted;
+};
 
 handlers['api/transactions-export'] = async function ({
   transactions,

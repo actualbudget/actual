@@ -263,6 +263,15 @@ describe('File import', () => {
     expect(await getTransactions('one')).toMatchSnapshot();
   });
 
+  test('ofx import reads comma decimal amounts', async () => {
+    const { errors, transactions } = await parseFile(
+      __dirname + '/../../../mocks/files/data-comma-decimal.ofx',
+    );
+
+    expect(errors.length).toBe(0);
+    expect(transactions).toMatchObject([{ amount: -19.78 }, { amount: 150 }]);
+  });
+
   test('csv import works (utf-16le bank export)', async () => {
     const { errors, transactions } = await parseFile(
       __dirname + '/../../../mocks/files/utf-16le.csv',

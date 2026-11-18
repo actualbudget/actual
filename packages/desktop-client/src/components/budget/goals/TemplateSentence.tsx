@@ -39,6 +39,7 @@ export function TemplateSentence({
         />
       );
     case 'average':
+    case 'weeklyAverage':
     case 'copy':
       return <HistoricalAutomationReadOnly template={template} />;
     case 'by':
