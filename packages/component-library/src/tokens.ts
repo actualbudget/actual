@@ -164,9 +164,9 @@ export const componentSizeControl: Record<
   },
   touch: {
     narrow: { paddingY: 10, paddingX: 14, minHeight: 40 },
-    small: { paddingY: 5, paddingX: 10 },
-    medium: { paddingY: 5, paddingX: 10 },
-    wide: { paddingY: 5, paddingX: 10 },
+    small: { paddingY: 5, paddingX: 10, minHeight: 0 },
+    medium: { paddingY: 5, paddingX: 10, minHeight: 0 },
+    wide: { paddingY: 5, paddingX: 10, minHeight: 0 },
   },
 };
 

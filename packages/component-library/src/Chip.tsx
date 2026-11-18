@@ -3,6 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 
 import { Button } from './Button';
 import { SvgClose } from './icons/v1';
+import { View } from './View';
 
 type ChipProps = Omit<
   ComponentPropsWithoutRef<typeof Button>,
@@ -27,7 +28,9 @@ export function Chip({
   children,
   ...props
 }: ChipProps) {
-  return (
+  const showRemove = onRemove != null && removable !== false;
+
+  const actionButton = (
     <Button
       {...props}
       variant={variant}
@@ -37,15 +40,31 @@ export function Chip({
       })}
     >
       {children}
-      {onRemove != null && removable !== false && (
-        <Button
-          variant="bare"
-          onPress={() => onRemove()}
-          style={{ padding: 0, flexShrink: 0 }}
-        >
-          <SvgClose width={10} height={10} />
-        </Button>
-      )}
     </Button>
+  );
+
+  if (!showRemove) {
+    return actionButton;
+  }
+
+  return (
+    <View
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexShrink: 0,
+      }}
+    >
+      {actionButton}
+      <Button
+        variant="bare"
+        isDisabled={props.isDisabled}
+        onPress={() => onRemove()}
+        style={{ padding: 0, flexShrink: 0 }}
+      >
+        <SvgClose width={10} height={10} />
+      </Button>
+    </View>
   );
 }
