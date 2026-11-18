@@ -79,11 +79,18 @@ async function revertStorage({
     forBudget != null
       ? fs.join(fs.getBudgetDir(forBudget), 'db.sqlite')
       : undefined;
-  if (
-    onlyPath != null &&
-    (await sqlite.hasMigratedSqliteFiles(undefined, onlyPath))
-  ) {
-    return { error: 'other-budgets-moved' };
+  if (onlyPath != null) {
+    let hasOthersMoved: boolean;
+    try {
+      hasOthersMoved = await sqlite.hasMigratedSqliteFiles(undefined, onlyPath);
+    } catch (error) {
+      // Nothing was closed or moved yet
+      logger.error('storage: could not look for other moved budgets', error);
+      return { error: 'revert-failed' };
+    }
+    if (hasOthersMoved) {
+      return { error: 'other-budgets-moved' };
+    }
   }
   // The budget this worker has open; `lastBudget` is whichever budget any
   // tab opened last, kept only so the relaunch starts where the user was

@@ -539,8 +539,11 @@ export function createOpfsStore({
           throw new Error('File does not exist: ' + path);
         }
         // An open that shared the import has the file by now, or is
-        // about to: it is read from that handle, as above
-        const opened = await (opening.get(path) ?? pool.open.get(fileName));
+        // about to: it is read from that handle, as above. One that
+        // failed since leaves no handle, and the file is in the pool
+        const opened =
+          (await opening.get(path)?.catch(() => undefined)) ??
+          pool.open.get(fileName);
         return opened ? exportBytes(opened) : exportPooled(pool, fileName);
       } finally {
         release(pool);

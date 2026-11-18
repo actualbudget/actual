@@ -27,10 +27,12 @@ export async function returnToPreviousStorage(
   }
   setStoredStorageBackend('legacy');
   // The address names the engine as well: it decides the next load even
-  // where the choice could not be stored, and is taken off again there
+  // where the choice could not be stored, and is taken off again there.
+  // It takes this page's place in the history, so that going back in the
+  // browser cannot return to a page still running the new engine
   const address = new URL(window.location.href);
   address.searchParams.set(STORAGE_BACKEND_URL_PARAM, 'legacy');
-  window.location.assign(address);
+  window.location.replace(address);
   return null;
 }
 

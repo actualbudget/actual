@@ -544,6 +544,35 @@ describe('OPFS pool store', () => {
     expect(await listIndexedDbNames()).not.toContain(name);
   });
 
+  it('reads a closed file from the pool when the open sharing its move fails afterwards', async () => {
+    const name = legacyDatabaseName(PATH);
+    const bytes = await budgetBytes('shared');
+    await seedLegacyDatabase(name, bytes);
+    const pool = fakePool();
+    const store = createOpfsStore({
+      // An open fails on its first statement, which comes after the move
+      sqlite3: () => fakeSqlite3(pool, { failExec: true }),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    // The read comes first, so the two share the move
+    const [read, opened] = await Promise.allSettled([
+      store.readFile(PATH),
+      store.open(PATH),
+    ]);
+    expect(opened.status).toBe('rejected');
+    // The move went through, so the file is there to be read
+    expect(read.status).toBe('fulfilled');
+    expect(
+      read.status === 'fulfilled' &&
+        Buffer.from(read.value).equals(Buffer.from(bytes)),
+    ).toBe(true);
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
   it('moves a closed file in once when two reads of it overlap', async () => {
     const name = legacyDatabaseName(PATH);
     const bytes = await budgetBytes('shared');

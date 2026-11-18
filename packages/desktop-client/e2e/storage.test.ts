@@ -390,6 +390,35 @@ test.describe('Browser storage', () => {
     ).toBe(requestedBackend);
   });
 
+  test('says that going back failed when it cannot check for other budgets', async ({
+    browser,
+  }) => {
+    test.skip(!usesNewStorage, 'only meaningful for the new storage');
+
+    page = await browser.newPage();
+    await createLegacyBudgetThenSwitch(page);
+    await setLegacyCopyUnreadable(page, true);
+    await page.getByText('Test Budget').click();
+    const report = failedMoveReport(page);
+    const goBack = report.getByRole('button', {
+      name: 'Go back to previous storage',
+    });
+    await expect(goBack).toBeVisible({ timeout: 60_000 });
+
+    await setFileRowLookupFailing(page);
+    await goBack.click();
+    await expect(report.getByRole('alert')).toHaveText(/Switching back failed/);
+    await expect(goBack).toBeEnabled();
+    // The report says it; it is not raised as an internal error as well.
+    // Long enough for that notification to have come up, and looked for
+    // once, as it goes away again by itself
+    await page.waitForTimeout(500);
+    expect(
+      await page.getByText('Something internally went wrong').count(),
+    ).toBe(0);
+    expectStorageLayout(await inspectStorage(page), 'legacy');
+  });
+
   test('says so when it cannot tell whether going back is possible', async ({
     browser,
   }) => {
@@ -451,9 +480,11 @@ test.describe('Browser storage', () => {
     await expect(
       page.getByRole('grid', { name: 'Budget files' }).getByText('Test Budget'),
     ).toBeVisible();
-    // Still there, and it names the budget although no list was loaded
-    // when it was raised
-    await expect(report.getByText('Moving budget "Test Budget"')).toBeVisible();
+    // Still there to be seen, and it names the budget although no list
+    // was loaded when it was raised
+    const namedBudget = report.getByText('Moving budget "Test Budget"');
+    await expect(namedBudget).toBeVisible();
+    await expect.poll(() => isShownToTheUser(namedBudget)).toBe(true);
   });
 
   test('a second tab cannot open the same budget at the same time', async ({

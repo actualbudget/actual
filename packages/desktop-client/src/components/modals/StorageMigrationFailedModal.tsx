@@ -88,10 +88,11 @@ export function StorageMigrationFailedModal({
                 </Trans>
               ) : canGoBack ? (
                 <Trans>
-                  If it keeps failing, you can go back to the previous storage,
-                  which reopens this budget as it was. If it does not open by
-                  itself, pick it from the list of files. The new storage engine
-                  can be turned on again under Settings → Experimental.
+                  If it keeps failing, you can go back to the previous storage.
+                  Actual then tries to open this budget the way it did before;
+                  if it does not open by itself, pick it from the list of files.
+                  The new storage engine can be turned on again under Settings →
+                  Experimental.
                 </Trans>
               ) : (
                 <Trans>
