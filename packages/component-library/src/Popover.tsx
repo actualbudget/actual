@@ -47,9 +47,11 @@ export const Popover = ({
   const ref = useRef<HTMLElement>(null);
 
   // When the popover is driven by a DialogTrigger, `isOpen` isn't passed in,
-  // so fall back to the trigger's own open state.
+  // so fall back to the trigger's own open state, and finally to
+  // `defaultOpen` for standalone uncontrolled popovers.
   const triggerState = useContext(OverlayTriggerStateContext);
-  const isOpen = props.isOpen ?? triggerState?.isOpen ?? false;
+  const isOpen =
+    props.isOpen ?? triggerState?.isOpen ?? props.defaultOpen ?? false;
 
   // Re-measure whenever the popover opens, so device rotation is picked up.
   const containerPadding = useMemo(
