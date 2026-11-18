@@ -9,7 +9,6 @@ import { send } from '@actual-app/core/platform/client/connection';
 import * as monthUtils from '@actual-app/core/shared/months';
 import type { SankeyWidget } from '@actual-app/core/types/models';
 import * as d from 'date-fns';
-import { debounce } from 'es-toolkit/compat';
 
 import { SankeyGraph } from '#components/reports/graphs/SankeyGraph';
 import { LoadingIndicator } from '#components/reports/LoadingIndicator';
@@ -19,10 +18,7 @@ import {
   boundMonthRangeFromDates,
   calculateTimeRange,
 } from '#components/reports/reportRanges';
-import {
-  getDefaultLayerRange,
-  topNNodes,
-} from '#components/reports/reports/Sankey';
+import { getDefaultLayerRange } from '#components/reports/reports/Sankey';
 import {
   buildSankeyData,
   createBaseGraphSpreadsheet,
@@ -35,7 +31,6 @@ import type {
 import { useReport } from '#components/reports/useReport';
 import { useCategories } from '#hooks/useCategories';
 import { useLocale } from '#hooks/useLocale';
-import { useResizeObserver } from '#hooks/useResizeObserver';
 
 const defaultGetBaseGraph = async (
   _spreadsheet: unknown,
@@ -82,32 +77,7 @@ export function SankeyCard({
   );
   const mode = meta?.mode ?? 'spent';
 
-  const [cardHeight, setCardHeight] = useState(0);
-  const throttledSetCardHeight = useMemo(
-    () =>
-      debounce(
-        (height: number) => {
-          setCardHeight(prev => (prev === height ? prev : height));
-        },
-        200,
-        { leading: true, trailing: true, maxWait: 100 },
-      ),
-    [],
-  );
-
-  useEffect(() => {
-    return () => {
-      throttledSetCardHeight.cancel();
-    };
-  }, [throttledSetCardHeight]);
-
-  const containerRef = useResizeObserver<HTMLDivElement>(rect => {
-    throttledSetCardHeight(rect.height);
-  });
-
-  const heightBasedTopN = topNNodes(cardHeight);
-  const configuredTopN = meta?.topNcategories ?? 15;
-  const topN = Math.min(configuredTopN, heightBasedTopN);
+  const categoryPercentage = meta?.categoryPercentage ?? 1;
 
   const defaultLayerRange = getDefaultLayerRange(mode);
   let layerFrom: GraphLayer;
@@ -175,7 +145,7 @@ export function SankeyCard({
 
     return buildSankeyData(
       displayBaseGraph,
-      topN,
+      categoryPercentage,
       groupedCategories,
       meta?.categorySort ?? 'per-group',
       layerFrom,
@@ -183,7 +153,7 @@ export function SankeyCard({
     );
   }, [
     displayBaseGraph,
-    topN,
+    categoryPercentage,
     groupedCategories,
     meta?.categorySort,
     layerFrom,
@@ -239,7 +209,7 @@ export function SankeyCard({
         </View>
 
         {compactData ? (
-          <View ref={containerRef} style={{ flexGrow: 1 }}>
+          <View style={{ flexGrow: 1 }}>
             <SankeyGraph
               data={compactData}
               showPercentages={meta?.showPercentages}

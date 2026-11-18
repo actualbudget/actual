@@ -495,7 +495,7 @@ export type SankeyWidget = AbstractWidget<
     conditionsOp?: 'and' | 'or';
     timeFrame?: TimeFrame;
     mode?: 'budgeted' | 'spent';
-    topNcategories?: number;
+    categoryPercentage?: number;
     categorySort?: 'per-group' | 'global' | 'budget-order';
     showPercentages?: boolean;
     groupAccounts?: boolean;

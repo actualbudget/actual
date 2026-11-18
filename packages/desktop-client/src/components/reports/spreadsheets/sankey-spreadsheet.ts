@@ -362,7 +362,7 @@ async function createBaseGraph(
 
 export function buildSankeyData(
   baseGraph: Graph,
-  topNcategories: number,
+  categoryPercentage: number,
   categories: CategoryGroupEntity[],
   categorySort: SortMode,
   layerFrom: GraphLayer,
@@ -372,7 +372,7 @@ export function buildSankeyData(
 
   const toolTipInfoMap = groupOtherCategories(
     graph,
-    topNcategories,
+    categoryPercentage,
     categorySort,
   );
   const sortedGraph = sortGraph(graph, categorySort, categories);
@@ -1351,11 +1351,37 @@ function isHiddenNodeKey(key: NodeKey): boolean {
 
 function groupOtherCategories(
   graph: Graph,
-  topN: number,
+  categoryPercentage: number,
   categorySort: SortMode = 'per-group',
 ): TooltipInfoMap {
   const toolTipInfoMap: TooltipInfoMap = new Map();
   const structuralKeys = new Set<string>(Object.values(SpecialNodeKeys));
+  const computedLayersByNode = getComputedNodeLayers(graph);
+  const layerSums = new Map<string, number>();
+
+  function getPercentageGroup(data: NodeData, layer: VisualLayerIndex): string {
+    return data.type === GraphLayers.Account
+      ? `type:${data.type}`
+      : `layer:${layer}`;
+  }
+
+  graph.forEach((data, key) => {
+    if (isHiddenNodeKey(key)) {
+      return;
+    }
+
+    const layer = computedLayersByNode.get(key);
+    if (layer === undefined) {
+      return;
+    }
+
+    const percentageGroup = getPercentageGroup(data, layer);
+    layerSums.set(
+      percentageGroup,
+      (layerSums.get(percentageGroup) ?? 0) +
+        getNodeValue(graph, key, computedLayersByNode),
+    );
+  });
 
   function isGroupableNode(key: NodeKey): boolean {
     const node = graph.get(key);
@@ -1369,19 +1395,68 @@ function groupOtherCategories(
 
   Object.values(GraphLayers).forEach(layer => {
     let ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
-    let otherNodes = nodesInLayer(graph, layer).filter(s =>
-      s.endsWith(SpecialNodeKeys.OtherSuffix),
-    );
+    const singletonNodes = new Set<NodeKey>();
+    const groupedNodeCounts = new Map<NodeKey, number>();
 
-    while (ordinaryNodes.length + otherNodes.length > topN) {
-      let minValue = Infinity;
+    while (categoryPercentage < 100) {
       let nodeToDelete: NodeKey | undefined;
+      let otherKeyForNode: NodeKey | undefined;
       for (const nodeKey of ordinaryNodes) {
-        const nodeValue = getNodeValue(graph, nodeKey);
-        if (nodeValue < minValue) {
-          minValue = nodeValue;
-          nodeToDelete = nodeKey;
+        if (singletonNodes.has(nodeKey)) {
+          continue;
         }
+
+        const node = graph.get(nodeKey);
+        const layer = computedLayersByNode.get(nodeKey);
+        if (!node || layer === undefined) {
+          continue;
+        }
+
+        const percentageGroup = getPercentageGroup(node, layer);
+        const layerTotal = layerSums.get(percentageGroup) ?? 0;
+        const percentage = layerTotal
+          ? (getNodeValue(graph, nodeKey, computedLayersByNode) / layerTotal) *
+            100
+          : 0;
+        if (percentage >= categoryPercentage) {
+          continue;
+        }
+
+        const otherKey = getOtherKey(graph, nodeKey, categorySort === 'global');
+        const nodesForOther = ordinaryNodes.filter(candidateKey => {
+          if (singletonNodes.has(candidateKey)) {
+            return false;
+          }
+
+          const candidate = graph.get(candidateKey);
+          const candidateLayer = computedLayersByNode.get(candidateKey);
+          if (!candidate || candidateLayer === undefined) {
+            return false;
+          }
+
+          const candidateGroup = getPercentageGroup(candidate, candidateLayer);
+          const candidateTotal = layerSums.get(candidateGroup) ?? 0;
+          const candidatePercentage = candidateTotal
+            ? (getNodeValue(graph, candidateKey, computedLayersByNode) /
+                candidateTotal) *
+              100
+            : 0;
+          return (
+            candidatePercentage < categoryPercentage &&
+            getOtherKey(graph, candidateKey, categorySort === 'global') ===
+              otherKey
+          );
+        });
+
+        const groupedNodeCount = groupedNodeCounts.get(otherKey) ?? 0;
+        if (nodesForOther.length + groupedNodeCount === 1) {
+          singletonNodes.add(nodeKey);
+          continue;
+        }
+
+        nodeToDelete = nodeKey;
+        otherKeyForNode = otherKey;
+        break;
       }
 
       if (nodeToDelete === undefined) break; // safety
@@ -1392,11 +1467,16 @@ function groupOtherCategories(
         toolTipInfoMap,
         categorySort === 'global',
       );
+      const otherKey = otherKeyForNode;
+      if (!otherKey) {
+        break;
+      }
+      groupedNodeCounts.set(
+        otherKey,
+        (groupedNodeCounts.get(otherKey) ?? 0) + 1,
+      );
 
       ordinaryNodes = nodesInLayer(graph, layer).filter(isGroupableNode);
-      otherNodes = nodesInLayer(graph, layer).filter(s =>
-        s.endsWith(SpecialNodeKeys.OtherSuffix),
-      );
     }
   });
 
@@ -1424,27 +1504,7 @@ function moveToOther(
   const toNodes = Array.from(graph.get(key)?.to.keys() ?? []);
   const fromNodes = Array.from(graph).filter(([, data]) => data.to.has(key));
 
-  let otherKey: NodeKey;
-  if (globalOther) {
-    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
-  } else {
-    otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
-
-    if (nodeData.type === GraphLayers.Category) {
-      const categoryGroupResult = getCategoryGroup(graph, key);
-      if (categoryGroupResult) {
-        const categoryGroupKey = categoryGroupResult[0];
-        otherKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
-      }
-    } else if (nodeData.type === GraphLayers.IncomePayee) {
-      const incomeCategoryKey = Array.from(
-        graph.get(key)?.to.keys() ?? [],
-      ).find(k => graph.get(k)?.type === GraphLayers.IncomeCategory);
-      if (incomeCategoryKey) {
-        otherKey = incomeCategoryKey + SpecialNodeKeys.OtherSuffix;
-      }
-    }
-  }
+  const otherKey = getOtherKey(graph, key, globalOther);
 
   // Make sure the Other node exists
   addNode(graph, otherKey, nodeData.type, 'Other');
@@ -1452,8 +1512,8 @@ function moveToOther(
   fromNodes.forEach(([fromKey, fromData]) => {
     const linkValue = fromData.to.get(key);
     if (linkValue !== undefined) {
-      // Avoid creating self-links (otherKey -> otherKey) which produce
-      // immediate cycles and can break recursive layer computation.
+      // Avoid creating self-links (otherKey -> otherKey) which can break
+      // recursive layer computation.
       if (fromKey !== otherKey) {
         addValueToLink(graph, fromKey, otherKey, linkValue);
         newAddTooltipInfo(
@@ -1492,6 +1552,40 @@ function moveToOther(
   });
 
   graph.delete(key);
+}
+
+function getOtherKey(
+  graph: Graph,
+  key: NodeKey,
+  globalOther: boolean,
+): NodeKey {
+  const nodeData = graph.get(key);
+  if (!nodeData) {
+    return `${key}${SpecialNodeKeys.OtherSuffix}`;
+  }
+
+  if (globalOther) {
+    return nodeData.type + SpecialNodeKeys.OtherSuffix;
+  }
+
+  let otherKey = nodeData.type + SpecialNodeKeys.OtherSuffix;
+
+  if (nodeData.type === GraphLayers.Category) {
+    const categoryGroupResult = getCategoryGroup(graph, key);
+    if (categoryGroupResult) {
+      const categoryGroupKey = categoryGroupResult[0];
+      otherKey = categoryGroupKey + SpecialNodeKeys.OtherSuffix;
+    }
+  } else if (nodeData.type === GraphLayers.IncomePayee) {
+    const incomeCategoryKey = Array.from(graph.get(key)?.to.keys() ?? []).find(
+      k => graph.get(k)?.type === GraphLayers.IncomeCategory,
+    );
+    if (incomeCategoryKey) {
+      otherKey = incomeCategoryKey + SpecialNodeKeys.OtherSuffix;
+    }
+  }
+
+  return otherKey;
 }
 
 function newAddTooltipInfo(
