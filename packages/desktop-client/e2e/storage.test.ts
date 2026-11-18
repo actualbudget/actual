@@ -254,7 +254,10 @@ test.describe('Browser storage', () => {
     await expect(report.getByRole('button', { name: 'Close' })).toBeHidden();
     await page.keyboard.press('Escape');
     await expect(report).toBeVisible();
-    await answerHeldBackendRequests(page, { error: 'revert-failed' });
+    // One press asks once: a second request would get the same answer
+    expect(
+      await answerHeldBackendRequests(page, { error: 'revert-failed' }),
+    ).toBe(1);
     // Announced in the report, which only one still there can show
     await expect(report.getByRole('alert')).toHaveText(/Switching back failed/);
 
@@ -669,8 +672,11 @@ async function holdBackendRequests(page: Page, name: string) {
 }
 
 // Answers the requests held so far, once there is one, and lets later
-// ones through again
-async function answerHeldBackendRequests(page: Page, result: unknown) {
+// ones through again. Resolves how many it answered
+async function answerHeldBackendRequests(
+  page: Page,
+  result: unknown,
+): Promise<number> {
   await expect
     .poll(() =>
       page.evaluate(
@@ -678,10 +684,11 @@ async function answerHeldBackendRequests(page: Page, result: unknown) {
       ),
     )
     .toBeGreaterThan(0);
-  await page.evaluate(answer => {
+  return page.evaluate(answer => {
     const gated = window as GatedWindow;
     gated.stopHoldingBackendRequests?.();
-    for (const { backend, id } of gated.heldBackendRequests ?? []) {
+    const held = gated.heldBackendRequests ?? [];
+    for (const { backend, id } of held) {
       backend.dispatchEvent(
         new MessageEvent('message', {
           data: { type: 'reply', id, result: answer },
@@ -689,6 +696,7 @@ async function answerHeldBackendRequests(page: Page, result: unknown) {
       );
     }
     gated.heldBackendRequests = [];
+    return held.length;
   }, result);
 }
 
