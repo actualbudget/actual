@@ -439,3 +439,77 @@ describe('PayeeAutocomplete.getPayeeSuggestions', () => {
     ).toStrictEqual(['Google', 'AAA Google']);
   });
 });
+
+describe('PayeeAutocomplete keyboard selection with transfer payees', () => {
+  const TRANSFER_ID = 'transfer-id';
+
+  beforeEach(() => {
+    vi.mocked(useNearbyPayees).mockReturnValue(mockNearbyPayeesResult([]));
+  });
+
+  // The transfer is highlighted via ArrowDown; Tab/Enter must pick it, not
+  // whichever payee sits at the same index in fzf order.
+  async function pickHighlighted(
+    transferName: string,
+    key: '{Tab}' | '{Enter}',
+  ) {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(payeeQueries.listCommon().queryKey, []);
+    const account = generateAccount('acct', false, false);
+    const onUpdate = vi.fn();
+    const onSelect = vi.fn();
+
+    render(
+      <TestProviders queryClient={queryClient}>
+        <AuthProvider>
+          <PayeeAutocomplete
+            type="single"
+            value={null}
+            embedded={false}
+            payees={[
+              makePayee('Test A'),
+              makePayee('Test B'),
+              {
+                id: TRANSFER_ID,
+                name: transferName,
+                favorite: false,
+                transfer_acct: account.id,
+              },
+            ]}
+            accounts={[account]}
+            onUpdate={onUpdate}
+            onSelect={onSelect}
+          />
+        </AuthProvider>
+      </TestProviders>,
+    );
+
+    const input = screen.getByLabelText('Payee');
+    await userEvent.click(input);
+    await userEvent.type(input, 'Test');
+    await waitForAutocomplete();
+    // Highlight starts on the first payee (after 'Create payee'); the
+    // transfer renders last, two rows down.
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await userEvent.keyboard(key);
+
+    // Tab commits the value last reported through onUpdate; Enter commits
+    // through onSelect (a later call than any onUpdate).
+    const mock = key === '{Tab}' ? onUpdate : onSelect;
+    return mock.mock.calls.at(-1)?.[0];
+  }
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s picks a transfer that fzf ranks above regular payees',
+    async key => {
+      expect(await pickHighlighted('Test', key)).toBe(TRANSFER_ID);
+    },
+  );
+
+  test.each(['{Tab}', '{Enter}'] as const)(
+    '%s picks a transfer that fzf ranks below regular payees',
+    async key => {
+      expect(await pickHighlighted('Test Account', key)).toBe(TRANSFER_ID);
+    },
+  );
+});

@@ -168,6 +168,22 @@ function determineItemType(
   }
 }
 
+// Downshift's highlightedIndex follows PayeeList's grouped render order, and
+// Autocomplete resolves keyboard updates by indexing into the suggestions, so
+// the suggestions must be in that same order (stable sort keeps fzf ranking
+// within each group).
+const RENDER_ORDER: PayeeAutocompleteItem['itemType'][] = [
+  'common_payee',
+  'payee',
+  'account',
+];
+
+function sortByRenderOrder(items: PayeeAutocompleteItem[]) {
+  const rank = (item: PayeeAutocompleteItem) =>
+    item.id === 'new' ? -1 : RENDER_ORDER.indexOf(item.itemType);
+  return [...items].sort((a, b) => rank(a) - rank(b));
+}
+
 function PayeeList({
   items,
   getItemProps,
@@ -538,10 +554,10 @@ export function PayeeAutocomplete({
         !firstFiltered.transfer_acct
       ) {
         // Exact match found, remove the 'Create payee' option.
-        return results.slice(1);
+        return sortByRenderOrder(results.slice(1));
       }
     }
-    return results;
+    return sortByRenderOrder(results);
   };
 
   return (
