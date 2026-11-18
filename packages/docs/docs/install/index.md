@@ -81,6 +81,7 @@ Content contained on external links is not managed or maintained by the Actual B
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)
   - [Adam Millerchip's guide](https://adamu.jp/blog/actual_budget_nas)
 - [UnRAID SSL Setup](https://discord.com/channels/937901803608096828/1158941114603155477) - this guide is found at our Discord
+- [ZopDay](https://zop.dev/zopday/app/deploy?image=actualbudget/actual-server:latest&port=5006&name=actual&utm_source=github&utm_medium=one_click&utm_content=actual) - one-click deploy of the official Docker image to managed ZopCloud, or into your own AWS or GCP account.
 - Arch Linux AUR packages:
   - [actual-bin](https://aur.archlinux.org/packages/actual-bin) - Desktop App, based on GitHub AppImage release but run with a system-wide electron install (v30) instead of the bundled version.
   - [actual-server](https://aur.archlinux.org/packages/actual-server) - Server and Web Client, based on `@actual-app/sync-server` NPM package, provides a systemd unit file to run the server.

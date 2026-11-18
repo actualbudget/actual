@@ -24,6 +24,7 @@ import type {
 } from '@actual-app/core/types/models';
 import {
   act,
+  createEvent,
   fireEvent,
   render,
   renderHook,
@@ -752,6 +753,70 @@ describe('Transactions', () => {
     // When reaching the top it shouldn't error
     // input = await editField(container, 'notes', 0);
     // await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
+  });
+
+  test('tab leaves the table when nothing is being edited', async () => {
+    const { container } = renderTransactions();
+    const table = container.querySelector<HTMLElement>(
+      '[data-testid="table"]',
+    )!;
+    const after = document.createElement('button');
+    document.body.appendChild(after);
+
+    table.focus();
+    const tab = createEvent.keyDown(table, { key: 'Tab' });
+    fireEvent(table, tab);
+    expect(tab.defaultPrevented).toBe(false);
+
+    table.focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(after);
+    expect(container.querySelector('input')).toBe(null);
+
+    table.focus();
+    const shiftTab = createEvent.keyDown(table, { key: 'Tab', shiftKey: true });
+    fireEvent(table, shiftTab);
+    expect(shiftTab.defaultPrevented).toBe(false);
+
+    await userEvent.tab({ shift: true });
+    expect(table.contains(document.activeElement)).toBe(false);
+
+    after.remove();
+  });
+
+  test.each(['[Enter]', '[ArrowDown]'])(
+    '%s on the focused table starts editing the first row',
+    async key => {
+      const { container } = renderTransactions();
+      const table = container.querySelector<HTMLElement>(
+        '[data-testid="table"]',
+      )!;
+
+      table.focus();
+      await userEvent.keyboard(key);
+      expectToBeEditingField(container, 'select', 0);
+
+      await userEvent.keyboard('[Tab]');
+      expectToBeEditingField(container, 'date', 0);
+    },
+  );
+
+  test('escape on a cell button stops editing and focuses the table', async () => {
+    const { container } = renderTransactions();
+    const table = container.querySelector<HTMLElement>(
+      '[data-testid="table"]',
+    )!;
+    const after = document.createElement('button');
+    document.body.appendChild(after);
+
+    await editField(container, 'select', 2);
+    await userEvent.keyboard('[Escape]');
+    expect(document.activeElement).toBe(table);
+
+    await userEvent.tab();
+    expect(document.activeElement).toBe(after);
+
+    after.remove();
   });
 
   test('keybinding escape resets the value', async () => {
