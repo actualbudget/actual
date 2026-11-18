@@ -785,6 +785,56 @@ describe('sankey-spreadsheet', () => {
       );
       expect(input).toEqual(testCase.entries);
     });
+
+    it('nets circular transfers between three accounts', () => {
+      const transferData = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'account-a',
+          accountName: 'Account A',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'account-b',
+          accountName: 'Account B',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'account-b',
+          accountName: 'Account B',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'account-c',
+          accountName: 'Account C',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'account-c',
+          accountName: 'Account C',
+          amount: -100,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'account-a',
+          accountName: 'Account A',
+          amount: 100,
+        },
+      ]);
+      const graph = createTransactionsGraph([], transferData);
+
+      expect(graph).toEqual(new Map());
+    });
   });
 
   describe('aggregateTransferPairs', () => {
@@ -850,6 +900,162 @@ describe('sankey-spreadsheet', () => {
       ]);
 
       expect(transferPairs).toEqual([]);
+    });
+
+    it('cancels an unequal three-account cycle', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: -40,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 40,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'a-account',
+          fromAccountName: 'A Account',
+          toAccountId: 'b-account',
+          toAccountName: 'B Account',
+          amount: 60,
+        },
+        {
+          fromAccountId: 'b-account',
+          fromAccountName: 'B Account',
+          toAccountId: 'c-account',
+          toAccountName: 'C Account',
+          amount: 60,
+        },
+      ]);
+    });
+
+    it('uses lexicographical traversal for overlapping cycles', () => {
+      const transferPairs = aggregateTransferPairs([
+        {
+          id: 'a-to-b',
+          transfer_id: 'b-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: -100,
+        },
+        {
+          id: 'b-to-a',
+          transfer_id: 'a-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-c',
+          transfer_id: 'c-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -100,
+        },
+        {
+          id: 'c-to-b',
+          transfer_id: 'b-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: 100,
+        },
+        {
+          id: 'c-to-a',
+          transfer_id: 'a-to-c',
+          accountId: 'c-account',
+          accountName: 'C Account',
+          amount: -100,
+        },
+        {
+          id: 'a-to-c',
+          transfer_id: 'c-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 100,
+        },
+        {
+          id: 'b-to-d',
+          transfer_id: 'd-to-b',
+          accountId: 'b-account',
+          accountName: 'B Account',
+          amount: -50,
+        },
+        {
+          id: 'd-to-b',
+          transfer_id: 'b-to-d',
+          accountId: 'd-account',
+          accountName: 'D Account',
+          amount: 50,
+        },
+        {
+          id: 'd-to-a',
+          transfer_id: 'a-to-d',
+          accountId: 'd-account',
+          accountName: 'D Account',
+          amount: -50,
+        },
+        {
+          id: 'a-to-d',
+          transfer_id: 'd-to-a',
+          accountId: 'a-account',
+          accountName: 'A Account',
+          amount: 50,
+        },
+      ]);
+
+      expect(transferPairs).toEqual([
+        {
+          fromAccountId: 'b-account',
+          fromAccountName: 'B Account',
+          toAccountId: 'd-account',
+          toAccountName: 'D Account',
+          amount: 50,
+        },
+        {
+          fromAccountId: 'd-account',
+          fromAccountName: 'D Account',
+          toAccountId: 'a-account',
+          toAccountName: 'A Account',
+          amount: 50,
+        },
+      ]);
     });
   });
 
