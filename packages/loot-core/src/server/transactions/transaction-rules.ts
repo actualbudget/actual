@@ -675,10 +675,30 @@ export function conditionsToAQL(
       case 'isbetween': {
         const [low, high] = sortNumbers(value.num1, value.num2);
         if (type === 'number') {
-          // `apply` is what folds in the inflow/outflow sign handling, the
-          // same way `Condition.eval` normalizes the sign before comparing
+          // The sign handling mirrors `Condition.eval`, which only rejects
+          // the opposite sign and so keeps a zero amount inside either an
+          // outflow or an inflow range. Outflows are negated first, so both
+          // bounds read as positive magnitudes.
+          if (options?.outflow) {
+            return {
+              $and: [
+                { amount: { $lte: 0 } },
+                { [field]: { $transform: '$neg', $gte: low } },
+                { [field]: { $transform: '$neg', $lte: high } },
+              ],
+            };
+          }
+          if (options?.inflow) {
+            return {
+              $and: [
+                { amount: { $gte: 0 } },
+                { [field]: { $gte: low } },
+                { [field]: { $lte: high } },
+              ],
+            };
+          }
           return {
-            $and: [apply(field, '$gte', low), apply(field, '$lte', high)],
+            $and: [{ amount: { $gte: low } }, { amount: { $lte: high } }],
           };
         }
         // Dates carry plain `YYYY-MM-DD` bounds, which compare directly

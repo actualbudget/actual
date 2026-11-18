@@ -1,6 +1,7 @@
 import { aqlQuery } from '#server/aql';
 import * as db from '#server/db';
 import { loadMappings } from '#server/db/mappings';
+import { Condition } from '#server/rules';
 // @ts-strict-ignore
 import { q } from '#shared/query';
 import { extractTagsFromText, makeExactTagSetQueryFilter } from '#shared/tags';
@@ -1117,18 +1118,9 @@ describe('Transaction rules', () => {
     expect(outflow).toStrictEqual([
       {
         $and: [
-          {
-            $and: [
-              { amount: { $lt: 0 } },
-              { amount: { $transform: '$neg', $gte: 1000 } },
-            ],
-          },
-          {
-            $and: [
-              { amount: { $lt: 0 } },
-              { amount: { $transform: '$neg', $lte: 5000 } },
-            ],
-          },
+          { amount: { $lte: 0 } },
+          { amount: { $transform: '$neg', $gte: 1000 } },
+          { amount: { $transform: '$neg', $lte: 5000 } },
         ],
       },
     ]);
@@ -1144,8 +1136,9 @@ describe('Transaction rules', () => {
     expect(inflow).toStrictEqual([
       {
         $and: [
-          { $and: [{ amount: { $gt: 0 } }, { amount: { $gte: 1000 } }] },
-          { $and: [{ amount: { $gt: 0 } }, { amount: { $lte: 5000 } }] },
+          { amount: { $gte: 0 } },
+          { amount: { $gte: 1000 } },
+          { amount: { $lte: 5000 } },
         ],
       },
     ]);
@@ -1194,6 +1187,48 @@ describe('Transaction rules', () => {
       },
     ]);
     expect(inflowTransactions.map(t => t.id)).toEqual(['6']);
+  });
+
+  test('a zero amount stays inside a zero-bound inflow or outflow range', async () => {
+    await loadRules();
+    const account = await db.insertAccount({ name: 'bank' });
+    const payeeId = await db.insertPayee({ name: 'payee' });
+
+    for (const [id, amount] of [
+      ['1', 0],
+      ['2', -3000],
+      ['3', 3000],
+    ]) {
+      await db.insertTransaction({
+        id,
+        date: '2020-10-01',
+        account,
+        payee: payeeId,
+        amount,
+      });
+    }
+
+    const value = { num1: 0, num2: 5000 };
+
+    const outflow = await getMatchingTransactions([
+      { field: 'amount', op: 'isbetween', options: { outflow: true }, value },
+    ]);
+    expect(outflow.map(t => t.id).sort()).toEqual(['1', '2']);
+
+    const inflow = await getMatchingTransactions([
+      { field: 'amount', op: 'isbetween', options: { inflow: true }, value },
+    ]);
+    expect(inflow.map(t => t.id).sort()).toEqual(['1', '3']);
+
+    // The query results must agree with the in-memory rule evaluation
+    const outflowCond = new Condition('isbetween', 'amount', value, {
+      outflow: true,
+    });
+    const inflowCond = new Condition('isbetween', 'amount', value, {
+      inflow: true,
+    });
+    expect(outflowCond.eval({ amount: 0 })).toBe(true);
+    expect(inflowCond.eval({ amount: 0 })).toBe(true);
   });
 
   test('and sub expression builds $and condition', async () => {
