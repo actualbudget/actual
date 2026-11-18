@@ -11,6 +11,7 @@ export class MobileAccountPage {
   readonly transactionList: Locator;
   readonly transactions: Locator;
   readonly selectedCount: Locator;
+  readonly loadingMore: Locator;
   readonly createTransactionButton: Locator;
   readonly accountMenuButton: Locator;
   readonly reconcilingBanner: Locator;
@@ -27,6 +28,7 @@ export class MobileAccountPage {
     this.transactionList = page.getByLabel('Transaction list');
     this.transactions = this.transactionList.getByRole('button');
     this.selectedCount = page.getByText(/^\d+ transactions? selected$/);
+    this.loadingMore = page.getByLabel('Loading more transactions...');
     this.createTransactionButton = page.getByRole('button', {
       name: 'Add Transaction',
     });
@@ -69,11 +71,27 @@ export class MobileAccountPage {
    */
   async longPressTransaction(transaction: Locator) {
     // Hold until the selection shows instead of for a fixed time, so a slow
-    // run can't release it before the long press registers.
-    await transaction.hover();
-    await this.page.mouse.down();
-    await this.selectedCount.waitFor();
-    await this.page.mouse.up();
+    // run can't release it before the long press registers. A list that is
+    // still settling can cancel the press, so release and press again.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await transaction.hover();
+      await this.page.mouse.down();
+      const selected = await this.selectedCount.waitFor({ timeout: 2000 }).then(
+        () => true,
+        () => false,
+      );
+      if (!selected) {
+        // Release away from the row, so a press that is still live can't
+        // count as a tap and open the transaction.
+        await this.page.mouse.move(0, 0);
+      }
+      await this.page.mouse.up();
+      // A selection that lands just after the wait must not be pressed again.
+      if (selected || (await this.selectedCount.isVisible())) {
+        return;
+      }
+    }
+    throw new Error('The long press never selected the transaction.');
   }
 
   /**
@@ -81,18 +99,20 @@ export class MobileAccountPage {
    */
   async scrollToEndOfList() {
     // More transactions load as the list nears its end, so keep scrolling
-    // until a scroll no longer makes it grow.
+    // until a finished load no longer makes it grow.
     let previousHeight = -1;
     for (let attempt = 0; attempt < 20; attempt++) {
-      const height = await this.transactionList.evaluate(el => {
+      await this.transactionList.evaluate(el => {
         el.scrollTop = el.scrollHeight;
-        return el.scrollHeight;
       });
+      // Give the scroll a moment to start a load, then let it finish.
+      await this.page.waitForTimeout(500);
+      await this.loadingMore.waitFor({ state: 'hidden' });
+      const height = await this.transactionList.evaluate(el => el.scrollHeight);
       if (height === previousHeight) {
         return;
       }
       previousHeight = height;
-      await this.page.waitForTimeout(500);
     }
     throw new Error('The transaction list kept growing.');
   }
