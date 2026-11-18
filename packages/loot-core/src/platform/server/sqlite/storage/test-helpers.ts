@@ -90,19 +90,23 @@ export function holdLegacyConnection(
 // writes: the file change counter in the header moves
 export async function writeToLegacyDatabase(name: string): Promise<void> {
   const database = await holdLegacyConnection(name);
-  await new Promise<void>((resolve, reject) => {
-    const transaction = database.transaction('data', 'readwrite');
-    const store = transaction.objectStore('data');
-    const request = store.get(0);
-    request.onsuccess = () => {
-      const block = new Uint8Array(request.result as ArrayBuffer);
-      block[27] += 1;
-      store.put(block.buffer, 0);
-    };
-    transaction.oncomplete = () => resolve();
-    transaction.onerror = () => reject(transaction.error);
-  });
-  database.close();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction('data', 'readwrite');
+      const store = transaction.objectStore('data');
+      const request = store.get(0);
+      request.onsuccess = () => {
+        const block = new Uint8Array(request.result as ArrayBuffer);
+        block[27] += 1;
+        store.put(block.buffer, 0);
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
+    });
+  } finally {
+    database.close();
+  }
 }
 
 export async function listIndexedDbNames(): Promise<string[]> {

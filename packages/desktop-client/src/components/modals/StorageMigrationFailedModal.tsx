@@ -25,9 +25,10 @@ type StorageMigrationFailedModalProps = Extract<
 /**
  * Shown when a budget could not be moved from the previous browser storage
  * to the new one. Nothing was lost, and opening the budget again tries
- * again. While nothing in the browser has been moved yet there is also a
- * way out that needs no open budget: back to the previous storage engine,
- * which opens the budget as before.
+ * again. While no other budget in the browser is on the new storage there
+ * is also a way out that needs no open budget: back to the previous storage
+ * engine, which opens the budget as before. The report cannot be dismissed
+ * while that is under way, as it is where a failure to go back is shown.
  */
 export function StorageMigrationFailedModal({
   budgetId,
@@ -55,12 +56,18 @@ export function StorageMigrationFailedModal({
   }
 
   return (
-    <Modal name="storage-migration-failed">
+    <Modal
+      name="storage-migration-failed"
+      isDismissable={!isGoingBack}
+      isKeyboardDismissDisabled={isGoingBack}
+    >
       {({ state }) => (
         <>
           <ModalHeader
             title={t('Budget could not be moved')}
-            rightContent={<ModalCloseButton onPress={() => state.close()} />}
+            rightContent={
+              !isGoingBack && <ModalCloseButton onPress={() => state.close()} />
+            }
           />
           <View style={{ lineHeight: 1.5, maxWidth: 500 }}>
             <Paragraph>{message}</Paragraph>

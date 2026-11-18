@@ -279,9 +279,12 @@ export function createOpfsStore({
       onMigrationProgress?.('verify');
       // Before any connection touches the file, so it is as imported. The
       // import itself sets the two file-format bytes of the header to 1,
-      // which takes a file out of WAL mode, so those are held to be the
-      // copy's; all else is compared
+      // which takes a file out of WAL mode: those have to be that, and
+      // are then held to be the copy's, so that all else is compared
       const imported = pool.util.exportFile(fileName);
+      if (imported[18] !== 1 || imported[19] !== 1) {
+        throw new Error('the moved file has an unexpected file format');
+      }
       imported.set(contents.snapshot.header.subarray(18, 20), 18);
       if (!(await matchesLegacyDatabase(path, imported, contents.snapshot))) {
         throw new Error('the moved file differs from the absurd-sql copy');

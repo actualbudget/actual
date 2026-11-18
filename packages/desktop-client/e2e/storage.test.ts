@@ -242,11 +242,21 @@ test.describe('Browser storage', () => {
     ).toBeVisible();
     expectStorageLayout(await inspectStorage(page), 'legacy');
 
-    // Back on the previous engine the budget opens as it did before
+    // While going back is under way the report cannot be dismissed: it is
+    // where a failure to would be shown
     const reloaded = page.waitForEvent('load', { timeout: 60_000 });
+    const busy = keepBackendBusy(page, 3000);
     await report
       .getByRole('button', { name: 'Go back to previous storage' })
       .click();
+    await page.keyboard.press('Escape');
+    // Long enough for a report that was dismissed to have gone
+    await page.waitForTimeout(500);
+    await expect(report).toBeVisible();
+    await expect(report.getByRole('button', { name: 'Close' })).toBeHidden();
+    await busy;
+
+    // Back on the previous engine the budget opens as it did before
     await reloaded;
     await expect(page.getByTestId('budget-table')).toBeVisible({
       timeout: 60_000,
@@ -526,25 +536,41 @@ async function rewriteLegacyFirstBlocks(
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });
-      await new Promise<void>((resolve, reject) => {
-        const transaction = database.transaction(['data'], 'readwrite');
-        const store = transaction.objectStore('data');
-        if (requestedChange === 'blank') {
-          store.put(new ArrayBuffer(4096), 0);
-        } else {
-          const read = store.get(0);
-          read.onsuccess = () => {
-            const block = new Uint8Array(read.result as ArrayBuffer);
-            block.set([2, 2], 18);
-            store.put(block.buffer, 0);
-          };
-        }
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-      });
-      database.close();
+      try {
+        await new Promise<void>((resolve, reject) => {
+          const transaction = database.transaction(['data'], 'readwrite');
+          const store = transaction.objectStore('data');
+          if (requestedChange === 'blank') {
+            store.put(new ArrayBuffer(4096), 0);
+          } else {
+            const read = store.get(0);
+            read.onsuccess = () => {
+              const block = new Uint8Array(read.result as ArrayBuffer);
+              block.set([2, 2], 18);
+              store.put(block.buffer, 0);
+            };
+          }
+          transaction.oncomplete = () => resolve();
+          transaction.onerror = () => reject(transaction.error);
+          transaction.onabort = () => reject(transaction.error);
+        });
+      } finally {
+        database.close();
+      }
     }
   }, change);
+}
+
+// Keeps the backend from answering for a while, so that whatever it is
+// asked meanwhile stays under way
+function keepBackendBusy(page: Page, milliseconds: number) {
+  const [backend] = page.workers();
+  return backend.evaluate(duration => {
+    const end = Date.now() + duration;
+    while (Date.now() < end) {
+      // Spinning, as a waiting worker would still take messages
+    }
+  }, milliseconds);
 }
 
 // What a tab hears when another one stores a different engine

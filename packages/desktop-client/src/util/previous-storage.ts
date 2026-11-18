@@ -27,5 +27,5 @@ export function describePreviousStorageError(
 ): string {
   return error === 'budget-in-use'
     ? t('Close Actual in your other tabs first, then try again.')
-    : t('Switching back failed. Your budgets stay on the new storage engine.');
+    : t('Switching back failed. Actual is still using the new storage engine.');
 }

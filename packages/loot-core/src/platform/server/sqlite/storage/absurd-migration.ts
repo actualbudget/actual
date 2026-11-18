@@ -127,15 +127,12 @@ function evictLegacyConnections(
   });
 }
 
-// Resolves null when no absurd-sql database exists under this name. Given
-// the snapshot a copy was taken from, rejects as a budget in use when the
-// store no longer matches it.
+// Resolves null when no absurd-sql database exists under this name
 async function openLegacyDatabase(
   name: string,
   path: string,
-  snapshot?: LegacySnapshot,
 ): Promise<IDBDatabase | null> {
-  if (!(await evictLegacyConnections(name, path, snapshot))) {
+  if (!(await evictLegacyConnections(name, path))) {
     return null;
   }
   return new Promise((resolve, reject) => {
@@ -412,31 +409,54 @@ export async function readLegacyDatabaseBytes(
   return bytes;
 }
 
+// Whether the store still holds what a snapshot was taken from, with the
+// header and the size read in one transaction
+async function holdsSnapshot(
+  database: IDBDatabase,
+  snapshot: LegacySnapshot,
+): Promise<boolean> {
+  const store = database
+    .transaction([LEGACY_STORE], 'readonly')
+    .objectStore(LEGACY_STORE);
+  const [firstBlock, meta] = await Promise.all([
+    requestToPromise<ArrayBuffer | undefined>(store.get(0)),
+    requestToPromise<LegacyMeta | undefined>(store.get(-1)),
+  ]);
+  return matchesSnapshot(snapshot, firstBlock, meta);
+}
+
 // Whether a file holds exactly what the absurd-sql copy of its path does
 // now, byte for byte. The copy is read a second time for this. Both stores
 // ask it of what they moved before the copy is dropped: the structural
 // check alone would pass a file whose contents went wrong on the way. A
-// copy written to since the snapshot it was moved at is not a move gone
-// wrong but a budget in use, and rejects as one before it is compared.
+// difference is told apart by the snapshot the file was moved at: a copy
+// that no longer holds it was written to meanwhile, whenever that landed,
+// which is not a move gone wrong but a budget in use, and rejects as one.
+// Only a file that differs from an unchanged copy resolves false.
 export async function matchesLegacyDatabase(
   path: string,
   bytes: Uint8Array,
   snapshot: LegacySnapshot,
 ): Promise<boolean> {
-  const database = await openLegacyDatabase(
-    legacyDatabaseName(path),
-    path,
-    snapshot,
-  );
+  const database = await openLegacyDatabase(legacyDatabaseName(path), path);
   if (database == null) {
     return false;
   }
   try {
     const meta = await readLegacyKey<LegacyMeta | undefined>(database, -1);
-    return (
+    if (
       typeof meta?.size === 'number' &&
       (await blocksMatch(database, meta.size, bytes))
-    );
+    ) {
+      return true;
+    }
+    if (!(await holdsSnapshot(database, snapshot))) {
+      throw new BudgetInUseError(
+        path,
+        'the absurd-sql copy changed during the move',
+      );
+    }
+    return false;
   } finally {
     database.close();
   }

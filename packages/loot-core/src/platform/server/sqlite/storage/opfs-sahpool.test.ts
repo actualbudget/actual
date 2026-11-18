@@ -826,40 +826,54 @@ describe('OPFS pool store', () => {
     });
   });
 
-  it('keeps the absurd-sql copy when the moved file differs from it', async () => {
-    const name = legacyDatabaseName(PATH);
-    await seedLegacyDatabase(name, await budgetBytes('legacy'));
-    const pool = fakePool();
-    // What landed in the pool is one byte off, in a place the structural
-    // check would not look
-    pool.exportFile.mockImplementationOnce((fileName: string) => {
-      const stored = pool.files.get(fileName) as Uint8Array;
-      const altered = stored.slice();
-      altered[altered.length - 1] ^= 0xff;
-      return altered;
-    });
-    const phases: string[] = [];
-    const store = createOpfsStore({
-      sqlite3: () => fakeSqlite3(pool),
-      acquireLock: trackingLock().acquire,
-      sleep: noSleep,
-      onMigrationProgress: phase => phases.push(phase),
-    });
+  it.each([
+    [
+      'in a place the structural check would not look',
+      (moved: Uint8Array) => {
+        moved[moved.length - 1] ^= 0xff;
+      },
+    ],
+    [
+      'in the file-format bytes the pool writes itself',
+      (moved: Uint8Array) => {
+        moved[18] = 3;
+      },
+    ],
+  ])(
+    'keeps the absurd-sql copy when the moved file is off %s',
+    async (_where, alter) => {
+      const name = legacyDatabaseName(PATH);
+      await seedLegacyDatabase(name, await budgetBytes('legacy'));
+      const pool = fakePool();
+      // What landed in the pool is one byte off
+      pool.exportFile.mockImplementationOnce((fileName: string) => {
+        const altered = (pool.files.get(fileName) as Uint8Array).slice();
+        alter(altered);
+        return altered;
+      });
+      const phases: string[] = [];
+      const store = createOpfsStore({
+        sqlite3: () => fakeSqlite3(pool),
+        acquireLock: trackingLock().acquire,
+        sleep: noSleep,
+        onMigrationProgress: phase => phases.push(phase),
+      });
 
-    await expect(store.open(PATH)).rejects.toBeInstanceOf(
-      StorageMigrationError,
-    );
-    // The move is undone and the copy is still the budget
-    expect(phases).toContain('failed');
-    expect(pool.files.size).toBe(0);
-    expect(await listIndexedDbNames()).toContain(name);
-    expect(await getSqliteFileRow(PATH)).toBeUndefined();
+      await expect(store.open(PATH)).rejects.toBeInstanceOf(
+        StorageMigrationError,
+      );
+      // The move is undone and the copy is still the budget
+      expect(phases).toContain('failed');
+      expect(pool.files.size).toBe(0);
+      expect(await listIndexedDbNames()).toContain(name);
+      expect(await getSqliteFileRow(PATH)).toBeUndefined();
 
-    // The next open moves it
-    await store.open(PATH);
-    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
-    expect(await listIndexedDbNames()).not.toContain(name);
-  });
+      // The next open moves it
+      await store.open(PATH);
+      expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+      expect(await listIndexedDbNames()).not.toContain(name);
+    },
+  );
 
   it('imports an absurd-sql database into the pool and verifies it', async () => {
     const bytes = await budgetBytes('legacy');

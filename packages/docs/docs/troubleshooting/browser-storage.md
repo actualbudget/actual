@@ -22,7 +22,7 @@ The choice is remembered by the browser, not by the budget. It covers every budg
 
 Each budget is moved to the new storage the first time it is opened. The loading screen shows the progress. The old copy is deleted only after the moved budget has been checked against it, byte for byte.
 
-If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no budget in the browser has been moved yet, the message also offers **Go back to previous storage**, which opens the budget as before and turns the new storage engine off again.
+If a budget cannot be moved, nothing is deleted and Actual tells you so. Opening the budget again tries once more. While no other budget in the browser uses the new storage yet, the message also offers **Go back to previous storage**, which opens the budget as before and turns the new storage engine off again.
 
 Opening Actual once with `?storage=opfs` added to the address, for example `https://your-server.example/?storage=opfs`, turns it on as well. You do not need the parameter again.
 
