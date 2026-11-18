@@ -30,7 +30,7 @@ type StorageMigrationFailedModalProps = Extract<
  * engine, which opens the budget as before. The report cannot be dismissed
  * while that is under way, as it is where a failure to go back is shown.
  * Where it could not be found out whether going back is possible, the
- * report says nothing about it.
+ * report says so and offers neither.
  */
 export function StorageMigrationFailedModal({
   budgetId,
@@ -80,25 +80,28 @@ export function StorageMigrationFailedModal({
           />
           <View style={{ lineHeight: 1.5, maxWidth: 500 }}>
             <Paragraph>{message}</Paragraph>
-            {canGoBack != null && (
-              <Paragraph>
-                {canGoBack ? (
-                  <Trans>
-                    If it keeps failing, you can go back to the previous
-                    storage. That opens this budget as before and turns the new
-                    storage engine off again. You can turn it back on under
-                    Settings → Experimental.
-                  </Trans>
-                ) : (
-                  <Trans>
-                    Other budgets in this browser already use the new storage.
-                    To go back to the previous storage for all of them, open one
-                    of those budgets and turn the new storage engine off under
-                    Settings → Experimental.
-                  </Trans>
-                )}
-              </Paragraph>
-            )}
+            <Paragraph>
+              {canGoBack == null ? (
+                <Trans>
+                  Actual could not check whether going back to the previous
+                  storage is possible. Open the budget again to check once more.
+                </Trans>
+              ) : canGoBack ? (
+                <Trans>
+                  If it keeps failing, you can go back to the previous storage.
+                  That opens this budget as before and turns the new storage
+                  engine off again. You can turn it back on under Settings →
+                  Experimental.
+                </Trans>
+              ) : (
+                <Trans>
+                  Other budgets in this browser already use the new storage. To
+                  go back to the previous storage for all of them, open one of
+                  those budgets and turn the new storage engine off under
+                  Settings → Experimental.
+                </Trans>
+              )}
+            </Paragraph>
             {goingBackError && (
               <Paragraph role="alert" style={{ color: theme.errorText }}>
                 {describePreviousStorageError(goingBackError)}

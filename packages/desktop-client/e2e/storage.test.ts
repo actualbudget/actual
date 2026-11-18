@@ -253,8 +253,9 @@ test.describe('Browser storage', () => {
     await expect(goBack).toBeDisabled();
     await expect(report.getByRole('button', { name: 'Close' })).toBeHidden();
     await page.keyboard.press('Escape');
+    await expect(report).toBeVisible();
     await answerHeldBackendRequests(page, { error: 'revert-failed' });
-    // Announced in the report that Escape did not dismiss
+    // Announced in the report, which only one still there can show
     await expect(report.getByRole('alert')).toHaveText(/Switching back failed/);
 
     // Back on the previous engine the budget opens as it did before, even
@@ -386,7 +387,7 @@ test.describe('Browser storage', () => {
     ).toBe(requestedBackend);
   });
 
-  test('says nothing about going back when it cannot tell', async ({
+  test('says so when it cannot tell whether going back is possible', async ({
     browser,
   }) => {
     test.skip(!usesNewStorage, 'only meaningful for the new storage');
@@ -401,6 +402,7 @@ test.describe('Browser storage', () => {
       timeout: 60_000,
     });
     // Neither the way back nor a claim that other budgets have moved
+    await expect(report.getByText('could not check')).toBeVisible();
     await expect(
       report.getByRole('button', { name: 'Go back to previous storage' }),
     ).toBeHidden();

@@ -544,6 +544,28 @@ describe('OPFS pool store', () => {
     expect(await listIndexedDbNames()).not.toContain(name);
   });
 
+  it('moves a closed file in once when two reads of it overlap', async () => {
+    const name = legacyDatabaseName(PATH);
+    await seedLegacyDatabase(name, await budgetBytes('shared'));
+    const pool = fakePool();
+    const store = createOpfsStore({
+      sqlite3: () => fakeSqlite3(pool),
+      acquireLock: trackingLock().acquire,
+      sleep: noSleep,
+    });
+
+    const [first, second] = await Promise.all([
+      store.readFile(PATH),
+      store.readFile(PATH),
+    ]);
+    expect(pool.importDb).toHaveBeenCalledTimes(1);
+    const pooled = pool.files.get('/db.sqlite') as Uint8Array;
+    expect(Buffer.from(first).equals(Buffer.from(pooled))).toBe(true);
+    expect(Buffer.from(second).equals(Buffer.from(pooled))).toBe(true);
+    expect((await getSqliteFileRow(PATH))?.storage).toBe('opfs');
+    expect(await listIndexedDbNames()).not.toContain(name);
+  });
+
   it('waits for an open in flight before removing its file', async () => {
     await seedLegacyDatabase(
       legacyDatabaseName(PATH),
