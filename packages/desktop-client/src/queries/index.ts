@@ -151,3 +151,15 @@ export function uncategorizedTransactions() {
     ],
   });
 }
+
+export function accountBalanceQuery(
+  accountId: Parameters<typeof transactions>[0],
+) {
+  let query = transactions(accountId);
+
+  if (accountId === undefined) {
+    query = query.filter({ 'account.closed': false });
+  }
+
+  return query.calculate({ $sum: '$amount' });
+}
