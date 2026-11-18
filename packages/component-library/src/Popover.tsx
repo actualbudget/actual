@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import type { ComponentProps } from 'react';
-import { Popover as ReactAriaPopover } from 'react-aria-components';
+import {
+  OverlayTriggerStateContext,
+  Popover as ReactAriaPopover,
+} from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
@@ -43,13 +46,15 @@ export const Popover = ({
 }: PopoverProps) => {
   const ref = useRef<HTMLElement>(null);
 
+  // When the popover is driven by a DialogTrigger, `isOpen` isn't passed in,
+  // so fall back to the trigger's own open state.
+  const triggerState = useContext(OverlayTriggerStateContext);
+  const isOpen = props.isOpen ?? triggerState?.isOpen ?? false;
+
   // Re-measure whenever the popover opens, so device rotation is picked up.
-  // `isOpen` is undefined when the popover is driven by a DialogTrigger.
   const containerPadding = useMemo(
-    () =>
-      DEFAULT_CONTAINER_PADDING +
-      (props.isOpen === false ? 0 : getSafeAreaInset()),
-    [props.isOpen],
+    () => DEFAULT_CONTAINER_PADDING + (isOpen ? getSafeAreaInset() : 0),
+    [isOpen],
   );
 
   const handleFocus = useCallback(
