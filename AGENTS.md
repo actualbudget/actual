@@ -585,7 +585,7 @@ All storage is **SQLite** (file-based via `better-sqlite3`). No external databas
 
 - `yarn start` builds the plugins-service worker, loot-core browser backend, and starts the Vite dev server on port **3001**.
 - `yarn start:server-dev` starts both the sync server (port 5006) and the web frontend together.
-- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` with proper COOP/COEP headers (`Cross-Origin-Opener-Policy: same-origin`, `Cross-Origin-Embedder-Policy: require-corp`).
+- The Vite HMR dev server serves many unbundled modules. In constrained environments, the browser may hit `ERR_INSUFFICIENT_RESOURCES`. If that happens, use `yarn build:browser` followed by serving the built output from `packages/desktop-client/build/` (for example with `node packages/desktop-client/bin/serve-build.mjs`).
 
 ### Lint, test, typecheck
 

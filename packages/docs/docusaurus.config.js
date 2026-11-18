@@ -190,6 +190,10 @@ module.exports = {
             from: '/docs/actual-server-repo-move',
             to: '/docs/install/',
           },
+          {
+            from: '/docs/troubleshooting/shared-array-buffer',
+            to: '/docs/troubleshooting/browser-storage',
+          },
         ],
       },
     ],

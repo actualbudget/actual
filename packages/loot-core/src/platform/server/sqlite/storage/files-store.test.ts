@@ -1,11 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  hasMigratedSqliteFiles,
-  listSqliteFileRows,
-  putSqliteFileRow,
-} from './files-store';
+import { hasMigratedSqliteFiles, putSqliteFileRow } from './files-store';
 import { resetIndexedDb } from './test-helpers';
 
 beforeEach(() => resetIndexedDb());
@@ -16,7 +12,6 @@ describe('sqlite file rows', () => {
       filepath: '/documents/a/db.sqlite',
       contents: '',
     });
-    expect(await listSqliteFileRows()).toEqual([]);
     expect(await hasMigratedSqliteFiles()).toBe(false);
   });
 
@@ -43,8 +38,5 @@ describe('sqlite file rows', () => {
     });
     expect(await hasMigratedSqliteFiles()).toBe(true);
     expect(await hasMigratedSqliteFiles('opfs')).toBe(true);
-    expect(
-      (await listSqliteFileRows()).map(row => row.filepath).sort(),
-    ).toEqual(['/documents/a/db.sqlite', '/documents/b/db.sqlite']);
   });
 });

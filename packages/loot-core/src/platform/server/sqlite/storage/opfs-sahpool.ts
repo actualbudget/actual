@@ -10,7 +10,6 @@ import {
   deleteLegacyDatabase,
   openLegacyDatabaseContents,
   verifyMigratedDatabase,
-  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import {
   BudgetInUseError,
@@ -533,7 +532,7 @@ export function createOpfsStore({
         // The rows go first, while the budgets are held: a waiting worker
         // could otherwise write a replacement whose marker this would
         // delete, and a worker killed from here on leaves at worst a file
-        // nothing names, never a marker for a file that is gone.
+        // nothing names, never a marker for a file that is gone
         for (const path of paths) {
           await deleteSqliteFileRow(path);
         }
@@ -564,58 +563,6 @@ export function createOpfsStore({
       // on another connection, so not under the locks
       for (const path of paths) {
         await deleteLegacyDatabase(legacyDatabaseName(path));
-      }
-    },
-
-    async revertFile(path) {
-      const { dirId, fileName } = splitSqlitePath(path);
-      await opening.get(path)?.catch(() => undefined);
-      await replacing.get(path)?.catch(() => undefined);
-      const pool = await acquire(dirId, path);
-      try {
-        if (pool.open.has(fileName)) {
-          throw new Error(`cannot revert an open database: ${path}`);
-        }
-        const row = await getSqliteFileRow(path);
-        // Another worker moved it back while this one waited for the pool,
-        // or it is gone: the legacy marker is not this store's to touch
-        if (row?.storage == null) {
-          return;
-        }
-        const pooled = pool.util.getFileNames().includes(fileName);
-        if (row.storage === 'opfs' && !pooled) {
-          throw new StorageLostError(path);
-        }
-        // The fallback's whole-file row is what the app last used, so as on
-        // open it wins over a pooled file an interrupted promotion left; an
-        // empty one was recorded but never saved
-        const stored = row.contents;
-        const fallbackBytes =
-          ArrayBuffer.isView(stored) && stored.byteLength > 0
-            ? new Uint8Array(
-                stored.buffer,
-                stored.byteOffset,
-                stored.byteLength,
-              )
-            : null;
-        const bytes =
-          fallbackBytes ?? (pooled ? exportPooled(pool, fileName) : null);
-        if (bytes == null) {
-          await deleteSqliteFileRow(path);
-          return;
-        }
-        await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
-        // The marker goes before the file, as in a removal
-        await putSqliteFileRow({ filepath: path, contents: '' });
-        if (pooled) {
-          unlinkJournal(pool, fileName);
-          pool.util.unlink(fileName);
-          if (pool.util.getFileCount() === 0) {
-            await pool.util.wipeFiles();
-          }
-        }
-      } finally {
-        release(pool);
       }
     },
 

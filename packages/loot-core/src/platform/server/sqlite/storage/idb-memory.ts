@@ -14,7 +14,6 @@ import {
   legacySnapshot,
   readLegacyDatabaseBytes,
   verifyMigratedDatabase,
-  writeLegacyDatabaseBytes,
 } from './absurd-migration';
 import {
   BudgetInUseError,
@@ -477,39 +476,6 @@ export function createMemoryIdbStore({
       }
       for (const path of paths) {
         await deleteLegacyDatabase(legacyDatabaseName(path));
-      }
-    },
-
-    // Bytes a failed save left in memory count as the file's, as in a read
-    async revertFile(path) {
-      await opening.get(path)?.catch(() => undefined);
-      await pendingWrites.get(path);
-      if (entries.has(path)) {
-        throw new Error(`cannot revert an open database: ${path}`);
-      }
-      const releaseLock = await lockBudget(path);
-      try {
-        const row = await getSqliteFileRow(path);
-        // Another worker moved it back while this one waited for the lock,
-        // or it is gone: the legacy marker is not this store's to touch
-        if (row?.storage == null) {
-          return;
-        }
-        assertNotInOpfs(path, row);
-        const stranded = currentStranded(path, row);
-        const bytes =
-          stranded?.bytes ??
-          (isByteContents(row.contents) ? row.contents : null);
-        if (bytes == null) {
-          // Recorded but never saved: nothing to copy, the row just goes
-          await deleteSqliteFileRow(path);
-          return;
-        }
-        await writeLegacyDatabaseBytes(legacyDatabaseName(path), bytes);
-        await putSqliteFileRow({ filepath: path, contents: '' });
-        unsaved.delete(path);
-      } finally {
-        releaseLock();
       }
     },
 

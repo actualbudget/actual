@@ -16,12 +16,7 @@
     "packages/api": {
       "entry": ["index.browser.ts", "browser-worker.ts", "e2e/**/*.{ts,mjs}"],
       "ignore": ["typings.ts"],
-      "ignoreDependencies": [
-        "@actual-app/crdt",
-        "better-sqlite3",
-        "uuid",
-        "@jlongster/sql.js"
-      ]
+      "ignoreDependencies": ["@actual-app/crdt", "better-sqlite3", "uuid"]
     },
     "packages/ci-actions": {
       "entry": ["bin/*.ts"],

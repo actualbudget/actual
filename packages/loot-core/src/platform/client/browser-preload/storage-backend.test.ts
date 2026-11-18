@@ -14,9 +14,9 @@ afterEach(() => {
 });
 
 describe('storage backend flag', () => {
-  it('defaults to the legacy engine', () => {
-    expect(getStoredStorageBackend()).toBe('legacy');
-    expect(resolveStorageBackend()).toBe('legacy');
+  it('defaults to the sqlite-wasm engine on OPFS', () => {
+    expect(getStoredStorageBackend()).toBe('opfs');
+    expect(resolveStorageBackend()).toBe('opfs');
   });
 
   it('stores and reads the chosen backend', () => {
@@ -27,7 +27,15 @@ describe('storage backend flag', () => {
 
   it('ignores values that are not a backend', () => {
     localStorage.setItem(STORAGE_BACKEND_KEY, 'floppy');
-    expect(getStoredStorageBackend()).toBe('legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
+  });
+
+  it('treats a stale choice of the removed engine as the default', () => {
+    localStorage.setItem(STORAGE_BACKEND_KEY, 'legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
+    window.history.replaceState(null, '', '/?storage=legacy');
+    expect(resolveStorageBackend()).toBe('opfs');
+    expect(window.location.search).toBe('');
   });
 
   it('takes a one-shot URL parameter, stores it and strips it', () => {
@@ -44,11 +52,11 @@ describe('storage backend flag', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('full', 'QuotaExceededError');
     });
-    window.history.replaceState(null, '', '/?storage=opfs');
-    expect(resolveStorageBackend()).toBe('opfs');
+    window.history.replaceState(null, '', '/?storage=memory-idb');
+    expect(resolveStorageBackend()).toBe('memory-idb');
     expect(window.location.search).toBe('');
     // Nothing was stored, so the next load is back on the default
-    expect(resolveStorageBackend()).toBe('legacy');
+    expect(resolveStorageBackend()).toBe('opfs');
   });
 
   it('drops an unknown URL parameter without changing the stored choice', () => {
@@ -62,6 +70,6 @@ describe('storage backend flag', () => {
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('denied');
     });
-    expect(getStoredStorageBackend()).toBe('legacy');
+    expect(getStoredStorageBackend()).toBe('opfs');
   });
 });
