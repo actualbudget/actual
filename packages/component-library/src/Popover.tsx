@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import type { ComponentProps } from 'react';
 import {
   OverlayTriggerStateContext,
@@ -53,11 +60,23 @@ export const Popover = ({
   const isOpen =
     props.isOpen ?? triggerState?.isOpen ?? props.defaultOpen ?? false;
 
-  // Re-measure whenever the popover opens, so device rotation is picked up.
-  const containerPadding = useMemo(
-    () => DEFAULT_CONTAINER_PADDING + (isOpen ? getSafeAreaInset() : 0),
-    [isOpen],
-  );
+  // Measure the inset when the popover opens and keep it current while it
+  // stays open (e.g. the device rotates), so react-aria repositions it with
+  // the up-to-date value. An explicit `containerPadding` prop still wins
+  // because `props` is spread after it below.
+  const [safeAreaInset, setSafeAreaInset] = useState(0);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const update = () => setSafeAreaInset(getSafeAreaInset());
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [isOpen]);
+
+  const containerPadding = DEFAULT_CONTAINER_PADDING + safeAreaInset;
 
   const handleFocus = useCallback(
     (e: FocusEvent) => {
