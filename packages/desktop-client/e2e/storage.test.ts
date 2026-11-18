@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
 import {
   addE2EInitScripts,
@@ -243,17 +243,17 @@ test.describe('Browser storage', () => {
     expectStorageLayout(await inspectStorage(page), 'legacy');
 
     // While going back is under way the report cannot be dismissed: it is
-    // where a failure to would be shown. The first request is kept from
-    // the backend, so it stays under way until the test answers it
+    // where a failure to would be shown. The request is kept from the
+    // backend, so it stays under way until the test answers it
     const goBack = report.getByRole('button', {
       name: 'Go back to previous storage',
     });
-    await holdNextBackendRequest(page, 'storage-revert');
+    await holdBackendRequests(page, 'storage-revert');
     await goBack.click();
     await expect(goBack).toBeDisabled();
     await expect(report.getByRole('button', { name: 'Close' })).toBeHidden();
     await page.keyboard.press('Escape');
-    await answerHeldBackendRequest(page, { error: 'revert-failed' });
+    await answerHeldBackendRequests(page, { error: 'revert-failed' });
     // Announced in the report that Escape did not dismiss
     await expect(report.getByRole('alert')).toHaveText(/Switching back failed/);
 
@@ -429,11 +429,20 @@ test.describe('Browser storage', () => {
     await page.goto('/data-file-index.txt');
     await rewriteLegacyFirstBlocks(page, 'blank');
 
-    // The budget is reopened at once, cannot be moved, and the app then
-    // goes to its list of files: the report has to outlast that
+    // The budget is reopened at once and cannot be moved. The report is
+    // shown without waiting for the server's list of files, which a slow
+    // server keeps the app loading on, and which is held here
+    await page.addInitScript(holdRequests, 'get-remote-files');
     await page.goto('/accounts');
     const report = failedMoveReport(page);
     await expect(report).toBeVisible({ timeout: 60_000 });
+    await expect
+      .poll(() => isShownToTheUser(report.getByText('Nothing was deleted')))
+      .toBe(true);
+
+    // The app then goes to its list of files, which waits for that list
+    // too: the report has to outlast that
+    await answerHeldBackendRequests(page, null);
     await expect(
       page.getByRole('grid', { name: 'Budget files' }).getByText('Test Budget'),
     ).toBeVisible();
@@ -624,45 +633,79 @@ async function rewriteLegacyFirstBlocks(
 
 type HeldRequest = { backend: Worker; id: string };
 type GatedWindow = Window & {
-  heldBackendRequest?: HeldRequest;
+  heldBackendRequests?: HeldRequest[];
+  stopHoldingBackendRequests?: () => void;
 };
 
-// Keeps the next request of that name from reaching the backend, so that
-// it stays under way until `answerHeldBackendRequest` answers it in the
-// backend's place. Requests after it go through as usual
-async function holdNextBackendRequest(page: Page, name: string) {
-  await page.evaluate(requestName => {
-    const workingPost = Worker.prototype.postMessage;
-    Worker.prototype.postMessage = function holdingPost(
-      this: Worker,
-      ...args: Parameters<Worker['postMessage']>
-    ) {
-      const [message] = args;
-      if (message?.name !== requestName) {
-        workingPost.apply(this, args);
-        return;
-      }
-      (window as GatedWindow).heldBackendRequest = {
-        backend: this,
-        id: message.id,
-      };
-      Worker.prototype.postMessage = workingPost;
-    };
-  }, name);
+// Runs in the page: keeps every request of that name from reaching the
+// backend, so that they stay under way until `answerHeldBackendRequests`
+// answers them in the backend's place. As an init script it holds the
+// requests the app makes as it starts
+function holdRequests(requestName: string) {
+  const gated = window as GatedWindow;
+  const held: HeldRequest[] = [];
+  gated.heldBackendRequests = held;
+  const workingPost = Worker.prototype.postMessage;
+  gated.stopHoldingBackendRequests = () => {
+    Worker.prototype.postMessage = workingPost;
+  };
+  Worker.prototype.postMessage = function holdingPost(
+    this: Worker,
+    ...args: Parameters<Worker['postMessage']>
+  ) {
+    const [message] = args;
+    if (message?.name === requestName) {
+      held.push({ backend: this, id: message.id });
+    } else {
+      workingPost.apply(this, args);
+    }
+  };
 }
 
-async function answerHeldBackendRequest(page: Page, result: unknown) {
+async function holdBackendRequests(page: Page, name: string) {
+  await page.evaluate(holdRequests, name);
+}
+
+// Answers the requests held so far, once there is one, and lets later
+// ones through again
+async function answerHeldBackendRequests(page: Page, result: unknown) {
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as GatedWindow).heldBackendRequests?.length ?? 0,
+      ),
+    )
+    .toBeGreaterThan(0);
   await page.evaluate(answer => {
-    const held = (window as GatedWindow).heldBackendRequest;
-    if (!held) {
-      throw new Error('no backend request is being held');
+    const gated = window as GatedWindow;
+    gated.stopHoldingBackendRequests?.();
+    for (const { backend, id } of gated.heldBackendRequests ?? []) {
+      backend.dispatchEvent(
+        new MessageEvent('message', {
+          data: { type: 'reply', id, result: answer },
+        }),
+      );
     }
-    held.backend.dispatchEvent(
-      new MessageEvent('message', {
-        data: { type: 'reply', id: held.id, result: answer },
-      }),
-    );
+    gated.heldBackendRequests = [];
   }, result);
+}
+
+// Whether nothing around the element hides it. Dialogs are kept in place
+// but see-through while the app shows a loading text, which the usual
+// visibility check does not notice
+function isShownToTheUser(element: Locator) {
+  return element.evaluate(shown => {
+    for (
+      let ancestor: Element | null = shown;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
+      if (getComputedStyle(ancestor).opacity === '0') {
+        return false;
+      }
+    }
+    return true;
+  });
 }
 
 // Records a budget file as living in the new storage, from the page, the
