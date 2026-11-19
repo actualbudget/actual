@@ -24,6 +24,7 @@ import type {
 } from '@actual-app/core/types/models';
 import {
   act,
+  createEvent,
   fireEvent,
   render,
   renderHook,
@@ -174,6 +175,8 @@ type LiveTransactionTableProps = {
     transaction: TransactionEntity,
     updatedFieldName?: string | null,
   ) => Promise<TransactionEntity>;
+  focusedTransactionId?: TransactionEntity['id'] | null;
+  onFocusedTransactionShown?: () => void;
 };
 
 function LiveTransactionTable(props: LiveTransactionTableProps) {
@@ -594,6 +597,29 @@ describe('Transactions', () => {
     });
   });
 
+  test('points out the focused transaction for a while', () => {
+    vi.useFakeTimers();
+    try {
+      const onFocusedTransactionShown = vi.fn();
+      const { container, getTransactions, updateProps } = renderTransactions({
+        onFocusedTransactionShown,
+      });
+      updateProps({ focusedTransactionId: getTransactions()[2].id });
+
+      const pulsing = container.querySelectorAll('[data-pulse]');
+      expect(pulsing).toHaveLength(1);
+      expect(pulsing[0]).toBe(
+        queryField(container, 'payee', 'div', 2).closest('[data-testid="row"]'),
+      );
+      expect(onFocusedTransactionShown).not.toHaveBeenCalled();
+
+      vi.runOnlyPendingTimers();
+      expect(onFocusedTransactionShown).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   test('transactions table shows the correct data', () => {
     const { container, getTransactions } = renderTransactions();
 
@@ -729,6 +755,70 @@ describe('Transactions', () => {
     // await userEvent.type(input, '{Shift>}[Enter]{/Shift}');
   });
 
+  test('tab leaves the table when nothing is being edited', async () => {
+    const { container } = renderTransactions();
+    const table = container.querySelector<HTMLElement>(
+      '[data-testid="table"]',
+    )!;
+    const after = document.createElement('button');
+    document.body.appendChild(after);
+
+    table.focus();
+    const tab = createEvent.keyDown(table, { key: 'Tab' });
+    fireEvent(table, tab);
+    expect(tab.defaultPrevented).toBe(false);
+
+    table.focus();
+    await userEvent.tab();
+    expect(document.activeElement).toBe(after);
+    expect(container.querySelector('input')).toBe(null);
+
+    table.focus();
+    const shiftTab = createEvent.keyDown(table, { key: 'Tab', shiftKey: true });
+    fireEvent(table, shiftTab);
+    expect(shiftTab.defaultPrevented).toBe(false);
+
+    await userEvent.tab({ shift: true });
+    expect(table.contains(document.activeElement)).toBe(false);
+
+    after.remove();
+  });
+
+  test.each(['[Enter]', '[ArrowDown]'])(
+    '%s on the focused table starts editing the first row',
+    async key => {
+      const { container } = renderTransactions();
+      const table = container.querySelector<HTMLElement>(
+        '[data-testid="table"]',
+      )!;
+
+      table.focus();
+      await userEvent.keyboard(key);
+      expectToBeEditingField(container, 'select', 0);
+
+      await userEvent.keyboard('[Tab]');
+      expectToBeEditingField(container, 'date', 0);
+    },
+  );
+
+  test('escape on a cell button stops editing and focuses the table', async () => {
+    const { container } = renderTransactions();
+    const table = container.querySelector<HTMLElement>(
+      '[data-testid="table"]',
+    )!;
+    const after = document.createElement('button');
+    document.body.appendChild(after);
+
+    await editField(container, 'select', 2);
+    await userEvent.keyboard('[Escape]');
+    expect(document.activeElement).toBe(table);
+
+    await userEvent.tab();
+    expect(document.activeElement).toBe(after);
+
+    after.remove();
+  });
+
   test('keybinding escape resets the value', async () => {
     const { container } = renderTransactions();
 
@@ -748,6 +838,34 @@ describe('Transactions', () => {
     await userEvent.type(input, '[Escape]');
     expect(input.value).toEqual(oldValue);
   });
+
+  test.each(['debit', 'credit'] as const)(
+    'invalid arithmetic in %s preserves the amount and allows correction',
+    async field => {
+      const onTransactionsChange = vi.fn();
+      const { container } = renderTransactions({ onTransactionsChange });
+      const input = await editField(container, field, 0);
+      await userEvent.clear(input);
+      await userEvent.type(input, '1/0[Tab]');
+
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([expect.objectContaining({ amount: -2777 })]),
+      );
+      expect(queryField(container, 'debit', 'div', 0).textContent).toBe(
+        '27.77',
+      );
+      expect(queryField(container, 'credit', '', 0).textContent).toBe('');
+
+      const correctedInput = await editField(container, field, 0);
+      await userEvent.clear(correctedInput);
+      await userEvent.type(correctedInput, '12/2[Tab]');
+      expect(onTransactionsChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ amount: field === 'debit' ? -600 : 600 }),
+        ]),
+      );
+    },
+  );
 
   test('text fields save when moved away from', async () => {
     const { container, getTransactions } = renderTransactions();
@@ -785,6 +903,74 @@ describe('Transactions', () => {
     // Blur the input to make it stop editing
     await userEvent.tab();
     expect(getTransactions()[2].notes).toBe('another happy note');
+  });
+
+  test('a note with line breaks is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI\r\nFrom 2. Savings';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    // The input shows the line breaks as spaces, like the cell does
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('To 1. Main EndToEndID: FRI From 2. Savings');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('a note with leading and trailing whitespace is not changed by focusing it', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = '  a note with spaces  ';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    let input = await editField(container, 'notes', 2);
+    expect(input.value).toBe('  a note with spaces  ');
+
+    // Neither blurring the input nor moving to another field saves anything
+    await userEvent.tab();
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Tab]');
+    input = await editField(container, 'notes', 2);
+    await userEvent.type(input, '[Enter]');
+
+    expect(onTransactionsChange).not.toHaveBeenCalled();
+  });
+
+  test('editing a note with line breaks saves them as spaces', async () => {
+    const transactions = generateTransactions(5);
+    transactions[2].notes = 'To 1. Main\nEndToEndID: FRI';
+    const onTransactionsChange = vi.fn();
+    const { container } = renderTransactions({
+      transactions,
+      onTransactionsChange,
+    });
+
+    const input = await editField(container, 'notes', 2);
+    await userEvent.type(input, ' paid');
+    await userEvent.tab();
+
+    expect(onTransactionsChange).toHaveBeenLastCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: transactions[2].id,
+          notes: 'To 1. Main EndToEndID: FRI paid',
+        }),
+      ]),
+    );
   });
 
   test('dropdown automatically opens and can be filtered', async () => {

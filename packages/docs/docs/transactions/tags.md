@@ -32,7 +32,7 @@ To view transactions with a given tag, you can:
 The Tag management page can be found under _Settings_ > _Tags_. Here you can perform the following actions:
 
 - Change the color. Tags use a default color defined in the theme. Change the color of any tag by clicking on the tag to bring up a color picker.
-- **Add New** tags. Do not include the `#` prefix when adding tags here; it will be added automatically. If the tag already exists, this will update its color.
+- **Add new tag**. Do not include the `#` prefix when adding tags here; it will be added automatically. If the tag already exists, this will update its color.
 - **Discover new tags**, in the menu at the top right, searches for tags already used within transactions and adds them to the list of managed tags.
 - Add a description by clicking in the description field.
 - **View Transactions** which use a given tag.

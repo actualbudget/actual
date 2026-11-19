@@ -325,7 +325,7 @@ type InputValueProps = Omit<
   'value' | 'onUpdate'
 > & {
   value?: string;
-  onUpdate?: (newValue: string) => void;
+  onUpdate?: (newValue: string, isEdited: boolean) => void;
 } & {
   [key: `data-${string}`]: unknown;
 };
@@ -337,10 +337,12 @@ function InputValue({
   ...props
 }: InputValueProps) {
   const [value, setValue] = useState(defaultValue);
+  const [isEdited, setIsEdited] = useState(false);
   const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
 
   if (prevDefaultValue !== defaultValue) {
     setValue(defaultValue);
+    setIsEdited(false);
     setPrevDefaultValue(defaultValue);
   }
 
@@ -358,7 +360,7 @@ function InputValue({
     }
 
     if (shouldSaveFromKey(e)) {
-      onUpdate?.(value);
+      onUpdate?.(value, isEdited);
     }
   }
 
@@ -366,6 +368,7 @@ function InputValue({
     if (value !== defaultValue) {
       setValue(defaultValue);
     }
+    setIsEdited(false);
   }
 
   const ops = ['+', '-', '*', '/', '^'];
@@ -375,6 +378,7 @@ function InputValue({
   }
 
   function setValue_(text) {
+    setIsEdited(true);
     if (valueIsASingleOperator(text)) {
       setValue(defaultValue + text);
     } else {
@@ -388,7 +392,7 @@ function InputValue({
       value={value}
       onChangeValue={setValue_}
       onBlur={onBlur_}
-      onUpdate={onUpdate}
+      onUpdate={newValue => onUpdate?.(newValue, isEdited)}
       onKeyDown={onKeyDown}
       onEscape={onEscape}
       style={{
@@ -773,8 +777,14 @@ export function SheetCell<
         return (
           <InputValue
             value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
-            onUpdate={value => {
-              onSave(unformatExpr ? unformatExpr(value) : value);
+            onUpdate={(value, isEdited) => {
+              if (!unformatExpr) {
+                onSave(value);
+              } else {
+                // Untouched text can be rounded (hidden decimals); keep the
+                // exact value
+                onSave(isEdited ? unformatExpr(value) : sheetValue);
+              }
             }}
             {...inputProps}
             style={{ textAlign, ...(inputProps?.style || {}) }}
@@ -834,6 +844,7 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
+  footer?: ReactNode;
 };
 
 export function SelectedItemsButton<Name extends string>({
@@ -841,6 +852,7 @@ export function SelectedItemsButton<Name extends string>({
   name,
   items,
   onSelect,
+  footer,
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -887,6 +899,7 @@ export function SelectedItemsButton<Name extends string>({
             setMenuOpen(false);
           }}
           items={items}
+          footer={footer}
         />
       </Popover>
     </View>
@@ -973,20 +986,30 @@ export const Table = forwardRef(
       isSelected,
       saveScrollWidth,
       listContainerRef,
+      onKeyDown,
       ...props
     },
     ref,
   ) => {
+    const hasNavigator = navigator != null;
     if (!navigator) {
       navigator = {
         onEdit: () => {},
+        onEditFirstField: () => {},
         editingId: null,
         focusedField: null,
         getNavigatorProps: props => props,
       };
     }
 
-    const { onEdit, editingId, focusedField, getNavigatorProps } = navigator;
+    const {
+      onEdit,
+      onEditFirstField,
+      editingId,
+      focusedField,
+      getNavigatorProps,
+    } = navigator;
+    const focusExit = useRef<HTMLDivElement>(null);
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
@@ -1161,16 +1184,77 @@ export const Table = forwardRef(
 
     const isEmpty = (count || items.length) === 0;
 
+    const navigatorProps = getNavigatorProps(props);
+
+    function onContainerKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+      onKeyDown?.(e);
+      if (e.isPropagationStopped()) {
+        return;
+      }
+
+      navigatorProps.onKeyDown?.(e);
+      onEnterOrExit(e);
+    }
+
+    function onEnterOrExit(e: KeyboardEvent<HTMLDivElement>) {
+      if (!hasNavigator) {
+        return;
+      }
+
+      if (editingId != null) {
+        if (
+          e.key === 'Escape' &&
+          e.target instanceof HTMLElement &&
+          e.target.tagName !== 'INPUT'
+        ) {
+          onEdit(null);
+          e.currentTarget.focus();
+        }
+        return;
+      }
+
+      if (e.target !== e.currentTarget) {
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        if (!e.shiftKey && !e.isDefaultPrevented()) {
+          focusExit.current?.focus({ preventScroll: true });
+        }
+      } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+        const index =
+          list.current && scrollContainer.current
+            ? list.current.getStartIndexForOffset(
+                scrollContainer.current.scrollTop,
+              )
+            : 0;
+        const item = items[index];
+        if (item != null) {
+          list.current?.scrollToItem(index, 'smart');
+          onEditFirstField(item.id);
+        }
+      }
+    }
+
     return (
       <View
         style={{
           flex: 1,
           outline: 'none',
           overflow: 'hidden',
+          ':focus-visible::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            border: `2px solid ${theme.formInputBorderSelected}`,
+            pointerEvents: 'none',
+            zIndex: 201,
+          },
           ...style,
         }}
         tabIndex={0}
-        {...getNavigatorProps(props)}
+        {...navigatorProps}
+        onKeyDown={onContainerKeyDown}
         data-testid="table"
       >
         {headers && (
@@ -1227,6 +1311,13 @@ export const Table = forwardRef(
             />
           )}
         </View>
+        {hasNavigator && (
+          <View
+            innerRef={focusExit}
+            tabIndex={-1}
+            style={{ outline: 'none' }}
+          />
+        )}
       </View>
     );
   },
@@ -1239,9 +1330,12 @@ Table.displayName = 'Table';
 
 export type TableNavigator<T extends TableItem> = {
   onEdit: (id: T['id'] | null, field?: string) => void;
+  onEditFirstField: (id: T['id']) => void;
   editingId: T['id'];
   focusedField: string;
-  getNavigatorProps: (userProps: object) => object;
+  getNavigatorProps: (userProps: object) => {
+    onKeyDown?: (e: KeyboardEvent<HTMLDivElement>) => void;
+  };
 };
 
 export function useTableNavigator<T extends TableItem>(
@@ -1252,6 +1346,7 @@ export function useTableNavigator<T extends TableItem>(
   const [editingId, setEditingId] = useState<T['id']>(null);
   const [focusedField, setFocusedField] = useState<string>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isFlashing = useRef(false);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1263,6 +1358,14 @@ export function useTableNavigator<T extends TableItem>(
     setFocusedField(id ? field : null);
   }, []);
 
+  function onEditFirstField(id: T['id']) {
+    const item = data.find(item => item.id === id);
+    const [field] = item ? getFields(item) : [];
+    if (field != null) {
+      onEdit(id, field);
+    }
+  }
+
   function flashInput() {
     // Force the container to be focused which suppresses the "space
     // pages down" behavior. If we don't do this and the user presses
@@ -1273,8 +1376,10 @@ export function useTableNavigator<T extends TableItem>(
     // Not ideal, but works for now. Let the UI show the input
     // go away, and then bring it back on the same row/field
     onEdit(null);
+    isFlashing.current = true;
 
     setTimeout(() => {
+      isFlashing.current = false;
       onEdit(editingId, focusedField);
     }, 100);
   }
@@ -1387,6 +1492,10 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'Enter':
           case 'Tab':
+            if (e.key === 'Tab' && editingId == null && !isFlashing.current) {
+              break;
+            }
+
             e.preventDefault();
             e.stopPropagation();
 
@@ -1434,5 +1543,11 @@ export function useTableNavigator<T extends TableItem>(
     };
   }
 
-  return { onEdit, editingId, focusedField, getNavigatorProps };
+  return {
+    onEdit,
+    onEditFirstField,
+    editingId,
+    focusedField,
+    getNavigatorProps,
+  };
 }

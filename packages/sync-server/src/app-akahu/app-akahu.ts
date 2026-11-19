@@ -6,8 +6,6 @@ import type {
   PendingTransaction,
   Transaction,
 } from 'akahu';
-// For some reason this is not provided in the provided index.d.ts file
-import type { EnrichedPendingTransaction } from 'akahu/dist/models/transactions';
 import express from 'express';
 
 import { handleError } from '#app-gocardless/util/handle-error';
@@ -46,6 +44,14 @@ const app = express();
 export { app as handlers };
 app.use(express.json());
 app.use(requestLoggerMiddleware);
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
 app.use(validateSessionMiddleware);
 
 app.post(
@@ -160,6 +166,9 @@ app.post(
         now.getMonth() + 1,
         1,
       ).toISOString();
+      const startDateObj = new Date(
+        Math.min(getNZStartOfDay(startDate).getTime(), now.getTime()),
+      );
 
       // Fetch all transactions using pagination
       const transactions: Transaction[] = [];
@@ -167,7 +176,8 @@ app.post(
       do {
         const { items, cursor: nextCursor } =
           await akahu.accounts.listTransactions(userToken, accountId, {
-            start: new Date(startDate).toISOString(),
+            // Akahu treats `start` as exclusive
+            start: new Date(startDateObj.getTime() - 1).toISOString(),
             end: endDate,
             cursor,
           });
@@ -210,7 +220,6 @@ app.post(
         });
       }
 
-      const startDateObj = new Date(startDate);
       const all = [];
       const booked = [];
       const pending = [];
@@ -300,6 +309,47 @@ function getRefreshedAccount(
   });
 }
 
+function getNZStartOfDay(startDate: string): Date {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
+    return new Date(startDate);
+  }
+  const wallClock = new Date(`${startDate}T00:00:00Z`).getTime();
+  // The offset has to be the one in effect at Auckland midnight itself, not
+  // at UTC midnight, or the result is an hour off on daylight saving
+  // transition days. Midnight always exists in Auckland (the clocks change
+  // at 2am/3am), so resolving the offset a second time is enough.
+  const guess = wallClock - getNZOffset(new Date(wallClock));
+  return new Date(wallClock - getNZOffset(new Date(guess)));
+}
+
+function getNZOffset(date: Date): number {
+  const parts = Object.fromEntries(
+    dateTimePartsFormatNZ
+      .formatToParts(date)
+      .map(part => [part.type, Number(part.value)]),
+  );
+  const wallClock = Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+  );
+  return wallClock - Math.floor(date.getTime() / 1000) * 1000;
+}
+
+const dateTimePartsFormatNZ = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'Pacific/Auckland',
+  hourCycle: 'h23',
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+});
+
 function getDate(date: Date): string {
   const parts = dateTimeFormatNZ.formatToParts(date);
   const month = parts[0].value;
@@ -320,11 +370,7 @@ function convertToCents(amount: number): number {
   return Math.round(amount * 100);
 }
 
-type AnyTransaction =
-  | Transaction
-  | EnrichedTransaction
-  | PendingTransaction
-  | EnrichedPendingTransaction;
+type AnyTransaction = Transaction | EnrichedTransaction | PendingTransaction;
 
 function getPayeeName(trans: AnyTransaction): string {
   return getMerchantName(trans) ?? getOtherAccount(trans) ?? trans.description;
@@ -345,7 +391,7 @@ function getOtherAccount(trans: AnyTransaction): string | undefined {
 }
 
 function processPendingTransaction(
-  trans: PendingTransaction | EnrichedPendingTransaction,
+  trans: PendingTransaction,
   account: Account,
 ): AkahuTransaction {
   const transactionDate = new Date(trans.date);

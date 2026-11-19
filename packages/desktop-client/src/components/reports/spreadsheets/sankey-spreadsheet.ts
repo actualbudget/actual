@@ -120,6 +120,138 @@ type TransferPair = {
   amount: number;
 };
 
+type WeightedTransferGraph = Map<string, Map<string, number>>;
+
+type DirectedGraphChildren<NodeKey extends string> = (
+  nodeKey: NodeKey,
+) => Iterable<NodeKey>;
+
+function findDirectedCycle<NodeKey extends string>(
+  nodes: Iterable<NodeKey>,
+  getChildren: DirectedGraphChildren<NodeKey>,
+): Array<[NodeKey, NodeKey]> | undefined {
+  const state = new Map<NodeKey, 'unvisited' | 'visiting' | 'visited'>();
+
+  type SearchFrame = {
+    nodeKey: NodeKey;
+    children: NodeKey[];
+    nextChildIndex: number;
+  };
+
+  for (const startNodeKey of Array.from(nodes).sort()) {
+    if (state.get(startNodeKey)) continue;
+
+    const path: NodeKey[] = [startNodeKey];
+    const pathIndex = new Map([[startNodeKey, 0]]);
+    const stack: SearchFrame[] = [
+      {
+        nodeKey: startNodeKey,
+        children: Array.from(getChildren(startNodeKey)).sort(),
+        nextChildIndex: 0,
+      },
+    ];
+    state.set(startNodeKey, 'visiting');
+
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      const childKey = frame.children[frame.nextChildIndex];
+
+      if (childKey === undefined) {
+        state.set(frame.nodeKey, 'visited');
+        stack.pop();
+        pathIndex.delete(frame.nodeKey);
+        path.pop();
+        continue;
+      }
+
+      frame.nextChildIndex += 1;
+      const childState = state.get(childKey);
+      if (childState === 'visited') continue;
+
+      if (childState === 'visiting') {
+        const cycleStart = pathIndex.get(childKey);
+        if (cycleStart === undefined) continue;
+
+        const cycle: Array<[NodeKey, NodeKey]> = [];
+        for (let index = cycleStart; index < path.length - 1; index++) {
+          cycle.push([path[index], path[index + 1]]);
+        }
+        cycle.push([frame.nodeKey, childKey]);
+        return cycle;
+      }
+
+      state.set(childKey, 'visiting');
+      pathIndex.set(childKey, path.length);
+      path.push(childKey);
+      stack.push({
+        nodeKey: childKey,
+        children: Array.from(getChildren(childKey)).sort(),
+        nextChildIndex: 0,
+      });
+    }
+  }
+
+  return undefined;
+}
+
+function getStronglyConnectedComponents<NodeKey extends string>(
+  nodes: Iterable<NodeKey>,
+  getChildren: DirectedGraphChildren<NodeKey>,
+): NodeKey[][] {
+  const visitedIndex = new Map<NodeKey, number>();
+  const lowlink = new Map<NodeKey, number>();
+  const stack: NodeKey[] = [];
+  const activeStack = new Set<NodeKey>();
+  const components: NodeKey[][] = [];
+  let index = 0;
+
+  function strongConnect(nodeKey: NodeKey): void {
+    visitedIndex.set(nodeKey, index);
+    lowlink.set(nodeKey, index);
+    index += 1;
+    stack.push(nodeKey);
+    activeStack.add(nodeKey);
+
+    for (const childKey of getChildren(nodeKey)) {
+      if (!visitedIndex.has(childKey)) {
+        strongConnect(childKey);
+        lowlink.set(
+          nodeKey,
+          Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
+        );
+      } else if (activeStack.has(childKey)) {
+        lowlink.set(
+          nodeKey,
+          Math.min(lowlink.get(nodeKey) ?? 0, visitedIndex.get(childKey) ?? 0),
+        );
+      }
+    }
+
+    if (lowlink.get(nodeKey) !== visitedIndex.get(nodeKey)) {
+      return;
+    }
+
+    const component: NodeKey[] = [];
+    let poppedNode: NodeKey | undefined;
+    do {
+      poppedNode = stack.pop();
+      if (!poppedNode) break;
+      activeStack.delete(poppedNode);
+      component.push(poppedNode);
+    } while (poppedNode !== nodeKey);
+
+    components.push(component);
+  }
+
+  for (const nodeKey of nodes) {
+    if (!visitedIndex.has(nodeKey)) {
+      strongConnect(nodeKey);
+    }
+  }
+
+  return components;
+}
+
 type SortMode = 'per-group' | 'global' | 'budget-order';
 
 type NodeKey = string;
@@ -157,6 +289,7 @@ const SpecialNodeKeys = {
   OtherSuffix: '__OTHER_BUCKET',
   HiddenSuffix: '__HIDDEN',
   NegativeSuffix: '__NEGATIVE',
+  NoPayeeSuffix: '__NO_PAYEE',
 } as const;
 export const GraphLayers = {
   IncomePayee: 'payee',
@@ -572,15 +705,11 @@ async function fetchCategoryData(
                 ],
               })
               .filter({ category: category.id, 'account.offbudget': false })
-              .groupBy(
-                categoryGroup.is_income
-                  ? [
-                      { $id: '$category' },
-                      { $id: '$account' },
-                      { $id: '$payee' },
-                    ]
-                  : [{ $id: '$category' }, { $id: '$account' }],
-              )
+              .groupBy([
+                { $id: '$category' },
+                { $id: '$account' },
+                { $id: '$payee' },
+              ])
               .select([
                 { accountId: { $id: '$account.id' } },
                 { accountName: { $id: '$account.name' } },
@@ -618,16 +747,55 @@ async function fetchCategoryData(
   );
   const allCategoryData = nested.flat();
 
-  if (groupAccounts) {
-    allCategoryData.forEach(entry => {
-      if (entry.accountName && entry.accountId) {
-        entry.accountName = SpecialNodeKeys.AllAccounts;
-        entry.accountId = SpecialNodeKeys.AllAccounts;
-      }
-    });
+  return aggregateCategoryData(allCategoryData, groupAccounts);
+}
+
+export function aggregateCategoryData(
+  categoryData: readonly CategoryEntry[],
+  groupAccounts: boolean,
+): CategoryEntry[] {
+  if (!groupAccounts) {
+    return categoryData.map(entry => ({ ...entry }));
   }
 
-  return allCategoryData;
+  const groupedCategoryData = new Map<
+    string,
+    CategoryEntry & { signedValue: number }
+  >();
+
+  // Preserve payee paths while netting their account flows together.
+  categoryData.forEach(entry => {
+    const key = `${entry.categoryId}|${entry.payeeId}`;
+    const existingEntry = groupedCategoryData.get(key);
+    const signedValue = entry.isNegative ? -entry.value : entry.value;
+
+    if (existingEntry) {
+      existingEntry.signedValue += signedValue;
+    } else {
+      groupedCategoryData.set(key, {
+        ...entry,
+        payeeId: entry.payeeId,
+        payeeName: entry.payeeName,
+        value: Math.abs(signedValue),
+        isNegative: signedValue < 0,
+        signedValue,
+      });
+    }
+  });
+
+  return Array.from(groupedCategoryData.values())
+    .filter(entry => entry.signedValue !== 0)
+    .map(({ signedValue, ...entry }) => ({
+      ...entry,
+      value: Math.abs(signedValue),
+      isNegative: signedValue < 0,
+      ...(entry.accountName && entry.accountId
+        ? {
+            accountName: SpecialNodeKeys.AllAccounts,
+            accountId: SpecialNodeKeys.AllAccounts,
+          }
+        : {}),
+    }));
 }
 
 // Fetch transactions that are transfers within the provided month range
@@ -681,13 +849,12 @@ export function aggregateTransferPairs(
 ): TransferPair[] {
   const byId = new Map<string, TransferEntry>();
   const byAccountId = new Map<string, string>();
+  const transferGraph: WeightedTransferGraph = new Map();
 
   rawResults.forEach((transfer: TransferEntry) => {
     byId.set(String(transfer.id), transfer);
     byAccountId.set(String(transfer.accountId), transfer.accountName);
   });
-
-  const resultPairs = new Map<string, number>();
 
   rawResults.forEach((from: TransferEntry) => {
     const to = byId.get(String(from.transfer_id));
@@ -695,30 +862,68 @@ export function aggregateTransferPairs(
 
     if (from.accountId > to.accountId) return;
 
-    const [accountId1, accountId2] = [from.accountId, to.accountId].sort();
-    const pairKey = `${accountId1}|${accountId2}`;
     const sourceAccountId = from.amount < 0 ? from.accountId : to.accountId;
-    const sign = sourceAccountId === accountId1 ? 1 : -1;
-    const existingValue = resultPairs.get(pairKey) ?? 0;
+    const targetAccountId =
+      sourceAccountId === from.accountId ? to.accountId : from.accountId;
+    if (sourceAccountId === targetAccountId || from.amount === 0) return;
 
-    resultPairs.set(pairKey, existingValue + sign * Math.abs(from.amount));
+    const children = transferGraph.get(sourceAccountId) ?? new Map();
+    children.set(
+      targetAccountId,
+      (children.get(targetAccountId) ?? 0) + Math.abs(from.amount),
+    );
+    transferGraph.set(sourceAccountId, children);
   });
 
-  return Array.from(resultPairs.entries())
-    .filter(([, value]) => value !== 0)
-    .map(([key, value]) => {
-      const [accountId1, accountId2] = key.split('|');
-      const fromAccountId = value > 0 ? accountId1 : accountId2;
-      const toAccountId = value > 0 ? accountId2 : accountId1;
+  cancelTransferCycles(transferGraph);
 
-      return {
+  return Array.from(transferGraph.entries())
+    .flatMap(([fromAccountId, children]) =>
+      Array.from(children.entries()).map(([toAccountId, amount]) => ({
         fromAccountId,
         fromAccountName: byAccountId.get(fromAccountId) || '',
         toAccountId,
         toAccountName: byAccountId.get(toAccountId) || '',
-        amount: Math.abs(value),
-      };
-    }) satisfies TransferPair[];
+        amount,
+      })),
+    )
+    .sort(
+      (first, second) =>
+        first.fromAccountId.localeCompare(second.fromAccountId) ||
+        first.toAccountId.localeCompare(second.toAccountId),
+    ) satisfies TransferPair[];
+}
+
+function cancelTransferCycles(graph: WeightedTransferGraph): void {
+  while (true) {
+    const cycle = findDirectedCycle(
+      graph.keys(),
+      accountId => graph.get(accountId)?.keys() ?? [],
+    );
+    if (!cycle) return;
+
+    const cycleAmount = Math.min(
+      ...cycle.map(
+        ([fromAccountId, toAccountId]) =>
+          graph.get(fromAccountId)?.get(toAccountId) ?? 0,
+      ),
+    );
+
+    cycle.forEach(([fromAccountId, toAccountId]) => {
+      const children = graph.get(fromAccountId);
+      if (!children) return;
+
+      const remainingAmount = (children.get(toAccountId) ?? 0) - cycleAmount;
+      if (remainingAmount > 0) {
+        children.set(toAccountId, remainingAmount);
+      } else {
+        children.delete(toAccountId);
+      }
+      if (children.size === 0) {
+        graph.delete(fromAccountId);
+      }
+    });
+  }
 }
 
 export function createBudgetGraph(
@@ -974,20 +1179,34 @@ export function createTransactionsGraph(
             entry.value,
           );
         } else {
-          // Category > Account
+          // Payee > Category > Account
+          const categoryKey = entry.categoryId + SpecialNodeKeys.NegativeSuffix;
           addNode(
             graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
+            categoryKey,
             GraphLayers.IncomeCategory,
-            entry.payeeName || entry.category,
+            entry.category,
           );
           addAccountNode(entry.accountId, entry.accountName);
-          addValueToLink(
-            graph,
-            entry.categoryId + SpecialNodeKeys.NegativeSuffix,
-            entry.accountId,
-            entry.value,
-          );
+          addValueToLink(graph, categoryKey, entry.accountId, entry.value);
+          if (entry.payeeId) {
+            addNode(
+              graph,
+              entry.payeeId,
+              GraphLayers.IncomePayee,
+              entry.payeeName,
+            );
+            addValueToLink(graph, entry.payeeId, categoryKey, entry.value);
+          } else {
+            const noPayeeKey = entry.categoryId + SpecialNodeKeys.NoPayeeSuffix;
+            addNode(
+              graph,
+              noPayeeKey,
+              GraphLayers.IncomePayee,
+              t('(No payee)'),
+            );
+            addValueToLink(graph, noPayeeKey, categoryKey, entry.value);
+          }
         }
       }
     }
@@ -1080,71 +1299,17 @@ export function getLayer(
 function getLayersByStronglyConnectedComponents(
   graph: Graph,
 ): Map<NodeKey, VisualLayerIndex> {
-  const visitedIndex = new Map<NodeKey, number>();
-  const lowlink = new Map<NodeKey, number>();
-  const stack: NodeKey[] = [];
-  const activeStack = new Set<NodeKey>();
+  const components = getStronglyConnectedComponents(graph.keys(), nodeKey =>
+    Array.from(graph.get(nodeKey)?.to.keys() ?? []).filter(childKey =>
+      graph.has(childKey),
+    ),
+  );
   const componentByNode = new Map<NodeKey, number>();
-  const components: NodeKey[][] = [];
-  let index = 0;
-
-  function strongConnect(nodeKey: NodeKey) {
-    visitedIndex.set(nodeKey, index);
-    lowlink.set(nodeKey, index);
-    index += 1;
-    stack.push(nodeKey);
-    activeStack.add(nodeKey);
-
-    const node = graph.get(nodeKey);
-    if (node) {
-      for (const childKey of node.to.keys()) {
-        if (!graph.has(childKey)) {
-          continue;
-        }
-
-        if (!visitedIndex.has(childKey)) {
-          strongConnect(childKey);
-          lowlink.set(
-            nodeKey,
-            Math.min(lowlink.get(nodeKey) ?? 0, lowlink.get(childKey) ?? 0),
-          );
-        } else if (activeStack.has(childKey)) {
-          lowlink.set(
-            nodeKey,
-            Math.min(
-              lowlink.get(nodeKey) ?? 0,
-              visitedIndex.get(childKey) ?? 0,
-            ),
-          );
-        }
-      }
-    }
-
-    if (lowlink.get(nodeKey) === visitedIndex.get(nodeKey)) {
-      const componentIndex = components.length;
-      const componentNodes: NodeKey[] = [];
-
-      let poppedNode: NodeKey | undefined;
-      do {
-        poppedNode = stack.pop();
-        if (!poppedNode) {
-          break;
-        }
-
-        activeStack.delete(poppedNode);
-        componentByNode.set(poppedNode, componentIndex);
-        componentNodes.push(poppedNode);
-      } while (poppedNode !== nodeKey);
-
-      components.push(componentNodes);
-    }
-  }
-
-  for (const nodeKey of graph.keys()) {
-    if (!visitedIndex.has(nodeKey)) {
-      strongConnect(nodeKey);
-    }
-  }
+  components.forEach((component, componentIndex) => {
+    component.forEach(nodeKey => {
+      componentByNode.set(nodeKey, componentIndex);
+    });
+  });
 
   const parentsByComponent = new Map<number, Set<number>>();
   for (
@@ -1318,8 +1483,13 @@ function moveToOther(
   // Some `__NEGATIVE`-suffixed placeholder nodes (the refund-dominant
   // expense case in createTransactionsGraph) don't set `isNegative` and so
   // aren't excluded by isGroupableNode above - but their key isn't a real
-  // category id, so it can't go into a drilldown filter.
-  if (otherNodeData && !key.endsWith(SpecialNodeKeys.NegativeSuffix)) {
+  // category id, so it can't go into a drilldown filter. The same goes for
+  // the synthetic `__NO_PAYEE` payee nodes.
+  if (
+    otherNodeData &&
+    !key.endsWith(SpecialNodeKeys.NegativeSuffix) &&
+    !key.endsWith(SpecialNodeKeys.NoPayeeSuffix)
+  ) {
     otherNodeData.otherMembers = [...(otherNodeData.otherMembers ?? []), key];
   }
 
@@ -1621,13 +1791,21 @@ export function getNodeValue(
   }
 
   const incomingValue = getIncomingValue(graph, key);
-  // If node is in reality a root node, masked behind hidden nodes
-  return incomingValue < 0 ? getOutgoingValue(graph, key) : incomingValue;
+  // If the node is masked behind hidden nodes, use its visible outgoing flow.
+  return incomingValue <= 0 ? getOutgoingValue(graph, key) : incomingValue;
 }
 
 export function addPercentageLabels(graph: Graph): void {
-  const layerSums = new Map<VisualLayerIndex, number>();
+  const layerSums = new Map<string, number>();
   const computedLayersByNode = getComputedNodeLayers(graph);
+
+  function getPercentageGroup(data: NodeData, layer: VisualLayerIndex): string {
+    // Accounts can be split across visual columns by hidden alignment nodes,
+    // but their percentages should still describe the account distribution.
+    return data.type === GraphLayers.Account
+      ? `type:${data.type}`
+      : `layer:${layer}`;
+  }
 
   // First pass: calculate visual-layer sums
   graph.forEach((_: NodeData, key: NodeKey) => {
@@ -1641,7 +1819,11 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    layerSums.set(layer, (layerSums.get(layer) ?? 0) + nodeValue);
+    const percentageGroup = getPercentageGroup(graph.get(key)!, layer);
+    layerSums.set(
+      percentageGroup,
+      (layerSums.get(percentageGroup) ?? 0) + nodeValue,
+    );
   });
 
   // Second pass: assign percentage label to each node
@@ -1658,7 +1840,8 @@ export function addPercentageLabels(graph: Graph): void {
     }
 
     const nodeValue = getNodeValue(graph, key, computedLayersByNode);
-    const layerTotal = layerSums.get(layer) ?? 1;
+    const percentageGroup = getPercentageGroup(data, layer);
+    const layerTotal = layerSums.get(percentageGroup) ?? 1;
     const percentage = layerTotal ? (nodeValue / layerTotal) * 100 : 0;
     data.percentageLabel = `${percentage.toFixed(1)}%`;
   });
@@ -2012,6 +2195,8 @@ function getNodeDrilldown(
     NON_DRILLDOWN_NODE_KEYS.has(key) ||
     key.endsWith(SpecialNodeKeys.HiddenSuffix) ||
     key.endsWith(SpecialNodeKeys.NegativeSuffix) ||
+    // Synthetic "(No payee)" node - its key isn't a real payee id.
+    key.endsWith(SpecialNodeKeys.NoPayeeSuffix) ||
     // `isNegative` nodes are budget-mode accounting placeholders (e.g. the
     // "From {{category}}" overspend node, keyed by the category's own id
     // but typed as an Account) rather than the real entity their key names.

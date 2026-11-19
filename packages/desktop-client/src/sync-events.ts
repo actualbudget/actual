@@ -18,7 +18,7 @@ import { payeeQueries } from './payees';
 import { loadPrefs } from './prefs/prefsSlice';
 import type { AppStore } from './redux/store';
 import { dashboardQueries, reportQueries } from './reports';
-import { signOut } from './users/usersSlice';
+import { getUserData, signOut } from './users/usersSlice';
 
 // Tables whose changes can move the budget's month bounds. `preferences`
 // holds the synced budget type.
@@ -72,6 +72,19 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
           },
         }),
       );
+    }
+  });
+
+  // Keep the online/offline status in step with whether syncing actually
+  // reaches the server.
+  const unlistenReachability = listen('sync-event', ({ type }) => {
+    const userData = store.getState().user.data;
+    const isReachabilityOutdated =
+      userData &&
+      ((type === 'success' && userData.offline) ||
+        (type === 'error' && !userData.offline));
+    if (isReachabilityOutdated) {
+      void store.dispatch(getUserData());
     }
   });
 
@@ -469,6 +482,7 @@ export function listenForSyncEvent(store: AppStore, queryClient: QueryClient) {
 
   return () => {
     unlistenUnauthorized();
+    unlistenReachability();
     unlistenSuccess();
   };
 }

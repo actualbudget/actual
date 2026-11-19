@@ -14,6 +14,7 @@ import { baseInputStyle, Input } from '@actual-app/components/input';
 import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
+import { amountToInteger, integerToAmount } from '@actual-app/core/shared/util';
 import type { IntegerAmount } from '@actual-app/core/shared/util';
 import { css, cx } from '@emotion/css';
 
@@ -80,10 +81,13 @@ export function AmountInput({
   );
 
   const [value, setValue] = useState(getDisplayValue(initialValue, false));
-  useEffect(
-    () => setValue(getDisplayValue(initialValue, isFocused)),
-    [initialValue, isFocused, getDisplayValue],
-  );
+  // The exact amount the text shows until the user types. The text can be
+  // rounded (hidden decimals), so parsing it would lose a stored fraction
+  const exactAmount = useRef<IntegerAmount | null>(initialValue);
+  useEffect(() => {
+    setValue(getDisplayValue(initialValue, isFocused));
+    exactAmount.current = initialValue;
+  }, [initialValue, isFocused, getDisplayValue]);
 
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const innerRef = useRef<HTMLInputElement | null>(null);
@@ -102,6 +106,10 @@ export function AmountInput({
   }, [sign]);
 
   const getAmount = useCallback(() => {
+    if (exactAmount.current != null) {
+      const absValue = Math.abs(exactAmount.current);
+      return symbol === '-' ? -absValue : absValue;
+    }
     const signedValued = symbol === '-' ? symbol + value : value;
     return format.fromEdit(signedValued, 0);
   }, [symbol, value, format]);
@@ -135,17 +143,23 @@ export function AmountInput({
       if (digits === '') {
         newText = '';
       } else {
-        const intValue = parseInt(digits, 10);
-        newText = format.forEdit(intValue);
+        // Typed digits are in the currency's smallest unit (cents, whole yen)
+        const amount = integerToAmount(
+          parseInt(digits, 10),
+          format.currency.decimalPlaces,
+        );
+        newText = format.forEdit(amountToInteger(amount));
       }
     }
 
+    exactAmount.current = null;
     setValue(newText || '');
     onChangeValue?.(newText);
   }
 
   function fireUpdate(amount) {
     onUpdate?.(amount);
+    exactAmount.current = amount;
 
     if (sign) {
       setSymbol(sign);
@@ -240,11 +254,14 @@ export function AmountInput({
 
 type BetweenAmountInputProps = {
   defaultValue: { num1: number; num2: number };
+  /** Which way an untouched zero amount is signed. Defaults to an outflow. */
+  zeroSign?: '-' | '+';
   onChange: (newValue: { num1: number; num2: number }) => void;
 };
 
 export function BetweenAmountInput({
   defaultValue,
+  zeroSign,
   onChange,
 }: BetweenAmountInputProps) {
   const { t } = useTranslation();
@@ -255,6 +272,7 @@ export function BetweenAmountInput({
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <AmountInput
         value={num1}
+        zeroSign={zeroSign}
         onUpdate={value => {
           setNum1(value);
           onChange({ num1: value, num2 });
@@ -264,6 +282,7 @@ export function BetweenAmountInput({
       <View style={{ margin: '0 5px' }}>{t('and')}</View>
       <AmountInput
         value={num2}
+        zeroSign={zeroSign}
         onUpdate={value => {
           setNum2(value);
           onChange({ num1, num2: value });
