@@ -1,9 +1,6 @@
 name: Build Android Release
 
-# Produces signed APK/AAB artifacts without uploading to Google Play.
-# Configure these secrets in the release environment:
-# ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
-# ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD.
+# Android apps are published for every new release and nightly schedule
 
 defaults:
   run:

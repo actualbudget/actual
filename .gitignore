@@ -77,10 +77,12 @@ DESIGN.json
 .cursor/agents/impeccable-*.md
 .github/agents/impeccable-*.agent.md
 
-# Misc
-.#*
+# Android signing keys
 *.jks
 *.keystore
+
+# Misc
+.#*
 
 # Local Netlify folder
 .netlify
