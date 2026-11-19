@@ -79,6 +79,8 @@ DESIGN.json
 
 # Misc
 .#*
+*.jks
+*.keystore
 
 # Local Netlify folder
 .netlify
