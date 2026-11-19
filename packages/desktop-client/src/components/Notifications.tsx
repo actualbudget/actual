@@ -379,11 +379,13 @@ export function Notifications({ style }: { style?: CSSProperties }) {
     .slice(-MAX_VISIBLE_NOTIFICATIONS)
     .reverse();
 
+  const bottomInset = notificationInset?.bottom || 20;
+
   return (
     <View
       style={{
         position: 'fixed',
-        bottom: notificationInset?.bottom || 20,
+        bottom: `calc(${bottomInset}px + env(safe-area-inset-bottom))`,
         top: notificationInset?.top,
         right: notificationInset?.right || 13,
         left: notificationInset?.left || (isNarrowWidth ? 13 : undefined),
