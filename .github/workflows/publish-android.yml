@@ -1,4 +1,4 @@
-name: Build Android Release
+name: Publish Android
 
 # Android apps are published for every new release and nightly schedule
 
