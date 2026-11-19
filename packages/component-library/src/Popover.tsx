@@ -1,16 +1,6 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { ComponentProps } from 'react';
-import {
-  OverlayTriggerStateContext,
-  Popover as ReactAriaPopover,
-} from 'react-aria-components';
+import { Popover as ReactAriaPopover } from 'react-aria-components';
 
 import { css } from '@emotion/css';
 
@@ -18,32 +8,28 @@ import { styles } from './styles';
 
 type PopoverProps = ComponentProps<typeof ReactAriaPopover>;
 
-// react-aria's default padding between the popover and the viewport edge
-const DEFAULT_CONTAINER_PADDING = 12;
+let safeAreaBoundary: HTMLElement | null = null;
 
 /**
- * Reads the device safe-area insets (e.g. the iOS status bar / notch and the
- * home indicator). react-aria positions popovers against the raw viewport and
- * doesn't know about these insets, so a long list could otherwise end up
- * underneath the status bar. Returns 0 on platforms without insets.
+ * A hidden fixed element covering the part of the viewport outside the
+ * device safe-area insets (e.g. the iOS status bar and home indicator).
+ * Used as the popover boundary so react-aria keeps popovers clear of them.
+ * On platforms without insets it simply matches the viewport.
  */
-function getSafeAreaInset(): number {
+function getSafeAreaBoundary(): HTMLElement | undefined {
   if (typeof document === 'undefined' || !document.body) {
-    return 0;
+    return undefined;
   }
-  const probe = document.createElement('div');
-  probe.style.cssText =
-    'position:fixed;visibility:hidden;pointer-events:none;' +
-    'padding-top:env(safe-area-inset-top);' +
-    'padding-bottom:env(safe-area-inset-bottom);';
-  document.body.appendChild(probe);
-  const style = window.getComputedStyle(probe);
-  const inset = Math.max(
-    parseFloat(style.paddingTop) || 0,
-    parseFloat(style.paddingBottom) || 0,
-  );
-  probe.remove();
-  return inset;
+  if (!safeAreaBoundary?.isConnected) {
+    safeAreaBoundary = document.createElement('div');
+    safeAreaBoundary.setAttribute('aria-hidden', 'true');
+    safeAreaBoundary.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'top:env(safe-area-inset-top);bottom:env(safe-area-inset-bottom);' +
+      'left:env(safe-area-inset-left);right:env(safe-area-inset-right);';
+    document.body.appendChild(safeAreaBoundary);
+  }
+  return safeAreaBoundary;
 }
 
 export const Popover = ({
@@ -52,31 +38,6 @@ export const Popover = ({
   ...props
 }: PopoverProps) => {
   const ref = useRef<HTMLElement>(null);
-
-  // When the popover is driven by a DialogTrigger, `isOpen` isn't passed in,
-  // so fall back to the trigger's own open state, and finally to
-  // `defaultOpen` for standalone uncontrolled popovers.
-  const triggerState = useContext(OverlayTriggerStateContext);
-  const isOpen =
-    props.isOpen ?? triggerState?.isOpen ?? props.defaultOpen ?? false;
-
-  // Measure the inset when the popover opens and keep it current while it
-  // stays open (e.g. the device rotates), so react-aria repositions it with
-  // the up-to-date value. An explicit `containerPadding` prop still wins
-  // because `props` is spread after it below.
-  const [safeAreaInset, setSafeAreaInset] = useState(0);
-
-  useLayoutEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const update = () => setSafeAreaInset(getSafeAreaInset());
-    update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, [isOpen]);
-
-  const containerPadding = DEFAULT_CONTAINER_PADDING + safeAreaInset;
 
   const handleFocus = useCallback(
     (e: FocusEvent) => {
@@ -102,7 +63,7 @@ export const Popover = ({
       ref={ref}
       placement="bottom end"
       offset={1}
-      containerPadding={containerPadding}
+      boundaryElement={getSafeAreaBoundary()}
       className={css({
         ...styles.tooltip,
         ...styles.lightScrollbar,
