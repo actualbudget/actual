@@ -49,9 +49,7 @@ const mobileSheetContainerStyle: CSSProperties = {
 const SHEET_EXIT_MS = 180;
 const KEYBOARD_FOLLOW_TRANSITION = '300ms cubic-bezier(0.22, 1, 0.36, 1)';
 
-// Registering the variable as a length lets it be transitioned, so the
-// container and everything sized from it ease together. Where registration is
-// unavailable only the container's own height can ease.
+// A registered length can be transitioned; unregistered variables cannot.
 const canTransitionViewportHeightVariable = registerViewportHeightVariable();
 
 function registerViewportHeightVariable() {
@@ -66,7 +64,7 @@ function registerViewportHeightVariable() {
       initialValue: '0px',
     });
   } catch {
-    // Already registered (e.g. after a hot reload).
+    // Already registered.
   }
   return true;
 }
@@ -230,8 +228,7 @@ export const Modal = ({
           nativeStyle={{
             // React Aria's height removes pinch zoom scaling. Safari page zoom
             // needs CSS pixels, including keyboard resizing while zoomed.
-            // The status bar area is left out so modals never sit under it;
-            // sizes derived from this variable shrink to match.
+            // Excludes the status bar area.
             '--visual-viewport-height': `calc(${viewport.height}px - env(safe-area-inset-top, 0px))`,
             top: viewport.offsetTop,
           }}
@@ -240,11 +237,7 @@ export const Modal = ({
             marginTop: 'env(safe-area-inset-top, 0px)',
             alignItems: isSheet ? 'stretch' : 'center',
             height: 'var(--visual-viewport-height)',
-            // The viewport resizes in one step when the on-screen keyboard
-            // starts to open or close; easing the variable follows the
-            // keyboard's slide instead of snapping, for this container and
-            // for descendants that size themselves from it. Without a
-            // registered variable, the container's height eases on its own.
+            // Follow the on-screen keyboard instead of snapping.
             ...(isNarrowWidth &&
               !prefersReducedMotion && {
                 transition: `${canTransitionViewportHeightVariable ? '--visual-viewport-height' : 'height'} ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
@@ -256,10 +249,7 @@ export const Modal = ({
           <ReactAriaModal
             ref={sheetRef}
             className={isAnimatedSheet ? mobileSheetModalClassName : undefined}
-            // Auto margins centre a dialog (or pin a sheet to the bottom) while
-            // it fits, but never push its top above the container, so content
-            // taller than the screen scrolls instead of hiding under the
-            // status bar.
+            // Auto margins never push an oversized modal above the container.
             style={{ marginTop: 'auto', marginBottom: isSheet ? 0 : 'auto' }}
           >
             {modalProps => (
