@@ -21,7 +21,7 @@ import { useDispatch, useSelector } from '#redux';
 
 import { Link } from './common/Link';
 import { MODAL_Z_INDEX } from './common/Modal';
-import { useFixedMobileNavHeight } from './mobile/MobileNavTabs';
+import { useExperimentalMobileNavHeight } from './mobile/ExperimentalMobileNavTabs';
 
 // Notification stacking configuration
 const MAX_VISIBLE_NOTIFICATIONS = 3; // Maximum number of notifications visible in the stack
@@ -373,7 +373,7 @@ export function Notifications({ style }: { style?: CSSProperties }) {
   const { isNarrowWidth } = useResponsive();
   const notifications = useSelector(state => state.notifications.notifications);
   const notificationInset = useSelector(state => state.notifications.inset);
-  const navHeight = useFixedMobileNavHeight();
+  const navHeight = useExperimentalMobileNavHeight();
 
   // Only show the last N notifications (newest first) for z-axis stacking
   // Reverse so newest notification (last in array) becomes index 0 (front)

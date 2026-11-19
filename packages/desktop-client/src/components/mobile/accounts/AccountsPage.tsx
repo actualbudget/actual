@@ -28,8 +28,8 @@ import { css } from '@emotion/css';
 import { useMoveAccountMutation, useSyncAndDownloadMutation } from '#accounts';
 import { isAccountFailedSync } from '#accounts/syncStatus';
 import { makeAmountFullStyle } from '#components/budget/util';
+import { ExperimentalMobileSettingsButton } from '#components/mobile/ExperimentalMobileSettingsButton';
 import { MOBILE_NAV_HEIGHT } from '#components/mobile/MobileNavTabs';
-import { MobileSettingsButton } from '#components/mobile/MobileSettingsButton';
 import { PullToRefresh } from '#components/mobile/PullToRefresh';
 import { MobilePageHeader, Page } from '#components/Page';
 import { CellValue, CellValueText } from '#components/spreadsheet/CellValue';
@@ -349,7 +349,7 @@ function AllAccountList({
               >
                 <SvgAdd width={20} height={20} />
               </Button>
-              <MobileSettingsButton />
+              <ExperimentalMobileSettingsButton />
             </>
           }
         />

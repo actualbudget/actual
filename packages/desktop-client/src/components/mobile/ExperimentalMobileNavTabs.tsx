@@ -15,9 +15,20 @@ import { styles } from '@actual-app/components/styles';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-export const SIMPLE_MOBILE_NAV_HEIGHT = 56;
+import { useFeatureFlag } from '#hooks/useFeatureFlag';
 
-export function SimpleMobileNavTabs() {
+export const EXPERIMENTAL_MOBILE_NAV_HEIGHT = 56;
+
+/**
+ * Space taken at the bottom of the screen by the experimental always-visible
+ * navbar (`simpleMobileNavbar` flag), or 0 when the flag is off.
+ */
+export function useExperimentalMobileNavHeight() {
+  const isEnabled = useFeatureFlag('simpleMobileNavbar');
+  return isEnabled ? EXPERIMENTAL_MOBILE_NAV_HEIGHT : 0;
+}
+
+export function ExperimentalMobileNavTabs() {
   const { t } = useTranslation();
   const { isNarrowWidth } = useResponsive();
 
@@ -49,7 +60,7 @@ export function SimpleMobileNavTabs() {
       <View
         style={{
           flexDirection: 'row',
-          height: SIMPLE_MOBILE_NAV_HEIGHT,
+          height: EXPERIMENTAL_MOBILE_NAV_HEIGHT,
           width: '100%',
         }}
       >

@@ -3,14 +3,14 @@ import type { CSSProperties, PropsWithChildren } from 'react';
 import { theme } from '@actual-app/components/theme';
 import { View } from '@actual-app/components/view';
 
-import { useFixedMobileNavHeight } from './MobileNavTabs';
+import { useExperimentalMobileNavHeight } from './ExperimentalMobileNavTabs';
 
 type FloatingActionBarProps = PropsWithChildren & {
   style: CSSProperties;
 };
 
 export function FloatingActionBar({ style, children }: FloatingActionBarProps) {
-  const navHeight = useFixedMobileNavHeight();
+  const navHeight = useExperimentalMobileNavHeight();
   return (
     <View
       style={{

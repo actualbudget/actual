@@ -7,7 +7,7 @@ import { SvgCog } from '@actual-app/components/icons/v1';
 import { useFeatureFlag } from '#hooks/useFeatureFlag';
 import { useNavigate } from '#hooks/useNavigate';
 
-export function MobileSettingsButton() {
+export function ExperimentalMobileSettingsButton() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const isSimpleNavbar = useFeatureFlag('simpleMobileNavbar');

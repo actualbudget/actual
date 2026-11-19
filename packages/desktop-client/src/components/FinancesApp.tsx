@@ -32,6 +32,7 @@ import { EnableBankingCallback } from './EnableBankingCallback';
 import { FeatureErrorFallback } from './FeatureErrorFallback';
 import { GlobalKeys } from './GlobalKeys';
 import { MobileBankSyncAccountEditPage } from './mobile/banksync/MobileBankSyncAccountEditPage';
+import { ExperimentalMobileNavTabs } from './mobile/ExperimentalMobileNavTabs';
 import { MobileNavTabs } from './mobile/MobileNavTabs';
 import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { NotificationsPage } from './news/NotificationsPage';
@@ -606,7 +607,7 @@ export function FinancesApp() {
                       path="/bank-sync/account/:accountId/edit"
                       element={null}
                     />
-                    <Route path="*" element={<MobileNavTabs />} />
+                    <Route path="*" element={<ExperimentalMobileNavTabs />} />
                   </Routes>
                 ) : (
                   <Routes>

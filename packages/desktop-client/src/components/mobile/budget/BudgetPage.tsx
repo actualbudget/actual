@@ -48,7 +48,7 @@ import { closeBudget } from '#budgetfiles/budgetfilesSlice';
 import { clampMonth } from '#components/budget/MonthsContext';
 import { prewarmMonth } from '#components/budget/util';
 import { FinancialText } from '#components/FinancialText';
-import { MobileSettingsButton } from '#components/mobile/MobileSettingsButton';
+import { ExperimentalMobileSettingsButton } from '#components/mobile/ExperimentalMobileSettingsButton';
 import { MobilePageHeader, Page } from '#components/Page';
 import { SyncRefresh } from '#components/SyncRefresh';
 import { useCategories } from '#hooks/useCategories';
@@ -581,7 +581,7 @@ export function BudgetPage() {
                   <SvgCalendar width={20} height={20} />
                 </Button>
               )}
-              <MobileSettingsButton />
+              <ExperimentalMobileSettingsButton />
             </>
           }
         />
