@@ -51,8 +51,13 @@ const KEYBOARD_FOLLOW_TRANSITION = '300ms cubic-bezier(0.22, 1, 0.36, 1)';
 
 // Registering the variable as a length lets it be transitioned, so the
 // container and everything sized from it ease together. Where registration is
-// unavailable the variable changes in one step, as before.
-if (typeof CSS !== 'undefined' && 'registerProperty' in CSS) {
+// unavailable only the container's own height can ease.
+const canTransitionViewportHeightVariable = registerViewportHeightVariable();
+
+function registerViewportHeightVariable() {
+  if (typeof CSS === 'undefined' || !('registerProperty' in CSS)) {
+    return false;
+  }
   try {
     CSS.registerProperty({
       name: '--visual-viewport-height',
@@ -63,6 +68,7 @@ if (typeof CSS !== 'undefined' && 'registerProperty' in CSS) {
   } catch {
     // Already registered (e.g. after a hot reload).
   }
+  return true;
 }
 
 const sheetSlideIn = keyframes({
@@ -237,10 +243,11 @@ export const Modal = ({
             // The viewport resizes in one step when the on-screen keyboard
             // starts to open or close; easing the variable follows the
             // keyboard's slide instead of snapping, for this container and
-            // for descendants that size themselves from it.
+            // for descendants that size themselves from it. Without a
+            // registered variable, the container's height eases on its own.
             ...(isNarrowWidth &&
               !prefersReducedMotion && {
-                transition: `--visual-viewport-height ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
+                transition: `${canTransitionViewportHeightVariable ? '--visual-viewport-height' : 'height'} ${KEYBOARD_FOLLOW_TRANSITION}, top ${KEYBOARD_FOLLOW_TRANSITION}`,
               }),
             overflowY: 'auto',
             ...wrapperProps?.style,
