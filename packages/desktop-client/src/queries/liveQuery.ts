@@ -1,5 +1,8 @@
 // @ts-strict-ignore
-import { listen } from '@actual-app/core/platform/client/connection';
+import {
+  isOwnRequest,
+  listen,
+} from '@actual-app/core/platform/client/connection';
 import type { Query } from '@actual-app/core/shared/query';
 
 import { aqlQuery } from './aqlQuery';
@@ -139,10 +142,14 @@ export class LiveQuery<TResponse = unknown> {
       this._unsubscribeSyncEvent = listen('sync-event', event => {
         // Optimistic updates should not trigger redundant refetches.
         // Changes originating from another tab must still be fetched.
+        const isFromAnotherTab =
+          event.type === 'applied' &&
+          event.requestId != null &&
+          !isOwnRequest(event.requestId);
+
         if (
           (event.type === 'applied' || event.type === 'success') &&
-          (this._supportedSyncTypes.has(event.type) ||
-            (event.type === 'applied' && event.fromAnotherTab === true))
+          (this._supportedSyncTypes.has(event.type) || isFromAnotherTab)
         ) {
           this.onUpdate(event.tables);
         }

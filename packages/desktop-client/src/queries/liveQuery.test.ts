@@ -62,11 +62,16 @@ async function mockSend(name, args, { delay }) {
   }
 }
 
-function mockServer({ send = mockSend, listen = mockListen }) {
+function mockServer({
+  send = mockSend,
+  listen = mockListen,
+  isOwnRequest = (_id: string): boolean => false,
+}) {
   vi.spyOn(connection, 'send').mockImplementation((name, args) => {
     return send(name, args, { delay: 0 });
   });
   vi.spyOn(connection, 'listen').mockImplementation(listen);
+  vi.spyOn(connection, 'isOwnRequest').mockImplementation(isOwnRequest);
 }
 
 function clearMockServer() {
@@ -149,11 +154,38 @@ describe('liveQuery', () => {
     mockPublishEvent('sync-event', {
       type: 'applied',
       tables: ['transactions'],
-      fromAnotherTab: true,
+      requestId: 'other-tab-request',
     });
 
     await tracer.expect('server-query');
     await tracer.expect('data', ['*']);
+  });
+
+  it('ignores applied events from the same tab (onlySync: true)', async () => {
+    mockServer({
+      isOwnRequest: id => id === 'own-tab-request',
+    });
+
+    tracer.start();
+
+    const query = q('transactions').select('*');
+
+    liveQuery(query, {
+      onData: data => tracer.event('data', data),
+      options: { onlySync: true },
+    });
+
+    await tracer.expect('server-query');
+    await tracer.expect('data', ['*']);
+
+    mockPublishEvent('sync-event', {
+      type: 'applied',
+      tables: ['transactions'],
+      requestId: 'own-tab-request',
+    });
+
+    const p = Promise.race([tracer.wait('server-query'), wait(100)]);
+    expect(await p).toEqual('wait(100)');
   });
 
   it(`runs and updates with sync events (onlySync: true)`, async () => {
