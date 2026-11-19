@@ -42,12 +42,21 @@ jobs:
       - name: Build mobile web app
         run: yarn build:browser --mobile
 
+      # Secrets (all in the `release` environment):
+      #
+      # - ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD: a signing
+      #   keystore. Generate once with:
+      #   keytool -genkeypair -keystore actual-android.jks -storetype JKS \
+      #     -alias actual -keyalg RSA -keysize 2048 -validity 10000
+      #   Press Enter at the key-password prompt to reuse the keystore password.
+      #   The secret is `base64 -i actual-android.jks` and the keystore password.
+      #   Back up the key securely and supply it when enrolling in Play App Signing.
       - name: Build and verify signed Android release
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: actual
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           umask 077
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/actual-android-upload.jks"
