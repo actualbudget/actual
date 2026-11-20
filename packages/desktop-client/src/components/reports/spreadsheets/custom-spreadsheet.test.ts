@@ -77,3 +77,50 @@ it.each([
     ]);
   },
 );
+
+it('rolls monthly rows up into calendar quarters for Quarterly reports', async () => {
+  vi.mocked(fetchSpreadsheetQueryData).mockResolvedValue({
+    assets: [],
+    debts: [
+      { ...transaction, notes: '#red', amount: -50, date: '2026-01' },
+      { ...transaction, notes: '#red', amount: -25, date: '2026-03' },
+      { ...transaction, notes: '#red', amount: -10, date: '2026-04' },
+      { ...transaction, notes: '#red', amount: -5, date: '2026-09' },
+    ],
+  });
+  const { result } = renderHook(useSpreadsheet, {
+    wrapper: SpreadsheetProvider,
+  });
+  const setData = vi.fn<(data: DataEntity) => void>();
+  await createCustomSpreadsheet({
+    startDate: '2026-01-01',
+    endDate: '2026-09-30',
+    interval: 'Quarterly',
+    categories: { list: [], grouped: [] },
+    conditions: [],
+    conditionsOp: 'and',
+    showEmpty: false,
+    showOffBudget: false,
+    showHiddenCategories: false,
+    showUncategorized: false,
+    trimIntervals: false,
+    groupBy: 'Tag',
+    tags: [{ id: 'red', tag: 'red' }],
+  })(result.current, setData);
+
+  const data = setData.mock.calls[0][0];
+  expect(data.intervalData.map(interval => interval.date)).toEqual([
+    "Q1 '26",
+    "Q2 '26",
+    "Q3 '26",
+  ]);
+  expect(data.intervalData.map(interval => interval.totalDebts)).toEqual([
+    -75, -10, -5,
+  ]);
+  expect(data.intervalData.map(interval => interval.intervalEndDate)).toEqual([
+    '2026-03-31',
+    '2026-06-30',
+    '2026-09-30',
+  ]);
+  expect(data.totalDebts).toBe(-90);
+});

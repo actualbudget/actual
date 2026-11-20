@@ -18,7 +18,9 @@ import type {
   CategoryEntity,
   CategoryGroupEntity,
   CustomReportEntity,
+  CustomReportTagScope,
   sortByOpType,
+  TagEntity,
   TimeFrame,
   TransactionEntity,
 } from '@actual-app/core/types/models';
@@ -35,16 +37,19 @@ import { getIntervalFormat, ReportOptions } from './ReportOptions';
 import type { dateRangeProps } from './ReportOptions';
 import { validateEnd, validateStart } from './reportRanges';
 import { setSessionReport } from './setSessionReport';
+import { TagScopeSelector } from './TagScopeSelector';
 
 type ReportSidebarProps = {
   customReportItems: CustomReportEntity;
   selectedCategories: CategoryEntity[];
   categories: { list: CategoryEntity[]; grouped: CategoryGroupEntity[] };
+  tags: TagEntity[];
   dateRangeLine: number;
   allIntervals: { name: string; pretty: string }[];
   setDateRange: (value: CustomReportEntity['dateRange']) => void;
   setGraphType: (value: CustomReportEntity['graphType']) => void;
   setGroupBy: (value: CustomReportEntity['groupBy']) => void;
+  setTagScope: (value: CustomReportTagScope) => void;
   setInterval: (value: CustomReportEntity['interval']) => void;
   setBalanceType: (value: CustomReportEntity['balanceType']) => void;
   setSortBy: (value: CustomReportEntity['sortBy']) => void;
@@ -83,11 +88,13 @@ export function ReportSidebar({
   customReportItems,
   selectedCategories,
   categories,
+  tags,
   dateRangeLine,
   allIntervals,
   setDateRange,
   setGraphType,
   setGroupBy,
+  setTagScope,
   setInterval,
   setBalanceType,
   setSortBy,
@@ -181,22 +188,29 @@ export function ReportSidebar({
     defaultItems(cond);
   };
 
+  const onChangeTagScope = (scope: CustomReportTagScope) => {
+    setSessionReport('tagScope', scope);
+    onReportChange({ type: 'modify' });
+    setTagScope(scope);
+  };
+
   const onChangeBalanceType = (cond: string) => {
     setSessionReport('balanceType', cond);
     onReportChange({ type: 'modify' });
     setBalanceType(cond);
 
     if (cond === 'Budgeted') {
-      // Budgeted does not support Payee and Account splits
+      // Budgeted does not support Payee, Account, or Tag splits
       if (
         customReportItems.groupBy === 'Payee' ||
-        customReportItems.groupBy === 'Account'
+        customReportItems.groupBy === 'Account' ||
+        customReportItems.groupBy === 'Tag'
       ) {
         setSessionReport('groupBy', 'Category');
         setGroupBy('Category');
         defaultItems('Category');
       }
-      // Budgeted only supports Monthly and Yearly intervals
+      // Budgeted only supports Monthly, Quarterly and Yearly intervals
       if (
         customReportItems.interval === 'Daily' ||
         customReportItems.interval === 'Weekly'
@@ -212,6 +226,42 @@ export function ReportSidebar({
           onSelectRange(defaultsList.intervalRange.get('Monthly') || '');
         }
       }
+    }
+  };
+
+  const onChangeInterval = (cond: string) => {
+    setSessionReport('interval', cond);
+    setInterval(cond);
+    onReportChange({ type: 'modify' });
+    const isRangeUnsupported = ReportOptions.dateRange
+      .filter(d => !d[cond as keyof dateRangeProps])
+      .map(int => int.key)
+      .includes(customReportItems.dateRange);
+
+    if (cond === 'Weekly' && customReportItems.isDateStatic) {
+      if (isRangeUnsupported) {
+        // Keep the live range valid without replacing the static dates.
+        const range = defaultsList.intervalRange.get(cond) || '';
+        setSessionReport('dateRange', range);
+        setDateRange(range);
+      }
+      // Widen static dates to whole weeks so the range matches the weeks
+      // shown in From and To, bounded the same way as picking a To week.
+      onChangeDates(
+        ...validateEnd(
+          earliestTransaction,
+          latestTransaction,
+          monthUtils.weekFromDate(
+            customReportItems.startDate,
+            firstDayOfWeekIdx,
+          ),
+          customReportItems.endDate,
+          cond,
+          firstDayOfWeekIdx,
+        ),
+      );
+    } else if (isRangeUnsupported) {
+      onSelectRange(defaultsList.intervalRange.get(cond) || '');
     }
   };
 
@@ -242,6 +292,13 @@ export function ReportSidebar({
         ?.graphs.find(g => g.description === customReportItems.graphType)
         ?.disableSort ??
         false));
+
+  // A weekly end date is the last day of its week, but the options list the
+  // first day of each week.
+  const endIntervalValue =
+    customReportItems.interval === 'Weekly'
+      ? monthUtils.weekFromDate(customReportItems.endDate, firstDayOfWeekIdx)
+      : customReportItems.endDate;
 
   return (
     <View
@@ -310,10 +367,27 @@ export function ReportSidebar({
             ])}
             disabledKeys={
               customReportItems.balanceType === 'Budgeted'
-                ? [...new Set([...disabledItems('split'), 'Payee', 'Account'])]
+                ? [
+                    ...new Set([
+                      ...disabledItems('split'),
+                      'Payee',
+                      'Account',
+                      'Tag',
+                    ]),
+                  ]
                 : disabledItems('split')
             }
+            style={{ minWidth: 0 }}
           />
+          {customReportItems.groupBy === 'Tag' && (
+            <View style={{ marginLeft: 5, minWidth: 0 }}>
+              <TagScopeSelector
+                tags={tags}
+                tagScope={customReportItems.tagScope}
+                onChange={onChangeTagScope}
+              />
+            </View>
+          )}
         </View>
 
         <View
@@ -348,19 +422,7 @@ export function ReportSidebar({
           </Text>
           <Select
             value={customReportItems.interval}
-            onChange={e => {
-              setSessionReport('interval', e);
-              setInterval(e);
-              onReportChange({ type: 'modify' });
-              if (
-                ReportOptions.dateRange
-                  .filter(d => !d[e as keyof dateRangeProps])
-                  .map(int => int.key)
-                  .includes(customReportItems.dateRange)
-              ) {
-                onSelectRange(defaultsList.intervalRange.get(e) || '');
-              }
-            }}
+            onChange={onChangeInterval}
             options={ReportOptions.interval.map(option => [
               option.key,
               option.description,
@@ -665,9 +727,9 @@ export function ReportSidebar({
                     ),
                   )
                 }
-                value={customReportItems.endDate}
+                value={endIntervalValue}
                 defaultLabel={monthUtils.format(
-                  customReportItems.endDate,
+                  endIntervalValue,
                   getIntervalFormat(customReportItems.interval, dateFormat),
                   locale,
                 )}

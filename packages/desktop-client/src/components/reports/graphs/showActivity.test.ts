@@ -245,6 +245,36 @@ describe('showActivity', () => {
     },
   );
 
+  it('filters a Quarterly time drilldown to the whole quarter', () => {
+    const navigate = vi.fn();
+
+    showActivity({
+      navigate,
+      categories,
+      accounts,
+      balanceTypeOp: 'totalTotals',
+      filters: [],
+      showHiddenCategories: true,
+      showOffBudget: true,
+      type: 'time',
+      startDate: '2026-04',
+      endDate: '2026-06-30',
+      interval: 'Quarterly',
+    });
+
+    const [, options] = navigate.mock.calls[0];
+
+    expect(options.state.filterConditions).toEqual([
+      { field: 'date', op: 'gte', value: '2026-04-01', type: 'date' },
+      {
+        field: 'date',
+        op: 'lte',
+        value: '2026-06-30',
+        options: { date: true },
+      },
+    ]);
+  });
+
   it.each(['totalTotals', 'netAssets', 'netDebts'] as const)(
     'includes all transactions for a %s interval drilldown',
     balanceTypeOp => {

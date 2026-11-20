@@ -22,7 +22,7 @@ The Command Palette is a powerful tool which allows you to quickly access variou
 - Open it by pressing the <Key mod="ctrl" fixed k="k" /> combination.
 - On macOS keyboards, use the <Key mod="cmd" fixed k="k" /> key combination.
 
-![Command Palette](/img/tips-tricks/command-palette.webp)
+<img width="600" alt="The command palette open, listing pages and accounts" src="/img/tips-tricks/tips-tricks-command-palette@2x.webp" />
 
 Once open, you can start typing to search for the functions in the sidebar, or you can use the arrow keys to navigate
 through the list of available commands. You can also quickly move to any of the available accounts by typing their name.
@@ -93,7 +93,7 @@ See [Bulk Actions](../transactions/bulk-editing.md) for guidance on working with
 
 In the top left of the budget, you will see this control:
 
-![Months selector](/img/tips-tricks/months-selector.webp)
+<img width="92" alt="Four calendar icons, two of them highlighted to show two months" src="/img/tips-tricks/tips-tricks-months-selector@2x.webp" />
 
 This sets the maximum amount of months to render at once, and defaults to 1. If you want to view multiple months on the same page, click the boxes to increase the number.
 
@@ -113,11 +113,11 @@ Be advised that when you hover over scrambled items, the amounts will be shown. 
 
 **Turn it on**: Click the _eye icon_ in the top-right corner of the app or use the shortcut <Key mod="shift" mod="ctrl" k="P" />.
 
-![Top right corner](/img/a-tour-of-actual/tour-overview-top-right.webp)
+<img width="286" alt="The top right corner of the app, with the eye icon labeled A" src="/img/elements/top-bar/top-right@2x.webp" />
 
 When enabled, only currency amounts are scrambled so you can take screenshots or share your screen without exposing real numbers.
 
-![Top right corner](/img/tips-tricks/scrambled-scrambled-view.webp)
+![The Budget page with every amount scrambled by the privacy filter](/img/tips-tricks/tips-tricks-privacy-filter@2x.webp)
 
 What changes when the filter is on:
 
@@ -139,7 +139,7 @@ To enable this:
 
 A new column should appear which shows the balance of the account after each transaction:
 
-![Show running balance](/img/tips-tricks/running-balance.webp)
+![An account register with the Balance column showing the running balance](/img/tips-tricks/tips-tricks-running-balance@2x.webp)
 
 ## Using Emojis in Actual
 
@@ -149,7 +149,7 @@ flair to your budget and make it more fun to use.
 To add an emoji, you can use the emoji picker on your operating system, or you can copy and paste emojis from web sites
 like [Emojipedia](https://emojipedia.org/), [EmojiDB](https://emojidb.org/) or [Get Emoji](https://getemoji.com/).
 
-![Emojis everywhere](/img/tips-tricks/using-emojis.webp)
+![Category and account names that start with emojis](/img/tips-tricks/tips-tricks-emojis@2x.webp)
 
 :::tip[HINT]
 

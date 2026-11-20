@@ -36,7 +36,10 @@ export const Toggle = ({
         className={css({
           height: 0,
           width: 0,
-          visibility: 'hidden',
+          opacity: 0,
+          '&:focus-visible + label': {
+            boxShadow: '0 0 0 2px ' + theme.formInputBorderSelected,
+          },
         })}
         type="checkbox"
       />

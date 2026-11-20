@@ -43,42 +43,46 @@ Pluggy integration is experimental at this point, so before you can use it you n
 
 1. In Actual, click **"+ Add account"** at the bottom of the sidebar.
 
-   ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
+   <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Select **"Set-up Pluggy for bank-sync."**
+2. Select **Set up bank sync**. This opens the **Bank Sync** page in Settings.
 
-   ![](/img/connecting-your-bank/pluggy-setup-modal-setup.webp)
+   <img width="518" alt="The Add account dialog with the Set up bank sync button highlighted" src="/img/advanced/bank-sync/bank-sync-add-account-modal@2x.webp" />
 
-3. In the dialog that appears, enter:
+3. Under **Providers**, click **Set up** on the Pluggy.ai card.
+
+   <img width="640" alt="The Providers section of the Bank Sync page with Set up on the Pluggy.ai card highlighted" src="/img/advanced/bank-sync/pluggyai-set-up@2x.webp" />
+
+4. In the dialog that appears, enter:
    - **Client ID**: From your Pluggy Dashboard
    - **Client Secret**: From your Pluggy Dashboard
    - **Item IDs**: Comma-separated if entering more than one
 
-   ![](/img/connecting-your-bank/pluggy-setup-modal.webp)
+   <img width="510" alt="The Set-up Pluggy.ai dialog with empty Client ID, Client Secret and Item Ids fields" src="/img/advanced/bank-sync/pluggyai-setup-modal@2x.webp" />
 
-4. Click **Save**. The credentials will be securely stored on the server.
+5. Click **Save and continue**. The credentials will be securely stored on the server.
 
 ---
 
 ### Link Accounts with Pluggy
 
 1. In Actual, link a bank account (existing or new):
-   - For an **existing account**, click it, then click the `...` (kebab menu) and choose **Link Account**.
+   - For an **existing account**, click it, then click the `...` (kebab menu) and choose **Link account**.
 
-     ![](/img/connecting-your-bank/connecting-your-bank-01.webp)
+     <img width="297" alt="The account menu with Link account highlighted" src="/img/advanced/bank-sync/bank-sync-link-account-menu@2x.webp" />
 
-   - For a **new account**, click **"+ Add account"** in the sidebar.
+   - For a **new account**, click **"+ Add account"** in the sidebar, then **Set up bank sync**.
 
-     ![](/img/connecting-your-bank/connecting-your-bank-02.webp)
+     <img width="240" alt="The sidebar with the Add account button at the bottom highlighted" src="/img/advanced/bank-sync/bank-sync-add-account@2x.webp" />
 
-2. Select **Link your bank account** with Pluggy.ai.
+2. Click **Link bank account** on the Pluggy.ai card.
 
-   ![](/img/connecting-your-bank/pluggy-setup-add-account.webp)
+   <img width="662" alt="The Link account dialog with Link bank account on the Pluggy.ai card highlighted" src="/img/advanced/bank-sync/pluggyai-link-bank-account@2x.webp" />
 
 3. A list of accounts from your Pluggy connection will appear.
-4. Click **Set up bank-sync** next to the one you want to sync.
+4. Click **Set up bank sync** next to the one you want to sync.
 
-   ![](/img/connecting-your-bank/pluggy-setup-modal-link-account.webp)
+   <img width="988" alt="The Link Accounts dialog listing Pluggy.ai accounts, with one Set up bank sync button highlighted" src="/img/advanced/bank-sync/pluggyai-link-accounts@2x.webp" />
 
 ---
 

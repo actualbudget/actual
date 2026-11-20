@@ -297,6 +297,32 @@ function fillInBudgets(
   return budgets;
 }
 
+export function getBudgetNotes(
+  budget: YNAB4.MonthlyBudget,
+  entityIdMap: Map<string, string>,
+): { id: string; note: string }[] {
+  const month = monthUtils.monthFromDate(budget.month);
+  const notes: { id: string; note: string }[] = [];
+
+  if (typeof budget.note === 'string' && budget.note.length > 0) {
+    notes.push({ id: `budget-${month}`, note: budget.note });
+  }
+
+  for (const categoryBudget of budget.monthlySubCategoryBudgets) {
+    const categoryId = entityIdMap.get(categoryBudget.categoryId);
+    if (
+      !categoryBudget.isTombstone &&
+      categoryId &&
+      typeof categoryBudget.note === 'string' &&
+      categoryBudget.note.length > 0
+    ) {
+      notes.push({ id: `${categoryId}-${month}`, note: categoryBudget.note });
+    }
+  }
+
+  return notes;
+}
+
 async function importBudgets(
   data: YNAB4.YFull,
   entityIdMap: Map<string, string>,
@@ -307,6 +333,10 @@ async function importBudgets(
   await send('api/batch-budget-start');
   try {
     for (const budget of budgets) {
+      for (const note of getBudgetNotes(budget, entityIdMap)) {
+        await send('notes-save', note);
+      }
+
       const filled = fillInBudgets(
         data,
         budget.monthlySubCategoryBudgets.filter(b => !b.isTombstone),

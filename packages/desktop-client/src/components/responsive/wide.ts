@@ -12,6 +12,8 @@ export { ManageRulesPage as Rules } from '#components/ManageRulesPage';
 export { ManageRulesPage as RuleEdit } from '#components/ManageRulesPage';
 export { ManagePayeesPage as Payees } from '#components/payees/ManagePayeesPage';
 export { ManagePayeesPage as PayeeEdit } from '#components/payees/ManagePayeesPage';
+export { ManageTagsPage as Tags } from '#components/tags/ManageTagsPage';
+export { ManageTagsPage as TagEdit } from '#components/tags/ManageTagsPage';
 
 export { BankSync } from '#components/banksync';
 

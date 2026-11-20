@@ -189,7 +189,7 @@ export function LineGraph({
     ? computeTrendLines(data.intervalData, data.legend)
     : [];
 
-  const onShowActivity = (id, payload, uncategorizedId) => {
+  const onShowActivity = (id, payload, uncategorizedId, bucketTagNames) => {
     showActivity({
       navigate,
       categories,
@@ -204,6 +204,8 @@ export function LineGraph({
       field: groupBy.toLowerCase(),
       id,
       uncategorizedId,
+      bucketTagNames,
+      scopeTagNames: data.scopeTagNames,
       interval,
     });
   };
@@ -242,13 +244,11 @@ export function LineGraph({
                 />
               )}
               {!compact && <CartesianGrid strokeDasharray="3 3" />}
-              {!compact && (
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: theme.pageText }}
-                  tickLine={{ stroke: theme.pageText }}
-                />
-              )}
+              <XAxis
+                dataKey="date"
+                tick={{ fill: theme.pageText }}
+                tickLine={{ stroke: theme.pageText }}
+              />
               {!compact && (
                 <YAxis
                   tickFormatter={value =>
@@ -300,6 +300,7 @@ export function LineGraph({
                           entry.id,
                           payload,
                           entry.uncategorizedId,
+                          entry.bucketTagNames,
                         ),
                     }}
                   />

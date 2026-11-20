@@ -20,6 +20,24 @@ describe('alior_albpplpw', () => {
       expect(normalizedTransaction?.payeeName).toEqual('Example Coffee Bar');
     });
 
+    it('takes the merchant from a credit card payment, which has no card type in the prefix', () => {
+      const transaction = {
+        bookingDate: '2026-01-16',
+        transactionAmount: { amount: '-45.90', currency: 'PLN' },
+        debtorName: 'JOHN EXAMPLE',
+        debtorAccount: { iban: 'PL00000000000000000987654321' },
+        remittanceInformationUnstructured:
+          'Transakcja kartą, EXAMPLE MARKET 02',
+      };
+
+      const normalizedTransaction = AliorAlbpplpw.normalizeTransaction(
+        transaction,
+        true,
+      );
+
+      expect(normalizedTransaction?.payeeName).toEqual('Example Market 02');
+    });
+
     it('does not fall back to the account holder on card payments', () => {
       const transaction = {
         bookingDate: '2026-01-16',

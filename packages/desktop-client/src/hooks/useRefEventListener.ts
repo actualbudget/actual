@@ -18,26 +18,26 @@ export function useRefEventListener<
   callbackRef.current = callback;
 
   // Mutating `ref.current` doesn't re-run effects, so the element can't go in
-  // a dependency array. Re-resolve it after every render and rebind only
-  // when it (or the event) actually changed. This deliberately avoids
-  // mirroring the element into state: that would schedule an extra render
-  // every time a component using this hook mounts, and a virtualized list
-  // mounting many rows while scrolling can then trip React's "Maximum
-  // update depth exceeded" guard (#9170).
-  const boundRef = useRef<{
+  // a dependency array. Re-resolve it after every render and only rebind the
+  // native listener when the element or `event` has actually changed.
+  const bindingRef = useRef<{
     target: EventTarget;
     event: EventType;
     listener: EventListener;
   } | null>(null);
 
-  // oxlint-disable-next-line react-hooks/exhaustive-deps -- must run every render to notice a swapped element
   useEffect(() => {
     const target =
       ref instanceof Document || ref instanceof Window ? ref : ref.current;
-    const bound = boundRef.current;
-    if (bound?.target === target && bound?.event === event) return;
+    const binding = bindingRef.current;
+    if (binding && binding.target === target && binding.event === event) {
+      return;
+    }
 
-    unbind(boundRef);
+    if (binding) {
+      binding.target.removeEventListener(binding.event, binding.listener);
+      bindingRef.current = null;
+    }
     if (!target) return;
 
     const listener: EventListener = e =>
@@ -46,21 +46,16 @@ export function useRefEventListener<
         e as HTMLElementEventMap[EventType],
       );
     target.addEventListener(event, listener);
-    boundRef.current = { target, event, listener };
+    bindingRef.current = { target, event, listener };
   });
 
-  useEffect(() => () => unbind(boundRef), []);
-}
-
-function unbind(
-  boundRef: RefObject<{
-    target: EventTarget;
-    event: string;
-    listener: EventListener;
-  } | null>,
-) {
-  const bound = boundRef.current;
-  if (!bound) return;
-  bound.target.removeEventListener(bound.event, bound.listener);
-  boundRef.current = null;
+  useEffect(() => {
+    return () => {
+      const binding = bindingRef.current;
+      if (binding) {
+        binding.target.removeEventListener(binding.event, binding.listener);
+        bindingRef.current = null;
+      }
+    };
+  }, []);
 }

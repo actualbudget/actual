@@ -1,20 +1,30 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { SvgCog, SvgReports, SvgWallet } from '@actual-app/components/icons/v1';
-import { SvgCalendar3 } from '@actual-app/components/icons/v2';
+import { SvgCog } from '@actual-app/components/icons/v1';
 import { View } from '@actual-app/components/view';
 
+import { useSidebarMenu } from '#hooks/useSidebarMenu';
+
 import { Item } from './Item';
+import { getSidebarMenuItemPath } from './sidebarMenu';
+import { useSidebarMenuItemDetails } from './useSidebarMenuItemDetails';
 
 export function PrimaryButtons() {
   const { t } = useTranslation();
+  const { sidebarItems } = useSidebarMenu();
+  const itemDetails = useSidebarMenuItemDetails();
 
   return (
     <View data-testid="sidebar-primary-buttons" style={{ flexShrink: 0 }}>
-      <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
-      <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
-      <Item title={t('Schedules')} Icon={SvgCalendar3} to="/schedules" />
+      {sidebarItems.map(item => (
+        <Item
+          key={item.id}
+          title={itemDetails[item.id].title}
+          Icon={itemDetails[item.id].Icon}
+          to={getSidebarMenuItemPath(item.id, true)}
+        />
+      ))}
       <Item title={t('Settings')} Icon={SvgCog} to="/settings" />
     </View>
   );
