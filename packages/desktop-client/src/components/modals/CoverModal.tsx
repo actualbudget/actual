@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { Button } from '@actual-app/components/button';
@@ -40,7 +46,7 @@ export function CoverModal({
   const [categoryGroups, categories] = useMemo(() => {
     const expenseGroups = originalCategoryGroups.filter(g => !g.is_income);
     const categoryGroups = showToBeBudgeted
-      ? addToBeBudgetedGroup(expenseGroups, { forNextMonth: forNextMonth ?? 0 })
+      ? addToBeBudgetedGroup(expenseGroups, forNextMonth)
       : expenseGroups;
     const filteredCategoryGroups = categoryId
       ? removeCategoriesFromGroups(categoryGroups, categoryId)
@@ -84,13 +90,13 @@ export function CoverModal({
 
   // The picker gets a copy of the groups, so wait until the "For next
   // month" row can be worked out before opening it
-  const [hasOpenedPicker, setHasOpenedPicker] = useState(false);
+  const hasOpenedPicker = useRef(false);
   useEffect(() => {
-    if (!hasOpenedPicker && forNextMonth != null) {
-      setHasOpenedPicker(true);
+    if (!hasOpenedPicker.current && forNextMonth != null) {
+      hasOpenedPicker.current = true;
       openCategoryModal();
     }
-  }, [hasOpenedPicker, forNextMonth, openCategoryModal]);
+  }, [forNextMonth, openCategoryModal]);
 
   return (
     <Modal name="cover">

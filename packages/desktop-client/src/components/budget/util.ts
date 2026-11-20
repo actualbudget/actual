@@ -27,7 +27,7 @@ import { getValidMonthBounds } from './MonthsContext';
 // amount, for covering a category's overspending in a managed month
 export function addToBeBudgetedGroup(
   groups: CategoryGroupEntity[],
-  { forNextMonth = 0 }: { forNextMonth?: number } = {},
+  forNextMonth?: number | null,
 ) {
   return [
     {
@@ -39,7 +39,7 @@ export function addToBeBudgetedGroup(
           name: t('To Budget'),
           group: 'to-budget',
         },
-        ...(forNextMonth > 0
+        ...(forNextMonth
           ? [
               {
                 id: 'for-next-month',

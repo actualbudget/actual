@@ -653,14 +653,12 @@ export async function coverOverspending({
   const toBudgeted = await getSheetValue(sheetName, 'budget-' + to);
   const leftoverFrom =
     from === 'for-next-month'
-      ? to === 'to-budget'
-        ? 0
-        : getForNextMonthCoverable({
-            managed: isManagedMonth(month),
-            forNextMonth: await getSheetValue(sheetName, 'buffered-selected'),
-            balance: await getSheetValue(sheetName, 'leftover-' + to),
-            carryover: await getSheetBoolean(sheetName, 'carryover-' + to),
-          })
+      ? getForNextMonthCoverable({
+          managed: isManagedMonth(month),
+          forNextMonth: await getSheetValue(sheetName, 'buffered-selected'),
+          balance: await getSheetValue(sheetName, 'leftover-' + to),
+          carryover: await getSheetBoolean(sheetName, 'carryover-' + to),
+        })
       : await getSheetValue(
           sheetName,
           from === 'to-budget' ? 'to-budget' : 'leftover-' + from,
