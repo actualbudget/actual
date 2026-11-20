@@ -27,7 +27,7 @@ import {
   useMoveDashboardPageMutation,
 } from '#reports/mutations';
 
-import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
+import { translateBuiltInDashboardPageName } from './reports/defaultDashboardNames';
 
 type DashboardSelectorProps = {
   dashboards: readonly DashboardPageEntity[];
@@ -146,7 +146,11 @@ export function DashboardSelector({
             textAlign: 'center',
           }}
         >
-          {translateBuiltInDashboardName(currentDashboard.name, t)}
+          {translateBuiltInDashboardPageName(
+            currentDashboard.name,
+            currentDashboard.builtin_key ?? undefined,
+            t,
+          )}
         </View>
         <SvgExpandArrow
           width={7}
@@ -234,7 +238,11 @@ function DashboardSelectorItem({
   return (
     <GridListItem
       id={dashboard.id}
-      textValue={translateBuiltInDashboardName(dashboard.name, t)}
+      textValue={translateBuiltInDashboardPageName(
+        dashboard.name,
+        dashboard.builtin_key ?? undefined,
+        t,
+      )}
       className={css({
         display: 'flex',
         flexDirection: 'row',
@@ -252,7 +260,11 @@ function DashboardSelectorItem({
         slot="drag"
         variant="bare"
         aria-label={t('Reorder {{ dashboardName }}', {
-          dashboardName: translateBuiltInDashboardName(dashboard.name, t),
+          dashboardName: translateBuiltInDashboardPageName(
+            dashboard.name,
+            dashboard.builtin_key ?? undefined,
+            t,
+          ),
         })}
         style={{
           cursor: 'grab',
@@ -263,7 +275,11 @@ function DashboardSelectorItem({
         <SvgMenu width={10} height={10} />
       </Button>
       <Text style={{ fontWeight: isCurrent ? 600 : undefined }}>
-        {translateBuiltInDashboardName(dashboard.name, t)}
+        {translateBuiltInDashboardPageName(
+          dashboard.name,
+          dashboard.builtin_key ?? undefined,
+          t,
+        )}
       </Text>
     </GridListItem>
   );

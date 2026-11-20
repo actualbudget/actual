@@ -54,6 +54,7 @@ export function SpendingCard({
   const averageRangeLabel = getSpendingAverageRangeLabel(averageRange, t);
   const cardName = translateBuiltInDashboardName(
     meta?.name || t('Monthly Spending'),
+    meta?.builtin_key,
     t,
   );
 
@@ -115,6 +116,7 @@ export function SpendingCard({
                 if (newName !== cardName) {
                   onMetaChange({
                     ...meta,
+                    builtin_key: undefined,
                     name: newName,
                   });
                 }

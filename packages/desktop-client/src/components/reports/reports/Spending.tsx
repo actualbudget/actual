@@ -272,6 +272,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
 
   const title = translateBuiltInDashboardName(
     widget?.meta?.name || t('Monthly Spending'),
+    widget?.meta?.builtin_key,
     t,
   );
   const onSaveWidgetName = async (newName: string) => {
@@ -288,6 +289,7 @@ function SpendingInternal({ widget }: SpendingInternalProps) {
         id: widget.id,
         meta: {
           ...(widget.meta ?? {}),
+          builtin_key: undefined,
           name,
         },
       },

@@ -38,7 +38,11 @@ export function SummaryCard({
   const { t } = useTranslation();
   const [latestTransaction, setLatestTransaction] = useState<string>('');
   const [nameMenuOpen, setNameMenuOpen] = useState(false);
-  const cardName = translateBuiltInDashboardName(meta?.name || t('Summary'), t);
+  const cardName = translateBuiltInDashboardName(
+    meta?.name || t('Summary'),
+    meta?.builtin_key,
+    t,
+  );
 
   useEffect(() => {
     async function fetchLatestTransaction() {
@@ -107,6 +111,7 @@ export function SummaryCard({
               if (newName !== cardName) {
                 onMetaChange({
                   ...meta,
+                  builtin_key: undefined,
                   content: JSON.stringify(content),
                   name: newName,
                 });

@@ -49,7 +49,11 @@ export function MarkdownCard({
   onMetaChange,
 }: MarkdownCardProps) {
   const { t } = useTranslation();
-  const displayContent = translateBuiltInDashboardContent(meta.content, t);
+  const displayContent = translateBuiltInDashboardContent(
+    meta.content,
+    meta.builtin_key,
+    t,
+  );
 
   const [isVisibleTextArea, setIsVisibleTextArea] = useState(false);
 
@@ -135,6 +139,7 @@ export function MarkdownCard({
               if (event.currentTarget.value !== displayContent) {
                 onMetaChange({
                   ...meta,
+                builtin_key: undefined,
                   content: event.currentTarget.value,
                 });
               }

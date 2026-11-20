@@ -12,7 +12,7 @@ import type { Modal as ModalType } from '#modals/modalsSlice';
 // The Reports alias only resolves files already present in the alias index.
 // Keep this as a relative import until the alias resolver supports new modules.
 // eslint-disable-next-line actual/prefer-subpath-imports, typescript-paths/absolute-parent-import
-import { translateBuiltInDashboardName } from '../reports/reports/defaultDashboardNames';
+import { translateBuiltInDashboardPageName } from '../reports/reports/defaultDashboardNames';
 
 type CopyWidgetToDashboardModalProps = Extract<
   ModalType,
@@ -29,7 +29,11 @@ export function CopyWidgetToDashboardModal({
     () =>
       dashboardPages.map(d => ({
         name: d.id,
-        text: translateBuiltInDashboardName(d.name, t),
+        text: translateBuiltInDashboardPageName(
+          d.name,
+          d.builtin_key ?? undefined,
+          t,
+        ),
       })),
     [dashboardPages, t],
   );

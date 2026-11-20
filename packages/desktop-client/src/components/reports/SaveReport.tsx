@@ -24,7 +24,7 @@ import {
 } from '#reports/mutations';
 
 import { LoadingIndicator } from './LoadingIndicator';
-import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
+import { translateBuiltInDashboardPageName } from './reports/defaultDashboardNames';
 import { SaveReportChoose } from './SaveReportChoose';
 import { SaveReportDelete } from './SaveReportDelete';
 import { SaveReportMenu } from './SaveReportMenu';
@@ -326,7 +326,11 @@ export function SaveReport({
                     defaultLabel={t('None')}
                     options={dashboardPages.map(d => [
                       d.id,
-                      translateBuiltInDashboardName(d.name, t),
+                      translateBuiltInDashboardPageName(
+                        d.name,
+                        d.builtin_key ?? undefined,
+                        t,
+                      ),
                     ])}
                     style={{ marginTop: 10, width: 300 }}
                   />

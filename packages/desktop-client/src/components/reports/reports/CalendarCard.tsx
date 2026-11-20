@@ -64,6 +64,7 @@ export function CalendarCard({
   const format = useFormat();
   const cardName = translateBuiltInDashboardName(
     meta?.name || t('Calendar'),
+    meta?.builtin_key,
     t,
   );
 
@@ -189,6 +190,7 @@ export function CalendarCard({
                 if (newName !== cardName) {
                   onMetaChange({
                     ...meta,
+                    builtin_key: undefined,
                     name: newName,
                   });
                 }

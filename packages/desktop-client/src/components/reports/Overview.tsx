@@ -61,7 +61,7 @@ import { CalendarCard } from './reports/CalendarCard';
 import { CashFlowCard } from './reports/CashFlowCard';
 import { CrossoverCard } from './reports/CrossoverCard';
 import { CustomReportListCards } from './reports/CustomReportListCards';
-import { translateBuiltInDashboardName } from './reports/defaultDashboardNames';
+import { translateBuiltInDashboardPageName } from './reports/defaultDashboardNames';
 import { FormulaCard } from './reports/FormulaCard';
 import { MarkdownCard } from './reports/MarkdownCard';
 import { MissingReportCard } from './reports/MissingReportCard';
@@ -492,7 +492,11 @@ export function Overview({ dashboard }: OverviewProps) {
                   }}
                 >
                   <Trans>Reports</Trans>:{' '}
-                  {translateBuiltInDashboardName(dashboard.name, t)}
+                  {translateBuiltInDashboardPageName(
+                    dashboard.name,
+                    dashboard.builtin_key ?? undefined,
+                    t,
+                  )}
                 </View>
               }
             />
