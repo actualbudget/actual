@@ -1,6 +1,6 @@
 ---
-category: Bugfix
+category: Maintenance
 authors: [tabedzki]
 ---
 
-Reduce the chance of the transaction list crashing when scrolling quickly
+Add tests that guard against the transaction list crashing when scrolling quickly
