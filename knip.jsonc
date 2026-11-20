@@ -1,17 +1,17 @@
 {
-  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema-jsonc.json",
   "rules": {
     "exports": "off",
     "types": "off",
     "nsExports": "off",
     "nsTypes": "off",
-    "duplicates": "off"
+    "duplicates": "off",
   },
   "ignoreBinaries": ["electron-rebuild"],
   "workspaces": {
     ".": {
       "entry": ["bin/*.mts"],
-      "ignore": ["lage.config.js", ".claude/**", ".agents/**"]
+      "ignore": ["lage.config.js", ".claude/**", ".agents/**"],
     },
     "packages/api": {
       "entry": ["index.browser.ts", "browser-worker.ts", "e2e/**/*.{ts,mjs}"],
@@ -20,50 +20,50 @@
         "@actual-app/crdt",
         "better-sqlite3",
         "uuid",
-        "@jlongster/sql.js"
-      ]
+        "@jlongster/sql.js",
+      ],
     },
     "packages/ci-actions": {
       "entry": ["bin/*.ts"],
       "ignoreBinaries": ["bin/tsx"],
-      "ignoreDependencies": ["extensionless"]
+      "ignoreDependencies": ["extensionless"],
     },
     "packages/component-library": {
       "entry": ["src/icons/index-template.ts", "src/icons/template.ts"],
       "ignore": ["src/icons/.svgrrc.js", "src/icons/add-attribute.ts"],
-      "ignoreDependencies": ["@svgr/babel-plugin-add-jsx-attribute"]
+      "ignoreDependencies": ["@svgr/babel-plugin-add-jsx-attribute"],
     },
     "packages/crdt": {
       "ignore": ["src/proto/**"],
-      "ignoreDependencies": ["@bufbuild/protoc-gen-es"]
+      "ignoreDependencies": ["@bufbuild/protoc-gen-es"],
     },
     "packages/desktop-client": {
       "entry": [
         "bin/*.mjs",
         "globals.ts",
         "src/globals.ts",
-        "src/build-shims.js"
+        "src/build-shims.js",
       ],
       "ignore": ["playwright.config.d.ts"],
-      "ignoreDependencies": ["plugins-service"]
+      "ignoreDependencies": ["plugins-service"],
     },
     "packages/desktop-electron": {
       "entry": [
         "preload.ts",
         "server.ts",
         "afterSignHook.ts",
-        "beforePackHook.ts"
+        "beforePackHook.ts",
       ],
       "ignoreBinaries": ["bin/update-client"],
-      "ignoreDependencies": ["better-sqlite3"]
+      "ignoreDependencies": ["better-sqlite3"],
     },
     "packages/docs": {
       "entry": [
         "src/theme/**/*.{ts,tsx,js,jsx}",
         "src/components/**/*.{ts,tsx,js,jsx}",
-        "docs/**/*.{js,jsx}"
+        "docs/**/*.{js,jsx}",
       ],
-      "ignore": ["docusaurus.netlify-config.js"]
+      "ignore": ["docusaurus.netlify-config.js"],
     },
     "packages/loot-core": {
       "entry": ["src/**/index-types.ts", "src/mocks/**"],
@@ -75,26 +75,28 @@
         "path-browserify",
         "stream-browserify",
         "timers-browserify",
-        "util"
-      ]
+        "util",
+      ],
     },
     "packages/mobile-client": {
       "entry": ["bin/*"],
+      // Provided by the JDK and required for Android release signing
+      "ignoreBinaries": ["jarsigner"],
       "ignore": [
         "android/app/src/main/assets/**",
         "ios/App/App/public/**",
-        "ios/DerivedData/**"
+        "ios/DerivedData/**",
       ],
       "ignoreDependencies": [
         "@capacitor/app",
         "@capacitor/filesystem",
         "@capacitor/haptics",
         "@capacitor/share",
-        "@capacitor/splash-screen"
-      ]
+        "@capacitor/splash-screen",
+      ],
     },
     "packages/plugins-service": {
-      "entry": ["src/plugin-service-worker.ts"]
+      "entry": ["src/plugin-service-worker.ts"],
     },
     "packages/sync-server": {
       "entry": [
@@ -102,8 +104,8 @@
         "src/app.ts",
         "bin/**/*.js",
         "src/scripts/**/*.{js,ts}",
-        "src/app-*/app-*.{ts,js}"
-      ]
-    }
-  }
+        "src/app-*/app-*.{ts,js}",
+      ],
+    },
+  },
 }
