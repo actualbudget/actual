@@ -139,7 +139,7 @@ export function MarkdownCard({
               if (event.currentTarget.value !== displayContent) {
                 onMetaChange({
                   ...meta,
-                builtin_key: undefined,
+                  builtin_key: undefined,
                   content: event.currentTarget.value,
                 });
               }

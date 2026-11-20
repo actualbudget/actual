@@ -10,10 +10,12 @@ describe('translateBuiltInDashboardName', () => {
     const t = vi.fn(key => `sv:${key}`);
 
     expect(
-      translateBuiltInDashboardName('Total Income (YTD)', 'total-income-ytd', t),
-    ).toBe(
-      'sv:Total Income (YTD)',
-    );
+      translateBuiltInDashboardName(
+        'Total Income (YTD)',
+        'total-income-ytd',
+        t,
+      ),
+    ).toBe('sv:Total Income (YTD)');
     expect(t).toHaveBeenCalledWith('Total Income (YTD)');
   });
 
@@ -29,9 +31,9 @@ describe('translateBuiltInDashboardName', () => {
   it('preserves a user title that equals a built-in English title', () => {
     const t = vi.fn();
 
-    expect(
-      translateBuiltInDashboardName('This Month', undefined, t),
-    ).toBe('This Month');
+    expect(translateBuiltInDashboardName('This Month', undefined, t)).toBe(
+      'This Month',
+    );
     expect(t).not.toHaveBeenCalled();
   });
 
@@ -40,9 +42,9 @@ describe('translateBuiltInDashboardName', () => {
     const defaultContent =
       '## Dashboard Tips\n\nYou can add new widgets or edit existing widgets by using the buttons at the top of the page. Choose a widget type and customize it to fit your needs.\n\n**Moving cards:** Drag any card by its header to reposition it.\n\n**Deleting cards:** Click the three-dot menu on any card and select "Remove".';
 
-    expect(translateBuiltInDashboardContent(defaultContent, 'dashboard-tips', t)).toBe(
-      `sv:${defaultContent}`,
-    );
+    expect(
+      translateBuiltInDashboardContent(defaultContent, 'dashboard-tips', t),
+    ).toBe(`sv:${defaultContent}`);
     expect(translateBuiltInDashboardContent('## Egna tips', undefined, t)).toBe(
       '## Egna tips',
     );

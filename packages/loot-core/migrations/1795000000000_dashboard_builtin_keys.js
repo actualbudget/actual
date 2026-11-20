@@ -48,7 +48,10 @@ export default async function runMigration(db) {
       const seededMeta = JSON.stringify(widget.meta);
 
       for (const row of existing) {
-        if (row.meta !== JSON.stringify(originalMeta) && row.meta !== seededMeta) {
+        if (
+          row.meta !== JSON.stringify(originalMeta) &&
+          row.meta !== seededMeta
+        ) {
           continue;
         }
         db.runQuery('UPDATE dashboard SET meta = ? WHERE id = ?', [
