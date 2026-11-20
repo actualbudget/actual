@@ -115,6 +115,109 @@ test.describe('Multiple tabs on one budget', () => {
     await expect(budgetedAmount(leader, 'Food')).toHaveText('123.00');
     await expect(budgetedAmount(follower, 'Food')).toHaveText('123.00');
   });
+
+  test('transaction edits sync to another tab without refresh', async () => {
+    // Open the same account in both tabs
+    const accountA = await new Navigation(leader).goToAccountPage(
+      'Ally Savings',
+    );
+    const accountB = await new Navigation(follower).goToAccountPage(
+      'Ally Savings',
+    );
+
+    // Select the first transaction in each tab
+    const rowA = accountA.transactionTableRow.first();
+    const rowB = accountB.transactionTableRow.first();
+
+    await expect(rowA).toBeVisible();
+    await expect(rowB).toBeVisible();
+
+    // Verify that both tabs display the same transaction
+    const payee = (await rowA.getByTestId('payee').innerText()).trim();
+    await expect(rowB.getByTestId('payee')).toHaveText(payee);
+
+    const notesA = rowA.getByTestId('notes');
+    const notesB = rowB.getByTestId('notes');
+
+    const originalNotes = (await notesA.innerText()).trim();
+    await expect(notesB).toHaveText(originalNotes);
+
+    // Edit the transaction in the first tab
+
+    const bounds = await notesA.boundingBox();
+    if (!bounds) {
+      throw new Error('Notes cell is not visible');
+    }
+    // Click in the empty area on the right, avoiding clickable tags
+    await notesA.click({
+      position: {
+        x: bounds.width - 12,
+        y: bounds.height / 2,
+      },
+    });
+    const notesEditor = notesA.getByRole('combobox');
+    // Fail quickly if clicking did not activate edit mode
+    await expect(notesEditor).toBeVisible({ timeout: 5000 });
+
+    await notesEditor.fill('regression-9423');
+    await leader.keyboard.press('Tab');
+
+    // Confirm the first tab displays the new value
+    await expect(notesA).toHaveText('regression-9423');
+
+    // The second tab must update without a manual refresh
+    await expect(notesB).toHaveText('regression-9423', {
+      timeout: 10_000,
+    });
+  });
+
+  test('follower transaction edits sync to leader without refresh', async () => {
+    const leaderAccount = await new Navigation(leader).goToAccountPage(
+      'Ally Savings',
+    );
+    const followerAccount = await new Navigation(follower).goToAccountPage(
+      'Ally Savings',
+    );
+
+    const leaderRow = leaderAccount.transactionTableRow.first();
+    const followerRow = followerAccount.transactionTableRow.first();
+
+    await expect(leaderRow).toBeVisible();
+    await expect(followerRow).toBeVisible();
+
+    const payee = (await followerRow.getByTestId('payee').innerText()).trim();
+    await expect(leaderRow.getByTestId('payee')).toHaveText(payee);
+
+    const followerNotes = followerRow.getByTestId('notes');
+    const leaderNotes = leaderRow.getByTestId('notes');
+
+    const originalNotes = (await followerNotes.innerText()).trim();
+    await expect(leaderNotes).toHaveText(originalNotes);
+
+    const bounds = await followerNotes.boundingBox();
+    if (!bounds) {
+      throw new Error('Follower notes cell is not visible');
+    }
+
+    await followerNotes.click({
+      position: {
+        x: bounds.width - 12,
+        y: bounds.height / 2,
+      },
+    });
+
+    const editor = followerNotes.getByRole('combobox');
+    await expect(editor).toBeVisible({ timeout: 5000 });
+
+    const newNotes = 'regression-9423-from-follower';
+    await editor.fill(newNotes);
+    await follower.keyboard.press('Tab');
+
+    await expect(followerNotes).toHaveText(newNotes);
+    await expect(leaderNotes).toHaveText(newNotes, {
+      timeout: 10_000,
+    });
+  });
 });
 
 test.describe('Refreshing a tab', () => {
