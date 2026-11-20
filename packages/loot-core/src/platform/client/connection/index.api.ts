@@ -18,3 +18,6 @@ export const send = (async <K extends keyof Handlers>(
   }
   return lib.send(name, args);
 }) as T.Send;
+export function isOwnRequest(_id: string): boolean {
+  return false;
+}

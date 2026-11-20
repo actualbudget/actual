@@ -76,6 +76,7 @@ Content contained on external links is not managed or maintained by the Actual B
 - [Pethost](https://pethost.dev/templates/actual-budget/) - one-click template on managed Docker hosting, with a persistent volume and nightly backups.
 - [podway](https://podway.io/start?app=actual-budget) - managed hosting with an AI admin you steer from your Claude plan.
 - [Proxmox VE Helper-Scripts](https://community-scripts.github.io/ProxmoxVE/scripts?id=actualbudget)
+- [Simafri](https://www.simafri.com/en/guides/self-host-actual-budget/) - guide to install Actual on a managed VPS, with system updates, monitoring and encrypted nightly backups handled by Simafri.
 - [Syncloud](https://syncloud.org/en/actual-budget)
 - Synology NAS
   - [Marius Bogdan Lixandru's guide](https://mariushosting.com/how-to-install-actual-on-your-synology-nas/)

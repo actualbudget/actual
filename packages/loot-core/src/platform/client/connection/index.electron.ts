@@ -178,3 +178,6 @@ export const initServer: T.InitServer = async function () {
 export const serverPush: T.ServerPush = async function () {
   // serverPush is used in tests to mock the server
 };
+export function isOwnRequest(id: string): boolean {
+  return replyHandlers.has(id);
+}
