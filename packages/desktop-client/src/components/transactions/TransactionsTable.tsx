@@ -476,7 +476,6 @@ type StatusCellProps = {
   isChild?: boolean;
   isPreview?: boolean;
   onEdit: TransactionEditFunction;
-  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
   onUpdate: TransactionUpdateFunction;
 };
 
@@ -488,7 +487,6 @@ function StatusCell({
   isChild,
   isPreview,
   onEdit,
-  onFocusCell,
   onUpdate,
 }: StatusCellProps) {
   const isClearedField =
@@ -544,7 +542,6 @@ function StatusCell({
         }}
         disabled={isPreview || isChild}
         onEdit={() => onEdit(id, 'cleared')}
-        onFocus={onFocusCell && (() => onFocusCell(id, 'cleared'))}
         onSelect={onSelect}
       >
         {createElement(statusProps.Icon, {
@@ -1025,7 +1022,6 @@ type TransactionProps = {
     name: string,
   ) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
-  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
   onExit?: () => void;
   onDelete: (id: TransactionEntity['id']) => void;
   onBatchDelete?: (ids: TransactionEntity['id'][]) => void;
@@ -1091,7 +1087,6 @@ const Transaction = memo(function Transaction({
   hideFraction,
   onSave,
   onEdit,
-  onFocusCell,
   onExit,
   onDelete,
   onBatchDelete,
@@ -1618,7 +1613,6 @@ const Transaction = memo(function Transaction({
         });
       }}
       onEdit={() => onEdit(id, 'select')}
-      onFocus={onFocusCell && (() => onFocusCell(id, 'select'))}
       selected={selected}
       style={{ ...(isChild && { borderLeftWidth: 1 }) }}
       value={
@@ -2132,7 +2126,6 @@ const Transaction = memo(function Transaction({
             }
             isChild={isChild}
             onEdit={onEdit}
-            onFocusCell={onFocusCell}
             onUpdate={onUpdate}
           />
         );
@@ -2475,7 +2468,6 @@ type NewTransactionProps = {
   onDelete: (id: TransactionEntity['id']) => void;
   onDistributeRemainder: (id: TransactionEntity['id']) => void;
   onEdit: (id: TransactionEntity['id'], field: string) => void;
-  onFocusCell?: (id: TransactionEntity['id'], field?: string) => void;
   onExit?: () => void;
   onManagePayees: (id: PayeeEntity['id'] | undefined) => void;
   onNavigateToSchedule: (id: ScheduleEntity['id']) => void;
@@ -2513,7 +2505,6 @@ function NewTransaction({
   onSplit,
   onToggleSplit,
   onEdit,
-  onFocusCell,
   onExit,
   onDelete,
   onSave,
@@ -2585,7 +2576,6 @@ function NewTransaction({
           hideFraction={!!hideFraction}
           expanded
           onEdit={onEdit}
-          onFocusCell={onFocusCell}
           onExit={onExit}
           onSave={onSave}
           onSplit={onSplit}
@@ -2922,7 +2912,6 @@ function TransactionTableInner({
         dateFormat={dateFormat}
         hideFraction={hideFraction}
         onEdit={tableNavigator.onEdit}
-        onFocusCell={tableNavigator.focusCell}
         onExit={tableNavigator.exitEdit}
         onSave={props.onSave}
         onDelete={props.onDelete}
@@ -3038,7 +3027,6 @@ function TransactionTableInner({
               onToggleSplit={props.onToggleSplit}
               onSplit={props.onSplit}
               onEdit={newNavigator.onEdit}
-              onFocusCell={newNavigator.focusCell}
               onExit={newNavigator.exitEdit}
               onSave={props.onSave}
               onDelete={props.onDelete}

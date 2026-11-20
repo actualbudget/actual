@@ -852,6 +852,29 @@ describe('Transactions', () => {
     },
   );
 
+  test('arrow keys move a visible cursor between row checkboxes', async () => {
+    const { container } = renderTransactions();
+    await userEvent.click(
+      queryField(container, 'select', '[data-testid=cell-button]', 2),
+    );
+
+    await userEvent.keyboard('[ArrowDown]');
+
+    // The unchecked checkbox of the row under the cursor must be shown, not
+    // only revealed on hover, so the user can see where they are
+    const cursor = queryField(
+      container,
+      'select',
+      '[data-testid=cell-button]',
+      3,
+    );
+    expect(document.activeElement).toBe(cursor);
+    expect(cursor).not.toHaveClass('hover-visible');
+
+    await userEvent.keyboard('[Space]');
+    expect(countSelectedRows(container)).toBe(2);
+  });
+
   test('escape leaves the cell being edited before clearing the selection', async () => {
     const { container } = renderTransactions();
     await userEvent.click(

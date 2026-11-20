@@ -564,7 +564,6 @@ type CellButtonProps = {
   clickBehavior?: string;
   onSelect?: (e) => void;
   onEdit?: () => void;
-  onFocus?: () => void;
   className?: string;
 };
 export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
@@ -578,7 +577,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
       clickBehavior,
       onSelect,
       onEdit,
-      onFocus,
       className,
     },
     ref,
@@ -596,9 +594,6 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
     // * The cell begins editing on focus. That means if the user does a
     //   mouse down, but moves out of the element and then does mouse
     //   up, it will properly still receive focus & being editing
-    // * Tables that track a focused cell separately from editing pass
-    //   `onFocus`, so focusing the button doesn't enter edit mode
-    const focusCell = onFocus ?? onEdit;
     return (
       <View
         innerRef={ref}
@@ -647,7 +642,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
               },
           ...style,
         }}
-        onFocus={() => focusCell?.()}
+        onFocus={() => onEdit?.()}
         data-testid="cell-button"
         onClick={
           clickBehavior === 'none'
@@ -655,7 +650,7 @@ export const CellButton = forwardRef<HTMLDivElement, CellButtonProps>(
             : e => {
                 if (!disabled) {
                   onSelect?.(e);
-                  focusCell?.();
+                  onEdit?.();
                 }
               }
         }
@@ -671,7 +666,6 @@ CellButton.displayName = 'CellButton';
 type SelectCellProps = Omit<ComponentProps<typeof Cell>, 'children'> & {
   partial?: boolean;
   onEdit?: () => void;
-  onFocus?: () => void;
   onSelect?: (e) => void;
   icon?: ReactNode;
   buttonProps?: Partial<CellButtonProps>;
@@ -682,7 +676,6 @@ export function SelectCell({
   style,
   onSelect,
   onEdit,
-  onFocus,
   icon = <SvgCheckmark width={6} height={6} />,
   buttonProps = {},
   ...props
@@ -697,7 +690,7 @@ export function SelectCell({
       onClick={e => {
         e.stopPropagation();
         onSelect?.(e);
-        (onFocus ?? onEdit)?.();
+        onEdit?.();
       }}
     >
       {() => (
@@ -721,7 +714,6 @@ export function SelectCell({
             },
           }}
           onEdit={onEdit}
-          onFocus={onFocus}
           onSelect={onSelect}
           clickBehavior="none"
           {...buttonProps}
@@ -990,7 +982,6 @@ export type TableProps<T extends TableItem = TableItem> = {
     focusedField: string | null;
     onEdit: TableNavigator<T>['onEdit'];
     onExit?: () => void;
-    onFocusCell?: (id: T['id'] | null, field?: string) => void;
     index: number;
     position: number;
   }) => ReactNode;
@@ -1036,7 +1027,6 @@ export const Table = forwardRef(
       navigator = {
         cursor: null,
         isEditing: false,
-        focusCell: () => {},
         beginEdit: () => {},
         exitEdit: () => {},
         onEdit: () => {},
@@ -1052,7 +1042,6 @@ export const Table = forwardRef(
       onEdit,
       onEditFirstField,
       exitEdit,
-      focusCell,
       editingId,
       focusedField,
       getNavigatorProps,
@@ -1155,7 +1144,6 @@ export const Table = forwardRef(
         focusedField: editing ? focusedField : null,
         onEdit,
         onExit: exitEdit,
-        onFocusCell: focusCell,
         index,
         position: style.top,
       });
@@ -1375,7 +1363,6 @@ export type TableCursor<T extends TableItem = TableItem> = {
 export type TableNavigator<T extends TableItem = TableItem> = {
   cursor: TableCursor<T>;
   isEditing: boolean;
-  focusCell: (id: T['id'] | null, field?: string) => void;
   beginEdit: (id: T['id'], field?: string) => void;
   exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
@@ -1411,11 +1398,6 @@ export function useTableNavigator<T extends TableItem>(
   // which case the Escape branch below is a no-op.
   const selectedItems = useSelectedItems();
   const selectedDispatch = useSelectedDispatch();
-
-  const focusCell = useCallback((id: T['id'] | null, field?: string) => {
-    setCursor(id == null ? null : { id, field });
-    setIsEditing(false);
-  }, []);
 
   const beginEdit = useCallback((id: T['id'], field?: string) => {
     setCursor({ id, field });
@@ -1546,17 +1528,9 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
-  // A focused button cell (see focusCell) counts as being in a cell even
-  // though it isn't editing. Other controls inside the table, e.g. header
-  // buttons, don't: the cursor may be left over from an earlier edit.
-  function isInCell(e: KeyboardEvent) {
-    return (
-      isEditing ||
-      isFlashing.current ||
-      (cursor != null &&
-        e.target instanceof Element &&
-        e.target.closest('[data-testid="cell-button"]') != null)
-    );
+  // Keys pressed while no cell is active belong to the Table (#9494)
+  function isInCell() {
+    return isEditing || isFlashing.current;
   }
 
   function getNavigatorProps<
@@ -1576,7 +1550,7 @@ export function useTableNavigator<T extends TableItem>(
         switch (e.key) {
           case 'ArrowUp':
           case 'k':
-            if (isInCell(e) && !(e.target instanceof HTMLInputElement)) {
+            if (isInCell() && !(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('up');
             }
@@ -1584,7 +1558,7 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'ArrowDown':
           case 'j':
-            if (isInCell(e) && !(e.target instanceof HTMLInputElement)) {
+            if (isInCell() && !(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('down');
             }
@@ -1592,7 +1566,7 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'Enter':
           case 'Tab':
-            if (!isInCell(e)) {
+            if (!isInCell()) {
               break;
             }
 
@@ -1612,19 +1586,22 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'Escape': {
             // Each press peels off one layer: editing first, then the
-            // selection. A focused button cell (e.g. the checkbox just
-            // clicked) isn't editing, so one press clears the selection
-            // and returns focus to the table.
-            const isFocusInCell = isInCell(e);
+            // selection. A button cell (e.g. the checkbox just clicked) has
+            // nothing to revert, so one press leaves it and clears the
+            // selection.
+            const isActive = isInCell();
+            const isOnButtonCell =
+              e.target instanceof Element &&
+              e.target.closest('[data-testid="cell-button"]') != null;
             const hasSelection =
               selectedItems != null && selectedItems.size > 0;
-            if (isFocusInCell) {
+            if (isActive) {
               exitEdit();
             }
-            if (!isEditing && hasSelection) {
+            if (hasSelection && (!isActive || isOnButtonCell)) {
               selectedDispatch?.({ type: 'select-none' });
             }
-            if (isFocusInCell || hasSelection) {
+            if (isActive || hasSelection) {
               e.preventDefault();
               e.stopPropagation();
             }
@@ -1669,7 +1646,6 @@ export function useTableNavigator<T extends TableItem>(
   return {
     cursor,
     isEditing,
-    focusCell,
     beginEdit,
     exitEdit,
     onEdit,
