@@ -45,9 +45,9 @@ const backgroundColorHover: Record<
 };
 
 const borderColor: {
-  [key in
-    | ButtonVariant
-    | `${ButtonVariant}Disabled`]?: CSSProperties['borderColor'];
+  [
+    key in ButtonVariant | `${ButtonVariant}Disabled`
+  ]?: CSSProperties['borderColor'];
 } = {
   normal: theme.buttonNormalBorder,
   normalDisabled: theme.buttonNormalDisabledBorder,

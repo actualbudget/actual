@@ -1,14 +1,11 @@
 import express from 'express';
 
-import { isAdmin } from '#account-db';
 import { handleError } from '#app-gocardless/util/handle-error';
 import { SecretName, secretsService } from '#services/secrets-service';
 import * as UserService from '#services/user-service';
-import {
-  requestLoggerMiddleware,
-  validateSessionMiddleware,
-} from '#util/middlewares';
+import { requestLoggerMiddleware } from '#util/middlewares';
 import { isValidFileId } from '#util/paths';
+import { validateBankSyncSession } from '#util/validate-budget-session';
 
 import { pluggyaiService } from './pluggyai-service';
 
@@ -16,11 +13,16 @@ const app = express();
 export { app as handlers };
 app.use(requestLoggerMiddleware);
 app.use(express.json());
-app.use(validateSessionMiddleware);
-
-function canAccessFile(fileId, userId) {
-  return isAdmin(userId) || UserService.countUserAccess(fileId, userId) > 0;
-}
+// SECURITY NOTE (intended behaviour - not a vulnerability):
+// Routes below that read bank data with stored credentials only require a
+// valid session; they deliberately do NOT check the user's role. Setting
+// server-wide (global) bank-sync credentials is admin-only, but every
+// signed-in user on that server may use them. This is a supported feature
+// and will remain; budgets with their own credentials use those instead.
+// API keys may only use credentials configured for an accessible budget.
+// All users on one server are trusted; roles are not a security boundary.
+// See SECURITY.md ("Threat model" and "Out of scope").
+app.use(validateBankSyncSession);
 
 app.post(
   '/status',
@@ -36,7 +38,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -46,7 +48,10 @@ app.post(
       }
     }
 
-    const source = pluggyaiService.getCredentialSource(fileId);
+    const source = pluggyaiService.getCredentialSource(
+      fileId,
+      !res.locals.apiKeyFileIds,
+    );
 
     res.send({
       status: 'ok',
@@ -72,7 +77,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -83,7 +88,10 @@ app.post(
     }
 
     try {
-      const source = pluggyaiService.getCredentialSource(fileId);
+      const source = pluggyaiService.getCredentialSource(
+        fileId,
+        !res.locals.apiKeyFileIds,
+      );
       if (!source) {
         res.status(400).send({
           status: 'error',
@@ -104,7 +112,11 @@ app.post(
       let accounts = [];
 
       for (const item of itemIds) {
-        const partial = await pluggyaiService.getAccountsByItemId(item, fileId);
+        const partial = await pluggyaiService.getAccountsByItemId(
+          item,
+          fileId,
+          !res.locals.apiKeyFileIds,
+        );
         accounts = accounts.concat(partial.results);
       }
 
@@ -140,7 +152,7 @@ app.post(
         return;
       }
 
-      if (!canAccessFile(fileId, res.locals.user_id)) {
+      if (!UserService.canAccessActiveFile(fileId, res.locals.user_id)) {
         res.status(403).send({
           status: 'error',
           reason: 'file-access-denied',
@@ -151,7 +163,10 @@ app.post(
     }
 
     try {
-      const source = pluggyaiService.getCredentialSource(fileId);
+      const source = pluggyaiService.getCredentialSource(
+        fileId,
+        !res.locals.apiKeyFileIds,
+      );
       if (!source) {
         res.status(400).send({
           status: 'error',
@@ -161,13 +176,31 @@ app.post(
         return;
       }
 
+      const account = await pluggyaiService.getAccountById(
+        accountId,
+        fileId,
+        !res.locals.apiKeyFileIds,
+      );
+      if (res.locals.apiKeyFileIds) {
+        const itemIds = (
+          secretsService.get(SecretName.pluggyai_itemIds, fileId) ?? ''
+        )
+          .split(',')
+          .map(item => item.trim());
+        if (!itemIds.includes(account.itemId)) {
+          res
+            .status(403)
+            .send({ status: 'error', reason: 'file-access-denied' });
+          return;
+        }
+      }
+
       const transactions = await pluggyaiService.getTransactionsByAccountId(
         accountId,
         startDate,
         fileId,
+        !res.locals.apiKeyFileIds,
       );
-
-      const account = await pluggyaiService.getAccountById(accountId, fileId);
 
       let startingBalance = parseInt(
         Math.round(account.balance * 100).toString(),

@@ -7,6 +7,7 @@ import {
   mockPendingTransaction,
   mockPendingTransactionNoDate,
 } from '#app-enablebanking/services/tests/fixtures';
+import { EnableBankingError } from '#app-enablebanking/utils/errors';
 
 // Mock all external dependencies before importing the app (mirrors
 // poll-auth.spec.ts).
@@ -48,8 +49,8 @@ vi.mock('../../app-gocardless/util/handle-error', () => ({
     },
 }));
 
-// Mock fetch globally (the service is stubbed below, this just guards stray calls)
-vi.stubGlobal('fetch', vi.fn());
+// Mock provider requests (the service is stubbed below, this just guards stray calls)
+vi.mock('undici', () => ({ fetch: vi.fn() }));
 
 const { handlers } = await import('../app-enablebanking');
 const { enableBankingService } =
@@ -111,5 +112,62 @@ describe('POST /transactions', () => {
 
     expect(res.body.data.transactions.all).toHaveLength(2);
     expect(ids(res.body.data.transactions.all)).toEqual(['ref-002', 'tx-003']);
+  });
+
+  it('gives two identical transactions without a bank id distinct ids', async () => {
+    const withoutId = { ...mockDebitTransaction, entry_reference: undefined };
+    vi.spyOn(enableBankingService, 'getAllTransactions').mockResolvedValue([
+      withoutId,
+      withoutId,
+    ]);
+
+    const res = await request(app)
+      .post('/transactions')
+      .send({ accountId: 'acc-1', startDate: '2026-03-01' });
+
+    const [first, second] = ids(res.body.data.transactions.all);
+    expect(first).toBeTruthy();
+    expect(second).toBeTruthy();
+    expect(first).not.toBe(second);
+  });
+
+  it('still imports transactions when the balance request fails', async () => {
+    // Some banks reject the balances call outright. That must not stop the
+    // transactions from being fetched.
+    vi.spyOn(enableBankingService, 'getBalances').mockRejectedValue(
+      new EnableBankingError('Error interacting with ASPSP', 'INVALID_INPUT'),
+    );
+    vi.spyOn(enableBankingService, 'getAllTransactions').mockResolvedValue([
+      mockDebitTransaction,
+    ]);
+
+    const res = await request(app)
+      .post('/transactions')
+      .send({ accountId: 'acc-1', startDate: '2026-03-01' });
+
+    expect(res.body.status).toBe('ok');
+    expect(ids(res.body.data.transactions.all)).toEqual(['ref-002']);
+    expect(res.body.data.balances).toEqual([]);
+    expect(res.body.data.startingBalance).toBeNull();
+  });
+
+  it('sends an IPv4-mapped client address to the bank as plain IPv4', async () => {
+    // Node reports IPv4 clients as `::ffff:1.2.3.4` on dual-stack sockets and
+    // some banks reject that form of the PSU address.
+    const getAllTransactions = vi
+      .spyOn(enableBankingService, 'getAllTransactions')
+      .mockResolvedValue([]);
+
+    await request(app)
+      .post('/transactions')
+      .set('X-Forwarded-For', '::ffff:136.243.37.31')
+      .send({ accountId: 'acc-1', startDate: '2026-03-01' });
+
+    expect(getAllTransactions).toHaveBeenCalledWith(
+      'acc-1',
+      '2026-03-01',
+      expect.any(String),
+      expect.objectContaining({ 'Psu-Ip-Address': '136.243.37.31' }),
+    );
   });
 });

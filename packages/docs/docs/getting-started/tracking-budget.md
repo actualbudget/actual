@@ -82,6 +82,7 @@ This is useful when you add or change a recurring expense and want to update all
 All the non-budgeting features of Actual can be used with the **Tracking Budget** the same as the **Envelope Budget**.
 Experimental features may not work with the **Tracking Budget** yet.
 If not please let us know in the feature feedback.
+
 :::note
 If you find critical functionality missing that you need, please submit a request on [GitHub](https://github.com/actualbudget/actual/issues/new/choose).
 :::

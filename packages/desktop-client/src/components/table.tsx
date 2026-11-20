@@ -447,7 +447,7 @@ type InputValueProps = Omit<
   'value' | 'onUpdate'
 > & {
   value?: string;
-  onUpdate?: (newValue: string) => void;
+  onUpdate?: (newValue: string, isEdited: boolean) => void;
   onExit?: () => void;
 } & {
   [key: `data-${string}`]: unknown;
@@ -462,9 +462,16 @@ function InputValue({
   ...props
 }: InputValueProps) {
   const committedValue = defaultValue ?? '';
+  const [isEdited, setIsEdited] = useState(false);
+  const [prevCommittedValue, setPrevCommittedValue] = useState(committedValue);
+  if (prevCommittedValue !== committedValue) {
+    setIsEdited(false);
+    setPrevCommittedValue(committedValue);
+  }
+
   const cellEditor = useCellEditor({
     committedValue,
-    onUpdate,
+    onUpdate: newValue => onUpdate?.(newValue, isEdited),
     onExit,
     onBlur: onBlur ? e => fireBlur(onBlur, e) : undefined,
   });
@@ -476,6 +483,7 @@ function InputValue({
   }
 
   function setValue_(text) {
+    setIsEdited(true);
     if (valueIsASingleOperator(text)) {
       cellEditor.setValue(defaultValue + text);
     } else {
@@ -490,6 +498,7 @@ function InputValue({
     }
 
     if (e.key === 'Escape') {
+      setIsEdited(false);
       cellEditor.onKeyDown(e);
       return;
     }
@@ -585,6 +594,8 @@ type CustomCellProps<T = string | undefined> = Omit<
   'children' | 'value'
 > & {
   value?: T;
+  // Starting value for edits when it differs from the displayed value
+  editValue?: T;
   children?: (props: CustomCellRenderProps<T>) => ReactNode;
   onUpdate?: (value: T) => void;
   onBlur?: (ev: UIEvent<unknown>) => void;
@@ -592,14 +603,18 @@ type CustomCellProps<T = string | undefined> = Omit<
 };
 export function CustomCell<T = string | undefined>({
   value: defaultValue,
+  editValue,
   children,
   onUpdate,
   onBlur,
   onExit,
   ...props
 }: CustomCellProps<T>) {
+  const committedValue = (
+    editValue !== undefined ? editValue : defaultValue
+  ) as T;
   const cellEditor = useCellEditor<T>({
-    committedValue: defaultValue as T,
+    committedValue,
     isEditing: props.exposed ?? false,
     onUpdate,
     onExit,
@@ -618,7 +633,7 @@ export function CustomCell<T = string | undefined>({
   }
 
   const editSession: CellEditSession<T> = {
-    committedValue: defaultValue as T,
+    committedValue,
     onUpdateDraft: val => cellEditor.setValue(val),
     onCommit: val => {
       cellEditor.commitEdit(val);
@@ -941,8 +956,14 @@ export function SheetCell<
         return (
           <InputValue
             value={formatExpr ? formatExpr(sheetValue) : sheetValue.toString()}
-            onUpdate={value => {
-              onSave(unformatExpr ? unformatExpr(value) : value);
+            onUpdate={(value, isEdited) => {
+              if (!unformatExpr) {
+                onSave(value);
+              } else {
+                // Untouched text can be rounded (hidden decimals); keep the
+                // exact value
+                onSave(isEdited ? unformatExpr(value) : sheetValue);
+              }
             }}
             {...inputProps}
             style={{ textAlign, ...(inputProps?.style || {}) }}
@@ -1002,6 +1023,7 @@ type SelectedItemsButtonProps<Name extends string> = {
   name: ((count: number) => string) | string;
   items: MenuItem<Name>[];
   onSelect: (name: Name, items: string[]) => void;
+  footer?: ReactNode;
 };
 
 export function SelectedItemsButton<Name extends string>({
@@ -1009,6 +1031,7 @@ export function SelectedItemsButton<Name extends string>({
   name,
   items,
   onSelect,
+  footer,
 }: SelectedItemsButtonProps<Name>) {
   const selectedItems = useSelectedItems();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -1055,6 +1078,7 @@ export function SelectedItemsButton<Name extends string>({
             setMenuOpen(false);
           }}
           items={items}
+          footer={footer}
         />
       </Popover>
     </View>
@@ -1143,10 +1167,12 @@ export const Table = forwardRef(
       isSelected,
       saveScrollWidth,
       listContainerRef,
+      onKeyDown,
       ...props
     },
     ref,
   ) => {
+    const hasNavigator = navigator != null;
     if (!navigator) {
       navigator = {
         cursor: null,
@@ -1155,6 +1181,7 @@ export const Table = forwardRef(
         beginEdit: () => {},
         exitEdit: () => {},
         onEdit: () => {},
+        onEditFirstField: () => {},
         editingId: null,
         focusedField: null,
         getNavigatorProps: (props =>
@@ -1164,12 +1191,16 @@ export const Table = forwardRef(
 
     const {
       onEdit,
+      onEditFirstField,
+      cursor,
+      beginEdit,
       exitEdit,
       focusCell,
       editingId,
       focusedField,
       getNavigatorProps,
     } = navigator;
+    const focusExit = useRef<HTMLDivElement>(null);
     const list = useRef(null);
     const listContainerInnerRef = useRef<HTMLDivElement>(null);
     const listContainer = listContainerRef || listContainerInnerRef;
@@ -1230,6 +1261,15 @@ export const Table = forwardRef(
       },
     }));
 
+    function saveScrollDelayed() {
+      saveScrollWidth(
+        scrollContainer.current?.offsetParent
+          ? scrollContainer.current?.offsetParent.clientWidth
+          : 0,
+        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
+      );
+    }
+
     useLayoutEffect(() => {
       // We wait for the list to mount because AutoSizer needs to run
       // before it's mounted
@@ -1246,15 +1286,6 @@ export const Table = forwardRef(
         return () => clearTimeout(timeout);
       }
     });
-
-    function saveScrollDelayed() {
-      saveScrollWidth(
-        scrollContainer.current?.offsetParent
-          ? scrollContainer.current?.offsetParent.clientWidth
-          : 0,
-        scrollContainer.current ? scrollContainer.current.clientWidth : 0,
-      );
-    }
 
     function renderRow({ index, style, key }) {
       const item = items[index];
@@ -1346,16 +1377,71 @@ export const Table = forwardRef(
 
     const isEmpty = (count || items.length) === 0;
 
+    const navigatorProps = getNavigatorProps(props);
+
+    function onContainerKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+      onKeyDown?.(e);
+      if (e.isPropagationStopped()) {
+        return;
+      }
+
+      navigatorProps.onKeyDown?.(e);
+      onEnterOrExit(e);
+    }
+
+    function onEnterOrExit(e: KeyboardEvent<HTMLDivElement>) {
+      if (!hasNavigator) {
+        return;
+      }
+
+      // The navigator owns keys while editing, including Escape
+      if (editingId != null || e.target !== e.currentTarget) {
+        return;
+      }
+
+      if (e.key === 'Tab') {
+        if (!e.shiftKey && !e.isDefaultPrevented()) {
+          focusExit.current?.focus({ preventScroll: true });
+        }
+      } else if (e.key === 'Enter' || e.key === 'ArrowDown') {
+        // Resume where the user left off before falling back to the top row
+        if (cursor && items.some(item => item.id === cursor.id)) {
+          beginEdit(cursor.id, cursor.field);
+          return;
+        }
+        const index =
+          list.current && scrollContainer.current
+            ? list.current.getStartIndexForOffset(
+                scrollContainer.current.scrollTop,
+              )
+            : 0;
+        const item = items[index];
+        if (item != null) {
+          list.current?.scrollToItem(index, 'smart');
+          onEditFirstField(item.id);
+        }
+      }
+    }
+
     return (
       <View
         style={{
           flex: 1,
           outline: 'none',
           overflow: 'hidden',
+          ':focus-visible::after': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            border: `2px solid ${theme.formInputBorderSelected}`,
+            pointerEvents: 'none',
+            zIndex: 201,
+          },
           ...style,
         }}
         tabIndex={0}
-        {...getNavigatorProps(props)}
+        {...navigatorProps}
+        onKeyDown={onContainerKeyDown}
         data-testid="table"
       >
         {headers && (
@@ -1412,6 +1498,13 @@ export const Table = forwardRef(
             />
           )}
         </View>
+        {hasNavigator && (
+          <View
+            innerRef={focusExit}
+            tabIndex={-1}
+            style={{ outline: 'none' }}
+          />
+        )}
       </View>
     );
   },
@@ -1434,6 +1527,7 @@ export type TableNavigator<T extends TableItem = TableItem> = {
   beginEdit: (id: T['id'], field?: string) => void;
   exitEdit: () => void;
   onEdit: (id: T['id'] | null, field?: string) => void;
+  onEditFirstField: (id: T['id']) => void;
   editingId: T['id'] | null;
   focusedField: string | null;
   getNavigatorProps: <P extends object>(
@@ -1453,6 +1547,7 @@ export function useTableNavigator<T extends TableItem>(
   const [cursor, setCursor] = useState<TableCursor<T>>(null);
   const [isEditing, setIsEditing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isFlashing = useRef(false);
 
   // See `onBlur` for why we need this
   const modalState = useModalState();
@@ -1499,6 +1594,14 @@ export function useTableNavigator<T extends TableItem>(
   const editingId = isEditing && cursor ? cursor.id : null;
   const focusedField = cursor?.field ?? null;
 
+  function onEditFirstField(id: T['id']) {
+    const item = data.find(item => item.id === id);
+    const [field] = item ? getFields(item) : [];
+    if (field != null) {
+      beginEdit(id, field);
+    }
+  }
+
   function flashInput() {
     // Force the container to be focused which suppresses the "space
     // pages down" behavior. If we don't do this and the user presses
@@ -1509,7 +1612,9 @@ export function useTableNavigator<T extends TableItem>(
     setIsEditing(false);
 
     if (currentCursor) {
+      isFlashing.current = true;
       setTimeout(() => {
+        isFlashing.current = false;
         beginEdit(currentCursor.id, currentCursor.field);
       }, 100);
     }
@@ -1572,13 +1677,6 @@ export function useTableNavigator<T extends TableItem>(
           break;
         }
       }
-    } else if (data.length > 0) {
-      const nextIdx = dir < 0 ? data.length - 1 : 0;
-      const next = data[nextIdx];
-      const availableFields = getFields(next);
-      if (availableFields.length > 0) {
-        beginEdit(next.id, availableFields[0]);
-      }
     }
   }
 
@@ -1601,6 +1699,16 @@ export function useTableNavigator<T extends TableItem>(
     }
   }
 
+  // Keys pressed on the container itself (nothing focused inside) are
+  // handled by the Table, which decides where editing starts.
+  function isInCell(e: KeyboardEvent) {
+    return (
+      isEditing ||
+      isFlashing.current ||
+      (cursor != null && e.target !== e.currentTarget)
+    );
+  }
+
   function getNavigatorProps<
     P extends { onKeyDown?: (e: KeyboardEvent) => void },
   >(userProps?: P) {
@@ -1618,7 +1726,7 @@ export function useTableNavigator<T extends TableItem>(
         switch (e.key) {
           case 'ArrowUp':
           case 'k':
-            if (!(e.target instanceof HTMLInputElement)) {
+            if (isInCell(e) && !(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('up');
             }
@@ -1626,7 +1734,7 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'ArrowDown':
           case 'j':
-            if (!(e.target instanceof HTMLInputElement)) {
+            if (isInCell(e) && !(e.target instanceof HTMLInputElement)) {
               e.preventDefault();
               onMove('down');
             }
@@ -1634,6 +1742,10 @@ export function useTableNavigator<T extends TableItem>(
 
           case 'Enter':
           case 'Tab':
+            if (!isInCell(e)) {
+              break;
+            }
+
             e.preventDefault();
             e.stopPropagation();
 
@@ -1649,7 +1761,7 @@ export function useTableNavigator<T extends TableItem>(
             break;
 
           case 'Escape': {
-            if (isEditing) {
+            if (isInCell(e)) {
               e.preventDefault();
               e.stopPropagation();
               exitEdit();
@@ -1703,6 +1815,7 @@ export function useTableNavigator<T extends TableItem>(
     beginEdit,
     exitEdit,
     onEdit,
+    onEditFirstField,
     editingId,
     focusedField,
     getNavigatorProps,

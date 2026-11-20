@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+def mobilePackage = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def releaseVersionCode = System.getenv('ANDROID_VERSION_CODE')
+
 android {
     namespace = "org.actualbudget"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +10,8 @@ android {
         applicationId "org.actualbudget"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode releaseVersionCode ? releaseVersionCode.toInteger() : 1
+        versionName mobilePackage.version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

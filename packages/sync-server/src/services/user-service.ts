@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-import { getAccountDb } from '#account-db';
+import { getAccountDb, isAdmin } from '#account-db';
 
 export function getUserByUsername(userName) {
   if (!userName || typeof userName !== 'string') {
@@ -152,6 +152,14 @@ export function getUserAccess(fileId, userId, isAdmin) {
      WHERE files.id = ? and (files.owner = ? OR 1 = ?)`,
     [fileId, userId, isAdmin ? 1 : 0],
   );
+}
+
+export function canAccessActiveFile(fileId: string, userId: string): boolean {
+  const file = getAccountDb().first(
+    'SELECT id FROM files WHERE id = ? AND deleted = 0',
+    [fileId],
+  );
+  return !!file && (isAdmin(userId) || countUserAccess(fileId, userId) > 0);
 }
 
 export function countUserAccess(fileId, userId) {

@@ -9,9 +9,9 @@ export class RulesPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.searchBox = page.getByPlaceholder('Filter rules...');
+    this.searchBox = page.getByPlaceholder('Filter rules…');
     this.createNewRuleButton = page.getByRole('button', {
-      name: 'Create new rule',
+      name: 'Add new rule',
     });
   }
 

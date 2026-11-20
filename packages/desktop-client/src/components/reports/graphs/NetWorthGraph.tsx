@@ -33,6 +33,8 @@ import { usePrivacyMode } from '#hooks/usePrivacyMode';
 
 import { computePadding } from './util/computePadding';
 
+const PARSE_REFERENCE_DATE = new Date(0);
+
 type NetWorthDataPoint = {
   x: string;
   y: number;
@@ -334,7 +336,7 @@ export function NetWorthGraph({
     const pointFormat = getIntervalFormat(interval, dateFormat);
     return graphData.data
       .filter(point => {
-        const date = parse(point.x, pointFormat, new Date());
+        const date = parse(point.x, pointFormat, PARSE_REFERENCE_DATE);
         return getDay(date) === 1; // Monday
       })
       .map(point => point.x);

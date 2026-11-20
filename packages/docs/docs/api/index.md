@@ -74,6 +74,25 @@ let api = require('@actual-app/api');
 
 Heads up! You probably don't want to hard-code the passwords like that, especially if you'll be using Git to track your code. You can use environment variables to store the passwords instead, or read them in from a file, or request them interactively when running the script instead.
 
+### API Keys
+
+For even more security, you can generate budget-scoped API keys rather than providing your password.
+
+1. In your budget, go to **Settings → General → Security → API keys** and select **Add key**.
+2. Enter a name for your API key and select **Create key**.
+3. Copy the generated key (it will not be displayed again).
+4. The key will appear in the **API keys** section in case you need to revoke it later.
+
+Pass the key as `sessionToken` when connecting:
+
+```js
+await api.init({
+  dataDir: '/some/path',
+  serverURL: 'https://actual.example.com',
+  sessionToken: process.env.ACTUAL_API_KEY,
+});
+```
+
 ### Self-Signed Https Certificates
 
 If the serverURL is using [self-signed or custom CA certificates](../config/https.md), additional Node.js configuration will be needed for the connections to succeed.
@@ -103,14 +122,16 @@ console.log(await api.getAccounts());
 await api.shutdown();
 ```
 
-Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's IndexedDB and stays on the device.
+Behind the scenes, `init` starts a Web Worker running the same budget engine the Actual web app uses, backed by SQLite compiled to WebAssembly. Your budget data is stored in the browser's origin private file system, or in IndexedDB in browsers without it, and stays on the device. Budgets stored by earlier versions of the package are moved over the first time they are opened.
 
-In the browser, `dataDir` is a path inside the worker's virtual file system rather than a folder on disk. It is optional: it defaults to `/documents`, and if you pass a custom path it is created automatically and persisted to IndexedDB just the same.
+In the browser, `dataDir` is a path inside the worker's virtual file system rather than a folder on disk. It is optional: it defaults to `/documents`, and if you pass a custom path it is created automatically and persisted just the same.
 
 The browser build is fully self-contained: the Web Worker and its WebAssembly and data files are inlined into the package. There are no extra files to copy or serve, and no bundler configuration is required (no `optimizeDeps` tweaks, no worker or asset plugins). Importing the package and calling `init()` is all that's needed.
 
-:::caution Cross-origin isolation is required
-The engine uses `SharedArrayBuffer`, so the page that runs the API must be served **cross-origin isolated**: over HTTPS, with `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp`. This is a hosting/server requirement (it cannot be bundled away). See [Enabling SharedArrayBuffer Access](../troubleshooting/shared-array-buffer.md). In local development, set the same headers on your dev server (for example via a small Vite middleware plugin).
+:::note No special headers
+The browser build does not use `SharedArrayBuffer`, so the page running it does not need to be cross-origin isolated. Serve it over HTTPS (or from `localhost`) like any other page that stores data.
+
+A budget can be open in one tab at a time. Opening the same budget from a second tab fails until the first one closes it.
 :::
 
 ## Handling Errors
@@ -214,11 +235,15 @@ If no `serverURL` is provided, no network connections will be made, and you'll o
 
 You can find your budget id in the "Advanced" section of the settings page.
 
+In the [browser build](#using-the-api-in-a-browser), `init` fails while the API is already running. Call `shutdown` first.
+
 #### `shutdown`
 
 <Method name="shutdown" args={[]} returns="Promise<void>" />
 
 Close the current budget file, and stop any other ongoing processes. It's recommended to call this before exiting your script.
+
+In the [browser build](#using-the-api-in-a-browser), `shutdown` fails when the last changes could not be saved to the browser's storage, for example because the storage is full. Nothing is shut down when that happens, so the changes are not lost. Make room in the storage and call `shutdown` again.
 
 #### `utils.amountToInteger`
 

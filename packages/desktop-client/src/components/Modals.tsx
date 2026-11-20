@@ -17,6 +17,8 @@ import { AccountGroupsModal } from './modals/AccountGroupsModal';
 import { AccountMenuModal } from './modals/AccountMenuModal';
 import { AccountReconcileModal } from './modals/AccountReconcileModal';
 import { AkahuInitialiseModal } from './modals/AkahuInitialiseModal';
+import { AllAccountsMenuModal } from './modals/AllAccountsMenuModal';
+import { ApiKeyModal } from './modals/ApiKeyModal';
 import { BudgetAutomationsModal } from './modals/BudgetAutomationsModal';
 import { BudgetPageMenuModal } from './modals/BudgetPageMenuModal';
 import { CategoryAutocompleteModal } from './modals/CategoryAutocompleteModal';
@@ -46,7 +48,6 @@ import { EnvelopeBudgetMenuModal } from './modals/EnvelopeBudgetMenuModal';
 import { EnvelopeBudgetMonthMenuModal } from './modals/EnvelopeBudgetMonthMenuModal';
 import { EnvelopeBudgetSummaryModal } from './modals/EnvelopeBudgetSummaryModal';
 import { EnvelopeIncomeBalanceMenuModal } from './modals/EnvelopeIncomeBalanceMenuModal';
-import { EnvelopeToBudgetMenuModal } from './modals/EnvelopeToBudgetMenuModal';
 import { FixEncryptionKeyModal } from './modals/FixEncryptionKeyModal';
 import { GoalTemplateModal } from './modals/GoalTemplateModal';
 import { GoCardlessExternalMsgModal } from './modals/GoCardlessExternalMsgModal';
@@ -76,6 +77,7 @@ import { PluggyAiInitialiseModal } from './modals/PluggyAiInitialiseModal';
 import { ScheduledTransactionMenuModal } from './modals/ScheduledTransactionMenuModal';
 import { SelectLinkedAccountsModal } from './modals/SelectLinkedAccountsModal';
 import { SimpleFinInitialiseModal } from './modals/SimpleFinInitialiseModal';
+import { TagColorModal } from './modals/TagColorModal';
 import { TrackingBalanceMenuModal } from './modals/TrackingBalanceMenuModal';
 import { TrackingBudgetMenuModal } from './modals/TrackingBudgetMenuModal';
 import { TrackingBudgetMonthMenuModal } from './modals/TrackingBudgetMonthMenuModal';
@@ -286,6 +288,9 @@ export function Modals() {
         case 'account-menu':
           return <AccountMenuModal key={key} {...modal.options} />;
 
+        case 'all-accounts-menu':
+          return <AllAccountsMenuModal key={key} {...modal.options} />;
+
         case 'account-reconcile':
           return <AccountReconcileModal key={key} {...modal.options} />;
 
@@ -315,6 +320,9 @@ export function Modals() {
         case 'category-group-menu':
           return <CategoryGroupMenuModal key={key} {...modal.options} />;
 
+        case 'tag-color':
+          return <TagColorModal key={key} {...modal.options} />;
+
         case 'notes':
           return <NotesModal key={key} {...modal.options} />;
 
@@ -335,16 +343,6 @@ export function Modals() {
               name={monthUtils.sheetForMonth(modal.options.month)}
             >
               <EnvelopeIncomeBalanceMenuModal {...modal.options} />
-            </SheetNameProvider>
-          );
-
-        case 'envelope-summary-to-budget-menu':
-          return (
-            <SheetNameProvider
-              key={key}
-              name={monthUtils.sheetForMonth(modal.options.month)}
-            >
-              <EnvelopeToBudgetMenuModal {...modal.options} />
             </SheetNameProvider>
           );
 
@@ -429,6 +427,8 @@ export function Modals() {
         case 'transfer-ownership':
           return <TransferOwnership key={key} {...modal.options} />;
 
+        case 'api-key':
+          return <ApiKeyModal key={key} {...modal.options} />;
         case 'enable-openid':
           return <OpenIDEnableModal key={key} {...modal.options} />;
 

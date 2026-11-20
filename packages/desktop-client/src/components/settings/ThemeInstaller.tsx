@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { TextArea } from 'react-aria-components';
 import { Trans, useTranslation } from 'react-i18next';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
@@ -55,7 +55,9 @@ export function ThemeInstaller({
   const [selectedCatalogTheme, setSelectedCatalogTheme] =
     useState<CatalogTheme | null>(null);
   const [erroringTheme, setErroringTheme] = useState<CatalogTheme | null>(null);
-  const [pastedCss, setPastedCss] = useState('');
+  // Mount-only: pref changes while the installer is open should not clobber
+  // in-progress edits to the textarea.
+  const [pastedCss, setPastedCss] = useState(customCssOverride || '');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,15 +67,6 @@ export function ThemeInstaller({
     isLoading: catalogLoading,
     error: catalogError,
   } = useThemeCatalog();
-
-  // Mount-only: pref changes while the installer is open should not clobber
-  // in-progress edits to the textarea.
-  useEffect(() => {
-    if (customCssOverride) {
-      setPastedCss(customCssOverride);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Calculate theme item width based on container width (always 3 per row)
   const getItemWidth = useCallback((containerWidth: number) => {

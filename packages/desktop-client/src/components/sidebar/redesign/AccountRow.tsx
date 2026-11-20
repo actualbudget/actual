@@ -27,6 +27,7 @@ import { DragHandle } from './DragHandle';
 import { SidebarBalance } from './SidebarBalance';
 import { SyncDot, useSyncDotLabel } from './SyncDot';
 import type { SyncDotStatus } from './SyncDot';
+import { useTreeItemEditing } from './treeItemEditing';
 import { treeKeys } from './treeKeys';
 
 type AccountRowProps = {
@@ -46,7 +47,9 @@ export function AccountRow({
   const syncingAccountIds = useSelector(state => state.account.accountsSyncing);
   const updatedAccounts = useUpdatedAccounts();
   const isUpdated = !isClosed && updatedAccounts.includes(account.id);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useTreeItemEditing(
+    treeKeys.account(account.id),
+  );
   const href = `/accounts/${account.id}`;
   const isActive = location.pathname === href;
 

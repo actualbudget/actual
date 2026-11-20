@@ -276,7 +276,7 @@ describe('buildBalanceForecastChartData', () => {
 });
 
 describe('countForecastScheduledOccurrences', () => {
-  it('counts a transfer schedule once across both account legs', () => {
+  it('counts a transfer occurrence once even when rules move one account leg', () => {
     const forecastData = {
       dataPoints: [
         {
@@ -290,11 +290,12 @@ describe('countForecastScheduledOccurrences', () => {
               payee: 'Transfer to savings',
               scheduleId: 'schedule-transfer',
               scheduleName: 'Transfer to savings',
+              occurrenceDate: '2024-03-20',
             },
           ],
         },
         {
-          date: '2024-03-20',
+          date: '2024-03-21',
           balance: 250,
           accountId: 'savings',
           accountName: 'Savings',
@@ -304,6 +305,7 @@ describe('countForecastScheduledOccurrences', () => {
               payee: 'Transfer from checking',
               scheduleId: 'schedule-transfer',
               scheduleName: 'Transfer to savings',
+              occurrenceDate: '2024-03-20',
             },
           ],
         },

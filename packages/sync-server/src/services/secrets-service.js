@@ -103,6 +103,10 @@ export const secretsService = {
     return secretsDb.set(name, value, fileId);
   },
 
+  /**
+   * @param {SecretName} name
+   * @param {string|null} [fileId]
+   */
   reset: (name, fileId = null) => {
     return secretsDb.reset(name, fileId);
   },

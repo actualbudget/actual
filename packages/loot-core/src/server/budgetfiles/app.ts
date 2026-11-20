@@ -7,6 +7,13 @@ import * as asyncStorage from '#platform/server/asyncStorage';
 import * as connection from '#platform/server/connection';
 import * as fs from '#platform/server/fs';
 import { logger } from '#platform/server/log';
+import {
+  BudgetInUseError,
+  flushSqliteStorage,
+  StorageLostError,
+  StorageMigrationError,
+  StorageUnavailableError,
+} from '#platform/server/sqlite';
 import { createApp } from '#server/app';
 import * as budget from '#server/budget/base';
 import * as cloudStorage from '#server/cloud-storage';
@@ -23,7 +30,9 @@ import * as sheet from '#server/sheet';
 import {
   clearFullSyncTimeout,
   initialFullSync,
+  resumeFullSync,
   setSyncingMode,
+  stopFullSync,
 } from '#server/sync';
 import * as syncMigrations from '#server/sync/migrate';
 import { replayPendingMessages } from '#server/sync/replay';
@@ -266,7 +275,29 @@ async function syncBudget() {
   return result;
 }
 
+// The load in progress: a second request for the same budget waits for it.
+// Prefs are set before the database opens, so the shortcut in
+// `loadBudgetOnce` would otherwise answer a tab that joins through the
+// coordinator while the storage is still moving the budget over
+let loading: {
+  id: Budget['id'];
+  result: ReturnType<typeof loadBudgetOnce>;
+} | null = null;
+
 async function loadBudget({ id }: { id: Budget['id'] }) {
+  if (loading?.id === id) {
+    return loading.result;
+  }
+  const result = loadBudgetOnce(id).finally(() => {
+    if (loading?.result === result) {
+      loading = null;
+    }
+  });
+  loading = { id, result };
+  return result;
+}
+
+async function loadBudgetOnce(id: Budget['id']) {
   const currentPrefs = prefs.getPrefs();
 
   if (currentPrefs) {
@@ -279,9 +310,7 @@ async function loadBudget({ id }: { id: Budget['id'] }) {
     }
   }
 
-  const res = await _loadBudget(id);
-
-  return res;
+  return _loadBudget(id);
 }
 
 async function createDemoBudget() {
@@ -298,6 +327,15 @@ async function createDemoBudget() {
 }
 
 async function closeBudget() {
+  await stopFullSync();
+  try {
+    return await unloadBudget();
+  } finally {
+    resumeFullSync();
+  }
+}
+
+async function unloadBudget() {
   captureBreadcrumb({ message: 'Closing budget' });
   resetFormulaPreferencesCache();
 
@@ -309,6 +347,13 @@ async function closeBudget() {
   await mainApp.stopServices();
 
   db.closeDatabase();
+  // The IndexedDB fallback writes lazily: the budget is closed only once
+  // its last write is in
+  try {
+    await flushSqliteStorage();
+  } catch (error) {
+    captureException(error);
+  }
 
   try {
     await asyncStorage.setItem('lastBudget', '');
@@ -582,7 +627,11 @@ async function _loadBudget(id: Budget['id']): Promise<{
     | 'loading-budget'
     | 'out-of-sync-migrations'
     | 'out-of-sync-data'
-    | 'opening-budget';
+    | 'opening-budget'
+    | 'budget-in-use'
+    | 'storage-migration-failed'
+    | 'storage-unavailable'
+    | 'storage-lost';
 }> {
   let dir: string;
   try {
@@ -607,8 +656,24 @@ async function _loadBudget(id: Budget['id']): Promise<{
     await db.openDatabase(id);
   } catch (e) {
     captureBreadcrumb({ message: 'Error loading budget ' + id });
-    captureException(e);
     await closeBudget();
+    // Expected conditions on the web storage, not bugs
+    if (e instanceof BudgetInUseError) {
+      return { error: 'budget-in-use' };
+    }
+    if (e instanceof StorageMigrationError) {
+      logger.error('Storage migration failed', e);
+      return { error: 'storage-migration-failed' };
+    }
+    if (e instanceof StorageUnavailableError) {
+      logger.error('Storage unavailable', e);
+      return { error: 'storage-unavailable' };
+    }
+    if (e instanceof StorageLostError) {
+      logger.error('Storage lost', e);
+      return { error: 'storage-lost' };
+    }
+    captureException(e);
     return { error: 'opening-budget' };
   }
 

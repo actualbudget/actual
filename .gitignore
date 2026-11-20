@@ -77,6 +77,10 @@ DESIGN.json
 .cursor/agents/impeccable-*.md
 .github/agents/impeccable-*.agent.md
 
+# Android signing keys
+*.jks
+*.keystore
+
 # Misc
 .#*
 
@@ -116,3 +120,6 @@ storybook-static
 .actualrc.yaml
 .actualrc.yml
 actual.config.js
+
+# Mac App Store provisioning profiles, downloaded per machine
+packages/desktop-electron/mas/*.provisionprofile

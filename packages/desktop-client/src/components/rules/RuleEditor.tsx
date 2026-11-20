@@ -48,6 +48,11 @@ import { FinancialText } from '#components/FinancialText';
 import { StatusBadge } from '#components/schedules/StatusBadge';
 import { SimpleTransactionsTable } from '#components/transactions/SimpleTransactionsTable';
 import { BetweenAmountInput } from '#components/util/AmountInput';
+import { BetweenDateInput } from '#components/util/BetweenDateInput';
+import {
+  normalizeConditionRange,
+  rangeForCondition,
+} from '#components/util/betweenRange';
 import { DisplayId } from '#components/util/DisplayId';
 import { GenericInput } from '#components/util/GenericInput';
 import { useDateFormat } from '#hooks/useDateFormat';
@@ -62,6 +67,36 @@ import { disableUndo, enableUndo } from '#undo';
 import { friendlyOp, getAllocationMethods, mapField } from '#util/rule';
 
 import { FormulaActionEditor } from './FormulaActionEditor';
+
+// On narrow screens the value editor drops to its own full-width line and the
+// -/+ buttons stay on the first line, pushed to the right.
+const narrowValueStyle: CSSProperties = { order: 1, flexBasis: '100%' };
+const narrowButtonsStyle: CSSProperties = { marginLeft: 'auto' };
+
+// Keeps the split method select on the first line, truncating its label
+// instead of wrapping.
+const narrowMethodSelectStyle: CSSProperties = {
+  flex: '1 1 0',
+  minWidth: 0,
+  maxWidth: 'max-content',
+};
+
+// Minimum width of the transactions table on narrow screens, mirroring the
+// select, date and amount cell widths in SimpleTransactionsTable plus 200px per
+// flexible column. Fields the table does not render (e.g. `cleared`) are
+// ignored.
+const flexibleTableFields = [
+  'imported_payee',
+  'payee',
+  'category',
+  'account',
+  'notes',
+];
+
+function getNarrowTableMinWidth(fields: string[]) {
+  const flexCount = fields.filter(f => flexibleTableFields.includes(f)).length;
+  return 20 + 100 + 75 + flexCount * 200;
+}
 
 function updateValue(array, value, update) {
   return array.map(v => (v === value ? update() : v));
@@ -272,6 +307,7 @@ function ConditionEditor({
   onDelete,
   onAdd,
 }) {
+  const { isNarrowWidth } = useResponsive();
   const {
     field: originalField,
     op,
@@ -281,6 +317,7 @@ function ConditionEditor({
     error,
     inputKey,
   } = condition;
+  const dateFormat = useDateFormat() || 'MM/dd/yyyy';
 
   const translatedConditions = useMemo(() => {
     const retValue = [...conditionFields];
@@ -309,6 +346,16 @@ function ConditionEditor({
       <BetweenAmountInput
         key={inputKey}
         defaultValue={value}
+        onChange={v => onChange('value', v)}
+      />
+    );
+  } else if (type === 'date' && op === 'isbetween') {
+    valueEditor = (
+      <BetweenDateInput
+        key={inputKey}
+        // Both bounds are filled in when the condition enters state
+        value={value}
+        dateFormat={dateFormat}
         onChange={v => onChange('value', v)}
       />
     );
@@ -345,9 +392,21 @@ function ConditionEditor({
       />
       <OpSelect ops={ops} value={op} type={type} onChange={onChange} />
 
-      <View style={{ flex: 1, minWidth: 80 }}>{valueEditor}</View>
+      <View
+        style={{
+          flex: 1,
+          minWidth: 80,
+          ...(isNarrowWidth && narrowValueStyle),
+        }}
+      >
+        {valueEditor}
+      </View>
 
-      <SpaceBetween direction="horizontal" gap={0}>
+      <SpaceBetween
+        direction="horizontal"
+        gap={0}
+        style={isNarrowWidth ? narrowButtonsStyle : undefined}
+      >
         <EditorButtons
           onAdd={onAdd}
           onDelete={isSchedule && field === 'date' ? null : onDelete}
@@ -486,6 +545,7 @@ function ActionEditor({
   onAdd,
 }: ActionEditorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const {
     field,
     op,
@@ -530,7 +590,7 @@ function ActionEditor({
             onChange={value => onChange('field', value)}
           />
 
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, ...(isNarrowWidth && narrowValueStyle) }}>
             <View style={{ flex: 1 }}>
               {hasFormula ? (
                 <FormulaActionEditor
@@ -547,7 +607,7 @@ function ActionEditor({
                   // @ts-expect-error fix this
                   op={op}
                   // @ts-expect-error fix this
-                  value={options?.template ?? value}
+                  value={options?.template ?? value ?? ''}
                   onChange={v => onChange('value', v)}
                   numberFormatType="currency"
                   inputStyle={{ height: 30 }}
@@ -638,35 +698,43 @@ function ActionEditor({
           <SplitAmountMethodSelect
             options={getAllocationMethodOptions(isFormulaEnabled)}
             value={options.method}
+            style={isNarrowWidth ? narrowMethodSelectStyle : undefined}
             onChange={onChange}
           />
 
-          <View
-            style={{
-              flex: 1,
-              minWidth: options.method === 'fixed-percent' ? 45 : 70,
-            }}
-          >
-            {options.method === 'formula' ? (
-              <FormulaActionEditor
-                value={options?.formula || '='}
-                onChange={v => onChange('formula', v, { formula: true })}
-              />
-            ) : options.method !== 'remainder' ? (
-              <GenericInput
-                key={inputKey}
-                // @ts-expect-error fix this
-                field={field}
-                op={op}
-                type="number"
-                numberFormatType={
-                  options.method === 'fixed-percent' ? 'percentage' : 'currency'
-                }
-                value={value}
-                onChange={v => onChange('value', v)}
-              />
-            ) : null}
-          </View>
+          {/* On wide screens the empty remainder wrapper spaces the buttons to
+              the right; on narrow screens it would only add a blank line. */}
+          {(options.method !== 'remainder' || !isNarrowWidth) && (
+            <View
+              style={{
+                flex: 1,
+                minWidth: options.method === 'fixed-percent' ? 45 : 70,
+                ...(isNarrowWidth && narrowValueStyle),
+              }}
+            >
+              {options.method === 'formula' ? (
+                <FormulaActionEditor
+                  value={options?.formula || '='}
+                  onChange={v => onChange('formula', v, { formula: true })}
+                />
+              ) : options.method !== 'remainder' ? (
+                <GenericInput
+                  key={inputKey}
+                  // @ts-expect-error fix this
+                  field={field}
+                  op={op}
+                  type="number"
+                  numberFormatType={
+                    options.method === 'fixed-percent'
+                      ? 'percentage'
+                      : 'currency'
+                  }
+                  value={value ?? ''}
+                  onChange={v => onChange('value', v)}
+                />
+              ) : null}
+            </View>
+          )}
           {options.method === 'formula' && (
             <View
               style={{
@@ -714,14 +782,14 @@ function ActionEditor({
             onChange={onChange}
           />
 
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, ...(isNarrowWidth && narrowValueStyle) }}>
             <GenericInput
               key={inputKey}
               // @ts-expect-error fix this
               field={field}
               type="string"
               op={op}
-              value={value}
+              value={value ?? ''}
               onChange={v => onChange('value', v)}
             />
           </View>
@@ -735,7 +803,13 @@ function ActionEditor({
       ) : null}
 
       {op !== 'delete-transaction' && (
-        <SpaceBetween gap={0} style={{ flexShrink: 0 }}>
+        <SpaceBetween
+          gap={0}
+          style={{
+            flexShrink: 0,
+            ...(isNarrowWidth && narrowButtonsStyle),
+          }}
+        >
           <EditorButtons
             onAdd={onAdd}
             onDelete={
@@ -931,15 +1005,9 @@ function ConditionsList({
             // tries to parse the value as a float and we had to
             // special-case isbetween. I don't know why we need that
             // behavior and we can probably get rid of `makeValue`
-            return makeValue(
-              {
-                num1: cond.value,
-                num2: cond.value,
-              },
-              { ...cond, op: value },
-            );
+            return makeValue(rangeForCondition(cond), { ...cond, op: value });
           } else if (cond.op === 'isbetween' && op !== 'isbetween') {
-            return makeValue(cond.value.num1 || 0, {
+            return makeValue(rangeForCondition(cond).num1, {
               ...cond,
               op: value,
             });
@@ -1034,8 +1102,12 @@ export function RuleEditor({
   style,
 }: RuleEditorProps) {
   const { t } = useTranslation();
+  const { isNarrowWidth } = useResponsive();
   const [conditions, setConditions] = useState(
-    defaultRule.conditions.map(parse).map(c => ({ ...c, inputKey: uuidv4() })),
+    defaultRule.conditions
+      .map(parse)
+      .map(normalizeConditionRange)
+      .map(c => ({ ...c, inputKey: uuidv4() })),
   );
   const [actionSplits, setActionSplits] = useState(() => {
     const parsedActions = defaultRule.actions.map(parse);
@@ -1064,6 +1136,10 @@ export function RuleEditor({
 
   const isSchedule = getActions(actionSplits).some(
     action => action.op === 'link-schedule',
+  );
+  const transactionFields = getTransactionFields(
+    conditions,
+    getActions(actionSplits),
   );
 
   useEffect(() => {
@@ -1555,15 +1631,28 @@ export function RuleEditor({
             </Button>
           </SpaceBetween>
 
-          {/* @ts-expect-error fix this */}
-          <SimpleTransactionsTable
-            transactions={transactions}
-            fields={getTransactionFields(conditions, getActions(actionSplits))}
+          <View
             style={{
-              border: '1px solid ' + theme.tableBorder,
-              borderRadius: '6px 6px 0 0',
+              flex: 1,
+              ...(isNarrowWidth && {
+                ...styles.horizontalScrollbar,
+                overflowX: 'auto',
+              }),
             }}
-          />
+          >
+            {/* @ts-expect-error fix this */}
+            <SimpleTransactionsTable
+              transactions={transactions}
+              fields={transactionFields}
+              style={{
+                border: '1px solid ' + theme.tableBorder,
+                borderRadius: '6px 6px 0 0',
+                ...(isNarrowWidth && {
+                  minWidth: getNarrowTableMinWidth(transactionFields),
+                }),
+              }}
+            />
+          </View>
 
           <SpaceBetween
             style={{

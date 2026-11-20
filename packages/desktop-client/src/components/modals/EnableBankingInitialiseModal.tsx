@@ -88,10 +88,12 @@ export function EnableBankingInitialiseModal({
         return;
       }
 
-      if (result?.data?.error_code) {
+      // The server replies with `{ configured: true }` or, when it could not
+      // validate the credentials, `{ error_code, error_type }`.
+      if (result?.error_code) {
         setIsValid(false);
         setError(
-          result.data.error_type ||
+          result.error_type ||
             t(
               'Could not validate the credentials. Please check your Application ID and secret key.',
             ),
